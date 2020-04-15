@@ -1,0 +1,108 @@
+Renderer.1 {
+}
+
+Group.main {
+    Size = (100%, 100%);
+    renderer = &1;
+
+    Button.Button1 {
+        Text = Button;
+        TextSize = 13;
+
+        Renderer {
+            backgroundcolor = #F5F5F5;
+            backgroundcolordisabled = #E6E6E6;
+            backgroundcolordown = #EBEBEB;
+            backgroundcolorhover = white;
+            bordercolor = #3C3C3C;
+            bordercolordisabled = #7D7D7D;
+            bordercolordown = black;
+            bordercolorfocused = #1E1EB4;
+            bordercolorhover = black;
+            borders = (1, 1, 1, 1);
+            textcolor = #3C3C3C;
+            textcolordisabled = #7D7D7D;
+            textcolordown = black;
+            textcolorhover = black;
+            texture = None;
+            texturedisabled = None;
+            texturedown = None;
+            texturefocused = None;
+            texturehover = None;
+        }
+    }
+
+    Picture.Picture1 {
+        Position = (130, 110);
+        Size = (100, 100);
+
+        Renderer {
+            texture = None;
+        }
+    }
+
+    Panel.Panel1 {
+        Position = (170, 190);
+        Size = (230, 180);
+
+        Renderer {
+            backgroundcolor = white;
+            bordercolor = black;
+            texturebackground = None;
+        }
+    }
+}
+
+Group.settings {
+    Size = (100%, 100%);
+    Visible = false;
+    renderer = &1;
+
+    Button.Button1 {
+        Text = Settings;
+        TextSize = 13;
+
+        Renderer {
+            backgroundcolor = #F5F5F5;
+            backgroundcolordisabled = #E6E6E6;
+            backgroundcolordown = #EBEBEB;
+            backgroundcolorhover = white;
+            bordercolor = #3C3C3C;
+            bordercolordisabled = #7D7D7D;
+            bordercolordown = black;
+            bordercolorfocused = #1E1EB4;
+            bordercolorhover = black;
+            borders = (1, 1, 1, 1);
+            textcolor = #3C3C3C;
+            textcolordisabled = #7D7D7D;
+            textcolordown = black;
+            textcolorhover = black;
+            texture = None;
+            texturedisabled = None;
+            texturedown = None;
+            texturefocused = None;
+            texturehover = None;
+        }
+    }
+
+    Picture.Picture1 {
+        Position = (130, 110);
+        Size = (100, 100);
+
+        Renderer {
+            texture = "C:\Users\User\Documents\CPPLibs\TGUI-0.8.7-vc16-64bit-for-SFML-2.5.1\TGUI-0.8\gui-builder\resources\DefaultPicture.png";
+            transparenttexture = false;
+        }
+    }
+
+    Panel.Panel1 {
+        Position = (170, 190);
+        Size = (230, 180);
+
+        Renderer {
+            backgroundcolor = white;
+            bordercolor = black;
+            texturebackground = None;
+        }
+    }
+}

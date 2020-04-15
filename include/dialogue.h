@@ -171,7 +171,7 @@ bool awe::dialogue_sequence::animate(Ts... values) noexcept {
 			delete _diag;
 			_diag = nullptr;
 			//problem? if we've deleted this drawable before display(), are there issues?
-			//theoretically would be find as it is out of sight anyway,
+			//theoretically would be fine as it is out of sight anyway,
 			//but if errors start cropping up it might be because of this
 		}
 	} else {
