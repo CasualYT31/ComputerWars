@@ -1,0 +1,12 @@
+{
+	"basepath": "assets/sprites/co/co",
+	"format": "png",
+	"frames": 1,
+	"framerate": 0.0,
+	"sprites": [
+		[0,487,90,20],
+		
+		[0,0,139,487],
+		[20,30,90,20]
+	]
+}

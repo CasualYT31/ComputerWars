@@ -1,0 +1,382 @@
+{
+	"000": {
+		"longname": "Plains",
+		"shortname": "Plns",
+		"picture": 0,
+		"description": "A rich, green plain. Easy to traverse, but offers little defensive cover.",
+		"hp": 0,
+		"defence": 1,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 2,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"001": {
+		"longname": "Sea",
+		"shortname": "Sea",
+		"picture": 0,
+		"description": "A body of water. Only naval and air units can traverse seas.",
+		"hp": 0,
+		"defence": 0,
+		"movecosts": {
+			"inftry": -1,
+			"mech": -1,
+			"tires": -1,
+			"tread": -1,
+			"air": 1,
+			"pipe": -1,
+			"ships": 1,
+			"trans": 1,
+			"slime": -1
+		}
+	},
+	"002": {
+		"longname": "Road",
+		"shortname": "Road",
+		"picture": 0,
+		"description": "A paved road. Easy to traverse, but offers little protection.",
+		"hp": 0,
+		"defence": 0,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"003": {
+		"longname": "Bridge",
+		"shortname": "Brdg",
+		"picture": 0,
+		"description": "A paved road. Easy to traverse, but offers little protection.",
+		"hp": 0,
+		"defence": 0,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"004": {
+		"longname": "Mountain",
+		"shortname": "Mont",
+		"picture": 0,
+		"description": "A steep mountain. Infantry units add 3 to their vision range from here.",
+		"hp": 0,
+		"defence": 4,
+		"movecosts": {
+			"inftry": 2,
+			"mech": 1,
+			"tires": -1,
+			"tread": -1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"005": {
+		"longname": "Woods",
+		"shortname": "Wood",
+		"picture": 0,
+		"description": "In Fog of War, units hidden here can only be seen by adjacent units and air units.",
+		"hp": 0,
+		"defence": 2,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 3,
+			"tread": 2,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"006": {
+		"longname": "River",
+		"shortname": "Rivr",
+		"picture": 0,
+		"description": "A gentle flowing river. Only infantry units can ford rivers.",
+		"hp": 0,
+		"defence": 0,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": -1,
+			"tread": -1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"007": {
+		"longname": "Reef",
+		"shortname": "Reef",
+		"picture": 0,
+		"description": "In Fog of War, units hidden here can only be seen by adjacent units and air units.",
+		"hp": 0,
+		"defence": 1,
+		"movecosts": {
+			"inftry": -1,
+			"mech": -1,
+			"tires": -1,
+			"tread": -1,
+			"air": 1,
+			"pipe": -1,
+			"ships": 2,
+			"trans": 2,
+			"slime": -1
+		}
+	},
+	"008": {
+		"longname": "Shoal",
+		"shortname": "Shol",
+		"picture": 0,
+		"description": "A sandy shoal. Lander units load and unload units here.",
+		"hp": 0,
+		"defence": 0,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": 1,
+			"slime": 1
+		}
+	},
+	"009": {
+		"longname": "Pipe",
+		"shortname": "Pipe",
+		"picture": 0,
+		"description": "A Black Hole pipeline. Thick armour renders it indestructible. No units can pass it.",
+		"hp": 0,
+		"defence": 0,
+		"movecosts": {
+			"inftry": -1,
+			"mech": -1,
+			"tires": -1,
+			"tread": -1,
+			"air": -1,
+			"pipe": 1,
+			"ships": -1,
+			"trans": -1,
+			"slime": -1
+		}
+	},
+	"010": {
+		"longname": "Pipe Seam",
+		"shortname": "Seam",
+		"picture": 0,
+		"description": "A Black Hole pipeline. The armor is weaker here than on other sections of the pipe.",
+		"hp": 99,
+		"defence": 0,
+		"movecosts": {
+			"inftry": -1,
+			"mech": -1,
+			"tires": -1,
+			"tread": -1,
+			"air": -1,
+			"pipe": 1,
+			"ships": -1,
+			"trans": -1,
+			"slime": -1
+		}
+	},
+	"011": {
+		"longname": "Missile Silo",
+		"shortname": "Silo",
+		"picture": 0,
+		"description": "A missile silo. Has a huge blast radius & unlimited range, but it can only fire once.",
+		"hp": 0,
+		"defence": 3,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"012": {
+		"longname": "City",
+		"shortname": "City",
+		"picture": 0,
+		"description": "A normal city. Ground units gain supplies and HP in allied cities.",
+		"hp": 20,
+		"defence": 3,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"013": {
+		"longname": "Base",
+		"shortname": "Base",
+		"picture": 0,
+		"description": "A base. Allied bases deploy, supply, and restore HP to ground units.",
+		"hp": 20,
+		"defence": 3,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"014": {
+		"longname": "Airport",
+		"shortname": "Arpt",
+		"picture": 0,
+		"description": "An air base. Allied bases deploy, supply, and restore HP to air units.",
+		"hp": 20,
+		"defence": 3,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"015": {
+		"longname": "Port",
+		"shortname": "Port",
+		"picture": 0,
+		"description": "A naval base. Allied bases deploy, supply and restore HP to naval units.",
+		"hp": 20,
+		"defence": 3,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"016": {
+		"longname": "COM Tower",
+		"shortname": "COM",
+		"picture": 0,
+		"description": "Controlling a tower will grant all units you control +10% attack.",
+		"hp": 20,
+		"defence": 3,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"017": {
+		"longname": "Lab",
+		"shortname": "Lab",
+		"picture": 0,
+		"description": "Similar to an HQ. A place where units are designed and developed.",
+		"hp": 20,
+		"defence": 3,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	},
+	"018": {
+		"longname": "Volcano",
+		"shortname": "Vlcn",
+		"picture": 0,
+		"description": "A dangerous volcano that spews out molten magma on a daily basis.",
+		"hp": 0,
+		"defence": 0,
+		"movecosts": {
+			"inftry": -1,
+			"mech": -1,
+			"tires": -1,
+			"tread": -1,
+			"air": -1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": -1
+		}
+	},
+	"019": {
+		"longname": "Headquarters",
+		"shortname": "HQ",
+		"picture": 0,
+		"description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",
+		"hp": 20,
+		"defence": 4,
+		"movecosts": {
+			"inftry": 1,
+			"mech": 1,
+			"tires": 1,
+			"tread": 1,
+			"air": 1,
+			"pipe": -1,
+			"ships": -1,
+			"trans": -1,
+			"slime": 1
+		}
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"normal": {
+		"id": 1,
+		"longname": "Normal",
+		"shortname": "Nrml",
+		"icon": 0
+	},
+	"wasteland": {
+		"id": 2,
+		"longname": "Wasteland",
+		"shortname": "Wstl",
+		"icon": 0
+	},
+	"snowy": {
+		"id": 3,
+		"longname": "Snowy",
+		"shortname": "Snow",
+		"icon": 0
+	},
+	"sandy": {
+		"id": 4,
+		"longname": "Sandy",
+		"shortname": "Sand",
+		"icon": 0
+	}
+}

@@ -1,0 +1,56 @@
+{
+	"inftry": {
+		"id": 1,
+		"longname": "Infantry",
+		"shortname": "Inftry",
+		"icon": 0
+	},
+	"mech": {
+		"id": 2,
+		"longname": "Mech",
+		"shortname": "Mech",
+		"icon": 0
+	},
+	"tires": {
+		"id": 3,
+		"longname": "Tires",
+		"shortname": "Tires",
+		"icon": 0
+	},
+	"tread": {
+		"id": 4,
+		"longname": "Tread",
+		"shortname": "Tread",
+		"icon": 0
+	},
+	"air": {
+		"id": 5,
+		"longname": "Air",
+		"shortname": "Air",
+		"icon": 0
+	},
+	"pipe": {
+		"id": 6,
+		"longname": "Pipeline",
+		"shortname": "Pipe",
+		"icon": 0
+	},
+	"ships": {
+		"id": 7,
+		"longname": "Ships",
+		"shortname": "Ships",
+		"icon": 0
+	},
+	"trans": {
+		"id": 8,
+		"longname": "Transport",
+		"shortname": "Trans",
+		"icon": 0
+	},
+	"slime": {
+		"id": 9,
+		"longname": "Slime",
+		"shortname": "Slime",
+		"icon": 0
+	}
+}

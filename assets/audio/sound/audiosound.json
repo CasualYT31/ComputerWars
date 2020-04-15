@@ -1,0 +1,79 @@
+{
+	"music": 100.0,
+	"sound": 100.0,
+	"select": {
+		"type": "sound",
+		"path": "assets/audio/sound/select.wav",
+		"offset": 0.0
+	},
+	"back": {
+		"type": "sound",
+		"path": "assets/audio/sound/back.wav",
+		"offset": 0.0
+	},
+	"captured": {
+		"type": "sound",
+		"path": "assets/audio/sound/captured.wav",
+		"offset": 0.0
+	},
+	"capturing": {
+		"type": "sound",
+		"path": "assets/audio/sound/capturing.wav",
+		"offset": 0.0
+	},
+	"destroy": {
+		"type": "sound",
+		"path": "assets/audio/sound/destroy.wav",
+		"offset": 0.0
+	},
+	"hide": {
+		"type": "sound",
+		"path": "assets/audio/sound/hide.wav",
+		"offset": 0.0
+	},
+	"load": {
+		"type": "sound",
+		"path": "assets/audio/sound/load.wav",
+		"offset": 0.0
+	},
+	"movecursor": {
+		"type": "sound",
+		"path": "assets/audio/sound/movecursor.wav",
+		"offset": 0.0
+	},
+	"movesel": {
+		"type": "sound",
+		"path": "assets/audio/sound/movesel.wav",
+		"offset": 0.0
+	},
+	"prohibit": {
+		"type": "sound",
+		"path": "assets/audio/sound/prohibit.wav",
+		"offset": 0.0
+	},
+	"replenish": {
+		"type": "sound",
+		"path": "assets/audio/sound/replenish.wav",
+		"offset": 0.0
+	},
+	"save": {
+		"type": "sound",
+		"path": "assets/audio/sound/save.wav",
+		"offset": 0.0
+	},
+	"trap": {
+		"type": "sound",
+		"path": "assets/audio/sound/trap.wav",
+		"offset": 0.0
+	},
+	"unhide": {
+		"type": "sound",
+		"path": "assets/audio/sound/unhide.wav",
+		"offset": 0.0
+	},
+	"unload": {
+		"type": "sound",
+		"path": "assets/audio/sound/unload.wav",
+		"offset": 0.0
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"main": {
+		"path": "assets/gui/main.txt",
+		"background": [255,0,0,255],
+		"BitmapButton1": {
+			"sprite": 0,
+			"pressed": "TestName"
+		},
+		"Picture1": {
+			"sprite": 1
+		}
+	},
+	"settings": {
+		"path": "assets/gui/settings.txt",
+		"background": 0
+	}
+}

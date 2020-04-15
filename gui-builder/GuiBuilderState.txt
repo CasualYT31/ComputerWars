@@ -1,0 +1,2 @@
+FormSize = (800, 600);
+Themes = ["themes/BabyBlue.txt", "themes/BabyBlue.txt", "themes/Black.txt", "themes/TransparentGrey.txt"];
