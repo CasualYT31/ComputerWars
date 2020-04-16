@@ -46,7 +46,7 @@ namespace awe {
 		unsigned int getSprite() const noexcept;
 		sf::Color getColour() const noexcept;
 	private:
-		type _flag;
+		type _flag = Colour;
 		unsigned int _key = 0;
 		sf::Color _colour;
 	};

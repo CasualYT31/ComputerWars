@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\as-addons">
+      <UniqueIdentifier>{7a599a02-4825-4049-a3af-e8ca348b1c53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\as-addons">
+      <UniqueIdentifier>{7ec92aaf-a653-4c84-b9b4-3a491fbbc98b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\audio.cpp">
@@ -60,6 +66,18 @@
     <ClCompile Include="src\userinput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\script.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\as-addons\scriptbuilder.cpp">
+      <Filter>Source Files\as-addons</Filter>
+    </ClCompile>
+    <ClCompile Include="src\as-addons\scriptstdstring.cpp">
+      <Filter>Source Files\as-addons</Filter>
+    </ClCompile>
+    <ClCompile Include="src\as-addons\scriptstdstring_utils.cpp">
+      <Filter>Source Files\as-addons</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\audio.h">
@@ -103,6 +121,15 @@
     </ClInclude>
     <ClInclude Include="include\userinput.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\script.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\as-addons\scriptbuilder.h">
+      <Filter>Header Files\as-addons</Filter>
+    </ClInclude>
+    <ClInclude Include="include\as-addons\scriptstdstring.h">
+      <Filter>Header Files\as-addons</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

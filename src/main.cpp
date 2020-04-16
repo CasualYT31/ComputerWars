@@ -61,7 +61,7 @@ New JSON method: getTypeName()
 
 int main() {
     // create the sink all loggers output to
-    global::sink::Get("Advance Wars Engine", "CasualYouTuber31", "assets/log", false);
+    global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
     // initialise game loop
     awe::game gameLoop;
     // run game loop, then destroy the object once the loop terminates

@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\as-addons\scriptbuilder.cpp" />
+    <ClCompile Include="src\as-addons\scriptstdstring.cpp" />
+    <ClCompile Include="src\as-addons\scriptstdstring_utils.cpp" />
     <ClCompile Include="src\audio.cpp" />
     <ClCompile Include="src\dialogue.cpp" />
     <ClCompile Include="src\fonts.cpp" />
@@ -30,12 +33,15 @@
     <ClCompile Include="src\property.cpp" />
     <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\safejson.cpp" />
+    <ClCompile Include="src\script.cpp" />
     <ClCompile Include="src\terrain.cpp" />
     <ClCompile Include="src\texture.cpp" />
     <ClCompile Include="src\unit.cpp" />
     <ClCompile Include="src\userinput.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\as-addons\scriptbuilder.h" />
+    <ClInclude Include="include\as-addons\scriptstdstring.h" />
     <ClInclude Include="include\audio.h" />
     <ClInclude Include="include\dialogue.h" />
     <ClInclude Include="include\fonts.h" />
@@ -46,6 +52,7 @@
     <ClInclude Include="include\property.h" />
     <ClInclude Include="include\renderer.h" />
     <ClInclude Include="include\safejson.h" />
+    <ClInclude Include="include\script.h" />
     <ClInclude Include="include\terrain.h" />
     <ClInclude Include="include\texture.h" />
     <ClInclude Include="include\unit.h" />
