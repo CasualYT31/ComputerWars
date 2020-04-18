@@ -91,7 +91,7 @@ void awe::gui::drawBackground(sfx::spritesheet* sprites) noexcept {
 			_gui.getTarget()->clear();
 			sf::Texture sprite = (*sprites)[_guiBackground[getGUI()].getSprite()];
 			_bgsprite.setTexture(sprite);
-			_bgsprite.setScale(_gui.getTarget()->getSize().x / sprite.getSize().x, _gui.getTarget()->getSize().y / sprite.getSize().y);
+			_bgsprite.setScale((float) _gui.getTarget()->getSize().x / (float) sprite.getSize().x, (float) _gui.getTarget()->getSize().y / (float) sprite.getSize().y);
 			_gui.getTarget()->draw(_bgsprite);
 		} else {
 			_gui.getTarget()->clear();
@@ -120,7 +120,6 @@ void awe::gui::drawForeground(sfx::spritesheet* sprites) noexcept {
 			}
 		}
 	}
-	_gui.saveWidgetsToFile("test.txt");
 	//draw
 	_gui.draw();
 }

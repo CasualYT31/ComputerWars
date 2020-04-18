@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\as-addons\scriptarray.cpp" />
     <ClCompile Include="src\as-addons\scriptbuilder.cpp" />
     <ClCompile Include="src\as-addons\scriptstdstring.cpp" />
     <ClCompile Include="src\as-addons\scriptstdstring_utils.cpp" />
@@ -40,6 +41,7 @@
     <ClCompile Include="src\userinput.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\as-addons\scriptarray.h" />
     <ClInclude Include="include\as-addons\scriptbuilder.h" />
     <ClInclude Include="include\as-addons\scriptstdstring.h" />
     <ClInclude Include="include\audio.h" />
@@ -150,6 +152,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

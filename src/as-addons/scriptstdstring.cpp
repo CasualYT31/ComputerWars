@@ -1,4 +1,5 @@
-#include "scriptstdstring.h"
+//Casual has had to amend the path of the include here to match with the project's filesystem
+#include "as-addons/scriptstdstring.h"
 #include <assert.h> // assert()
 #include <sstream>  // std::stringstream
 #include <string.h> // strstr()

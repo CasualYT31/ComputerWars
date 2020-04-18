@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "texture.h"
 #include "userinput.h"
 #include "gui.h"
+#include "script.h"
 
 namespace awe {
 	class game : sf::NonCopyable {
@@ -82,5 +83,7 @@ namespace awe {
 		sfx::spritesheet _spritesheet_Tile;
 		// user input objects
 		sfx::user_input _userinput;
+		// scripts object
+		awe::scripts _scripts;
 	};
 }

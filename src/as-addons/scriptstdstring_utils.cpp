@@ -1,6 +1,7 @@
 #include <assert.h>
-#include "scriptstdstring.h"
-#include "../scriptarray/scriptarray.h"
+//Casual has had to amend the paths of the includes here to match with the project's filesystem
+#include "as-addons/scriptstdstring.h"
+#include "as-addons/scriptarray.h"
 #include <stdio.h>
 #include <string.h>
 

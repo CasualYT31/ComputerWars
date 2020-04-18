@@ -78,6 +78,9 @@
     <ClCompile Include="src\as-addons\scriptstdstring_utils.cpp">
       <Filter>Source Files\as-addons</Filter>
     </ClCompile>
+    <ClCompile Include="src\as-addons\scriptarray.cpp">
+      <Filter>Source Files\as-addons</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\audio.h">
@@ -129,6 +132,9 @@
       <Filter>Header Files\as-addons</Filter>
     </ClInclude>
     <ClInclude Include="include\as-addons\scriptstdstring.h">
+      <Filter>Header Files\as-addons</Filter>
+    </ClInclude>
+    <ClInclude Include="include\as-addons\scriptarray.h">
       <Filter>Header Files\as-addons</Filter>
     </ClInclude>
   </ItemGroup>

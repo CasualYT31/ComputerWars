@@ -27,7 +27,7 @@ awe::game::game(const std::string& name) noexcept :
 		_logger(name), _audio_Sound("audio_sound"), _audio_Music("audio_music"), _renderer("renderer"),
 		_language_GUI("language_gui"), _language_Game("language_game"), _language_Dialogue("language_dialogue"),
 		_spritesheet_GUI("spritesheet_gui"), _spritesheet_CO("spritesheet_co"), _spritesheet_Unit("spritesheet_unit"),
-		_spritesheet_Tile("spritesheet_tile"), _userinput(_renderer) {
+		_spritesheet_Tile("spritesheet_tile"), _userinput(_renderer), _scripts("assets/script") {
 	// load JSON configurations for each backend object
 	_audio_Sound.load("assets/audio/sound/audiosound.json");
 	_audio_Music.load("assets/audio/music/audiomusic.json");
@@ -45,13 +45,18 @@ awe::game::game(const std::string& name) noexcept :
 	i18n::translation::addLanguageObject("game", &_language_Game);
 	i18n::translation::addLanguageObject("dialogue", &_language_Dialogue);
 	i18n::translation::setLanguage("GB");
-	// setup GUI objects
+	// setup GUI object
 	_gui.setTarget(_renderer);
 	// construction completed
 	_state = awe::game::state::MainMenu;
 }
 
 int awe::game::run() noexcept {
+	_scripts.callFunction("main");
+	int a = 7, b = a;
+	_scripts.callFunction("add", a, b);
+	_scripts.callFunction("printFloat", "hello");
+
 	_renderer.openWindow();
 
 	_gui.setGUI("main");

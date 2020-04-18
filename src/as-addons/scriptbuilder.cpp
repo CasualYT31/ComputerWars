@@ -1,4 +1,4 @@
-#include "scriptbuilder.h"
+#include "as-addons/scriptbuilder.h"
 #include <vector>
 #include <assert.h>
 using namespace std;
