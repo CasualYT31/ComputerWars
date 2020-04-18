@@ -116,7 +116,7 @@ void safe::json::applyColour(sf::Color& dest, safe::json::KeySequence keys, cons
 	if (suppressErrors) resetState();
 }
 
-std::string safe::json::_getTypeName(nlohmann::json& j) noexcept {
+std::string safe::json::_getTypeName(nlohmann::json& j) const noexcept {
 	if (j.is_number_float()) return "float";
 	return j.type_name();
 }

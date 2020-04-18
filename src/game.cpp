@@ -55,7 +55,7 @@ int awe::game::run() noexcept {
 	_scripts.callFunction("main");
 	int a = 7, b = a;
 	_scripts.callFunction("add", a, b);
-	_scripts.callFunction("printFloat", "hello");
+	_scripts.callFunction("printFloat", 72.1f);
 
 	_renderer.openWindow();
 

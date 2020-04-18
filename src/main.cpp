@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /* Tracker
-New JSON method: getTypeName()
+
 */
 
 #include "game.h"

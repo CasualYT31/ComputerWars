@@ -74,7 +74,7 @@ namespace safe {
 		void applyArray(std::array<T, N>& dest, KeySequence keys) noexcept;
 		void applyColour(sf::Color& dest, KeySequence keys, const sf::Color* defval = nullptr, const bool suppressErrors = false) noexcept;
 	private:
-		std::string _getTypeName(nlohmann::json& j) noexcept;
+		std::string _getTypeName(nlohmann::json& j) const noexcept;
 
 		nlohmann::json _j;
 		global::logger _logger;
