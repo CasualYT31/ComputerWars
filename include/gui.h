@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tgui/tgui.hpp"
 #include "texture.h"
+#include "script.h"
 
 namespace awe {
 	struct gui_data {
@@ -46,14 +47,14 @@ namespace awe {
 		unsigned int getSprite() const noexcept;
 		sf::Color getColour() const noexcept;
 	private:
-		type _flag = Colour;
+		type _flag = type::Colour;
 		unsigned int _key = 0;
 		sf::Color _colour;
 	};
 
 	class gui : public safe::json_script {
 	public:
-		gui(const std::string& name = "gui") noexcept;
+		gui(awe::scripts* scripts, const std::string& name = "gui") noexcept;
 
 		std::string setGUI(const std::string& newPanel) noexcept;
 		std::string getGUI() noexcept;
@@ -62,15 +63,19 @@ namespace awe {
 		bool handleEvent(sf::Event e) noexcept;
 		void drawBackground(sfx::spritesheet* sprites = nullptr) noexcept;
 		void drawForeground(sfx::spritesheet* sprites = nullptr) noexcept;
+
+		void signalHandler(tgui::Widget::Ptr widget, const std::string& signalName) noexcept;
 	private:
 		virtual bool _load(safe::json& j) noexcept;
 		virtual bool _save(nlohmann::json& j) noexcept;
 		bool _loadGUI(const std::string& name, const std::string& filepath) noexcept;
+		void _connectSignals(tgui::Widget::Ptr widget) noexcept;
 
 		global::logger _logger;
 		tgui::Gui _gui;
 		std::string _currentGUI;
 		std::unordered_map<std::string, gui_background> _guiBackground;
+		awe::scripts* _scripts = nullptr;
 		//background drawing stuff
 		sf::Sprite _bgsprite;
 		//data

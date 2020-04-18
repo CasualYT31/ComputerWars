@@ -55,7 +55,9 @@ sf::Color awe::gui_background::getColour() const noexcept {
 	return _colour;
 }
 
-awe::gui::gui(const std::string& name) noexcept : _logger(name) {}
+awe::gui::gui(awe::scripts* scripts, const std::string& name) noexcept : _scripts(scripts), _logger(name) {
+	if (!scripts) _logger.error("No scripts object has been provided to this GUI object: no signal handling will occur.");
+}
 
 std::string awe::gui::setGUI(const std::string& newPanel) noexcept {
 	auto old = getGUI();
@@ -186,6 +188,7 @@ bool awe::gui::_loadGUI(const std::string& name, const std::string& filepath) no
 	try {
 		for (auto enditr = widgetList.end(); itr != enditr; itr++) {
 			auto copy = (*itr)->clone();
+			_connectSignals(copy);
 			group->add(copy, (*itr)->getWidgetName());
 		}
 	} catch (tgui::Exception& e) {
@@ -197,4 +200,27 @@ bool awe::gui::_loadGUI(const std::string& name, const std::string& filepath) no
 	group->setVisible(false);
 	_gui.add(group, name);
 	return true;
+}
+
+void awe::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
+	//connect common Widget signals
+	widget->connect("PositionChanged", &signalHandler, this);
+	widget->connect("SizeChanged", &signalHandler, this);
+	widget->connect("Focused", &signalHandler, this);
+	widget->connect("Unfocused", &signalHandler, this);
+	widget->connect("MouseEntered", &signalHandler, this);
+	widget->connect("MouseLeft", &signalHandler, this);
+	widget->connect("AnimationFinished", &signalHandler, this);
+	//connect clickable widget signals
+	std::string type = widget->getWidgetType();
+	if (type == "Button" || type == "EditBox" || type == "Label" || type == "Picture" || type == "ProgressBar" || type == "RadioButton" || type == "SpinButton") {
+		widget->connect("MousePressed", &signalHandler, this);
+		widget->connect("MouseReleased", &signalHandler, this);
+		widget->connect("Clicked", &signalHandler, this);
+		widget->connect("RightMousePressed", &signalHandler, this);
+		widget->connect("RightMouseReleased", &signalHandler, this);
+		widget->connect("RightClicked", &signalHandler, this);
+	}
+	//connect bespoke signals
+	if (type == )
 }
