@@ -10,3 +10,7 @@ void add(int a, int b) {
 void printFloat(float a) {
 	printfloat(a);
 }
+
+void settings_Button1_Pressed() {
+	print("I was pressed! And I was changed!\n");
+}

@@ -27,7 +27,7 @@ awe::game::game(const std::string& name) noexcept :
 		_logger(name), _audio_Sound("audio_sound"), _audio_Music("audio_music"), _renderer("renderer"),
 		_language_GUI("language_gui"), _language_Game("language_game"), _language_Dialogue("language_dialogue"),
 		_spritesheet_GUI("spritesheet_gui"), _spritesheet_CO("spritesheet_co"), _spritesheet_Unit("spritesheet_unit"),
-		_spritesheet_Tile("spritesheet_tile"), _userinput(_renderer), _scripts("assets/script") {
+		_spritesheet_Tile("spritesheet_tile"), _userinput(_renderer), _scripts("assets/script"), _gui(&_scripts) {
 	// load JSON configurations for each backend object
 	_audio_Sound.load("assets/audio/sound/audiosound.json");
 	_audio_Music.load("assets/audio/music/audiomusic.json");
@@ -64,7 +64,7 @@ int awe::game::run() noexcept {
 	while (_state != awe::game::state::Terminated) {
 		_userinput.update();
 
-		if (_userinput["up"]) std::cout << "up\n";
+		if (_userinput["up"]) std::cout << "up: hot reloaded scripts\n";
 		if (_userinput["down"]) std::cout << "down\n";
 		if (_userinput["left"]) std::cout << "left\n";
 		if (_userinput["right"]) std::cout << "right\n";
@@ -75,6 +75,9 @@ int awe::game::run() noexcept {
 		if (_userinput["back"]) {
 			std::cout << "back\n";
 			_gui.setGUI("main");
+		}
+		if (_userinput["up"]) {
+			_scripts.reloadScripts();
 		}
 
 		_rendererEventPolling();

@@ -78,8 +78,8 @@ void awe::scripts::contextExceptionCallback(asIScriptContext* context) noexcept 
 }
 
 bool awe::scripts::reloadScripts(std::string folder) noexcept {
-    _logger.write("Loading scripts from \"{}\"...", folder);
     if (folder == "") folder = getScriptsFolder();
+    _logger.write("Loading scripts from \"{}\"...", folder);
     if (folder == "" || !_engine) return false;
     CScriptBuilder builder;
     int r = builder.StartNewModule(_engine, "ComputerWars");
@@ -110,6 +110,10 @@ bool awe::scripts::reloadScripts(std::string folder) noexcept {
 
 const std::string& awe::scripts::getScriptsFolder() const noexcept {
     return _scriptsFolder;
+}
+
+bool awe::scripts::functionExists(const std::string& name) const noexcept {
+    return _engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
 }
 
 bool awe::scripts::callFunction(const std::string& name) noexcept {

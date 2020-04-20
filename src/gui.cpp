@@ -126,6 +126,11 @@ void awe::gui::drawForeground(sfx::spritesheet* sprites) noexcept {
 	_gui.draw();
 }
 
+void awe::gui::signalHandler(tgui::Widget::Ptr widget, const std::string& signalName) noexcept {
+	std::string functionName = getGUI() + "_" + widget->getWidgetName() + "_" + signalName;
+	if (_scripts && getGUI() != "" && _scripts->functionExists(functionName)) _scripts->callFunction(functionName);
+}
+
 bool awe::gui::_load(safe::json& j) noexcept {
 	bool ret = true;
 	nlohmann::json jj = j.nlohmannJSON();
@@ -202,25 +207,47 @@ bool awe::gui::_loadGUI(const std::string& name, const std::string& filepath) no
 	return true;
 }
 
+//ALL SIGNALS NEED TO BE TESTED IDEALLY
 void awe::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	//connect common Widget signals
-	widget->connect("PositionChanged", &signalHandler, this);
-	widget->connect("SizeChanged", &signalHandler, this);
-	widget->connect("Focused", &signalHandler, this);
-	widget->connect("Unfocused", &signalHandler, this);
-	widget->connect("MouseEntered", &signalHandler, this);
-	widget->connect("MouseLeft", &signalHandler, this);
-	widget->connect("AnimationFinished", &signalHandler, this);
+	widget->connect({"PositionChanged", "SizeChanged", "Focused", "Unfocused", "MouseEntered", "MouseLeft", "AnimationFinished"}, &awe::gui::signalHandler, this);
 	//connect clickable widget signals
-	std::string type = widget->getWidgetType();
-	if (type == "Button" || type == "EditBox" || type == "Label" || type == "Picture" || type == "ProgressBar" || type == "RadioButton" || type == "SpinButton") {
-		widget->connect("MousePressed", &signalHandler, this);
-		widget->connect("MouseReleased", &signalHandler, this);
-		widget->connect("Clicked", &signalHandler, this);
-		widget->connect("RightMousePressed", &signalHandler, this);
-		widget->connect("RightMouseReleased", &signalHandler, this);
-		widget->connect("RightClicked", &signalHandler, this);
+	tgui::String type = widget->getWidgetType(); type = type.toLower();
+	if (type == "button" || type == "editbox" || type == "label" || type == "picture" || type == "progressbar" || type == "radiobutton" || type == "spinbutton" || type == "panel") {
+		widget->connect({"MousePressed", "MouseReleased", "Clicked", "RightMousePressed", "RightMouseReleased", "RightClicked"}, &awe::gui::signalHandler, this);
 	}
 	//connect bespoke signals
-	if (type == )
+	if (type == "button") {
+		widget->connect({ "Pressed" }, &awe::gui::signalHandler, this);
+	} else if (type == "childwindow") {
+		widget->connect({ "MousePressed", "Closed", "Minimized", "Maximized", "EscapeKeyPressed" }, &awe::gui::signalHandler, this);
+	} else if (type == "combobox") {
+		widget->connect({ "ItemSelected" }, &awe::gui::signalHandler, this);
+	} else if (type == "editbox") {
+		widget->connect({ "TextChanged", "ReturnKeyPressed" }, &awe::gui::signalHandler, this);
+	} else if (type == "knob" || type == "scrollbar" || type == "slider" || type == "spinbutton") {
+		widget->connect({ "ValueChanged" }, &awe::gui::signalHandler, this);
+	} else if (type == "label" || type == "picture") {
+		widget->connect({ "DoubleClicked" }, &awe::gui::signalHandler, this);
+	} else if (type == "listbox") {
+		widget->connect({ "ItemSelected", "MousePressed", "MouseReleased", "DoubleClicked" }, &awe::gui::signalHandler, this);
+	} else if (type == "listview") {
+		widget->connect({ "ItemSelected", "HeaderClicked", "RightClicked", "DoubleClicked" }, &awe::gui::signalHandler, this);
+	} else if (type == "menubar") {
+		widget->connect({ "MenuItemClicked" }, &awe::gui::signalHandler, this);
+	} else if (type == "messagebox") {
+		widget->connect({ "ButtonPressed" }, &awe::gui::signalHandler, this);
+	} else if (type == "progressbar") {
+		widget->connect({ "ValueChanged", "Full" }, &awe::gui::signalHandler, this);
+	} else if (type == "radiobutton") {
+		widget->connect({ "Checked", "Unchecked", "Changed" }, &awe::gui::signalHandler, this);
+	} else if (type == "rangeslider") {
+		widget->connect({ "RangeChanged" }, &awe::gui::signalHandler, this);
+	} else if (type == "tabs") {
+		widget->connect({ "TabSelected" }, &awe::gui::signalHandler, this);
+	} else if (type == "textbox") {
+		widget->connect({ "TextChanged", "SelectionChanged" }, &awe::gui::signalHandler, this);
+	} else if (type == "treeview") {
+		widget->connect({ "ItemSelected", "DoubleClicked", "Expanded", "Collapsed" }, &awe::gui::signalHandler, this);
+	}
 }

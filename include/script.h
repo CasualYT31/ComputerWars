@@ -39,6 +39,7 @@ namespace awe {
 
 		bool reloadScripts(std::string folder = "") noexcept;
 		const std::string& getScriptsFolder() const noexcept;
+		bool functionExists(const std::string& name) const noexcept;
 
 		template<typename T, typename... Ts>
 		bool callFunction(const std::string& name, T value, Ts... values) noexcept;
