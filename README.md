@@ -27,4 +27,4 @@ If you really want an Advance Wars engine **now**, then you can check out [Robos
 - [JSON for C++](https://github.com/nlohmann/json)
 
 ### Licence
-Despite its incomplete state, you are free to fork the project if you wish, as well as work with my code, so long as you follow the MIT licence attached to this repository.
+Despite its incomplete state, you are free to work with some or all of my code for your own projects, so long as you follow the MIT licence attached to this repository.
