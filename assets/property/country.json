@@ -1,118 +1,101 @@
 {
-	"neutral": {
-		"id": 1,
+	"neutral": {"id": 1,
 		"longname": "Neutral",
 		"shortname": "Neut",
 		"icon": 0,
 		"colour": [255,255,255,255]
 	},
-	"os": {
-		"id": 2,
+	"os": {"id": 2,
 		"longname": "Orange Star",
 		"shortname": "OS",
 		"icon": 0,
 		"colour": [255,80,80,255]
 	},
-	"bm": {
-		"id": 3,
+	"bm": {"id": 3,
 		"longname": "Blue Moon",
 		"shortname": "BM",
 		"icon": 0,
 		"colour": [70,110,255,255]
 	},
-	"ge": {
-		"id": 4,
+	"ge": {"id": 4,
 		"longname": "Green Earth",
 		"shortname": "GE",
 		"icon": 0,
 		"colour": [60,200,40,255]
 	},
-	"yc": {
-		"id": 5,
+	"yc": {"id": 5,
 		"longname": "Yellow Comet",
 		"shortname": "YC",
 		"icon": 0,
 		"colour": [200,190,0,255]
 	},
-	"bh": {
-		"id": 6,
+	"bh": {"id": 6,
 		"longname": "Black Hole",
 		"shortname": "BH",
 		"icon": 0,
 		"colour": [130,110,160,255]
 	},
-	"rf": {
-		"id": 7,
+	"rf": {"id": 7,
 		"longname": "Red Fire",
 		"shortname": "RF",
 		"icon": 0,
 		"colour": [190,70,90,255]
 	},
-	"gs": {
-		"id": 8,
+	"gs": {"id": 8,
 		"longname": "Grey Sky",
 		"shortname": "GS",
 		"icon": 0,
 		"colour": [110,110,110,255]
 	},
-	"bd": {
-		"id": 9,
+	"bd": {"id": 9,
 		"longname": "Brown Desert",
 		"shortname": "BD",
 		"icon": 0,
 		"colour": [170,120,100,255]
 	},
-	"ab": {
-		"id": 10,
+	"ab": {"id": 10,
 		"longname": "Amber Blaze",
 		"shortname": "AB",
 		"icon": 0,
 		"colour": [255,140,50,255]
 	},
-	"js": {
-		"id": 11,
+	"js": {"id": 11,
 		"longname": "Jade Sun",
 		"shortname": "JS",
 		"icon": 0,
 		"colour": [160,180,150,255]
 	},
-	"ci": {
-		"id": 12,
+	"ci": {"id": 12,
 		"longname": "Cobalt Ice",
 		"shortname": "CI",
 		"icon": 0,
 		"colour": [20,40,120,255]
 	},
-	"pc": {
-		"id": 13,
+	"pc": {"id": 13,
 		"longname": "Pink Cosmos",
 		"shortname": "PC",
 		"icon": 0,
 		"colour": [255,100,200,255]
 	},
-	"tg": {
-		"id": 14,
+	"tg": {"id": 14,
 		"longname": "Teal Galaxy",
 		"shortname": "TG",
 		"icon": 0,
 		"colour": [100,210,190,255]
 	},
-	"pl": {
-		"id": 15,
+	"pl": {"id": 15,
 		"longname": "Purple Lightning",
 		"shortname": "PL",
 		"icon": 0,
 		"colour": [160,70,210,255]
 	},
-	"ar": {
-		"id": 16,
+	"ar": {"id": 16,
 		"longname": "Acid Rain",
 		"shortname": "AR",
 		"icon": 0,
 		"colour": [100,120,20,255]
 	},
-	"wn": {
-		"id": 17,
+	"wn": {"id": 17,
 		"longname": "White Nova",
 		"shortname": "WN",
 		"icon": 0,

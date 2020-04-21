@@ -44,16 +44,25 @@ bool awe::unit_bank::_load(safe::json& j) noexcept {
 		j.apply(newtype.nativeName, { i.key(), "longname" }, &newtype.nativeName, true);
 		j.apply(newtype.nativeShortName, { i.key(), "shortname" }, &newtype.nativeShortName, true);
 		j.apply(newtype.spriteKey, { i.key(), "sprite" }, &newtype.spriteKey, true);
+		j.apply(newtype.pictureKey, { i.key(), "picture" }, &newtype.pictureKey, true);
 		j.apply(newtype.description, { i.key(), "description" }, &newtype.description, true);
-		j.apply(newtype.cost, { i.key(), "cost" }, &newtype.cost, true);
+		j.apply(newtype.cost, { i.key(), "price" }, &newtype.cost, true);
 		j.apply(newtype.max_hp, { i.key(), "hp" }, &newtype.max_hp, true);
 		j.apply(newtype.max_fuel, { i.key(), "fuel" }, &newtype.max_fuel, true);
 		j.apply(newtype.max_ammo, { i.key(), "ammo" }, &newtype.max_ammo, true);
-		j.apply(newtype.movementTypeID, { i.key(), "movement" }, &newtype.movementTypeID, true);
+		j.apply(newtype.movementTypeID, { i.key(), "movetype" }, &newtype.movementTypeID, true);
+		j.apply(newtype.movementPoints, { i.key(), "mp" }, &newtype.movementPoints, true);
+		j.apply(newtype.vision, { i.key(), "vision" }, &newtype.vision, true);
+		j.apply(newtype.lowerRange, { i.key(), "lowrange" }, &newtype.lowerRange, true);
+		j.apply(newtype.higherRange, { i.key(), "highrange" }, &newtype.higherRange, true);
 		if (_movementTypes) {
 			if (!_movementTypes->find(newtype.movementTypeID)) {
 				_logger.error("Could not find movement type with ID {}, for unit with key \"{}\": expect erroneous behaviour.", newtype.movementTypeID, i.key());
 			}
+		}
+		if (newtype.higherRange < newtype.lowerRange) {
+			_logger.write("Unit with key \"{}\" has a lower range {} which is higher than it's higher range {}: these values have been swapped internally to avoid errors.", i.key(), newtype.lowerRange, newtype.higherRange);
+			std::swap(newtype.lowerRange, newtype.higherRange);
 		}
 		newtype.id = (unsigned int)_types.size();
 		_types.push_back(newtype);

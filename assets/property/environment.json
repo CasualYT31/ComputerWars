@@ -1,26 +1,26 @@
 {
-	"normal": {
-		"id": 1,
+	"normal": {"id": 1,
 		"longname": "Normal",
 		"shortname": "Nrml",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"wasteland": {
-		"id": 2,
+	"wasteland": {"id": 2,
 		"longname": "Wasteland",
 		"shortname": "Wstl",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"snowy": {
-		"id": 3,
+	"snowy": {"id": 3,
 		"longname": "Snowy",
 		"shortname": "Snow",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"sandy": {
-		"id": 4,
+	"sandy": {"id": 4,
 		"longname": "Sandy",
 		"shortname": "Sand",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	}
 }

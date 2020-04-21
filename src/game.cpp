@@ -62,11 +62,6 @@ awe::game::game(const std::string& name) noexcept :
 }
 
 int awe::game::run() noexcept {
-	_scripts.callFunction("main");
-	int a = 7, b = a;
-	_scripts.callFunction("add", a, b);
-	_scripts.callFunction("printFloat", 72.1f);
-
 	_renderer.openWindow();
 
 	while (_state != awe::game::STATE_TERMINATED) {

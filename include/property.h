@@ -30,7 +30,7 @@ namespace awe {
 		unsigned int id = 0;
 		std::string nativeName = "";
 		std::string nativeShortName = "";
-		unsigned int spriteKey = 0; //icon
+		unsigned int spriteKey = 0;
 		sf::Color colour = sf::Color();
 	};
 

@@ -74,16 +74,16 @@ bool awe::scripts::callFunction(const std::string& name, T value, Ts... values) 
 	if (std::is_integral<T>::value) {
 		switch (sizeof value) {
 		case 1:
-			r = _context->SetArgByte(_argumentID, value);
+			r = _context->SetArgByte(_argumentID, (asBYTE) value);
 			break;
 		case 2:
-			r = _context->SetArgWord(_argumentID, value);
+			r = _context->SetArgWord(_argumentID, (asWORD) value);
 			break;
 		case 4:
-			r = _context->SetArgDWord(_argumentID, value);
+			r = _context->SetArgDWord(_argumentID, (asDWORD) value);
 			break;
 		case 8:
-			r = _context->SetArgQWord(_argumentID, value);
+			r = _context->SetArgQWord(_argumentID, (asQWORD) value);
 			break;
 		default:
 			_logger.error("Unexpected length {} of integer variable {}, it will not be set to argument {} - behaviour is undefined after this point.", sizeof value, value, _argumentID);
@@ -91,9 +91,9 @@ bool awe::scripts::callFunction(const std::string& name, T value, Ts... values) 
 		}
 	} else if (std::is_floating_point<T>::value) {
 		if (sizeof value == 4) {
-			r = _context->SetArgFloat(_argumentID, value);
+			r = _context->SetArgFloat(_argumentID, (float) value);
 		} else {
-			r = _context->SetArgDouble(_argumentID, value);
+			r = _context->SetArgDouble(_argumentID, (double) value);
 		}
 	}
 	if (r < 0) {

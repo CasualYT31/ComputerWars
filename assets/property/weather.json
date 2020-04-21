@@ -1,44 +1,44 @@
 {
-	"clear": {
-		"id": 1,
+	"clear": {"id": 1,
 		"longname": "Clear",
 		"shortname": "Clr",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"rain": {
-		"id": 2,
+	"rain": {"id": 2,
 		"longname": "Rain",
 		"shortname": "Rain",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"sandstorm": {
-		"id": 3,
+	"sandstorm": {"id": 3,
 		"longname": "Sandstorm",
 		"shortname": "Sand",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"snow": {
-		"id": 4,
+	"snow": {"id": 4,
 		"longname": "Snow",
 		"shortname": "Snow",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"fog": {
-		"id": 5,
+	"fog": {"id": 5,
 		"longname": "Fog-of-War",
 		"shortname": "Fog",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"fograin": {
-		"id": 6,
+	"fograin": {"id": 6,
 		"longname": "Fog-and-Rain",
 		"shortname": "F&R",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"fogsnow": {
-		"id": 7,
+	"fogsnow": {"id": 7,
 		"longname": "Fog-and-Snow",
 		"shortname": "F&S",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	}
 }

@@ -28,10 +28,15 @@ namespace awe {
 	struct unit_data : public awe::property {
 		std::string description = "";
 		unsigned int movementTypeID = 0;
+		unsigned int pictureKey = 0;
 		int cost = 0;
 		int max_fuel = 0;
 		int max_ammo = 0;
 		int max_hp = 100;
+		int movementPoints = 0;
+		int vision = 0;
+		unsigned int lowerRange = 1;
+		unsigned int higherRange = 1;
 	};
 
 	class unit_bank : public safe::json_script {

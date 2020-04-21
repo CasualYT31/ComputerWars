@@ -1,56 +1,62 @@
 {
-	"inftry": {
-		"id": 1,
+	"none": {"id": 0,
+		"longname": "None",
+		"shortname": "None",
+		"icon": 0,
+		"colour": [255,255,255,255]
+	},
+	"inftry": {"id": 1,
 		"longname": "Infantry",
 		"shortname": "Inftry",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"mech": {
-		"id": 2,
+	"mech": {"id": 2,
 		"longname": "Mech",
 		"shortname": "Mech",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"tires": {
-		"id": 3,
+	"tires": {"id": 3,
 		"longname": "Tires",
 		"shortname": "Tires",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"tread": {
-		"id": 4,
+	"tread": {"id": 4,
 		"longname": "Tread",
 		"shortname": "Tread",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"air": {
-		"id": 5,
+	"air": {"id": 5,
 		"longname": "Air",
 		"shortname": "Air",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"pipe": {
-		"id": 6,
+	"pipe": {"id": 6,
 		"longname": "Pipeline",
 		"shortname": "Pipe",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"ships": {
-		"id": 7,
+	"ships": {"id": 7,
 		"longname": "Ships",
 		"shortname": "Ships",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"trans": {
-		"id": 8,
+	"trans": {"id": 8,
 		"longname": "Transport",
 		"shortname": "Trans",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	},
-	"slime": {
-		"id": 9,
+	"slime": {"id": 9,
 		"longname": "Slime",
 		"shortname": "Slime",
-		"icon": 0
+		"icon": 0,
+		"colour": [0,0,0,255]
 	}
 }
