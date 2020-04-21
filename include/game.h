@@ -30,15 +30,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "userinput.h"
 #include "gui.h"
 #include "script.h"
+#include "terrain.h"
+#include "unit.h"
 
 namespace awe {
 	class game : sf::NonCopyable {
 	public:
-		enum class state {
-			Terminated,
-			MainMenu,
-			Construction
-		};
+		static const char* STATE_TERMINATED;
 
 		game(const std::string& name = "game_loop") noexcept;
 		int run() noexcept;
@@ -55,11 +53,20 @@ namespace awe {
 		//========== STATE DATA ==========
 		//================================
 		// state
-		state _state = state::Construction;
+		std::string _state = "main";
 		//================================
-		//==========  GUI  DATA ==========
+		//==========  GAME DATA ==========
 		//================================
-		awe::gui _gui;
+		// game properties
+		awe::country _countries;
+		awe::weather _weathers;
+		awe::environment _environments;
+		awe::movement _movements;
+		// terrain-related data
+		awe::terrain_bank _terrainTypeBank;
+		awe::terrain_tile_bank _terrainTileBank;
+		// unit-related data
+		awe::unit_bank _unitTypeBank;
 		//================================
 		//==========BACKEND DATA==========
 		//================================
@@ -85,5 +92,7 @@ namespace awe {
 		sfx::user_input _userinput;
 		// scripts object
 		awe::scripts _scripts;
+		// GUI object
+		awe::gui _gui;
 	};
 }

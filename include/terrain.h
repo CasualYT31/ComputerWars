@@ -23,7 +23,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "property.h"
-#include "texture.h"
 
 namespace awe {
 	struct terrain : public awe::property {
@@ -49,7 +48,7 @@ namespace awe {
 
 	struct terrain_tile {
 		const terrain* type = nullptr;
-		std::unordered_map<unsigned int, int> tile; //animted tiles for each country
+		std::unordered_map<unsigned int, int> tile; //animated tiles for each country
 	};
 
 	class terrain_tile_bank : public safe::json_script {
@@ -69,7 +68,7 @@ namespace awe {
 
 	class tile {
 	public:
-		tile(const sfx::spritesheet* spritesheet, const terrain_tile* tile = nullptr, const int hp = 0, const unsigned int owner = 0) noexcept;
+		tile(const terrain_tile* tile = nullptr, const unsigned int owner = 0, const int hp = 0) noexcept;
 		const terrain_tile* setTile(const terrain_tile* newTile) noexcept;
 		const terrain_tile* getTile() const noexcept;
 		int setHP(const int newHP) noexcept;
@@ -78,34 +77,7 @@ namespace awe {
 		unsigned int getOwner() const noexcept;
 	private:
 		const terrain_tile* _tileType = nullptr; //not dynamically allocated within the class, so no destructor is required
-		int _hp = 0;
 		unsigned int _owner = 0;
+		int _hp = 0;
 	};
 }
-
-/*
-
-#include "property.h"
-
-namespace awe {
-	class terrain /*: public safe::json_script {
-	public:
-		virtual ~terrain() noexcept; //always declare destructors virtual for polymorphic base classes
-		virtual void startOfTurn() noexcept;
-	protected:
-		terrain() noexcept;
-		/*virtual bool _load(safe::json& j) noexcept;
-		virtual bool _save(nlohmann::json& j) noexcept;
-
-		//global::logger _logger;
-		awe::property _property;
-		std::string _description;
-		int _defence = 0;
-		std::vector<int> _movementCost;
-
-		//dynamic data
-
-	};
-}
-
-*/

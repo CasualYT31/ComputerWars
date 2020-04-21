@@ -31,11 +31,19 @@ awe::property& awe::game_property::operator[](const std::string& key) noexcept {
 }
 
 awe::property& awe::game_property::operator[](const unsigned int id) noexcept {
-	if (_findByID.find(id) == _findByID.end()) {
+	if (!find(id)) {
 		_data[""].id = id;
 		_findByID[id] = &_data[""];
 	}
 	return *_findByID[id];
+}
+
+bool awe::game_property::find(const std::string& key) const noexcept {
+	return _data.find(key) != _data.end();
+}
+
+bool awe::game_property::find(const unsigned int id) const noexcept {
+	return _findByID.find(id) != _findByID.end();
 }
 
 bool awe::game_property::_load(safe::json& j) noexcept {

@@ -65,7 +65,7 @@ bool awe::terrain_bank::_load(safe::json& j) noexcept {
 				_logger.error("No movement costs have been provided for terrain of key \"{}\".", i.key());
 			}
 		}
-		newtype.id = (unsigned int) _types.size();
+		newtype.id = (unsigned int)_types.size();
 		_types.push_back(newtype);
 	}
 	return true;
@@ -133,7 +133,7 @@ bool awe::terrain_tile_bank::_save(nlohmann::json& j) noexcept {
 	return false;
 }
 
-awe::tile::tile(const sfx::spritesheet* spritesheet, const awe::terrain_tile* tile, const int hp, const unsigned int owner) noexcept : _tileType(tile), _hp(hp), _owner(owner) {}
+awe::tile::tile(const awe::terrain_tile* tile, const unsigned int owner, const int hp) noexcept : _tileType(tile), _hp(hp), _owner(owner) {}
 
 const awe::terrain_tile* awe::tile::setTile(const awe::terrain_tile* newTile) noexcept {
 	auto old = getTile();

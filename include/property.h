@@ -39,6 +39,8 @@ namespace awe {
 		virtual ~game_property() noexcept; //always declare destructors virtual for polymorphic base classes
 		property& operator[](const std::string& key) noexcept;
 		property& operator[](const unsigned int id) noexcept;
+		bool find(const std::string& key) const noexcept;
+		bool find(const unsigned int id) const noexcept;
 	private:
 		virtual bool _load(safe::json& j) noexcept;
 		virtual bool _save(nlohmann::json& j) noexcept;
