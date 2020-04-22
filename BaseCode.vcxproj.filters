@@ -81,6 +81,9 @@
     <ClCompile Include="src\as-addons\scriptarray.cpp">
       <Filter>Source Files\as-addons</Filter>
     </ClCompile>
+    <ClCompile Include="src\bank.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\audio.h">
@@ -136,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="include\as-addons\scriptarray.h">
       <Filter>Header Files\as-addons</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bank.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

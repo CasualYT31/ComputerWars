@@ -24,6 +24,7 @@
     <ClCompile Include="src\as-addons\scriptstdstring.cpp" />
     <ClCompile Include="src\as-addons\scriptstdstring_utils.cpp" />
     <ClCompile Include="src\audio.cpp" />
+    <ClCompile Include="src\bank.cpp" />
     <ClCompile Include="src\dialogue.cpp" />
     <ClCompile Include="src\fonts.cpp" />
     <ClCompile Include="src\game.cpp" />
@@ -45,6 +46,7 @@
     <ClInclude Include="include\as-addons\scriptbuilder.h" />
     <ClInclude Include="include\as-addons\scriptstdstring.h" />
     <ClInclude Include="include\audio.h" />
+    <ClInclude Include="include\bank.h" />
     <ClInclude Include="include\dialogue.h" />
     <ClInclude Include="include\fonts.h" />
     <ClInclude Include="include\game.h" />
