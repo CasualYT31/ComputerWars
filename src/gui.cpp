@@ -113,10 +113,10 @@ void awe::gui::drawForeground(sfx::spritesheet* sprites) noexcept {
 				//apply new texture
 				if (widget->getWidgetType() == "BitmapButton") {
 					auto bitmapbutton = _gui.get<tgui::BitmapButton>(widget->getWidgetName());
-					bitmapbutton->setImage((*sprites)[_guidata[getGUI()][widget->getWidgetName()].spriteKey]);
+					bitmapbutton->setImage((*sprites)[_guiSpriteKeys[getGUI()][widget->getWidgetName()]]);
 				} else {
 					auto newRenderer = tgui::PictureRenderer();
-					newRenderer.setTexture((*sprites)[_guidata[getGUI()][widget->getWidgetName()].spriteKey]);
+					newRenderer.setTexture((*sprites)[_guiSpriteKeys[getGUI()][widget->getWidgetName()]]);
 					_gui.get<tgui::Picture>(widget->getWidgetName())->setRenderer(newRenderer.getData());
 				}
 			}
@@ -162,13 +162,7 @@ bool awe::gui::_load(safe::json& j) noexcept {
 		for (auto& ii : jjj.items()) {
 			if (ii.key() == "path" || ii.key() == "background") continue;
 			if (ii.value().find("sprite") != ii.value().end()) {
-				j.apply(_guidata[i.key()][ii.key()].spriteKey, { i.key(), ii.key(), "sprite" }, &_guidata[i.key()][ii.key()].spriteKey, true);
-			}
-			
-			nlohmann::json jjjj = ii.value(); //ok, this is getting dumb now...
-			for (auto& iii : jjjj.items()) {
-				if (iii.key() == "sprite") continue;
-				j.apply(_guidata[i.key()][ii.key()].methods[iii.key()], { i.key(), ii.key(), iii.key() }, &_guidata[i.key()][ii.key()].methods[iii.key()], true);
+				j.apply(_guiSpriteKeys[i.key()][ii.key()], { i.key(), ii.key(), "sprite" }, &_guiSpriteKeys[i.key()][ii.key()], true);
 			}
 		}
 	}

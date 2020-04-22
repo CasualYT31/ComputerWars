@@ -27,11 +27,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "script.h"
 
 namespace awe {
-	struct gui_data {
-		unsigned int spriteKey = 0;
-		std::unordered_map<std::string, std::string> methods;
-	};
-
 	class gui_background {
 	public:
 		enum type {
@@ -79,6 +74,6 @@ namespace awe {
 		//background drawing stuff
 		sf::Sprite _bgsprite;
 		//data
-		std::unordered_map<std::string, std::unordered_map<std::string, gui_data>> _guidata;
+		std::unordered_map<std::string, std::unordered_map<std::string, unsigned int>> _guiSpriteKeys;
 	};
 }
