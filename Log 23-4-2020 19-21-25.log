@@ -1,0 +1,39 @@
+Application © 2020 Developer
+---------------
+Event Log:
+[2020-04-23 19:21:25.647] [json_script_0] [info] Loading JSON script assets/property/country.json...
+[2020-04-23 19:21:25.658] [json_2] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.658] [json_2] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.659] [json_3] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.659] [json_3] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.660] [json_4] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.660] [json_4] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.661] [json_5] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.661] [json_5] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.663] [json_6] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.663] [json_6] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.664] [json_7] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.664] [json_7] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.664] [json_8] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.664] [json_8] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.665] [json_9] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.665] [json_9] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.666] [json_10] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.666] [json_10] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.667] [json_11] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.667] [json_11] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.668] [json_12] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.668] [json_12] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.669] [json_13] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.669] [json_13] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.670] [json_14] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.670] [json_14] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.671] [json_15] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.671] [json_15] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.672] [json_16] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.672] [json_16] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.673] [json_17] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.673] [json_17] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.674] [json_18] [error] The key sequence {"name"} does not exist in the JSON object.
+[2020-04-23 19:21:25.674] [json_18] [info] {"name"} property faulty: reset to the default of .
+[2020-04-23 19:21:25.676] [json_script_0] [info] Finished loading JSON script assets/property/country.json.

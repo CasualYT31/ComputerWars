@@ -21,6 +21,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /* Tracker
+texture.h: changed unsigned ints to SpriteKey and FrameIndex
+
 Updating the documentation a little has helped me identify a lot of flaws with the current system:
 1. scripts and gui are placed within the awe namespace despite not being
    specific to the engine, they should be put in their own namespace.
@@ -67,7 +69,24 @@ I have decided to leave the documentation update for now to focus on the correct
 architecture for the game engine
 */
 
-#include "game.h"
+#include "bank.h"
+#include <iostream>
+
+int main() {
+    global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
+    awe::bank<awe::country> test;
+    awe::bank<awe::weather> weather;
+    awe::bank<awe::environment> environment;
+    test.load("assets/property/country.json");
+    weather.load("assets/property/weather.json");
+    environment.load("assets/property/environment.json");
+    std::cout << test[1]->getName() << std::endl;
+    std::cout << weather[1]->getName() << std::endl;
+    std::cout << environment[1]->getName() << std::endl;
+    return 0;
+}
+
+/*#include "game.h"
 
 int main() {
     // create the sink all loggers output to
@@ -76,4 +95,4 @@ int main() {
     awe::game gameLoop;
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run();
-}
+}*/

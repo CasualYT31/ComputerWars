@@ -32,14 +32,14 @@ std::string sfx::spritesheet::getFormat() const noexcept {
 	return _format;
 }
 
-sf::Texture sfx::spritesheet::getFrame(unsigned int frame, unsigned int sprite) noexcept {
+sf::Texture sfx::spritesheet::getFrame(sfx::FrameIndex frame, sfx::SpriteKey sprite) noexcept {
 	if (_frame.size() == 0) {
 		//_logger.error("There were no frames loaded.");
 		return sf::Texture();
 	}
 	if (frame >= _frame.size()) {
 		//_logger.write("The frame index {} is too large, last frame in the vector ({}) used instead", frame, _frame.size() - 1);
-		frame = (unsigned int) _frame.size() - 1;
+		frame = (sfx::FrameIndex) _frame.size() - 1;
 	}
 	if (_frame[frame].size() == 0) {
 		//_logger.error("There were no sprites loaded.");
@@ -47,18 +47,18 @@ sf::Texture sfx::spritesheet::getFrame(unsigned int frame, unsigned int sprite) 
 	}
 	if (sprite >= _frame[frame].size()) {
 		//_logger.write("The sprite index {} is too large, last sprite in the vector ({}) used instead", sprite, _frame[frame].size() - 1);
-		sprite = (unsigned int) _frame[frame].size() - 1;
+		sprite = (sfx::SpriteKey) _frame[frame].size() - 1;
 	}
 	return _frame[frame][sprite];
 }
 
-sf::IntRect sfx::spritesheet::getSprite(unsigned int sprite) noexcept {
+sf::IntRect sfx::spritesheet::getSprite(sfx::SpriteKey sprite) noexcept {
 	if (_sprite.size() == 0) {
 		return sf::IntRect();
 	}
 	if (sprite >= _sprite.size()) {
 		//_logger.write("The sprite index {} is too large, last sprite in the vector ({}) used instead", sprite, _sprite.size() - 1);
-		sprite = (unsigned int) _sprite.size() - 1;
+		sprite = (sfx::SpriteKey) _sprite.size() - 1;
 	}
 	return _sprite[sprite];
 }
@@ -71,11 +71,11 @@ unsigned int sfx::spritesheet::getFrames() const noexcept {
 	return _frames;
 }
 
-unsigned int sfx::spritesheet::getCurrentFrame() const noexcept {
+sfx::FrameIndex sfx::spritesheet::getCurrentFrame() const noexcept {
 	return _currentFrame;
 }
 
-unsigned int sfx::spritesheet::setCurrentFrame(unsigned int frame) noexcept {
+sfx::FrameIndex sfx::spritesheet::setCurrentFrame(sfx::FrameIndex frame) noexcept {
 	auto old = _currentFrame;
 	if (frame >= _frame.size()) frame = 0;
 	_currentFrame = frame;
@@ -87,7 +87,7 @@ void sfx::spritesheet::resetCurrentFrame() noexcept {
 	_hasNotBeenDrawn = true;
 }
 
-sf::Texture sfx::spritesheet::operator[](unsigned int sprite) noexcept {
+sf::Texture sfx::spritesheet::operator[](sfx::SpriteKey sprite) noexcept {
 	if (_hasNotBeenDrawn) {
 		_clock.restart();
 		_hasNotBeenDrawn = false;
@@ -98,16 +98,16 @@ sf::Texture sfx::spritesheet::operator[](unsigned int sprite) noexcept {
 	return this->getFrame(getCurrentFrame(), sprite);
 }
 
-unsigned int sfx::spritesheet::operator++() noexcept {
+sfx::FrameIndex sfx::spritesheet::operator++() noexcept {
 	setCurrentFrame(getCurrentFrame() + 1);
 	return getCurrentFrame();
 }
 
-unsigned int sfx::spritesheet::operator++(int) noexcept {
+sfx::FrameIndex sfx::spritesheet::operator++(int) noexcept {
 	return setCurrentFrame(getCurrentFrame() + 1);
 }
 
-unsigned int sfx::spritesheet::operator--() noexcept {
+sfx::FrameIndex sfx::spritesheet::operator--() noexcept {
 	if ((int)getCurrentFrame() - 1 < 0) {
 		setCurrentFrame(getFrames() - 1);
 	} else {
@@ -116,7 +116,7 @@ unsigned int sfx::spritesheet::operator--() noexcept {
 	return getCurrentFrame();
 }
 
-unsigned int sfx::spritesheet::operator--(int) noexcept {
+sfx::FrameIndex sfx::spritesheet::operator--(int) noexcept {
 	auto oldCurrentFrame = getCurrentFrame();
 	--(*this);
 	return oldCurrentFrame;

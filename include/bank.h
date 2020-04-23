@@ -22,15 +22,52 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "safejson.h"
+#include "texture.h"
 
 namespace awe {
+	class common_properties {
+	public:
+		virtual ~common_properties() noexcept;
+		const std::string& getName() const noexcept;
+		const std::string& getShortName() const noexcept;
+		sfx::SpriteKey getIconKey() const noexcept;
+	protected:
+		common_properties(safe::json& j) noexcept;
+	private:
+		std::string _name = "";
+		std::string _shortName = "";
+		sfx::SpriteKey _iconKey = 0;
+	};
+
+	class country : public common_properties {
+	public:
+		country(safe::json& j) noexcept;
+		const sf::Color& getColour() const noexcept;
+	private:
+		sf::Color _colour;
+	};
+
+	class weather : public common_properties {
+	public:
+		weather(safe::json& j) noexcept;
+	};
+
+	class environment : public common_properties {
+	public:
+		environment(safe::json& j) noexcept;
+	};
+
+	class movement_type : public common_properties {
+	public:
+		movement_type(safe::json& j) noexcept;
+	};
+
+	typedef unsigned int BankIndex;
 	template<typename T>
 	class bank : public safe::json_script {
 	public:
-		typedef unsigned int index;
 		~bank() noexcept;
-		const T* operator[](bank::index id) const noexcept;
+		const T* operator[](BankIndex id) const noexcept;
 	private:
 		virtual bool _load(safe::json& j) noexcept;
 		virtual bool _save(nlohmann::json& j) noexcept;
@@ -46,9 +83,9 @@ awe::bank<T>::~bank() noexcept {
 }
 
 template<typename T>
-const T* awe::bank<T>::operator[](awe::bank<T>::index id) const noexcept {
+const T* awe::bank<T>::operator[](awe::BankIndex id) const noexcept {
 	if (id >= _bank.size()) return nullptr;
-	return &_bank[id];
+	return _bank[id];
 }
 
 template<typename T>
@@ -56,9 +93,11 @@ bool awe::bank<T>::_load(safe::json& j) noexcept {
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		//loop through each object, allowing the template type T to construct its values based on each object
-		const T* pItem = new T(i.value());
+		safe::json input(i.value());
+		const T* pItem = new T(input);
 		_bank.push_back(pItem);
 	}
+	return true;
 }
 
 template<typename T>

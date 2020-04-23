@@ -26,26 +26,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sfml/Graphics.hpp"
 
 namespace sfx {
+	typedef unsigned int FrameIndex;
+	typedef unsigned int SpriteKey;
+
 	class spritesheet : public safe::json_script {
 	public:
 		spritesheet(const std::string& name = "spritesheet") noexcept;
 
 		std::string getBasePath() const noexcept;
 		std::string getFormat() const noexcept;
-		sf::Texture getFrame(unsigned int frame = 0, unsigned int sprite = 0) noexcept;
-		sf::IntRect getSprite(unsigned int sprite = 0) noexcept;
+		sf::Texture getFrame(FrameIndex frame = 0, SpriteKey sprite = 0) noexcept;
+		sf::IntRect getSprite(SpriteKey sprite = 0) noexcept;
 		float getFrameRate() const noexcept;
 		unsigned int getFrames() const noexcept;
-		unsigned int getCurrentFrame() const noexcept;
-		unsigned int setCurrentFrame(unsigned int frame) noexcept;
+		FrameIndex getCurrentFrame() const noexcept;
+		FrameIndex setCurrentFrame(FrameIndex frame) noexcept;
 		void resetCurrentFrame() noexcept;
 
-		sf::Texture operator[](unsigned int sprite) noexcept;
+		sf::Texture operator[](SpriteKey sprite) noexcept;
 
-		unsigned int operator++() noexcept;
-		unsigned int operator++(int) noexcept;
-		unsigned int operator--() noexcept;
-		unsigned int operator--(int) noexcept;
+		FrameIndex operator++() noexcept;
+		FrameIndex operator++(int) noexcept;
+		FrameIndex operator--() noexcept;
+		FrameIndex operator--(int) noexcept;
 	private:
 		virtual bool _load(safe::json& j) noexcept;
 		virtual bool _save(nlohmann::json& j) noexcept;
@@ -58,7 +61,7 @@ namespace sfx {
 		float _framerate = 60.0;
 		unsigned int _frames = 1;
 
-		unsigned int _currentFrame = 0;
+		FrameIndex _currentFrame = 0;
 		sf::Clock _clock;
 		bool _hasNotBeenDrawn = true;
 		global::logger _logger;
