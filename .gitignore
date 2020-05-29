@@ -2,6 +2,7 @@ assets.old/
 x64/
 .vs/
 lib/
+doc/
 git-bash-ComputerWars.lnk
 BaseCode.sln
 BaseCode.vcxproj

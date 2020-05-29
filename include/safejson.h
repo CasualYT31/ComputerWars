@@ -46,7 +46,13 @@ namespace safe {
 	 */
 	class json_state {
 	public:
+		/**
+		 * Polymorphic base classes must have virtual destructors.
+		 */
 		virtual ~json_state() noexcept;
+		/**
+		 * 
+		 */
 		typedef unsigned short FailBits;
 		static const FailBits                  SUCCESS = 0b0000000000000000;
 		static const FailBits      JSON_WAS_NOT_OBJECT = 0b0000000000000001;
