@@ -22,61 +22,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "property.h"
+#include "bank.h"
 
 namespace awe {
-	struct terrain : public awe::property {
-		std::string description = "";
-		int max_hp = 0;
-		int defence = 0;
-		std::unordered_map<unsigned int, int> movecost;
-	};
-
-	class terrain_bank : public safe::json_script {
-	public:
-		terrain_bank(awe::movement* movetypes, const std::string& name = "terrain_bank") noexcept;
-		const terrain* operator[](const std::size_t& id) const noexcept;
-		bool find(const std::size_t& id) const noexcept;
-	private:
-		virtual bool _load(safe::json& j) noexcept;
-		virtual bool _save(nlohmann::json& j) noexcept;
-
-		global::logger _logger;
-		std::vector<terrain> _types;
-		awe::movement* _movementTypes = nullptr;
-	};
-
-	struct terrain_tile {
-		const terrain* type = nullptr;
-		std::unordered_map<unsigned int, int> tile; //animated tiles for each country
-	};
-
-	class terrain_tile_bank : public safe::json_script {
-	public:
-		terrain_tile_bank(terrain_bank* tBank, awe::country* countries, const std::string& name = "tile_bank") noexcept;
-		const terrain_tile* operator[](const std::size_t& id) const noexcept;
-		bool find(const std::size_t& id) const noexcept;
-	private:
-		virtual bool _load(safe::json& j) noexcept;
-		virtual bool _save(nlohmann::json& j) noexcept;
-
-		global::logger _logger;
-		std::vector<terrain_tile> _tiles;
-		terrain_bank* _bank = nullptr;
-		awe::country* _countries = nullptr;
-	};
-
 	class tile {
 	public:
-		tile(const terrain_tile* tile = nullptr, const unsigned int owner = 0, const int hp = 0) noexcept;
-		const terrain_tile* setTile(const terrain_tile* newTile) noexcept;
-		const terrain_tile* getTile() const noexcept;
+		tile(const tile_type* tile = nullptr, const unsigned int owner = 0, const int hp = 0) noexcept;
+		const tile_type* setTile(const tile_type* newTile) noexcept;
+		const tile_type* getTile() const noexcept;
 		int setHP(const int newHP) noexcept;
 		int getHP() const noexcept;
 		unsigned int setOwner(const unsigned int newOwner) noexcept;
 		unsigned int getOwner() const noexcept;
 	private:
-		const terrain_tile* _tileType = nullptr; //not dynamically allocated within the class, so no destructor is required
+		const tile_type* _tileType = nullptr;
 		unsigned int _owner = 0;
 		int _hp = 0;
 	};

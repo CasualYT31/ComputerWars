@@ -22,84 +22,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 
-awe::unit_bank::unit_bank(awe::movement* movetypes, const std::string& name) noexcept : _logger(name) {
-	if (!movetypes) {
-		_logger.error("No movement types bank has been provided for this unit bank.");
-	}
+awe::unit::unit(const unit_type* type, const int hp, const int fuel, const int ammo) noexcept : _unitType(type) {
+	setHP(hp);
+	setFuel(fuel);
+	setAmmo(ammo);
 }
 
-bool awe::unit_bank::find(const std::size_t& id) const noexcept {
-	return id < _types.size();
-}
-
-const awe::unit_data* awe::unit_bank::operator[](const std::size_t& id) const noexcept {
-	if (!find(id)) return nullptr;
-	return &_types[id];
-}
-
-bool awe::unit_bank::_load(safe::json& j) noexcept {
-	nlohmann::json jj = j.nlohmannJSON();
-	for (auto& i : jj.items()) {
-		awe::unit_data newtype;
-		j.apply(newtype.nativeName, { i.key(), "longname" }, &newtype.nativeName, true);
-		j.apply(newtype.nativeShortName, { i.key(), "shortname" }, &newtype.nativeShortName, true);
-		j.apply(newtype.spriteKey, { i.key(), "sprite" }, &newtype.spriteKey, true);
-		j.apply(newtype.pictureKey, { i.key(), "picture" }, &newtype.pictureKey, true);
-		j.apply(newtype.description, { i.key(), "description" }, &newtype.description, true);
-		j.apply(newtype.cost, { i.key(), "price" }, &newtype.cost, true);
-		j.apply(newtype.max_hp, { i.key(), "hp" }, &newtype.max_hp, true);
-		j.apply(newtype.max_fuel, { i.key(), "fuel" }, &newtype.max_fuel, true);
-		j.apply(newtype.max_ammo, { i.key(), "ammo" }, &newtype.max_ammo, true);
-		j.apply(newtype.movementTypeID, { i.key(), "movetype" }, &newtype.movementTypeID, true);
-		j.apply(newtype.movementPoints, { i.key(), "mp" }, &newtype.movementPoints, true);
-		j.apply(newtype.vision, { i.key(), "vision" }, &newtype.vision, true);
-		j.apply(newtype.lowerRange, { i.key(), "lowrange" }, &newtype.lowerRange, true);
-		j.apply(newtype.higherRange, { i.key(), "highrange" }, &newtype.higherRange, true);
-		if (_movementTypes) {
-			if (!_movementTypes->find(newtype.movementTypeID)) {
-				_logger.error("Could not find movement type with ID {}, for unit with key \"{}\": expect erroneous behaviour.", newtype.movementTypeID, i.key());
-			}
-		}
-		if (newtype.higherRange < newtype.lowerRange) {
-			_logger.write("Unit with key \"{}\" has a lower range {} which is higher than it's higher range {}: these values have been swapped internally to avoid errors.", i.key(), newtype.lowerRange, newtype.higherRange);
-			std::swap(newtype.lowerRange, newtype.higherRange);
-		}
-		newtype.id = (unsigned int)_types.size();
-		_types.push_back(newtype);
-	}
-	return true;
-}
-
-bool awe::unit_bank::_save(nlohmann::json& j) noexcept {
-	return false;
-}
-
-awe::unit::unit(const unit_data* type, const unsigned int owner, const int hp, const int fuel, const int ammo) noexcept :
-	_unitType(type), _owner(owner), _hp(hp), _fuel(fuel), _ammo(ammo) {}
-
-const awe::unit_data* awe::unit::setType(const awe::unit_data* newType) noexcept {
+const awe::unit_type* awe::unit::setType(const awe::unit_type* newType) noexcept {
 	auto old = getType();
 	_unitType = newType;
+	setHP(getHP());
+	setFuel(getFuel());
+	setAmmo(getAmmo());
 	return old;
 }
 
-const awe::unit_data* awe::unit::getType() const noexcept {
+const awe::unit_type* awe::unit::getType() const noexcept {
 	return _unitType;
-}
-
-unsigned int awe::unit::setOwner(const unsigned int newOwner) noexcept {
-	auto old = getOwner();
-	_owner = newOwner;
-	return old;
-}
-
-unsigned int awe::unit::getOwner() const noexcept {
-	return _owner;
 }
 
 int awe::unit::setHP(const int newHP) noexcept {
 	auto old = getHP();
 	_hp = newHP;
+	if (_hp < 0) {
+		_hp = 0;
+	} else if (_hp > (int)_unitType->getMaxHP()) {
+		_hp = (int)_unitType->getMaxHP();
+	}
 	return old;
 }
 
@@ -110,6 +59,11 @@ int awe::unit::getHP() const noexcept {
 int awe::unit::setFuel(const int newFuel) noexcept {
 	auto old = getFuel();
 	_fuel = newFuel;
+	if (_fuel < 0) {
+		_fuel = 0;
+	} else if (!_unitType->isInfiniteFuel() && _fuel > _unitType->getMaxFuel()) {
+		_fuel = (int)_unitType->getMaxFuel();
+	}
 	return old;
 }
 
@@ -120,6 +74,11 @@ int awe::unit::getFuel() const noexcept {
 int awe::unit::setAmmo(const int newAmmo) noexcept {
 	auto old = getAmmo();
 	_ammo = newAmmo;
+	if (_ammo < 0) {
+		_ammo = 0;
+	} else if (!_unitType->isInfiniteAmmo() && _ammo > _unitType->getMaxAmmo()) {
+		_ammo = _unitType->getMaxAmmo();
+	}
 	return old;
 }
 

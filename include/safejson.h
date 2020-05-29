@@ -73,6 +73,8 @@ namespace safe {
 		template<typename T, std::size_t N>
 		void applyArray(std::array<T, N>& dest, KeySequence keys) noexcept;
 		void applyColour(sf::Color& dest, KeySequence keys, const sf::Color* defval = nullptr, const bool suppressErrors = false) noexcept;
+		template<typename T>
+		void applyVector(std::vector<T>& dest, KeySequence keys);
 	private:
 		std::string _getTypeName(nlohmann::json& j) const noexcept;
 
@@ -163,6 +165,39 @@ void safe::json::applyArray(std::array<T, N>& dest, safe::json::KeySequence keys
 			} else {
 				_toggleState(MISMATCHING_TYPE);
 				_logger.error("Attempted to assign a value of data type \"{}\" to an array, in the key sequence {}.", _getTypeName(test), synthesiseKeySequence(keys));
+			}
+		} else {
+			_toggleState(KEYS_DID_NOT_EXIST);
+			_logger.error("The key sequence {} does not exist in the JSON object.", synthesiseKeySequence(keys));
+		}
+	}
+}
+
+template<typename T>
+void safe::json::applyVector(std::vector<T>& dest, safe::json::KeySequence keys) {
+	if (keys.empty()) {
+		_toggleState(NO_KEYS_GIVEN);
+		_logger.error("Attempted to assign a value to a vector without specifying a key sequence.");
+	} else {
+		nlohmann::json test;
+		if (keysExist(keys, &test)) {
+			if (test.is_array()) {
+				nlohmann::json testDataType = T();
+				for (std::size_t i = 0; i < test.size(); i++) {
+					if (i == test.size() - 1 && equalType(testDataType, test[i])) {
+						dest.clear();
+						for (std::size_t j = 0; j < test.size(); j++) {
+							dest.push_back(test[j].get<T>());
+						}
+					} else if (!equalType(testDataType, test[i])) {
+						_toggleState(MISMATCHING_ELEMENT_TYPE);
+						_logger.error("The specified JSON array was not homogeneous, found an element of data type \"{}\" when attempting to assign to a vector of data type \"{}\", in the key sequence {}.", _getTypeName(test[i]), _getTypeName(testDataType), synthesiseKeySequence(keys));
+						break;
+					}
+				}
+			} else {
+				_toggleState(MISMATCHING_TYPE);
+				_logger.error("Attempted to assign a value of data type \"{}\" to a vector, in the key sequence {}.", _getTypeName(test), synthesiseKeySequence(keys));
 			}
 		} else {
 			_toggleState(KEYS_DID_NOT_EXIST);

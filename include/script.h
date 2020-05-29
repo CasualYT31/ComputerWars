@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "logger.h"
 #include <type_traits>
 
-namespace awe {
+namespace engine {
 	class scripts {
 	public:
 		scripts(const std::string& folder = "", const std::string& name = "scripts") noexcept;
@@ -58,7 +58,7 @@ namespace awe {
 }
 
 template<typename T, typename... Ts>
-bool awe::scripts::callFunction(const std::string& name, T value, Ts... values) noexcept {
+bool engine::scripts::callFunction(const std::string& name, T value, Ts... values) noexcept {
 	if (!_callFunction_TemplateCall) {
 		//first call to the template version, setup the context
 		if (!_setupContext(name)) return false;

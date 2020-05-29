@@ -1,62 +1,47 @@
 {
-	"none": {"id": 0,
-		"longname": "None",
-		"shortname": "None",
-		"icon": 0,
-		"colour": [255,255,255,255]
-	},
-	"inftry": {"id": 1,
-		"longname": "Infantry",
+	"001": {"longname": "Infantry",
 		"shortname": "Inftry",
 		"icon": 0,
-		"colour": [0,0,0,255]
+		"description": "Infantry movement type."
 	},
-	"mech": {"id": 2,
-		"longname": "Mech",
+	"002": {"longname": "Mech",
 		"shortname": "Mech",
 		"icon": 0,
-		"colour": [0,0,0,255]
+		"description": "Mech movement type."
 	},
-	"tires": {"id": 3,
-		"longname": "Tires",
+	"003": {"longname": "Tires",
 		"shortname": "Tires",
 		"icon": 0,
-		"colour": [0,0,0,255]
+		"description": "This unit uses tires to move."
 	},
-	"tread": {"id": 4,
-		"longname": "Tread",
+	"004": {"longname": "Tread",
 		"shortname": "Tread",
 		"icon": 0,
-		"colour": [0,0,0,255]
+		"description": "This unit uses treads to move."
 	},
-	"air": {"id": 5,
-		"longname": "Air",
+	"005": {"longname": "Air",
 		"shortname": "Air",
 		"icon": 0,
-		"colour": [0,0,0,255]
+		"description": "This unit flies through the air."
 	},
-	"pipe": {"id": 6,
-		"longname": "Pipeline",
+	"006": {"longname": "Pipeline",
 		"shortname": "Pipe",
 		"icon": 0,
-		"colour": [0,0,0,255]
+		"description": "This unit moves along pipes."
 	},
-	"ships": {"id": 7,
-		"longname": "Ships",
+	"007": {"longname": "Ships",
 		"shortname": "Ships",
 		"icon": 0,
-		"colour": [0,0,0,255]
+		"description": "This unit sails through sea."
 	},
-	"trans": {"id": 8,
-		"longname": "Transport",
+	"008": {"longname": "Transport",
 		"shortname": "Trans",
 		"icon": 0,
-		"colour": [0,0,0,255]
+		"description": "This unit can stop at shoals."
 	},
-	"slime": {"id": 9,
-		"longname": "Slime",
+	"009": {"longname": "Slime",
 		"shortname": "Slime",
 		"icon": 0,
-		"colour": [0,0,0,255]
+		"description": "This unit is made out of slime."
 	}
 }

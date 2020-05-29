@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "texture.h"
 #include "script.h"
 
-namespace awe {
+namespace engine {
 	class gui_background {
 	public:
 		enum type {
@@ -49,7 +49,7 @@ namespace awe {
 
 	class gui : public safe::json_script {
 	public:
-		gui(awe::scripts* scripts, const std::string& name = "gui") noexcept;
+		gui(engine::scripts* scripts, const std::string& name = "gui") noexcept;
 
 		std::string setGUI(const std::string& newPanel) noexcept;
 		std::string getGUI() noexcept;
@@ -70,7 +70,7 @@ namespace awe {
 		tgui::Gui _gui;
 		std::string _currentGUI;
 		std::unordered_map<std::string, gui_background> _guiBackground;
-		awe::scripts* _scripts = nullptr;
+		engine::scripts* _scripts = nullptr;
 		//background drawing stuff
 		sf::Sprite _bgsprite;
 		//data

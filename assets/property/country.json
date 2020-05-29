@@ -2,86 +2,103 @@
 	"000": {"longname": "Neutral",
 		"shortname": "Neut",
 		"icon": 0,
+		"description": "Neutral.",
 		"colour": [255,255,255,255]
 	},
 	"001": {"longname": "Orange Star",
 		"shortname": "OS",
 		"icon": 0,
+		"description": "Orange Star.",
 		"colour": [255,80,80,255]
 	},
 	"002": {"longname": "Blue Moon",
 		"shortname": "BM",
 		"icon": 0,
+		"description": "Blue Moon.",
 		"colour": [70,110,255,255]
 	},
 	"003": {"longname": "Green Earth",
 		"shortname": "GE",
 		"icon": 0,
+		"description": "Green Earth.",
 		"colour": [60,200,40,255]
 	},
 	"004": {"longname": "Yellow Comet",
 		"shortname": "YC",
 		"icon": 0,
+		"description": "Yellow Comet.",
 		"colour": [200,190,0,255]
 	},
 	"005": {"longname": "Black Hole",
 		"shortname": "BH",
 		"icon": 0,
+		"description": "Black Hole.",
 		"colour": [130,110,160,255]
 	},
 	"006": {"longname": "Red Fire",
 		"shortname": "RF",
 		"icon": 0,
+		"description": "Red Fire.",
 		"colour": [190,70,90,255]
 	},
 	"007": {"longname": "Grey Sky",
 		"shortname": "GS",
 		"icon": 0,
+		"description": "Grey Sky.",
 		"colour": [110,110,110,255]
 	},
 	"008": {"longname": "Brown Desert",
 		"shortname": "BD",
 		"icon": 0,
+		"description": "Brown Desert.",
 		"colour": [170,120,100,255]
 	},
 	"009": {"longname": "Amber Blaze",
 		"shortname": "AB",
 		"icon": 0,
+		"description": "Amber Blaze.",
 		"colour": [255,140,50,255]
 	},
 	"010": {"longname": "Jade Sun",
 		"shortname": "JS",
 		"icon": 0,
+		"description": "Jade Sun.",
 		"colour": [160,180,150,255]
 	},
 	"011": {"longname": "Cobalt Ice",
 		"shortname": "CI",
 		"icon": 0,
+		"description": "Cobalt Ice.",
 		"colour": [20,40,120,255]
 	},
 	"012": {"longname": "Pink Cosmos",
 		"shortname": "PC",
 		"icon": 0,
+		"description": "Pink Cosmos.",
 		"colour": [255,100,200,255]
 	},
 	"013": {"longname": "Teal Galaxy",
 		"shortname": "TG",
 		"icon": 0,
+		"description": "Teal Galaxy.",
 		"colour": [100,210,190,255]
 	},
 	"014": {"longname": "Purple Lightning",
 		"shortname": "PL",
 		"icon": 0,
+		"description": "Purple Lightning.",
 		"colour": [160,70,210,255]
 	},
 	"015": {"longname": "Acid Rain",
 		"shortname": "AR",
 		"icon": 0,
+		"description": "Acid Rain.",
 		"colour": [100,120,20,255]
 	},
 	"016": {"longname": "White Nova",
 		"shortname": "WN",
 		"icon": 0,
+		"description": "White Nova.",
 		"colour": [190,90,90,255]
 	}
 }

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\army.cpp" />
     <ClCompile Include="src\as-addons\scriptarray.cpp" />
     <ClCompile Include="src\as-addons\scriptbuilder.cpp" />
     <ClCompile Include="src\as-addons\scriptstdstring.cpp" />
@@ -32,7 +33,6 @@
     <ClCompile Include="src\language.cpp" />
     <ClCompile Include="src\logger.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\property.cpp" />
     <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\safejson.cpp" />
     <ClCompile Include="src\script.cpp" />
@@ -42,6 +42,7 @@
     <ClCompile Include="src\userinput.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\army.h" />
     <ClInclude Include="include\as-addons\scriptarray.h" />
     <ClInclude Include="include\as-addons\scriptbuilder.h" />
     <ClInclude Include="include\as-addons\scriptstdstring.h" />
@@ -53,7 +54,6 @@
     <ClInclude Include="include\gui.h" />
     <ClInclude Include="include\language.h" />
     <ClInclude Include="include\logger.h" />
-    <ClInclude Include="include\property.h" />
     <ClInclude Include="include\renderer.h" />
     <ClInclude Include="include\safejson.h" />
     <ClInclude Include="include\script.h" />
@@ -155,6 +155,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ProgramDataBaseFileName>$(TEMP)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

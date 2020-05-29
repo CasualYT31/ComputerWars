@@ -23,43 +23,43 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui.h"
 #include <iostream>
 
-awe::gui_background::gui_background() noexcept {}
+engine::gui_background::gui_background() noexcept {}
 
-awe::gui_background::gui_background(unsigned int key) noexcept {
+engine::gui_background::gui_background(unsigned int key) noexcept {
 	set(key);
 }
 
-awe::gui_background::gui_background(sf::Color colour) noexcept {
+engine::gui_background::gui_background(sf::Color colour) noexcept {
 	set(colour);
 }
 
-void awe::gui_background::set(unsigned int key) noexcept {
-	_flag = awe::gui_background::type::Sprite;
+void engine::gui_background::set(unsigned int key) noexcept {
+	_flag = engine::gui_background::type::Sprite;
 	_key = key;
 }
 
-void awe::gui_background::set(sf::Color colour) noexcept {
-	_flag = awe::gui_background::type::Colour;
+void engine::gui_background::set(sf::Color colour) noexcept {
+	_flag = engine::gui_background::type::Colour;
 	_colour = colour;
 }
 
-awe::gui_background::type awe::gui_background::getType() const noexcept {
+engine::gui_background::type engine::gui_background::getType() const noexcept {
 	return _flag;
 }
 
-unsigned int awe::gui_background::getSprite() const noexcept {
+unsigned int engine::gui_background::getSprite() const noexcept {
 	return _key;
 }
 
-sf::Color awe::gui_background::getColour() const noexcept {
+sf::Color engine::gui_background::getColour() const noexcept {
 	return _colour;
 }
 
-awe::gui::gui(awe::scripts* scripts, const std::string& name) noexcept : _scripts(scripts), _logger(name) {
+engine::gui::gui(engine::scripts* scripts, const std::string& name) noexcept : _scripts(scripts), _logger(name) {
 	if (!scripts) _logger.error("No scripts object has been provided to this GUI object: no signal handling will occur.");
 }
 
-std::string awe::gui::setGUI(const std::string& newPanel) noexcept {
+std::string engine::gui::setGUI(const std::string& newPanel) noexcept {
 	auto old = getGUI();
 	if (_gui.get(old)) _gui.get(old)->setVisible(false);
 	try {
@@ -73,21 +73,21 @@ std::string awe::gui::setGUI(const std::string& newPanel) noexcept {
 	return old;
 }
 
-std::string awe::gui::getGUI() noexcept {
+std::string engine::gui::getGUI() noexcept {
 	return _currentGUI;
 }
 
-void awe::gui::setTarget(sf::RenderTarget& newTarget) noexcept {
+void engine::gui::setTarget(sf::RenderTarget& newTarget) noexcept {
 	_gui.setTarget(newTarget);
 }
 
-bool awe::gui::handleEvent(sf::Event e) noexcept {
+bool engine::gui::handleEvent(sf::Event e) noexcept {
 	return _gui.handleEvent(e);
 }
 
-void awe::gui::drawBackground(sfx::spritesheet* sprites) noexcept {
+void engine::gui::drawBackground(sfx::spritesheet* sprites) noexcept {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
-		if (_guiBackground[getGUI()].getType() == awe::gui_background::type::Colour) {
+		if (_guiBackground[getGUI()].getType() == engine::gui_background::type::Colour) {
 			_gui.getTarget()->clear(_guiBackground[getGUI()].getColour());
 		} else if (sprites) {
 			_gui.getTarget()->clear();
@@ -103,7 +103,7 @@ void awe::gui::drawBackground(sfx::spritesheet* sprites) noexcept {
 	}
 }
 
-void awe::gui::drawForeground(sfx::spritesheet* sprites) noexcept {
+void engine::gui::drawForeground(sfx::spritesheet* sprites) noexcept {
 	if (sprites && getGUI() != "") {
 		//update bitmapbutton and picture sprites
 		auto widgetList = _gui.get<tgui::Group>(getGUI())->getWidgets();
@@ -126,12 +126,12 @@ void awe::gui::drawForeground(sfx::spritesheet* sprites) noexcept {
 	_gui.draw();
 }
 
-void awe::gui::signalHandler(tgui::Widget::Ptr widget, const std::string& signalName) noexcept {
+void engine::gui::signalHandler(tgui::Widget::Ptr widget, const std::string& signalName) noexcept {
 	std::string functionName = getGUI() + "_" + widget->getWidgetName() + "_" + signalName;
 	if (_scripts && getGUI() != "" && _scripts->functionExists(functionName)) _scripts->callFunction(functionName);
 }
 
-bool awe::gui::_load(safe::json& j) noexcept {
+bool engine::gui::_load(safe::json& j) noexcept {
 	bool ret = true;
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
@@ -169,11 +169,11 @@ bool awe::gui::_load(safe::json& j) noexcept {
 	return ret;
 }
 
-bool awe::gui::_save(nlohmann::json& j) noexcept {
+bool engine::gui::_save(nlohmann::json& j) noexcept {
 	return false;
 }
 
-bool awe::gui::_loadGUI(const std::string& name, const std::string& filepath) noexcept {
+bool engine::gui::_loadGUI(const std::string& name, const std::string& filepath) noexcept {
 	tgui::Gui temp;
 	try {
 		temp.loadWidgetsFromFile(filepath);
@@ -202,46 +202,46 @@ bool awe::gui::_loadGUI(const std::string& name, const std::string& filepath) no
 }
 
 //ALL SIGNALS NEED TO BE TESTED IDEALLY
-void awe::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
+void engine::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	//connect common Widget signals
-	widget->connect({"PositionChanged", "SizeChanged", "Focused", "Unfocused", "MouseEntered", "MouseLeft", "AnimationFinished"}, &awe::gui::signalHandler, this);
+	widget->connect({"PositionChanged", "SizeChanged", "Focused", "Unfocused", "MouseEntered", "MouseLeft", "AnimationFinished"}, &engine::gui::signalHandler, this);
 	//connect clickable widget signals
 	tgui::String type = widget->getWidgetType(); type = type.toLower();
 	if (type == "button" || type == "editbox" || type == "label" || type == "picture" || type == "progressbar" || type == "radiobutton" || type == "spinbutton" || type == "panel") {
-		widget->connect({"MousePressed", "MouseReleased", "Clicked", "RightMousePressed", "RightMouseReleased", "RightClicked"}, &awe::gui::signalHandler, this);
+		widget->connect({"MousePressed", "MouseReleased", "Clicked", "RightMousePressed", "RightMouseReleased", "RightClicked"}, &engine::gui::signalHandler, this);
 	}
 	//connect bespoke signals
 	if (type == "button") {
-		widget->connect({ "Pressed" }, &awe::gui::signalHandler, this);
+		widget->connect({ "Pressed" }, &engine::gui::signalHandler, this);
 	} else if (type == "childwindow") {
-		widget->connect({ "MousePressed", "Closed", "Minimized", "Maximized", "EscapeKeyPressed" }, &awe::gui::signalHandler, this);
+		widget->connect({ "MousePressed", "Closed", "Minimized", "Maximized", "EscapeKeyPressed" }, &engine::gui::signalHandler, this);
 	} else if (type == "combobox") {
-		widget->connect({ "ItemSelected" }, &awe::gui::signalHandler, this);
+		widget->connect({ "ItemSelected" }, &engine::gui::signalHandler, this);
 	} else if (type == "editbox") {
-		widget->connect({ "TextChanged", "ReturnKeyPressed" }, &awe::gui::signalHandler, this);
+		widget->connect({ "TextChanged", "ReturnKeyPressed" }, &engine::gui::signalHandler, this);
 	} else if (type == "knob" || type == "scrollbar" || type == "slider" || type == "spinbutton") {
-		widget->connect({ "ValueChanged" }, &awe::gui::signalHandler, this);
+		widget->connect({ "ValueChanged" }, &engine::gui::signalHandler, this);
 	} else if (type == "label" || type == "picture") {
-		widget->connect({ "DoubleClicked" }, &awe::gui::signalHandler, this);
+		widget->connect({ "DoubleClicked" }, &engine::gui::signalHandler, this);
 	} else if (type == "listbox") {
-		widget->connect({ "ItemSelected", "MousePressed", "MouseReleased", "DoubleClicked" }, &awe::gui::signalHandler, this);
+		widget->connect({ "ItemSelected", "MousePressed", "MouseReleased", "DoubleClicked" }, &engine::gui::signalHandler, this);
 	} else if (type == "listview") {
-		widget->connect({ "ItemSelected", "HeaderClicked", "RightClicked", "DoubleClicked" }, &awe::gui::signalHandler, this);
+		widget->connect({ "ItemSelected", "HeaderClicked", "RightClicked", "DoubleClicked" }, &engine::gui::signalHandler, this);
 	} else if (type == "menubar") {
-		widget->connect({ "MenuItemClicked" }, &awe::gui::signalHandler, this);
+		widget->connect({ "MenuItemClicked" }, &engine::gui::signalHandler, this);
 	} else if (type == "messagebox") {
-		widget->connect({ "ButtonPressed" }, &awe::gui::signalHandler, this);
+		widget->connect({ "ButtonPressed" }, &engine::gui::signalHandler, this);
 	} else if (type == "progressbar") {
-		widget->connect({ "ValueChanged", "Full" }, &awe::gui::signalHandler, this);
+		widget->connect({ "ValueChanged", "Full" }, &engine::gui::signalHandler, this);
 	} else if (type == "radiobutton") {
-		widget->connect({ "Checked", "Unchecked", "Changed" }, &awe::gui::signalHandler, this);
+		widget->connect({ "Checked", "Unchecked", "Changed" }, &engine::gui::signalHandler, this);
 	} else if (type == "rangeslider") {
-		widget->connect({ "RangeChanged" }, &awe::gui::signalHandler, this);
+		widget->connect({ "RangeChanged" }, &engine::gui::signalHandler, this);
 	} else if (type == "tabs") {
-		widget->connect({ "TabSelected" }, &awe::gui::signalHandler, this);
+		widget->connect({ "TabSelected" }, &engine::gui::signalHandler, this);
 	} else if (type == "textbox") {
-		widget->connect({ "TextChanged", "SelectionChanged" }, &awe::gui::signalHandler, this);
+		widget->connect({ "TextChanged", "SelectionChanged" }, &engine::gui::signalHandler, this);
 	} else if (type == "treeview") {
-		widget->connect({ "ItemSelected", "DoubleClicked", "Expanded", "Collapsed" }, &awe::gui::signalHandler, this);
+		widget->connect({ "ItemSelected", "DoubleClicked", "Expanded", "Collapsed" }, &engine::gui::signalHandler, this);
 	}
 }

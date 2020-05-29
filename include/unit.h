@@ -22,44 +22,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "property.h"
+#include "bank.h"
 
 namespace awe {
-	struct unit_data : public awe::property {
-		std::string description = "";
-		unsigned int movementTypeID = 0;
-		unsigned int pictureKey = 0;
-		int cost = 0;
-		int max_fuel = 0;
-		int max_ammo = 0;
-		int max_hp = 100;
-		int movementPoints = 0;
-		int vision = 0;
-		unsigned int lowerRange = 1;
-		unsigned int higherRange = 1;
-	};
-
-	class unit_bank : public safe::json_script {
-	public:
-		unit_bank(awe::movement* movetypes, const std::string& name = "unit_bank") noexcept;
-		const unit_data* operator[](const std::size_t& id) const noexcept;
-		bool find(const std::size_t& id) const noexcept;
-	private:
-		virtual bool _load(safe::json& j) noexcept;
-		virtual bool _save(nlohmann::json& j) noexcept;
-
-		global::logger _logger;
-		std::vector<unit_data> _types;
-		awe::movement* _movementTypes = nullptr;
-	};
-
 	class unit {
 	public:
-		unit(const unit_data* type = nullptr, const unsigned int owner = 0, const int hp = 0, const int fuel = 0, const int ammo = 0) noexcept;
-		const unit_data* setType(const unit_data* newType) noexcept;
-		const unit_data* getType() const noexcept;
-		unsigned int setOwner(const unsigned int newOwner) noexcept;
-		unsigned int getOwner() const noexcept;
+		unit(const unit_type* type = nullptr, const int hp = 0, const int fuel = 0, const int ammo = 0) noexcept;
+		const unit_type* setType(const unit_type* newType) noexcept;
+		const unit_type* getType() const noexcept;
 		int setHP(const int newHP) noexcept;
 		int getHP() const noexcept;
 		int setFuel(const int newFuel) noexcept;
@@ -67,8 +37,7 @@ namespace awe {
 		int setAmmo(const int newAmmo) noexcept;
 		int getAmmo() const noexcept;
 	private:
-		const unit_data* _unitType = nullptr;
-		unsigned int _owner = 0;
+		const unit_type* _unitType = nullptr;
 		int _hp = 0;
 		int _fuel = 0;
 		int _ammo = 0;

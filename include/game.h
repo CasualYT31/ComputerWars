@@ -26,10 +26,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "fonts.h"
 #include "language.h"
 #include "renderer.h"
-#include "texture.h"
 #include "userinput.h"
 #include "gui.h"
-#include "script.h"
 #include "terrain.h"
 #include "unit.h"
 
@@ -38,7 +36,26 @@ namespace awe {
 	public:
 		static const char* STATE_TERMINATED;
 
-		game(const std::string& name = "game_loop") noexcept;
+		game(const std::string& scriptsFolder = "assets/script",
+			const std::string& JSON_AudioSound = "assets/audio/sound/audiosound.json",
+			const std::string& JSON_AudioMusic = "assets/audio/music/audiomusic.json",
+			const std::string& JSON_Fonts = "assets/fonts/fonts.json",
+			const std::string& JSON_Renderer = "assets/renderer/renderer.json",
+			const std::string& JSON_Spritesheet_GUI = "assets/sprites/gui/spritesgui.json",
+			const std::string& JSON_Spritesheet_CO = "assets/sprites/gui/spritesco.json",
+			const std::string& JSON_UserInput = "assets/userinput/userinput.json",
+			const std::string& JSON_GUI = "assets/gui/gui.json",
+			const std::string& JSON_LanguageFolder = "assets/lang",
+			const std::string& JSON_Countries = "assets/property/country.json",
+			const std::string& JSON_Weathers = "assets/property/weather.json",
+			const std::string& JSON_Environments = "assets/property/environment.json",
+			const std::string& JSON_Movements = "assets/property/movement.json",
+			const std::string& JSON_Terrains = "assets/property/terrain.json",
+			const std::string& JSON_Tiles = "assets/property/tile.json",
+			const std::string& JSON_Units = "assets/property/unit.json",
+			const std::string& JSON_COs = "assets/property/co.json",
+			const std::string& name = "game_loop") noexcept;
+
 		int run() noexcept;
 	private:
 		//================================
@@ -58,15 +75,14 @@ namespace awe {
 		//==========  GAME DATA ==========
 		//================================
 		// game properties
-		awe::country _countries;
-		awe::weather _weathers;
-		awe::environment _environments;
-		awe::movement _movements;
-		// terrain-related data
-		awe::terrain_bank _terrainTypeBank;
-		awe::terrain_tile_bank _terrainTileBank;
-		// unit-related data
-		awe::unit_bank _unitTypeBank;
+		awe::bank<awe::country> _countryBank;
+		awe::bank<awe::weather> _weatherBank;
+		awe::bank<awe::environment> _environmentBank;
+		awe::bank<awe::movement_type> _movementBank;
+		awe::bank<awe::terrain> _terrainBank;
+		awe::bank<awe::tile_type> _tileBank;
+		awe::bank<awe::unit_type> _unitBank;
+		awe::bank<awe::commander> _commanderBank;
 		//================================
 		//==========BACKEND DATA==========
 		//================================
@@ -86,13 +102,11 @@ namespace awe {
 		// spritesheet objects
 		sfx::spritesheet _spritesheet_GUI;
 		sfx::spritesheet _spritesheet_CO;
-		sfx::spritesheet _spritesheet_Unit;
-		sfx::spritesheet _spritesheet_Tile;
 		// user input objects
 		sfx::user_input _userinput;
 		// scripts object
-		awe::scripts _scripts;
+		engine::scripts _scripts;
 		// GUI object
-		awe::gui _gui;
+		engine::gui _gui;
 	};
 }

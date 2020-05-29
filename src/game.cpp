@@ -25,38 +25,54 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 const char* awe::game::STATE_TERMINATED = "terminated";
 
-awe::game::game(const std::string& name) noexcept :
+awe::game::game(const std::string& scriptsFolder,
+			const std::string& JSON_AudioSound,
+			const std::string& JSON_AudioMusic,
+			const std::string& JSON_Fonts,
+			const std::string& JSON_Renderer,
+			const std::string& JSON_Spritesheet_GUI,
+			const std::string& JSON_Spritesheet_CO,
+			const std::string& JSON_UserInput,
+			const std::string& JSON_GUI,
+			const std::string& JSON_LanguageFolder,
+			const std::string& JSON_Countries,
+			const std::string& JSON_Weathers,
+			const std::string& JSON_Environments,
+			const std::string& JSON_Movements,
+			const std::string& JSON_Terrains,
+			const std::string& JSON_Tiles,
+			const std::string& JSON_Units,
+			const std::string& JSON_COs,
+			const std::string& name) noexcept :
 		_logger(name), _audio_Sound("audio_sound"), _audio_Music("audio_music"), _renderer("renderer"),
 		_language_GUI("language_gui"), _language_Game("language_game"), _language_Dialogue("language_dialogue"),
-		_spritesheet_GUI("spritesheet_gui"), _spritesheet_CO("spritesheet_co"), _spritesheet_Unit("spritesheet_unit"),
-		_spritesheet_Tile("spritesheet_tile"), _userinput(_renderer), _scripts("assets/script"), _gui(&_scripts),
-		_terrainTypeBank(&_movements), _terrainTileBank(&_terrainTypeBank, &_countries), _unitTypeBank(&_movements) {
+		_spritesheet_GUI("spritesheet_gui"), _spritesheet_CO("spritesheet_co"), _userinput(_renderer),
+		_scripts(scriptsFolder), _gui(&_scripts) {
 	// load JSON configurations for each backend object
-	_audio_Sound.load("assets/audio/sound/audiosound.json");
-	_audio_Music.load("assets/audio/music/audiomusic.json");
-	_fonts.load("assets/fonts/fonts.json");
-	_renderer.load("assets/renderer/renderer.json");
-	_spritesheet_GUI.load("assets/sprites/gui/spritesgui.json");
-	_spritesheet_CO.load("assets/sprites/co/spritesco.json");
-	_spritesheet_Unit.load("assets/sprites/unit/spritesunit.json");
-	_spritesheet_Tile.load("assets/sprites/tile/spritestile.json");
-	_userinput.load("assets/userinput/userinput.json");
-	_gui.load("assets/gui/gui.json");
+	_audio_Sound.load(JSON_AudioSound);
+	_audio_Music.load(JSON_AudioMusic);
+	_fonts.load(JSON_Fonts);
+	_renderer.load(JSON_Renderer);
+	_spritesheet_GUI.load(JSON_Spritesheet_GUI);
+	_spritesheet_CO.load(JSON_Spritesheet_CO);
+	_userinput.load(JSON_UserInput);
+	_gui.load(JSON_GUI);
 	// setup translation object
-	i18n::translation::setLanguageScriptPath("assets/lang");
+	i18n::translation::setLanguageScriptPath(JSON_LanguageFolder);
 	i18n::translation::addLanguageObject("gui", &_language_GUI);
 	i18n::translation::addLanguageObject("game", &_language_Game);
 	i18n::translation::addLanguageObject("dialogue", &_language_Dialogue);
 	i18n::translation::setLanguage("GB");
-	// load JSON configurations for each property object
-	_countries.load("assets/property/country.json");
-	_weathers.load("assets/property/weather.json");
-	_environments.load("assets/property/environment.json");
-	_movements.load("assets/property/movement.json");
-	// load JSON configurations for each game object
-	_terrainTypeBank.load("assets/property/terrain.json");
-	_terrainTileBank.load("assets/property/tile.json");
-	_unitTypeBank.load("assets/property/unit.json");
+	// load JSON configurations for each property bank
+	_countryBank.load(JSON_Countries);
+	_weatherBank.load(JSON_Weathers);
+	_environmentBank.load(JSON_Environments);
+	_movementBank.load(JSON_Movements);
+	_terrainBank.load(JSON_Terrains);
+	_tileBank.load(JSON_Tiles);
+	_unitBank.load(JSON_Units);
+	_commanderBank.load(JSON_COs);
+	awe::updateAllTerrains(_tileBank, _terrainBank);
 	// setup GUI object
 	_gui.setTarget(_renderer);
 }
@@ -68,22 +84,6 @@ int awe::game::run() noexcept {
 		if (_state != _gui.getGUI()) _gui.setGUI(_state);
 
 		_userinput.update();
-
-		if (_userinput["up"]) std::cout << "up: hot reloaded scripts\n";
-		if (_userinput["down"]) std::cout << "down\n";
-		if (_userinput["left"]) std::cout << "left\n";
-		if (_userinput["right"]) std::cout << "right\n";
-		if (_userinput["select"]) {
-			std::cout << "select\n";
-			_state = "settings";
-		}
-		if (_userinput["back"]) {
-			std::cout << "back\n";
-			_state = "main";
-		}
-		if (_userinput["up"]) {
-			_scripts.reloadScripts();
-		}
 
 		_rendererEventPolling();
 
