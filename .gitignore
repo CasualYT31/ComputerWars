@@ -1,7 +1,8 @@
 assets.old/
 x64/
 .vs/
-git-bash-ComputerWars
+lib/
+git-bash-ComputerWars.lnk
 BaseCode.sln
 BaseCode.vcxproj
 BaseCode.vcxproj.filters

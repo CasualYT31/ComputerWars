@@ -20,13 +20,30 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/**@file safejson.h
+ * Classes which are used to interact with JSON in a "safer" way.
+ * Classes in this file allow clients to interact with JSON in a safer way by
+ * reporting errors in assumptions that are made, such as the existance of a key
+ * sequence or the type of a value. Nlohmann's JSON library is used as the backend
+ * for these classes.
+ */
+
 #pragma once
 
 #include "logger.h"
 #include "nlohmann/json.hpp"
 #include "sfml/Graphics/Color.hpp"
 
+/**
+ * The \c safe namespace contains classes used to interact with JSON in a "safer" way.
+ */
 namespace safe {
+	/**
+	 * This class is used to track the error state of all JSON-based classes.
+	 * This is a superclass for the other classes in this namespace. It provides
+	 * common error-tracking functionality using the error bit model found in the
+	 * STL.
+	 */
 	class json_state {
 	public:
 		virtual ~json_state() noexcept;
@@ -53,6 +70,13 @@ namespace safe {
 		FailBits _bits = SUCCESS;
 	};
 
+	/**
+	 * This class is used to interact with a JSON object in a "safer" way.
+	 * A \c nlohmann::json object is given, and then accessed through an instantiation
+	 * of this class. Key sequences can be tested, as well as values and their data
+	 * types. A variety of methods are provided to allow clients to apply different
+	 * types of values to C++ variables and objects.
+	 */
 	class json : public json_state {
 	public:
 		typedef std::vector<std::string> KeySequence;
@@ -82,6 +106,20 @@ namespace safe {
 		global::logger _logger;
 	};
 
+	/**
+	 * This abstract class is used to read from and write to JSON script files.
+	 * This class allows derived classes to be "configured" using a JSON script,
+	 * by reading values from the script via the \c safe::json class and applying
+	 * them to member fields. In addition to this, derived classes can also save these
+	 * values to a JSON script.
+	 *
+	 * PROBLEM: ideally, there should only be "one" method: one which outlines the
+	 * expected format of the JSON script. Then this class can, in some way, either
+	 * read or write using this method, instead of the programmer manually typing
+	 * out both the read and write methods themselves. This will help to reduce errors
+	 * but will end up with the programmer having less power. More analysis should be
+	 * conducted to see if this approach is viable.
+	 */
 	class json_script : public json_state {
 	public:
 		virtual ~json_script() noexcept;
