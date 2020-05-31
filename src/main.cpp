@@ -28,10 +28,22 @@ script.h & gui.h: moved classes into engine namespace and out of awe namespace
 I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
 */
 
+/**@file main.cpp
+ * The entry point into the program.
+ * Some basic initialisation occurs before handing control over to the sole awe::game object.
+ * See the documentation on main() for more information.
+ */
+
 #include "bank.h"
 
 #include "game.h"
 
+/**
+ * The entry point into the program.
+ * Some basic game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the awe::game object is constructed.
+ * Much more of the game's initialisation occurs in awe::game's constructor.
+ * @return The result of calling awe::game::run(): by this point, the game has been shut down.
+ */
 int main() {
     // create the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
