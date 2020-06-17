@@ -16,7 +16,7 @@ If you've somehow stumbled across this project, then please stick around. This i
 
 This project is very much in the pre-pre-alpha stage right now, as I've only been working on this version of the engine since December 2019. I don't have any working product to show yet. However, a lot of the ground work has been covered (rendering, audio, user input, logging, internationalisation, etc.), and I am making a lot of progress beyond this ground work.
 
-If you really want an Advance Wars engine **now**, then you can check out [Robosturm's project](https://github.com/Robosturm/Commander_Wars): it might be the only AW engine out there of this flavour that's still be actively developed, so go check it out. [This project by ThislsAUsername](https://github.com/ThislsAUsername/DefendPeace) is also worth mentioning.
+If you really want an Advance Wars engine **now**, then you can check out [Robosturm's project](https://github.com/Robosturm/Commander_Wars): it might be the only AW engine out there of this flavour that's still being actively developed, so go check it out. [This project by ThislsAUsername](https://github.com/ThislsAUsername/DefendPeace) is also worth mentioning.
 
 ### Dependencies
 - [SFML](https://github.com/SFML/SFML)
