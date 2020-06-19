@@ -34,6 +34,22 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
  * See the documentation on main() for more information.
  */
 
+#include "language.h"
+
+#include <iostream>
+
+int main() {
+    std::cout << i18n::expand_string::insert("Test with no variables.\n");
+    std::cout << i18n::expand_string::insert("Test with the right number of variables: #.\n", "this is the first and only variable");
+    std::cout << i18n::expand_string::insert("Test with less variables: #.\n");
+    std::cout << i18n::expand_string::insert("Test with more variables: #.\n", 32);
+    i18n::expand_string::setVarChar('%');
+    std::cout << i18n::expand_string::insert("Test double var chars (only works if variables are given) %% and setVarChar and getVarChar.\n", -7);
+    std::cout << i18n::expand_string::getVarChar() << std::endl;
+}
+
+/*
+
 #include "bank.h"
 
 #include "game.h"
@@ -43,7 +59,7 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
  * Some basic game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the awe::game object is constructed.
  * Much more of the game's initialisation occurs in awe::game's constructor.
  * @return The result of calling awe::game::run(): by this point, the game has been shut down.
- */
+ *
 int main() {
     // create the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
@@ -52,3 +68,5 @@ int main() {
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run();
 }
+
+*/
