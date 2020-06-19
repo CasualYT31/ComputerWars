@@ -117,7 +117,6 @@ namespace i18n {
 	 * This class works by loading a variety of JSON scripts. The first contains a list of JSON scripts and their language IDs, forming the language map.
 	 * Each of these scripts contains a list of string pairs, with the keys IDing strings of a particular language, such as English or German. This forms the string map.
 	 * The same key should be given to equivalent strings so that they can be accessed in the same way by the client.
-	 * @todo It is not necessary to load all language scripts at once: just loading one at a time should suffice. I should make amends for this in the code.
 	 * @sa   _load()
 	 */
 	class language_dictionary : public safe::json_script {
@@ -130,21 +129,26 @@ namespace i18n {
 		language_dictionary(const std::string& name = "dictionary") noexcept;
 
 		/**
-		 * Loads a JSON script and adds it to the internal language map.
-		 * The language is only added if loading was completed successfully. If the ID of an existing language was given, the old is replaced with the new.
+		 * Ensures that any dynamically-allocated memory is deleted.
+		 */
+		~language_dictionary() noexcept;
+
+		/**
+		 * Adds a path to a language's string map script.
+		 * The language is only added if the given ID was non-blank and was not the ID of the current language.
+		 * If the ID of an existing language was given, the old path is replaced with the new path.
 		 * Please see \c i18n::language_dictionary::language::_load() for a rundown of the format this JSON script is to have.
-		 * It is advised to instead load all language scripts at once using the \c load() function inherited from \c safe::json_script.
-		 * The name of the language object given in the logger will be "language_ID".
-		 * @param  id   The ID to give to this language. It should ideally take the format "ENG_US", "DE_DEU", etc. It cannot be an empty string.
+		 * It is advised to instead load all language script paths at once using the \c load() function inherited from \c safe::json_script.
+		 * @param  id   The ID to give to this language. It should ideally take the format "ENG_US", "DE_DEU", etc.
 		 * @param  path The path of the JSON script to load.
-		 * @return \c TRUE if loading the language went successfully, \c FALSE otherwise (if \c id was blank, for example).
+		 * @return \c TRUE if adding the language went successfully, \c FALSE otherwise (if \c id was blank, for example).
 		 */
 		bool addLanguage(const std::string& id, const std::string& path) noexcept;
 
 		/**
-		 * Removes a loaded language from the language map.
-		 * If the given ID could not identify a language loaded at the time of calling, or if it was the ID of the current language, then the method will fail.
-		 * @param  id The ID of the language to remove/unload.
+		 * Removes a language path from the internal collection.
+		 * If the given ID could not identify a language script path at the time of calling, or if it was the ID of the current language, then the method will fail.
+		 * @param  id The ID of the language to remove.
 		 * @return \c TRUE if removal was successful, \c FALSE otherwise.
 		 */
 		bool removeLanguage(const std::string& id) noexcept;
@@ -154,8 +158,9 @@ namespace i18n {
 		 * This class has been setup to only access the string map of one language at a time.
 		 * This method is used to change the language to access, dubbed "the current language."
 		 * If set to an empty string, the operator() method will instead return the given string with variables inserted.
+		 * The name of the freshly allocated \c language object given in the logger will be "language_ID".
 		 * @param  id The ID of the language to set.
-		 * @return \c TRUE if switching was successful, \c FALSE if the given ID could not identify a loaded language.
+		 * @return \c TRUE if switching was successful, \c FALSE if the given ID could not identify a loaded language, or if loading the script failed.
 		 * @sa     operator()
 		 * @sa     getLanguage()
 		 */
@@ -173,6 +178,7 @@ namespace i18n {
 		 * This method looks up the current language's string map and searches for a string with the given key. This key is also known as the "native string."
 		 * It uses the \c expand_string::insert() function to insert variables into the string found in the string map.
 		 * Please see i18n::language_dictionary::language::get() method for more information.
+		 * If the string map of the current language is \c NULL, and yet this method still attempts to access it, a fatal error will be logged and "<fatal>" will be returned.
 		 * @tparam Ts           The types of the variables to insert into the language string, if any are given.
 		 * @param  nativeString A string key which uniquely identifies a string in the current language's string map.
 		 * @param  values       The variables to insert into the language string.
@@ -264,10 +270,14 @@ namespace i18n {
 		};
 
 		/**
-		 * The language map, also called the dictionary.
-		 * A language map is essentially a collection of string maps, each one having a unique language ID.
+		 * The collection of language scripts that are available for this dictionary object.
 		 */
-		std::unordered_map<std::string, i18n::language_dictionary::language> _dictionary;
+		std::unordered_map<std::string, std::string> _languageFiles;
+
+		/**
+		 * A pointer to a dynamically-allocated language map object, holding the string map of the current language.
+		 */
+		language* _languageMap = nullptr;
 
 		/**
 		 * Stores the ID of the current language.
@@ -317,5 +327,10 @@ std::string i18n::language_dictionary::language::get(const std::string& nativeSt
 template<typename... Ts>
 std::string i18n::language_dictionary::operator()(const std::string& nativeString, Ts... values) noexcept {
 	if (_currentLanguage == "") return i18n::expand_string::insert(nativeString, values...);
-	return _dictionary.at(_currentLanguage).get(nativeString, values...);
+	if (_languageMap) {
+		return _languageMap->get(nativeString, values...);
+	} else {
+		_logger.error("Fatal - _languageMap was NULL.");
+		return "<fatal>";
+	}
 }

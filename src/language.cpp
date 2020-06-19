@@ -46,37 +46,63 @@ std::string i18n::expand_string::insert(const std::string& original) noexcept {
 
 i18n::language_dictionary::language_dictionary(const std::string& name) noexcept : _logger(name) {}
 
+i18n::language_dictionary::~language_dictionary() noexcept {
+	if (_languageMap) delete _languageMap;
+}
+
 bool i18n::language_dictionary::addLanguage(const std::string& id, const std::string& path) noexcept {
-	i18n::language_dictionary::language newStringMap("language_" + id);
-	newStringMap.load(path);
-	if (newStringMap.inGoodState() && id != "") {
-		_dictionary[id] = newStringMap;
+	if (id == _currentLanguage) {
+		_logger.write("Attempted to replace the script path of the current language \"{}\".", id);
+		return false;
+	} else if (id == "") {
+		_logger.write("Attempted to add a script path with a blank language ID.");
+		return false;
 	} else {
-		_logger.error("Failed to add new language object \"{}\".", id);
+		_languageFiles[id] = path;
+		return true;
 	}
-	return newStringMap.inGoodState();
 }
 
 bool i18n::language_dictionary::removeLanguage(const std::string& id) noexcept {
-	if (_dictionary.find(id) == _dictionary.end()) {
-		_logger.write("Attempted to remove non-existent language object \"{}\".", id);
+	if (_languageFiles.find(id) == _languageFiles.end()) {
+		_logger.write("Attempted to remove non-existent language script path \"{}\".", id);
 		return false;
 	} else if (id == _currentLanguage) {
-		_logger.write("Attempted to remove current language object \"{}\".", id);
+		_logger.write("Attempted to remove current language script path \"{}\".", id);
 		return false;
 	} else {
-		_dictionary.erase(id);
+		_languageFiles.erase(id);
 		return true;
 	}
 }
 
 bool i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
-	if (id != "" && _dictionary.find(id) == _dictionary.end()) {
-		_logger.write("Attempted to switch to non-existent language object \"{}\".", id);
+	if (id != "" && _languageFiles.find(id) == _languageFiles.end()) {
+		_logger.write("Attempted to switch to non-existent string map \"{}\".", id);
 		return false;
 	} else {
-		_currentLanguage = id;
-		return true;
+		if (id == "") {
+			if (_languageMap) delete _languageMap;
+			return true;
+		}
+		i18n::language_dictionary::language* newMap = nullptr;
+		try {
+			newMap = new i18n::language_dictionary::language("language_" + id);
+		} catch (std::bad_alloc e) {
+			_logger.error("Failed to allocate memory for the string map of langauage \"{}\".", id);
+			return false;
+		}
+		newMap->load(_languageFiles[id]);
+		if (newMap->inGoodState()) {
+			if (_languageMap) delete _languageMap;
+			_languageMap = newMap;
+			_currentLanguage = id;
+			return true;
+		} else {
+			delete newMap;
+			_logger.error("Failed to load string map script for language \"{}\".", id);
+			return false;
+		}
 	}
 }
 
@@ -87,7 +113,7 @@ std::string i18n::language_dictionary::getLanguage() const noexcept {
 bool i18n::language_dictionary::_load(safe::json& j) noexcept {
 	std::string buffer = "";
 	// firstly, load language scripts
-	_dictionary.clear();
+	_languageFiles.clear();
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		if (i.key() != "lang" && i.key() != "") {
@@ -110,8 +136,8 @@ bool i18n::language_dictionary::_load(safe::json& j) noexcept {
 
 bool i18n::language_dictionary::_save(nlohmann::json& j) noexcept {
 	j["lang"] = _currentLanguage;
-	for (auto itr = _dictionary.begin(), enditr = _dictionary.end(); itr != enditr; itr++) {
-		j[itr->first] = itr->second.getScriptPath();
+	for (auto itr = _languageFiles.begin(), enditr = _languageFiles.end(); itr != enditr; itr++) {
+		j[itr->first] = itr->second;
 	}
 	return true;
 }
