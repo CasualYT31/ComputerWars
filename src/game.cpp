@@ -56,8 +56,6 @@ awe::game::game(const std::string& scriptsFolder,
 	_spritesheet_CO.load(JSON_Spritesheet_CO);
 	_userinput.load(JSON_UserInput);
 	_gui.load(JSON_GUI);
-	// setup language dictionary object
-	_dictionary.addLanguage("ENG_GB", "assets/lang/ENG_GB.json");
 	_dictionary.load(JSON_Language);
 	// load JSON configurations for each property bank
 	_countryBank.load(JSON_Countries);
@@ -71,6 +69,10 @@ awe::game::game(const std::string& scriptsFolder,
 	awe::updateAllTerrains(_tileBank, _terrainBank);
 	// setup GUI object
 	_gui.setTarget(_renderer);
+}
+
+awe::game::~game() noexcept {
+	_dictionary.save();
 }
 
 int awe::game::run() noexcept {
