@@ -112,31 +112,172 @@ namespace i18n {
 		static char _varchar;
 	};
 
+	/**
+	 * Class used to translate strings during runtime.
+	 * This class works by loading a variety of JSON scripts. The first contains a list of JSON scripts and their language IDs, forming the language map.
+	 * Each of these scripts contains a list of string pairs, with the keys IDing strings of a particular language, such as English or German. This forms the string map.
+	 * The same key should be given to equivalent strings so that they can be accessed in the same way by the client.
+	 * @todo It is not necessary to load all language scripts at once: just loading one at a time should suffice. I should make amends for this in the code.
+	 * @sa   _load()
+	 */
 	class language_dictionary : public safe::json_script {
 	public:
+		/**
+		 * Initialises the internal logger object.
+		 * @param name The name to give this particular instantiation within the log file. Defaults to "dictionary."
+		 * @sa    \c global::logger
+		 */
 		language_dictionary(const std::string& name = "dictionary") noexcept;
+
+		/**
+		 * Loads a JSON script and adds it to the internal language map.
+		 * The language is only added if loading was completed successfully. If the ID of an existing language was given, the old is replaced with the new.
+		 * Please see \c i18n::language_dictionary::language::_load() for a rundown of the format this JSON script is to have.
+		 * It is advised to instead load all language scripts at once using the \c load() function inherited from \c safe::json_script.
+		 * The name of the language object given in the logger will be "language_ID".
+		 * @param  id   The ID to give to this language. It should ideally take the format "ENG_US", "DE_DEU", etc. It cannot be an empty string.
+		 * @param  path The path of the JSON script to load.
+		 * @return \c TRUE if loading the language went successfully, \c FALSE otherwise (if \c id was blank, for example).
+		 */
 		bool addLanguage(const std::string& id, const std::string& path) noexcept;
+
+		/**
+		 * Removes a loaded language from the language map.
+		 * If the given ID could not identify a language loaded at the time of calling, or if it was the ID of the current language, then the method will fail.
+		 * @param  id The ID of the language to remove/unload.
+		 * @return \c TRUE if removal was successful, \c FALSE otherwise.
+		 */
 		bool removeLanguage(const std::string& id) noexcept;
+
+		/**
+		 * Updates the current language.
+		 * This class has been setup to only access the string map of one language at a time.
+		 * This method is used to change the language to access, dubbed "the current language."
+		 * If set to an empty string, the operator() method will instead return the given string with variables inserted.
+		 * @param  id The ID of the language to set.
+		 * @return \c TRUE if switching was successful, \c FALSE if the given ID could not identify a loaded language.
+		 * @sa     operator()
+		 * @sa     getLanguage()
+		 */
 		bool setLanguage(const std::string& id) noexcept;
+
+		/**
+		 * Retrieves the ID of the current language.
+		 * @return The ID of the current language.
+		 * @sa     setLanguage()
+		 */
 		std::string getLanguage() const noexcept;
+
+		/**
+		 * Retrieves a string from the current language's string map.
+		 * This method looks up the current language's string map and searches for a string with the given key. This key is also known as the "native string."
+		 * It uses the \c expand_string::insert() function to insert variables into the string found in the string map.
+		 * Please see i18n::language_dictionary::language::get() method for more information.
+		 * @tparam Ts           The types of the variables to insert into the language string, if any are given.
+		 * @param  nativeString A string key which uniquely identifies a string in the current language's string map.
+		 * @param  values       The variables to insert into the language string.
+		 * @return The translated string.
+		 */
 		template<typename... Ts>
 		std::string operator()(const std::string& nativeString, Ts... values) noexcept;
 	private:
+		/**
+		 * The JSON load method for this class.
+		 * Before loading, the language map is \b cleared, even if the method returns \c FALSE.
+		 * The JSON script loaded by this class must have the following format:
+		 * there should only be string values, no objects or any other types are permitted. If they exist a warning will be reported and the value will be ignored.
+		 * There is a special key, "lang", which is paired with the current language ID as it was when last saved.
+		 * All other keys are language IDs, and <em>their</em> values should be paths to JSON scripts detailing that language's string map.
+		 * A blank key and its value will be completely ignored.
+		 * Please see i18n::language_dictionary::language::_load() for more details on the format of these string map JSON scripts.
+		 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.
+		 * @return \c TRUE if the current language as dictated by the \c lang key could be loaded, \c FALSE if not, or if the current language ID could not identify a language.
+		 */
 		virtual bool _load(safe::json& j) noexcept;
+
+		/**
+		 * The JSON save method for this class.
+		 * Please see \c _load() for a detailed summary of the format of JSON script that this method produces.
+		 * @param  j The \c nlohmann::json object representing the JSON script which this method writes to.
+		 * @return Always returns \c TRUE.
+		 */
 		virtual bool _save(nlohmann::json& j) noexcept;
+
+		/**
+		 * This class represents the string map of a single language.
+		 * This is a nested class, meaning that only the \c language_dictionary class can access it.
+		 * It is accessed via the \c language_dictionary class.
+		 */
 		class language : public safe::json_script {
 		public:
+			/**
+			 * Initialises the internal logger object.
+			 * @param name The name to give this particular instantiation within the log file. Defaults to "language."
+			 * @sa    \c global::logger
+			 */
 			language(const std::string& name = "language") noexcept;
+
+			/**
+			 * Accesses a string stored within the string map.
+			 * In addition, this method uses the \c expand_string::insert() method to insert variables into the string found.
+			 * If a string with the given key could not be found, then "<error>" is returned and an error is logged.
+			 * "<error>" can be amended by the i18n::language_dictionary::operator() method if any of its characters is set as a var char (see \c i18n::expand_string).
+			 * @tparam Ts           The types of the variables to insert into the language string, if any are given.
+			 * @param  nativeString The key uniquely identifying the language string to extract. Also called the "native string."
+			 * @param  values       The variables to insert into the language string.
+			 * @return The final language string.
+			 */
 			template<typename... Ts>
 			std::string get(const std::string& nativeString, Ts... values) noexcept;
 		private:
+			/**
+			 * The JSON load method for this class.
+			 * Before loading, the string map is \b cleared.
+			 * The script should contain values of a string type only. Any other types of values will be ignored.
+			 * The key of a key-value pair defines the native string which the client provides.
+			 * It does not have to contain any var chars and it does not have to be numbers: it can be anything, including an empty string.
+			 * The value defines the corresponding language string.
+			 * Each string map JSON script should contain the same list of keys, but they should have different values, depending on the language the script is supposed to store.
+			 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.
+			 * @return Always returns \c TRUE.
+			 */
 			virtual bool _load(safe::json& j) noexcept;
+
+			/**
+			 * The JSON save method for this class.
+			 * Please see \c _load() for a detailed summary of the format of JSON script that this method produces.
+			 * @param  j The \c nlohmann::json object representing the JSON script which this method writes to.
+			 * @return Always returns \c TRUE.
+			*/
 			virtual bool _save(nlohmann::json& j) noexcept;
-			global::logger _logger;
+
+			/**
+			 * The string map.
+			 * A string map is a collection of strings, each one having a unique native string key identifying them.
+			 */
 			std::unordered_map<std::string, std::string> _strings;
+
+			/**
+			 * The internal logger object.
+			 */
+			global::logger _logger;
 		};
+
+		/**
+		 * The language map, also called the dictionary.
+		 * A language map is essentially a collection of string maps, each one having a unique language ID.
+		 */
 		std::unordered_map<std::string, i18n::language_dictionary::language> _dictionary;
+
+		/**
+		 * Stores the ID of the current language.
+		 * @sa setLanguage()
+		 */
 		std::string _currentLanguage = "";
+
+		/**
+		 * The internal logger object.
+		 */
 		global::logger _logger;
 	};
 }
@@ -175,6 +316,6 @@ std::string i18n::language_dictionary::language::get(const std::string& nativeSt
 
 template<typename... Ts>
 std::string i18n::language_dictionary::operator()(const std::string& nativeString, Ts... values) noexcept {
-	if (_currentLanguage == "") return nativeString;
+	if (_currentLanguage == "") return i18n::expand_string::insert(nativeString, values...);
 	return _dictionary.at(_currentLanguage).get(nativeString, values...);
 }

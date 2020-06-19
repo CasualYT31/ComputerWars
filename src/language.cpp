@@ -49,7 +49,7 @@ i18n::language_dictionary::language_dictionary(const std::string& name) noexcept
 bool i18n::language_dictionary::addLanguage(const std::string& id, const std::string& path) noexcept {
 	i18n::language_dictionary::language newStringMap("language_" + id);
 	newStringMap.load(path);
-	if (newStringMap.inGoodState()) {
+	if (newStringMap.inGoodState() && id != "") {
 		_dictionary[id] = newStringMap;
 	} else {
 		_logger.error("Failed to add new language object \"{}\".", id);
@@ -90,7 +90,7 @@ bool i18n::language_dictionary::_load(safe::json& j) noexcept {
 	_dictionary.clear();
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
-		if (i.key() != "lang") {
+		if (i.key() != "lang" && i.key() != "") {
 			j.apply(buffer, { i.key() });
 			if (j.inGoodState()) {
 				addLanguage(i.key(), buffer);
