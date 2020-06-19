@@ -88,7 +88,7 @@ bool i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
 		i18n::language_dictionary::language* newMap = nullptr;
 		try {
 			newMap = new i18n::language_dictionary::language("language_" + id);
-		} catch (std::bad_alloc e) {
+		} catch (std::bad_alloc& e) {
 			_logger.error("Failed to allocate memory for the string map of langauage \"{}\".", id);
 			return false;
 		}
