@@ -39,13 +39,29 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
 #include <iostream>
 
 int main() {
-    std::cout << i18n::expand_string::insert("Test with no variables.\n");
-    std::cout << i18n::expand_string::insert("Test with the right number of variables: #.\n", "this is the first and only variable");
-    std::cout << i18n::expand_string::insert("Test with less variables: #.\n");
-    std::cout << i18n::expand_string::insert("Test with more variables: #.\n", 32);
-    i18n::expand_string::setVarChar('%');
-    std::cout << i18n::expand_string::insert("Test double var chars (only works if variables are given) %% and setVarChar and getVarChar.\n", -7);
-    std::cout << i18n::expand_string::getVarChar() << std::endl;
+    global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
+    i18n::language_dictionary translate;
+    translate.addLanguage("ENG_GB", "./assets/lang/GB_test.json");
+    translate.addLanguage("DE_DEU", "./assets/lang/DE_test.json");
+    translate.load("./assets/lang/lang.json");
+    std::cout << translate("directly print string without translation - current language is \"\"\n");
+    translate.setLanguage("ENG_GB");
+    std::cout << translate("0");
+    std::cout << translate("1", translate("2"));
+    std::cout << translate("title");
+    translate.setLanguage("test");
+    std::cout << translate("0");
+    translate.setLanguage("DE_DEU");
+    std::cout << translate("0");
+    std::cout << translate("1", translate("2"));
+    std::cout << translate.getLanguage();
+    translate.removeLanguage("DE_DEU");
+    translate.setLanguage("ENG_GB");
+    translate.removeLanguage("DE_DEU");
+    translate.removeLanguage("non");
+    translate.addLanguage("testing", "non-existent script path");
+    std::cout << translate("invalid key");
+    translate.save("./assets/lang/lang.json");
 }
 
 /*

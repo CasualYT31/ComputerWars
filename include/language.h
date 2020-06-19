@@ -52,21 +52,23 @@ namespace i18n {
 		static char _varchar;
 	};
 
-	class language_dictionary {
+	class language_dictionary : public safe::json_script {
 	public:
 		language_dictionary(const std::string& name = "dictionary") noexcept;
-		void addLanguage(const std::string& id, const std::string& path) noexcept;
-		void removeLanguage(const std::string& id) noexcept;
-		void setLanguage(const std::string& id) noexcept;
+		bool addLanguage(const std::string& id, const std::string& path) noexcept;
+		bool removeLanguage(const std::string& id) noexcept;
+		bool setLanguage(const std::string& id) noexcept;
 		std::string getLanguage() const noexcept;
 		template<typename... Ts>
-		std::string get(const std::string& nativeString, Ts... values) const noexcept;
+		std::string operator()(const std::string& nativeString, Ts... values) noexcept;
 	private:
+		virtual bool _load(safe::json& j) noexcept;
+		virtual bool _save(nlohmann::json& j) noexcept;
 		class language : public safe::json_script {
 		public:
 			language(const std::string& name = "language") noexcept;
 			template<typename... Ts>
-			std::string get(const std::string& nativeString, Ts... values) const noexcept;
+			std::string get(const std::string& nativeString, Ts... values) noexcept;
 		private:
 			virtual bool _load(safe::json& j) noexcept;
 			virtual bool _save(nlohmann::json& j) noexcept;
@@ -312,7 +314,7 @@ std::string i18n::expand_string::insert(const std::string& original, T value, Ts
 }
 
 template<typename... Ts>
-std::string i18n::language_dictionary::language::get(const std::string& nativeString, Ts... values) const noexcept {
+std::string i18n::language_dictionary::language::get(const std::string& nativeString, Ts... values) noexcept {
 	if (_strings.find(nativeString) == _strings.end()) {
 		_logger.error("Native string \"{}\" does not exist in this string map.", nativeString);
 		return "<error>";
@@ -322,7 +324,8 @@ std::string i18n::language_dictionary::language::get(const std::string& nativeSt
 }
 
 template<typename... Ts>
-std::string i18n::language_dictionary::get(const std::string& nativeString, Ts... values) const noexcept {
+std::string i18n::language_dictionary::operator()(const std::string& nativeString, Ts... values) noexcept {
+	if (_currentLanguage == "") return nativeString;
 	return _dictionary.at(_currentLanguage).get(nativeString, values...);
 }
 

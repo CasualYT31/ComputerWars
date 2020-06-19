@@ -49,7 +49,7 @@ std::string i18n::expand_string::insert(const std::string& original) noexcept {
 
 i18n::language_dictionary::language_dictionary(const std::string& name) noexcept : _logger(name) {}
 
-void i18n::language_dictionary::addLanguage(const std::string& id, const std::string& path) noexcept {
+bool i18n::language_dictionary::addLanguage(const std::string& id, const std::string& path) noexcept {
 	i18n::language_dictionary::language newStringMap("language_" + id);
 	newStringMap.load(path);
 	if (newStringMap.inGoodState()) {
@@ -57,26 +57,49 @@ void i18n::language_dictionary::addLanguage(const std::string& id, const std::st
 	} else {
 		_logger.error("Failed to add new language object \"{}\".", id);
 	}
+	return newStringMap.inGoodState();
 }
 
-void i18n::language_dictionary::removeLanguage(const std::string& id) noexcept {
+bool i18n::language_dictionary::removeLanguage(const std::string& id) noexcept {
 	if (_dictionary.find(id) == _dictionary.end()) {
 		_logger.write("Attempted to remove non-existent language object \"{}\".", id);
+		return false;
+	} else if (id == _currentLanguage) {
+		_logger.write("Attempted to remove current language object \"{}\".", id);
+		return false;
 	} else {
 		_dictionary.erase(id);
+		return true;
 	}
 }
 
-void i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
+bool i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
 	if (id != "" && _dictionary.find(id) == _dictionary.end()) {
-		_logger.write("Attempted to switch to non-existent langauge object \"{}\".", id);
+		_logger.write("Attempted to switch to non-existent language object \"{}\".", id);
+		return false;
 	} else {
 		_currentLanguage = id;
+		return true;
 	}
 }
 
 std::string i18n::language_dictionary::getLanguage() const noexcept {
 	return _currentLanguage;
+}
+
+bool i18n::language_dictionary::_load(safe::json& j) noexcept {
+	std::string curlang = _currentLanguage;
+	j.apply(curlang, { "lang" });
+	if (!j.inGoodState()) {
+		return false;
+	} else {
+		return setLanguage(curlang);
+	}
+}
+
+bool i18n::language_dictionary::_save(nlohmann::json& j) noexcept {
+	j["lang"] = _currentLanguage;
+	return true;
 }
 
 i18n::language_dictionary::language::language(const std::string& name) noexcept : _logger(name) {}
