@@ -22,9 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "language.h"
 
-
-// CONSTRUCTION ZONE
-
 std::stringstream i18n::expand_string::_sstream = std::stringstream();
 char i18n::expand_string::_varchar = '#';
 
@@ -124,11 +121,7 @@ bool i18n::language_dictionary::language::_save(nlohmann::json& j) noexcept {
 	return true;
 }
 
-// END OF CONSTRUCTION ZONE
-
-
-
-
+/*
 
 i18n::language::language(const std::string& name) noexcept : _logger(name) {}
 
@@ -245,4 +238,4 @@ i18n::language* i18n::translation::getLanguageObject(const std::string& name) no
 	} else {
 		return _langs[name];
 	}
-}
+}*/

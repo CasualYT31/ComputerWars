@@ -34,7 +34,7 @@ awe::game::game(const std::string& scriptsFolder,
 			const std::string& JSON_Spritesheet_CO,
 			const std::string& JSON_UserInput,
 			const std::string& JSON_GUI,
-			const std::string& JSON_LanguageFolder,
+			const std::string& JSON_Language,
 			const std::string& JSON_Countries,
 			const std::string& JSON_Weathers,
 			const std::string& JSON_Environments,
@@ -45,7 +45,6 @@ awe::game::game(const std::string& scriptsFolder,
 			const std::string& JSON_COs,
 			const std::string& name) noexcept :
 		_logger(name), _audio_Sound("audio_sound"), _audio_Music("audio_music"), _renderer("renderer"),
-		_language_GUI("language_gui"), _language_Game("language_game"), _language_Dialogue("language_dialogue"),
 		_spritesheet_GUI("spritesheet_gui"), _spritesheet_CO("spritesheet_co"), _userinput(_renderer),
 		_scripts(scriptsFolder), _gui(&_scripts) {
 	// load JSON configurations for each backend object
@@ -57,12 +56,9 @@ awe::game::game(const std::string& scriptsFolder,
 	_spritesheet_CO.load(JSON_Spritesheet_CO);
 	_userinput.load(JSON_UserInput);
 	_gui.load(JSON_GUI);
-	// setup translation object
-	i18n::translation::setLanguageScriptPath(JSON_LanguageFolder);
-	i18n::translation::addLanguageObject("gui", &_language_GUI);
-	i18n::translation::addLanguageObject("game", &_language_Game);
-	i18n::translation::addLanguageObject("dialogue", &_language_Dialogue);
-	i18n::translation::setLanguage("GB");
+	// setup language dictionary object
+	_dictionary.addLanguage("ENG_GB", "assets/lang/ENG_GB.json");
+	_dictionary.load(JSON_Language);
 	// load JSON configurations for each property bank
 	_countryBank.load(JSON_Countries);
 	_weatherBank.load(JSON_Weathers);
@@ -75,12 +71,6 @@ awe::game::game(const std::string& scriptsFolder,
 	awe::updateAllTerrains(_tileBank, _terrainBank);
 	// setup GUI object
 	_gui.setTarget(_renderer);
-}
-
-awe::game::~game() noexcept {
-	i18n::translation::removeLanguageObject("gui");
-	i18n::translation::removeLanguageObject("game");
-	i18n::translation::removeLanguageObject("dialogue");
 }
 
 int awe::game::run() noexcept {

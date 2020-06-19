@@ -45,7 +45,7 @@ namespace awe {
 			const std::string& JSON_Spritesheet_CO = "assets/sprites/gui/spritesco.json",
 			const std::string& JSON_UserInput = "assets/userinput/userinput.json",
 			const std::string& JSON_GUI = "assets/gui/gui.json",
-			const std::string& JSON_LanguageFolder = "assets/lang",
+			const std::string& JSON_Language = "assets/lang/lang.json",
 			const std::string& JSON_Countries = "assets/property/country.json",
 			const std::string& JSON_Weathers = "assets/property/weather.json",
 			const std::string& JSON_Environments = "assets/property/environment.json",
@@ -55,7 +55,6 @@ namespace awe {
 			const std::string& JSON_Units = "assets/property/unit.json",
 			const std::string& JSON_COs = "assets/property/co.json",
 			const std::string& name = "game_loop") noexcept;
-		~game() noexcept;
 
 		int run() noexcept;
 	private:
@@ -94,10 +93,8 @@ namespace awe {
 		sfx::audio _audio_Music;
 		// fonts object
 		sfx::fonts _fonts;
-		// language objects
-		i18n::language _language_GUI;
-		i18n::language _language_Game;
-		i18n::language _language_Dialogue;
+		// language dictionary object
+		i18n::language_dictionary _dictionary;
 		// renderer object
 		sfx::renderer _renderer;
 		// spritesheet objects

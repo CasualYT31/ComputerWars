@@ -36,8 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sstream>
 
 namespace i18n {
-	// CONSTRUCTION ZONE
-
 	class expand_string {
 	public:
 		template<typename T, typename... Ts>
@@ -80,216 +78,212 @@ namespace i18n {
 		global::logger _logger;
 	};
 
-	// END OF CONSTRUCTION ZONE
+	///**
+	// * Represents a map of string pairs which hold native language strings and their corresponding translations.
+	// * This class was designed to simplify the localisation effort for software projects in terms of language translation.
+	// * Programmers can create \c language objects which accept a JSON script, written by translators, containing string key-value pairs.
+	// * The key holds the "native language" string, the value holds the equivolent "foreign language" string.
+	// * The programmer then replaces native language strings in the code with languageObjectName("native string").
+	// * This allows the client to switch out native or foreign language strings by simply calling \c toNativeLanguage().
+	// * In order to cohesively support multiple foreign languages, the \c translation class should be used.
+	// * @sa translation
+	// */
+	//class language : public safe::json_script {
+	//public:
+	//	/**
+	//	 * Typedef represening a map of string pairs.
+	//	 * The key represents the native language string, the value represents the foreign language string.
+	//	 * @todo Perhaps this should be made into its own class.
+	//	 */
+	//	typedef std::unordered_map<std::string, std::string> Dictionary;
 
-	/**
-	 * Represents a map of string pairs which hold native language strings and their corresponding translations.
-	 * This class was designed to simplify the localisation effort for software projects in terms of language translation.
-	 * Programmers can create \c language objects which accept a JSON script, written by translators, containing string key-value pairs.
-	 * The key holds the "native language" string, the value holds the equivolent "foreign language" string.
-	 * The programmer then replaces native language strings in the code with languageObjectName("native string").
-	 * This allows the client to switch out native or foreign language strings by simply calling \c toNativeLanguage().
-	 * In order to cohesively support multiple foreign languages, the \c translation class should be used.
-	 * @sa translation
-	 */
-	class language : public safe::json_script {
-	public:
-		/**
-		 * Typedef represening a map of string pairs.
-		 * The key represents the native language string, the value represents the foreign language string.
-		 * @todo Perhaps this should be made into its own class.
-		 */
-		typedef std::unordered_map<std::string, std::string> Dictionary;
+	//	/**
+	//	 * Character which represents a variable to insert into the string.
+	//	 * Whenever a variable needs to be inserted into a native or foreign language string, this character should be included.
+	//	 * If the character needs to be output instead of a variable, then two of these characters, one directly after the other, should be typed.
+	//	 * @todo This should be taken out of this class and made into its own: see \c _dumpToStream().
+	//	 */
+	//	static const char VAR_CHAR = '#';
 
-		/**
-		 * Character which represents a variable to insert into the string.
-		 * Whenever a variable needs to be inserted into a native or foreign language string, this character should be included.
-		 * If the character needs to be output instead of a variable, then two of these characters, one directly after the other, should be typed.
-		 * @todo This should be taken out of this class and made into its own: see \c _dumpToStream().
-		 */
-		static const char VAR_CHAR = '#';
+	//	/**
+	//	 * Constructor which initialises the internal logger object.
+	//	 * @param name The name to given this \c language object in the log file.
+	//	 * @sa    logger.logger()
+	//	 */
+	//	language(const std::string& name = "language") noexcept;
 
-		/**
-		 * Constructor which initialises the internal logger object.
-		 * @param name The name to given this \c language object in the log file.
-		 * @sa    logger.logger()
-		 */
-		language(const std::string& name = "language") noexcept;
+	//	/**
+	//	 * Translates a string.
+	//	 * This operator accepts a string and an optional list of variables to insert into the string.
+	//	 * The string given must be the native language string.
+	//	 * <tt>VAR_CHAR</tt>s are read from left to right, and are replaced with any given variables, starting with the one given first, then proceeding.
+	//	 * If more variables were given than <tt>VAR_CHAR</tt>s, the extra variables are ignored.
+	//	 * If more <tt>VAR_CHAR</tt>s were given than variables, the extra <tt>VAR_CHAR</tt>s are preserved in the resulting string.
+	//	 * @tparam Ts         The types of the objects within the parameter pack \c values.
+	//	 * @param  baseString The native language string to process.
+	//	 * @param  values     The variables to optionally insert into the native language string. Can be none.
+	//	 * @return The string after translation and variable processing.
+	//	 * @sa     VAR_CHAR
+	//	 * @sa     _dumpToStream()
+	//	 */
+	//	template<typename... Ts>
+	//	std::string operator()(const std::string& baseString, Ts... values) noexcept;
 
-		/**
-		 * Translates a string.
-		 * This operator accepts a string and an optional list of variables to insert into the string.
-		 * The string given must be the native language string.
-		 * <tt>VAR_CHAR</tt>s are read from left to right, and are replaced with any given variables, starting with the one given first, then proceeding.
-		 * If more variables were given than <tt>VAR_CHAR</tt>s, the extra variables are ignored.
-		 * If more <tt>VAR_CHAR</tt>s were given than variables, the extra <tt>VAR_CHAR</tt>s are preserved in the resulting string.
-		 * @tparam Ts         The types of the objects within the parameter pack \c values.
-		 * @param  baseString The native language string to process.
-		 * @param  values     The variables to optionally insert into the native language string. Can be none.
-		 * @return The string after translation and variable processing.
-		 * @sa     VAR_CHAR
-		 * @sa     _dumpToStream()
-		 */
-		template<typename... Ts>
-		std::string operator()(const std::string& baseString, Ts... values) noexcept;
+	//	/**
+	//	 * Switches the language mode of this object.
+	//	 * This method is used to switch between returning he native or foreign language string when the operator()() method is called.
+	//	 * @param newval \c TRUE if the native language string should be returned, \c FALSE if the foreign language string should be returned.
+	//	 */
+	//	void toNativeLanguage(bool newval) noexcept;
 
-		/**
-		 * Switches the language mode of this object.
-		 * This method is used to switch between returning he native or foreign language string when the operator()() method is called.
-		 * @param newval \c TRUE if the native language string should be returned, \c FALSE if the foreign language string should be returned.
-		 */
-		void toNativeLanguage(bool newval) noexcept;
+	//	/**
+	//	 * Tests if the object is in native language mode.
+	//	 * @return \c TRUE if the object is in native language mode, \c FALSE if it's in the foreign language mode.
+	//	 */
+	//	bool inNativeLanguage() const noexcept;
+	//private:
+	//	/**
+	//	 * Configures the class with a JSON script.
+	//	 * The root object must hold a set of string key-value pairs.
+	//	 * The key must hold the native language string: this is the string that is used in the program code.
+	//	 * The value must hold the foreign language equivalent of the native language string.
+	//	 * If any value is a non-string, an error will be logged and \c FALSE will be returned: the \c language object can be used but not all strings are guaranteed to be loaded.
+	//	 * The internal Dictionary will only be updated if loading was completely successful. The internal Dictionary will be wiped before being updated.
+	//	 * @param  j The \c safe::json object which contains the contents of the loaded script.
+	//	 * @return \c TRUE upon success, \c FALSE if loading failed.
+	//	 * @sa     VAR_CHAR
+	//	 * @sa     json._load()
+	//	 * @sa     _save()
+	//	 */
+	//	virtual bool _load(safe::json& j) noexcept;
 
-		/**
-		 * Tests if the object is in native language mode.
-		 * @return \c TRUE if the object is in native language mode, \c FALSE if it's in the foreign language mode.
-		 */
-		bool inNativeLanguage() const noexcept;
-	private:
-		/**
-		 * Configures the class with a JSON script.
-		 * The root object must hold a set of string key-value pairs.
-		 * The key must hold the native language string: this is the string that is used in the program code.
-		 * The value must hold the foreign language equivalent of the native language string.
-		 * If any value is a non-string, an error will be logged and \c FALSE will be returned: the \c language object can be used but not all strings are guaranteed to be loaded.
-		 * The internal Dictionary will only be updated if loading was completely successful. The internal Dictionary will be wiped before being updated.
-		 * @param  j The \c safe::json object which contains the contents of the loaded script.
-		 * @return \c TRUE upon success, \c FALSE if loading failed.
-		 * @sa     VAR_CHAR
-		 * @sa     json._load()
-		 * @sa     _save()
-		 */
-		virtual bool _load(safe::json& j) noexcept;
+	//	/**
+	//	 * Exports the class' data into a JSON script.
+	//	 * See _load() for a description of the resulting format of the JSON script.
+	//	 * @param  j The object to write this object's data to.
+	//	 * @return \c TRUE.
+	//	 * @sa     json._save()
+	//	 * @sa     _load()
+	//	 */
+	//	virtual bool _save(nlohmann::json& j) noexcept;
 
-		/**
-		 * Exports the class' data into a JSON script.
-		 * See _load() for a description of the resulting format of the JSON script.
-		 * @param  j The object to write this object's data to.
-		 * @return \c TRUE.
-		 * @sa     json._save()
-		 * @sa     _load()
-		 */
-		virtual bool _save(nlohmann::json& j) noexcept;
+	//	/**
+	//	 * Determines which string should be returned via the operator()() method.
+	//	 * If in native language mode, the method will simply return the string it is given.
+	//	 * If in foreign language mode, the corresponding foreign language string will be returned using the native language string given.
+	//	 * If it could be found, it is returned. If it could not be found, an error string is returned and it is logged.
+	//	 * @param  baseString The native language string to translate.
+	//	 * @return Either the native or foreign language string depending on the language mode at the time of calling, or an error string if an error occurred.
+	//	 * @remark Yes, the string is technically duplicated via this method if in native language mode.
+	//	 *         However, assuming that the result is used for output only, this copy only exists temporarily.
+	//	 */
+	//	std::string _calculateString(const std::string& baseString) noexcept;
 
-		/**
-		 * Determines which string should be returned via the operator()() method.
-		 * If in native language mode, the method will simply return the string it is given.
-		 * If in foreign language mode, the corresponding foreign language string will be returned using the native language string given.
-		 * If it could be found, it is returned. If it could not be found, an error string is returned and it is logged.
-		 * @param  baseString The native language string to translate.
-		 * @return Either the native or foreign language string depending on the language mode at the time of calling, or an error string if an error occurred.
-		 * @remark Yes, the string is technically duplicated via this method if in native language mode.
-		 *         However, assuming that the result is used for output only, this copy only exists temporarily.
-		 */
-		std::string _calculateString(const std::string& baseString) noexcept;
+	//	/**
+	//	 * Parses a string and inserts variables into it.
+	//	 * This method is called if at least one variable is given in a call to the operator()() method.
+	//	 * Characters are individually checked. If one of them is a lone \c VAR_CHAR, \c value is inserted into the string, and a recursive call is performed.
+	//	 * Since the \c value object is inserted via a \c stringstream object, it must be able to be output to such an object using the \c operator<<() method on a \c stringstream.
+	//	 * @todo   This method should be made into its own separate function. There may well be use for this elsewhere.
+	//	 * @tparam T  The type of the first object in the parameter pack.
+	//	 * @tparam Ts The types of the remaining objects in the parameter pack, if any exist.
+	//	 * @param  transString The string to process: can be either native or foreign.
+	//	 * @param  value       The variable to insert into \c transString if a \c VAR_CHAR is found.
+	//	 * @param  values      The remaining variables to insert into \c transString. Can be zero.
+	//	 * @sa     _dumpToStream()
+	//	 */
+	//	template<typename T, typename... Ts>
+	//	void _dumpToStream(const std::string& transString, T value, Ts... values) noexcept;
 
-		/**
-		 * Parses a string and inserts variables into it.
-		 * This method is called if at least one variable is given in a call to the operator()() method.
-		 * Characters are individually checked. If one of them is a lone \c VAR_CHAR, \c value is inserted into the string, and a recursive call is performed.
-		 * Since the \c value object is inserted via a \c stringstream object, it must be able to be output to such an object using the \c operator<<() method on a \c stringstream.
-		 * @todo   This method should be made into its own separate function. There may well be use for this elsewhere.
-		 * @tparam T  The type of the first object in the parameter pack.
-		 * @tparam Ts The types of the remaining objects in the parameter pack, if any exist.
-		 * @param  transString The string to process: can be either native or foreign.
-		 * @param  value       The variable to insert into \c transString if a \c VAR_CHAR is found.
-		 * @param  values      The remaining variables to insert into \c transString. Can be zero.
-		 * @sa     _dumpToStream()
-		 */
-		template<typename T, typename... Ts>
-		void _dumpToStream(const std::string& transString, T value, Ts... values) noexcept;
+	//	/**
+	//	 * Writes the given string to an internal string stream object.
+	//	 * This method is called if no variables are given in a call to the operator()() method.
+	//	 * This method is also automatically called if all given variables have been inserted.
+	//	 * @param transString The string to process: can be either native or foreign.
+	//	 * @sa    _dumpToString<T,Ts>()
+	//	 */
+	//	void _dumpToStream(const std::string& transString) noexcept;
 
-		/**
-		 * Writes the given string to an internal string stream object.
-		 * This method is called if no variables are given in a call to the operator()() method.
-		 * This method is also automatically called if all given variables have been inserted.
-		 * @param transString The string to process: can be either native or foreign.
-		 * @sa    _dumpToString<T,Ts>()
-		 */
-		void _dumpToStream(const std::string& transString) noexcept;
+	//	/**
+	//	 * The string pair map holding native language strings and their corresponding foreign language strings.
+	//	 */
+	//	Dictionary _dict;
 
-		/**
-		 * The string pair map holding native language strings and their corresponding foreign language strings.
-		 */
-		Dictionary _dict;
+	//	/**
+	//	 * Tracks the language mode of the object.
+	//	 * If \c TRUE, the object is in native language mode, if \c FALSE, the object is in foreign language mode.
+	//	 */
+	//	bool _baseLanguage = true;
 
-		/**
-		 * Tracks the language mode of the object.
-		 * If \c TRUE, the object is in native language mode, if \c FALSE, the object is in foreign language mode.
-		 */
-		bool _baseLanguage = true;
+	//	/**
+	//	 * The string stream used for string processing internally.
+	//	 * @sa _dumpToStream()
+	//	 */
+	//	std::stringstream _sstr;
 
-		/**
-		 * The string stream used for string processing internally.
-		 * @sa _dumpToStream()
-		 */
-		std::stringstream _sstr;
+	//	/**
+	//	 * The logger object.
+	//	 */
+	//	global::logger _logger;
+	//};
 
-		/**
-		 * The logger object.
-		 */
-		global::logger _logger;
-	};
+	///**
+	// * Singleton class used to collect a list of language objects.
+	// * This class coordinates switching languages between multiple language objects that are scattered throughout the program.
+	// * @sa   language
+	// * @todo Different types of pointers should be considered: if a stored pointer becomes invalid then the program will break.
+	// */
+	//class translation {
+	//public:
+	//	/**
+	//	 * Typedef which represents a list of language objects with their own names.
+	//	 * @todo Perhaps this should be made into its own class.
+	//	 */
+	//	typedef std::unordered_map<std::string, i18n::language*> LanguageObjectList;
 
-	/**
-	 * Singleton class used to collect a list of language objects.
-	 * This class coordinates switching languages between multiple language objects that are scattered throughout the program.
-	 * @sa   language
-	 * @todo Different types of pointers should be considered: if a stored pointer becomes invalid then the program will break.
-	 */
-	class translation {
-	public:
-		/**
-		 * Typedef which represents a list of language objects with their own names.
-		 * @todo Perhaps this should be made into its own class.
-		 */
-		typedef std::unordered_map<std::string, i18n::language*> LanguageObjectList;
+	//	/**
+	//	 * Adds an existing i18n::language object to the list.
+	//	 * Please read the documentation on setLanguage() for the meaning of the name parameter.
+	//	 * If a NULL pointer is given, the call is ignored.
+	//	 * If the name of an existing object in the list is given, the pointer to the existing object will be replaced by the one given.
+	//	 * @param name The name to give the language object.
+	//	 * @param obj  The pointer to the existing language object.
+	//	 */
+	//	static void addLanguageObject(const std::string& name, i18n::language* obj) noexcept;
 
-		/**
-		 * Adds an existing i18n::language object to the list.
-		 * Please read the documentation on setLanguage() for the meaning of the name parameter.
-		 * If a NULL pointer is given, the call is ignored.
-		 * If the name of an existing object in the list is given, the pointer to the existing object will be replaced by the one given.
-		 * @param name The name to give the language object.
-		 * @param obj  The pointer to the existing language object.
-		 */
-		static void addLanguageObject(const std::string& name, i18n::language* obj) noexcept;
+	//	/**
+	//	 * Retrieves an i18n::language object from the internal list.
+	//	 * This method shouldn't be used by preference: the language objects should be stored by the client and accessed directly.
+	//	 * @param  name The name of the language object to retrieve.
+	//	 * @return A pointer to the language object.
+	//	 */
+	//	static i18n::language* getLanguageObject(const std::string& name) noexcept;
 
-		/**
-		 * Retrieves an i18n::language object from the internal list.
-		 * This method shouldn't be used by preference: the language objects should be stored by the client and accessed directly.
-		 * @param  name The name of the language object to retrieve.
-		 * @return A pointer to the language object.
-		 */
-		static i18n::language* getLanguageObject(const std::string& name) noexcept;
+	//	/**
+	//	 * Removes an i18n::language object from the internal list.
+	//	 * This should be called by the client once the i18n::language object in question becomes invalid (before destruction).
+	//	 * @param name The name of the language object to remove.
+	//	 */
+	//	static void removeLanguageObject(const std::string& name) noexcept;
 
-		/**
-		 * Removes an i18n::language object from the internal list.
-		 * This should be called by the client once the i18n::language object in question becomes invalid (before destruction).
-		 * @param name The name of the language object to remove.
-		 */
-		static void removeLanguageObject(const std::string& name) noexcept;
+	//	/**
+	//	 * Sets the application-wide language.
+	//	 */
+	//	static void setLanguage(const std::string& lang) noexcept;
+	//	static std::string getLanguage() noexcept;
 
-		/**
-		 * Sets the application-wide language.
-		 */
-		static void setLanguage(const std::string& lang) noexcept;
-		static std::string getLanguage() noexcept;
+	//	static void setLanguageScriptPath(const std::string& path) noexcept;
+	//	static std::string getLanguageScriptPath() noexcept;
 
-		static void setLanguageScriptPath(const std::string& path) noexcept;
-		static std::string getLanguageScriptPath() noexcept;
-
-		static bool inGoodState() noexcept;
-	protected:
-		translation() noexcept;
-	private:
-		static LanguageObjectList _langs;
-		static std::string _curlang;
-		static std::string _path;
-	};
+	//	static bool inGoodState() noexcept;
+	//protected:
+	//	translation() noexcept;
+	//private:
+	//	static LanguageObjectList _langs;
+	//	static std::string _curlang;
+	//	static std::string _path;
+	//};
 }
-
-// CONSTRUCTION ZONE
 
 template<typename T, typename... Ts>
 std::string i18n::expand_string::insert(const std::string& original, T value, Ts... values) noexcept {
@@ -329,9 +323,7 @@ std::string i18n::language_dictionary::operator()(const std::string& nativeStrin
 	return _dictionary.at(_currentLanguage).get(nativeString, values...);
 }
 
-// END OF CONSTRUCTION ZONE
-
-template<typename... Ts>
+/*template<typename... Ts>
 std::string i18n::language::operator()(const std::string& baseString, Ts... values) noexcept {
 	if (sizeof...(Ts)) {
 		_sstr.str(std::string()); _sstr.clear();
@@ -361,4 +353,4 @@ void i18n::language::_dumpToStream(const std::string& transString, T value, Ts..
 			_sstr << transString[c];
 		}
 	}
-}
+}*/

@@ -34,38 +34,6 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
  * See the documentation on main() for more information.
  */
 
-#include "language.h"
-
-#include <iostream>
-
-int main() {
-    global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
-    i18n::language_dictionary translate;
-    translate.addLanguage("ENG_GB", "./assets/lang/GB_test.json");
-    translate.addLanguage("DE_DEU", "./assets/lang/DE_test.json");
-    translate.load("./assets/lang/lang.json");
-    std::cout << translate("directly print string without translation - current language is \"\"\n");
-    translate.setLanguage("ENG_GB");
-    std::cout << translate("0");
-    std::cout << translate("1", translate("2"));
-    std::cout << translate("title");
-    translate.setLanguage("test");
-    std::cout << translate("0");
-    translate.setLanguage("DE_DEU");
-    std::cout << translate("0");
-    std::cout << translate("1", translate("2"));
-    std::cout << translate.getLanguage();
-    translate.removeLanguage("DE_DEU");
-    translate.setLanguage("ENG_GB");
-    translate.removeLanguage("DE_DEU");
-    translate.removeLanguage("non");
-    translate.addLanguage("testing", "non-existent script path");
-    std::cout << translate("invalid key");
-    translate.save("./assets/lang/lang.json");
-}
-
-/*
-
 #include "bank.h"
 
 #include "game.h"
@@ -75,7 +43,7 @@ int main() {
  * Some basic game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the awe::game object is constructed.
  * Much more of the game's initialisation occurs in awe::game's constructor.
  * @return The result of calling awe::game::run(): by this point, the game has been shut down.
- *
+ */
 int main() {
     // create the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
@@ -84,5 +52,3 @@ int main() {
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run();
 }
-
-*/

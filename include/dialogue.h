@@ -55,7 +55,7 @@ namespace awe {
 		sfx::audio* audioObject = nullptr;
 		sfx::renderer* rendererObject = nullptr;
 		sfx::user_input* userinputObject = nullptr;
-		i18n::language* languageObject = nullptr;
+		i18n::language_dictionary* languageObject = nullptr;
 		sfx::spritesheet* spritesheetObject = nullptr;
 		//data that have "safe" defaults
 		sf::Time typingDelay = sf::milliseconds(50);
@@ -120,7 +120,7 @@ namespace awe {
 
 	class dialogue_sequence : public safe::json_script {
 	public:
-		dialogue_sequence(sfx::renderer* r, sfx::fonts* f, sfx::user_input* u = nullptr, sfx::spritesheet* s = nullptr, i18n::language* l = nullptr, sfx::audio* a = nullptr, const std::string& name = "dialogue_sequence") noexcept;
+		dialogue_sequence(sfx::renderer* r, sfx::fonts* f, sfx::user_input* u = nullptr, sfx::spritesheet* s = nullptr, i18n::language_dictionary* l = nullptr, sfx::audio* a = nullptr, const std::string& name = "dialogue_sequence") noexcept;
 		~dialogue_sequence() noexcept;
 		template<typename... Ts>
 		bool animate(Ts... values) noexcept;
@@ -144,7 +144,7 @@ namespace awe {
 		sfx::fonts* _font = nullptr;
 		//optional
 		sfx::audio* _audio = nullptr;
-		i18n::language* _language = nullptr;
+		i18n::language_dictionary* _language = nullptr;
 		sfx::spritesheet* _spritesheet = nullptr;
 		sfx::user_input* _userinput = nullptr;
 	};
