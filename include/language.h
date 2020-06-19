@@ -21,13 +21,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**@file language.h
- * Classes used for string translation.
- * This file declares two classes, \c language and \c translation.
- * \c language stores a map of string pairs which can be accessed.
- * The string retrieved is dependant on if the \c language object is configured to retrieve the \e native or \e foreign language string.
- * The \c translation singleton class is used to manipulate multiple \c language objects simulataneously.
- * @todo I wonder if a better architecture could be figured out here: it's best to avoid singleton classes wherever possible. Look into creation design patterns.
- *       I've got the basic building blocks in place: I just have to make it so that the client uses \e one class instead of \e two somehow.
+ * Classes used for string translation and manipulation.
+ * This file declares two classes, \c expand_string and \c language_dictionary.
+ * \c language_dictionary stores a map of maps of string pairs which can be accessed based on two keys: a language ID and a string ID.
+ * \c expand_string is a small suite of functions used to insert variables into strings.
  */
 
 #pragma once
@@ -35,18 +32,83 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "safejson.h"
 #include <sstream>
 
+/**
+ * The \c i18n namespace contains internationalisation-based classes.
+ */
 namespace i18n {
+	/**
+	 * This class contains a small suite of functions used to insert variables into strings.
+	 * Each function is static, as well as all the data members. This class cannot be instantiated.
+	 * A class approach was chosen since there needed to be shared, private data between the two versions of insert().
+	 * @warning This class is *not* thread safe! Don't attempt to change the var char during a call to insert().
+	 */
 	class expand_string {
 	public:
+		/**
+		 * Inserts variables into a given string.
+		 * This version of the insert() function scans through every character of a given string in search of <em>var chars</em>.
+		 * When a single var char is found within a string, a variable given in the call to insert() is inserted instead of the var char,
+		 * and a recursive call is performed. If there are no more variables left, then the second version of insert() is called.
+		 * If two var chars are found next to each other, then one var char is inserted into the final string and the other is discarded.
+		 * Once this is done, character scanning continues to the character after the last of the two var chars: this means that, if three
+		 * var chars are given in a row, then the first two will be replaced with one var char, and the last var char will be replaced by
+		 * a variable. If more variables are given than var chars in the string, surplus variables will be ignored.
+		 * If less variables are given than var chars in the string, surplus var chars will be treated as normal characters by the second
+		 * version of insert().
+		 * Since an STL string stream is used internally as an output, most standard variable types will work (numeric, string, chars, etc.).
+		 * @tparam T        The type of the first variable given.
+		 * @tparam Ts       The types of subsequent variables, if any are given.
+		 * @param  original The string to scan.
+		 * @param  value    The variable to insert in this call.
+		 * @param  values   Subsequent variables in the queue.
+		 * @return The final string, with variables inserted.
+		 * @sa     insert()
+		 * @sa     setVarChar()
+		 */
 		template<typename T, typename... Ts>
 		static std::string insert(const std::string& original, T value, Ts... values) noexcept;
+
+		/**
+		 * Dumps the given string to the internal stream and returns the final string.
+		 * This version of insert() is the one called when no variables are given for insertion. This is usually the final call in the
+		 * recursive chain, but it can also be the only call in the insert() chain. The given string is dumped to the string stream,
+		 * and then the entire stream is output to a string object, which is then returned. This function also resets the string stream,
+		 * ready for another call to insert().
+		 * All characters of the given string are treated the same: the entire string is simply dumped to the stream.
+		 * @param  original The string to dump to the internal stream: usually the tail end of a larger string.
+		 * @return The final string as stored by the stream.
+		 * @sa     insert<T,Ts>()
+		 */
 		static std::string insert(const std::string& original) noexcept;
+
+		/**
+		 * Retrieves the var char.
+		 * @return The var char, defaults to '#'.
+		 * @sa     setVarChar()
+		 */
 		static char getVarChar() noexcept;
+
+		/**
+		 * Updates the var char.
+		 * @param varchar The new var char.
+		 * @sa    getVarChar()
+		 */
 		static void setVarChar(const char varchar) noexcept;
 	protected:
+		/**
+		 * This class cannot be instantiated by the client.
+		 */
 		expand_string() noexcept;
 	private:
+		/**
+		 * The string stream which is used to piece together the final string.
+		 * @sa insert<T,Ts>()
+		 */
 		static std::stringstream _sstream;
+
+		/**
+		 * Stores the var char.
+		 */
 		static char _varchar;
 	};
 
