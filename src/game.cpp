@@ -77,6 +77,12 @@ awe::game::game(const std::string& scriptsFolder,
 	_gui.setTarget(_renderer);
 }
 
+awe::game::~game() noexcept {
+	i18n::translation::removeLanguageObject("gui");
+	i18n::translation::removeLanguageObject("game");
+	i18n::translation::removeLanguageObject("dialogue");
+}
+
 int awe::game::run() noexcept {
 	_renderer.openWindow();
 

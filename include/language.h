@@ -36,6 +36,50 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sstream>
 
 namespace i18n {
+	// CONSTRUCTION ZONE
+
+	class expand_string {
+	public:
+		template<typename T, typename... Ts>
+		static std::string insert(const std::string& original, T value, Ts... values) noexcept;
+		static std::string insert(const std::string& original) noexcept;
+		static char getVarChar() noexcept;
+		static void setVarChar(const char varchar) noexcept;
+	protected:
+		expand_string() noexcept;
+	private:
+		static std::stringstream _sstream;
+		static char _varchar;
+	};
+
+	class language_dictionary {
+	public:
+		language_dictionary(const std::string& name = "dictionary") noexcept;
+		void addLanguage(const std::string& id, const std::string& path) noexcept;
+		void removeLanguage(const std::string& id) noexcept;
+		void setLanguage(const std::string& id) noexcept;
+		std::string getLanguage() const noexcept;
+		template<typename... Ts>
+		std::string get(const std::string& nativeString, Ts... values) const noexcept;
+	private:
+		class language : public safe::json_script {
+		public:
+			language(const std::string& name = "language") noexcept;
+			template<typename... Ts>
+			std::string get(const std::string& nativeString, Ts... values) const noexcept;
+		private:
+			virtual bool _load(safe::json& j) noexcept;
+			virtual bool _save(nlohmann::json& j) noexcept;
+			global::logger _logger;
+			std::unordered_map<std::string, std::string> _strings;
+		};
+		std::unordered_map<std::string, i18n::language_dictionary::language> _dictionary;
+		std::string _currentLanguage = "";
+		global::logger _logger;
+	};
+
+	// END OF CONSTRUCTION ZONE
+
 	/**
 	 * Represents a map of string pairs which hold native language strings and their corresponding translations.
 	 * This class was designed to simplify the localisation effort for software projects in terms of language translation.
@@ -185,14 +229,48 @@ namespace i18n {
 		global::logger _logger;
 	};
 
+	/**
+	 * Singleton class used to collect a list of language objects.
+	 * This class coordinates switching languages between multiple language objects that are scattered throughout the program.
+	 * @sa   language
+	 * @todo Different types of pointers should be considered: if a stored pointer becomes invalid then the program will break.
+	 */
 	class translation {
 	public:
+		/**
+		 * Typedef which represents a list of language objects with their own names.
+		 * @todo Perhaps this should be made into its own class.
+		 */
 		typedef std::unordered_map<std::string, i18n::language*> LanguageObjectList;
 
+		/**
+		 * Adds an existing i18n::language object to the list.
+		 * Please read the documentation on setLanguage() for the meaning of the name parameter.
+		 * If a NULL pointer is given, the call is ignored.
+		 * If the name of an existing object in the list is given, the pointer to the existing object will be replaced by the one given.
+		 * @param name The name to give the language object.
+		 * @param obj  The pointer to the existing language object.
+		 */
 		static void addLanguageObject(const std::string& name, i18n::language* obj) noexcept;
+
+		/**
+		 * Retrieves an i18n::language object from the internal list.
+		 * This method shouldn't be used by preference: the language objects should be stored by the client and accessed directly.
+		 * @param  name The name of the language object to retrieve.
+		 * @return A pointer to the language object.
+		 */
 		static i18n::language* getLanguageObject(const std::string& name) noexcept;
+
+		/**
+		 * Removes an i18n::language object from the internal list.
+		 * This should be called by the client once the i18n::language object in question becomes invalid (before destruction).
+		 * @param name The name of the language object to remove.
+		 */
 		static void removeLanguageObject(const std::string& name) noexcept;
 
+		/**
+		 * Sets the application-wide language.
+		 */
 		static void setLanguage(const std::string& lang) noexcept;
 		static std::string getLanguage() noexcept;
 
@@ -208,6 +286,47 @@ namespace i18n {
 		static std::string _path;
 	};
 }
+
+// CONSTRUCTION ZONE
+
+template<typename T, typename... Ts>
+std::string i18n::expand_string::insert(const std::string& original, T value, Ts... values) noexcept {
+	for (std::size_t c = 0; c < original.length(); c++) {
+		if (original[c] == _varchar) {
+			if (c < original.length() - 1 && original[c + 1] == _varchar) {
+				// if two varchars appear in succession,
+				// then one is printed, and the next one is ignored
+				_sstream << _varchar; // print...
+				c++; // ignore...
+			} else {
+				_sstream << value;
+				return insert(original.substr(c + 1), values...);
+			}
+		} else {
+			_sstream << original[c];
+		}
+	}
+	// execution enters this point if more variables were given than varchars
+	// in which case, we've reached the end of the original string, so retrieve the results and return them
+	return insert("");
+}
+
+template<typename... Ts>
+std::string i18n::language_dictionary::language::get(const std::string& nativeString, Ts... values) const noexcept {
+	if (_strings.find(nativeString) == _strings.end()) {
+		_logger.error("Native string \"{}\" does not exist in this string map.", nativeString);
+		return "<error>";
+	} else {
+		return i18n::expand_string::insert(_strings.at(nativeString), values...);
+	}
+}
+
+template<typename... Ts>
+std::string i18n::language_dictionary::get(const std::string& nativeString, Ts... values) const noexcept {
+	return _dictionary.at(_currentLanguage).get(nativeString, values...);
+}
+
+// END OF CONSTRUCTION ZONE
 
 template<typename... Ts>
 std::string i18n::language::operator()(const std::string& baseString, Ts... values) noexcept {

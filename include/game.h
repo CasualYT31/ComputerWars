@@ -55,6 +55,7 @@ namespace awe {
 			const std::string& JSON_Units = "assets/property/unit.json",
 			const std::string& JSON_COs = "assets/property/co.json",
 			const std::string& name = "game_loop") noexcept;
+		~game() noexcept;
 
 		int run() noexcept;
 	private:

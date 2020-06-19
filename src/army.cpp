@@ -22,8 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "army.h"
 
-awe::army::army(TeamID team = 0, const awe::country* country = nullptr, unsigned int funds = 0,
-		const awe::commander* firstCO = nullptr, const awe::commander* secondCO = nullptr) noexcept :
+awe::army::army(TeamID team, const awe::country* country, unsigned int funds,
+		const awe::commander* firstCO, const awe::commander* secondCO) noexcept :
 		_team(team), _country(country), _funds(funds), _firstCO(firstCO), _secondCO(secondCO) {}
 
 awe::TeamID awe::army::setTeam(awe::TeamID newTeam) noexcept {
@@ -57,7 +57,7 @@ int awe::army::getFunds() const noexcept {
 	return _funds;
 }
 
-void awe::army::setCommanders(const awe::commander* firstCO, const awe::commander* secondCO = nullptr) noexcept {
+void awe::army::setCommanders(const awe::commander* firstCO, const awe::commander* secondCO) noexcept {
 	_firstCO = firstCO;
 	_secondCO = secondCO;
 	if (!_firstCO && _secondCO) std::swap(_firstCO, _secondCO);

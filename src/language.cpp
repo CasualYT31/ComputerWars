@@ -22,6 +22,91 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "language.h"
 
+
+// CONSTRUCTION ZONE
+
+std::stringstream i18n::expand_string::_sstream = std::stringstream();
+char i18n::expand_string::_varchar = '#';
+
+i18n::expand_string::expand_string() noexcept {}
+
+char i18n::expand_string::getVarChar() noexcept {
+	return _varchar;
+}
+
+void i18n::expand_string::setVarChar(const char varchar) noexcept {
+	_varchar = varchar;
+}
+
+std::string i18n::expand_string::insert(const std::string& original) noexcept {
+	_sstream << original;
+	std::string finalString;
+	std::getline(_sstream, finalString, '\0');
+	_sstream.str(std::string());
+	_sstream.clear();
+	return finalString;
+}
+
+i18n::language_dictionary::language_dictionary(const std::string& name) noexcept : _logger(name) {}
+
+void i18n::language_dictionary::addLanguage(const std::string& id, const std::string& path) noexcept {
+	i18n::language_dictionary::language newStringMap("language_" + id);
+	newStringMap.load(path);
+	if (newStringMap.inGoodState()) {
+		_dictionary[id] = newStringMap;
+	} else {
+		_logger.error("Failed to add new language object \"{}\".", id);
+	}
+}
+
+void i18n::language_dictionary::removeLanguage(const std::string& id) noexcept {
+	if (_dictionary.find(id) == _dictionary.end()) {
+		_logger.write("Attempted to remove non-existent language object \"{}\".", id);
+	} else {
+		_dictionary.erase(id);
+	}
+}
+
+void i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
+	if (id != "" && _dictionary.find(id) == _dictionary.end()) {
+		_logger.write("Attempted to switch to non-existent langauge object \"{}\".", id);
+	} else {
+		_currentLanguage = id;
+	}
+}
+
+std::string i18n::language_dictionary::getLanguage() const noexcept {
+	return _currentLanguage;
+}
+
+i18n::language_dictionary::language::language(const std::string& name) noexcept : _logger(name) {}
+
+bool i18n::language_dictionary::language::_load(safe::json& j) noexcept {
+	_strings.clear();
+	nlohmann::json jj = j.nlohmannJSON();
+	for (auto& i : jj.items()) {
+		j.apply(_strings[i.key()], { i.key() });
+		if (!j.inGoodState()) {
+			_strings.erase(i.key());
+			j.resetState();
+		}
+	}
+	return true;
+}
+
+bool i18n::language_dictionary::language::_save(nlohmann::json& j) noexcept {
+	for (auto itr = _strings.begin(), enditr = _strings.end(); itr != enditr; itr++) {
+		j[itr->first] = itr->second;
+	}
+	return true;
+}
+
+// END OF CONSTRUCTION ZONE
+
+
+
+
+
 i18n::language::language(const std::string& name) noexcept : _logger(name) {}
 
 void i18n::language::toNativeLanguage(bool newval) noexcept {
