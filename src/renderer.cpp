@@ -30,6 +30,47 @@ float sfx::delta_timer::get() const noexcept {
 	return _delta;
 }
 
+// CONSTRUCTION ZONE
+
+void sfx::rendererr::openWindow(const sf::ContextSettings& settings) noexcept {
+	create(sf::VideoMode(width, height), caption, 
+		(style.close ? sf::Style::Close : 0) |
+		(style.def ? sf::Style::Default : 0) |
+		(style.fullscreen ? sf::Style::Fullscreen : 0) |
+		(style.none ? sf::Style::None : 0) |
+		(style.resize ? sf::Style::Resize : 0) |
+		(style.titlebar ? sf::Style::Titlebar : 0),
+		settings);
+}
+
+bool sfx::rendererr::_load(safe::json& j) noexcept {
+	j.apply(width, { "width" }, &width, true);
+	j.apply(height, { "height" }, &height, true);
+	j.apply(caption, { "caption" }, &caption, true);
+	j.apply(style.close, { "close" }, &style.close, true);
+	j.apply(style.def, { "def" }, &style.def, true);
+	j.apply(style.fullscreen, { "fullscreen" }, &style.fullscreen, true);
+	j.apply(style.none, { "none" }, &style.none, true);
+	j.apply(style.resize, { "resize" }, &style.resize, true);
+	j.apply(style.titlebar, { "titlebar" }, &style.titlebar, true);
+	return true;
+}
+
+bool sfx::rendererr::_save(nlohmann::json& j) noexcept {
+	j["width"] = width;
+	j["height"] = height;
+	j["caption"] = caption;
+	j["close"] = style.close;
+	j["def"] = style.def;
+	j["fullscreen"] = style.fullscreen;
+	j["none"] = style.none;
+	j["resize"] = style.resize;
+	j["titlebar"] = style.titlebar;
+	return true;
+}
+
+// END OF CONSTRUCTION ZONE
+
 const sfx::renderer_properties sfx::renderer::default_properties = sfx::renderer_properties();
 
 sfx::renderer::renderer(const std::string& name) noexcept : _logger(name) {}

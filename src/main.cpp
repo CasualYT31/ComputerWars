@@ -47,8 +47,26 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
 int main() {
     // create the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
-    // initialise game loop
+    
+    sfx::rendererr newRenderer;
+    newRenderer.load("assets/renderer/rendererr.json");
+    newRenderer.openWindow();
+
+    bool leave = false;
+    while (!leave) {
+        sf::Event event;
+        while (newRenderer.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                leave = true;
+            }
+        }
+        newRenderer.display();
+    }
+
+    newRenderer.close();
+
+    /* // initialise game loop
     awe::game gameLoop;
     // run game loop, then destroy the object once the loop terminates
-    return gameLoop.run();
+    return gameLoop.run(); */
 }

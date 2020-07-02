@@ -35,6 +35,32 @@ namespace sfx {
 		sf::Clock _deltaTimer; //UNIT (usually pixels) per second
 	};
 
+	// CONSTRUCTION ZONE
+
+	class rendererr : public sf::RenderWindow, public safe::json_script {
+	public:
+		void openWindow(const sf::ContextSettings& settings = sf::ContextSettings()) noexcept;
+	private:
+		virtual bool _load(safe::json& j) noexcept;
+		virtual bool _save(nlohmann::json& j) noexcept;
+
+		unsigned int width = 1280;
+		unsigned int height = 720;
+		std::string caption = "Application";
+#pragma pack(push, 1)
+		struct style_flags {
+			bool close = false;
+			bool def = true;
+			bool fullscreen = false;
+			bool none = false;
+			bool resize = false;
+			bool titlebar = false;
+		} style;
+#pragma pack(pop)
+	};
+
+	// END OF CONSTRUCTION ZONE
+
 	struct renderer_properties {
 		unsigned int width = 900;
 		unsigned int height = 600;

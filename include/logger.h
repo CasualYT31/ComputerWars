@@ -44,8 +44,7 @@ namespace global {
 	 * This class uses the singleton design pattern. As such, no instantiation of this
 	 * class can be made. Instead, the client must access the log file via \c sink.Get().
 	 * <b>It is important to emphasise that the client should call \c Get() once at the start
-	 * of the program to open and initalise the log file before any \c logger objects
-	 * use it!</b>
+	 * of the program to open and initalise the log file before any \c logger objects use it!</b>
 	 */
 	class sink {
 	public:
