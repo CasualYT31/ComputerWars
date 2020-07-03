@@ -26,18 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sfml/Graphics.hpp"
 
 namespace sfx {
-	class delta_timer {
-	public:
-		void calculate() noexcept;
-		float get() const noexcept;
-	private:
-		float _delta = 0.0f;
-		sf::Clock _deltaTimer; //UNIT (usually pixels) per second
-	};
-
-	// CONSTRUCTION ZONE
-
-	class rendererr : public sf::RenderWindow, public safe::json_script {
+	class renderer : public sf::RenderWindow, public safe::json_script {
 	public:
 		void openWindow(const sf::ContextSettings& settings = sf::ContextSettings()) noexcept;
 	private:
@@ -59,67 +48,27 @@ namespace sfx {
 #pragma pack(pop)
 	};
 
-	// END OF CONSTRUCTION ZONE
-
-	struct renderer_properties {
-		unsigned int width = 900;
-		unsigned int height = 600;
-		unsigned int size = 0;
-		std::string caption = "Window";
-		bool fullscreen = false;
-		float scale = 1.0;
-	};
-
-	class renderer : public sf::RenderWindow, public safe::json_script {
+	class animated_drawable : public sf::Drawable {
 	public:
-		static const renderer_properties default_properties;
-
-		renderer(const std::string& name = "renderer") noexcept;
-
-		void setProperties(const renderer_properties& newval) noexcept;
-		renderer_properties getProperties() const noexcept;
-
-		void openWindow() noexcept;
-
-		//draw method which abides by the scale property
-		void drawToScale(const sf::Texture& tex, float x = 0.0, float y = 0.0, const bool scale = true);
-		void drawToScale(const sf::Drawable& drawing, float x = 0.0, float y = 0.0, const bool scale = true);
-
-		//camera methods
-		sf::Vector2f getCamera() const noexcept;
-		sf::Vector2f setCamera(const sf::Vector2f& newCamera = sf::Vector2f(0,0)) noexcept;
-		sf::Vector2f setCamera(const float x = 0.0f, const float y = 0.0f) noexcept;
-		sf::Vector2f moveCamera(const sf::Vector2f& offset) noexcept;
-		sf::Vector2f moveCamera(const float x, const float y) noexcept;
+		virtual bool animate(sf::RenderTarget& target) noexcept = 0;
+	protected:
+		float calculateDelta() noexcept;
 	private:
-		virtual bool _load(safe::json& j) noexcept;
-		virtual bool _save(nlohmann::json& j) noexcept;
-
-		global::logger _logger;
-		renderer_properties _window;
-		sf::Vector2f _camera;
+		sf::Clock _deltaTimer;
 	};
 
 	namespace trans {
-		class iTrans {
+		class rectangle : public sfx::animated_drawable {
 		public:
-			virtual bool transition() = 0;
-		protected:
-			delta_timer _delta;
-		};
-
-		class rectangle : public iTrans {
-		public:
-			rectangle(sf::RenderWindow* window, const bool fadingIn, const sf::Time& duration = sf::seconds(1), const sf::Color& colour = sf::Color()) noexcept;
-			bool transition();
+			rectangle(const bool isFadingIn, const sf::Time& duration = sf::seconds(1), const sf::Color& colour = sf::Color()) noexcept;
+			virtual bool animate(sf::RenderTarget& target) noexcept;
 		private:
-			//properties
-			bool _fadingIn;
+			virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+			// properties
+			bool _isFadingIn;
 			sf::Time _duration;
-			sf::Color _colour;
-			//live data
-			sf::RenderWindow* _window;
-			sf::Clock _clock;
+			// live data
+			bool _isFirstCallToAnimate = true;
 			sf::Vector2f _size;
 			sf::RectangleShape _toprect, _bottomrect;
 		};

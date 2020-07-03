@@ -48,7 +48,7 @@ int main() {
     // create the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
     
-    sfx::rendererr newRenderer;
+    sfx::renderer newRenderer;
     newRenderer.load("assets/renderer/rendererr.json");
     newRenderer.openWindow();
 
