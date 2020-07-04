@@ -47,6 +47,8 @@ bool sfx::renderer::_load(safe::json& j) noexcept {
 }
 
 bool sfx::renderer::_save(nlohmann::json& j) noexcept {
+	width = getSize().x;
+	height = getSize().y;
 	j["width"] = width;
 	j["height"] = height;
 	j["caption"] = caption;
@@ -61,55 +63,4 @@ bool sfx::renderer::_save(nlohmann::json& j) noexcept {
 
 float sfx::animated_drawable::calculateDelta() noexcept {
 	return _deltaTimer.restart().asSeconds();
-}
-
-// TRANSITIONS
-
-sfx::trans::rectangle::rectangle(const bool isFadingIn, const sf::Time& duration, const sf::Color& colour) noexcept :
-	_isFadingIn(isFadingIn), _duration(duration) {
-	_toprect.setFillColor(colour);
-	_bottomrect.setFillColor(colour);
-}
-
-bool sfx::trans::rectangle::animate(sf::RenderTarget& target) noexcept {
-	// initialise animation
-	if (_isFirstCallToAnimate) {
-		if (_isFadingIn) {
-			_size.x = (float)target.getSize().x;
-			_size.y = (float)target.getSize().y;
-		}
-		else {
-			_size = sf::Vector2f(0.0, 0.0);
-		}
-		_isFirstCallToAnimate = false;
-	}
-	// animate
-	float delta = calculateDelta();
-	if (_isFadingIn) {
-		_size.x -= (((float)target.getSize().y / _duration.asSeconds()) * ((float)target.getSize().x / (float)target.getSize().y)) * delta;
-		_size.y -= (((float)target.getSize().x / _duration.asSeconds()) * ((float)target.getSize().y / (float)target.getSize().x)) * delta;
-	}
-	else {
-		_size.x += (((float)target.getSize().y / _duration.asSeconds()) * ((float)target.getSize().x / (float)target.getSize().y)) * delta;
-		_size.y += (((float)target.getSize().x / _duration.asSeconds()) * ((float)target.getSize().y / (float)target.getSize().x)) * delta;
-	}
-	_toprect.setSize(_size);
-	_bottomrect.setSize(_size);
-	_toprect.setPosition(0, 0);
-	_bottomrect.setPosition(target.getSize().x - _size.x, target.getSize().y - _size.y);
-	// check to see if transition has completed
-	if (_isFadingIn && (_size.x <= 0.0f && _size.y <= 0.0f)) {
-		return true;
-	}
-	else if (!_isFadingIn && (_size.x >= target.getSize().x && _size.y >= target.getSize().y)) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-void sfx::trans::rectangle::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	target.draw(_toprect, states);
-	target.draw(_bottomrect, states);
 }
