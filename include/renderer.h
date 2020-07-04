@@ -27,7 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * such as size, caption, and style flags.
  * The \c animated_drawable class is intended to introduce a unified approach to dealing with more
  * complex drawables that change state in a pre-determined way.
- * @todo More work has to be done for the new renderer class.
+ * @todo Add support for icons.
+ * @todo Allow all settings to be overriden in-code.
  */
 
 #pragma once
