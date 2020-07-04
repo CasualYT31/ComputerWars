@@ -64,6 +64,9 @@ namespace sfx {
 		 * <table><tr>Key<th></th><th>Data Type</th><th>Meaning</th></tr>
 		 * <tr><td>width</td><td>unsigned integer</td><td>The width of the render window in pixels.</td></tr>
 		 * <tr><td>height</td><td>unsigned integer</td><td>The height of the render window in pixels.</td></tr>
+		 * <tr><td>x</td><td>integer</td><td>The X position of the render window in pixels.</td></tr>
+		 * <tr><td>y</td><td>integer</td><td>The Y position of the render window in pixels.</td></tr>
+		 * <tr><td>framerate</td><td>unsigned integer</td><td>The frame rate limit of the render window in frames per second.</td></tr>
 		 * <tr><td>caption</td><td>string</td><td>The caption of the render window.</td></tr>
 		 * <tr><td>close</td><td>bool</td><td>\c TRUE if the render window has a close button.</td></tr>
 		 * <tr><td>def</td><td>bool</td><td>\c TRUE if the render window has default styles (titlebar, resize, close).</td></tr>
@@ -71,6 +74,9 @@ namespace sfx {
 		 * <tr><td>none</td><td>bool</td><td>\c TRUE if the render window has no styles.</td></tr>
 		 * <tr><td>resize</td><td>bool</td><td>\c TRUE if the render window can be resized.</td></tr>
 		 * <tr><td>titlebar</td><td>bool</td><td>\c TRUE if the render window has a titlebar.</td></tr></table>
+		 * <tr><td>vsync</td><td>bool</td><td>\c TRUE if the render window has vertical sync enabled.</td></tr></table>
+		 * <tr><td>cursor</td><td>bool</td><td>\c TRUE if the render window shows the OS mouse cursor.</td></tr></table>
+		 * <tr><td>grabbedmouse</td><td>bool</td><td>\c TRUE if the render window keeps the mouse cursor within the window if in set focus.</td></tr></table>
 		 * All other keys will be ignored.
 		 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.
 		 * @return Always returns \c TRUE.
@@ -94,6 +100,18 @@ namespace sfx {
 		 * Stores the height of the render window in pixels.
 		 */
 		unsigned int height = 720;
+		/**
+		 * Stores the X position of the render window in pixels.
+		 */
+		int x = 0;
+		/**
+		 * Stores the Y position of the render window in pixels.
+		 */
+		int y = 0;
+		/**
+		 * Stores the frame rate limit of the render window.
+		 */
+		unsigned int framerate = 0;
 		/**
 		 * Stores the caption of the render window.
 		 */
@@ -127,6 +145,18 @@ namespace sfx {
 			 * Corresponds to the \c sf::Style::Titlebar style bit.
 			 */
 			bool titlebar = false;
+			/**
+			 * Stores whether or not V-Sync is on.
+			 */
+			bool vsync = false;
+			/**
+			 * Stores whether or not the mouse cursor is visible within the render window.
+			 */
+			bool mouseVisible = true;
+			/**
+			 * Stores whether or not the mouse is kept within the render window whilst in set focus.
+			 */
+			bool mouseGrabbed = false;
 		} style; /*!< This stores all the style flags associated with this render window instance. */
 #pragma pack(pop)
 	};
