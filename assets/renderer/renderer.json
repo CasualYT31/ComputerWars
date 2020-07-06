@@ -1,8 +1,1 @@
-{
-	"caption": "Advance Wars Engine",
-	"fullscreen": false,
-	"height": 720,
-	"scale": 1.0,
-	"size": 0,
-	"width": 1280
-}
+{"caption":"Computer Wars","close":false,"cursor":true,"def":true,"framerate":60,"fullscreen":false,"grabbedmouse":false,"height":720,"icon":"./assets/renderer/icon.png","none":false,"resize":false,"titlebar":false,"vsync":false,"width":1280,"x":352,"y":200}

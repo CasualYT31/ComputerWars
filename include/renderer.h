@@ -24,11 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Classes used for rendering.
  * These classes were intended to accompany, and not replace or encapsulate, the SFML dependency.
  * The \c renderer class is an \c sf::RenderWindow that reads and writes simple properties to a JSON script,
- * such as size, caption, and style flags.
+ * such as size, caption, and style flags. The client can also use the \c renderer_settings structure to apply
+ * different properties at runtime, which can then be saved to a JSON script.
  * The \c animated_drawable class is intended to introduce a unified approach to dealing with more
  * complex drawables that change state in a pre-determined way.
- * @todo Add support for icons.
- * @todo Allow all settings to be overriden in-code.
+ * @todo REMEMBER TO ADD X-Y CONFIGURATION ISSUE TO USER DOCUMENTATION! If the window doesn't appear, the X and/or Y property will have to be amended manually. Explain why I chose against adding checks in the code.
  */
 
 #pragma once
@@ -41,6 +41,103 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 namespace sfx {
 	/**
+	 * This structure contains a collection of settings that can be applied to a \c renderer object.
+	 */
+	struct renderer_settings {
+		/**
+		 * Stores the width of the render window in pixels.
+		 */
+		unsigned int width = 1280;
+
+		/**
+		 * Stores the height of the render window in pixels.
+		 */
+		unsigned int height = 720;
+
+		/**
+		 * Stores the X position of the render window in pixels.
+		 */
+		int x = 0;
+
+		/**
+		 * Stores the Y position of the render window in pixels.
+		 */
+		int y = 0;
+
+		/**
+		 * Stores the frame rate limit of the render window.
+		 */
+		unsigned int framerate = 0;
+
+		/**
+		 * Stores the caption of the render window.
+		 */
+		std::string caption = "Application";
+
+		/**
+		 * Stores the path to the image file to use as the icon for this window. Blank represents the default icon.
+		 */
+		std::string iconPath = "";
+
+		/**
+		 * The OpenGL context settings the renderer is to use.
+		 */
+		sf::ContextSettings contextSettings;
+
+#pragma pack(push, 1)
+		/**
+		 * This packed structure contains all the style flags associated with a render window object.
+		 */
+		struct style_flags {
+			/**
+			 * Corresponds to the \c sf::Style::Close style bit.
+			 */
+			bool close = false;
+
+			/**
+			 * Corresponds to the \c sf::Style::Default style bit.
+			 */
+			bool def = true;
+
+			/**
+			 * Corresponds to the \c sf::Style::Fullscreen style bit.
+			 */
+			bool fullscreen = false;
+
+			/**
+			 * Corresponds to the \c sf::Style::None style bit.
+			 */
+			bool none = false;
+
+			/**
+			 * Corresponds to the \c sf::Style::Resize style bit.
+			 */
+			bool resize = false;
+
+			/**
+			 * Corresponds to the \c sf::Style::Titlebar style bit.
+			 */
+			bool titlebar = false;
+
+			/**
+			 * Stores whether or not V-Sync is on.
+			 */
+			bool vsync = false;
+
+			/**
+			 * Stores whether or not the mouse cursor is visible within the render window.
+			 */
+			bool mouseVisible = true;
+
+			/**
+			 * Stores whether or not the mouse is kept within the render window whilst in set focus.
+			 */
+			bool mouseGrabbed = false;
+		} style; /*!< This stores all the style flags associated with this \c renderer_settings instance. */
+#pragma pack(pop)
+	};
+
+	/**
 	 * This class is a 'dynamically' configurable render window.
 	 * It inherits from \c sf::RenderWindow publicly, so it should be treated like any other \c sf::RenderWindow.
 	 * There are only two differences:
@@ -50,14 +147,39 @@ namespace sfx {
 	class renderer : public sf::RenderWindow, public safe::json_script {
 	public:
 		/**
-		 * Opens the render window using internal configurations.
-		 * These internal configurations can only be changed via reading from and writing to a JSON script.
-		 * Since this class is an \c sf::RenderWindow, the \c create() method can be used. However, only the size
+		 * Initialises the internal logger object.
+		 * @param name The name to give this particular instantiation within the log file. Defaults to "renderer."
+		 * @sa    \c global::logger
+		 */
+		renderer(const std::string& name = "renderer") noexcept;
+
+		/**
+		 * Opens the render window using configurations.
+		 * Since this class is an \c sf::RenderWindow, the \c create() method can be used. However, only the size and position
 		 * of the window can be updated in the internal configurations if this done: any change in any other property
 		 * won't be saved.
-		 * @param settings The context settings to pass to the \c create() method.
+		 * In addition to this, if the client uses \c create() to switch from windowed to fullscreen or vice versa,
+		 * positional data may not be saved correctly. For these reasons it is discouraged to use \c create() with this class.
 		 */
-		void openWindow(const sf::ContextSettings& settings = sf::ContextSettings()) noexcept;
+		void openWindow() noexcept;
+
+		/**
+		 * Used to acquire the current renderer settings.
+		 * @return A reference to the current renderer settings.
+		 * @sa     setSettings()
+		 */
+		const sfx::renderer_settings& getSettings() const noexcept;
+
+		/**
+		 * Used to update the renderer's settings.
+		 * This is the preferred way of updating/reopening the renderer, as it ensures that all properties can be saved via \c save().
+		 * Before this method returns, it will call \c openWindow() to apply all the changes given.
+		 * @remark The client can use both the \c getSettings() and \c setSettings() methods to provide their own overrides to certain settings if they so desired.
+		 * @param  newSettings The new settings to apply.
+		 * @sa     getSettings()
+		 * @sa     openWindow()
+		 */
+		void setSettings(const sfx::renderer_settings& newSettings) noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -69,6 +191,7 @@ namespace sfx {
 		 * <tr><td>y</td><td>integer</td><td>The Y position of the render window in pixels.</td></tr>
 		 * <tr><td>framerate</td><td>unsigned integer</td><td>The frame rate limit of the render window in frames per second.</td></tr>
 		 * <tr><td>caption</td><td>string</td><td>The caption of the render window.</td></tr>
+		 * <tr><td>icon</td><td>string</td><td>The path of the image file to apply as the icon of the window. Defaults to the default OS icon (blank string).</td></tr>
 		 * <tr><td>close</td><td>bool</td><td>\c TRUE if the render window has a close button.</td></tr>
 		 * <tr><td>def</td><td>bool</td><td>\c TRUE if the render window has default styles (titlebar, resize, close).</td></tr>
 		 * <tr><td>fullscreen</td><td>bool</td><td>\c TRUE if the render window is in full screen. In which case, \c width and \c height both have to form a valid video mode.</td></tr>
@@ -83,6 +206,7 @@ namespace sfx {
 		 * @return Always returns \c TRUE.
 		 */
 		virtual bool _load(safe::json& j) noexcept;
+
 		/**
 		 * The JSON save method for this class.
 		 * Please see \c _load() for a detailed summary of the format of JSON script that this method produces.
@@ -94,72 +218,14 @@ namespace sfx {
 		virtual bool _save(nlohmann::json& j) noexcept;
 
 		/**
-		 * Stores the width of the render window in pixels.
+		 * The internal logger object.
 		 */
-		unsigned int width = 1280;
+		global::logger _logger;
+		
 		/**
-		 * Stores the height of the render window in pixels.
+		 * The settings of this renderer object.
 		 */
-		unsigned int height = 720;
-		/**
-		 * Stores the X position of the render window in pixels.
-		 */
-		int x = 0;
-		/**
-		 * Stores the Y position of the render window in pixels.
-		 */
-		int y = 0;
-		/**
-		 * Stores the frame rate limit of the render window.
-		 */
-		unsigned int framerate = 0;
-		/**
-		 * Stores the caption of the render window.
-		 */
-		std::string caption = "Application";
-#pragma pack(push, 1)
-		/**
-		 * This packed structure contains all the style flags associated with a render window object.
-		 */
-		struct style_flags {
-			/**
-			 * Corresponds to the \c sf::Style::Close style bit.
-			 */
-			bool close = false;
-			/**
-			 * Corresponds to the \c sf::Style::Default style bit.
-			 */
-			bool def = true;
-			/**
-			 * Corresponds to the \c sf::Style::Fullscreen style bit.
-			 */
-			bool fullscreen = false;
-			/**
-			 * Corresponds to the \c sf::Style::None style bit.
-			 */
-			bool none = false;
-			/**
-			 * Corresponds to the \c sf::Style::Resize style bit.
-			 */
-			bool resize = false;
-			/**
-			 * Corresponds to the \c sf::Style::Titlebar style bit.
-			 */
-			bool titlebar = false;
-			/**
-			 * Stores whether or not V-Sync is on.
-			 */
-			bool vsync = false;
-			/**
-			 * Stores whether or not the mouse cursor is visible within the render window.
-			 */
-			bool mouseVisible = true;
-			/**
-			 * Stores whether or not the mouse is kept within the render window whilst in set focus.
-			 */
-			bool mouseGrabbed = false;
-		} style; /*!< This stores all the style flags associated with this render window instance. */
-#pragma pack(pop)
+		sfx::renderer_settings _settings;
 	};
 
 	/**

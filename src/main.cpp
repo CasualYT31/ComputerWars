@@ -49,8 +49,11 @@ int main() {
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
     
     sfx::renderer newRenderer;
-    newRenderer.load("assets/renderer/rendererr.json");
-    newRenderer.openWindow();
+    newRenderer.load("assets/renderer/renderer.json");
+    // example of overriding
+    sfx::renderer_settings settings = newRenderer.getSettings();
+    settings.style.mouseGrabbed = false;
+    newRenderer.setSettings(settings);
 
     bool leave = false;
     while (!leave) {
@@ -58,11 +61,14 @@ int main() {
         while (newRenderer.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 leave = true;
+            } else if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Escape) {
+                leave = true;
             }
         }
         newRenderer.display();
     }
 
+    newRenderer.save();
     newRenderer.close();
 
     /* // initialise game loop
