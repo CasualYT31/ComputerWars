@@ -41,6 +41,49 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 namespace sfx {
 	/**
+	 * \c sf::Drawable that animates.
+	 * This class was introduced for two main reasons:
+	 * <ol><li>To introduce a common apporach to complex animated drawables.</li>
+	 *     <li>To bundle a delta timer with each drawable.</li></ol>
+	 * Here's how you'd use this class:
+	 * <ol><li>Inherit from \c animated_drawable just like you would with \c Drawable. Implement \c draw() as normal.</li>
+	 *     <li>Implement \c animate(): these are the calculations performed to make a drawable animate.</li>
+	 *     <li>Within \c animate(), if a delta timer is required, make sure to add the following line of code: <tt>float delta = calculateDelta();</tt></li>
+	 *     <li>When working with your \c animated_drawable object, \c animate() should be called within the draw loop at some point before the corresponding \c draw().</li></ol>
+	 */
+	class animated_drawable : public sf::Drawable {
+	public:
+		/**
+		 * Method which performs calculations on a drawable before drawing it.
+		 * \c Drawable rightly prevents a subclass from changing its state within its \c draw() implementation.
+		 * However, in some cases, drawables have a consistent animation which must be maintained throughout all instances.
+		 * This method must be implemented by subclasses to make changes to the internal state, ready for drawing later.
+		 * It is to accompany the \c draw() method, so it should be called within the draw loop, before it's drawn.
+		 * @param  target The render target which the drawable is to be later drawn to.
+		 * @return This method can optionally return \c TRUE to signify that an animation has completed, or \c FALSE if it has not.
+		 *         Alternatively, subclasses can ignore this return value if this is unimportant to them.
+		 */
+		virtual bool animate(const sf::RenderTarget& target) noexcept = 0;
+	protected:
+		/**
+		 * Calculates the time elapsed from the last call to this method.
+		 * The \c animate() method should animate things independent from the render target's frame rate.
+		 * In order to achieve this, the time since the last frame update is measured, and any calculations in
+		 * transforms etc. can include this value to ensure animations remain smooth.
+		 * A local variable, preferably called \c delta, should be declared in \c animate(), and it should store the
+		 * result of this method.
+		 * The unit used with this method is \b seconds.
+		 * @return The time elapsed since the last call \c calculateDelta().
+		 */
+		float calculateDelta() noexcept;
+	private:
+		/**
+		 * Clock used to measure time between frames.
+		 */
+		sf::Clock _deltaTimer;
+	};
+
+	/**
 	 * This structure contains a collection of settings that can be applied to a \c renderer object.
 	 */
 	struct renderer_settings {
@@ -180,6 +223,14 @@ namespace sfx {
 		 * @sa     openWindow()
 		 */
 		void setSettings(const sfx::renderer_settings& newSettings) noexcept;
+
+		/**
+		 * Animate an \c sfx::animated_drawable object.
+		 * This method was introduced to provide an alternative way to animate \c animated_drawables that's more akin to SFML's \c draw() architecture.
+		 * \c sfx::animated_drawable's \c animate() method remains public, so that it can remain compatible with \c sf::RenderWindow.
+		 * @param drawable The animated drawable to animate.
+		 */
+		void animate(sfx::animated_drawable& drawable) const noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -226,48 +277,5 @@ namespace sfx {
 		 * The settings of this renderer object.
 		 */
 		sfx::renderer_settings _settings;
-	};
-
-	/**
-	 * \c sf::Drawable that animates.
-	 * This class was introduced for two main reasons:
-	 * <ol><li>To introduce a common apporach to complex animated drawables.</li>
-	 *     <li>To bundle a delta timer with each drawable.</li></ol>
-	 * Here's how you'd use this class:
-	 * <ol><li>Inherit from \c animated_drawable just like you would with \c Drawable. Implement \c draw() as normal.</li>
-	 *     <li>Implement \c animate(): these are the calculations performed to make a drawable animate.</li>
-	 *     <li>Within \c animate(), if a delta timer is required, make sure to add the following line of code: <tt>float delta = calculateDelta();</tt></li>
-	 *     <li>When working with your \c animated_drawable object, \c animate() should be called within the draw loop at some point before the corresponding \c draw().</li></ol>
-	 */
-	class animated_drawable : public sf::Drawable {
-	public:
-		/**
-		 * Method which performs calculations on a drawable before drawing it.
-		 * \c Drawable rightly prevents a subclass from changing its state within its \c draw() implementation.
-		 * However, in some cases, drawables have a consistent animation which must be maintained throughout all instances.
-		 * This method must be implemented by subclasses to make changes to the internal state, ready for drawing later.
-		 * It is to accompany the \c draw() method, so it should be called within the draw loop, before it's drawn.
-		 * @param  target The render target which the drawable is to be later drawn to.
-		 * @return This method can optionally return \c TRUE to signify that an animation has completed, or \c FALSE if it has not.
-		 *         Alternatively, subclasses can ignore this return value if this is unimportant to them.
-		 */
-		virtual bool animate(sf::RenderTarget& target) noexcept = 0;
-	protected:
-		/**
-		 * Calculates the time elapsed from the last call to this method.
-		 * The \c animate() method should animate things independent from the render target's frame rate.
-		 * In order to achieve this, the time since the last frame update is measured, and any calculations in
-		 * transforms etc. can include this value to ensure animations remain smooth.
-		 * A local variable, preferably called \c delta, should be declared in \c animate(), and it should store the
-		 * result of this method.
-		 * The unit used with this method is \b seconds.
-		 * @return The time elapsed since the last call \c calculateDelta().
-		 */
-		float calculateDelta() noexcept;
-	private:
-		/**
-		 * Clock used to measure time between frames.
-		 */
-		sf::Clock _deltaTimer;
 	};
 }

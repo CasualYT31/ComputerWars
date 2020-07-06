@@ -38,6 +38,8 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
 
 #include "game.h"
 
+#include "transitions.h"
+
 /**
  * The entry point into the program.
  * Some basic game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the awe::game object is constructed.
@@ -55,6 +57,8 @@ int main() {
     settings.style.mouseGrabbed = false;
     newRenderer.setSettings(settings);
 
+    transition::rectangle trans(true);
+
     bool leave = false;
     while (!leave) {
         sf::Event event;
@@ -65,6 +69,9 @@ int main() {
                 leave = true;
             }
         }
+        newRenderer.clear(sf::Color::White);
+        newRenderer.animate(trans);
+        newRenderer.draw(trans);
         newRenderer.display();
     }
 

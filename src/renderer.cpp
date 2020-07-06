@@ -66,6 +66,10 @@ void sfx::renderer::setSettings(const sfx::renderer_settings& newSettings) noexc
 	openWindow();
 }
 
+void sfx::renderer::animate(sfx::animated_drawable& drawable) const noexcept {
+	drawable.animate(*this);
+}
+
 bool sfx::renderer::_load(safe::json& j) noexcept {
 	j.apply(_settings.width, { "width" }, &_settings.width, true);
 	j.apply(_settings.height, { "height" }, &_settings.height, true);

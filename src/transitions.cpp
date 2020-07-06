@@ -28,7 +28,8 @@ transition::rectangle::rectangle(const bool isFadingIn, const sf::Time& duration
 	_bottomrect.setFillColor(colour);
 }
 
-bool transition::rectangle::animate(sf::RenderTarget& target) noexcept {
+bool transition::rectangle::animate(const sf::RenderTarget& target) noexcept {
+	if (_finished) return true;
 	// initialise animation
 	if (_isFirstCallToAnimate) {
 		if (_isFadingIn) {
@@ -56,14 +57,18 @@ bool transition::rectangle::animate(sf::RenderTarget& target) noexcept {
 	_bottomrect.setPosition(target.getSize().x - _size.x, target.getSize().y - _size.y);
 	// check to see if transition has completed
 	if (_isFadingIn && (_size.x <= 0.0f && _size.y <= 0.0f)) {
-		return true;
+		_finished = true;
+	} else if (!_isFadingIn && (_size.x >= target.getSize().x && _size.y >= target.getSize().y)) {
+		_finished = true;
+	} else {
+		_finished = false;
 	}
-	else if (!_isFadingIn && (_size.x >= target.getSize().x && _size.y >= target.getSize().y)) {
-		return true;
+	if (_finished) {
+		_size = sf::Vector2f(0.0, 0.0);
+		_toprect.setSize(_size);
+		_bottomrect.setSize(_size);
 	}
-	else {
-		return false;
-	}
+	return _finished;
 }
 
 void transition::rectangle::draw(sf::RenderTarget& target, sf::RenderStates states) const {
