@@ -34,6 +34,8 @@ sf::Font& sfx::fonts::operator[](const std::string& key) {
 }
 
 bool sfx::fonts::_load(safe::json& j) noexcept {
+	_font.clear();
+	_fontpath.clear();
 	bool ret = true;
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {

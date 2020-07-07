@@ -235,7 +235,7 @@ namespace sfx {
 		/**
 		 * The JSON load method for this class.
 		 * There are a variety of key-value pairs that are stored in the root object of the script:
-		 * <table><tr>Key<th></th><th>Data Type</th><th>Meaning</th></tr>
+		 * <table><tr><th>Key</th><th>Data Type</th><th>Meaning</th></tr>
 		 * <tr><td>width</td><td>unsigned integer</td><td>The width of the render window in pixels.</td></tr>
 		 * <tr><td>height</td><td>unsigned integer</td><td>The height of the render window in pixels.</td></tr>
 		 * <tr><td>x</td><td>integer</td><td>The X position of the render window in pixels.</td></tr>
@@ -248,9 +248,9 @@ namespace sfx {
 		 * <tr><td>fullscreen</td><td>bool</td><td>\c TRUE if the render window is in full screen. In which case, \c width and \c height both have to form a valid video mode.</td></tr>
 		 * <tr><td>none</td><td>bool</td><td>\c TRUE if the render window has no styles.</td></tr>
 		 * <tr><td>resize</td><td>bool</td><td>\c TRUE if the render window can be resized.</td></tr>
-		 * <tr><td>titlebar</td><td>bool</td><td>\c TRUE if the render window has a titlebar.</td></tr></table>
-		 * <tr><td>vsync</td><td>bool</td><td>\c TRUE if the render window has vertical sync enabled.</td></tr></table>
-		 * <tr><td>cursor</td><td>bool</td><td>\c TRUE if the render window shows the OS mouse cursor.</td></tr></table>
+		 * <tr><td>titlebar</td><td>bool</td><td>\c TRUE if the render window has a titlebar.</td></tr>
+		 * <tr><td>vsync</td><td>bool</td><td>\c TRUE if the render window has vertical sync enabled.</td></tr>
+		 * <tr><td>cursor</td><td>bool</td><td>\c TRUE if the render window shows the OS mouse cursor.</td></tr>
 		 * <tr><td>grabbedmouse</td><td>bool</td><td>\c TRUE if the render window keeps the mouse cursor within the window if in set focus.</td></tr></table>
 		 * All other keys will be ignored.
 		 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.

@@ -60,6 +60,7 @@ namespace sfx {
 		 * The JSON load method for this class.
 		 * The root object is to contain a list of key-string value pairs only.
 		 * The key defines the name of the font object, and the value defines the absolute or relative path of the font file to load.
+		 * When called, the internal collection of font objects and their paths are cleared, even if the method returns \c FALSE.
 		 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.
 		 * @return \c TRUE if all font files could be loaded, \c FALSE if at least one could not be loaded.
 		 */
