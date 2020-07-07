@@ -100,9 +100,8 @@ namespace sfx {
 	 * Both background audio and sounds are unified under one interface.
 	 * @remark You can emulate different sound groups with their separate volumes
 	 *         by instantiating separate \c audio objects with their own volumes.
-	 * @todo   Sound and music base volumes should combine into one volume:
-	 *         using the technique above, all music objects could go in one \c audio object,
-	 *         and sounds can go in another \c audio object, with each having their own volume.
+	 *         Using this technique, all music objects could go in one \c audio object,
+	 *         and sounds can go in another \c audio object, each having their own volume.
 	 * @sa     _load()
 	 */
 	class audio : public safe::json_script {
