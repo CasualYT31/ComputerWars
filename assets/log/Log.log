@@ -1,7 +1,15 @@
 Computer Wars © 2020 CasualYouTuber31
 ---------------
 Event Log:
-[2020-07-06 17:05:20.538] [json_script_0] [info] Loading JSON script assets/renderer/renderer.json...
-[2020-07-06 17:05:20.542] [json_script_0] [info] Finished loading JSON script assets/renderer/renderer.json.
-[2020-07-06 17:05:23.319] [json_script_0] [info] Saving JSON script assets/renderer/renderer.json...
-[2020-07-06 17:05:23.320] [json_script_0] [info] Finished saving JSON script assets/renderer/renderer.json.
+[2020-07-07 13:56:44.455] [json_script_0] [info] Loading JSON script assets/renderer/renderer.json...
+[2020-07-07 13:56:44.460] [json_script_0] [info] Finished loading JSON script assets/renderer/renderer.json.
+[2020-07-07 13:56:44.858] [json_script_3] [info] Loading JSON script ./assets/audio/music/audiomusic.json...
+[2020-07-07 13:56:45.097] [json_7] [error] The key sequence {"volume", "path"} does not exist in the JSON object.
+[2020-07-07 13:56:45.097] [music_4] [error] Error: audio object "volume" was not given a valid "path" value, in script "./assets/audio/music/audiomusic.json".
+[2020-07-07 13:56:45.105] [json_script_3] [info] Finished loading JSON script ./assets/audio/music/audiomusic.json.
+[2020-07-07 13:56:45.106] [json_script_5] [info] Loading JSON script ./assets/audio/sound/audiosound.json...
+[2020-07-07 13:56:45.151] [json_8] [error] The key sequence {"volume", "path"} does not exist in the JSON object.
+[2020-07-07 13:56:45.151] [sound_6] [error] Error: audio object "volume" was not given a valid "path" value, in script "./assets/audio/sound/audiosound.json".
+[2020-07-07 13:56:45.317] [json_script_5] [info] Finished loading JSON script ./assets/audio/sound/audiosound.json.
+[2020-07-07 13:56:51.128] [json_script_0] [info] Saving JSON script assets/renderer/renderer.json...
+[2020-07-07 13:56:51.129] [json_script_0] [info] Finished saving JSON script assets/renderer/renderer.json.

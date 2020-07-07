@@ -59,14 +59,24 @@ int main() {
 
     transition::rectangle trans(true);
 
+    sfx::audio music("music"), sound("sound");
+    music.load("./assets/audio/music/audiomusic.json");
+    sound.load("./assets/audio/sound/audiosound.json");
+    sound.setVolume(100.0);
+    music.play("noco");
+
     bool leave = false;
     while (!leave) {
         sf::Event event;
         while (newRenderer.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 leave = true;
-            } else if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Escape) {
-                leave = true;
+            } else if (event.type == sf::Event::KeyReleased) {
+                if (event.key.code == sf::Keyboard::Escape) {
+                    leave = true;
+                } else if (event.key.code == sf::Keyboard::Up) {
+                    sound.play("select");
+                }
             }
         }
         newRenderer.clear(sf::Color::White);

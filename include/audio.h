@@ -115,30 +115,18 @@ namespace sfx {
 		audio(const std::string& name = "audio") noexcept;
 
 		/**
-		 * Retrieves the base volume of all music objects.
+		 * Retrieves the base volume of all audio objects.
 		 * @return The volume, a value between \c 0.0 and \c 100.0.
 		 */
-		float getMusicVolume() const noexcept;
+		float getVolume() const noexcept;
 
 		/**
-		 * Updates the base volume of all music objects.
+		 * Updates the base volume of all audio objects.
 		 * @param  newvolume The new volume, a value between \c 0.0 and \c 100.0.
 		 * @return The old base volume.
+		 * @sa     _validateVolume()
 		 */
-		float setMusicVolume(float newvolume) noexcept;
-
-		/**
-		 * Retrieves the base volume of all sound objects.
-		 * @return The volume, a value between \c 0.0 and \c 100.0.
-		 */
-		float getSoundVolume() const noexcept;
-
-		/**
-		 * Updates the base volume of all sound objects.
-		 * @param  newvolume The new volume, a value between \c 0.0 and \c 100.0.
-		 * @return The old base volume.
-		 */
-		float setSoundVolume(float newvolume) noexcept;
+		float setVolume(float newvolume) noexcept;
 
 		/**
 		 * Plays a specified audio object.
@@ -197,12 +185,11 @@ namespace sfx {
 		/**
 		 * The JSON load method for this class.
 		 * All calls to this method will clear the internal collections of sound and music objects, even if \c FALSE is returned.
-		 * Within the root object, there are two special keys, \c "sound" and \c "music".
-		 * These store the floating point base volumes of the sound and music objects respectively.
+		 * Within the root object, there is one special key, \c "volume", which stores the floating point base volume of each audio object.
 		 * All other keys are names of audio objects to store. Each of these keys must have an object value.
 		 * Within these object values, there are several key-value pairs to include:
 		 * <ul><li>\c "path" is the absolute or relative (to the executable's start path) path of the audio file.</li>
-		 *     <li>\c "offset" is the volume offset to apply to the base volume for this audio object.
+		 *     <li>\c "offset" is the volume offset to apply to the base volume for this audio object. Defaults to 0.0.
 		 *         It's helpful when your audio assets are of different volumes and you're not easily able to adjust them directly.</li>
 		 *     <li>\c "type" must be either \c "sound" or \c "music" exactly. If an invalid type is provided, \c "sound" will be assumed and an error will be logged.</li>
 		 *     <li>\c "loopto" <em>Music type only</em> Used to apply \c sfx::music::loopTo.</li>
@@ -210,6 +197,7 @@ namespace sfx {
 		 * All other keys within these object values are ignored.
 		 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.
 		 * @return \c TRUE if all audio files could be loaded successfully, \c FALSE if at least one couldn't be loaded.
+		 * @sa     setVolume()
 		 */
 		virtual bool _load(safe::json& j) noexcept;
 
@@ -270,12 +258,17 @@ namespace sfx {
 		/**
 		 * The base sound volume.
 		 */
-		float _soundVolume = 50.0;
+		// float _soundVolume = 50.0;
 
 		/**
 		 * The base music volume.
 		 */
-		float _musicVolume = 50.0;
+		// float _musicVolume = 50.0;
+
+		/**
+		 * The base volume.
+		 */
+		float _volume = 50.0f;
 
 		/**
 		 * Flag which keeps track of whether or not a piece of music is fading out or not.

@@ -1,6 +1,5 @@
 {
-	"music": 100.0,
-	"sound": 100.0,
+	"volume": 100.0,
 	"select": {
 		"type": "sound",
 		"path": "assets/audio/sound/select.wav",
