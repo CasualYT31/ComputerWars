@@ -151,7 +151,7 @@ bool sfx::audio::_load(safe::json& j) noexcept {
 	_music.clear();
 
 	for (auto& i : jj.items()) {
-		if (i.key() != "sound" && i.key() != "music") {
+		if (i.key() != "volume") {
 			std::string path;
 			j.apply(path, { i.key(), "path" });
 			if (!j.inGoodState()) {
