@@ -40,6 +40,8 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
 
 #include "transitions.h"
 
+#include <iostream>
+
 /**
  * The entry point into the program.
  * Some basic game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the awe::game object is constructed.
@@ -57,13 +59,15 @@ int main() {
     settings.style.mouseGrabbed = false;
     newRenderer.setSettings(settings);
 
-    transition::rectangle trans(true);
-
-    sfx::audio music("music"), sound("sound");
-    music.load("./assets/audio/music/audiomusic.json");
-    sound.load("./assets/audio/sound/audiosound.json");
-    sound.setVolume(100.0);
-    music.play("noco");
+    sfx::fonts fonts;
+    fonts.load("./assets/fonts/fonts.json");
+    try {
+        fonts["dialogue"];
+        // fonts["invalid"];
+        std::cout << "control flow test\n";
+    } catch (std::invalid_argument& e) {
+        std::cout << e.what() << std::endl;
+    }
 
     bool leave = false;
     while (!leave) {
@@ -74,14 +78,11 @@ int main() {
             } else if (event.type == sf::Event::KeyReleased) {
                 if (event.key.code == sf::Keyboard::Escape) {
                     leave = true;
-                } else if (event.key.code == sf::Keyboard::Up) {
-                    sound.play("select");
                 }
             }
         }
-        newRenderer.clear(sf::Color::White);
-        newRenderer.animate(trans);
-        newRenderer.draw(trans);
+        newRenderer.clear(sf::Color::Black);
+
         newRenderer.display();
     }
 

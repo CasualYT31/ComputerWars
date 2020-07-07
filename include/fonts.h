@@ -22,7 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**@file fonts.h
  * Defines the \c fonts class.
- * @todo Better error reporting needs to be considered for operator[] - perhaps throw an exception instead of returning?
  */
 
 #pragma once
@@ -30,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "safejson.h"
 #include "sfml/Graphics/Font.hpp"
 
- // for documentation on the sfx namespace, please see renderer.h
+// for documentation on the sfx namespace, please see renderer.h
 namespace sfx {
 	/**
 	 * This class is used as a JSON-configured font collection.
@@ -47,14 +46,15 @@ namespace sfx {
 
 		/**
 		 * Accesses a previously loaded \c sf::Font object.
-		 * If an non-existent font is given, an error will be logged. In addition to this, a reference to a dummy sf::Font object will be returned.
+		 * If an non-existent font is given, an error will be logged.
 		 * The font object may technically be amended but no edits will be saved in any way via \c save().
 		 * @warning Since this operator returns a reference, a new set of fonts should not be loaded so long as
 		 *          the client uses the font object pointed to by this reference!
 		 * @param   key The string name of the font which was given in the JSON script.
 		 * @return  The reference to the \c sf::Font object.
+		 * @throws  std::invalid_argument If the given key could not uniquely identify a font object at the time of calling.
 		 */
-		sf::Font& operator[](const std::string& key) noexcept;
+		sf::Font& operator[](const std::string& key);
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -72,11 +72,6 @@ namespace sfx {
 		 * @return Always returns \c TRUE.
 		 */
 		virtual bool _save(nlohmann::json& j) noexcept;
-
-		/**
-		 * The dummy font object which is returned in case \c operator[]() was called with an invalid key.
-		 */
-		sf::Font _errorfont;
 
 		/**
 		 * The collection of font objects.
