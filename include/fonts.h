@@ -46,7 +46,7 @@ namespace sfx {
 
 		/**
 		 * Accesses a previously loaded \c sf::Font object.
-		 * If an non-existent font is given, an error will be logged.
+		 * If a non-existent font is given, an error will be logged.
 		 * The font object may technically be amended but no edits will be saved in any way via \c save().
 		 * @warning Since this operator returns a reference, a new set of fonts should not be loaded so long as
 		 *          the client uses the font object pointed to by this reference!

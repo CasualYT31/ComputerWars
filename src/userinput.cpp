@@ -57,7 +57,7 @@ sfx::control_signal sfx::convert::tosignaltype(unsigned int s) noexcept {
 	return static_cast<sfx::control_signal>(s);
 }
 
-sfx::user_input::user_input(sf::RenderWindow& window, const std::string& name) noexcept : _logger(name), _window(window) {}
+sfx::user_input::user_input(sf::Window& window, const std::string& name) noexcept : _logger(name), _window(window) {}
 
 unsigned int sfx::user_input::getJoystickID() const noexcept {
 	return _joystickid;
