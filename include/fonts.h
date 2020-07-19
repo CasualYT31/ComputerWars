@@ -33,7 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace sfx {
 	/**
 	 * This class is used as a JSON-configured font collection.
-	 * @sa _load()
 	 */
 	class fonts : public safe::json_script {
 	public:

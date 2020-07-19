@@ -63,6 +63,7 @@ int main() {
     std::shared_ptr<sfx::animated_spritesheet> sheet = std::make_shared<sfx::animated_spritesheet>();
     sheet->load("./assets/sprites/unit/idle/spritesunitidle.json");
     sfx::animated_sprite sprite(sheet, 0);
+    sfx::animated_sprite sprite2(sheet, 0);
 
     bool leave = false;
     while (!leave) {
@@ -86,7 +87,9 @@ int main() {
         }
         newRenderer.clear(sf::Color::Black);
         newRenderer.animate(sprite);
+        newRenderer.animate(sprite2);
         newRenderer.draw(sprite);
+        newRenderer.draw(sprite2, sf::RenderStates(sf::Transform().translate(50.0, 50.0)));
         newRenderer.display();
     }
 
