@@ -1,7 +1,6 @@
 {
-	"basepath": "assets/sprites/unit/idle/unitidle",
-	"format": "png",
-	"frames": 1,
+	"path": "assets/sprites/unit/idle/unitidle.png",
+	"frames": 4,
 	"framerate": 0.0,
 	"sprites": [
 		[0,0,16,16],

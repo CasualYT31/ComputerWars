@@ -59,15 +59,10 @@ int main() {
     settings.style.mouseGrabbed = false;
     newRenderer.setSettings(settings);
 
-    sfx::fonts fonts;
-    fonts.load("./assets/fonts/fonts.json");
-    try {
-        fonts["dialogue"];
-        // fonts["invalid"];
-        std::cout << "control flow test\n";
-    } catch (std::invalid_argument& e) {
-        std::cout << e.what() << std::endl;
-    }
+    // animated sprite testing
+    std::shared_ptr<sfx::animated_spritesheet> sheet = std::make_shared<sfx::animated_spritesheet>();
+    sheet->load("./assets/sprites/unit/idle/spritesunitidle.json");
+    sfx::animated_sprite sprite(sheet, 0);
 
     bool leave = false;
     while (!leave) {
@@ -78,11 +73,20 @@ int main() {
             } else if (event.type == sf::Event::KeyReleased) {
                 if (event.key.code == sf::Keyboard::Escape) {
                     leave = true;
+                } else if (event.key.code == sf::Keyboard::Up) {
+                    sprite.setSprite(sprite.getSprite() + 1);
+                } else if (event.key.code == sf::Keyboard::Down) {
+                    sprite.setSprite(sprite.getSprite() - 1);
+                } else if (event.key.code == sf::Keyboard::Left) {
+                    sprite--;
+                } else if (event.key.code == sf::Keyboard::Right) {
+                    sprite++;
                 }
             }
         }
         newRenderer.clear(sf::Color::Black);
-
+        newRenderer.animate(sprite);
+        newRenderer.draw(sprite);
         newRenderer.display();
     }
 
