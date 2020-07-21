@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "bank.h"
-
+/*
 namespace awe {
 	class unit {
 	public:
@@ -42,4 +42,4 @@ namespace awe {
 		int _fuel = 0;
 		int _ammo = 0;
 	};
-}
+}*/

@@ -1,7 +1,7 @@
 {
 	"path": "assets/sprites/unit/idle/unitidle.png",
 	"frames": 4,
-	"framerate": 0.0,
+	"framerate": 10.0,
 	"sprites": [
 		[0,0,16,16],
 		[0,16,16,16],

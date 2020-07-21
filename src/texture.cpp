@@ -140,11 +140,15 @@ void sfx::animated_sprite::setSpritesheet(std::shared_ptr<const sfx::animated_sp
 	_sheet = sheet;
 	if (!_sheet) _logger.error("No animated spritesheet has been assigned to this sprite.");
 	_errored = false;
+	_hasNotBeenDrawn = true;
+	_currentFrame = 0;
 }
 
 void sfx::animated_sprite::setSprite(unsigned int sprite) noexcept {
 	_spriteID = sprite;
 	_errored = false;
+	_hasNotBeenDrawn = true;
+	_currentFrame = 0;
 }
 
 unsigned int sfx::animated_sprite::getSprite() const noexcept {
@@ -165,6 +169,7 @@ bool sfx::animated_sprite::animate(const sf::RenderTarget& target) noexcept {
 		}
 		_sprite.setTexture(_sheet->accessTexture(_currentFrame));
 		_sprite.setTextureRect(_sheet->accessSprite(_spriteID));
+		return getCurrentFrame() == _sheet->getFrameCount() - 1;
 	} catch (std::out_of_range& e) {
 		if (!_errored) {
 			_logger.error("Attempted to access non-existent frame {} of sprite {}: {}", _currentFrame, _spriteID, e.what());
@@ -172,7 +177,6 @@ bool sfx::animated_sprite::animate(const sf::RenderTarget& target) noexcept {
 		}
 		return true;
 	}
-	return getCurrentFrame() == 0;
 }
 
 unsigned int sfx::animated_sprite::getCurrentFrame() const noexcept {

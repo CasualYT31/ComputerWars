@@ -19,7 +19,7 @@ ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-
+/*
 #include "unit.h"
 
 awe::unit::unit(const unit_type* type, const int hp, const int fuel, const int ammo) noexcept : _unitType(type) {
@@ -84,4 +84,4 @@ int awe::unit::setAmmo(const int newAmmo) noexcept {
 
 int awe::unit::getAmmo() const noexcept {
 	return _ammo;
-}
+}*/

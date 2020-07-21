@@ -19,7 +19,7 @@ ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-
+/*
 #include "game.h"
 #include <iostream>
 
@@ -110,4 +110,4 @@ void awe::game::_rendererRendering() noexcept {
 	_gui.drawBackground(&_spritesheet_GUI);
 	_gui.drawForeground(&_spritesheet_GUI);
 	_renderer.display();
-}
+}*/

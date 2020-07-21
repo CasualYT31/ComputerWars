@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "bank.h"
-
+/*
 void awe::updateAllTerrains(awe::bank<awe::tile_type>& tileBank, const awe::bank<awe::terrain>& terrainBank) noexcept {
 	for (std::size_t i = 0; i < tileBank.size(); i++) {
 		tileBank[(awe::bank<awe::tile_type>::index)i]->updateTerrain(terrainBank);
@@ -195,4 +195,4 @@ awe::commander::commander(safe::json& j) noexcept : common_properties(j) {
 }
 sfx::SpriteKey awe::commander::getPortrait() const noexcept {
 	return _portrait;
-}
+}*/

@@ -49,6 +49,7 @@ namespace sfx {
 		 * Accesses a reference to an entire frame.
 		 * @param  frameID The 0-based ID of the frame to access.
 		 * @return A reference to the \c Texture object storing the frame.
+		 * @throws std::out_of_range If no frame exists with the given ID.
 		 */
 		const sf::Texture& accessTexture(unsigned int frameID) const;
 
@@ -57,6 +58,7 @@ namespace sfx {
 		 * This bounding rectangle (X and Y coordinates, as well as dimensions) remains consistent across all frames.
 		 * @param  spriteID THe 0-based ID of the sprite whose bounding rectangle is required.
 		 * @return The bounding rectangle of the sprite.
+		 * @throws std::out_of_range If no sprite exists with the given ID.
 		 */
 		sf::IntRect accessSprite(unsigned int spriteID) const;
 
@@ -79,7 +81,7 @@ namespace sfx {
 		 * There are four key-value pairs that should be defined:
 		 * <ul><li>\c path - <em>Required</em> - The path to find all the image files, each representing a single frame. All files must have extensions.</li>
 		 * <li>\c frames - Defaults to 1 (unsigned) - The number of frames this spritesheet should contain.</li>
-		 * <li>\c framerate - Defaults to 60.0 - The frame rate, in frames per second. Negative values will be turned into \c 0.0.</li>
+		 * <li>\c framerate - Defaults to 60.0 - The frame rate, in frames per second. Negative values will be turned into \c 0.0. \c 0.0 represents a spritesheet that does not animate.</li>
 		 * <li>\c sprites - An array of bounding rectangles representing each sprite.</li></ul>
 		 * \c path is to have the following format: <tt>folders/image_name.png</tt> (or any other valid image format).
 		 * \c _loadImages() then inserts frame IDs into the base path to produce the final list of image files to load.
@@ -146,30 +148,154 @@ namespace sfx {
 		std::vector<sf::IntRect> _sprites;
 	};
 
+	/**
+	 * This class represents an animated sprite.
+	 * It is intended to be used with \c animated_spritesheet to manage the animation of an already loaded sprite.
+	 * Multiple \c animated_sprite objects can draw the same sprite, with animations starting at different times if so desired.
+	 * @sa sfx::animated_drawable
+	 */
 	class animated_sprite : public sfx::animated_drawable {
 	public:
+		/**
+		 * Constructs an animated sprite and initialises the internal logger object.
+		 * @param  sheet  A pointer to an \c animated_spritesheet object containing the sprite to animate.
+		 * @param  sprite The ID of the sprite from the given sheet which is to be animated/drawn.
+		 * @param  name   The name to give this particular instantiation within the log file. Defaults to "sprite."
+		 * @sa     \c global::logger
+		 */
 		animated_sprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite, const std::string& name = "sprite") noexcept;
+
+		/**
+		 * Sets a new \c animated_spritesheet to this animated sprite.
+		 * If a NULL pointer is given, an error will be logged and future calls to other methods will likely not work.
+		 * This method also updates \c _hasNotBeenDrawn and \c _currentFrame so that the animated sprite will start from the beginning of the animation.
+		 * @param sheet A pointer to the sheet to assign to this sprite.
+		 */
 		void setSpritesheet(std::shared_ptr<const sfx::animated_spritesheet> sheet) noexcept;
+
+		/**
+		 * Updates the sprite to animate and draw with this object.
+		 * This method also updates \c _hasNotBeenDrawn and \c _currentFrame so that the animated sprite will start from the beginning of the animation.
+		 * @param sprite The ID of the sprite to animate and draw.
+		 */
 		void setSprite(unsigned int sprite) noexcept;
+
+		/**
+		 * Retrieves the sprite ID assigned to this object.
+		 * @return The ID of the sprite to animate and draw with this object.
+		 */
 		unsigned int getSprite() const noexcept;
+
+		/**
+		 * This drawable's \c animate() method.
+		 * This method will look up the assigned sprite's details (such as frame rate) and will advance the current frame based on these details.
+		 * This method also assigns the necessary texture and texture rectangle to the internal \c sf::Sprite object,
+		 * so it must be called even if a non-animated spritesheet is being used so that the object will render properly.
+		 * If no sheet was given, this method will return \c TRUE and will not perform any other operations.
+		 * If the sprite ID (client assigned) or current frame ID (internal) do not refer to a valid sprite or frame,
+		 * an error will be logged only once. If the spritesheet or sprite ID is changed after this time, another error will be logged if any IDs are still invalid.
+		 * @return \c TRUE if the current frame is the last frame, or if \c _sheet is NULL, or if there was an error in retrieving the sprite information, \c FALSE otherwise.
+		 */
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
+
+		/**
+		 * Retrieves the current frame ID.
+		 * @return The ID of the current frame.
+		 */
 		unsigned int getCurrentFrame() const noexcept;
+		
+		/**
+		 * Sets the current frame.
+		 * This method shouldn't be called unless you have a spritesheet with a frame rate of \c 0.0
+		 * and you wish to choose the frame to display. If you wish to animate the sprite instead, please use \c animate().
+		 * If a frame ID outside of the range of frames is provided, \c _currentFrame will be set to \c 0!
+		 * In the event \c _sheet is NULL, the current frame will be returned only and no other calculations will be carried out.
+		 * @param  newFrame The ID of the new current frame.
+		 * @return The old current frame ID.
+		 * @sa     \c animate()
+		 */
 		unsigned int setCurrentFrame(unsigned int newFrame) noexcept;
-		unsigned int operator++() noexcept; // prefix
-		unsigned int operator++(int) noexcept; // postfix
+
+		/**
+		 * The prefix frame increment operator.
+		 * Increments \c _currentFrame by 1 using \c setCurrentFrame().
+		 * @return The new value of \c _currentFrame.
+		 * @sa     \c setCurrentFrame()
+		 */
+		unsigned int operator++() noexcept;
+
+		/**
+		 * The postfix frame increment operator.
+		 * Increments \c _currentFrame by 1 using \c setCurrentFrame().
+		 * @return The old value of \c _currentFrame.
+		 * @sa     \c setCurrentFrame()
+		 */
+		unsigned int operator++(int) noexcept;
+
+		/**
+		 * The prefix frame decrement operator.
+		 * Decrements \c _currentFrame by 1 using \c setCurrentFrame().
+		 * If decrementing from the first frame, \c _currentFrame will wrap round to the last frame.
+		 * If \c _sheet is NULL, \c _currentFrame is returned and no other calculations are carried out.
+		 * @return The new value of \c _currentFrame.
+		 * @sa     \c setCurrentFrame()
+		 */
 		unsigned int operator--() noexcept;
+
+		/**
+		 * The postfix frame decrement operator.
+		 * Decrements \c _currentFrame by 1 using \c operator--().
+		 * @return The old value of \c _currentFrame.
+		 * @sa     \c setCurrentFrame()
+		 */
 		unsigned int operator--(int) noexcept;
 	private:
+		/**
+		 * This drawable's \c draw() method.
+		 * Simply draws \c _sprite to the screen: to actually assign the correct sprite graphic to this internal sprite object, please call \c animate() first!
+		 * @param target The target to render the animated sprite to.
+		 * @param states The render states to apply to the sprite. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 */
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
+		/**
+		 * Pointer to an unalterable \c animated_spritesheet object.
+		 */
 		std::shared_ptr<const sfx::animated_spritesheet> _sheet;
-		unsigned int _spriteID;
+
+		/**
+		 * The ID of the sprite from \c _sheet to animate and draw.
+		 */
+		unsigned int _spriteID = 0;
+
+		/**
+		 * The internal sprite object.
+		 */
 		sf::Sprite _sprite;
 
+		/**
+		 * The internal logger object.
+		 */
 		mutable global::logger _logger;
+
+		/**
+		 * The current frame.
+		 */
 		unsigned int _currentFrame = 0;
+
+		/**
+		 * Flag representing if \c animate() has not yet been called with the current sheet-spriteID configuration.
+		 */
 		bool _hasNotBeenDrawn = true;
+
+		/**
+		 * Flag tracking \c animate() errors so they don't spam the log file.
+		 */
 		bool _errored = false;
+
+		/**
+		 * Times frame increments so that \c animate() follows the frame rate of the spritesheet given to it.
+		 */
 		sf::Clock _clock;
 	};
 }

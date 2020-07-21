@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #pragma once
-
+/*
 #include "texture.h"
 
 namespace awe {
@@ -180,4 +180,4 @@ bool awe::bank<T>::_load(safe::json& j) noexcept {
 template<typename T>
 bool awe::bank<T>::_save(nlohmann::json& j) noexcept {
 	return false;
-}
+}*/

@@ -34,11 +34,11 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
  * See the documentation on main() for more information.
  */
 
-#include "bank.h"
+// #include "bank.h"
 
-#include "game.h"
+// #include "game.h"
 
-#include "transitions.h"
+#include "texture.h"
 
 #include <iostream>
 

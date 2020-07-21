@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 #include "terrain.h"
-
+/*
 namespace awe {
 	typedef unsigned int TeamID;
 
@@ -64,4 +64,4 @@ namespace awe {
 		const awe::commander* _firstCO = nullptr;
 		const awe::commander* _secondCO = nullptr;
 	};
-}
+}*/

@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "bank.h"
-
+/*
 namespace awe {
 	class tile {
 	public:
@@ -39,4 +39,4 @@ namespace awe {
 		unsigned int _owner = 0;
 		int _hp = 0;
 	};
-}
+}*/

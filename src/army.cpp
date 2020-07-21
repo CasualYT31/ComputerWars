@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "army.h"
-
+/*
 awe::army::army(TeamID team, const awe::country* country, unsigned int funds,
 		const awe::commander* firstCO, const awe::commander* secondCO) noexcept :
 		_team(team), _country(country), _funds(funds), _firstCO(firstCO), _secondCO(secondCO) {}
@@ -98,4 +98,4 @@ void awe::army::clearOwnedTiles() noexcept {
 std::size_t awe::army::ownedTilesCount(std::vector<const awe::terrain const*> filter, const bool inverted) const noexcept {
 	if (filter.size() == 0 && !inverted) return 0;
 	if (filter.size() == 0 && inverted) return _ownedTiles.size();
-}
+}*/
