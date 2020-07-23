@@ -21,10 +21,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #pragma once
-/*
+
 #include "audio.h"
 #include "fonts.h"
-#include "renderer.h"
 #include "userinput.h"
 #include "texture.h"
 #include "language.h"
@@ -322,4 +321,4 @@ void awe::dialogue::_setTextToDisplay(Ts... values) noexcept {
 			}
 		}
 	}
-}*/
+}

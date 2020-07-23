@@ -24,11 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 sfx::fonts::fonts(const std::string& name) noexcept : _logger(name) {}
 
-sf::Font& sfx::fonts::operator[](const std::string& key) {
+std::shared_ptr<sf::Font> sfx::fonts::operator[](const std::string& key) {
 	if (_font.find(key) == _font.end()) {
 		std::string msg = "Attempting to access font with key \"" + key + "\" which does not exist.";
 		_logger.error(msg);
-		throw std::invalid_argument(msg);
+		throw std::out_of_range(msg);
 	}
 	return _font.at(key);
 }
@@ -40,7 +40,8 @@ bool sfx::fonts::_load(safe::json& j) noexcept {
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		std::string path = i.value();
-		if (!_font[i.key()].loadFromFile(path)) {
+		_font[i.key()] = std::make_shared<sf::Font>();
+		if (!_font[i.key()]->loadFromFile(path)) {
 			_logger.error("Attempting to load font file \"{}\" which does not exist.", path);
 			_font.erase(i.key());
 			ret = false;

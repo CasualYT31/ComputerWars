@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "dialogue.h"
-/*
+
 awe::dialogue_sequence::dialogue_sequence(sfx::renderer* r, sfx::fonts* f,
 	sfx::user_input* u, sfx::spritesheet* s, i18n::language_dictionary* l, sfx::audio* a, const std::string& name) noexcept : _logger(name) {
 	_renderer = r;
@@ -341,4 +341,4 @@ void awe::dialogue::_setInitialPosition() noexcept {
 			break;
 		}
 	}
-}*/
+}
