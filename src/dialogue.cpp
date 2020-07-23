@@ -22,6 +22,47 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dialogue.h"
 
+// CONSTRUCTION ZONE
+
+bool awe::dialogue_sequence::dialogue::animate(const sf::RenderTarget& target) noexcept {
+	float delta = calculateDelta();
+	// _sprite.animate(target);
+
+	// state machine
+	if (_state == awe::dialogue_state::TransitioningIn) {
+		if (_skipTransitioningIn) {
+			_state = awe::dialogue_state::Typing;
+		} else {
+
+		}
+	} else if (_state == awe::dialogue_state::TransitioningOut) {
+		if (_skipTransitioningOut) {
+			_state = awe::dialogue_state::Closed;
+		} else {
+
+		}
+	}
+}
+
+void awe::dialogue_sequence::dialogue::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(_bg, states);
+	target.draw(_nameBg, states);
+	target.draw(_sprite, states);
+	target.draw(_nameText, states);
+	target.draw(_text, states);
+	target.draw(_indicator, states);
+}
+
+bool awe::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept {
+	_dialogue->animate(target);
+}
+
+void awe::dialogue_sequence::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(*_dialogue);
+}
+
+// END OF CONSTRUCTION ZONE
+
 awe::dialogue_sequence::dialogue_sequence(sfx::renderer* r, sfx::fonts* f,
 	sfx::user_input* u, sfx::spritesheet* s, i18n::language_dictionary* l, sfx::audio* a, const std::string& name) noexcept : _logger(name) {
 	_renderer = r;

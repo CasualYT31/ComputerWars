@@ -22,20 +22,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "audio.h"
+/*#include "audio.h"
 #include "fonts.h"
 #include "userinput.h"
 #include "texture.h"
-#include "language.h"
+#include "language.h"*/
+
+#include "texture.h"
 
 namespace awe {
-	enum class dialogue_location {
-		Bottom,
-		Top,
-		Middle //PLEASE KEEP AS THE LAST ONE! This is because it is used in a check in dialogue_sequence to test if a read JSON uint is within the safe range of the enum
-	};
+	// CONSTRUCTION ZONE
 
-	enum class dialogue_status {
+	enum class dialogue_state {
 		TransitioningIn,
 		Typing,
 		StoppedTyping,
@@ -46,36 +44,89 @@ namespace awe {
 		Option3
 	};
 
+	class dialogue_sequence : public sfx::animated_drawable, public safe::json_script {
+	public:
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
+	private:
+		class dialogue : public sfx::animated_drawable {
+		public:
+			virtual bool animate(const sf::RenderTarget& target) noexcept;
+		private:
+			virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+			bool _skipTransitioningIn = false;
+			bool _skipTransitioningOut = false;
+
+			dialogue_state _state = dialogue_state::TransitioningIn;
+			sf::Text _text;
+			sf::Text _nameText;
+			sfx::animated_sprite _sprite;
+			sf::RectangleShape _bg;
+			sf::RectangleShape _indicator;
+			sf::RectangleShape _nameBg;
+		};
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		std::unique_ptr<dialogue> _dialogue = nullptr;
+	};
+
+	// END OF CONSTRUCTION ZONE
+
+
+
+
+	enum class dialogue_location {
+		Bottom,
+		Top,
+		Middle, // OLD -> PLEASE KEEP AS THE LAST ONE! This is because it is used in a check in dialogue_sequence to test if a read JSON uint is within the safe range of the enum
+		LocationCount
+	};
+
+	
+
 	struct dialogue_data {
-		//data that should be provided
-		std::string nativeString = "";
-		unsigned int spriteKey = 0;
-		sf::Font* font = nullptr;
-		sfx::audio* audioObject = nullptr;
-		sfx::renderer* rendererObject = nullptr;
-		sfx::user_input* userinputObject = nullptr;
-		i18n::language_dictionary* languageObject = nullptr;
-		sfx::spritesheet* spritesheetObject = nullptr;
-		//data that have "safe" defaults
+		// CONSTRUCTION ZONE
+
+		std::shared_ptr<sfx::animated_spritesheet> spritesheetObject = nullptr;
+		unsigned int characterSpriteID = 0;
+
+		std::string translatedStringToDisplay = "";
+		std::shared_ptr<sf::Font> font = nullptr;
 		sf::Time typingDelay = sf::milliseconds(50);
 		sf::Time transitionOutDelay = sf::milliseconds(1000);
-		float transitionSpeed = 400.0f; //pixels per second
-		std::string typingSoundKey = "typing";
-		std::string selectionSoundKey = "moveselection";
-		std::string selectControlKey = "select";
-		std::string leftControlKey = "left";
-		std::string rightControlKey = "right";
+		float transitionSpeed = 400.0f; // pixels per second
 		sf::Color borderColour = sf::Color();
 		sf::Color backgroundColour = sf::Color(100, 100, 100, 255);
 		std::array<std::string, 3> option = { "", "", "" };
 		bool flip = false;
 		bool skipable = true;
+		bool skipTransitioningIn = false;
+		bool skipTransitioningOut = false;
 		dialogue_location location = dialogue_location::Bottom;
 		float lineSpacingFactor = 1.0f;
 		unsigned int fontSize = 30;
 		float height = 165.0f;
-		bool skipTransitioningIn = false, skipTransitioningOut = false;
+
+		std::shared_ptr<sfx::audio> audioObject = nullptr;
+		std::string typingSoundKey = "typing";
+		std::string selectionSoundKey = "moveselection";
+
+		std::shared_ptr<sfx::user_input> userInputObject = nullptr;
+		std::string selectControlKey = "select";
+		std::string leftControlKey = "left";
+		std::string rightControlKey = "right";
+		
+		// END OF CONSTRUCTION ZONE
 	};
+
+	// CONSTRUCTION ZONE
+
+	class dialogue : public sfx::animated_drawable {
+	public:
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
+	private:
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+	};
+
+	// END OF CONSTRUCTION ZONE
 
 	class dialogue {
 	public:

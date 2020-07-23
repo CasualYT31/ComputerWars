@@ -73,7 +73,7 @@ namespace sfx {
 		 * A local variable, preferably called \c delta, should be declared in \c animate(), and it should store the
 		 * result of this method.
 		 * The unit used with this method is \b seconds.
-		 * @return The time elapsed since the last call \c calculateDelta().
+		 * @return The time elapsed since the last call to \c calculateDelta().
 		 */
 		float calculateDelta() noexcept;
 	private:

@@ -194,6 +194,7 @@ namespace sfx {
 		 * If no sheet was given, this method will return \c TRUE and will not perform any other operations.
 		 * If the sprite ID (client assigned) or current frame ID (internal) do not refer to a valid sprite or frame,
 		 * an error will be logged only once. If the spritesheet or sprite ID is changed after this time, another error will be logged if any IDs are still invalid.
+		 * @todo   OH YEAH, I ALSO HAVE TO MAKE SURE THIS ABIDES BY DELTA AT SOME POINT IN THE FUTURE!
 		 * @return \c TRUE if the current frame is the last frame, or if \c _sheet is NULL, or if there was an error in retrieving the sprite information, \c FALSE otherwise.
 		 */
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
