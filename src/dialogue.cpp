@@ -22,6 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dialogue.h"
 
+void awe::dialogue_box::setPosition(const awe::dialogue_box_position position) noexcept {
+	_position = position;
+}
+
 void awe::dialogue_box::setBackgroundColour(const sf::Color& colour) noexcept {
 	_background.setFillColor(colour);
 	_nameBackground.setFillColor(colour);
@@ -38,7 +42,7 @@ void awe::dialogue_box::setOutlineThickness(const float thickness) noexcept {
 }
 
 void awe::dialogue_box::setMainText(const std::string& text) noexcept {
-	_mainText.setString(text);
+	_fullText = text;
 }
 
 void awe::dialogue_box::setNameText(const std::string& text) noexcept {
@@ -51,10 +55,6 @@ void awe::dialogue_box::setFont(std::shared_ptr<sf::Font> font) noexcept {
 	_option2Text.setFont(*font);
 	_option3Text.setFont(*font);
 	_nameText.setFont(*font);
-}
-
-void awe::dialogue_box::namePositionIsBottom(const bool isBottom) noexcept {
-	_namePositionIsBottom = isBottom;
 }
 
 void awe::dialogue_box::setOptions(std::string option1, std::string option2, std::string option3) noexcept {
@@ -74,16 +74,8 @@ void awe::dialogue_box::setOptions(std::string option1, std::string option2, std
 	_option3Text.setString(option3);
 }
 
-void awe::dialogue_box::split(const bool isSplit) noexcept {
-	_isSplit = isSplit;
-}
-
-void awe::dialogue_box::setRatio(const float ratio) noexcept {
-	_ratio = ratio;
-}
-
-void awe::dialogue_box::animateSprite(const bool isAnimated) noexcept {
-	_spriteIsAnimated = isAnimated;
+void awe::dialogue_box::setSizeRatio(const float ratio) noexcept {
+	_sizeRatio = ratio;
 }
 
 void awe::dialogue_box::setSprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite) noexcept {
@@ -92,23 +84,136 @@ void awe::dialogue_box::setSprite(std::shared_ptr<const sfx::animated_spriteshee
 	_spriteInfoChanged = true;
 }
 
-bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
-	_background.setSize(sf::Vector2f(target.getSize().x, target.getSize().y / _ratio));
-	// ^^ this is actually bad
+void awe::dialogue_box::skipTransitioningIn(const bool skip) noexcept {
+	_skipTransitioningIn = skip;
+}
 
-	if (_spriteIsAnimated || _spriteInfoChanged) {
+void awe::dialogue_box::skipTransitioningOut(const bool skip) noexcept {
+	_skipTransitioningOut = skip;
+}
+
+void awe::dialogue_box::selectNextOption() noexcept {
+	if (++_currentOption == 4) _currentOption = 1;
+}
+
+void awe::dialogue_box::selectPreviousOption() noexcept {
+	if (--_currentOption == 0) _currentOption = 3;
+}
+
+void awe::dialogue_box::selectCurrentOption() noexcept {
+	if (_currentOption == 1) {
+		_state = awe::dialogue_box_state::Option1;
+	} else if (_currentOption == 2) {
+		_state = awe::dialogue_box_state::Option2;
+	} else {
+		_state = awe::dialogue_box_state::Option3;
+	}
+}
+
+void awe::dialogue_box::flip(const bool isFlipped) noexcept {
+	_flipped = isFlipped;
+}
+
+bool awe::dialogue_box::thereAreOptions() const noexcept {
+	return _option1Text.getString() != "";
+}
+
+bool awe::dialogue_box::thereIsAName() const noexcept {
+	return _nameText.getString() != "";
+}
+
+bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
+	_stateMachine();
+
+	sf::Vector2f size = _calculateBackgroundSize(target),
+		position = _calculateOrigin(size, target);
+	_background.setSize(size);
+	_background.setPosition(position);
+
+	sf::Vector2f nameSize = _calculateNameSize(),
+		namePosition = _calculateNameOrigin(position, size, nameSize);
+	_nameBackground.setSize(nameSize);
+	_nameBackground.setPosition(namePosition);
+
+	if (_state == awe::dialogue_box_state::Typing || _spriteInfoChanged) {
 		if (_spriteInfoChanged) {
 			_characterSprite.setSpritesheet(_sheet);
 			_characterSprite.setSprite(_spriteID);
 			_spriteInfoChanged = false;
 			// call animate once immediately so that even if the sprite isn't animated,
 			// it can still be setup
-			// small bug: the delta timer should be able to be reset somehow!
 		}
 		_characterSprite.animate(target);
 	}
 
 	return true;
+}
+
+sf::Vector2f awe::dialogue_box::_calculateBackgroundSize(const sf::RenderTarget& target) const noexcept {
+	return sf::Vector2f(target.getSize().x, target.getSize().y * _sizeRatio);
+}
+
+sf::Vector2f awe::dialogue_box::_calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept {
+	if (_position == awe::dialogue_box_position::Top) {
+		return sf::Vector2f(0.0f, 0.0f - (size.y * _positionRatio));
+	} else if (_position == awe::dialogue_box_position::Bottom) {
+		return sf::Vector2f(0.0f, target.getSize().y - (size.y * _positionRatio));
+	} else if (_position == awe::dialogue_box_position::Middle) {
+		return sf::Vector2f(0.0f, (target.getSize().y / 2.0f) - (size.y / 2.0f) * _positionRatio);
+	}
+}
+
+sf::Vector2f awe::dialogue_box::_calculateNameSize() const noexcept {
+	if (thereIsAName()) {
+		return sf::Vector2f(_nameText.getLocalBounds().width + 10.0f, _nameText.getLocalBounds().height + 10.0f);
+	} else {
+		return sf::Vector2f(0.0f, 0.0f);
+	}
+}
+
+sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept {
+	if (_flipped) origin.x += bgSize.x - nameSize.x;
+	if (_position == awe::dialogue_box_position::Top) {
+		origin.y += bgSize.y;
+	} else {
+		origin.y -= nameSize.y;
+	}
+	return origin;
+}
+
+void awe::dialogue_box::_stateMachine() noexcept {
+	if (_state == awe::dialogue_box_state::Closed) {
+		if (_skipTransitioningIn) {
+			_positionRatio = 1.0f;
+			_state = awe::dialogue_box_state::Typing;
+		} else {
+			_state = awe::dialogue_box_state::TransitioningIn;
+		}
+	}
+	if (_state == awe::dialogue_box_state::TransitioningIn) {
+		if (_positionRatio >= 1.0f) {
+			_state = awe::dialogue_box_state::Typing;
+		}
+	}
+	if (_state == awe::dialogue_box_state::Typing) {
+		if (_mainText.getString() == _fullText) {
+			_state == awe::dialogue_box_state::StoppedTyping;
+		}
+	}
+	// see selectCurrentOption()
+	if (_state == awe::dialogue_box_state::Option1 || _state == awe::dialogue_box_state::Option2 || _state == awe::dialogue_box_state::Option3) {
+		if (_skipTransitioningOut) {
+			_positionRatio = 0.0f;
+			_state = awe::dialogue_box_state::Closed;
+		} else {
+			_state = awe::dialogue_box_state::TransitioningOut;
+		}
+	}
+	if (_state == awe::dialogue_box_state::TransitioningOut) {
+		if (_positionRatio <= 0.0f) {
+			_state = awe::dialogue_box_state::Closed;
+		}
+	}
 }
 
 void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -119,10 +224,12 @@ void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) 
 	}
 	target.draw(_characterSprite, states);
 	target.draw(_mainText, states);
-	if (_option1Text.getString() != "") target.draw(_option1Text, states);
-	if (_option2Text.getString() != "") target.draw(_option2Text, states);
-	if (_option3Text.getString() != "") target.draw(_option3Text, states);
-	if (_option1Text.getString() != "") target.draw(_indicator, states);
+	if (thereAreOptions()) {
+		target.draw(_option1Text, states);
+		if (_option2Text.getString() != "") target.draw(_option2Text, states);
+		if (_option3Text.getString() != "") target.draw(_option3Text, states);
+		target.draw(_indicator, states);
+	}
 }
 
 /*

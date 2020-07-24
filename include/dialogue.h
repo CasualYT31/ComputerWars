@@ -25,37 +25,75 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "texture.h"
 
 namespace awe {
+	enum class dialogue_box_position {
+		Bottom,
+		Top,
+		Middle,
+		NumberOfPositions
+	};
+
+	enum class dialogue_box_state {
+		Closed,
+		TransitioningIn,
+		Typing,
+		StoppedTyping,
+		Option1,
+		Option2,
+		Option3,
+		TransitioningOut
+	};
+
 	class dialogue_box : public sfx::animated_drawable {
 	public:
+		void setPosition(const awe::dialogue_box_position position) noexcept;
 		void setBackgroundColour(const sf::Color& colour) noexcept;
 		void setThemeColour(const sf::Color& colour) noexcept;
 		void setOutlineThickness(const float thickness) noexcept;
 		void setMainText(const std::string& text) noexcept;
 		void setNameText(const std::string& text) noexcept;
 		void setFont(std::shared_ptr<sf::Font> font) noexcept;
-		void namePositionIsBottom(const bool isBottom) noexcept;
 		void setOptions(std::string option1, std::string option2 = "", std::string option3 = "") noexcept;
-		void split(const bool isSplit) noexcept;
-		void setRatio(const float ratio) noexcept;
-		void animateSprite(const bool isAnimated) noexcept;
+		void setSizeRatio(const float ratio) noexcept;
 		void setSprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite) noexcept;
+		void skipTransitioningIn(const bool skip) noexcept;
+		void skipTransitioningOut(const bool skip) noexcept;
+		void selectNextOption() noexcept;
+		void selectPreviousOption() noexcept;
+		void selectCurrentOption() noexcept;
+		void flip(const bool isFlipped) noexcept;
+		bool thereAreOptions() const noexcept;
+		bool thereIsAName() const noexcept;
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
+		// drawing
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-
+		// sf::RenderTexture _canvas;
 		sf::RectangleShape _background;
 		sf::RectangleShape _nameBackground;
-		sfx::animated_sprite _characterSprite; // create default constructor for this class
+		sfx::animated_sprite _characterSprite;
 		sf::Text _nameText;
 		sf::Text _mainText;
 		sf::Text _option1Text;
 		sf::Text _option2Text;
 		sf::Text _option3Text;
 		sf::ConvexShape _indicator;
-		bool _isSplit = false;
-		bool _namePositionIsBottom = true;
-		bool _spriteIsAnimated = false;
-		float _ratio = 0.16;
+		// base properties that define the transforms of the dialogue box
+		sf::Vector2f _calculateBackgroundSize(const sf::RenderTarget& target) const noexcept;
+		sf::Vector2f _calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept;
+		sf::Vector2f _calculateNameSize() const noexcept;
+		sf::Vector2f _calculateNameOrigin(sf::Vector2f bgOrigin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept;
+		awe::dialogue_box_position _position = awe::dialogue_box_position::Bottom;
+		float _sizeRatio = 0.16f;
+		float _positionRatio = 0.0f;
+		bool _flipped = false;
+		// tracks the state of the dialogue box
+		void _stateMachine() noexcept;
+		awe::dialogue_box_state _state = awe::dialogue_box_state::Closed;
+		std::string _fullText = "";
+		bool _skipTransitioningIn = false;
+		bool _skipTransitioningOut = false;
+		unsigned short _currentOption = 1;
+		// animated_sprite data
 		std::shared_ptr<const sfx::animated_spritesheet> _sheet = nullptr;
 		unsigned int _spriteID = 0;
 		bool _spriteInfoChanged = true;
