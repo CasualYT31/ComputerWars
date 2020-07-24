@@ -22,6 +22,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dialogue.h"
 
+const float awe::dialogue_box::_namePadding = 5.0f;
+const float awe::dialogue_box::_mainPadding = 50.0f;
+const float awe::dialogue_box::_indicatorSize = 5.0f;
+
+awe::dialogue_box::dialogue_box() noexcept {
+	_indicator.setPointCount(3);
+	_indicator.setPoint(0, sf::Vector2f(0.0f, 0.0f));
+	_indicator.setPoint(1, sf::Vector2f(_indicatorSize, _indicatorSize / 2.0f));
+	_indicator.setPoint(2, sf::Vector2f(0.0f, _indicatorSize));
+	_indicator.setFillColor(sf::Color::Red);
+}
+
+void awe::dialogue_box::setTransitionSpeed(const float pixelsPerSecond) noexcept {
+	_transitionSpeed = pixelsPerSecond;
+}
+
+void awe::dialogue_box::setTypingDelay(const float seconds) noexcept {
+	_typingDelay = seconds;
+}
+
 void awe::dialogue_box::setPosition(const awe::dialogue_box_position position) noexcept {
 	_position = position;
 }
@@ -145,9 +165,31 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 		}
 		_characterSprite.animate(target);
 	}
-	_calculateSpriteOrigin(position);
+	_calculateSpriteOrigin(position, size);
 
-	return true;
+	_nameText.setPosition(namePosition + sf::Vector2f(_namePadding, _namePadding));
+
+	if (_flipped) {
+		_mainText.setPosition(sf::Vector2f(size.x - _mainText.getLocalBounds().width - _mainPadding, _mainPadding));
+	} else {
+		_mainText.setPosition(sf::Vector2f(_mainPadding, _mainPadding));
+	}
+
+	_option1Text.setPosition(_mainText.getPosition().x + _indicatorSize * 1.5f, size.y - _option1Text.getLocalBounds().height - _mainPadding);
+
+	_option2Text.setPosition(_option1Text.getPosition().x + _option1Text.getLocalBounds().width + _indicatorSize * 2.5f, _option1Text.getPosition().y);
+
+	_option3Text.setPosition(_option2Text.getPosition().x + _option2Text.getLocalBounds().width + _indicatorSize * 2.5f, _option2Text.getPosition().y);
+
+	if (_currentOption == 1) {
+		_indicator.setPosition(_option1Text.getPosition() - sf::Vector2f(_indicatorSize * 1.5f, 0.0f));
+	} else if (_currentOption == 2) {
+		_indicator.setPosition(_option2Text.getPosition() - sf::Vector2f(_indicatorSize * 1.5f, 0.0f));
+	} else if (_currentOption == 3) {
+		_indicator.setPosition(_option3Text.getPosition() - sf::Vector2f(_indicatorSize * 1.5f, 0.0f));
+	}
+
+	return _state == awe::dialogue_box_state::Closed;
 }
 
 sf::Vector2f awe::dialogue_box::_calculateBackgroundSize(const sf::RenderTarget& target) const noexcept {
@@ -166,7 +208,7 @@ sf::Vector2f awe::dialogue_box::_calculateOrigin(const sf::Vector2f& size, const
 
 sf::Vector2f awe::dialogue_box::_calculateNameSize() const noexcept {
 	if (thereIsAName()) {
-		return sf::Vector2f(_nameText.getLocalBounds().width + 10.0f, _nameText.getLocalBounds().height + 10.0f);
+		return sf::Vector2f(_nameText.getLocalBounds().width + _namePadding * 2.0f, _nameText.getLocalBounds().height + _namePadding * 2.0f);
 	} else {
 		return sf::Vector2f(0.0f, 0.0f);
 	}
@@ -185,11 +227,17 @@ sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const 
 void awe::dialogue_box::_calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSize) noexcept {
 	_spriteTranslation.x = bgOrigin.x + 50.0f;
 	_spriteTranslation.y = bgOrigin.y + 50.0f;
-	if (_flipped) _spriteTranslation.x += bgSize.x - () - 50.0f;
+	if (_flipped) _spriteTranslation.x += bgSize.x - _characterSprite.getSize().x - 50.0f;
+}
+
+float awe::dialogue_box::_calculatePositionRatioOffset(const float secondsElapsed) const noexcept {
+	return secondsElapsed / (_background.getSize().y / _transitionSpeed);
 }
 
 void awe::dialogue_box::_stateMachine() noexcept {
+	float delta = calculateDelta();
 	if (_state == awe::dialogue_box_state::Closed) {
+		_mainText.setString("");
 		if (_skipTransitioningIn) {
 			_positionRatio = 1.0f;
 			_state = awe::dialogue_box_state::Typing;
@@ -198,11 +246,18 @@ void awe::dialogue_box::_stateMachine() noexcept {
 		}
 	}
 	if (_state == awe::dialogue_box_state::TransitioningIn) {
+		_positionRatio += _calculatePositionRatioOffset(delta);
 		if (_positionRatio >= 1.0f) {
 			_state = awe::dialogue_box_state::Typing;
+			_positionRatio = 1.0f;
 		}
 	}
 	if (_state == awe::dialogue_box_state::Typing) {
+		if (delta >= _typingDelay) {
+			if (_mainText.getString().getSize() < _fullText.size()) {
+				_mainText.setString(_mainText.getString() + _fullText.substr(_mainText.getString().getSize(), (std::size_t)(delta / _typingDelay)));
+			}
+		}
 		if (_mainText.getString() == _fullText) {
 			_state == awe::dialogue_box_state::StoppedTyping;
 		}
@@ -217,19 +272,23 @@ void awe::dialogue_box::_stateMachine() noexcept {
 		}
 	}
 	if (_state == awe::dialogue_box_state::TransitioningOut) {
+		_positionRatio -= _calculatePositionRatioOffset(delta);
 		if (_positionRatio <= 0.0f) {
 			_state = awe::dialogue_box_state::Closed;
+			_positionRatio = 0.0f;
 		}
 	}
 }
 
 void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_background, states);
-	if (_nameText.getString() != "") {
+	if (thereIsAName()) {
 		target.draw(_nameBackground, states);
 		target.draw(_nameText, states);
 	}
-	target.draw(_characterSprite, states);
+	sf::RenderStates firstState;
+	firstState.transform.translate();
+	target.draw(_characterSprite, states.transform.translate());
 	target.draw(_mainText, states);
 	if (thereAreOptions()) {
 		target.draw(_option1Text, states);

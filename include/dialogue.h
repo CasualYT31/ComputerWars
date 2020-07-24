@@ -45,6 +45,9 @@ namespace awe {
 
 	class dialogue_box : public sfx::animated_drawable {
 	public:
+		dialogue_box() noexcept;
+		void setTransitionSpeed(const float pixelsPerSecond) noexcept;
+		void setTypingDelay(const float seconds) noexcept;
 		void setPosition(const awe::dialogue_box_position position) noexcept;
 		void setBackgroundColour(const sf::Color& colour) noexcept;
 		void setThemeColour(const sf::Color& colour) noexcept;
@@ -83,6 +86,7 @@ namespace awe {
 		sf::Vector2f _calculateNameSize() const noexcept;
 		sf::Vector2f _calculateNameOrigin(sf::Vector2f bgOrigin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept;
 		void _calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSzie) noexcept;
+		float _calculatePositionRatioOffset(const float secondsElapsed) const noexcept;
 		awe::dialogue_box_position _position = awe::dialogue_box_position::Bottom;
 		float _sizeRatio = 0.16f;
 		float _positionRatio = 0.0f;
@@ -99,6 +103,13 @@ namespace awe {
 		unsigned int _spriteID = 0;
 		bool _spriteInfoChanged = true; // only if the above two fields are updated
 		sf::Vector2f _spriteTranslation = sf::Vector2f(0.0f, 0.0f);
+		// padding/sizing constants
+		static const float _namePadding;
+		static const float _mainPadding;
+		static const float _indicatorSize;
+		// timing data
+		float _transitionSpeed = 400.0f;
+		float _typingDelay = 0.05f;
 	};
 }
 

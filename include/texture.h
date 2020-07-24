@@ -265,6 +265,18 @@ namespace sfx {
 		 * @return The size of the internal sprite, specifically, the texture rect width and height, at the time of calling.
 		 */
 		sf::Vector2f getSize() const noexcept;
+
+		/**
+		 * Sets the position of the internal sprite.
+		 * @param newPosition The new position, in pixels, of the sprite.
+		 */
+		void setPosition(const sf::Vector2f& newPosition) noexcept;
+
+		/**
+		 * Gets the position of the internal sprite.
+		 * @return The position of the sprite, in pixels.
+		 */
+		sf::Vector2f getPosition() const noexcept;
 	private:
 		/**
 		 * This drawable's \c draw() method.
