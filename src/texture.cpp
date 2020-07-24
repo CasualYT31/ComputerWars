@@ -218,6 +218,10 @@ unsigned int sfx::animated_sprite::operator--(int) noexcept {
 	return old;
 }
 
+sf::Vector2f sfx::animated_sprite::getSize() const noexcept {
+	return sf::Vector2f(_sprite.getTextureRect().width, _sprite.getTextureRect().height);
+}
+
 void sfx::animated_sprite::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_sprite, states);
 }

@@ -259,6 +259,12 @@ namespace sfx {
 		 * @sa     \c setCurrentFrame()
 		 */
 		unsigned int operator--(int) noexcept;
+
+		/**
+		 * Gets the current size of the sprite.
+		 * @return The size of the internal sprite, specifically, the texture rect width and height, at the time of calling.
+		 */
+		sf::Vector2f getSize() const noexcept;
 	private:
 		/**
 		 * This drawable's \c draw() method.

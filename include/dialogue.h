@@ -82,6 +82,7 @@ namespace awe {
 		sf::Vector2f _calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept;
 		sf::Vector2f _calculateNameSize() const noexcept;
 		sf::Vector2f _calculateNameOrigin(sf::Vector2f bgOrigin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept;
+		void _calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSzie) noexcept;
 		awe::dialogue_box_position _position = awe::dialogue_box_position::Bottom;
 		float _sizeRatio = 0.16f;
 		float _positionRatio = 0.0f;
@@ -96,7 +97,8 @@ namespace awe {
 		// animated_sprite data
 		std::shared_ptr<const sfx::animated_spritesheet> _sheet = nullptr;
 		unsigned int _spriteID = 0;
-		bool _spriteInfoChanged = true;
+		bool _spriteInfoChanged = true; // only if the above two fields are updated
+		sf::Vector2f _spriteTranslation = sf::Vector2f(0.0f, 0.0f);
 	};
 }
 

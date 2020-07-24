@@ -145,6 +145,7 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 		}
 		_characterSprite.animate(target);
 	}
+	_calculateSpriteOrigin(position);
 
 	return true;
 }
@@ -179,6 +180,12 @@ sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const 
 		origin.y -= nameSize.y;
 	}
 	return origin;
+}
+
+void awe::dialogue_box::_calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSize) noexcept {
+	_spriteTranslation.x = bgOrigin.x + 50.0f;
+	_spriteTranslation.y = bgOrigin.y + 50.0f;
+	if (_flipped) _spriteTranslation.x += bgSize.x - () - 50.0f;
 }
 
 void awe::dialogue_box::_stateMachine() noexcept {
