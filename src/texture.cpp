@@ -219,7 +219,7 @@ unsigned int sfx::animated_sprite::operator--(int) noexcept {
 }
 
 sf::Vector2f sfx::animated_sprite::getSize() const noexcept {
-	return sf::Vector2f(_sprite.getTextureRect().width, _sprite.getTextureRect().height);
+	return sf::Vector2f((float)_sprite.getTextureRect().width, (float)_sprite.getTextureRect().height);
 }
 
 void sfx::animated_sprite::setPosition(const sf::Vector2f& newPosition) noexcept {

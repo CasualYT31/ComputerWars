@@ -102,7 +102,6 @@ namespace awe {
 		std::shared_ptr<const sfx::animated_spritesheet> _sheet = nullptr;
 		unsigned int _spriteID = 0;
 		bool _spriteInfoChanged = true; // only if the above two fields are updated
-		sf::Vector2f _spriteTranslation = sf::Vector2f(0.0f, 0.0f);
 		// padding/sizing constants
 		static const float _namePadding;
 		static const float _mainPadding;

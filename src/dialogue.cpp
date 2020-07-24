@@ -193,7 +193,7 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 }
 
 sf::Vector2f awe::dialogue_box::_calculateBackgroundSize(const sf::RenderTarget& target) const noexcept {
-	return sf::Vector2f(target.getSize().x, target.getSize().y * _sizeRatio);
+	return sf::Vector2f((float)target.getSize().x, (float)target.getSize().y * _sizeRatio);
 }
 
 sf::Vector2f awe::dialogue_box::_calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept {
@@ -225,9 +225,9 @@ sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const 
 }
 
 void awe::dialogue_box::_calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSize) noexcept {
-	_spriteTranslation.x = bgOrigin.x + 50.0f;
-	_spriteTranslation.y = bgOrigin.y + 50.0f;
-	if (_flipped) _spriteTranslation.x += bgSize.x - _characterSprite.getSize().x - 50.0f;
+	sf::Vector2f spriteTranslation(bgOrigin.x + 50.0f, bgOrigin.y + 50.0f);
+	if (_flipped) spriteTranslation.x += bgSize.x - _characterSprite.getSize().x - 50.0f;
+	_characterSprite.setPosition(spriteTranslation);
 }
 
 float awe::dialogue_box::_calculatePositionRatioOffset(const float secondsElapsed) const noexcept {
@@ -259,7 +259,7 @@ void awe::dialogue_box::_stateMachine() noexcept {
 			}
 		}
 		if (_mainText.getString() == _fullText) {
-			_state == awe::dialogue_box_state::StoppedTyping;
+			_state = awe::dialogue_box_state::StoppedTyping;
 		}
 	}
 	// see selectCurrentOption()
@@ -286,9 +286,7 @@ void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) 
 		target.draw(_nameBackground, states);
 		target.draw(_nameText, states);
 	}
-	sf::RenderStates firstState;
-	firstState.transform.translate();
-	target.draw(_characterSprite, states.transform.translate());
+	target.draw(_characterSprite, states);
 	target.draw(_mainText, states);
 	if (thereAreOptions()) {
 		target.draw(_option1Text, states);

@@ -38,7 +38,8 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
 
 // #include "game.h"
 
-#include "texture.h"
+#include "dialogue.h"
+#include "fonts.h"
 
 #include <iostream>
 
@@ -65,7 +66,20 @@ int main() {
     sfx::animated_sprite sprite(sheet, 0);
     sfx::animated_sprite sprite2(sheet, 0);
 
+    // dialogue box testing
+    sfx::fonts fonts;
+    fonts.load("assets/fonts/fonts.json");
+    awe::dialogue_box box;
+    box.setBackgroundColour(sf::Color(150,150,150));
+    box.setThemeColour(sf::Color::Red);
+    box.setOutlineThickness(5.0f);
+    box.setMainText("Testing");
+    box.setNameText("");
+    box.setFont(fonts["dialogue"]);
+    box.setSprite(sheet, 50);
+
     bool leave = false;
+    bool selectCurrentOption = false;
     while (!leave) {
         sf::Event event;
         while (newRenderer.pollEvent(event)) {
@@ -82,15 +96,21 @@ int main() {
                     sprite--;
                 } else if (event.key.code == sf::Keyboard::Right) {
                     sprite++;
+                } else if (event.key.code == sf::Keyboard::Z) {
+                    selectCurrentOption = true;
                 }
             }
         }
         newRenderer.clear(sf::Color::Black);
         newRenderer.animate(sprite);
         newRenderer.animate(sprite2);
+        newRenderer.animate(box);
+        if (selectCurrentOption) box.selectCurrentOption();
         newRenderer.draw(sprite);
         newRenderer.draw(sprite2, sf::RenderStates(sf::Transform().translate(50.0, 50.0)));
+        newRenderer.draw(box);
         newRenderer.display();
+        selectCurrentOption = false;
     }
 
     newRenderer.save();
