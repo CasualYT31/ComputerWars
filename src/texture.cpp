@@ -131,6 +131,8 @@ bool sfx::animated_spritesheet::_loadImages(unsigned int expectedFrames) noexcep
 	return result;
 }
 
+sfx::animated_sprite::animated_sprite(const std::string& name) noexcept : _logger(name) {}
+
 sfx::animated_sprite::animated_sprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite, const std::string& name) noexcept : _logger(name) {
 	setSpritesheet(sheet);
 	setSprite(sprite);

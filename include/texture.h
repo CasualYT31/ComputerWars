@@ -157,6 +157,15 @@ namespace sfx {
 	class animated_sprite : public sfx::animated_drawable {
 	public:
 		/**
+		 * Initialises the internal logger object.
+		 * \c _sheet will be initialised with \c nullptr, so it should be set later on with
+		 * \c setSpritesheet() if this constructor is used.
+		 * @param  name The name to give this particular instantiation within the log file. Defaults to "sprite."
+		 * @sa     \c global::logger
+		 */
+		animated_sprite(const std::string& name = "sprite") noexcept;
+
+		/**
 		 * Constructs an animated sprite and initialises the internal logger object.
 		 * @param  sheet  A pointer to an \c animated_spritesheet object containing the sprite to animate.
 		 * @param  sprite The ID of the sprite from the given sheet which is to be animated/drawn.
@@ -262,7 +271,7 @@ namespace sfx {
 		/**
 		 * Pointer to an unalterable \c animated_spritesheet object.
 		 */
-		std::shared_ptr<const sfx::animated_spritesheet> _sheet;
+		std::shared_ptr<const sfx::animated_spritesheet> _sheet = nullptr;
 
 		/**
 		 * The ID of the sprite from \c _sheet to animate and draw.

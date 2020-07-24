@@ -22,12 +22,54 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include "texture.h"
+
+namespace awe {
+	class dialogue_box : public sfx::animated_drawable {
+	public:
+		void setBackgroundColour(const sf::Color& colour) noexcept;
+		void setThemeColour(const sf::Color& colour) noexcept;
+		void setOutlineThickness(const float thickness) noexcept;
+		void setMainText(const std::string& text) noexcept;
+		void setNameText(const std::string& text) noexcept;
+		void setFont(std::shared_ptr<sf::Font> font) noexcept;
+		void namePositionIsBottom(const bool isBottom) noexcept;
+		void setOptions(std::string option1, std::string option2 = "", std::string option3 = "") noexcept;
+		void split(const bool isSplit) noexcept;
+		void setRatio(const float ratio) noexcept;
+		void animateSprite(const bool isAnimated) noexcept;
+		void setSprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite) noexcept;
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
+	private:
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+		sf::RectangleShape _background;
+		sf::RectangleShape _nameBackground;
+		sfx::animated_sprite _characterSprite; // create default constructor for this class
+		sf::Text _nameText;
+		sf::Text _mainText;
+		sf::Text _option1Text;
+		sf::Text _option2Text;
+		sf::Text _option3Text;
+		sf::ConvexShape _indicator;
+		bool _isSplit = false;
+		bool _namePositionIsBottom = true;
+		bool _spriteIsAnimated = false;
+		float _ratio = 0.16;
+		std::shared_ptr<const sfx::animated_spritesheet> _sheet = nullptr;
+		unsigned int _spriteID = 0;
+		bool _spriteInfoChanged = true;
+	};
+}
+
+/*
 /*#include "audio.h"
 #include "fonts.h"
 #include "userinput.h"
 #include "texture.h"
-#include "language.h"*/
+#include "language.h"
 
+#include "language.h"
 #include "texture.h"
 
 namespace awe {
@@ -47,12 +89,22 @@ namespace awe {
 	class dialogue_sequence : public sfx::animated_drawable, public safe::json_script {
 	public:
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		template<typename... Ts>
+		void updateText(const i18n::language_dictionary& dict, Ts... values) noexcept;
 	private:
 		class dialogue : public sfx::animated_drawable {
 		public:
 			virtual bool animate(const sf::RenderTarget& target) noexcept;
+			template <typename... Ts>
+			void updateText(const i18n::language_dictionary& dict, Ts... values) noexcept;
 		private:
 			virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+			void _transitionIn(bool shouldEnd) noexcept;
+			void _transitionOut(bool shouldEnd) noexcept;
+
+			void _offsetPosition() noexcept;
+
 			bool _skipTransitioningIn = false;
 			bool _skipTransitioningOut = false;
 
@@ -372,4 +424,4 @@ void awe::dialogue::_setTextToDisplay(Ts... values) noexcept {
 			}
 		}
 	}
-}
+}*/

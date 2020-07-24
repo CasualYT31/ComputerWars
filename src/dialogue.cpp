@@ -22,6 +22,110 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dialogue.h"
 
+void awe::dialogue_box::setBackgroundColour(const sf::Color& colour) noexcept {
+	_background.setFillColor(colour);
+	_nameBackground.setFillColor(colour);
+}
+
+void awe::dialogue_box::setThemeColour(const sf::Color& colour) noexcept {
+	_background.setOutlineColor(colour);
+	_nameBackground.setOutlineColor(colour);
+}
+
+void awe::dialogue_box::setOutlineThickness(const float thickness) noexcept {
+	_background.setOutlineThickness(thickness);
+	_nameBackground.setOutlineThickness(thickness);
+}
+
+void awe::dialogue_box::setMainText(const std::string& text) noexcept {
+	_mainText.setString(text);
+}
+
+void awe::dialogue_box::setNameText(const std::string& text) noexcept {
+	_nameText.setString(text);
+}
+
+void awe::dialogue_box::setFont(std::shared_ptr<sf::Font> font) noexcept {
+	_mainText.setFont(*font);
+	_option1Text.setFont(*font);
+	_option2Text.setFont(*font);
+	_option3Text.setFont(*font);
+	_nameText.setFont(*font);
+}
+
+void awe::dialogue_box::namePositionIsBottom(const bool isBottom) noexcept {
+	_namePositionIsBottom = isBottom;
+}
+
+void awe::dialogue_box::setOptions(std::string option1, std::string option2, std::string option3) noexcept {
+	if (option1 == "" && option2 != "") {
+		option1 = option2;
+		option2 = "";
+	} else if (option1 == "" && option3 != "") {
+		option1 = option3;
+		option3 = "";
+	}
+	if (option2 == "" && option3 != "") {
+		option2 = option3;
+		option3 = "";
+	}
+	_option1Text.setString(option1);
+	_option2Text.setString(option2);
+	_option3Text.setString(option3);
+}
+
+void awe::dialogue_box::split(const bool isSplit) noexcept {
+	_isSplit = isSplit;
+}
+
+void awe::dialogue_box::setRatio(const float ratio) noexcept {
+	_ratio = ratio;
+}
+
+void awe::dialogue_box::animateSprite(const bool isAnimated) noexcept {
+	_spriteIsAnimated = isAnimated;
+}
+
+void awe::dialogue_box::setSprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite) noexcept {
+	_sheet = sheet;
+	_spriteID = sprite;
+	_spriteInfoChanged = true;
+}
+
+bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
+	_background.setSize(sf::Vector2f(target.getSize().x, target.getSize().y / _ratio));
+	// ^^ this is actually bad
+
+	if (_spriteIsAnimated || _spriteInfoChanged) {
+		if (_spriteInfoChanged) {
+			_characterSprite.setSpritesheet(_sheet);
+			_characterSprite.setSprite(_spriteID);
+			_spriteInfoChanged = false;
+			// call animate once immediately so that even if the sprite isn't animated,
+			// it can still be setup
+			// small bug: the delta timer should be able to be reset somehow!
+		}
+		_characterSprite.animate(target);
+	}
+
+	return true;
+}
+
+void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(_background, states);
+	if (_nameText.getString() != "") {
+		target.draw(_nameBackground, states);
+		target.draw(_nameText, states);
+	}
+	target.draw(_characterSprite, states);
+	target.draw(_mainText, states);
+	if (_option1Text.getString() != "") target.draw(_option1Text, states);
+	if (_option2Text.getString() != "") target.draw(_option2Text, states);
+	if (_option3Text.getString() != "") target.draw(_option3Text, states);
+	if (_option1Text.getString() != "") target.draw(_indicator, states);
+}
+
+/*
 // CONSTRUCTION ZONE
 
 bool awe::dialogue_sequence::dialogue::animate(const sf::RenderTarget& target) noexcept {
@@ -30,16 +134,54 @@ bool awe::dialogue_sequence::dialogue::animate(const sf::RenderTarget& target) n
 
 	// state machine
 	if (_state == awe::dialogue_state::TransitioningIn) {
-		if (_skipTransitioningIn) {
-			_state = awe::dialogue_state::Typing;
-		} else {
+		_transitionIn(_skipTransitioningIn);
+	}
+	
+	if (_state == awe::dialogue_state::TransitioningOut) {
+		_transitionOut(_skipTransitioningOut);
+	}
+}
 
+void awe::dialogue_sequence::dialogue::_transitionIn(bool shouldEnd) noexcept {
+	if (shouldEnd) {
+		_state = awe::dialogue_state::Typing;
+	} else {
+
+	}
+}
+
+void awe::dialogue_sequence::dialogue::_transitionOut(bool shouldEnd) noexcept {
+	if (shouldEnd) {
+		_state = awe::dialogue_state::Closed;
+	} else {
+
+	}
+}
+
+void awe::dialogue_sequence::dialogue::_offsetPosition() noexcept {
+	if (_state == awe::dialogue_state::TransitioningIn) {
+		switch (_data.location) {
+		case (dialogue_location::Bottom):
+			_position.y -= _data.transitionSpeed * _delta.get();
+			break;
+		case (dialogue_location::Top):
+			_position.y += _data.transitionSpeed * _delta.get();
+			break;
+		case (dialogue_location::Middle):
+			_position.y -= (_data.transitionSpeed / 2.0f) * _delta.get();
+			break;
 		}
-	} else if (_state == awe::dialogue_state::TransitioningOut) {
-		if (_skipTransitioningOut) {
-			_state = awe::dialogue_state::Closed;
-		} else {
-
+	} else if (_status == dialogue_status::TransitioningOut) {
+		switch (_data.location) {
+		case (dialogue_location::Bottom):
+			_position.y += _data.transitionSpeed * _delta.get();
+			break;
+		case (dialogue_location::Top):
+			_position.y -= _data.transitionSpeed * _delta.get();
+			break;
+		case (dialogue_location::Middle):
+			_position.y += (_data.transitionSpeed / 2.0f) * _delta.get();
+			break;
 		}
 	}
 }
@@ -339,34 +481,6 @@ bool awe::dialogue::_positionIsReady() noexcept {
 	return false;
 }
 
-void awe::dialogue::_offsetPosition() noexcept {
-	if (_status == dialogue_status::TransitioningIn) {
-		switch (_data.location) {
-		case (dialogue_location::Bottom):
-			_position.y -= _data.transitionSpeed * _delta.get();
-			break;
-		case (dialogue_location::Top):
-			_position.y += _data.transitionSpeed * _delta.get();
-			break;
-		case (dialogue_location::Middle):
-			_position.y -= (_data.transitionSpeed / 2.0f) * _delta.get();
-			break;
-		}
-	} else if (_status == dialogue_status::TransitioningOut) {
-		switch (_data.location) {
-		case (dialogue_location::Bottom):
-			_position.y += _data.transitionSpeed * _delta.get();
-			break;
-		case (dialogue_location::Top):
-			_position.y -= _data.transitionSpeed * _delta.get();
-			break;
-		case (dialogue_location::Middle):
-			_position.y += (_data.transitionSpeed / 2.0f) * _delta.get();
-			break;
-		}
-	}
-}
-
 void awe::dialogue::_setInitialPosition() noexcept {
 	_position.x = -_bg.getOutlineThickness();
 	if (_data.rendererObject) {
@@ -382,4 +496,4 @@ void awe::dialogue::_setInitialPosition() noexcept {
 			break;
 		}
 	}
-}
+}*/
