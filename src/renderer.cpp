@@ -66,8 +66,8 @@ void sfx::renderer::setSettings(const sfx::renderer_settings& newSettings) noexc
 	openWindow();
 }
 
-void sfx::renderer::animate(sfx::animated_drawable& drawable) const noexcept {
-	drawable.animate(*this);
+bool sfx::renderer::animate(sfx::animated_drawable& drawable) const noexcept {
+	return drawable.animate(*this);
 }
 
 bool sfx::renderer::_load(safe::json& j) noexcept {

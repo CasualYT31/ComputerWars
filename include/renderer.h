@@ -230,7 +230,7 @@ namespace sfx {
 		 * \c sfx::animated_drawable's \c animate() method remains public, so that it can remain compatible with \c sf::RenderWindow.
 		 * @param drawable The animated drawable to animate.
 		 */
-		void animate(sfx::animated_drawable& drawable) const noexcept;
+		bool animate(sfx::animated_drawable& drawable) const noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.

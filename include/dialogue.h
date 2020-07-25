@@ -62,7 +62,7 @@ namespace awe {
 		void skipTransitioningOut(const bool skip) noexcept;
 		void selectNextOption() noexcept;
 		void selectPreviousOption() noexcept;
-		void selectCurrentOption() noexcept;
+		unsigned short selectCurrentOption() noexcept;
 		void flip(const bool isFlipped) noexcept;
 		bool thereAreOptions() const noexcept;
 		bool thereIsAName() const noexcept;

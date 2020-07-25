@@ -122,7 +122,7 @@ void awe::dialogue_box::selectPreviousOption() noexcept {
 	if (--_currentOption == 0) _currentOption = 3;
 }
 
-void awe::dialogue_box::selectCurrentOption() noexcept {
+unsigned short awe::dialogue_box::selectCurrentOption() noexcept {
 	if (_currentOption == 1) {
 		_state = awe::dialogue_box_state::Option1;
 	} else if (_currentOption == 2) {
@@ -130,6 +130,7 @@ void awe::dialogue_box::selectCurrentOption() noexcept {
 	} else {
 		_state = awe::dialogue_box_state::Option3;
 	}
+	return _currentOption;
 }
 
 void awe::dialogue_box::flip(const bool isFlipped) noexcept {
@@ -184,11 +185,11 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	_option3Text.setPosition(_option2Text.getPosition().x + _option2Text.getLocalBounds().width + _indicatorSize * 2.5f, _option2Text.getPosition().y);
 
 	if (_currentOption == 1) {
-		_indicator.setPosition(_option1Text.getPosition() - sf::Vector2f(_indicatorSize * 1.5f, 0.0f));
+		_indicator.setPosition(_option1Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option1Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
 	} else if (_currentOption == 2) {
-		_indicator.setPosition(_option2Text.getPosition() - sf::Vector2f(_indicatorSize * 1.5f, 0.0f));
+		_indicator.setPosition(_option2Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option2Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
 	} else if (_currentOption == 3) {
-		_indicator.setPosition(_option3Text.getPosition() - sf::Vector2f(_indicatorSize * 1.5f, 0.0f));
+		_indicator.setPosition(_option3Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option3Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
 	}
 
 	return _state == awe::dialogue_box_state::Closed;
@@ -222,7 +223,7 @@ sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const 
 	origin.y -= _nameBackground.getOutlineThickness();
 	if (_flipped) origin.x += bgSize.x - nameSize.x;
 	if (_position == awe::dialogue_box_position::Top) {
-		origin.y += bgSize.y;
+		origin.y += bgSize.y + _nameBackground.getOutlineThickness() * 2.0f;
 	} else {
 		origin.y -= nameSize.y;
 	}

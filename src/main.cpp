@@ -74,7 +74,7 @@ int main() {
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Red);
     box.setMainText("Testing\nSecond Line");
-    box.setNameText("Tank");
+    box.setNameText("Mountain");
     box.setOptions("Option1", "Option2", "Option3");
     try {
         box.setFont(fonts["dialogue"]);
@@ -85,6 +85,7 @@ int main() {
 
     bool leave = false;
     bool selectCurrentOption = false;
+    bool showBox = true;
     while (!leave) {
         sf::Event event;
         while (newRenderer.pollEvent(event)) {
@@ -113,11 +114,11 @@ int main() {
         newRenderer.clear(sf::Color::Black);
         newRenderer.animate(sprite);
         newRenderer.animate(sprite2);
-        newRenderer.animate(box);
+        if (newRenderer.animate(box)) showBox = false;
         if (selectCurrentOption) box.selectCurrentOption();
         newRenderer.draw(sprite);
         newRenderer.draw(sprite2, sf::RenderStates(sf::Transform().translate(50.0, 50.0)));
-        newRenderer.draw(box);
+        if (showBox) newRenderer.draw(box);
         newRenderer.display();
         selectCurrentOption = false;
     }
