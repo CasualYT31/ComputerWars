@@ -21,7 +21,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "dialogue.h"
-#include <iostream>
 
 const float awe::dialogue_box::_smallPadding = 10.0f;
 const float awe::dialogue_box::_largePadding = 50.0f;
@@ -123,14 +122,18 @@ void awe::dialogue_box::selectPreviousOption() noexcept {
 }
 
 unsigned short awe::dialogue_box::selectCurrentOption() noexcept {
-	if (_currentOption == 1) {
-		_state = awe::dialogue_box_state::Option1;
-	} else if (_currentOption == 2) {
-		_state = awe::dialogue_box_state::Option2;
+	if (_state == awe::dialogue_box_state::StoppedTyping) {
+		if (_currentOption == 1) {
+			_state = awe::dialogue_box_state::Option1;
+		} else if (_currentOption == 2) {
+			_state = awe::dialogue_box_state::Option2;
+		} else {
+			_state = awe::dialogue_box_state::Option3;
+		}
+		return _currentOption;
 	} else {
-		_state = awe::dialogue_box_state::Option3;
+		return 0;
 	}
-	return _currentOption;
 }
 
 void awe::dialogue_box::flip(const bool isFlipped) noexcept {

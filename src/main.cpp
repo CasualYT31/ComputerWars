@@ -42,6 +42,8 @@ I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
 #include "fonts.h"
 
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 /**
  * The entry point into the program.
@@ -70,10 +72,13 @@ int main() {
     sfx::fonts fonts;
     fonts.load("assets/fonts/fonts.json");
     awe::dialogue_box box;
+    box.setTransitionSpeed(200.0f);
     box.setPosition(awe::dialogue_box_position::Bottom);
     box.setBackgroundColour(sf::Color(150,150,150));
-    box.setThemeColour(sf::Color::Red);
-    box.setMainText("Testing\nSecond Line");
+    box.setThemeColour(sf::Color::Green);
+    box.setSizeRatio(0.15f);
+    box.setMainText("Hello");
+    box.flip(true);
     box.setNameText("Mountain");
     box.setOptions("Option1", "Option2", "Option3");
     try {
@@ -104,6 +109,8 @@ int main() {
                     box.selectNextOption();
                 } else if (event.key.code == sf::Keyboard::Z) {
                     selectCurrentOption = true;
+                } else if (event.key.code == sf::Keyboard::Y) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 }
             } else if (event.type == sf::Event::Resized) {
                 // update the view to the new size of the window
@@ -118,7 +125,7 @@ int main() {
         if (selectCurrentOption) box.selectCurrentOption();
         newRenderer.draw(sprite);
         newRenderer.draw(sprite2, sf::RenderStates(sf::Transform().translate(50.0, 50.0)));
-        if (showBox) newRenderer.draw(box);
+        if (true) newRenderer.draw(box);
         newRenderer.display();
         selectCurrentOption = false;
     }
