@@ -68,7 +68,11 @@ int main() {
     // dialogue box testing
     sfx::fonts fonts;
     fonts.load("assets/fonts/fonts.json");
+    std::shared_ptr<sfx::audio> audio = std::make_shared<sfx::audio>();
+    audio->load("assets/audio/sound/audiosound.json");
+
     awe::dialogue_box box;
+    box.setSounds(audio, "movecursor", "movesel", "select");
     box.setTransitionSpeed(200.0f);
     box.setPosition(awe::dialogue_box_position::Bottom);
     box.setBackgroundColour(sf::Color(150,150,150));
@@ -86,7 +90,6 @@ int main() {
     box.setSprite(sheet, 15);
 
     /* What to test/add:
-    3. Sound support
     4. Adjust line/character spacing properties in constructor
     5. Refactor: compartmentalise code into separate methods even further so that maintenance will be easier in the future
     Separate idea: create a template type which has a shared_ptr and identifier variable?

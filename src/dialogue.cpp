@@ -35,6 +35,25 @@ awe::dialogue_box::dialogue_box() noexcept {
 	_indicator.setFillColor(sf::Color::Red);
 }
 
+void awe::dialogue_box::setSounds(std::shared_ptr<sfx::audio> audioLibrary, const std::string& typing, const std::string& moveSelection, const std::string& select) noexcept {
+	_audioLibrary = audioLibrary;
+	_typingKey = typing;
+	_moveSelectionKey = moveSelection;
+	_selectKey = select;
+}
+
+std::string awe::dialogue_box::getTypingSound() const noexcept {
+	return _typingKey;
+}
+
+std::string awe::dialogue_box::getMoveSelectionSound() const noexcept {
+	return _moveSelectionKey;
+}
+
+std::string awe::dialogue_box::getSelectSound() const noexcept {
+	return _selectKey;
+}
+
 void awe::dialogue_box::setTransitionSpeed(const float pixelsPerSecond) noexcept {
 	_transitionSpeed = pixelsPerSecond;
 }
@@ -115,10 +134,12 @@ void awe::dialogue_box::skipTransitioningOut(const bool skip) noexcept {
 
 void awe::dialogue_box::selectNextOption() noexcept {
 	if (++_currentOption == 4) _currentOption = 1;
+	_playSound(_moveSelectionKey);
 }
 
 void awe::dialogue_box::selectPreviousOption() noexcept {
 	if (--_currentOption == 0) _currentOption = 3;
+	_playSound(_moveSelectionKey);
 }
 
 unsigned short awe::dialogue_box::selectCurrentOption() noexcept {
@@ -130,6 +151,7 @@ unsigned short awe::dialogue_box::selectCurrentOption() noexcept {
 		} else {
 			_state = awe::dialogue_box_state::Option3;
 		}
+		_playSound(_selectKey);
 		return _currentOption;
 	} else {
 		return 0;
@@ -276,6 +298,7 @@ void awe::dialogue_box::_stateMachine() noexcept {
 	}
 	if (_state == awe::dialogue_box_state::Typing) {
 		if (_typingTimer.getElapsedTime().asSeconds() >= _typingDelay) {
+			_playSound(_typingKey);
 			if (_mainText.getString().getSize() < _fullText.size()) {
 				_mainText.setString(_mainText.getString() + _fullText.substr(_mainText.getString().getSize(), (std::size_t)(_typingTimer.getElapsedTime().asSeconds() / _typingDelay)));
 			}
@@ -350,6 +373,10 @@ void awe::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcept {
 		_portion1.setPosition(_background.getPosition().x, _background.getPosition().y - _nameBackground.getSize().y - _background.getOutlineThickness() - _nameBackground.getOutlineThickness());
 		_portion2.setPosition(_background.getPosition().x, _portion1.getPosition().y + heightOfHalves + _nameBackground.getSize().y + _background.getOutlineThickness() + _nameBackground.getOutlineThickness());
 	}
+}
+
+void awe::dialogue_box::_playSound(const std::string& key) noexcept {
+	if (_audioLibrary && key != "") _audioLibrary->play(key);
 }
 
 /*

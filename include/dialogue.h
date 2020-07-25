@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "texture.h"
+#include "audio.h"
 
 namespace awe {
 	enum class dialogue_box_position {
@@ -46,6 +47,10 @@ namespace awe {
 	class dialogue_box : public sfx::animated_drawable {
 	public:
 		dialogue_box() noexcept;
+		void setSounds(std::shared_ptr<sfx::audio> audioLibrary, const std::string& typing = "", const std::string& moveSelection = "", const std::string& select = "") noexcept;
+		std::string getTypingSound() const noexcept;
+		std::string getMoveSelectionSound() const noexcept;
+		std::string getSelectSound() const noexcept;
 		void setTransitionSpeed(const float pixelsPerSecond) noexcept;
 		void setTypingDelay(const float seconds) noexcept;
 		void setPosition(const awe::dialogue_box_position position) noexcept;
@@ -112,6 +117,12 @@ namespace awe {
 		float _transitionSpeed = 400.0f;
 		float _typingDelay = 0.05f;
 		sf::Clock _typingTimer;
+		// audio data
+		void _playSound(const std::string& key) noexcept;
+		std::shared_ptr<sfx::audio> _audioLibrary = nullptr;
+		std::string _typingKey = "";
+		std::string _moveSelectionKey = "";
+		std::string _selectKey = "";
 	};
 }
 
