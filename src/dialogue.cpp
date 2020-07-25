@@ -232,7 +232,7 @@ sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const 
 }
 
 void awe::dialogue_box::_calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSize) noexcept {
-	sf::Vector2f spriteTranslation(bgOrigin.x + 50.0f, bgOrigin.y + 50.0f);
+	sf::Vector2f spriteTranslation(bgOrigin.x + 40.0f, bgOrigin.y + (bgSize.y / 2.0f) - (_characterSprite.getSize().y / 2.0f));
 	if (_flipped) spriteTranslation.x += bgSize.x - _characterSprite.getSize().x - 50.0f;
 	_characterSprite.setPosition(spriteTranslation);
 }

@@ -1,6 +1,5 @@
 {
-	"basepath": "assets/sprites/tile/normal/tilenormal",
-	"format": "png",
+	"path": "assets/sprites/tile/normal/tilenormal.png",
 	"frames": 1,
 	"framerate": 0.0,
 	"sprites": [

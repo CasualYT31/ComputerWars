@@ -62,7 +62,7 @@ int main() {
 
     // animated sprite testing
     std::shared_ptr<sfx::animated_spritesheet> sheet = std::make_shared<sfx::animated_spritesheet>();
-    sheet->load("./assets/sprites/unit/idle/spritesunitidle.json");
+    sheet->load("./assets/sprites/tile/normal/spritestilenormal.json");
     sfx::animated_sprite sprite(sheet, 0);
     sfx::animated_sprite sprite2(sheet, 0);
 
@@ -81,7 +81,7 @@ int main() {
     } catch (std::out_of_range& e) {
         std::cout << "Font error! " << e.what() << std::endl;
     }
-    box.setSprite(sheet, 50);
+    box.setSprite(sheet, 15);
 
     bool leave = false;
     bool selectCurrentOption = false;
