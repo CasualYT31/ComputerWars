@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 const float awe::dialogue_box::_smallPadding = 10.0f;
 const float awe::dialogue_box::_largePadding = 50.0f;
-const float awe::dialogue_box::_indicatorSize = 5.0f;
+const float awe::dialogue_box::_indicatorSize = 15.0f;
 
 awe::dialogue_box::dialogue_box() noexcept {
 	setOutlineThickness(5.0f);
@@ -177,7 +177,7 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 		_mainText.setPosition(position + sf::Vector2f(_characterSprite.getPosition().x + _characterSprite.getSize().x + _largePadding, _smallPadding));
 	}
 
-	_option1Text.setPosition(_mainText.getPosition().x + _indicatorSize * 1.5f, size.y - _option1Text.getLocalBounds().height - _largePadding);
+	_option1Text.setPosition(_mainText.getPosition().x + _indicatorSize * 1.5f, position.y + size.y - _option1Text.getLocalBounds().height - _smallPadding);
 
 	_option2Text.setPosition(_option1Text.getPosition().x + _option1Text.getLocalBounds().width + _indicatorSize * 2.5f, _option1Text.getPosition().y);
 
@@ -303,7 +303,7 @@ void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) 
 	}
 	target.draw(_characterSprite, states);
 	target.draw(_mainText, sf::RenderStates(states).transform.translate(sf::Vector2f(-_mainText.getLocalBounds().left, -_mainText.getLocalBounds().top)));
-	if (thereAreOptions()) {
+	if (thereAreOptions() && _state == awe::dialogue_box_state::StoppedTyping || _state == awe::dialogue_box_state::TransitioningOut) {
 		target.draw(_option1Text, sf::RenderStates(states).transform.translate(sf::Vector2f(-_option1Text.getLocalBounds().left, -_option1Text.getLocalBounds().top)));
 		if (_option2Text.getString() != "") target.draw(_option2Text, sf::RenderStates(states).transform.translate(sf::Vector2f(-_option2Text.getLocalBounds().left, -_option2Text.getLocalBounds().top)));
 		if (_option3Text.getString() != "") target.draw(_option3Text, sf::RenderStates(states).transform.translate(sf::Vector2f(-_option3Text.getLocalBounds().left, -_option3Text.getLocalBounds().top)));

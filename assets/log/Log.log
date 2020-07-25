@@ -1,3 +1,19 @@
 Computer Wars © 2020 CasualYouTuber31
 ---------------
 Event Log:
+[2020-07-25 14:10:51.824] [json_script_0] [info] Loading JSON script assets/renderer/renderer.json...
+[2020-07-25 14:10:51.832] [json_script_0] [info] Finished loading JSON script assets/renderer/renderer.json.
+[2020-07-25 14:10:52.000] [json_script_3] [info] Loading JSON script ./assets/sprites/tile/normal/spritestilenormal.json...
+[2020-07-25 14:10:52.120] [json_script_3] [info] Finished loading JSON script ./assets/sprites/tile/normal/spritestilenormal.json.
+[2020-07-25 14:10:52.141] [json_script_8] [info] Loading JSON script assets/fonts/fonts.json...
+[2020-07-25 14:10:52.142] [json_script_8] [info] Finished loading JSON script assets/fonts/fonts.json.
+[2020-07-25 14:11:08.343] [sprite_6] [error] Attempted to access non-existent frame 0 of sprite 4294967295: Attempted to access non-existent sprite 4294967295.
+[2020-07-25 14:11:08.478] [sprite_6] [error] Attempted to access non-existent frame 0 of sprite 4294967294: Attempted to access non-existent sprite 4294967294.
+[2020-07-25 14:11:08.626] [sprite_6] [error] Attempted to access non-existent frame 0 of sprite 4294967293: Attempted to access non-existent sprite 4294967293.
+[2020-07-25 14:11:08.853] [sprite_6] [error] Attempted to access non-existent frame 0 of sprite 4294967294: Attempted to access non-existent sprite 4294967294.
+[2020-07-25 14:11:09.018] [sprite_6] [error] Attempted to access non-existent frame 0 of sprite 4294967295: Attempted to access non-existent sprite 4294967295.
+[2020-07-25 14:11:15.035] [sprite_6] [error] Attempted to access non-existent frame 0 of sprite 4294967295: Attempted to access non-existent sprite 4294967295.
+[2020-07-25 14:11:16.427] [sprite_6] [error] Attempted to access non-existent frame 0 of sprite 4294967294: Attempted to access non-existent sprite 4294967294.
+[2020-07-25 14:11:17.653] [sprite_6] [error] Attempted to access non-existent frame 0 of sprite 4294967295: Attempted to access non-existent sprite 4294967295.
+[2020-07-25 14:11:34.008] [json_script_0] [info] Saving JSON script assets/renderer/renderer.json...
+[2020-07-25 14:11:34.010] [json_script_0] [info] Finished saving JSON script assets/renderer/renderer.json.

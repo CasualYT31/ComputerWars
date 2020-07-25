@@ -71,12 +71,11 @@ int main() {
     fonts.load("assets/fonts/fonts.json");
     awe::dialogue_box box;
     box.setPosition(awe::dialogue_box_position::Bottom);
-    box.setTransitionSpeed(200.0f);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Red);
     box.setMainText("Testing\nSecond Line");
     box.setNameText("Tank");
-    box.setOptions("Option1", "", "Option2");
+    box.setOptions("Option1", "Option2", "Option3");
     try {
         box.setFont(fonts["dialogue"]);
     } catch (std::out_of_range& e) {
@@ -99,12 +98,16 @@ int main() {
                 } else if (event.key.code == sf::Keyboard::Down) {
                     sprite.setSprite(sprite.getSprite() - 1);
                 } else if (event.key.code == sf::Keyboard::Left) {
-                    sprite--;
+                    box.selectPreviousOption();
                 } else if (event.key.code == sf::Keyboard::Right) {
-                    sprite++;
+                    box.selectNextOption();
                 } else if (event.key.code == sf::Keyboard::Z) {
                     selectCurrentOption = true;
                 }
+            } else if (event.type == sf::Event::Resized) {
+                // update the view to the new size of the window
+                sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+                newRenderer.setView(sf::View(visibleArea));
             }
         }
         newRenderer.clear(sf::Color::Black);
