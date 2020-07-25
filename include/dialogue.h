@@ -85,7 +85,7 @@ namespace awe {
 		sf::Vector2f _calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept;
 		sf::Vector2f _calculateNameSize() const noexcept;
 		sf::Vector2f _calculateNameOrigin(sf::Vector2f bgOrigin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept;
-		void _calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSzie) noexcept;
+		sf::Vector2f _calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSzie) noexcept;
 		float _calculatePositionRatioOffset(const float secondsElapsed) const noexcept;
 		awe::dialogue_box_position _position = awe::dialogue_box_position::Bottom;
 		float _sizeRatio = 0.16f;

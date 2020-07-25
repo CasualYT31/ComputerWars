@@ -20,12 +20,9 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* Tracker
-texture.h: changed unsigned ints to SpriteKey and FrameIndex
-safejson.h: added applyVector()
-script.h & gui.h: moved classes into engine namespace and out of awe namespace
-
-I SHOULD LOOK THROUGH MY NEW CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
+/* Project - Overarching Goals
+1. I SHOULD LOOK THROUGH MY CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
+2. I should refactor my generic solutions to ensure as little redundant duplication as possible
 */
 
 /**@file main.cpp
@@ -73,7 +70,7 @@ int main() {
     fonts.load("assets/fonts/fonts.json");
     awe::dialogue_box box;
     box.setTransitionSpeed(200.0f);
-    box.setPosition(awe::dialogue_box_position::Bottom);
+    box.setPosition(awe::dialogue_box_position::Middle);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Green);
     box.setSizeRatio(0.15f);
@@ -87,6 +84,15 @@ int main() {
         std::cout << "Font error! " << e.what() << std::endl;
     }
     box.setSprite(sheet, 15);
+
+    /* What to test/add:
+    2. Middle position transitioning -> switch to drawing on a canvas in animate()
+    3. Sound support
+    4. Adjust line/character spacing properties in constructor
+    5. Refactor: compartmentalise code into separate methods even further so that maintenance will be easier in the future
+    Separate idea: create a template type which has a shared_ptr and identifier variable?
+    This pairing seems like it will be very common and if we have to change the way things are identified we can change it one place (namely this class),
+    instead of throughout the code*/
 
     bool leave = false;
     bool selectCurrentOption = false;

@@ -171,7 +171,8 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 		}
 		_characterSprite.animate(target);
 	}
-	_calculateSpriteOrigin(position, size);
+	sf::Vector2f spritePosition = _calculateSpriteOrigin(position, size);
+	_characterSprite.setPosition(spritePosition);
 
 	_nameText.setPosition(namePosition + sf::Vector2f(_smallPadding, _smallPadding));
 
@@ -224,7 +225,7 @@ sf::Vector2f awe::dialogue_box::_calculateNameSize() const noexcept {
 sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept {
 	origin.x += _nameBackground.getOutlineThickness();
 	origin.y -= _nameBackground.getOutlineThickness();
-	if (_flipped) origin.x += bgSize.x - nameSize.x;
+	if (_flipped) origin.x += bgSize.x - nameSize.x - _nameBackground.getOutlineThickness() * 2.0f;
 	if (_position == awe::dialogue_box_position::Top) {
 		origin.y += bgSize.y + _nameBackground.getOutlineThickness() * 2.0f;
 	} else {
@@ -233,10 +234,13 @@ sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const 
 	return origin;
 }
 
-void awe::dialogue_box::_calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSize) noexcept {
-	sf::Vector2f spriteTranslation(bgOrigin.x + _largePadding, bgOrigin.y + (bgSize.y / 2.0f) - (_characterSprite.getSize().y / 2.0f));
-	if (_flipped) spriteTranslation.x += bgSize.x - _characterSprite.getSize().x - 50.0f;
-	_characterSprite.setPosition(spriteTranslation);
+sf::Vector2f awe::dialogue_box::_calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSize) noexcept {
+	float y = bgOrigin.y + (bgSize.y / 2.0f) - (_characterSprite.getSize().y / 2.0f);
+	if (_flipped) {
+		return sf::Vector2f(bgOrigin.x + bgSize.x - _characterSprite.getSize().x - _largePadding, y);
+	} else {
+		return sf::Vector2f(bgOrigin.x + _largePadding, y);
+	}
 }
 
 float awe::dialogue_box::_calculatePositionRatioOffset(const float secondsElapsed) const noexcept {
