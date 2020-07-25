@@ -147,6 +147,8 @@ bool awe::dialogue_box::thereIsAName() const noexcept {
 bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	_stateMachine();
 
+	std::cout << _mainText.getString().toAnsiString() << std::endl;
+
 	sf::Vector2f size = _calculateBackgroundSize(target),
 		position = _calculateOrigin(size, target);
 	_background.setSize(size);
@@ -174,9 +176,9 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	_nameText.setPosition(namePosition + sf::Vector2f(_namePadding, 0.0f));
 
 	if (_flipped) {
-		_mainText.setPosition(sf::Vector2f(size.x - _mainText.getLocalBounds().width - _mainPadding, _mainPadding));
+		_mainText.setPosition(position + sf::Vector2f(size.x - _mainText.getLocalBounds().width - _mainPadding, _mainPadding));
 	} else {
-		_mainText.setPosition(sf::Vector2f(_mainPadding, _mainPadding));
+		_mainText.setPosition(position + sf::Vector2f(_mainPadding, _mainPadding));
 	}
 
 	_option1Text.setPosition(_mainText.getPosition().x + _indicatorSize * 1.5f, size.y - _option1Text.getLocalBounds().height - _mainPadding);
@@ -248,6 +250,7 @@ void awe::dialogue_box::_stateMachine() noexcept {
 		if (_skipTransitioningIn) {
 			_positionRatio = 1.0f;
 			_state = awe::dialogue_box_state::Typing;
+			_typingTimer.restart();
 		} else {
 			_state = awe::dialogue_box_state::TransitioningIn;
 		}
@@ -262,13 +265,15 @@ void awe::dialogue_box::_stateMachine() noexcept {
 		if (_positionRatio >= 1.0f) {
 			_state = awe::dialogue_box_state::Typing;
 			_positionRatio = 1.0f;
+			_typingTimer.restart();
 		}
 	}
 	if (_state == awe::dialogue_box_state::Typing) {
-		if (delta >= _typingDelay) {
+		if (_typingTimer.getElapsedTime().asSeconds() >= _typingDelay) {
 			if (_mainText.getString().getSize() < _fullText.size()) {
-				_mainText.setString(_mainText.getString() + _fullText.substr(_mainText.getString().getSize(), (std::size_t)(delta / _typingDelay)));
+				_mainText.setString(_mainText.getString() + _fullText.substr(_mainText.getString().getSize(), (std::size_t)(_typingTimer.getElapsedTime().asSeconds() / _typingDelay)));
 			}
+			_typingTimer.restart();
 		}
 		if (_mainText.getString() == _fullText) {
 			_state = awe::dialogue_box_state::StoppedTyping;

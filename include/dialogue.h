@@ -109,6 +109,7 @@ namespace awe {
 		// timing data
 		float _transitionSpeed = 400.0f;
 		float _typingDelay = 0.05f;
+		sf::Clock _typingTimer;
 	};
 }
 
