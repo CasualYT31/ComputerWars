@@ -70,12 +70,17 @@ int main() {
     sfx::fonts fonts;
     fonts.load("assets/fonts/fonts.json");
     awe::dialogue_box box;
+    box.setPosition(awe::dialogue_box_position::Bottom);
+    box.setTransitionSpeed(200.0f);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Red);
-    box.setOutlineThickness(5.0f);
     box.setMainText("Testing");
-    box.setNameText("");
-    box.setFont(fonts["dialogue"]);
+    box.setNameText("Tank");
+    try {
+        box.setFont(fonts["dialogue"]);
+    } catch (std::out_of_range& e) {
+        std::cout << "Font error! " << e.what() << std::endl;
+    }
     box.setSprite(sheet, 50);
 
     bool leave = false;

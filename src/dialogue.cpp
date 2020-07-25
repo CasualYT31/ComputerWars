@@ -21,12 +21,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "dialogue.h"
+#include <iostream>
 
 const float awe::dialogue_box::_namePadding = 5.0f;
 const float awe::dialogue_box::_mainPadding = 50.0f;
 const float awe::dialogue_box::_indicatorSize = 5.0f;
 
 awe::dialogue_box::dialogue_box() noexcept {
+	setOutlineThickness(5.0f);
 	_indicator.setPointCount(3);
 	_indicator.setPoint(0, sf::Vector2f(0.0f, 0.0f));
 	_indicator.setPoint(1, sf::Vector2f(_indicatorSize, _indicatorSize / 2.0f));
@@ -198,12 +200,13 @@ sf::Vector2f awe::dialogue_box::_calculateBackgroundSize(const sf::RenderTarget&
 
 sf::Vector2f awe::dialogue_box::_calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept {
 	if (_position == awe::dialogue_box_position::Top) {
-		return sf::Vector2f(0.0f, 0.0f - (size.y * _positionRatio));
+		return sf::Vector2f(0.0f, (0.0f - size.y - _background.getOutlineThickness()) + (size.y + _background.getOutlineThickness() * 2.0f) * _positionRatio);
 	} else if (_position == awe::dialogue_box_position::Bottom) {
-		return sf::Vector2f(0.0f, target.getSize().y - (size.y * _positionRatio));
+		return sf::Vector2f(0.0f, ((float)target.getSize().y + _background.getOutlineThickness()) - ((size.y + _background.getOutlineThickness() * 2.0f) * _positionRatio));
 	} else if (_position == awe::dialogue_box_position::Middle) {
-		return sf::Vector2f(0.0f, (target.getSize().y / 2.0f) - (size.y / 2.0f) * _positionRatio);
+		return sf::Vector2f(0.0f, ((float)target.getSize().y / 2.0f) - ((size.y + _background.getOutlineThickness() * 2.0f) / 2.0f) * _positionRatio);
 	}
+	return sf::Vector2f(0.0f, 0.0f);
 }
 
 sf::Vector2f awe::dialogue_box::_calculateNameSize() const noexcept {
