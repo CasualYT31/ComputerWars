@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dialogue.h"
 #include <iostream>
 
-const float awe::dialogue_box::_namePadding = 5.0f;
+const float awe::dialogue_box::_namePadding = 10.0f;
 const float awe::dialogue_box::_mainPadding = 50.0f;
 const float awe::dialogue_box::_indicatorSize = 5.0f;
 
@@ -147,8 +147,6 @@ bool awe::dialogue_box::thereIsAName() const noexcept {
 bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	_stateMachine();
 
-	std::cout << _mainText.getString().toAnsiString() << std::endl;
-
 	sf::Vector2f size = _calculateBackgroundSize(target),
 		position = _calculateOrigin(size, target);
 	_background.setSize(size);
@@ -171,9 +169,7 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	}
 	_calculateSpriteOrigin(position, size);
 
-	// weird position offsets...
-	// could be something to do with the font, or a property of the Text object...
-	_nameText.setPosition(namePosition + sf::Vector2f(_namePadding, 0.0f));
+	_nameText.setPosition(namePosition + sf::Vector2f(_namePadding, _namePadding));
 
 	if (_flipped) {
 		_mainText.setPosition(position + sf::Vector2f(size.x - _mainText.getLocalBounds().width - _mainPadding, _mainPadding));
@@ -298,17 +294,19 @@ void awe::dialogue_box::_stateMachine() noexcept {
 }
 
 void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	// remember to offset the weird origin behaviour for all Text objects
+	// thanks Hapax: https://en.sfml-dev.org/forums/index.php?topic=15951.0
 	target.draw(_background, states);
 	if (thereIsAName()) {
 		target.draw(_nameBackground, states);
-		target.draw(_nameText, states);
+		target.draw(_nameText, sf::RenderStates(states).transform.translate(sf::Vector2f(-_nameText.getLocalBounds().left, -_nameText.getLocalBounds().top)));
 	}
 	target.draw(_characterSprite, states);
-	target.draw(_mainText, states);
+	target.draw(_mainText, sf::RenderStates(states).transform.translate(sf::Vector2f(-_mainText.getLocalBounds().left, -_mainText.getLocalBounds().top)));
 	if (thereAreOptions()) {
-		target.draw(_option1Text, states);
-		if (_option2Text.getString() != "") target.draw(_option2Text, states);
-		if (_option3Text.getString() != "") target.draw(_option3Text, states);
+		target.draw(_option1Text, sf::RenderStates(states).transform.translate(sf::Vector2f(-_option1Text.getLocalBounds().left, -_option1Text.getLocalBounds().top)));
+		if (_option2Text.getString() != "") target.draw(_option2Text, sf::RenderStates(states).transform.translate(sf::Vector2f(-_option2Text.getLocalBounds().left, -_option2Text.getLocalBounds().top)));
+		if (_option3Text.getString() != "") target.draw(_option3Text, sf::RenderStates(states).transform.translate(sf::Vector2f(-_option3Text.getLocalBounds().left, -_option3Text.getLocalBounds().top)));
 		target.draw(_indicator, states);
 	}
 }

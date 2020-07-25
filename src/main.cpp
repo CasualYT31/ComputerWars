@@ -74,7 +74,7 @@ int main() {
     box.setTransitionSpeed(200.0f);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Red);
-    box.setMainText("Testing");
+    box.setMainText("Testing\nSecond Line");
     box.setNameText("Tank");
     try {
         box.setFont(fonts["dialogue"]);
