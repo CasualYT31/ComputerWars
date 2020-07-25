@@ -103,8 +103,8 @@ namespace awe {
 		unsigned int _spriteID = 0;
 		bool _spriteInfoChanged = true; // only if the above two fields are updated
 		// padding/sizing constants
-		static const float _namePadding;
-		static const float _mainPadding;
+		static const float _smallPadding;
+		static const float _largePadding;
 		static const float _indicatorSize;
 		// timing data
 		float _transitionSpeed = 400.0f;

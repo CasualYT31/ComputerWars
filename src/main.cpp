@@ -76,6 +76,7 @@ int main() {
     box.setThemeColour(sf::Color::Red);
     box.setMainText("Testing\nSecond Line");
     box.setNameText("Tank");
+    box.setOptions("Option1", "", "Option2");
     try {
         box.setFont(fonts["dialogue"]);
     } catch (std::out_of_range& e) {

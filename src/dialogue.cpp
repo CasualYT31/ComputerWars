@@ -23,8 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dialogue.h"
 #include <iostream>
 
-const float awe::dialogue_box::_namePadding = 10.0f;
-const float awe::dialogue_box::_mainPadding = 50.0f;
+const float awe::dialogue_box::_smallPadding = 10.0f;
+const float awe::dialogue_box::_largePadding = 50.0f;
 const float awe::dialogue_box::_indicatorSize = 5.0f;
 
 awe::dialogue_box::dialogue_box() noexcept {
@@ -169,15 +169,15 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	}
 	_calculateSpriteOrigin(position, size);
 
-	_nameText.setPosition(namePosition + sf::Vector2f(_namePadding, _namePadding));
+	_nameText.setPosition(namePosition + sf::Vector2f(_smallPadding, _smallPadding));
 
 	if (_flipped) {
-		_mainText.setPosition(position + sf::Vector2f(size.x - _mainText.getLocalBounds().width - _mainPadding, _mainPadding));
+		_mainText.setPosition(position + sf::Vector2f(_largePadding, _smallPadding));
 	} else {
-		_mainText.setPosition(position + sf::Vector2f(_mainPadding, _mainPadding));
+		_mainText.setPosition(position + sf::Vector2f(_characterSprite.getPosition().x + _characterSprite.getSize().x + _largePadding, _smallPadding));
 	}
 
-	_option1Text.setPosition(_mainText.getPosition().x + _indicatorSize * 1.5f, size.y - _option1Text.getLocalBounds().height - _mainPadding);
+	_option1Text.setPosition(_mainText.getPosition().x + _indicatorSize * 1.5f, size.y - _option1Text.getLocalBounds().height - _largePadding);
 
 	_option2Text.setPosition(_option1Text.getPosition().x + _option1Text.getLocalBounds().width + _indicatorSize * 2.5f, _option1Text.getPosition().y);
 
@@ -211,7 +211,7 @@ sf::Vector2f awe::dialogue_box::_calculateOrigin(const sf::Vector2f& size, const
 
 sf::Vector2f awe::dialogue_box::_calculateNameSize() const noexcept {
 	if (thereIsAName()) {
-		return sf::Vector2f(_nameText.getLocalBounds().width + _namePadding * 2.0f, _nameText.getLocalBounds().height + _namePadding * 2.0f);
+		return sf::Vector2f(_nameText.getLocalBounds().width + _smallPadding * 2.0f, _nameText.getLocalBounds().height + _smallPadding * 2.0f);
 	} else {
 		return sf::Vector2f(0.0f, 0.0f);
 	}
@@ -230,7 +230,7 @@ sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const 
 }
 
 void awe::dialogue_box::_calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSize) noexcept {
-	sf::Vector2f spriteTranslation(bgOrigin.x + 40.0f, bgOrigin.y + (bgSize.y / 2.0f) - (_characterSprite.getSize().y / 2.0f));
+	sf::Vector2f spriteTranslation(bgOrigin.x + _largePadding, bgOrigin.y + (bgSize.y / 2.0f) - (_characterSprite.getSize().y / 2.0f));
 	if (_flipped) spriteTranslation.x += bgSize.x - _characterSprite.getSize().x - 50.0f;
 	_characterSprite.setPosition(spriteTranslation);
 }
