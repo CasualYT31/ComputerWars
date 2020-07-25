@@ -25,6 +25,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 2. I should refactor my generic solutions to ensure as little redundant duplication as possible
 */
 
+/* Separate idea: create a template type which has a shared_ptr and identifier variable?
+This pairing seems like it will be very common and if we have to change the way things are identified we can change it in one place (namely this class),
+instead of throughout the code */
+
 /**@file main.cpp
  * The entry point into the program.
  * Some basic initialisation occurs before handing control over to the sole awe::game object.
@@ -73,8 +77,8 @@ int main() {
 
     awe::dialogue_box box;
     box.setSounds(audio, "movecursor", "movesel", "select");
-    box.setTransitionSpeed(200.0f);
-    box.setPosition(awe::dialogue_box_position::Middle);
+    box.setTransitionLength(2.0f);
+    box.setPosition(awe::dialogue_box_position::Bottom);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Green);
     box.setSizeRatio(0.15f);
@@ -88,13 +92,6 @@ int main() {
         std::cout << "Font error! " << e.what() << std::endl;
     }
     box.setSprite(sheet, 15);
-
-    /* What to test/add:
-    4. Adjust line/character spacing properties in constructor
-    5. Refactor: compartmentalise code into separate methods even further so that maintenance will be easier in the future
-    Separate idea: create a template type which has a shared_ptr and identifier variable?
-    This pairing seems like it will be very common and if we have to change the way things are identified we can change it one place (namely this class),
-    instead of throughout the code*/
 
     bool leave = false;
     bool selectCurrentOption = false;

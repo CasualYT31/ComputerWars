@@ -49,8 +49,8 @@ std::string awe::dialogue_box::getSelectSound() const noexcept {
 	return _selectKey;
 }
 
-void awe::dialogue_box::setTransitionSpeed(const float pixelsPerSecond) noexcept {
-	_transitionSpeed = pixelsPerSecond;
+void awe::dialogue_box::setTransitionLength(const float seconds) noexcept {
+	_transitionLength = seconds;
 }
 
 void awe::dialogue_box::setTypingDelay(const float seconds) noexcept {
@@ -272,7 +272,7 @@ sf::Vector2f awe::dialogue_box::_calculateSpriteOrigin(const sf::Vector2f& bgOri
 }
 
 float awe::dialogue_box::_calculatePositionRatioOffset(const float secondsElapsed) const noexcept {
-	return secondsElapsed / (_background.getSize().y / _transitionSpeed);
+	return secondsElapsed / _transitionLength;
 }
 
 void awe::dialogue_box::_resizeIndicator(const float size) noexcept {

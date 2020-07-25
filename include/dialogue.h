@@ -51,7 +51,7 @@ namespace awe {
 		std::string getTypingSound() const noexcept;
 		std::string getMoveSelectionSound() const noexcept;
 		std::string getSelectSound() const noexcept;
-		void setTransitionSpeed(const float pixelsPerSecond) noexcept;
+		void setTransitionLength(const float seconds) noexcept;
 		void setTypingDelay(const float seconds) noexcept;
 		void setPosition(const awe::dialogue_box_position position) noexcept;
 		void setBackgroundColour(const sf::Color& colour) noexcept;
@@ -115,7 +115,7 @@ namespace awe {
 		static const float _largePadding;
 		float _indicatorSize = 0.0f;
 		// timing data
-		float _transitionSpeed = 400.0f;
+		float _transitionLength = 1.0f;
 		float _typingDelay = 0.05f;
 		sf::Clock _typingTimer;
 		// audio data
