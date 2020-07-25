@@ -196,6 +196,8 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 		_indicator.setPosition(_option3Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option3Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
 	}
 
+	_drawToCanvas(target);
+
 	return _state == awe::dialogue_box_state::Closed;
 }
 
@@ -302,20 +304,51 @@ void awe::dialogue_box::_stateMachine() noexcept {
 }
 
 void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(_portion1, states);
+	if (_position == awe::dialogue_box_position::Middle) {
+		target.draw(_portion2, states);
+	}
+}
+
+void awe::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcept {
 	// remember to offset the weird origin behaviour for all Text objects
 	// thanks Hapax: https://en.sfml-dev.org/forums/index.php?topic=15951.0
-	target.draw(_background, states);
+	_canvas.create(target.getSize().x, target.getSize().y);
+	_canvas.clear(sf::Color::Transparent);
+	_canvas.draw(_background);
 	if (thereIsAName()) {
-		target.draw(_nameBackground, states);
-		target.draw(_nameText, sf::RenderStates(states).transform.translate(sf::Vector2f(-_nameText.getLocalBounds().left, -_nameText.getLocalBounds().top)));
+		_canvas.draw(_nameBackground);
+		_canvas.draw(_nameText, sf::RenderStates().transform.translate(sf::Vector2f(-_nameText.getLocalBounds().left, -_nameText.getLocalBounds().top)));
 	}
-	target.draw(_characterSprite, states);
-	target.draw(_mainText, sf::RenderStates(states).transform.translate(sf::Vector2f(-_mainText.getLocalBounds().left, -_mainText.getLocalBounds().top)));
+	_canvas.draw(_characterSprite);
+	_canvas.draw(_mainText, sf::RenderStates().transform.translate(sf::Vector2f(-_mainText.getLocalBounds().left, -_mainText.getLocalBounds().top)));
 	if (thereAreOptions() && _state == awe::dialogue_box_state::StoppedTyping || _state == awe::dialogue_box_state::TransitioningOut) {
-		target.draw(_option1Text, sf::RenderStates(states).transform.translate(sf::Vector2f(-_option1Text.getLocalBounds().left, -_option1Text.getLocalBounds().top)));
-		if (_option2Text.getString() != "") target.draw(_option2Text, sf::RenderStates(states).transform.translate(sf::Vector2f(-_option2Text.getLocalBounds().left, -_option2Text.getLocalBounds().top)));
-		if (_option3Text.getString() != "") target.draw(_option3Text, sf::RenderStates(states).transform.translate(sf::Vector2f(-_option3Text.getLocalBounds().left, -_option3Text.getLocalBounds().top)));
-		target.draw(_indicator, states);
+		_canvas.draw(_option1Text, sf::RenderStates().transform.translate(sf::Vector2f(-_option1Text.getLocalBounds().left, -_option1Text.getLocalBounds().top)));
+		if (_option2Text.getString() != "") _canvas.draw(_option2Text, sf::RenderStates().transform.translate(sf::Vector2f(-_option2Text.getLocalBounds().left, -_option2Text.getLocalBounds().top)));
+		if (_option3Text.getString() != "") _canvas.draw(_option3Text, sf::RenderStates().transform.translate(sf::Vector2f(-_option3Text.getLocalBounds().left, -_option3Text.getLocalBounds().top)));
+		_canvas.draw(_indicator);
+	}
+	_canvas.display();
+
+	_portion1.setTexture(_canvas.getTexture(), true);
+	_portion1.setPosition(0.0f, 0.0f);
+	if (_position == awe::dialogue_box_position::Middle) {
+		_portion2.setTexture(_canvas.getTexture());
+		int heightOfHalves = (int)(_background.getSize().y / 2.0f * _positionRatio);
+		_portion1.setTextureRect(sf::IntRect(
+			_background.getPosition().x,
+			_background.getPosition().y - _nameBackground.getSize().y - _nameBackground.getOutlineThickness() - _background.getOutlineThickness(),
+			(int)_background.getSize().x,
+			heightOfHalves + _nameBackground.getSize().y + _nameBackground.getOutlineThickness() + _background.getOutlineThickness()
+		));
+		_portion2.setTextureRect(sf::IntRect(
+			_background.getPosition().x,
+			_background.getPosition().y + (int)_background.getSize().y - heightOfHalves,
+			(int)_background.getSize().x,
+			heightOfHalves + _background.getOutlineThickness()
+		));
+		_portion1.setPosition(_background.getPosition().x, _background.getPosition().y - _nameBackground.getSize().y - _background.getOutlineThickness() - _nameBackground.getOutlineThickness());
+		_portion2.setPosition(_background.getPosition().x, _portion1.getPosition().y + heightOfHalves + _nameBackground.getSize().y + _background.getOutlineThickness() + _nameBackground.getOutlineThickness());
 	}
 }
 

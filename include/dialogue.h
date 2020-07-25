@@ -70,7 +70,8 @@ namespace awe {
 	private:
 		// drawing
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-		// sf::RenderTexture _canvas;
+		void _drawToCanvas(const sf::RenderTarget& target) noexcept;
+		sf::RenderTexture _canvas;
 		sf::RectangleShape _background;
 		sf::RectangleShape _nameBackground;
 		sfx::animated_sprite _characterSprite;
@@ -80,6 +81,7 @@ namespace awe {
 		sf::Text _option2Text;
 		sf::Text _option3Text;
 		sf::ConvexShape _indicator;
+		sf::Sprite _portion1, _portion2;
 		// base properties that define the transforms of the dialogue box
 		sf::Vector2f _calculateBackgroundSize(const sf::RenderTarget& target) const noexcept;
 		sf::Vector2f _calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept;

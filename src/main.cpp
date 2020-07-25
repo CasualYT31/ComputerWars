@@ -70,7 +70,7 @@ int main() {
     fonts.load("assets/fonts/fonts.json");
     awe::dialogue_box box;
     box.setTransitionSpeed(200.0f);
-    box.setPosition(awe::dialogue_box_position::Middle);
+    box.setPosition(awe::dialogue_box_position::Bottom);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Green);
     box.setSizeRatio(0.15f);
@@ -86,7 +86,6 @@ int main() {
     box.setSprite(sheet, 15);
 
     /* What to test/add:
-    2. Middle position transitioning -> switch to drawing on a canvas in animate()
     3. Sound support
     4. Adjust line/character spacing properties in constructor
     5. Refactor: compartmentalise code into separate methods even further so that maintenance will be easier in the future
@@ -117,6 +116,9 @@ int main() {
                     selectCurrentOption = true;
                 } else if (event.key.code == sf::Keyboard::Y) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                } else if (event.key.code == sf::Keyboard::X) {
+                    box.setPosition(awe::dialogue_box_position::Middle);
+                    // you can even change the position half way through and it won't mess anything up!
                 }
             } else if (event.type == sf::Event::Resized) {
                 // update the view to the new size of the window
