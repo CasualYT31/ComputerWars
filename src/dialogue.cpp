@@ -169,7 +169,9 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	}
 	_calculateSpriteOrigin(position, size);
 
-	_nameText.setPosition(namePosition + sf::Vector2f(_namePadding, _namePadding));
+	// weird position offsets...
+	// could be something to do with the font, or a property of the Text object...
+	_nameText.setPosition(namePosition + sf::Vector2f(_namePadding, 0.0f));
 
 	if (_flipped) {
 		_mainText.setPosition(sf::Vector2f(size.x - _mainText.getLocalBounds().width - _mainPadding, _mainPadding));
