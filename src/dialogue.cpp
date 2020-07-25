@@ -247,8 +247,7 @@ void awe::dialogue_box::_stateMachine() noexcept {
 		} else {
 			_state = awe::dialogue_box_state::TransitioningIn;
 		}
-	}
-	if (_state == awe::dialogue_box_state::TransitioningIn) {
+	} else if (_state == awe::dialogue_box_state::TransitioningIn) {
 		_positionRatio += _calculatePositionRatioOffset(delta);
 		if (_positionRatio >= 1.0f) {
 			_state = awe::dialogue_box_state::Typing;
