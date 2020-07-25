@@ -24,15 +24,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 const float awe::dialogue_box::_smallPadding = 10.0f;
 const float awe::dialogue_box::_largePadding = 50.0f;
-const float awe::dialogue_box::_indicatorSize = 15.0f;
 
 awe::dialogue_box::dialogue_box() noexcept {
 	setOutlineThickness(5.0f);
 	_indicator.setPointCount(3);
-	_indicator.setPoint(0, sf::Vector2f(0.0f, 0.0f));
-	_indicator.setPoint(1, sf::Vector2f(_indicatorSize, _indicatorSize / 2.0f));
-	_indicator.setPoint(2, sf::Vector2f(0.0f, _indicatorSize));
-	_indicator.setFillColor(sf::Color::Red);
 }
 
 void awe::dialogue_box::setSounds(std::shared_ptr<sfx::audio> audioLibrary, const std::string& typing, const std::string& moveSelection, const std::string& select) noexcept {
@@ -74,6 +69,7 @@ void awe::dialogue_box::setBackgroundColour(const sf::Color& colour) noexcept {
 void awe::dialogue_box::setThemeColour(const sf::Color& colour) noexcept {
 	_background.setOutlineColor(colour);
 	_nameBackground.setOutlineColor(colour);
+	_indicator.setFillColor(colour);
 }
 
 void awe::dialogue_box::setOutlineThickness(const float thickness) noexcept {
@@ -173,6 +169,14 @@ bool awe::dialogue_box::thereIsAName() const noexcept {
 bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	_stateMachine();
 
+	_mainText.setCharacterSize((unsigned int)target.getSize().y / 27);
+	_nameText.setCharacterSize(_mainText.getCharacterSize());
+	_option1Text.setCharacterSize(_mainText.getCharacterSize());
+	_option2Text.setCharacterSize(_mainText.getCharacterSize());
+	_option3Text.setCharacterSize(_mainText.getCharacterSize());
+
+	_resizeIndicator(_option1Text.getCharacterSize() * 0.5f);
+
 	sf::Vector2f size = _calculateBackgroundSize(target),
 		position = _calculateOrigin(size, target);
 	_background.setSize(size);
@@ -271,6 +275,13 @@ float awe::dialogue_box::_calculatePositionRatioOffset(const float secondsElapse
 	return secondsElapsed / (_background.getSize().y / _transitionSpeed);
 }
 
+void awe::dialogue_box::_resizeIndicator(const float size) noexcept {
+	_indicatorSize = size;
+	_indicator.setPoint(0, sf::Vector2f(0.0f, 0.0f));
+	_indicator.setPoint(1, sf::Vector2f(size, size / 2.0f));
+	_indicator.setPoint(2, sf::Vector2f(0.0f, size));
+}
+
 void awe::dialogue_box::_stateMachine() noexcept {
 	float delta = calculateDelta();
 	if (_state == awe::dialogue_box_state::Closed) {
@@ -359,19 +370,19 @@ void awe::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcept {
 		_portion2.setTexture(_canvas.getTexture());
 		int heightOfHalves = (int)(_background.getSize().y / 2.0f * _positionRatio);
 		_portion1.setTextureRect(sf::IntRect(
-			_background.getPosition().x,
-			_background.getPosition().y - _nameBackground.getSize().y - _nameBackground.getOutlineThickness() - _background.getOutlineThickness(),
+			(int)_background.getPosition().x,
+			(int)(_background.getPosition().y - _nameBackground.getSize().y - _nameBackground.getOutlineThickness() - _background.getOutlineThickness()),
 			(int)_background.getSize().x,
-			heightOfHalves + _nameBackground.getSize().y + _nameBackground.getOutlineThickness() + _background.getOutlineThickness()
+			heightOfHalves + (int)(_nameBackground.getSize().y + _nameBackground.getOutlineThickness() + _background.getOutlineThickness())
 		));
 		_portion2.setTextureRect(sf::IntRect(
-			_background.getPosition().x,
-			_background.getPosition().y + (int)_background.getSize().y - heightOfHalves,
+			(int)_background.getPosition().x,
+			(int)_background.getPosition().y + (int)_background.getSize().y - heightOfHalves,
 			(int)_background.getSize().x,
-			heightOfHalves + _background.getOutlineThickness()
+			heightOfHalves + (int)_background.getOutlineThickness()
 		));
 		_portion1.setPosition(_background.getPosition().x, _background.getPosition().y - _nameBackground.getSize().y - _background.getOutlineThickness() - _nameBackground.getOutlineThickness());
-		_portion2.setPosition(_background.getPosition().x, _portion1.getPosition().y + heightOfHalves + _nameBackground.getSize().y + _background.getOutlineThickness() + _nameBackground.getOutlineThickness());
+		_portion2.setPosition(_background.getPosition().x, _portion1.getPosition().y + (float)heightOfHalves + _nameBackground.getSize().y + _background.getOutlineThickness() + _nameBackground.getOutlineThickness());
 	}
 }
 

@@ -74,12 +74,12 @@ int main() {
     awe::dialogue_box box;
     box.setSounds(audio, "movecursor", "movesel", "select");
     box.setTransitionSpeed(200.0f);
-    box.setPosition(awe::dialogue_box_position::Bottom);
+    box.setPosition(awe::dialogue_box_position::Middle);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Green);
     box.setSizeRatio(0.15f);
-    box.setMainText("Hello");
-    box.flip(true);
+    box.setMainText("Hello\nNew Line\nAnother new line");
+    box.flip(false);
     box.setNameText("Mountain");
     box.setOptions("Option1", "Option2", "Option3");
     try {

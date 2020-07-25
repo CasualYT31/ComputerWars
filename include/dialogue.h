@@ -94,8 +94,9 @@ namespace awe {
 		sf::Vector2f _calculateNameOrigin(sf::Vector2f bgOrigin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept;
 		sf::Vector2f _calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSzie) noexcept;
 		float _calculatePositionRatioOffset(const float secondsElapsed) const noexcept;
+		void _resizeIndicator(const float size) noexcept;
 		awe::dialogue_box_position _position = awe::dialogue_box_position::Bottom;
-		float _sizeRatio = 0.16f;
+		float _sizeRatio = 0.2f;
 		float _positionRatio = 0.0f;
 		bool _flipped = false;
 		// tracks the state of the dialogue box
@@ -112,7 +113,7 @@ namespace awe {
 		// padding/sizing constants
 		static const float _smallPadding;
 		static const float _largePadding;
-		static const float _indicatorSize;
+		float _indicatorSize = 0.0f;
 		// timing data
 		float _transitionSpeed = 400.0f;
 		float _typingDelay = 0.05f;
