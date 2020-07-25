@@ -218,6 +218,8 @@ sf::Vector2f awe::dialogue_box::_calculateNameSize() const noexcept {
 }
 
 sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept {
+	origin.x += _nameBackground.getOutlineThickness();
+	origin.y -= _nameBackground.getOutlineThickness();
 	if (_flipped) origin.x += bgSize.x - nameSize.x;
 	if (_position == awe::dialogue_box_position::Top) {
 		origin.y += bgSize.y;
@@ -248,6 +250,12 @@ void awe::dialogue_box::_stateMachine() noexcept {
 			_state = awe::dialogue_box_state::TransitioningIn;
 		}
 	} else if (_state == awe::dialogue_box_state::TransitioningIn) {
+		// must be else-if so that Closed doesn't immediately switch to TransitioningIn.
+		// this allows animate() to set the initial size of the dialogue box so that
+		// _calculatePositionRatioOffset() doesn't consider the dialogue box to be 0,
+		// thus skipping this transition when first drawing
+		// this also fixes any potential delta-related problems:
+		// i.e. dialogue_box created, then animated seconds later resulting in a "skipped" first transition in
 		_positionRatio += _calculatePositionRatioOffset(delta);
 		if (_positionRatio >= 1.0f) {
 			_state = awe::dialogue_box_state::Typing;
