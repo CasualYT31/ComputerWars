@@ -176,7 +176,8 @@ namespace sfx {
 
 		/**
 		 * Sets a new \c animated_spritesheet to this animated sprite.
-		 * If a NULL pointer is given, an error will be logged and future calls to other methods will likely not work.
+		 * Passing \c nullptr will reset the internal sprite's texture rect to <tt>IntRect(0,0,0,0)</tt> -
+		 * this can be used to effectively remove an animated sprie whilst keeping the object alive.
 		 * This method also updates \c _hasNotBeenDrawn and \c _currentFrame so that the animated sprite will start from the beginning of the animation.
 		 * @param sheet A pointer to the sheet to assign to this sprite.
 		 */

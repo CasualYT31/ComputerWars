@@ -95,6 +95,7 @@ int main() {
     bool leave = false;
     bool selectCurrentOption = false;
     bool showBox = true;
+    bool toggleSprite = true;
     while (!leave) {
         sf::Event event;
         while (newRenderer.pollEvent(event)) {
@@ -120,6 +121,14 @@ int main() {
                         dict.setLanguage("GER_DE");
                     } else {
                         dict.setLanguage("ENG_GB");
+                    }
+                } else if (event.key.code == sf::Keyboard::W) {
+                    if (toggleSprite) {
+                        box.setSprite(nullptr, 0);
+                        toggleSprite = false;
+                    } else {
+                        box.setSprite(sheet, 15);
+                        toggleSprite = true;
                     }
                 }
             } else if (event.type == sf::Event::Resized) {

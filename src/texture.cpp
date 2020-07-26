@@ -140,7 +140,7 @@ sfx::animated_sprite::animated_sprite(std::shared_ptr<const sfx::animated_sprite
 
 void sfx::animated_sprite::setSpritesheet(std::shared_ptr<const sfx::animated_spritesheet> sheet) noexcept {
 	_sheet = sheet;
-	if (!_sheet) _logger.error("No animated spritesheet has been assigned to this sprite.");
+	if (!_sheet) _sprite.setTextureRect(sf::IntRect(0,0,0,0));
 	_errored = false;
 	_hasNotBeenDrawn = true;
 	_currentFrame = 0;
