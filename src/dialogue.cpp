@@ -281,17 +281,66 @@ void awe::dialogue_box::_resizeIndicator(const float size) noexcept {
 	_indicator.setPoint(2, sf::Vector2f(0.0f, size));
 }
 
+void awe::dialogue_box::_fromClosedToTransitioning() noexcept {
+	_characterPosition = 0;
+	if (_skipTransitioningIn) {
+		_positionRatio = 1.0f;
+		_state = awe::dialogue_box_state::Typing;
+		_typingTimer.restart();
+	} else {
+		_state = awe::dialogue_box_state::TransitioningIn;
+	}
+}
+
+void awe::dialogue_box::_fromTransitioningToTyping(const float delta) noexcept {
+	_positionRatio += _calculatePositionRatioOffset(delta);
+	if (_skipCurrentState || _positionRatio >= 1.0f) {
+		_state = awe::dialogue_box_state::Typing;
+		_positionRatio = 1.0f;
+		_typingTimer.restart();
+		_skipCurrentState = false;
+	}
+}
+
+void awe::dialogue_box::_fromTypingToStoppedTyping() noexcept {
+	if (_typingTimer.getElapsedTime().asSeconds() >= _typingDelay) {
+		_playSound(_typingKey);
+		if (_characterPosition < _fullText.size()) {
+			_characterPosition += (std::size_t)(_typingTimer.getElapsedTime().asSeconds() / _typingDelay);
+		}
+		_typingTimer.restart();
+	}
+	if (_skipCurrentState) {
+		_characterPosition = _fullText.size();
+		_skipCurrentState = false;
+	}
+	if (_characterPosition == _fullText.size()) {
+		_state = awe::dialogue_box_state::StoppedTyping;
+	}
+}
+
+void awe::dialogue_box::_fromOptionToTransitioning() noexcept {
+	if (_skipTransitioningOut) {
+		_positionRatio = 0.0f;
+		_state = awe::dialogue_box_state::Closed;
+	} else {
+		_state = awe::dialogue_box_state::TransitioningOut;
+	}
+}
+
+void awe::dialogue_box::_fromTransitioningToClosed(const float delta) noexcept {
+	_positionRatio -= _calculatePositionRatioOffset(delta);
+	if (_skipCurrentState || _positionRatio <= 0.0f) {
+		_state = awe::dialogue_box_state::Closed;
+		_positionRatio = 0.0f;
+		_skipCurrentState = false;
+	}
+}
+
 void awe::dialogue_box::_stateMachine() noexcept {
 	float delta = calculateDelta();
 	if (_state == awe::dialogue_box_state::Closed) {
-		_characterPosition = 0;
-		if (_skipTransitioningIn) {
-			_positionRatio = 1.0f;
-			_state = awe::dialogue_box_state::Typing;
-			_typingTimer.restart();
-		} else {
-			_state = awe::dialogue_box_state::TransitioningIn;
-		}
+		_fromClosedToTransitioning();
 	} else if (_state == awe::dialogue_box_state::TransitioningIn) {
 		// must be else-if so that Closed doesn't immediately switch to TransitioningIn.
 		// this allows animate() to set the initial size of the dialogue box so that
@@ -299,55 +348,26 @@ void awe::dialogue_box::_stateMachine() noexcept {
 		// thus skipping this transition when first drawing
 		// this also fixes any potential delta-related problems:
 		// i.e. dialogue_box created, then animated seconds later resulting in a "skipped" first transition in
-		_positionRatio += _calculatePositionRatioOffset(delta);
-		if (_skipCurrentState || _positionRatio >= 1.0f) {
-			_state = awe::dialogue_box_state::Typing;
-			_positionRatio = 1.0f;
-			_typingTimer.restart();
-			_skipCurrentState = false;
-		}
+		_fromTransitioningToTyping(delta);
 	}
 	if (_state == awe::dialogue_box_state::Typing) {
-		if (_typingTimer.getElapsedTime().asSeconds() >= _typingDelay) {
-			_playSound(_typingKey);
-			if (_characterPosition < _fullText.size()) {
-				_characterPosition += (std::size_t)(_typingTimer.getElapsedTime().asSeconds() / _typingDelay);
-			}
-			_typingTimer.restart();
-		}
-		if (_skipCurrentState) {
-			_characterPosition = _fullText.size();
-			_skipCurrentState = false;
-		}
-		if (_characterPosition == _fullText.size()) {
-			_state = awe::dialogue_box_state::StoppedTyping;
-		}
+		_fromTypingToStoppedTyping();
 	}
-	// see selectCurrentOption()
+	// see selectCurrentOption() [and skipCurrentState()]
 	if (_skipCurrentState && _state == awe::dialogue_box_state::StoppedTyping) {
 		_state = awe::dialogue_box_state::Option1;
 		_skipCurrentState = false;
 	}
 	if (_state == awe::dialogue_box_state::Option1 || _state == awe::dialogue_box_state::Option2 || _state == awe::dialogue_box_state::Option3) {
-		if (_skipTransitioningOut) {
-			_positionRatio = 0.0f;
-			_state = awe::dialogue_box_state::Closed;
-		} else {
-			_state = awe::dialogue_box_state::TransitioningOut;
-		}
+		_fromOptionToTransitioning();
 	}
 	if (_state == awe::dialogue_box_state::TransitioningOut) {
-		_positionRatio -= _calculatePositionRatioOffset(delta);
-		if (_skipCurrentState || _positionRatio <= 0.0f) {
-			_state = awe::dialogue_box_state::Closed;
-			_positionRatio = 0.0f;
-			_skipCurrentState = false;
-		}
+		_fromTransitioningToClosed(delta);
 	}
+	// this ensures changes in mainText apply to a pre-existing dialogue box
 	if (_state == awe::dialogue_box_state::StoppedTyping || _state == awe::dialogue_box_state::Option1 ||
 		_state == awe::dialogue_box_state::Option2 || _state == awe::dialogue_box_state::Option3 ||
 		_state == awe::dialogue_box_state::TransitioningOut) {
-		// this ensures changes in language apply to a pre-existing dialogue box
 		_characterPosition = _fullText.size();
 	}
 }
@@ -391,6 +411,10 @@ void awe::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcept {
 	}
 	_canvas.display();
 
+	_prepareHalfSprites();
+}
+
+void awe::dialogue_box::_prepareHalfSprites() noexcept {
 	_portion1.setTexture(_canvas.getTexture(), true);
 	_portion1.setPosition(0.0f, 0.0f);
 	if (_position == awe::dialogue_box_position::Middle) {
@@ -495,8 +519,6 @@ void awe::dialogue_sequence::draw(sf::RenderTarget& target, sf::RenderStates sta
 	target.draw(*_dialogue);
 }
 
-// END OF CONSTRUCTION ZONE
-
 awe::dialogue_sequence::dialogue_sequence(sfx::renderer* r, sfx::fonts* f,
 	sfx::user_input* u, sfx::spritesheet* s, i18n::language_dictionary* l, sfx::audio* a, const std::string& name) noexcept : _logger(name) {
 	_renderer = r;
@@ -578,214 +600,4 @@ bool awe::dialogue_sequence::_load(safe::json& j) noexcept {
 
 bool awe::dialogue_sequence::_save(nlohmann::json& j) noexcept {
 	return false;
-}
-
-awe::dialogue::dialogue(const awe::dialogue_data& data, const std::string& name) noexcept : _logger(name), _data(data) {
-	//some error checking
-	if (!_data.audioObject) {
-		_logger.write("Warning: no audio object has been provided for this dialogue object, no sounds will play.");
-	}
-
-	if (!_data.languageObject) {
-		_logger.write("Warning: no language object has been provided for this dialogue object, no strings will be translated.");
-	}
-
-	if (!_data.spritesheetObject) {
-		_logger.write("Warning: no spritesheet object has been provided for this dialogue object, no accompanying sprite will be displayed.");
-	}
-
-	if (!_data.userinputObject && thereAreOptions()) {
-		_logger.error("No user input object has been provided for this option-based dialogue object, user will not be able to select an option!");
-	}
-
-	_bg.setOutlineThickness(4.0f);
-
-	if (!_data.rendererObject) {
-		_logger.error("No renderer object has been provided for this dialogue object.");
-	} else {
-		_bg.setSize(sf::Vector2f(_data.rendererObject->getSize().x + _bg.getOutlineThickness(), _data.height));
-		_bg.setPosition(0, _bg.getOutlineThickness());
-		_canvas.create((unsigned int)_bg.getSize().x, (unsigned int)(_bg.getSize().y + _bg.getOutlineThickness() * 2.0f));
-	}
-
-	if (_data.flip) {
-		_text.setPosition(25.0f, 25.0f);
-		_sprite.setPosition(_bg.getSize().x - 140.0f, 25.0f);
-	} else {
-		_text.setPosition(175.0f, 25.0f);
-		_sprite.setPosition(25.0f, 25.0f);
-	}
-
-	_bg.setFillColor(_data.backgroundColour);
-	_bg.setOutlineColor(_data.borderColour);
-
-	if (_data.font) {
-		_text.setFont(*_data.font);
-	} else {
-		_logger.error("No font object has been provided for this dialogue object.");
-	}
-
-	_text.setLineSpacing(_data.lineSpacingFactor);
-	_text.setCharacterSize(_data.fontSize);
-	_setInitialPosition();
-	_indicator.setFillColor(sf::Color::Cyan);
-	_indicator.setSize(sf::Vector2f(10.0f, 10.0f));
-}
-
-unsigned int awe::dialogue::choice() const noexcept {
-	return _selection - 1;
-}
-
-bool awe::dialogue::thereAreOptions() const noexcept {
-	if (_data.option[0] != "" || _data.option[1] != "" || _data.option[2] != "") {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-void awe::dialogue::_render() noexcept {
-	if (thereAreOptions()) {
-		std::size_t* pos = nullptr;
-		switch (_selection) {
-		case 1:
-			pos = &_o1pos;
-			break;
-		case 2:
-			pos = &_o2pos;
-			break;
-		case 3:
-			pos = &_o3pos;
-			break;
-		}
-		if (pos) {
-			_indicator.setPosition(
-				_text.findCharacterPos(*pos).x - _indicator.getSize().x - 5,
-				_text.findCharacterPos(*pos).y
-			);
-		}
-	}
-
-	if (_data.spritesheetObject) {
-		if (_status == dialogue_status::Typing) {
-			_spriteTexture = (*_data.spritesheetObject)[_data.spriteKey];
-		} else {
-			_spriteTexture = _data.spritesheetObject->getFrame(0, _data.spriteKey);
-		}
-		_sprite.setTexture(_spriteTexture, true);
-	}
-
-	_canvas.clear();
-	_canvas.draw(_bg);
-	_canvas.draw(_sprite);
-	_canvas.draw(_text);
-	if (thereAreOptions() && _status == dialogue_status::StoppedTyping) _canvas.draw(_indicator);
-	_canvas.display();
-
-	if (_data.rendererObject) {
-		if (_data.location == dialogue_location::Middle && (_status == dialogue_status::TransitioningIn || _status == dialogue_status::TransitioningOut)) {
-			_tophalf.setTexture(_canvas.getTexture());
-			_bottomhalf.setTexture(_canvas.getTexture());
-			_tophalf.setTextureRect(sf::IntRect(
-				0,
-				0,
-				(int)_canvas.getSize().x,
-				(int)((float)_data.rendererObject->getSize().y / 2.0f - _position.y)
-			));
-			_bottomhalf.setTextureRect(sf::IntRect(
-				0,
-				(int)(_canvas.getSize().y - _tophalf.getTextureRect().height),
-				(int)_canvas.getSize().x,
-				_tophalf.getTextureRect().height
-			));
-			_data.rendererObject->drawToScale(_tophalf, (float)_position.x, (float)_position.y);
-			_data.rendererObject->drawToScale(_bottomhalf, (float)_position.x, (float)(_position.y + _tophalf.getTextureRect().height));
-		} else {
-			_data.rendererObject->drawToScale(_canvas.getTexture(), _position.x, _position.y, false);
-		}
-	}
-}
-
-void awe::dialogue::_resetSelection() noexcept {
-	if (_data.option[0] != "") {
-		_selection = 1;
-		return;
-	}
-	if (_data.option[1] != "") {
-		_selection = 2;
-		return;
-	}
-	if (_data.option[2] != "") _selection = 3;
-}
-
-bool awe::dialogue::_positionIsReady() noexcept {
-	float finalY = 0.0f;
-	if (_data.rendererObject) {
-		if (_status == dialogue_status::TransitioningIn) {
-			switch (_data.location) {
-			case (dialogue_location::Bottom):
-				finalY = (float)_data.rendererObject->getSize().y - (_bg.getSize().y + _bg.getOutlineThickness() * 2.0f);
-				if (_data.skipTransitioningIn || _position.y <= finalY) {
-					_position.y = finalY;
-					return true;
-				}
-				break;
-			case (dialogue_location::Top):
-				if (_data.skipTransitioningIn || _position.y >= finalY) {
-					_position.y = finalY;
-					return true;
-				}
-				break;
-			case (dialogue_location::Middle):
-				finalY = (float)_data.rendererObject->getSize().y / 2.0f - (_bg.getSize().y + _bg.getOutlineThickness() * 2.0f) / 2.0f;
-				if (_data.skipTransitioningIn || _position.y <= finalY) {
-					_position.y = finalY;
-					return true;
-				}
-				break;
-			}
-		} else if (_status == dialogue_status::TransitioningOut) {
-			switch (_data.location) {
-			case (dialogue_location::Bottom):
-				finalY = (float)_data.rendererObject->getSize().y + _bg.getOutlineThickness();
-				if (_data.skipTransitioningOut || _position.y >= finalY) {
-					_position.y = finalY;
-					return true;
-				}
-				break;
-			case (dialogue_location::Top):
-				finalY = -_bg.getSize().y - _bg.getOutlineThickness() * 2.0f;
-				if (_data.skipTransitioningOut || _position.y <= finalY) {
-					_position.y = finalY;
-					return true;
-				}
-				break;
-			case (dialogue_location::Middle):
-				finalY = (float)_data.rendererObject->getSize().y / 2.0f;
-				if (_data.skipTransitioningOut || _position.y >= finalY) {
-					_position.y = finalY;
-					return true;
-				}
-				break;
-			}
-		}
-	}
-	return false;
-}
-
-void awe::dialogue::_setInitialPosition() noexcept {
-	_position.x = -_bg.getOutlineThickness();
-	if (_data.rendererObject) {
-		switch (_data.location) {
-		case (dialogue_location::Bottom):
-			_position.y = _data.rendererObject->getSize().y + _bg.getOutlineThickness();
-			break;
-		case (dialogue_location::Top):
-			_position.y = -_bg.getSize().y - _bg.getOutlineThickness() * 2.0f;
-			break;
-		case (dialogue_location::Middle):
-			_position.y = (float)_data.rendererObject->getSize().y / 2.0f;
-			break;
-		}
-	}
 }*/

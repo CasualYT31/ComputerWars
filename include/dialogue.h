@@ -25,9 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "texture.h"
 #include "audio.h"
 
-// TASKS
-// 1. Refactor
-
 namespace awe {
 	enum class dialogue_box_position {
 		Bottom,
@@ -88,6 +85,7 @@ namespace awe {
 		void _resizeIndicator(const float size) noexcept;
 		void _repositionIndicator() noexcept;
 		void _drawToCanvas(const sf::RenderTarget& target) noexcept;
+		void _prepareHalfSprites() noexcept;
 		sf::RenderTexture _canvas;
 		sf::RectangleShape _background;
 		sf::RectangleShape _nameBackground;
@@ -108,6 +106,11 @@ namespace awe {
 		bool _flipped = false;
 		// tracks the state of the dialogue box
 		void _stateMachine() noexcept;
+		void _fromClosedToTransitioning() noexcept;
+		void _fromTransitioningToTyping(const float delta) noexcept;
+		void _fromTypingToStoppedTyping() noexcept;
+		void _fromOptionToTransitioning() noexcept;
+		void _fromTransitioningToClosed(const float delta) noexcept;
 		awe::dialogue_box_state _state = awe::dialogue_box_state::Closed;
 		std::string _fullText = "";
 		bool _skipTransitioningIn = false;
@@ -195,104 +198,6 @@ namespace awe {
 
 	// END OF CONSTRUCTION ZONE
 
-
-
-
-	enum class dialogue_location {
-		Bottom,
-		Top,
-		Middle, // OLD -> PLEASE KEEP AS THE LAST ONE! This is because it is used in a check in dialogue_sequence to test if a read JSON uint is within the safe range of the enum
-		LocationCount
-	};
-
-	
-
-	struct dialogue_data {
-		// CONSTRUCTION ZONE
-
-		std::shared_ptr<sfx::animated_spritesheet> spritesheetObject = nullptr;
-		unsigned int characterSpriteID = 0;
-
-		std::string translatedStringToDisplay = "";
-		std::shared_ptr<sf::Font> font = nullptr;
-		sf::Time typingDelay = sf::milliseconds(50);
-		sf::Time transitionOutDelay = sf::milliseconds(1000);
-		float transitionSpeed = 400.0f; // pixels per second
-		sf::Color borderColour = sf::Color();
-		sf::Color backgroundColour = sf::Color(100, 100, 100, 255);
-		std::array<std::string, 3> option = { "", "", "" };
-		bool flip = false;
-		bool skipable = true;
-		bool skipTransitioningIn = false;
-		bool skipTransitioningOut = false;
-		dialogue_location location = dialogue_location::Bottom;
-		float lineSpacingFactor = 1.0f;
-		unsigned int fontSize = 30;
-		float height = 165.0f;
-
-		std::shared_ptr<sfx::audio> audioObject = nullptr;
-		std::string typingSoundKey = "typing";
-		std::string selectionSoundKey = "moveselection";
-
-		std::shared_ptr<sfx::user_input> userInputObject = nullptr;
-		std::string selectControlKey = "select";
-		std::string leftControlKey = "left";
-		std::string rightControlKey = "right";
-		
-		// END OF CONSTRUCTION ZONE
-	};
-
-	// CONSTRUCTION ZONE
-
-	class dialogue : public sfx::animated_drawable {
-	public:
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
-	private:
-		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-	};
-
-	// END OF CONSTRUCTION ZONE
-
-	class dialogue {
-	public:
-		dialogue(const dialogue_data& data, const std::string& name = "dialogue") noexcept;
-		template<typename... Ts>
-		dialogue_status animate(Ts... values) noexcept;
-		bool thereAreOptions() const noexcept;
-		unsigned int choice() const noexcept;
-	private:
-		void _setInitialPosition() noexcept;
-		void _offsetPosition() noexcept;
-		bool _positionIsReady() noexcept;
-		void _resetSelection() noexcept;
-		template<typename... Ts>
-		void _setTextToDisplay(Ts... values) noexcept;
-
-		template<typename... Ts>
-		void _stateMachine(Ts... values) noexcept;
-		void _render() noexcept;
-
-		sfx::delta_timer _delta;
-
-		global::logger _logger;
-		dialogue_data _data;
-		dialogue_status _status = dialogue_status::Closed;
-		sf::Clock _clock;
-		std::size_t _charid = 0;
-		std::string _textToDisplay = "";
-		unsigned int _selection = 1;
-
-		sf::RenderTexture _canvas;
-		sf::RectangleShape _bg;
-		sf::Text _text;
-		sf::Sprite _sprite;
-		sf::Texture _spriteTexture;
-		sf::Sprite _tophalf, _bottomhalf;
-		sf::Vector2f _position;
-		std::size_t _o1pos = 0, _o2pos = 0, _o3pos = 0;
-		sf::RectangleShape _indicator;
-	};
-
 	class dialogue_sequence : public safe::json_script {
 	public:
 		dialogue_sequence(sfx::renderer* r, sfx::fonts* f, sfx::user_input* u = nullptr, sfx::spritesheet* s = nullptr, i18n::language_dictionary* l = nullptr, sfx::audio* a = nullptr, const std::string& name = "dialogue_sequence") noexcept;
@@ -354,147 +259,4 @@ bool awe::dialogue_sequence::animate(Ts... values) noexcept {
 	}
 	return ret;
 }
-
-template<typename... Ts>
-awe::dialogue_status awe::dialogue::animate(Ts... values) noexcept {
-	_delta.calculate();
-	_stateMachine(values...);
-	_render();
-	return _status;
-}
-
-template<typename... Ts>
-void awe::dialogue::_stateMachine(Ts... values) noexcept {
-	if (_status == dialogue_status::Option1 || _status == dialogue_status::Option2 || _status == dialogue_status::Option3) {
-		_status = dialogue_status::TransitioningOut;
-	}
-
-	if (_status == dialogue_status::Closed) {
-		_delta.calculate(); //restarts timer so that it doesn't skip transitioning in
-		_status = dialogue_status::TransitioningIn;
-	}
-
-	if (_status == dialogue_status::TransitioningIn || _status == dialogue_status::TransitioningOut) {
-		_offsetPosition();
-		if (_positionIsReady()) {
-			if (_status == dialogue_status::TransitioningIn) {
-				_status = dialogue_status::Typing;
-				_setTextToDisplay(values...);
-				_clock.restart();
-			} else {
-				_charid = 0;
-				_text.setString("");
-				_status = dialogue_status::Closed;
-			}
-		}
-	}
-
-	if (_status == dialogue_status::Typing) {
-		if (_data.skipable && _data.userinputObject && (*_data.userinputObject)[_data.selectControlKey]) {
-			_charid = _textToDisplay.size();
-			_text.setString(_textToDisplay);
-		}
-		if (_clock.getElapsedTime() >= _data.typingDelay) {
-			if (_charid < _textToDisplay.size()) _text.setString(_text.getString() + _textToDisplay.at(_charid++));
-			if (thereAreOptions() && (_charid == _o1pos || _charid == _o2pos || _charid == _o3pos)) {
-				_charid = _textToDisplay.size();
-				_text.setString(_textToDisplay);
-			}
-			if (_data.audioObject) {
-				_data.audioObject->play(_data.typingSoundKey);
-			}
-			_clock.restart();
-		}
-		if (_charid == _textToDisplay.size()) {
-			_status = dialogue_status::StoppedTyping;
-			_resetSelection();
-		}
-	} else if (_status == dialogue_status::StoppedTyping) {
-		if (_data.userinputObject) {
-			if (thereAreOptions()) {
-				bool l = (*_data.userinputObject)[_data.leftControlKey], r = (*_data.userinputObject)[_data.rightControlKey];
-				do {
-					if (l) {
-						_data.audioObject->play(_data.selectionSoundKey);
-						_selection--;
-					}
-					if (r) {
-						_data.audioObject->play(_data.selectionSoundKey);
-						_selection++;
-					}
-					if (_selection < 1) _selection = 3;
-					if (_selection > 3) _selection = 1;
-				} while (_data.option[_selection - 1] == "");
-				if ((*_data.userinputObject)[_data.selectControlKey]) {
-					switch (_selection) {
-					case 1:
-						_status = dialogue_status::Option1;
-						break;
-					case 2:
-						_status = dialogue_status::Option2;
-						break;
-					case 3:
-						_status = dialogue_status::Option3;
-						break;
-					}
-				}
-			} else {
-				if ((*_data.userinputObject)[_data.selectControlKey]) {
-					_status = dialogue_status::TransitioningOut;
-				}
-			}
-		} else {
-			if (_clock.getElapsedTime() >= _data.transitionOutDelay) {
-				_status = dialogue_status::TransitioningOut;
-			}
-		}
-	}
-}
-
-//updates text to display
-template<typename... Ts>
-void awe::dialogue::_setTextToDisplay(Ts... values) noexcept {
-	if (_data.languageObject) {
-		_textToDisplay = (*_data.languageObject)(_data.nativeString, values...);
-		if (thereAreOptions()) {
-			if (_textToDisplay.find('\n') == std::string::npos) {
-				_textToDisplay += "\n\n";
-			} else {
-				_textToDisplay += "\n";
-			}
-			if (_data.option[0] != "") {
-				_o1pos = _textToDisplay.size();
-				_textToDisplay += (*_data.languageObject)(_data.option[0]) + '\t';
-			}
-			if (_data.option[1] != "") {
-				_o2pos = _textToDisplay.size();
-				_textToDisplay += (*_data.languageObject)(_data.option[1]) + '\t';
-			}
-			if (_data.option[2] != "") {
-				_o3pos = _textToDisplay.size();
-				_textToDisplay += (*_data.languageObject)(_data.option[2]) + '\t';
-			}
-		}
-	} else {
-		_textToDisplay = _data.nativeString;
-		if (thereAreOptions()) {
-			if (_textToDisplay.find('\n') == std::string::npos) {
-				_textToDisplay += "\n\n";
-			} else {
-				_textToDisplay += "\n";
-			}
-			if (_data.option[0] != "") {
-				_o1pos = _textToDisplay.size();
-				_textToDisplay += _data.option[0] + '\t';
-			}
-			if (_data.option[1] != "") {
-				_o2pos = _textToDisplay.size();
-				_textToDisplay += _data.option[1] + '\t';
-			}
-			if (_data.option[2] != "") {
-				_o3pos = _textToDisplay.size();
-				_textToDisplay += _data.option[2] + '\t';
-			}
-		}
-	}
-}*/
+*/
