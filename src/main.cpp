@@ -117,8 +117,7 @@ int main() {
                 } else if (event.key.code == sf::Keyboard::Y) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 } else if (event.key.code == sf::Keyboard::X) {
-                    box.setPosition(awe::dialogue_box_position::Middle);
-                    // you can even change the position half way through and it won't mess anything up!
+                    box.skipCurrentState();
                 }
             } else if (event.type == sf::Event::Resized) {
                 // update the view to the new size of the window

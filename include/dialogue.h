@@ -25,6 +25,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "texture.h"
 #include "audio.h"
 
+// TASKS
+// 1. Allow the client to skip states half-way-through manually (allows user presses to skip text, transitions etc.)
+// 2. Refactor
+// 3. Change the way text is rendered so that changes of string (of language) part-way through can be accounted for
+
 namespace awe {
 	enum class dialogue_box_position {
 		Bottom,
@@ -71,6 +76,7 @@ namespace awe {
 		void flip(const bool isFlipped) noexcept;
 		bool thereAreOptions() const noexcept;
 		bool thereIsAName() const noexcept;
+		void skipCurrentState() noexcept;
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
 		// drawing
@@ -106,6 +112,7 @@ namespace awe {
 		bool _skipTransitioningIn = false;
 		bool _skipTransitioningOut = false;
 		unsigned short _currentOption = 1;
+		bool _skipCurrentState = false;
 		// animated_sprite data
 		std::shared_ptr<const sfx::animated_spritesheet> _sheet = nullptr;
 		unsigned int _spriteID = 0;

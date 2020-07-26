@@ -166,6 +166,10 @@ bool awe::dialogue_box::thereIsAName() const noexcept {
 	return _nameText.getString() != "";
 }
 
+void awe::dialogue_box::skipCurrentState() noexcept {
+	_skipCurrentState = true;
+}
+
 bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	_stateMachine();
 
@@ -296,15 +300,16 @@ void awe::dialogue_box::_stateMachine() noexcept {
 	} else if (_state == awe::dialogue_box_state::TransitioningIn) {
 		// must be else-if so that Closed doesn't immediately switch to TransitioningIn.
 		// this allows animate() to set the initial size of the dialogue box so that
-		// _calculatePositionRatioOffset() doesn't consider the dialogue box to be 0,
+		// _calculatePositionRatioOffset() doesn't consider the dialogue box size to be 0,
 		// thus skipping this transition when first drawing
 		// this also fixes any potential delta-related problems:
 		// i.e. dialogue_box created, then animated seconds later resulting in a "skipped" first transition in
 		_positionRatio += _calculatePositionRatioOffset(delta);
-		if (_positionRatio >= 1.0f) {
+		if (_skipCurrentState || _positionRatio >= 1.0f) {
 			_state = awe::dialogue_box_state::Typing;
 			_positionRatio = 1.0f;
 			_typingTimer.restart();
+			_skipCurrentState = false;
 		}
 	}
 	if (_state == awe::dialogue_box_state::Typing) {
@@ -315,11 +320,19 @@ void awe::dialogue_box::_stateMachine() noexcept {
 			}
 			_typingTimer.restart();
 		}
+		if (_skipCurrentState) {
+			_mainText.setString(_fullText);
+			_skipCurrentState = false;
+		}
 		if (_mainText.getString() == _fullText) {
 			_state = awe::dialogue_box_state::StoppedTyping;
 		}
 	}
 	// see selectCurrentOption()
+	if (_skipCurrentState && _state == awe::dialogue_box_state::StoppedTyping) {
+		_state = awe::dialogue_box_state::Option1;
+		_skipCurrentState = false;
+	}
 	if (_state == awe::dialogue_box_state::Option1 || _state == awe::dialogue_box_state::Option2 || _state == awe::dialogue_box_state::Option3) {
 		if (_skipTransitioningOut) {
 			_positionRatio = 0.0f;
@@ -330,9 +343,10 @@ void awe::dialogue_box::_stateMachine() noexcept {
 	}
 	if (_state == awe::dialogue_box_state::TransitioningOut) {
 		_positionRatio -= _calculatePositionRatioOffset(delta);
-		if (_positionRatio <= 0.0f) {
+		if (_skipCurrentState || _positionRatio <= 0.0f) {
 			_state = awe::dialogue_box_state::Closed;
 			_positionRatio = 0.0f;
+			_skipCurrentState = false;
 		}
 	}
 }
