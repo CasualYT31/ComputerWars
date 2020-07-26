@@ -26,9 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "audio.h"
 
 // TASKS
-// 1. Allow the client to skip states half-way-through manually (allows user presses to skip text, transitions etc.)
-// 2. Refactor
-// 3. Change the way text is rendered so that changes of string (of language) part-way through can be accounted for
+// 1. Refactor
 
 namespace awe {
 	enum class dialogue_box_position {
@@ -93,6 +91,7 @@ namespace awe {
 		sf::Text _option3Text;
 		sf::ConvexShape _indicator;
 		sf::Sprite _portion1, _portion2;
+		std::size_t _characterPosition = 0;
 		// base properties that define the transforms of the dialogue box
 		sf::Vector2f _calculateBackgroundSize(const sf::RenderTarget& target) const noexcept;
 		sf::Vector2f _calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept;

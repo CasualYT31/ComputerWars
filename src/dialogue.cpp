@@ -173,6 +173,8 @@ void awe::dialogue_box::skipCurrentState() noexcept {
 bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	_stateMachine();
 
+	_mainText.setString(_fullText.substr(0, _characterPosition));
+
 	_mainText.setCharacterSize((unsigned int)target.getSize().y / 27);
 	_nameText.setCharacterSize(_mainText.getCharacterSize());
 	_option1Text.setCharacterSize(_mainText.getCharacterSize());
@@ -289,7 +291,7 @@ void awe::dialogue_box::_resizeIndicator(const float size) noexcept {
 void awe::dialogue_box::_stateMachine() noexcept {
 	float delta = calculateDelta();
 	if (_state == awe::dialogue_box_state::Closed) {
-		_mainText.setString("");
+		_characterPosition = 0;
 		if (_skipTransitioningIn) {
 			_positionRatio = 1.0f;
 			_state = awe::dialogue_box_state::Typing;
@@ -315,16 +317,16 @@ void awe::dialogue_box::_stateMachine() noexcept {
 	if (_state == awe::dialogue_box_state::Typing) {
 		if (_typingTimer.getElapsedTime().asSeconds() >= _typingDelay) {
 			_playSound(_typingKey);
-			if (_mainText.getString().getSize() < _fullText.size()) {
-				_mainText.setString(_mainText.getString() + _fullText.substr(_mainText.getString().getSize(), (std::size_t)(_typingTimer.getElapsedTime().asSeconds() / _typingDelay)));
+			if (_characterPosition < _fullText.size()) {
+				_characterPosition += (std::size_t)(_typingTimer.getElapsedTime().asSeconds() / _typingDelay);
 			}
 			_typingTimer.restart();
 		}
 		if (_skipCurrentState) {
-			_mainText.setString(_fullText);
+			_characterPosition = _fullText.size();
 			_skipCurrentState = false;
 		}
-		if (_mainText.getString() == _fullText) {
+		if (_characterPosition == _fullText.size()) {
 			_state = awe::dialogue_box_state::StoppedTyping;
 		}
 	}
@@ -348,6 +350,12 @@ void awe::dialogue_box::_stateMachine() noexcept {
 			_positionRatio = 0.0f;
 			_skipCurrentState = false;
 		}
+	}
+	if (_state == awe::dialogue_box_state::StoppedTyping || _state == awe::dialogue_box_state::Option1 ||
+		_state == awe::dialogue_box_state::Option2 || _state == awe::dialogue_box_state::Option3 ||
+		_state == awe::dialogue_box_state::TransitioningOut) {
+		// this ensures changes in language apply to a pre-existing dialogue box
+		_characterPosition = _fullText.size();
 	}
 }
 

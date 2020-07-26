@@ -39,6 +39,7 @@ instead of throughout the code */
 
 // #include "game.h"
 
+#include "language.h"
 #include "dialogue.h"
 #include "fonts.h"
 
@@ -55,6 +56,9 @@ instead of throughout the code */
 int main() {
     // create the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
+
+    i18n::language_dictionary dict;
+    dict.load("assets/lang/lang.json");
     
     sfx::renderer newRenderer;
     newRenderer.load("assets/renderer/renderer.json");
@@ -77,7 +81,6 @@ int main() {
 
     awe::dialogue_box box;
     box.setSounds(audio, "movecursor", "movesel", "select");
-    box.setTransitionLength(2.0f);
     box.setPosition(awe::dialogue_box_position::Bottom);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Green);
@@ -85,7 +88,6 @@ int main() {
     box.setMainText("Hello\nNew Line\nAnother new line");
     box.flip(false);
     box.setNameText("Mountain");
-    box.setOptions("Option1", "Option2", "Option3");
     try {
         box.setFont(fonts["dialogue"]);
     } catch (std::out_of_range& e) {
@@ -117,7 +119,11 @@ int main() {
                 } else if (event.key.code == sf::Keyboard::Y) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 } else if (event.key.code == sf::Keyboard::X) {
-                    box.skipCurrentState();
+                    if (dict.getLanguage() == "ENG_GB") {
+                        dict.setLanguage("GER_DE");
+                    } else {
+                        dict.setLanguage("ENG_GB");
+                    }
                 }
             } else if (event.type == sf::Event::Resized) {
                 // update the view to the new size of the window
@@ -125,6 +131,8 @@ int main() {
                 newRenderer.setView(sf::View(visibleArea));
             }
         }
+        box.setMainText(dict("day", -1));
+        box.setOptions(dict("day", 5), dict("greeting"), dict("cancel"));
         newRenderer.clear(sf::Color::Black);
         newRenderer.animate(sprite);
         newRenderer.animate(sprite2);
