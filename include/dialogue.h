@@ -604,6 +604,21 @@ namespace engine {
 		 */
 		std::string _selectKey = "";
 	};
+
+	class dialogue_sequence : public safe::json_script, public sfx::animated_drawable {
+	public:
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
+	private:
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		virtual bool _load(safe::json& j) noexcept;
+		virtual bool _save(nlohmann::json& j) noexcept;
+
+		struct dialogue_box_data {
+
+		};
+		std::vector<dialogue_box_data> _boxes;
+		std::unique_ptr<dialogue_box> _currentBox;
+	};
 }
 
 /*

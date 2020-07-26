@@ -22,6 +22,30 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dialogue.h"
 
+// dialogue_sequence
+
+bool engine::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept {
+
+}
+
+void engine::dialogue_sequence::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+
+}
+
+bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
+	nlohmann::json jj = j.nlohmannJSON();
+	for (auto& i : jj.items()) {
+
+	}
+	return true;
+}
+
+bool engine::dialogue_sequence::_save(nlohmann::json& j) noexcept {
+	return false;
+}
+
+// dialogue_box
+
 const float engine::dialogue_box::_smallPadding = 10.0f;
 const float engine::dialogue_box::_largePadding = 50.0f;
 
