@@ -22,130 +22,147 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dialogue.h"
 
-const float awe::dialogue_box::_smallPadding = 10.0f;
-const float awe::dialogue_box::_largePadding = 50.0f;
+const float engine::dialogue_box::_smallPadding = 10.0f;
+const float engine::dialogue_box::_largePadding = 50.0f;
 
-awe::dialogue_box::dialogue_box() noexcept {
+engine::dialogue_box::dialogue_box() noexcept {
 	setOutlineThickness(5.0f);
-	_indicator.setPointCount(3);
 }
 
-void awe::dialogue_box::setSounds(std::shared_ptr<sfx::audio> audioLibrary, const std::string& typing, const std::string& moveSelection, const std::string& select) noexcept {
+void engine::dialogue_box::setSounds(std::shared_ptr<sfx::audio> audioLibrary, const std::string& typing, const std::string& moveSelection, const std::string& select) noexcept {
 	_audioLibrary = audioLibrary;
 	_typingKey = typing;
 	_moveSelectionKey = moveSelection;
 	_selectKey = select;
 }
 
-std::string awe::dialogue_box::getTypingSound() const noexcept {
+std::string engine::dialogue_box::getTypingSound() const noexcept {
 	return _typingKey;
 }
 
-std::string awe::dialogue_box::getMoveSelectionSound() const noexcept {
+std::string engine::dialogue_box::getMoveSelectionSound() const noexcept {
 	return _moveSelectionKey;
 }
 
-std::string awe::dialogue_box::getSelectSound() const noexcept {
+std::string engine::dialogue_box::getSelectSound() const noexcept {
 	return _selectKey;
 }
 
-void awe::dialogue_box::setTransitionLength(const float seconds) noexcept {
+void engine::dialogue_box::setTransitionLength(const float seconds) noexcept {
 	_transitionLength = seconds;
 }
 
-void awe::dialogue_box::setTypingDelay(const float seconds) noexcept {
+void engine::dialogue_box::setTypingDelay(const float seconds) noexcept {
 	_typingDelay = seconds;
 }
 
-void awe::dialogue_box::setPosition(const awe::dialogue_box_position position) noexcept {
+void engine::dialogue_box::setPosition(const engine::dialogue_box_position position) noexcept {
 	_position = position;
+	if (_position == engine::dialogue_box_position::NumberOfPositions) {
+		_position = engine::dialogue_box_position::Bottom;
+	}
 }
 
-void awe::dialogue_box::setBackgroundColour(const sf::Color& colour) noexcept {
+void engine::dialogue_box::setBackgroundColour(const sf::Color& colour) noexcept {
 	_background.setFillColor(colour);
 	_nameBackground.setFillColor(colour);
 }
 
-void awe::dialogue_box::setThemeColour(const sf::Color& colour) noexcept {
+void engine::dialogue_box::setThemeColour(const sf::Color& colour) noexcept {
 	_background.setOutlineColor(colour);
 	_nameBackground.setOutlineColor(colour);
 	_indicator.setFillColor(colour);
 }
 
-void awe::dialogue_box::setOutlineThickness(const float thickness) noexcept {
+void engine::dialogue_box::setOutlineThickness(const float thickness) noexcept {
 	_background.setOutlineThickness(thickness);
 	_nameBackground.setOutlineThickness(thickness);
 }
 
-void awe::dialogue_box::setMainText(const std::string& text) noexcept {
+void engine::dialogue_box::setMainText(const std::string& text) noexcept {
 	_fullText = text;
 }
 
-void awe::dialogue_box::setNameText(const std::string& text) noexcept {
+void engine::dialogue_box::setNameText(const std::string& text) noexcept {
 	_nameText.setString(text);
 }
 
-void awe::dialogue_box::setFont(std::shared_ptr<sf::Font> font) noexcept {
-	_mainText.setFont(*font);
-	_option1Text.setFont(*font);
-	_option2Text.setFont(*font);
-	_option3Text.setFont(*font);
-	_nameText.setFont(*font);
+void engine::dialogue_box::setFont(std::shared_ptr<sf::Font> font) noexcept {
+	if (font) {
+		_mainText.setFont(*font);
+		_option1Text.setFont(*font);
+		_option2Text.setFont(*font);
+		_option3Text.setFont(*font);
+		_nameText.setFont(*font);
+	}
 }
 
-void awe::dialogue_box::setOptions(std::string option1, std::string option2, std::string option3) noexcept {
-	if (option1 == "" && option2 != "") {
-		option1 = option2;
-		option2 = "";
-	} else if (option1 == "" && option3 != "") {
-		option1 = option3;
-		option3 = "";
-	}
-	if (option2 == "" && option3 != "") {
-		option2 = option3;
-		option3 = "";
+void engine::dialogue_box::setOptions(const std::string& option1, const std::string& option2, const std::string& option3) noexcept {
+	if (_option1Text.getString() == "" && (option1 != "" || option2 != "" || option3 != "")) {
+		// select first option if there were no options before and now we are adding options
+		_currentOption = 1;
 	}
 	_option1Text.setString(option1);
 	_option2Text.setString(option2);
 	_option3Text.setString(option3);
+	if (_option1Text.getString() == "" && _option2Text.getString() != "") {
+		_option1Text.setString(_option2Text.getString());
+		_option2Text.setString("");
+	} else if (_option1Text.getString() == "" && _option3Text.getString() != "") {
+		_option1Text.setString(_option2Text.getString());
+		_option3Text.setString("");
+	}
+	if (_option2Text.getString() == "" && _option3Text.getString() != "") {
+		_option2Text.setString(_option3Text.getString());
+		_option3Text.setString("");
+	}
+	if (optionCount() == 0) {
+		_currentOption = 0;
+	} else if (_currentOption > optionCount()) {
+		_currentOption = optionCount();
+	}
 }
 
-void awe::dialogue_box::setSizeRatio(const float ratio) noexcept {
+void engine::dialogue_box::setSizeRatio(const float ratio) noexcept {
 	_sizeRatio = ratio;
 }
 
-void awe::dialogue_box::setSprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite) noexcept {
+void engine::dialogue_box::setSprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite) noexcept {
 	_sheet = sheet;
 	_spriteID = sprite;
 	_spriteInfoChanged = true;
 }
 
-void awe::dialogue_box::skipTransitioningIn(const bool skip) noexcept {
+void engine::dialogue_box::skipTransitioningIn(const bool skip) noexcept {
 	_skipTransitioningIn = skip;
 }
 
-void awe::dialogue_box::skipTransitioningOut(const bool skip) noexcept {
+void engine::dialogue_box::skipTransitioningOut(const bool skip) noexcept {
 	_skipTransitioningOut = skip;
 }
 
-void awe::dialogue_box::selectNextOption() noexcept {
-	if (++_currentOption == 4) _currentOption = 1;
-	_playSound(_moveSelectionKey);
+void engine::dialogue_box::selectNextOption() noexcept {
+	if (optionCount() > 0 && _state == engine::dialogue_box_state::StoppedTyping) {
+		if (++_currentOption == optionCount() + 1) _currentOption = 1;
+		_playSound(_moveSelectionKey);
+	}
 }
 
-void awe::dialogue_box::selectPreviousOption() noexcept {
-	if (--_currentOption == 0) _currentOption = 3;
-	_playSound(_moveSelectionKey);
+void engine::dialogue_box::selectPreviousOption() noexcept {
+	if (optionCount() > 0 && _state == engine::dialogue_box_state::StoppedTyping) {
+		if (--_currentOption == 0) _currentOption = optionCount();
+		_playSound(_moveSelectionKey);
+	}
 }
 
-unsigned short awe::dialogue_box::selectCurrentOption() noexcept {
-	if (_state == awe::dialogue_box_state::StoppedTyping) {
+unsigned short engine::dialogue_box::selectCurrentOption() noexcept {
+	if (optionCount() > 0 && _state == engine::dialogue_box_state::StoppedTyping) {
 		if (_currentOption == 1) {
-			_state = awe::dialogue_box_state::Option1;
+			_state = engine::dialogue_box_state::Option1;
 		} else if (_currentOption == 2) {
-			_state = awe::dialogue_box_state::Option2;
+			_state = engine::dialogue_box_state::Option2;
 		} else {
-			_state = awe::dialogue_box_state::Option3;
+			_state = engine::dialogue_box_state::Option3;
 		}
 		_playSound(_selectKey);
 		return _currentOption;
@@ -154,23 +171,27 @@ unsigned short awe::dialogue_box::selectCurrentOption() noexcept {
 	}
 }
 
-void awe::dialogue_box::flip(const bool isFlipped) noexcept {
+void engine::dialogue_box::flip(const bool isFlipped) noexcept {
 	_flipped = isFlipped;
 }
 
-bool awe::dialogue_box::thereAreOptions() const noexcept {
-	return _option1Text.getString() != "";
+unsigned short engine::dialogue_box::optionCount() const noexcept {
+	unsigned short count = 0;
+	if (_option1Text.getString() != "") count++;
+	if (_option2Text.getString() != "") count++;
+	if (_option3Text.getString() != "") count++;
+	return count;
 }
 
-bool awe::dialogue_box::thereIsAName() const noexcept {
+bool engine::dialogue_box::thereIsAName() const noexcept {
 	return _nameText.getString() != "";
 }
 
-void awe::dialogue_box::skipCurrentState() noexcept {
+void engine::dialogue_box::skipCurrentState() noexcept {
 	_skipCurrentState = true;
 }
 
-bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
+bool engine::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	// manage the state of the dialogue box first
 	_stateMachine();
 	// quite a few measurements are based on the bounding box of the text,
@@ -187,10 +208,10 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	_repositionIndicator();
 	_drawToCanvas(target);
 	// if the dialogue box has finished, return TRUE
-	return _state == awe::dialogue_box_state::Closed;
+	return _state == engine::dialogue_box_state::Closed;
 }
 
-void awe::dialogue_box::_repositionIndicator() noexcept {
+void engine::dialogue_box::_repositionIndicator() noexcept {
 	if (_currentOption == 1) {
 		_indicator.setPosition(_option1Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option1Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
 	} else if (_currentOption == 2) {
@@ -200,7 +221,7 @@ void awe::dialogue_box::_repositionIndicator() noexcept {
 	}
 }
 
-void awe::dialogue_box::_updateTextPositions() noexcept {
+void engine::dialogue_box::_updateTextPositions() noexcept {
 	_nameText.setPosition(_nameBackground.getPosition() + sf::Vector2f(_smallPadding, _smallPadding));
 	
 	if (_flipped) {
@@ -218,8 +239,8 @@ void awe::dialogue_box::_updateTextPositions() noexcept {
 	_option3Text.setPosition(_option2Text.getPosition().x + _option2Text.getLocalBounds().width + _indicatorSize * 2.5f, _option2Text.getPosition().y);
 }
 
-void awe::dialogue_box::_updateCharacterSprite(const sf::RenderTarget& target) noexcept {
-	if (_state == awe::dialogue_box_state::Typing || _spriteInfoChanged) {
+void engine::dialogue_box::_updateCharacterSprite(const sf::RenderTarget& target) noexcept {
+	if (_state == engine::dialogue_box_state::Typing || _spriteInfoChanged) {
 		if (_spriteInfoChanged) {
 			_characterSprite.setSpritesheet(_sheet);
 			_characterSprite.setSprite(_spriteID);
@@ -238,7 +259,7 @@ void awe::dialogue_box::_updateCharacterSprite(const sf::RenderTarget& target) n
 	}
 }
 
-void awe::dialogue_box::_updateNameBackground() noexcept {
+void engine::dialogue_box::_updateNameBackground() noexcept {
 	if (thereIsAName()) {
 		_nameBackground.setSize(sf::Vector2f(_nameText.getLocalBounds().width + _smallPadding * 2.0f, _nameText.getLocalBounds().height + _smallPadding * 2.0f));
 	} else {
@@ -249,7 +270,7 @@ void awe::dialogue_box::_updateNameBackground() noexcept {
 	origin.x += _nameBackground.getOutlineThickness();
 	origin.y -= _nameBackground.getOutlineThickness();
 	if (_flipped) origin.x += _background.getSize().x - _nameBackground.getSize().x - _nameBackground.getOutlineThickness() * 2.0f;
-	if (_position == awe::dialogue_box_position::Top) {
+	if (_position == engine::dialogue_box_position::Top) {
 		origin.y += _background.getSize().y + _nameBackground.getOutlineThickness() * 2.0f;
 	} else {
 		origin.y -= _nameBackground.getSize().y;
@@ -257,52 +278,52 @@ void awe::dialogue_box::_updateNameBackground() noexcept {
 	_nameBackground.setPosition(origin);
 }
 
-void awe::dialogue_box::_updateBackground(const sf::RenderTarget& target) noexcept {
+void engine::dialogue_box::_updateBackground(const sf::RenderTarget& target) noexcept {
 	_background.setSize(sf::Vector2f((float)target.getSize().x, (float)target.getSize().y * _sizeRatio));
-	if (_position == awe::dialogue_box_position::Top) {
+	if (_position == engine::dialogue_box_position::Top) {
 		_background.setPosition(0.0f, (0.0f - _background.getSize().y - _background.getOutlineThickness()) + (_background.getSize().y + _background.getOutlineThickness() * 2.0f) * _positionRatio);
-	} else if (_position == awe::dialogue_box_position::Bottom) {
+	} else if (_position == engine::dialogue_box_position::Bottom) {
 		_background.setPosition(0.0f, ((float)target.getSize().y + _background.getOutlineThickness()) - ((_background.getSize().y + _background.getOutlineThickness() * 2.0f) * _positionRatio));
-	} else if (_position == awe::dialogue_box_position::Middle) {
+	} else if (_position == engine::dialogue_box_position::Middle) {
 		_background.setPosition(0.0f, ((float)target.getSize().y / 2.0f) - ((_background.getSize().y + _background.getOutlineThickness() * 2.0f) / 2.0f) * _positionRatio);
 	} else {
 		_background.setPosition(0.0f, 0.0f);
 	}
 }
 
-float awe::dialogue_box::_calculatePositionRatioOffset(const float secondsElapsed) const noexcept {
+float engine::dialogue_box::_calculatePositionRatioOffset(const float secondsElapsed) const noexcept {
 	return secondsElapsed / _transitionLength;
 }
 
-void awe::dialogue_box::_resizeIndicator(const float size) noexcept {
+void engine::dialogue_box::_resizeIndicator(const float size) noexcept {
 	_indicatorSize = size;
 	_indicator.setPoint(0, sf::Vector2f(0.0f, 0.0f));
 	_indicator.setPoint(1, sf::Vector2f(size, size / 2.0f));
 	_indicator.setPoint(2, sf::Vector2f(0.0f, size));
 }
 
-void awe::dialogue_box::_fromClosedToTransitioning() noexcept {
+void engine::dialogue_box::_fromClosedToTransitioning() noexcept {
 	_characterPosition = 0;
 	if (_skipTransitioningIn) {
 		_positionRatio = 1.0f;
-		_state = awe::dialogue_box_state::Typing;
+		_state = engine::dialogue_box_state::Typing;
 		_typingTimer.restart();
 	} else {
-		_state = awe::dialogue_box_state::TransitioningIn;
+		_state = engine::dialogue_box_state::TransitioningIn;
 	}
 }
 
-void awe::dialogue_box::_fromTransitioningToTyping(const float delta) noexcept {
+void engine::dialogue_box::_fromTransitioningToTyping(const float delta) noexcept {
 	_positionRatio += _calculatePositionRatioOffset(delta);
 	if (_skipCurrentState || _positionRatio >= 1.0f) {
-		_state = awe::dialogue_box_state::Typing;
+		_state = engine::dialogue_box_state::Typing;
 		_positionRatio = 1.0f;
 		_typingTimer.restart();
 		_skipCurrentState = false;
 	}
 }
 
-void awe::dialogue_box::_fromTypingToStoppedTyping() noexcept {
+void engine::dialogue_box::_fromTypingToStoppedTyping() noexcept {
 	if (_typingTimer.getElapsedTime().asSeconds() >= _typingDelay) {
 		_playSound(_typingKey);
 		if (_characterPosition < _fullText.size()) {
@@ -315,33 +336,34 @@ void awe::dialogue_box::_fromTypingToStoppedTyping() noexcept {
 		_skipCurrentState = false;
 	}
 	if (_characterPosition == _fullText.size()) {
-		_state = awe::dialogue_box_state::StoppedTyping;
+		_characterSprite.setCurrentFrame(0);
+		_state = engine::dialogue_box_state::StoppedTyping;
 	}
 }
 
-void awe::dialogue_box::_fromOptionToTransitioning() noexcept {
+void engine::dialogue_box::_fromOptionToTransitioning() noexcept {
 	if (_skipTransitioningOut) {
 		_positionRatio = 0.0f;
-		_state = awe::dialogue_box_state::Closed;
+		_state = engine::dialogue_box_state::Closed;
 	} else {
-		_state = awe::dialogue_box_state::TransitioningOut;
+		_state = engine::dialogue_box_state::TransitioningOut;
 	}
 }
 
-void awe::dialogue_box::_fromTransitioningToClosed(const float delta) noexcept {
+void engine::dialogue_box::_fromTransitioningToClosed(const float delta) noexcept {
 	_positionRatio -= _calculatePositionRatioOffset(delta);
 	if (_skipCurrentState || _positionRatio <= 0.0f) {
-		_state = awe::dialogue_box_state::Closed;
+		_state = engine::dialogue_box_state::Closed;
 		_positionRatio = 0.0f;
 		_skipCurrentState = false;
 	}
 }
 
-void awe::dialogue_box::_stateMachine() noexcept {
+void engine::dialogue_box::_stateMachine() noexcept {
 	float delta = calculateDelta();
-	if (_state == awe::dialogue_box_state::Closed) {
+	if (_state == engine::dialogue_box_state::Closed) {
 		_fromClosedToTransitioning();
-	} else if (_state == awe::dialogue_box_state::TransitioningIn) {
+	} else if (_state == engine::dialogue_box_state::TransitioningIn) {
 		// must be else-if so that Closed doesn't immediately switch to TransitioningIn.
 		// this allows animate() to set the initial size of the dialogue box so that
 		// _calculatePositionRatioOffset() doesn't consider the dialogue box size to be 0,
@@ -350,40 +372,40 @@ void awe::dialogue_box::_stateMachine() noexcept {
 		// i.e. dialogue_box created, then animated seconds later resulting in a "skipped" first transition in
 		_fromTransitioningToTyping(delta);
 	}
-	if (_state == awe::dialogue_box_state::Typing) {
+	if (_state == engine::dialogue_box_state::Typing) {
 		_fromTypingToStoppedTyping();
 	}
 	// see selectCurrentOption() [and skipCurrentState()]
-	if (_skipCurrentState && _state == awe::dialogue_box_state::StoppedTyping) {
-		_state = awe::dialogue_box_state::Option1;
+	if (_skipCurrentState && _state == engine::dialogue_box_state::StoppedTyping) {
+		_state = engine::dialogue_box_state::Option1;
 		_skipCurrentState = false;
 	}
-	if (_state == awe::dialogue_box_state::Option1 || _state == awe::dialogue_box_state::Option2 || _state == awe::dialogue_box_state::Option3) {
+	if (_state == engine::dialogue_box_state::Option1 || _state == engine::dialogue_box_state::Option2 || _state == engine::dialogue_box_state::Option3) {
 		_fromOptionToTransitioning();
 	}
-	if (_state == awe::dialogue_box_state::TransitioningOut) {
+	if (_state == engine::dialogue_box_state::TransitioningOut) {
 		_fromTransitioningToClosed(delta);
 	}
 	// this ensures changes in mainText apply to a pre-existing dialogue box
-	if (_state == awe::dialogue_box_state::StoppedTyping || _state == awe::dialogue_box_state::Option1 ||
-		_state == awe::dialogue_box_state::Option2 || _state == awe::dialogue_box_state::Option3 ||
-		_state == awe::dialogue_box_state::TransitioningOut) {
+	if (_state == engine::dialogue_box_state::StoppedTyping || _state == engine::dialogue_box_state::Option1 ||
+		_state == engine::dialogue_box_state::Option2 || _state == engine::dialogue_box_state::Option3 ||
+		_state == engine::dialogue_box_state::TransitioningOut) {
 		_characterPosition = _fullText.size();
 	}
 }
 
-void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+void engine::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_portion1, states);
-	if (_position == awe::dialogue_box_position::Middle) {
+	if (_position == engine::dialogue_box_position::Middle) {
 		target.draw(_portion2, states);
 	}
 }
 
-void awe::dialogue_box::_updateMainText() noexcept {
+void engine::dialogue_box::_updateMainText() noexcept {
 	_mainText.setString(_fullText.substr(0, _characterPosition));
 }
 
-void awe::dialogue_box::_updateCharacterSize(const sf::RenderTarget& target) noexcept {
+void engine::dialogue_box::_updateCharacterSize(const sf::RenderTarget& target) noexcept {
 	_mainText.setCharacterSize((unsigned int)target.getSize().y / 27);
 	_nameText.setCharacterSize(_mainText.getCharacterSize());
 	_option1Text.setCharacterSize(_mainText.getCharacterSize());
@@ -391,7 +413,7 @@ void awe::dialogue_box::_updateCharacterSize(const sf::RenderTarget& target) noe
 	_option3Text.setCharacterSize(_mainText.getCharacterSize());
 }
 
-void awe::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcept {
+void engine::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcept {
 	// remember to offset the weird origin behaviour for all Text objects
 	// thanks Hapax: https://en.sfml-dev.org/forums/index.php?topic=15951.0
 	_canvas.create(target.getSize().x, target.getSize().y);
@@ -403,7 +425,7 @@ void awe::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcept {
 	}
 	_canvas.draw(_characterSprite);
 	_canvas.draw(_mainText, sf::RenderStates().transform.translate(sf::Vector2f(-_mainText.getLocalBounds().left, -_mainText.getLocalBounds().top)));
-	if (thereAreOptions() && _state == awe::dialogue_box_state::StoppedTyping || _state == awe::dialogue_box_state::TransitioningOut) {
+	if (optionCount() > 0 && _state == engine::dialogue_box_state::StoppedTyping || _state == engine::dialogue_box_state::TransitioningOut) {
 		_canvas.draw(_option1Text, sf::RenderStates().transform.translate(sf::Vector2f(-_option1Text.getLocalBounds().left, -_option1Text.getLocalBounds().top)));
 		if (_option2Text.getString() != "") _canvas.draw(_option2Text, sf::RenderStates().transform.translate(sf::Vector2f(-_option2Text.getLocalBounds().left, -_option2Text.getLocalBounds().top)));
 		if (_option3Text.getString() != "") _canvas.draw(_option3Text, sf::RenderStates().transform.translate(sf::Vector2f(-_option3Text.getLocalBounds().left, -_option3Text.getLocalBounds().top)));
@@ -414,10 +436,10 @@ void awe::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcept {
 	_prepareHalfSprites();
 }
 
-void awe::dialogue_box::_prepareHalfSprites() noexcept {
+void engine::dialogue_box::_prepareHalfSprites() noexcept {
 	_portion1.setTexture(_canvas.getTexture(), true);
 	_portion1.setPosition(0.0f, 0.0f);
-	if (_position == awe::dialogue_box_position::Middle) {
+	if (_position == engine::dialogue_box_position::Middle) {
 		_portion2.setTexture(_canvas.getTexture());
 		int heightOfHalves = (int)(_background.getSize().y / 2.0f * _positionRatio);
 		_portion1.setTextureRect(sf::IntRect(
@@ -437,45 +459,45 @@ void awe::dialogue_box::_prepareHalfSprites() noexcept {
 	}
 }
 
-void awe::dialogue_box::_playSound(const std::string& key) noexcept {
+void engine::dialogue_box::_playSound(const std::string& key) noexcept {
 	if (_audioLibrary && key != "") _audioLibrary->play(key);
 }
 
 /*
 // CONSTRUCTION ZONE
 
-bool awe::dialogue_sequence::dialogue::animate(const sf::RenderTarget& target) noexcept {
+bool engine::dialogue_sequence::dialogue::animate(const sf::RenderTarget& target) noexcept {
 	float delta = calculateDelta();
 	// _sprite.animate(target);
 
 	// state machine
-	if (_state == awe::dialogue_state::TransitioningIn) {
+	if (_state == engine::dialogue_state::TransitioningIn) {
 		_transitionIn(_skipTransitioningIn);
 	}
 	
-	if (_state == awe::dialogue_state::TransitioningOut) {
+	if (_state == engine::dialogue_state::TransitioningOut) {
 		_transitionOut(_skipTransitioningOut);
 	}
 }
 
-void awe::dialogue_sequence::dialogue::_transitionIn(bool shouldEnd) noexcept {
+void engine::dialogue_sequence::dialogue::_transitionIn(bool shouldEnd) noexcept {
 	if (shouldEnd) {
-		_state = awe::dialogue_state::Typing;
+		_state = engine::dialogue_state::Typing;
 	} else {
 
 	}
 }
 
-void awe::dialogue_sequence::dialogue::_transitionOut(bool shouldEnd) noexcept {
+void engine::dialogue_sequence::dialogue::_transitionOut(bool shouldEnd) noexcept {
 	if (shouldEnd) {
-		_state = awe::dialogue_state::Closed;
+		_state = engine::dialogue_state::Closed;
 	} else {
 
 	}
 }
 
-void awe::dialogue_sequence::dialogue::_offsetPosition() noexcept {
-	if (_state == awe::dialogue_state::TransitioningIn) {
+void engine::dialogue_sequence::dialogue::_offsetPosition() noexcept {
+	if (_state == engine::dialogue_state::TransitioningIn) {
 		switch (_data.location) {
 		case (dialogue_location::Bottom):
 			_position.y -= _data.transitionSpeed * _delta.get();
@@ -502,7 +524,7 @@ void awe::dialogue_sequence::dialogue::_offsetPosition() noexcept {
 	}
 }
 
-void awe::dialogue_sequence::dialogue::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+void engine::dialogue_sequence::dialogue::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_bg, states);
 	target.draw(_nameBg, states);
 	target.draw(_sprite, states);
@@ -511,15 +533,15 @@ void awe::dialogue_sequence::dialogue::draw(sf::RenderTarget& target, sf::Render
 	target.draw(_indicator, states);
 }
 
-bool awe::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept {
+bool engine::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept {
 	_dialogue->animate(target);
 }
 
-void awe::dialogue_sequence::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+void engine::dialogue_sequence::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(*_dialogue);
 }
 
-awe::dialogue_sequence::dialogue_sequence(sfx::renderer* r, sfx::fonts* f,
+engine::dialogue_sequence::dialogue_sequence(sfx::renderer* r, sfx::fonts* f,
 	sfx::user_input* u, sfx::spritesheet* s, i18n::language_dictionary* l, sfx::audio* a, const std::string& name) noexcept : _logger(name) {
 	_renderer = r;
 	_font = f;
@@ -531,33 +553,33 @@ awe::dialogue_sequence::dialogue_sequence(sfx::renderer* r, sfx::fonts* f,
 	if (!_font) _logger.error("No fonts object given (null pointer): text behaviour is undefined (likely will not display).");
 }
 
-awe::dialogue_sequence::~dialogue_sequence() noexcept {
+engine::dialogue_sequence::~dialogue_sequence() noexcept {
 	//remember to free up the dynamically allocated object!
 	if (_diag) delete _diag;
 }
 
-unsigned int awe::dialogue_sequence::choice() const noexcept {
+unsigned int engine::dialogue_sequence::choice() const noexcept {
 	return _lastChoice;
 }
 
-awe::dialogue_status awe::dialogue_sequence::status() const noexcept {
+engine::dialogue_status engine::dialogue_sequence::status() const noexcept {
 	return _lastStatus;
 }
 
-bool awe::dialogue_sequence::thereAreOptions() const noexcept {
+bool engine::dialogue_sequence::thereAreOptions() const noexcept {
 	if (!_diag) return false;
 	return _diag->thereAreOptions();
 }
 
-std::string awe::dialogue_sequence::current() const noexcept {
+std::string engine::dialogue_sequence::current() const noexcept {
 	return _currentObject->first;
 }
 
-bool awe::dialogue_sequence::_load(safe::json& j) noexcept {
+bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		std::string fontKey = "dialogue";
-		awe::dialogue_data& d = _diagdata[i.key()];
+		engine::dialogue_data& d = _diagdata[i.key()];
 		d.audioObject = _audio;
 		d.rendererObject = _renderer;
 		d.languageObject = _language;
@@ -598,6 +620,6 @@ bool awe::dialogue_sequence::_load(safe::json& j) noexcept {
 	return true;
 }
 
-bool awe::dialogue_sequence::_save(nlohmann::json& j) noexcept {
+bool engine::dialogue_sequence::_save(nlohmann::json& j) noexcept {
 	return false;
 }*/

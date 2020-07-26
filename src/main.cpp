@@ -79,9 +79,9 @@ int main() {
     std::shared_ptr<sfx::audio> audio = std::make_shared<sfx::audio>();
     audio->load("assets/audio/sound/audiosound.json");
 
-    awe::dialogue_box box;
+    engine::dialogue_box box;
     box.setSounds(audio, "movecursor", "movesel", "select");
-    box.setPosition(awe::dialogue_box_position::Middle);
+    box.setPosition(engine::dialogue_box_position::Middle);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Green);
     box.setNameText("Mountain");
@@ -96,6 +96,7 @@ int main() {
     bool selectCurrentOption = false;
     bool showBox = true;
     bool toggleSprite = true;
+    bool showThirdOption = true;
     while (!leave) {
         sf::Event event;
         while (newRenderer.pollEvent(event)) {
@@ -130,6 +131,8 @@ int main() {
                         box.setSprite(sheet, 15);
                         toggleSprite = true;
                     }
+                } else if (event.key.code == sf::Keyboard::V) {
+                    showThirdOption = !showThirdOption;
                 }
             } else if (event.type == sf::Event::Resized) {
                 // update the view to the new size of the window
@@ -138,7 +141,11 @@ int main() {
             }
         }
         box.setMainText(dict("day", -1));
-        box.setOptions(dict("day", 5), dict("greeting"), dict("cancel"));
+        if (showThirdOption) {
+            box.setOptions(dict("day", 5), dict("greeting"), showThirdOption ? dict("cancel") : "");
+        } else {
+            box.setOptions("");
+        }
         newRenderer.clear(sf::Color::Black);
         newRenderer.animate(sprite);
         newRenderer.animate(sprite2);
