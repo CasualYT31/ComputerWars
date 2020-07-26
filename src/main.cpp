@@ -81,12 +81,9 @@ int main() {
 
     awe::dialogue_box box;
     box.setSounds(audio, "movecursor", "movesel", "select");
-    box.setPosition(awe::dialogue_box_position::Bottom);
+    box.setPosition(awe::dialogue_box_position::Middle);
     box.setBackgroundColour(sf::Color(150,150,150));
     box.setThemeColour(sf::Color::Green);
-    box.setSizeRatio(0.15f);
-    box.setMainText("Hello\nNew Line\nAnother new line");
-    box.flip(false);
     box.setNameText("Mountain");
     try {
         box.setFont(fonts["dialogue"]);

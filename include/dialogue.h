@@ -79,6 +79,14 @@ namespace awe {
 	private:
 		// drawing
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		void _updateMainText() noexcept;
+		void _updateCharacterSize(const sf::RenderTarget& target) noexcept;
+		void _updateBackground(const sf::RenderTarget& target) noexcept;
+		void _updateNameBackground() noexcept;
+		void _updateCharacterSprite(const sf::RenderTarget& target) noexcept;
+		void _updateTextPositions() noexcept;
+		void _resizeIndicator(const float size) noexcept;
+		void _repositionIndicator() noexcept;
 		void _drawToCanvas(const sf::RenderTarget& target) noexcept;
 		sf::RenderTexture _canvas;
 		sf::RectangleShape _background;
@@ -93,15 +101,9 @@ namespace awe {
 		sf::Sprite _portion1, _portion2;
 		std::size_t _characterPosition = 0;
 		// base properties that define the transforms of the dialogue box
-		sf::Vector2f _calculateBackgroundSize(const sf::RenderTarget& target) const noexcept;
-		sf::Vector2f _calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept;
-		sf::Vector2f _calculateNameSize() const noexcept;
-		sf::Vector2f _calculateNameOrigin(sf::Vector2f bgOrigin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept;
-		sf::Vector2f _calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSzie) noexcept;
 		float _calculatePositionRatioOffset(const float secondsElapsed) const noexcept;
-		void _resizeIndicator(const float size) noexcept;
 		awe::dialogue_box_position _position = awe::dialogue_box_position::Bottom;
-		float _sizeRatio = 0.2f;
+		float _sizeRatio = 0.15f;
 		float _positionRatio = 0.0f;
 		bool _flipped = false;
 		// tracks the state of the dialogue box

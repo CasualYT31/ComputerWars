@@ -171,28 +171,54 @@ void awe::dialogue_box::skipCurrentState() noexcept {
 }
 
 bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
+	// manage the state of the dialogue box first
 	_stateMachine();
-
-	_mainText.setString(_fullText.substr(0, _characterPosition));
-
-	_mainText.setCharacterSize((unsigned int)target.getSize().y / 27);
-	_nameText.setCharacterSize(_mainText.getCharacterSize());
-	_option1Text.setCharacterSize(_mainText.getCharacterSize());
-	_option2Text.setCharacterSize(_mainText.getCharacterSize());
-	_option3Text.setCharacterSize(_mainText.getCharacterSize());
-
+	// quite a few measurements are based on the bounding box of the text,
+	// so update that before anything else
+	_updateMainText();
+	_updateCharacterSize(target);
 	_resizeIndicator(_option1Text.getCharacterSize() * 0.5f);
+	// practically all measurements are based on the main graphic of the dialogue box,
+	// so resize and reposition that next
+	_updateBackground(target);
+	_updateNameBackground();
+	_updateCharacterSprite(target);
+	_updateTextPositions();
+	_repositionIndicator();
+	_drawToCanvas(target);
+	// if the dialogue box has finished, return TRUE
+	return _state == awe::dialogue_box_state::Closed;
+}
 
-	sf::Vector2f size = _calculateBackgroundSize(target),
-		position = _calculateOrigin(size, target);
-	_background.setSize(size);
-	_background.setPosition(position);
+void awe::dialogue_box::_repositionIndicator() noexcept {
+	if (_currentOption == 1) {
+		_indicator.setPosition(_option1Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option1Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
+	} else if (_currentOption == 2) {
+		_indicator.setPosition(_option2Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option2Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
+	} else if (_currentOption == 3) {
+		_indicator.setPosition(_option3Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option3Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
+	}
+}
 
-	sf::Vector2f nameSize = _calculateNameSize(),
-		namePosition = _calculateNameOrigin(position, size, nameSize);
-	_nameBackground.setSize(nameSize);
-	_nameBackground.setPosition(namePosition);
+void awe::dialogue_box::_updateTextPositions() noexcept {
+	_nameText.setPosition(_nameBackground.getPosition() + sf::Vector2f(_smallPadding, _smallPadding));
+	
+	if (_flipped) {
+		_mainText.setPosition(_background.getPosition() + sf::Vector2f(_largePadding, _smallPadding));
+	} else {
+		_mainText.setPosition(_background.getPosition() + sf::Vector2f(_characterSprite.getPosition().x + _characterSprite.getSize().x + _largePadding, _smallPadding));
+	}
 
+	// I probably could've avoided having to take into account the position in some cases
+	// if I instead changed the origin and not the position of objects
+	_option1Text.setPosition(_mainText.getPosition().x + _indicatorSize * 1.5f, _background.getPosition().y + _background.getSize().y - _option1Text.getLocalBounds().height - _smallPadding);
+
+	_option2Text.setPosition(_option1Text.getPosition().x + _option1Text.getLocalBounds().width + _indicatorSize * 2.5f, _option1Text.getPosition().y);
+
+	_option3Text.setPosition(_option2Text.getPosition().x + _option2Text.getLocalBounds().width + _indicatorSize * 2.5f, _option2Text.getPosition().y);
+}
+
+void awe::dialogue_box::_updateCharacterSprite(const sf::RenderTarget& target) noexcept {
 	if (_state == awe::dialogue_box_state::Typing || _spriteInfoChanged) {
 		if (_spriteInfoChanged) {
 			_characterSprite.setSpritesheet(_sheet);
@@ -203,77 +229,44 @@ bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 		}
 		_characterSprite.animate(target);
 	}
-	sf::Vector2f spritePosition = _calculateSpriteOrigin(position, size);
-	_characterSprite.setPosition(spritePosition);
 
-	_nameText.setPosition(namePosition + sf::Vector2f(_smallPadding, _smallPadding));
-
+	float y = _background.getPosition().y + (_background.getSize().y / 2.0f) - (_characterSprite.getSize().y / 2.0f);
 	if (_flipped) {
-		_mainText.setPosition(position + sf::Vector2f(_largePadding, _smallPadding));
+		_characterSprite.setPosition(sf::Vector2f(_background.getPosition().x + _background.getSize().x - _characterSprite.getSize().x - _largePadding, y));
 	} else {
-		_mainText.setPosition(position + sf::Vector2f(_characterSprite.getPosition().x + _characterSprite.getSize().x + _largePadding, _smallPadding));
+		_characterSprite.setPosition(sf::Vector2f(_background.getPosition().x + _largePadding, y));
 	}
-
-	_option1Text.setPosition(_mainText.getPosition().x + _indicatorSize * 1.5f, position.y + size.y - _option1Text.getLocalBounds().height - _smallPadding);
-
-	_option2Text.setPosition(_option1Text.getPosition().x + _option1Text.getLocalBounds().width + _indicatorSize * 2.5f, _option1Text.getPosition().y);
-
-	_option3Text.setPosition(_option2Text.getPosition().x + _option2Text.getLocalBounds().width + _indicatorSize * 2.5f, _option2Text.getPosition().y);
-
-	if (_currentOption == 1) {
-		_indicator.setPosition(_option1Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option1Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
-	} else if (_currentOption == 2) {
-		_indicator.setPosition(_option2Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option2Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
-	} else if (_currentOption == 3) {
-		_indicator.setPosition(_option3Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option3Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
-	}
-
-	_drawToCanvas(target);
-
-	return _state == awe::dialogue_box_state::Closed;
 }
 
-sf::Vector2f awe::dialogue_box::_calculateBackgroundSize(const sf::RenderTarget& target) const noexcept {
-	return sf::Vector2f((float)target.getSize().x, (float)target.getSize().y * _sizeRatio);
-}
-
-sf::Vector2f awe::dialogue_box::_calculateOrigin(const sf::Vector2f& size, const sf::RenderTarget& target) const noexcept {
-	if (_position == awe::dialogue_box_position::Top) {
-		return sf::Vector2f(0.0f, (0.0f - size.y - _background.getOutlineThickness()) + (size.y + _background.getOutlineThickness() * 2.0f) * _positionRatio);
-	} else if (_position == awe::dialogue_box_position::Bottom) {
-		return sf::Vector2f(0.0f, ((float)target.getSize().y + _background.getOutlineThickness()) - ((size.y + _background.getOutlineThickness() * 2.0f) * _positionRatio));
-	} else if (_position == awe::dialogue_box_position::Middle) {
-		return sf::Vector2f(0.0f, ((float)target.getSize().y / 2.0f) - ((size.y + _background.getOutlineThickness() * 2.0f) / 2.0f) * _positionRatio);
-	}
-	return sf::Vector2f(0.0f, 0.0f);
-}
-
-sf::Vector2f awe::dialogue_box::_calculateNameSize() const noexcept {
+void awe::dialogue_box::_updateNameBackground() noexcept {
 	if (thereIsAName()) {
-		return sf::Vector2f(_nameText.getLocalBounds().width + _smallPadding * 2.0f, _nameText.getLocalBounds().height + _smallPadding * 2.0f);
+		_nameBackground.setSize(sf::Vector2f(_nameText.getLocalBounds().width + _smallPadding * 2.0f, _nameText.getLocalBounds().height + _smallPadding * 2.0f));
 	} else {
-		return sf::Vector2f(0.0f, 0.0f);
+		_nameBackground.setSize(sf::Vector2f(0.0f, 0.0f));
 	}
-}
 
-sf::Vector2f awe::dialogue_box::_calculateNameOrigin(sf::Vector2f origin, const sf::Vector2f& bgSize, const sf::Vector2f& nameSize) const noexcept {
+	sf::Vector2f origin = _background.getPosition();
 	origin.x += _nameBackground.getOutlineThickness();
 	origin.y -= _nameBackground.getOutlineThickness();
-	if (_flipped) origin.x += bgSize.x - nameSize.x - _nameBackground.getOutlineThickness() * 2.0f;
+	if (_flipped) origin.x += _background.getSize().x - _nameBackground.getSize().x - _nameBackground.getOutlineThickness() * 2.0f;
 	if (_position == awe::dialogue_box_position::Top) {
-		origin.y += bgSize.y + _nameBackground.getOutlineThickness() * 2.0f;
+		origin.y += _background.getSize().y + _nameBackground.getOutlineThickness() * 2.0f;
 	} else {
-		origin.y -= nameSize.y;
+		origin.y -= _nameBackground.getSize().y;
 	}
-	return origin;
+	_nameBackground.setPosition(origin);
 }
 
-sf::Vector2f awe::dialogue_box::_calculateSpriteOrigin(const sf::Vector2f& bgOrigin, const sf::Vector2f& bgSize) noexcept {
-	float y = bgOrigin.y + (bgSize.y / 2.0f) - (_characterSprite.getSize().y / 2.0f);
-	if (_flipped) {
-		return sf::Vector2f(bgOrigin.x + bgSize.x - _characterSprite.getSize().x - _largePadding, y);
+void awe::dialogue_box::_updateBackground(const sf::RenderTarget& target) noexcept {
+	_background.setSize(sf::Vector2f((float)target.getSize().x, (float)target.getSize().y * _sizeRatio));
+	if (_position == awe::dialogue_box_position::Top) {
+		_background.setPosition(0.0f, (0.0f - _background.getSize().y - _background.getOutlineThickness()) + (_background.getSize().y + _background.getOutlineThickness() * 2.0f) * _positionRatio);
+	} else if (_position == awe::dialogue_box_position::Bottom) {
+		_background.setPosition(0.0f, ((float)target.getSize().y + _background.getOutlineThickness()) - ((_background.getSize().y + _background.getOutlineThickness() * 2.0f) * _positionRatio));
+	} else if (_position == awe::dialogue_box_position::Middle) {
+		_background.setPosition(0.0f, ((float)target.getSize().y / 2.0f) - ((_background.getSize().y + _background.getOutlineThickness() * 2.0f) / 2.0f) * _positionRatio);
 	} else {
-		return sf::Vector2f(bgOrigin.x + _largePadding, y);
+		_background.setPosition(0.0f, 0.0f);
 	}
 }
 
@@ -364,6 +357,18 @@ void awe::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) 
 	if (_position == awe::dialogue_box_position::Middle) {
 		target.draw(_portion2, states);
 	}
+}
+
+void awe::dialogue_box::_updateMainText() noexcept {
+	_mainText.setString(_fullText.substr(0, _characterPosition));
+}
+
+void awe::dialogue_box::_updateCharacterSize(const sf::RenderTarget& target) noexcept {
+	_mainText.setCharacterSize((unsigned int)target.getSize().y / 27);
+	_nameText.setCharacterSize(_mainText.getCharacterSize());
+	_option1Text.setCharacterSize(_mainText.getCharacterSize());
+	_option2Text.setCharacterSize(_mainText.getCharacterSize());
+	_option3Text.setCharacterSize(_mainText.getCharacterSize());
 }
 
 void awe::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcept {
