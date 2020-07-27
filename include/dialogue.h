@@ -29,6 +29,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "texture.h"
 #include "audio.h"
+#include "language.h"
+#include "userinput.h"
 
 /**
  * The \c engine namespace defines game code that isn't specific to Computer Wars.
@@ -605,6 +607,28 @@ namespace engine {
 		std::string _selectKey = "";
 	};
 
+	struct dialogue_box_data {
+		engine::dialogue_box_position position = engine::dialogue_box_position::Bottom;
+		float size = 0.15f;
+		bool flipped = false;
+		std::string mainText = "";
+		bool skipTransIn = false;
+		bool skipTransOut = false;
+		unsigned short currentOption = 0;
+		std::shared_ptr<sfx::animated_spritesheet> sheet = nullptr;
+		unsigned int spriteID = 0;
+		float transLength = 1.0f;
+		float typingDelay = 0.05f;
+		std::shared_ptr<sfx::audio> audio = nullptr;
+		std::string typingSoundKey = "typing";
+		std::string moveSelSoundKey = "movesel";
+		std::string selectSoundKey = "select";
+		sf::Color themeColour = sf::Color::Black;
+		std::string nameText = "";
+		std::shared_ptr<sf::Font> font = nullptr;
+		std::array<std::string, 3> options = { "", "", "" };
+	};
+
 	class dialogue_sequence : public safe::json_script, public sfx::animated_drawable {
 	public:
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
@@ -613,10 +637,18 @@ namespace engine {
 		virtual bool _load(safe::json& j) noexcept;
 		virtual bool _save(nlohmann::json& j) noexcept;
 
-		struct dialogue_box_data {
+		// may need to combine this with dialogue_box class
+		
 
-		};
+		std::shared_ptr<i18n::language_dictionary> _langDic = nullptr;
+		std::shared_ptr<sfx::user_input> _userInput = nullptr;
+		std::string _moveRightControlKey = "right";
+		std::string _moveLeftControlKey = "left";
+		std::string _selectControlKey = "select";
+		std::string _skipControlKey = "pause";
+
 		std::vector<dialogue_box_data> _boxes;
+		std::size_t _currentBoxID = 0;
 		std::unique_ptr<dialogue_box> _currentBox;
 	};
 }
