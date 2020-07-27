@@ -299,6 +299,24 @@ namespace engine {
 		bool thereIsAName() const noexcept;
 
 		/**
+		 * Retrieves the first option's text directly from the text object.
+		 * @return The previously assigned text.
+		 */
+		std::string getOption1Text() const noexcept;
+
+		/**
+		 * Retrieves the second option's text directly from the text object.
+		 * @return The previously assigned text.
+		 */
+		std::string getOption2Text() const noexcept;
+
+		/**
+		 * Retrieves the third option's text directly from the text object.
+		 * @return The previously assigned text.
+		 */
+		std::string getOption3Text() const noexcept;
+
+		/**
 		 * Skips the current state.
 		 * This is used to skip transitions, typing, and option selection midway through.
 		 * It is the primary way of causing the dialogue box to transition out after all text has been displayed.
@@ -607,38 +625,49 @@ namespace engine {
 		std::string _selectKey = "";
 	};
 
-	struct dialogue_box_data {
-		engine::dialogue_box_position position = engine::dialogue_box_position::Bottom;
-		float size = 0.15f;
-		bool flipped = false;
-		std::string mainText = "";
-		bool skipTransIn = false;
-		bool skipTransOut = false;
-		unsigned short currentOption = 0;
-		std::shared_ptr<sfx::animated_spritesheet> sheet = nullptr;
-		unsigned int spriteID = 0;
-		float transLength = 1.0f;
-		float typingDelay = 0.05f;
-		std::shared_ptr<sfx::audio> audio = nullptr;
-		std::string typingSoundKey = "typing";
-		std::string moveSelSoundKey = "movesel";
-		std::string selectSoundKey = "select";
-		sf::Color themeColour = sf::Color::Black;
-		std::string nameText = "";
-		std::shared_ptr<sf::Font> font = nullptr;
-		std::array<std::string, 3> options = { "", "", "" };
-	};
-
 	class dialogue_sequence : public safe::json_script, public sfx::animated_drawable {
 	public:
+		dialogue_sequence(const std::string& name = "dialogue_sequence") noexcept;
+		void setLanguageDictionary(std::shared_ptr<i18n::language_dictionary> dict) noexcept;
+		void setUserInput(std::shared_ptr<sfx::user_input> ui) noexcept;
+		template<typename... Ts>
+		void updateMainText(Ts... values) noexcept;
+		template<typename... Ts>
+		void updateNameText(Ts... values) noexcept;
+		template<typename... Ts>
+		void updateOption1Text(Ts... values) noexcept;
+		template<typename... Ts>
+		void updateOption2Text(Ts... values) noexcept;
+		template<typename... Ts>
+		void updateOption3Text(Ts... values) noexcept;
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 		virtual bool _load(safe::json& j) noexcept;
 		virtual bool _save(nlohmann::json& j) noexcept;
+		std::unique_ptr<engine::dialogue_box> _allocateDialogueBox(const std::size_t i) noexcept;
 
 		// may need to combine this with dialogue_box class
-		
+		struct dialogue_box_data {
+			engine::dialogue_box_position position = engine::dialogue_box_position::Bottom;
+			float size = 0.15f;
+			bool flipped = false;
+			std::string mainText = "";
+			bool skipTransIn = false;
+			bool skipTransOut = false;
+			std::shared_ptr<sfx::animated_spritesheet> sheet = nullptr;
+			unsigned int spriteID = 0;
+			float transLength = 1.0f;
+			float typingDelay = 0.05f;
+			std::shared_ptr<sfx::audio> audio = nullptr;
+			std::string typingSoundKey = "typing";
+			std::string moveSelSoundKey = "movesel";
+			std::string selectSoundKey = "select";
+			sf::Color themeColour = sf::Color::Black;
+			std::string nameText = "";
+			std::shared_ptr<sf::Font> font = nullptr;
+			std::array<std::string, 3> options = { "", "", "" };
+		};
 
 		std::shared_ptr<i18n::language_dictionary> _langDic = nullptr;
 		std::shared_ptr<sfx::user_input> _userInput = nullptr;
@@ -650,7 +679,34 @@ namespace engine {
 		std::vector<dialogue_box_data> _boxes;
 		std::size_t _currentBoxID = 0;
 		std::unique_ptr<dialogue_box> _currentBox;
+
+		global::logger _logger;
 	};
+}
+
+template<typename... Ts>
+void engine::dialogue_sequence::updateMainText(Ts... values) noexcept {
+	if (_langDic && _currentBox) _currentBox->setMainText((*_langDic)(_boxes[_currentBoxID].mainText, values...));
+}
+
+template<typename... Ts>
+void engine::dialogue_sequence::updateNameText(Ts... values) noexcept {
+	if (_langDic && _currentBox) _currentBox->setNameText((*_langDic)(_boxes[_currentBoxID].nameText, values...));
+}
+
+template<typename... Ts>
+void engine::dialogue_sequence::updateOption1Text(Ts... values) noexcept {
+	if (_langDic && _currentBox) _currentBox->setOptions((*_langDic)(_boxes[_currentBoxID].options[0], values...), _currentBox->getOption2Text(), _currentBox->getOption3Text());
+}
+
+template<typename... Ts>
+void engine::dialogue_sequence::updateOption2Text(Ts... values) noexcept {
+	if (_langDic && _currentBox) _currentBox->setOptions(_currentBox->getOption1Text(), (*_langDic)(_boxes[_currentBoxID].options[1], values...), _currentBox->getOption3Text());
+}
+
+template<typename... Ts>
+void engine::dialogue_sequence::updateOption3Text(Ts... values) noexcept {
+	if (_langDic && _currentBox) _currentBox->setOptions(_currentBox->getOption1Text(), _currentBox->getOption2Text(), (*_langDic)(_boxes[_currentBoxID].options[2], values...));
 }
 
 /*

@@ -24,16 +24,89 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // dialogue_sequence
 
-bool engine::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept {
+engine::dialogue_sequence::dialogue_sequence(const std::string& name) noexcept : _logger(name) {}
 
+void engine::dialogue_sequence::setLanguageDictionary(std::shared_ptr<i18n::language_dictionary> dict) noexcept {
+	_langDic = dict;
+}
+
+void engine::dialogue_sequence::setUserInput(std::shared_ptr<sfx::user_input> ui) noexcept {
+	_userInput = ui;
+}
+
+bool engine::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept {
+	if (!_currentBox) {
+		// if no box has ever been allocated yet, attempt to allocate the first one
+		_currentBox = _allocateDialogueBox(_currentBoxID = 0);
+		// if it couldn't be allocated, return TRUE and ignore call
+		if (!_currentBox) return true;
+	}
+	if (_currentBox) {
+		// handle user input
+		if (_userInput) {
+			if ((*_userInput)[_moveRightControlKey]) {
+				_currentBox->selectNextOption();
+			} else if ((*_userInput)[_moveLeftControlKey]) {
+				_currentBox->selectPreviousOption();
+			} else if ((*_userInput)[_selectControlKey]) {
+				if (_currentBox->optionCount() > 0) {
+					// this also conveniently makes it so that users can't skip any part of an option dialogue
+					// it allows users to become aware that they should stop spamming the "A" button since they could inadvertedly select something which they don't want to
+					_currentBox->selectCurrentOption();
+				} else {
+					_currentBox->skipCurrentState();
+				}
+			} else if ((*_userInput)[_skipControlKey]) {
+				// emulate a failed dialogue box allocation
+				_currentBox = nullptr;
+				return true;
+			}
+		}
+		// animate the dialogue box
+		if (_currentBox->animate(target)) {
+			// current box has ended, allocate next one
+			_currentBox = _allocateDialogueBox(++_currentBoxID);
+			// if nullptr is returned, the end of the sequence has been reached (hopefully it is not an allocation error, maybe move exception checking outside of that method?), return TRUE
+			if (!_currentBox) return true;
+		}
+	}
+	return false;
+}
+
+std::unique_ptr<engine::dialogue_box> engine::dialogue_sequence::_allocateDialogueBox(const std::size_t i) noexcept {
+	if (i >= _boxes.size()) return nullptr;
+	std::unique_ptr<engine::dialogue_box> ret;
+	try {
+		ret = std::make_unique<engine::dialogue_box>();
+	} catch (std::bad_alloc& e) {
+		_logger.error("Fatal allocation error of dialogue box {}: {}", i, e.what());
+		return nullptr;
+	}
+	engine::dialogue_sequence::dialogue_box_data& data = _boxes[i];
+	ret->setPosition(data.position);
+	ret->setSizeRatio(data.size);
+	ret->flip(data.flipped);
+	ret->setMainText(data.mainText);
+	ret->skipTransitioningIn(data.skipTransIn);
+	ret->skipTransitioningOut(data.skipTransOut);
+	ret->setSprite(nullptr, data.spriteID);
+	ret->setTransitionLength(data.transLength);
+	ret->setTypingDelay(data.typingDelay);
+	ret->setSounds(nullptr, data.typingSoundKey, data.moveSelSoundKey, data.selectSoundKey);
+	ret->setThemeColour(data.themeColour);
+	ret->setNameText(data.nameText);
+	ret->setFont(nullptr);
+	ret->setOptions(data.options[0], data.options[1], data.options[2]);
+	return ret;
 }
 
 void engine::dialogue_sequence::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-
+	if (_currentBox) target.draw(*_currentBox, states);
 }
 
 bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 	_boxes.clear();
+	_currentBox = nullptr;
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		// special keys
@@ -46,10 +119,8 @@ bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 		} else if (i.key() == "skip") {
 			j.apply(_skipControlKey, { "skip" }, &_skipControlKey, true);
 		} else { // other keys store dialogue boxes
-			_boxes.push_back(dialogue_box_data());
+			_boxes.push_back(dialogue_box_data()); // in VS this line appears as an error sometimes but it compiles fine...
 			std::size_t k = _boxes.size() - 1;
-
-			dialogue_box_data data;
 
 			unsigned short pos = 0;
 			j.apply(pos, { i.key(), "position" }, &pos, true);
@@ -63,8 +134,8 @@ bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 			j.apply(_boxes[k].mainText, { i.key(), "text" }, &_boxes[k].mainText, true);
 			j.apply(_boxes[k].skipTransIn, { i.key(), "skiptransin" }, &_boxes[k].skipTransIn, true);
 			j.apply(_boxes[k].skipTransOut, { i.key(), "skiptransout" }, &_boxes[k].skipTransOut, true);
-			j.apply(_boxes[k].currentOption, { i.key(), "option" }, &_boxes[k].currentOption, true);
 			// in order to achieve spritesheet key, we're going to need some kind of request system whereby a class requests a pointer to a spritesheet from awe::game...
+			// look at the Mediator design pattern
 			j.apply(_boxes[k].spriteID, { i.key(), "sprite" }, &_boxes[k].spriteID, true);
 			j.apply(_boxes[k].transLength, { i.key(), "translength" }, &_boxes[k].transLength, true);
 			j.apply(_boxes[k].typingDelay, { i.key(), "typingdelay" }, &_boxes[k].typingDelay, true);
@@ -77,8 +148,6 @@ bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 			// see above, also applies to font key
 			j.applyArray(_boxes[k].options, { i.key(), "options" });
 			j.resetState();
-
-			_boxes.push_back(data);
 		}
 	}
 	return true;
@@ -253,6 +322,18 @@ unsigned short engine::dialogue_box::optionCount() const noexcept {
 
 bool engine::dialogue_box::thereIsAName() const noexcept {
 	return _nameText.getString() != "";
+}
+
+std::string engine::dialogue_box::getOption1Text() const noexcept {
+	return _option1Text.getString().toAnsiString();
+}
+
+std::string engine::dialogue_box::getOption2Text() const noexcept {
+	return _option2Text.getString().toAnsiString();
+}
+
+std::string engine::dialogue_box::getOption3Text() const noexcept {
+	return _option3Text.getString().toAnsiString();
 }
 
 void engine::dialogue_box::skipCurrentState() noexcept {
