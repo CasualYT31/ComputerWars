@@ -20,6 +20,10 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/**@file gui.h
+ * Defines code related to managing GUIs.
+ */
+
 #pragma once
 
 #include "tgui/tgui.hpp"
@@ -47,20 +51,23 @@ namespace engine {
 		sf::Color _colour;
 	};
 
-	class gui : public safe::json_script {
+	class gui : public sfx::animated_drawable, public safe::json_script {
 	public:
-		gui(engine::scripts* scripts, const std::string& name = "gui") noexcept;
+		gui(std::shared_ptr<engine::scripts> scripts, const std::string& name = "gui") noexcept;
 
 		std::string setGUI(const std::string& newPanel) noexcept;
-		std::string getGUI() noexcept;
+		std::string getGUI() const noexcept;
+
+		void setSpritesheet(std::shared_ptr<sfx::animated_spritesheet> sheet) noexcept;
 
 		void setTarget(sf::RenderTarget& newTarget) noexcept;
 		bool handleEvent(sf::Event e) noexcept;
-		void drawBackground(sfx::spritesheet* sprites = nullptr) noexcept;
-		void drawForeground(sfx::spritesheet* sprites = nullptr) noexcept;
-
 		void signalHandler(tgui::Widget::Ptr widget, const std::string& signalName) noexcept;
+
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
 		virtual bool _load(safe::json& j) noexcept;
 		virtual bool _save(nlohmann::json& j) noexcept;
 		bool _loadGUI(const std::string& name, const std::string& filepath) noexcept;
@@ -70,10 +77,16 @@ namespace engine {
 		tgui::Gui _gui;
 		std::string _currentGUI;
 		std::unordered_map<std::string, gui_background> _guiBackground;
-		engine::scripts* _scripts = nullptr;
-		//background drawing stuff
-		sf::Sprite _bgsprite;
-		//data
+
+		std::shared_ptr<engine::scripts> _scripts = nullptr;
+		std::shared_ptr<sfx::animated_spritesheet> _sheet = nullptr;
+
+		sf::RectangleShape _bgColour;
+		sfx::animated_sprite _bgSprite;
+
+		std::vector<sf::Texture> _widgetPictures;
+		std::vector<sfx::animated_sprite> _widgetSprites;
+
 		std::unordered_map<std::string, std::unordered_map<std::string, unsigned int>> _guiSpriteKeys;
 	};
 }

@@ -19,7 +19,7 @@ ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/*
+
 #include "gui.h"
 #include <iostream>
 
@@ -55,7 +55,7 @@ sf::Color engine::gui_background::getColour() const noexcept {
 	return _colour;
 }
 
-engine::gui::gui(engine::scripts* scripts, const std::string& name) noexcept : _scripts(scripts), _logger(name) {
+engine::gui::gui(std::shared_ptr<engine::scripts> scripts, const std::string& name) noexcept : _scripts(scripts), _logger(name) {
 	if (!scripts) _logger.error("No scripts object has been provided to this GUI object: no signal handling will occur.");
 }
 
@@ -69,12 +69,18 @@ std::string engine::gui::setGUI(const std::string& newPanel) noexcept {
 		_logger.error("{}", e.what());
 		return old;
 	}
+	// clear widget sprites
+	_widgetSprites.clear();
 	_currentGUI = newPanel;
 	return old;
 }
 
-std::string engine::gui::getGUI() noexcept {
+std::string engine::gui::getGUI() const noexcept {
 	return _currentGUI;
+}
+
+void engine::gui::setSpritesheet(std::shared_ptr<sfx::animated_spritesheet> sheet) noexcept {
+	_sheet = sheet;
 }
 
 void engine::gui::setTarget(sf::RenderTarget& newTarget) noexcept {
@@ -85,25 +91,81 @@ bool engine::gui::handleEvent(sf::Event e) noexcept {
 	return _gui.handleEvent(e);
 }
 
-void engine::gui::drawBackground(sfx::spritesheet* sprites) noexcept {
-	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
-		if (_guiBackground[getGUI()].getType() == engine::gui_background::type::Colour) {
-			_gui.getTarget()->clear(_guiBackground[getGUI()].getColour());
-		} else if (sprites) {
-			_gui.getTarget()->clear();
-			sf::Texture sprite = (*sprites)[_guiBackground[getGUI()].getSprite()];
-			_bgsprite.setTexture(sprite);
-			_bgsprite.setScale((float) _gui.getTarget()->getSize().x / (float) sprite.getSize().x, (float) _gui.getTarget()->getSize().y / (float) sprite.getSize().y);
-			_gui.getTarget()->draw(_bgsprite);
-		} else {
-			_gui.getTarget()->clear();
-		}
-	} else {
-		_gui.getTarget()->clear();
-	}
+void engine::gui::signalHandler(tgui::Widget::Ptr widget, const std::string& signalName) noexcept {
+	std::string functionName = getGUI() + "_" + widget->getWidgetName() + "_" + signalName;
+	if (_scripts && getGUI() != "" && _scripts->functionExists(functionName)) _scripts->callFunction(functionName);
 }
 
-void engine::gui::drawForeground(sfx::spritesheet* sprites) noexcept {
+bool engine::gui::animate(const sf::RenderTarget& target) noexcept {
+	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
+		// this GUI has a background to animate
+		if (_guiBackground[getGUI()].getType() == engine::gui_background::type::Colour) {
+			_bgColour.setSize(sf::Vector2f(target.getSize().x, target.getSize().y));
+			_bgColour.setFillColor(_guiBackground[getGUI()].getColour());
+		} else {
+			_bgSprite.setSpritesheet(_sheet);
+			_bgSprite.setSprite(_guiBackground[getGUI()].getSprite());
+			_bgSprite.animate(target);
+		}
+	}
+
+	_widgetPictures.clear();
+	std::size_t i = 0;
+	if (_sheet && getGUI() != "") {
+		//update bitmapbutton and picture sprites
+		auto widgetList = _gui.get<tgui::Group>(getGUI())->getWidgets();
+		for (auto itr = widgetList.begin(), enditr = widgetList.end(); itr != enditr; itr++) {
+			auto widget = *itr;
+			if (widget->getWidgetType() == "BitmapButton" || widget->getWidgetType() == "Picture") {
+				unsigned int spriteID = _guiSpriteKeys[getGUI()][widget->getWidgetName()];
+				if (i == _widgetSprites.size()) {
+					// animated sprite doesn't yet exist, allocate it
+					_widgetSprites.push_back(sfx::animated_sprite(_sheet, spriteID));
+				}
+				_widgetSprites[i].animate(target);
+				_widgetPictures.push_back(_sheet->accessTexture(_widgetSprites[i].getCurrentFrame()));
+				_widgetPictures[i].
+
+				//apply new texture
+				if (widget->getWidgetType() == "BitmapButton") {
+					auto bitmapbutton = _gui.get<tgui::BitmapButton>(widget->getWidgetName());
+
+					
+					/* I've got a big problem...
+					The new spritesheet classes aren't very compatible with TGUI...
+					TGUI won't accept texture rects, which the new classes rely on,
+					And I'm not sure how I should approach the solution to this problem
+					*/
+
+
+					_widgetPictures.push_back(_sheet->accessTexture());
+					bitmapbutton->setImage((*sprites)[_guiSpriteKeys[getGUI()][widget->getWidgetName()]]);
+				} else {
+					auto newRenderer = tgui::PictureRenderer();
+					newRenderer.setTexture((*sprites)[]);
+
+					_gui.get<tgui::Picture>(widget->getWidgetName())->setRenderer(newRenderer.getData());
+				}
+				i++;
+			}
+		}
+	}
+
+	return false;
+}
+
+void engine::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	// draw background
+	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
+		// this GUI has a background to animate
+		if (_guiBackground.at(getGUI()).getType() == engine::gui_background::type::Colour) {
+			target.draw(_bgColour);
+		} else {
+			target.draw(_bgSprite);
+		}
+	}
+
+	// draw foreground
 	if (sprites && getGUI() != "") {
 		//update bitmapbutton and picture sprites
 		auto widgetList = _gui.get<tgui::Group>(getGUI())->getWidgets();
@@ -122,13 +184,7 @@ void engine::gui::drawForeground(sfx::spritesheet* sprites) noexcept {
 			}
 		}
 	}
-	//draw
 	_gui.draw();
-}
-
-void engine::gui::signalHandler(tgui::Widget::Ptr widget, const std::string& signalName) noexcept {
-	std::string functionName = getGUI() + "_" + widget->getWidgetName() + "_" + signalName;
-	if (_scripts && getGUI() != "" && _scripts->functionExists(functionName)) _scripts->callFunction(functionName);
 }
 
 bool engine::gui::_load(safe::json& j) noexcept {
@@ -244,4 +300,4 @@ void engine::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	} else if (type == "treeview") {
 		widget->connect({ "ItemSelected", "DoubleClicked", "Expanded", "Collapsed" }, &engine::gui::signalHandler, this);
 	}
-}*/
+}
