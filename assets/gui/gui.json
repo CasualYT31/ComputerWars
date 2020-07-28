@@ -3,8 +3,7 @@
 		"path": "assets/gui/main.txt",
 		"background": [255,0,0,255],
 		"BitmapButton1": {
-			"sprite": 0,
-			"pressed": "TestName"
+			"sprite": 0
 		},
 		"Picture1": {
 			"sprite": 1

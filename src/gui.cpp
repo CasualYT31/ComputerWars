@@ -21,7 +21,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "gui.h"
-#include <iostream>
 
 engine::gui_background::gui_background() noexcept {}
 
@@ -56,7 +55,7 @@ sf::Color engine::gui_background::getColour() const noexcept {
 }
 
 engine::gui::gui(std::shared_ptr<engine::scripts> scripts, const std::string& name) noexcept : _scripts(scripts), _logger(name) {
-	if (!scripts) _logger.error("No scripts object has been provided to this GUI object: no signal handling will occur.");
+	if (!scripts) _logger.error("No scripts object has been provided to this GUI object: no signals will be handled.");
 }
 
 std::string engine::gui::setGUI(const std::string& newPanel) noexcept {
@@ -67,6 +66,7 @@ std::string engine::gui::setGUI(const std::string& newPanel) noexcept {
 		_gui.get(newPanel)->setVisible(true);
 	} catch (tgui::Exception& e) {
 		_logger.error("{}", e.what());
+		_gui.get(old)->setVisible(true);
 		return old;
 	}
 	// clear widget sprites
@@ -167,10 +167,7 @@ bool engine::gui::_load(safe::json& j) noexcept {
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		if (i.value().find("path") != i.value().end() && i.value()["path"].is_string()) {
-			if (!_loadGUI(i.key(), i.value()["path"])) {
-				ret = false;
-				std::cout << "invalid!\n";
-			}
+			if (!_loadGUI(i.key(), i.value()["path"])) ret = false;
 		} else {
 			_logger.write("Warning - GUI with the name \"{}\" did not refer to a valid string path within its required object value.", i.key());
 		}
