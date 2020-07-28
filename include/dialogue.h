@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * The \c engine namespace defines game code that isn't specific to Computer Wars.
- * Code within this namespace utilises dependencies defined within non-<tt>cwe</tt> namespaces to define game-based classes that aren't specific to Computer Wars.
+ * Code within this namespace utilises dependencies defined within non-<tt>awe</tt> namespaces to define game-based classes that aren't specific to Computer Wars.
  * These could include script, GUI, and dialogue management classes.
  */
 namespace engine {

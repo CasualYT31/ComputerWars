@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "bank.h"
-/*
+
 void awe::updateAllTerrains(awe::bank<awe::tile_type>& tileBank, const awe::bank<awe::terrain>& terrainBank) noexcept {
 	for (std::size_t i = 0; i < tileBank.size(); i++) {
 		tileBank[(awe::bank<awe::tile_type>::index)i]->updateTerrain(terrainBank);
@@ -44,7 +44,7 @@ const std::string& awe::common_properties::getName() const noexcept {
 const std::string& awe::common_properties::getShortName() const noexcept {
 	return _shortName;
 }
-sfx::SpriteKey awe::common_properties::getIconKey() const noexcept {
+unsigned int awe::common_properties::getIconKey() const noexcept {
 	return _iconKey;
 }
 const std::string& awe::common_properties::getDescription() const noexcept {
@@ -97,7 +97,7 @@ int awe::terrain::getMoveCost(const awe::bank<awe::movement_type>::index movecos
 	if (movecostID >= _movecosts.size()) return -1;
 	return _movecosts[movecostID];
 }
-sfx::SpriteKey awe::terrain::getPicture(const awe::bank<awe::country>::index countryID) const noexcept {
+unsigned int awe::terrain::getPicture(const awe::bank<awe::country>::index countryID) const noexcept {
 	if (countryID >= _pictures.size()) return UINT_MAX;
 	return _pictures[countryID];
 }
@@ -115,7 +115,7 @@ awe::tile_type::tile_type(safe::json& j) noexcept {
 awe::bank<awe::terrain>::index awe::tile_type::getTypeIndex() const noexcept {
 	return _terrainType;
 }
-sfx::SpriteKey awe::tile_type::getTile(awe::bank<awe::country>::index countryID) const noexcept {
+unsigned int awe::tile_type::getTile(awe::bank<awe::country>::index countryID) const noexcept {
 	if (countryID >= _tiles.size()) return UINT_MAX;
 	return _tiles[countryID];
 }
@@ -148,11 +148,11 @@ awe::unit_type::unit_type(safe::json& j) noexcept : common_properties(j) {
 awe::bank<awe::movement_type>::index awe::unit_type::getMovementType() const noexcept {
 	return _movementTypeID;
 }
-sfx::SpriteKey awe::unit_type::getPicture(awe::bank<awe::country>::index countryID) const noexcept {
+unsigned int awe::unit_type::getPicture(awe::bank<awe::country>::index countryID) const noexcept {
 	if (countryID >= _pictures.size()) return UINT_MAX;
 	return _pictures[countryID];
 }
-sfx::SpriteKey awe::unit_type::getUnit(awe::bank<awe::country>::index countryID) const noexcept {
+unsigned int awe::unit_type::getUnit(awe::bank<awe::country>::index countryID) const noexcept {
 	if (countryID >= _units.size()) return UINT_MAX;
 	return _units[countryID];
 }
@@ -193,6 +193,6 @@ bool awe::unit_type::isInfiniteAmmo() const noexcept {
 awe::commander::commander(safe::json& j) noexcept : common_properties(j) {
 	j.apply(_portrait, { "portrait" }, &_portrait, true);
 }
-sfx::SpriteKey awe::commander::getPortrait() const noexcept {
+unsigned int awe::commander::getPortrait() const noexcept {
 	return _portrait;
-}*/
+}
