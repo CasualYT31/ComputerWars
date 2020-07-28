@@ -40,8 +40,9 @@ instead of throughout the code */
 // #include "game.h"
 
 #include "language.h"
-#include "dialogue.h"
 #include "fonts.h"
+
+#include "gui.h"
 
 #include <iostream>
 #include <chrono>
@@ -67,36 +68,21 @@ int main() {
     settings.style.mouseGrabbed = false;
     newRenderer.setSettings(settings);
 
-    // animated sprite testing
     std::shared_ptr<sfx::animated_spritesheet> sheet = std::make_shared<sfx::animated_spritesheet>();
-    sheet->load("./assets/sprites/tile/normal/spritestilenormal.json");
-    sfx::animated_sprite sprite(sheet, 0);
-    sfx::animated_sprite sprite2(sheet, 0);
+    sheet->load("assets/sprites/gui/spritesgui.json");
 
-    // dialogue box testing
     sfx::fonts fonts;
     fonts.load("assets/fonts/fonts.json");
-    std::shared_ptr<sfx::audio> audio = std::make_shared<sfx::audio>();
-    audio->load("assets/audio/sound/audiosound.json");
 
-    engine::dialogue_box box;
-    box.setSounds(audio, "movecursor", "movesel", "select");
-    box.setPosition(engine::dialogue_box_position::Middle);
-    box.setBackgroundColour(sf::Color(150,150,150));
-    box.setThemeColour(sf::Color::Green);
-    box.setNameText("Mountain");
-    try {
-        box.setFont(fonts["dialogue"]);
-    } catch (std::out_of_range& e) {
-        std::cout << "Font error! " << e.what() << std::endl;
-    }
-    box.setSprite(sheet, 15);
+    std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>("assets/script");
+
+    engine::gui gui(scripts);
+    gui.load("assets/gui/gui.json");
+    gui.setTarget(newRenderer);
+    gui.setSpritesheet(sheet);
+    gui.setGUI("main");
 
     bool leave = false;
-    bool selectCurrentOption = false;
-    bool showBox = true;
-    bool toggleSprite = true;
-    bool showThirdOption = true;
     while (!leave) {
         sf::Event event;
         while (newRenderer.pollEvent(event)) {
@@ -105,57 +91,25 @@ int main() {
             } else if (event.type == sf::Event::KeyReleased) {
                 if (event.key.code == sf::Keyboard::Escape) {
                     leave = true;
-                } else if (event.key.code == sf::Keyboard::Up) {
-                    sprite.setSprite(sprite.getSprite() + 1);
-                } else if (event.key.code == sf::Keyboard::Down) {
-                    sprite.setSprite(sprite.getSprite() - 1);
-                } else if (event.key.code == sf::Keyboard::Left) {
-                    box.selectPreviousOption();
-                } else if (event.key.code == sf::Keyboard::Right) {
-                    box.selectNextOption();
                 } else if (event.key.code == sf::Keyboard::Z) {
-                    selectCurrentOption = true;
-                } else if (event.key.code == sf::Keyboard::Y) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                } else if (event.key.code == sf::Keyboard::X) {
-                    if (dict.getLanguage() == "ENG_GB") {
-                        dict.setLanguage("GER_DE");
+                    if (gui.getGUI() == "main") {
+                        gui.setGUI("settings");
                     } else {
-                        dict.setLanguage("ENG_GB");
+                        gui.setGUI("main");
                     }
-                } else if (event.key.code == sf::Keyboard::W) {
-                    if (toggleSprite) {
-                        box.setSprite(nullptr, 0);
-                        toggleSprite = false;
-                    } else {
-                        box.setSprite(sheet, 15);
-                        toggleSprite = true;
-                    }
-                } else if (event.key.code == sf::Keyboard::V) {
-                    showThirdOption = !showThirdOption;
                 }
             } else if (event.type == sf::Event::Resized) {
                 // update the view to the new size of the window
-                sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+                sf::FloatRect visibleArea(0, 0, (float)event.size.width, (float)event.size.height);
                 newRenderer.setView(sf::View(visibleArea));
             }
+            gui.handleEvent(event);
         }
-        box.setMainText(dict("day", -1));
-        if (showThirdOption) {
-            box.setOptions(dict("day", 5), dict("greeting"), showThirdOption ? dict("cancel") : "");
-        } else {
-            box.setOptions("");
-        }
+
         newRenderer.clear(sf::Color::Black);
-        newRenderer.animate(sprite);
-        newRenderer.animate(sprite2);
-        if (newRenderer.animate(box)) showBox = false;
-        if (selectCurrentOption) box.selectCurrentOption();
-        newRenderer.draw(sprite);
-        newRenderer.draw(sprite2, sf::RenderStates(sf::Transform().translate(50.0, 50.0)));
-        if (true) newRenderer.draw(box);
+        newRenderer.animate(gui);
+        newRenderer.draw(gui);
         newRenderer.display();
-        selectCurrentOption = false;
     }
 
     newRenderer.save();

@@ -117,35 +117,28 @@ bool engine::gui::animate(const sf::RenderTarget& target) noexcept {
 		for (auto itr = widgetList.begin(), enditr = widgetList.end(); itr != enditr; itr++) {
 			auto widget = *itr;
 			if (widget->getWidgetType() == "BitmapButton" || widget->getWidgetType() == "Picture") {
-				unsigned int spriteID = _guiSpriteKeys[getGUI()][widget->getWidgetName()];
 				if (i == _widgetSprites.size()) {
 					// animated sprite doesn't yet exist, allocate it
-					_widgetSprites.push_back(sfx::animated_sprite(_sheet, spriteID));
+					_widgetSprites.push_back(sfx::animated_sprite(_sheet, _guiSpriteKeys[getGUI()][widget->getWidgetName()]));
 				}
 				_widgetSprites[i].animate(target);
-				_widgetPictures.push_back(_sheet->accessTexture(_widgetSprites[i].getCurrentFrame()));
-				_widgetPictures[i].
+				try {
+					_widgetPictures.push_back(tgui::Texture(_sheet->accessTexture(_widgetSprites[i].getCurrentFrame()), _sheet->accessSprite(_widgetSprites[i].getSprite())));
+				} catch (std::out_of_range& e) {
+					i++;
+					continue;
+				}
 
 				//apply new texture
 				if (widget->getWidgetType() == "BitmapButton") {
 					auto bitmapbutton = _gui.get<tgui::BitmapButton>(widget->getWidgetName());
-
-					
-					/* I've got a big problem...
-					The new spritesheet classes aren't very compatible with TGUI...
-					TGUI won't accept texture rects, which the new classes rely on,
-					And I'm not sure how I should approach the solution to this problem
-					*/
-
-
-					_widgetPictures.push_back(_sheet->accessTexture());
-					bitmapbutton->setImage((*sprites)[_guiSpriteKeys[getGUI()][widget->getWidgetName()]]);
+					bitmapbutton->setImage(_widgetPictures[i]);
 				} else {
 					auto newRenderer = tgui::PictureRenderer();
-					newRenderer.setTexture((*sprites)[]);
-
+					newRenderer.setTexture(_widgetPictures[i]);
 					_gui.get<tgui::Picture>(widget->getWidgetName())->setRenderer(newRenderer.getData());
 				}
+
 				i++;
 			}
 		}
@@ -166,24 +159,6 @@ void engine::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const 
 	}
 
 	// draw foreground
-	if (sprites && getGUI() != "") {
-		//update bitmapbutton and picture sprites
-		auto widgetList = _gui.get<tgui::Group>(getGUI())->getWidgets();
-		for (auto itr = widgetList.begin(), enditr = widgetList.end(); itr != enditr; itr++) {
-			auto widget = *itr;
-			if (widget->getWidgetType() == "BitmapButton" || widget->getWidgetType() == "Picture") {
-				//apply new texture
-				if (widget->getWidgetType() == "BitmapButton") {
-					auto bitmapbutton = _gui.get<tgui::BitmapButton>(widget->getWidgetName());
-					bitmapbutton->setImage((*sprites)[_guiSpriteKeys[getGUI()][widget->getWidgetName()]]);
-				} else {
-					auto newRenderer = tgui::PictureRenderer();
-					newRenderer.setTexture((*sprites)[_guiSpriteKeys[getGUI()][widget->getWidgetName()]]);
-					_gui.get<tgui::Picture>(widget->getWidgetName())->setRenderer(newRenderer.getData());
-				}
-			}
-		}
-	}
 	_gui.draw();
 }
 

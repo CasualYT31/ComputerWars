@@ -74,7 +74,8 @@ namespace engine {
 		void _connectSignals(tgui::Widget::Ptr widget) noexcept;
 
 		global::logger _logger;
-		tgui::Gui _gui;
+		// unfortunately, we have to make this mutable so that the tgui::Gui::draw() method can be called in this class' draw() implementation
+		mutable tgui::Gui _gui;
 		std::string _currentGUI;
 		std::unordered_map<std::string, gui_background> _guiBackground;
 
@@ -84,7 +85,7 @@ namespace engine {
 		sf::RectangleShape _bgColour;
 		sfx::animated_sprite _bgSprite;
 
-		std::vector<sf::Texture> _widgetPictures;
+		std::vector<tgui::Texture> _widgetPictures;
 		std::vector<sfx::animated_sprite> _widgetSprites;
 
 		std::unordered_map<std::string, std::unordered_map<std::string, unsigned int>> _guiSpriteKeys;

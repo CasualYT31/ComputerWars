@@ -1,6 +1,5 @@
 {
-	"basepath": "assets/sprites/gui/gui",
-	"format": "png",
+	"path": "assets/sprites/gui/gui.png",
 	"frames": 2,
 	"framerate": 4.0,
 	"sprites": [
