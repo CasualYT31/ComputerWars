@@ -248,69 +248,349 @@ namespace awe {
 		movement_type(safe::json& j) noexcept;
 	};
 
+	/**
+	 * A game property class which stores the information associated with a single terrain type.
+	 * @sa \c awe::common_properties
+	 */
 	class terrain : public common_properties {
 	public:
+		/**
+		 * Constructor which scans a JSON object for the terrain type's properties.
+		 * It also passes on the JSON object to the \c common_properties constructor.
+		 * In addition to the keys defined in the superclass, the following keys are required:
+		 * <ul><li>\c "hp" = \c _maxHP, <tt>(unsigned 32-bit int - capped off at signed 32-bit int's maximum value)</tt></li>
+		 * <li>\c "defence" = \c _defenece, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "capturable" = \c _isCapturable, <tt>(bool)</tt></li>
+		 * <li>\c "movecosts" = \c _movecosts, <tt>([signed 32-bit int{, signed 32-bit int, etc.}])</tt></li>
+		 * <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li></ul>
+		 * The \c movecosts array stores a list of movement points associated with each movement type.
+		 * For example, the first value will store the number of movement points it takes for the first type of movement to traverse over it (in the default implementation, Infantry).\n
+		 * The \c pictures array stores a list of animated sprite IDs associated with each country.
+		 * For example, the first value will store the ID of the sprite shown when the first country owns it (in the default implementation, Neutral).
+		 * Not all countries have to be accounted for if the tile cannot be "owned," i.e. captured.
+		 * @param j The object value containing the terrain type's properties.
+		 */
 		terrain(safe::json& j) noexcept;
+
+		/**
+		 * Retrieves the maximum health property.
+		 * This can be the health points of a cannon, or the capture points of a property.
+		 * @return The health points this terrain can have.
+		 */
 		unsigned int getMaxHP() const noexcept;
+
+		/**
+		 * Retrieves the defence property.
+		 * @return The defence this terrain provides.
+		 */
 		unsigned int getDefence() const noexcept;
+
+		/**
+		 * Retrieves the movement point cost property associated with a given movement type.
+		 * @param  movecostID The ID of the type of movement.
+		 * @return The movement point cost.
+		 */
 		int getMoveCost(const bank<movement_type>::index movecostID) const noexcept;
+
+		/**
+		 * Retrieves the sprite ID associated with a given country.
+		 * @param  countryID The ID of the country.
+		 * @return The sprite ID of the terrain picture, or \c UINT_MAX if the given country ID didn't identify a sprite ID.
+		 */
 		unsigned int getPicture(const bank<country>::index countryID) const noexcept;
+
+		/**
+		 * Retrieves the capturable property.
+		 * @return The capturable property.
+		 */
 		bool isCapturable() const noexcept;
 	private:
+		/**
+		 * Maximum health points property.
+		 */
 		unsigned int _maxHP = 0;
+
+		/**
+		 * Defence property.
+		 */
 		unsigned int _defence = 0;
+
+		/**
+		 * Movement point cost properties.
+		 */
 		std::vector<int> _movecosts;
+
+		/**
+		 * Picture properties.
+		 */
 		std::vector<unsigned int> _pictures;
+
+		/**
+		 * Capturable property.
+		 */
+		bool _isCapturable = false;
 	};
 
+	/**
+	 * A game property class which stores the information associated with a single type of tile.
+	 * Tiles and terrain types were separated in this way so that different visual representations of the same terrain can be maintained.
+	 * For example, a road may be straight, a bend, a T-junction, or a crossroads.
+	 */
 	class tile_type {
 	public:
+		/**
+		 * Constructor which reads the given JSON object for tile properties.
+		 * The following keys are required:
+		 * <ul><li>\c "type" = \c _terrainType, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "tiles" = \c _tiles, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li></ul>
+		 * The \c tiles vector stores a list of animated sprite IDs associated with each country's version of the tile.
+		 * For example, the first value will store the ID of the sprite shown on the map when the first country owns it (in the default implementation, Neutral).
+		 * Not all countries have to be accounted for if the tile cannot be "owned," i.e. captured.
+		 * @param j The object value containing the tile type's properties.
+		 */
 		tile_type(safe::json& j) noexcept;
+
+		/**
+		 * Retrieves the ID of the type of terrain this tile represents (i.e. "Plains" or "Road").
+		 * @return The ID of the type of terrain.
+		 */
 		bank<terrain>::index getTypeIndex() const noexcept;
+
+		/**
+		 * Retrieves the ID of the sprite that is shown for a given country.
+		 * @param  countryID The ID of the country.
+		 * @return The ID of the tile's sprite, or \c UINT_MAX if the given country ID didn't identify a sprite ID.
+		 */
 		unsigned int getTile(bank<country>::index countryID) const noexcept;
+
+		/**
+		 * Retrieves a pointer to the details of the type of terrain this tile represents.
+		 * @return The pointer to the terrain type's properties.
+		 * @sa     updateTerrain()
+		 */
 		const terrain* getType() const noexcept;
+
+		/**
+		 * Updates the stored terrain type properties pointer.
+		 * @param terrainBank A reference to the terrain bank to pull the pointer from.
+		 */
 		void updateTerrain(const bank<terrain>& terrainBank) const noexcept;
 	private:
+		/**
+		 * The ID of the type of terrain this tile represents.
+		 */
 		bank<terrain>::index _terrainType = 0;
+
+		/**
+		 * Pointer to the properties of this tile's type of terrain.
+		 * It was made mutable so that it can be updated after construction if an instance of \c tile_type is constant.
+		 * @todo I will probably remove this feature in the future; no other class does this and it increases coupling unnecessarily.
+		 */
 		mutable const terrain* _terrain = nullptr;
+
+		/**
+		 * The sprite IDs of the tile corresponding to each country.
+		 */
 		std::vector<unsigned int> _tiles;
 	};
 
+	/**
+	 * A game property class which stores the information associated with type of unit.
+	 * @sa \c awe::common_properties
+	 */
 	class unit_type : public common_properties {
 	public:
+		/**
+		 * Constructor which scans a JSON object for the unit type's properties.
+		 * It also passes on the JSON object to the \c common_properties constructor.
+		 * In addition to the keys defined in the superclass, the following keys are required:
+		 * <ul><li>\c "movetype" = \c _movementTypeID, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "price" = \c _cost, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "fuel" = \c _maxFuel, <tt>(signed 32-bit int)</tt></li>
+		 * <li>\c "ammo" = \c _maxAmmo, <tt>(signed 32-bit int)</tt></li>
+		 * <li>\c "hp" = \c _maxHP, <tt>(unsigned 32-bit int - capped off at signed 32-bit int's maximum value)</tt></li>
+		 * <li>\c "mp" = \c _movementPoints, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "vision" = \c _vision, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "lowrange" = \c _lowerRange, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "highrange" = \c _higherRange, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li>
+		 * <li>\c "sprites" = \c _units, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li></ul>
+		 * The \c movecosts array stores a list of movement points associated with each movement type.
+		 * For example, the first value will store the number of movement points it takes for the first type of movement to traverse over it (in the default implementation, Infantry).\n
+		 * The \c pictures array stores a list of animated sprite IDs associated with each country.
+		 * For example, the first value will store the ID of the sprite shown when the first country owns it (in the default implementation, Neutral).
+		 * Not all countries have to be accounted for if the tile cannot be "owned," i.e. captured.
+		 * Ranged values work by counting the number of tiles away from the unit's current tile.
+		 * If the tile is within both the lower and higher ranges inclusive, then the attack is valid. If not, the attack is invalid.\n
+		 * Pictures is an array of sprite IDs corresponding to each country's portrait of the type of unit.\n
+		 * Sprites is an array of sprite IDs corresponding to each country's map representation of the type of unit.
+		 * @param j The object value containing the terrain type's properties.
+		 * @sa    isInfiniteFuel()
+		 * @sa    isInfiniteAmmo()
+		 */
 		unit_type(safe::json& j) noexcept;
+
+		/**
+		 * Retrieves the movement type ID.
+		 * @return The movement type ID.
+		 * @sa     awe::movement_type
+		 */
 		bank<movement_type>::index getMovementType() const noexcept;
+
+		/**
+		 * Retrieves the sprite ID of a given country's portrait of this unit.
+		 * @param  countryID The ID of the country.
+		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't identify a sprite ID.
+		 */
 		unsigned int getPicture(bank<country>::index countryID) const noexcept;
+
+		/**
+		 * Retrieves the sprite ID of a given country's map sprite of this unit.
+		 * @param  countryID The ID of the country.
+		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't identify a sprite ID.
+		 */
 		unsigned int getUnit(bank<country>::index countryID) const noexcept;
+
+		/**
+		 * Retrieves the price property.
+		 * @return The price property.
+		 */
 		unsigned int getCost() const noexcept;
+
+		/**
+		 * Retrieves the max fuel property.
+		 * @return The max fuel property.
+		 */
 		int getMaxFuel() const noexcept;
+
+		/**
+		 * Retrieves the max primary ammo property.
+		 * @return The max ammo property.
+		 */
 		int getMaxAmmo() const noexcept;
+
+		/**
+		 * Retrieves the max HP property.
+		 * @return The max HP property.
+		 */
 		unsigned int getMaxHP() const noexcept;
+
+		/**
+		 * Retrieves the MP property.
+		 * @return The MP property.
+		 */
 		unsigned int getMovementPoints() const noexcept;
+
+		/**
+		 * Retrieves the vision property.
+		 * @return The vision property.
+		 */
 		unsigned int getVision() const noexcept;
+
+		/**
+		 * Retrieves the lower range property.
+		 * @return The lower bound of the range property.
+		 */
 		unsigned int getLowerRange() const noexcept;
+
+		/**
+		 * Retrieves the higher range property.
+		 * @return The higher bound of the range property.
+		 */
 		unsigned int getHigherRange() const noexcept;
+
+		/**
+		 * Finds out if this type of unit has infinite fuel.
+		 * @return \c TRUE if \c _maxFuel is less than \c 0, \c FALSE otherwise.
+		 */
 		bool isInfiniteFuel() const noexcept;
+
+		/**
+		 * Finds out if this type of unit has infinite ammo.
+		 * @return \c TRUE if \c _maxAmmo is less than \c 0, \c FALSE otherwise.
+		 */
 		bool isInfiniteAmmo() const noexcept;
 	private:
+		/**
+		 * The movement type ID property.
+		 */
 		bank<movement_type>::index _movementTypeID = 0;
+
+		/**
+		 * The portrait IDs.
+		 */
 		std::vector<unsigned int> _pictures;
+
+		/**
+		 * The sprite IDs.
+		 */
 		std::vector<unsigned int> _units;
+
+		/**
+		 * The price property.
+		 */
 		unsigned int _cost = 0;
+
+		/**
+		 * The max fuel property.
+		 */
 		int _maxFuel = 0;
+
+		/**
+		 * The max ammo property.
+		 */
 		int _maxAmmo = 0;
+
+		/**
+		 * The max HP property.
+		 */
 		unsigned int _maxHP = 100;
+
+		/**
+		 * The MP property.
+		 */
 		unsigned int _movementPoints = 0;
+
+		/**
+		 * The vision property.
+		 */
 		unsigned int _vision = 1;
+
+		/**
+		 * The lower bound of the unit's range.
+		 */
 		unsigned int _lowerRange = 1;
+
+		/**
+		 * The higher bound of the unit's range.
+		 */
 		unsigned int _higherRange = 1;
 	};
-	
+
+	/**
+	 * A game property class which stores the information associated with a single commander.
+	 * @sa \c awe::common_properties
+	 */
 	class commander : public common_properties {
 	public:
+		/**
+		 * Constructor which scans a JSON object for the portrait property.
+		 * It also passes on the JSON object to the \c common_properties constructor.
+		 * In addition to the keys defined in the superclass, the following keys are required:
+		 * <ul><li>\c "portrait" = \c _portrait, <tt>(unsigned 32-bit int)</tt></li></ul>
+		 * @param j The object value containing the commander's properties.
+		 */
 		commander(safe::json& j) noexcept;
+
+		/**
+		 * Retrieves the animated sprite ID of this commander's portrait.
+		 * @return The animated sprite ID.
+		 */
 		unsigned int getPortrait() const noexcept;
 	private:
+		/**
+		 * The portrait property.
+		 */
 		unsigned int _portrait = 0;
 	};
 

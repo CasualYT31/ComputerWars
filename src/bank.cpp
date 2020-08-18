@@ -83,6 +83,7 @@ awe::terrain::terrain(safe::json& j) noexcept : common_properties(j) {
 	j.apply(_maxHP, { "hp" }, &_maxHP, true);
 	if (_maxHP > INT_MAX) _maxHP = INT_MAX;
 	j.apply(_defence, { "defence" }, &_defence, true);
+	j.apply(_isCapturable, { "capturable" }, &_isCapturable, true);
 	j.applyVector(_movecosts, { "movecosts" });
 	j.resetState();
 	j.applyVector(_pictures, { "pictures" });
@@ -102,7 +103,7 @@ unsigned int awe::terrain::getPicture(const awe::bank<awe::country>::index count
 	return _pictures[countryID];
 }
 bool awe::terrain::isCapturable() const noexcept {
-	return getMaxHP();
+	return _isCapturable;
 }
 
 //******
