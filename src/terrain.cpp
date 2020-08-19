@@ -19,10 +19,14 @@ ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/*
+
 #include "terrain.h"
 
-awe::tile::tile(const awe::tile_type* tile, const unsigned int owner, const int hp) noexcept : _tileType(tile), _hp(hp), _owner(owner) {}
+awe::tile::tile(const awe::tile_type* tile, const unsigned int owner, const int hp) noexcept {
+	setTile(tile);
+	setHP(hp);
+	setOwner(owner);
+}
 
 const awe::tile_type* awe::tile::setTile(const awe::tile_type* newTile) noexcept {
 	auto old = getTile();
@@ -57,4 +61,4 @@ unsigned int awe::tile::setOwner(const unsigned int newOwner) noexcept {
 
 unsigned int awe::tile::getOwner() const noexcept {
 	return _owner;
-}*/
+}
