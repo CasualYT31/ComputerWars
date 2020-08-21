@@ -99,12 +99,12 @@ namespace awe {
 		// renderer object
 		sfx::renderer _renderer;
 		// spritesheet objects
-		sfx::spritesheet _spritesheet_GUI;
-		sfx::spritesheet _spritesheet_CO;
+		sfx::animated_spritesheet _spritesheet_GUI;
+		sfx::animated_spritesheet _spritesheet_CO;
 		// user input objects
 		sfx::user_input _userinput;
 		// scripts object
-		engine::scripts _scripts;
+		std::shared_ptr<engine::scripts> _scripts;
 		// GUI object
 		engine::gui _gui;
 	};

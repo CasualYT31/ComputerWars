@@ -20,16 +20,31 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/**
+ * @file army.h
+ * Declares the class which represents an army in a match.
+ */
+
 #pragma once
 
 #include "unit.h"
 #include "terrain.h"
-/*
+
+// for documentation on the awe namespace, please see bank.h
 namespace awe {
+	/**
+	 * Typedef representing a team ID.
+	 */
 	typedef unsigned int TeamID;
 
+	/**
+	 * Class which represents a single army on the map.
+	 */
 	class army {
 	public:
+		/**
+		 * 
+		 */
 		army(TeamID team = 0, const awe::country* country = nullptr, unsigned int funds = 0,
 			const awe::commander* firstCO = nullptr, const awe::commander* secondCO = nullptr) noexcept;
 
@@ -64,4 +79,4 @@ namespace awe {
 		const awe::commander* _firstCO = nullptr;
 		const awe::commander* _secondCO = nullptr;
 	};
-}*/
+}

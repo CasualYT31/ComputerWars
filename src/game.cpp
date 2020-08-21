@@ -19,7 +19,7 @@ ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-/*
+
 #include "game.h"
 #include <iostream>
 
@@ -46,7 +46,7 @@ awe::game::game(const std::string& scriptsFolder,
 			const std::string& name) noexcept :
 		_logger(name), _audio_Sound("audio_sound"), _audio_Music("audio_music"), _renderer("renderer"),
 		_spritesheet_GUI("spritesheet_gui"), _spritesheet_CO("spritesheet_co"), _userinput(_renderer),
-		_scripts(scriptsFolder), _gui(&_scripts) {
+		_scripts(std::make_shared<engine::scripts>(scriptsFolder)), _gui(_scripts) {
 	// load JSON configurations for each backend object
 	_audio_Sound.load(JSON_AudioSound);
 	_audio_Music.load(JSON_AudioMusic);
@@ -107,7 +107,7 @@ void awe::game::_checkTerminated(sf::Event& event) noexcept {
 }
 
 void awe::game::_rendererRendering() noexcept {
-	_gui.drawBackground(&_spritesheet_GUI);
-	_gui.drawForeground(&_spritesheet_GUI);
+	_renderer.animate(_gui);
+	_renderer.draw(_gui);
 	_renderer.display();
-}*/
+}
