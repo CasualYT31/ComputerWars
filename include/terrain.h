@@ -31,6 +31,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
+	class army;
+
 	/**
 	 * Class representing a single terrain tile on the map.
 	 */
@@ -44,7 +46,7 @@ namespace awe {
 		 * @param hp    The initial HP of the tile.
 		 * @sa    awe::tile_type
 		 */
-		tile(const tile_type* tile = nullptr, const unsigned int owner = 0, const int hp = 0) noexcept;
+		tile(const tile_type* tile = nullptr, const int hp = 0, std::weak_ptr<army> owner = std::weak_ptr<army>()) noexcept;
 		
 		/**
 		 * Updates the type of tile this object represents.
@@ -76,16 +78,15 @@ namespace awe {
 
 		/**
 		 * Updates the owner of the tile.
-		 * @param  The army ID of the new owner.
-		 * @return The ID of the old owner.
+		 * @param  A pointer to the army which owns the tile.
 		 */
-		unsigned int setOwner(const unsigned int newOwner) noexcept;
+		void setOwner(std::weak_ptr<army> newOwner) noexcept;
 
 		/**
 		 * Retrieves the current owner of the tile.
 		 * @return The army ID of the current owner.
 		 */
-		unsigned int getOwner() const noexcept;
+		std::weak_ptr<army> getOwner() const noexcept;
 	private:
 		/**
 		 * Pointer to the tile type's static information.
@@ -93,9 +94,9 @@ namespace awe {
 		const tile_type* _tileType = nullptr;
 
 		/**
-		 * The owner ID.
+		 * Weak reference to the army which owns the tile.
 		 */
-		unsigned int _owner = 0;
+		std::weak_ptr<army> _owner;
 
 		/**
 		 * The HP of the tile.
