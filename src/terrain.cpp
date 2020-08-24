@@ -60,3 +60,19 @@ void awe::tile::setOwner(std::weak_ptr<awe::army> newOwner) noexcept {
 std::weak_ptr <awe::army> awe::tile::getOwner() const noexcept {
 	return _owner;
 }
+
+void awe::tile::setUnit(std::weak_ptr<awe::unit> newUnit) noexcept {
+	_unit = newUnit;
+}
+
+std::weak_ptr<awe::unit> awe::tile::getUnit() const noexcept {
+	return _unit;
+}
+
+bool awe::tile::isOwned() const noexcept {
+	return !_owner.expired();
+}
+
+bool awe::tile::isOccupied() const noexcept {
+	return !_unit.expired();
+}

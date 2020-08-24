@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "bank.h"
+#include "unit.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
@@ -78,15 +78,47 @@ namespace awe {
 
 		/**
 		 * Updates the owner of the tile.
-		 * @param  A pointer to the army which owns the tile.
+		 * If the given pointer is /em expired, this denotes that the tile should not be owned.
+		 * @param A pointer to the army which owns the tile.
 		 */
 		void setOwner(std::weak_ptr<army> newOwner) noexcept;
 
 		/**
 		 * Retrieves the current owner of the tile.
+		 * If the returned pointer is /em expired, this denotes that the tile is not owned.
 		 * @return The army ID of the current owner.
 		 */
 		std::weak_ptr<army> getOwner() const noexcept;
+
+		/**
+		 * Allows the client to assign a weak reference to a unit that is occupying this tile.
+		 * If the given pointer is /em expired, this denotes that the tile should not be occupied.
+		 * @param newUnit The reference to the unit that is currently occupying this tile.
+		 */
+		void setUnit(std::weak_ptr<awe::unit> newUnit) noexcept;
+
+		/**
+		 * Retrieves a reference to the unit currently occupying this tile.
+		 * If the returned pointer is /em expired, this denotes that the tile is not occupied.
+		 * @return Information on the unit that is occupying this tile.
+		 */
+		std::weak_ptr<awe::unit> getUnit() const noexcept;
+
+		/**
+		 * Tests whether or not this tile is owned by another army.
+		 * Note that this method will also return /c FALSE if the assigned army has been destroyed,
+		 * rendering the weak reference invalid.
+		 * @return /c TRUE if this tile has been assigned a valid owner, /c FALSE otherwise.
+		 */
+		bool isOwned() const noexcept;
+
+		/**
+		 * Tests whether or not this tile is currently occupied.
+		 * Note that this method will also return /c FALSE if the assigned unit has been destroyed,
+		 * rendering the weak reference invalid.
+		 * @return /c TRUE if this tile is being occupied, /c FALSE otherwise.
+		 */
+		bool isOccupied() const noexcept;
 	private:
 		/**
 		 * Pointer to the tile type's static information.
@@ -102,5 +134,10 @@ namespace awe {
 		 * The HP of the tile.
 		 */
 		int _hp = 0;
+
+		/**
+		 * Weak reference to the unit occupying this tile.
+		 */
+		std::weak_ptr<awe::unit> _unit;
 	};
 }
