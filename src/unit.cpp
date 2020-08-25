@@ -22,34 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 
-awe::unit_linked_list::unit_linked_list(std::weak_ptr<awe::unit> init) noexcept {
-	_unit = init;
-}
-
-void awe::unit_linked_list::append(std::weak_ptr<awe::unit> unit) noexcept {
-	if (_unit.expired()) {
-		_unit = unit;
-	} else {
-		if (_nextUnit) {
-			_nextUnit->append(unit);
-		} else {
-			_nextUnit = std::make_unique<awe::unit_linked_list>(unit);
-		}
-	}
-}
-
-void awe::unit_linked_list::remove(std::weak_ptr<awe::unit> remove) noexcept {
-	if (remove.expired()) return;
-	if (_unit.lock())
-}
-
-void awe::unit_linked_list::clear() noexcept {
-	if (_nextUnit) {
-		_nextUnit->clear();
-		_nextUnit.reset(nullptr);
-	}
-}
-
 sf::Uint64 awe::unit::_id_counter = 0;
 
 awe::unit::unit(const unit_type* type, const int hp, const int fuel, const int ammo) noexcept : _unitType(type) {
@@ -122,6 +94,22 @@ int awe::unit::setAmmo(const int newAmmo) noexcept {
 
 int awe::unit::getAmmo() const noexcept {
 	return _ammo;
+}
+
+bool awe::unit::loadUnit(const std::shared_ptr<awe::unit>& unit) noexcept {
+	if (unit && _unitType->canLoad()) {
+		_loadedUnits.push_back(unit);
+		return true;
+	}
+	return false;
+}
+
+bool awe::unit::unloadUnit(const std::shared_ptr<awe::unit>& unitToUnload) noexcept {
+	return false;
+}
+
+std::vector<std::weak_ptr<awe::unit>> awe::unit::loadedUnits() const noexcept {
+
 }
 
 bool awe::unit::operator==(const awe::unit& rhs) const noexcept {

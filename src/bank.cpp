@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "bank.h"
+#include <algorithm>
 
 void awe::updateAllTerrains(awe::bank<awe::tile_type>& tileBank, const awe::bank<awe::terrain>& terrainBank) noexcept {
 	for (std::size_t i = 0; i < tileBank.size(); i++) {
@@ -145,6 +146,8 @@ awe::unit_type::unit_type(safe::json& j) noexcept : common_properties(j) {
 	j.applyVector(_pictures, { "pictures" });
 	j.resetState();
 	j.applyVector(_units, { "sprites" });
+	j.resetState();
+	j.applyVector(_canLoadThese, { "canload" });
 }
 awe::bank<awe::movement_type>::index awe::unit_type::getMovementType() const noexcept {
 	return _movementTypeID;
@@ -186,6 +189,9 @@ bool awe::unit_type::isInfiniteFuel() const noexcept {
 }
 bool awe::unit_type::isInfiniteAmmo() const noexcept {
 	return _maxAmmo < 0;
+}
+bool awe::unit_type::canLoad(const awe::bank<unit_type>::index typeID) const noexcept {
+	return std::find(_canLoadThese.begin(), _canLoadThese.end(), typeID) != _canLoadThese.end();
 }
 
 //***********

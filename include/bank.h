@@ -414,7 +414,8 @@ namespace awe {
 		 * <li>\c "lowrange" = \c _lowerRange, <tt>(unsigned 32-bit int)</tt></li>
 		 * <li>\c "highrange" = \c _higherRange, <tt>(unsigned 32-bit int)</tt></li>
 		 * <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li>
-		 * <li>\c "sprites" = \c _units, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li></ul>
+		 * <li>\c "sprites" = \c _units, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li>
+		 * <li>\c "canload" = \c _canLoadThese, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li></ul>
 		 * The \c movecosts array stores a list of movement points associated with each movement type.
 		 * For example, the first value will store the number of movement points it takes for the first type of movement to traverse over it (in the default implementation, Infantry).\n
 		 * The \c pictures array stores a list of animated sprite IDs associated with each country.
@@ -427,14 +428,6 @@ namespace awe {
 		 * @param j The object value containing the terrain type's properties.
 		 * @sa    isInfiniteFuel()
 		 * @sa    isInfiniteAmmo()
-		 */
-		unit_type(safe::json& j) noexcept;
-
-		/**
-		 * Retrieves the movement type ID.
-		 * @return The movement type ID.
-		 * @sa     awe::movement_type
-		 */
 		bank<movement_type>::index getMovementType() const noexcept;
 
 		/**
@@ -510,6 +503,13 @@ namespace awe {
 		 * @return \c TRUE if \c _maxAmmo is less than \c 0, \c FALSE otherwise.
 		 */
 		bool isInfiniteAmmo() const noexcept;
+
+		/**
+		 * Finds out if this type of unit can load onto it a given unit type.
+		 * @param  typeID The ID of the type of unit to test.
+		 * @return \c TRUE if yes, \c FALSE otherwise.
+		 */
+		bool canLoad(const awe::bank<unit_type>::index typeID) const noexcept;
 	private:
 		/**
 		 * The movement type ID property.
@@ -565,6 +565,11 @@ namespace awe {
 		 * The higher bound of the unit's range.
 		 */
 		unsigned int _higherRange = 1;
+
+		/**
+		 * List of unit types that can be loaded onto this type of unit.
+		 */
+		std::vector<awe::bank<unit_type>::index> _canLoadThese;
 	};
 
 	/**

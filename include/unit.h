@@ -32,20 +32,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
 	/**
-	 * Small utility class used to create a list of units.
-	 */
-	class unit_linked_list {
-	public:
-		unit_linked_list(std::weak_ptr<awe::unit> init) noexcept;
-		void append(std::weak_ptr<awe::unit> unit) noexcept;
-		void remove(std::weak_ptr<awe::unit> remove) noexcept;
-		void clear() noexcept;
-	private:
-		std::weak_ptr<awe::unit> _unit;
-		std::unique_ptr<awe::unit_linked_list> _nextUnit;
-	};
-
-	/**
 	 * Class representing a single unit.
 	 */
 	class unit {
@@ -127,25 +113,24 @@ namespace awe {
 
 		/**
 		 * Loads a unit onto this one if the unit's type allows for it.
+		 * @param  unit Reference to the unit to load.
+		 * @return \c TRUE if the unit was loaded successfully, \c FALSE if not.
 		 */
-		void loadUnit(std::weak_ptr<awe::unit> unit) noexcept;
+		bool loadUnit(const std::shared_ptr<awe::unit>& unit) noexcept;
 
 		/**
 		 * Unloads a unit from this one if it exists.
+		 * @param  unitToUnload Reference to the unit to unload.
+		 * @return \c TRUE if the unit was unloaded successfully, \c FALSE if not.
 		 */
-		bool unloadUnit(std::weak_ptr<awe::unit> unitToUnload) noexcept;
-
-		/**
-		 * Returns the number of loaded units.
-		 * @return The number of loaded units.
-		 */
-		std::size_t loadedUnitCount() const noexcept;
+		bool unloadUnit(const std::shared_ptr<awe::unit>& unitToUnload) noexcept;
 
 		/**
 		 * Copies the internal list of references to each loaded unit and returns it.
-		 * @return
+		 * Care should be taken to ensure all weak references are valid before accessing them.
+		 * @return A list of references to units that are loaded onto this one.
 		 */
-		std::vector<awe::unit> loadedUnits() const noexcept;
+		std::vector<std::weak_ptr<awe::unit>> loadedUnits() const noexcept;
 
 		/**
 		 * Tests if a given \c awe::unit object is equivalent to this one.
@@ -171,7 +156,7 @@ namespace awe {
 		 * Counter used to generate unit IDs.
 		 * @warning Since the maximum value of an unsigned 64 bit value is extremely large,
 		 *          no checks have been made in the game code to ensure that two units aren't
-		 *          given the same ID. Once there are UINT64_MAX number of units in play, the
+		 *          given the same ID. Once there are UINT64_MAX number of units actively in play, the
 		 *          game will begin to bug out because more than one unit can then have the same ID.
 		 */
 		static sf::Uint64 _id_counter;
@@ -204,6 +189,6 @@ namespace awe {
 		/**
 		 * A list of weak references to units which are loaded onto this one.
 		 */
-		std::vector<awe::unit> _loadedUnits;
+		std::vector<std::weak_ptr<awe::unit>> _loadedUnits;
 	};
 }
