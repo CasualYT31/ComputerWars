@@ -46,10 +46,9 @@ namespace awe {
 		unit(const unit_type* type = nullptr, const int hp = 0, const int fuel = 0, const int ammo = 0) noexcept;
 
 		/**
-		 * Retrieves this unit's automatically generated ID.
-		 * @return The ID.
+		 * This unit's UUID object.
 		 */
-		sf::Uint64 getID() const noexcept;
+		engine::uuid<awe::unit> UUID;
 
 		/**
 		 * Updates the unit's type.
@@ -120,7 +119,7 @@ namespace awe {
 
 		/**
 		 * Unloads a unit from this one if it exists.
-		 * @param  unitToUnload Reference to the unit to unload.
+		 * @param  unitToUnload Reference to the unit to unload. If an empty pointer was given, \c FALSE will be returned.
 		 * @return \c TRUE if the unit was unloaded successfully, \c FALSE if not.
 		 */
 		bool unloadUnit(const std::shared_ptr<awe::unit>& unitToUnload) noexcept;
@@ -152,20 +151,6 @@ namespace awe {
 		 */
 		bool operator!=(const awe::unit& rhs) const noexcept;
 	private:
-		/**
-		 * Counter used to generate unit IDs.
-		 * @warning Since the maximum value of an unsigned 64 bit value is extremely large,
-		 *          no checks have been made in the game code to ensure that two units aren't
-		 *          given the same ID. Once there are UINT64_MAX number of units actively in play, the
-		 *          game will begin to bug out because more than one unit can then have the same ID.
-		 */
-		static sf::Uint64 _id_counter;
-
-		/**
-		 * ID uniquely identifying the unit.
-		 */
-		sf::Uint64 _id = 0;
-
 		/**
 		 * Pointer to the unit's type information.
 		 */

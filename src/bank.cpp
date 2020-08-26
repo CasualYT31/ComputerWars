@@ -243,14 +243,10 @@ bool awe::unit_type::canLoad(const awe::bank<unit_type>::index typeID) const noe
 	return std::find(_canLoadThese.begin(), _canLoadThese.end(), typeID) != _canLoadThese.end();
 }
 bool awe::unit_type::canLoad(const awe::unit_type& type) const noexcept {
-	bool ret = false;
 	for (auto& u : _canLoadTheseUnitTypes) {
-		if (u && *u == type) {
-			ret = true;
-			break;
-		}
+		if (u && *u == type) return true;
 	}
-	return ret;
+	return false
 }
 void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank) const noexcept {
 	_canLoadTheseUnitTypes.clear();

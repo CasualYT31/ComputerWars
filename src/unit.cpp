@@ -22,19 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 
-sf::Uint64 awe::unit::_id_counter = 0;
-
 awe::unit::unit(const unit_type* type, const int hp, const int fuel, const int ammo) noexcept : _unitType(type) {
 	setHP(hp);
 	setFuel(fuel);
 	setAmmo(ammo);
-	// generate unit's ID
-	_id = _id_counter++;
-	if (_id_counter == UINT64_MAX) _id_counter = 0;
-}
-
-sf::Uint64 awe::unit::getID() const noexcept {
-	return _id;
 }
 
 const awe::unit_type* awe::unit::setType(const awe::unit_type* newType) noexcept {
@@ -71,7 +62,7 @@ int awe::unit::setFuel(const int newFuel) noexcept {
 	_fuel = newFuel;
 	if (_fuel < 0) {
 		_fuel = 0;
-	} else if (!_unitType->isInfiniteFuel() && _fuel > _unitType->getMaxFuel()) {
+	} else if (!_unitType->hasInfiniteFuel() && _fuel > _unitType->getMaxFuel()) {
 		_fuel = (int)_unitType->getMaxFuel();
 	}
 	return old;
@@ -86,7 +77,7 @@ int awe::unit::setAmmo(const int newAmmo) noexcept {
 	_ammo = newAmmo;
 	if (_ammo < 0) {
 		_ammo = 0;
-	} else if (!_unitType->isInfiniteAmmo() && _ammo > _unitType->getMaxAmmo()) {
+	} else if (!_unitType->hasInfiniteAmmo() && _ammo > _unitType->getMaxAmmo()) {
 		_ammo = _unitType->getMaxAmmo();
 	}
 	return old;
@@ -97,7 +88,7 @@ int awe::unit::getAmmo() const noexcept {
 }
 
 bool awe::unit::loadUnit(const std::shared_ptr<awe::unit>& unit) noexcept {
-	if (unit && _unitType->canLoad()) {
+	if (unit && _unitType->canLoad(*unit->getType())) {
 		_loadedUnits.push_back(unit);
 		return true;
 	}
@@ -105,15 +96,24 @@ bool awe::unit::loadUnit(const std::shared_ptr<awe::unit>& unit) noexcept {
 }
 
 bool awe::unit::unloadUnit(const std::shared_ptr<awe::unit>& unitToUnload) noexcept {
+	if (!unitToUnload) return false;
+	for (auto itr = _loadedUnits.begin(), enditr = _loadedUnits.end(); itr != enditr; itr++) {
+		if (auto spLoadedUnit = itr->lock()) {
+			if (*unitToUnload == *spLoadedUnit) {
+				_loadedUnits.erase(itr);
+				return true;
+			}
+		}
+	}
 	return false;
 }
 
 std::vector<std::weak_ptr<awe::unit>> awe::unit::loadedUnits() const noexcept {
-
+	return _loadedUnits;
 }
 
 bool awe::unit::operator==(const awe::unit& rhs) const noexcept {
-	return getID() == rhs.getID();
+	return UUID == rhs.UUID;
 }
 
 bool awe::unit::operator!=(const awe::unit& rhs) const noexcept {
