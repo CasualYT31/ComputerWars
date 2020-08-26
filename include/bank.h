@@ -30,7 +30,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * <li>Types of terrain.</li>
  * <li>Types of units.</li>
  * <li>Commanders available.</li></ul>
- * @todo Replace all instances of indexes and IDs with weak references.
  */
 
 #pragma once
@@ -465,7 +464,7 @@ namespace awe {
 		 * @return The pointer to the terrain type's properties.
 		 * @sa     updateTerrain()
 		 */
-		const terrain* getType() const noexcept;
+		std::shared_ptr<const terrain> getType() const noexcept;
 
 		/**
 		 * Updates the stored terrain type properties pointer.
@@ -500,9 +499,8 @@ namespace awe {
 		/**
 		 * Pointer to the properties of this tile's type of terrain.
 		 * It was made mutable so that it can be updated after construction if an instance of \c tile_type is constant.
-		 * @todo I will probably remove this feature in the future; no other class does this and it increases coupling unnecessarily.
 		 */
-		mutable const terrain* _terrain = nullptr;
+		mutable std::shared_ptr<const awe::terrain> _terrain;
 
 		/**
 		 * The sprite IDs of the tile corresponding to each country.
@@ -550,7 +548,20 @@ namespace awe {
 		 * Retrieves the movement type of this unit.
 		 * @return The index of the movement type of this unit.
 		 */
-		bank<movement_type>::index getMovementType() const noexcept;
+		bank<movement_type>::index getMovementTypeIndex() const noexcept;
+
+		/**
+		 * Retrieves a pointer to the details of the type of movement this unit has.
+		 * @return The pointer to the movement type's properties.
+		 * @sa     updateMovementType()
+		 */
+		std::shared_ptr<const movement_type> getMovementType() const noexcept;
+
+		/**
+		 * Updates the stored movement type properties pointer.
+		 * @param movementBank A reference to the movement type bank to pull the pointer from.
+		 */
+		void updateMovementType(const bank<movement_type>& movementBank) const noexcept;
 
 		/**
 		 * Retrieves the sprite ID of a given country's portrait of this unit.
@@ -618,13 +629,13 @@ namespace awe {
 		 * Finds out if this type of unit has infinite fuel.
 		 * @return \c TRUE if \c _maxFuel is less than \c 0, \c FALSE otherwise.
 		 */
-		bool isInfiniteFuel() const noexcept;
+		bool hasInfiniteFuel() const noexcept;
 
 		/**
 		 * Finds out if this type of unit has infinite ammo.
 		 * @return \c TRUE if \c _maxAmmo is less than \c 0, \c FALSE otherwise.
 		 */
-		bool isInfiniteAmmo() const noexcept;
+		bool hasInfiniteAmmo() const noexcept;
 
 		/**
 		 * Finds out if this type of unit can load onto it a given unit type.
@@ -632,6 +643,19 @@ namespace awe {
 		 * @return \c TRUE if yes, \c FALSE otherwise.
 		 */
 		bool canLoad(const awe::bank<unit_type>::index typeID) const noexcept;
+
+		/**
+		 * Overloaded version of \c canLoad() that checks using a given unit type.
+		 * @param  type The unit type to check for.
+		 * @return \c TRUE if the given unit type can be loaded onto units of this type, \c FALSE if not.
+		 */
+		bool canLoad(const awe::unit_type& type) const noexcept;
+
+		/**
+		 * Updates the stored unit type properties pointers for units that can be loaded onto this one.
+		 * @param unitBank A reference to the unit type bank to pull the pointers from.
+		 */
+		void updateUnitTypes(const bank<unit_type>& unitBank) const noexcept;
 
 		/**
 		 * The object's UUID.
@@ -656,6 +680,12 @@ namespace awe {
 		 * The movement type ID property.
 		 */
 		bank<movement_type>::index _movementTypeID = 0;
+
+		/**
+		 * Pointer to this unit's movement typre details.
+		 * It was made mutable so that it can be updated after construction if an instance of \c unit_type is constant.
+		 */
+		mutable std::shared_ptr<const awe::movement_type> _movementType;
 
 		/**
 		 * The portrait IDs.
@@ -708,9 +738,15 @@ namespace awe {
 		unsigned int _higherRange = 1;
 
 		/**
-		 * List of unit types that can be loaded onto this type of unit.
+		 * List of unit type IDs that can be loaded onto this type of unit.
 		 */
 		std::vector<awe::bank<unit_type>::index> _canLoadThese;
+
+		/**
+		 * List of unit types that can be loaded onto this type of unit.
+		 * It was made mutable so that it can be updated after construction if an instance of \c unit_type is constant.
+		 */
+		mutable std::vector<std::shared_ptr<const awe::unit_type>> _canLoadTheseUnitTypes;
 	};
 
 	/**
@@ -759,7 +795,19 @@ namespace awe {
 		unsigned int _portrait = 0;
 	};
 
-	void updateAllTerrains(bank<tile_type>& bank, const awe::bank<awe::terrain>& terrainBank) noexcept;
+	/**
+	 * Calls \c tile_type::updateTerrain() on an entire bank of \c tile_type objects.
+	 * @param tileBank    The \c tile_type bank to update.
+	 * @param terrainBank The \c terrian bank to pull the pointers from.
+	 */
+	void updateAllTerrains(bank<tile_type>& tileBank, const awe::bank<awe::terrain>& terrainBank) noexcept;
+
+	/**
+	 * Calls \c unit_type::updateMovementType() and \c unit_type::updateUnitTypes on an entire bank of \c unit_type objects.
+	 * @param unitBank     The \c unit_type bank to update. Conversely the \c unit_type bank that is used to update itself.
+	 * @param movementBank The \c movement_type bank to pull the pointers from.
+	 */
+	void updateAllMovementsAndLoadedUnits(bank<unit_type>& unitBank, const awe::bank<awe::movement_type>& movementBank) noexcept;
 }
 
 template<typename T>

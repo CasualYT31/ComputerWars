@@ -29,6 +29,13 @@ void awe::updateAllTerrains(awe::bank<awe::tile_type>& tileBank, const awe::bank
 	}
 }
 
+void awe::updateAllMovementsAndLoadedUnits(awe::bank<awe::unit_type>& unitBank, const awe::bank<awe::movement_type>& movementBank) noexcept {
+	for (std::size_t i = 0; i < unitBank.size(); i++) {
+		unitBank[i]->updateMovementType(movementBank);
+		unitBank[i]->updateUnitTypes(unitBank);
+	}
+}
+
 //*******************
 //*COMMON PROPERTIES*
 //*******************
@@ -151,11 +158,11 @@ unsigned int awe::tile_type::getTile(awe::bank<awe::country>::index countryID) c
 	if (countryID >= _tiles.size()) return UINT_MAX;
 	return _tiles[countryID];
 }
-const awe::terrain* awe::tile_type::getType() const noexcept {
+std::shared_ptr<const awe::terrain> awe::tile_type::getType() const noexcept {
 	return _terrain;
 }
 void awe::tile_type::updateTerrain(const awe::bank<awe::terrain>& terrainBank) const noexcept {
-	_terrain = terrainBank[_terrainType];
+	_terrain = std::make_shared<const awe::terrain>(terrainBank[_terrainType]);
 }
 bool awe::tile_type::operator==(const awe::tile_type& rhs) const noexcept {
 	return UUID == rhs.UUID;
@@ -185,8 +192,14 @@ awe::unit_type::unit_type(safe::json& j) noexcept : common_properties(j) {
 	j.resetState();
 	j.applyVector(_canLoadThese, { "canload" });
 }
-awe::bank<awe::movement_type>::index awe::unit_type::getMovementType() const noexcept {
+awe::bank<awe::movement_type>::index awe::unit_type::getMovementTypeIndex() const noexcept {
 	return _movementTypeID;
+}
+std::shared_ptr<const awe::movement_type> awe::unit_type::getMovementType() const noexcept {
+	return _movementType;
+}
+void awe::unit_type::updateMovementType(const awe::bank<awe::movement_type>& movementBank) const noexcept {
+	_movementType = std::make_shared<const awe::movement_type>(movementBank[_movementTypeID]);
 }
 unsigned int awe::unit_type::getPicture(awe::bank<awe::country>::index countryID) const noexcept {
 	if (countryID >= _pictures.size()) return UINT_MAX;
@@ -220,14 +233,30 @@ unsigned int awe::unit_type::getLowerRange() const noexcept {
 unsigned int awe::unit_type::getHigherRange() const noexcept {
 	return _higherRange;
 }
-bool awe::unit_type::isInfiniteFuel() const noexcept {
+bool awe::unit_type::hasInfiniteFuel() const noexcept {
 	return _maxFuel < 0;
 }
-bool awe::unit_type::isInfiniteAmmo() const noexcept {
+bool awe::unit_type::hasInfiniteAmmo() const noexcept {
 	return _maxAmmo < 0;
 }
 bool awe::unit_type::canLoad(const awe::bank<unit_type>::index typeID) const noexcept {
 	return std::find(_canLoadThese.begin(), _canLoadThese.end(), typeID) != _canLoadThese.end();
+}
+bool awe::unit_type::canLoad(const awe::unit_type& type) const noexcept {
+	bool ret = false;
+	for (auto& u : _canLoadTheseUnitTypes) {
+		if (u && *u == type) {
+			ret = true;
+			break;
+		}
+	}
+	return ret;
+}
+void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank) const noexcept {
+	_canLoadTheseUnitTypes.clear();
+	for (std::size_t i = 0; i < unitBank.size(); i++) {
+		_canLoadTheseUnitTypes.push_back(std::make_shared<const awe::unit_type>(unitBank[i]));
+	}
 }
 bool awe::unit_type::operator==(const awe::unit_type& rhs) const noexcept {
 	return UUID == rhs.UUID;
