@@ -38,12 +38,14 @@ namespace awe {
 	public:
 		/**
 		 * Constructor which initialises a unit.
-		 * @param type Pointer to the unit's static information defining its type.
-		 * @param hp   The initial HP of the unit. Is set using \c setHP().
-		 * @param fuel The initial fuel of the unit. Is set using \c setFuel().
-		 * @param ammo The initial ammo of the unit. Is set using \c setAmmo().
+		 * @param type        Pointer to the unit's static information defining its type.
+		 * @param hp          The initial HP of the unit. Is set using \c setHP().
+		 * @param fuel        The initial fuel of the unit. Is set using \c setFuel().
+		 * @param ammo        The initial ammo of the unit. Is set using \c setAmmo().
+		 * @param initForUUID The initial value of this object type's \c uuid::_id_counter.
+		 * @sa    engine::uuid::uuid()
 		 */
-		unit(const unit_type* type = nullptr, const int hp = 0, const int fuel = 0, const int ammo = 0) noexcept;
+		unit(const unit_type* type = nullptr, const int hp = -1, const int fuel = -1, const int ammo = -1, const sf::Uint64 initForUUID = 1) noexcept;
 
 		/**
 		 * This unit's UUID object.
@@ -68,7 +70,7 @@ namespace awe {
 		/**
 		 * Updates the unit's HP.
 		 * If an HP value is given outside of the range (0 to unit type's maximum health),
-		 * it will automatically be adjusted (0 if <0, max HP if >max HP).
+		 * it will automatically be adjusted to the max health.
 		 * @param  newHP The new HP.
 		 * @return The old HP.
 		 */
@@ -83,7 +85,7 @@ namespace awe {
 		/**
 		 * Updates the unit's fuel.
 		 * If a fuel value is given outside of the range (0 to unit type's maximum fuel),
-		 * it will automatically be adjusted (0 if <0, max fuel if >max fuel).
+		 * it will automatically be adjusted to the max fuel.
 		 * @param  newFuel The new fuel.
 		 * @return The old fuel.
 		 */
@@ -98,7 +100,7 @@ namespace awe {
 		/**
 		 * Updates the unit's ammo.
 		 * If an ammo value is given outside of the range (0 to unit type's maximum ammo),
-		 * it will automatically be adjusted (0 if <0, max ammo if >max ammo).
+		 * it will automatically be adjusted to the max ammo.
 		 * @param  newAmmo The new ammo.
 		 * @return The old ammo.
 		 */

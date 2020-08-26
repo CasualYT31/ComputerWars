@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 
-awe::unit::unit(const unit_type* type, const int hp, const int fuel, const int ammo) noexcept : _unitType(type) {
+awe::unit::unit(const unit_type* type, const int hp, const int fuel, const int ammo, const sf::Uint64 initForUUID) noexcept : UUID(initForUUID), _unitType(type) {
 	setHP(hp);
 	setFuel(fuel);
 	setAmmo(ammo);
@@ -45,9 +45,7 @@ const awe::unit_type* awe::unit::getType() const noexcept {
 int awe::unit::setHP(const int newHP) noexcept {
 	auto old = getHP();
 	_hp = newHP;
-	if (_hp < 0) {
-		_hp = 0;
-	} else if (_hp > (int)_unitType->getMaxHP()) {
+	if (_hp < 0 || _hp > (int)_unitType->getMaxHP()) {
 		_hp = (int)_unitType->getMaxHP();
 	}
 	return old;
@@ -60,9 +58,7 @@ int awe::unit::getHP() const noexcept {
 int awe::unit::setFuel(const int newFuel) noexcept {
 	auto old = getFuel();
 	_fuel = newFuel;
-	if (_fuel < 0) {
-		_fuel = 0;
-	} else if (!_unitType->hasInfiniteFuel() && _fuel > _unitType->getMaxFuel()) {
+	if (_fuel < 0 || (!_unitType->hasInfiniteFuel() && _fuel > _unitType->getMaxFuel())) {
 		_fuel = (int)_unitType->getMaxFuel();
 	}
 	return old;
@@ -75,9 +71,7 @@ int awe::unit::getFuel() const noexcept {
 int awe::unit::setAmmo(const int newAmmo) noexcept {
 	auto old = getAmmo();
 	_ammo = newAmmo;
-	if (_ammo < 0) {
-		_ammo = 0;
-	} else if (!_unitType->hasInfiniteAmmo() && _ammo > _unitType->getMaxAmmo()) {
+	if (_ammo < 0 || (!_unitType->hasInfiniteAmmo() && _ammo > _unitType->getMaxAmmo())) {
 		_ammo = _unitType->getMaxAmmo();
 	}
 	return old;

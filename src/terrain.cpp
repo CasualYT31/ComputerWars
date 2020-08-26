@@ -41,9 +41,7 @@ const awe::tile_type* awe::tile::getTile() const noexcept {
 int awe::tile::setHP(const int newHP) noexcept {
 	auto old = getHP();
 	_hp = newHP;
-	if (_hp < 0) {
-		_hp = 0;
-	} else if (_hp > (int)_tileType->getType()->getMaxHP()) {
+	if (_hp < 0 || _hp > (int)_tileType->getType()->getMaxHP()) {
 		_hp = _tileType->getType()->getMaxHP();
 	}
 	return old;
