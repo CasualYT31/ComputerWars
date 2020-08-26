@@ -61,21 +61,45 @@ awe::country::country(safe::json& j) noexcept : common_properties(j) {
 const sf::Color& awe::country::getColour() const noexcept {
 	return _colour;
 }
+bool awe::country::operator==(const awe::country& rhs) const noexcept {
+	return UUID == rhs.UUID;
+}
+bool awe::country::operator!=(const awe::country& rhs) const noexcept {
+	return !(*this == rhs);
+}
 
 //*********
 //*WEATHER*
 //*********
 awe::weather::weather(safe::json& j) noexcept : common_properties(j) {}
+bool awe::weather::operator==(const awe::weather& rhs) const noexcept {
+	return UUID == rhs.UUID;
+}
+bool awe::weather::operator!=(const awe::weather& rhs) const noexcept {
+	return !(*this == rhs);
+}
 
 //*************
 //*ENVIRONMENT*
 //*************
 awe::environment::environment(safe::json& j) noexcept : common_properties(j) {}
+bool awe::environment::operator==(const awe::environment& rhs) const noexcept {
+	return UUID == rhs.UUID;
+}
+bool awe::environment::operator!=(const awe::environment& rhs) const noexcept {
+	return !(*this == rhs);
+}
 
 //***************
 //*MOVEMENT TYPE*
 //***************
 awe::movement_type::movement_type(safe::json& j) noexcept : common_properties(j) {}
+bool awe::movement_type::operator==(const awe::movement_type& rhs) const noexcept {
+	return UUID == rhs.UUID;
+}
+bool awe::movement_type::operator!=(const awe::movement_type& rhs) const noexcept {
+	return !(*this == rhs);
+}
 
 //*********
 //*TERRAIN*
@@ -106,6 +130,12 @@ unsigned int awe::terrain::getPicture(const awe::bank<awe::country>::index count
 bool awe::terrain::isCapturable() const noexcept {
 	return _isCapturable;
 }
+bool awe::terrain::operator==(const awe::terrain& rhs) const noexcept {
+	return UUID == rhs.UUID;
+}
+bool awe::terrain::operator!=(const awe::terrain& rhs) const noexcept {
+	return !(*this == rhs);
+}
 
 //******
 //*TILE*
@@ -126,6 +156,12 @@ const awe::terrain* awe::tile_type::getType() const noexcept {
 }
 void awe::tile_type::updateTerrain(const awe::bank<awe::terrain>& terrainBank) const noexcept {
 	_terrain = terrainBank[_terrainType];
+}
+bool awe::tile_type::operator==(const awe::tile_type& rhs) const noexcept {
+	return UUID == rhs.UUID;
+}
+bool awe::tile_type::operator!=(const awe::tile_type& rhs) const noexcept {
+	return !(*this == rhs);
 }
 
 //******
@@ -193,6 +229,12 @@ bool awe::unit_type::isInfiniteAmmo() const noexcept {
 bool awe::unit_type::canLoad(const awe::bank<unit_type>::index typeID) const noexcept {
 	return std::find(_canLoadThese.begin(), _canLoadThese.end(), typeID) != _canLoadThese.end();
 }
+bool awe::unit_type::operator==(const awe::unit_type& rhs) const noexcept {
+	return UUID == rhs.UUID;
+}
+bool awe::unit_type::operator!=(const awe::unit_type& rhs) const noexcept {
+	return !(*this == rhs);
+}
 
 //***********
 //*COMMANDER*
@@ -202,4 +244,10 @@ awe::commander::commander(safe::json& j) noexcept : common_properties(j) {
 }
 unsigned int awe::commander::getPortrait() const noexcept {
 	return _portrait;
+}
+bool awe::commander::operator==(const awe::commander& rhs) const noexcept {
+	return UUID == rhs.UUID;
+}
+bool awe::commander::operator!=(const awe::commander& rhs) const noexcept {
+	return !(*this == rhs);
 }

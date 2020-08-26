@@ -30,11 +30,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * <li>Types of terrain.</li>
  * <li>Types of units.</li>
  * <li>Commanders available.</li></ul>
+ * @todo Replace all instances of indexes and IDs with weak references.
  */
 
 #pragma once
 
 #include "texture.h"
+#include "uuid.h"
 
 /**
  * The \c awe namespace contains Computer Wars-specific code.
@@ -198,6 +200,25 @@ namespace awe {
 		 * @return The colour of the country.
 		 */
 		const sf::Color& getColour() const noexcept;
+
+		/**
+		 * The object's UUID.
+		 */
+		engine::uuid<awe::country> UUID;
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The \c country object to test against.
+		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
+		 */
+		bool operator==(const awe::country& rhs) const noexcept;
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The \c country object to test against.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 */
+		bool operator!=(const awe::country& rhs) const noexcept;
 	private:
 		/**
 		 * The colour property.
@@ -217,6 +238,25 @@ namespace awe {
 		 * @param j The object value containing the weather's properties.
 		 */
 		weather(safe::json& j) noexcept;
+
+		/**
+		 * The object's UUID.
+		 */
+		engine::uuid<awe::weather> UUID;
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The \c weather object to test against.
+		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
+		 */
+		bool operator==(const awe::weather& rhs) const noexcept;
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The \c weather object to test against.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 */
+		bool operator!=(const awe::weather& rhs) const noexcept;
 	};
 
 	/**
@@ -232,6 +272,25 @@ namespace awe {
 		 * @param j The object value containing the environment's properties.
 		 */
 		environment(safe::json& j) noexcept;
+
+		/**
+		 * The object's UUID.
+		 */
+		engine::uuid<awe::environment> UUID;
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The \c environment object to test against.
+		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
+		 */
+		bool operator==(const awe::environment& rhs) const noexcept;
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The \c environment object to test against.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 */
+		bool operator!=(const awe::environment& rhs) const noexcept;
 	};
 
 	/**
@@ -246,6 +305,25 @@ namespace awe {
 		 * @param j The object value containing the movement type's properties.
 		 */
 		movement_type(safe::json& j) noexcept;
+
+		/**
+		 * The object's UUID.
+		 */
+		engine::uuid<awe::movement_type> UUID;
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The \c movement_type object to test against.
+		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
+		 */
+		bool operator==(const awe::movement_type& rhs) const noexcept;
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The \c environment object to test against.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 */
+		bool operator!=(const awe::movement_type& rhs) const noexcept;
 	};
 
 	/**
@@ -304,6 +382,25 @@ namespace awe {
 		 * @return The capturable property.
 		 */
 		bool isCapturable() const noexcept;
+
+		/**
+		 * The object's UUID.
+		 */
+		engine::uuid<awe::terrain> UUID;
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The \c terrain object to test against.
+		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
+		 */
+		bool operator==(const awe::terrain& rhs) const noexcept;
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The \c terrain object to test against.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 */
+		bool operator!=(const awe::terrain& rhs) const noexcept;
 	private:
 		/**
 		 * Maximum health points property.
@@ -375,6 +472,25 @@ namespace awe {
 		 * @param terrainBank A reference to the terrain bank to pull the pointer from.
 		 */
 		void updateTerrain(const bank<terrain>& terrainBank) const noexcept;
+
+		/**
+		 * The object's UUID.
+		 */
+		engine::uuid<awe::tile_type> UUID;
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The \c tile_type object to test against.
+		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
+		 */
+		bool operator==(const awe::tile_type& rhs) const noexcept;
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The \c tile_type object to test against.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 */
+		bool operator!=(const awe::tile_type& rhs) const noexcept;
 	private:
 		/**
 		 * The ID of the type of terrain this tile represents.
@@ -427,7 +543,13 @@ namespace awe {
 		 * Sprites is an array of sprite IDs corresponding to each country's map representation of the type of unit.
 		 * @param j The object value containing the terrain type's properties.
 		 * @sa    isInfiniteFuel()
-		 * @sa    isInfiniteAmmo()
+		 * @sa    isInfiniteAmmo()*/
+		unit_type(safe::json& j) noexcept;
+
+		/**
+		 * Retrieves the movement type of this unit.
+		 * @return The index of the movement type of this unit.
+		 */
 		bank<movement_type>::index getMovementType() const noexcept;
 
 		/**
@@ -510,6 +632,25 @@ namespace awe {
 		 * @return \c TRUE if yes, \c FALSE otherwise.
 		 */
 		bool canLoad(const awe::bank<unit_type>::index typeID) const noexcept;
+
+		/**
+		 * The object's UUID.
+		 */
+		engine::uuid<awe::unit_type> UUID;
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The \c unit_type object to test against.
+		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
+		 */
+		bool operator==(const awe::unit_type& rhs) const noexcept;
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The \c unit_type object to test against.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 */
+		bool operator!=(const awe::unit_type& rhs) const noexcept;
 	private:
 		/**
 		 * The movement type ID property.
@@ -592,6 +733,25 @@ namespace awe {
 		 * @return The animated sprite ID.
 		 */
 		unsigned int getPortrait() const noexcept;
+
+		/**
+		 * The object's UUID.
+		 */
+		engine::uuid<awe::commander> UUID;
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The \c commander object to test against.
+		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
+		 */
+		bool operator==(const awe::commander& rhs) const noexcept;
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The \c commander object to test against.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 */
+		bool operator!=(const awe::commander& rhs) const noexcept;
 	private:
 		/**
 		 * The portrait property.
