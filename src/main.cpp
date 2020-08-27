@@ -22,9 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /* Project - Overarching Goals
 1. I SHOULD LOOK THROUGH MY CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
-2. I should refactor my generic solutions to ensure as little redundant duplication as possible.
+2. I should refactor my template solutions to ensure as little redundant duplication as possible.
 3. JSON backend has been developed a lot since I started using it: unordered_json support has been added, as well as the ability to serialise/deserialise user-defined types.
    These features must be reviewed to see if they're useful for me, and if they are, I can think about radically changing the way safejson works for the better.
+4. I should favour smart pointer objects over raw pointers. I also need to ensure I use the right type of pointer class throughout my code.
 */
 
 /* Separate idea: create a template type which has a shared_ptr and identifier variable?
@@ -33,92 +34,23 @@ instead of throughout the code */
 
 /**@file main.cpp
  * The entry point into the program.
- * Some basic initialisation occurs before handing control over to the sole awe::game object.
- * See the documentation on main() for more information.
+ * Some basic initialisation occurs before handing control over to the sole awe::game_engine object.
+ * See the documentation on \c main() for more information.
  */
 
-// #include "bank.h"
-
-// #include "game.h"
-
-#include "language.h"
-#include "fonts.h"
-
-#include "gui.h"
-
-#include <iostream>
-#include <chrono>
-#include <thread>
+#include "engine.h"
 
 /**
  * The entry point into the program.
- * Some basic game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the awe::game object is constructed.
- * Much more of the game's initialisation occurs in awe::game's constructor.
- * @return The result of calling awe::game::run(): by this point, the game has been shut down.
+ * Some basic game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the \c awe::game_engine object is constructed.
+ * Much more of the game's initialisation occurs in \c awe::game_engine's constructor.
+ * @return The result of calling \c awe::game_engine::run(): by this point, the game has been shut down.
  */
 int main() {
     // create the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
-
-    i18n::language_dictionary dict;
-    dict.load("assets/lang/lang.json");
-    
-    sfx::renderer newRenderer;
-    newRenderer.load("assets/renderer/renderer.json");
-    // example of overriding
-    sfx::renderer_settings settings = newRenderer.getSettings();
-    settings.style.mouseGrabbed = false;
-    newRenderer.setSettings(settings);
-
-    std::shared_ptr<sfx::animated_spritesheet> sheet = std::make_shared<sfx::animated_spritesheet>();
-    sheet->load("assets/sprites/gui/spritesgui.json");
-
-    sfx::fonts fonts;
-    fonts.load("assets/fonts/fonts.json");
-
-    std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>("assets/script");
-
-    engine::gui gui(scripts);
-    gui.load("assets/gui/gui.json");
-    gui.setTarget(newRenderer);
-    gui.setSpritesheet(sheet);
-    gui.setGUI("main");
-
-    bool leave = false;
-    while (!leave) {
-        sf::Event event;
-        while (newRenderer.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                leave = true;
-            } else if (event.type == sf::Event::KeyReleased) {
-                if (event.key.code == sf::Keyboard::Escape) {
-                    leave = true;
-                } else if (event.key.code == sf::Keyboard::Z) {
-                    if (gui.getGUI() == "main") {
-                        gui.setGUI("settings");
-                    } else {
-                        gui.setGUI("main");
-                    }
-                }
-            } else if (event.type == sf::Event::Resized) {
-                // update the view to the new size of the window
-                sf::FloatRect visibleArea(0, 0, (float)event.size.width, (float)event.size.height);
-                newRenderer.setView(sf::View(visibleArea));
-            }
-            gui.handleEvent(event);
-        }
-
-        newRenderer.clear(sf::Color::Black);
-        newRenderer.animate(gui);
-        newRenderer.draw(gui);
-        newRenderer.display();
-    }
-
-    newRenderer.save();
-    newRenderer.close();
-
-    /* // initialise game loop
-    awe::game gameLoop;
+    // initialise game loop
+    awe::game_engine gameLoop;
     // run game loop, then destroy the object once the loop terminates
-    return gameLoop.run(); */
+    return gameLoop.run();
 }

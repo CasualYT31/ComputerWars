@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "game.h"
+#include "engine.h"
 #include <iostream>
 
-const char* awe::game::STATE_TERMINATED = "terminated";
+const char* awe::game_engine::STATE_TERMINATED = "terminated";
 
-awe::game::game(const std::string& scriptsFolder,
+awe::game_engine::game_engine(const std::string& scriptsFolder,
 			const std::string& JSON_AudioSound,
 			const std::string& JSON_AudioMusic,
 			const std::string& JSON_Fonts,
@@ -71,14 +71,14 @@ awe::game::game(const std::string& scriptsFolder,
 	_gui.setTarget(_renderer);
 }
 
-awe::game::~game() noexcept {
+awe::game_engine::~game_engine() noexcept {
 	_dictionary.save();
 }
 
-int awe::game::run() noexcept {
+int awe::game_engine::run() noexcept {
 	_renderer.openWindow();
 
-	while (_state != awe::game::STATE_TERMINATED) {
+	while (_state != awe::game_engine::STATE_TERMINATED) {
 		if (_state != _gui.getGUI()) _gui.setGUI(_state);
 
 		_userinput.update();
@@ -92,7 +92,7 @@ int awe::game::run() noexcept {
 	return 0;
 }
 
-void awe::game::_rendererEventPolling() noexcept {
+void awe::game_engine::_rendererEventPolling() noexcept {
 	sf::Event event;
 	while (_renderer.pollEvent(event)) {
 		_checkTerminated(event);
@@ -100,13 +100,13 @@ void awe::game::_rendererEventPolling() noexcept {
 	}
 }
 
-void awe::game::_checkTerminated(sf::Event& event) noexcept {
+void awe::game_engine::_checkTerminated(sf::Event& event) noexcept {
 	if (event.type == sf::Event::Closed) {
-		_state = awe::game::STATE_TERMINATED;
+		_state = awe::game_engine::STATE_TERMINATED;
 	}
 }
 
-void awe::game::_rendererRendering() noexcept {
+void awe::game_engine::_rendererRendering() noexcept {
 	_renderer.animate(_gui);
 	_renderer.draw(_gui);
 	_renderer.display();

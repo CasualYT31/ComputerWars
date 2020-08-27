@@ -32,11 +32,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "unit.h"
 
 namespace awe {
-	class game : sf::NonCopyable {
+	class game_engine : sf::NonCopyable {
 	public:
 		static const char* STATE_TERMINATED;
 
-		game(const std::string& scriptsFolder = "assets/script",
+		game_engine(const std::string& scriptsFolder = "assets/script",
 			const std::string& JSON_AudioSound = "assets/audio/sound/audiosound.json",
 			const std::string& JSON_AudioMusic = "assets/audio/music/audiomusic.json",
 			const std::string& JSON_Fonts = "assets/fonts/fonts.json",
@@ -55,7 +55,7 @@ namespace awe {
 			const std::string& JSON_Units = "assets/property/unit.json",
 			const std::string& JSON_COs = "assets/property/co.json",
 			const std::string& name = "game_loop") noexcept;
-		~game() noexcept;
+		~game_engine() noexcept;
 
 		int run() noexcept;
 	private:
