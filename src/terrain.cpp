@@ -74,3 +74,11 @@ bool awe::tile::isOwned() const noexcept {
 bool awe::tile::isOccupied() const noexcept {
 	return !_unit.expired();
 }
+
+bool awe::tile::operator==(const awe::tile& rhs) const noexcept {
+	return UUID == rhs.UUID;
+}
+
+bool awe::tile::operator!=(const awe::tile& rhs) const noexcept {
+	return !(*this == rhs);
+}

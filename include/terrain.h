@@ -119,6 +119,25 @@ namespace awe {
 		 * @return /c TRUE if this tile is being occupied, /c FALSE otherwise.
 		 */
 		bool isOccupied() const noexcept;
+
+		/**
+		 * The tile's UUID object.
+		 */
+		engine::uuid<awe::tile> UUID;
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The other \c tile object to test against.
+		 * @return \c TRUE if both tile's UUID objects are equivalent, \c FALSE if not.
+		 */
+		bool operator==(const awe::tile& rhs) const noexcept;
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The other \c tile object to test against.
+		 * @return \c TRUE if both tile's UUID objects are not equivalent, \c FALSE if they are.
+		 */
+		bool operator!=(const awe::tile& rhs) const noexcept;
 	private:
 		/**
 		 * Pointer to the tile type's static information.

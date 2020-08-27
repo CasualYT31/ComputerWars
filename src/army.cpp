@@ -36,38 +36,36 @@ awe::TeamID awe::army::getTeam() const noexcept {
 	return _team;
 }
 
-const awe::country* awe::army::setCountry(const awe::country* newCountry) noexcept {
-	auto old = getCountry();
+void awe::army::setCountry(std::shared_ptr<const awe::country> newCountry) noexcept {
 	if (newCountry) _country = newCountry;
-	return old;
 }
 
-const awe::country* awe::army::getCountry() const noexcept {
+std::shared_ptr<const awe::country> awe::army::getCountry() const noexcept {
 	return _country;
 }
 
-int awe::army::setFunds(int newFunds) noexcept {
+unsigned int awe::army::setFunds(unsigned int newFunds) noexcept {
 	auto old = getFunds();
 	_funds = newFunds;
 	if (_funds < 0) _funds = 0;
 	return old;
 }
 
-int awe::army::getFunds() const noexcept {
+unsigned int awe::army::getFunds() const noexcept {
 	return _funds;
 }
 
-void awe::army::setCommanders(const awe::commander* firstCO, const awe::commander* secondCO) noexcept {
+void awe::army::setCommanders(std::shared_ptr<const awe::commander> firstCO, std::shared_ptr<const awe::commander> secondCO) noexcept {
 	_firstCO = firstCO;
 	_secondCO = secondCO;
 	if (!_firstCO && _secondCO) std::swap(_firstCO, _secondCO);
 }
 
-const awe::commander* awe::army::getFirstCommander() const noexcept {
+std::shared_ptr<const awe::commander> awe::army::getFirstCommander() const noexcept {
 	return _firstCO;
 }
 
-const awe::commander* awe::army::getSecondCommander() const noexcept {
+std::shared_ptr<const awe::commander> awe::army::getSecondCommander() const noexcept {
 	return _secondCO;
 }
 
@@ -75,27 +73,53 @@ bool awe::army::isTagTeam() const noexcept {
 	return _firstCO && _secondCO;
 }
 
-void awe::army::addOwnedTile(awe::tile const* ptr) noexcept {
-	if (!ptr) return;
+void awe::army::addOwnedTile(const std::weak_ptr<awe::tile>& ptr) noexcept {
+	if (ptr.expired()) return;
 	_ownedTiles.push_back(ptr);
 }
 
-void awe::army::removeOwnedTile(awe::tile const* ptr) noexcept {
+void awe::army::removeOwnedTile(const std::shared_ptr<awe::tile>& ptr) noexcept {
 	if (!ptr) return;
-	auto itemReference = std::find(_ownedTiles.begin(), _ownedTiles.end(), ptr);
-	if (itemReference != _ownedTiles.end()) _ownedTiles.erase(itemReference);
+	for (auto itr = _ownedTiles.begin(), enditr = _ownedTiles.end(); itr != enditr; itr++) {
+		auto spOwnedTile = itr->lock();
+		if (spOwnedTile && *spOwnedTile == *ptr) {
+			_ownedTiles.erase(itr);
+			return;
+		}
+	}
 }
 
-bool awe::army::isOwnedTile(awe::tile const* ptr) const noexcept {
+bool awe::army::isOwnedTile(const std::shared_ptr<awe::tile>& ptr) const noexcept {
 	if (!ptr) return false;
-	return std::find(_ownedTiles.begin(), _ownedTiles.end(), ptr) != _ownedTiles.end();
+	for (auto itr = _ownedTiles.begin(), enditr = _ownedTiles.end(); itr != enditr; itr++) {
+		auto spOwnedTile = itr->lock();
+		if (spOwnedTile && *spOwnedTile == *ptr) return true;
+	}
+	return false;
 }
 
 void awe::army::clearOwnedTiles() noexcept {
 	_ownedTiles.clear();
 }
 
-std::size_t awe::army::ownedTilesCount(std::vector<const awe::terrain const*> filter, const bool inverted) const noexcept {
+std::size_t awe::army::ownedTilesCount(std::vector<std::shared_ptr<const awe::terrain>> filter, const bool inverted) const noexcept {
 	if (filter.size() == 0 && !inverted) return 0;
 	if (filter.size() == 0 && inverted) return _ownedTiles.size();
+	std::size_t count = 0;
+	for (auto itr = _ownedTiles.begin(), enditr = _ownedTiles.end(); itr != enditr; itr++) {
+		auto spOwnedTile = itr->lock();
+		if (spOwnedTile) {
+			auto filterItr = filter.begin(), filterEnd = filter.end();
+			for (; filterItr != filterEnd; filterItr++) {
+				if (!*filterItr) continue;
+				auto terrainToTest = **filterItr;
+				if (spOwnedTile && *spOwnedTile->getTile()->getType() == terrainToTest) {
+					if (!inverted) count++;
+					break;
+				}
+			}
+			if (inverted && filterItr == filterEnd) count++;
+		}
+	}
+	return count;
 }
