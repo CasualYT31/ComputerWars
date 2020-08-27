@@ -22,8 +22,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "army.h"
 
-awe::army::army(TeamID team, const awe::country* country, unsigned int funds,
-		const awe::commander* firstCO, const awe::commander* secondCO) noexcept :
+awe::army::army(TeamID team = 0, const std::shared_ptr<const awe::country>& country = nullptr, unsigned int funds = 0,
+				const std::shared_ptr<const awe::commander>& firstCO = nullptr,
+				const std::shared_ptr<const awe::commander>& secondCO = nullptr) noexcept :
 		_team(team), _country(country), _funds(funds), _firstCO(firstCO), _secondCO(secondCO) {}
 
 awe::TeamID awe::army::setTeam(awe::TeamID newTeam) noexcept {
@@ -112,8 +113,55 @@ std::size_t awe::army::ownedTilesCount(std::vector<std::shared_ptr<const awe::te
 			auto filterItr = filter.begin(), filterEnd = filter.end();
 			for (; filterItr != filterEnd; filterItr++) {
 				if (!*filterItr) continue;
-				auto terrainToTest = **filterItr;
-				if (spOwnedTile && *spOwnedTile->getTile()->getType() == terrainToTest) {
+				auto& terrainToTest = **filterItr;
+				if (*spOwnedTile->getTile()->getType() == terrainToTest) {
+					if (!inverted) count++;
+					break;
+				}
+			}
+			if (inverted && filterItr == filterEnd) count++;
+		}
+	}
+	return count;
+}
+
+std::shared_ptr<awe::unit> awe::army::addUnit(const std::shared_ptr<const awe::unit_type>& typeInfo) noexcept {
+	std::shared_ptr<awe::unit> temp = std::make_shared<awe::unit>(awe::unit(typeInfo));
+	_units.push_back(temp);
+	return temp;
+}
+
+void awe::army::removeUnit(const std::shared_ptr<awe::unit>& unitToDelete) noexcept {
+	for (auto itr = _units.begin(), enditr = _units.end(); itr != enditr; itr++) {
+		if (*itr && unitToDelete && **itr == *unitToDelete) {
+			_units.erase(itr);
+			return;
+		}
+	}
+}
+
+bool awe::army::isArmysUnit(const std::shared_ptr<awe::unit>& unitToSearch) const noexcept {
+	for (auto itr = _units.begin(), enditr = _units.end(); itr != enditr; itr++) {
+		if (*itr && unitToSearch && **itr == *unitToSearch) return true;
+	}
+	return false;
+}
+
+void awe::army::clearUnits() noexcept {
+	_units.clear();
+}
+
+std::size_t awe::army::unitCount(std::vector<std::shared_ptr<const awe::unit_type>> filter, const bool inverted) const noexcept {
+	if (filter.size() == 0 && !inverted) return 0;
+	if (filter.size() == 0 && inverted) return _units.size();
+	std::size_t count = 0;
+	for (auto itr = _units.begin(), enditr = _units.end(); itr != enditr; itr++) {
+		if (*itr) {
+			auto filterItr = filter.begin(), filterEnd = filter.end();
+			for (; filterItr != filterEnd; filterItr++) {
+				if (!*filterItr) continue;
+				auto& unitTypeToTest = **filterItr;
+				if (*(*itr)->getType() == unitTypeToTest) {
 					if (!inverted) count++;
 					break;
 				}

@@ -22,23 +22,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 
-awe::unit::unit(const unit_type* type, const int hp, const int fuel, const int ammo, const sf::Uint64 initForUUID) noexcept : UUID(initForUUID), _unitType(type) {
+awe::unit::unit(const std::shared_ptr<const unit_type>& type, const int hp, const int fuel, const int ammo, const sf::Uint64 initForUUID) noexcept : UUID(initForUUID), _unitType(type) {
 	setHP(hp);
 	setFuel(fuel);
 	setAmmo(ammo);
 }
 
-const awe::unit_type* awe::unit::setType(const awe::unit_type* newType) noexcept {
-	auto old = getType();
+void awe::unit::setType(const std::shared_ptr<const unit_type>& newType) noexcept {
 	_unitType = newType;
 	setHP(getHP());
 	setFuel(getFuel());
 	setAmmo(getAmmo());
 	_loadedUnits.clear();
-	return old;
 }
 
-const awe::unit_type* awe::unit::getType() const noexcept {
+const std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept {
 	return _unitType;
 }
 

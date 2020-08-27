@@ -43,10 +43,16 @@ namespace awe {
 	class army {
 	public:
 		/**
-		 * 
+		 * Initialises an army object.
+		 * @param team     The team ID of the army.
+		 * @param country  The country information of the army.
+		 * @param funds    The funds information of the army.
+		 * @param firstCO  The commander information of the first CO.
+		 * @param secondCO The commander information of the second CO.
 		 */
-		army(TeamID team = 0, const awe::country* country = nullptr, unsigned int funds = 0,
-			const awe::commander* firstCO = nullptr, const awe::commander* secondCO = nullptr) noexcept;
+		army(TeamID team = 0, const std::shared_ptr<const awe::country>& country = nullptr, unsigned int funds = 0,
+			const std::shared_ptr<const awe::commander>& firstCO = nullptr,
+			const std::shared_ptr<const awe::commander>& secondCO = nullptr) noexcept;
 
 		/**
 		 * Sets the army's team.
@@ -153,7 +159,7 @@ namespace awe {
 		 * If \c filter is empty, and \c inverted is \c FALSE, \c 0 will be returned.
 		 * If \c filter is empty, and \c inverted is \c TRUE, the number of owned tiles will be returned.\n
 		 * Individual tiles are not considered: rather their type of terrain is considered.
-		 * @param  filter   A collection of \c awe::terrain pointers that are to be searched for (or converse, that are to be ignored, if \c inverted is \c TRUE).
+		 * @param  filter   A collection of \c awe::terrain pointers that are to be searched for (or conversely, that are to be ignored, if \c inverted is \c TRUE).
 		 * @param  inverted If set to \c TRUE, the search will be inverted, i.e. tiles that are \em not any of the given types will be counted.
 		 * @return The number of tiles that match the search criteria.
 		 */
@@ -163,7 +169,7 @@ namespace awe {
 		 * Allocates a new unit and adds it to the army's collection.
 		 * @param typeInfo The type of unit to allocate.
 		 */
-		void addUnit(const std::shared_ptr<const awe::unit_type>& typeInfo) noexcept;
+		std::shared_ptr<awe::unit> addUnit(const std::shared_ptr<const awe::unit_type>& typeInfo) noexcept;
 
 		/**
 		 * Deletes a unit from the army's collection.
@@ -184,16 +190,48 @@ namespace awe {
 		void clearUnits() noexcept;
 
 		/**
-		 * 
+		 * Counts the number of units that are in an army's collection based on a given filter.
+		 * If \c filter is empty, and \c inverted is \c FALSE, \c 0 will be returned.
+		 * If \c filter is empty, and \c inverted is \c TRUE, the number of units will be returned.
+		 * @param  filter   A collection of \c awe::unit_type pointers that are to be searched for (or conversely, that are to be ignored, if \c inverted is \c TRUE).
+		 * @param  inverted If set to \c TRUE, the search will be inverted, i.e. units that are \em not any of the given types will be counted.
+		 * @return The number of units that match the search criteria.
 		 */
-		std::size_t unitCount(std::vector<const awe::unit_type const*> filter = {}, const bool inverted = false) const noexcept;
+		std::size_t unitCount(std::vector<std::shared_ptr<const awe::unit_type>> filter = {}, const bool inverted = false) const noexcept;
 	private:
+		/**
+		 * Team ID.
+		 */
 		TeamID _team = 0;
+
+		/**
+		 * Country information.
+		 */
 		std::shared_ptr<const awe::country> _country = nullptr;
-		std::vector<awe::unit> _units;
+
+		/**
+		 * Collection of units.
+		 */
+		std::vector<std::shared_ptr<awe::unit>> _units;
+
+		/**
+		 * Collection of owned tiles.
+		 */
 		std::vector<std::weak_ptr<awe::tile>> _ownedTiles;
+
+		/**
+		 * Funds.
+		 */
 		unsigned int _funds = 0;
+
+		/**
+		 * First CO information.
+		 */
 		std::shared_ptr<const awe::commander> _firstCO = nullptr;
+
+		/**
+		 * Second CO information.
+		 */
 		std::shared_ptr<const awe::commander> _secondCO = nullptr;
 	};
 }

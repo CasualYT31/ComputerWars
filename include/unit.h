@@ -45,7 +45,7 @@ namespace awe {
 		 * @param initForUUID The initial value of this object type's \c uuid::_id_counter.
 		 * @sa    engine::uuid::uuid()
 		 */
-		unit(const unit_type* type = nullptr, const int hp = -1, const int fuel = -1, const int ammo = -1, const sf::Uint64 initForUUID = 1) noexcept;
+		unit(const std::shared_ptr<const unit_type>& type = nullptr, const int hp = -1, const int fuel = -1, const int ammo = -1, const sf::Uint64 initForUUID = 1) noexcept;
 
 		/**
 		 * This unit's UUID object.
@@ -56,16 +56,15 @@ namespace awe {
 		 * Updates the unit's type.
 		 * When updating the unit's type, its HP, fuel, and ammo will be reset to the type's max stats.
 		 * It will also unload all units.
-		 * @param  newType Pointer to the static information of the unit's new type.
-		 * @return Pointer to the information on the unit's old type.
+		 * @param newType Pointer to the static information of the unit's new type.
 		 */
-		const unit_type* setType(const unit_type* newType) noexcept;
+		void setType(const std::shared_ptr<const awe::unit_type>& newType) noexcept;
 
 		/**
 		 * Retrieves information on the unit's type.
 		 * @return Pointer to the static information on the unit.
 		 */
-		const unit_type* getType() const noexcept;
+		const std::shared_ptr<const unit_type> getType() const noexcept;
 
 		/**
 		 * Updates the unit's HP.
@@ -156,7 +155,7 @@ namespace awe {
 		/**
 		 * Pointer to the unit's type information.
 		 */
-		const unit_type* _unitType = nullptr;
+		std::shared_ptr<const unit_type> _unitType = nullptr;
 
 		/**
 		 * The HP of the unit.
