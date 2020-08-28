@@ -22,9 +22,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "army.h"
 
-awe::army::army(TeamID team = 0, const std::shared_ptr<const awe::country>& country = nullptr, unsigned int funds = 0,
-				const std::shared_ptr<const awe::commander>& firstCO = nullptr,
-				const std::shared_ptr<const awe::commander>& secondCO = nullptr) noexcept :
+awe::army::army(TeamID team, const std::shared_ptr<const awe::country>& country, unsigned int funds,
+				const std::shared_ptr<const awe::commander>& firstCO,
+				const std::shared_ptr<const awe::commander>& secondCO) noexcept :
 		_team(team), _country(country), _funds(funds), _firstCO(firstCO), _secondCO(secondCO) {}
 
 awe::TeamID awe::army::setTeam(awe::TeamID newTeam) noexcept {

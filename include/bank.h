@@ -157,6 +157,11 @@ namespace awe {
 		 * @param j The object value containing the name, icon, and description properties.
 		 */
 		common_properties(safe::json& j) noexcept;
+
+		/**
+		 * See \c awe::terrain::terrain(const awe::terrain*).
+		 */
+		common_properties(const awe::common_properties* old) noexcept;
 	private:
 		/**
 		 * The long name property.
@@ -306,6 +311,11 @@ namespace awe {
 		movement_type(safe::json& j) noexcept;
 
 		/**
+		 * See \c awe::terrain::terrain(const awe::terrain*).
+		 */
+		movement_type(const awe::movement_type* old) noexcept;
+
+		/**
 		 * The object's UUID.
 		 */
 		engine::uuid<awe::movement_type> UUID;
@@ -350,6 +360,15 @@ namespace awe {
 		terrain(safe::json& j) noexcept;
 
 		/**
+		 * Seems to be some sort of copy constructor I needed for my code to compile when used in conjunction with shared_ptr?
+		 * I'm not sure why it would need this: I may have designed my code incorrectly at some point.
+		 * Whenever I copy a shared_ptr object I want to point to the original data, not copy the data...
+		 * But I need my code to compile for now so I'll include this where required.
+		 * Classes that needed it for future investigation: common_properties (implicitly), terrain, movement_type, and unit_type.
+		 */
+		terrain(const awe::terrain* old) noexcept;
+
+		/**
 		 * Retrieves the maximum health property.
 		 * This can be the health points of a cannon, or the capture points of a property.
 		 * @return The health points this terrain can have.
@@ -381,6 +400,18 @@ namespace awe {
 		 * @return The capturable property.
 		 */
 		bool isCapturable() const noexcept;
+
+		/**
+		 * Copies the internal list of movement costs and returns it.
+		 * @return All the move costs assigned to this terrain.
+		 */
+		std::vector<int> copyMoveCosts() const noexcept;
+
+		/**
+		 * Copies the internal list of picture keys and returns it.
+		 * @return All the pictures assigned to this terrain.
+		 */
+		std::vector<unsigned int> copyPictures() const noexcept;
 
 		/**
 		 * The object's UUID.
@@ -543,6 +574,11 @@ namespace awe {
 		 * @sa    isInfiniteFuel()
 		 * @sa    isInfiniteAmmo()*/
 		unit_type(safe::json& j) noexcept;
+
+		/**
+		 * See \c awe::terrain::terrain(const awe::terrain*).
+		 */
+		unit_type(const awe::unit_type* old) noexcept;
 
 		/**
 		 * Retrieves the movement type of this unit.

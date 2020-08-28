@@ -21,8 +21,113 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "engine.h"
-#include <iostream>
 
+awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
+
+int awe::game_engine::run() noexcept {
+	auto r = _initCheck();
+	if (r) return r;
+
+
+
+	return 0;
+}
+
+int awe::game_engine::_initCheck() const noexcept {
+	std::string errstring = "";
+	if (!_countries) errstring += "countries, ";
+	if (!_weathers) errstring += "weathers, ";
+	if (!_environments) errstring += "environments, ";
+	if (!_movements) errstring += "movements, ";
+	if (!_terrains) errstring += "terrains, ";
+	if (!_tiles) errstring += "tiles, ";
+	if (!_units) errstring += "units, ";
+	if (!_commanders) errstring += "commanders, ";
+	if (!_dictionary) errstring += "dictionary, ";
+	if (!_fonts) errstring += "fonts, ";
+	if (!_sounds) errstring += "sounds, ";
+	if (!_music) errstring += "music, ";
+	if (!_renderer) errstring += "renderer, ";
+	if (!_userinput) errstring += "userinput, ";
+	if (!_scripts) errstring += "scripts, ";
+	if (!_gui) errstring += "gui, ";
+	if (errstring.length()) {
+		errstring.at(errstring.length() - 2) = '.';
+		_logger.error("Fatal error: could not run the game engine due to the following objects not being allocated correctly: {}Game will now shutdown.", errstring);
+		return 1;
+	}
+	return 0;
+}
+
+
+// set methods
+
+void awe::game_engine::setCountries(const std::shared_ptr<awe::bank<const awe::country>>& ptr) noexcept {
+	_countries = ptr;
+}
+
+void awe::game_engine::setWeathers(const std::shared_ptr<awe::bank<const awe::weather>>& ptr) noexcept {
+	_weathers = ptr;
+}
+
+void awe::game_engine::setEnvironments(const std::shared_ptr<awe::bank<const awe::environment>>& ptr) noexcept {
+	_environments = ptr;
+}
+
+void awe::game_engine::setMovements(const std::shared_ptr<awe::bank<const awe::movement_type>>& ptr) noexcept {
+	_movements = ptr;
+}
+
+void awe::game_engine::setTerrains(const std::shared_ptr<awe::bank<const awe::terrain>>& ptr) noexcept {
+	_terrains = ptr;
+}
+
+void awe::game_engine::setTiles(const std::shared_ptr<awe::bank<const awe::tile_type>>& ptr) noexcept {
+	_tiles = ptr;
+}
+
+void awe::game_engine::setUnits(const std::shared_ptr<awe::bank<const awe::unit_type>>& ptr) noexcept {
+	_units = ptr;
+}
+
+void awe::game_engine::setCommanders(const std::shared_ptr<awe::bank<const awe::commander>>& ptr) noexcept {
+	_commanders = ptr;
+}
+
+void awe::game_engine::setDictionary(const std::shared_ptr<i18n::language_dictionary>& ptr) noexcept {
+	_dictionary = ptr;
+}
+
+void awe::game_engine::setFonts(const std::shared_ptr<sfx::fonts>& ptr) noexcept {
+	_fonts = ptr;
+}
+
+void awe::game_engine::setSounds(const std::shared_ptr<sfx::audio>& ptr) noexcept {
+	_sounds = ptr;
+}
+
+void awe::game_engine::setMusic(const std::shared_ptr<sfx::audio>& ptr) noexcept {
+	_music = ptr;
+}
+
+void awe::game_engine::setRenderer(const std::shared_ptr<sfx::renderer>& ptr) noexcept {
+	_renderer = ptr;
+}
+
+void awe::game_engine::setUserInput(const std::shared_ptr<sfx::user_input>& ptr) noexcept {
+	_userinput = ptr;
+}
+
+void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& ptr) noexcept {
+	_scripts = ptr;
+}
+
+void awe::game_engine::setGUI(const std::shared_ptr<engine::gui>& ptr) noexcept {
+	_gui = ptr;
+}
+
+// OLD
+/*
 const char* awe::game_engine::STATE_TERMINATED = "terminated";
 
 awe::game_engine::game_engine(const std::string& scriptsFolder,
@@ -110,4 +215,4 @@ void awe::game_engine::_rendererRendering() noexcept {
 	_renderer.animate(_gui);
 	_renderer.draw(_gui);
 	_renderer.display();
-}
+}*/

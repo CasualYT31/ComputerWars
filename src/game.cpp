@@ -23,9 +23,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 
 bool awe::game::read(const std::string& filename) noexcept {
-
+	return true;
 }
 
 bool awe::game::write(const std::string& filename) noexcept {
-
+	return true;
 }
