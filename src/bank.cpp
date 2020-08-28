@@ -220,10 +220,18 @@ awe::unit_type::unit_type(safe::json& j) noexcept : common_properties(j) {
 awe::unit_type::unit_type(const awe::unit_type* old) noexcept : common_properties(old) {
 	_movementTypeID = old->getMovementTypeIndex();
 	_movementType = old->getMovementType();
-	// copy pictures
-	// copy units (icons)
-	// copy canLoadThese
-	// copy canLoadTheseUnitTypes
+	_pictures = old->copyPictures();
+	_units = old->copyUnits();
+	_cost = old->getCost();
+	_maxFuel = old->getMaxFuel();
+	_maxAmmo = old->getMaxAmmo();
+	_maxHP = old->getMaxHP();
+	_movementPoints = old->getMovementPoints();
+	_vision = old->getVision();
+	_lowerRange = old->getLowerRange();
+	_higherRange = old->getHigherRange();
+	_canLoadThese = old->copyLoadableUnitIDs();
+	_canLoadTheseUnitTypes = old->copyLoadableUnits();
 }
 awe::bank<awe::movement_type>::index awe::unit_type::getMovementTypeIndex() const noexcept {
 	return _movementTypeID;
@@ -286,6 +294,18 @@ void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank) 
 	for (std::size_t i = 0; i < unitBank.size(); i++) {
 		_canLoadTheseUnitTypes.push_back(std::make_shared<const awe::unit_type>(unitBank[(awe::bank<awe::unit_type>::index)i]));
 	}
+}
+std::vector<unsigned int> awe::unit_type::copyPictures() const noexcept {
+	return _pictures;
+}
+std::vector<unsigned int> awe::unit_type::copyUnits() const noexcept {
+	return _units;
+}
+std::vector<awe::bank<awe::unit_type>::index> awe::unit_type::copyLoadableUnitIDs() const noexcept {
+	return _canLoadThese;
+}
+std::vector<std::shared_ptr<const awe::unit_type>> awe::unit_type::copyLoadableUnits() const noexcept {
+	return _canLoadTheseUnitTypes;
 }
 bool awe::unit_type::operator==(const awe::unit_type& rhs) const noexcept {
 	return UUID == rhs.UUID;

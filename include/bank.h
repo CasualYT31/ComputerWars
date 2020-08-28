@@ -693,6 +693,14 @@ namespace awe {
 		 */
 		void updateUnitTypes(const bank<unit_type>& unitBank) const noexcept;
 
+		std::vector<unsigned int> copyPictures() const noexcept;
+
+		std::vector<unsigned int> copyUnits() const noexcept;
+
+		std::vector<awe::bank<unit_type>::index> copyLoadableUnitIDs() const noexcept;
+
+		std::vector<std::shared_ptr<const awe::unit_type>> copyLoadableUnits() const noexcept;
+
 		/**
 		 * The object's UUID.
 		 */

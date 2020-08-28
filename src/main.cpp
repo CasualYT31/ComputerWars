@@ -47,10 +47,24 @@ instead of throughout the code */
  * @return The result of calling \c awe::game_engine::run(): by this point, the game has been shut down.
  */
 int main() {
-    // create the sink all loggers output to
+    // initialise the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
-    // initialise game loop
+
+    // initialise the language dictionary
+    std::shared_ptr<i18n::language_dictionary> dictionary = std::make_shared<i18n::language_dictionary>();
+    dictionary->load("assets/lang/lang.json");
+
+    // initialise the fonts
+    std::shared_ptr<sfx::fonts> fonts = std::make_shared<sfx::fonts>();
+    fonts->load("assets/fonts/fonts.json");
+
+    // continue to do this next time I'm able to work on this
+
+    // initialise game engine
     awe::game_engine gameLoop;
+    gameLoop.setDictionary(dictionary);
+    gameLoop.setFonts(fonts);
+
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run();
 }

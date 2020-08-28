@@ -1,1 +1,25 @@
-Testing WebHook Again
+Computer Wars © 2020 CasualYouTuber31
+---------------
+Event Log:
+[2020-08-28 23:08:19.171] [json_script_0] [info] Loading JSON script assets/lang/lang.json...
+[2020-08-28 23:08:19.176] [json_script_3] [info] Loading JSON script ./assets/lang/ENG_GB.json...
+[2020-08-28 23:08:19.180] [json_script_3] [info] Finished loading JSON script ./assets/lang/ENG_GB.json.
+[2020-08-28 23:08:19.180] [json_script_0] [info] Finished loading JSON script assets/lang/lang.json.
+[2020-08-28 23:08:19.180] [json_script_6] [info] Loading JSON script assets/fonts/fonts.json...
+[2020-08-28 23:08:19.193] [json_script_6] [info] Finished loading JSON script assets/fonts/fonts.json.
+[2020-08-28 23:08:19.194] [engine_9] [error] Fatal error: could not run the game engine due to the following objects not being allocated correctly:
+countries
+weathers
+environments
+movements
+terrains
+tiles
+units
+commanders
+sounds
+music
+renderer
+userinput
+scripts
+gui
+Game will now shut down.
