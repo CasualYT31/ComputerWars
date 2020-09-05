@@ -21,11 +21,73 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "game.h"
+#include <fstream>
 
-bool awe::game::read(const std::string& filename) noexcept {
+awe::game::game(const std::string& name) noexcept : _logger(name) {}
+
+bool awe::game::read(std::string filename) noexcept {
+	std::shared_ptr<awe::map> map;
+	std::shared_ptr<std::vector<std::shared_ptr<awe::army>>> armies;
+	try {
+		std::shared_ptr<std::fstream> file = _openFile(filename, true);
+
+		sf::Uint32 version = _readNumber<sf::Uint32>(file);
+
+		if (version == 1297564416) { // first version of the standard format
+
+		} else {
+			_logger.error("The version of the format used in the map file \"{}\" is unsupported: {}.", filename, version);
+			return false;
+		}
+	} catch (std::exception& e) {
+		_logger.error("An error occurred when attempting to open map file \"{}\": {}", filename, e.what());
+		return false;
+	}
+	_map = map;
+	_armies = armies;
+	_filename = filename;
 	return true;
 }
 
-bool awe::game::write(const std::string& filename) noexcept {
+bool awe::game::write(std::string filename) noexcept {
+	try {
+		std::shared_ptr<std::fstream> file = _openFile(filename, false);
+
+		*file << VERSION_NUMBER;
+	} catch (std::exception& e) {
+		_logger.error("An error occurred when attempting to write to map file \"{}\": {}", filename, e.what());
+		return false;
+	}
+	_filename = filename;
 	return true;
+}
+
+bool awe::game::_isBigEndian() const noexcept {
+	return (unsigned long)0x1 >> sizeof(unsigned long) - 1 != 0x1;
+}
+
+std::shared_ptr<std::fstream> awe::game::_openFile(std::string& filename, bool forInput) {
+	if (filename == "") filename = _filename;
+	std::shared_ptr<std::fstream> ret = std::make_shared<std::fstream>();
+	ret->exceptions(std::fstream::failbit | std::fstream::badbit | std::fstream::eofbit);
+	if (forInput) {
+		ret->open(filename, std::ios::binary | std::ios::in);
+	} else {
+		ret->open(filename, std::ios::binary | std::ios::out | std::ios::trunc);
+	}
+	return ret;
+}
+
+std::shared_ptr<awe::map> awe::game::getMap() const noexcept {
+	return _map;
+}
+
+std::shared_ptr<awe::army> awe::game::getArmy(std::size_t i) const noexcept {
+	if (i < getNumberOfArmies()) return (*_armies)[i];
+	return std::shared_ptr<awe::army>();
+}
+
+std::size_t awe::game::getNumberOfArmies() const noexcept {
+	if (_armies) return _armies->size();
+	return 0;
 }
