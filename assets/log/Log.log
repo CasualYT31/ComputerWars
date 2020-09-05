@@ -1,25 +1,107 @@
 Computer Wars © 2020 CasualYouTuber31
 ---------------
 Event Log:
-[2020-08-28 23:08:19.171] [json_script_0] [info] Loading JSON script assets/lang/lang.json...
-[2020-08-28 23:08:19.176] [json_script_3] [info] Loading JSON script ./assets/lang/ENG_GB.json...
-[2020-08-28 23:08:19.180] [json_script_3] [info] Finished loading JSON script ./assets/lang/ENG_GB.json.
-[2020-08-28 23:08:19.180] [json_script_0] [info] Finished loading JSON script assets/lang/lang.json.
-[2020-08-28 23:08:19.180] [json_script_6] [info] Loading JSON script assets/fonts/fonts.json...
-[2020-08-28 23:08:19.193] [json_script_6] [info] Finished loading JSON script assets/fonts/fonts.json.
-[2020-08-28 23:08:19.194] [engine_9] [error] Fatal error: could not run the game engine due to the following objects not being allocated correctly:
-countries
-weathers
-environments
-movements
-terrains
-tiles
-units
-commanders
-sounds
-music
-renderer
-userinput
-scripts
-gui
-Game will now shut down.
+[2020-09-05 13:41:29.279] [json_script_0] [info] Loading JSON script assets/lang/lang.json...
+[2020-09-05 13:41:29.282] [json_script_3] [info] Loading JSON script ./assets/lang/ENG_GB.json...
+[2020-09-05 13:41:29.283] [json_script_3] [info] Finished loading JSON script ./assets/lang/ENG_GB.json.
+[2020-09-05 13:41:29.284] [json_script_0] [info] Finished loading JSON script assets/lang/lang.json.
+[2020-09-05 13:41:29.284] [json_script_6] [info] Loading JSON script assets/fonts/fonts.json...
+[2020-09-05 13:41:29.286] [json_script_6] [info] Finished loading JSON script assets/fonts/fonts.json.
+[2020-09-05 13:41:29.286] [json_script_9] [info] Loading JSON script assets/audio/sound/audiosound.json...
+[2020-09-05 13:41:30.191] [json_script_9] [info] Finished loading JSON script assets/audio/sound/audiosound.json.
+[2020-09-05 13:41:30.192] [json_script_12] [info] Loading JSON script assets/audio/music/audiomusic.json...
+[2020-09-05 13:41:30.203] [json_script_12] [info] Finished loading JSON script assets/audio/music/audiomusic.json.
+[2020-09-05 13:41:30.450] [json_script_15] [info] Loading JSON script assets/renderer/renderer.json...
+[2020-09-05 13:41:30.454] [json_script_15] [info] Finished loading JSON script assets/renderer/renderer.json.
+[2020-09-05 13:41:30.455] [json_script_18] [info] Loading JSON script assets/userinput/userinput.json...
+[2020-09-05 13:41:30.528] [user_input_19] [info] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
+[2020-09-05 13:41:30.535] [json_script_18] [info] Finished loading JSON script assets/userinput/userinput.json.
+[2020-09-05 13:41:30.541] [scripts_21] [info] Registering script interface...
+[2020-09-05 13:41:30.542] [scripts_21] [info] Finished registering script interface.
+[2020-09-05 13:41:30.542] [scripts_21] [info] Loading scripts from "assets/script/"...
+[2020-09-05 13:41:30.545] [scripts_21] [info] Finished loading scripts.
+[2020-09-05 13:41:30.546] [json_script_22] [info] Loading JSON script assets/gui/gui.json...
+[2020-09-05 13:41:30.600] [json_script_22] [info] Finished loading JSON script assets/gui/gui.json.
+[2020-09-05 13:41:30.600] [json_script_26] [info] Loading JSON script assets/property/country.json...
+[2020-09-05 13:41:30.634] [json_script_26] [info] Finished loading JSON script assets/property/country.json.
+[2020-09-05 13:41:30.638] [json_script_45] [info] Loading JSON script assets/property/weather.json...
+[2020-09-05 13:41:30.647] [json_script_45] [info] Finished loading JSON script assets/property/weather.json.
+[2020-09-05 13:41:30.648] [json_script_54] [info] Loading JSON script assets/property/environment.json...
+[2020-09-05 13:41:30.654] [json_script_54] [info] Finished loading JSON script assets/property/environment.json.
+[2020-09-05 13:41:30.655] [json_script_60] [info] Loading JSON script assets/property/movement.json...
+[2020-09-05 13:41:30.667] [json_script_60] [info] Finished loading JSON script assets/property/movement.json.
+[2020-09-05 13:41:30.668] [json_script_71] [info] Loading JSON script assets/property/terrain.json...
+[2020-09-05 13:41:30.687] [json_73] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.688] [json_73] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.690] [json_74] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.690] [json_74] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.693] [json_75] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.693] [json_75] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.696] [json_76] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.696] [json_76] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.699] [json_77] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.699] [json_77] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.703] [json_78] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.703] [json_78] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.706] [json_79] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.706] [json_79] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.709] [json_80] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.709] [json_80] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.712] [json_81] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.712] [json_81] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.715] [json_82] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.715] [json_82] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.718] [json_83] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.718] [json_83] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.723] [json_84] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.723] [json_84] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.727] [json_85] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.727] [json_85] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.731] [json_86] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.732] [json_86] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.736] [json_87] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.736] [json_87] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.740] [json_88] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.740] [json_88] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.744] [json_89] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.744] [json_89] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.748] [json_90] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.748] [json_90] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.752] [json_91] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.752] [json_91] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.756] [json_92] [error] The key sequence {"capturable"} does not exist in the JSON object.
+[2020-09-05 13:41:30.756] [json_92] [info] {"capturable"} property faulty: reset to the default of false.
+[2020-09-05 13:41:30.760] [json_script_71] [info] Finished loading JSON script assets/property/terrain.json.
+[2020-09-05 13:41:30.767] [json_script_93] [info] Loading JSON script assets/property/tile.json...
+[2020-09-05 13:41:30.769] [json_script_93] [info] Finished loading JSON script assets/property/tile.json.
+[2020-09-05 13:41:30.769] [json_script_96] [info] Loading JSON script assets/property/unit.json...
+[2020-09-05 13:41:30.805] [json_98] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.811] [json_99] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.817] [json_100] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.823] [json_101] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.827] [json_102] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.832] [json_103] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.838] [json_104] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.843] [json_105] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.848] [json_106] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.853] [json_107] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.858] [json_108] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.863] [json_109] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.867] [json_110] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.873] [json_111] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.879] [json_112] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.883] [json_113] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.887] [json_114] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.892] [json_115] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.898] [json_116] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.905] [json_117] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.915] [json_118] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.924] [json_119] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.929] [json_120] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.935] [json_121] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.940] [json_122] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.945] [json_123] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.950] [json_124] [error] The key sequence {"canload"} does not exist in the JSON object.
+[2020-09-05 13:41:30.956] [json_script_96] [info] Finished loading JSON script assets/property/unit.json.
+[2020-09-05 13:41:30.967] [json_script_125] [info] Loading JSON script assets/property/co.json...
+[2020-09-05 13:41:30.974] [json_script_125] [info] Finished loading JSON script assets/property/co.json.

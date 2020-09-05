@@ -54,7 +54,7 @@ sf::Color engine::gui_background::getColour() const noexcept {
 	return _colour;
 }
 
-engine::gui::gui(std::shared_ptr<engine::scripts> scripts, const std::string& name) noexcept : _scripts(scripts), _logger(name) {
+engine::gui::gui(const std::shared_ptr<engine::scripts>& scripts, const std::string& name) noexcept : _scripts(scripts), _logger(name) {
 	if (!scripts) _logger.error("No scripts object has been provided to this GUI object: no signals will be handled.");
 }
 

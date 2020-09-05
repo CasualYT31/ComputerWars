@@ -133,7 +133,7 @@ namespace engine {
 		 * @param name    The name to give this particular instantiation within the log file. Defaults to "gui."
 		 * @sa    \c global::logger
 		 */
-		gui(std::shared_ptr<engine::scripts> scripts, const std::string& name = "gui") noexcept;
+		gui(const std::shared_ptr<engine::scripts>& scripts, const std::string& name = "gui") noexcept;
 
 		/**
 		 * Sets the GUI menu to display.

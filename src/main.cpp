@@ -28,13 +28,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 4. I should favour smart pointer objects over raw pointers. I also need to ensure I use the right type of pointer class throughout my code.
 */
 
-/* Separate idea: create a template type which has a shared_ptr and identifier variable?
-This pairing seems like it will be very common and if we have to change the way things are identified we can change it in one place (namely this class),
-instead of throughout the code */
-
 /**@file main.cpp
  * The entry point into the program.
- * Some basic initialisation occurs before handing control over to the sole awe::game_engine object.
+ * Most of the initialisation occurs before handing control over to the sole awe::game_engine object.
  * See the documentation on \c main() for more information.
  */
 
@@ -42,8 +38,7 @@ instead of throughout the code */
 
 /**
  * The entry point into the program.
- * Some basic game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the \c awe::game_engine object is constructed.
- * Much more of the game's initialisation occurs in \c awe::game_engine's constructor.
+ * A majority of the game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the \c awe::game_engine object is constructed.
  * @return The result of calling \c awe::game_engine::run(): by this point, the game has been shut down.
  */
 int main() {
@@ -58,12 +53,82 @@ int main() {
     std::shared_ptr<sfx::fonts> fonts = std::make_shared<sfx::fonts>();
     fonts->load("assets/fonts/fonts.json");
 
-    // continue to do this next time I'm able to work on this
+    // initialise the sounds
+    std::shared_ptr<sfx::audio> sounds = std::make_shared<sfx::audio>();
+    sounds->load("assets/audio/sound/audiosound.json");
+
+    // initialise the BGM
+    std::shared_ptr<sfx::audio> music = std::make_shared<sfx::audio>();
+    music->load("assets/audio/music/audiomusic.json");
+
+    // initialise the renderer
+    std::shared_ptr<sfx::renderer> renderer = std::make_shared<sfx::renderer>();
+    renderer->load("assets/renderer/renderer.json");
+
+    // initialise the user input
+    std::shared_ptr<sfx::user_input> userInput = std::make_shared<sfx::user_input>(*renderer);
+    userInput->load("assets/userinput/userinput.json");
+
+    // initialise the scripts
+    std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>("assets/script/");
+
+    // initialise the GUI
+    std::shared_ptr<engine::gui> gui = std::make_shared<engine::gui>(scripts);
+    gui->load("assets/gui/gui.json");
+
+    // initialise the countries
+    std::shared_ptr<awe::bank<const awe::country>> countries = std::make_shared<awe::bank<const awe::country>>();
+    countries->load("assets/property/country.json");
+
+    // initialise the weathers
+    std::shared_ptr<awe::bank<const awe::weather>> weathers = std::make_shared<awe::bank<const awe::weather>>();
+    weathers->load("assets/property/weather.json");
+
+    // initialise the environments
+    std::shared_ptr<awe::bank<const awe::environment>> environments = std::make_shared<awe::bank<const awe::environment>>();
+    environments->load("assets/property/environment.json");
+
+    // initialise the movements
+    std::shared_ptr<awe::bank<const awe::movement_type>> movements = std::make_shared<awe::bank<const awe::movement_type>>();
+    movements->load("assets/property/movement.json");
+
+    // initialise the terrains
+    std::shared_ptr<awe::bank<const awe::terrain>> terrains = std::make_shared<awe::bank<const awe::terrain>>();
+    terrains->load("assets/property/terrain.json");
+
+    // initialise the tiles
+    std::shared_ptr<awe::bank<const awe::tile_type>> tiles = std::make_shared<awe::bank<const awe::tile_type>>();
+    tiles->load("assets/property/tile.json");
+
+    // initialise the units
+    std::shared_ptr<awe::bank<const awe::unit_type>> units = std::make_shared<awe::bank<const awe::unit_type>>();
+    units->load("assets/property/unit.json");
+
+    // initialise the COs
+    std::shared_ptr<awe::bank<const awe::commander>> commanders = std::make_shared<awe::bank<const awe::commander>>();
+    commanders->load("assets/property/co.json");
 
     // initialise game engine
     awe::game_engine gameLoop;
     gameLoop.setDictionary(dictionary);
     gameLoop.setFonts(fonts);
+    gameLoop.setSounds(sounds);
+    gameLoop.setMusic(music);
+    gameLoop.setRenderer(renderer);
+    gameLoop.setUserInput(userInput);
+    gameLoop.setScripts(scripts);
+    gameLoop.setGUI(gui);
+    gameLoop.setCountries(countries);
+    gameLoop.setWeathers(weathers);
+    gameLoop.setEnvironments(environments);
+    gameLoop.setMovements(movements);
+    gameLoop.setTerrains(terrains);
+    gameLoop.setTiles(tiles);
+    gameLoop.setUnits(units);
+    gameLoop.setCommanders(commanders);
+
+    // open renderer window
+    renderer->openWindow();
 
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run();
