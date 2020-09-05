@@ -501,7 +501,7 @@ namespace awe {
 		 * Updates the stored terrain type properties pointer.
 		 * @param terrainBank A reference to the terrain bank to pull the pointer from.
 		 */
-		void updateTerrain(const bank<terrain>& terrainBank) const noexcept;
+		void updateTerrain(const bank<const terrain>& terrainBank) const noexcept;
 
 		/**
 		 * The object's UUID.
@@ -597,7 +597,7 @@ namespace awe {
 		 * Updates the stored movement type properties pointer.
 		 * @param movementBank A reference to the movement type bank to pull the pointer from.
 		 */
-		void updateMovementType(const bank<movement_type>& movementBank) const noexcept;
+		void updateMovementType(const bank<const movement_type>& movementBank) const noexcept;
 
 		/**
 		 * Retrieves the sprite ID of a given country's portrait of this unit.
@@ -691,7 +691,7 @@ namespace awe {
 		 * Updates the stored unit type properties pointers for units that can be loaded onto this one.
 		 * @param unitBank A reference to the unit type bank to pull the pointers from.
 		 */
-		void updateUnitTypes(const bank<unit_type>& unitBank) const noexcept;
+		void updateUnitTypes(const bank<const unit_type>& unitBank) const noexcept;
 
 		std::vector<unsigned int> copyPictures() const noexcept;
 
@@ -844,14 +844,14 @@ namespace awe {
 	 * @param tileBank    The \c tile_type bank to update.
 	 * @param terrainBank The \c terrian bank to pull the pointers from.
 	 */
-	void updateAllTerrains(bank<tile_type>& tileBank, const awe::bank<awe::terrain>& terrainBank) noexcept;
+	void updateAllTerrains(bank<const tile_type>& tileBank, const awe::bank<const awe::terrain>& terrainBank) noexcept;
 
 	/**
 	 * Calls \c unit_type::updateMovementType() and \c unit_type::updateUnitTypes on an entire bank of \c unit_type objects.
 	 * @param unitBank     The \c unit_type bank to update. Conversely the \c unit_type bank that is used to update itself.
 	 * @param movementBank The \c movement_type bank to pull the pointers from.
 	 */
-	void updateAllMovementsAndLoadedUnits(bank<unit_type>& unitBank, const awe::bank<awe::movement_type>& movementBank) noexcept;
+	void updateAllMovementsAndLoadedUnits(bank<const unit_type>& unitBank, const awe::bank<const awe::movement_type>& movementBank) noexcept;
 }
 
 template<typename T>

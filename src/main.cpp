@@ -108,6 +108,10 @@ int main() {
     std::shared_ptr<awe::bank<const awe::commander>> commanders = std::make_shared<awe::bank<const awe::commander>>();
     commanders->load("assets/property/co.json");
 
+    // setup banks
+    awe::updateAllTerrains(*tiles, *terrains);
+    awe::updateAllMovementsAndLoadedUnits(*units, *movements);
+
     // initialise game engine
     awe::game_engine gameLoop;
     gameLoop.setDictionary(dictionary);
