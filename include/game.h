@@ -100,6 +100,7 @@ namespace awe {
 
 		/**
 		 * Automatically converts from little endian to big endian if required.
+		 * @tparam T    The type of integer or floating point value to read.
 		 * @param  file The file to read a number from.
 		 * @return The number read from the given file.
 		 */
@@ -108,14 +109,24 @@ namespace awe {
 
 		/**
 		 * Automatically converts to little endian from big endian if required.
-		 * @param file   The file to write the number to.
-		 * @param number The number to write.
+		 * @tparam T      The type of integer or floating point value to write.
+		 * @param  file   The file to write the number to.
+		 * @param  number The number to write.
 		 */
 		template<typename T>
 		void _writeNumber(const std::shared_ptr<std::fstream>& file, T number) const;
 
 		/**
-		 * Determines if a conversion should be carried out.
+		 * Converts a number between little and big endian encoding.
+		 * @tparam T      The type of integer or floating point value to convert.
+		 * @param  number The number to convert.
+		 * @return The converted number.
+		 */
+		template<typename T>
+		T _convertNumber(T number) const noexcept;
+
+		/**
+		 * Determines if the system is running on big endian byte ordering.
 		 * @return \c TRUE if the system is in big endian, \c FALSE if not.
 		 */
 		bool _isBigEndian() const noexcept;
@@ -144,24 +155,23 @@ namespace awe {
 
 template<typename T>
 T awe::game::_readNumber(const std::shared_ptr<std::fstream>& file) const {
-	T ret = 1;
-	if (sizeof(T) == 1 || ret >> 8 * sizeof(ret) - 1 == 1) {
-		// if the system running is little endian or number is a single byte, read as normal
-		*file >> ret;
-	} else {
-		// if the system is running on big endian encoding, convert from little endian
-		T copy;
-		*file >> copy;
-		for (std::size_t i = 0; i < sizeof(T); i++) {
-			ret << 8;
-			ret |= copy & 0xFF;
-			copy >> 8;
-		}
-	}
+	T ret;
+	*file >> ret;
+	if (sizeof(T) > 1 && _isBigEndian()) ret = _convertNumber(ret);
 	return ret;
 }
 
 template<typename T>
 void awe::game::_writeNumber(const std::shared_ptr<std::fstream>& file, T number) const {
+	if (sizeof(T) > 1 && _isBigEndian()) number = _convertNumber(number);
 	*file << number;
+}
+
+template<typename T>
+T awe::game::_convertNumber(T number) const noexcept {
+	T copy = number;
+	for (std::size_t i = 0; i < sizeof(T); i++) {
+		*((unsigned char*)&number + i) = *((unsigned char*)&copy + sizeof(T) - i - 1);
+	}
+	return number;
 }

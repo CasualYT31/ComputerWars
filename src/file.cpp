@@ -1,0 +1,80 @@
+/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and/or sell copies of the
+Software, and to permit persons to whom the Software is furnished
+to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+#include "file.h"
+
+engine::binary_file::binary_file() noexcept {
+	_file.exceptions(std::fstream::failbit | std::fstream::badbit | std::fstream::eofbit);
+}
+
+bool engine::binary_file::isBigEndian() noexcept {
+	/* Explanation
+	1. Define an integer holding the value 1.
+	2. Retrieve its address.
+	3. Convert that address to an address pointing to a single byte instead.
+	4. Access the value of the integer's first byte (the one with the smallest address).
+	5. If it is still 1, then we can be sure the system is running on little endian,
+	   as this signifies that the least significant byte is stored FIRST.
+	https://developer.ibm.com/articles/au-endianc/ */
+	static const int i = 1;
+	return (*(char*)&i) == 0;
+}
+
+void engine::binary_file::open(const std::string& filepath, const bool forInput) {
+	close();
+	_file.open(filepath, std::ios::binary | ((forInput)?(std::ios::in):(std::ios::out | std::ios::trunc)));
+}
+
+void engine::binary_file::close() {
+	if (_file.is_open()) _file.close();
+}
+
+bool engine::binary_file::readBool() {
+	unsigned char inp;
+	_file >> inp;
+	return inp;
+}
+
+void engine::binary_file::writeBool(const bool val) {
+	unsigned char out = val ? 0xFF : 0x00;
+	_file << out;
+}
+
+std::string engine::binary_file::readString() {
+	sf::Uint32 len = 0;
+	_file >> len;
+	std::string ret;
+	for (sf::Uint32 i = 0; i < len; i++) {
+		char inp;
+		_file >> inp;
+		ret += inp;
+	}
+	return ret;
+}
+
+void engine::binary_file::writeString(const std::string& str) {
+	sf::Uint32 len = str.length();
+	_file << len;
+	for (sf::Uint32 i = 0; i < len; i++) {
+		_file << str.at(i);
+	}
+}

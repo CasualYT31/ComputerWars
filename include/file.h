@@ -1,0 +1,150 @@
+/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and/or sell copies of the
+Software, and to permit persons to whom the Software is furnished
+to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+/**
+ * @file file.h
+ * Declares a class that can be used to read and write binary files.
+ */
+
+#pragma once
+
+#include <fstream>
+#include "sfml/System/NonCopyable.hpp"
+
+// for documentation on the engine namespace, please see dialogue.h
+namespace engine {
+	/**
+	 * Represents a binary file written in little endian encoding.
+	 * This class can be used to ensure that binary files are written in a consistent encoding (which is little endian),
+	 * regardless of the byte ordering the running system uses internally.
+	 */
+	class binary_file : sf::NonCopyable {
+	public:
+		/**
+		 * Initialises the internal file stream.
+		 * The internal file stream will throw an exception when any of its fail, bad, and eof bits are set.
+		 */
+		binary_file() noexcept;
+
+		/**
+		 * Determines if the system is running on big endian byte ordering.
+		 * @return \c TRUE if the system is in big endian, \c FALSE if not.
+		 */
+		static bool isBigEndian() noexcept;
+
+		/**
+		 * Converts a number between little and big endian encoding.
+		 * @tparam T      The type of integer or floating point value to convert.
+		 * @param  number The number to convert.
+		 * @return The converted number.
+		 */
+		template<typename T>
+		static T convertNumber(T number) noexcept;
+
+		/**
+		 * Opens a given file for either input or output.
+		 * This method also automatically closes the previously opened file, if any.
+		 * @param filepath The path of the file to open.
+		 * @param forInput \c TRUE if the file is to be open for input, \c FALSE if for output.
+		 */
+		void open(const std::string& filepath, const bool forInput);
+
+		/**
+		 * Closes the currently open file, if any is open.
+		 */
+		void close();
+
+		/**
+		 * Reads a number from the binary file.
+		 * @tparam The type of arithmetic value to read.
+		 * @return The number retrieved from the binary file, in the correct format.
+		 */
+		template<typename T>
+		T readNumber();
+
+		/**
+		 * Reads a bool value from the binary file.
+		 * This class reads and writes bool values as single bytes. \c FALSE is represented by a value of \c 0,
+		 * whereas \c TRUE is a value of \c !0, with \c 0xFF being the value that is written.
+		 * @return The boolean value retrieved from the binary file.
+		 */
+		bool readBool();
+
+		/**
+		 * Reads a string from the binary file.
+		 * This class reads and writes strings as a list of bytes prepended by the length of the string,
+		 * which is stored as an unsigned 32-bit integer.
+		 * @return The string retrieved from the binary file.
+		 */
+		std::string readString();
+
+		/**
+		 * Writes a number value to the binary file.
+		 * @tparam The type of arithmetic value to write.
+		 * @param  number The arithmetic value to write, converted to little endian if required.
+		 */
+		template<typename T>
+		void writeNumber(T number);
+
+		/**
+		 * Writes a bool value to the binary file.
+		 * @param val The bool value to write.
+		 * @sa    readBool()
+		 */
+		void writeBool(const bool val);
+
+		/**
+		 * Writes a string to the binary file.
+		 * @param str The string to write.
+		 * @sa    readString()
+		 */
+		void writeString(const std::string& str);
+	private:
+		/**
+		 * The internal file stream.
+		 */
+		std::fstream _file;
+	};
+}
+
+template<typename T>
+T engine::binary_file::convertNumber(T number) noexcept {
+	T copy = number;
+	for (std::size_t i = 0; i < sizeof(T); i++) {
+		*((unsigned char*)&number + i) = *((unsigned char*)&copy + sizeof(T) - i - 1);
+	}
+	return number;
+}
+
+template<typename T>
+T engine::binary_file::readNumber() {
+	T ret;
+	_file >> ret;
+	if (sizeof(T) > 1 && isBigEndian()) ret = convertNumber(ret);
+	return ret;
+}
+
+template<typename T>
+void engine::binary_file::writeNumber(T number) {
+	if (sizeof(T) > 1 && isBigEndian()) number = convertNumber(number);
+	_file << number;
+}

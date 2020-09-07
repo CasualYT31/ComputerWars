@@ -35,13 +35,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "engine.h"
+#include <iostream>
+
+template<typename T>
+T convertNumber(T number) noexcept {
+    T copy = number;
+    for (std::size_t i = 0; i < sizeof(T); i++) {;
+    *((unsigned char*)&number + i) = *((unsigned char*)&copy + sizeof(T) - i - 1);
+    }
+    return number;
+}
+
+int main() {
+    int testInt = 255;
+    float testFloat = 1.7f;
+    std::cout << "Before byte switch: " << testInt << '\n';
+    std::cout << "Before byte switch: " << testFloat << '\n';
+    std::cout << "After byte switch: " << convertNumber(testInt) << '\n';
+    std::cout << "After byte switch: " << convertNumber(testFloat) << '\n';
+}
 
 /**
  * The entry point into the program.
  * A majority of the game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the \c awe::game_engine object is constructed.
  * @return The result of calling \c awe::game_engine::run(): by this point, the game has been shut down.
  */
-int main() {
+int main_old() {
     // initialise the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
 

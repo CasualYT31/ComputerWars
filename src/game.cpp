@@ -63,7 +63,16 @@ bool awe::game::write(std::string filename) noexcept {
 }
 
 bool awe::game::_isBigEndian() const noexcept {
-	return (unsigned long)0x1 >> sizeof(unsigned long) - 1 != 0x1;
+	/* Explanation
+	1. Define an integer holding the value 1.
+	2. Retrieve its address.
+	3. Convert that address to an address pointing to a single byte instead.
+	4. Access the value of the integer's first byte (the one with the smallest address).
+	5. If it is still 1, then we can be sure the system is running on little endian,
+	   as this signifies that the least significant byte is stored FIRST.
+	https://developer.ibm.com/articles/au-endianc/ */
+	static const int i = 1;
+	return (*(char*)&i) == 0;
 }
 
 std::shared_ptr<std::fstream> awe::game::_openFile(std::string& filename, bool forInput) {
