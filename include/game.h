@@ -100,6 +100,12 @@ namespace awe {
 		std::shared_ptr<engine::binary_file> _openFile(std::string& filename, bool forInput);
 
 		/**
+		 * Reads a map file in the first version of the CWM format.
+		 * @param file The binary file to read from.
+		 */
+		void _read_CWM_1(const std::shared_ptr<engine::binary_file>& file);
+
+		/**
 		 * Internal logger object.
 		 */
 		mutable global::logger _logger;

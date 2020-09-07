@@ -34,7 +34,7 @@ bool awe::game::read(std::string filename) noexcept {
 		sf::Uint32 version = file->readNumber<sf::Uint32>();
 
 		if (version == 1297564416) { // first version of the standard format
-
+			_read_CWM_1(file);
 		} else {
 			_logger.error("The version of the format used in the map file \"{}\" is unsupported: {}.", filename, version);
 			return false;
@@ -54,12 +54,22 @@ bool awe::game::write(std::string filename) noexcept {
 		std::shared_ptr<engine::binary_file> file = _openFile(filename, false);
 
 		file->writeNumber(VERSION_NUMBER);
+
+
 	} catch (std::exception& e) {
 		_logger.error("An error occurred when attempting to write to map file \"{}\": {}", filename, e.what());
 		return false;
 	}
 	_filename = filename;
 	return true;
+}
+
+void awe::game::_read_CWM_1(const std::shared_ptr<engine::binary_file>& file) {
+	// first, read number of armies in play
+	sf::Uint8 armyCount = file->readNumber<sf::Uint8>();
+	for (sf::Uint16 army = 0; army < armyCount; army++) {
+		// second, read each army's information
+	}
 }
 
 std::shared_ptr<engine::binary_file> awe::game::_openFile(std::string& filename, bool forInput) {
