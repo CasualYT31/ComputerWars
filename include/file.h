@@ -138,7 +138,7 @@ T engine::binary_file::convertNumber(T number) noexcept {
 template<typename T>
 T engine::binary_file::readNumber() {
 	T ret;
-	_file >> ret;
+	_file.read(reinterpret_cast<char*>(&ret), sizeof(T));
 	if (sizeof(T) > 1 && isBigEndian()) ret = convertNumber(ret);
 	return ret;
 }
@@ -146,5 +146,5 @@ T engine::binary_file::readNumber() {
 template<typename T>
 void engine::binary_file::writeNumber(T number) {
 	if (sizeof(T) > 1 && isBigEndian()) number = convertNumber(number);
-	_file << number;
+	_file.write(reinterpret_cast<char*>(&number), sizeof(T));
 }

@@ -41,7 +41,11 @@ bool engine::binary_file::isBigEndian() noexcept {
 
 void engine::binary_file::open(const std::string& filepath, const bool forInput) {
 	close();
-	_file.open(filepath, std::ios::binary | ((forInput)?(std::ios::in):(std::ios::out | std::ios::trunc)));
+	if (forInput) {
+		_file.open(filepath, std::ios::binary | std::ios::in);
+	} else {
+		_file.open(filepath, std::ios::binary | std::ios::out | std::ios::trunc);
+	}
 }
 
 void engine::binary_file::close() {
@@ -50,31 +54,31 @@ void engine::binary_file::close() {
 
 bool engine::binary_file::readBool() {
 	unsigned char inp;
-	_file >> inp;
+	_file.read(reinterpret_cast<char*>(&inp), sizeof(inp));
 	return inp;
 }
 
 void engine::binary_file::writeBool(const bool val) {
 	unsigned char out = val ? 0xFF : 0x00;
-	_file << out;
+	_file.write(reinterpret_cast<char*>(&out), sizeof(out));
 }
 
 std::string engine::binary_file::readString() {
 	sf::Uint32 len = 0;
-	_file >> len;
+	_file.read(reinterpret_cast<char*>(&len), sizeof(len));
 	std::string ret;
 	for (sf::Uint32 i = 0; i < len; i++) {
 		char inp;
-		_file >> inp;
+		_file.read(&inp, sizeof(inp));
 		ret += inp;
 	}
 	return ret;
 }
 
 void engine::binary_file::writeString(const std::string& str) {
-	sf::Uint32 len = str.length();
-	_file << len;
+	sf::Uint32 len = (sf::Uint32)str.length();
+	_file.write(reinterpret_cast<char*>(&len), sizeof(len));
 	for (sf::Uint32 i = 0; i < len; i++) {
-		_file << str.at(i);
+		_file.write(&str.at(i), 1);
 	}
 }

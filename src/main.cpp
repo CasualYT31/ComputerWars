@@ -36,23 +36,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.h"
 #include <iostream>
-
-template<typename T>
-T convertNumber(T number) noexcept {
-    T copy = number;
-    for (std::size_t i = 0; i < sizeof(T); i++) {;
-    *((unsigned char*)&number + i) = *((unsigned char*)&copy + sizeof(T) - i - 1);
-    }
-    return number;
-}
+#include "file.h"
 
 int main() {
-    int testInt = 255;
-    float testFloat = 1.7f;
-    std::cout << "Before byte switch: " << testInt << '\n';
-    std::cout << "Before byte switch: " << testFloat << '\n';
-    std::cout << "After byte switch: " << convertNumber(testInt) << '\n';
-    std::cout << "After byte switch: " << convertNumber(testFloat) << '\n';
+    engine::binary_file file;
+    try {
+        file.open("test.bin", false);
+        file.writeNumber<sf::Int32>(1297564416);
+        file.writeBool(true);
+        file.writeString("Hello World!");
+        file.close();
+
+        file.open("test.bin", true);
+        std::cout << file.readBool() << '\n';
+        std::cout << file.readNumber<sf::Int32>() << '\n';
+        std::cout << file.readString() << '\n';
+    } catch (std::exception& e) {
+        std::cout << "an error occurred: " << e.what() << '\n';
+    }
 }
 
 /**
