@@ -39,21 +39,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "file.h"
 
 int main() {
-    engine::binary_file file;
-    try {
-        file.open("test.bin", false);
-        file.writeNumber<sf::Int32>(1297564416);
-        file.writeBool(true);
-        file.writeString("Hello World!");
-        file.close();
-
-        file.open("test.bin", true);
-        std::cout << file.readBool() << '\n';
-        std::cout << file.readNumber<sf::Int32>() << '\n';
-        std::cout << file.readString() << '\n';
-    } catch (std::exception& e) {
-        std::cout << "an error occurred: " << e.what() << '\n';
-    }
+    global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
+    awe::game game;
+    game.read("test.bin");
+    game.write("test.bin");
 }
 
 /**

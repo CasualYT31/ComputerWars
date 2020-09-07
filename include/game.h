@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.h"
 #include "army.h"
+#include "file.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
@@ -37,7 +38,7 @@ namespace awe {
 	 * This class is only responsible for the storage and direct manipulation of the game,
 	 * which means game rules are defined in that other class.
 	 */
-	class game {
+	class game : sf::NonCopyable {
 	public:
 		/**
 		 * Current version number representing the file format in use.
@@ -96,40 +97,7 @@ namespace awe {
 		 * @param  forInput \c TRUE if opening the file for input, \c FALSE for output.
 		 * @return Pointer to the opened file.
 		 */
-		std::shared_ptr<std::fstream> _openFile(std::string& filename, bool forInput);
-
-		/**
-		 * Automatically converts from little endian to big endian if required.
-		 * @tparam T    The type of integer or floating point value to read.
-		 * @param  file The file to read a number from.
-		 * @return The number read from the given file.
-		 */
-		template<typename T>
-		T _readNumber(const std::shared_ptr<std::fstream>& file) const;
-
-		/**
-		 * Automatically converts to little endian from big endian if required.
-		 * @tparam T      The type of integer or floating point value to write.
-		 * @param  file   The file to write the number to.
-		 * @param  number The number to write.
-		 */
-		template<typename T>
-		void _writeNumber(const std::shared_ptr<std::fstream>& file, T number) const;
-
-		/**
-		 * Converts a number between little and big endian encoding.
-		 * @tparam T      The type of integer or floating point value to convert.
-		 * @param  number The number to convert.
-		 * @return The converted number.
-		 */
-		template<typename T>
-		T _convertNumber(T number) const noexcept;
-
-		/**
-		 * Determines if the system is running on big endian byte ordering.
-		 * @return \c TRUE if the system is in big endian, \c FALSE if not.
-		 */
-		bool _isBigEndian() const noexcept;
+		std::shared_ptr<engine::binary_file> _openFile(std::string& filename, bool forInput);
 
 		/**
 		 * Internal logger object.
@@ -151,27 +119,4 @@ namespace awe {
 		 */
 		std::shared_ptr<std::vector<std::shared_ptr<awe::army>>> _armies;
 	};
-}
-
-template<typename T>
-T awe::game::_readNumber(const std::shared_ptr<std::fstream>& file) const {
-	T ret;
-	*file >> ret;
-	if (sizeof(T) > 1 && _isBigEndian()) ret = _convertNumber(ret);
-	return ret;
-}
-
-template<typename T>
-void awe::game::_writeNumber(const std::shared_ptr<std::fstream>& file, T number) const {
-	if (sizeof(T) > 1 && _isBigEndian()) number = _convertNumber(number);
-	*file << number;
-}
-
-template<typename T>
-T awe::game::_convertNumber(T number) const noexcept {
-	T copy = number;
-	for (std::size_t i = 0; i < sizeof(T); i++) {
-		*((unsigned char*)&number + i) = *((unsigned char*)&copy + sizeof(T) - i - 1);
-	}
-	return number;
 }
