@@ -107,9 +107,6 @@ bool awe::environment::operator!=(const awe::environment& rhs) const noexcept {
 //*MOVEMENT TYPE*
 //***************
 awe::movement_type::movement_type(safe::json& j) noexcept : common_properties(j) {}
-awe::movement_type::movement_type(const awe::movement_type* old) noexcept : common_properties(old) {
-	UUID = old->UUID;
-}
 bool awe::movement_type::operator==(const awe::movement_type& rhs) const noexcept {
 	return UUID == rhs.UUID;
 }
@@ -128,16 +125,6 @@ awe::terrain::terrain(safe::json& j) noexcept : common_properties(j) {
 	j.applyVector(_movecosts, { "movecosts" });
 	j.resetState();
 	j.applyVector(_pictures, { "pictures" });
-}
-awe::terrain::terrain(const awe::terrain* old) noexcept : common_properties(old) {
-	_maxHP = old->getMaxHP();
-	_defence = old->getDefence();
-	_movecosts = old->copyMoveCosts();
-	_pictures = old->copyPictures();
-	_isCapturable = old->isCapturable();
-	// if we're copying a terrain type verbatim, then we also need to copy its UUID
-	// doesn't this then make the UUID not so universally unique...?
-	UUID = old->UUID;
 }
 unsigned int awe::terrain::getMaxHP() const noexcept {
 	return _maxHP;
@@ -187,7 +174,7 @@ std::shared_ptr<const awe::terrain> awe::tile_type::getType() const noexcept {
 	return _terrain;
 }
 void awe::tile_type::updateTerrain(const awe::bank<const awe::terrain>& terrainBank) const noexcept {
-	_terrain = std::make_shared<const awe::terrain>(terrainBank[_terrainType]);
+	_terrain = terrainBank[_terrainType];
 }
 bool awe::tile_type::operator==(const awe::tile_type& rhs) const noexcept {
 	return UUID == rhs.UUID;
@@ -217,22 +204,6 @@ awe::unit_type::unit_type(safe::json& j) noexcept : common_properties(j) {
 	j.resetState();
 	j.applyVector(_canLoadThese, { "canload" });
 }
-awe::unit_type::unit_type(const awe::unit_type* old) noexcept : common_properties(old) {
-	_movementTypeID = old->getMovementTypeIndex();
-	_movementType = old->getMovementType();
-	_pictures = old->copyPictures();
-	_units = old->copyUnits();
-	_cost = old->getCost();
-	_maxFuel = old->getMaxFuel();
-	_maxAmmo = old->getMaxAmmo();
-	_maxHP = old->getMaxHP();
-	_movementPoints = old->getMovementPoints();
-	_vision = old->getVision();
-	_lowerRange = old->getLowerRange();
-	_higherRange = old->getHigherRange();
-	_canLoadThese = old->copyLoadableUnitIDs();
-	_canLoadTheseUnitTypes = old->copyLoadableUnits();
-}
 awe::bank<awe::movement_type>::index awe::unit_type::getMovementTypeIndex() const noexcept {
 	return _movementTypeID;
 }
@@ -240,7 +211,7 @@ std::shared_ptr<const awe::movement_type> awe::unit_type::getMovementType() cons
 	return _movementType;
 }
 void awe::unit_type::updateMovementType(const awe::bank<const awe::movement_type>& movementBank) const noexcept {
-	_movementType = std::make_shared<const awe::movement_type>(movementBank[_movementTypeID]);
+	_movementType = movementBank[_movementTypeID];
 }
 unsigned int awe::unit_type::getPicture(awe::bank<awe::country>::index countryID) const noexcept {
 	if (countryID >= _pictures.size()) return UINT_MAX;
@@ -292,7 +263,7 @@ bool awe::unit_type::canLoad(const awe::unit_type& type) const noexcept {
 void awe::unit_type::updateUnitTypes(const awe::bank<const awe::unit_type>& unitBank) const noexcept {
 	_canLoadTheseUnitTypes.clear();
 	for (std::size_t i = 0; i < unitBank.size(); i++) {
-		_canLoadTheseUnitTypes.push_back(std::make_shared<const awe::unit_type>(unitBank[(awe::bank<awe::unit_type>::index)i]));
+		_canLoadTheseUnitTypes.push_back(unitBank[(awe::bank<awe::unit_type>::index)i]);
 	}
 }
 std::vector<unsigned int> awe::unit_type::copyPictures() const noexcept {

@@ -306,11 +306,6 @@ namespace awe {
 		movement_type(safe::json& j) noexcept;
 
 		/**
-		 * See \c awe::terrain::terrain(const awe::terrain*).
-		 */
-		movement_type(const awe::movement_type* old) noexcept;
-
-		/**
 		 * The object's UUID.
 		 */
 		engine::uuid<awe::movement_type> UUID;
@@ -353,15 +348,6 @@ namespace awe {
 		 * @param j The object value containing the terrain type's properties.
 		 */
 		terrain(safe::json& j) noexcept;
-
-		/**
-		 * Seems to be some sort of copy constructor I needed for my code to compile when used in conjunction with shared_ptr?
-		 * I'm not sure why it would need this: I may have designed my code incorrectly at some point.
-		 * Whenever I copy a shared_ptr object I want to point to the original data, not copy the data...
-		 * But I need my code to compile for now so I'll include this where required.
-		 * Classes that needed it for future investigation: common_properties (implicitly), terrain, movement_type, and unit_type.
-		 */
-		terrain(const awe::terrain* old) noexcept;
 
 		/**
 		 * Retrieves the maximum health property.
@@ -569,11 +555,6 @@ namespace awe {
 		 * @sa    isInfiniteFuel()
 		 * @sa    isInfiniteAmmo()*/
 		unit_type(safe::json& j) noexcept;
-
-		/**
-		 * See \c awe::terrain::terrain(const awe::terrain*).
-		 */
-		unit_type(const awe::unit_type* old) noexcept;
 
 		/**
 		 * Retrieves the movement type of this unit.
