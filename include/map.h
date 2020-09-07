@@ -74,7 +74,7 @@ namespace awe {
 		 * @sa     _tiles
 		 * @sa     awe::tile
 		 */
-		awe::tile& getTile(const sf::Vector2u& pos);
+		std::shared_ptr<awe::tile> getTile(const sf::Vector2u& pos);
 	private:
 		/**
 		 * Stores the map's tiles.
@@ -82,7 +82,7 @@ namespace awe {
 		 * This means the /em first index will refer to the tile in the horizontal axis, and the /em second index will
 		 * identify the tile in the vertical axis.
 		 */
-		std::vector<std::vector<awe::tile>> _tiles;
+		std::vector<std::vector<std::shared_ptr<awe::tile>>> _tiles;
 
 		/**
 		 * Stores the map's dimensions, in tiles.

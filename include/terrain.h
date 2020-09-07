@@ -46,20 +46,19 @@ namespace awe {
 		 * @param owner The owner's army ID.
 		 * @sa    awe::tile_type
 		 */
-		tile(const tile_type* tile = nullptr, const int hp = -1, std::weak_ptr<army> owner = std::weak_ptr<army>()) noexcept;
+		tile(const std::shared_ptr<const tile_type>& tile = nullptr, const sf::Int32 hp = -1, std::weak_ptr<army> owner = std::weak_ptr<army>()) noexcept;
 		
 		/**
 		 * Updates the type of tile this object represents.
-		 * @param  newTile A pointer to the static information on the tile type to assign.
-		 * @return Pointer to the old tile type's information.
+		 * @param newTile A pointer to the static information on the tile type to assign.
 		 */
-		const tile_type* setTile(const tile_type* newTile) noexcept;
+		void setTile(const std::shared_ptr<const tile_type>& newTile) noexcept;
 
 		/**
 		 * Retrieves the information on the tile's static information.
 		 * @return Pointer to the information.
 		 */
-		const tile_type* getTile() const noexcept;
+		std::shared_ptr<const tile_type> getTile() const noexcept;
 
 		/**
 		 * Updates the HP of the tile.
@@ -68,13 +67,13 @@ namespace awe {
 		 * @param  newHP The new HP
 		 * @return The old HP.
 		 */
-		int setHP(const int newHP) noexcept;
+		sf::Int32 setHP(const sf::Int32 newHP) noexcept;
 
 		/**
 		 * Retrieves the current HP of the tile.
 		 * @return The current HP.
 		 */
-		int getHP() const noexcept;
+		sf::Int32 getHP() const noexcept;
 
 		/**
 		 * Updates the owner of the tile.
@@ -142,7 +141,7 @@ namespace awe {
 		/**
 		 * Pointer to the tile type's static information.
 		 */
-		const tile_type* _tileType = nullptr;
+		std::shared_ptr<const tile_type> _tileType = nullptr;
 
 		/**
 		 * Weak reference to the army which owns the tile.
@@ -152,7 +151,7 @@ namespace awe {
 		/**
 		 * The HP of the tile.
 		 */
-		int _hp = 0;
+		sf::Int32 _hp = 0;
 
 		/**
 		 * Weak reference to the unit occupying this tile.

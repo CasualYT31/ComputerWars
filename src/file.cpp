@@ -46,30 +46,39 @@ void engine::binary_file::open(const std::string& filepath, const bool forInput)
 	} else {
 		_file.open(filepath, std::ios::binary | std::ios::out | std::ios::trunc);
 	}
+	_bytes = 0;
 }
 
 void engine::binary_file::close() {
 	if (_file.is_open()) _file.close();
 }
 
+sf::Uint64 engine::binary_file::position() const noexcept {
+	return _bytes;
+}
+
 bool engine::binary_file::readBool() {
 	unsigned char inp;
 	_file.read(reinterpret_cast<char*>(&inp), sizeof(inp));
+	_bytes += sizeof(inp);
 	return inp;
 }
 
 void engine::binary_file::writeBool(const bool val) {
 	unsigned char out = val ? 0xFF : 0x00;
 	_file.write(reinterpret_cast<char*>(&out), sizeof(out));
+	_bytes += sizeof(out);
 }
 
 std::string engine::binary_file::readString() {
 	sf::Uint32 len = 0;
 	_file.read(reinterpret_cast<char*>(&len), sizeof(len));
+	_bytes += sizeof(len);
 	std::string ret;
 	for (sf::Uint32 i = 0; i < len; i++) {
 		char inp;
 		_file.read(&inp, sizeof(inp));
+		_bytes += sizeof(inp);
 		ret += inp;
 	}
 	return ret;
@@ -78,7 +87,9 @@ std::string engine::binary_file::readString() {
 void engine::binary_file::writeString(const std::string& str) {
 	sf::Uint32 len = (sf::Uint32)str.length();
 	_file.write(reinterpret_cast<char*>(&len), sizeof(len));
+	_bytes += sizeof(len);
 	for (sf::Uint32 i = 0; i < len; i++) {
 		_file.write(&str.at(i), 1);
+		_bytes += 1;
 	}
 }

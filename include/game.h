@@ -51,6 +51,16 @@ namespace awe {
 		static const sf::Uint32 VERSION_NUMBER = 1297564416;
 
 		/**
+		 * Value representing no commander in-file.
+		 */
+		static const awe::bank<const awe::commander>::index NO_CO = UINT_MAX;
+
+		/**
+		 * Value representing no army in-file.
+		 */
+		static const unsigned char NO_ARMY = 0xFF;
+
+		/**
 		 * Initialises the internal logger object.
 		 * @param name The name to give this particular instantiation within the log file. Defaults to "game."
 		 * @sa    \c global::logger
@@ -59,7 +69,8 @@ namespace awe {
 
 		/**
 		 * Opens a binary file and reads the contents to overwrite what's currently stored in this object.
-		 * This method has strong exception safety.
+		 * This method has strong exception safety.\n
+		 * \c FALSE is returned if any of the banks haven't been assigned yet (see, for example, \c setCountries()).
 		 * @param   filename The name of the file to open. If a blank string, \c _filename will be substitued.
 		 * @return  \c TRUE if reading was successful, \c FALSE otherwise.
 		 */
@@ -90,6 +101,30 @@ namespace awe {
 		 * @return The number of armies allocated.
 		 */
 		std::size_t getNumberOfArmies() const noexcept;
+
+		/**
+		 * Sets the country bank of this game.
+		 * @param ptr Pointer to the country information to pull from.
+		 */
+		void setCountries(const std::shared_ptr<awe::bank<const awe::country>>& ptr) noexcept;
+
+		/**
+		 * Sets the commander bank of this game.
+		 * @param ptr Pointer to the commander information to pull from.
+		 */
+		void setCommanders(const std::shared_ptr<awe::bank<const awe::commander>>& ptr) noexcept;
+
+		/**
+		 * Sets the tile bank of this game.
+		 * @param ptr Pointer to the tile information to pull from.
+		 */
+		void setTiles(const std::shared_ptr<awe::bank<const awe::tile_type>>& ptr) noexcept;
+
+		/**
+		 * Sets the unit bank of this game.
+		 * @param ptr Pointer to the unit information to pull from.
+		 */
+		void setUnits(const std::shared_ptr<awe::bank<const awe::unit_type>>& ptr) noexcept;
 	private:
 		/**
 		 * Initialises a file stream for either input or output.
@@ -101,9 +136,24 @@ namespace awe {
 
 		/**
 		 * Reads a map file in the first version of the CWM format.
-		 * @param file The binary file to read from.
+		 * @param file   The binary file to read from.
+		 * @param map    Pointer to the map object to update.
+		 * @param armies Pointer to the armies vector to update.
 		 */
-		void _read_CWM_1(const std::shared_ptr<engine::binary_file>& file);
+		void _read_CWM_1(const std::shared_ptr<engine::binary_file>& file,
+			std::shared_ptr<awe::map> map,
+			std::shared_ptr<std::vector<std::shared_ptr<awe::army>>> armies);
+
+		/**
+		 * Reads unit information from a map file in the first version of the CWM format.
+		 * @param  file      The binary file to read from.
+		 * @param  armyCount The number of armies that should be in play.
+		 * @param  armies    Pointer to the armies vector to update.
+		 * @return Pointer to the created unit, or \c nullptr if no unit was found.
+		 */
+		std::shared_ptr<awe::unit> _read_unit_CWM_1(const std::shared_ptr<engine::binary_file>& file,
+			sf::Uint8 armyCount, sf::Uint32 x, sf::Uint32 y,
+			std::shared_ptr<std::vector<std::shared_ptr<awe::army>>> armies);
 
 		/**
 		 * Internal logger object.
@@ -124,5 +174,25 @@ namespace awe {
 		 * The armies involved in the game.
 		 */
 		std::shared_ptr<std::vector<std::shared_ptr<awe::army>>> _armies;
+
+		/**
+		 * The countries involved in the game.
+		 */
+		std::shared_ptr<awe::bank<const awe::country>> _countries;
+
+		/**
+		 * The commanders involved in the game.
+		 */
+		std::shared_ptr<awe::bank<const awe::commander>> _commanders;
+
+		/**
+		 * The tiles involved in the game.
+		 */
+		std::shared_ptr<awe::bank<const awe::tile_type>> _tiles;
+
+		/**
+		 * The units involved in the game.
+		 */
+		std::shared_ptr<awe::bank<const awe::unit_type>> _units;
 	};
 }

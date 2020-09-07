@@ -46,7 +46,7 @@ std::string awe::map::getName() const noexcept {
 	return _name;
 }
 
-awe::tile& awe::map::getTile(const sf::Vector2u& pos) {
+std::shared_ptr<awe::tile> awe::map::getTile(const sf::Vector2u& pos) {
 	if (pos.x >= _tiles.size() || pos.y >= _tiles[0].size()) throw std::out_of_range("Tile position was out of range");
 	return _tiles[pos.x][pos.y];
 }

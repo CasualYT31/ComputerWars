@@ -35,7 +35,7 @@ namespace awe {
 	/**
 	 * Typedef representing a team ID.
 	 */
-	typedef unsigned int TeamID;
+	typedef sf::Uint8 TeamID;
 
 	/**
 	 * Class which represents a single army on the map.
@@ -167,7 +167,8 @@ namespace awe {
 
 		/**
 		 * Allocates a new unit and adds it to the army's collection.
-		 * @param typeInfo The type of unit to allocate.
+		 * @param  typeInfo The type of unit to allocate.
+		 * @return A pointer to the created unit.
 		 */
 		std::shared_ptr<awe::unit> addUnit(const std::shared_ptr<const awe::unit_type>& typeInfo) noexcept;
 

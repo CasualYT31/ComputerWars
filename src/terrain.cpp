@@ -22,23 +22,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "terrain.h"
 
-awe::tile::tile(const awe::tile_type* tile, const int hp, std::weak_ptr<army> owner) noexcept {
+awe::tile::tile(const std::shared_ptr<const awe::tile_type>& tile, const sf::Int32 hp, std::weak_ptr<army> owner) noexcept {
 	setTile(tile);
 	setHP(hp);
 	setOwner(owner);
 }
 
-const awe::tile_type* awe::tile::setTile(const awe::tile_type* newTile) noexcept {
-	auto old = getTile();
+void awe::tile::setTile(const std::shared_ptr<const awe::tile_type>& newTile) noexcept {
 	_tileType = newTile;
-	return old;
 }
 
-const awe::tile_type* awe::tile::getTile() const noexcept {
+std::shared_ptr<const awe::tile_type> awe::tile::getTile() const noexcept {
 	return _tileType;
 }
 
-int awe::tile::setHP(const int newHP) noexcept {
+sf::Int32 awe::tile::setHP(const sf::Int32 newHP) noexcept {
 	auto old = getHP();
 	_hp = newHP;
 	if (_hp < 0 || _hp > (int)_tileType->getType()->getMaxHP()) {
@@ -47,7 +45,7 @@ int awe::tile::setHP(const int newHP) noexcept {
 	return old;
 }
 
-int awe::tile::getHP() const noexcept {
+sf::Int32 awe::tile::getHP() const noexcept {
 	return _hp;
 }
 

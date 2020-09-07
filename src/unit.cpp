@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 
-awe::unit::unit(const std::shared_ptr<const unit_type>& type, const int hp, const int fuel, const int ammo, const sf::Uint64 initForUUID) noexcept : UUID(initForUUID), _unitType(type) {
+awe::unit::unit(const std::shared_ptr<const unit_type>& type, const sf::Int32 hp, const sf::Int32 fuel, const sf::Int32 ammo, const sf::Uint64 initForUUID) noexcept : UUID(initForUUID), _unitType(type) {
 	setHP(hp);
 	setFuel(fuel);
 	setAmmo(ammo);
@@ -40,7 +40,7 @@ const std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept 
 	return _unitType;
 }
 
-int awe::unit::setHP(const int newHP) noexcept {
+sf::Int32 awe::unit::setHP(const sf::Int32 newHP) noexcept {
 	auto old = getHP();
 	_hp = newHP;
 	if (_hp < 0 || _hp > (int)_unitType->getMaxHP()) {
@@ -49,11 +49,11 @@ int awe::unit::setHP(const int newHP) noexcept {
 	return old;
 }
 
-int awe::unit::getHP() const noexcept {
+sf::Int32 awe::unit::getHP() const noexcept {
 	return _hp;
 }
 
-int awe::unit::setFuel(const int newFuel) noexcept {
+sf::Int32 awe::unit::setFuel(const sf::Int32 newFuel) noexcept {
 	auto old = getFuel();
 	_fuel = newFuel;
 	if (_fuel < 0 || (!_unitType->hasInfiniteFuel() && _fuel > _unitType->getMaxFuel())) {
@@ -62,11 +62,11 @@ int awe::unit::setFuel(const int newFuel) noexcept {
 	return old;
 }
 
-int awe::unit::getFuel() const noexcept {
+sf::Int32 awe::unit::getFuel() const noexcept {
 	return _fuel;
 }
 
-int awe::unit::setAmmo(const int newAmmo) noexcept {
+sf::Int32 awe::unit::setAmmo(const sf::Int32 newAmmo) noexcept {
 	auto old = getAmmo();
 	_ammo = newAmmo;
 	if (_ammo < 0 || (!_unitType->hasInfiniteAmmo() && _ammo > _unitType->getMaxAmmo())) {
@@ -75,7 +75,7 @@ int awe::unit::setAmmo(const int newAmmo) noexcept {
 	return old;
 }
 
-int awe::unit::getAmmo() const noexcept {
+sf::Int32 awe::unit::getAmmo() const noexcept {
 	return _ammo;
 }
 

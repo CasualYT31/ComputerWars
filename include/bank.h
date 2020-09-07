@@ -59,19 +59,14 @@ namespace awe {
 		 * Typedef used to identify members of the bank.
 		 * This acts as a way to ensure that IDs intended for different banks cannot be used with this one.
 		 */
-		typedef unsigned int index;
-
-		/**
-		 * Destroys all dynamically allocated members of the bank.
-		 */
-		~bank() noexcept;
+		typedef sf::Uint32 index;
 
 		/**
 		 * Allows the client to access the game properties of a bank member.
 		 * @param  id The ID of the member to access.
 		 * @return A pointer to the properties.
 		 */
-		const T* operator[](index id) const noexcept;
+		std::shared_ptr<const T> operator[](index id) const noexcept;
 
 		/**
 		 * Calculates the size of the bank.
@@ -106,7 +101,7 @@ namespace awe {
 		/**
 		 * The internal vector of game properties.
 		 */
-		std::vector<const T*> _bank;
+		std::vector<std::shared_ptr<const T>> _bank;
 	};
 
 	/**
@@ -855,14 +850,7 @@ namespace awe {
 }
 
 template<typename T>
-awe::bank<T>::~bank() noexcept {
-	for (auto& i : _bank) {
-		delete i;
-	}
-}
-
-template<typename T>
-const T* awe::bank<T>::operator[](index id) const noexcept {
+std::shared_ptr<const T> awe::bank<T>::operator[](index id) const noexcept {
 	if (id >= size()) return nullptr;
 	return _bank[id];
 }
@@ -879,8 +867,7 @@ bool awe::bank<T>::_load(safe::json& j) noexcept {
 	for (auto& i : jj.items()) {
 		//loop through each object, allowing the template type T to construct its values based on each object
 		safe::json input(i.value());
-		const T* pItem = new T(input);
-		_bank.push_back(pItem);
+		_bank.push_back(std::make_shared<const T>(input));
 	}
 	return true;
 }

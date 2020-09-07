@@ -45,7 +45,7 @@ namespace awe {
 		 * @param initForUUID The initial value of this object type's \c uuid::_id_counter.
 		 * @sa    engine::uuid::uuid()
 		 */
-		unit(const std::shared_ptr<const unit_type>& type = nullptr, const int hp = -1, const int fuel = -1, const int ammo = -1, const sf::Uint64 initForUUID = 1) noexcept;
+		unit(const std::shared_ptr<const unit_type>& type = nullptr, const sf::Int32 hp = -1, const sf::Int32 fuel = -1, const sf::Int32 ammo = -1, const sf::Uint64 initForUUID = 1) noexcept;
 
 		/**
 		 * This unit's UUID object.
@@ -73,13 +73,13 @@ namespace awe {
 		 * @param  newHP The new HP.
 		 * @return The old HP.
 		 */
-		int setHP(const int newHP) noexcept;
+		sf::Int32 setHP(const sf::Int32 newHP) noexcept;
 
 		/**
 		 * Retrieves the unit's current HP.
 		 * @return The current HP.
 		 */
-		int getHP() const noexcept;
+		sf::Int32 getHP() const noexcept;
 
 		/**
 		 * Updates the unit's fuel.
@@ -88,13 +88,13 @@ namespace awe {
 		 * @param  newFuel The new fuel.
 		 * @return The old fuel.
 		 */
-		int setFuel(const int newFuel) noexcept;
+		sf::Int32 setFuel(const sf::Int32 newFuel) noexcept;
 
 		/**
 		 * Retrieves the unit's current fuel.
 		 * @return The current fuel.
 		 */
-		int getFuel() const noexcept;
+		sf::Int32 getFuel() const noexcept;
 
 		/**
 		 * Updates the unit's ammo.
@@ -103,13 +103,13 @@ namespace awe {
 		 * @param  newAmmo The new ammo.
 		 * @return The old ammo.
 		 */
-		int setAmmo(const int newAmmo) noexcept;
+		sf::Int32 setAmmo(const sf::Int32 newAmmo) noexcept;
 
 		/**
 		 * Retrieves the unit's current primary ammo.
 		 * @return The current ammo.
 		 */
-		int getAmmo() const noexcept;
+		sf::Int32 getAmmo() const noexcept;
 
 		/**
 		 * Loads a unit onto this one if the unit's type allows for it.

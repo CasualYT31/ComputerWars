@@ -74,6 +74,13 @@ namespace engine {
 		void close();
 
 		/**
+		 * Returns the current byte position of the file.
+		 * Read and write methods in this class count the number of bytes they read or write in a file.
+		 * @return The number of bytes read/written since the beginning of the file.
+		 */
+		sf::Uint64 position() const noexcept;
+
+		/**
 		 * Reads a number from the binary file.
 		 * @tparam The type of arithmetic value to read.
 		 * @return The number retrieved from the binary file, in the correct format.
@@ -123,6 +130,11 @@ namespace engine {
 		 * The internal file stream.
 		 */
 		std::fstream _file;
+
+		/**
+		 * Counts the number of bytes read and/or written since the last call to \c open().
+		 */
+		sf::Uint64 _bytes = 0;
 	};
 }
 
@@ -139,6 +151,7 @@ template<typename T>
 T engine::binary_file::readNumber() {
 	T ret;
 	_file.read(reinterpret_cast<char*>(&ret), sizeof(T));
+	_bytes += sizeof(T);
 	if (sizeof(T) > 1 && isBigEndian()) ret = convertNumber(ret);
 	return ret;
 }
@@ -147,4 +160,5 @@ template<typename T>
 void engine::binary_file::writeNumber(T number) {
 	if (sizeof(T) > 1 && isBigEndian()) number = convertNumber(number);
 	_file.write(reinterpret_cast<char*>(&number), sizeof(T));
+	_bytes += sizeof(T);
 }
