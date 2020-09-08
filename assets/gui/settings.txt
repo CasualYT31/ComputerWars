@@ -28,11 +28,6 @@ Button.Button1 {
 Picture.Picture1 {
     Position = (130, 110);
     Size = (100, 100);
-
-    Renderer {
-        texture = "C:\Users\User\Documents\CPPLibs\TGUI-0.8.7-vc16-64bit-for-SFML-2.5.1\TGUI-0.8\gui-builder\resources\DefaultPicture.png";
-        transparenttexture = false;
-    }
 }
 
 Panel.Panel1 {

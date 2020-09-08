@@ -35,22 +35,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "engine.h"
-#include <iostream>
-#include "file.h"
-
-int main() {
-    global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
-    awe::game game;
-    game.read("test.bin");
-    game.write("test.bin");
-}
 
 /**
  * The entry point into the program.
  * A majority of the game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the \c awe::game_engine object is constructed.
  * @return The result of calling \c awe::game_engine::run(): by this point, the game has been shut down.
  */
-int main_old() {
+int main() {
     // initialise the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
 

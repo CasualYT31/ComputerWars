@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <string>
 #include <fstream>
 #include "sfml/System/NonCopyable.hpp"
 
@@ -63,13 +64,15 @@ namespace engine {
 		/**
 		 * Opens a given file for either input or output.
 		 * This method also automatically closes the previously opened file, if any.
-		 * @param filepath The path of the file to open.
-		 * @param forInput \c TRUE if the file is to be open for input, \c FALSE if for output.
+		 * @param  filepath The path of the file to open.
+		 * @param  forInput \c TRUE if the file is to be open for input, \c FALSE if for output.
+		 * @throws std::exception if the file couldn't be opened.
 		 */
 		void open(const std::string& filepath, const bool forInput);
 
 		/**
 		 * Closes the currently open file, if any is open.
+		 * @throws std::exception if the file couldn't be closed.
 		 */
 		void close();
 
@@ -84,6 +87,7 @@ namespace engine {
 		 * Reads a number from the binary file.
 		 * @tparam The type of arithmetic value to read.
 		 * @return The number retrieved from the binary file, in the correct format.
+		 * @throws std::exception if the number could not be read.
 		 */
 		template<typename T>
 		T readNumber();
@@ -93,6 +97,7 @@ namespace engine {
 		 * This class reads and writes bool values as single bytes. \c FALSE is represented by a value of \c 0,
 		 * whereas \c TRUE is a value of \c !0, with \c 0xFF being the value that is written.
 		 * @return The boolean value retrieved from the binary file.
+		 * @throws std::exception if the bool could not be read.
 		 */
 		bool readBool();
 
@@ -101,6 +106,7 @@ namespace engine {
 		 * This class reads and writes strings as a list of bytes prepended by the length of the string,
 		 * which is stored as an unsigned 32-bit integer.
 		 * @return The string retrieved from the binary file.
+		 * @throws std::exception if the string could not be read.
 		 */
 		std::string readString();
 
@@ -108,21 +114,24 @@ namespace engine {
 		 * Writes a number value to the binary file.
 		 * @tparam The type of arithmetic value to write.
 		 * @param  number The arithmetic value to write, converted to little endian if required.
+		 * @throws std::exception if the number could not be written.
 		 */
 		template<typename T>
 		void writeNumber(T number);
 
 		/**
 		 * Writes a bool value to the binary file.
-		 * @param val The bool value to write.
-		 * @sa    readBool()
+		 * @param  val The bool value to write.
+		 * @sa     readBool()
+		 * @throws std::exception if the bool could not be written.
 		 */
 		void writeBool(const bool val);
 
 		/**
 		 * Writes a string to the binary file.
-		 * @param str The string to write.
-		 * @sa    readString()
+		 * @param  str The string to write.
+		 * @sa     readString()
+		 * @throws std::exception if the string could not be written.
 		 */
 		void writeString(const std::string& str);
 	private:
@@ -149,16 +158,26 @@ T engine::binary_file::convertNumber(T number) noexcept {
 
 template<typename T>
 T engine::binary_file::readNumber() {
-	T ret;
-	_file.read(reinterpret_cast<char*>(&ret), sizeof(T));
-	_bytes += sizeof(T);
-	if (sizeof(T) > 1 && isBigEndian()) ret = convertNumber(ret);
-	return ret;
+	try {
+		T ret;
+		_file.read(reinterpret_cast<char*>(&ret), sizeof(T));
+		_bytes += sizeof(T);
+		if (sizeof(T) > 1 && isBigEndian()) ret = convertNumber(ret);
+		return ret;
+	} catch (std::exception& e) {
+		std::string w = "Failed to read number at position " + std::to_string(_bytes) + ": " + e.what();
+		throw std::exception(w.c_str());
+	}
 }
 
 template<typename T>
 void engine::binary_file::writeNumber(T number) {
-	if (sizeof(T) > 1 && isBigEndian()) number = convertNumber(number);
-	_file.write(reinterpret_cast<char*>(&number), sizeof(T));
-	_bytes += sizeof(T);
+	try {
+		if (sizeof(T) > 1 && isBigEndian()) number = convertNumber(number);
+		_file.write(reinterpret_cast<char*>(&number), sizeof(T));
+		_bytes += sizeof(T);
+	} catch (std::exception& e) {
+		std::string w = "Failed to write number to position " + std::to_string(_bytes) + ": " + e.what();
+		throw std::exception(w.c_str());
+	}
 }

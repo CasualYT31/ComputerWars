@@ -28,7 +28,17 @@ int awe::game_engine::run() noexcept {
 	auto r = _initCheck();
 	if (r) return r;
 
+	awe::game game;
+	game.setCountries(_countries);
+	game.setCommanders(_commanders);
+	game.setTiles(_tiles);
+	game.setUnits(_units);
 
+	try {
+		game.read("assets/map/test.map");
+	} catch (std::exception&) {
+		
+	}
 
 	return 0;
 }

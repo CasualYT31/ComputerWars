@@ -13,7 +13,8 @@
 		"mp": 3,
 		"vision": 2,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"001": {"longname": "Mech",
 		"shortname": "Mech",
@@ -29,7 +30,8 @@
 		"mp": 2,
 		"vision": 2,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"002": {"longname": "Recon",
 		"shortname": "Recn",
@@ -45,7 +47,8 @@
 		"mp": 8,
 		"vision": 5,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"003": {"longname": "Tank",
 		"shortname": "Tank",
@@ -61,7 +64,8 @@
 		"mp": 6,
 		"vision": 3,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"004": {"longname": "MD Tank",
 		"shortname": "MTnk",
@@ -77,7 +81,8 @@
 		"mp": 5,
 		"vision": 1,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"005": {"longname": "Neo Tank",
 		"shortname": "Neo",
@@ -93,7 +98,8 @@
 		"mp": 6,
 		"vision": 1,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"006": {"longname": "Megatank",
 		"shortname": "Mega",
@@ -109,7 +115,8 @@
 		"mp": 4,
 		"vision": 1,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"007": {"longname": "APC",
 		"shortname": "APC",
@@ -125,7 +132,8 @@
 		"mp": 6,
 		"vision": 1,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": [0, 1]
 	},
 	"008": {"longname": "Anti-Air",
 		"shortname": "AAir",
@@ -141,7 +149,8 @@
 		"mp": 6,
 		"vision": 2,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"009": {"longname": "Artillery",
 		"shortname": "Artl",
@@ -157,7 +166,8 @@
 		"mp": 5,
 		"vision": 1,
 		"lowrange": 2,
-		"highrange": 3
+		"highrange": 3,
+		"canload": []
 	},
 	"010": {"longname": "Rockets",
 		"shortname": "Rokt",
@@ -173,7 +183,8 @@
 		"mp": 5,
 		"vision": 1,
 		"lowrange": 3,
-		"highrange": 5
+		"highrange": 5,
+		"canload": []
 	},
 	"011": {"longname": "Missiles",
 		"shortname": "Misi",
@@ -189,7 +200,8 @@
 		"mp": 4,
 		"vision": 5,
 		"lowrange": 3,
-		"highrange": 5
+		"highrange": 5,
+		"canload": []
 	},
 	"012": {"longname": "Piperunner",
 		"shortname": "Pipe",
@@ -205,7 +217,8 @@
 		"mp": 9,
 		"vision": 4,
 		"lowrange": 2,
-		"highrange": 5
+		"highrange": 5,
+		"canload": []
 	},
 	"013": {"longname": "T Copter",
 		"shortname": "TCop",
@@ -221,7 +234,8 @@
 		"mp": 6,
 		"vision": 2,
 		"lowrange": 0,
-		"highrange": 0
+		"highrange": 0,
+		"canload": [0, 1]
 	},
 	"014": {"longname": "B Copter",
 		"shortname": "BCop",
@@ -237,7 +251,8 @@
 		"mp": 6,
 		"vision": 3,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"015": {"longname": "Fighter",
 		"shortname": "Fitr",
@@ -253,7 +268,8 @@
 		"mp": 9,
 		"vision": 2,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"016": {"longname": "Bomber",
 		"shortname": "Bomb",
@@ -269,7 +285,8 @@
 		"mp": 7,
 		"vision": 2,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"017": {"longname": "Stealth",
 		"shortname": "Stea",
@@ -285,7 +302,8 @@
 		"mp": 6,
 		"vision": 4,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"018": {"longname": "Black Bomb",
 		"shortname": "BBom",
@@ -301,7 +319,8 @@
 		"mp": 9,
 		"vision": 1,
 		"lowrange": 1,
-		"highrange": 3
+		"highrange": 3,
+		"canload": []
 	},
 	"019": {"longname": "Black Boat",
 		"shortname": "Boat",
@@ -317,7 +336,8 @@
 		"mp": 7,
 		"vision": 1,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": [0, 1]
 	},
 	"020": {"longname": "Lander",
 		"shortname": "Land",
@@ -333,7 +353,8 @@
 		"mp": 6,
 		"vision": 1,
 		"lowrange": 0,
-		"highrange": 0
+		"highrange": 0,
+		"canload": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 26]
 	},
 	"021": {"longname": "Cruiser",
 		"shortname": "Crus",
@@ -349,7 +370,8 @@
 		"mp": 6,
 		"vision": 3,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": [13, 14]
 	},
 	"022": {"longname": "Sub",
 		"shortname": "Sub",
@@ -365,7 +387,8 @@
 		"mp": 5,
 		"vision": 5,
 		"lowrange": 1,
-		"highrange": 1
+		"highrange": 1,
+		"canload": []
 	},
 	"023": {"longname": "Battleship",
 		"shortname": "Bshp",
@@ -381,7 +404,8 @@
 		"mp": 5,
 		"vision": 2,
 		"lowrange": 2,
-		"highrange": 6
+		"highrange": 6,
+		"canload": []
 	},
 	"024": {"longname": "Carrier",
 		"shortname": "Cari",
@@ -397,7 +421,8 @@
 		"mp": 5,
 		"vision": 4,
 		"lowrange": 3,
-		"highrange": 8
+		"highrange": 8,
+		"canload": [13, 14, 15, 16, 17, 18]
 	},
 	"025": {"longname": "Pipe Seam",
 		"shortname": "Seam",
@@ -413,7 +438,8 @@
 		"mp": 0,
 		"vision": 0,
 		"lowrange": 0,
-		"highrange": 0
+		"highrange": 0,
+		"canload": []
 	},
 	"026": {"longname": "Oozium 238",
 		"shortname": "Ozzi",
@@ -429,6 +455,7 @@
 		"mp": 1,
 		"vision": 1,
 		"lowrange": 0,
-		"highrange": 0
+		"highrange": 0,
+		"canload": []
 	}
 }

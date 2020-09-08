@@ -63,7 +63,7 @@ namespace awe {
 		/**
 		 * Updates the HP of the tile.
 		 * If outside of the range of the HP (0 to the tile type's maximum HP),
-		 * it will automatically be adjusted to max HP.
+		 * it will automatically be adjusted to max HP, if the tile has been given a type.
 		 * @param  newHP The new HP
 		 * @return The old HP.
 		 */

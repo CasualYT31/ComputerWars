@@ -48,7 +48,6 @@ bool awe::game::read(std::string filename) noexcept {
 	std::shared_ptr<std::vector<std::shared_ptr<awe::army>>> armies = std::make_shared<std::vector<std::shared_ptr<awe::army>>>();
 	try {
 		std::shared_ptr<engine::binary_file> file = _openFile(filename, true);
-
 		sf::Uint32 version = file->readNumber<sf::Uint32>();
 
 		if (version == 1297564416) { // first version of the standard format

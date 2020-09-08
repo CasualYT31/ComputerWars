@@ -43,8 +43,10 @@ const std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept 
 sf::Int32 awe::unit::setHP(const sf::Int32 newHP) noexcept {
 	auto old = getHP();
 	_hp = newHP;
-	if (_hp < 0 || _hp > (int)_unitType->getMaxHP()) {
-		_hp = (int)_unitType->getMaxHP();
+	if (_unitType) {
+		if (_hp < 0 || _hp >(int)_unitType->getMaxHP()) {
+			_hp = (int)_unitType->getMaxHP();
+		}
 	}
 	return old;
 }
@@ -56,8 +58,10 @@ sf::Int32 awe::unit::getHP() const noexcept {
 sf::Int32 awe::unit::setFuel(const sf::Int32 newFuel) noexcept {
 	auto old = getFuel();
 	_fuel = newFuel;
-	if (_fuel < 0 || (!_unitType->hasInfiniteFuel() && _fuel > _unitType->getMaxFuel())) {
-		_fuel = (int)_unitType->getMaxFuel();
+	if (_unitType) {
+		if (_fuel < 0 || (!_unitType->hasInfiniteFuel() && _fuel > _unitType->getMaxFuel())) {
+			_fuel = (int)_unitType->getMaxFuel();
+		}
 	}
 	return old;
 }
@@ -69,8 +73,10 @@ sf::Int32 awe::unit::getFuel() const noexcept {
 sf::Int32 awe::unit::setAmmo(const sf::Int32 newAmmo) noexcept {
 	auto old = getAmmo();
 	_ammo = newAmmo;
-	if (_ammo < 0 || (!_unitType->hasInfiniteAmmo() && _ammo > _unitType->getMaxAmmo())) {
-		_ammo = _unitType->getMaxAmmo();
+	if (_unitType) {
+		if (_ammo < 0 || (!_unitType->hasInfiniteAmmo() && _ammo > _unitType->getMaxAmmo())) {
+			_ammo = _unitType->getMaxAmmo();
+		}
 	}
 	return old;
 }
@@ -80,7 +86,7 @@ sf::Int32 awe::unit::getAmmo() const noexcept {
 }
 
 bool awe::unit::loadUnit(const std::shared_ptr<awe::unit>& unit) noexcept {
-	if (unit && _unitType->canLoad(*unit->getType())) {
+	if (unit && _unitType && _unitType->canLoad(*unit->getType())) {
 		_loadedUnits.push_back(unit);
 		return true;
 	}

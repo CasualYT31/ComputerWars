@@ -28,6 +28,14 @@ sf::Vector2u awe::map::setSize(const sf::Vector2u& dim) noexcept {
 	for (auto itr = _tiles.begin(), enditr = _tiles.end(); itr != enditr; itr++) {
 		itr->resize(dim.y);
 	}
+	// if the map has gotten bigger, we need to allocate new tiles
+	if (old.x < dim.x || old.y < dim.y) {
+		for (auto XItr = _tiles.begin(), endXItr = _tiles.end(); XItr != endXItr; XItr++) {
+			for (auto YItr = XItr->begin(), endYItr = XItr->end(); YItr != endYItr; YItr++) {
+				if (!*YItr) *YItr = std::make_shared<awe::tile>();
+			}
+		}
+	}
 	_size = dim;
 	return old;
 }

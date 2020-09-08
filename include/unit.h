@@ -69,7 +69,7 @@ namespace awe {
 		/**
 		 * Updates the unit's HP.
 		 * If an HP value is given outside of the range (0 to unit type's maximum health),
-		 * it will automatically be adjusted to the max health.
+		 * it will automatically be adjusted to the max health, if the unit has been given a type.
 		 * @param  newHP The new HP.
 		 * @return The old HP.
 		 */
@@ -84,7 +84,7 @@ namespace awe {
 		/**
 		 * Updates the unit's fuel.
 		 * If a fuel value is given outside of the range (0 to unit type's maximum fuel),
-		 * it will automatically be adjusted to the max fuel.
+		 * it will automatically be adjusted to the max fuel, if the unit has been given a type.
 		 * @param  newFuel The new fuel.
 		 * @return The old fuel.
 		 */
@@ -99,7 +99,7 @@ namespace awe {
 		/**
 		 * Updates the unit's ammo.
 		 * If an ammo value is given outside of the range (0 to unit type's maximum ammo),
-		 * it will automatically be adjusted to the max ammo.
+		 * it will automatically be adjusted to the max ammo, if the unit has been given a type.
 		 * @param  newAmmo The new ammo.
 		 * @return The old ammo.
 		 */
@@ -114,7 +114,7 @@ namespace awe {
 		/**
 		 * Loads a unit onto this one if the unit's type allows for it.
 		 * @param  unit Reference to the unit to load.
-		 * @return \c TRUE if the unit was loaded successfully, \c FALSE if not.
+		 * @return \c TRUE if the unit was loaded successfully, \c FALSE if not (or if this unit has no given type).
 		 */
 		bool loadUnit(const std::shared_ptr<awe::unit>& unit) noexcept;
 

@@ -39,8 +39,10 @@ std::shared_ptr<const awe::tile_type> awe::tile::getTile() const noexcept {
 sf::Int32 awe::tile::setHP(const sf::Int32 newHP) noexcept {
 	auto old = getHP();
 	_hp = newHP;
-	if (_hp < 0 || _hp > (int)_tileType->getType()->getMaxHP()) {
-		_hp = _tileType->getType()->getMaxHP();
+	if (_tileType) {
+		if (_hp < 0 || _hp >(int)_tileType->getType()->getMaxHP()) {
+			_hp = _tileType->getType()->getMaxHP();
+		}
 	}
 	return old;
 }
