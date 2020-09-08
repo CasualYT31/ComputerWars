@@ -37,6 +37,86 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
+	/**
+	 * Structure used to hold all the spritesheets required by the engine.
+	 */
+	struct spritesheets {
+		/**
+		 * Tests all the pointers to ensure they aren't empty.
+		 * @param errstring The error string within \c _initChecks().
+		 *                  If any pointers are invalid, their names will be added to this string.
+		 */
+		void test(std::string& errstring) const noexcept;
+
+		/**
+		 * Pointer to the CO spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> CO;
+
+		/**
+		 * A collection of unit spritesheets.
+		 */
+		struct units {
+			/**
+			 * Pointer to the unit spritesheet used when a unit is idle.
+			 */
+			std::shared_ptr<sfx::animated_spritesheet> idle;
+		};
+
+		/**
+		 * Pointer to the tile picture spritesheets.
+		 */
+		std::shared_ptr<awe::spritesheets::units> unit;
+
+		/**
+		 * A collection of tile spritesheets.
+		 */
+		struct tiles {
+			/**
+			 * Pointer to the tile spritesheet used in normal weather.
+			 */
+			std::shared_ptr<sfx::animated_spritesheet> normal;
+		};
+
+		/**
+		 * Pointer to the tile spritesheets.
+		 */
+		std::shared_ptr<awe::spritesheets::tiles> tile;
+
+		/**
+		 * Pointer to the unit picture spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> unitPicture;
+
+		/**
+		 * A collection of tile picture spritesheets.
+		 */
+		struct tile_pictures {
+			/**
+			 * Pointer to the tile picture spritesheet used in normal weather.
+			 */
+			std::shared_ptr<sfx::animated_spritesheet> normal;
+		};
+
+		/**
+		 * Pointer to the tile picture spritesheets.
+		 */
+		std::shared_ptr<awe::spritesheets::tile_pictures> tilePicture;
+
+		/**
+		 * Pointer to the icon spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> icon;
+
+		/**
+		 * Pointer to the GUI spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> GUI;
+	};
+
+	/**
+	 * The game engine class.
+	 */
 	class game_engine : sf::NonCopyable {
 	public:
 		/**
@@ -136,6 +216,12 @@ namespace awe {
 		 * @param ptr Pointer to the data.
 		 */
 		void setUserInput(const std::shared_ptr<sfx::user_input>& ptr) noexcept;
+
+		/**
+		 * Sets the engine's spritesheets.
+		 * @param ptr Pointer to the data.
+		 */
+		void setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept;
 
 		/**
 		 * Sets the engine's available scripts.
@@ -242,7 +328,10 @@ namespace awe {
 		 */
 		std::shared_ptr<sfx::user_input> _userinput;
 
-		// spritesheets
+		/**
+		 * Pointer to the spritesheets.
+		 */
+		std::shared_ptr<awe::spritesheets> _sprites;
 
 		/**
 		 * Pointer to the scripts object containing all the scripts.

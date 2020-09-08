@@ -69,6 +69,26 @@ int main() {
     std::shared_ptr<sfx::user_input> userInput = std::make_shared<sfx::user_input>(*renderer);
     userInput->load("assets/userinput/userinput.json");
 
+    // initialise spritesheets
+    std::shared_ptr<awe::spritesheets> spritesheets = std::make_shared<awe::spritesheets>();
+    spritesheets->CO = std::make_shared<sfx::animated_spritesheet>();
+    spritesheets->CO->load("assets/sprites/co/spritesco.json");
+    spritesheets->unit = std::make_shared<awe::spritesheets::units>();
+    spritesheets->unit->idle = std::make_shared<sfx::animated_spritesheet>();
+    spritesheets->unit->idle->load("assets/sprites/unit/idle/spritesunitidle.json");
+    spritesheets->tile = std::make_shared<awe::spritesheets::tiles>();
+    spritesheets->tile->normal = std::make_shared<sfx::animated_spritesheet>();
+    spritesheets->tile->normal->load("assets/sprites/tile/normal/spritestilenormal.json");
+    spritesheets->unitPicture = std::make_shared<sfx::animated_spritesheet>();
+    spritesheets->unitPicture->load("assets/sprites/unit_picture/spritesunit_picture.json");
+    spritesheets->tilePicture = std::make_shared<awe::spritesheets::tile_pictures>();
+    spritesheets->tilePicture->normal = std::make_shared<sfx::animated_spritesheet>();
+    spritesheets->tilePicture->normal->load("assets/sprites/tile_picture/normal/spritestile_picturenormal.json");
+    spritesheets->icon = std::make_shared<sfx::animated_spritesheet>();
+    spritesheets->icon->load("assets/sprites/icon/spritesicon.json");
+    spritesheets->GUI = std::make_shared<sfx::animated_spritesheet>();
+    spritesheets->GUI->load("assets/sprites/gui/spritesgui.json");
+
     // initialise the scripts
     std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>("assets/script/");
 
@@ -120,6 +140,7 @@ int main() {
     gameLoop.setMusic(music);
     gameLoop.setRenderer(renderer);
     gameLoop.setUserInput(userInput);
+    gameLoop.setSpritesheets(spritesheets);
     gameLoop.setScripts(scripts);
     gameLoop.setGUI(gui);
     gameLoop.setCountries(countries);

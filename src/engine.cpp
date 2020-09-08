@@ -22,6 +22,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.h"
 
+void awe::spritesheets::test(std::string& errstring) const noexcept {
+	if (!CO) errstring += "CO spritesheet\n";
+	if (!unit) {
+		errstring += "unit spritesheets\n";
+	} else {
+		if (!unit->idle) errstring += "idle unit spritesheet\n";
+	}
+	if (!tile) {
+		errstring += "tile spritesheets\n";
+	} else {
+		if (!tile->normal) errstring += "normal tile spritesheet\n";
+	}
+	if (!unitPicture) errstring += "unit picture spritesheet\n";
+	if (!tilePicture) {
+		errstring += "tile picture spritesheets\n";
+	} else {
+		if (!tilePicture->normal) errstring += "normal tile picture spritesheet\n";
+	}
+	if (!icon) errstring += "icon spritesheet\n";
+	if (!GUI) errstring += "GUI spritesheet\n";
+}
+
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
 int awe::game_engine::run() noexcept {
@@ -59,6 +81,11 @@ int awe::game_engine::_initCheck() const noexcept {
 	if (!_music) errstring += "music\n";
 	if (!_renderer) errstring += "renderer\n";
 	if (!_userinput) errstring += "userinput\n";
+	if (!_sprites) {
+		errstring += "spritesheet collection\n";
+	} else {
+		_sprites->test(errstring);
+	}
 	if (!_scripts) errstring += "scripts\n";
 	if (!_gui) errstring += "gui\n";
 	if (errstring.length()) {
@@ -125,6 +152,10 @@ void awe::game_engine::setRenderer(const std::shared_ptr<sfx::renderer>& ptr) no
 
 void awe::game_engine::setUserInput(const std::shared_ptr<sfx::user_input>& ptr) noexcept {
 	_userinput = ptr;
+}
+
+void awe::game_engine::setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept {
+	_sprites = ptr;
 }
 
 void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& ptr) noexcept {
