@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 #include "terrain.h"
-#include "spritesheets.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
@@ -212,6 +211,13 @@ namespace awe {
 		 * @param ptr Pointer to the spritesheet information to pull from.
 		 */
 		void setPictureSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
+
+		/**
+		 * This drawable's \c animate() method.
+		 * This will essentially animate all of the units in play.
+		 * @return \c FALSE.
+		 */
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
 		/**
 		 * This drawable's \c draw() method.

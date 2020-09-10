@@ -127,6 +127,7 @@ std::size_t awe::army::ownedTilesCount(std::vector<std::shared_ptr<const awe::te
 
 std::shared_ptr<awe::unit> awe::army::addUnit(const std::shared_ptr<const awe::unit_type>& typeInfo) noexcept {
 	std::shared_ptr<awe::unit> temp = std::make_shared<awe::unit>(awe::unit(typeInfo));
+	temp->setOwner(this);
 	_units.push_back(temp);
 	return temp;
 }
@@ -178,4 +179,12 @@ void awe::army::setUnitSpritesheet(const std::shared_ptr<awe::spritesheets::unit
 
 void awe::army::setPictureSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
 	_pictureSprites = ptr;
+}
+
+bool awe::army::animate(const sf::RenderTarget& target) noexcept {
+	return false;
+}
+
+void awe::army::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+
 }

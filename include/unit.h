@@ -28,13 +28,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "bank.h"
+#include "spritesheets.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
+	class army;
+
 	/**
 	 * Class representing a single unit.
 	 */
-	class unit {
+	class unit : public sfx::animated_drawable {
 	public:
 		/**
 		 * Constructor which initialises a unit.
@@ -133,6 +136,21 @@ namespace awe {
 		std::vector<std::weak_ptr<awe::unit>> loadedUnits() const noexcept;
 
 		/**
+		 * Assigns the unit an owner.
+		 * @remark Unfortunately, there wasn't an easy way to use weak_ptr, so a raw pointer has been used instead.
+		 * @todo   Find a way to use weak_ptr instead of a raw pointer in the future...
+		 *         Perhaps have factory methods that automatically handle circle references?
+		 * @param  ptr Pointer to the army owning the unit.
+		 */
+		void setOwner(awe::army* ptr) noexcept;
+
+		/**
+		 * Retrieves the owner of this unit.
+		 * @return Reference to the owning army, if there is one.
+		 */
+		awe::army* getOwner() const noexcept;
+
+		/**
 		 * Tests if a given \c awe::unit object is equivalent to this one.
 		 * If the two units given have the same internal ID, they are equivalent.
 		 * If they are different, they are two different units.
@@ -151,11 +169,48 @@ namespace awe {
 		 * @sa     operator==()
 		 */
 		bool operator!=(const awe::unit& rhs) const noexcept;
+
+		/**
+		 * Sets the spritesheets used with this unit.
+		 * @param ptr Pointer to the data.
+		 */
+		void setSpritesheets(const std::shared_ptr<awe::spritesheets::units>& ptr) noexcept;
+
+		/**
+		 * This drawable's \c animate() method.
+		 * This will animate the unit's sprite.
+		 * @return The return value of the internal \c sfx::animated_sprite::animate() call.
+		 * @sa     \c sfx::animated_sprite::animate()
+		 */
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
+		/**
+		 * This drawable's \c draw() method.
+		 * Draws the unit to the screen.
+		 * @param target The target to render the unit to.
+		 * @param states The render states to apply to the unit. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 */
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+		/**
+		 * Pointer to the spritesheets used with this unit.
+		 */
+		std::shared_ptr<awe::spritesheets::units> _spritesheets;
+
+		/**
+		 * Unit's sprite.
+		 */
+		sfx::animated_sprite _sprite;
+
 		/**
 		 * Pointer to the unit's type information.
 		 */
 		std::shared_ptr<const unit_type> _unitType = nullptr;
+
+		/**
+		 * Reference to the army which owns this unit.
+		 */
+		awe::army* _owner = nullptr;
 
 		/**
 		 * The HP of the unit.

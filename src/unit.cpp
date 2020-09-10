@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "unit.h"
+#include "army.h"
 
 awe::unit::unit(const std::shared_ptr<const unit_type>& type, const sf::Int32 hp, const sf::Int32 fuel, const sf::Int32 ammo, const sf::Uint64 initForUUID) noexcept : UUID(initForUUID), _unitType(type) {
 	setHP(hp);
@@ -110,10 +110,41 @@ std::vector<std::weak_ptr<awe::unit>> awe::unit::loadedUnits() const noexcept {
 	return _loadedUnits;
 }
 
+void awe::unit::setOwner(awe::army* ptr) noexcept {
+	_owner = ptr;
+}
+
+awe::army* awe::unit::getOwner() const noexcept {
+	return _owner;
+}
+
 bool awe::unit::operator==(const awe::unit& rhs) const noexcept {
 	return UUID == rhs.UUID;
 }
 
 bool awe::unit::operator!=(const awe::unit& rhs) const noexcept {
 	return !(*this == rhs);
+}
+
+void awe::unit::setSpritesheets(const std::shared_ptr<awe::spritesheets::units>& ptr) noexcept {
+	_spritesheets = ptr;
+}
+
+bool awe::unit::animate(const sf::RenderTarget& target) noexcept {
+	// update sprite's sheets
+	if (_spritesheets && _spritesheets->idle) {
+		_sprite.setSpritesheet(_spritesheets->idle);
+	} else {
+		_sprite.setSpritesheet(nullptr);
+	}
+	// update sprite's sprite
+	if (_unitType && _owner && _owner->getCountry()) {
+		_sprite.setSprite(_unitType->getUnit(_owner->getCountry()->UUID.getID()));
+	}
+	// animate
+	return _sprite.animate(target);
+}
+
+void awe::unit::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(_sprite, states);
 }
