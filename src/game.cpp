@@ -193,3 +193,7 @@ void awe::game::setTiles(const std::shared_ptr<awe::bank<const awe::tile_type>>&
 void awe::game::setUnits(const std::shared_ptr<awe::bank<const awe::unit_type>>& ptr) noexcept {
 	_units = ptr;
 }
+
+void awe::game::setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept {
+	_sprites = ptr;
+}

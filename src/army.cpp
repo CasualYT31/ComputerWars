@@ -171,3 +171,11 @@ std::size_t awe::army::unitCount(std::vector<std::shared_ptr<const awe::unit_typ
 	}
 	return count;
 }
+
+void awe::army::setUnitSpritesheet(const std::shared_ptr<awe::spritesheets::units>& ptr) noexcept {
+	_unitSprites = ptr;
+}
+
+void awe::army::setPictureSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
+	_pictureSprites = ptr;
+}

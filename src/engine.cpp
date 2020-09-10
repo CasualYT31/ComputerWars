@@ -22,28 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.h"
 
-void awe::spritesheets::test(std::string& errstring) const noexcept {
-	if (!CO) errstring += "CO spritesheet\n";
-	if (!unit) {
-		errstring += "unit spritesheets\n";
-	} else {
-		if (!unit->idle) errstring += "idle unit spritesheet\n";
-	}
-	if (!tile) {
-		errstring += "tile spritesheets\n";
-	} else {
-		if (!tile->normal) errstring += "normal tile spritesheet\n";
-	}
-	if (!unitPicture) errstring += "unit picture spritesheet\n";
-	if (!tilePicture) {
-		errstring += "tile picture spritesheets\n";
-	} else {
-		if (!tilePicture->normal) errstring += "normal tile picture spritesheet\n";
-	}
-	if (!icon) errstring += "icon spritesheet\n";
-	if (!GUI) errstring += "GUI spritesheet\n";
-}
-
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
 int awe::game_engine::run() noexcept {

@@ -58,3 +58,11 @@ std::shared_ptr<awe::tile> awe::map::getTile(const sf::Vector2u& pos) {
 	if (pos.x >= _tiles.size() || pos.y >= _tiles[0].size()) throw std::out_of_range("Tile position was out of range");
 	return _tiles[pos.x][pos.y];
 }
+
+void awe::map::setTileSpritesheet(const std::shared_ptr<awe::spritesheets::tiles>& ptr) noexcept {
+	_tileSprites = ptr;
+}
+
+void awe::map::setPictureSpritesheet(const std::shared_ptr<awe::spritesheets::tile_pictures>& ptr) noexcept {
+	_pictureSprites = ptr;
+}

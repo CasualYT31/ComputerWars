@@ -125,6 +125,12 @@ namespace awe {
 		 * @param ptr Pointer to the unit information to pull from.
 		 */
 		void setUnits(const std::shared_ptr<awe::bank<const awe::unit_type>>& ptr) noexcept;
+
+		/**
+		 * Sets the spritesheets of this game.
+		 * @param ptr Pointer to the spritesheet information to pull from.
+		 */
+		void setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept;
 	private:
 		/**
 		 * Initialises a file stream for either input or output.
@@ -194,5 +200,10 @@ namespace awe {
 		 * The units involved in the game.
 		 */
 		std::shared_ptr<awe::bank<const awe::unit_type>> _units;
+
+		/**
+		 * The spritesheets involved in the game.
+		 */
+		std::shared_ptr<awe::spritesheets> _sprites;
 	};
 }

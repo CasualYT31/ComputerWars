@@ -26,6 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "terrain.h"
+#include "spritesheets.h"
 
 #pragma once
 
@@ -75,6 +76,18 @@ namespace awe {
 		 * @sa     awe::tile
 		 */
 		std::shared_ptr<awe::tile> getTile(const sf::Vector2u& pos);
+
+		/**
+		 * Sets the tile spritesheets to be used with this map.
+		 * @param ptr Pointer to the spritesheet information to pull from.
+		 */
+		void setTileSpritesheet(const std::shared_ptr<awe::spritesheets::tiles>& ptr) noexcept;
+
+		/**
+		 * Sets the tile picture spritesheets to be used with this map.
+		 * @param ptr Pointer to the spritesheet information to pull from.
+		 */
+		void setPictureSpritesheet(const std::shared_ptr<awe::spritesheets::tile_pictures>& ptr) noexcept;
 	private:
 		/**
 		 * Stores the map's tiles.
@@ -94,5 +107,15 @@ namespace awe {
 		 * Stores the map's name.
 		 */
 		std::string _name = "";
+
+		/**
+		 * Pointer to the tile spritesheets.
+		 */
+		std::shared_ptr<awe::spritesheets::tiles> _tileSprites;
+
+		/**
+		 * Pointer to the tile picture spritesheets.
+		 */
+		std::shared_ptr<awe::spritesheets::tile_pictures> _pictureSprites;
 	};
 }

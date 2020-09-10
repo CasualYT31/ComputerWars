@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 #include "terrain.h"
+#include "spritesheets.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
@@ -40,7 +41,7 @@ namespace awe {
 	/**
 	 * Class which represents a single army on the map.
 	 */
-	class army {
+	class army : public sfx::animated_drawable {
 	public:
 		/**
 		 * Initialises an army object.
@@ -199,7 +200,27 @@ namespace awe {
 		 * @return The number of units that match the search criteria.
 		 */
 		std::size_t unitCount(std::vector<std::shared_ptr<const awe::unit_type>> filter = {}, const bool inverted = false) const noexcept;
+
+		/**
+		 * Sets the unit spritesheets to be used with this army.
+		 * @param ptr Pointer to the spritesheet information to pull from.
+		 */
+		void setUnitSpritesheet(const std::shared_ptr<awe::spritesheets::units>& ptr) noexcept;
+
+		/**
+		 * Sets the unit picture spritesheet to be used with this army.
+		 * @param ptr Pointer to the spritesheet information to pull from.
+		 */
+		void setPictureSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
 	private:
+		/**
+		 * This drawable's \c draw() method.
+		 * Draws an army's units to the screen.
+		 * @param target The target to render the units to.
+		 * @param states The render states to apply to the sprite. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 */
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
 		/**
 		 * Team ID.
 		 */
@@ -234,5 +255,15 @@ namespace awe {
 		 * Second CO information.
 		 */
 		std::shared_ptr<const awe::commander> _secondCO = nullptr;
+
+		/**
+		 * Pointer to the unit spritesheets.
+		 */
+		std::shared_ptr<awe::spritesheets::units> _unitSprites;
+
+		/**
+		 * Pointer to the unit picture spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _pictureSprites;
 	};
 }
