@@ -142,20 +142,34 @@ namespace global {
 		 * @param  line The line of text.
 		 * @param  values A parameter pack containing the values to insert into the text.
 		 * @sa     logger.error()
+		 * @sa     logger.warning()
 		 */
 		template<typename... Ts>
 		void write(const std::string& line, Ts... values) noexcept;
 
 		/**
 		 * Outputs text to the log file as an error.
-		 * A single line which records an error is output to the log file via a call to this method. Please see \c logger.write() for more information.
+		 * A single line, which records an error, is output to the log file via a call to this method. Please see \c logger.write() for more information.
 		 * @tparam Ts The types in the parameter pack.
 		 * @param  line The line of text.
 		 * @param  values A parameter pack containing the values to insert into the text.
 		 * @sa     logger.write()
+		 * @sa     logger.warning()
 		 */
 		template<typename... Ts>
 		void error(const std::string& line, Ts... values) noexcept;
+
+		/**
+		 * Outputs text to the log file as a warning.
+		 * A single line, which records a non-fatal error, is output to the log file via a call to this method. Please see \c logger.write() for more information.
+		 * @tparam Ts The types in the parameter pack.
+		 * @param  line The line of text.
+		 * @param  values A parameter pack containing the values to insert into the text.
+		 * @sa     logger.write()
+		 * @sa     logger.error()
+		 */
+		template<typename... Ts>
+		void warning(const std::string& line, Ts... values) noexcept;
 	private:
 		/**
 		 * A pointer to the logger object.
@@ -190,6 +204,15 @@ void global::logger::error(const std::string& line, Ts... values) noexcept {
 		_logger->error(line, values...);
 	}
 	catch (std::exception & e) {
+		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
+	}
+}
+
+template<typename... Ts>
+void global::logger::warning(const std::string& line, Ts... values) noexcept {
+	try {
+		_logger->warn(line, values...);
+	} catch (std::exception& e) {
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
 }
