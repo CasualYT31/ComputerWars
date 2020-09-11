@@ -22,10 +22,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "terrain.h"
 
-awe::tile::tile(const std::shared_ptr<const awe::tile_type>& tile, const sf::Int32 hp, std::weak_ptr<army> owner) noexcept {
+awe::tile::tile(sf::Vector2u location, const std::shared_ptr<const awe::tile_type>& tile, const sf::Int32 hp, std::weak_ptr<army> owner) noexcept {
+	setLocation(location);
 	setTile(tile);
 	setHP(hp);
 	setOwner(owner);
+}
+
+void awe::tile::setLocation(sf::Vector2u location) noexcept {
+	_location = location;
+}
+
+sf::Vector2u awe::tile::getLocation() const noexcept {
+	return _location;
 }
 
 void awe::tile::setTile(const std::shared_ptr<const awe::tile_type>& newTile) noexcept {

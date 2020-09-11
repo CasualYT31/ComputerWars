@@ -41,13 +41,26 @@ namespace awe {
 		/**
 		 * Constructs a tile.
 		 * All properties are set using their respective set methods.
-		 * @param tile  The type of tile this object represents.
-		 * @param hp    The initial HP of the tile.
-		 * @param owner The owner's army ID.
+		 * @param location The location of this tile in the map.
+		 * @param tile     The type of tile this object represents.
+		 * @param hp       The initial HP of the tile.
+		 * @param owner    The owner's army ID.
 		 * @sa    awe::tile_type
 		 */
-		tile(const std::shared_ptr<const tile_type>& tile = nullptr, const sf::Int32 hp = -1, std::weak_ptr<army> owner = std::weak_ptr<army>()) noexcept;
+		tile(sf::Vector2u location, const std::shared_ptr<const tile_type>& tile = nullptr, const sf::Int32 hp = -1, std::weak_ptr<army> owner = std::weak_ptr<army>()) noexcept;
 		
+		/**
+		 * Sets the location this tile has on its map.
+		 * @param location The location in tile coordinates.
+		 */
+		void setLocation(sf::Vector2u location) noexcept;
+
+		/**
+		 * Retrieves the location this tile is on in its map.
+		 * @return The location in tile coordinates.
+		 */
+		sf::Vector2u getLocation() const noexcept;
+
 		/**
 		 * Updates the type of tile this object represents.
 		 * @param newTile A pointer to the static information on the tile type to assign.
@@ -157,5 +170,10 @@ namespace awe {
 		 * Weak reference to the unit occupying this tile.
 		 */
 		std::weak_ptr<awe::unit> _unit;
+
+		/**
+		 * Location of this tile in the map.
+		 */
+		sf::Vector2u _location;
 	};
 }
