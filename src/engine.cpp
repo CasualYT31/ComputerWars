@@ -52,10 +52,7 @@ int awe::game_engine::run() noexcept {
 			// HOLY SHIT IT WORKS?????!!?!?!?
 		}
 
-		// test delete unit
-		game.deleteUnit(pUnit);
-		pUnit = nullptr; // createUnit() didn't work the first time because we still held a reference to the unit, so the weak reference at the tile still pointed to a valid unit
-		pUnit = game.createUnit(game.getArmy(0), (*_units)[1], sf::Vector2u(0, 0));
+		auto pUnit2 = game.createUnit(game.getArmy(0), (*_units)[7], sf::Vector2u(0, 1));
 
 		// test changeTileOwner
 		_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getOwner().expired());
@@ -67,7 +64,7 @@ int awe::game_engine::run() noexcept {
 
 		// test moveUnit
 		_logger.write("{}", game.moveUnit(pUnit, sf::Vector2u(0, 0)));
-		_logger.write("{}", game.moveUnit(pUnit, sf::Vector2u(0, 1)));
+		_logger.write("{}", game.moveUnit(pUnit, sf::Vector2u(0, 1))); // should now not work
 		// expected values:
 		// old tile no longer holds reference to unit
 		// new tile holds reference to unit
@@ -76,11 +73,19 @@ int awe::game_engine::run() noexcept {
 		_logger.write("\n{}", game.getMap()->getTile(sf::Vector2u(0, 1))->getUnit().lock() == pUnit);
 		_logger.write("\n{}", game.getMap()->getTile(sf::Vector2u(0, 1)) == pUnit->getTile().lock());
 
-		// test loadUnit
+		// when a unit is loaded...
+		// it should probably be removed from the map
+		// this is so that tiles are freed up for non-loaded units to move onto
 
+		// test loadUnit
+		game.loadUnit(pUnit, pUnit2); // shouldn't work
+		game.loadUnit(pUnit2, pUnit); // should work
+
+		_logger.write("{}", pUnit2->loadedUnits().size());
 
 		// test unloadUnit
-
+		game.unloadUnit(pUnit2, pUnit);
+		_logger.write("{}", pUnit2->loadedUnits().size());
 	} catch (std::exception&) {
 		
 	}
