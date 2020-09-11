@@ -132,8 +132,8 @@ namespace awe {
 		/**
 		 * Changes the owner of a given tile.
 		 * @param  ref           Strong reference to the tile in question.
-		 * @param  newOwningArmy The new owner of the tile.
-		 * @return \c TRUE if the owner was changed successfully, \c FALSE if any of the pointers were empty (errors will be logged).
+		 * @param  newOwningArmy The new owner of the tile, \c nullptr for no owner.
+		 * @return \c TRUE if the owner was changed successfully, \c FALSE if \c ref was empty (errors will be logged).
 		 */
 		bool changeTileOwner(const std::shared_ptr<awe::tile>& ref, const std::shared_ptr<awe::army>& newOwningArmy) noexcept;
 

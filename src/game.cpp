@@ -215,11 +215,11 @@ bool awe::game::deleteUnit(const std::shared_ptr<awe::unit>& ref) noexcept {
 }
 
 bool awe::game::changeTileOwner(const std::shared_ptr<awe::tile>& ref, const std::shared_ptr<awe::army>& newOwningArmy) noexcept {
-	if (ref && newOwningArmy) {
+	if (ref) {
 		auto pOldOwner = ref->getOwner().lock();
 		if (pOldOwner) pOldOwner->removeOwnedTile(ref);
 		ref->setOwner(newOwningArmy);
-		newOwningArmy->addOwnedTile(ref);
+		if (newOwningArmy) newOwningArmy->addOwnedTile(ref);
 		return true;
 	} else {
 		_logger.error("Failed to give ownership of tile at ({}, {}) to army \"{}\".",
@@ -231,26 +231,30 @@ bool awe::game::changeTileOwner(const std::shared_ptr<awe::tile>& ref, const std
 }
 
 bool awe::game::moveUnit(const std::shared_ptr<awe::unit>& ref, sf::Vector2u newLocation) noexcept {
-	if (ref && _map && _map->getTile(newLocation)) {
-		auto pOldTile = ref->getTile().lock();
-		if (!pOldTile) {
-			_logger.error("Unit did not hold a reference to the tile it occupies: could not move the unit.");
-			return false;
+	try {
+		if (ref && _map && _map->getTile(newLocation)) {
+			auto pOldTile = ref->getTile().lock();
+			if (!pOldTile) {
+				_logger.error("Unit did not hold a reference to the tile it occupies: could not move the unit.");
+				return false;
+			}
+			// should accept movement if the same tile is selected
+			if (_map->getTile(newLocation)->isOccupied() && _map->getTile(newLocation) != pOldTile) {
+				_logger.error("Attempted to move a unit onto a tile occupied by another unit.");
+				return false;
+			}
+			// move unit
+			pOldTile->setUnit(nullptr);               // remove unit from old tile
+			_map->getTile(newLocation)->setUnit(ref); // add unit to new tile
+			ref->setTile(_map->getTile(newLocation)); // overwrite old tile reference in unit with new tile reference
+			return true;
+		} else {
+			_logger.error("Could not move unit at location ({}, {}) to ({}, {}).", 0, 0, newLocation.x, newLocation.y);
 		}
-		// should accept movement if the same tile is selected
-		if (_map->getTile(newLocation)->isOccupied() && _map->getTile(newLocation) != pOldTile) {
-			_logger.error("Attempted to move a unit onto a tile occupied by another unit.");
-			return false;
-		}
-		// move unit
-		pOldTile->setUnit(nullptr);               // remove unit from old tile
-		_map->getTile(newLocation)->setUnit(ref); // add unit to new tile
-		ref->setTile(_map->getTile(newLocation)); // overwrite old tile reference in unit with new tile reference
-		return true;
-	} else {
-		_logger.error("Could not move unit at location ({}, {}) to ({}, {}).", 0, 0, newLocation.x, newLocation.y);
-		return false;
+	} catch (std::out_of_range&) { // given location was out of range
+		_logger.error("Attempted to move a unit to a location outside the map's range of ({}, {}).", _map->getSize().x, _map->getSize().y);
 	}
+	return false;
 }
 
 bool awe::game::loadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src) noexcept {

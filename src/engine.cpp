@@ -58,12 +58,29 @@ int awe::game_engine::run() noexcept {
 		pUnit = game.createUnit(game.getArmy(0), (*_units)[1], sf::Vector2u(0, 0));
 
 		// test changeTileOwner
+		_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getOwner().expired());
+		game.changeTileOwner(game.getMap()->getTile(sf::Vector2u(0, 0)), game.getArmy(0));
+		_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getOwner().expired());
+		_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getOwner().expired());
+		game.changeTileOwner(game.getMap()->getTile(sf::Vector2u(0, 0)), nullptr);
+		_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getOwner().expired());
 
 		// test moveUnit
+		_logger.write("{}", game.moveUnit(pUnit, sf::Vector2u(0, 0)));
+		_logger.write("{}", game.moveUnit(pUnit, sf::Vector2u(0, 1)));
+		// expected values:
+		// old tile no longer holds reference to unit
+		// new tile holds reference to unit
+		// unit holds reference to new tile
+		_logger.write("\n{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getUnit().expired());
+		_logger.write("\n{}", game.getMap()->getTile(sf::Vector2u(0, 1))->getUnit().lock() == pUnit);
+		_logger.write("\n{}", game.getMap()->getTile(sf::Vector2u(0, 1)) == pUnit->getTile().lock());
 
 		// test loadUnit
 
-		// test unloadUniy
+
+		// test unloadUnit
+
 	} catch (std::exception&) {
 		
 	}
