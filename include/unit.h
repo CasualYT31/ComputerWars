@@ -165,18 +165,15 @@ namespace awe {
 
 		/**
 		 * Assigns the unit an owner.
-		 * @remark Unfortunately, there wasn't an easy way to use weak_ptr, so a raw pointer has been used instead.
-		 * @todo   Find a way to use weak_ptr instead of a raw pointer in the future...
-		 *         Perhaps have factory methods that automatically handle circle references?
 		 * @param  ptr Pointer to the army owning the unit.
 		 */
-		void setOwner(awe::army* ptr) noexcept;
+		void setOwner(const std::shared_ptr<awe::army>& ptr) noexcept;
 
 		/**
 		 * Retrieves the owner of this unit.
-		 * @return Reference to the owning army, if there is one.
+		 * @return Reference to the owning army.
 		 */
-		awe::army* getOwner() const noexcept;
+		std::weak_ptr<awe::army> getOwner() const noexcept;
 
 		/**
 		 * Tests if a given \c awe::unit object is equivalent to this one.
@@ -238,7 +235,7 @@ namespace awe {
 		/**
 		 * Reference to the army which owns this unit.
 		 */
-		awe::army* _owner = nullptr;
+		std::weak_ptr<awe::army> _owner;
 
 		/**
 		 * The HP of the unit.

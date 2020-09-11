@@ -182,7 +182,7 @@ bool awe::game::createUnit(const std::shared_ptr<awe::army>& owningArmy, const s
 	try {
 		if (owningArmy && type && _map && _map->getTile(location) && !_map->getTile(location)->isOccupied()) {
 			auto unit = owningArmy->addUnit(type);
-			unit->setOwner(owningArmy.get());
+			unit->setOwner(owningArmy);
 			_map->getTile(location)->setUnit(unit);
 			unit->setTile(_map->getTile(location));
 			return true;
@@ -200,7 +200,7 @@ bool awe::game::createUnit(const std::shared_ptr<awe::army>& owningArmy, const s
 
 bool awe::game::deleteUnit(const std::shared_ptr<awe::unit>& ref) noexcept {
 	if (ref) {
-		auto temp = ref->getOwner();
+		auto temp = ref->getOwner().lock();
 		if (temp) {
 			temp->removeUnit(ref);
 			return true;
