@@ -202,15 +202,9 @@ std::shared_ptr<awe::unit> awe::game::createUnit(const std::shared_ptr<awe::army
 
 bool awe::game::deleteUnit(const std::shared_ptr<awe::unit>& ref) noexcept {
 	if (ref) {
-		auto pOwner = ref->getOwner().lock();
-		if (pOwner) {
-			if (auto pTile = ref->getTile().lock()) {
-				pTile->setUnit(nullptr);
-				pOwner->removeUnit(ref);
-				return true;
-			} else {
-				_logger.error("Attempted to delete a unit that wasn't on a tile.");
-			}
+		if (auto pOwner = ref->getOwner().lock()) {
+			pOwner->removeUnit(ref);
+			return true;
 		} else {
 			_logger.error("Attempted to delete a unit without an owning army.");
 		}

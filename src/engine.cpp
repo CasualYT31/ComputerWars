@@ -54,6 +54,7 @@ int awe::game_engine::run() noexcept {
 
 		// test delete unit
 		game.deleteUnit(pUnit);
+		pUnit = nullptr; // createUnit() didn't work the first time because we still held a reference to the unit, so the weak reference at the tile still pointed to a valid unit
 		pUnit = game.createUnit(game.getArmy(0), (*_units)[1], sf::Vector2u(0, 0));
 
 		// test changeTileOwner
