@@ -29,14 +29,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 #include "terrain.h"
+#include "typedef.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
-	/**
-	 * Typedef representing a team ID.
-	 */
-	typedef sf::Uint8 TeamID;
-
 	/**
 	 * Class which represents a single army on the map.
 	 */

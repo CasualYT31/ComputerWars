@@ -92,14 +92,14 @@ namespace awe {
 		/**
 		 * Stores the map's tiles.
 		 * The outer vector stores each set of vertical tiles, and the inner vector stores each tile in a column.
-		 * This means the /em first index will refer to the tile in the horizontal axis, and the /em second index will
+		 * This means the \em first index will refer to the tile in the horizontal axis, and the \em second index will
 		 * identify the tile in the vertical axis.
 		 */
 		std::vector<std::vector<std::shared_ptr<awe::tile>>> _tiles;
 
 		/**
 		 * Stores the map's dimensions, in tiles.
-		 * /c x will hold the width, /c y will hold the height.
+		 * \c x will hold the width, \c y will hold the height.
 		 */
 		sf::Vector2u _size;
 
