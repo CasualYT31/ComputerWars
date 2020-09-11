@@ -252,6 +252,34 @@ bool awe::game::moveUnit(const std::shared_ptr<awe::unit>& ref, sf::Vector2u new
 	}
 }
 
+bool awe::game::loadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src) noexcept {
+	if (dest && src) {
+		auto ret = dest->loadUnit(src);
+		if (ret) {
+			src->setHolderUnit(dest);
+		} else {
+			_logger.error("Attempt to load unit of type \"{}\" onto unit of type \"{}\" failed.", ((src->getType())?(src->getType()->getName()):("[NULL]")), ((dest->getType()) ? (dest->getType()->getName()) : ("[NULL]")));
+		}
+		return ret;
+	}
+	_logger.error("Attempted to call \c loadUnit() with empty references.");
+	return false;
+}
+
+bool awe::game::unloadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src) noexcept {
+	if (dest && src) {
+		auto ret = dest->unloadUnit(src);
+		if (ret) {
+			src->setHolderUnit(nullptr);
+		} else {
+			_logger.error("Attempt to unload unit of type \"{}\" from unit of type \"{}\" failed.", ((src->getType()) ? (src->getType()->getName()) : ("[NULL]")), ((dest->getType()) ? (dest->getType()->getName()) : ("[NULL]")));
+		}
+		return ret;
+	}
+	_logger.error("Attempted to call \c unloadUnit() with empty references.");
+	return false;
+}
+
 void awe::game::setCountries(const std::shared_ptr<awe::bank<const awe::country>>& ptr) noexcept {
 	_countries = ptr;
 }

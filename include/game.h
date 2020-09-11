@@ -142,6 +142,22 @@ namespace awe {
 		 */
 		bool moveUnit(const std::shared_ptr<awe::unit>& ref, sf::Vector2u newLocation) noexcept;
 
+		/**
+		 * Loads a unit onto this one.
+		 * @param  dest The unit which will hold \c src.
+		 * @param  src  The unit to load onto \c dest.
+		 * @return \c TRUE if the operation was completed successfully, \c FALSE if either reference was empty, or if the load operation failed.
+		 */
+		bool loadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src) noexcept;
+
+		/**
+		 * Unloads a unit from another.
+		 * @param  dest The unit which holds \c src.
+		 * @param  src  The unit to unload from \c dest.
+		 * @return \c TRUE if the operation was completed successfully, \c FALSE if either reference was empty, or if the unload operation failed.
+		 */
+		bool unloadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src) noexcept;
+
 		// setup methods
 
 		/**
