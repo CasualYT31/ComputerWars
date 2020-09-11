@@ -39,7 +39,8 @@ int awe::game_engine::run() noexcept {
 		game.read("assets/map/test.map");
 		
 		// test create unit
-		if (auto pUnit = game.createUnit(game.getArmy(0), (*_units)[0], sf::Vector2u(0, 0))) {
+		auto pUnit = game.createUnit(game.getArmy(0), (*_units)[0], sf::Vector2u(0, 0));
+		if (pUnit) {
 			// expected values:
 			// army holds reference to unit
 			// unit holds reference to army
@@ -52,6 +53,8 @@ int awe::game_engine::run() noexcept {
 		}
 
 		// test delete unit
+		game.deleteUnit(pUnit);
+		pUnit = game.createUnit(game.getArmy(0), (*_units)[1], sf::Vector2u(0, 0));
 
 		// test changeTileOwner
 

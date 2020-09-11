@@ -20,6 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/**
+ * @file terrain.fwd.h
+ * Forward declaration header for the \c tile class.
+ * Much thanks go to Tony Delroy for the solution to the circular dependency issue: https://stackoverflow.com/posts/29209540/revisions.
+ */
+
 #pragma once
 
 namespace awe {

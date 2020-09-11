@@ -186,6 +186,8 @@ std::shared_ptr<awe::unit> awe::game::createUnit(const std::shared_ptr<awe::army
 			_map->getTile(location)->setUnit(unit);
 			unit->setTile(_map->getTile(location));
 			return unit;
+		} else if (_map->getTile(location)->isOccupied()) {
+			_logger.error("Tile was occupied!");
 		}
 	} catch (std::out_of_range&) { // given location was out of range
 		_logger.error("Attempted to create a new unit which is outside the map's range of ({}, {}).", _map->getSize().x, _map->getSize().y);
@@ -200,10 +202,15 @@ std::shared_ptr<awe::unit> awe::game::createUnit(const std::shared_ptr<awe::army
 
 bool awe::game::deleteUnit(const std::shared_ptr<awe::unit>& ref) noexcept {
 	if (ref) {
-		auto temp = ref->getOwner().lock();
-		if (temp) {
-			temp->removeUnit(ref);
-			return true;
+		auto pOwner = ref->getOwner().lock();
+		if (pOwner) {
+			if (auto pTile = ref->getTile().lock()) {
+				pTile->setUnit(nullptr);
+				pOwner->removeUnit(ref);
+				return true;
+			} else {
+				_logger.error("Attempted to delete a unit that wasn't on a tile.");
+			}
 		} else {
 			_logger.error("Attempted to delete a unit without an owning army.");
 		}
