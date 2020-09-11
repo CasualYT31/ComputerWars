@@ -102,6 +102,48 @@ namespace awe {
 		 */
 		std::size_t getNumberOfArmies() const noexcept;
 
+		// game methods
+
+		/**
+		 * Creates a new unit.
+		 * This method will fail under the following circumstances:
+		 * <ol><li>\c owningArmy is an empty pointer.</li>
+		 * <li>\c type is an empty pointer.</li>
+		 * <li>\c _map is an empty pointer.</li>
+		 * <li>\c _map->getTile(location) is an empty pointer or throws.</li>
+		 * <li>The tile at \c location is occupied.</li></ol>
+		 * @param  owningArmy The owner of the unit.
+		 * @param  type       The type of unit to create.
+		 * @param  location   The starting location of the new unit.
+		 * @return \c TRUE if the unit could be created, \c FALSE if not (errors will be logged).
+		 */
+		bool createUnit(const std::shared_ptr<awe::army>& owningArmy, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept;
+
+		/**
+		 * Deletes an existing unit.
+		 * @param  ref Strong reference to the unit to delete.
+		 * @return \c TRUE if the unit was successfully deleted, \c FALSE if \c ref was an empty pointer (an error will be logged).
+		 */
+		bool deleteUnit(const std::shared_ptr<awe::unit>& ref) noexcept;
+
+		/**
+		 * Changes the owner of a given tile.
+		 * @param  ref           Strong reference to the tile in question.
+		 * @param  newOwningArmy The new owner of the tile.
+		 * @return \c TRUE if the owner was changed successfully, \c FALSE if any of the pointers were empty (errors will be logged).
+		 */
+		bool changeTileOwner(const std::shared_ptr<awe::tile>& ref, const std::shared_ptr<awe::army>& newOwningArmy) noexcept;
+
+		/**
+		 * Moves a given unit to a given location on the map.
+		 * @param  ref         Strong reference to the unit to move.
+		 * @param  newLocation New location to set the unit to.
+		 * @return \c TRUE if the unit was moved successfully, \c FALSE if not (errors will be logged).
+		 */
+		bool moveUnit(const std::shared_ptr<awe::unit>& ref, sf::Vector2u newLocation) noexcept;
+
+		// setup methods
+
 		/**
 		 * Sets the country bank of this game.
 		 * @param ptr Pointer to the country information to pull from.

@@ -178,6 +178,64 @@ std::size_t awe::game::getNumberOfArmies() const noexcept {
 	return 0;
 }
 
+bool awe::game::createUnit(const std::shared_ptr<awe::army>& owningArmy, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept {
+	try {
+		if (owningArmy && type && _map && _map->getTile(location) && !_map->getTile(location)->isOccupied()) {
+			auto unit = owningArmy->addUnit(type);
+			unit->setOwner(owningArmy.get());
+			// what tile is this unit on?
+			_map->getTile(location)->setUnit(unit);
+			return true;
+		}
+	} catch (std::out_of_range&) { // given location was out of range
+		_logger.error("Attempted to create a new unit which is outside the map's range of ({}, {}).", _map->getSize().x, _map->getSize().y);
+	}
+	_logger.error("Failed to create unit of type \"{}\" for army \"{}\" at location ({}, {}).",
+		((type)?(type->getName()):("[NULL]")),
+		( (owningArmy) ? ((owningArmy->getCountry())?(owningArmy->getCountry()->getName()):("[No Country]")) : ("[NULL]") ),
+		location.x, location.y);
+	if (!_map) _logger.error("Map is unallocated!");
+	return false;
+}
+
+bool awe::game::deleteUnit(const std::shared_ptr<awe::unit>& ref) noexcept {
+	if (ref) {
+		auto temp = ref->getOwner();
+		// make checks once I switch to weak_ptr - probably a good place for a warning if the checks fail
+		if (temp) temp->removeUnit(ref);
+		return true;
+	} else {
+		_logger.error("Could not delete unit, given reference was null.");
+		return false;
+	}
+}
+
+bool awe::game::changeTileOwner(const std::shared_ptr<awe::tile>& ref, const std::shared_ptr<awe::army>& newOwningArmy) noexcept {
+	if (ref && newOwningArmy) {
+		auto pOldOwner = ref->getOwner().lock();
+		if (pOldOwner) pOldOwner->removeOwnedTile(ref); // warning
+		ref->setOwner(newOwningArmy);
+		newOwningArmy->addOwnedTile(ref);
+		return true;
+	} else {
+		// change type to location
+		_logger.error("Failed to give ownership of tile with type \"{}\" to army \"{}\".", ((ref)?(((ref->getTile())?((ref->getTile()->getType())?(ref->getTile()->getType()->getName()):("[No Type]")):("[No Tile]"))):("[NULL]")));
+		return false;
+	}
+}
+
+bool awe::game::moveUnit(const std::shared_ptr<awe::unit>& ref, sf::Vector2u newLocation) noexcept {
+	// should accept movement if the same tile is selected
+	if (ref && _map && _map->getTile(newLocation) && !_map->getTile(newLocation)->isOccupied()) {
+		_map->getTile(newLocation)->setUnit(ref);
+		// what tile is this unit on? -> then remove the unit reference from the old tile via this method
+		return true;
+	} else {
+		_logger.error("Could not move unit at location ({}, {}) to ({}, {}).", 0, 0, newLocation.x, newLocation.y);
+		return false;
+	}
+}
+
 void awe::game::setCountries(const std::shared_ptr<awe::bank<const awe::country>>& ptr) noexcept {
 	_countries = ptr;
 }
