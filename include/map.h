@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * This header file declares the \c map class, which represents a grid of tiles and their units.
  */
 
+#include "terrain.fwd.h"
 #include "terrain.h"
 #include "spritesheets.h"
 

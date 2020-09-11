@@ -27,9 +27,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "unit.h"
+#include "army.fwd.h"
+#include "terrain.fwd.h"
 #include "terrain.h"
+#include "unit.fwd.h"
+#include "unit.h"
 #include "typedef.h"
+#include "bank.h"
+#include "spritesheets.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
@@ -163,8 +168,9 @@ namespace awe {
 
 		/**
 		 * Allocates a new unit and adds it to the army's collection.
-		 * @param  typeInfo The type of unit to allocate.
-		 * @return A pointer to the created unit.
+		 * @warning This method does not automatically assign this army as the unit's owner. Please see \c awe::game::createUnit().
+		 * @param   typeInfo The type of unit to allocate.
+		 * @return  A pointer to the created unit.
 		 */
 		std::shared_ptr<awe::unit> addUnit(const std::shared_ptr<const awe::unit_type>& typeInfo) noexcept;
 
@@ -207,6 +213,31 @@ namespace awe {
 		 * @param ptr Pointer to the spritesheet information to pull from.
 		 */
 		void setPictureSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
+
+		/**
+		 * This army's UUID object.
+		 */
+		engine::uuid<awe::army> UUID;
+
+		/**
+		 * Tests if a given \c awe::army object is equivalent to this one.
+		 * If the two armies given have the same internal ID, they are equivalent.
+		 * If they are different, they are two different armies.
+		 * @param  rhs Right-hand side argument. The \c awe::army object to test against.
+		 * @return \c TRUE if both objects are equivalent, \c FALSE if not.
+		 * @sa     operator!=()
+		 */
+		bool operator==(const awe::army& rhs) const noexcept;
+
+		/**
+		 * Tests if a given \c awe::army object is not equivalent to this one.
+		 * If the two armies given have the same internal ID, they are equivalent.
+		 * If they are different, they are two different armies.
+		 * @param  rhs Right-hand side argument. The \c awe::army object to test against.
+		 * @return \c TRUE if both objects are not equivalent, \c FALSE if they are.
+		 * @sa     operator==()
+		 */
+		bool operator!=(const awe::army& rhs) const noexcept;
 
 		/**
 		 * This drawable's \c animate() method.

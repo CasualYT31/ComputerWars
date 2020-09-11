@@ -178,14 +178,14 @@ std::size_t awe::game::getNumberOfArmies() const noexcept {
 	return 0;
 }
 
-bool awe::game::createUnit(const std::shared_ptr<awe::army>& owningArmy, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept {
+std::shared_ptr<awe::unit> awe::game::createUnit(const std::shared_ptr<awe::army>& owningArmy, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept {
 	try {
 		if (owningArmy && type && _map && _map->getTile(location) && !_map->getTile(location)->isOccupied()) {
 			auto unit = owningArmy->addUnit(type);
 			unit->setOwner(owningArmy);
 			_map->getTile(location)->setUnit(unit);
 			unit->setTile(_map->getTile(location));
-			return true;
+			return unit;
 		}
 	} catch (std::out_of_range&) { // given location was out of range
 		_logger.error("Attempted to create a new unit which is outside the map's range of ({}, {}).", _map->getSize().x, _map->getSize().y);
@@ -195,7 +195,7 @@ bool awe::game::createUnit(const std::shared_ptr<awe::army>& owningArmy, const s
 		( (owningArmy) ? ((owningArmy->getCountry())?(owningArmy->getCountry()->getName()):("[No Country]")) : ("[NULL]") ),
 		location.x, location.y);
 	if (!_map) _logger.error("Map is unallocated!");
-	return false;
+	return nullptr;
 }
 
 bool awe::game::deleteUnit(const std::shared_ptr<awe::unit>& ref) noexcept {
@@ -262,7 +262,7 @@ bool awe::game::loadUnit(const std::shared_ptr<awe::unit>& dest, const std::shar
 		}
 		return ret;
 	}
-	_logger.error("Attempted to call \c loadUnit() with empty references.");
+	_logger.error("Attempted to call loadUnit() with empty references.");
 	return false;
 }
 
@@ -276,7 +276,7 @@ bool awe::game::unloadUnit(const std::shared_ptr<awe::unit>& dest, const std::sh
 		}
 		return ret;
 	}
-	_logger.error("Attempted to call \c unloadUnit() with empty references.");
+	_logger.error("Attempted to call unloadUnit() with empty references.");
 	return false;
 }
 

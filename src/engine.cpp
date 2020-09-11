@@ -33,9 +33,33 @@ int awe::game_engine::run() noexcept {
 	game.setCommanders(_commanders);
 	game.setTiles(_tiles);
 	game.setUnits(_units);
+	game.setSpritesheets(_sprites);
 
 	try {
 		game.read("assets/map/test.map");
+		
+		// test create unit
+		if (auto pUnit = game.createUnit(game.getArmy(0), (*_units)[0], sf::Vector2u(0, 0))) {
+			// expected values:
+			// army holds reference to unit
+			// unit holds reference to army
+			// tile holds reference to unit
+			// unit holds reference to tile
+			_logger.write("{}", game.getArmy(0)->isArmysUnit(pUnit));
+			_logger.write("{}", pUnit->getOwner().lock() == game.getArmy(0));
+			_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0)) == pUnit->getTile().lock());
+			// HOLY SHIT IT WORKS?????!!?!?!?
+		}
+
+		// test delete unit
+
+		// test changeTileOwner
+
+		// test moveUnit
+
+		// test loadUnit
+
+		// test unloadUniy
 	} catch (std::exception&) {
 		
 	}

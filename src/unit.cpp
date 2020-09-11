@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "army.h"
+#include "unit.h"
 
 awe::unit::unit(const std::shared_ptr<const unit_type>& type, const sf::Int32 hp, const sf::Int32 fuel, const sf::Int32 ammo, const sf::Uint64 initForUUID) noexcept : UUID(initForUUID), _unitType(type) {
 	setHP(hp);
@@ -154,8 +154,9 @@ bool awe::unit::animate(const sf::RenderTarget& target) noexcept {
 		_sprite.setSpritesheet(nullptr);
 	}
 	// update sprite's sprite
-	if (_unitType && _owner && _owner->getCountry()) {
-		_sprite.setSprite(_unitType->getUnit(_owner->getCountry()->UUID.getID()));
+	auto pOwner = _owner.lock();
+	if (_unitType && pOwner && pOwner->getCountry()) {
+		_sprite.setSprite(_unitType->getUnit(pOwner->getCountry()->UUID.getID()));
 	}
 	// animate
 	return _sprite.animate(target);

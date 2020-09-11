@@ -27,9 +27,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "map.h"
-#include "army.h"
 #include "file.h"
+#include "map.h"
+#include "unit.fwd.h"
+#include "unit.h"
+#include "army.fwd.h"
+#include "army.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
@@ -115,9 +118,9 @@ namespace awe {
 		 * @param  owningArmy The owner of the unit.
 		 * @param  type       The type of unit to create.
 		 * @param  location   The starting location of the new unit.
-		 * @return \c TRUE if the unit could be created, \c FALSE if not (errors will be logged).
+		 * @return Pointer to the created unit, \c nullptr if it could not be created (errors will be logged).
 		 */
-		bool createUnit(const std::shared_ptr<awe::army>& owningArmy, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept;
+		std::shared_ptr<awe::unit> createUnit(const std::shared_ptr<awe::army>& owningArmy, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept;
 
 		/**
 		 * Deletes an existing unit.

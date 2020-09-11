@@ -27,12 +27,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "unit.h"
+#include "terrain.fwd.h"
+#include "unit.fwd.h"
+#include "army.fwd.h"
+#include "bank.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
-	class army;
-
 	/**
 	 * Class representing a single terrain tile on the map.
 	 */

@@ -27,13 +27,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include "unit.fwd.h"
+#include "terrain.fwd.h"
+#include "army.fwd.h"
+#include "army.h"
 #include "bank.h"
 #include "spritesheets.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
-	class army;
-
 	/**
 	 * Class representing a single unit.
 	 */
