@@ -110,6 +110,14 @@ std::vector<std::weak_ptr<awe::unit>> awe::unit::loadedUnits() const noexcept {
 	return _loadedUnits;
 }
 
+void awe::unit::setHolderUnit(const std::shared_ptr<awe::unit>& unit) noexcept {
+	_holderUnit = unit;
+}
+
+std::weak_ptr<awe::unit> awe::unit::getHolderUnit() const noexcept {
+	return _holderUnit;
+}
+
 void awe::unit::setOwner(awe::army* ptr) noexcept {
 	_owner = ptr;
 }

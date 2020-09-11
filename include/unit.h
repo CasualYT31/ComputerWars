@@ -116,15 +116,17 @@ namespace awe {
 
 		/**
 		 * Loads a unit onto this one if the unit's type allows for it.
-		 * @param  unit Reference to the unit to load.
-		 * @return \c TRUE if the unit was loaded successfully, \c FALSE if not (or if this unit has no given type).
+		 * @warning This method does \b not automatically call \c unit.unitLoadedOnto().
+		 * @param   unit Reference to the unit to load.
+		 * @return  \c TRUE if the unit was loaded successfully, \c FALSE if not (or if this unit has no given type).
 		 */
 		bool loadUnit(const std::shared_ptr<awe::unit>& unit) noexcept;
 
 		/**
 		 * Unloads a unit from this one if it exists.
-		 * @param  unitToUnload Reference to the unit to unload. If an empty pointer was given, \c FALSE will be returned.
-		 * @return \c TRUE if the unit was unloaded successfully, \c FALSE if not.
+		 * @warning This method does \b not automatically call \c unitToUnload.unitLoadedOnto().
+		 * @param   unitToUnload Reference to the unit to unload. If an empty pointer was given, \c FALSE will be returned.
+		 * @return  \c TRUE if the unit was unloaded successfully, \c FALSE if not.
 		 */
 		bool unloadUnit(const std::shared_ptr<awe::unit>& unitToUnload) noexcept;
 
@@ -134,6 +136,20 @@ namespace awe {
 		 * @return A list of references to units that are loaded onto this one.
 		 */
 		std::vector<std::weak_ptr<awe::unit>> loadedUnits() const noexcept;
+
+		/**
+		 * Provides a reference to the unit which this one is loaded onto, if any.
+		 * @param unit Empty pointer if this unit isn't loaded onto any other,
+		 *             otherwise the reference to the unit which holds this one.
+		 */
+		void setHolderUnit(const std::shared_ptr<awe::unit>& unit) noexcept;
+
+		/**
+		 * Retrieves a reference to the unit which this one is loaded onto, if any.
+		 * @return Empty/expired if this unit is not loaded onto any of the others,
+		 *         otherwise a pointer to the unit which this one is loaded onto.
+		 */
+		std::weak_ptr<awe::unit> getHolderUnit() const noexcept;
 
 		/**
 		 * Assigns the unit an owner.
@@ -231,5 +247,10 @@ namespace awe {
 		 * A list of weak references to units which are loaded onto this one.
 		 */
 		std::vector<std::weak_ptr<awe::unit>> _loadedUnits;
+
+		/**
+		 * Weak reference to the unit this one is loaded onto, if any.
+		 */
+		std::weak_ptr<awe::unit> _holderUnit;
 	};
 }
