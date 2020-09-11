@@ -118,6 +118,14 @@ std::weak_ptr<awe::unit> awe::unit::getHolderUnit() const noexcept {
 	return _holderUnit;
 }
 
+void awe::unit::setTile(const std::shared_ptr<awe::tile>& ptr) noexcept {
+	_currentTile = ptr;
+}
+
+std::weak_ptr<awe::tile> awe::unit::getTile() const noexcept {
+	return _currentTile;
+}
+
 void awe::unit::setOwner(awe::army* ptr) noexcept {
 	_owner = ptr;
 }

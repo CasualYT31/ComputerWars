@@ -152,6 +152,18 @@ namespace awe {
 		std::weak_ptr<awe::unit> getHolderUnit() const noexcept;
 
 		/**
+		 * Provides a weak reference to the tile this unit is upon.
+		 * @param ptr Reference to the tile this unit is on.
+		 */
+		void setTile(const std::shared_ptr<awe::tile>& ptr) noexcept;
+
+		/**
+		 * Retrieves the weak reference to the tile this unit is upon.
+		 * @return Weak reference to the tile this unit is upon.
+		 */
+		std::weak_ptr<awe::tile> getTile() const noexcept;
+
+		/**
 		 * Assigns the unit an owner.
 		 * @remark Unfortunately, there wasn't an easy way to use weak_ptr, so a raw pointer has been used instead.
 		 * @todo   Find a way to use weak_ptr instead of a raw pointer in the future...
@@ -252,5 +264,10 @@ namespace awe {
 		 * Weak reference to the unit this one is loaded onto, if any.
 		 */
 		std::weak_ptr<awe::unit> _holderUnit;
+
+		/**
+		 * Weak reference to the tile this unit is upon.
+		 */
+		std::weak_ptr<awe::tile> _currentTile;
 	};
 }
