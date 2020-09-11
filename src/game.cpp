@@ -242,9 +242,9 @@ bool awe::game::moveUnit(const std::shared_ptr<awe::unit>& ref, sf::Vector2u new
 			return false;
 		}
 		// move unit
-		pOldTile->setUnit(std::weak_ptr<awe::unit>()); // remove unit from old tile
-		_map->getTile(newLocation)->setUnit(ref);      // add unit to new tile
-		ref->setTile(_map->getTile(newLocation));      // overwrite old tile reference in unit with new tile reference
+		pOldTile->setUnit(nullptr);               // remove unit from old tile
+		_map->getTile(newLocation)->setUnit(ref); // add unit to new tile
+		ref->setTile(_map->getTile(newLocation)); // overwrite old tile reference in unit with new tile reference
 		return true;
 	} else {
 		_logger.error("Could not move unit at location ({}, {}) to ({}, {}).", 0, 0, newLocation.x, newLocation.y);

@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "terrain.h"
 
-awe::tile::tile(sf::Vector2u location, const std::shared_ptr<const awe::tile_type>& tile, const sf::Int32 hp, std::weak_ptr<army> owner) noexcept {
+awe::tile::tile(sf::Vector2u location, const std::shared_ptr<const awe::tile_type>& tile, const sf::Int32 hp, std::shared_ptr<awe::army> owner) noexcept {
 	setLocation(location);
 	setTile(tile);
 	setHP(hp);
@@ -60,7 +60,7 @@ sf::Int32 awe::tile::getHP() const noexcept {
 	return _hp;
 }
 
-void awe::tile::setOwner(std::weak_ptr<awe::army> newOwner) noexcept {
+void awe::tile::setOwner(std::shared_ptr<awe::army> newOwner) noexcept {
 	_owner = newOwner;
 }
 
@@ -68,7 +68,7 @@ std::weak_ptr <awe::army> awe::tile::getOwner() const noexcept {
 	return _owner;
 }
 
-void awe::tile::setUnit(std::weak_ptr<awe::unit> newUnit) noexcept {
+void awe::tile::setUnit(std::shared_ptr<awe::unit> newUnit) noexcept {
 	_unit = newUnit;
 }
 

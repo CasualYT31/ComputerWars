@@ -47,7 +47,7 @@ namespace awe {
 		 * @param owner    The owner's army ID.
 		 * @sa    awe::tile_type
 		 */
-		tile(sf::Vector2u location, const std::shared_ptr<const tile_type>& tile = nullptr, const sf::Int32 hp = -1, std::weak_ptr<army> owner = std::weak_ptr<army>()) noexcept;
+		tile(sf::Vector2u location, const std::shared_ptr<const tile_type>& tile = nullptr, const sf::Int32 hp = -1, std::shared_ptr<awe::army> owner = nullptr) noexcept;
 		
 		/**
 		 * Sets the location this tile has on its map.
@@ -93,7 +93,7 @@ namespace awe {
 		 * If the given pointer is /em expired, this denotes that the tile should not be owned.
 		 * @param A pointer to the army which owns the tile.
 		 */
-		void setOwner(std::weak_ptr<army> newOwner) noexcept;
+		void setOwner(std::shared_ptr<army> newOwner) noexcept;
 
 		/**
 		 * Retrieves the current owner of the tile.
@@ -104,10 +104,10 @@ namespace awe {
 
 		/**
 		 * Allows the client to assign a weak reference to a unit that is occupying this tile.
-		 * If the given pointer is /em expired, this denotes that the tile should not be occupied.
+		 * If the given pointer is /em empty (\c nullptr), this denotes that the tile should not be occupied.
 		 * @param newUnit The reference to the unit that is currently occupying this tile.
 		 */
-		void setUnit(std::weak_ptr<awe::unit> newUnit) noexcept;
+		void setUnit(std::shared_ptr<awe::unit> newUnit) noexcept;
 
 		/**
 		 * Retrieves a reference to the unit currently occupying this tile.
