@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <cstdint>
-#include "sfml/Config.hpp"
+#include "typedef.h"
 
 // for documentation on the engine namespace, please see dialogue.h
 namespace engine {
@@ -54,26 +54,26 @@ namespace engine {
 		/**
 		 * Constructs a UUID.
 		 * @warning Note that once \c _id_counter reaches its maximum value, it will wrap
-		 *          around to \c 1 again. This can cause problems if previous objects with
+		 *          around to \c 0 again. This can cause problems if previous objects with
 		 *          old IDs such as \c 1 and \c 2 have not been destroyed yet. However,
-		 *          since unsigned 64-bit integers can store extremely large values, for
+		 *          since unsigned 32-bit integers can store very large values, for
 		 *          most cases the engine should not have to explicitly manage these cases:
-		 *          simply ensure that no more than \c 18446744073709551615 units are in one
+		 *          simply ensure that no more than \c 4294967295-1 units are in one
 		 *          game at a time, for example 😂.
 		 * @param   init Optionally initialise both \c _id_counter and \c _id to a given value.
-		 *               This should only be given once. It is useful, for example, when you
-		 *               have a collection of units in a binary map file with IDs that did not
-		 *               start at \c 1 (this can easily happen when starting a second game in
-		 *               the same execution). If left to the default value, \c _id will be
-		 *               assigned \c _id_counter then the latter will increment.
+		 *               This should only be given once throughout the program for each type \c T.
+		 *               It is useful when you want to have UUIDs map directly to some other
+		 *               IDing system, such as unique vector indecies.
+		 *               If left to the default value, \c _id will be assigned \c _id_counter
+		 *               then the latter will increment.
 		 */
-		uuid(const sf::Uint64 init = 1) noexcept;
+		uuid(const awe::UUIDValue init = 0) noexcept;
 
 		/**
 		 * Retrieves the UUID.
 		 * @return The UUID of this object.
 		 */
-		sf::Uint64 getID() const noexcept;
+		awe::UUIDValue getID() const noexcept;
 
 		/**
 		 * Comparison operator.
@@ -92,27 +92,27 @@ namespace engine {
 		/**
 		 * ID counter that works across all objects of type \c T.
 		 */
-		static sf::Uint64 _id_counter;
+		static awe::UUIDValue _id_counter;
 
 		/**
 		 * The UUID of this instantiation.
 		 */
-		sf::Uint64 _id = 1;
+		awe::UUIDValue _id = 0;
 	};
 }
 
 template<typename T>
-sf::Uint64 engine::uuid<T>::_id_counter = 1;
+awe::UUIDValue engine::uuid<T>::_id_counter = 0;
 
 template<typename T>
-engine::uuid<T>::uuid(const sf::Uint64 init) noexcept {
-	if (init != 1) _id_counter = init;
+engine::uuid<T>::uuid(const awe::UUIDValue init) noexcept {
+	if (init != 0) _id_counter = init;
 	_id = _id_counter++;
-	if (_id_counter == UINT64_MAX) _id_counter = 1;
+	if (_id_counter == UINT32_MAX) _id_counter = 0;
 }
 
 template<typename T>
-sf::Uint64 engine::uuid<T>::getID() const noexcept {
+awe::UUIDValue engine::uuid<T>::getID() const noexcept {
 	return _id;
 }
 

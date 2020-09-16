@@ -34,6 +34,7 @@ void awe::unit::setType(const std::shared_ptr<const unit_type>& newType) noexcep
 	setFuel(getFuel());
 	setAmmo(getAmmo());
 	_loadedUnits.clear();
+	_updateSprite();
 }
 
 const std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept {
@@ -128,6 +129,7 @@ std::weak_ptr<awe::tile> awe::unit::getTile() const noexcept {
 
 void awe::unit::setOwner(const std::shared_ptr<awe::army>& ptr) noexcept {
 	_owner = ptr;
+	_updateSprite();
 }
 
 std::weak_ptr<awe::army> awe::unit::getOwner() const noexcept {
@@ -143,25 +145,25 @@ bool awe::unit::operator!=(const awe::unit& rhs) const noexcept {
 }
 
 void awe::unit::setSpritesheets(const std::shared_ptr<awe::spritesheets::units>& ptr) noexcept {
-	_spritesheets = ptr;
-}
-
-bool awe::unit::animate(const sf::RenderTarget& target) noexcept {
-	// update sprite's sheets
-	if (_spritesheets && _spritesheets->idle) {
-		_sprite.setSpritesheet(_spritesheets->idle);
+	if (ptr) {
+		_sprite.setSpritesheet(ptr->idle);
+		_updateSprite();
 	} else {
 		_sprite.setSpritesheet(nullptr);
 	}
-	// update sprite's sprite
-	auto pOwner = _owner.lock();
-	if (_unitType && pOwner && pOwner->getCountry()) {
-		_sprite.setSprite(_unitType->getUnit(pOwner->getCountry()->UUID.getID()));
-	}
-	// animate
+}
+
+bool awe::unit::animate(const sf::RenderTarget& target) noexcept {
 	return _sprite.animate(target);
 }
 
 void awe::unit::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_sprite, states);
+}
+
+void awe::unit::_updateSprite() noexcept {
+	auto pOwner = _owner.lock();
+	if (_unitType && pOwner && pOwner->getCountry()) {
+		_sprite.setSprite(_unitType->getUnit(pOwner->getCountry()->UUID.getID()));
+	}
 }

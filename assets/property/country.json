@@ -1,10 +1,4 @@
 {
-	"000": {"longname": "Neutral",
-		"shortname": "Neut",
-		"icon": 0,
-		"description": "Neutral.",
-		"colour": [255,255,255,255]
-	},
 	"001": {"longname": "Orange Star",
 		"shortname": "OS",
 		"icon": 0,

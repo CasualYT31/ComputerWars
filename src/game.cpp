@@ -187,6 +187,7 @@ std::shared_ptr<awe::unit> awe::game::createUnit(const std::shared_ptr<awe::army
 			unit->setOwner(owningArmy);
 			_map->getTile(location)->setUnit(unit);
 			unit->setTile(_map->getTile(location));
+			if (_sprites) unit->setSpritesheets(_sprites->unit);
 			return unit;
 		} else if (_map->getTile(location)->isOccupied()) {
 			_logger.error("Tile was occupied!");

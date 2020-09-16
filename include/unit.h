@@ -220,6 +220,12 @@ namespace awe {
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
+		 * Updates the sprite graphic ID of the unit.
+		 * The sprite graphic of a unit is automatically updated whenever the unit's owner, type, or spritesheet changes.
+		 */
+		void _updateSprite() noexcept;
+
+		/**
 		 * Pointer to the spritesheets used with this unit.
 		 */
 		std::shared_ptr<awe::spritesheets::units> _spritesheets;

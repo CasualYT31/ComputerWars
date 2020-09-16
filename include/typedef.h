@@ -36,6 +36,11 @@ namespace awe {
 	 */
 	typedef sf::Uint8 TeamID;
 
+	/**
+	 * Typedef representing an underlying UUID value.
+	 */
+	typedef sf::Uint32 UUIDValue;
+
 	/* Typedefs to add
 	+ Funds
 	+ Tile HP

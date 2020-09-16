@@ -37,58 +37,14 @@ int awe::game_engine::run() noexcept {
 
 	try {
 		game.read("assets/map/test.map");
-		
-		// test create unit
 		auto pUnit = game.createUnit(game.getArmy(0), (*_units)[0], sf::Vector2u(0, 0));
-		if (pUnit) {
-			// expected values:
-			// army holds reference to unit
-			// unit holds reference to army
-			// tile holds reference to unit
-			// unit holds reference to tile
-			_logger.write("{}", game.getArmy(0)->isArmysUnit(pUnit));
-			_logger.write("{}", pUnit->getOwner().lock() == game.getArmy(0));
-			_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0)) == pUnit->getTile().lock());
-			// HOLY SHIT IT WORKS?????!!?!?!?
+
+		while (true) {
+			_renderer->clear();
+			_renderer->animate(*pUnit);
+			_renderer->draw(*pUnit);
+			_renderer->display();
 		}
-
-		auto pUnit2 = game.createUnit(game.getArmy(0), (*_units)[7], sf::Vector2u(0, 1));
-
-		// test changeTileOwner
-		_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getOwner().expired());
-		game.changeTileOwner(game.getMap()->getTile(sf::Vector2u(0, 0)), game.getArmy(0));
-		_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getOwner().expired());
-		_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getOwner().expired());
-		game.changeTileOwner(game.getMap()->getTile(sf::Vector2u(0, 0)), nullptr);
-		_logger.write("{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getOwner().expired());
-
-		// test moveUnit
-		_logger.write("{}", game.moveUnit(pUnit, sf::Vector2u(0, 0)));
-		_logger.write("{}", game.moveUnit(pUnit, sf::Vector2u(0, 1))); // should now not work
-		// expected values:
-		// old tile no longer holds reference to unit
-		// new tile holds reference to unit
-		// unit holds reference to new tile
-		_logger.write("\n{}", game.getMap()->getTile(sf::Vector2u(0, 0))->getUnit().expired());
-		_logger.write("\n{}", game.getMap()->getTile(sf::Vector2u(0, 1))->getUnit().lock() == pUnit);
-		_logger.write("\n{}", game.getMap()->getTile(sf::Vector2u(0, 1)) == pUnit->getTile().lock());
-
-		// when a unit is loaded...
-		// it should probably be removed from the map
-		// this is so that tiles are freed up for non-loaded units to move onto
-
-		// test loadUnit
-		_logger.write("should fail {}", game.loadUnit(pUnit, pUnit2)); // shouldn't work
-		_logger.write("should run {}", game.loadUnit(pUnit2, pUnit)); // should work
-
-		_logger.write("first tile: {}", (bool)game.getMap()->getTile(sf::Vector2u(0, 0))->getUnit().lock());
-		_logger.write("second tile: {}", (bool)game.getMap()->getTile(sf::Vector2u(0, 1))->getUnit().lock());
-
-		_logger.write("{}", pUnit2->loadedUnits().size());
-
-		// test unloadUnit
-		_logger.write("test: {}", game.unloadUnit(pUnit2, pUnit, sf::Vector2u(0, 0)));
-		_logger.write("{}", pUnit2->loadedUnits().size());
 	} catch (std::exception&) {
 		
 	}
