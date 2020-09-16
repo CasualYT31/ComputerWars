@@ -26,5 +26,9 @@ If you really want an Advance Wars engine **now**, then you can check out [Robos
 - [SPDLOG](https://github.com/gabime/spdlog)
 - [JSON for C++](https://github.com/nlohmann/json)
 
+### Links
+- [Trello Board](https://trello.com/b/GN25IV5j/computer-wars)
+- [Discord Server](https://discord.gg/SxaMn2n)
+
 ### Licence
 Despite its incomplete state, you are free to work with some or all of my code for your own projects, so long as you follow the MIT licence attached to this repository.
