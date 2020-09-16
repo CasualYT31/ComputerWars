@@ -103,7 +103,9 @@ void awe::game::_read_CWM_1(const std::shared_ptr<engine::binary_file>& file, st
 	// 3 - read map name
 	map->setName(file->readString());
 	// 4 - read map dimensions: X, Y
-	map->setSize(sf::Vector2u(file->readNumber<unsigned int>(), file->readNumber<unsigned int>()));
+	auto w = file->readNumber<unsigned int>();
+	auto h = file->readNumber<unsigned int>();
+	map->setSize(sf::Vector2u(w, h));
 	// 5 - read each map tile, reading left-to-right, then top-to-bottom
 	for (sf::Uint32 y = 0, endY = map->getSize().y; y < endY; y++) {
 		for (sf::Uint32 x = 0, endX = map->getSize().x; x < endX; x++) {
