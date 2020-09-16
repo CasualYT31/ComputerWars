@@ -37,8 +37,13 @@ namespace awe {
 	/**
 	 * Class representing a single terrain tile on the map.
 	 */
-	class tile {
+	class tile : public sfx::animated_drawable {
 	public:
+		/**
+		 * Minimum height a tile graphic should have, in native resolution pixels.
+		 */
+		static const unsigned int MIN_TILE_HEIGHT = 16;
+
 		/**
 		 * Constructs a tile.
 		 * All properties are set using their respective set methods.
@@ -151,7 +156,24 @@ namespace awe {
 		 * @return \c TRUE if both tile's UUID objects are not equivalent, \c FALSE if they are.
 		 */
 		bool operator!=(const awe::tile& rhs) const noexcept;
+
+		/**
+		 * This drawable's \c animate() method.
+		 * This will animate the tile's sprite.
+		 * @return The return value of the internal \c sfx::animated_sprite::animate() call.
+		 * @sa     \c sfx::animated_sprite::animate()
+		 */
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
+		/**
+		 * This drawable's \c draw() method.
+		 * Draws the tile to the screen, along with its unit. If the unit is taller than \c MIN_TILE_HEIGHT,
+		 * it will be anchored to the bottom edge of the tile graphic.
+		 * @param target The target to render the unit to.
+		 * @param states The render states to apply to the unit. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 */
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
 		/**
 		 * Pointer to the tile type's static information.
 		 */
