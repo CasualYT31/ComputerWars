@@ -86,7 +86,7 @@ sf::Int32 awe::unit::getAmmo() const noexcept {
 }
 
 bool awe::unit::loadUnit(const std::shared_ptr<awe::unit>& unit) noexcept {
-	if (unit && _unitType && _unitType->canLoad(*unit->getType())) {
+	if (unit && _unitType && unit->getType() && _unitType->canLoad(unit->getType())) {
 		_loadedUnits.push_back(unit);
 		return true;
 	}

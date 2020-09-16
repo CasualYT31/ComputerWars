@@ -234,17 +234,14 @@ bool awe::game::moveUnit(const std::shared_ptr<awe::unit>& ref, sf::Vector2u new
 	try {
 		if (ref && _map && _map->getTile(newLocation)) {
 			auto pOldTile = ref->getTile().lock();
-			if (!pOldTile) {
-				_logger.error("Unit did not hold a reference to the tile it occupies: could not move the unit.");
-				return false;
-			}
 			// should accept movement if the same tile is selected
-			if (_map->getTile(newLocation)->isOccupied() && _map->getTile(newLocation) != pOldTile) {
+			if (_map->getTile(newLocation)->isOccupied() && (pOldTile ? (_map->getTile(newLocation) != pOldTile) : true)) {
 				_logger.error("Attempted to move a unit onto a tile occupied by another unit.");
 				return false;
 			}
 			// move unit
-			pOldTile->setUnit(nullptr);               // remove unit from old tile
+			if (pOldTile) pOldTile->setUnit(nullptr);
+			// remove unit from old tile
 			_map->getTile(newLocation)->setUnit(ref); // add unit to new tile
 			ref->setTile(_map->getTile(newLocation)); // overwrite old tile reference in unit with new tile reference
 			return true;
@@ -262,6 +259,11 @@ bool awe::game::loadUnit(const std::shared_ptr<awe::unit>& dest, const std::shar
 		auto ret = dest->loadUnit(src);
 		if (ret) {
 			src->setHolderUnit(dest);
+			auto pTile = src->getTile().lock();
+			if (pTile) {
+				pTile->setUnit(nullptr);
+				src->setTile(nullptr);
+			}
 		} else {
 			_logger.error("Attempt to load unit of type \"{}\" onto unit of type \"{}\" failed.", ((src->getType())?(src->getType()->getName()):("[NULL]")), ((dest->getType()) ? (dest->getType()->getName()) : ("[NULL]")));
 		}
@@ -271,12 +273,16 @@ bool awe::game::loadUnit(const std::shared_ptr<awe::unit>& dest, const std::shar
 	return false;
 }
 
-bool awe::game::unloadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src) noexcept {
+bool awe::game::unloadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src, sf::Vector2u newLocation) noexcept {
 	if (dest && src) {
-		auto ret = dest->unloadUnit(src);
+		auto ret = moveUnit(src, newLocation);
 		if (ret) {
-			src->setHolderUnit(nullptr);
+			ret = dest->unloadUnit(src);
+			if (ret) src->setHolderUnit(nullptr);
 		} else {
+			_logger.error("Attempted to unload a unit onto an invalid tile.");
+		}
+		if (!ret) {
 			_logger.error("Attempt to unload unit of type \"{}\" from unit of type \"{}\" failed.", ((src->getType()) ? (src->getType()->getName()) : ("[NULL]")), ((dest->getType()) ? (dest->getType()->getName()) : ("[NULL]")));
 		}
 		return ret;

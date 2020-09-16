@@ -78,13 +78,16 @@ int awe::game_engine::run() noexcept {
 		// this is so that tiles are freed up for non-loaded units to move onto
 
 		// test loadUnit
-		game.loadUnit(pUnit, pUnit2); // shouldn't work
-		game.loadUnit(pUnit2, pUnit); // should work
+		_logger.write("should fail {}", game.loadUnit(pUnit, pUnit2)); // shouldn't work
+		_logger.write("should run {}", game.loadUnit(pUnit2, pUnit)); // should work
+
+		_logger.write("first tile: {}", (bool)game.getMap()->getTile(sf::Vector2u(0, 0))->getUnit().lock());
+		_logger.write("second tile: {}", (bool)game.getMap()->getTile(sf::Vector2u(0, 1))->getUnit().lock());
 
 		_logger.write("{}", pUnit2->loadedUnits().size());
 
 		// test unloadUnit
-		game.unloadUnit(pUnit2, pUnit);
+		_logger.write("test: {}", game.unloadUnit(pUnit2, pUnit, sf::Vector2u(0, 0)));
 		_logger.write("{}", pUnit2->loadedUnits().size());
 	} catch (std::exception&) {
 		

@@ -254,16 +254,22 @@ bool awe::unit_type::hasInfiniteAmmo() const noexcept {
 bool awe::unit_type::canLoad(const awe::bank<unit_type>::index typeID) const noexcept {
 	return std::find(_canLoadThese.begin(), _canLoadThese.end(), typeID) != _canLoadThese.end();
 }
-bool awe::unit_type::canLoad(const awe::unit_type& type) const noexcept {
+bool awe::unit_type::canLoad(const std::shared_ptr<const awe::unit_type>& type) const noexcept {
+	if (!type) return false;
 	for (auto& u : _canLoadTheseUnitTypes) {
-		if (u && *u == type) return true;
+		if (u && *u == *type) return true;
 	}
 	return false;
 }
 void awe::unit_type::updateUnitTypes(const awe::bank<const awe::unit_type>& unitBank) const noexcept {
 	_canLoadTheseUnitTypes.clear();
 	for (std::size_t i = 0; i < unitBank.size(); i++) {
-		_canLoadTheseUnitTypes.push_back(unitBank[(awe::bank<awe::unit_type>::index)i]);
+		for (auto& u : _canLoadThese) {
+			if (i == u) {
+				_canLoadTheseUnitTypes.push_back(unitBank[(awe::bank<awe::unit_type>::index)i]);
+				break;
+			}
+		}
 	}
 }
 std::vector<unsigned int> awe::unit_type::copyPictures() const noexcept {

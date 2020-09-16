@@ -658,10 +658,10 @@ namespace awe {
 
 		/**
 		 * Overloaded version of \c canLoad() that checks using a given unit type.
-		 * @param  type The unit type to check for.
+		 * @param  type The unit type to check for. Returns \c FALSE if empty.
 		 * @return \c TRUE if the given unit type can be loaded onto units of this type, \c FALSE if not.
 		 */
-		bool canLoad(const awe::unit_type& type) const noexcept;
+		bool canLoad(const std::shared_ptr<const awe::unit_type>& type) const noexcept;
 
 		/**
 		 * Updates the stored unit type properties pointers for units that can be loaded onto this one.

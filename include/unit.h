@@ -120,7 +120,7 @@ namespace awe {
 		 * Loads a unit onto this one if the unit's type allows for it.
 		 * @warning This method does \b not automatically call \c unit.unitLoadedOnto().
 		 * @param   unit Reference to the unit to load.
-		 * @return  \c TRUE if the unit was loaded successfully, \c FALSE if not (or if this unit has no given type).
+		 * @return  \c TRUE if the unit was loaded successfully, \c FALSE if not (or if none of the units have no given type).
 		 */
 		bool loadUnit(const std::shared_ptr<awe::unit>& unit) noexcept;
 

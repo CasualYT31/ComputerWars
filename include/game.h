@@ -124,6 +124,9 @@ namespace awe {
 
 		/**
 		 * Deletes an existing unit.
+		 * @remark Remember that a \c shared_ptr is provided: if the parameter is still active once the call finishes,
+		 *         the unit will still remain active. It will only be removed from the game if all shared references
+		 *         to the unit have been dropped.
 		 * @param  ref Strong reference to the unit to delete.
 		 * @return \c TRUE if the unit was successfully deleted, \c FALSE if \c ref was an empty pointer (an error will be logged).
 		 */
@@ -147,19 +150,23 @@ namespace awe {
 
 		/**
 		 * Loads a unit onto this one.
-		 * @param  dest The unit which will hold \c src.
-		 * @param  src  The unit to load onto \c dest.
-		 * @return \c TRUE if the operation was completed successfully, \c FALSE if either reference was empty, or if the load operation failed.
+		 * @warning Note that this method removes the tile reference from the loaded unit,
+		 *          as well as the loaded unit reference from this tile.
+		 * @param   dest The unit which will hold \c src.
+		 * @param   src  The unit to load onto \c dest.
+		 * @return  \c TRUE if the operation was completed successfully, \c FALSE if either reference was empty, or if the load operation failed.
 		 */
 		bool loadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src) noexcept;
 
 		/**
 		 * Unloads a unit from another.
-		 * @param  dest The unit which holds \c src.
-		 * @param  src  The unit to unload from \c dest.
-		 * @return \c TRUE if the operation was completed successfully, \c FALSE if either reference was empty, or if the unload operation failed.
+		 * @param  dest        The unit which holds \c src.
+		 * @param  src         The unit to unload from \c dest.
+		 * @param  newLocation The tile on which \c src should be unloaded to.
+		 * @return \c TRUE if the operation was completed successfully, \c FALSE if either reference was empty, or if the unload operation failed,
+		 *         or if the move operation failed (\c newLocation was not valid).
 		 */
-		bool unloadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src) noexcept;
+		bool unloadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src, sf::Vector2u newLocation) noexcept;
 
 		// setup methods
 
