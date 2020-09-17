@@ -56,6 +56,21 @@ namespace awe {
 		sf::Vector2u getSize() const noexcept;
 
 		/**
+		 * Sets the visible portion of the map.
+		 * If <tt>(0, 0, 0, 0)</tt> is given, all the of the map becomes visible.
+		 * @param  portion The new portion of the map to draw, all measurements are in tiles.
+		 * @return \c TRUE if the portion was updated, \c FALSE if the portion was out of the map's range and thus was not updated.
+		 * @sa     _visiblePortion
+		 */
+		bool setVisiblePortion(const sf::Rect<unsigned int> portion) noexcept;
+
+		/**
+		 * Retrieves a copy of the visible portion of the map.
+		 * @return The visible portion of the map.
+		 */
+		sf::Rect<unsigned int> getVisiblePortion() const noexcept;
+
+		/**
 		 * Updates the name of the map.
 		 * @param  newName The new name to give the map.
 		 * @return The old name of the map.
@@ -89,7 +104,22 @@ namespace awe {
 		 * @param ptr Pointer to the spritesheet information to pull from.
 		 */
 		void setPictureSpritesheet(const std::shared_ptr<awe::spritesheets::tile_pictures>& ptr) noexcept;
+
+		/**
+		 * This drawable's \c animate() method.
+		 * This will animate each of the map's tile and unit sprites.
+		 * @return \c FALSE.
+		 */
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
+		/**
+		 * This drawable's \c draw() method.
+		 * Draws the map's visible tiles and their units.
+		 * @param target The target to render the map to.
+		 * @param states The render states to apply to the map. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 */
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
 		/**
 		 * Stores the map's tiles.
 		 * The outer vector stores each set of vertical tiles, and the inner vector stores each tile in a column.
@@ -118,5 +148,12 @@ namespace awe {
 		 * Pointer to the tile picture spritesheets.
 		 */
 		std::shared_ptr<awe::spritesheets::tile_pictures> _pictureSprites;
+
+		/**
+		 * The portion of the map that is rendered to the screen.
+		 * By default, all of the map is drawn. Note also that this does not affect the tiles and units that are animated:
+		 * all tiles and units are always animated (except for loaded units, as they are not accessible via the map object).
+		 */
+		sf::Rect<unsigned int> _visiblePortion = sf::Rect<unsigned int>(0, 0, 0, 0);
 	};
 }

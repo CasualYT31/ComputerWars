@@ -56,7 +56,7 @@ namespace sfx {
 		/**
 		 * Accesses the bounding rectangle of a sprite.
 		 * This bounding rectangle (X and Y coordinates, as well as dimensions) remains consistent across all frames.
-		 * @param  spriteID THe 0-based ID of the sprite whose bounding rectangle is required.
+		 * @param  spriteID The 0-based ID of the sprite whose bounding rectangle is required.
 		 * @return The bounding rectangle of the sprite.
 		 * @throws std::out_of_range If no sprite exists with the given ID.
 		 */

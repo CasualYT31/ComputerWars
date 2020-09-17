@@ -166,6 +166,12 @@ namespace awe {
 		void setSpritesheets(const std::shared_ptr<awe::spritesheets::tiles>& ptr) noexcept;
 
 		/**
+		 * Gets the spritesheets used with this tile.
+		 * @return Pointer to the data.
+		 */
+		std::shared_ptr<awe::spritesheets::tiles> getSpritesheets() const noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
 		 * This will animate the tile's sprite. Note that the occupying unit is not animated.
 		 * @return The return value of the internal \c sfx::animated_sprite::animate() call.
@@ -215,7 +221,7 @@ namespace awe {
 		/**
 		 * Pointer to the spritesheets used by this tile.
 		 */
-		std::shared_ptr<awe::spritesheets::tiles> _spritsheets;
+		std::shared_ptr<awe::spritesheets::tiles> _spritesheets;
 
 		/**
 		 * Tile's sprite.

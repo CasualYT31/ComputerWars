@@ -48,6 +48,16 @@ sf::Vector2u awe::map::getSize() const noexcept {
 	return _size;
 }
 
+bool awe::map::setVisiblePortion(const sf::Rect<unsigned int> portion) noexcept {
+	if (portion.left >= _size.x || portion.top >= _size.y || portion.left + portion.width > _size.x || portion.top + portion.height > _size.y) return false;
+	_visiblePortion = portion;
+	return true;
+}
+
+sf::Rect<unsigned int> awe::map::getVisiblePortion() const noexcept {
+	return _visiblePortion;
+}
+
 std::string awe::map::setName(const std::string& newName) noexcept {
 	auto old = getName();
 	_name = newName;
@@ -69,4 +79,37 @@ void awe::map::setTileSpritesheet(const std::shared_ptr<awe::spritesheets::tiles
 
 void awe::map::setPictureSpritesheet(const std::shared_ptr<awe::spritesheets::tile_pictures>& ptr) noexcept {
 	_pictureSprites = ptr;
+}
+
+bool awe::map::animate(const sf::RenderTarget& target) noexcept {
+	for (auto XItr = _tiles.begin(), XEndItr = _tiles.end(); XItr != XEndItr; XItr++) {
+		for (auto YItr = XItr->begin(), YEndItr = XItr->end(); YItr != YEndItr; YItr++) {
+			auto pTile = *YItr;
+			pTile->animate(target);
+			if (auto pUnit = pTile->getUnit().lock()) pUnit->animate(target);
+		}
+	}
+}
+
+void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	unsigned int width = ( _visiblePortion.width == 0 ? _size.x : _visiblePortion.left + _visiblePortion.width );
+	unsigned int height = ( _visiblePortion.height == 0 ? _size.y : _visiblePortion.top + _visiblePortion.height );
+	float xDrawing = 0.0, yDrawing = 0.0;
+	for (unsigned int x = _visiblePortion.left; x < width; x++) {
+		for (unsigned int y = _visiblePortion.top; y < height; y++) {
+			// ensure that tiles higher than MIN_TILE_HEIGHT are anchored to the bottom edge
+			// ensure unit is drawn
+
+			auto pTile = _tiles[x][y];
+			target.draw(*pTile, sf::RenderStates().transform.translate(xDrawing, yDrawing).combine(states.transform));
+			// changes to the way spritesheets work in awe classes should make calculating this a lot easier, but for now, we're assuming the normal sheet is always used, as well as the neutral tile
+			try {
+				if (pTile->getSpritesheets() && pTile->getSpritesheets()->normal && pTile->getTile())
+					xDrawing += pTile->getSpritesheets()->normal->accessSprite(pTile->getTile()->getNeutralTile()).width;
+			} catch (std::exception&) {
+				// accessSprite threw
+			}
+		}
+		yDrawing += awe::tile::MIN_TILE_HEIGHT;
+	}
 }

@@ -101,6 +101,11 @@ void awe::tile::setSpritesheets(const std::shared_ptr<awe::spritesheets::tiles>&
 	} else {
 		_sprite.setSpritesheet(nullptr);
 	}
+	_spritesheets = ptr;
+}
+
+std::shared_ptr<awe::spritesheets::tiles> awe::tile::getSpritesheets() const noexcept {
+	return _spritesheets;
 }
 
 bool awe::tile::animate(const sf::RenderTarget& target) noexcept {
