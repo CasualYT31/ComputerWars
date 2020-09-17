@@ -94,18 +94,22 @@ bool awe::tile::operator!=(const awe::tile& rhs) const noexcept {
 	return !(*this == rhs);
 }
 
-void awe::tile::setSpritesheets(const std::shared_ptr<awe::spritesheets::tiles>& ptr) noexcept {
+void awe::tile::setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
 	if (ptr) {
-		_sprite.setSpritesheet(ptr->normal);
+		_sprite.setSpritesheet(ptr);
 		_updateSprite();
 	} else {
 		_sprite.setSpritesheet(nullptr);
 	}
-	_spritesheets = ptr;
+	_spritesheet = ptr;
 }
 
-std::shared_ptr<awe::spritesheets::tiles> awe::tile::getSpritesheets() const noexcept {
-	return _spritesheets;
+std::shared_ptr<sfx::animated_spritesheet> awe::tile::getSpritesheet() const noexcept {
+	return _spritesheet;
+}
+
+unsigned int awe::tile::getSpriteID() const noexcept {
+	return _sprite.getSprite();
 }
 
 bool awe::tile::animate(const sf::RenderTarget& target) noexcept {

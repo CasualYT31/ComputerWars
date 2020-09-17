@@ -160,16 +160,22 @@ namespace awe {
 		bool operator!=(const awe::tile& rhs) const noexcept;
 
 		/**
-		 * Sets the spritesheets used with this tile.
+		 * Sets the spritesheet used with this tile.
 		 * @param ptr Pointer to the data.
 		 */
-		void setSpritesheets(const std::shared_ptr<awe::spritesheets::tiles>& ptr) noexcept;
+		void setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
 
 		/**
-		 * Gets the spritesheets used with this tile.
+		 * Gets the spritesheet used with this tile.
 		 * @return Pointer to the data.
 		 */
-		std::shared_ptr<awe::spritesheets::tiles> getSpritesheets() const noexcept;
+		std::shared_ptr<sfx::animated_spritesheet> getSpritesheet() const noexcept;
+
+		/**
+		 * Gets the sprite ID used with this tile.
+		 * @return The sprite ID assigned to the internal sprite object.
+		 */
+		unsigned int getSpriteID() const noexcept;
 
 		/**
 		 * This drawable's \c animate() method.
@@ -219,9 +225,9 @@ namespace awe {
 		sf::Vector2u _location;
 
 		/**
-		 * Pointer to the spritesheets used by this tile.
+		 * Pointer to the spritesheet used by this tile.
 		 */
-		std::shared_ptr<awe::spritesheets::tiles> _spritesheets;
+		std::shared_ptr<sfx::animated_spritesheet> _spritesheet;
 
 		/**
 		 * Tile's sprite.

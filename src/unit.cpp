@@ -144,13 +144,22 @@ bool awe::unit::operator!=(const awe::unit& rhs) const noexcept {
 	return !(*this == rhs);
 }
 
-void awe::unit::setSpritesheets(const std::shared_ptr<awe::spritesheets::units>& ptr) noexcept {
+void awe::unit::setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
 	if (ptr) {
-		_sprite.setSpritesheet(ptr->idle);
+		_sprite.setSpritesheet(ptr);
 		_updateSprite();
 	} else {
 		_sprite.setSpritesheet(nullptr);
 	}
+	_spritesheet = ptr;
+}
+
+std::shared_ptr<sfx::animated_spritesheet> awe::unit::getSpritesheet() const noexcept {
+	return _spritesheet;
+}
+
+unsigned int awe::unit::getSpriteID() const noexcept {
+	return _sprite.getSprite();
 }
 
 bool awe::unit::animate(const sf::RenderTarget& target) noexcept {

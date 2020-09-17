@@ -198,10 +198,22 @@ namespace awe {
 		bool operator!=(const awe::unit& rhs) const noexcept;
 
 		/**
-		 * Sets the spritesheets used with this unit.
+		 * Sets the spritesheet used with this unit.
 		 * @param ptr Pointer to the data.
 		 */
-		void setSpritesheets(const std::shared_ptr<awe::spritesheets::units>& ptr) noexcept;
+		void setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
+
+		/**
+		 * Gets the spritesheet used with this unit.
+		 * @return Pointer to the data.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> getSpritesheet() const noexcept;
+
+		/**
+		 * Gets the sprite ID used with this unit.
+		 * @return The sprite ID assigned to the internal sprite object.
+		 */
+		unsigned int getSpriteID() const noexcept;
 
 		/**
 		 * This drawable's \c animate() method.
@@ -239,6 +251,11 @@ namespace awe {
 		 * Pointer to the unit's type information.
 		 */
 		std::shared_ptr<const unit_type> _unitType = nullptr;
+
+		/**
+		 * Pointer to the spritesheet this unit is using.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _spritesheet = nullptr;
 
 		/**
 		 * Reference to the army which owns this unit.
