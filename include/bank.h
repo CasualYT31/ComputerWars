@@ -450,10 +450,14 @@ namespace awe {
 		 * Constructor which reads the given JSON object for tile properties.
 		 * The following keys are required:
 		 * <ul><li>\c "type" = \c _terrainType, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "neutral" = \c _neutralTile, <tt>(unsigned 32-bit int)</tt></li>
 		 * <li>\c "tiles" = \c _tiles, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li></ul>
+		 * The \c neutral key stores a sprite ID shown when the tile is not owned by any country. This should be given for
+		 * all tile types.\n
 		 * The \c tiles vector stores a list of animated sprite IDs associated with each country's version of the tile.
-		 * For example, the first value will store the ID of the sprite shown on the map when the first country owns it (in the default implementation, Neutral).
-		 * Not all countries have to be accounted for if the tile cannot be "owned," i.e. captured.
+		 * For example, the first value will store the ID of the sprite shown on the map when the first country owns it.
+		 * This vector does not have to be accounted for if the tile cannot be owned/captured. In which case, an empty
+		 * vector should be given in the script.
 		 * @param j The object value containing the tile type's properties.
 		 */
 		tile_type(safe::json& j) noexcept;
@@ -467,9 +471,15 @@ namespace awe {
 		/**
 		 * Retrieves the ID of the sprite that is shown for a given country.
 		 * @param  countryID The ID of the country.
-		 * @return The ID of the tile's sprite, or \c UINT_MAX if the given country ID didn't identify a sprite ID.
+		 * @return The ID of the tile's sprite, or \c _neutralTile if the given country ID didn't identify a sprite ID.
 		 */
-		unsigned int getTile(bank<country>::index countryID) const noexcept;
+		unsigned int getOwnedTile(bank<country>::index countryID) const noexcept;
+
+		/**
+		 * Retrieves the ID of the sprite that is shown when no country owns the tile.
+		 * @return The ID of the tile's neutral sprite.
+		 */
+		unsigned int getNeutralTile() const noexcept;
 
 		/**
 		 * Retrieves a pointer to the details of the type of terrain this tile represents.
@@ -518,6 +528,11 @@ namespace awe {
 		 * The sprite IDs of the tile corresponding to each country.
 		 */
 		std::vector<unsigned int> _tiles;
+
+		/**
+		 * The sprite ID of the tile with no owner.
+		 */
+		unsigned int _neutralTile = 0;
 	};
 
 	/**

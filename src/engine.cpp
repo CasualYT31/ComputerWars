@@ -37,14 +37,13 @@ int awe::game_engine::run() noexcept {
 
 	try {
 		game.read("assets/map/test.map");
-		auto pUnit = game.createUnit(game.getArmy(0), (*_units)[0], sf::Vector2u(0, 0));
-		game.getArmy(0)->setCountry((*_countries)[1]);
-		game.getMap()->getTile(sf::Vector2u(0, 0))->getUnit().lock()->setSpritesheets(_sprites->unit);
+		auto pTile = game.getMap()->getTile(sf::Vector2u(0, 0));
+		pTile->setSpritesheets(_sprites->tile);
 
 		while (true) {
 			_renderer->clear();
-			_renderer->animate(*pUnit);
-			_renderer->draw(*pUnit);
+			_renderer->animate(*pTile);
+			_renderer->draw(*pTile);
 			_renderer->display();
 		}
 	} catch (std::exception&) {

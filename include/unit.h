@@ -205,7 +205,7 @@ namespace awe {
 
 		/**
 		 * This drawable's \c animate() method.
-		 * This will animate the unit's sprite.
+		 * This will animate the unit's sprite. Note that the tile this unit is occupying is not animated.
 		 * @return The return value of the internal \c sfx::animated_sprite::animate() call.
 		 * @sa     \c sfx::animated_sprite::animate()
 		 */
@@ -213,7 +213,7 @@ namespace awe {
 	private:
 		/**
 		 * This drawable's \c draw() method.
-		 * Draws the unit to the screen.
+		 * Draws the unit to the screen. Note that the tile this unit is occupying is not drawn.
 		 * @param target The target to render the unit to.
 		 * @param states The render states to apply to the unit. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
 		 */

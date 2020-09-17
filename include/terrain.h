@@ -29,8 +29,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "terrain.fwd.h"
 #include "unit.fwd.h"
+#include "unit.h"
 #include "army.fwd.h"
 #include "bank.h"
+#include "spritesheets.h"
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
@@ -158,8 +160,14 @@ namespace awe {
 		bool operator!=(const awe::tile& rhs) const noexcept;
 
 		/**
+		 * Sets the spritesheets used with this tile.
+		 * @param ptr Pointer to the data.
+		 */
+		void setSpritesheets(const std::shared_ptr<awe::spritesheets::tiles>& ptr) noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
-		 * This will animate the tile's sprite.
+		 * This will animate the tile's sprite. Note that the occupying unit is not animated.
 		 * @return The return value of the internal \c sfx::animated_sprite::animate() call.
 		 * @sa     \c sfx::animated_sprite::animate()
 		 */
@@ -167,12 +175,17 @@ namespace awe {
 	private:
 		/**
 		 * This drawable's \c draw() method.
-		 * Draws the tile to the screen, along with its unit. If the unit is taller than \c MIN_TILE_HEIGHT,
-		 * it will be anchored to the bottom edge of the tile graphic.
-		 * @param target The target to render the unit to.
-		 * @param states The render states to apply to the unit. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 * Draws the tile to the screen. Note that the occupying unit is not drawn.
+		 * @param target The target to render the tile to.
+		 * @param states The render states to apply to the tile. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
 		 */
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+		/**
+		 * Updates the sprite graphic ID of the tile.
+		 * The sprite graphic of a tile is automatically updated whenever the tile's owner, type, or spritesheet changes.
+		 */
+		void _updateSprite() noexcept;
 
 		/**
 		 * Pointer to the tile type's static information.
@@ -198,5 +211,15 @@ namespace awe {
 		 * Location of this tile in the map.
 		 */
 		sf::Vector2u _location;
+
+		/**
+		 * Pointer to the spritesheets used by this tile.
+		 */
+		std::shared_ptr<awe::spritesheets::tiles> _spritsheets;
+
+		/**
+		 * Tile's sprite.
+		 */
+		sfx::animated_sprite _sprite;
 	};
 }

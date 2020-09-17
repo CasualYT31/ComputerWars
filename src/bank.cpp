@@ -162,13 +162,17 @@ bool awe::terrain::operator!=(const awe::terrain& rhs) const noexcept {
 awe::tile_type::tile_type(safe::json& j) noexcept {
 	j.apply(_terrainType, { "type" }, &_terrainType, true);
 	j.applyVector(_tiles, { "tiles" });
+	j.apply(_neutralTile, { "neutral" }, &_neutralTile, true);
 }
 awe::bank<awe::terrain>::index awe::tile_type::getTypeIndex() const noexcept {
 	return _terrainType;
 }
-unsigned int awe::tile_type::getTile(awe::bank<awe::country>::index countryID) const noexcept {
-	if (countryID >= _tiles.size()) return UINT_MAX;
+unsigned int awe::tile_type::getOwnedTile(awe::bank<awe::country>::index countryID) const noexcept {
+	if (countryID >= _tiles.size()) return _neutralTile;
 	return _tiles[countryID];
+}
+unsigned int awe::tile_type::getNeutralTile() const noexcept {
+	return _neutralTile;
 }
 std::shared_ptr<const awe::terrain> awe::tile_type::getType() const noexcept {
 	return _terrain;

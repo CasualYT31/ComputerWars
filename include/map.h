@@ -36,7 +36,7 @@ namespace awe {
 	/**
 	 * Class which represents a grid of tiles and their units.
 	 */
-	class map {
+	class map : public sfx::animated_drawable {
 	public:
 		/**
 		 * Resizes the map to the given dimensions.

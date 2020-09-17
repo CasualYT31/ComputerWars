@@ -39,6 +39,7 @@ sf::Vector2u awe::tile::getLocation() const noexcept {
 
 void awe::tile::setTile(const std::shared_ptr<const awe::tile_type>& newTile) noexcept {
 	_tileType = newTile;
+	_updateSprite();
 }
 
 std::shared_ptr<const awe::tile_type> awe::tile::getTile() const noexcept {
@@ -62,6 +63,7 @@ sf::Int32 awe::tile::getHP() const noexcept {
 
 void awe::tile::setOwner(std::shared_ptr<awe::army> newOwner) noexcept {
 	_owner = newOwner;
+	_updateSprite();
 }
 
 std::weak_ptr <awe::army> awe::tile::getOwner() const noexcept {
@@ -90,4 +92,32 @@ bool awe::tile::operator==(const awe::tile& rhs) const noexcept {
 
 bool awe::tile::operator!=(const awe::tile& rhs) const noexcept {
 	return !(*this == rhs);
+}
+
+void awe::tile::setSpritesheets(const std::shared_ptr<awe::spritesheets::tiles>& ptr) noexcept {
+	if (ptr) {
+		_sprite.setSpritesheet(ptr->normal);
+		_updateSprite();
+	} else {
+		_sprite.setSpritesheet(nullptr);
+	}
+}
+
+bool awe::tile::animate(const sf::RenderTarget& target) noexcept {
+	return _sprite.animate(target);
+}
+
+void awe::tile::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(_sprite, states);
+}
+
+void awe::tile::_updateSprite() noexcept {
+	if (_tileType) {
+		auto pOwner = _owner.lock();
+		if (pOwner && pOwner->getCountry()) {
+			_sprite.setSprite(_tileType->getOwnedTile(pOwner->getCountry()->UUID.getID()));
+		} else {
+			_sprite.setSprite(_tileType->getNeutralTile());
+		}
+	}
 }
