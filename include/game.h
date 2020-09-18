@@ -87,6 +87,60 @@ namespace awe {
 		bool write(std::string filename = "") noexcept;
 
 		/**
+		 * Updates the map's size.
+		 * @param newSize The new size of the map in tiles.
+		 * @sa    \c awe::map::setSize()
+		 */
+		void setMapSize(const sf::Vector2u& newSize) noexcept;
+
+		/**
+		 * Retrieves the map's size.
+		 * @return The size of the map in tiles.
+		 * @sa     \c awe::map::getSize()
+		 */
+		sf::Vector2u getMapSize() const noexcept;
+
+		/**
+		 * Updates the map's name.
+		 * @param newName The new name of the map.
+		 * @sa    \c awe::map::setName()
+		 */
+		void setMapName(const std::string& newName) noexcept;
+
+		/**
+		 * Retrieves the map's name.
+		 * @return The name of the map.
+		 * @sa     \c awe::map::getName()
+		 */
+		std::string getMapName() const noexcept;
+
+		/**
+		 * Creates a new army and adds it to the internal list.
+		 * The new army is given \c 0 funds, and its has no commanders.
+		 * Its team ID will be the same as the country ID given.
+		 * @param id The ID of the country of the army, which also defines the turn order of the army.
+		 */
+		void createArmy(awe::bank<awe::country>::index id) noexcept;
+
+		/**
+		 * Deletes an existing army from the internal list.
+		 * This will delete all of the army's units and will indirectly turn all owned tiles to neutral.
+		 * Note that if any strong references to the army or the unit remain,
+		 * it will not be deleted until those are dropped, too.
+		 * @param ptr Pointer to the country of the army to remove.
+		 */
+		void deleteArmy(const std::shared_ptr<const awe::country>& ptr) noexcept;
+
+		/**
+		 * Assigns the given army a new team.
+		 * @param ptr     Pointer to the country of the army to amend.
+		 * @param newTeam The ID of the team to assign this army to.
+		 */
+		void setArmysTeam(const std::shared_ptr<const awe::country>& ptr, awe::TeamID newTeam) noexcept;
+
+
+
+		/**
 		 * Allows access to the map object.
 		 * @return Pointer to the map object, or an empty pointer if a map hasn't been allocated yet.
 		 */
@@ -201,6 +255,15 @@ namespace awe {
 		void setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept;
 	private:
 		/**
+		 * Retrieves an iterator for a given element within a given vector container.
+		 * @param  container The vector container to pull an iterator from.
+		 * @param  index     The 0-based index of the element to pull an iterator of. \c end() if it is out of range.
+		 * @return The iterator pointing to the element referenced by \c index.
+		 */
+		template<typename T>
+		typename std::vector<T>::iterator getIterator(const std::vector<T>& container, unsigned int index) const noexcept;
+
+		/**
 		 * Initialises a file stream for either input or output.
 		 * @param  filename The path of the file to open.
 		 * @param  forInput \c TRUE if opening the file for input, \c FALSE for output.
@@ -274,4 +337,11 @@ namespace awe {
 		 */
 		std::shared_ptr<awe::spritesheets> _sprites;
 	};
+}
+
+template<typename T>
+typename std::vector<T>::iterator awe::game::getIterator(const std::vector<T>& container, unsigned int index) const noexcept {
+	auto itr = container.begin();
+	for (unsigned int counter = 0; counter < index || itr == container.end(); counter++, itr++);
+	return itr;
 }

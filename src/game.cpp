@@ -172,6 +172,64 @@ std::shared_ptr<engine::binary_file> awe::game::_openFile(std::string& filename,
 	return ret;
 }
 
+void awe::game::setMapSize(const sf::Vector2u& newSize) noexcept {
+	if (_map) _map->setSize(newSize);
+}
+
+sf::Vector2u awe::game::getMapSize() const noexcept {
+	if (_map) {
+		return _map->getSize();
+	} else {
+		return sf::Vector2u(0, 0);
+	}
+}
+
+void awe::game::setMapName(const std::string& newName) noexcept {
+	if (_map) _map->setName(newName);
+}
+
+std::string awe::game::getMapName() const noexcept {
+	if (_map) {
+		return _map->getName();
+	} else {
+		return "";
+	}
+}
+
+void awe::game::createArmy(awe::bank<awe::country>::index id) noexcept {
+	if (_armies && _countries) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *(*_countries)[id]) return;
+		}
+		_armies->insert(getIterator(*_armies, (unsigned int)id), std::make_shared<awe::army>((awe::TeamID)id, (*_countries)[id]));
+	}
+}
+
+void awe::game::deleteArmy(const std::shared_ptr<const awe::country>& ptr) noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				_armies->erase(itr);
+				break;
+			}
+		}
+	}
+}
+
+void awe::game::setArmysTeam(const std::shared_ptr<const awe::country>& ptr, awe::TeamID newTeam) noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				(*itr)->setTeam(newTeam);
+				break;
+			}
+		}
+	}
+}
+
+
+
+
 std::shared_ptr<awe::map> awe::game::getMap() const noexcept {
 	return _map;
 }
