@@ -43,6 +43,10 @@ bool awe::game::read(std::string filename) noexcept {
 		_logger.error("Reading map operation cancelled: no unit types bank has been assigned to this game object.");
 		return false;
 	}
+	if (!_sprites) {
+		_logger.error("Reading map operation cancelled: no spritesheets have been assigned to this game object.");
+		return false;
+	}
 	// read
 	std::shared_ptr<awe::map> map = std::make_shared<awe::map>();
 	std::shared_ptr<std::vector<std::shared_ptr<awe::army>>> armies = std::make_shared<std::vector<std::shared_ptr<awe::army>>>();
@@ -99,6 +103,8 @@ void awe::game::_read_CWM_1(const std::shared_ptr<engine::binary_file>& file, st
 			second = file->readNumber<awe::bank<const awe::commander>::index>();
 		army.setCommanders(( (first != NO_CO) ? ((*_commanders)[first]) : (nullptr) ),
 			( (second != NO_CO) ? ((*_commanders)[second]) : (nullptr) ));
+		// extra - assign spritesheet
+		army.setUnitSpritesheet(_sprites->unit->idle);
 	}
 	// 3 - read map name
 	map->setName(file->readString());
@@ -187,7 +193,6 @@ std::shared_ptr<awe::unit> awe::game::createUnit(const std::shared_ptr<awe::army
 			unit->setOwner(owningArmy);
 			_map->getTile(location)->setUnit(unit);
 			unit->setTile(_map->getTile(location));
-			if (_sprites) unit->setSpritesheets(_sprites->unit);
 			return unit;
 		} else if (_map->getTile(location)->isOccupied()) {
 			_logger.error("Tile was occupied!");

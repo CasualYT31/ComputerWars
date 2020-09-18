@@ -89,6 +89,7 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 			if (auto pUnit = pTile->getUnit().lock()) pUnit->animate(target);
 		}
 	}
+	return false;
 }
 
 void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -104,8 +105,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			target.draw(*pTile, sf::RenderStates().transform.translate(xDrawing, yDrawing).combine(states.transform));
 			// changes to the way spritesheets work in awe classes should make calculating this a lot easier, but for now, we're assuming the normal sheet is always used, as well as the neutral tile
 			try {
-				if (pTile->getSpritesheets() && pTile->getSpritesheets()->normal && pTile->getTile())
-					xDrawing += pTile->getSpritesheets()->normal->accessSprite(pTile->getTile()->getNeutralTile()).width;
+				//if (pTile->getSpritesheets() && pTile->getSpritesheets()->normal && pTile->getTile())
+				//	xDrawing += pTile->getSpritesheets()->normal->accessSprite(pTile->getTile()->getNeutralTile()).width;
 			} catch (std::exception&) {
 				// accessSprite threw
 			}

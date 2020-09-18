@@ -73,7 +73,7 @@ namespace awe {
 		/**
 		 * Opens a binary file and reads the contents to overwrite what's currently stored in this object.
 		 * This method has strong exception safety.\n
-		 * \c FALSE is returned if any of the banks haven't been assigned yet (see, for example, \c setCountries()).
+		 * \c FALSE is returned if any of the banks or spritesheets haven't been assigned yet (see, for example, \c setCountries()).
 		 * @param   filename The name of the file to open. If a blank string, \c _filename will be substitued.
 		 * @return  \c TRUE if reading was successful, \c FALSE otherwise.
 		 */

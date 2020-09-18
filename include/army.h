@@ -168,6 +168,7 @@ namespace awe {
 
 		/**
 		 * Allocates a new unit and adds it to the army's collection.
+		 * The given spritesheet pointer is automatically assigned to the newly created unit.
 		 * @warning This method does not automatically assign this army as the unit's owner. Please see \c awe::game::createUnit().
 		 * @param   typeInfo The type of unit to allocate.
 		 * @return  A pointer to the created unit.
@@ -203,10 +204,10 @@ namespace awe {
 		std::size_t unitCount(std::vector<std::shared_ptr<const awe::unit_type>> filter = {}, const bool inverted = false) const noexcept;
 
 		/**
-		 * Sets the unit spritesheets to be used with this army.
+		 * Sets the unit spriteshees to be used with this army.
 		 * @param ptr Pointer to the spritesheet information to pull from.
 		 */
-		void setUnitSpritesheet(const std::shared_ptr<awe::spritesheets::units>& ptr) noexcept;
+		void setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
 
 		/**
 		 * Sets the unit picture spritesheet to be used with this army.
@@ -290,9 +291,9 @@ namespace awe {
 		std::shared_ptr<const awe::commander> _secondCO = nullptr;
 
 		/**
-		 * Pointer to the unit spritesheets.
+		 * Pointer to the unit spritesheet.
 		 */
-		std::shared_ptr<awe::spritesheets::units> _unitSprites;
+		std::shared_ptr<sfx::animated_spritesheet> _unitSprites;
 
 		/**
 		 * Pointer to the unit picture spritesheet.
