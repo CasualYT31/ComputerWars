@@ -201,7 +201,11 @@ void awe::game::createArmy(awe::bank<awe::country>::index id) noexcept {
 		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
 			if (*(*itr)->getCountry() == *(*_countries)[id]) return;
 		}
-		_armies->insert(getIterator(*_armies, (unsigned int)id), std::make_shared<awe::army>((awe::TeamID)id, (*_countries)[id]));
+		try {
+			_armies->insert(_getArmyIterator((unsigned int)id), std::make_shared<awe::army>((awe::TeamID)id, (*_countries)[id]));
+		} catch (std::exception&) {
+			// failed - ignore call
+		}
 	}
 }
 
@@ -226,9 +230,6 @@ void awe::game::setArmysTeam(const std::shared_ptr<const awe::country>& ptr, awe
 		}
 	}
 }
-
-
-
 
 std::shared_ptr<awe::map> awe::game::getMap() const noexcept {
 	return _map;
@@ -375,4 +376,11 @@ void awe::game::setUnits(const std::shared_ptr<awe::bank<const awe::unit_type>>&
 
 void awe::game::setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept {
 	_sprites = ptr;
+}
+
+std::vector<std::shared_ptr<awe::army>>::iterator awe::game::_getArmyIterator(unsigned int index) const {
+	if (!_armies) throw std::out_of_range("Internal armies vector was NULL at the time of calling.");
+	auto itr = _armies->begin();
+	for (unsigned int counter = 0; counter < index || itr == _armies->end(); counter++, itr++);
+	return itr;
 }

@@ -255,13 +255,12 @@ namespace awe {
 		void setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept;
 	private:
 		/**
-		 * Retrieves an iterator for a given element within a given vector container.
-		 * @param  container The vector container to pull an iterator from.
-		 * @param  index     The 0-based index of the element to pull an iterator of. \c end() if it is out of range.
-		 * @return The iterator pointing to the element referenced by \c index.
+		 * Retrieves a vector iterator for a given army.
+		 * @param  index The 0-based index of the army to retrieve the iterator of.
+		 * @return The iterator pointing to the army referenced by \c index. \c end() if \c index is out of range.
+		 * @throws \c std::out_of_range if \c _armies was \c nullptr at the time of calling.
 		 */
-		template<typename T>
-		typename std::vector<T>::iterator getIterator(const std::vector<T>& container, unsigned int index) const noexcept;
+		std::vector<std::shared_ptr<awe::army>>::iterator _getArmyIterator(unsigned int index) const;
 
 		/**
 		 * Initialises a file stream for either input or output.
@@ -337,11 +336,4 @@ namespace awe {
 		 */
 		std::shared_ptr<awe::spritesheets> _sprites;
 	};
-}
-
-template<typename T>
-typename std::vector<T>::iterator awe::game::getIterator(const std::vector<T>& container, unsigned int index) const noexcept {
-	auto itr = container.begin();
-	for (unsigned int counter = 0; counter < index || itr == container.end(); counter++, itr++);
-	return itr;
 }
