@@ -35,13 +35,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "engine.h"
+#include "tests.h"
 
 /**
  * The entry point into the program.
  * A majority of the game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the \c awe::game_engine object is constructed.
  * @return The result of calling \c awe::game_engine::run(): by this point, the game has been shut down.
  */
-int main() {
+int game() {
     // initialise the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
 
@@ -157,4 +158,25 @@ int main() {
 
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run();
+}
+
+/**
+ * The entry point into the program's tests.
+ */
+int test() {
+    // initialise the test log file
+    global::sink::Get("Computer Wars Tests", "CasualYouTuber31", ".", false);
+
+    // setup the test cases
+    std::vector<test::test_case> testcases;
+    testcases.push_back(new );
+
+    // run the test cases
+    for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
+        itr->runTests();
+    }
+}
+
+int main() {
+    return test();
 }
