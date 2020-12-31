@@ -31,6 +31,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sfml/System/Clock.hpp"
 
 /**
+ * Macro that allows implementations of test::test_case::runTests() to run a test and
+ * automatically assign the name of the test as the test function's name.
+ * @param instance      The name of the class which contains the method to run.
+ * @param test_function The name of the method which contains the test to run.
+ */
+#define RUN_TEST(instance, test_function) runTest(#test_function, new std::function<void(test::test_case*)>(&instance::test_function))
+
+/**
  * The \c test namespace contains test-related classes.
  */
 namespace test {
@@ -51,12 +59,17 @@ namespace test {
 	/**
 	 * Class which represents a set of unit tests.
 	 * Each derived class is a test case, with its unit tests executed within its implemented \c runTests().
-	 * Tests can be divided up within the subclass in whatever way the programmer sees fit, so long as they are executed within \c runTests().
+	 * Tests can be divided up within the subclass in whatever way the programmer sees fit, so long as they are executed within \c runTests(),
+	 * and remain within the subclass (as if they are outside of the subclass, the assert methods cannot be called).\n
+	 * Note also that tests cannot be specified with \c noexcept, as when an assertion fails, \c failed_assert is thrown,
+	 * and must be left alone for the \c test_case class to handle.
 	 */
 	class test_case {
 	public:
 		/**
 		 * The method which will include this test case's tests.
+		 * @warning Care must be taken when writing the unit tests to \b not call this method within them,
+		 *          or else the stack will overflow (unless you implement a terminating condition).
 		 */
 		virtual void runTests() noexcept = 0;
 	protected:
@@ -67,7 +80,7 @@ namespace test {
 		 * @param name The name of the test.
 		 * @param test The test to execute. \c failed_assert exceptions will be automatically handled.
 		 */
-		void runTest(const std::string& name, const std::function<void()>& test) noexcept;
+		void runTest(const std::string& name, const std::function<void(test::test_case*)>& test) noexcept;
 
 		/**
 		 * Called when all unit tests have been carried out.

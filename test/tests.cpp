@@ -23,8 +23,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tests.h"
 
 void test::test_language::runTests() {
-	runTest("expand_string", [](){
-		// completely overlooked that assert methods can't be used in here.....
-		// need to rethink this...
-	});
+	RUN_TEST(test_language, expand_string);
+}
+
+void test::test_language::expand_string() {
+	assertTrue(true);
 }

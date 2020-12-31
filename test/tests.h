@@ -35,9 +35,15 @@ namespace test {
 	 * Tests language.h classes.
 	 */
 	class test_language : public test::test_case {
+	public:
 		/**
 		 * Runs all the tests.
 		 */
 		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c expand_string class.
+		 */
+		void expand_string();
 	};
 }

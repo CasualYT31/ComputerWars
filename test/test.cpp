@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "test.h"
 
-void test::test_case::runTest(const std::string& name, const std::function<void()>& test) {
+void test::test_case::runTest(const std::string& name, const std::function<void(test::test_case*)>& test) {
 	if (!_started) {
 		_started = true;
 		_timer.restart();
@@ -30,7 +30,7 @@ void test::test_case::runTest(const std::string& name, const std::function<void(
 	_count++;
 	_currentTestName = name;
 	try {
-		test();
+		test(this);
 		// successful test
 	} catch (std::bad_function_call& e) { // no test
 		_faultyCount++;
