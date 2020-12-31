@@ -32,10 +32,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // for documentation on the test namespace, please see test.h
 namespace test {
 	/**
+	 * The entry point into the solution's tests.
+	 * @return The value ideally returned by \c main().
+	 */
+	int test();
+
+	/**
 	 * Tests language.h classes.
 	 */
 	class test_language : public test::test_case {
 	public:
+		/**
+		 * Assigns the unique name of the test case to the logger object.
+		 */
+		test_language() noexcept;
+
 		/**
 		 * Runs all the tests.
 		 */
@@ -45,5 +56,10 @@ namespace test {
 		 * Runs tests related to the \c expand_string class.
 		 */
 		void expand_string();
+
+		/**
+		 * Runs tests related to the \c language_dictionary class.
+		 */
+		void language_dictionary();
 	};
 }

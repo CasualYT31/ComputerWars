@@ -33,10 +33,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * Macro that allows implementations of test::test_case::runTests() to run a test and
  * automatically assign the name of the test as the test function's name.
- * @param instance      The name of the class which contains the method to run.
- * @param test_function The name of the method which contains the test to run.
+ * @param test_function The full name of the method which contains the test to run, for example \c test::test_class::method.
  */
-#define RUN_TEST(instance, test_function) runTest(#test_function, new std::function<void(test::test_case*)>(&instance::test_function))
+#define RUN_TEST(test_function) runTest(#test_function, std::bind(&test_function, this))
 
 /**
  * The \c test namespace contains test-related classes.
@@ -67,6 +66,18 @@ namespace test {
 	class test_case {
 	public:
 		/**
+		 * Initialises the internal logger object.
+		 * @param name The name to give this particular instantiation within the log file. Defaults to "test_case."
+		 * @sa    \c global::logger
+		 */
+		test_case(const std::string& name = "test_case") noexcept;
+
+		/**
+		 * Polymorphic base classes should have virtual destructors.
+		 */
+		virtual ~test_case() noexcept = default;
+
+		/**
 		 * The method which will include this test case's tests.
 		 * @warning Care must be taken when writing the unit tests to \b not call this method within them,
 		 *          or else the stack will overflow (unless you implement a terminating condition).
@@ -80,7 +91,7 @@ namespace test {
 		 * @param name The name of the test.
 		 * @param test The test to execute. \c failed_assert exceptions will be automatically handled.
 		 */
-		void runTest(const std::string& name, const std::function<void(test::test_case*)>& test) noexcept;
+		void runTest(const std::string& name, const std::function<void(void)>& test) noexcept;
 
 		/**
 		 * Called when all unit tests have been carried out.
@@ -98,7 +109,7 @@ namespace test {
 		 * @throws failed_assert if \c a and \b are unequal.
 		 */
 		template<typename T, typename U>
-		void assertEqual(T a, U b) const;
+		void assertEqual(T a, U b);
 
 		/**
 		 * Asserts that two values aren't equivalent according to their comparison operator results (!=).
@@ -109,7 +120,7 @@ namespace test {
 		 * @throws failed_assert if \c a and \b are equal.
 		 */
 		template<typename T, typename U>
-		void assertNotEqual(T a, U b) const;
+		void assertNotEqual(T a, U b);
 
 		/**
 		 * Asserts that a value evaluates to true according to its boolean operator.
@@ -118,7 +129,7 @@ namespace test {
 		 * @throws failed_assert if \c a evaluates to false.
 		 */
 		template<typename T>
-		void assertTrue(T a) const;
+		void assertTrue(T a);
 
 		/**
 		 * Asserts that a value evaluates to false according to its boolean operator.
@@ -127,7 +138,7 @@ namespace test {
 		 * @throws failed_assert if \c a evaluates to true.
 		 */
 		template<typename T>
-		void assertFalse(T a) const;
+		void assertFalse(T a);
 
 		/**
 		 * Asserts that a given value (not key) is stored within a given \c unordered_map.
@@ -138,7 +149,7 @@ namespace test {
 		 * @throws failed_assert if \c a is not within \b.
 		 */
 		template<typename T, typename U>
-		void assertInMap(T a, std::unordered_map<U, T> b) const;
+		void assertInMap(T a, std::unordered_map<U, T> b);
 
 		/**
 		 * Asserts that a given value (not key) isn't stored within a given \c unordered_map.
@@ -149,7 +160,7 @@ namespace test {
 		 * @throws failed_assert if \c a is within \b.
 		 */
 		template<typename T, typename U>
-		void assertNotInMap(T a, std::unordered_map<U, T> b) const;
+		void assertNotInMap(T a, std::unordered_map<U, T> b);
 	private:
 		/**
 		 * Throws a \c failed_assert exception and logs it as a failed test.
@@ -162,7 +173,7 @@ namespace test {
 		 * @throws failed_assert
 		 */
 		template<typename T, typename U>
-		void _failedTest(const std::string& msg, T a, U b) const;
+		void _failedTest(const std::string& msg, T a, U b);
 
 		/**
 		 * Logger object used to print test output.
@@ -202,34 +213,34 @@ namespace test {
 }
 
 template<typename T, typename U>
-void test::test_case::_failedTest(const std::string& msg, T a, U b) const {
+void test::test_case::_failedTest(const std::string& msg, T a, U b) {
 	_failedCount++;
 	_logger.error("FAILED TEST ~~~ {} ~~~ " + msg, _currentTestName, a, b);
-	throw new failed_assert();
+	throw failed_assert();
 }
 
 template<typename T, typename U>
-void test::test_case::assertEqual(T a, U b) const {
+void test::test_case::assertEqual(T a, U b) {
 	if (!(a == b)) _failedTest("{} is not equal to {}", a, b);
 }
 
 template<typename T, typename U>
-void test::test_case::assertNotEqual(T a, U b) const {
+void test::test_case::assertNotEqual(T a, U b) {
 	if (!(a != b)) _failedTest("{} is equal to {}", a, b);
 }
 
 template<typename T>
-void test::test_case::assertTrue(T a) const {
+void test::test_case::assertTrue(T a) {
 	if (!a) _failedTest("{} is {}", a, "true");
 }
 
 template<typename T>
-void test::test_case::assertFalse(T a) const {
+void test::test_case::assertFalse(T a) {
 	if (a) _failedTest("{} is {}", a, "false");
 }
 
 template<typename T, typename U>
-void test::test_case::assertInMap(T a, std::unordered_map<U, T> b) const {
+void test::test_case::assertInMap(T a, std::unordered_map<U, T> b) {
 	for (auto itr = b.begin(), enditr = b.end(); itr != enditr; itr++) {
 		if (itr->second == a) return;
 	}
@@ -237,7 +248,7 @@ void test::test_case::assertInMap(T a, std::unordered_map<U, T> b) const {
 }
 
 template<typename T, typename U>
-void test::test_case::assertNotInMap(T a, std::unordered_map<U, T> b) const {
+void test::test_case::assertNotInMap(T a, std::unordered_map<U, T> b) {
 	for (auto itr = b.begin(), enditr = b.end(); itr != enditr; itr++) {
 		if (itr->second == a) _failedTest("{} is stored at the {} key in the map", a, itr->first);
 	}

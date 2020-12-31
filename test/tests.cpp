@@ -22,10 +22,42 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tests.h"
 
-void test::test_language::runTests() {
-	RUN_TEST(test_language, expand_string);
+int test::test() {
+	// initialise the test log file
+	global::sink::Get("Computer Wars Tests", "CasualYouTuber31", ".", false);
+
+	// setup the test cases
+	std::vector<test::test_case*> testcases;
+	testcases.push_back(new test::test_language());
+
+	// run the test cases
+	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
+		(*itr)->runTests();
+		delete *itr;
+	}
+
+	return 0;
+}
+
+test::test_language::test_language() noexcept : test_case("language_test_case") {}
+
+void test::test_language::runTests() noexcept {
+	RUN_TEST(test::test_language::expand_string);
+	RUN_TEST(test::test_language::language_dictionary);
+	endTesting();
 }
 
 void test::test_language::expand_string() {
+	int val = 9;
+	assertNotEqual(val, 8);
+	assertFalse(false);
 	assertTrue(true);
+}
+
+void test::test_language::language_dictionary() {
+	assertEqual(8, 8);
+	std::unordered_map<std::string, int> map;
+	map["test"] = 9;
+	map["another"] = -9;
+	assertNotInMap(-9, map);
 }

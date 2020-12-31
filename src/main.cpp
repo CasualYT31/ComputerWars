@@ -160,23 +160,6 @@ int game() {
     return gameLoop.run();
 }
 
-/**
- * The entry point into the program's tests.
- */
-int test() {
-    // initialise the test log file
-    global::sink::Get("Computer Wars Tests", "CasualYouTuber31", ".", false);
-
-    // setup the test cases
-    std::vector<test::test_case> testcases;
-    testcases.push_back(new );
-
-    // run the test cases
-    for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
-        itr->runTests();
-    }
-}
-
 int main() {
-    return test();
+    return test::test();
 }
