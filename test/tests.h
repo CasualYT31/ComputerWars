@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * @file tests.h
- * Defines all the tests run in test(): see main.cpp.
+ * Defines all the tests.
  */
 
 #pragma once
@@ -32,7 +32,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // for documentation on the test namespace, please see test.h
 namespace test {
 	/**
-	 * The entry point into the solution's tests.
+	 * The entry point into the solution's tests.\n
+	 * The test results are output to a single log file in the path "./test/results".\n
+	 * When you write a new <tt>test_case</tt>-derived class, you need to add it to the list of test cases in this function.
+	 * You can do this my pushing back a <tt>new</tt>d instance of your class to the \c testcases vector.
 	 * @return The value ideally returned by \c main().
 	 */
 	int test();
@@ -43,12 +46,12 @@ namespace test {
 	class test_language : public test::test_case {
 	public:
 		/**
-		 * Assigns the unique name of the test case to the logger object.
+		 * Assigns the name "language_test_case" to the logger object.
 		 */
 		test_language() noexcept;
 
 		/**
-		 * Runs all the tests.
+		 * Runs all the tests defined in the private methods of this class.
 		 */
 		void runTests() noexcept;
 	private:

@@ -1,0 +1,5 @@
+Computer Wars Tests © 2020 CasualYouTuber31
+---------------
+Event Log:
+[2020-12-31 18:13:45.449] [language_test_case_0] [error] FAILED TEST ~~~ test::test_language::language_dictionary ~~~ -9 is stored at the another key in the map
+[2020-12-31 18:13:45.457] [language_test_case_0] [info] ~~~ Ran 2 tests in 0.00979s ~~~ FAILED (faults=0 errors=1)

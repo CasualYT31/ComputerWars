@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 int test::test() {
 	// initialise the test log file
-	global::sink::Get("Computer Wars Tests", "CasualYouTuber31", ".", false);
+	global::sink::Get("Computer Wars Tests", "CasualYouTuber31", "test/results", false);
 
 	// setup the test cases
 	std::vector<test::test_case*> testcases;
