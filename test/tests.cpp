@@ -23,23 +23,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tests.h"
 
 int test::test() {
-	// initialise the test log file
-	global::sink::Get("Computer Wars Tests", "CasualYouTuber31", "test/results", false);
-
 	// setup the test cases
 	std::vector<test::test_case*> testcases;
-	testcases.push_back(new test::test_language());
+	testcases.push_back(new test::test_language("./test/results/"));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
 		(*itr)->runTests();
 		delete *itr;
 	}
-
 	return 0;
 }
 
-test::test_language::test_language() noexcept : test_case("language_test_case") {}
+test::test_language::test_language(const std::string& path) noexcept : test_case(path + "language_test_case.log") {}
 
 void test::test_language::runTests() noexcept {
 	RUN_TEST(test::test_language::expand_string);
@@ -48,16 +44,16 @@ void test::test_language::runTests() noexcept {
 }
 
 void test::test_language::expand_string() {
-	int val = 9;
-	assertNotEqual(val, 8);
-	assertFalse(false);
-	assertTrue(true);
+	int val = 8;
+	ASSERT_NOT_EQUAL(val, 8);
+	ASSERT_FALSE(false);
+	ASSERT_TRUE(true);
 }
 
 void test::test_language::language_dictionary() {
-	assertEqual(8, 8);
+	ASSERT_EQUAL(8, 8);
 	std::unordered_map<std::string, int> map;
 	map["test"] = 9;
 	map["another"] = -9;
-	assertNotInMap(-9, map);
+	ASSERT_NOT_IN_MAP(-9, map);
 }

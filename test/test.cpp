@@ -22,7 +22,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "test.h"
 
-test::test_case::test_case(const std::string& name) noexcept : _logger(name) {}
+test::failed_assert::failed_assert(const std::string& msg) noexcept : runtime_error(msg) {}
+
+test::test_case::test_case(const std::string& name) noexcept : _output(name) {}
 
 void test::test_case::runTest(const std::string& name, const std::function<void(void)>& test) noexcept {
 	if (!_started) {
@@ -36,18 +38,23 @@ void test::test_case::runTest(const std::string& name, const std::function<void(
 		// successful test
 	} catch (std::bad_function_call& e) { // no test
 		_faultyCount++;
-		_logger.error("FAULTY TEST ~~~ {} ~~~ {}", _currentTestName, e.what());
+		_output << "FAULTY TEST ~~~ " << _currentTestName << " ~~~ " << e.what() << '\n';
 	} catch (test::failed_assert& e) { // assertion failed
-		// see _failedTest()
-		e.what();
+		_failedCount++;
+		_output << "FAILED TEST ~~~ " << _currentTestName << " ~~~ " << e.what() << '\n';
 	}
 }
 
 void test::test_case::endTesting() noexcept {
-	_logger.write("~~~ Ran {} test{} in {}s ~~~ {} (faults={} errors={})", _count, (_count == 1 ? "" : "s"),
-		_timer.getElapsedTime().asSeconds(), (_faultyCount + _failedCount == 0 ? "OK" : "FAILED"), _faultyCount, _failedCount);
+	_output << "----------------------------\n";
+	_output << "Ran " << _count << " test" << (_count == 1 ? "" : "s") << " in " << _timer.getElapsedTime().asSeconds() << "s\n";
+	_output << (_faultyCount + _failedCount == 0 ? "OK" : "FAILED") << " ~~~ (faults=" << _faultyCount << " errors=" << _failedCount << ")";
 	_started = false;
 	_count = 0;
 	_faultyCount = 0;
 	_failedCount = 0;
+}
+
+void test::test_case::_failedTest(const std::string& msg) const {
+	throw test::failed_assert(msg);
 }

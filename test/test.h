@@ -27,8 +27,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "logger.h"
 #include "sfml/System/Clock.hpp"
+#include <fstream>
+#include <unordered_map>
+#include <functional>
 
 /**
  * Macro that allows implementations of test::test_case::runTests() to run a test and
@@ -38,21 +40,65 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define RUN_TEST(test_function) runTest(#test_function, std::bind(&test_function, this))
 
 /**
+ * Macro that allows tests to call test::test_case::assertEqual() with
+ * automatically stringified value names.
+ * @param a The LHS value.
+ * @param b The RHS value.
+ */
+#define ASSERT_EQUAL(a, b) assertEqual(a, b, #a, #b)
+
+/**
+* Macro that allows tests to call test::test_case::assertNotEqual() with
+* automatically stringified value names.
+* @param a The LHS value.
+* @param b The RHS value.
+*/
+#define ASSERT_NOT_EQUAL(a, b) assertNotEqual(a, b, #a, #b)
+
+/**
+ * Macro that allows tests to call test::test_case::assertTrue() with
+ * automatically stringified value names.
+ * @param a The value.
+ */
+#define ASSERT_TRUE(a) assertTrue(a, #a)
+
+/**
+* Macro that allows tests to call test::test_case::assertFalse() with
+* automatically stringified value names.
+* @param a The value.
+*/
+#define ASSERT_FALSE(a) assertFalse(a, #a)
+
+/**
+ * Macro that allows tests to call test::test_case::assertInMap() with
+ * automatically stringified value names.
+ * @param a The value to search for.
+ * @param b The map to search in.
+ */
+#define ASSERT_IN_MAP(a, b) assertInMap(a, b, #a, #b)
+
+/**
+* Macro that allows tests to call test::test_case::assertNotInMap() with
+* automatically stringified value names.
+* @param a The value to search for.
+* @param b The map to search in.
+*/
+#define ASSERT_NOT_IN_MAP(a, b) assertNotInMap(a, b, #a, #b)
+
+/**
  * The \c test namespace contains test-related classes.
  */
 namespace test {
 	/**
 	 * Exception thrown when a \c test_case assert method fails.
 	 */
-	class failed_assert : public std::exception {
+	class failed_assert : public std::runtime_error {
 	public:
 		/**
-		 * The exception text.
-		 * @return "Assertion failed!"
+		 * Constructs a new \c failed_assert exception with a given message.
+		 * @param msg The exception message to assign.
 		 */
-		virtual const char* what() const throw() {
-			return "Assertion failed!";
-		}
+		failed_assert(const std::string& msg) noexcept;
 	};
 
 	/**
@@ -66,11 +112,11 @@ namespace test {
 	class test_case {
 	public:
 		/**
-		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the log file. Defaults to "test_case."
+		 * Initialises the internal file stream object.
+		 * @param name The name to give the resulting file. Defaults to "test_case.log."
 		 * @sa    \c global::logger
 		 */
-		test_case(const std::string& name = "test_case") noexcept;
+		test_case(const std::string& name = "test_case.log") noexcept;
 
 		/**
 		 * Polymorphic base classes should have virtual destructors.
@@ -102,83 +148,87 @@ namespace test {
 
 		/**
 		 * Asserts that two values are equivalent according to their comparison operator results (==).
-		 * @tparam T The type of parameter \c a.
-		 * @tparam U The type of parameter \c b.
-		 * @param  a LHS value.
-		 * @param  b RHS value.
+		 * @tparam T     The type of parameter \c a.
+		 * @tparam U     The type of parameter \c b.
+		 * @param  a     LHS value.
+		 * @param  b     RHS value.
+		 * @param  aName The name of the LHS value.
+		 * @param  bName The name of the RHS value.
 		 * @throws failed_assert if \c a and \b are unequal.
 		 */
 		template<typename T, typename U>
-		void assertEqual(T a, U b);
+		void assertEqual(T a, U b, const std::string& aName, const std::string& bName);
 
 		/**
 		 * Asserts that two values aren't equivalent according to their comparison operator results (!=).
-		 * @tparam T The type of parameter \c a.
-		 * @tparam U The type of parameter \c b.
-		 * @param  a LHS value.
-		 * @param  b RHS value.
+		 * @tparam T     The type of parameter \c a.
+		 * @tparam U     The type of parameter \c b.
+		 * @param  a     LHS value.
+		 * @param  b     RHS value.
+		 * @param  aName The name of the LHS value.
+		 * @param  bName The name of the RHS value.
 		 * @throws failed_assert if \c a and \b are equal.
 		 */
 		template<typename T, typename U>
-		void assertNotEqual(T a, U b);
+		void assertNotEqual(T a, U b, const std::string& aName, const std::string& bName);
 
 		/**
 		 * Asserts that a value evaluates to true according to its boolean operator.
-		 * @tparam T The type of parameter \c a.
-		 * @param  a The value.
+		 * @tparam T     The type of parameter \c a.
+		 * @param  a     The value.
+		 * @param  aName The name of the value.
 		 * @throws failed_assert if \c a evaluates to false.
 		 */
 		template<typename T>
-		void assertTrue(T a);
+		void assertTrue(T a, const std::string& aName);
 
 		/**
 		 * Asserts that a value evaluates to false according to its boolean operator.
-		 * @tparam T The type of parameter \c a.
-		 * @param  a The value.
+		 * @tparam T     The type of parameter \c a.
+		 * @param  a     The value.
+		 * @param  aName The name of the value.
 		 * @throws failed_assert if \c a evaluates to true.
 		 */
 		template<typename T>
-		void assertFalse(T a);
+		void assertFalse(T a, const std::string& aName);
 
 		/**
 		 * Asserts that a given value (not key) is stored within a given \c unordered_map.
-		 * @tparam T The type of values stored in the map.
-		 * @tparam U The type of keys stored in the map.
-		 * @param  a The value to test for.
-		 * @param  b The map to search.
+		 * @tparam T     The type of values stored in the map.
+		 * @tparam U     The type of keys stored in the map.
+		 * @param  a     The value to test for.
+		 * @param  b     The map to search.
+		 * @param  aName The name of the value to test for.
+		 * @param  bName The name of the map to search.
 		 * @throws failed_assert if \c a is not within \b.
 		 */
 		template<typename T, typename U>
-		void assertInMap(T a, std::unordered_map<U, T> b);
+		void assertInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName);
 
 		/**
 		 * Asserts that a given value (not key) isn't stored within a given \c unordered_map.
-		 * @tparam T The type of values stored in the map.
-		 * @tparam U The type of keys stored in the map.
-		 * @param  a The value to test for.
-		 * @param  b The map to search.
+		 * @tparam T     The type of values stored in the map.
+		 * @tparam U     The type of keys stored in the map.
+		 * @param  a     The value to test for.
+		 * @param  b     The map to search.
+		 * @param  aName The name of the value to test for.
+		 * @param  bName The name of the map to search.
 		 * @throws failed_assert if \c a is within \b.
 		 */
 		template<typename T, typename U>
-		void assertNotInMap(T a, std::unordered_map<U, T> b);
+		void assertNotInMap(T a, const std::unordered_map<U, T>& b, const std::string & aName, const std::string & bName);
 	private:
 		/**
-		 * Throws a \c failed_assert exception and logs it as a failed test.
-		 * @tparam T   Type of parameter \c a.
-		 * @tparam U   Type of parameter \c b.
-		 * @param  msg The message to literally append to the log message.
-		 *             This means you can add {}s where you want to insert parameters \c a and \c b.
-		 * @param  a   The first value.
-		 * @param  b   The second value.
+		 * Throws a \c failed_assert exception.
+		 * @param  msg The message to assign to the exception.
 		 * @throws failed_assert
 		 */
-		template<typename T, typename U>
-		void _failedTest(const std::string& msg, T a, U b);
+		void _failedTest(const std::string& msg) const;
 
 		/**
-		 * Logger object used to print test output.
+		 * Output file stream object used to print test output.
 		 */
-		mutable global::logger _logger;
+		std::ofstream _output;
 
 		/**
 		 * Flag used to determine if the test case has started execution or not.
@@ -213,43 +263,36 @@ namespace test {
 }
 
 template<typename T, typename U>
-void test::test_case::_failedTest(const std::string& msg, T a, U b) {
-	_failedCount++;
-	_logger.error("FAILED TEST ~~~ {} ~~~ " + msg, _currentTestName, a, b);
-	throw failed_assert();
+void test::test_case::assertEqual(T a, U b, const std::string& aName, const std::string& bName) {
+	if (!(a == b)) _failedTest(aName + " is equal to " + bName);
 }
 
 template<typename T, typename U>
-void test::test_case::assertEqual(T a, U b) {
-	if (!(a == b)) _failedTest("{} is not equal to {}", a, b);
-}
-
-template<typename T, typename U>
-void test::test_case::assertNotEqual(T a, U b) {
-	if (!(a != b)) _failedTest("{} is equal to {}", a, b);
+void test::test_case::assertNotEqual(T a, U b, const std::string& aName, const std::string& bName) {
+	if (!(a != b)) _failedTest(aName + " is not equal to " + bName);
 }
 
 template<typename T>
-void test::test_case::assertTrue(T a) {
-	if (!a) _failedTest("{} is {}", a, "true");
+void test::test_case::assertTrue(T a, const std::string& aName) {
+	if (!a) _failedTest(aName + " is true");
 }
 
 template<typename T>
-void test::test_case::assertFalse(T a) {
-	if (a) _failedTest("{} is {}", a, "false");
+void test::test_case::assertFalse(T a, const std::string& aName) {
+	if (a) _failedTest(aName + " is false");
 }
 
 template<typename T, typename U>
-void test::test_case::assertInMap(T a, std::unordered_map<U, T> b) {
+void test::test_case::assertInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName) {
 	for (auto itr = b.begin(), enditr = b.end(); itr != enditr; itr++) {
 		if (itr->second == a) return;
 	}
-	_failedTest("{} is not in {}", a, "the map");
+	_failedTest(aName + " is not in the map " + bName);
 }
 
 template<typename T, typename U>
-void test::test_case::assertNotInMap(T a, std::unordered_map<U, T> b) {
+void test::test_case::assertNotInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName) {
 	for (auto itr = b.begin(), enditr = b.end(); itr != enditr; itr++) {
-		if (itr->second == a) _failedTest("{} is stored at the {} key in the map", a, itr->first);
+		if (itr->second == a) _failedTest(aName + " is in the map " + bName);
 	}
 }
