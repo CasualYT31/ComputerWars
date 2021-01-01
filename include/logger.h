@@ -52,8 +52,7 @@ namespace global {
 		 * Retrieves the file sink.
 		 * If called for the first time, the .log file is opened, and cleared of all contents if it already exists. A pointer to the file sink representing this log file is then returned.
 		 * Subsequent calls are used to retrieve this pointer only: it will only attempt to create the file sink if creating it in the first call failed. If creating the file sink failed,
-		 * the \c boxer library is used to produce an error dialog containing the error text. Subsequent calls will ignore all parameters given.
-		 * 
+		 * the \c boxer library is used to produce an error dialog containing the error text. Subsequent calls will ignore all parameters given.\n
 		 * The log file has the following name: <tt>Log[ d-m-yyyy h-m-s].log. The components within brackets are optional and can be toggled off, see \c date below.
 		 * @param  name   The name of the application to write in the first line of the log file.
 		 * @param  dev    The name of the application developer/s to write in the first line of the log file.

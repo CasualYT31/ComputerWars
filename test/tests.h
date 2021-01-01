@@ -41,6 +41,28 @@ namespace test {
 	int test();
 
 	/**
+	 * Tests logger.h classes.
+	 */
+	class test_logger : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "logger_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_logger(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the creation of a log file via the \c sink class.
+		 */
+		void sink_Get();
+	};
+
+	/**
 	 * Tests language.h classes.
 	 */
 	class test_language : public test::test_case {

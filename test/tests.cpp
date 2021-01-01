@@ -21,11 +21,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "tests.h"
+#include "logger.h"
+#include <filesystem>
 
 int test::test() {
 	// setup the test cases
+	std::string path = "./test/results/";
 	std::vector<test::test_case*> testcases;
-	testcases.push_back(new test::test_language("./test/results/"));
+	testcases.push_back(new test::test_logger(path));
+	testcases.push_back(new test::test_language(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -34,6 +38,28 @@ int test::test() {
 	}
 	return 0;
 }
+
+test::test_logger::test_logger(const std::string& path) noexcept : test_case(path + "logger_test_case.log") {}
+
+void test::test_logger::runTests() noexcept {
+	// test global::sink
+	RUN_TEST(test::test_logger::sink_Get);
+	// test global::logger
+
+	endTesting();
+}
+
+void test::test_logger::sink_Get() {
+	// first Get should actually create the file, second should not
+	auto firstLog = global::sink::Get("Test", "Dev", "./test/results/", false);
+	auto secondLog = global::sink::Get("Test Again", "Developer", "./test/", false);
+	ASSERT_EQUAL(firstLog, secondLog);
+	bool firstLogFileExists = std::filesystem::exists("./test/results/Log.log");
+	bool secondLogFileExists = std::filesystem::exists("./test/Log.log");
+	ASSERT_TRUE(firstLogFileExists);
+	ASSERT_FALSE(secondLogFileExists);
+}
+
 
 test::test_language::test_language(const std::string& path) noexcept : test_case(path + "language_test_case.log") {}
 
