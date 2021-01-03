@@ -42,24 +42,42 @@ int test::test() {
 test::test_logger::test_logger(const std::string& path) noexcept : test_case(path + "logger_test_case.log") {}
 
 void test::test_logger::runTests() noexcept {
-	// test global::sink
-	RUN_TEST(test::test_logger::sink_Get);
-	// test global::logger
-
+	RUN_TEST(test::test_logger::sink);
+	RUN_TEST(test::test_logger::logger);
 	endTesting();
 }
 
-void test::test_logger::sink_Get() {
+void test::test_logger::sink() {
 	// first Get should actually create the file, second should not
-	auto firstLog = global::sink::Get("Test", "Dev", "./test/results/", false);
+	auto firstLog = global::sink::Get("Tests", "Dev", "./test/results/", false);
 	auto secondLog = global::sink::Get("Test Again", "Developer", "./test/", false);
 	ASSERT_EQUAL(firstLog, secondLog);
 	bool firstLogFileExists = std::filesystem::exists("./test/results/Log.log");
 	bool secondLogFileExists = std::filesystem::exists("./test/Log.log");
 	ASSERT_TRUE(firstLogFileExists);
 	ASSERT_FALSE(secondLogFileExists);
+	// now test the properties
+	ASSERT_EQUAL(global::sink::ApplicationName(), "Tests");
+	ASSERT_EQUAL(global::sink::DeveloperName(), "Dev");
+	ASSERT_EQUAL(global::sink::GetYear(), "2021"); // obviously test is dependent on year of execution...
 }
 
+void test::test_logger::logger() {
+	global::logger log("logger_test");
+	// test simple writes, errors, and warnings
+	log.write("Hello World!");
+	log.warning("We are currently testing!");
+	log.error("Oh no!");
+	// test variable writes, errors, and warnings
+	int simple_int = 8;
+	std::string text = "Inserted";
+	double f_number = -79.5;
+	bool boolean = true;
+	log.write("Number = {}", simple_int);
+	log.warning("{} text, {} = number", text, f_number);
+	log.error("Error is {}!", boolean);
+	// we need some way of accessing what was written for testing purposes...
+}
 
 test::test_language::test_language(const std::string& path) noexcept : test_case(path + "language_test_case.log") {}
 

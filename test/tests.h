@@ -58,8 +58,14 @@ namespace test {
 	private:
 		/**
 		 * Runs tests related to the creation of a log file via the \c sink class.
+		 * @warning Contains a test that is dependent on the year of execution!
 		 */
-		void sink_Get();
+		void sink();
+
+		/**
+		 * Runs tests related to the \c logger class.
+		 */
+		void logger();
 	};
 
 	/**

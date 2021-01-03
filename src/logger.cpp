@@ -91,8 +91,7 @@ global::logger::logger(const std::string& name) noexcept {
 		_logger = std::make_shared<spdlog::logger>(_name, global::sink::Get());
 		//don't increment in to_string() so that if it throws, the object count isn't incremented
 		_objectCount++;
-	}
-	catch (std::exception & e) { //also catches spdlog errors, which might not be the case if another backend is used!
+	} catch (std::exception& e) { //also catches spdlog errors, which might not be the case if another backend is used!
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
 }
@@ -100,9 +99,7 @@ global::logger::logger(const std::string& name) noexcept {
 global::logger::~logger() noexcept {
 	try {
 		spdlog::drop(_name);
-	}
-	catch (std::exception & e) {
-		//the logger object wasn't created successfully at construction, so ignore
+	} catch (std::exception& e) {
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
 }

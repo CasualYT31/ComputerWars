@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * This file provides two classes: \c logger and \c sink. \c sink is a
  * singleton class which represents the log file which all
  * instantiations of the \c logger class output to. These classes act
- * as simple wrappers for the spdlog backend.
+ * as simple wrappers for the \c spdlog backend.
  */
 
 #pragma once
@@ -50,10 +50,14 @@ namespace global {
 	public:
 		/**
 		 * Retrieves the file sink.
-		 * If called for the first time, the .log file is opened, and cleared of all contents if it already exists. A pointer to the file sink representing this log file is then returned.
-		 * Subsequent calls are used to retrieve this pointer only: it will only attempt to create the file sink if creating it in the first call failed. If creating the file sink failed,
-		 * the \c boxer library is used to produce an error dialog containing the error text. Subsequent calls will ignore all parameters given.\n
-		 * The log file has the following name: <tt>Log[ d-m-yyyy h-m-s].log. The components within brackets are optional and can be toggled off, see \c date below.
+		 * If called for the first time, the .log file is opened, and cleared of all contents if it already exists.
+		 * A pointer to the file sink representing this log file is then returned.
+		 * Subsequent calls are used to retrieve this pointer only: it will only attempt to create the
+		 * file sink if creating it in the first call failed. If creating the file sink failed,
+		 * the \c boxer library is used to produce an error dialog containing the error text.
+		 * Subsequent calls will ignore all parameters given.\n
+		 * The log file has the following name: <tt>Log[ d-m-yyyy h-m-s].log.
+		 * The components within brackets are optional and can be toggled off, see \c date below.
 		 * @param  name   The name of the application to write in the first line of the log file.
 		 * @param  dev    The name of the application developer/s to write in the first line of the log file.
 		 * @param  folder The directory, relative or absolute, to write the log file in.
@@ -86,6 +90,10 @@ namespace global {
 		 * @return The date and time in string form.
 		 */
 		static std::string GetDateTime() noexcept;
+
+		/**
+		 * 
+		 */
 	protected:
 		/**
 		 * This class cannot be instantiated by the client.
@@ -120,7 +128,7 @@ namespace global {
 		 * Creates a new logger object and adds it to the file sink.
 		 * An internal object counter is used to keep track of the number of logger objects throughout the execution of the program:
 		 * this is used only to ensure that all logger object names are unique as this is important to maintain for the logging backend.
-		 * This counter is only incremented if object creation is successful.
+		 * This counter is only incremented if object creation is successful.\n
 		 * If the operation failed, the \c boxer library is used to report an error string to the user via a message box.
 		 * @param name The name to give to the logger object.
 		 */
@@ -128,13 +136,13 @@ namespace global {
 
 		/**
 		 * Drops the logger object from spdlog's logger pool.
-		 * If the call to spdlog::drop() failed, the \c boxer library is used to report an error string to the user via a message box.
+		 * If the call to \c spdlog::drop() failed, the \c boxer library is used to report an error string to the user via a message box.
 		 */
 		~logger() noexcept;
 
 		/**
 		 * Outputs text to the log file.
-		 * A single line of text is written to the log file via this method. This method is intended for reporting simple messages.
+		 * A single line of text is written to the log file via this method. This method is intended for reporting simple messages.\n
 		 * Variables can be inserted into the message by inserting {} into the \c line string. Values are then appended to the parameter list and inserted
 		 * on a FIFO basis, replacing the {}s in the process. Please see spdlog documentation for more information.
 		 * @tparam Ts The types in the parameter pack.
@@ -148,7 +156,8 @@ namespace global {
 
 		/**
 		 * Outputs text to the log file as an error.
-		 * A single line, which records an error, is output to the log file via a call to this method. Please see \c logger.write() for more information.
+		 * A single line, which records an error, is output to the log file via a call to this method.
+		 * Please see \c logger.write() for more information.
 		 * @tparam Ts The types in the parameter pack.
 		 * @param  line The line of text.
 		 * @param  values A parameter pack containing the values to insert into the text.
@@ -160,7 +169,8 @@ namespace global {
 
 		/**
 		 * Outputs text to the log file as a warning.
-		 * A single line, which records a non-fatal error, is output to the log file via a call to this method. Please see \c logger.write() for more information.
+		 * A single line, which records a non-fatal error, is output to the log file via a call to this method.
+		 * Please see \c logger.write() for more information.
 		 * @tparam Ts The types in the parameter pack.
 		 * @param  line The line of text.
 		 * @param  values A parameter pack containing the values to insert into the text.
@@ -182,6 +192,7 @@ namespace global {
 
 		/**
 		 * The name of the logger object which is used to identify it within the log file.
+		 * The name is stored so that the \c spdlog::drop() function can be called for the internal logger object later.
 		 */
 		std::string _name;
 	};

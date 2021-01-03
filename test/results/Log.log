@@ -1,3 +1,14 @@
-Test © 2021 Dev
+Tests © 2021 Dev
 ---------------
 Event Log:
+[2021-01-03 13:48:40.435] [logger_test_0] [info] Hello World!
+[2021-01-03 13:48:40.435] [logger_test_0] [warning] We are currently testing!
+[2021-01-03 13:48:40.435] [logger_test_0] [error] Oh no!
+[2021-01-03 13:48:40.436] [logger_test_0] [info] Number = 8
+[2021-01-03 13:48:40.436] [logger_test_0] [warning] Inserted text, -79.5 = number
+[2021-01-03 13:48:40.436] [logger_test_0] [error] Error is true!
+[2021-01-03 13:48:40.437] [logger_test_0] [info] Tests © 2021 Dev
+---------------
+Event Log:
+
+
