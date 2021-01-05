@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tests.h"
 #include "logger.h"
 #include <filesystem>
+#include <iostream>
 
 int test::test() {
 	// setup the test cases
@@ -77,6 +78,7 @@ void test::test_logger::logger() {
 	log.warning("{} text, {} = number", text, f_number);
 	log.error("Error is {}!", boolean);
 	// we need some way of accessing what was written for testing purposes...
+	std::cout << global::sink::GetLog() << std::endl;
 }
 
 test::test_language::test_language(const std::string& path) noexcept : test_case(path + "language_test_case.log") {}

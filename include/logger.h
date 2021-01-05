@@ -33,7 +33,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "spdlog/spdlog.h"
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/ostream_sink.h"
+#include "spdlog/sinks/dist_sink.h"
 #include "boxer/boxer.h"
+#include <sstream>
 
 /**
  * The \c global namespace contains classes used for logging and debugging purposes.
@@ -42,7 +45,7 @@ namespace global {
 	/**
 	 * This class represents the log file which all loggers output to.
 	 * This class uses the singleton design pattern. As such, no instantiation of this
-	 * class can be made. Instead, the client must access the log file via \c sink.Get().
+	 * class can be made. Instead, the client must access the log file via \c sink.Get().\n
 	 * <b>It is important to emphasise that the client should call \c Get() once at the start
 	 * of the program to open and initalise the log file before any \c logger objects use it!</b>
 	 */
@@ -53,7 +56,7 @@ namespace global {
 		 * If called for the first time, the .log file is opened, and cleared of all contents if it already exists.
 		 * A pointer to the file sink representing this log file is then returned.
 		 * Subsequent calls are used to retrieve this pointer only: it will only attempt to create the
-		 * file sink if creating it in the first call failed. If creating the file sink failed,
+		 * necessary sinks if creating it in the first call failed. If creating the sink failed,
 		 * the \c boxer library is used to produce an error dialog containing the error text.
 		 * Subsequent calls will ignore all parameters given.\n
 		 * The log file has the following name: <tt>Log[ d-m-yyyy h-m-s].log.
@@ -62,10 +65,16 @@ namespace global {
 		 * @param  dev    The name of the application developer/s to write in the first line of the log file.
 		 * @param  folder The directory, relative or absolute, to write the log file in.
 		 * @param  date   If \c TRUE, a short form of the date and time will be included in the file name.
-		 * @return A pointer to the file sink representing the log file.
+		 * @return A pointer to the sink representing the log file.
 		 */
-		static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> Get(const std::string& name = "Application", const std::string& dev = "Developer", const std::string& folder = ".", const bool date = true) noexcept;
+		static std::shared_ptr<spdlog::sinks::dist_sink_mt> Get(const std::string& name = "Application", const std::string& dev = "Developer", const std::string& folder = ".", const bool date = true) noexcept;
 		
+		/**
+		 * Retrieves a copy of the event log produced thus far.
+		 * @return The event log produced thus far, including additional information at the start of the log file.
+		 */
+		static std::string GetLog() noexcept;
+
 		/**
 		 * Retrieves the application name as defined in the first call to \c sink.Get().
 		 * @return The application name.
@@ -90,10 +99,6 @@ namespace global {
 		 * @return The date and time in string form.
 		 */
 		static std::string GetDateTime() noexcept;
-
-		/**
-		 * 
-		 */
 	protected:
 		/**
 		 * This class cannot be instantiated by the client.
@@ -101,9 +106,14 @@ namespace global {
 		sink() noexcept;
 	private:
 		/**
-		 * The thread safe file sink representing the log file.
+		 * The thread safe distribution sink which outputs to a file and an ostringstream.
 		 */
-		static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> _sharedFileSink;
+		static std::shared_ptr<spdlog::sinks::dist_sink_mt> _sharedSink;
+
+		/**
+		 * The \c ostringstream used to store a copy of the event log of the log file.
+		 */
+		static std::ostringstream _fileCopy;
 		
 		/**
 		 * Stores the name of the application.

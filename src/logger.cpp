@@ -24,40 +24,48 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <ctime>
 
-std::shared_ptr<spdlog::sinks::basic_file_sink_mt> global::sink::_sharedFileSink = nullptr;
+std::shared_ptr<spdlog::sinks::dist_sink_mt> global::sink::_sharedSink = nullptr;
+std::ostringstream global::sink::_fileCopy = std::ostringstream();
 std::string global::sink::_appName = "";
 std::string global::sink::_devName = "";
 
 global::sink::sink() noexcept {}
 
-std::shared_ptr<spdlog::sinks::basic_file_sink_mt> global::sink::Get(const std::string& name, const std::string& dev, const std::string& folder, const bool date) noexcept {
-	if (!_sharedFileSink) {
+std::shared_ptr<spdlog::sinks::dist_sink_mt> global::sink::Get(const std::string& name, const std::string& dev, const std::string& folder, const bool date) noexcept {
+	if (!_sharedSink) {
 		try {
 			_appName = name;
 			_devName = dev;
 			std::string filename = folder + "/Log" + (date ? " " + GetDateTime() : "") + ".log";
 
-			std::ofstream logfile(filename);
-			logfile << ApplicationName() << " © " << GetYear() << " " << DeveloperName() << std::endl;
-			logfile << "---------------" << std::endl;
+			_fileCopy << ApplicationName() << " © " << GetYear() << " " << DeveloperName() << std::endl;
+			_fileCopy << "---------------" << std::endl;
 			/* logfile << "Hardware Specifications:" << std::endl;
-			logfile << "CPU       " << std::endl;
-			logfile << "Memory    " << std::endl;
-			logfile << "GPU       " << std::endl;
-			logfile << "Storage   " << std::endl;
-			logfile << "Platform  " << std::endl;
-			logfile << "Gamepads  " << std::endl;
-			logfile << "---------------" << std::endl; */
-			logfile << "Event Log:" << std::endl;
+			_fileCopy << "CPU       " <<  << std::endl;
+			_fileCopy << "Memory    " <<  << std::endl;
+			_fileCopy << "GPU       " <<  << std::endl;
+			_fileCopy << "Storage   " <<  << std::endl;
+			_fileCopy << "Platform  " <<  << std::endl;
+			_fileCopy << "Gamepads  " <<  << std::endl;
+			_fileCopy << "---------------" << std::endl; */
+			_fileCopy << "Event Log:" << std::endl;
+
+			std::ofstream logfile(filename);
+			logfile << _fileCopy.str();
 			logfile.close();
 
-			_sharedFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename);
-		}
-		catch (std::exception & e) {
+			_sharedSink = std::make_shared<spdlog::sinks::dist_sink_mt>();
+			_sharedSink->add_sink(std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename));
+			_sharedSink->add_sink(std::make_shared<spdlog::sinks::ostream_sink_mt>(_fileCopy));
+		} catch (std::exception& e) {
 			boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 		}
 	}
-	return _sharedFileSink;
+	return _sharedSink;
+}
+
+std::string global::sink::GetLog() noexcept {
+	return _fileCopy.str();
 }
 
 std::string global::sink::GetYear() noexcept {
