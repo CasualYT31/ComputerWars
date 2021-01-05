@@ -23,8 +23,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tests.h"
 #include "logger.h"
 #include <filesystem>
-#include <iostream>
 
+//*********************
+//*TESTING ENTRY POINT*
+//*********************
 int test::test() {
 	// setup the test cases
 	std::string path = "./test/results/";
@@ -40,6 +42,9 @@ int test::test() {
 	return 0;
 }
 
+//****************
+//*LOGGER.H TESTS*
+//****************
 test::test_logger::test_logger(const std::string& path) noexcept : test_case(path + "logger_test_case.log") {}
 
 void test::test_logger::runTests() noexcept {
@@ -61,6 +66,11 @@ void test::test_logger::sink() {
 	ASSERT_EQUAL(global::sink::ApplicationName(), "Tests");
 	ASSERT_EQUAL(global::sink::DeveloperName(), "Dev");
 	ASSERT_EQUAL(global::sink::GetYear(), "2021"); // obviously test is dependent on year of execution...
+	// has the file been written as expected so far?
+	// also implicitly tests that GetLog() is working as expected
+	std::string file = global::sink::GetLog();
+	std::string firstLine = file.substr(0, file.find('\n'));
+	ASSERT_EQUAL(firstLine, "Tests © 2021 Dev");
 }
 
 void test::test_logger::logger() {
@@ -77,10 +87,19 @@ void test::test_logger::logger() {
 	log.write("Number = {}", simple_int);
 	log.warning("{} text, {} = number", text, f_number);
 	log.error("Error is {}!", boolean);
-	// we need some way of accessing what was written for testing purposes...
-	std::cout << global::sink::GetLog() << std::endl;
+	// now search the log file to see if all of the previous writes were written as expected
+	std::string logFile = global::sink::GetLog();
+	ASSERT_TRUE(logFile.find("[info] Hello World!"));
+	ASSERT_TRUE(logFile.find("[warning] We are currently testing!"));
+	ASSERT_TRUE(logFile.find("[error] Oh no!"));
+	ASSERT_TRUE(logFile.find("[info] Number = 8"));
+	ASSERT_TRUE(logFile.find("[warning] Inserted text, -79.5 = number"));
+	ASSERT_TRUE(logFile.find("[error] Error is true!"));
 }
 
+//******************
+//*LANGUAGE.H TESTS*
+//******************
 test::test_language::test_language(const std::string& path) noexcept : test_case(path + "language_test_case.log") {}
 
 void test::test_language::runTests() noexcept {

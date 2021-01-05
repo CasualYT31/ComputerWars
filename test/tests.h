@@ -42,6 +42,8 @@ namespace test {
 
 	/**
 	 * Tests logger.h classes.
+	 * @todo Further tests required for better coverage include testing the date and time functionality,
+	 *       and the logger object count functionality.
 	 */
 	class test_logger : public test::test_case {
 	public:
@@ -58,7 +60,7 @@ namespace test {
 	private:
 		/**
 		 * Runs tests related to the creation of a log file via the \c sink class.
-		 * @warning Contains a test that is dependent on the year of execution!
+		 * @warning Contains tests that are dependent on the year of execution!
 		 */
 		void sink();
 

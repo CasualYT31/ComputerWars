@@ -264,22 +264,22 @@ namespace test {
 
 template<typename T, typename U>
 void test::test_case::assertEqual(T a, U b, const std::string& aName, const std::string& bName) {
-	if (!(a == b)) _failedTest(aName + " is equal to " + bName);
+	if (!(a == b)) _failedTest(aName + " is not equal to " + bName);
 }
 
 template<typename T, typename U>
 void test::test_case::assertNotEqual(T a, U b, const std::string& aName, const std::string& bName) {
-	if (!(a != b)) _failedTest(aName + " is not equal to " + bName);
+	if (!(a != b)) _failedTest(aName + " is equal to " + bName);
 }
 
 template<typename T>
 void test::test_case::assertTrue(T a, const std::string& aName) {
-	if (!a) _failedTest(aName + " is true");
+	if (!a) _failedTest(aName + " is false");
 }
 
 template<typename T>
 void test::test_case::assertFalse(T a, const std::string& aName) {
-	if (a) _failedTest(aName + " is false");
+	if (a) _failedTest(aName + " is true");
 }
 
 template<typename T, typename U>
