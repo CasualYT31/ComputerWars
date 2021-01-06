@@ -71,7 +71,8 @@ namespace global {
 		
 		/**
 		 * Retrieves a copy of the event log produced thus far.
-		 * @return The event log produced thus far, including additional information at the start of the log file.
+		 * @return The event log produced thus far, including additional
+		 *         information at the start of the log file.
 		 */
 		static std::string GetLog() noexcept;
 
@@ -128,33 +129,41 @@ namespace global {
 
 	/**
 	 * This class represents a single C++ object's interface with the log file.
-	 * The multiple logger-single sink architecture was created to allow for different C++ classes to have their own logger object which could output to the same file.
-	 * It also decouples C++ classes from the "global" file sink and makes implementing a multiple logger-multiple sink architecture easier.
-	 * @todo A warn() method should be added.
+	 * The multiple logger-single sink architecture was created to allow for different C++
+	 * classes to have their own logger object which could output to the same file.
+	 * It also decouples C++ classes from the "global" file sink and makes implementing a
+	 * multiple logger-multiple sink architecture easier.
 	 */
 	class logger {
 	public:
 		/**
 		 * Creates a new logger object and adds it to the file sink.
-		 * An internal object counter is used to keep track of the number of logger objects throughout the execution of the program:
-		 * this is used only to ensure that all logger object names are unique as this is important to maintain for the logging backend.
+		 * An internal object counter is used to keep track of the number of
+		 * logger objects throughout the execution of the program:
+		 * this is used only to ensure that all logger object names are unique as
+		 * this is important to maintain for the logging backend.
 		 * This counter is only incremented if object creation is successful.\n
-		 * If the operation failed, the \c boxer library is used to report an error string to the user via a message box.
+		 * If the operation failed, the \c boxer library is used to report an
+		 * error string to the user via a message box.
 		 * @param name The name to give to the logger object.
 		 */
 		logger(const std::string& name) noexcept;
 
 		/**
-		 * Drops the logger object from spdlog's logger pool.
-		 * If the call to \c spdlog::drop() failed, the \c boxer library is used to report an error string to the user via a message box.
+		 * Drops the logger object from <tt>spdlog</tt>'s logger pool.
+		 * If the call to \c spdlog::drop() failed, the \c boxer library is used to
+		 * report an error string to the user via a message box.
 		 */
 		~logger() noexcept;
 
 		/**
 		 * Outputs text to the log file.
-		 * A single line of text is written to the log file via this method. This method is intended for reporting simple messages.\n
-		 * Variables can be inserted into the message by inserting {} into the \c line string. Values are then appended to the parameter list and inserted
-		 * on a FIFO basis, replacing the {}s in the process. Please see spdlog documentation for more information.
+		 * A single line of text is written to the log file via this method.
+		 * This method is intended for reporting simple messages.\n
+		 * Variables can be inserted into the message by inserting {} into the
+		 * \c line string. Values are then appended to the parameter list and inserted
+		 * on a FIFO basis, replacing the {}s in the process.
+		 * Please see spdlog documentation for more information.
 		 * @tparam Ts The types in the parameter pack.
 		 * @param  line The line of text.
 		 * @param  values A parameter pack containing the values to insert into the text.
@@ -166,7 +175,8 @@ namespace global {
 
 		/**
 		 * Outputs text to the log file as an error.
-		 * A single line, which records an error, is output to the log file via a call to this method.
+		 * A single line, which records an error, is output to the log
+		 * file via a call to this method.
 		 * Please see \c logger.write() for more information.
 		 * @tparam Ts The types in the parameter pack.
 		 * @param  line The line of text.
@@ -179,7 +189,8 @@ namespace global {
 
 		/**
 		 * Outputs text to the log file as a warning.
-		 * A single line, which records a non-fatal error, is output to the log file via a call to this method.
+		 * A single line, which records a non-fatal error, is output to the
+		 * log file via a call to this method.
 		 * Please see \c logger.write() for more information.
 		 * @tparam Ts The types in the parameter pack.
 		 * @param  line The line of text.
@@ -202,7 +213,8 @@ namespace global {
 
 		/**
 		 * The name of the logger object which is used to identify it within the log file.
-		 * The name is stored so that the \c spdlog::drop() function can be called for the internal logger object later.
+		 * The name is stored so that the \c spdlog::drop() function
+		 * can be called for the internal logger object later.
 		 */
 		std::string _name;
 	};
