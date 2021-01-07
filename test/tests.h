@@ -92,6 +92,12 @@ namespace test {
 		void expand_string();
 
 		/**
+		 * Run a series of tests on \c expand_string with a given var char.
+		 * @param var The var char to test with.
+		 */
+		void expand_string_(const std::string& var);
+
+		/**
 		 * Runs tests related to the \c language_dictionary class.
 		 */
 		void language_dictionary();

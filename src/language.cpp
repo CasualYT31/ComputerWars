@@ -35,6 +35,8 @@ void i18n::expand_string::setVarChar(const char varchar) noexcept {
 	_varchar = varchar;
 }
 
+// there is likely a cleaner way of implementing this for future reference
+// I'm not sure why I didn't just grab the string contents directly using str()...
 std::string i18n::expand_string::insert(const std::string& original) noexcept {
 	_sstream << original;
 	std::string finalString;

@@ -21,8 +21,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "tests.h"
-#include "logger.h"
+#include "language.h"
 #include <filesystem>
+#include <iostream>
 
 //*********************
 //*TESTING ENTRY POINT*
@@ -109,16 +110,45 @@ void test::test_language::runTests() noexcept {
 }
 
 void test::test_language::expand_string() {
-	int val = 8;
-	ASSERT_NOT_EQUAL(val, 8);
-	ASSERT_FALSE(false);
-	ASSERT_TRUE(true);
+	// expand_string is a pretty easy class to test,
+	// but there are a lot of cases to cover:
+	// 1. test with default var char
+	// a. test no variables, no var chars
+	// b. test no variables, 1 var char
+	// c. test no variables, 2 var chars
+	// d. test 2 variables, no var chars
+	// e. test 2 variables, 1 var char
+	// f. test 2 variables, 2 var chars
+	// g. test 2 variables, 3 var chars
+	// h. test 3 variables, 2 var chars next to each other
+	// i. test 3 variables, 3 sets of 3 var chars next to each other
+	// 2. test get and set var char methods
+	// 3. repeat tests a-i with a new var char
+	ASSERT_EQUAL(i18n::expand_string::getVarChar(), '#');
+	expand_string_("#");
+	i18n::expand_string::setVarChar('$');
+	ASSERT_EQUAL(i18n::expand_string::getVarChar(), '$');
+	expand_string_("$");
+	// ENSURE TO REVERT BACK TO THE OLD VAR CHAR TO
+	// ENSURE THAT FUTURE TESTS THAT MAY RELY ON IT WORK
+	i18n::expand_string::setVarChar('#');
+	ASSERT_EQUAL(i18n::expand_string::getVarChar(), '#');
+}
+
+void test::test_language::expand_string_(const std::string& var) {
+	// see expand_string() ~ this method performs tests a-i
+	ASSERT_EQUAL(i18n::expand_string::insert("Hello World!"), "Hello World!");
+	ASSERT_EQUAL(i18n::expand_string::insert("Hello" + var + "World!"), "Hello" + var + "World!");
+	ASSERT_EQUAL(i18n::expand_string::insert("Hello" + var + "World!" + var), "Hello" + var + "World!" + var);
+	ASSERT_EQUAL(i18n::expand_string::insert("var1= var2=", 18, "Test"), "var1= var2=");
+	ASSERT_EQUAL(i18n::expand_string::insert("var1=" + var + " var2=", 18, "Test"), "var1=18 var2=");
+	ASSERT_EQUAL(i18n::expand_string::insert("var1=" + var + " var2=" + var, -18, "Test"), "var1=-18 var2=Test");
+	ASSERT_EQUAL(i18n::expand_string::insert(var + "var1=" + var + " var2=" + var, 0.5, "Testing"), "0.5var1=Testing var2=" + var);
+	ASSERT_EQUAL(i18n::expand_string::insert(var + var, true, false, 9.792), var);
+	ASSERT_EQUAL(i18n::expand_string::insert(var + var + var + " " + var + var + var + " " + var + var + var, 34, "LLL", 9.792),
+		                                     var + "34 " + var + "LLL " + var + "9.792");
 }
 
 void test::test_language::language_dictionary() {
-	ASSERT_EQUAL(8, 8);
-	std::unordered_map<std::string, int> map;
-	map["test"] = 9;
-	map["another"] = -9;
-	ASSERT_NOT_IN_MAP(-9, map);
+	// pass
 }
