@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <unordered_map>
 #include <functional>
+#include <string>
 
 /**
  * Macro that allows implementations of test::test_case::runTests() to run a test and
@@ -45,7 +46,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @param a The LHS value.
  * @param b The RHS value.
  */
-#define ASSERT_EQUAL(a, b) assertEqual(a, b, #a, #b)
+#define ASSERT_EQUAL(a, b) assertEqual(a, b, #a, #b, __LINE__)
 
 /**
 * Macro that allows tests to call test::test_case::assertNotEqual() with
@@ -53,21 +54,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 * @param a The LHS value.
 * @param b The RHS value.
 */
-#define ASSERT_NOT_EQUAL(a, b) assertNotEqual(a, b, #a, #b)
+#define ASSERT_NOT_EQUAL(a, b) assertNotEqual(a, b, #a, #b, __LINE__)
 
 /**
  * Macro that allows tests to call test::test_case::assertTrue() with
  * automatically stringified value names.
  * @param a The value.
  */
-#define ASSERT_TRUE(a) assertTrue(a, #a)
+#define ASSERT_TRUE(a) assertTrue(a, #a, __LINE__)
 
 /**
 * Macro that allows tests to call test::test_case::assertFalse() with
 * automatically stringified value names.
 * @param a The value.
 */
-#define ASSERT_FALSE(a) assertFalse(a, #a)
+#define ASSERT_FALSE(a) assertFalse(a, #a, __LINE__)
 
 /**
  * Macro that allows tests to call test::test_case::assertInMap() with
@@ -75,7 +76,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @param a The value to search for.
  * @param b The map to search in.
  */
-#define ASSERT_IN_MAP(a, b) assertInMap(a, b, #a, #b)
+#define ASSERT_IN_MAP(a, b) assertInMap(a, b, #a, #b, __LINE__)
 
 /**
 * Macro that allows tests to call test::test_case::assertNotInMap() with
@@ -83,7 +84,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 * @param a The value to search for.
 * @param b The map to search in.
 */
-#define ASSERT_NOT_IN_MAP(a, b) assertNotInMap(a, b, #a, #b)
+#define ASSERT_NOT_IN_MAP(a, b) assertNotInMap(a, b, #a, #b, __LINE__)
 
 /**
  * The \c test namespace contains test-related classes.
@@ -157,7 +158,7 @@ namespace test {
 		 * @throws failed_assert if \c a and \b are unequal.
 		 */
 		template<typename T, typename U>
-		void assertEqual(T a, U b, const std::string& aName, const std::string& bName);
+		void assertEqual(T a, U b, const std::string& aName, const std::string& bName, int line);
 
 		/**
 		 * Asserts that two values aren't equivalent according to their comparison operator results (!=).
@@ -170,7 +171,7 @@ namespace test {
 		 * @throws failed_assert if \c a and \b are equal.
 		 */
 		template<typename T, typename U>
-		void assertNotEqual(T a, U b, const std::string& aName, const std::string& bName);
+		void assertNotEqual(T a, U b, const std::string& aName, const std::string& bName, int line);
 
 		/**
 		 * Asserts that a value evaluates to true according to its boolean operator.
@@ -180,7 +181,7 @@ namespace test {
 		 * @throws failed_assert if \c a evaluates to false.
 		 */
 		template<typename T>
-		void assertTrue(T a, const std::string& aName);
+		void assertTrue(T a, const std::string& aName, int line);
 
 		/**
 		 * Asserts that a value evaluates to false according to its boolean operator.
@@ -190,7 +191,7 @@ namespace test {
 		 * @throws failed_assert if \c a evaluates to true.
 		 */
 		template<typename T>
-		void assertFalse(T a, const std::string& aName);
+		void assertFalse(T a, const std::string& aName, int line);
 
 		/**
 		 * Asserts that a given value (not key) is stored within a given \c unordered_map.
@@ -203,7 +204,7 @@ namespace test {
 		 * @throws failed_assert if \c a is not within \b.
 		 */
 		template<typename T, typename U>
-		void assertInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName);
+		void assertInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName, int line);
 
 		/**
 		 * Asserts that a given value (not key) isn't stored within a given \c unordered_map.
@@ -216,7 +217,7 @@ namespace test {
 		 * @throws failed_assert if \c a is within \b.
 		 */
 		template<typename T, typename U>
-		void assertNotInMap(T a, const std::unordered_map<U, T>& b, const std::string & aName, const std::string & bName);
+		void assertNotInMap(T a, const std::unordered_map<U, T>& b, const std::string & aName, const std::string & bName, int line);
 	private:
 		/**
 		 * Throws a \c failed_assert exception.
@@ -263,36 +264,36 @@ namespace test {
 }
 
 template<typename T, typename U>
-void test::test_case::assertEqual(T a, U b, const std::string& aName, const std::string& bName) {
-	if (!(a == b)) _failedTest(aName + " is not equal to " + bName);
+void test::test_case::assertEqual(T a, U b, const std::string& aName, const std::string& bName, int line) {
+	if (!(a == b)) _failedTest("Line " + std::to_string(line) + ": " + aName + " is not equal to " + bName);
 }
 
 template<typename T, typename U>
-void test::test_case::assertNotEqual(T a, U b, const std::string& aName, const std::string& bName) {
-	if (!(a != b)) _failedTest(aName + " is equal to " + bName);
+void test::test_case::assertNotEqual(T a, U b, const std::string& aName, const std::string& bName, int line) {
+	if (!(a != b)) _failedTest("Line " + std::to_string(line) + ": " + aName + " is equal to " + bName);
 }
 
 template<typename T>
-void test::test_case::assertTrue(T a, const std::string& aName) {
-	if (!a) _failedTest(aName + " is false");
+void test::test_case::assertTrue(T a, const std::string& aName, int line) {
+	if (!a) _failedTest("Line " + std::to_string(line) + ": " + aName + " is false");
 }
 
 template<typename T>
-void test::test_case::assertFalse(T a, const std::string& aName) {
-	if (a) _failedTest(aName + " is true");
+void test::test_case::assertFalse(T a, const std::string& aName, int line) {
+	if (a) _failedTest("Line " + std::to_string(line) + ": " + aName + " is true");
 }
 
 template<typename T, typename U>
-void test::test_case::assertInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName) {
+void test::test_case::assertInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName, int line) {
 	for (auto itr = b.begin(), enditr = b.end(); itr != enditr; itr++) {
 		if (itr->second == a) return;
 	}
-	_failedTest(aName + " is not in the map " + bName);
+	_failedTest("Line " + std::to_string(line) + ": " + aName + " is not in the map " + bName);
 }
 
 template<typename T, typename U>
-void test::test_case::assertNotInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName) {
+void test::test_case::assertNotInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName, int line) {
 	for (auto itr = b.begin(), enditr = b.end(); itr != enditr; itr++) {
-		if (itr->second == a) _failedTest(aName + " is in the map " + bName);
+		if (itr->second == a) _failedTest("Line " + std::to_string(line) + ": " + aName + " is in the map " + bName);
 	}
 }

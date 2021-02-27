@@ -150,7 +150,7 @@ namespace i18n {
 		/**
 		 * Adds a path to a language's string map script.
 		 * The language is only added if the given ID was non-blank and was not the ID of the current language.
-		 * If the ID of an existing language was given, the old path is replaced with the new path.
+		 * If the ID of an existing language was given, the old path is replaced with the new path.\n
 		 * Please see \c i18n::language_dictionary::language::_load() for a rundown of the format this JSON script is to have.
 		 * It is advised to instead load all language script paths at once using the \c load() function inherited from \c safe::json_script.
 		 * @param  id   The ID to give to this language. It should ideally take the format "ENG_US", "DE_DEU", etc.
@@ -225,7 +225,7 @@ namespace i18n {
 
 		/**
 		 * This class represents the string map of a single language.
-		 * This is a nested class, meaning that only the \c language_dictionary class can access it.
+		 * This is a private, nested class, meaning that only the \c language_dictionary class can access it.
 		 * It is accessed via the \c language_dictionary class.
 		 */
 		class language : public safe::json_script {

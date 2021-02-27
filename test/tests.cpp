@@ -90,12 +90,12 @@ void test::test_logger::logger() {
 	log.error("Error is {}!", boolean);
 	// now search the log file to see if all of the previous writes were written as expected
 	std::string logFile = global::sink::GetLog();
-	ASSERT_TRUE(logFile.find("[info] Hello World!"));
-	ASSERT_TRUE(logFile.find("[warning] We are currently testing!"));
-	ASSERT_TRUE(logFile.find("[error] Oh no!"));
-	ASSERT_TRUE(logFile.find("[info] Number = 8"));
-	ASSERT_TRUE(logFile.find("[warning] Inserted text, -79.5 = number"));
-	ASSERT_TRUE(logFile.find("[error] Error is true!"));
+	ASSERT_NOT_EQUAL(logFile.find("[info] Hello World!"), std::string::npos);
+	ASSERT_NOT_EQUAL(logFile.find("[warning] We are currently testing!"), std::string::npos);
+	ASSERT_NOT_EQUAL(logFile.find("[error] Oh no!"), std::string::npos);
+	ASSERT_NOT_EQUAL(logFile.find("[info] Number = 8"), std::string::npos);
+	ASSERT_NOT_EQUAL(logFile.find("[warning] Inserted text, -79.5 = number"), std::string::npos);
+	ASSERT_NOT_EQUAL(logFile.find("[error] Error is true!"), std::string::npos);
 }
 
 //******************
@@ -150,5 +150,47 @@ void test::test_language::expand_string_(const std::string& var) {
 }
 
 void test::test_language::language_dictionary() {
-	// pass
+	i18n::language_dictionary dict("name:test_dictionary");
+	// test behaviour when dictionary is empty
+	ASSERT_FALSE(dict.removeLanguage("test"));
+	ASSERT_FALSE(dict.removeLanguage(""));
+	ASSERT_FALSE(dict.setLanguage("testing"));
+	ASSERT_EQUAL(dict.getLanguage(), "");
+	ASSERT_EQUAL(dict("Native String"), "Native String");
+	ASSERT_TRUE(dict.setLanguage(""));
+	ASSERT_EQUAL(dict("Native String"), "Native String");
+	// now test addLanguage and load individual languages
+	ASSERT_TRUE(dict.addLanguage("test", "bad_path.json"));
+	ASSERT_FALSE(dict.addLanguage("", "test/assets/lang/ENG_GB.json"));
+	ASSERT_FALSE(dict.setLanguage("test"));
+	ASSERT_TRUE(dict.addLanguage("test", "test/assets/lang/ENG_GB.json"));
+	ASSERT_NOT_EQUAL(dict("day", 10), "Day 10");
+	ASSERT_TRUE(dict.setLanguage("test"));
+	ASSERT_EQUAL(dict("day", 10), "Day 10");
+	ASSERT_EQUAL(dict("greeting", 10), "Hello, World!");
+	ASSERT_EQUAL(dict.getLanguage(), "test");
+	ASSERT_FALSE(dict.addLanguage("test", "test/assets/lang/GER_DE.json"));
+	ASSERT_TRUE(dict.addLanguage("other", "test/assets/lang/GER_DE.json"));
+	ASSERT_TRUE(dict.setLanguage("other"));
+	ASSERT_EQUAL(dict("cancel"), "Stornieren");
+	ASSERT_EQUAL(dict.getLanguage(), "other");
+	ASSERT_TRUE(dict.setLanguage("test"));
+	ASSERT_EQUAL(dict("cancel"), "Cancel");
+	// ensure that constructor assigns name of the object to the log file correctly
+	ASSERT_NOT_EQUAL(global::sink::GetLog().find("name:test_dictionary"), std::string::npos);
+	// instantiate a fresh language_dictionary object and test the json_script methods
+	i18n::language_dictionary dict_js("test_dict_json_script");
+	dict_js.load("test/assets/lang/lang.json");
+	ASSERT_EQUAL(dict_js.getLanguage(), "ENG_GB");
+	ASSERT_EQUAL(dict_js("language"), "English");
+	ASSERT_TRUE(dict_js.setLanguage("GER_DE"));
+	ASSERT_EQUAL(dict_js("language"), "Deutsch");
+	ASSERT_TRUE(dict_js.setLanguage(""));
+	ASSERT_EQUAL(dict_js("language"), "language");
+	dict_js.save();
+	ASSERT_TRUE(dict_js.setLanguage("ENG_GB"));
+	dict_js.load();
+	ASSERT_EQUAL(dict_js.getLanguage(), "");
+	ASSERT_TRUE(dict_js.setLanguage("ENG_GB"));
+	dict_js.save();
 }

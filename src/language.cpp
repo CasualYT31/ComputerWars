@@ -54,10 +54,10 @@ i18n::language_dictionary::~language_dictionary() noexcept {
 
 bool i18n::language_dictionary::addLanguage(const std::string& id, const std::string& path) noexcept {
 	if (id == _currentLanguage) {
-		_logger.write("Attempted to replace the script path of the current language \"{}\".", id);
+		_logger.warning("Attempted to replace the script path of the current language \"{}\".", id);
 		return false;
 	} else if (id == "") {
-		_logger.write("Attempted to add a script path with a blank language ID.");
+		_logger.warning("Attempted to add a script path with a blank language ID.");
 		return false;
 	} else {
 		_languageFiles[id] = path;
@@ -67,10 +67,10 @@ bool i18n::language_dictionary::addLanguage(const std::string& id, const std::st
 
 bool i18n::language_dictionary::removeLanguage(const std::string& id) noexcept {
 	if (_languageFiles.find(id) == _languageFiles.end()) {
-		_logger.write("Attempted to remove non-existent language script path \"{}\".", id);
+		_logger.warning("Attempted to remove non-existent language script path \"{}\".", id);
 		return false;
 	} else if (id == _currentLanguage) {
-		_logger.write("Attempted to remove current language script path \"{}\".", id);
+		_logger.warning("Attempted to remove current language script path \"{}\".", id);
 		return false;
 	} else {
 		_languageFiles.erase(id);
@@ -80,11 +80,13 @@ bool i18n::language_dictionary::removeLanguage(const std::string& id) noexcept {
 
 bool i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
 	if (id != "" && _languageFiles.find(id) == _languageFiles.end()) {
-		_logger.write("Attempted to switch to non-existent string map \"{}\".", id);
+		_logger.warning("Attempted to switch to non-existent string map \"{}\".", id);
 		return false;
 	} else {
 		if (id == "") {
 			if (_languageMap) delete _languageMap;
+			_languageMap = nullptr;
+			_currentLanguage = "";
 			return true;
 		}
 		i18n::language_dictionary::language* newMap = nullptr;
@@ -116,6 +118,7 @@ bool i18n::language_dictionary::_load(safe::json& j) noexcept {
 	std::string buffer = "";
 	// firstly, load language scripts
 	_languageFiles.clear();
+	_currentLanguage = "";
 	nlohmann::json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		if (i.key() != "lang" && i.key() != "") {
