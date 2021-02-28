@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "safejson.h"
 #include <sstream>
+#include <memory>
 
 /**
  * The \c i18n namespace contains internationalisation-based classes.
@@ -263,25 +264,32 @@ namespace i18n {
 
 		/**
 		 * This class represents the string map of a single language.
-		 * This is a private, nested class, meaning that only the \c language_dictionary class can access it.
-		 * It is accessed via the \c language_dictionary class.
+		 * This is a private, nested class, meaning that only the
+		 * \c language_dictionary class can access it.
 		 */
 		class language : public safe::json_script {
 		public:
 			/**
 			 * Initialises the internal logger object.
-			 * @param name The name to give this particular instantiation within the log file. Defaults to "language."
+			 * @param name The name to give this particular instantiation
+			 *             within the log file. Defaults to "language."
 			 * @sa    \c global::logger
 			 */
 			language(const std::string& name = "language") noexcept;
 
 			/**
 			 * Accesses a string stored within the string map.
-			 * In addition, this method uses the \c expand_string::insert() method to insert variables into the string found.
-			 * If a string with the given key could not be found, then "<error>" is returned and an error is logged.
-			 * "<error>" can be amended by the i18n::language_dictionary::operator() method if any of its characters is set as a var char (see \c i18n::expand_string).
-			 * @tparam Ts           The types of the variables to insert into the language string, if any are given.
-			 * @param  nativeString The key uniquely identifying the language string to extract. Also called the "native string."
+			 * In addition, this method uses the \c expand_string::insert()
+			 * method to insert variables into the string found.
+			 * If a string with the given key could not be found, then
+			 * "<error>" is returned and an error is logged.
+			 * "<error>" can be amended by the
+			 * \c i18n::language_dictionary::operator() method if any of
+			 * its characters is set as a var char (see \c i18n::expand_string).
+			 * @tparam Ts           The types of the variables to insert into
+			 *                      the language string, if any are given.
+			 * @param  nativeString The key uniquely identifying the language
+			 *                      string to extract. Also called the "native string."
 			 * @param  values       The variables to insert into the language string.
 			 * @return The final language string.
 			 */
@@ -291,27 +299,37 @@ namespace i18n {
 			/**
 			 * The JSON load method for this class.
 			 * Before loading, the string map is \b cleared.
-			 * The script should contain values of a string type only. Any other types of values will be ignored.
-			 * The key of a key-value pair defines the native string which the client provides.
-			 * It does not have to contain any var chars and it does not have to be numbers: it can be anything, including an empty string.
-			 * The value defines the corresponding language string.
-			 * Each string map JSON script should contain the same list of keys, but they should have different values, depending on the language the script is supposed to store.
-			 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.
+			 * The script should contain values of a string type only.
+			 * Any other types of values will be ignored.\n
+			 * The key of a key-value pair defines the native string
+			 * which the client provides in its call to \c get().
+			 * It does not have to contain any var chars and it does
+			 * not have to be numbers: it can be anything, including
+			 * an empty string.\n
+			 * The value defines the corresponding language string.\n
+			 * Each string map JSON script should contain the same list
+			 * of keys, but they should have different values, depending
+			 * on the language the script is supposed to store.
+			 * @param  j The \c safe::json object representing the
+			 *           contents of the loaded script which this method reads.
 			 * @return Always returns \c TRUE.
 			 */
 			virtual bool _load(safe::json& j) noexcept;
 
 			/**
 			 * The JSON save method for this class.
-			 * Please see \c _load() for a detailed summary of the format of JSON script that this method produces.
-			 * @param  j The \c nlohmann::json object representing the JSON script which this method writes to.
+			 * Please see \c _load() for a detailed summary of the
+			 * format of JSON script that this method produces.
+			 * @param  j The \c nlohmann::json object representing the
+			 *           JSON script which this method writes to.
 			 * @return Always returns \c TRUE.
 			*/
 			virtual bool _save(nlohmann::json& j) noexcept;
 
 			/**
 			 * The string map.
-			 * A string map is a collection of strings, each one having a unique native string key identifying them.
+			 * A string map is a collection of strings, each one having
+			 * a unique native string key identifying them.
 			 */
 			std::unordered_map<std::string, std::string> _strings;
 

@@ -93,7 +93,7 @@ bool i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
 		}
 		newMap->load(_languageFiles[id]);
 		if (newMap->inGoodState()) {
-			_languageMap = std::move(newMap);
+			_languageMap.swap(newMap);
 			_currentLanguage = id;
 			return true;
 		} else {
