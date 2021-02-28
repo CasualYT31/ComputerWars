@@ -42,11 +42,11 @@ void safe::json_state::_toggleState(safe::json_state::FailBits state) noexcept {
 
 safe::json::json(const std::string& name) noexcept : _logger(name) {}
 
-safe::json::json(const nlohmann::json& jobj, const std::string& name) noexcept : _logger(name) {
+safe::json::json(const nlohmann::ordered_json& jobj, const std::string& name) noexcept : _logger(name) {
 	*this = jobj;
 }
 
-bool safe::json::equalType(nlohmann::json& dest, nlohmann::json& src) const noexcept {
+bool safe::json::equalType(nlohmann::ordered_json& dest, nlohmann::ordered_json& src) const noexcept {
 	if (dest.type() == src.type()) return true;
 	//special case 1: unsigned onto signed
 	//when this JSON library parses a positive integer, it interrprets that as an unsigned integer
@@ -61,9 +61,9 @@ bool safe::json::equalType(nlohmann::json& dest, nlohmann::json& src) const noex
 	return false;
 }
 
-bool safe::json::keysExist(safe::json::KeySequence keys, nlohmann::json* ret) const noexcept {
+bool safe::json::keysExist(safe::json::KeySequence keys, nlohmann::ordered_json* ret) const noexcept {
 	if (!keys.empty()) {
-		nlohmann::json jCopy = _j;
+		nlohmann::ordered_json jCopy = _j;
 		for (auto itr = keys.begin(), enditr = keys.end(); itr != enditr; itr++) {
 			if (jCopy.contains(*itr)) {
 				jCopy = jCopy[*itr];
@@ -90,17 +90,17 @@ std::string safe::json::synthesiseKeySequence(safe::json::KeySequence& keys) con
 	}
 }
 
-safe::json& safe::json::operator=(const nlohmann::json& jobj) noexcept {
+safe::json& safe::json::operator=(const nlohmann::ordered_json& jobj) noexcept {
 	if (jobj.is_object()) {
 		_j = jobj;
 	} else {
 		_toggleState(safe::json_state::JSON_WAS_NOT_OBJECT);
-		_logger.error("Attempted to assign a nlohmann::json object which had no root object.");
+		_logger.error("Attempted to assign a nlohmann::ordered_json object which had no root object.");
 	}
 	return *this;
 }
 
-nlohmann::json safe::json::nlohmannJSON() const noexcept {
+nlohmann::ordered_json safe::json::nlohmannJSON() const noexcept {
 	return _j;
 }
 
@@ -116,7 +116,7 @@ void safe::json::applyColour(sf::Color& dest, safe::json::KeySequence keys, cons
 	if (suppressErrors) resetState();
 }
 
-std::string safe::json::_getTypeName(nlohmann::json& j) const noexcept {
+std::string safe::json::_getTypeName(nlohmann::ordered_json& j) const noexcept {
 	if (j.is_number_float()) return "float";
 	return j.type_name();
 }
@@ -134,7 +134,7 @@ std::string safe::json_script::jsonwhat() const noexcept {
 void safe::json_script::load(const std::string script) noexcept {
 	if (script != "") _script = script;
 	_logger.write("Loading JSON script {}...", getScriptPath());
-	nlohmann::json nlohmannJSON;
+	nlohmann::ordered_json nlohmannJSON;
 	if (_loadFromScript(nlohmannJSON)) {
 		safe::json safeJSON = nlohmannJSON;
 		if (!_load(safeJSON)) {
@@ -149,7 +149,7 @@ void safe::json_script::load(const std::string script) noexcept {
 void safe::json_script::save(const std::string script) noexcept {
 	std::string scriptPath = _script; if (script != "") scriptPath = script;
 	_logger.write("Saving JSON script {}...", scriptPath);
-	nlohmann::json nlohmannJSON;
+	nlohmann::ordered_json nlohmannJSON;
 	if (!_save(nlohmannJSON)) {
 		_toggleState(safe::json_state::FAILED_SAVE_METHOD);
 		_logger.write("Failed to save JSON script {}.", scriptPath);
@@ -163,7 +163,7 @@ void safe::json_script::save(const std::string script) noexcept {
 	}
 }
 
-bool safe::json_script::_loadFromScript(nlohmann::json& jobj) noexcept {
+bool safe::json_script::_loadFromScript(nlohmann::ordered_json& jobj) noexcept {
 	std::ifstream jscript(_script);
 	if (jscript.good()) {
 		try {
@@ -183,7 +183,7 @@ bool safe::json_script::_loadFromScript(nlohmann::json& jobj) noexcept {
 	return false;
 }
 
-bool safe::json_script::_saveToScript(nlohmann::json& jobj) noexcept {
+bool safe::json_script::_saveToScript(nlohmann::ordered_json& jobj) noexcept {
 	std::ofstream jscript(_script);
 	if (jscript.good()) {
 		try {

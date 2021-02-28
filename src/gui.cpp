@@ -164,7 +164,7 @@ void engine::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const 
 
 bool engine::gui::_load(safe::json& j) noexcept {
 	bool ret = true;
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		if (i.value().find("path") != i.value().end() && i.value()["path"].is_string()) {
 			if (!_loadGUI(i.key(), i.value()["path"])) ret = false;
@@ -186,7 +186,7 @@ bool engine::gui::_load(safe::json& j) noexcept {
 			_guiBackground[i.key()].set(sf::Color(0,0,0,255));
 		}
 
-		nlohmann::json jjj = i.value();
+		nlohmann::ordered_json jjj = i.value();
 		for (auto& ii : jjj.items()) {
 			if (ii.key() == "path" || ii.key() == "background") continue;
 			if (ii.value().find("sprite") != ii.value().end()) {
@@ -197,7 +197,7 @@ bool engine::gui::_load(safe::json& j) noexcept {
 	return ret;
 }
 
-bool engine::gui::_save(nlohmann::json& j) noexcept {
+bool engine::gui::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }
 

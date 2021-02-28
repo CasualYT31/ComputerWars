@@ -37,7 +37,7 @@ bool sfx::fonts::_load(safe::json& j) noexcept {
 	_font.clear();
 	_fontpath.clear();
 	bool ret = true;
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		std::string path = i.value();
 		_font[i.key()] = std::make_shared<sf::Font>();
@@ -51,7 +51,7 @@ bool sfx::fonts::_load(safe::json& j) noexcept {
 	return ret;
 }
 
-bool sfx::fonts::_save(nlohmann::json& j) noexcept {
+bool sfx::fonts::_save(nlohmann::ordered_json& j) noexcept {
 	for (auto itr = _fontpath.begin(), enditr = _fontpath.end(); itr != enditr; itr++) {
 		j[itr->first] = itr->second;
 	}

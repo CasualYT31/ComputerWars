@@ -223,10 +223,10 @@ namespace engine {
 		/**
 		 * The JSON save method for this class.
 		 * This class does not have the ability to be saved.
-		 * @param  j The \c nlohmann::json object representing the JSON script which this method writes to.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON script which this method writes to.
 		 * @return Always returns \c FALSE.
 		 */
-		virtual bool _save(nlohmann::json& j) noexcept;
+		virtual bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * Loads a GUI menu.

@@ -146,7 +146,7 @@ float sfx::audio::_volumeAfterOffset(const std::string& name) const noexcept {
 
 bool sfx::audio::_load(safe::json& j) noexcept {
 	j.apply(_volume, { "volume" }, &_volume, true);
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 	_sound.clear();
 	_music.clear();
 
@@ -182,7 +182,7 @@ bool sfx::audio::_load(safe::json& j) noexcept {
 	return _loadAudio();
 }
 
-bool sfx::audio::_save(nlohmann::json& j) noexcept {
+bool sfx::audio::_save(nlohmann::ordered_json& j) noexcept {
 	j["volume"] = _volume;
 	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; itr++) {
 		j[itr->first]["type"] = "sound";

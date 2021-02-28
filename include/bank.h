@@ -93,10 +93,10 @@ namespace awe {
 		/**
 		 * The JSON save method for this class.
 		 * This class does not have the ability to be saved.
-		 * @param  j The \c nlohmann::json object representing the JSON script which this method writes to.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON script which this method writes to.
 		 * @return Always returns \c FALSE.
 		 */
-		virtual bool _save(nlohmann::json& j) noexcept;
+		virtual bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * The internal vector of game properties.
@@ -859,7 +859,7 @@ std::size_t awe::bank<T>::size() const noexcept {
 template<typename T>
 bool awe::bank<T>::_load(safe::json& j) noexcept {
 	_bank.clear();
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		//loop through each object, allowing the template type T to construct its values based on each object
 		safe::json input(i.value());
@@ -869,6 +869,6 @@ bool awe::bank<T>::_load(safe::json& j) noexcept {
 }
 
 template<typename T>
-bool awe::bank<T>::_save(nlohmann::json& j) noexcept {
+bool awe::bank<T>::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }

@@ -644,7 +644,7 @@ namespace engine {
 	private:
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 		virtual bool _load(safe::json& j) noexcept;
-		virtual bool _save(nlohmann::json& j) noexcept;
+		virtual bool _save(nlohmann::ordered_json& j) noexcept;
 		std::unique_ptr<engine::dialogue_box> _allocateDialogueBox(const std::size_t i) noexcept;
 
 		// may need to combine this with dialogue_box class
@@ -781,7 +781,7 @@ namespace awe {
 		std::string current() const noexcept;
 	private:
 		virtual bool _load(safe::json& j) noexcept;
-		virtual bool _save(nlohmann::json& j) noexcept;
+		virtual bool _save(nlohmann::ordered_json& j) noexcept;
 
 		global::logger _logger;
 		awe::dialogue* _diag = nullptr;

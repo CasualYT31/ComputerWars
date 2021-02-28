@@ -107,7 +107,7 @@ void engine::dialogue_sequence::draw(sf::RenderTarget& target, sf::RenderStates 
 bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 	_boxes.clear();
 	_currentBox = nullptr;
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		// special keys
 		if (i.key() == "right") {
@@ -153,7 +153,7 @@ bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 	return true;
 }
 
-bool engine::dialogue_sequence::_save(nlohmann::json& j) noexcept {
+bool engine::dialogue_sequence::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }
 
@@ -725,7 +725,7 @@ std::string engine::dialogue_sequence::current() const noexcept {
 }
 
 bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		std::string fontKey = "dialogue";
 		engine::dialogue_data& d = _diagdata[i.key()];
@@ -769,6 +769,6 @@ bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 	return true;
 }
 
-bool engine::dialogue_sequence::_save(nlohmann::json& j) noexcept {
+bool engine::dialogue_sequence::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }*/

@@ -116,7 +116,7 @@ namespace safe {
 
 	/**
 	 * This class is used to interact with a JSON object in a "safer" way.
-	 * A \c nlohmann::json object is given, and then accessed through an instantiation
+	 * A \c nlohmann::ordered_json object is given, and then accessed through an instantiation
 	 * of this class. Key sequences can be tested, as well as values and their data
 	 * types. A variety of methods are provided to allow clients to apply different
 	 * types of values to C++ variables and objects.
@@ -142,40 +142,40 @@ namespace safe {
 		/**
 		 * Constructs a JSON object from a \c nlohmann one.
 		 * The assignment operator is called in order to achieve this.
-		 * @param jobj The \c nlohmann::json object to store within this object - this is referred to as the JSON object.
+		 * @param jobj The \c nlohmann::ordered_json object to store within this object - this is referred to as the JSON object.
 		 * @param name The string name of the internal logger object which helps identify this object if it causes an error.
 		 * @sa    json.operator=()
 		 */
-		json(const nlohmann::json& jobj, const std::string& name = "json") noexcept;
+		json(const nlohmann::ordered_json& jobj, const std::string& name = "json") noexcept;
 
 		/**
-		 * Assignment operator which accepts a \c nlohmann::json object.
+		 * Assignment operator which accepts a \c nlohmann::ordered_json object.
 		 * This operator replaces the JSON object stored within this object if it is called. All JSON objects given must have a root object:
 		 * they cannot just contain a number, or a string, or an array, etc.
 		 * @warning If the given JSON object did not have a root object, the \c JSON_WAS_NOT_OBJECT bit will be set.
-		 * @param   jobj The \c nlohmann::json object to store within this object - this is referred to as the JSON object.
+		 * @param   jobj The \c nlohmann::ordered_json object to store within this object - this is referred to as the JSON object.
 		 * @return  A reference to this object.
 		 */
-		safe::json& operator=(const nlohmann::json& jobj) noexcept;
+		safe::json& operator=(const nlohmann::ordered_json& jobj) noexcept;
 
 		/**
 		 * Determines if a specified value within the JSON object exists.
 		 * A key sequence must be given which pinpoints the value within the JSON object's object hierarchy.
 		 * @param  keys The key sequence which is to be tested.
-		 * @param  ret  A pointer to a \c nlohmann::json object which stores the JSON, but only if it exists. This method will only change the pointer value if it succeeds.
+		 * @param  ret  A pointer to a \c nlohmann::ordered_json object which stores the JSON, but only if it exists. This method will only change the pointer value if it succeeds.
 		 * @return \c TRUE if the key sequence existed (succeeded), \c FALSE if at least one expected key did not exist.
 		 * @sa     json.KeySequence
 		 */
-		bool keysExist(KeySequence keys, nlohmann::json* ret = nullptr) const noexcept;
+		bool keysExist(KeySequence keys, nlohmann::ordered_json* ret = nullptr) const noexcept;
 
 		/**
-		 * Determines if two \c nlohmann::json objects contain a value with the same or compatible data types.
+		 * Determines if two \c nlohmann::ordered_json objects contain a value with the same or compatible data types.
 		 * The test is performed on a source-destination basis: if the source could be safely assigned to the destination, then they are of compatible types.
 		 * It is to be emphasised that \b no actual value transfer occurs between source and destination objects.
 		 * 
 		 * Here are the cases which cause this method to return \c TRUE:
 		 * <ol>
-		 * <li>If \c type() returns the same for both \c nlohmann::json objects.</li>
+		 * <li>If \c type() returns the same for both \c nlohmann::ordered_json objects.</li>
 		 * <li>If \c source is unsigned and within the limits of the <tt>signed int</tt> data type, and the \c destination is signed.</li>
 		 * <li>If \c source is signed or unsigned, and \c destination is floating point.</li>
 		 * <li>If \c source is a floating point with a fraction of \c 0, and \c destination is signed or unsigned.</li>
@@ -187,7 +187,7 @@ namespace safe {
 		 * @param   src  The "source" JSON value.
 		 * @return  \c TRUE if the two JSON values are of compatible data types, \c FALSE if not.
 		 */
-		bool equalType(nlohmann::json& dest, nlohmann::json& src) const noexcept;
+		bool equalType(nlohmann::ordered_json& dest, nlohmann::ordered_json& src) const noexcept;
 
 		/**
 		 * Converts a key sequence into a single string.
@@ -200,14 +200,14 @@ namespace safe {
 		std::string synthesiseKeySequence(KeySequence& keys) const noexcept;
 
 		/**
-		 * Returns the \c nlohmann::json object stored in this object.
+		 * Returns the \c nlohmann::ordered_json object stored in this object.
 		 * This is helpful when all the keys in an object value need to be iterated through.
 		 * Otherwise, this should be avoided as no error checking occurs with the use of this method.
 		 * The \c apply() template methods should be used whenever possible.
 		 * @return The root JSON object stored in this object.
 		 * @sa     json.apply()
 		 */
-		nlohmann::json nlohmannJSON() const noexcept;
+		nlohmann::ordered_json nlohmannJSON() const noexcept;
 
 		/**
 		 * Applies a value found within the JSON object to a given C++ object.
@@ -221,7 +221,7 @@ namespace safe {
 		 * It should be noted that only simple types are supported with this method. Array and object values are not supported. However, if the destination object can be
 		 * reliably assigned signed and unsigned values, or strings, or floating point values, or boolean values, then this method can be used. Primative data types have been
 		 * tested extensively and they work, as well as \c std::string objects. If you wish to utilise your own classes with this method, be sure to test that they work as expected.
-		 * They must be assignable to \c nlohmann::json objects.
+		 * They must be assignable to \c nlohmann::ordered_json objects.
 		 * @warning The \c NO_KEYS_GIVEN bit will be set if an empty key sequence was given.
 		 * @warning The \c KEYS_DID_NOT_EXIST bit will be set if the key sequence given did not exist in the JSON object.
 		 * @warning The \c MISMATCHING_TYPE bit will be set if the value pointed to by the key sequence contained a value of an incompatible type to the destination object.
@@ -242,7 +242,7 @@ namespace safe {
 		 * Applies a JSON array of homogenous values to a given \c std::array object.
 		 * All the checks peformed in \c apply() are performed in this method too, along with a few array-specific checks, such as a size check and homogenous value checks.
 		 * 
-		 * Array elements must be of a type that can easily interact with \c nlohmann::json. Please see the second paragraph of \c apply() for more details.
+		 * Array elements must be of a type that can easily interact with \c nlohmann::ordered_json. Please see the second paragraph of \c apply() for more details.
 		 * 
 		 * The C++ array will only be changed if the method will be successful, i.e. all checks are satisfied.
 		 * @warning This method assumes that \c N is more than 0!
@@ -296,19 +296,19 @@ namespace safe {
 		void applyVector(std::vector<T>& dest, KeySequence keys);
 	private:
 		/**
-		 * Returns the data type of the value stored in a given \c nlohmann::json object as a string.
-		 * Internally, \c nlohmann::json's \c type_name() method is used. This private method only exists to return "float" in case the JSON number is indeed a float:
+		 * Returns the data type of the value stored in a given \c nlohmann::ordered_json object as a string.
+		 * Internally, \c nlohmann::ordered_json's \c type_name() method is used. This private method only exists to return "float" in case the JSON number is indeed a float:
 		 * this method does not distinguish between different types of numbers.
 		 * @todo   This method should be made static.
-		 * @param  j The \c nlohmann::json object containing the JSON value to evaluate.
-		 * @return The string name of the JSON data type as defined by the nlohmann::json class (unless where specified in the detailed section).
+		 * @param  j The \c nlohmann::ordered_json object containing the JSON value to evaluate.
+		 * @return The string name of the JSON data type as defined by the nlohmann::ordered_json class (unless where specified in the detailed section).
 		 */
-		std::string _getTypeName(nlohmann::json& j) const noexcept;
+		std::string _getTypeName(nlohmann::ordered_json& j) const noexcept;
 
 		/**
-		 * The \c nlohmann::json object stored internally.
+		 * The \c nlohmann::ordered_json object stored internally.
 		 */
-		nlohmann::json _j;
+		nlohmann::ordered_json _j;
 
 		/**
 		 * The internal logger object.
@@ -363,8 +363,8 @@ namespace safe {
 		
 		/**
 		 * Saves a JSON script.
-		 * This method performs the initialisation steps necessary to setup the nlohmann::json object before it is passed on to the derived _save() method.
-		 * It allows _save() to initialise the nlohmann::json object before attempting to write the JSON script to disc. It outputs to the logger when saving commenses and ends.
+		 * This method performs the initialisation steps necessary to setup the nlohmann::ordered_json object before it is passed on to the derived _save() method.
+		 * It allows _save() to initialise the nlohmann::ordered_json object before attempting to write the JSON script to disc. It outputs to the logger when saving commenses and ends.
 		 * 
 		 * Files will be \b overwritten if they exist.
 		 * @warning The \c FAILED_SAVE_METHOD bit will be set if the derived _save() method returned \c FALSE.
@@ -389,7 +389,7 @@ namespace safe {
 		
 		/**
 		 * The method which derived classes use to store their configurations.
-		 * This method must be implemented by derived classes. It accepts a nlohmann::json object, which can be populated with the derived class' data fields as necessary.
+		 * This method must be implemented by derived classes. It accepts a nlohmann::ordered_json object, which can be populated with the derived class' data fields as necessary.
 		 * The structure of the resulting JSON object (besides the requirement for a root object) is entirely up to the derived class.
 		 * It should, however, be consistent with the one implmented in the corresponding _load() method.
 		 * 
@@ -397,27 +397,27 @@ namespace safe {
 		 * @todo   Ensure that both loading and saving enforce the root object requirement!
 		 * @return \c TRUE if the method succeeded, or \c FALSE if a serious/unrecoverable error occurred.
 		 */
-		virtual bool _save(nlohmann::json&) noexcept = 0;
+		virtual bool _save(nlohmann::ordered_json&) noexcept = 0;
 
 		/**
 		 * This method loads a JSON script file and stores it in the given JSON object.
 		 * \c _script stores the path to use.
 		 * @warning The \c FAILED_SCRIPT_LOAD bit will be set if the JSON script file couldn't be opened.
 		 * @warning The \c UNPARSABLE bit will be set if the JSON contained in the script file was invalid. jsonwhat() retrieves more information on the error.
-		 * @param   jobj The nlohmann::json object to load the script into.
+		 * @param   jobj The nlohmann::ordered_json object to load the script into.
 		 * @return  \c TRUE if loading was successful, \c FALSE if not.
 		 */
-		bool _loadFromScript(nlohmann::json& jobj) noexcept;
+		bool _loadFromScript(nlohmann::ordered_json& jobj) noexcept;
 		
 		/**
 		 * This method saves a given JSON object to a JSON script file.
 		 * \c _script stores the path to use.
 		 * @warning The \c FAILED_SCRIPT_SAVE bit will be set if the JSON script file couldn't be opened or written to.
 		 *          jsonwhat() retrieves more information if opening succeeded but writing did not.
-		 * @param   jobj The nlohmann::json object to save to the script.
+		 * @param   jobj The nlohmann::ordered_json object to save to the script.
 		 * @return  \c TRUE if saving was successful, \c FALSE if not.
 		 */
-		bool _saveToScript(nlohmann::json& jobj) noexcept;
+		bool _saveToScript(nlohmann::ordered_json& jobj) noexcept;
 
 		/**
 		 * A string storing the path of the last written to or read from script file.
@@ -438,13 +438,13 @@ namespace safe {
 
 template<typename T>
 void safe::json::apply(T& dest, safe::json::KeySequence keys, const T* defval, const bool suppressErrors) noexcept {
-	nlohmann::json test;
+	nlohmann::ordered_json test;
 	if (keys.empty()) {
 		_toggleState(NO_KEYS_GIVEN);
 		_logger.error("Attempted to assign a value to a variable without specifying a key sequence.");
 	} else {
 		if (keysExist(keys, &test)) {
-			nlohmann::json testDataType = dest;
+			nlohmann::ordered_json testDataType = dest;
 			if (equalType(testDataType, test)) {
 				dest = test.get<T>();
 				return;
@@ -468,7 +468,7 @@ void safe::json::apply(T& dest, safe::json::KeySequence keys, const T* defval, c
 template<typename T, std::size_t N>
 void safe::json::applyArray(std::array<T, N>& dest, safe::json::KeySequence keys) noexcept {
 	if (!N) return;
-	nlohmann::json test;
+	nlohmann::ordered_json test;
 	if (keys.empty()) {
 		_toggleState(NO_KEYS_GIVEN);
 		_logger.error("Attempted to assign a value to an array without specifying a key sequence.");
@@ -476,7 +476,7 @@ void safe::json::applyArray(std::array<T, N>& dest, safe::json::KeySequence keys
 		if (keysExist(keys, &test)) {
 			if (test.is_array()) {
 				if (test.size() == N) {
-					nlohmann::json testDataType = dest[0];
+					nlohmann::ordered_json testDataType = dest[0];
 					//loop through each element in the JSON array to see if it matches completely in data type
 					for (std::size_t i = 0; i < N; i++) {
 						//if the JSON array is homogeneous, assign it to the destination array
@@ -511,10 +511,10 @@ void safe::json::applyVector(std::vector<T>& dest, safe::json::KeySequence keys)
 		_toggleState(NO_KEYS_GIVEN);
 		_logger.error("Attempted to assign a value to a vector without specifying a key sequence.");
 	} else {
-		nlohmann::json test;
+		nlohmann::ordered_json test;
 		if (keysExist(keys, &test)) {
 			if (test.is_array()) {
-				nlohmann::json testDataType = T();
+				nlohmann::ordered_json testDataType = T();
 				for (std::size_t i = 0; i < test.size(); i++) {
 					if (i == test.size() - 1 && equalType(testDataType, test[i])) {
 						dest.clear();

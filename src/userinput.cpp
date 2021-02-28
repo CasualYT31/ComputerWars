@@ -271,7 +271,7 @@ bool sfx::user_input::_scanInput(sfx::user_configuration& ref) const noexcept {
 
 bool sfx::user_input::_load(safe::json& j) noexcept {
 	_control.clear();
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 
 	for (auto& i : jj.items()) {
 		if (i.key() == "joystickid") {
@@ -345,7 +345,7 @@ bool sfx::user_input::_load(safe::json& j) noexcept {
 	return true;
 }
 
-bool sfx::user_input::_save(nlohmann::json& j) noexcept {
+bool sfx::user_input::_save(nlohmann::ordered_json& j) noexcept {
 	j["joystickid"] = getJoystickID();
 	j["joystickaxis"] = getJoystickAxisThreshold();
 	for (auto c = _control.begin(), ec = _control.end(); c != ec; c++) {

@@ -263,10 +263,10 @@ namespace sfx {
 		 * Please see \c _load() for a detailed summary of the format of JSON script that this method produces.
 		 * The width and height of the render window at the time of the client calling this method are stored.
 		 * All other values are not changed from the last call to \c load().
-		 * @param  j The \c nlohmann::json object representing the JSON script which this method writes to.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON script which this method writes to.
 		 * @return Always returns \c TRUE.
 		 */
-		virtual bool _save(nlohmann::json& j) noexcept;
+		virtual bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * The internal logger object.

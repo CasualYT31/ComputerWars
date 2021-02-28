@@ -203,10 +203,10 @@ namespace sfx {
 		/**
 		 * The JSON save method for this class.
 		 * Please see \c _load() for a detailed summary of the format of JSON script that this method produces.
-		 * @param  j The \c nlohmann::json object representing the JSON script which this method writes to.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON script which this method writes to.
 		 * @return Always returns \c TRUE.
 		 */
-		virtual bool _save(nlohmann::json& j) noexcept;
+		virtual bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * Helper method called in \c _load() which reads all paths for each audio object and loads the files.

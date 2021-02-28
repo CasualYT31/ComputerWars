@@ -256,11 +256,11 @@ namespace i18n {
 		 * The JSON save method for this class.
 		 * Please see \c _load() for a detailed summary of
 		 * the format of JSON script that this method produces.
-		 * @param  j The \c nlohmann::json object representing
+		 * @param  j The \c nlohmann::ordered_json object representing
 		 *           the JSON script which this method writes to.
 		 * @return Always returns \c TRUE.
 		 */
-		virtual bool _save(nlohmann::json& j) noexcept;
+		virtual bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * This class represents the string map of a single language.
@@ -320,11 +320,11 @@ namespace i18n {
 			 * The JSON save method for this class.
 			 * Please see \c _load() for a detailed summary of the
 			 * format of JSON script that this method produces.
-			 * @param  j The \c nlohmann::json object representing the
+			 * @param  j The \c nlohmann::ordered_json object representing the
 			 *           JSON script which this method writes to.
 			 * @return Always returns \c TRUE.
 			*/
-			virtual bool _save(nlohmann::json& j) noexcept;
+			virtual bool _save(nlohmann::ordered_json& j) noexcept;
 
 			/**
 			 * The string map.

@@ -90,7 +90,7 @@ bool sfx::renderer::_load(safe::json& j) noexcept {
 	return true;
 }
 
-bool sfx::renderer::_save(nlohmann::json& j) noexcept {
+bool sfx::renderer::_save(nlohmann::ordered_json& j) noexcept {
 	_settings.width = getSize().x;
 	_settings.height = getSize().y;
 	if (!_settings.style.fullscreen) {

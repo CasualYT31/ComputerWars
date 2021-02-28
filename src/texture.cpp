@@ -74,7 +74,7 @@ bool sfx::animated_spritesheet::_load(safe::json& j) noexcept {
 
 	_basepath = temp_basepath;
 	_sprites.clear();
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 	try {
 		jj = jj["sprites"];
 		for (std::size_t s = 0; s < jj.size(); s++) {
@@ -100,7 +100,7 @@ bool sfx::animated_spritesheet::_load(safe::json& j) noexcept {
 	return _loadImages(frameCount);
 }
 
-bool sfx::animated_spritesheet::_save(nlohmann::json& j) noexcept {
+bool sfx::animated_spritesheet::_save(nlohmann::ordered_json& j) noexcept {
 	j["path"] = _basepath;
 	j["frames"] = getFrameCount();
 	j["framerate"] = getFramerate();

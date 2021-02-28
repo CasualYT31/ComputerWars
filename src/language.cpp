@@ -112,7 +112,7 @@ bool i18n::language_dictionary::_load(safe::json& j) noexcept {
 	// firstly, load language scripts
 	_languageFiles.clear();
 	_currentLanguage = "";
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		if (i.key() != "lang" && i.key() != "") {
 			j.apply(buffer, { i.key() });
@@ -132,7 +132,7 @@ bool i18n::language_dictionary::_load(safe::json& j) noexcept {
 	}
 }
 
-bool i18n::language_dictionary::_save(nlohmann::json& j) noexcept {
+bool i18n::language_dictionary::_save(nlohmann::ordered_json& j) noexcept {
 	j["lang"] = _currentLanguage;
 	for (auto itr = _languageFiles.begin(), enditr = _languageFiles.end(); itr != enditr; itr++) {
 		j[itr->first] = itr->second;
@@ -144,7 +144,7 @@ i18n::language_dictionary::language::language(const std::string& name) noexcept 
 
 bool i18n::language_dictionary::language::_load(safe::json& j) noexcept {
 	_strings.clear();
-	nlohmann::json jj = j.nlohmannJSON();
+	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		j.apply(_strings[i.key()], { i.key() });
 		if (!j.inGoodState()) {
@@ -155,7 +155,7 @@ bool i18n::language_dictionary::language::_load(safe::json& j) noexcept {
 	return true;
 }
 
-bool i18n::language_dictionary::language::_save(nlohmann::json& j) noexcept {
+bool i18n::language_dictionary::language::_save(nlohmann::ordered_json& j) noexcept {
 	for (auto itr = _strings.begin(), enditr = _strings.end(); itr != enditr; itr++) {
 		j[itr->first] = itr->second;
 	}
