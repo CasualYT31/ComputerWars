@@ -29,6 +29,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "test.h"
 
+/**
+ * Macro that allows tests which rely on the logger dependency to test if their naming functionality works.
+ * @param n The string literal containing the name of the object used in the log file.
+ */
+#define ASSERT_NAME_IN_LOG(n) ASSERT_NOT_EQUAL(global::sink::GetLog().find(n), std::string::npos);
+
 // for documentation on the test namespace, please see test.h
 namespace test {
 	/**
@@ -68,6 +74,28 @@ namespace test {
 		 * Runs tests related to the \c logger class.
 		 */
 		void logger();
+	};
+
+	/**
+	 * Tests safejson.h classes.
+	 */
+	class test_safejson : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "safejson_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_safejson(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c json class.
+		 */
+		void json();
 	};
 
 	/**

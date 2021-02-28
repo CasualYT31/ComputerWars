@@ -34,6 +34,7 @@ int test::test() {
 	std::vector<test::test_case*> testcases;
 	testcases.push_back(new test::test_logger(path));
 	testcases.push_back(new test::test_language(path));
+	testcases.push_back(new test::test_safejson(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -96,6 +97,63 @@ void test::test_logger::logger() {
 	ASSERT_NOT_EQUAL(logFile.find("[info] Number = 8"), std::string::npos);
 	ASSERT_NOT_EQUAL(logFile.find("[warning] Inserted text, -79.5 = number"), std::string::npos);
 	ASSERT_NOT_EQUAL(logFile.find("[error] Error is true!"), std::string::npos);
+}
+
+//******************
+//*SAFEJSON.H TESTS*
+//******************
+test::test_safejson::test_safejson(const std::string& path) noexcept : test_case(path + "safejson_test_case.log") {}
+
+void test::test_safejson::runTests() noexcept {
+	RUN_TEST(test::test_safejson::json);
+	endTesting();
+}
+
+void test::test_safejson::json() {
+	// test empty json object
+	safe::json j(std::string("name:test_json"));
+	ASSERT_FALSE(j.keysExist({ "test", "test" }));
+	ASSERT_FALSE(j.keysExist({}));
+	// test apply() NO_KEYS_GIVEN
+	int holder = 0;
+	j.apply(holder, {});
+	ASSERT_TRUE(j.whatFailed() & safe::json_state::NO_KEYS_GIVEN);
+	j.resetState();
+	// test apply() KEYS_DID_NOT_EXIST
+	j.apply(holder, { "test" });
+	ASSERT_TRUE(j.whatFailed() & safe::json_state::KEYS_DID_NOT_EXIST);
+	j.resetState();
+	// test assignment operator
+	j = R"(
+	{
+		"pi": 3.141,
+		"happy": true,
+		"name": "John",
+		"nothing": null,
+		"answer": {
+			"everything": 42
+		},
+		"list": [1, 0, 2],
+		"object": {
+			"currency": "USD",
+			"value": -42
+		}
+	}
+	)"_json;
+	ASSERT_FALSE(j.keysExist({ "test" }));
+	ASSERT_TRUE(j.keysExist({ "object", "value" }));
+	// test apply() MISMATCHING_TYPE
+	j.apply(holder, { "happy" });
+	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_TYPE);
+	j.resetState();
+	j.apply(holder, { "pi" });
+	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_TYPE);
+	j.resetState();
+	// test apply
+	j.apply(holder, { "answer", "everything" });
+	ASSERT_TRUE(j.inGoodState());
+	ASSERT_EQUAL(holder, 42);
+	ASSERT_NAME_IN_LOG("name:test_json");
 }
 
 //******************
@@ -177,8 +235,7 @@ void test::test_language::language_dictionary() {
 	ASSERT_EQUAL(dict.getLanguage(), "other");
 	ASSERT_TRUE(dict.setLanguage("test"));
 	ASSERT_EQUAL(dict("cancel"), "Cancel");
-	// ensure that constructor assigns name of the object to the log file correctly
-	ASSERT_NOT_EQUAL(global::sink::GetLog().find("name:test_dictionary"), std::string::npos);
+	ASSERT_NAME_IN_LOG("name:test_dictionary");
 }
 
 void test::test_language::language_dictionary_json() {

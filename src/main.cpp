@@ -23,9 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* Project - Overarching Goals
 1. I SHOULD LOOK THROUGH MY CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
 2. I should refactor my template solutions to ensure as little redundant duplication as possible.
-3. JSON backend has been developed a lot since I started using it: unordered_json support has been added, as well as the ability to serialise/deserialise user-defined types.
-   These features must be reviewed to see if they're useful for me, and if they are, I can think about radically changing the way safejson works for the better.
-4. I should favour smart pointer objects over raw pointers. I also need to ensure I use the right type of pointer class throughout my code.
+3. I should favour smart pointer objects over raw pointers. I also need to ensure I use the right type of pointer class throughout my code.
 */
 
 /**@file main.cpp

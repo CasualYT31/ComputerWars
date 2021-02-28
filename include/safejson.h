@@ -43,9 +43,8 @@ namespace safe {
 	 * This is a superclass for the other classes in this namespace. It provides
 	 * common error-tracking functionality using the error bit model found in the
 	 * STL.
-	 * @todo Object composition should be considered instead, especially for \c json_script: this prevents classes beyond the \c safe namespace to fiddle with the bit sequence in any way.
-	 *
-	 * @todo An alternative to error bits should be considered: exceptions could be appropriate here.
+	 * @todo An alternative to error bits should be considered:
+	 *       exceptions could be appropriate here.
 	 */
 	class json_state {
 	public:
@@ -74,23 +73,29 @@ namespace safe {
 		
 		/**
 		 * Tests the state of the \c json_state object.
-		 * If the internal bit sequence is equal to \c SUCCESS, then the \c json_state object is said to be in a "good" state.
-		 * If any bit within the bit sequence is on, then the object is said to be in a "bad" state: this should be addressed by the client and reset using \c resetState().
+		 * If the internal bit sequence is equal to \c SUCCESS,
+		 * then the \c json_state object is said to be in a "good" state.
+		 * If any bit within the bit sequence is on, then the object
+		 * is said to be in a "bad" state: this should be addressed by
+		 * the client and reset using \c resetState().
 		 * @return \c TRUE if the object is in a good state, \c FALSE if not.
 		 */
 		bool inGoodState() const noexcept;
 
 		/**
 		 * Returns the internal bit sequence which can be tested against.
-		 * The return value of this method can be tested against using the \c FailBits constants in this class.
-		 * For example one could perform the check <tt>whatFailed() & UNPARSABLE</tt> to determine if the error was due to a wrongly formatted JSON script.
+		 * The return value of this method can be tested against using the
+		 * \c FailBits constants in this class. For example one could perform
+		 * the check <tt>whatFailed() & UNPARSABLE</tt> to determine if the
+		 * error was due to a wrongly formatted JSON script.
 		 * @return The bit sequence to test against using the bitwise-AND operator.
 		 */
 		FailBits whatFailed() const noexcept;
 
 		/**
 		 * Resets the state of the object.
-		 * The internal bit sequence representing the state of the object is set to \c SUCCESS.
+		 * The internal bit sequence representing the state of the object
+		 * is set to \c SUCCESS.
 		 */
 		void resetState() noexcept;
 	protected:
@@ -101,7 +106,8 @@ namespace safe {
 
 		/**
 		 * Sets the error state of the object.
-		 * This method is used to set an error bit in the internal bit sequence. A single fail bit from the ones stored in this class should be passed.
+		 * This method is used to set an error bit in the internal bit sequence.
+		 * A single fail bit from the ones stored in this class should be passed.
 		 * The fail bit is assigned via a bitwise-OR operation.
 		 * @param state The fail bit to set to the internal bit sequence.
 		 */
@@ -119,69 +125,88 @@ namespace safe {
 	 * A \c nlohmann::ordered_json object is given, and then accessed through an instantiation
 	 * of this class. Key sequences can be tested, as well as values and their data
 	 * types. A variety of methods are provided to allow clients to apply different
-	 * types of values to C++ variables and objects.
+	 * types of values to C++ variables and objects, whilst automatically peforming
+	 * relevant checks on the data before assignment.
 	 */
 	class json : public json_state {
 	public:
 		/**
 		 * Typedef representing a key sequence.
-		 * A key sequence is a list of strings, each containing a key which should exist in the JSON object.
-		 * The first key in the list should exist in the root object. The second key should exist within the object referenced by the first key, and so.
-		 * This means the following: the last key can point to any type of value, but all the keys before it must point to object values.
-		 * Since this typedef uses the \c vector STL container, initialiser lists can be used for parameters of type \c KeySequence.
-		 * @todo Perhaps this should be made into its own class if I'm confident enough to implement support for initialiser lists.
+		 * A key sequence is a list of strings, each containing a key which
+		 * should exist in the JSON object.
+		 * The first key in the list should exist in the root object.
+		 * The second key should exist within the object referenced by the
+		 * first key, and so.
+		 * This means the following: the last key can point to any type of
+		 * value, but all the keys before it must point to object values.\n
+		 * Since this typedef uses the \c vector STL container, initialiser
+		 * lists can be used for parameters of type \c KeySequence.
 		 */
 		typedef std::vector<std::string> KeySequence;
 
 		/**
 		 * Constructs an empty JSON object.
-		 * @param name The string name of the internal logger object which helps identify this object if it causes an error.
+		 * @param name The string name of the internal logger object which helps
+		 *             identify this object if it causes an error.
 		 */
 		json(const std::string& name = "json") noexcept;
 
 		/**
 		 * Constructs a JSON object from a \c nlohmann one.
 		 * The assignment operator is called in order to achieve this.
-		 * @param jobj The \c nlohmann::ordered_json object to store within this object - this is referred to as the JSON object.
-		 * @param name The string name of the internal logger object which helps identify this object if it causes an error.
+		 * @param jobj The \c nlohmann::ordered_json object to store within this
+		 *             object - this is referred to as the JSON object.
+		 * @param name The string name of the internal logger object which helps
+		 *             identify this object if it causes an error.
 		 * @sa    json.operator=()
 		 */
 		json(const nlohmann::ordered_json& jobj, const std::string& name = "json") noexcept;
 
 		/**
 		 * Assignment operator which accepts a \c nlohmann::ordered_json object.
-		 * This operator replaces the JSON object stored within this object if it is called. All JSON objects given must have a root object:
-		 * they cannot just contain a number, or a string, or an array, etc.
-		 * @warning If the given JSON object did not have a root object, the \c JSON_WAS_NOT_OBJECT bit will be set.
-		 * @param   jobj The \c nlohmann::ordered_json object to store within this object - this is referred to as the JSON object.
+		 * This operator replaces the JSON object stored within this object if it is called.
+		 * All JSON objects given must have a root object: they cannot just contain a number,
+		 * or a string, or an array, etc.
+		 * @warning If the given JSON object did not have a root object,
+		 *          the \c JSON_WAS_NOT_OBJECT bit will be set.
+		 * @param   jobj The \c nlohmann::ordered_json object to store within this object -
+		 *          this is referred to as the JSON object.
 		 * @return  A reference to this object.
 		 */
 		safe::json& operator=(const nlohmann::ordered_json& jobj) noexcept;
 
 		/**
 		 * Determines if a specified value within the JSON object exists.
-		 * A key sequence must be given which pinpoints the value within the JSON object's object hierarchy.
+		 * A key sequence must be given which pinpoints the value within
+		 * the JSON object's object hierarchy.
 		 * @param  keys The key sequence which is to be tested.
-		 * @param  ret  A pointer to a \c nlohmann::ordered_json object which stores the JSON, but only if it exists. This method will only change the pointer value if it succeeds.
-		 * @return \c TRUE if the key sequence existed (succeeded), \c FALSE if at least one expected key did not exist.
+		 * @param  ret  A pointer to a \c nlohmann::ordered_json object which stores the JSON,
+		 *              but only if it exists. This method will only change the pointer value
+		 *              if it succeeds.
+		 * @return \c TRUE if the key sequence existed (succeeded),
+		 *         \c FALSE if at least one expected key did not exist.
 		 * @sa     json.KeySequence
 		 */
 		bool keysExist(KeySequence keys, nlohmann::ordered_json* ret = nullptr) const noexcept;
 
 		/**
 		 * Determines if two \c nlohmann::ordered_json objects contain a value with the same or compatible data types.
-		 * The test is performed on a source-destination basis: if the source could be safely assigned to the destination, then they are of compatible types.
-		 * It is to be emphasised that \b no actual value transfer occurs between source and destination objects.
-		 * 
+		 * The test is performed on a source-destination basis:
+		 * if the source could be safely assigned to the destination,
+		 * then they are of compatible types.\n
+		 * It is to be emphasised that \b no actual value transfer occurs
+		 * between source and destination objects.\n
 		 * Here are the cases which cause this method to return \c TRUE:
-		 * <ol>
-		 * <li>If \c type() returns the same for both \c nlohmann::ordered_json objects.</li>
-		 * <li>If \c source is unsigned and within the limits of the <tt>signed int</tt> data type, and the \c destination is signed.</li>
+		 * <ol><li>If \c type() returns the same for both \c nlohmann::ordered_json objects.</li>
+		 * <li>If \c source is unsigned and within the limits of the <tt>signed int</tt> data type,
+		 *     and the \c destination is signed.</li>
 		 * <li>If \c source is signed or unsigned, and \c destination is floating point.</li>
-		 * <li>If \c source is a floating point with a fraction of \c 0, and \c destination is signed or unsigned.</li>
-		 * </ol>
-		 * @warning The case of \c source signed, \c destination unsigned isn't necessary as the underlying JSON library only parses integers as signed if they are negative.
-		 *          This case mustn't be forgotten if another JSON library is used and this behaviour doesn't occur!
+		 * <li>If \c source is a floating point with a fraction of \c 0,
+		 *     and \c destination is signed or unsigned.</li></ol>
+		 * @warning The case of \c source signed, \c destination unsigned isn't necessary as the
+		 *          underlying JSON library only parses integers as signed if they are negative.
+		 *          This case mustn't be forgotten if another JSON library is used and this behaviour
+		 *          doesn't occur!
 		 * @todo    This should be made into a static method.
 		 * @param   dest The "destination" JSON value.
 		 * @param   src  The "source" JSON value.
@@ -191,8 +216,9 @@ namespace safe {
 
 		/**
 		 * Converts a key sequence into a single string.
-		 * This method loops through each key in a key sequence and generates one long string which lists all of them in this format:
-		 * <tt>{"key1", "key2", "keyEtc"}</tt>. This is helpful for debugging/logging purposes.
+		 * This method loops through each key in a key sequence and generates one long string
+		 * which lists all of them in this format: <tt>{"key1", "key2", "keyEtc"}</tt>.
+		 * This is helpful for debugging/logging purposes.
 		 * @todo   This should be made into a static method.
 		 * @param  keys The key sequence to convert.
 		 * @return The string containing all the keys in the sequence.
@@ -211,26 +237,45 @@ namespace safe {
 
 		/**
 		 * Applies a value found within the JSON object to a given C++ object.
-		 * This method automatically checks for the existance of keys, that data types match etc. and reports errors via the internal logging object if these checks fail.
-		 * The \c suppressErrors flag does not disable these checks: rather it automatically resets the error state of this object by the end of the call.
-		 * This is helpful when a non-critical JSON value is faulty. If this JSON value is indeed non-critical, then a fallback or default value must be specified
-		 * to ensure that the program executes as smoothly as possible after this method is called. This is done by providing a pointer to the value to set to the destination
-		 * object in case of an error. The destination object is usually initialised the default value explicitly by the client, and a pointer to the object is provided,
-		 * though this is not always the case. If no default value is given, and an error occurred, the destination object will remain unamended.
-		 * 
-		 * It should be noted that only simple types are supported with this method. Array and object values are not supported. However, if the destination object can be
-		 * reliably assigned signed and unsigned values, or strings, or floating point values, or boolean values, then this method can be used. Primative data types have been
-		 * tested extensively and they work, as well as \c std::string objects. If you wish to utilise your own classes with this method, be sure to test that they work as expected.
-		 * They must be assignable to \c nlohmann::ordered_json objects.
+		 * This method automatically checks for the existance of keys,
+		 * that data types match etc. and reports errors via the internal logging
+		 * object if these checks fail.
+		 * The \c suppressErrors flag does not disable these checks: rather it
+		 * automatically resets the error state of this object by the end of the call.
+		 * This is helpful when a non-critical JSON value is faulty. If this JSON
+		 * value is indeed non-critical, then a fallback or default value must be
+		 * specified to ensure that the program executes as smoothly as possible after
+		 * this method is called. This is done by providing a pointer to the value to
+		 * set to the destination object in case of an error. The destination object
+		 * is usually initialised the default value explicitly by the client, and a
+		 * pointer to the object is provided, though this is not always the case.
+		 * If no default value is given, and an error occurred, the destination object
+		 * will remain unamended.\n
+		 * It should be noted that only simple types are supported with this method.
+		 * Array and object values are not supported. However, if the destination
+		 * object can be reliably assigned signed and unsigned values, or strings, or
+		 * floating point values, or boolean values, then this method can be used.
+		 * Primative data types have been tested extensively and they work, as well as
+		 * \c std::string objects. If you wish to utilise your own classes with this
+		 * method, be sure to test that they work as expected. They must be assignable
+		 * to \c nlohmann::ordered_json objects.
 		 * @warning The \c NO_KEYS_GIVEN bit will be set if an empty key sequence was given.
-		 * @warning The \c KEYS_DID_NOT_EXIST bit will be set if the key sequence given did not exist in the JSON object.
-		 * @warning The \c MISMATCHING_TYPE bit will be set if the value pointed to by the key sequence contained a value of an incompatible type to the destination object.
-		 * @todo    Is the default value system really required? Find a case where this parameter \e isn't just a pointer to destination...
-		 * @tparam  T The type of the destination object. This parameter is inferred so it does not usually need to be explicitly provided.
+		 * @warning The \c KEYS_DID_NOT_EXIST bit will be set if the key sequence given
+		 *          did not exist in the JSON object.
+		 * @warning The \c MISMATCHING_TYPE bit will be set if the value pointed to by
+		 *          the key sequence contained a value of an incompatible type to the
+		 *          destination object.
+		 * @todo    Is the default value system really required? Find a case where this
+		 *          parameter \e isn't just a pointer to destination...
+		 * @tparam  T             The type of the destination object. This parameter is
+		 *                        inferred so it does not usually need to be explicitly provided.
 		 * @param   dest          The destination object.
-		 * @param   keys          The key sequence uniquely identifying the JSON value to apply to the C++ object.
-		 * @param   defval        Points to a C++ object containing the value to assign to \c dest in case an error occurs. If \c NULL, no default value is considered.
-		 * @param   supressErrors If \c TRUE, the error state of this object will be reset at the end of the call.
+		 * @param   keys          The key sequence uniquely identifying the JSON value to
+		 *                        apply to the C++ object.
+		 * @param   defval        Points to a C++ object containing the value to assign to \c dest
+		 *                        in case an error occurs. If \c NULL, no default value is considered.
+		 * @param   supressErrors If \c TRUE, the error state of this object will be reset at
+		 *                        the end of the call.
 		 * @sa      json.applyArray()
 		 * @sa      json.applyColour()
 		 * @sa      json.applyVector()
@@ -240,21 +285,26 @@ namespace safe {
 
 		/**
 		 * Applies a JSON array of homogenous values to a given \c std::array object.
-		 * All the checks peformed in \c apply() are performed in this method too, along with a few array-specific checks, such as a size check and homogenous value checks.
-		 * 
-		 * Array elements must be of a type that can easily interact with \c nlohmann::ordered_json. Please see the second paragraph of \c apply() for more details.
-		 * 
-		 * The C++ array will only be changed if the method will be successful, i.e. all checks are satisfied.
-		 * @warning This method assumes that \c N is more than 0!
+		 * All the checks peformed in \c apply() are performed in this method too,
+		 * along with a few array-specific checks, such as a size check and homogenous value checks.\n
+		 * Array elements must be of a type that can easily interact with \c nlohmann::ordered_json.
+		 * Please see the second paragraph of \c apply() for more details.\n
+		 * The C++ array will only be changed if the method will be successful,
+		 * i.e. all checks are satisfied.
 		 * @warning The \c NO_KEYS_GIVEN bit will be set if an empty key sequence was given.
-		 * @warning The \c KEYS_DID_NOT_EXIST bit will be set if the key sequence given did not exist in the JSON object.
-		 * @warning The \c MISMATCHING_TYPE bit will be set if the value pointed to by the key sequence did not contain an array.
-		 * @warning The \c MISMATCHING_SIZE bit will be set if the JSON array did not have the same number of elements as the C++ array.
-		 * @warning The \c MISMATCHING_ELEMENT_TYPE bit will be set if a value within the JSON array was not of the correct data type (dictated by \c T).
-		 * @tparam  T The type of elements within the \c std::array object. Inferred from \c dest.
-		 * @tparam  N The size of the \c std::array object. Inferred from \c dest.
+		 * @warning The \c KEYS_DID_NOT_EXIST bit will be set if the key sequence given did
+		 *          not exist in the JSON object.
+		 * @warning The \c MISMATCHING_TYPE bit will be set if the value pointed to by the
+		 *          key sequence did not contain an array.
+		 * @warning The \c MISMATCHING_SIZE bit will be set if the JSON array did not have
+		 *          the same number of elements as the C++ array.
+		 * @warning The \c MISMATCHING_ELEMENT_TYPE bit will be set if a value within the
+		 *          JSON array was not of the correct data type (dictated by \c T).
+		 * @tparam  T    The type of elements within the \c std::array object. Inferred from \c dest.
+		 * @tparam  N    The size of the \c std::array object. Inferred from \c dest.
 		 * @param   dest The destination array object.
-		 * @param   keys The key sequence uniquely identifying the JSON array value to apply to the C++ array object.
+		 * @param   keys The key sequence uniquely identifying the JSON array value to apply
+		 *               to the C++ array object.
 		 * @sa      json.apply()
 		 * @sa      json.applyColour()
 		 * @sa      json.applyVector()
