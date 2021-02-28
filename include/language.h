@@ -149,11 +149,6 @@ namespace i18n {
 		language_dictionary(const std::string& name = "dictionary") noexcept;
 
 		/**
-		 * Ensures that any dynamically-allocated memory is deleted.
-		 */
-		~language_dictionary() noexcept;
-
-		/**
 		 * Adds a path to a language's string map script.
 		 * The language is only added if the given ID was
 		 * non-blank and was not the ID of the current language.
@@ -334,7 +329,7 @@ namespace i18n {
 		/**
 		 * A pointer to a dynamically-allocated language map object, holding the string map of the current language.
 		 */
-		language* _languageMap = nullptr;
+		std::unique_ptr<i18n::language_dictionary::language> _languageMap = nullptr;
 
 		/**
 		 * Stores the ID of the current language.

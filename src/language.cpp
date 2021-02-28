@@ -48,10 +48,6 @@ std::string i18n::expand_string::insert(const std::string& original) noexcept {
 
 i18n::language_dictionary::language_dictionary(const std::string& name) noexcept : _logger(name) {}
 
-i18n::language_dictionary::~language_dictionary() noexcept {
-	if (_languageMap) delete _languageMap;
-}
-
 bool i18n::language_dictionary::addLanguage(const std::string& id, const std::string& path) noexcept {
 	if (id == _currentLanguage) {
 		_logger.warning("Attempted to replace the script path of the current language \"{}\".", id);
@@ -84,26 +80,23 @@ bool i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
 		return false;
 	} else {
 		if (id == "") {
-			if (_languageMap) delete _languageMap;
 			_languageMap = nullptr;
 			_currentLanguage = "";
 			return true;
 		}
-		i18n::language_dictionary::language* newMap = nullptr;
+		std::unique_ptr<i18n::language_dictionary::language> newMap = nullptr;
 		try {
-			newMap = new i18n::language_dictionary::language("language_" + id);
+			newMap = std::make_unique<i18n::language_dictionary::language>("language_" + id);
 		} catch (std::bad_alloc& e) {
 			_logger.error("Failed to allocate memory for the string map of langauage \"{}\": {}", id, e.what());
 			return false;
 		}
 		newMap->load(_languageFiles[id]);
 		if (newMap->inGoodState()) {
-			if (_languageMap) delete _languageMap;
-			_languageMap = newMap;
+			_languageMap = std::move(newMap);
 			_currentLanguage = id;
 			return true;
 		} else {
-			delete newMap;
 			_logger.error("Failed to load string map script for language \"{}\".", id);
 			return false;
 		}
