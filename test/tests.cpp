@@ -106,6 +106,7 @@ test::test_language::test_language(const std::string& path) noexcept : test_case
 void test::test_language::runTests() noexcept {
 	RUN_TEST(test::test_language::expand_string);
 	RUN_TEST(test::test_language::language_dictionary);
+	RUN_TEST(test::test_language::language_dictionary_json);
 	endTesting();
 }
 
@@ -178,7 +179,14 @@ void test::test_language::language_dictionary() {
 	ASSERT_EQUAL(dict("cancel"), "Cancel");
 	// ensure that constructor assigns name of the object to the log file correctly
 	ASSERT_NOT_EQUAL(global::sink::GetLog().find("name:test_dictionary"), std::string::npos);
+}
+
+void test::test_language::language_dictionary_json() {
 	// instantiate a fresh language_dictionary object and test the json_script methods
+	// common approach for json_script class:
+	// ensure load() works and that it completely replaces the state of the object as required
+	// ensure that save() writes a JSON script as necessary in the correct format,
+	// this can easily be tested by using the verified load() method.
 	i18n::language_dictionary dict_js("test_dict_json_script");
 	dict_js.load("test/assets/lang/lang.json");
 	ASSERT_EQUAL(dict_js.getLanguage(), "ENG_GB");

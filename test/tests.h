@@ -101,5 +101,10 @@ namespace test {
 		 * Runs tests related to the \c language_dictionary class.
 		 */
 		void language_dictionary();
+
+		/**
+		 * Runs tests related to the JSON script component of the \c language_dictionary class.
+		 */
+		void language_dictionary_json();
 	};
 }
