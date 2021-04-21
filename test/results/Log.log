@@ -1,43 +1,48 @@
 Tests © 2021 Dev
 ---------------
 Event Log:
-[2021-02-28 18:14:10.184] [logger_test_0] [info] Hello World!
-[2021-02-28 18:14:10.184] [logger_test_0] [warning] We are currently testing!
-[2021-02-28 18:14:10.184] [logger_test_0] [error] Oh no!
-[2021-02-28 18:14:10.184] [logger_test_0] [info] Number = 8
-[2021-02-28 18:14:10.184] [logger_test_0] [warning] Inserted text, -79.5 = number
-[2021-02-28 18:14:10.184] [logger_test_0] [error] Error is true!
-[2021-02-28 18:14:10.186] [name:test_dictionary_2] [warning] Attempted to remove non-existent language script path "test".
-[2021-02-28 18:14:10.186] [name:test_dictionary_2] [warning] Attempted to remove non-existent language script path "".
-[2021-02-28 18:14:10.186] [name:test_dictionary_2] [warning] Attempted to switch to non-existent string map "testing".
-[2021-02-28 18:14:10.187] [name:test_dictionary_2] [warning] Attempted to replace the script path of the current language "".
-[2021-02-28 18:14:10.187] [json_script_3] [info] Loading JSON script bad_path.json...
-[2021-02-28 18:14:10.187] [json_script_3] [error] Failed to open JSON script "bad_path.json" for reading.
-[2021-02-28 18:14:10.187] [name:test_dictionary_2] [error] Failed to load string map script for language "test".
-[2021-02-28 18:14:10.187] [json_script_5] [info] Loading JSON script test/assets/lang/ENG_GB.json...
-[2021-02-28 18:14:10.189] [json_script_5] [info] Finished loading JSON script test/assets/lang/ENG_GB.json.
-[2021-02-28 18:14:10.189] [name:test_dictionary_2] [warning] Attempted to replace the script path of the current language "test".
-[2021-02-28 18:14:10.189] [json_script_8] [info] Loading JSON script test/assets/lang/GER_DE.json...
-[2021-02-28 18:14:10.190] [json_script_8] [info] Finished loading JSON script test/assets/lang/GER_DE.json.
-[2021-02-28 18:14:10.190] [json_script_11] [info] Loading JSON script test/assets/lang/ENG_GB.json...
-[2021-02-28 18:14:10.191] [json_script_11] [info] Finished loading JSON script test/assets/lang/ENG_GB.json.
-[2021-02-28 18:14:10.191] [json_script_14] [info] Loading JSON script test/assets/lang/lang.json...
-[2021-02-28 18:14:10.192] [json_script_17] [info] Loading JSON script ./test/assets/lang/ENG_GB.json...
-[2021-02-28 18:14:10.193] [json_script_17] [info] Finished loading JSON script ./test/assets/lang/ENG_GB.json.
-[2021-02-28 18:14:10.194] [json_script_14] [info] Finished loading JSON script test/assets/lang/lang.json.
-[2021-02-28 18:14:10.194] [json_script_20] [info] Loading JSON script ./test/assets/lang/GER_DE.json...
-[2021-02-28 18:14:10.195] [json_script_20] [info] Finished loading JSON script ./test/assets/lang/GER_DE.json.
-[2021-02-28 18:14:10.195] [json_script_14] [info] Saving JSON script test/assets/lang/lang.json...
-[2021-02-28 18:14:10.196] [json_script_14] [info] Finished saving JSON script test/assets/lang/lang.json.
-[2021-02-28 18:14:10.196] [json_script_23] [info] Loading JSON script ./test/assets/lang/ENG_GB.json...
-[2021-02-28 18:14:10.197] [json_script_23] [info] Finished loading JSON script ./test/assets/lang/ENG_GB.json.
-[2021-02-28 18:14:10.197] [json_script_14] [info] Loading JSON script test/assets/lang/lang.json...
-[2021-02-28 18:14:10.198] [json_script_14] [info] Finished loading JSON script test/assets/lang/lang.json.
-[2021-02-28 18:14:10.198] [json_script_27] [info] Loading JSON script ./test/assets/lang/ENG_GB.json...
-[2021-02-28 18:14:10.199] [json_script_27] [info] Finished loading JSON script ./test/assets/lang/ENG_GB.json.
-[2021-02-28 18:14:10.200] [json_script_14] [info] Saving JSON script test/assets/lang/lang.json...
-[2021-02-28 18:14:10.200] [json_script_14] [info] Finished saving JSON script test/assets/lang/lang.json.
-[2021-02-28 18:14:10.201] [name:test_json_30] [error] Attempted to assign a value to a variable without specifying a key sequence.
-[2021-02-28 18:14:10.201] [name:test_json_30] [error] The key sequence {"test"} does not exist in the JSON object.
-[2021-02-28 18:14:10.203] [name:test_json_30] [error] Attempted to assign a value of data type "boolean" to a destination of type "number", in the key sequence {"happy"}.
-[2021-02-28 18:14:10.203] [name:test_json_30] [error] Attempted to assign a value of data type "float" to a destination of type "number", in the key sequence {"pi"}.
+[2021-04-21 16:08:55.939] [logger_test_0] [info] Hello World!
+[2021-04-21 16:08:55.939] [logger_test_0] [warning] We are currently testing!
+[2021-04-21 16:08:55.939] [logger_test_0] [error] Oh no!
+[2021-04-21 16:08:55.939] [logger_test_0] [info] Number = 8
+[2021-04-21 16:08:55.939] [logger_test_0] [warning] Inserted text, -79.5 = number
+[2021-04-21 16:08:55.939] [logger_test_0] [error] Error is true!
+[2021-04-21 16:08:55.941] [name:test_dictionary_2] [warning] Attempted to remove non-existent language script path "test".
+[2021-04-21 16:08:55.941] [name:test_dictionary_2] [warning] Attempted to remove non-existent language script path "".
+[2021-04-21 16:08:55.941] [name:test_dictionary_2] [warning] Attempted to switch to non-existent string map "testing".
+[2021-04-21 16:08:55.941] [name:test_dictionary_2] [warning] Attempted to replace the script path of the current language "".
+[2021-04-21 16:08:55.941] [json_script_3] [info] Loading JSON script bad_path.json...
+[2021-04-21 16:08:55.941] [json_script_3] [error] Failed to open JSON script "bad_path.json" for reading.
+[2021-04-21 16:08:55.941] [name:test_dictionary_2] [error] Failed to load string map script for language "test".
+[2021-04-21 16:08:55.941] [json_script_5] [info] Loading JSON script test/assets/lang/ENG_GB.json...
+[2021-04-21 16:08:55.943] [json_script_5] [info] Finished loading JSON script test/assets/lang/ENG_GB.json.
+[2021-04-21 16:08:55.943] [name:test_dictionary_2] [warning] Attempted to replace the script path of the current language "test".
+[2021-04-21 16:08:55.943] [json_script_8] [info] Loading JSON script test/assets/lang/GER_DE.json...
+[2021-04-21 16:08:55.944] [json_script_8] [info] Finished loading JSON script test/assets/lang/GER_DE.json.
+[2021-04-21 16:08:55.944] [json_script_11] [info] Loading JSON script test/assets/lang/ENG_GB.json...
+[2021-04-21 16:08:55.945] [json_script_11] [info] Finished loading JSON script test/assets/lang/ENG_GB.json.
+[2021-04-21 16:08:55.945] [json_script_14] [info] Loading JSON script file...
+[2021-04-21 16:08:55.946] [json_script_14] [error] Failed to open JSON script "file" for reading.
+[2021-04-21 16:08:55.946] [json_script_16] [info] Loading JSON script test/assets/lang/lang.json...
+[2021-04-21 16:08:55.946] [json_script_19] [info] Loading JSON script ./test/assets/lang/ENG_GB.json...
+[2021-04-21 16:08:55.947] [json_script_19] [info] Finished loading JSON script ./test/assets/lang/ENG_GB.json.
+[2021-04-21 16:08:55.948] [json_script_16] [info] Finished loading JSON script test/assets/lang/lang.json.
+[2021-04-21 16:08:55.948] [json_script_22] [info] Loading JSON script ./test/assets/lang/GER_DE.json...
+[2021-04-21 16:08:55.949] [json_script_22] [info] Finished loading JSON script ./test/assets/lang/GER_DE.json.
+[2021-04-21 16:08:55.949] [json_script_16] [info] Saving JSON script test/assets/lang/lang.json...
+[2021-04-21 16:08:55.950] [json_script_16] [info] Finished saving JSON script test/assets/lang/lang.json.
+[2021-04-21 16:08:55.950] [json_script_25] [info] Loading JSON script ./test/assets/lang/ENG_GB.json...
+[2021-04-21 16:08:55.952] [json_script_25] [info] Finished loading JSON script ./test/assets/lang/ENG_GB.json.
+[2021-04-21 16:08:55.952] [json_script_16] [info] Loading JSON script test/assets/lang/lang.json...
+[2021-04-21 16:08:55.953] [json_script_16] [info] Finished loading JSON script test/assets/lang/lang.json.
+[2021-04-21 16:08:55.954] [json_script_29] [info] Loading JSON script ./test/assets/lang/ENG_GB.json...
+[2021-04-21 16:08:55.955] [json_script_29] [info] Finished loading JSON script ./test/assets/lang/ENG_GB.json.
+[2021-04-21 16:08:55.955] [json_script_16] [info] Saving JSON script test/assets/lang/lang.json...
+[2021-04-21 16:08:55.956] [json_script_16] [info] Finished saving JSON script test/assets/lang/lang.json.
+[2021-04-21 16:08:55.956] [name:test_json_32] [error] Attempted to assign a value to a variable without specifying a key sequence.
+[2021-04-21 16:08:55.957] [name:test_json_32] [error] The key sequence {"test"} does not exist in the JSON object.
+[2021-04-21 16:08:55.958] [name:test_json_32] [error] Attempted to assign a value of data type "boolean" to a destination of type "number", in the key sequence {"happy"}.
+[2021-04-21 16:08:55.958] [name:test_json_32] [error] Attempted to assign a value of data type "float" to a destination of type "number", in the key sequence {"pi"}.
+[2021-04-21 16:08:55.959] [name:test_json_32] [error] The size of the JSON array specified (3) does not match with the size of the provided array (2), in the key sequence {"list"}.
+[2021-04-21 16:08:55.959] [name:test_json_32] [error] The size of the JSON array specified (3) does not match with the size of the provided array (4), in the key sequence {"list"}.
+[2021-04-21 16:08:55.960] [name:test_json_32] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to an array of data type "string", in the key sequence {"list"}.

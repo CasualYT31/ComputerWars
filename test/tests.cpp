@@ -154,6 +154,34 @@ void test::test_safejson::json() {
 	ASSERT_TRUE(j.inGoodState());
 	ASSERT_EQUAL(holder, 42);
 	ASSERT_NAME_IN_LOG("name:test_json");
+	// test applyArray() MISMATCHING_SIZE
+	std::array<int, 2> holderArrayError;
+	j.applyArray(holderArrayError, { "list" });
+	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_SIZE);
+	j.resetState();
+	std::array<int, 4> holderArrayTooBig;
+	j.applyArray(holderArrayTooBig, { "list" });
+	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_SIZE);
+	j.resetState();
+	// test applyArray() MISMATCHING_ELEMENT_TYPE
+	std::array<std::string, 3> holderArrayBadType;
+	j.applyArray(holderArrayBadType, { "list" });
+	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_ELEMENT_TYPE);
+	j.resetState();
+	// test applyArray()
+	std::array<int, 3> holderArray;
+	j.applyArray(holderArray, { "list" });
+	ASSERT_TRUE(j.inGoodState());
+	ASSERT_EQUAL(holderArray[2], 2);
+	// test applyColour()
+	j = R"({
+		"colour": [255, 180, 255, 255]
+	})"_json;
+	sf::Color recipient;
+	j.applyColour(recipient, { "colour" });
+	ASSERT_TRUE(j.inGoodState());
+	ASSERT_EQUAL(recipient.r, 255);
+	ASSERT_EQUAL(recipient.g, 180);
 }
 
 //******************
@@ -239,6 +267,11 @@ void test::test_language::language_dictionary() {
 }
 
 void test::test_language::language_dictionary_json() {
+	// do some json_script generic tests
+	// test non-existent file
+	i18n::language_dictionary jsonscripttest;
+	jsonscripttest.load("file");
+	ASSERT_TRUE(jsonscripttest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
 	// instantiate a fresh language_dictionary object and test the json_script methods
 	// common approach for json_script class:
 	// ensure load() works and that it completely replaces the state of the object as required

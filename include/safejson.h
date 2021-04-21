@@ -300,6 +300,7 @@ namespace safe {
 		 *          the same number of elements as the C++ array.
 		 * @warning The \c MISMATCHING_ELEMENT_TYPE bit will be set if a value within the
 		 *          JSON array was not of the correct data type (dictated by \c T).
+		 *          If the type can be converted, it will be, and this error bit will not be set.
 		 * @tparam  T    The type of elements within the \c std::array object. Inferred from \c dest.
 		 * @tparam  N    The size of the \c std::array object. Inferred from \c dest.
 		 * @param   dest The destination array object.
