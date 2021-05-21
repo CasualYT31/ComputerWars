@@ -48,20 +48,9 @@ namespace awe {
 
 		/**
 		 * Constructs a tile.
-		 * All properties are set using their respective set methods.
-		 * @param location The location of this tile in the map.
-		 * @param tile     The type of tile this object represents.
-		 * @param hp       The initial HP of the tile.
-		 * @param owner    The owner's army ID.
-		 * @sa    awe::tile_type
+		 * @param location The location of this tile in the map, which won't change after allocation.
 		 */
-		tile(sf::Vector2u location, const std::shared_ptr<const tile_type>& tile = nullptr, const sf::Int32 hp = -1, std::shared_ptr<awe::army> owner = nullptr) noexcept;
-		
-		/**
-		 * Sets the location this tile has on its map.
-		 * @param location The location in tile coordinates.
-		 */
-		void setLocation(sf::Vector2u location) noexcept;
+		tile(sf::Vector2u location) noexcept;
 
 		/**
 		 * Retrieves the location this tile is on in its map.
@@ -73,13 +62,13 @@ namespace awe {
 		 * Updates the type of tile this object represents.
 		 * @param newTile A pointer to the static information on the tile type to assign.
 		 */
-		void setTile(const std::shared_ptr<const tile_type>& newTile) noexcept;
+		void setTileType(const std::shared_ptr<const tile_type>& newTile) noexcept;
 
 		/**
 		 * Retrieves the information on the tile's static information.
 		 * @return Pointer to the information.
 		 */
-		std::shared_ptr<const tile_type> getTile() const noexcept;
+		std::shared_ptr<const tile_type> getTileType() const noexcept;
 
 		/**
 		 * Updates the HP of the tile.
@@ -88,20 +77,20 @@ namespace awe {
 		 * @param  newHP The new HP
 		 * @return The old HP.
 		 */
-		sf::Int32 setHP(const sf::Int32 newHP) noexcept;
+		void setHP(const awe::HP newHP) noexcept;
 
 		/**
 		 * Retrieves the current HP of the tile.
 		 * @return The current HP.
 		 */
-		sf::Int32 getHP() const noexcept;
+		awe::HP getHP() const noexcept;
 
 		/**
 		 * Updates the owner of the tile.
 		 * If the given pointer is /em expired, this denotes that the tile should not be owned.
 		 * @param A pointer to the army which owns the tile.
 		 */
-		void setOwner(std::shared_ptr<army> newOwner) noexcept;
+		void setOwner(const std::shared_ptr<army>& newOwner) noexcept;
 
 		/**
 		 * Retrieves the current owner of the tile.
@@ -115,7 +104,7 @@ namespace awe {
 		 * If the given pointer is /em empty (\c nullptr), this denotes that the tile should not be occupied.
 		 * @param newUnit The reference to the unit that is currently occupying this tile.
 		 */
-		void setUnit(std::shared_ptr<awe::unit> newUnit) noexcept;
+		void setUnit(const std::shared_ptr<awe::unit>& newUnit) noexcept;
 
 		/**
 		 * Retrieves a reference to the unit currently occupying this tile.
@@ -123,22 +112,6 @@ namespace awe {
 		 * @return Information on the unit that is occupying this tile.
 		 */
 		std::weak_ptr<awe::unit> getUnit() const noexcept;
-
-		/**
-		 * Tests whether or not this tile is owned by another army.
-		 * Note that this method will also return /c FALSE if the assigned army has been destroyed,
-		 * rendering the weak reference invalid.
-		 * @return /c TRUE if this tile has been assigned a valid owner, /c FALSE otherwise.
-		 */
-		bool isOwned() const noexcept;
-
-		/**
-		 * Tests whether or not this tile is currently occupied.
-		 * Note that this method will also return /c FALSE if the assigned unit has been destroyed,
-		 * rendering the weak reference invalid.
-		 * @return /c TRUE if this tile is being occupied, /c FALSE otherwise.
-		 */
-		bool isOccupied() const noexcept;
 
 		/**
 		 * The tile's UUID object.
@@ -160,22 +133,22 @@ namespace awe {
 		bool operator!=(const awe::tile& rhs) const noexcept;
 
 		/**
-		 * Sets the spritesheet used with this tile.
+		 * Sets the tile spritesheet used with this tile.
 		 * @param ptr Pointer to the data.
 		 */
-		void setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
+		void setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
 
 		/**
 		 * Gets the spritesheet used with this tile.
 		 * @return Pointer to the data.
 		 */
-		std::shared_ptr<sfx::animated_spritesheet> getSpritesheet() const noexcept;
+		std::shared_ptr<sfx::animated_spritesheet> getTileSpritesheet() const noexcept;
 
 		/**
 		 * Gets the sprite ID used with this tile.
 		 * @return The sprite ID assigned to the internal sprite object.
 		 */
-		unsigned int getSpriteID() const noexcept;
+		unsigned int getTileSpriteID() const noexcept;
 
 		/**
 		 * This drawable's \c animate() method.
@@ -212,7 +185,7 @@ namespace awe {
 		/**
 		 * The HP of the tile.
 		 */
-		sf::Int32 _hp = 0;
+		awe::HP _hp = 0;
 
 		/**
 		 * Weak reference to the unit occupying this tile.
@@ -225,9 +198,9 @@ namespace awe {
 		sf::Vector2u _location;
 
 		/**
-		 * Pointer to the spritesheet used by this tile.
+		 * Pointer to the tile spritesheet used by this tile.
 		 */
-		std::shared_ptr<sfx::animated_spritesheet> _spritesheet;
+		std::shared_ptr<sfx::animated_spritesheet> _tileSpritesheet;
 
 		/**
 		 * Tile's sprite.

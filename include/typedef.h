@@ -45,14 +45,23 @@ namespace awe {
 	 * Typedef representing funds.
 	 * I decided to make this signed because fund calculations
 	 * will result in negative values more often than not, and
-	 * they should be handled properly.
+	 * they should be handled properly. This reasoning can be
+	 * applied to pretty much all of my signed int typedefs.
 	 */
 	typedef sf::Int32 Funds;
 
-	/* Typedefs to add
-	+ Tile HP
-	+ Unit HP
-	+ Unit Fuel
-	+ Unit Ammo
-	*/
+	/**
+	 * Typedef representing a tile's or unit's HP.
+	 */
+	typedef sf::Int32 HP;
+
+	/**
+	 * Typedef representing a unit's fuel.
+	 */
+	typedef sf::Int32 Fuel;
+
+	/**
+	 * Typedef representing a unit's ammo.
+	 */
+	typedef sf::Int32 Ammo;
 }

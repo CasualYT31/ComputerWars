@@ -22,46 +22,35 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "terrain.h"
 
-awe::tile::tile(sf::Vector2u location, const std::shared_ptr<const awe::tile_type>& tile, const sf::Int32 hp, std::shared_ptr<awe::army> owner) noexcept {
-	setLocation(location);
-	setTile(tile);
-	setHP(hp);
-	setOwner(owner);
-}
-
-void awe::tile::setLocation(sf::Vector2u location) noexcept {
-	_location = location;
-}
+awe::tile::tile(sf::Vector2u location) noexcept : _location(location) {}
 
 sf::Vector2u awe::tile::getLocation() const noexcept {
 	return _location;
 }
 
-void awe::tile::setTile(const std::shared_ptr<const awe::tile_type>& newTile) noexcept {
+void awe::tile::setTileType(const std::shared_ptr<const awe::tile_type>& newTile) noexcept {
 	_tileType = newTile;
 	_updateSprite();
 }
 
-std::shared_ptr<const awe::tile_type> awe::tile::getTile() const noexcept {
+std::shared_ptr<const awe::tile_type> awe::tile::getTileType() const noexcept {
 	return _tileType;
 }
 
-sf::Int32 awe::tile::setHP(const sf::Int32 newHP) noexcept {
-	auto old = getHP();
+void awe::tile::setHP(const awe::HP newHP) noexcept {
 	_hp = newHP;
 	if (_tileType) {
 		if (_hp < 0 || _hp >(int)_tileType->getType()->getMaxHP()) {
 			_hp = _tileType->getType()->getMaxHP();
 		}
 	}
-	return old;
 }
 
 sf::Int32 awe::tile::getHP() const noexcept {
 	return _hp;
 }
 
-void awe::tile::setOwner(std::shared_ptr<awe::army> newOwner) noexcept {
+void awe::tile::setOwner(const std::shared_ptr<awe::army>& newOwner) noexcept {
 	_owner = newOwner;
 	_updateSprite();
 }
@@ -70,20 +59,12 @@ std::weak_ptr <awe::army> awe::tile::getOwner() const noexcept {
 	return _owner;
 }
 
-void awe::tile::setUnit(std::shared_ptr<awe::unit> newUnit) noexcept {
+void awe::tile::setUnit(const std::shared_ptr<awe::unit>& newUnit) noexcept {
 	_unit = newUnit;
 }
 
 std::weak_ptr<awe::unit> awe::tile::getUnit() const noexcept {
 	return _unit;
-}
-
-bool awe::tile::isOwned() const noexcept {
-	return !_owner.expired();
-}
-
-bool awe::tile::isOccupied() const noexcept {
-	return !_unit.expired();
 }
 
 bool awe::tile::operator==(const awe::tile& rhs) const noexcept {
@@ -94,21 +75,21 @@ bool awe::tile::operator!=(const awe::tile& rhs) const noexcept {
 	return !(*this == rhs);
 }
 
-void awe::tile::setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
+void awe::tile::setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
 	if (ptr) {
 		_sprite.setSpritesheet(ptr);
 		_updateSprite();
 	} else {
 		_sprite.setSpritesheet(nullptr);
 	}
-	_spritesheet = ptr;
+	_tileSpritesheet = ptr;
 }
 
-std::shared_ptr<sfx::animated_spritesheet> awe::tile::getSpritesheet() const noexcept {
-	return _spritesheet;
+std::shared_ptr<sfx::animated_spritesheet> awe::tile::getTileSpritesheet() const noexcept {
+	return _tileSpritesheet;
 }
 
-unsigned int awe::tile::getSpriteID() const noexcept {
+unsigned int awe::tile::getTileSpriteID() const noexcept {
 	return _sprite.getSprite();
 }
 

@@ -52,6 +52,12 @@ namespace engine {
 	class uuid {
 	public:
 		/**
+		 * Reserved value, can be used for error checking.
+		 * Used in the \c uuid implementation to know when to wrap UUIDs back around to 0.
+		 */
+		static const awe::UUIDValue INVALID = UINT32_MAX;
+
+		/**
 		 * Constructs a UUID.
 		 * @warning Note that once \c _id_counter reaches its maximum value, it will wrap
 		 *          around to \c 0 again. This can cause problems if previous objects with
@@ -108,7 +114,7 @@ template<typename T>
 engine::uuid<T>::uuid(const awe::UUIDValue init) noexcept {
 	if (init != 0) _id_counter = init;
 	_id = _id_counter++;
-	if (_id_counter == UINT32_MAX) _id_counter = 0;
+	if (_id_counter == INVALID) _id_counter = 0;
 }
 
 template<typename T>

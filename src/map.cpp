@@ -22,14 +22,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.h"
 
-sf::Vector2u awe::map::setSize(const sf::Vector2u& dim) noexcept {
-	auto old = getSize();
+void awe::map::setSize(const sf::Vector2u& dim) noexcept {
+	auto oldx = _size.x, oldy = _size.y;
 	_tiles.resize(dim.x);
 	for (auto itr = _tiles.begin(), enditr = _tiles.end(); itr != enditr; itr++) {
 		itr->resize(dim.y);
 	}
 	// if the map has gotten bigger, we need to allocate new tiles
-	if (old.x < dim.x || old.y < dim.y) {
+	if (oldx < dim.x || oldy < dim.y) {
 		unsigned int x = 0;
 		for (auto XItr = _tiles.begin(), endXItr = _tiles.end(); XItr != endXItr; XItr++) {
 			unsigned int y = 0;
@@ -41,14 +41,62 @@ sf::Vector2u awe::map::setSize(const sf::Vector2u& dim) noexcept {
 		}
 	}
 	_size = dim;
-	return old;
 }
 
 sf::Vector2u awe::map::getSize() const noexcept {
 	return _size;
 }
 
-bool awe::map::setVisiblePortion(const sf::Rect<unsigned int> portion) noexcept {
+void awe::map::setName(const std::string& newName) noexcept {
+	_name = newName;
+}
+
+std::string awe::map::getName() const noexcept {
+	return _name;
+}
+
+void awe::map::setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
+	for (auto XItr = _tiles.begin(), endXItr = _tiles.end(); XItr != endXItr; XItr++) {
+		for (auto YItr = XItr->begin(), endYItr = XItr->end(); YItr != endYItr; YItr++) {
+			(*YItr)->setTileSpritesheet(ptr);
+		}
+	}
+}
+
+void awe::map::setTileType(sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept {
+	auto t = _findTile(pos);
+	if (t) t->setTileType(type);
+}
+
+std::shared_ptr<const awe::tile_type> awe::map::getTileType(sf::Vector2u pos) const noexcept {
+	auto t = _findTile(pos);
+	if (t) return t->getTileType();
+	return nullptr;
+}
+
+void awe::map::setTileHP(sf::Vector2u pos, awe::HP hp) noexcept {
+	auto t = _findTile(pos);
+	if (t) t->setHP(hp);
+}
+
+awe::HP awe::map::getTileHP(sf::Vector2u pos) const noexcept {
+	auto t = _findTile(pos);
+	if (t) return t->getHP();
+	return -1;
+}
+
+void awe::map::setTileOwner(sf::Vector2u pos, const std::shared_ptr<awe::army>& owner) noexcept {
+	auto t = _findTile(pos);
+	if (t) t->setOwner(owner);
+}
+
+std::weak_ptr<awe::army> awe::map::getTileOwner(sf::Vector2u pos) const noexcept {
+	auto t = _findTile(pos);
+	if (t) return t->getOwner();
+	return std::weak_ptr<awe::army>();
+}
+
+/*bool awe::map::setVisiblePortion(const sf::Rect<unsigned int> portion) noexcept {
 	if (portion.left >= _size.x || portion.top >= _size.y || portion.left + portion.width > _size.x || portion.top + portion.height > _size.y) return false;
 	_visiblePortion = portion;
 	return true;
@@ -56,29 +104,11 @@ bool awe::map::setVisiblePortion(const sf::Rect<unsigned int> portion) noexcept 
 
 sf::Rect<unsigned int> awe::map::getVisiblePortion() const noexcept {
 	return _visiblePortion;
-}
+}*/
 
-std::string awe::map::setName(const std::string& newName) noexcept {
-	auto old = getName();
-	_name = newName;
-	return old;
-}
-
-std::string awe::map::getName() const noexcept {
-	return _name;
-}
-
-std::shared_ptr<awe::tile> awe::map::getTile(const sf::Vector2u& pos) {
-	if (pos.x >= _tiles.size() || pos.y >= _tiles[0].size()) throw std::out_of_range("Tile position was out of range");
-	return _tiles[pos.x][pos.y];
-}
-
-void awe::map::setTileSpritesheet(const std::shared_ptr<awe::spritesheets::tiles>& ptr) noexcept {
-	_tileSprites = ptr;
-}
-
-void awe::map::setPictureSpritesheet(const std::shared_ptr<awe::spritesheets::tile_pictures>& ptr) noexcept {
-	_pictureSprites = ptr;
+std::shared_ptr<awe::tile> awe::map::_findTile(sf::Vector2u pos) const noexcept {
+	if (_size.x < pos.x || _size.y < pos.y) return _tiles[pos.x][pos.y];
+	return nullptr;
 }
 
 bool awe::map::animate(const sf::RenderTarget& target) noexcept {
