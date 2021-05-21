@@ -86,6 +86,10 @@ namespace awe {
 		 */
 		bool write(std::string filename = "") noexcept;
 
+		/////////////////
+		// MAP METHODS //
+		/////////////////
+		
 		/**
 		 * Updates the map's size.
 		 * @param newSize The new size of the map in tiles.
@@ -114,10 +118,15 @@ namespace awe {
 		 */
 		std::string getMapName() const noexcept;
 
+		//////////////////
+		// ARMY METHODS //
+		//////////////////
+
 		/**
 		 * Creates a new army and adds it to the internal list.
 		 * The new army is given \c 0 funds, and it has no commanders.
-		 * Its team ID will be the same as the country ID given.
+		 * Its team ID will be the same as the country ID given:
+		 * this means that by default, each army is on their own team.
 		 * @param id The ID of the country of the army, which also defines the turn order of the army.
 		 */
 		void createArmy(awe::bank<awe::country>::index id) noexcept;
@@ -204,22 +213,25 @@ namespace awe {
 		 */
 		std::size_t getNumberOfArmies() const noexcept;
 
-		// game methods
+		//////////////////
+		// UNIT METHODS //
+		//////////////////
 
 		/**
 		 * Creates a new unit.
 		 * This method will fail under the following circumstances:
-		 * <ol><li>\c owningArmy is an empty pointer.</li>
+		 * <ol><li>\c _armies is an empty pointer.</li>
+		 * <li>\c owningCountry is an empty pointer.</li>
 		 * <li>\c type is an empty pointer.</li>
 		 * <li>\c _map is an empty pointer.</li>
 		 * <li>\c _map->getTile(location) is an empty pointer or throws.</li>
 		 * <li>The tile at \c location is occupied.</li></ol>
-		 * @param  owningArmy The owner of the unit.
-		 * @param  type       The type of unit to create.
-		 * @param  location   The starting location of the new unit.
+		 * @param  owningCountry The country of the owning army of the unit.
+		 * @param  type          The type of unit to create.
+		 * @param  location      The starting location of the new unit.
 		 * @return Pointer to the created unit, \c nullptr if it could not be created (errors will be logged).
 		 */
-		std::shared_ptr<awe::unit> createUnit(const std::shared_ptr<awe::army>& owningArmy, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept;
+		std::shared_ptr<awe::unit> createUnit(const std::shared_ptr<const awe::country>& owningCountry, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept;
 
 		/**
 		 * Deletes an existing unit.
@@ -230,14 +242,6 @@ namespace awe {
 		 * @return \c TRUE if the unit was successfully deleted, \c FALSE if \c ref was an empty pointer (an error will be logged).
 		 */
 		bool deleteUnit(const std::shared_ptr<awe::unit>& ref) noexcept;
-
-		/**
-		 * Changes the owner of a given tile.
-		 * @param  ref           Strong reference to the tile in question.
-		 * @param  newOwningArmy The new owner of the tile, \c nullptr for no owner.
-		 * @return \c TRUE if the owner was changed successfully, \c FALSE if \c ref was empty (errors will be logged).
-		 */
-		bool changeTileOwner(const std::shared_ptr<awe::tile>& ref, const std::shared_ptr<awe::army>& newOwningArmy) noexcept;
 
 		/**
 		 * Moves a given unit to a given location on the map.
@@ -266,6 +270,14 @@ namespace awe {
 		 *         or if the move operation failed (\c newLocation was not valid).
 		 */
 		bool unloadUnit(const std::shared_ptr<awe::unit>& dest, const std::shared_ptr<awe::unit>& src, sf::Vector2u newLocation) noexcept;
+
+		/**
+		 * Changes the owner of a given tile.
+		 * @param  ref              Strong reference to the tile in question.
+		 * @param  newOwningCountry The new owner of the tile, \c nullptr for no owner.
+		 * @return \c TRUE if the owner was changed successfully, \c FALSE if \c ref was empty (errors will be logged).
+		 */
+		bool changeTileOwner(const std::shared_ptr<awe::tile>& ref, const std::shared_ptr<const awe::country>& newOwningCountry) noexcept;
 
 		// setup methods
 

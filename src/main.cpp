@@ -159,5 +159,5 @@ int game() {
 }
 
 int main() {
-    return test::test();
+    return game();
 }

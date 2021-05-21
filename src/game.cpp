@@ -199,12 +199,15 @@ std::string awe::game::getMapName() const noexcept {
 void awe::game::createArmy(awe::bank<awe::country>::index id) noexcept {
 	if (_armies && _countries) {
 		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
-			if (*(*itr)->getCountry() == *(*_countries)[id]) return;
+			if (*(*itr)->getCountry() == *(*_countries)[id]) {
+				_logger.warning("Attempted to create a new army with a country that already exists on the map, country ID {}.", id);
+				return;
+			}
 		}
 		try {
 			_armies->insert(_getArmyIterator((unsigned int)id), std::make_shared<awe::army>((awe::TeamID)id, (*_countries)[id]));
-		} catch (std::exception&) {
-			// failed - ignore call
+		} catch (std::exception& e) {
+			_logger.error("Failed to create new army with country ID {}: {}", id, e.what());
 		}
 	}
 }
@@ -270,7 +273,8 @@ std::size_t awe::game::getNumberOfArmies() const noexcept {
 	return 0;
 }
 
-std::shared_ptr<awe::unit> awe::game::createUnit(const std::shared_ptr<awe::army>& owningArmy, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept {
+std::shared_ptr<awe::unit> awe::game::createUnit(const std::shared_ptr<const awe::country>& owningCountry, const std::shared_ptr<const awe::unit_type>& type, sf::Vector2u location) noexcept {
+	auto owningArmy = _findArmyByCountry(owningCountry);
 	try {
 		if (owningArmy && type && _map && _map->getTile(location) && !_map->getTile(location)->isOccupied()) {
 			auto unit = owningArmy->addUnit(type);
@@ -282,7 +286,7 @@ std::shared_ptr<awe::unit> awe::game::createUnit(const std::shared_ptr<awe::army
 			_logger.error("Tile was occupied!");
 		}
 	} catch (std::out_of_range&) { // given location was out of range
-		_logger.error("Attempted to create a new unit which is outside the map's range of ({}, {}).", _map->getSize().x, _map->getSize().y);
+		_logger.error("Attempted to create a new unit at ({}, {}) which is outside the map's range of ({}, {}).", location.x, location.y, _map->getSize().x, _map->getSize().y);
 	}
 	_logger.error("Failed to create unit of type \"{}\" for army \"{}\" at location ({}, {}).",
 		((type)?(type->getName()):("[NULL]")),
@@ -306,7 +310,8 @@ bool awe::game::deleteUnit(const std::shared_ptr<awe::unit>& ref) noexcept {
 	return false;
 }
 
-bool awe::game::changeTileOwner(const std::shared_ptr<awe::tile>& ref, const std::shared_ptr<awe::army>& newOwningArmy) noexcept {
+bool awe::game::changeTileOwner(const std::shared_ptr<awe::tile>& ref, const std::shared_ptr<const awe::country>& newOwningCountry) noexcept {
+	auto newOwningArmy = _findArmyByCountry(newOwningCountry);
 	if (ref) {
 		auto pOldOwner = ref->getOwner().lock();
 		if (pOldOwner) pOldOwner->removeOwnedTile(ref);
