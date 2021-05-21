@@ -97,7 +97,7 @@ void awe::game::_read_CWM_1(const std::shared_ptr<engine::binary_file>& file, st
 		// b - read country
 		army.setCountry((*_countries)[file->readNumber<awe::bank<const awe::country>::index>()]);
 		// c - read funds
-		army.setFunds(file->readNumber<unsigned int>());
+		army.setFunds(file->readNumber<awe::Funds>());
 		// d - read commanders: first CO, second CO
 		awe::bank<const awe::commander>::index first = file->readNumber<awe::bank<const awe::commander>::index>(),
 			second = file->readNumber<awe::bank<const awe::commander>::index>();
@@ -245,7 +245,7 @@ awe::Funds awe::game::getArmysFunds(const std::shared_ptr<const awe::country>& p
 	return -1;
 }
 
-void awe::game::setArmysCommanders(const std::shared_ptr<const awe::country>& ptr, std::shared_ptr<const awe::commander> firstCO, std::shared_ptr<const awe::commander> secondCO = nullptr) noexcept {
+void awe::game::setArmysCommanders(const std::shared_ptr<const awe::country>& ptr, std::shared_ptr<const awe::commander> firstCO, std::shared_ptr<const awe::commander> secondCO) noexcept {
 	auto army = _findArmyByCountry(ptr);
 	if (army) army->setCommanders(firstCO, secondCO);
 }
@@ -406,6 +406,8 @@ void awe::game::setUnits(const std::shared_ptr<awe::bank<const awe::unit_type>>&
 
 void awe::game::setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept {
 	_sprites = ptr;
+	// debugging
+	_map->setTileSpritesheet(ptr->tile);
 }
 
 std::vector<std::shared_ptr<awe::army>>::iterator awe::game::_getArmyIterator(unsigned int index) const {
@@ -424,4 +426,13 @@ std::shared_ptr<awe::army> awe::game::_findArmyByCountry(const std::shared_ptr<c
 		}
 	}
 	return nullptr;
+}
+
+bool awe::game::animate(const sf::RenderTarget& target) noexcept {
+	if (_map) return _map->animate(target);
+	return false;
+}
+
+void awe::game::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	if (_map) target.draw(*_map, states);
 }

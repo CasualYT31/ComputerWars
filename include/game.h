@@ -41,7 +41,7 @@ namespace awe {
 	 * This class is only responsible for the storage and direct manipulation of the game,
 	 * which means game rules are defined in another class.
 	 */
-	class game : sf::NonCopyable {
+	class game : sf::NonCopyable, public sfx::animated_drawable {
 	public:
 		/**
 		 * Current version number representing the file format in use.
@@ -310,7 +310,22 @@ namespace awe {
 		 * @param ptr Pointer to the spritesheet information to pull from.
 		 */
 		void setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept;
+
+		/**
+		* This drawable's \c animate() method.
+		* This will animate the map.
+		* @return \c FALSE.
+		*/
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
+		/**
+		 * This drawable's \c draw() method.
+		 * Draws the map.
+		 * @param target The target to render the map to.
+		 * @param states The render states to apply to the map. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 */
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
 		/**
 		 * Retrieves a vector iterator for a given army.
 		 * @param  index The 0-based index of the army to retrieve the iterator of.
