@@ -221,90 +221,47 @@ void awe::game::deleteArmy(const std::shared_ptr<const awe::country>& ptr) noexc
 }
 
 void awe::game::setArmysTeam(const std::shared_ptr<const awe::country>& ptr, awe::TeamID newTeam) noexcept {
-	if (_armies && ptr) {
-		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
-			if (*(*itr)->getCountry() == *ptr) {
-				(*itr)->setTeam(newTeam);
-				break;
-			}
-		}
-	}
+	auto army = _findArmyByCountry(ptr);
+	if (army) army->setTeam(newTeam);
 }
 
 awe::TeamID awe::game::getArmysTeam(const std::shared_ptr<const awe::country>& ptr) const noexcept {
-	if (_armies && ptr) {
-		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
-			if (*(*itr)->getCountry() == *ptr) {
-				return (*itr)->getTeam();
-			}
-		}
-	}
+	auto army = _findArmyByCountry(ptr);
+	if (army) army->getTeam();
 	return NO_ARMY;
 }
 
 void awe::game::setArmysFunds(const std::shared_ptr<const awe::country>& ptr, awe::Funds funds) noexcept {
-	if (_armies && ptr) {
-		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
-			if (*(*itr)->getCountry() == *ptr) {
-				(*itr)->setFunds(funds);
-				break;
-			}
-		}
-	}
+	auto army = _findArmyByCountry(ptr);
+	if (army) army->setFunds(funds);
 }
 
 awe::Funds awe::game::getArmysFunds(const std::shared_ptr<const awe::country>& ptr) const noexcept {
-	if (_armies && ptr) {
-		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
-			if (*(*itr)->getCountry() == *ptr) {
-				return (*itr)->getFunds();
-			}
-		}
-	}
+	auto army = _findArmyByCountry(ptr);
+	if (army) army->getFunds();
 	return -1;
 }
 
 void awe::game::setArmysCommanders(const std::shared_ptr<const awe::country>& ptr, std::shared_ptr<const awe::commander> firstCO, std::shared_ptr<const awe::commander> secondCO = nullptr) noexcept {
-	if (_armies && ptr) {
-		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
-			if (*(*itr)->getCountry() == *ptr) {
-				(*itr)->setCommanders(firstCO, secondCO);
-				break;
-			}
-		}
-	}
+	auto army = _findArmyByCountry(ptr);
+	if (army) army->setCommanders(firstCO, secondCO);
 }
 
 std::shared_ptr<const awe::commander> awe::game::getFirstCommander(const std::shared_ptr<const awe::country>& ptr) const noexcept {
-	if (_armies && ptr) {
-		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
-			if (*(*itr)->getCountry() == *ptr) {
-				return (*itr)->getFirstCommander();
-			}
-		}
-	}
+	auto army = _findArmyByCountry(ptr);
+	if (army) army->getFirstCommander();
 	return nullptr;
 }
 
 std::shared_ptr<const awe::commander> awe::game::getSecondCommander(const std::shared_ptr<const awe::country>& ptr) const noexcept {
-	if (_armies && ptr) {
-		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
-			if (*(*itr)->getCountry() == *ptr) {
-				return (*itr)->getSecondCommander();
-			}
-		}
-	}
+	auto army = _findArmyByCountry(ptr);
+	if (army) army->getSecondCommander();
 	return nullptr;
 }
 
 bool awe::game::isTagTeam(const std::shared_ptr<const awe::country>& ptr) const noexcept {
-	if (_armies && ptr) {
-		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
-			if (*(*itr)->getCountry() == *ptr) {
-				return (*itr)->getFirstCommander() && (*itr)->getSecondCommander();
-			}
-		}
-	}
+	auto army = _findArmyByCountry(ptr);
+	if (army) return army->getFirstCommander() && army->getSecondCommander();
 	return false;
 }
 
@@ -460,4 +417,15 @@ std::vector<std::shared_ptr<awe::army>>::iterator awe::game::_getArmyIterator(un
 	auto itr = _armies->begin();
 	for (unsigned int counter = 0; counter < index || itr == _armies->end(); counter++, itr++);
 	return itr;
+}
+
+std::shared_ptr<awe::army> awe::game::_findArmyByCountry(const std::shared_ptr<const awe::country>& ptr) const noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				return *itr;
+			}
+		}
+	}
+	return nullptr;
 }

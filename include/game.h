@@ -321,6 +321,13 @@ namespace awe {
 		std::vector<std::shared_ptr<awe::army>>::iterator _getArmyIterator(unsigned int index) const;
 
 		/**
+		 * Finds an army based on its country.
+		 * @param ptr Pointer to the country's static information.
+		 * @return The \c army object, or \c nullptr if the army with the given country couldn't be found.
+		 */
+		std::shared_ptr<awe::army> _findArmyByCountry(const std::shared_ptr<const awe::country>& ptr) const noexcept;
+
+		/**
 		 * Initialises a file stream for either input or output.
 		 * @param  filename The path of the file to open.
 		 * @param  forInput \c TRUE if opening the file for input, \c FALSE for output.
