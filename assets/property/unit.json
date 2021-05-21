@@ -14,7 +14,9 @@
 		"vision": 2,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"001": {"longname": "Mech",
 		"shortname": "Mech",
@@ -31,7 +33,9 @@
 		"vision": 2,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"002": {"longname": "Recon",
 		"shortname": "Recn",
@@ -48,7 +52,9 @@
 		"vision": 5,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"003": {"longname": "Tank",
 		"shortname": "Tank",
@@ -65,7 +71,9 @@
 		"vision": 3,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"004": {"longname": "MD Tank",
 		"shortname": "MTnk",
@@ -82,7 +90,9 @@
 		"vision": 1,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"005": {"longname": "Neo Tank",
 		"shortname": "Neo",
@@ -99,7 +109,9 @@
 		"vision": 1,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"006": {"longname": "Megatank",
 		"shortname": "Mega",
@@ -116,7 +128,9 @@
 		"vision": 1,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"007": {"longname": "APC",
 		"shortname": "APC",
@@ -133,7 +147,9 @@
 		"vision": 1,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": [0, 1]
+		"canload": [0, 1],
+		"loadlimit": 1,
+		"fuelperturn": 0
 	},
 	"008": {"longname": "Anti-Air",
 		"shortname": "AAir",
@@ -150,7 +166,9 @@
 		"vision": 2,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"009": {"longname": "Artillery",
 		"shortname": "Artl",
@@ -167,7 +185,9 @@
 		"vision": 1,
 		"lowrange": 2,
 		"highrange": 3,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"010": {"longname": "Rockets",
 		"shortname": "Rokt",
@@ -184,7 +204,9 @@
 		"vision": 1,
 		"lowrange": 3,
 		"highrange": 5,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"011": {"longname": "Missiles",
 		"shortname": "Misi",
@@ -201,7 +223,9 @@
 		"vision": 5,
 		"lowrange": 3,
 		"highrange": 5,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"012": {"longname": "Piperunner",
 		"shortname": "Pipe",
@@ -218,7 +242,9 @@
 		"vision": 4,
 		"lowrange": 2,
 		"highrange": 5,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"013": {"longname": "T Copter",
 		"shortname": "TCop",
@@ -235,7 +261,9 @@
 		"vision": 2,
 		"lowrange": 0,
 		"highrange": 0,
-		"canload": [0, 1]
+		"canload": [0, 1],
+		"loadlimit": 1,
+		"fuelperturn": 2
 	},
 	"014": {"longname": "B Copter",
 		"shortname": "BCop",
@@ -252,7 +280,9 @@
 		"vision": 3,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 2
 	},
 	"015": {"longname": "Fighter",
 		"shortname": "Fitr",
@@ -269,7 +299,9 @@
 		"vision": 2,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 5
 	},
 	"016": {"longname": "Bomber",
 		"shortname": "Bomb",
@@ -286,7 +318,9 @@
 		"vision": 2,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 5
 	},
 	"017": {"longname": "Stealth",
 		"shortname": "Stea",
@@ -303,7 +337,9 @@
 		"vision": 4,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 5
 	},
 	"018": {"longname": "Black Bomb",
 		"shortname": "BBom",
@@ -320,7 +356,9 @@
 		"vision": 1,
 		"lowrange": 1,
 		"highrange": 3,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 5
 	},
 	"019": {"longname": "Black Boat",
 		"shortname": "Boat",
@@ -337,7 +375,9 @@
 		"vision": 1,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": [0, 1]
+		"canload": [0, 1],
+		"loadlimit": 2,
+		"fuelperturn": 1
 	},
 	"020": {"longname": "Lander",
 		"shortname": "Land",
@@ -354,7 +394,9 @@
 		"vision": 1,
 		"lowrange": 0,
 		"highrange": 0,
-		"canload": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 26]
+		"canload": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 26],
+		"loadlimit": 2,
+		"fuelperturn": 1
 	},
 	"021": {"longname": "Cruiser",
 		"shortname": "Crus",
@@ -371,7 +413,9 @@
 		"vision": 3,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": [13, 14]
+		"canload": [13, 14],
+		"loadlimit": 2,
+		"fuelperturn": 1
 	},
 	"022": {"longname": "Sub",
 		"shortname": "Sub",
@@ -388,7 +432,9 @@
 		"vision": 5,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 1
 	},
 	"023": {"longname": "Battleship",
 		"shortname": "Bshp",
@@ -405,7 +451,9 @@
 		"vision": 2,
 		"lowrange": 2,
 		"highrange": 6,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 1
 	},
 	"024": {"longname": "Carrier",
 		"shortname": "Cari",
@@ -422,7 +470,9 @@
 		"vision": 4,
 		"lowrange": 3,
 		"highrange": 8,
-		"canload": [13, 14, 15, 16, 17, 18]
+		"canload": [13, 14, 15, 16, 17, 18],
+		"loadlimit": 2,
+		"fuelperturn": 1
 	},
 	"025": {"longname": "Pipe Seam",
 		"shortname": "Seam",
@@ -439,7 +489,9 @@
 		"vision": 0,
 		"lowrange": 0,
 		"highrange": 0,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	},
 	"026": {"longname": "Oozium 238",
 		"shortname": "Ozzi",
@@ -456,6 +508,8 @@
 		"vision": 1,
 		"lowrange": 0,
 		"highrange": 0,
-		"canload": []
+		"canload": [],
+		"loadlimit": 0,
+		"fuelperturn": 0
 	}
 }

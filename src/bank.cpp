@@ -207,6 +207,8 @@ awe::unit_type::unit_type(safe::json& j) noexcept : common_properties(j) {
 	j.applyVector(_units, { "sprites" });
 	j.resetState();
 	j.applyVector(_canLoadThese, { "canload" });
+	j.apply(_loadLimit, { "loadlimit" }, &_loadLimit, true);
+	j.apply(_fuelPerTurn, { "fuelperturn" }, &_fuelPerTurn, true);
 }
 awe::bank<awe::movement_type>::index awe::unit_type::getMovementTypeIndex() const noexcept {
 	return _movementTypeID;
@@ -264,6 +266,12 @@ bool awe::unit_type::canLoad(const std::shared_ptr<const awe::unit_type>& type) 
 		if (u && *u == *type) return true;
 	}
 	return false;
+}
+unsigned int awe::unit_type::loadLimit() const noexcept {
+	return _loadLimit;
+}
+signed int awe::unit_type::fuelPerTurn() const noexcept {
+	return _fuelPerTurn;
 }
 void awe::unit_type::updateUnitTypes(const awe::bank<const awe::unit_type>& unitBank) const noexcept {
 	_canLoadTheseUnitTypes.clear();

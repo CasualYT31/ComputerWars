@@ -556,7 +556,9 @@ namespace awe {
 		 * <li>\c "highrange" = \c _higherRange, <tt>(unsigned 32-bit int)</tt></li>
 		 * <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li>
 		 * <li>\c "sprites" = \c _units, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li>
-		 * <li>\c "canload" = \c _canLoadThese, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li></ul>
+		 * <li>\c "canload" = \c _canLoadThese, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li>
+		 * <li>\c "loadlimit" = \c _loadLimit, <tt>(unsigned 32-bit int)</tt></li>
+		 * <li>\c "fuelperturn" = \c _fuelPerTurn, <tt>(signed 32-bit int)</tt></li></ul>
 		 * The \c movecosts array stores a list of movement points associated with each movement type.
 		 * For example, the first value will store the number of movement points it takes for the first type of movement to traverse over it (in the default implementation, Infantry).\n
 		 * The \c pictures array stores a list of animated sprite IDs associated with each country.
@@ -679,6 +681,18 @@ namespace awe {
 		bool canLoad(const std::shared_ptr<const awe::unit_type>& type) const noexcept;
 
 		/**
+		 * Retrieves the load limit of this unit type.
+		 * @return The maximum number of units this unit can hold at any given time.
+		 */
+		unsigned int loadLimit() const noexcept;
+
+		/**
+		 * Retrieves the amount of fuel consumed at the beginning of each day.
+		 * @return The amount of fuel this unit type consumes at the beginning of each day.
+		 */
+		signed int fuelPerTurn() const noexcept;
+
+		/**
 		 * Updates the stored unit type properties pointers for units that can be loaded onto this one.
 		 * @param unitBank A reference to the unit type bank to pull the pointers from.
 		 */
@@ -782,6 +796,16 @@ namespace awe {
 		 * It was made mutable so that it can be updated after construction if an instance of \c unit_type is constant.
 		 */
 		mutable std::vector<std::shared_ptr<const awe::unit_type>> _canLoadTheseUnitTypes;
+
+		/**
+		 * The maximum number of units this unit type can load.
+		 */
+		unsigned int _loadLimit = 0;
+
+		/**
+		 * The amount of fuel this unit type consumes at the beginning of every day.
+		 */
+		signed int _fuelPerTurn = 0;
 	};
 
 	/**
