@@ -231,7 +231,7 @@ void awe::game::setArmysTeam(const std::shared_ptr<const awe::country>& ptr, awe
 	}
 }
 
-awe::TeamID awe::game::getArmysTeam(const std::shared_ptr<const awe::country>& ptr) noexcept {
+awe::TeamID awe::game::getArmysTeam(const std::shared_ptr<const awe::country>& ptr) const noexcept {
 	if (_armies && ptr) {
 		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
 			if (*(*itr)->getCountry() == *ptr) {
@@ -240,6 +240,17 @@ awe::TeamID awe::game::getArmysTeam(const std::shared_ptr<const awe::country>& p
 		}
 	}
 	return NO_ARMY;
+}
+
+void awe::game::setArmysFunds(const std::shared_ptr<const awe::country>& ptr, awe::Funds funds) noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				(*itr)->setFunds(funds);
+				break;
+			}
+		}
+	}
 }
 
 std::shared_ptr<awe::map> awe::game::getMap() const noexcept {

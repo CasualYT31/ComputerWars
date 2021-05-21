@@ -89,13 +89,13 @@ namespace awe {
 		 * @param  newFunds The new fund amount.
 		 * @return The old fund amount.
 		 */
-		unsigned int setFunds(unsigned int newFunds) noexcept;
+		awe::Funds setFunds(awe::Funds newFunds) noexcept;
 
 		/**
 		 * Retrieves the funds this army currently obtains.
 		 * @return The fund amount.
 		 */
-		unsigned int getFunds() const noexcept;
+		awe::Funds getFunds() const noexcept;
 
 		/**
 		 * Sets the commanders of this army.
@@ -278,7 +278,7 @@ namespace awe {
 		/**
 		 * Funds.
 		 */
-		unsigned int _funds = 0;
+		awe::Funds _funds = 0;
 
 		/**
 		 * First CO information.

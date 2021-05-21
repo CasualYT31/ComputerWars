@@ -45,14 +45,14 @@ std::shared_ptr<const awe::country> awe::army::getCountry() const noexcept {
 	return _country;
 }
 
-unsigned int awe::army::setFunds(unsigned int newFunds) noexcept {
+awe::Funds awe::army::setFunds(awe::Funds newFunds) noexcept {
 	auto old = getFunds();
 	_funds = newFunds;
 	if (_funds < 0) _funds = 0;
 	return old;
 }
 
-unsigned int awe::army::getFunds() const noexcept {
+awe::Funds awe::army::getFunds() const noexcept {
 	return _funds;
 }
 

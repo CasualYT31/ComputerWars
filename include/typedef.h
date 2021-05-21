@@ -41,8 +41,15 @@ namespace awe {
 	 */
 	typedef sf::Uint32 UUIDValue;
 
+	/**
+	 * Typedef representing funds.
+	 * I decided to make this signed because fund calculations
+	 * will result in negative values more often than not, and
+	 * they should be handled properly.
+	 */
+	typedef sf::Int32 Funds;
+
 	/* Typedefs to add
-	+ Funds
 	+ Tile HP
 	+ Unit HP
 	+ Unit Fuel

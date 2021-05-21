@@ -133,7 +133,7 @@ namespace awe {
 
 		/**
 		 * Assigns the given army a new team.
-		 * If the given army doesn't exist, the call will be ignored.
+		 * If the given army doesn't exist, or if \c ptr is \c NULL, the call will be ignored.
 		 * @param ptr     Pointer to the country of the army to amend.
 		 * @param newTeam The ID of the team to assign this army to.
 		 */
@@ -145,7 +145,15 @@ namespace awe {
 		 * @return The team ID of the specified army, if that army exists.
 		 *         If the army doesn't exist or \c ptr is \c NULL, \c NO_ARMY will be returned.
 		 */
-		awe::TeamID getArmysTeam(const std::shared_ptr<const awe::country>& ptr) noexcept;
+		awe::TeamID getArmysTeam(const std::shared_ptr<const awe::country>& ptr) const noexcept;
+
+		/**
+		 * Sets the number of funds a given army possesses.
+		 * If the given army doesn't exist, or if \c ptr is \c NULL, the call will be ignored.
+		 * @param ptr   Pointer to the country of the army to amend.
+		 * @param funds The new fund amount.
+		 */
+		void setArmysFunds(const std::shared_ptr<const awe::country>& ptr, awe::Funds funds) noexcept;
 
 		/**
 		 * Allows access to the map object.
