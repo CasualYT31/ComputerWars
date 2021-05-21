@@ -39,7 +39,7 @@ namespace awe {
 	/**
 	 * Class that represents a single game of Advance Wars, with a map and its armies.
 	 * This class is only responsible for the storage and direct manipulation of the game,
-	 * which means game rules are defined in that other class.
+	 * which means game rules are defined in another class.
 	 */
 	class game : sf::NonCopyable {
 	public:
@@ -116,7 +116,7 @@ namespace awe {
 
 		/**
 		 * Creates a new army and adds it to the internal list.
-		 * The new army is given \c 0 funds, and its has no commanders.
+		 * The new army is given \c 0 funds, and it has no commanders.
 		 * Its team ID will be the same as the country ID given.
 		 * @param id The ID of the country of the army, which also defines the turn order of the army.
 		 */
@@ -133,12 +133,19 @@ namespace awe {
 
 		/**
 		 * Assigns the given army a new team.
+		 * If the given army doesn't exist, the call will be ignored.
 		 * @param ptr     Pointer to the country of the army to amend.
 		 * @param newTeam The ID of the team to assign this army to.
 		 */
 		void setArmysTeam(const std::shared_ptr<const awe::country>& ptr, awe::TeamID newTeam) noexcept;
 
-
+		/**
+		 * Retrieves the team of a given army.
+		 * @param ptr Pointer to the country of the army to retrieve the team of.
+		 * @return The team ID of the specified army, if that army exists.
+		 *         If the army doesn't exist or \c ptr is \c NULL, \c NO_ARMY will be returned.
+		 */
+		awe::TeamID getArmysTeam(const std::shared_ptr<const awe::country>& ptr) noexcept;
 
 		/**
 		 * Allows access to the map object.

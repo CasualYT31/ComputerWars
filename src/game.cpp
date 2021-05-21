@@ -231,6 +231,17 @@ void awe::game::setArmysTeam(const std::shared_ptr<const awe::country>& ptr, awe
 	}
 }
 
+awe::TeamID awe::game::getArmysTeam(const std::shared_ptr<const awe::country>& ptr) noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				return (*itr)->getTeam();
+			}
+		}
+	}
+	return NO_ARMY;
+}
+
 std::shared_ptr<awe::map> awe::game::getMap() const noexcept {
 	return _map;
 }
