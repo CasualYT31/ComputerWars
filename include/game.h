@@ -156,6 +156,14 @@ namespace awe {
 		void setArmysFunds(const std::shared_ptr<const awe::country>& ptr, awe::Funds funds) noexcept;
 
 		/**
+		 * Retrieves the funds a given army possesses.
+		 * @param ptr Pointer to the country of the army to retrieve the funds of.
+		 * @return The funds the specified army owns, if that army exists.
+		 *         If the army doesn't exist or \c ptr is \c NULL, \c -1 will be returned.
+		 */
+		awe::Funds getArmysFunds(const std::shared_ptr<const awe::country>& ptr) const noexcept;
+
+		/**
 		 * Allows access to the map object.
 		 * @return Pointer to the map object, or an empty pointer if a map hasn't been allocated yet.
 		 */

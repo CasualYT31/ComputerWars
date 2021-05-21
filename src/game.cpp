@@ -253,6 +253,17 @@ void awe::game::setArmysFunds(const std::shared_ptr<const awe::country>& ptr, aw
 	}
 }
 
+awe::Funds awe::game::getArmysFunds(const std::shared_ptr<const awe::country>& ptr) const noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				return (*itr)->getFunds();
+			}
+		}
+	}
+	return -1;
+}
+
 std::shared_ptr<awe::map> awe::game::getMap() const noexcept {
 	return _map;
 }
