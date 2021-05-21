@@ -164,6 +164,41 @@ namespace awe {
 		awe::Funds getArmysFunds(const std::shared_ptr<const awe::country>& ptr) const noexcept;
 
 		/**
+		 * Sets an army's commanders.
+		 * \c nullptr signifies that no commander should be present.
+		 * In the event that \c firstCO is \c nullptr and \c secondCO is not, these two values will be swapped.
+		 * @param ptr      Pointer to the country of the army to amend.
+		 * @param firstCO  Pointer to the first CO's static information.
+		 * @param secondCO Pointer to the second CO's static information.
+		 */
+		void setArmysCommanders(const std::shared_ptr<const awe::country>& ptr,
+								std::shared_ptr<const awe::commander> firstCO,
+								std::shared_ptr<const awe::commander> secondCO = nullptr) noexcept;
+
+		/**
+		 * Retrieves the static information of the first commander.
+		 * By default, no CO is set to an army, so care should be taken when accessing the returned pointer.
+		 * @param ptr Pointer to the country of the army to retrieve the first CO of.
+		 * @return Pointer to the first CO's information, or \c nullptr if the specified army doesn't exist.
+		 */
+		std::shared_ptr<const awe::commander> getFirstCommander(const std::shared_ptr<const awe::country>& ptr) const noexcept;
+
+		/**
+		 * Retrieves the static information of the second commander.
+		 * Special care should be taken when accessing the returned pointer, as an army may well have no secondary commander.
+		 * @param ptr Pointer to the country of the army to retrieve the second CO of.
+		 * @return Pointer to the second CO's information, or \c nullptr if the specified army doesn't exist.
+		 */
+		std::shared_ptr<const awe::commander> getSecondCommander(const std::shared_ptr<const awe::country>& ptr) const noexcept;
+
+		/**
+		 * Finds out if an army has two COs.
+		 * @param ptr Pointer to the country of the army to test.
+		 * @return \c TRUE if an army has been assigned two COs, \c FALSE otherwise.
+		 */
+		bool isTagTeam(const std::shared_ptr<const awe::country>& ptr) const noexcept;
+
+		/**
 		 * Allows access to the map object.
 		 * @return Pointer to the map object, or an empty pointer if a map hasn't been allocated yet.
 		 */

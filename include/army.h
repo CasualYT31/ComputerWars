@@ -121,12 +121,6 @@ namespace awe {
 		std::shared_ptr<const awe::commander> getSecondCommander() const noexcept;
 
 		/**
-		 * Finds out if an army has two COs.
-		 * @return \c TRUE if an army has been assigned two COs, \c FALSE otherwise.
-		 */
-		bool isTagTeam() const noexcept;
-
-		/**
 		 * Adds a previously allocated tile to this army's collection of owned tiles.
 		 * If the given weak reference was expired at the time of the call, the call will be ignored.
 		 * @warning This method does \b not automatically call \c awe::tile::setOwner().

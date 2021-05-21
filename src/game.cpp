@@ -264,6 +264,50 @@ awe::Funds awe::game::getArmysFunds(const std::shared_ptr<const awe::country>& p
 	return -1;
 }
 
+void awe::game::setArmysCommanders(const std::shared_ptr<const awe::country>& ptr, std::shared_ptr<const awe::commander> firstCO, std::shared_ptr<const awe::commander> secondCO = nullptr) noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				(*itr)->setCommanders(firstCO, secondCO);
+				break;
+			}
+		}
+	}
+}
+
+std::shared_ptr<const awe::commander> awe::game::getFirstCommander(const std::shared_ptr<const awe::country>& ptr) const noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				return (*itr)->getFirstCommander();
+			}
+		}
+	}
+	return nullptr;
+}
+
+std::shared_ptr<const awe::commander> awe::game::getSecondCommander(const std::shared_ptr<const awe::country>& ptr) const noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				return (*itr)->getSecondCommander();
+			}
+		}
+	}
+	return nullptr;
+}
+
+bool awe::game::isTagTeam(const std::shared_ptr<const awe::country>& ptr) const noexcept {
+	if (_armies && ptr) {
+		for (auto itr = _armies->begin(), enditr = _armies->end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *ptr) {
+				return (*itr)->getFirstCommander() && (*itr)->getSecondCommander();
+			}
+		}
+	}
+	return false;
+}
+
 std::shared_ptr<awe::map> awe::game::getMap() const noexcept {
 	return _map;
 }

@@ -70,10 +70,6 @@ std::shared_ptr<const awe::commander> awe::army::getSecondCommander() const noex
 	return _secondCO;
 }
 
-bool awe::army::isTagTeam() const noexcept {
-	return _firstCO && _secondCO;
-}
-
 void awe::army::addOwnedTile(const std::weak_ptr<awe::tile>& ptr) noexcept {
 	if (ptr.expired()) return;
 	_ownedTiles.push_back(ptr);
