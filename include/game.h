@@ -139,6 +139,13 @@ namespace awe {
 		 */
 		std::weak_ptr<awe::army> getTileOwner(sf::Vector2u pos) const noexcept;
 
+		/**
+		 * Finds out if a given tile is occupied by a unit.
+		 * @param  pos The X and Y location of the tile to check.
+		 * @return \c TRUE if the tile is vacant, \c FALSE if it is occupied by a unit.
+		 */
+		bool isTileVacant(const sf::Vector2u pos) const noexcept;
+
 		/////////////////////
 		// ARMY OPERATIONS //
 		/////////////////////
@@ -167,6 +174,7 @@ namespace awe {
 		/////////////////////
 		/**
 		 * Creates a new unit for a given army.
+		 * Call is logged if at least one null pointer is given, and no unit is created if that is the case.
 		 * @param country  The country of the army to create the unit for.
 		 * @param unitType The static information of the type of unit to create.
 		 */
@@ -181,11 +189,13 @@ namespace awe {
 		void deleteUnit(engine::uuid<awe::unit> uuid) noexcept;
 
 		/**
-		 * Deletes a unit from a given location on the map.
-		 * This method identifies the unit's UUID and calls the UUID version of \c deleteUnit().
-		 * @param pos The X and Y location of the unit to delete.
+		 * Moves a unit to a given location.
+		 * If the given location is already occupied, the call will be ignored.
+		 * If the given location is out of bounds, the call will be logged.
+		 * @param uuid The UUID of the unit to move.
+		 * @param pos  The new position of the unit.
 		 */
-		void deleteUnit(const sf::Vector2u pos) noexcept;
+		void setUnitPosition(engine::uuid<awe::unit> uuid, const sf::Vector2u pos) noexcept;
 
 		/**
 		 * Retrieves the UUID of the unit at a given location.
@@ -196,6 +206,7 @@ namespace awe {
 	private:
 		/**
 		 * Finds an army based on its country.
+		 * Returns \c nullptr if \c country is also \c NULL.
 		 * @param  country Static information of the country to search with.
 		 * @return Pointer to the army beloning to the given country, or \c nullptr if that army doesn't exist.
 		 */

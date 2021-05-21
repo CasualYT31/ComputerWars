@@ -96,6 +96,12 @@ std::weak_ptr<awe::army> awe::map::getTileOwner(sf::Vector2u pos) const noexcept
 	return std::weak_ptr<awe::army>();
 }
 
+bool awe::map::isTileVacant(const sf::Vector2u pos) const noexcept {
+	auto t = _findTile(pos);
+	if (t) return t->getUnit().expired();
+	return false;
+}
+
 /*bool awe::map::setVisiblePortion(const sf::Rect<unsigned int> portion) noexcept {
 	if (portion.left >= _size.x || portion.top >= _size.y || portion.left + portion.width > _size.x || portion.top + portion.height > _size.y) return false;
 	_visiblePortion = portion;

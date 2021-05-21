@@ -43,14 +43,12 @@ namespace awe {
 	public:
 		/**
 		 * Constructor which initialises a unit.
+		 * The unit's HP, fuel, and ammo are set to their max according to the type given.
 		 * @param type        Pointer to the unit's static information defining its type.
-		 * @param hp          The initial HP of the unit. Is set using \c setHP().
-		 * @param fuel        The initial fuel of the unit. Is set using \c setFuel().
-		 * @param ammo        The initial ammo of the unit. Is set using \c setAmmo().
 		 * @param initForUUID The initial value of this object type's \c uuid::_id_counter.
 		 * @sa    engine::uuid::uuid()
 		 */
-		unit(const std::shared_ptr<const unit_type>& type = nullptr, const sf::Int32 hp = -1, const sf::Int32 fuel = -1, const sf::Int32 ammo = -1, const sf::Uint64 initForUUID = 1) noexcept;
+		unit(const std::shared_ptr<const unit_type>& type = nullptr, const sf::Uint64 initForUUID = 1) noexcept;
 
 		/**
 		 * This unit's UUID object.
@@ -75,16 +73,15 @@ namespace awe {
 		 * Updates the unit's HP.
 		 * If an HP value is given outside of the range (0 to unit type's maximum health),
 		 * it will automatically be adjusted to the max health, if the unit has been given a type.
-		 * @param  newHP The new HP.
-		 * @return The old HP.
+		 * @param newHP The new HP.
 		 */
-		sf::Int32 setHP(const sf::Int32 newHP) noexcept;
+		void setHP(const awe::HP newHP) noexcept;
 
 		/**
 		 * Retrieves the unit's current HP.
 		 * @return The current HP.
 		 */
-		sf::Int32 getHP() const noexcept;
+		awe::HP getHP() const noexcept;
 
 		/**
 		 * Updates the unit's fuel.
@@ -93,13 +90,13 @@ namespace awe {
 		 * @param  newFuel The new fuel.
 		 * @return The old fuel.
 		 */
-		sf::Int32 setFuel(const sf::Int32 newFuel) noexcept;
+		void setFuel(const awe::Fuel newFuel) noexcept;
 
 		/**
 		 * Retrieves the unit's current fuel.
 		 * @return The current fuel.
 		 */
-		sf::Int32 getFuel() const noexcept;
+		awe::Fuel getFuel() const noexcept;
 
 		/**
 		 * Updates the unit's ammo.
@@ -108,13 +105,13 @@ namespace awe {
 		 * @param  newAmmo The new ammo.
 		 * @return The old ammo.
 		 */
-		sf::Int32 setAmmo(const sf::Int32 newAmmo) noexcept;
+		void setAmmo(const awe::Ammo newAmmo) noexcept;
 
 		/**
 		 * Retrieves the unit's current primary ammo.
 		 * @return The current ammo.
 		 */
-		sf::Int32 getAmmo() const noexcept;
+		awe::Ammo getAmmo() const noexcept;
 
 		/**
 		 * Loads a unit onto this one if the unit's type allows for it.
@@ -201,19 +198,19 @@ namespace awe {
 		 * Sets the spritesheet used with this unit.
 		 * @param ptr Pointer to the data.
 		 */
-		void setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
+		void setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
 
 		/**
 		 * Gets the spritesheet used with this unit.
 		 * @return Pointer to the data.
 		 */
-		std::shared_ptr<sfx::animated_spritesheet> getSpritesheet() const noexcept;
+		std::shared_ptr<sfx::animated_spritesheet> getUnitSpritesheet() const noexcept;
 
 		/**
 		 * Gets the sprite ID used with this unit.
 		 * @return The sprite ID assigned to the internal sprite object.
 		 */
-		unsigned int getSpriteID() const noexcept;
+		unsigned int getUnitSpriteID() const noexcept;
 
 		/**
 		 * This drawable's \c animate() method.

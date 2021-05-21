@@ -22,10 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 
-awe::unit::unit(const std::shared_ptr<const unit_type>& type, const sf::Int32 hp, const sf::Int32 fuel, const sf::Int32 ammo, const sf::Uint64 initForUUID) noexcept : UUID(initForUUID), _unitType(type) {
-	setHP(hp);
-	setFuel(fuel);
-	setAmmo(ammo);
+awe::unit::unit(const std::shared_ptr<const unit_type>& type, const sf::Uint64 initForUUID) noexcept : UUID(initForUUID), _unitType(type) {
+	setHP(-1);
+	setFuel(-1);
+	setAmmo(-1);
 }
 
 void awe::unit::setType(const std::shared_ptr<const unit_type>& newType) noexcept {
@@ -41,48 +41,42 @@ const std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept 
 	return _unitType;
 }
 
-sf::Int32 awe::unit::setHP(const sf::Int32 newHP) noexcept {
-	auto old = getHP();
+void awe::unit::setHP(const awe::HP newHP) noexcept {
 	_hp = newHP;
 	if (_unitType) {
 		if (_hp < 0 || _hp >(int)_unitType->getMaxHP()) {
-			_hp = (int)_unitType->getMaxHP();
+			_hp = (awe::HP)_unitType->getMaxHP();
 		}
 	}
-	return old;
 }
 
-sf::Int32 awe::unit::getHP() const noexcept {
+awe::HP awe::unit::getHP() const noexcept {
 	return _hp;
 }
 
-sf::Int32 awe::unit::setFuel(const sf::Int32 newFuel) noexcept {
-	auto old = getFuel();
+void awe::unit::setFuel(const awe::Fuel newFuel) noexcept {
 	_fuel = newFuel;
 	if (_unitType) {
 		if (_fuel < 0 || (!_unitType->hasInfiniteFuel() && _fuel > _unitType->getMaxFuel())) {
-			_fuel = (int)_unitType->getMaxFuel();
+			_fuel = (awe::Fuel)_unitType->getMaxFuel();
 		}
 	}
-	return old;
 }
 
-sf::Int32 awe::unit::getFuel() const noexcept {
+awe::Fuel awe::unit::getFuel() const noexcept {
 	return _fuel;
 }
 
-sf::Int32 awe::unit::setAmmo(const sf::Int32 newAmmo) noexcept {
-	auto old = getAmmo();
+void awe::unit::setAmmo(const awe::Ammo newAmmo) noexcept {
 	_ammo = newAmmo;
 	if (_unitType) {
 		if (_ammo < 0 || (!_unitType->hasInfiniteAmmo() && _ammo > _unitType->getMaxAmmo())) {
 			_ammo = _unitType->getMaxAmmo();
 		}
 	}
-	return old;
 }
 
-sf::Int32 awe::unit::getAmmo() const noexcept {
+awe::Ammo awe::unit::getAmmo() const noexcept {
 	return _ammo;
 }
 
@@ -144,7 +138,7 @@ bool awe::unit::operator!=(const awe::unit& rhs) const noexcept {
 	return !(*this == rhs);
 }
 
-void awe::unit::setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
+void awe::unit::setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
 	if (ptr) {
 		_sprite.setSpritesheet(ptr);
 		_updateSprite();
@@ -154,11 +148,11 @@ void awe::unit::setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
 	_spritesheet = ptr;
 }
 
-std::shared_ptr<sfx::animated_spritesheet> awe::unit::getSpritesheet() const noexcept {
+std::shared_ptr<sfx::animated_spritesheet> awe::unit::getUnitSpritesheet() const noexcept {
 	return _spritesheet;
 }
 
-unsigned int awe::unit::getSpriteID() const noexcept {
+unsigned int awe::unit::getUnitSpriteID() const noexcept {
 	return _sprite.getSprite();
 }
 

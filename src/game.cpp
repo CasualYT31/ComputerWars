@@ -71,8 +71,12 @@ std::weak_ptr<awe::army> awe::game::getTileOwner(sf::Vector2u pos) const noexcep
 	return _map->getTileOwner(pos);
 }
 
+bool awe::game::isTileVacant(const sf::Vector2u pos) const noexcept {
+	return _map->isTileVacant(pos);
+}
+
 void awe::game::createArmy(const std::shared_ptr<const awe::country>& country) noexcept {
-	if (!_findArmy(country)) _armies.push_back(std::make_shared<awe::army>(country->UUID, country));
+	if (!_findArmy(country)) _armies.push_back(std::make_shared<awe::army>(country, (awe::TeamID)country->UUID.getID()));
 }
 
 void awe::game::deleteArmy(const std::shared_ptr<const awe::country>& country) noexcept {
@@ -92,9 +96,44 @@ void awe::game::setUnitSpritesheet(const std::shared_ptr<sfx::animated_spriteshe
 	}
 }
 
-std::shared_ptr<awe::army> awe::game::_findArmy(const std::shared_ptr<const awe::country>& country) const noexcept {
+void awe::game::createUnit(const std::shared_ptr<const awe::country>& country, const std::shared_ptr<const awe::unit_type>& unitType) noexcept {
+	if (unitType) {
+		auto a = _findArmy(country);
+		if (a) {
+			a->createUnit(unitType);
+		} else {
+			_logger.error("Army \"{}\" does not exist.", ((country) ? (country->getName()) : ("[NULL]")));
+		}
+	} else {
+		_logger.error("No unit type was given when attempting to create unit for army \"{}\".", ((country) ? (country->getName()) : ("[NULL]")));
+	}
+}
+
+void awe::game::deleteUnit(engine::uuid<awe::unit> uuid) noexcept {
 	for (auto itr = _armies.begin(), enditr = _armies.end(); itr != enditr; itr++) {
-		if (*(*itr)->getCountry() == *country) return *itr;
+		if ((*itr)->deleteUnit(uuid)) break;
+	}
+}
+
+void awe::game::setUnitPosition(engine::uuid<awe::unit> uuid, const sf::Vector2u pos) noexcept {
+	auto map = getMapSize();
+	if (pos.x > map.x || pos.y > map.y) {
+		_logger.error("Attempted to move a unit with UUID {} to location ({},{}), which is out of bounds with the current map of size ({},{}).",
+			uuid.getID(), pos.x, pos.y, map.x, map.y);
+	} else {
+
+	}
+}
+
+engine::uuid<awe::unit> awe::game::unitAt(const sf::Vector2u pos) const noexcept {
+	// access via map class
+}
+
+std::shared_ptr<awe::army> awe::game::_findArmy(const std::shared_ptr<const awe::country>& country) const noexcept {
+	if (country) {
+		for (auto itr = _armies.begin(), enditr = _armies.end(); itr != enditr; itr++) {
+			if (*(*itr)->getCountry() == *country) return *itr;
+		}
 	}
 	return nullptr;
 }

@@ -117,6 +117,13 @@ namespace awe {
 		std::weak_ptr<awe::army> getTileOwner(sf::Vector2u pos) const noexcept;
 
 		/**
+		 * Determines if the specified tile is vacant or occupied.
+		 * @param  pos The X and Y location of the tile to check.
+		 * @return \c TRUE if the tile is vacant, \c FALSE if the tile is occupied.
+		 */
+		bool isTileVacant(const sf::Vector2u pos) const noexcept;
+
+		/**
 		 * Sets the visible portion of the map.
 		 * If <tt>(0, 0, 0, 0)</tt> is given, all the of the map becomes visible.
 		 * @param  portion The new portion of the map to draw, all measurements are in tiles.
