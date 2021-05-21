@@ -265,15 +265,6 @@ bool awe::game::isTagTeam(const std::shared_ptr<const awe::country>& ptr) const 
 	return false;
 }
 
-std::shared_ptr<awe::map> awe::game::getMap() const noexcept {
-	return _map;
-}
-
-std::shared_ptr<awe::army> awe::game::getArmy(std::size_t i) const noexcept {
-	if (i < getNumberOfArmies()) return (*_armies)[i];
-	return std::shared_ptr<awe::army>();
-}
-
 std::size_t awe::game::getNumberOfArmies() const noexcept {
 	if (_armies) return _armies->size();
 	return 0;

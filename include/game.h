@@ -199,19 +199,6 @@ namespace awe {
 		bool isTagTeam(const std::shared_ptr<const awe::country>& ptr) const noexcept;
 
 		/**
-		 * Allows access to the map object.
-		 * @return Pointer to the map object, or an empty pointer if a map hasn't been allocated yet.
-		 */
-		std::shared_ptr<awe::map> getMap() const noexcept;
-
-		/**
-		 * Allows access to a given army object.
-		 * @param  i The 0-based index of the army to retrieve.
-		 * @return Pointer to the army object, or an empty pointer if \c i is out of range.
-		 */
-		std::shared_ptr<awe::army> getArmy(std::size_t i) const noexcept;
-
-		/**
 		 * Retrieves the number of armies allocated.
 		 * @return The number of armies allocated.
 		 */
