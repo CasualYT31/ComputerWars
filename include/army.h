@@ -24,6 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Declares the class which represents an in-game army.
  */
 
+#include "bank.h"
+
 #pragma once
 
 // for documentation on the awe namespace, please see bank.h
@@ -32,6 +34,22 @@ namespace awe {
 	 * Class which represents a single army on a map.
 	 */
 	class army {
+	public:
+		/**
+		 * Constructs a new army.
+		 * @param country The country the army belongs to, which can't be changed.
+		 */
+		army(const std::shared_ptr<const awe::country>& country) noexcept;
 
+		/**
+		 * Gets the army's country information.
+		 * @return The army's country information.
+		 */
+		std::shared_ptr<const awe::country> getCountry() const noexcept;
+	private:
+		/**
+		 * The country of the army.
+		 */
+		const std::shared_ptr<const awe::country> _country;
 	};
 }

@@ -41,3 +41,23 @@ void awe::tile::setTileOwner(const awe::UUIDValue owner) noexcept {
 awe::UUIDValue awe::tile::getTileOwner() const noexcept {
 	return _owner;
 }
+
+void awe::tile::setTileHP(const awe::HP hp) noexcept {
+	if (hp <= 0) {
+		_hp = 0;
+	} else {
+		_hp = hp;
+	}
+}
+
+awe::HP awe::tile::getTileHP() const noexcept {
+	return _hp;
+}
+
+void awe::tile::setUnit(const awe::UnitID id) noexcept {
+	_unit = id;
+}
+
+awe::UnitID awe::tile::getUnit() const noexcept {
+	return _unit;
+}

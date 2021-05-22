@@ -67,6 +67,8 @@ namespace awe {
 
 	/**
 	 * Typedef representing a unit ID.
+	 * \c 0 should be reserved.
+	 * @sa awe::map::_findUnitID()
 	 */
 	typedef sf::Uint32 UnitID;
 }

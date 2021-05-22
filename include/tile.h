@@ -67,6 +67,31 @@ namespace awe {
 		 * @return The army ID of the owning army. \c INVALID if the tile isn't owned.
 		 */
 		awe::UUIDValue getTileOwner() const noexcept;
+
+		/**
+		 * Sets the tile's HP.
+		 * If a negative number is given, it will be adjusted to \c 0.
+		 * @param hp The HP to set to the tile.
+		 */
+		void setTileHP(const awe::HP hp) noexcept;
+
+		/**
+		 * Retrieves the tile's HP.
+		 * @return The HP of the tile.
+		 */
+		awe::HP getTileHP() const noexcept;
+
+		/**
+		 * Sets the unit currently occupying the tile.
+		 * @param id The ID of the unit now occupying the tile. \c 0 indicates this tile should be vacant.
+		 */
+		void setUnit(const awe::UnitID id) noexcept;
+
+		/**
+		 * Retrieves the ID of the unit currently occupying the tile.
+		 * @return The ID of the unit occupying the tile. \c 0 if the tile is vacant.
+		 */
+		awe::UnitID getUnit() const noexcept;
 	private:
 		/**
 		 * The type of this tile.
@@ -77,5 +102,16 @@ namespace awe {
 		 * The army ID of the owner of the tile.
 		 */
 		awe::UUIDValue _owner = engine::uuid<awe::country>::INVALID;
+
+		/**
+		 * The tile's HP.
+		 */
+		awe::HP _hp = 0;
+
+		/**
+		 * The ID of the unit currently occupying the tile.
+		 * \c 0 indicates vacancy.
+		 */
+		awe::UnitID _unit = 0;
 	};
 }

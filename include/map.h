@@ -84,6 +84,134 @@ namespace awe {
 		sf::Vector2u getMapSize() const noexcept;
 
 		/////////////////////
+		// ARMY OPERATIONS //
+		/////////////////////
+		/**
+		 * Allocates a new army.
+		 * If the army with the given country already exists, or \c nullptr is given,
+		 * the call will be ignored.
+		 * @param country The country of the army.
+		 */
+		void createArmy(const std::shared_ptr<const awe::country>& country) noexcept;
+
+		/**
+		 * Deletes an army entirely from the map.
+		 * Deleting an army removes the army from the army list, deletes all the units belonging to the army,
+		 * and disowns all owned tiles.
+		 * @param army The army ID of the army to delete.
+		 */
+		void deleteArmy(const awe::UUIDValue army) noexcept;
+
+		/////////////////////
+		// UNIT OPERATIONS //
+		/////////////////////
+		/**
+		 * Creates a new unit.
+		 * The unit won't be created if the army ID isn't valid.
+		 * @param  type The type of unit to create.
+		 * @param  army The ID of the army who will own this unit.
+		 * @return The 1-based ID of the unit created. Will be \c 0 if the unit couldn't be created.
+		 */
+		awe::UnitID createUnit(const std::shared_ptr<const awe::unit_type>& type, const awe::UUIDValue army) noexcept;
+
+		/**
+		 * Deletes a unit.
+		 * A deleted unit will be removed from the map's and owning army's list, as well as the tile it was on.\n
+		 * @warning Any loaded units will \b also be deleted.
+		 * @param   id The ID of the unit to delete.
+		 */
+		void deleteUnit(const awe::UnitID id) noexcept;
+
+		/**
+		 * Sets a unit's position on the map.
+		 * The operation will be cancelled if the specified tile is already occupied.
+		 * @param id  The ID of the unit to move.
+		 * @param pos The X and Y coordinate of the tile to move the unit to.
+		 */
+		void setUnitPosition(const awe::UnitID id, const sf::Vector2u pos) noexcept;
+
+		/**
+		 * Retrieves a unit's position, indicating the tile it is occupying.
+		 * This method does not take into account if the unit is \em actually on a tile:
+		 * please use this method in conjunction with \c isUnitOnMap().\n
+		 * If the unit doesn't exist, (0, 0) will be returned.
+		 * @param  id The ID of the unit.
+		 * @return The X and Y location of the unit on the map.
+		 */
+		sf::Vector2u getUnitPosition(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Finds out if this unit occupies a tile or not.
+		 * @param  id The ID of the unit to check.
+		 * @return \c TRUE if this unit occupies a tile, \c FALSE if not.
+		 */
+		bool isUnitOnMap(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Sets this unit's HP.
+		 * If < 0 is given, 0 will be stored.
+		 * @param id The ID of the unit to amend.
+		 * @param hp The new HP of the unit.
+		 */
+		void setUnitHP(const awe::UnitID id, const awe::HP hp) noexcept;
+
+		/**
+		 * Gets this unit's HP.
+		 * @param  id The ID of the unit to inspect.
+		 * @return The HP of the unit. \c 0 if unit doesn't exist.
+		 */
+		awe::HP getUnitHP(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Sets this unit's fuel.
+		 * If < 0 is given, 0 will be stored.
+		 * @param id   The ID of the unit to amend.
+		 * @param fuel The new fuel of the unit.
+		 */
+		void setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept;
+
+		/**
+		 * Gets this unit's fuel.
+		 * @param  id The ID of the unit to inspect.
+		 * @return The fuel of the unit. \c 0 if unit doesn't exist.
+		 */
+		awe::Fuel getUnitFuel(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Sets this unit's ammo.
+		 * If < 0 is given, 0 will be stored.
+		 * @param id   The ID of the unit to amend.
+		 * @param ammo The new ammo of the unit.
+		 */
+		void setUnitAmmo(const awe::UnitID id, const awe::Ammo ammo) noexcept;
+
+		/**
+		 * Gets this unit's ammo.
+		 * @param  id The ID of the unit to inspect.
+		 * @return The ammo of the unit. \c 0 if unit doesn't exist.
+		 */
+		awe::Ammo getUnitAmmo(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Loads one unit onto another.
+		 * If the unit to load is already loaded onto another unit, this call will be ignored.\n
+		 * This method does not consider any load limits imposed by any unit type.
+		 * @param load The ID of the unit to load onto another.
+		 * @param onto The ID of the unit which will load the unit.
+		 */
+		void loadUnit(const awe::UnitID load, const awe::UnitID onto) noexcept;
+
+		/**
+		 * Unloads one unit onto a given tile.
+		 * If the given location is out of bounds or occupied, then the operation will be cancelled.
+		 * If \c unload is not loaded onto \c from, then the call will be ignored.
+		 * @param unload The ID of the unit to unload.
+		 * @param from   The ID of the unit which houses the unit to unload.
+		 * @param onto   The X and Y location to move the unloaded unit to.
+		 */
+		void unloadUnit(const awe::UnitID unload, const awe::UnitID from, const sf::Vector2u onto) noexcept;
+
+		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////
 		/**
@@ -103,20 +231,77 @@ namespace awe {
 		 * @return The type of the tile and its information.
 		 */
 		std::shared_ptr<const awe::tile_type> getTileType(const sf::Vector2u pos) const noexcept;
+
+		/**
+		 * Sets a tile's HP.
+		 * If a negative value is given, it will be adjusted to \c 0.
+		 * @param pos The X and Y coordinate of the tile to change.
+		 * @param hp  The HP to assign to the tile.
+		 */
+		void setTileHP(const sf::Vector2u pos, const awe::HP hp) noexcept;
+
+		/**
+		 * Retrieves a tile's HP.
+		 * @param  post The X and Y coordinate of the tile to retrieve from.
+		 * @return The HP of the tile, or \c 0 if the given coordinate was out of bounds.
+		 */
+		awe::HP getTileHP(const sf::Vector2u pos) const noexcept;
+
+		/**
+		 * Sets a tile's owner.
+		 * @param pos  The X and Y coordinate of the tile to change.
+		 * @param army The ID of the army who now owns this tile.
+		 *             \c INVALID can be given to signal that the tile should not have an owner.
+		 */
+		void setTileOwner(const sf::Vector2u pos, awe::UUIDValue army) noexcept;
+
+		/**
+		 * Gets a tile's owner.
+		 * If the coorindate is out of bounds, \c INVALID is returned.
+		 * @param  pos The X and Y coordinate of the tile to change.
+		 * @return The ID of the army who owns this tile, or \c INVALID if no army owns it.
+		 */
+		awe::UUIDValue getTileOwner(const sf::Vector2u pos) const noexcept;
+
+		/**
+		 * Retrieves the unit currently occupying a specified tile.
+		 * This method will return 0 if there is a unit on this tile, but it is not physically on the map,
+		 * such as if the unit is loaded onto another unit.
+		 * @param  pos The X and Y coordinate of the tile to inspect.
+		 * @return The ID of the unit occupying this tile. 0 if the tile is vacant or out of bounds.
+		 */
+		awe::UnitID getUnitOnTile(const sf::Vector2u pos) const noexcept;
 	private:
 		/**
-		 * Checks to see if a given X and Y coordinate are out of bounds with the map's current size.
+		 * Checks if a given X and Y coordinate are out of bounds with the map's current size.
 		 * @param  pos The position to test.
 		 * @return \c TRUE if the position is out of bounds, \c FALSE if not.
 		 */
 		bool _isOutOfBounds(const sf::Vector2u pos) const noexcept;
 
 		/**
-		 * Checks to see if a given army ID is present on the map.
+		 * Checks if a given army ID is present on the map.
 		 * @param  id The ID of the army to check.
 		 * @return \c TRUE if the army is on the map, \c FALSE if they are not.
 		 */
 		bool _isArmyPresent(const awe::UUIDValue id) const noexcept;
+
+		/**
+		 * Checks if a unit is present in the game.
+		 * @param  id The ID of the unit to check.
+		 * @return \c TRUE if the unit is on the map, \c FALSE if they are not.
+		 */
+		bool _isUnitPresent(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Determines the ID the next unit should have.
+		 * A unit ID cannot be 0
+		 * Automatically assigns the returned value to \c _lastUnitID.
+		 * @warning \c UINT32_MAX is used interally to test if unit capacity has been reached.
+		 *          Don't forget to change this if you change the size of \c awe::UnitID!
+		 * @throws  std::bad_alloc In the [practically impossible] case that a new unique unit ID cannot be generated.
+		 */
+		awe::UnitID _findUnitID();
 
 		/**
 		 * Stores the map's name.
@@ -142,7 +327,7 @@ namespace awe {
 		 * The ID of the last unit created.
 		 * Used to generate unit IDs once the initial unit has been created.
 		 */
-		awe::UnitID _lastUnitID = 0;
+		awe::UnitID _lastUnitID = 1;
 
 		/**
 		 * The armys on this map.
