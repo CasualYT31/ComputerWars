@@ -79,7 +79,8 @@ namespace awe {
 
 		/**
 		 * Create new unit and add it to the army.
-		 * By default, all stats (HP, fuel, ammo) are at maximum.
+		 * By default, all stats (HP, fuel, ammo) are at maximum.\n
+		 * The spritesheet last assigned to the army will be assigned to the new unit.
 		 * @param unitType The type of unit to create.
 		 */
 		void createUnit(const std::shared_ptr<const awe::unit_type>& unitType) noexcept;
@@ -91,14 +92,22 @@ namespace awe {
 		 * @param  uuid The UUID of the unit to delete.
 		 * @return \c TRUE if the unit was deleted, \c FALSE if this army didn't have the specified unit.
 		 */
-		bool deleteUnit(engine::uuid<awe::unit> uuid) noexcept;
+		bool deleteUnit(const engine::uuid<awe::unit> uuid) noexcept;
+
+		/**
+		 * Sets a unit's tile upon which it stands.
+		 * No special validation is performed by this method.
+		 * @param uuid The UUID of the unit to move.
+		 * @param tile The tile on which the unit now resides.
+		 */
+		void setUnitLocation(const engine::uuid<awe::unit> uuid, const std::shared_ptr<awe::tile>& tile) noexcept;
 	private:
 		/**
 		 * Finds unit based on UUID search criterion.
 		 * @param  uuid The UUID of the unit to find.
 		 * @return Pointer to the unit if it exists in this army's list, \c nullptr if not.
 		 */
-		std::shared_ptr<awe::unit> _findUnit(engine::uuid<awe::unit> uuid) const noexcept;
+		std::shared_ptr<awe::unit> _findUnit(const engine::uuid<awe::unit> uuid) const noexcept;
 
 		/**
 		 * Country of the army.
@@ -114,6 +123,11 @@ namespace awe {
 		 * List of units that belong to this army.
 		 */
 		std::vector<std::shared_ptr<awe::unit>> _units;
+
+		/**
+		 * The spritesheet used with all units.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _sheet = nullptr;
 	};
 }
 

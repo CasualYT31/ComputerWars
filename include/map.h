@@ -41,7 +41,8 @@ namespace awe {
 		/**
 		 * Resizes the map to the given dimensions.
 		 * If the map shrinks, tiles towards the right and bottom sides of the map will be completely erased.
-		 * If the map grows, tiles will be added to the right and bottom sides of the map.
+		 * If the map grows, tiles will be added to the right and bottom sides of the map.\n
+		 * The spritesheet last assigned at the \c game level will be assigned to any new tiles created.
 		 * @param dim The new dimensions of the map, in tiles.
 		 * @sa    _size
 		 */
@@ -77,35 +78,35 @@ namespace awe {
 		 * @param pos  The X and Y position of the tile to change.
 		 * @param type The static information of the type of tile to set this tile to.
 		 */
-		void setTileType(sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept;
+		void setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept;
 
 		/**
 		 * Gets a specified tile's type.
 		 * @param  pos The X and Y position of the tile to inspect.
 		 * @return The static information of the specified tile, or \c nullptr if \c pos was an invalid coordinate.
 		 */
-		std::shared_ptr<const awe::tile_type> getTileType(sf::Vector2u pos) const noexcept;
+		std::shared_ptr<const awe::tile_type> getTileType(const sf::Vector2u pos) const noexcept;
 
 		/**
 		 * Sets a specified tile's HP.
 		 * @param pos The X and Y position of the tile to change.
 		 * @param hp  The new HP value to assign to the tile.
 		 */
-		void setTileHP(sf::Vector2u pos, awe::HP hp) noexcept;
+		void setTileHP(const sf::Vector2u pos, const awe::HP hp) noexcept;
 
 		/**
 		 * Retrieves the specified tile's HP.
 		 * @param  pos The X and Y position of the tile to inspect.
 		 * @return The current HP of the tile, or \c -1 if the tile coordinate given was invalid.
 		 */
-		awe::HP getTileHP(sf::Vector2u pos) const noexcept;
+		awe::HP getTileHP(const sf::Vector2u pos) const noexcept;
 
 		/**
 		 * Sets the owner of a given tile.
 		 * @param pos  The X and Y location of the tile to change.
 		 * @param army A pointer to the army object which now owns the specified tile.
 		 */
-		void setTileOwner(sf::Vector2u pos, const std::shared_ptr<awe::army>& owner) noexcept;
+		void setTileOwner(const sf::Vector2u pos, const std::shared_ptr<awe::army>& owner) noexcept;
 
 		/**
 		 * Finds the owner of a given tile.
@@ -114,7 +115,7 @@ namespace awe {
 		 *         If the pointer is expired, it indicates that the tile doesn't
 		 *         have an owner, or the given tile coordinate was invalid.
 		 */
-		std::weak_ptr<awe::army> getTileOwner(sf::Vector2u pos) const noexcept;
+		std::weak_ptr<awe::army> getTileOwner(const sf::Vector2u pos) const noexcept;
 
 		/**
 		 * Determines if the specified tile is vacant or occupied.
@@ -158,7 +159,7 @@ namespace awe {
 		 * @param  pos The position of the tile on the map.
 		 * @return A pointer to the tile, or \c nullptr if the tile is not within the map.
 		 */
-		std::shared_ptr<awe::tile> _findTile(sf::Vector2u pos) const noexcept;
+		std::shared_ptr<awe::tile> _findTile(const sf::Vector2u pos) const noexcept;
 
 		/**
 		 * Stores the map's tiles.
@@ -178,6 +179,11 @@ namespace awe {
 		 * Stores the map's name.
 		 */
 		std::string _name = "";
+
+		/**
+		 * Stores the map's spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _sheet = nullptr;
 
 		/**
 		 * The portion of the map that is rendered to the screen.

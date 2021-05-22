@@ -32,10 +32,12 @@ std::string awe::game::getMapName() const noexcept {
 	return _map->getName();
 }
 
-void awe::game::setMapSize(sf::Vector2u dim) noexcept {
+void awe::game::setMapSize(const sf::Vector2u dim) noexcept {
 	// automatically handles tile deletion
 	_map->setSize(dim);
 	// now handle unit deletion
+	// assign current spritesheet again in case new tiles are created
+	setTileSpritesheet(_tileSheet);
 }
 
 sf::Vector2u awe::game::getMapSize() const noexcept {
@@ -44,30 +46,35 @@ sf::Vector2u awe::game::getMapSize() const noexcept {
 
 void awe::game::setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
 	_map->setTileSpritesheet(ptr);
+	_tileSheet = ptr;
 }
 
-void awe::game::setTileType(sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept {
+std::shared_ptr<sfx::animated_spritesheet> awe::game::getTileSpritesheet() const noexcept {
+	return _tileSheet;
+}
+
+void awe::game::setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept {
 	_map->setTileType(pos, type);
 }
 
-std::shared_ptr<const awe::tile_type> awe::game::getTileType(sf::Vector2u pos) const noexcept {
+std::shared_ptr<const awe::tile_type> awe::game::getTileType(const sf::Vector2u pos) const noexcept {
 	return _map->getTileType(pos);
 }
 
-void awe::game::setTileHP(sf::Vector2u pos, awe::HP hp) noexcept {
+void awe::game::setTileHP(const sf::Vector2u pos, const awe::HP hp) noexcept {
 	_map->setTileHP(pos, hp);
 }
 
-awe::HP awe::game::getTileHP(sf::Vector2u pos) const noexcept {
+awe::HP awe::game::getTileHP(const sf::Vector2u pos) const noexcept {
 	return _map->getTileHP(pos);
 }
 
-void awe::game::setTileOwner(sf::Vector2u pos, const std::shared_ptr<const awe::country>& country) noexcept {
+void awe::game::setTileOwner(const sf::Vector2u pos, const std::shared_ptr<const awe::country>& country) noexcept {
 	auto a = _findArmy(country);
 	if (a) _map->setTileOwner(pos, a);
 }
 
-std::weak_ptr<awe::army> awe::game::getTileOwner(sf::Vector2u pos) const noexcept {
+std::weak_ptr<awe::army> awe::game::getTileOwner(const sf::Vector2u pos) const noexcept {
 	return _map->getTileOwner(pos);
 }
 
@@ -94,6 +101,11 @@ void awe::game::setUnitSpritesheet(const std::shared_ptr<sfx::animated_spriteshe
 	for (auto itr = _armies.begin(), enditr = _armies.end(); itr != enditr; itr++) {
 		(*itr)->setUnitSpritesheet(ptr);
 	}
+	_unitSheet = ptr;
+}
+
+std::shared_ptr<sfx::animated_spritesheet> awe::game::getUnitSpritesheet() const noexcept {
+	return _unitSheet;
 }
 
 void awe::game::createUnit(const std::shared_ptr<const awe::country>& country, const std::shared_ptr<const awe::unit_type>& unitType) noexcept {
@@ -109,19 +121,20 @@ void awe::game::createUnit(const std::shared_ptr<const awe::country>& country, c
 	}
 }
 
-void awe::game::deleteUnit(engine::uuid<awe::unit> uuid) noexcept {
+void awe::game::deleteUnit(const engine::uuid<awe::unit> uuid) noexcept {
 	for (auto itr = _armies.begin(), enditr = _armies.end(); itr != enditr; itr++) {
 		if ((*itr)->deleteUnit(uuid)) break;
 	}
 }
 
-void awe::game::setUnitPosition(engine::uuid<awe::unit> uuid, const sf::Vector2u pos) noexcept {
+void awe::game::setUnitPosition(const engine::uuid<awe::unit> uuid, const sf::Vector2u pos) noexcept {
 	auto map = getMapSize();
 	if (pos.x > map.x || pos.y > map.y) {
 		_logger.error("Attempted to move a unit with UUID {} to location ({},{}), which is out of bounds with the current map of size ({},{}).",
 			uuid.getID(), pos.x, pos.y, map.x, map.y);
 	} else {
-
+		// set unit's location and set unit to tile at location
+		// ... can't do it because i need a shared_ptr to tile which game can't get...
 	}
 }
 

@@ -34,7 +34,11 @@ void awe::map::setSize(const sf::Vector2u& dim) noexcept {
 		for (auto XItr = _tiles.begin(), endXItr = _tiles.end(); XItr != endXItr; XItr++) {
 			unsigned int y = 0;
 			for (auto YItr = XItr->begin(), endYItr = XItr->end(); YItr != endYItr; YItr++) {
-				if (!*YItr) *YItr = std::make_shared<awe::tile>(sf::Vector2u(x, y));
+				if (!*YItr) {
+					*YItr = std::make_shared<awe::tile>(sf::Vector2u(x, y));
+					// assign spritesheet to new tiles
+					(*YItr)->setTileSpritesheet(_sheet);
+				}
 				y++;
 			}
 			x++;
@@ -56,6 +60,7 @@ std::string awe::map::getName() const noexcept {
 }
 
 void awe::map::setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
+	_sheet = ptr;
 	for (auto XItr = _tiles.begin(), endXItr = _tiles.end(); XItr != endXItr; XItr++) {
 		for (auto YItr = XItr->begin(), endYItr = XItr->end(); YItr != endYItr; YItr++) {
 			(*YItr)->setTileSpritesheet(ptr);
@@ -63,23 +68,23 @@ void awe::map::setTileSpritesheet(const std::shared_ptr<sfx::animated_spriteshee
 	}
 }
 
-void awe::map::setTileType(sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept {
+void awe::map::setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept {
 	auto t = _findTile(pos);
 	if (t) t->setTileType(type);
 }
 
-std::shared_ptr<const awe::tile_type> awe::map::getTileType(sf::Vector2u pos) const noexcept {
+std::shared_ptr<const awe::tile_type> awe::map::getTileType(const sf::Vector2u pos) const noexcept {
 	auto t = _findTile(pos);
 	if (t) return t->getTileType();
 	return nullptr;
 }
 
-void awe::map::setTileHP(sf::Vector2u pos, awe::HP hp) noexcept {
+void awe::map::setTileHP(const sf::Vector2u pos, const awe::HP hp) noexcept {
 	auto t = _findTile(pos);
 	if (t) t->setHP(hp);
 }
 
-awe::HP awe::map::getTileHP(sf::Vector2u pos) const noexcept {
+awe::HP awe::map::getTileHP(const sf::Vector2u pos) const noexcept {
 	auto t = _findTile(pos);
 	if (t) return t->getHP();
 	return -1;
@@ -90,7 +95,7 @@ void awe::map::setTileOwner(sf::Vector2u pos, const std::shared_ptr<awe::army>& 
 	if (t) t->setOwner(owner);
 }
 
-std::weak_ptr<awe::army> awe::map::getTileOwner(sf::Vector2u pos) const noexcept {
+std::weak_ptr<awe::army> awe::map::getTileOwner(const sf::Vector2u pos) const noexcept {
 	auto t = _findTile(pos);
 	if (t) return t->getOwner();
 	return std::weak_ptr<awe::army>();
@@ -112,7 +117,7 @@ sf::Rect<unsigned int> awe::map::getVisiblePortion() const noexcept {
 	return _visiblePortion;
 }*/
 
-std::shared_ptr<awe::tile> awe::map::_findTile(sf::Vector2u pos) const noexcept {
+std::shared_ptr<awe::tile> awe::map::_findTile(const sf::Vector2u pos) const noexcept {
 	if (_size.x < pos.x || _size.y < pos.y) return _tiles[pos.x][pos.y];
 	return nullptr;
 }

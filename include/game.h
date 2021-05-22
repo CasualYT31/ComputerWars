@@ -78,7 +78,7 @@ namespace awe {
 		 * <b>This includes deleting all units on those now out-of-bounds tiles.</b>
 		 * @param dim The width (\c x) and height (\c y) of the map, in tiles.
 		 */
-		void setMapSize(sf::Vector2u dim) noexcept;
+		void setMapSize(const sf::Vector2u dim) noexcept;
 
 		/**
 		 * Retrieves the size of the map in tiles.
@@ -92,6 +92,12 @@ namespace awe {
 		 */
 		void setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
 
+		/**
+		 * Retrieves the spritesheet used for each tile in this map.
+		 * @return The spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> getTileSpritesheet() const noexcept;
+
 		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////
@@ -100,35 +106,35 @@ namespace awe {
 		 * @param pos  The X and Y position of the tile to change.
 		 * @param type The static information of the type of tile to set this tile to.
 		 */
-		void setTileType(sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept;
+		void setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept;
 
 		/**
 		 * Gets a specified tile's type.
 		 * @param  pos The X and Y position of the tile to inspect.
 		 * @return The static information of the specified tile, or \c nullptr if \c pos was an invalid coordinate.
 		 */
-		std::shared_ptr<const awe::tile_type> getTileType(sf::Vector2u pos) const noexcept;
+		std::shared_ptr<const awe::tile_type> getTileType(const sf::Vector2u pos) const noexcept;
 
 		/**
 		 * Sets a specified tile's HP.
 		 * @param pos The X and Y position of the tile to change.
 		 * @param hp  The new HP value to assign to the tile.
 		 */
-		void setTileHP(sf::Vector2u pos, awe::HP hp) noexcept;
+		void setTileHP(const sf::Vector2u pos, const awe::HP hp) noexcept;
 
 		/**
 		 * Retrieves the specified tile's HP.
 		 * @param  pos The X and Y position of the tile to inspect.
 		 * @return The current HP of the tile, or \c -1 if the tile coordinate given was invalid.
 		 */
-		awe::HP getTileHP(sf::Vector2u pos) const noexcept;
+		awe::HP getTileHP(const sf::Vector2u pos) const noexcept;
 
 		/**
 		 * Sets the owner of a given tile.
 		 * @param pos     The X and Y location of the tile to change.
 		 * @param country A pointer to the static information of a country which the owner army belongs to.
 		 */
-		void setTileOwner(sf::Vector2u pos, const std::shared_ptr<const awe::country>& country) noexcept;
+		void setTileOwner(const sf::Vector2u pos, const std::shared_ptr<const awe::country>& country) noexcept;
 
 		/**
 		 * Finds the owner of a given tile.
@@ -137,7 +143,7 @@ namespace awe {
 		 *         If the pointer is expired, it indicates that the tile doesn't
 		 *         have an owner, or the given tile coordinate was invalid.
 		 */
-		std::weak_ptr<awe::army> getTileOwner(sf::Vector2u pos) const noexcept;
+		std::weak_ptr<awe::army> getTileOwner(const sf::Vector2u pos) const noexcept;
 
 		/**
 		 * Finds out if a given tile is occupied by a unit.
@@ -169,6 +175,12 @@ namespace awe {
 		 */
 		void setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept;
 
+		/**
+		 * Retrieves the spritesheet used with all units in this map.
+		 * @return The spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> getUnitSpritesheet() const noexcept;
+
 		/////////////////////
 		// UNIT OPERATIONS //
 		/////////////////////
@@ -186,7 +198,7 @@ namespace awe {
 		 * This method also deletes all loaded units, if the specified unit has any.
 		 * @param uuid The UUID of the unit to delete. Call is ignored if \c INVALID is specified.
 		 */
-		void deleteUnit(engine::uuid<awe::unit> uuid) noexcept;
+		void deleteUnit(const engine::uuid<awe::unit> uuid) noexcept;
 
 		/**
 		 * Moves a unit to a given location.
@@ -195,7 +207,7 @@ namespace awe {
 		 * @param uuid The UUID of the unit to move.
 		 * @param pos  The new position of the unit.
 		 */
-		void setUnitPosition(engine::uuid<awe::unit> uuid, const sf::Vector2u pos) noexcept;
+		void setUnitPosition(const engine::uuid<awe::unit> uuid, const sf::Vector2u pos) noexcept;
 
 		/**
 		 * Retrieves the UUID of the unit at a given location.
@@ -228,6 +240,16 @@ namespace awe {
 		 * The order of play is determined by country ID, not by the order of armies within this list.
 		 */
 		std::vector<std::shared_ptr<awe::army>> _armies;
+
+		/**
+		 * A pointer to the tile spritesheet used with this map.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _tileSheet = nullptr;
+
+		/**
+		 * A pointer to the unit spritesheet used with this map.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _unitSheet = nullptr;
 	};
 }
 

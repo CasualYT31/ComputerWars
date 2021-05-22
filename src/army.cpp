@@ -41,16 +41,20 @@ awe::TeamID awe::army::getTeam() const noexcept {
 }
 
 void awe::army::setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& ptr) noexcept {
+	_sheet = ptr;
 	for (auto itr = _units.begin(), enditr = _units.end(); itr != enditr; itr++) {
 		(*itr)->setUnitSpritesheet(ptr);
 	}
 }
 
 void awe::army::createUnit(const std::shared_ptr<const awe::unit_type>& unitType) noexcept {
-	_units.push_back(std::make_shared<awe::unit>(unitType));
+	auto u = std::make_shared<awe::unit>(unitType);
+	// assign spritesheet to new units
+	u->setUnitSpritesheet(_sheet);
+	_units.push_back(u);
 }
 
-bool awe::army::deleteUnit(engine::uuid<awe::unit> uuid) noexcept {
+bool awe::army::deleteUnit(const engine::uuid<awe::unit> uuid) noexcept {
 	for (auto itr = _units.begin(), enditr = _units.end(); itr != enditr; itr++) {
 		if ((*itr)->UUID == uuid) {
 			// should automatically handle deletion of loaded units,
@@ -71,7 +75,12 @@ bool awe::army::deleteUnit(engine::uuid<awe::unit> uuid) noexcept {
 	return false;
 }
 
-std::shared_ptr<awe::unit> awe::army::_findUnit(engine::uuid<awe::unit> uuid) const noexcept {
+void awe::army::setUnitLocation(const engine::uuid<awe::unit> uuid, const std::shared_ptr<awe::tile>& tile) noexcept {
+	auto u = _findUnit(uuid);
+	if (u) u->setTile(tile);
+}
+
+std::shared_ptr<awe::unit> awe::army::_findUnit(const engine::uuid<awe::unit> uuid) const noexcept {
 	for (auto itr = _units.begin(), enditr = _units.end(); itr != enditr; itr++) {
 		if ((*itr)->UUID == uuid) return *itr;
 	}
