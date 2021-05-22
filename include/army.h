@@ -20,53 +20,18 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**
- * @file typedef.h
- * Defines a series of typedefs specific to Computer Wars.
- * These were added so that the sizes of these values could be easily amended after implementation.
+/**@file army.h
+ * Declares the class which represents an in-game army.
  */
 
 #pragma once
 
-#include "sfml/Config.hpp"
-
+// for documentation on the awe namespace, please see bank.h
 namespace awe {
 	/**
-	 * Typedef representing a team ID.
+	 * Class which represents a single army on a map.
 	 */
-	typedef sf::Uint8 TeamID;
+	class army {
 
-	/**
-	 * Typedef representing an underlying UUID value.
-	 */
-	typedef sf::Uint32 UUIDValue;
-
-	/**
-	 * Typedef representing funds.
-	 * I decided to make this signed because fund calculations
-	 * will result in negative values more often than not, and
-	 * they should be handled properly. This reasoning can be
-	 * applied to pretty much all of my signed int typedefs.
-	 */
-	typedef sf::Int32 Funds;
-
-	/**
-	 * Typedef representing a tile's or unit's HP.
-	 */
-	typedef sf::Int32 HP;
-
-	/**
-	 * Typedef representing a unit's fuel.
-	 */
-	typedef sf::Int32 Fuel;
-
-	/**
-	 * Typedef representing a unit's ammo.
-	 */
-	typedef sf::Int32 Ammo;
-
-	/**
-	 * Typedef representing a unit ID.
-	 */
-	typedef sf::Uint32 UnitID;
+	};
 }
