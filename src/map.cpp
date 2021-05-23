@@ -109,6 +109,18 @@ awe::Funds awe::map::getArmyFunds(const awe::UUIDValue army) const noexcept {
 	return 0;
 }
 
+std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::UUIDValue army) const noexcept {
+	if (_isArmyPresent(army)) return _armys.at(army).getTiles();
+	_logger.error("getTilesOfArmy operation failed: army with ID {} didn't exist at the time of calling!", army);
+	return std::unordered_set<sf::Vector2u>();
+}
+
+std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(const awe::UUIDValue army) const noexcept {
+	if (_isArmyPresent(army)) return _armys.at(army).getUnits();
+	_logger.error("getUnitsOfArmy operation failed: army with ID {} didn't exist at the time of calling!", army);
+	return std::unordered_set<awe::UnitID>();
+}
+
 awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& type, const awe::UUIDValue army) noexcept {
 	if (!type) _logger.warning("createUnit warning: creating a unit for army {} without a type!", army);
 	if (!_isArmyPresent(army)) {

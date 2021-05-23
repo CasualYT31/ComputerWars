@@ -123,6 +123,22 @@ namespace awe {
 		 */
 		awe::Funds getArmyFunds(const awe::UUIDValue army) const noexcept;
 
+		/**
+		 * Retrieves a list of tiles that belong to a specified army.
+		 * If the specified army doesn't exist, an empty set will be returned.
+		 * @param  army The ID of the army to retrieve the owned tiles of.
+		 * @return A list of locations of tiles that belong to the given army.
+		 */
+		std::unordered_set<sf::Vector2u> getTilesOfArmy(const awe::UUIDValue army) const noexcept;
+
+		/**
+		 * Retrieves a list of units that belong to a specified army.
+		 * If the specified army doesn't exist, an empty set will be returned.
+		 * @param  army The ID of the army to retrieve the units of.
+		 * @return A list of IDs identifying the units that belong to this army.
+		 */
+		std::unordered_set<awe::UnitID> getUnitsOfArmy(const awe::UUIDValue army) const noexcept;
+
 		/////////////////////
 		// UNIT OPERATIONS //
 		/////////////////////
