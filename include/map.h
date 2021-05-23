@@ -98,9 +98,24 @@ namespace awe {
 		 * Deletes an army entirely from the map.
 		 * Deleting an army removes the army from the army list, deletes all the units belonging to the army,
 		 * and disowns all owned tiles.
-		 * @param army The army ID of the army to delete.
+		 * @param army The ID of the army to delete.
 		 */
 		void deleteArmy(const awe::UUIDValue army) noexcept;
+
+		/**
+		 * Sets the amount of funds a specified army obtains.
+		 * If \c 0 or less is given, \c 0 will be stored.
+		 * @param army  The ID of the army to amend.
+		 * @param funds The new fund amount to assign to the army.
+		 */
+		void setArmyFunds(const awe::UUIDValue army, const awe::Funds funds) noexcept;
+
+		/**
+		 * Retrieves an army's fund count.
+		 * @param  army The ID of the army to inspect.
+		 * @return The amount of funds this army possesses, or \c 0 if the given army doesn't exist.
+		 */
+		awe::Funds getArmyFunds(const awe::UUIDValue army) const noexcept;
 
 		/////////////////////
 		// UNIT OPERATIONS //

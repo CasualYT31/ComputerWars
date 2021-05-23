@@ -75,6 +75,15 @@ void awe::map::deleteArmy(const awe::UUIDValue army) noexcept {
 	_armys.erase(army);
 }
 
+void awe::map::setArmyFunds(const awe::UUIDValue army, const awe::Funds funds) noexcept {
+	if (_isArmyPresent(army)) _armys[army].setFunds(funds);
+}
+
+awe::Funds awe::map::getArmyFunds(const awe::UUIDValue army) const noexcept {
+	if (_isArmyPresent(army)) return _armys.at(army).getFunds();
+	return 0;
+}
+
 awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& type, const awe::UUIDValue army) noexcept {
 	if (!_isArmyPresent(army)) return 0;
 	awe::UnitID id;

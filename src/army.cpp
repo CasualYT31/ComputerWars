@@ -27,3 +27,15 @@ awe::army::army(const std::shared_ptr<const awe::country>& country) noexcept : _
 std::shared_ptr<const awe::country> awe::army::getCountry() const noexcept {
 	return _country;
 }
+
+void awe::army::setFunds(const awe::Funds funds) noexcept {
+	if (funds <= 0) {
+		_funds = 0;
+	} else {
+		_funds = funds;
+	}
+}
+
+awe::Funds awe::army::getFunds() const noexcept {
+	return _funds;
+}

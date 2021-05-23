@@ -46,10 +46,29 @@ namespace awe {
 		 * @return The army's country information.
 		 */
 		std::shared_ptr<const awe::country> getCountry() const noexcept;
+
+		/**
+		 * Updates the army's fund count.
+		 * If a value below \c 0 is given, \c 0 will be stored.
+		 * @param funds The fund count to replace this army's old fund count with.
+		 */
+		void setFunds(const awe::Funds funds) noexcept;
+
+		/**
+		 * Retrieves the army's fund count.
+		 * By default, it is \c 0.
+		 * @return The funds this army obtains.
+		 */
+		awe::Funds getFunds() const noexcept;
 	private:
 		/**
 		 * The country of the army.
 		 */
 		const std::shared_ptr<const awe::country> _country;
+
+		/**
+		 * The funds this army obtains.
+		 */
+		awe::Funds _funds = 0;
 	};
 }
