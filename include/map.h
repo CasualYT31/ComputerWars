@@ -28,7 +28,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tile.h"
 #include "unit.h"
 #include "army.h"
-#include "spritesheets.h"
 
 #pragma once
 
