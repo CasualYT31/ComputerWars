@@ -39,7 +39,7 @@ namespace awe {
 	 * Only basic checks are carried out in this class; all game logic is separate.
 	 * If any of these basic checks fail, they will be logged.
 	 */
-	class map : sf::NonCopyable, public sfx::animated_drawable {
+	class map : sf::NonCopyable {
 	public:
 		/**
 		 * Initialises the internal logger object.
