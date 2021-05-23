@@ -288,6 +288,12 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from, cons
 	}
 }
 
+awe::UUIDValue awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {
+	if (_isUnitPresent(id)) return _units.at(id).getArmy();
+	_logger.error("getArmyOfUnit operation failed: unit with ID {} doesn't exist!", id);
+	return engine::uuid<awe::country>::INVALID;
+}
+
 void awe::map::setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept {
 	if (!type) _logger.warning("setTileType warning: assigning the tile at position ({},{}) an empty type!", pos.x, pos.y);
 	if (_isOutOfBounds(pos)) {

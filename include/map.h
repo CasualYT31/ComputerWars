@@ -248,6 +248,14 @@ namespace awe {
 		 */
 		void unloadUnit(const awe::UnitID unload, const awe::UnitID from, const sf::Vector2u onto) noexcept;
 
+		/**
+		 * Retrieves the ID of the army a specified unit belongs to.
+		 * <tt>engine::uuid<awe::country>::INVALID</tt> will be returned if the unit doesn't exist.
+		 * @param  id The ID of the unit to inspect.
+		 * @return The ID of the army that owns this unit.
+		 */
+		awe::UUIDValue getArmyOfUnit(const awe::UnitID id) const noexcept;
+
 		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////
