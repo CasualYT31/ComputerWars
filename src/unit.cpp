@@ -88,6 +88,10 @@ bool awe::unit::unloadUnit(const awe::UnitID id) noexcept {
 	return _loaded.erase(id);
 }
 
+std::unordered_set<awe::UnitID> awe::unit::loadedUnits() const noexcept {
+	return _loaded;
+}
+
 void awe::unit::loadOnto(const awe::UnitID id) noexcept {
 	_loadedOnto = id;
 }

@@ -22,6 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.h"
 
+awe::map::map(const std::string& name) noexcept : _logger(name) {}
+
 void awe::map::setMapName(const std::string& name) noexcept {
 	_mapName = name;
 }
@@ -38,18 +40,20 @@ void awe::map::setMapSize(const sf::Vector2u dim, const std::shared_ptr<const aw
 		_tiles[x].resize(dim.y, tile);
 	}
 	if (mapHasShrunk) {
-		// next, go through each army's owned tiles and units and remove all out of bounds objects
-		for (auto itr = _armys.begin(), enditr = _armys.end(); itr != enditr; itr++) {
-			// do stuff
+		// then, go through all owned tiles in each army and delete those that are now out of bounds
+		for (auto army : _armys) {
+			auto tiles = army.second.getTiles();
+			for (auto tile : tiles) {
+				if (_isOutOfBounds(tile)) army.second.removeTile(tile);
+			}
 		}
 		// then, go through all units and delete those that are out of bounds
-		// I avoided using erase in the first loop in case that might invalidate the iterator
 		std::vector<awe::UnitID> unitsToDelete;
 		for (auto itr = _units.begin(), enditr = _units.end(); itr != enditr; itr++) {
-			if (_isOutOfBounds(itr->second.getUnitPosition())) unitsToDelete.push_back(itr->first);
+			if (_isOutOfBounds(itr->second.getPosition())) unitsToDelete.push_back(itr->first);
 		}
 		for (auto itr = unitsToDelete.begin(), enditr = unitsToDelete.end(); itr != enditr; itr++) {
-			_units.erase(*itr);
+			deleteUnit(*itr);
 		}
 	}
 }
@@ -68,9 +72,15 @@ void awe::map::createArmy(const std::shared_ptr<const awe::country>& country) no
 void awe::map::deleteArmy(const awe::UUIDValue army) noexcept {
 	if (!_isArmyPresent(army)) return;
 	// firstly, delete all units belonging to the army
-	
+	auto units = _armys[army].getUnits();
+	for (auto unit : units) {
+		deleteUnit(unit);
+	}
 	// then, disown all tiles
-	
+	auto tiles = _armys[army].getTiles();
+	for (auto tile : tiles) {
+		_tiles[tile.x][tile.y].setTileOwner(engine::uuid<awe::country>::INVALID);
+	}
 	// finally, delete the army from the army list
 	_armys.erase(army);
 }
@@ -100,11 +110,17 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 void awe::map::deleteUnit(const awe::UnitID id) noexcept {
 	if (!_isUnitPresent(id)) return;
 	// firstly, remove the unit from the tile, if it was on a tile
-	
+	// we don't need to check if the unit "is actually on the map or not"
+	// since the tile will always hold the index to the unit in either case:
+	// which is why we need the "actually" check to begin with
+	if (!_isOutOfBounds(_units[id].getPosition())) _tiles[_units[id].getPosition().x][_units[id].getPosition().y].setUnit(0);
 	// secondly, remove the unit from the army's list
-
+	if (_isArmyPresent(_units[id].getArmy())) _armys[_units[id].getArmy()].removeUnit(id);
 	// thirdly, delete all units that are loaded onto this one
-	
+	auto loaded = _units[id].loadedUnits();
+	for (awe::UnitID unit : loaded) {
+		deleteUnit(unit);
+	}
 	// finally, delete the unit from the main list
 	_units.erase(id);
 }

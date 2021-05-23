@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "bank.h"
-#include <set>
+#include <unordered_set>
 
 #pragma once
 
@@ -127,6 +127,12 @@ namespace awe {
 		bool unloadUnit(const awe::UnitID id) noexcept;
 
 		/**
+		 * Copies the internal list of loaded units and returns it.
+		 * @return The IDs of the all the units that are loaded onto this one.
+		 */
+		std::unordered_set<awe::UnitID> loadedUnits() const noexcept;
+
+		/**
 		 * Loads this unit onto another.
 		 * Provide \c 0 to indicate that this unit is not to be loaded onto another unit.
 		 * @param id The ID of the unit this one is loaded onto.
@@ -172,7 +178,7 @@ namespace awe {
 		/**
 		 * The list of units loaded onto this one.
 		 */
-		std::set<awe::UnitID> _loaded;
+		std::unordered_set<awe::UnitID> _loaded;
 
 		/**
 		 * The unit this unit is loaded onto.

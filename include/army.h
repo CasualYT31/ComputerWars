@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "bank.h"
+#include <unordered_set>
 
 #pragma once
 
@@ -60,6 +61,42 @@ namespace awe {
 		 * @return The funds this army obtains.
 		 */
 		awe::Funds getFunds() const noexcept;
+
+		/**
+		 * Adds a unit to this army's unit list.
+		 * @param unit The ID of the unit to add.
+		 */
+		void addUnit(const awe::UnitID unit) noexcept;
+
+		/**
+		 * Removes a unit from this army's unit list.
+		 * @param unit The ID of the unit to remove.
+		 */
+		void removeUnit(const awe::UnitID unit) noexcept;
+
+		/**
+		 * Copies the internal list of all the units that belong to this army.
+		 * @return The IDs of all the units that belong to this army.
+		 */
+		std::unordered_set<awe::UnitID> getUnits() const noexcept;
+
+		/**
+		 * Adds a tile to this army's owned tiles list.
+		 * @param tile The X and Y location of the tile.
+		 */
+		void addTile(const sf::Vector2u tile) noexcept;
+
+		/**
+		 * Removes a tile from this army's owned tiles list.
+		 * @param tile The X and Y location of the tile.
+		 */
+		void removeTile(const sf::Vector2u tile) noexcept;
+
+		/**
+		 * Retrieves a list of all the tiles this army owns.
+		 * @return The internal list of tile locations, copied.
+		 */
+		std::unordered_set<sf::Vector2u> getTiles() const noexcept;
 	private:
 		/**
 		 * The country of the army.
@@ -70,5 +107,15 @@ namespace awe {
 		 * The funds this army obtains.
 		 */
 		awe::Funds _funds = 0;
+
+		/**
+		 * The units that belong to this army.
+		 */
+		std::unordered_set<awe::UnitID> _units;
+
+		/**
+		 * The tiles that belong to this army.
+		 */
+		std::unordered_set<sf::Vector2u> _tiles;
 	};
 }

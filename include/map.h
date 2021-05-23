@@ -23,8 +23,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**@file map.h
  * Declares the class which is used to manage a map.
  * Unit, armies, and tiles are all stored and managed here.
- * Only basic checks are carried out in this class; all game
- * logic is separate.
  */
 
 #include "tile.h"
@@ -38,9 +36,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace awe {
 	/**
 	 * Class which represents a map, and the armies and units that play on it.
+	 * Only basic checks are carried out in this class; all game logic is separate.
+	 * If any of these basic checks fail, they will be logged.
 	 */
 	class map : sf::NonCopyable, public sfx::animated_drawable {
 	public:
+		/**
+		 * Initialises the internal logger object.
+		 * @param name The name to give this particular instantiation within the log file. Defaults to "map."
+		 * @sa    \c global::logger
+		 */
+		map(const std::string& name = "map") noexcept;
+
 		////////////////////
 		// MAP OPERATIONS //
 		////////////////////
@@ -317,6 +324,11 @@ namespace awe {
 		 * @throws  std::bad_alloc In the [practically impossible] case that a new unique unit ID cannot be generated.
 		 */
 		awe::UnitID _findUnitID();
+
+		/**
+		 * Internal logger object.
+		 */
+		mutable global::logger _logger;
 
 		/**
 		 * Stores the map's name.

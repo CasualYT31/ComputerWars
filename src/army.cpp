@@ -39,3 +39,27 @@ void awe::army::setFunds(const awe::Funds funds) noexcept {
 awe::Funds awe::army::getFunds() const noexcept {
 	return _funds;
 }
+
+void awe::army::addUnit(const awe::UnitID unit) noexcept {
+	_units.insert(unit);
+}
+
+void awe::army::removeUnit(const awe::UnitID unit) noexcept {
+	_units.erase(unit);
+}
+
+std::unordered_set<awe::UnitID> awe::army::getUnits() const noexcept {
+	return _units;
+}
+
+void awe::army::addTile(const sf::Vector2u tile) noexcept {
+	_tiles.insert(tile);
+}
+
+void awe::army::removeTile(const sf::Vector2u tile) noexcept {
+	_tiles.erase(tile);
+}
+
+std::unordered_set<sf::Vector2u> awe::army::getTiles() const noexcept {
+	return _tiles;
+}
