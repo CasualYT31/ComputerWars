@@ -22,7 +22,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 
-awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type, const awe::UUIDValue army) noexcept : _type(type), _army(army) {}
+awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type, const awe::UUIDValue army,
+		const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr) noexcept :
+		_type(type), _army(army), _sprite(sheet, ((type) ? (type->getUnit(army)) : (0))) {}
 
 std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept {
 	return _type;
@@ -98,4 +100,20 @@ void awe::unit::loadOnto(const awe::UnitID id) noexcept {
 
 awe::UnitID awe::unit::loadedOnto() const noexcept {
 	return _loadedOnto;
+}
+
+void awe::unit::setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_sprite.setSpritesheet(sheet);
+}
+
+void awe::unit::setPixelPosition(float x, float y) noexcept {
+	_sprite.setPosition(sf::Vector2f(x, y));
+}
+
+bool awe::unit::animate(const sf::RenderTarget& target) noexcept {
+	return _sprite.animate(target);
+}
+
+void awe::unit::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(_sprite, states);
 }

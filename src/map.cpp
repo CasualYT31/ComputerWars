@@ -145,7 +145,7 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 		_logger.error("createUnit fatal error: could not generate a unique ID for a new unit. There are too many units allocated!");
 		return 0;
 	}
-	_units.insert({ id, awe::unit(type, army) });
+	_units.insert({ id, awe::unit(type, army, _sheet_unit) });
 	return id;
 }
 
@@ -408,6 +408,14 @@ void awe::map::setTileSpritesheet(const std::shared_ptr<sfx::animated_spriteshee
 	}
 }
 
+void awe::map::setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_sheet_unit = sheet;
+	// go through all of the units and set the new spritesheet to each one
+	for (auto& unit : _units) {
+		unit.second.setSpritesheet(sheet);
+	}
+}
+
 bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 	// step 1. the tiles
 	float tiley = 0.0;
@@ -416,7 +424,7 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 		for (sf::Uint32 x = 0, width = getMapSize().x; x < width; x++) {
 			auto& tile = _tiles[x][y];
 			tile.animate(target);
-			// position them if they are in the visible portion
+			// position them and their unit if they are in the visible portion
 			if (x >= _visiblePortion.left && x < _visiblePortion.left + _visiblePortion.width &&
 				y >= _visiblePortion.top && y < _visiblePortion.top + _visiblePortion.height) {
 				sf::Uint32 tileWidth = 0, tileHeight = 0;
@@ -433,24 +441,39 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 				if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;
 				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
 				tile.setPixelPosition(tilex, tiley - (float)(tileHeight - tile.MIN_HEIGHT));
+				_units[tile.getUnit()].setPixelPosition(tilex, tiley);
 				tilex += (float)tileWidth;
 			}
 		}
 		tiley += (float)awe::tile::MIN_HEIGHT;
 	}
+	// step 2. the units
+	// note that unit positioning was carried out in step 1
+	for (auto& unit : _units) {
+		unit.second.animate(target);
+	}
 	return false;
 }
 
 void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	// step 1. the tiles, and its unit if it has one
+	// step 1. the tiles
 	for (sf::Uint32 y = _visiblePortion.top; y < _visiblePortion.top + _visiblePortion.height; y++) {
 		for (sf::Uint32 x = _visiblePortion.left; x < _visiblePortion.left + _visiblePortion.width; x++) {
 			target.draw(_tiles[x][y], states);
 		}
 	}
-	// step 2. the cursor
-	// step 3. army pane
-	// step 4. tile + unit pane
+	// step 2. the units
+	// loop through all visible tiles only, and retrieve their units, instead of looping through all units
+	// unfortunately they have to be looped through separately to prevent tiles taller than the minimum
+	// height from drawing over units
+	for (sf::Uint32 y = _visiblePortion.top; y < _visiblePortion.top + _visiblePortion.height; y++) {
+		for (sf::Uint32 x = _visiblePortion.left; x < _visiblePortion.left + _visiblePortion.width; x++) {
+			target.draw(_units.at(_tiles[x][y].getUnit()), states);
+		}
+	}
+	// step 3. the cursor
+	// step 4. army pane
+	// step 5. tile + unit pane
 }
 
 bool awe::map::_isOutOfBounds(const sf::Vector2u pos) const noexcept {

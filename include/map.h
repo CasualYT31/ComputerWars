@@ -364,6 +364,12 @@ namespace awe {
 		void setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
 
 		/**
+		 * Sets the spritesheet used for drawing units.
+		 * @param sheet Pointer to the animated spritesheet to use for units.
+		 */
+		void setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
 		 * @param  target The target to render the map to.
 		 * @return \c FALSE, for now.
@@ -485,5 +491,10 @@ namespace awe {
 		 * Spritesheet used with all tiles.
 		 */
 		std::shared_ptr<sfx::animated_spritesheet> _sheet_tile = nullptr;
+
+		/**
+		 * Spritesheet used with all units.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _sheet_unit = nullptr;
 	};
 }
