@@ -32,15 +32,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace awe {
 	/**
 	 * Class which represents a single tile of a map.
+	 * Eh... Something tells me I shouldn't be inheriting from \c animated_sprite...
+	 * But whatever! It's not like the client outside of \c map will ever interact with this class!
 	 */
-	class tile {
+	class tile : public sfx::animated_sprite {
 	public:
 		/**
-		 * Construct a new tile with a given type.
-		 * @param type The type of tile to create.
-		*              \c nullptr if you don't wish to provide a type at this time.
+		 * The minimum width a rendered tile can be, in pixels.
 		 */
-		tile(const std::shared_ptr<const awe::tile_type>& type = nullptr) noexcept;
+		static const sf::Uint32 MIN_WIDTH = 16;
+
+		/**
+		 * The minimum height a rendered tile can be, in pixels.
+		 */
+		static const sf::Uint32 MIN_HEIGHT = 16;
+
+		/**
+		 * Construct a new tile with a given type.
+		 * @param type  The type of tile to create.
+		 *              \c nullptr if you don't wish to provide a type at this time.
+		 * @param sheet Pointer to the spritesheet to use with this tile.
+		 */
+		tile(const std::shared_ptr<const awe::tile_type>& type = nullptr, const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr) noexcept;
 
 		/**
 		 * Update's the tile's type.
@@ -93,6 +106,13 @@ namespace awe {
 		 */
 		awe::UnitID getUnit() const noexcept;
 	private:
+		/**
+		 * Updates the sprite ID to use with this tile.
+		 * This can change in a variety of different circumstances, and there are quite a few
+		 * conditions to check for, so it's best to keep it all in one method and call it where necessary.
+		 */
+		void _updateSpriteID() noexcept;
+
 		/**
 		 * The type of this tile.
 		 */

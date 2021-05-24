@@ -37,7 +37,7 @@ void awe::map::setMapSize(const sf::Vector2u dim, const std::shared_ptr<const aw
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
 	_tiles.resize(dim.x);
 	for (std::size_t x = 0; x < dim.x; x++) {
-		_tiles[x].resize(dim.y, tile);
+		_tiles[x].resize(dim.y, { tile, _sheet_tile });
 	}
 	if (mapHasShrunk) {
 		// then, go through all owned tiles in each army and delete those that are now out of bounds
@@ -54,6 +54,17 @@ void awe::map::setMapSize(const sf::Vector2u dim, const std::shared_ptr<const aw
 		}
 		for (auto itr = unitsToDelete.begin(), enditr = unitsToDelete.end(); itr != enditr; itr++) {
 			deleteUnit(*itr);
+		}
+		// finally, if the currently selected tile is now out of bounds, adjust it
+		if (_isOutOfBounds(_sel)) {
+			if (dim.x == 0)
+				_sel.x = 0; // will still be out of bounds: this should be checked for anyway in the drawing code
+			else if (_sel.x >= dim.x)
+				_sel.x = dim.x - 1;
+			if (dim.y == 0)
+				_sel.y = 0; // will still be out of bounds: this should be checked for anyway in the drawing code
+			else if (_sel.y >= dim.y)
+				_sel.y = dim.y - 1;
 		}
 	}
 }
@@ -363,6 +374,85 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u pos) const noexcept {
 	return 0;
 }
 
+void awe::map::selectTile(const sf::Vector2u pos) noexcept {
+	if (!_isOutOfBounds(pos)) _sel = pos;
+}
+
+void awe::map::selectArmy(const awe::UUIDValue army) noexcept {
+	if (_isArmyPresent(army))
+		_currentArmy = army;
+	else
+		_logger.error("selectArmy operation cancelled: army with ID {} does not exist!", army);
+}
+
+void awe::map::setVisiblePortionOfMap(const sf::Rect<sf::Uint32>& rect) noexcept {
+	if (rect.width == 0 || rect.height == 0) {
+		_logger.error("setVisiblePortionOfMap operation cancelled: attempted to set a portion of {} width and {} height: 0 in either of these dimensions is not accepted!",
+			rect.width, rect.height);
+	} else if (_isOutOfBounds(sf::Vector2u(rect.left + rect.width - 1, rect.top + rect.height - 1))) {
+		// we should only need to check the most bottom right corner
+		_logger.error("setVisiblePortionOfMap operation cancelled: attempted to set portion to ({} by {}) starting at ({},{}), which is out of bounds with the map's size of ({},{})!",
+			rect.width, rect.height, rect.left, rect.top, getMapSize().x, getMapSize().y);
+	} else {
+		_visiblePortion = rect;
+	}
+}
+
+void awe::map::setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_sheet_tile = sheet;
+	// go through all of the tiles and set the new spritesheet to each one
+	for (auto& column : _tiles) {
+		for (auto& tile : column) {
+			tile.setSpritesheet(sheet);
+		}
+	}
+}
+
+bool awe::map::animate(const sf::RenderTarget& target) noexcept {
+	// step 1. the tiles
+	float tiley = 0.0;
+	for (sf::Uint32 y = 0, height = getMapSize().y; y < height; y++) {
+		float tilex = 0.0;
+		for (sf::Uint32 x = 0, width = getMapSize().x; x < width; x++) {
+			auto& tile = _tiles[x][y];
+			tile.animate(target);
+			// position them if they are in the visible portion
+			if (x >= _visiblePortion.left && x < _visiblePortion.left + _visiblePortion.width &&
+				y >= _visiblePortion.top && y < _visiblePortion.top + _visiblePortion.height) {
+				sf::Uint32 tileWidth = 0, tileHeight = 0;
+				auto type = tile.getTileType();
+				if (type) {
+					if (tile.getTileOwner() == engine::uuid<awe::country>::INVALID) {
+						tileWidth = (sf::Uint32)_sheet_tile->accessSprite(type->getNeutralTile()).width;
+						tileHeight = (sf::Uint32)_sheet_tile->accessSprite(type->getNeutralTile()).height;
+					} else {
+						tileWidth = (sf::Uint32)_sheet_tile->accessSprite(type->getOwnedTile(tile.getTileOwner())).width;
+						tileHeight = (sf::Uint32)_sheet_tile->accessSprite(type->getOwnedTile(tile.getTileOwner())).height;
+					}
+				}
+				if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;
+				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
+				tile.setPosition(sf::Vector2f(tilex, tiley - (float)(tileHeight - tile.MIN_HEIGHT)));
+				tilex += (float)tileWidth;
+			}
+		}
+		tiley += (float)awe::tile::MIN_HEIGHT;
+	}
+	return false;
+}
+
+void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	// step 1. the tiles, and its unit if it has one
+	for (sf::Uint32 y = _visiblePortion.top; y < _visiblePortion.top + _visiblePortion.height; y++) {
+		for (sf::Uint32 x = _visiblePortion.left; x < _visiblePortion.left + _visiblePortion.width; x++) {
+			target.draw(_tiles[x][y], states);
+		}
+	}
+	// step 2. the cursor
+	// step 3. army pane
+	// step 4. tile + unit pane
+}
+
 bool awe::map::_isOutOfBounds(const sf::Vector2u pos) const noexcept {
 	return pos.x >= getMapSize().x || pos.y >= getMapSize().y;
 }
@@ -380,7 +470,13 @@ awe::UnitID awe::map::_findUnitID() {
 	// minus 1 to account for the reserved value, 0
 	if (_units.size() == UINT32_MAX - 1) throw std::bad_alloc();
 	auto temp = _lastUnitID + 1;
-	while (temp == 0 || _isUnitPresent(temp)) temp++;
+	while (_isUnitPresent(temp)) {
+		// manually handle overflow just to be safe
+		if (temp == UINT32_MAX)
+			temp = 1;
+		else
+			temp++;
+	}
 	_lastUnitID = temp;
 	return temp;
 }

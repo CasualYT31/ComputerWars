@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tile.h"
 #include "unit.h"
 #include "army.h"
+#include "spritesheets.h"
 
 #pragma once
 
@@ -38,7 +39,7 @@ namespace awe {
 	 * Only basic checks are carried out in this class; all game logic is separate.
 	 * If any of these basic checks fail, they will be logged.
 	 */
-	class map : sf::NonCopyable {
+	class map : sf::NonCopyable, public sfx::animated_drawable {
 	public:
 		/**
 		 * Initialises the internal logger object.
@@ -70,7 +71,10 @@ namespace awe {
 		 * Any indicies to these objects within any army object will also
 		 * be dropped.\n
 		 * If any new tiles should be created, then they will be assigned
-		 * \c tile as their new type as and when they are created.
+		 * \c tile as their new type as and when they are created.\n
+		 * The currently selected tile will be adjusted in case it should
+		 * become out of bounds after the resize. Only the out of bounds
+		 * axes will be adjusted if this is the case.
 		 * @remark Since this operation shouldn't be a bottleneck,
 		 *         I've not concerned myself much with efficiency in its
 		 *         implementation. The main way to improve efficiency
@@ -316,7 +320,72 @@ namespace awe {
 		 * @return The ID of the unit occupying this tile. 0 if the tile is vacant or out of bounds.
 		 */
 		awe::UnitID getUnitOnTile(const sf::Vector2u pos) const noexcept;
+
+		////////////////////////
+		// DRAWING OPERATIONS //
+		////////////////////////
+		/**
+		 * Selects a tile on the map.
+		 * Used only to let \c map know what tile to draw information on,
+		 * as well as where to draw the cursor.\n
+		 * If the given location is out of bounds, the call will be ignored.
+		 * @param pos The X and Y location of the tile which is selected.
+		 */
+		void selectTile(const sf::Vector2u pos) noexcept;
+
+		/**
+		 * Selects an army from the map.
+		 * Used only to let \c map know what army to draw information on.\n
+		 * If the given army didn't exist, the call will be cancelled and logged.
+		 * @param army The ID of the army which should be having their turn at the time of the call.
+		 */
+		void selectArmy(const awe::UUIDValue army) noexcept;
+
+		/**
+		 * Sets the drawn portion of the map.
+		 * To save resources, not all of a map should be drawn. Instead,
+		 * only the portion visible to the user via the render window
+		 * should be drawn. Everything will always be animated, though
+		 * animation calculation should not take up nearly as many resources.\n
+		 * If the given portion is at least partly out of bounds, an error
+		 * will be logged and the visible portion will not be changed.\n
+		 * A \c width and \c height of \c 0 will be rejected and logged.
+		 * @warning By default, none of the map is selected to be rendered!
+		 *          Make sure to call this method before you draw the map,
+		 *          and after you've set the size of the map!
+		 * @param   rect The portion of the map to render, in tiles.
+		 */
+		void setVisiblePortionOfMap(const sf::Rect<sf::Uint32>& rect) noexcept;
+
+		/**
+		 * Sets the spritesheet used for drawing tiles.
+		 * @param sheet Pointer to the animated spritesheet to use for tiles.
+		 */
+		void setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+
+		/**
+		 * This drawable's \c animate() method.
+		 * @param  target The target to render the map to.
+		 * @return \c FALSE, for now.
+		 */
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
+		/**
+		 * This drawable's \c draw() method.
+		 * Here is what will be rendered to the given target, in order:
+		 * <ol><li>The map's tiles that are within the visible portion, starting from the top row down.</li>
+		 * <li>All the units that are on the visible tiles, if they are to be on the map according to \c isUnitOnMap(). This includes their flashing icons.</li>
+		 * <li>The cursor, which will be drawn at the selected tile.</li>
+		 * <li>An information pane describing the selected army: their COs, their funds, their country, and their power meters.</li>
+		 * <li>An information pane describing the selected tile: its type and HP, and the unit's information, if there is a unit on the tile.</li></ol>
+		 * @param target The target to render the map to.
+		 * @param states The render states to apply to the map. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 */
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+		/////////////
+		// UTILITY //
+		/////////////
 		/**
 		 * Checks if a given X and Y coordinate are out of bounds with the map's current size.
 		 * @param  pos The position to test.
@@ -353,6 +422,9 @@ namespace awe {
 		 */
 		mutable global::logger _logger;
 
+		//////////
+		// DATA //
+		//////////
 		/**
 		 * Stores the map's name.
 		 */
@@ -374,16 +446,44 @@ namespace awe {
 		std::unordered_map<awe::UnitID, awe::unit> _units;
 
 		/**
+		 * The armys on this map.
+		 * To retain turn order, which is defined by countries, an ordered map was chosen.\n
+		 * @warning Please ensure that an army with the ID \c INVALID isn't created!
+		 */
+		std::map<awe::UUIDValue, awe::army> _armys;
+
+		/**
 		 * The ID of the last unit created.
 		 * Used to generate unit IDs once the initial unit has been created.
 		 */
 		awe::UnitID _lastUnitID = 1;
 
+		/////////////
+		// DRAWING //
+		/////////////
 		/**
-		 * The armys on this map.
-		 * To retain turn order, which is defined by countries, an ordered map was chosen.\n
-		 * @warning Please ensure that an army with the ID \c INVALID isn't created.
+		 * The currently selected tile.
 		 */
-		std::map<awe::UUIDValue, awe::army> _armys;
+		sf::Vector2u _sel = sf::Vector2u(0, 0);
+
+		/**
+		 * The army who is having their turn.
+		 * @warning The initial state of \c INVALID cannot be set again by the client.
+		 *          However, the drawing code must still check for it and act accordingly!
+		 */
+		awe::UUIDValue _currentArmy = engine::uuid<awe::country>::INVALID;
+
+		/**
+		 * The visible portion of the map.
+		 */
+		sf::Rect<sf::Uint32> _visiblePortion = sf::Rect<sf::Uint32>(0, 0, 0, 0);
+
+		//////////////////
+		// SPRITESHEETS //
+		//////////////////
+		/**
+		 * Spritesheet used with all tiles.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _sheet_tile = nullptr;
 	};
 }
