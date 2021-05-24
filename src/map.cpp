@@ -432,7 +432,7 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 				}
 				if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;
 				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
-				tile.setPosition(sf::Vector2f(tilex, tiley - (float)(tileHeight - tile.MIN_HEIGHT)));
+				tile.setPixelPosition(tilex, tiley - (float)(tileHeight - tile.MIN_HEIGHT));
 				tilex += (float)tileWidth;
 			}
 		}

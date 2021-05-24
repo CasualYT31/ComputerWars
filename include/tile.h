@@ -31,12 +31,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
 	/**
-	 * Class which represents a single tile of a map.
-	 * Eh... Something tells me I shouldn't be inheriting from \c animated_sprite...
-	 * But whatever! It's not like the client outside of \c map will ever interact with this class!
-	 * Oh yeah: it's because \c animated_sprite doesn't have a virtual destructor...
+	 * Class which represents a single tile on a map.
 	 */
-	class tile : public sfx::animated_sprite {
+	class tile : public sfx::animated_drawable {
 	public:
 		/**
 		 * The minimum width a rendered tile can be, in pixels.
@@ -106,7 +103,35 @@ namespace awe {
 		 * @return The ID of the unit occupying the tile. \c 0 if the tile is vacant.
 		 */
 		awe::UnitID getUnit() const noexcept;
+
+		/**
+		 * Sets the spritesheet to use with this tile.
+		 * @param sheet Pointer to the spritesheet to use with this tile.
+		 */
+		void setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+
+		/**
+		 * Sets the tile's pixel position to the internal sprite.
+		 * @param x The X position of the tile.
+		 * @param y The Y position of the tile.
+		 */
+		void setPixelPosition(float x, float y) noexcept;
+
+		/**
+		 * This drawable's \c animate() method.
+		 * Simply calls the internal sprite's \c animate() method.
+		 * @return The return value of <tt>animated_sprite</tt>'s \c animate() call.
+		 */
+		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
+		/**
+		 * This drawable's \c draw() method.
+		 * Simply draws \c _sprite to the screen.
+		 * @param target The target to render the tile to.
+		 * @param states The render states to apply to the tile. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 */
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
 		/**
 		 * Updates the sprite ID to use with this tile.
 		 * This can change in a variety of different circumstances, and there are quite a few
@@ -134,5 +159,10 @@ namespace awe {
 		 * \c 0 indicates vacancy.
 		 */
 		awe::UnitID _unit = 0;
+
+		/**
+		 * This tile's animated sprite object.
+		 */
+		sfx::animated_sprite _sprite;
 	};
 }

@@ -22,8 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tile.h"
 
-awe::tile::tile(const std::shared_ptr<const awe::tile_type>& type, const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept :
-		animated_sprite(sheet, 0) {
+awe::tile::tile(const std::shared_ptr<const awe::tile_type>& type,
+		const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept : _sprite(sheet, 0) {
 	setTileType(type);
 }
 
@@ -65,13 +65,29 @@ awe::UnitID awe::tile::getUnit() const noexcept {
 	return _unit;
 }
 
+void awe::tile::setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_sprite.setSpritesheet(sheet);
+}
+
+void awe::tile::setPixelPosition(float x, float y) noexcept {
+	_sprite.setPosition(sf::Vector2f(x, y));
+}
+
+bool awe::tile::animate(const sf::RenderTarget& target) noexcept {
+	return _sprite.animate(target);
+}
+
+void awe::tile::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(_sprite, states);
+}
+
 void awe::tile::_updateSpriteID() noexcept {
 	// if this tile has no type, leave the sprite ID alone
 	if (_type) {
 		if (_owner == engine::uuid<awe::country>::INVALID) {
-			setSprite(_type->getNeutralTile());
+			_sprite.setSprite(_type->getNeutralTile());
 		} else {
-			setSprite(_type->getOwnedTile(_owner));
+			_sprite.setSprite(_type->getOwnedTile(_owner));
 		}
 	}
 }
