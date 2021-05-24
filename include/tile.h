@@ -34,6 +34,7 @@ namespace awe {
 	 * Class which represents a single tile of a map.
 	 * Eh... Something tells me I shouldn't be inheriting from \c animated_sprite...
 	 * But whatever! It's not like the client outside of \c map will ever interact with this class!
+	 * Oh yeah: it's because \c animated_sprite doesn't have a virtual destructor...
 	 */
 	class tile : public sfx::animated_sprite {
 	public:

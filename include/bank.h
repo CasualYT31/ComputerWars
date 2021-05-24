@@ -105,10 +105,42 @@ namespace awe {
 	};
 
 	/**
+	 * Base class for all game property classes.
+	 * Inheritance is to be used to implement these properties in your game property classes.
+	 */
+	class bank_id {
+	public:
+		/**
+		 * Polymorphic base classes should have virtual destructors.
+		 */
+		virtual ~bank_id() noexcept;
+
+		/**
+		 * Retrieves the ID of this bank entry as defined during allocation of the entry.
+		 * @return The 0-based ID.
+		 */
+		std::size_t getID() const noexcept;
+	protected:
+		/**
+		 * Constructor which assigns the ID to the bank entry.
+		 * For classes that inherit from this one, this protected constructor is to be called,
+		 * either in the subclass' constructor definition's initialiser list,
+		 * or in the code block of the subclass constructor.
+		 * @param id The ID of this bank entry.
+		 */
+		bank_id(const std::size_t id) noexcept;
+	private:
+		/**
+		 * The ID of this bank entry.
+		 */
+		std::size_t _id = 0;
+	};
+
+	/**
 	 * Base class containing properties common to a majority of game property classes.
 	 * Inheritance is to be used to implement these properties in your game property classes.
 	 */
-	class common_properties {
+	class common_properties : public awe::bank_id {
 	public:
 		/**
 		 * Polymorphic base classes should have virtual destructors.
@@ -149,9 +181,10 @@ namespace awe {
 		 * <li>\c "shortname" = \c _shortName</li>
 		 * <li>\c "icon" = \c _iconKey</li>
 		 * <li>\c "description" = \c _description</li></ul>
-		 * @param j The object value containing the name, icon, and description properties.
+		 * @param id The ID of this bank entry.
+		 * @param j  The object value containing the name, icon, and description properties.
 		 */
-		common_properties(safe::json& j) noexcept;
+		common_properties(const std::size_t id, safe::json& j) noexcept;
 
 		/**
 		 * See \c awe::terrain::terrain(const awe::terrain*).
@@ -190,9 +223,10 @@ namespace awe {
 		 * It also passes on the JSON object to the \c common_properties constructor.
 		 * In addition to the keys defined in the superclass, the following keys are required:
 		 * <ul><li>\c "colour" = \c _colour, <tt>([r,g,b,a])</tt></li></ul>
-		 * @param j The object value containing the country's properties.
+		 * @param id The ID of the bank entry.
+		 * @param j  The object value containing the country's properties.
 		 */
-		country(safe::json& j) noexcept;
+		country(const std::size_t id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the colour property.
@@ -234,9 +268,10 @@ namespace awe {
 		/**
 		 * Constructor which passes on the JSON object to the \c common_properties constructor.
 		 * No additional keys are required.
-		 * @param j The object value containing the weather's properties.
+		 * @param id The ID of the bank entry.
+		 * @param j  The object value containing the weather's properties.
 		 */
-		weather(safe::json& j) noexcept;
+		weather(const std::size_t id, safe::json& j) noexcept;
 
 		/**
 		 * The object's UUID.
@@ -268,9 +303,10 @@ namespace awe {
 		/**
 		 * Constructor which passes on the JSON object to the \c common_properties constructor.
 		 * No additional keys are required.
-		 * @param j The object value containing the environment's properties.
+		 * @param id The ID of the bank entry.
+		 * @param j  The object value containing the environment's properties.
 		 */
-		environment(safe::json& j) noexcept;
+		environment(const std::size_t id, safe::json& j) noexcept;
 
 		/**
 		 * The object's UUID.
@@ -301,9 +337,10 @@ namespace awe {
 		/**
 		 * Constructor which passes on the JSON object to the \c common_properties constructor.
 		 * No additional keys are required.
-		 * @param j The object value containing the movement type's properties.
+		 * @param id The ID of the bank entry.
+		 * @param j  The object value containing the movement type's properties.
 		 */
-		movement_type(safe::json& j) noexcept;
+		movement_type(const std::size_t id, safe::json& j) noexcept;
 
 		/**
 		 * The object's UUID.
@@ -345,9 +382,10 @@ namespace awe {
 		 * The \c pictures array stores a list of animated sprite IDs associated with each country.
 		 * For example, the first value will store the ID of the sprite shown when the first country owns it (in the default implementation, Neutral).
 		 * Not all countries have to be accounted for if the tile cannot be "owned," i.e. captured.
-		 * @param j The object value containing the terrain type's properties.
+		 * @param id The ID of the bank entry.
+		 * @param j  The object value containing the terrain type's properties.
 		 */
-		terrain(safe::json& j) noexcept;
+		terrain(const std::size_t id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the maximum health property.
@@ -441,10 +479,11 @@ namespace awe {
 
 	/**
 	 * A game property class which stores the information associated with a single type of tile.
-	 * Tiles and terrain types were separated in this way so that different visual representations of the same terrain can be maintained.
+	 * Tiles and terrain types were separated in this way so that different visual representations
+	 * of the same terrain can be maintained.
 	 * For example, a road may be straight, a bend, a T-junction, or a crossroads.
 	 */
-	class tile_type {
+	class tile_type : public awe::bank_id {
 	public:
 		/**
 		 * Constructor which reads the given JSON object for tile properties.
@@ -458,9 +497,10 @@ namespace awe {
 		 * For example, the first value will store the ID of the sprite shown on the map when the first country owns it.
 		 * This vector does not have to be accounted for if the tile cannot be owned/captured. In which case, an empty
 		 * vector should be given in the script.
-		 * @param j The object value containing the tile type's properties.
+		 * @param id The ID of the bank entry.
+		 * @param j  The object value containing the tile type's properties.
 		 */
-		tile_type(safe::json& j) noexcept;
+		tile_type(const std::size_t id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the ID of the type of terrain this tile represents (i.e. "Plains" or "Road").
@@ -568,10 +608,11 @@ namespace awe {
 		 * If the tile is within both the lower and higher ranges inclusive, then the attack is valid. If not, the attack is invalid.\n
 		 * Pictures is an array of sprite IDs corresponding to each country's portrait of the type of unit.\n
 		 * Sprites is an array of sprite IDs corresponding to each country's map representation of the type of unit.
-		 * @param j The object value containing the terrain type's properties.
+		 * @param id The ID of the bank entry.
+		 * @param j  The object value containing the terrain type's properties.
 		 * @sa    isInfiniteFuel()
 		 * @sa    isInfiniteAmmo()*/
-		unit_type(safe::json& j) noexcept;
+		unit_type(const std::size_t id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the movement type of this unit.
@@ -819,9 +860,10 @@ namespace awe {
 		 * It also passes on the JSON object to the \c common_properties constructor.
 		 * In addition to the keys defined in the superclass, the following keys are required:
 		 * <ul><li>\c "portrait" = \c _portrait, <tt>(unsigned 32-bit int)</tt></li></ul>
-		 * @param j The object value containing the commander's properties.
+		 * @param id The ID of the bank entry.
+		 * @param j  The object value containing the commander's properties.
 		 */
-		commander(safe::json& j) noexcept;
+		commander(const std::size_t id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the animated sprite ID of this commander's portrait.
@@ -884,10 +926,11 @@ template<typename T>
 bool awe::bank<T>::_load(safe::json& j) noexcept {
 	_bank.clear();
 	nlohmann::ordered_json jj = j.nlohmannJSON();
+	std::size_t id = 0;
 	for (auto& i : jj.items()) {
 		//loop through each object, allowing the template type T to construct its values based on each object
 		safe::json input(i.value());
-		_bank.push_back(std::make_shared<const T>(input));
+		_bank.push_back(std::make_shared<const T>(id++, input));
 	}
 	return true;
 }

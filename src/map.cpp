@@ -80,11 +80,11 @@ void awe::map::createArmy(const std::shared_ptr<const awe::country>& country) no
 		_logger.error("createArmy operation cancelled: attempted to create an army with no country!");
 		return;
 	}
-	if (_isArmyPresent(country->UUID.getID())) {
+	if (_isArmyPresent(country->getID())) {
 		_logger.error("createArmy operation cancelled: attempted to create an army with a country, \"{}\", that already existed on the map!", country->getName());
 		return;
 	}
-	_armys.insert({ country->UUID.getID(), awe::army(country) });
+	_armys.insert({ country->getID(), awe::army(country) });
 }
 
 void awe::map::deleteArmy(const awe::UUIDValue army) noexcept {

@@ -36,16 +36,23 @@ void awe::updateAllMovementsAndLoadedUnits(awe::bank<const awe::unit_type>& unit
 	}
 }
 
+//*********
+//*BANK ID*
+//*********
+awe::bank_id::bank_id(const std::size_t id) noexcept : _id(id) {}
+awe::bank_id::~bank_id() noexcept {}
+std::size_t awe::bank_id::getID() const noexcept { return _id; }
+
 //*******************
 //*COMMON PROPERTIES*
 //*******************
-awe::common_properties::common_properties(safe::json& j) noexcept {
+awe::common_properties::common_properties(const std::size_t id, safe::json& j) noexcept : bank_id(id) {
 	j.apply(_name, { "longname" }, &_name, true);
 	j.apply(_shortName, { "shortname" }, &_shortName, true);
 	j.apply(_iconKey, { "icon" }, &_iconKey, true);
 	j.apply(_description, { "description" }, &_description, true);
 }
-awe::common_properties::common_properties(const awe::common_properties* old) noexcept {
+awe::common_properties::common_properties(const awe::common_properties* old) noexcept : bank_id(old->getID()) {
 	_name = old->getName();
 	_shortName = old->getShortName();
 	_iconKey = old->getIconKey();
@@ -68,7 +75,7 @@ const std::string& awe::common_properties::getDescription() const noexcept {
 //*********
 //*COUNTRY*
 //*********
-awe::country::country(safe::json& j) noexcept : common_properties(j) {
+awe::country::country(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {
 	j.applyColour(_colour, { "colour" }, &_colour, true);
 }
 const sf::Color& awe::country::getColour() const noexcept {
@@ -84,7 +91,7 @@ bool awe::country::operator!=(const awe::country& rhs) const noexcept {
 //*********
 //*WEATHER*
 //*********
-awe::weather::weather(safe::json& j) noexcept : common_properties(j) {}
+awe::weather::weather(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {}
 bool awe::weather::operator==(const awe::weather& rhs) const noexcept {
 	return UUID == rhs.UUID;
 }
@@ -95,7 +102,7 @@ bool awe::weather::operator!=(const awe::weather& rhs) const noexcept {
 //*************
 //*ENVIRONMENT*
 //*************
-awe::environment::environment(safe::json& j) noexcept : common_properties(j) {}
+awe::environment::environment(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {}
 bool awe::environment::operator==(const awe::environment& rhs) const noexcept {
 	return UUID == rhs.UUID;
 }
@@ -106,7 +113,7 @@ bool awe::environment::operator!=(const awe::environment& rhs) const noexcept {
 //***************
 //*MOVEMENT TYPE*
 //***************
-awe::movement_type::movement_type(safe::json& j) noexcept : common_properties(j) {}
+awe::movement_type::movement_type(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {}
 bool awe::movement_type::operator==(const awe::movement_type& rhs) const noexcept {
 	return UUID == rhs.UUID;
 }
@@ -117,7 +124,7 @@ bool awe::movement_type::operator!=(const awe::movement_type& rhs) const noexcep
 //*********
 //*TERRAIN*
 //*********
-awe::terrain::terrain(safe::json& j) noexcept : common_properties(j) {
+awe::terrain::terrain(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {
 	j.apply(_maxHP, { "hp" }, &_maxHP, true);
 	if (_maxHP > INT_MAX) _maxHP = INT_MAX;
 	j.apply(_defence, { "defence" }, &_defence, true);
@@ -159,7 +166,7 @@ bool awe::terrain::operator!=(const awe::terrain& rhs) const noexcept {
 //******
 //*TILE*
 //******
-awe::tile_type::tile_type(safe::json& j) noexcept {
+awe::tile_type::tile_type(const std::size_t id, safe::json& j) noexcept : bank_id(id) {
 	j.apply(_terrainType, { "type" }, &_terrainType, true);
 	j.applyVector(_tiles, { "tiles" });
 	j.apply(_neutralTile, { "neutral" }, &_neutralTile, true);
@@ -190,7 +197,7 @@ bool awe::tile_type::operator!=(const awe::tile_type& rhs) const noexcept {
 //******
 //*UNIT*
 //******
-awe::unit_type::unit_type(safe::json& j) noexcept : common_properties(j) {
+awe::unit_type::unit_type(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {
 	j.apply(_movementTypeID, { "movetype" }, &_movementTypeID, true);
 	j.apply(_cost, { "price" }, &_cost, true);
 	j.apply(_maxFuel, { "fuel" }, &_maxFuel, true);
@@ -306,7 +313,7 @@ bool awe::unit_type::operator!=(const awe::unit_type& rhs) const noexcept {
 //***********
 //*COMMANDER*
 //***********
-awe::commander::commander(safe::json& j) noexcept : common_properties(j) {
+awe::commander::commander(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {
 	j.apply(_portrait, { "portrait" }, &_portrait, true);
 }
 unsigned int awe::commander::getPortrait() const noexcept {
