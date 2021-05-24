@@ -24,6 +24,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 awe::map::map(const std::string& name) noexcept : _logger(name) {}
 
+awe::map::map(const std::string& file, const std::shared_ptr<engine::scripts>& script,
+		const std::string& func, const std::string& name = "map") noexcept : _logger(name) {
+	// load
+}
+
+void awe::map::save(const std::string& file, const std::shared_ptr<engine::scripts>& script,
+		const std::string& func) const noexcept {
+	// save
+}
+
 void awe::map::setMapName(const std::string& name) noexcept {
 	_mapName = name;
 }

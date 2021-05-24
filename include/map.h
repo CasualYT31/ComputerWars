@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tile.h"
 #include "unit.h"
 #include "army.h"
-#include "spritesheets.h"
+#include "script.h"
 
 #pragma once
 
@@ -47,6 +47,30 @@ namespace awe {
 		 * @sa    \c global::logger
 		 */
 		map(const std::string& name = "map") noexcept;
+
+		/////////////////////
+		// FILE OPERATIONS //
+		/////////////////////
+		/**
+		 * Loads a given binary file containing map data and initialises this map based off this data.
+		 * Also initialises the internal logger object.
+		 * @param file   Path to the binary file to load.
+		 * @param script Pointer to the scripts object containing the function to call to load the map data.
+		 * @param func   The name of the function in the \c scripts object to call when loading map data.
+		 * @param name   The name to give this particular instantiation within the log file. Defaults to "map."
+		 * @sa    \c global::logger
+		 */
+		map(const std::string& file, const std::shared_ptr<engine::scripts>& script,
+			const std::string& func, const std::string& name = "map") noexcept;
+
+		/**
+		 * Saves this \c map object's state to a given binary file.
+		 * @param file   Path to the binary file to save to.
+		 * @param script Pointer to the scripts object containing the function to call to save the map data.
+		 * @param func   The name of the function in the \c scripts object to call when saving map data.
+		 */
+		void save(const std::string& file, const std::shared_ptr<engine::scripts>& script,
+			const std::string& func) const noexcept;
 
 		////////////////////
 		// MAP OPERATIONS //
