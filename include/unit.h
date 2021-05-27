@@ -43,7 +43,7 @@ namespace awe {
 		 * @param   army  The army the unit belongs to, which can't be changed.
 		 * @param   sheet Pointer to the spritesheet to use with this unit.
 		 */
-		unit(const std::shared_ptr<const awe::unit_type>& type, const awe::UUIDValue army,
+		unit(const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army,
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr) noexcept;
 
 		/**
@@ -56,7 +56,7 @@ namespace awe {
 		 * Gets the unit's army affiliation.
 		 * @return The ID of the army which owns this unit.
 		 */
-		awe::UUIDValue getArmy() const noexcept;
+		awe::ArmyID getArmy() const noexcept;
 
 		/**
 		 * Sets this unit's X and Y location.
@@ -184,7 +184,7 @@ namespace awe {
 		/**
 		 * The ID of the army the unit belongs to.
 		 */
-		const awe::UUIDValue _army = engine::uuid<awe::country>::INVALID;
+		const awe::ArmyID _army = awe::army::NO_ARMY;
 
 		/**
 		 * The tile this unit occupies.

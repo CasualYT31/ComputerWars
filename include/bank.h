@@ -59,7 +59,7 @@ namespace awe {
 		 * Typedef used to identify members of the bank.
 		 * This acts as a way to ensure that IDs intended for different banks cannot be used with this one.
 		 */
-		typedef sf::Uint32 index;
+		typedef awe::BankID index;
 
 		/**
 		 * Allows the client to access the game properties of a bank member.
@@ -119,7 +119,7 @@ namespace awe {
 		 * Retrieves the ID of this bank entry as defined during allocation of the entry.
 		 * @return The 0-based ID.
 		 */
-		std::size_t getID() const noexcept;
+		awe::BankID getID() const noexcept;
 	protected:
 		/**
 		 * Constructor which assigns the ID to the bank entry.
@@ -128,12 +128,12 @@ namespace awe {
 		 * or in the code block of the subclass constructor.
 		 * @param id The ID of this bank entry.
 		 */
-		bank_id(const std::size_t id) noexcept;
+		bank_id(const awe::BankID id) noexcept;
 	private:
 		/**
 		 * The ID of this bank entry.
 		 */
-		std::size_t _id = 0;
+		awe::BankID _id = 0;
 	};
 
 	/**
@@ -184,7 +184,7 @@ namespace awe {
 		 * @param id The ID of this bank entry.
 		 * @param j  The object value containing the name, icon, and description properties.
 		 */
-		common_properties(const std::size_t id, safe::json& j) noexcept;
+		common_properties(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * See \c awe::terrain::terrain(const awe::terrain*).
@@ -226,7 +226,7 @@ namespace awe {
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the country's properties.
 		 */
-		country(const std::size_t id, safe::json& j) noexcept;
+		country(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the colour property.
@@ -271,7 +271,7 @@ namespace awe {
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the weather's properties.
 		 */
-		weather(const std::size_t id, safe::json& j) noexcept;
+		weather(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * The object's UUID.
@@ -306,7 +306,7 @@ namespace awe {
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the environment's properties.
 		 */
-		environment(const std::size_t id, safe::json& j) noexcept;
+		environment(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * The object's UUID.
@@ -340,7 +340,7 @@ namespace awe {
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the movement type's properties.
 		 */
-		movement_type(const std::size_t id, safe::json& j) noexcept;
+		movement_type(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * The object's UUID.
@@ -385,7 +385,7 @@ namespace awe {
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the terrain type's properties.
 		 */
-		terrain(const std::size_t id, safe::json& j) noexcept;
+		terrain(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the maximum health property.
@@ -500,7 +500,7 @@ namespace awe {
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the tile type's properties.
 		 */
-		tile_type(const std::size_t id, safe::json& j) noexcept;
+		tile_type(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the ID of the type of terrain this tile represents (i.e. "Plains" or "Road").
@@ -605,14 +605,14 @@ namespace awe {
 		 * For example, the first value will store the ID of the sprite shown when the first country owns it (in the default implementation, Neutral).
 		 * Not all countries have to be accounted for if the tile cannot be "owned," i.e. captured.
 		 * Ranged values work by counting the number of tiles away from the unit's current tile.
-		 * If the tile is within both the lower and higher ranges inclusive, then the attack is valid. If not, the attack is invalid.\n
+		 * If the tile is within both the lower and higher ranges inclusive, then the attack is valid. If not, the attack is awe::army::NO_ARMY.\n
 		 * Pictures is an array of sprite IDs corresponding to each country's portrait of the type of unit.\n
 		 * Sprites is an array of sprite IDs corresponding to each country's map representation of the type of unit.
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the terrain type's properties.
 		 * @sa    isInfiniteFuel()
 		 * @sa    isInfiniteAmmo()*/
-		unit_type(const std::size_t id, safe::json& j) noexcept;
+		unit_type(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the movement type of this unit.
@@ -863,7 +863,7 @@ namespace awe {
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the commander's properties.
 		 */
-		commander(const std::size_t id, safe::json& j) noexcept;
+		commander(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the animated sprite ID of this commander's portrait.
@@ -926,7 +926,7 @@ template<typename T>
 bool awe::bank<T>::_load(safe::json& j) noexcept {
 	_bank.clear();
 	nlohmann::ordered_json jj = j.nlohmannJSON();
-	std::size_t id = 0;
+	awe::BankID id = 0;
 	for (auto& i : jj.items()) {
 		//loop through each object, allowing the template type T to construct its values based on each object
 		safe::json input(i.value());

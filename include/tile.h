@@ -69,16 +69,16 @@ namespace awe {
 
 		/**
 		 * Sets the owner of this tile.
-		 * Set this to <tt>engine::uuid<awe::country>::INVALID</tt> to set no owner.
+		 * Set this to <tt>awe::army::NO_ARMY</tt> to set no owner.
 		 * @param owner The army ID of the owner of this tile.
 		 */
-		void setTileOwner(const awe::UUIDValue owner) noexcept;
+		void setTileOwner(const awe::ArmyID owner) noexcept;
 
 		/**
 		 * Retrieves the army ID of the army who owns this tile.
-		 * @return The army ID of the owning army. \c INVALID if the tile isn't owned.
+		 * @return The army ID of the owning army. \c awe::army::NO_ARMY if the tile isn't owned.
 		 */
-		awe::UUIDValue getTileOwner() const noexcept;
+		awe::ArmyID getTileOwner() const noexcept;
 
 		/**
 		 * Sets the tile's HP.
@@ -148,7 +148,7 @@ namespace awe {
 		/**
 		 * The army ID of the owner of the tile.
 		 */
-		awe::UUIDValue _owner = engine::uuid<awe::country>::INVALID;
+		awe::ArmyID _owner = awe::army::NO_ARMY;
 
 		/**
 		 * The tile's HP.

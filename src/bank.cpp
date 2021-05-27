@@ -24,13 +24,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 
 void awe::updateAllTerrains(awe::bank<const awe::tile_type>& tileBank, const awe::bank<const awe::terrain>& terrainBank) noexcept {
-	for (std::size_t i = 0; i < tileBank.size(); i++) {
+	for (awe::BankID i = 0; i < tileBank.size(); i++) {
 		tileBank[(awe::bank<awe::tile_type>::index)i]->updateTerrain(terrainBank);
 	}
 }
 
 void awe::updateAllMovementsAndLoadedUnits(awe::bank<const awe::unit_type>& unitBank, const awe::bank<const awe::movement_type>& movementBank) noexcept {
-	for (std::size_t i = 0; i < unitBank.size(); i++) {
+	for (awe::BankID i = 0; i < unitBank.size(); i++) {
 		unitBank[(awe::bank<awe::unit_type>::index)i]->updateMovementType(movementBank);
 		unitBank[(awe::bank<awe::unit_type>::index)i]->updateUnitTypes(unitBank);
 	}
@@ -39,14 +39,14 @@ void awe::updateAllMovementsAndLoadedUnits(awe::bank<const awe::unit_type>& unit
 //*********
 //*BANK ID*
 //*********
-awe::bank_id::bank_id(const std::size_t id) noexcept : _id(id) {}
+awe::bank_id::bank_id(const awe::BankID id) noexcept : _id(id) {}
 awe::bank_id::~bank_id() noexcept {}
-std::size_t awe::bank_id::getID() const noexcept { return _id; }
+awe::BankID awe::bank_id::getID() const noexcept { return _id; }
 
 //*******************
 //*COMMON PROPERTIES*
 //*******************
-awe::common_properties::common_properties(const std::size_t id, safe::json& j) noexcept : bank_id(id) {
+awe::common_properties::common_properties(const awe::BankID id, safe::json& j) noexcept : bank_id(id) {
 	j.apply(_name, { "longname" }, &_name, true);
 	j.apply(_shortName, { "shortname" }, &_shortName, true);
 	j.apply(_iconKey, { "icon" }, &_iconKey, true);
@@ -75,7 +75,7 @@ const std::string& awe::common_properties::getDescription() const noexcept {
 //*********
 //*COUNTRY*
 //*********
-awe::country::country(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {
+awe::country::country(const awe::BankID id, safe::json& j) noexcept : common_properties(id, j) {
 	j.applyColour(_colour, { "colour" }, &_colour, true);
 }
 const sf::Color& awe::country::getColour() const noexcept {
@@ -91,7 +91,7 @@ bool awe::country::operator!=(const awe::country& rhs) const noexcept {
 //*********
 //*WEATHER*
 //*********
-awe::weather::weather(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {}
+awe::weather::weather(const awe::BankID id, safe::json& j) noexcept : common_properties(id, j) {}
 bool awe::weather::operator==(const awe::weather& rhs) const noexcept {
 	return UUID == rhs.UUID;
 }
@@ -102,7 +102,7 @@ bool awe::weather::operator!=(const awe::weather& rhs) const noexcept {
 //*************
 //*ENVIRONMENT*
 //*************
-awe::environment::environment(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {}
+awe::environment::environment(const awe::BankID id, safe::json& j) noexcept : common_properties(id, j) {}
 bool awe::environment::operator==(const awe::environment& rhs) const noexcept {
 	return UUID == rhs.UUID;
 }
@@ -113,7 +113,7 @@ bool awe::environment::operator!=(const awe::environment& rhs) const noexcept {
 //***************
 //*MOVEMENT TYPE*
 //***************
-awe::movement_type::movement_type(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {}
+awe::movement_type::movement_type(const awe::BankID id, safe::json& j) noexcept : common_properties(id, j) {}
 bool awe::movement_type::operator==(const awe::movement_type& rhs) const noexcept {
 	return UUID == rhs.UUID;
 }
@@ -124,7 +124,7 @@ bool awe::movement_type::operator!=(const awe::movement_type& rhs) const noexcep
 //*********
 //*TERRAIN*
 //*********
-awe::terrain::terrain(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {
+awe::terrain::terrain(const awe::BankID id, safe::json& j) noexcept : common_properties(id, j) {
 	j.apply(_maxHP, { "hp" }, &_maxHP, true);
 	if (_maxHP > INT_MAX) _maxHP = INT_MAX;
 	j.apply(_defence, { "defence" }, &_defence, true);
@@ -166,7 +166,7 @@ bool awe::terrain::operator!=(const awe::terrain& rhs) const noexcept {
 //******
 //*TILE*
 //******
-awe::tile_type::tile_type(const std::size_t id, safe::json& j) noexcept : bank_id(id) {
+awe::tile_type::tile_type(const awe::BankID id, safe::json& j) noexcept : bank_id(id) {
 	j.apply(_terrainType, { "type" }, &_terrainType, true);
 	j.applyVector(_tiles, { "tiles" });
 	j.apply(_neutralTile, { "neutral" }, &_neutralTile, true);
@@ -197,7 +197,7 @@ bool awe::tile_type::operator!=(const awe::tile_type& rhs) const noexcept {
 //******
 //*UNIT*
 //******
-awe::unit_type::unit_type(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {
+awe::unit_type::unit_type(const awe::BankID id, safe::json& j) noexcept : common_properties(id, j) {
 	j.apply(_movementTypeID, { "movetype" }, &_movementTypeID, true);
 	j.apply(_cost, { "price" }, &_cost, true);
 	j.apply(_maxFuel, { "fuel" }, &_maxFuel, true);
@@ -282,7 +282,7 @@ signed int awe::unit_type::fuelPerTurn() const noexcept {
 }
 void awe::unit_type::updateUnitTypes(const awe::bank<const awe::unit_type>& unitBank) const noexcept {
 	_canLoadTheseUnitTypes.clear();
-	for (std::size_t i = 0; i < unitBank.size(); i++) {
+	for (awe::BankID i = 0; i < unitBank.size(); i++) {
 		for (auto& u : _canLoadThese) {
 			if (i == u) {
 				_canLoadTheseUnitTypes.push_back(unitBank[(awe::bank<awe::unit_type>::index)i]);
@@ -313,7 +313,7 @@ bool awe::unit_type::operator!=(const awe::unit_type& rhs) const noexcept {
 //***********
 //*COMMANDER*
 //***********
-awe::commander::commander(const std::size_t id, safe::json& j) noexcept : common_properties(id, j) {
+awe::commander::commander(const awe::BankID id, safe::json& j) noexcept : common_properties(id, j) {
 	j.apply(_portrait, { "portrait" }, &_portrait, true);
 }
 unsigned int awe::commander::getPortrait() const noexcept {

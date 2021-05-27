@@ -36,12 +36,12 @@ std::shared_ptr<const awe::tile_type> awe::tile::getTileType() const noexcept {
 	return _type;
 }
 
-void awe::tile::setTileOwner(const awe::UUIDValue owner) noexcept {
+void awe::tile::setTileOwner(const awe::ArmyID owner) noexcept {
 	_owner = owner;
 	_updateSpriteID();
 }
 
-awe::UUIDValue awe::tile::getTileOwner() const noexcept {
+awe::ArmyID awe::tile::getTileOwner() const noexcept {
 	return _owner;
 }
 
@@ -84,7 +84,7 @@ void awe::tile::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 void awe::tile::_updateSpriteID() noexcept {
 	// if this tile has no type, leave the sprite ID alone
 	if (_type) {
-		if (_owner == engine::uuid<awe::country>::INVALID) {
+		if (_owner == awe::army::NO_ARMY) {
 			_sprite.setSprite(_type->getNeutralTile());
 		} else {
 			_sprite.setSprite(_type->getOwnedTile(_owner));

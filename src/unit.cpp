@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.h"
 
-awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type, const awe::UUIDValue army,
+awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army,
 		const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr) noexcept :
 		_type(type), _army(army), _sprite(sheet, ((type) ? (type->getUnit(army)) : (0))) {}
 
@@ -30,7 +30,7 @@ std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept {
 	return _type;
 }
 
-awe::UUIDValue awe::unit::getArmy() const noexcept {
+awe::ArmyID awe::unit::getArmy() const noexcept {
 	return _army;
 }
 

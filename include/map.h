@@ -143,7 +143,7 @@ namespace awe {
 		 * and disowns all owned tiles.
 		 * @param army The ID of the army to delete.
 		 */
-		void deleteArmy(const awe::UUIDValue army) noexcept;
+		void deleteArmy(const awe::ArmyID army) noexcept;
 
 		/**
 		 * Sets the amount of funds a specified army obtains.
@@ -151,14 +151,14 @@ namespace awe {
 		 * @param army  The ID of the army to amend.
 		 * @param funds The new fund amount to assign to the army.
 		 */
-		void setArmyFunds(const awe::UUIDValue army, const awe::Funds funds) noexcept;
+		void setArmyFunds(const awe::ArmyID army, const awe::Funds funds) noexcept;
 
 		/**
 		 * Retrieves an army's fund count.
 		 * @param  army The ID of the army to inspect.
 		 * @return The amount of funds this army possesses, or \c 0 if the given army doesn't exist.
 		 */
-		awe::Funds getArmyFunds(const awe::UUIDValue army) const noexcept;
+		awe::Funds getArmyFunds(const awe::ArmyID army) const noexcept;
 
 		/**
 		 * Retrieves a list of tiles that belong to a specified army.
@@ -166,7 +166,7 @@ namespace awe {
 		 * @param  army The ID of the army to retrieve the owned tiles of.
 		 * @return A list of locations of tiles that belong to the given army.
 		 */
-		std::unordered_set<sf::Vector2u> getTilesOfArmy(const awe::UUIDValue army) const noexcept;
+		std::unordered_set<sf::Vector2u> getTilesOfArmy(const awe::ArmyID army) const noexcept;
 
 		/**
 		 * Retrieves a list of units that belong to a specified army.
@@ -174,7 +174,7 @@ namespace awe {
 		 * @param  army The ID of the army to retrieve the units of.
 		 * @return A list of IDs identifying the units that belong to this army.
 		 */
-		std::unordered_set<awe::UnitID> getUnitsOfArmy(const awe::UUIDValue army) const noexcept;
+		std::unordered_set<awe::UnitID> getUnitsOfArmy(const awe::ArmyID army) const noexcept;
 
 		/////////////////////
 		// UNIT OPERATIONS //
@@ -186,7 +186,7 @@ namespace awe {
 		 * @param  army The ID of the army who will own this unit.
 		 * @return The 1-based ID of the unit created. Will be \c 0 if the unit couldn't be created.
 		 */
-		awe::UnitID createUnit(const std::shared_ptr<const awe::unit_type>& type, const awe::UUIDValue army) noexcept;
+		awe::UnitID createUnit(const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army) noexcept;
 
 		/**
 		 * Deletes a unit.
@@ -287,11 +287,11 @@ namespace awe {
 
 		/**
 		 * Retrieves the ID of the army a specified unit belongs to.
-		 * <tt>engine::uuid<awe::country>::INVALID</tt> will be returned if the unit doesn't exist.
+		 * <tt>awe::army::NO_ARMY</tt> will be returned if the unit doesn't exist.
 		 * @param  id The ID of the unit to inspect.
 		 * @return The ID of the army that owns this unit.
 		 */
-		awe::UUIDValue getArmyOfUnit(const awe::UnitID id) const noexcept;
+		awe::ArmyID getArmyOfUnit(const awe::UnitID id) const noexcept;
 
 		/////////////////////
 		// TILE OPERATIONS //
@@ -333,17 +333,17 @@ namespace awe {
 		 * Sets a tile's owner.
 		 * @param pos  The X and Y coordinate of the tile to change.
 		 * @param army The ID of the army who now owns this tile.
-		 *             \c INVALID can be given to signal that the tile should not have an owner.
+		 *             \c awe::army::NO_ARMY can be given to signal that the tile should not have an owner.
 		 */
-		void setTileOwner(const sf::Vector2u pos, awe::UUIDValue army) noexcept;
+		void setTileOwner(const sf::Vector2u pos, awe::ArmyID army) noexcept;
 
 		/**
 		 * Gets a tile's owner.
-		 * If the coorindate is out of bounds, \c INVALID is returned.
+		 * If the coorindate is out of bounds, \c awe::army::NO_ARMY is returned.
 		 * @param  pos The X and Y coordinate of the tile to change.
-		 * @return The ID of the army who owns this tile, or \c INVALID if no army owns it.
+		 * @return The ID of the army who owns this tile, or \c awe::army::NO_ARMY if no army owns it.
 		 */
-		awe::UUIDValue getTileOwner(const sf::Vector2u pos) const noexcept;
+		awe::ArmyID getTileOwner(const sf::Vector2u pos) const noexcept;
 
 		/**
 		 * Retrieves the unit currently occupying a specified tile.
@@ -372,7 +372,7 @@ namespace awe {
 		 * If the given army didn't exist, the call will be cancelled and logged.
 		 * @param army The ID of the army which should be having their turn at the time of the call.
 		 */
-		void selectArmy(const awe::UUIDValue army) noexcept;
+		void selectArmy(const awe::ArmyID army) noexcept;
 
 		/**
 		 * Sets the drawn portion of the map.
@@ -437,7 +437,7 @@ namespace awe {
 		 * @param  id The ID of the army to check.
 		 * @return \c TRUE if the army is on the map, \c FALSE if they are not.
 		 */
-		bool _isArmyPresent(const awe::UUIDValue id) const noexcept;
+		bool _isArmyPresent(const awe::ArmyID id) const noexcept;
 
 		/**
 		 * Checks if a unit is present in the game.
@@ -524,9 +524,9 @@ namespace awe {
 		/**
 		 * The armys on this map.
 		 * To retain turn order, which is defined by countries, an ordered map was chosen.\n
-		 * @warning Please ensure that an army with the ID \c INVALID isn't created!
+		 * @warning Please ensure that an army with the ID \c awe::army::NO_ARMY isn't created!
 		 */
-		std::map<awe::UUIDValue, awe::army> _armys;
+		std::map<awe::ArmyID, awe::army> _armys;
 
 		/**
 		 * The ID of the last unit created.
@@ -544,10 +544,10 @@ namespace awe {
 
 		/**
 		 * The army who is having their turn.
-		 * @warning The initial state of \c INVALID cannot be set again by the client.
+		 * @warning The initial state of \c awe::army::NO_ARMY cannot be set again by the client.
 		 *          However, the drawing code must still check for it and act accordingly!
 		 */
-		awe::UUIDValue _currentArmy = engine::uuid<awe::country>::INVALID;
+		awe::ArmyID _currentArmy = awe::army::NO_ARMY;
 
 		/**
 		 * The visible portion of the map.

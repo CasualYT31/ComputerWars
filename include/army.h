@@ -37,6 +37,11 @@ namespace awe {
 	class army {
 	public:
 		/**
+		 * Reserved value representing no army.
+		 */
+		static const awe::ArmyID NO_ARMY = UINT32_MAX;
+
+		/**
 		 * Constructs a new army.
 		 * @param country The country the army belongs to, which can't be changed.
 		 */

@@ -112,7 +112,7 @@ void awe::map::createArmy(const std::shared_ptr<const awe::country>& country) no
 	_armys.insert({ country->getID(), awe::army(country) });
 }
 
-void awe::map::deleteArmy(const awe::UUIDValue army) noexcept {
+void awe::map::deleteArmy(const awe::ArmyID army) noexcept {
 	if (!_isArmyPresent(army)) {
 		_logger.error("deleteArmy operation cancelled: attempted to delete an army, {}, that didn't exist on the map!", army);
 		return;
@@ -125,13 +125,13 @@ void awe::map::deleteArmy(const awe::UUIDValue army) noexcept {
 	// then, disown all tiles
 	auto tiles = _armys[army].getTiles();
 	for (auto tile : tiles) {
-		_tiles[tile.x][tile.y].setTileOwner(engine::uuid<awe::country>::INVALID);
+		_tiles[tile.x][tile.y].setTileOwner(awe::army::NO_ARMY);
 	}
 	// finally, delete the army from the army list
 	_armys.erase(army);
 }
 
-void awe::map::setArmyFunds(const awe::UUIDValue army, const awe::Funds funds) noexcept {
+void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds) noexcept {
 	if (_isArmyPresent(army)) {
 		_armys[army].setFunds(funds);
 	} else {
@@ -139,25 +139,25 @@ void awe::map::setArmyFunds(const awe::UUIDValue army, const awe::Funds funds) n
 	}
 }
 
-awe::Funds awe::map::getArmyFunds(const awe::UUIDValue army) const noexcept {
+awe::Funds awe::map::getArmyFunds(const awe::ArmyID army) const noexcept {
 	if (_isArmyPresent(army)) return _armys.at(army).getFunds();
 	_logger.error("getArmyFunds operation failed: army with ID {} didn't exist at the time of calling!", army);
 	return 0;
 }
 
-std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::UUIDValue army) const noexcept {
+std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army) const noexcept {
 	if (_isArmyPresent(army)) return _armys.at(army).getTiles();
 	_logger.error("getTilesOfArmy operation failed: army with ID {} didn't exist at the time of calling!", army);
 	return std::unordered_set<sf::Vector2u>();
 }
 
-std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(const awe::UUIDValue army) const noexcept {
+std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(const awe::ArmyID army) const noexcept {
 	if (_isArmyPresent(army)) return _armys.at(army).getUnits();
 	_logger.error("getUnitsOfArmy operation failed: army with ID {} didn't exist at the time of calling!", army);
 	return std::unordered_set<awe::UnitID>();
 }
 
-awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& type, const awe::UUIDValue army) noexcept {
+awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army) noexcept {
 	if (!type) _logger.warning("createUnit warning: creating a unit for army {} without a type!", army);
 	if (!_isArmyPresent(army)) {
 		_logger.error("createUnit operation failed: attempted to create \"{}\" for army with ID {} that didn't exist!", ((type) ? (type->getName()) : ("[NULL]")), army);
@@ -324,10 +324,10 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from, cons
 	}
 }
 
-awe::UUIDValue awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {
+awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {
 	if (_isUnitPresent(id)) return _units.at(id).getArmy();
 	_logger.error("getArmyOfUnit operation failed: unit with ID {} doesn't exist!", id);
-	return engine::uuid<awe::country>::INVALID;
+	return awe::army::NO_ARMY;
 }
 
 void awe::map::setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept {
@@ -339,7 +339,7 @@ void awe::map::setTileType(const sf::Vector2u pos, const std::shared_ptr<const a
 	}
 	_tiles[pos.x][pos.y].setTileType(type);
 	// remove ownership of the tile from the army who owns it, if any army does
-	setTileOwner(pos, engine::uuid<awe::country>::INVALID);
+	setTileOwner(pos, awe::army::NO_ARMY);
 }
 
 std::shared_ptr<const awe::tile_type> awe::map::getTileType(const sf::Vector2u pos) const noexcept {
@@ -366,7 +366,7 @@ awe::HP awe::map::getTileHP(const sf::Vector2u pos) const noexcept {
 	return _tiles[pos.x][pos.y].getTileHP();
 }
 
-void awe::map::setTileOwner(const sf::Vector2u pos, awe::UUIDValue army) noexcept {
+void awe::map::setTileOwner(const sf::Vector2u pos, awe::ArmyID army) noexcept {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("setTileOwner operation cancelled: army with ID {} couldn't be assigned to tile at position ({},{}), as it is out of bounds with the map's size of ({},{})!",
 			army, pos.x, pos.y, getMapSize().x, getMapSize().y);
@@ -381,10 +381,10 @@ void awe::map::setTileOwner(const sf::Vector2u pos, awe::UUIDValue army) noexcep
 	tile.setTileOwner(army);
 }
 
-awe::UUIDValue awe::map::getTileOwner(const sf::Vector2u pos) const noexcept {
+awe::ArmyID awe::map::getTileOwner(const sf::Vector2u pos) const noexcept {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("getTileOwner operation failed: tile at position ({},{}) is out of bounds with the map's size of ({},{})!", pos.x, pos.y, getMapSize().x, getMapSize().y);
-		return engine::uuid<awe::country>::INVALID;
+		return awe::army::NO_ARMY;
 	}
 	return _tiles[pos.x][pos.y].getTileOwner();
 }
@@ -403,7 +403,7 @@ void awe::map::selectTile(const sf::Vector2u pos) noexcept {
 	if (!_isOutOfBounds(pos)) _sel = pos;
 }
 
-void awe::map::selectArmy(const awe::UUIDValue army) noexcept {
+void awe::map::selectArmy(const awe::ArmyID army) noexcept {
 	if (_isArmyPresent(army))
 		_currentArmy = army;
 	else
@@ -455,7 +455,7 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 				sf::Uint32 tileWidth = 0, tileHeight = 0;
 				auto type = tile.getTileType();
 				if (type) {
-					if (tile.getTileOwner() == engine::uuid<awe::country>::INVALID) {
+					if (tile.getTileOwner() == awe::army::NO_ARMY) {
 						tileWidth = (sf::Uint32)_sheet_tile->accessSprite(type->getNeutralTile()).width;
 						tileHeight = (sf::Uint32)_sheet_tile->accessSprite(type->getNeutralTile()).height;
 					} else {
@@ -505,7 +505,7 @@ bool awe::map::_isOutOfBounds(const sf::Vector2u pos) const noexcept {
 	return pos.x >= getMapSize().x || pos.y >= getMapSize().y;
 }
 
-bool awe::map::_isArmyPresent(const awe::UUIDValue id) const noexcept {
+bool awe::map::_isArmyPresent(const awe::ArmyID id) const noexcept {
 	return _armys.find(id) != _armys.end();
 }
 

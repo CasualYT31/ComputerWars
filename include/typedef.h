@@ -42,6 +42,11 @@ namespace awe {
 	typedef sf::Uint32 UUIDValue;
 
 	/**
+	 * Typedef representing a generic bank ID.
+	 */
+	typedef sf::Uint32 BankID;
+
+	/**
 	 * Typedef representing funds.
 	 * I decided to make this signed because fund calculations
 	 * will result in negative values more often than not, and
@@ -71,4 +76,11 @@ namespace awe {
 	 * @sa awe::map::_findUnitID()
 	 */
 	typedef sf::Uint32 UnitID;
+
+	/**
+	 * Typedef representing an army ID.
+	 * \c UINT32_MAX should be reserved, even if it isn't officially in bank.h...
+	 * @sa awe::army::NO_ARMY
+	 */
+	typedef awe::BankID ArmyID;
 }

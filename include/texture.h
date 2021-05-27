@@ -99,7 +99,7 @@ namespace sfx {
 		 * The second array will contain the bounding rectangle of the second sprite, with an ID of \c 1, etc.
 		 * This method clears both the \c _frames (indirectly) and \c _sprites vectors if a valid \c path value was given.
 		 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.
-		 * @return The result of \c _loadImages(). \c FALSE if an invalid \c path value was given.
+		 * @return The result of \c _loadImages(). \c FALSE if an awe::army::NO_ARMY \c path value was given.
 		 */
 		virtual bool _load(safe::json& j) noexcept;
 
@@ -203,7 +203,7 @@ namespace sfx {
 		 * so it must be called even if a non-animated spritesheet is being used so that the object will render properly.
 		 * If no sheet was given, this method will return \c TRUE and will not perform any other operations.
 		 * If the sprite ID (client assigned) or current frame ID (internal) do not refer to a valid sprite or frame,
-		 * an error will be logged only once. If the spritesheet or sprite ID is changed after this time, another error will be logged if any IDs are still invalid.
+		 * an error will be logged only once. If the spritesheet or sprite ID is changed after this time, another error will be logged if any IDs are still awe::army::NO_ARMY.
 		 * @todo   OH YEAH, I ALSO HAVE TO MAKE SURE THIS ABIDES BY DELTA AT SOME POINT IN THE FUTURE!
 		 * @return \c TRUE if the current frame is the last frame, or if \c _sheet is NULL, or if there was an error in retrieving the sprite information, \c FALSE otherwise.
 		 */
