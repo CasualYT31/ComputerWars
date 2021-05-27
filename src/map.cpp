@@ -566,12 +566,18 @@ void awe::map::_CWM_0(const bool isSave) {
 				if (tile.getUnit()) {
 					_CWM_0_Unit(isSave, tile.getUnit());
 				} else {
-					_file.writeNumber<std::size_t>(0xFFFFFFFF);
+					_file.writeNumber(awe::army::NO_ARMY);
 				}
 			}
 		}
 	} else {
+		setMapName(_file.readString());
+		sf::Uint32 width = _file.readNumber<sf::Uint32>(), height = _file.readNumber<sf::Uint32>();
+		setMapSize(sf::Vector2u(width, height));
+		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
+		for (sf::Uint64 army = 0; army < armyCount; army++) {
 
+		}
 	}
 }
 
@@ -589,7 +595,7 @@ void awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id) {
 				_CWM_0_Unit(isSave, loadedUnitID);
 			}
 		} else {
-			_file.writeNumber<std::size_t>(0xFFFFFFFF);
+			_file.writeNumber(awe::army::NO_ARMY);
 		}
 	} else {
 
