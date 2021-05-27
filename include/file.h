@@ -64,6 +64,7 @@ namespace engine {
 		/**
 		 * Opens a given file for either input or output.
 		 * This method also automatically closes the previously opened file, if any.
+		 * \c _bytes is only reset to \c 0 if opening the file was successful.
 		 * @param  filepath The path of the file to open.
 		 * @param  forInput \c TRUE if the file is to be open for input, \c FALSE if for output.
 		 * @throws std::exception if the file couldn't be opened.

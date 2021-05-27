@@ -24,14 +24,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 awe::map::map(const std::string& name) noexcept : _logger(name) {}
 
-awe::map::map(const std::string& file, const std::shared_ptr<engine::scripts>& script,
-		const std::string& func, const std::string& name = "map") noexcept : _logger(name) {
-	// load
+awe::map::map(const std::string& file, const unsigned char version, const std::string& name = "map") noexcept : _logger(name) {
+	try {
+		_file.open(file, true);
+		_filename = file;
+		_CWM_Header(false, version);
+		_file.close();
+	} catch (std::exception& e) {
+		_logger.error("Map loading operation: couldn't load map file \"{}\": {}", file, e.what());
+	}
 }
 
-void awe::map::save(const std::string& file, const std::shared_ptr<engine::scripts>& script,
-		const std::string& func) const noexcept {
-	// save
+bool awe::map::save(std::string file, const unsigned char version) noexcept {
+	if (file == "") file = _filename;
+	try {
+		_file.open(file, false);
+		_filename = file;
+		_CWM_Header(true, version);
+		_file.close();
+	} catch (std::exception& e) {
+		_logger.error("Map saving operation: couldn't save map file \"{}\": {}", file, e.what());
+		return false;
+	}
+	return true;
 }
 
 void awe::map::setMapName(const std::string& name) noexcept {
@@ -512,4 +527,71 @@ awe::UnitID awe::map::_findUnitID() {
 	}
 	_lastUnitID = temp;
 	return temp;
+}
+
+void awe::map::_CWM_Header(const bool isSave, unsigned char version) {
+	sf::Uint32 finalVersion = FIRST_FILE_VERSION + version;
+	if (isSave) {
+		_file.writeNumber(finalVersion);
+	} else {
+		finalVersion = _file.readNumber<sf::Uint32>();
+		version = finalVersion - FIRST_FILE_VERSION;
+	}
+	switch (version) {
+	case 0:
+		_CWM_0(isSave);
+		break;
+	default:
+		_logger.error("CWM version {} is unrecognised!", version);
+		throw std::exception("read above");
+	}
+}
+
+void awe::map::_CWM_0(const bool isSave) {
+	if (isSave) {
+		_file.writeString(getMapName());
+		_file.writeNumber((sf::Uint32)getMapSize().x);
+		_file.writeNumber((sf::Uint32)getMapSize().y);
+		_file.writeNumber((sf::Uint32)_armys.size());
+		for (auto& army : _armys) {
+			_file.writeNumber(army.second.getCountry()->getID());
+			_file.writeNumber(army.second.getFunds());
+		}
+		for (sf::Uint64 y = 0; y < getMapSize().y; y++) {
+			for (sf::Uint64 x = 0; x < getMapSize().x; x++) {
+				auto& tile = _tiles[x][y];
+				_file.writeNumber(tile.getTileType()->getID());
+				_file.writeNumber(tile.getTileHP());
+				_file.writeNumber(tile.getTileOwner());
+				if (tile.getUnit()) {
+					_CWM_0_Unit(isSave, tile.getUnit());
+				} else {
+					_file.writeNumber<std::size_t>(0xFFFFFFFF);
+				}
+			}
+		}
+	} else {
+
+	}
+}
+
+void awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id) {
+	if (isSave) {
+		auto& unit = _units[id];
+		_file.writeNumber(unit.getArmy());
+		_file.writeNumber(unit.getType()->getID());
+		_file.writeNumber(unit.getHP());
+		_file.writeNumber(unit.getFuel());
+		_file.writeNumber(unit.getAmmo());
+		auto loaded = unit.loadedUnits();
+		if (loaded.size()) {
+			for (auto loadedUnitID : loaded) {
+				_CWM_0_Unit(isSave, loadedUnitID);
+			}
+		} else {
+			_file.writeNumber<std::size_t>(0xFFFFFFFF);
+		}
+	} else {
+
+	}
 }

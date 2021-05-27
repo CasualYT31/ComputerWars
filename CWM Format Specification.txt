@@ -1,0 +1,66 @@
+# Computer Wars Map File Format
+
+## Introduction
+
+The different specifications for each version of the Computer Wars map
+format will make reference to the typedefs defined in the C++ header
+file typedef.h, so knowledge on all of these typedefs is required to
+understand them.
+
+All map files in Computer Wars are written in binary, and are read
+from and written to using the engine::binary_file class. As such,
+familiarity with how different data types are handled by that class is
+required in order to understand this specification. This class also
+writes files in Little Endian format, but in case you're running on a
+Big Endian machine, the class will convert the numbers for you so you
+shouldn't have to be concerned with this small detail.
+
+This map file format is in no way based on the original Advance Wars
+map file format. They may be similar by coincidence but chances are
+they will be extremely different. I also do not intend to program
+support for any AW map format, so conversion from/to the CW map format
+will have to be carried out separately.
+
+## Header
+
+All CW map file formats will begin with some variation of the four
+byte sequence "#CWM", with # being a byte starting with the value 0
+for the first version, then 1 for the second version, etc. This header
+was only added in case the file format has to undergo serious changes
+after initial release in a way that breaks early versions of the
+format, and so support for older versions can be retained alongside
+the newer versions which support more features.
+
+## 0CWM
+
+This section contains the specification for the initial release
+version of the Computer Wars map format. New lines here merely
+separate out the different pieces of data, and are not stored in the
+binary file. There are no other separator bytes used, unless where
+explicitly stated. Field names are also not stored in the binary file:
+just their data is expected to be within the file, in the given order.
+
+Map Name: string
+Map Width: uint32
+Map Height: uint32
+Army Count: uint32
+FOR EACH Army:
+	Army Country ID: awe::UUIDValue
+	Army Funds: awe::Funds
+FOR EACH Tile Row (i.e. Y coordinate, starting at 0):
+	FOR EACH Tile Column (i.e. X coordinate, starting at 0):
+		Tile Type ID: awe::UUIDValue
+		Tile HP: awe::HP
+		Tile Owner: awe::UUIDValue
+		Unit Owner: awe::UUIDValue
+		IF Unit Owner != engine::uuid<awe::country>::INVALID:
+			* Unit Type ID: awe::UUIDValue
+			Unit HP: awe::HP
+			Unit Fuel: awe::Fuel
+			Unit Ammo: awe::Ammo
+			First Loaded Unit Owner: awe::UUIDValue
+			IF First Loaded Unit Owner != INVALID:
+				GOTO *
+			Nth Loaded Unit Owner: awe::UUIDValue
+			IF Nth Loaded Unit Owner != INVALID:
+				GOTO *

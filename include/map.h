@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "unit.h"
 #include "army.h"
 #include "script.h"
+#include "file.h"
 
 #pragma once
 
@@ -52,25 +53,33 @@ namespace awe {
 		// FILE OPERATIONS //
 		/////////////////////
 		/**
+		 * Version number of the CWM format representing the very first version.
+		 * \c 1297564416 is the 32-bit integer value representing "[NUL]", "C", "W", and "M".
+		 * Adding a number of up to 255 to this value will increase the first byte (little endian is used),
+		 * so that different versions of the CWM format can be checked for easily.
+		 */
+		static const sf::Uint32 FIRST_FILE_VERSION = 1297564416;
+
+		/**
 		 * Loads a given binary file containing map data and initialises this map based off this data.
-		 * Also initialises the internal logger object.
-		 * @param file   Path to the binary file to load.
-		 * @param script Pointer to the scripts object containing the function to call to load the map data.
-		 * @param func   The name of the function in the \c scripts object to call when loading map data.
-		 * @param name   The name to give this particular instantiation within the log file. Defaults to "map."
+		 * Also initialises the internal logger object.\n
+		 * For full documentation on Computer Wars' map file format, please see .
+		 * @param file    Path to the binary file to load.
+		 * @param version The 0-based number identifying the iteration of the format to use.
+		 * @param name    The name to give this particular instantiation within the log file. Defaults to "map."
 		 * @sa    \c global::logger
 		 */
-		map(const std::string& file, const std::shared_ptr<engine::scripts>& script,
-			const std::string& func, const std::string& name = "map") noexcept;
+		map(const std::string& file, const unsigned char version = 0, const std::string& name = "map") noexcept;
 
 		/**
 		 * Saves this \c map object's state to a given binary file.
-		 * @param file   Path to the binary file to save to.
-		 * @param script Pointer to the scripts object containing the function to call to save the map data.
-		 * @param func   The name of the function in the \c scripts object to call when saving map data.
+		 * @param  file    Path to the binary file to save to. If a blank string, the file given previously,
+		 *                 in either the constructor or a call to \c save(), will be used.
+		 * @param  version The 0-based number identifying the iteration of the format to use.
+		 * @return \c TRUE if the save was successful, \c FALSE if the file couldn't be saved
+		 *         (reason will be logged).
 		 */
-		void save(const std::string& file, const std::shared_ptr<engine::scripts>& script,
-			const std::string& func) const noexcept;
+		bool save(std::string file, const unsigned char version = 0) noexcept;
 
 		////////////////////
 		// MAP OPERATIONS //
@@ -451,6 +460,43 @@ namespace awe {
 		 * Internal logger object.
 		 */
 		mutable global::logger _logger;
+
+		//////////
+		// FILE //
+		//////////
+		/**
+		 * Either reads from or writes to a binary file.
+		 * Also deduces the format which this file is to have or has.
+		 * @param  isSave  \c TRUE if the file is to be written to, \c FALSE if the file is to be read from.
+		 * @param  version If writing, the version should be given here.
+		 * @thorws std::exception if the header couldn't be read or written.
+		 */
+		void _CWM_Header(const bool isSave, unsigned char version);
+
+		/**
+		 * First version of the CWM format.
+		 * @param  isSave \c TRUE if the file is to be written, \c FALSE if the file is to be read.
+		 * @throws std::exception if the file couldn't be read or written.
+		 */
+		void _CWM_0(const bool isSave);
+
+		/**
+		 * Reads or writes information pertaining to a unit in 0CWM format.
+		 * @param  isSave \c TRUE if info is to be written, \c FALSE if info is to be read.
+		 * @param  id     The ID of the unit to write info on, if writing.
+		 * @throws std::exception if the unit info couldn't be read or written.
+		 */
+		void _CWM_0_Unit(const bool isSave, awe::UnitID id);
+
+		/**
+		 * File name of the binary file previously read from or written to.
+		 */
+		std::string _filename = "";
+
+		/**
+		 * Binary file object used to read files.
+		 */
+		engine::binary_file _file;
 
 		//////////
 		// DATA //
