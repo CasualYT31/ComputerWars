@@ -24,14 +24,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 awe::map::map(const std::string& name) noexcept : _logger(name) {}
 
-awe::map::map(const std::string& file, const unsigned char version, const std::string& name = "map") noexcept : _logger(name) {
+awe::map::map(const std::string& file, const std::shared_ptr<awe::bank<awe::country>>& countries, const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+		const std::shared_ptr<awe::bank<awe::unit_type>>& units, const unsigned char version, const std::string& name = "map") noexcept : _logger(name) {
 	try {
+		if (!countries) throw std::exception("no country bank provided!");
 		_file.open(file, true);
 		_filename = file;
-		_CWM_Header(false, version);
+		_CWM_Header(false, countries, tiles, units, version);
 		_file.close();
 	} catch (std::exception& e) {
 		_logger.error("Map loading operation: couldn't load map file \"{}\": {}", file, e.what());
+		_file.close();
 	}
 }
 
@@ -40,10 +43,11 @@ bool awe::map::save(std::string file, const unsigned char version) noexcept {
 	try {
 		_file.open(file, false);
 		_filename = file;
-		_CWM_Header(true, version);
+		_CWM_Header(true, nullptr, nullptr, nullptr, version);
 		_file.close();
 	} catch (std::exception& e) {
 		_logger.error("Map saving operation: couldn't save map file \"{}\": {}", file, e.what());
+		_file.close();
 		return false;
 	}
 	return true;
@@ -100,16 +104,17 @@ sf::Vector2u awe::map::getMapSize() const noexcept {
 	return ret;
 }
 
-void awe::map::createArmy(const std::shared_ptr<const awe::country>& country) noexcept {
+bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) noexcept {
 	if (!country) {
 		_logger.error("createArmy operation cancelled: attempted to create an army with no country!");
-		return;
+		return false;
 	}
 	if (_isArmyPresent(country->getID())) {
 		_logger.error("createArmy operation cancelled: attempted to create an army with a country, \"{}\", that already existed on the map!", country->getName());
-		return;
+		return false;
 	}
 	_armys.insert({ country->getID(), awe::army(country) });
+	return true;
 }
 
 void awe::map::deleteArmy(const awe::ArmyID army) noexcept {
@@ -330,16 +335,17 @@ awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {
 	return awe::army::NO_ARMY;
 }
 
-void awe::map::setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept {
+bool awe::map::setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept {
 	if (!type) _logger.warning("setTileType warning: assigning the tile at position ({},{}) an empty type!", pos.x, pos.y);
 	if (_isOutOfBounds(pos)) {
 		_logger.error("setTileType operation cancelled: attempted to assign type \"{}\" to tile at position ({},{}), which is out of bounds with the map's size of ({},{})!",
 			((type) ? (type->getType()->getName()) : ("[NULL]")), pos.x, pos.y, getMapSize().x, getMapSize().y);
-		return;
+		return false;
 	}
 	_tiles[pos.x][pos.y].setTileType(type);
 	// remove ownership of the tile from the army who owns it, if any army does
 	setTileOwner(pos, awe::army::NO_ARMY);
+	return true;
 }
 
 std::shared_ptr<const awe::tile_type> awe::map::getTileType(const sf::Vector2u pos) const noexcept {
@@ -529,7 +535,8 @@ awe::UnitID awe::map::_findUnitID() {
 	return temp;
 }
 
-void awe::map::_CWM_Header(const bool isSave, unsigned char version) {
+void awe::map::_CWM_Header(const bool isSave, const std::shared_ptr<awe::bank<awe::country>>& countries, const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+		const std::shared_ptr<awe::bank<awe::unit_type>>& units, unsigned char version) {
 	sf::Uint32 finalVersion = FIRST_FILE_VERSION + version;
 	if (isSave) {
 		_file.writeNumber(finalVersion);
@@ -539,7 +546,7 @@ void awe::map::_CWM_Header(const bool isSave, unsigned char version) {
 	}
 	switch (version) {
 	case 0:
-		_CWM_0(isSave);
+		_CWM_0(isSave, countries, tiles, units);
 		break;
 	default:
 		_logger.error("CWM version {} is unrecognised!", version);
@@ -547,7 +554,8 @@ void awe::map::_CWM_Header(const bool isSave, unsigned char version) {
 	}
 }
 
-void awe::map::_CWM_0(const bool isSave) {
+void awe::map::_CWM_0(const bool isSave, const std::shared_ptr<awe::bank<awe::country>>& countries, const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+		const std::shared_ptr<awe::bank<awe::unit_type>>& units) {
 	if (isSave) {
 		_file.writeString(getMapName());
 		_file.writeNumber((sf::Uint32)getMapSize().x);
@@ -564,7 +572,7 @@ void awe::map::_CWM_0(const bool isSave) {
 				_file.writeNumber(tile.getTileHP());
 				_file.writeNumber(tile.getTileOwner());
 				if (tile.getUnit()) {
-					_CWM_0_Unit(isSave, tile.getUnit());
+					_CWM_0_Unit(isSave, countries, tiles, units, tile.getUnit());
 				} else {
 					_file.writeNumber(awe::army::NO_ARMY);
 				}
@@ -576,12 +584,33 @@ void awe::map::_CWM_0(const bool isSave) {
 		setMapSize(sf::Vector2u(width, height));
 		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
 		for (sf::Uint64 army = 0; army < armyCount; army++) {
-
+			auto pCountry = (*countries)[_file.readNumber<awe::BankID>()];
+			if (createArmy(pCountry)) {
+				awe::Funds funds = _file.readNumber<awe::Funds>();
+				setArmyFunds(pCountry->getID(), funds);
+			} else {
+				throw std::exception("read above");
+			}
+		}
+		for (sf::Uint64 y = 0; y < getMapSize().y; y++) {
+			for (sf::Uint64 x = 0; x < getMapSize().x; x++) {
+				auto pos = sf::Vector2u(x, y);
+				if (setTileType(pos, (*tiles)[_file.readNumber<awe::BankID>()])) {
+					awe::HP hp = _file.readNumber<awe::HP>();
+					setTileHP(pos, hp);
+					awe::ArmyID army = _file.readNumber<awe::ArmyID>();
+					setTileOwner(pos, army);
+					_CWM_0_Unit(isSave, countries, tiles, units, 0);
+				} else {
+					throw std::exception("read above");
+				}
+			}
 		}
 	}
 }
 
-void awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id) {
+bool awe::map::_CWM_0_Unit(const bool isSave, const std::shared_ptr<awe::bank<awe::country>>& countries, const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+		const std::shared_ptr<awe::bank<awe::unit_type>>& units, awe::UnitID id) {
 	if (isSave) {
 		auto& unit = _units[id];
 		_file.writeNumber(unit.getArmy());
@@ -592,12 +621,30 @@ void awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id) {
 		auto loaded = unit.loadedUnits();
 		if (loaded.size()) {
 			for (auto loadedUnitID : loaded) {
-				_CWM_0_Unit(isSave, loadedUnitID);
+				_CWM_0_Unit(isSave, countries, tiles, units, loadedUnitID);
 			}
 		} else {
 			_file.writeNumber(awe::army::NO_ARMY);
 		}
+		return true;
 	} else {
-
+		auto ownerArmy = _file.readNumber<awe::ArmyID>();
+		if (ownerArmy != awe::army::NO_ARMY) {
+			auto unitID = createUnit((*units)[_file.readNumber<awe::BankID>()], ownerArmy);
+			if (unitID) {
+				auto hp = _file.readNumber<awe::HP>();
+				setUnitHP(unitID, hp);
+				auto fuel = _file.readNumber<awe::Fuel>();
+				setUnitFuel(unitID, fuel);
+				auto ammo = _file.readNumber<awe::Ammo>();
+				setUnitAmmo(unitID, ammo);
+				while (_CWM_0_Unit(isSave, countries, tiles, units, id));
+			} else {
+				throw std::exception("read above");
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

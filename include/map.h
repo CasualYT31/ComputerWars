@@ -64,12 +64,17 @@ namespace awe {
 		 * Loads a given binary file containing map data and initialises this map based off this data.
 		 * Also initialises the internal logger object.\n
 		 * For full documentation on Computer Wars' map file format, please see .
-		 * @param file    Path to the binary file to load.
-		 * @param version The 0-based number identifying the iteration of the format to use.
-		 * @param name    The name to give this particular instantiation within the log file. Defaults to "map."
+		 * @param file      Path to the binary file to load.
+		 * @param countries Information on the countries to search through when reading country IDs.
+		 * @param tiles     Information on the tile types to search through when reading tile type IDs.
+		 * @param units     Information on the unit types to search through when reading unit type IDs.
+		 * @param version   The 0-based number identifying the iteration of the format to use.
+		 * @param name      The name to give this particular instantiation within the log file. Defaults to "map."
 		 * @sa    \c global::logger
 		 */
-		map(const std::string& file, const unsigned char version = 0, const std::string& name = "map") noexcept;
+		map(const std::string& file, const std::shared_ptr<awe::bank<awe::country>>& countries,
+			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles, const std::shared_ptr<awe::bank<awe::unit_type>>& units,
+			const unsigned char version = 0, const std::string& name = "map") noexcept;
 
 		/**
 		 * Saves this \c map object's state to a given binary file.
@@ -132,10 +137,11 @@ namespace awe {
 		/**
 		 * Allocates a new army.
 		 * If the army with the given country already exists, or \c nullptr is given,
-		 * the call will be ignored.
-		 * @param country The country of the army.
+		 * the call will be logged.
+		 * @param  country The country of the army.
+		 * @return \c TRUE if the army was created, \c FALSE otherwise.
 		 */
-		void createArmy(const std::shared_ptr<const awe::country>& country) noexcept;
+		bool createArmy(const std::shared_ptr<const awe::country>& country) noexcept;
 
 		/**
 		 * Deletes an army entirely from the map.
@@ -301,10 +307,11 @@ namespace awe {
 		 * By default, a tile does not have a type, unless it was given in the call to \c setMapSize().\n
 		 * Changing a tile's type will automatically remove any ownership of the tile,
 		 * but it will not reset the tile's HP.
-		 * @param pos  The X and Y coordinate of the tile to change.
-		 * @param type The type to assign to the tile.
+		 * @param  pos  The X and Y coordinate of the tile to change.
+		 * @param  type The type to assign to the tile.
+		 * @return \c TRUE if setting the tile's type was successful, \c FALSE otherwise.
 		 */
-		void setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept;
+		bool setTileType(const sf::Vector2u pos, const std::shared_ptr<const awe::tile_type>& type) noexcept;
 
 		/**
 		 * Retrieves the specified tile's type.
@@ -467,26 +474,43 @@ namespace awe {
 		/**
 		 * Either reads from or writes to a binary file.
 		 * Also deduces the format which this file is to have or has.
-		 * @param  isSave  \c TRUE if the file is to be written to, \c FALSE if the file is to be read from.
-		 * @param  version If writing, the version should be given here.
+		 * @param  isSave    \c TRUE if the file is to be written to, \c FALSE if the file is to be read from.
+		 * @param  countries Information on the countries to index when reading country IDs.
+		 * @param  tiles     Information on the tile types to index when reading tile type IDs.
+		 * @param  units     Information on the unit types to index when reading unit type IDs.
+		 * @param  version   If writing, the version should be given here.
 		 * @thorws std::exception if the header couldn't be read or written.
 		 */
-		void _CWM_Header(const bool isSave, unsigned char version);
+		void _CWM_Header(const bool isSave, const std::shared_ptr<awe::bank<awe::country>>& countries,
+			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles, const std::shared_ptr<awe::bank<awe::unit_type>>& units,
+			unsigned char version);
 
 		/**
 		 * First version of the CWM format.
-		 * @param  isSave \c TRUE if the file is to be written, \c FALSE if the file is to be read.
+		 * @param  isSave    \c TRUE if the file is to be written, \c FALSE if the file is to be read.
+		 * @param  countries Information on the countries to index when reading country IDs.
+		 * @param  tiles     Information on the tile types to index when reading tile type IDs.
+		 * @param  units     Information on the unit types to index when reading unit type IDs.
 		 * @throws std::exception if the file couldn't be read or written.
 		 */
-		void _CWM_0(const bool isSave);
+		void _CWM_0(const bool isSave, const std::shared_ptr<awe::bank<awe::country>>& countries,
+			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+			const std::shared_ptr<awe::bank<awe::unit_type>>& units);
 
 		/**
 		 * Reads or writes information pertaining to a unit in 0CWM format.
-		 * @param  isSave \c TRUE if info is to be written, \c FALSE if info is to be read.
-		 * @param  id     The ID of the unit to write info on, if writing.
+		 * @param  isSave    \c TRUE if info is to be written, \c FALSE if info is to be read.
+		 * @param  countries Information on the countries to index when reading country IDs.
+		 * @param  tiles     Information on the tile types to index when reading tile type IDs.
+		 * @param  units     Information on the unit types to index when reading unit type IDs.
+		 * @param  id        The ID of the unit to write info on, if writing.
 		 * @throws std::exception if the unit info couldn't be read or written.
+		 * @return When loading, \c TRUE if there was a unit created, \c FALSE if no unit was created.
+		 *         When saving, always \c TRUE.
 		 */
-		void _CWM_0_Unit(const bool isSave, awe::UnitID id);
+		bool _CWM_0_Unit(const bool isSave, const std::shared_ptr<awe::bank<awe::country>>& countries,
+			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+			const std::shared_ptr<awe::bank<awe::unit_type>>& units, awe::UnitID id);
 
 		/**
 		 * File name of the binary file previously read from or written to.
