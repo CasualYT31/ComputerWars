@@ -35,6 +35,7 @@ int test::test() {
 	testcases.push_back(new test::test_logger(path));
 	testcases.push_back(new test::test_language(path));
 	testcases.push_back(new test::test_safejson(path));
+	testcases.push_back(new test::test_uuid(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -291,4 +292,30 @@ void test::test_language::language_dictionary_json() {
 	ASSERT_EQUAL(dict_js.getLanguage(), "");
 	ASSERT_TRUE(dict_js.setLanguage("ENG_GB"));
 	dict_js.save();
+}
+
+//**************
+//*UUID.H TESTS*
+//**************
+test::test_uuid::test_uuid(const std::string& path) noexcept : test_case(path + "uuid_test_case.log"), ID(UUID_INIT) {}
+
+void test::test_uuid::runTests() noexcept {
+	RUN_TEST(test::test_uuid::uuid);
+	endTesting();
+}
+
+void test::test_uuid::uuid() {
+	// test init in constructor and getID()
+	ASSERT_EQUAL(ID.getID(), UUID_INIT);
+	// test operator== and operator!=
+	test::test_uuid& reference = *this;
+	ASSERT_TRUE(ID == reference.ID);
+	ASSERT_FALSE(ID != reference.ID);
+	// wrapping, and operators again
+	engine::uuid<test::test_uuid> anotherID;
+	ASSERT_EQUAL(anotherID.getID(), 0);
+	ASSERT_FALSE(ID == anotherID);
+	ASSERT_TRUE(ID != anotherID);
+	engine::uuid<test::test_uuid> yetAnotherID;
+	ASSERT_EQUAL(yetAnotherID.getID(), 1);
 }

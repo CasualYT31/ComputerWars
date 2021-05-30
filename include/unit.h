@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "bank.h"
-#include <unordered_set>
+#include "army.h"
 
 #pragma once
 

@@ -20,12 +20,6 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/* Project - Overarching Goals
-1. I SHOULD LOOK THROUGH MY CODE TO SEE IF I ALWAYS CHECK FOR NULL POINTERS!
-2. I should refactor my template solutions to ensure as little redundant duplication as possible.
-3. I should favour smart pointer objects over raw pointers. I also need to ensure I use the right type of pointer class throughout my code.
-*/
-
 /**@file main.cpp
  * The entry point into the program.
  * Most of the initialisation occurs before handing control over to the sole awe::game_engine object.
@@ -39,7 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * The entry point into the program.
  * A majority of the game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the \c awe::game_engine object is constructed.
  * @return The result of calling \c awe::game_engine::run(): by this point, the game has been shut down.
- */
+ *
 int game() {
     // initialise the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
@@ -156,8 +150,9 @@ int game() {
 
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run();
-}
+}*/
 
 int main() {
-    return game();
+    // return game();
+    return test::test();
 }

@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 awe::map::map(const std::string& name) noexcept : _logger(name) {}
 
 awe::map::map(const std::string& file, const std::shared_ptr<awe::bank<awe::country>>& countries, const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-		const std::shared_ptr<awe::bank<awe::unit_type>>& units, const unsigned char version, const std::string& name = "map") noexcept : _logger(name) {
+		const std::shared_ptr<awe::bank<awe::unit_type>>& units, const unsigned char version, const std::string& name) noexcept : _logger(name) {
 	try {
 		if (!countries) throw std::exception("no country bank provided!");
 		_file.open(file, true);

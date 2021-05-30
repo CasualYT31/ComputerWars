@@ -25,9 +25,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "bank.h"
+#include "sfml/System/Vector2.hpp"
 #include <unordered_set>
 
 #pragma once
+
+namespace std {
+	/**
+	 * Custom specialisation of \c std::hash for \c sf::Vector2.
+	 * Much thanks to https://en.cppreference.com/w/cpp/utility/hash and
+	 * https://stackoverflow.com/questions/9927208/requirements-for-elements-in-stdunordered-set.
+	 * Also thanks to Elias Daler and Laurent
+	 * (https://en.sfml-dev.org/forums/index.php?topic=24275.0).
+	 */
+	template<typename T> struct hash<sf::Vector2<T>> {
+		std::size_t operator()(sf::Vector2<T> const& s) const noexcept {
+			// I don't actually think they need to be separate...
+			// Only did it this way in order to preserve Elias' intended execution
+			// (since the actual hashing was in a function in his example, meaning there
+			// would be two separate hashers in execution)
+			std::hash<T> hasherX, hasherY;
+			std::size_t seed = 0;
+			seed ^= hasherX(s.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= hasherY(s.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			return seed;
+		}
+	};
+}
 
 // for documentation on the awe namespace, please see bank.h
 namespace awe {
