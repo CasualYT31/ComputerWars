@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Declares the class which represents an in-game tile.
  */
 
-#include "bank.h"
+#include "army.h"
 
 #pragma once
 
