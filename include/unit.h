@@ -43,7 +43,8 @@ namespace awe {
 		 * @param   army  The army the unit belongs to, which can't be changed.
 		 * @param   sheet Pointer to the spritesheet to use with this unit.
 		 */
-		unit(const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army,
+		unit(const std::shared_ptr<const awe::unit_type>& type = nullptr,
+			const awe::ArmyID army = 0,
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr) noexcept;
 
 		/**

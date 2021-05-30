@@ -113,7 +113,7 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) no
 		_logger.error("createArmy operation cancelled: attempted to create an army with a country, \"{}\", that already existed on the map!", country->getName());
 		return false;
 	}
-	_armys.insert({ country->getID(), awe::army(country) });
+	_armys.insert(std::pair<awe::BankID, awe::army>(country->getID(), country));
 	return true;
 }
 
