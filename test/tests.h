@@ -251,4 +251,26 @@ namespace test {
 		 */
 		void renderer();
 	};
+
+	/**
+	 * Tests texture.h classes.
+	 */
+	class test_texture : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "texture_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_texture(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c animated_spritesheet and \c animated_sprite classes.
+		 */
+		void animation();
+	};
 }

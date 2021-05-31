@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "fonts.h"
 #include "audio.h"
 #include "renderer.h"
+#include "texture.h"
 #include <filesystem>
 #include <iostream>
 
@@ -42,6 +43,7 @@ int test::test() {
 	testcases.push_back(new test::test_fonts(path));
 	testcases.push_back(new test::test_audio(path));
 	testcases.push_back(new test::test_renderer(path));
+	testcases.push_back(new test::test_texture(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -511,4 +513,21 @@ void test::test_renderer::renderer() {
 	newSettings.x = 235;
 	window.setSettings(newSettings);
 	window.save();
+}
+
+//*****************
+//*TEXTURE.H TESTS*
+//*****************
+test::test_texture::test_texture(const std::string& path) noexcept : test_case(path + "texture_test_case.log") {}
+
+void test::test_texture::runTests() noexcept {
+	RUN_TEST(test::test_texture::animation);
+	endTesting();
+}
+
+void test::test_texture::animation() {
+	sfx::animated_spritesheet sheet;
+	// load good script
+	// load faulty script
+	// test sprite
 }
