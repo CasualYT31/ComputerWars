@@ -149,6 +149,8 @@ bool sfx::audio::_load(safe::json& j) noexcept {
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	_sound.clear();
 	_music.clear();
+	_currentMusic = "";
+	_fadingOut = false;
 
 	for (auto& i : jj.items()) {
 		if (i.key() != "volume") {

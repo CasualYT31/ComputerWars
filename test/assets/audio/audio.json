@@ -1,0 +1,1 @@
+{"volume":100.0,"load":{"type":"sound","path":"test/assets/audio/load.wav","offset":0.0},"unload":{"type":"sound","path":"test/assets/audio/unload.wav","offset":0.0},"noco":{"type":"music","path":"test/assets/audio/NoCO.ogg","offset":0.0,"loopto":5400,"loopwhen":69335},"jake":{"type":"music","path":"test/assets/audio/Jake.ogg","offset":1.0,"loopto":0,"loopwhen":90706}}

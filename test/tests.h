@@ -191,4 +191,38 @@ namespace test {
 		 */
 		void fonts();
 	};
+
+	/**
+	 * Tests audio.h classes.
+	 */
+	class test_audio : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "audio_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_audio(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c audio class.
+		 */
+		void audio();
+
+		/**
+		 * Wait 3 seconds.
+		 * @param msg Message to send to \c std::cout along with a waiting message.
+		 */
+		void longWait(const std::string& msg) noexcept;
+
+		/**
+		 * Wait 1 second.
+		 * @param msg Message to send to \c std::cout along with a waiting message.
+		 */
+		void shortWait(const std::string& msg) noexcept;
+	};
 }

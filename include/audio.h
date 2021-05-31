@@ -132,7 +132,7 @@ namespace sfx {
 		 * If a sound is played, it will always start from the beginning unless it was paused, in which case playback will resume.
 		 * If music is played, the currently playing or paused music (if any) will be stopped, and the new one will be played from the beginning or resumed if it was paused.
 		 * If an unregistered name was given, an error will be logged.
-		 * @param name The name of the audio object to play. If a blank string, the previously accessed \e music object will be substituted.
+		 * @param name The name of the audio object to play. If a blank string, the previously accessed \c music object will be substituted.
 		 */
 		void play(std::string name = "") noexcept;
 
@@ -168,7 +168,8 @@ namespace sfx {
 
 		/**
 		 * Defines how 'fine' the \c fadeout() method decreases the music volume.
-		 * The higher the value, the finer the fadeout.
+		 * The higher the value, the finer the fadeout.\n
+		 * Note that calling \c load() on this class will not reset the granularity.
 		 * @param  newval The new granularity value.
 		 * @return The old granularity value.
 		 */
@@ -177,6 +178,7 @@ namespace sfx {
 		/**
 		 * Gets the name of the current music, whether playing or paused.
 		 * If all music is in the stopped state, a blank string is returned.
+		 * Note that this method does not return names of any sounds that may be playing.
 		 * @return The name of the current music.
 		 */
 		std::string getCurrentMusic() const noexcept;

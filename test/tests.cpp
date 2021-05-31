@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tests.h"
 #include "language.h"
 #include "fonts.h"
+#include "audio.h"
 #include <filesystem>
 #include <iostream>
 
@@ -38,6 +39,7 @@ int test::test() {
 	testcases.push_back(new test::test_safejson(path));
 	testcases.push_back(new test::test_uuid(path));
 	testcases.push_back(new test::test_fonts(path));
+	testcases.push_back(new test::test_audio(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -365,4 +367,105 @@ void test::test_fonts::fonts() {
 	sfx::fonts savetest;
 	savetest.load("test/assets/fonts/fonts_save.json");
 	ASSERT_EQUAL(savetest["text"]->getInfo().family, "Advance Wars 2 GBA");
+}
+
+//***************
+//*AUDIO.H TESTS*
+//***************
+test::test_audio::test_audio(const std::string& path) noexcept : test_case(path + "audio_test_case.log") {}
+
+void test::test_audio::runTests() noexcept {
+	RUN_TEST(test::test_audio::audio);
+	endTesting();
+}
+
+void test::test_audio::audio() {
+	sfx::audio audio;
+	// test valid load() script
+	audio.load("test/assets/audio/audio.json");
+	audio.play("jake");
+	audio.pause();
+	ASSERT_EQUAL(audio.getCurrentMusic(), "jake");
+	// test faulty load() script ~ state should be reset
+	audio.load("test/assets/audio/faultyaudio.json");
+	audio.resetState();
+	ASSERT_NAME_IN_LOG("audio");
+	audio.play("jake");
+	ASSERT_EQUAL(audio.getCurrentMusic(), "");
+	audio.load("test/assets/audio/audio.json");
+	// test getVolume()
+	ASSERT_TRUE(audio.getVolume() < 101.0 && audio.getVolume() > 99.0);
+	// test setVolume() and play()
+	audio.play("noco");
+	longWait("Now playing... noco.");
+	audio.setVolume(-50.0);
+	ASSERT_TRUE(audio.getVolume() > -1.0 && audio.getVolume() < 1.0);
+	longWait("Set volume to... 0.0.");
+	audio.setVolume(500.0);
+	ASSERT_TRUE(audio.getVolume() < 101.0 && audio.getVolume() > 99.0);
+	longWait("Set volume to... 100.0.");
+	audio.setVolume(50.0);
+	longWait("Set volume to... 50.0.");
+	// test pause()
+	audio.pause();
+	ASSERT_EQUAL(audio.getCurrentMusic(), "noco");
+	longWait("Now paused...");
+	audio.play();
+	longWait("Now playing...");
+	// test stop()
+	audio.stop();
+	ASSERT_EQUAL(audio.getCurrentMusic(), "");
+	longWait("Now stopped...");
+	audio.play("noco");
+	longWait("Now playing... noco.");
+	// test fadeout() and granularity stuff
+	std::cout << "Now fading out for... 3 seconds. With granularity... " << audio.getGranularity() << std::endl;
+	while (!audio.fadeout(sf::seconds(3.0)));
+	shortWait("");
+	audio.play("noco");
+	longWait("Now playing... noco.");
+	audio.setGranularity(50.0);
+	std::cout << "Now fading out for... 3 seconds. With granularity... " << audio.getGranularity() << std::endl;
+	while (!audio.fadeout(sf::seconds(3.0)));
+	shortWait("");
+	// test music playing behaviour
+	audio.play("noco");
+	longWait("Now playing... noco.");
+	audio.play("jake");
+	longWait("Now playing... jake.");
+	audio.pause("jake");
+	longWait("Now pausing...");
+	audio.play("noco");
+	longWait("Now playing... noco.");
+	audio.play("jake"); // should start from the beginning again despite being paused previously
+	longWait("Now playing... jake.");
+	// test sound playing behaviour
+	longWait("Now testing sounds...");
+	audio.play("load");
+	shortWait("");
+	audio.play("unload");
+	shortWait("");
+	audio.play("load");
+	audio.play("unload");
+	audio.stop();
+	shortWait("Audio playback testing complete!");
+	// test save()
+	audio.save();
+	audio.setVolume(100.0);
+	audio.load();
+	ASSERT_TRUE(audio.getVolume() > 49.0 && audio.getVolume() < 51.0);
+	audio.setVolume(100.0); // tests will expect 100.0 volume at start
+	audio.save();
+}
+
+void test::test_audio::longWait(const std::string& msg) noexcept {
+	std::cout << msg << " Waiting... 3 seconds." << std::endl;
+	sf::Clock timer;
+	while (timer.getElapsedTime().asSeconds() < 3.0);
+}
+
+void test::test_audio::shortWait(const std::string& msg) noexcept {
+	std::cout << msg << " Waiting... 1 second." << std::endl;
+	sf::Clock timer;
+	while (timer.getElapsedTime().asSeconds() < 3.0);
 }
