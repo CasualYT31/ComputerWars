@@ -99,8 +99,8 @@ void awe::map::setMapSize(const sf::Vector2u dim, const std::shared_ptr<const aw
 }
 
 sf::Vector2u awe::map::getMapSize() const noexcept {
-	sf::Vector2u ret(_tiles.size(), 0);
-	if (ret.x) ret.y = _tiles.at(0).size();
+	sf::Vector2u ret((unsigned int)_tiles.size(), 0);
+	if (ret.x) ret.y = (unsigned int)_tiles.at(0).size();
 	return ret;
 }
 
@@ -325,7 +325,7 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from, cons
 		_units[unload].loadOnto(0);
 		setUnitPosition(unload, onto);
 	} else {
-		_logger.error("unloadUnit operation failed: unit with ID {} was not loaded onto unit with ID {}", unload, onto);
+		_logger.error("unloadUnit operation failed: unit with ID {} was not loaded onto unit with ID {}", unload, from);
 	}
 }
 
@@ -592,8 +592,8 @@ void awe::map::_CWM_0(const bool isSave, const std::shared_ptr<awe::bank<awe::co
 				throw std::exception("read above");
 			}
 		}
-		for (sf::Uint64 y = 0; y < getMapSize().y; y++) {
-			for (sf::Uint64 x = 0; x < getMapSize().x; x++) {
+		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
+			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
 				auto pos = sf::Vector2u(x, y);
 				if (setTileType(pos, (*tiles)[_file.readNumber<awe::BankID>()])) {
 					awe::HP hp = _file.readNumber<awe::HP>();
