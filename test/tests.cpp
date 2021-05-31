@@ -345,12 +345,18 @@ void test::test_fonts::fonts() {
 	// test load() ~ existent file
 	fontstest.load("test/assets/fonts/fonts.json");
 	ASSERT_EQUAL(fontstest["dialogue"]->getInfo().family, "Advance Wars 2 GBA");
-	// test load() ~ non-existent file ~ ensure that state isn't overwritten
+	// test load() ~ non-existent file ~ ensure that state isn't overwritten (it shouldn't in this case)
 	fontstest.load("anotherbadfile.json");
 	ASSERT_TRUE(fontstest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
 	fontstest.resetState();
 	ASSERT_EQUAL(fontstest["dialogue"]->getInfo().family, "Advance Wars 2 GBA");
+	// test load() ~ faulty file ~ ensure that state is overwritten (as per documentation)
+	fontstest.load("test/assets/fonts/faultyfonts.json");
+	fontstest.resetState();
+	ASSERT_EQUAL(fontstest["dialogue"], nullptr);
 	// test load() ~ existent file ~ ensure that state is overwritten
+	fontstest.load("test/assets/fonts/fonts.json");
+	ASSERT_NOT_EQUAL(fontstest["dialogue"], nullptr);
 	fontstest.load("test/assets/fonts/otherfonts.json");
 	ASSERT_EQUAL(fontstest["dialogue"], nullptr);
 	ASSERT_EQUAL(fontstest["text"]->getInfo().family, "Advance Wars 2 GBA");
