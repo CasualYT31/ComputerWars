@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tests.h"
 #include "language.h"
+#include "fonts.h"
 #include <filesystem>
 #include <iostream>
 
@@ -36,6 +37,7 @@ int test::test() {
 	testcases.push_back(new test::test_language(path));
 	testcases.push_back(new test::test_safejson(path));
 	testcases.push_back(new test::test_uuid(path));
+	testcases.push_back(new test::test_fonts(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -318,4 +320,43 @@ void test::test_uuid::uuid() {
 	ASSERT_TRUE(ID != anotherID);
 	engine::uuid<test::test_uuid> yetAnotherID;
 	ASSERT_EQUAL(yetAnotherID.getID(), 1);
+}
+
+//***************
+//*FONTS.H TESTS*
+//***************
+test::test_fonts::test_fonts(const std::string& path) noexcept : test_case(path + "fonts_test_case.log") {}
+
+void test::test_fonts::runTests() noexcept {
+	RUN_TEST(test::test_fonts::fonts);
+	endTesting();
+}
+
+void test::test_fonts::fonts() {
+	sfx::fonts fontstest;
+	// test behaviour when fonts object is empty
+	ASSERT_EQUAL(fontstest["test"], nullptr);
+	// test logging
+	ASSERT_NAME_IN_LOG("fonts");
+	// now test load() ~ non-existent file
+	fontstest.load("badfile.json");
+	ASSERT_TRUE(fontstest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
+	fontstest.resetState();
+	// test load() ~ existent file
+	fontstest.load("test/assets/fonts/fonts.json");
+	ASSERT_EQUAL(fontstest["dialogue"]->getInfo().family, "Advance Wars 2 GBA");
+	// test load() ~ non-existent file ~ ensure that state isn't overwritten
+	fontstest.load("anotherbadfile.json");
+	ASSERT_TRUE(fontstest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
+	fontstest.resetState();
+	ASSERT_EQUAL(fontstest["dialogue"]->getInfo().family, "Advance Wars 2 GBA");
+	// test load() ~ existent file ~ ensure that state is overwritten
+	fontstest.load("test/assets/fonts/otherfonts.json");
+	ASSERT_EQUAL(fontstest["dialogue"], nullptr);
+	ASSERT_EQUAL(fontstest["text"]->getInfo().family, "Advance Wars 2 GBA");
+	// test save() ~ load() that script and test accordingly
+	fontstest.save("test/assets/fonts/fonts_save.json");
+	sfx::fonts savetest;
+	savetest.load("test/assets/fonts/fonts_save.json");
+	ASSERT_EQUAL(savetest["text"]->getInfo().family, "Advance Wars 2 GBA");
 }

@@ -46,12 +46,11 @@ namespace sfx {
 		/**
 		 * Accesses a previously loaded \c sf::Font object.
 		 * If a non-existent font is given, an error will be logged.
-		 * The font object may technically be amended but no edits will be saved in any way via \c save().
+		 * The \c font object may technically be amended but no edits will be saved in any way via \c save().
 		 * @param  key The string name of the font which was given in the JSON script.
-		 * @return The pointer to the \c sf::Font object.
-		 * @throws \c std::out_of_range If the given key could not uniquely identify a font object at the time of calling.
+		 * @return The pointer to the \c sf::Font object, or \c nullptr if the font didn't exist.
 		 */
-		std::shared_ptr<sf::Font> operator[](const std::string& key);
+		std::shared_ptr<sf::Font> operator[](const std::string& key) noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.

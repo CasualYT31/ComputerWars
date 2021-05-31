@@ -24,11 +24,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 sfx::fonts::fonts(const std::string& name) noexcept : _logger(name) {}
 
-std::shared_ptr<sf::Font> sfx::fonts::operator[](const std::string& key) {
-	if (_font.find(key) == _font.end()) {
-		std::string msg = "Attempting to access font with key \"" + key + "\" which does not exist.";
-		_logger.error(msg);
-		throw std::out_of_range(msg);
+std::shared_ptr<sf::Font> sfx::fonts::operator[](const std::string& key) noexcept {
+ 	if (_font.find(key) == _font.end()) {
+		_logger.error("Attempting to access font with key \"{}\" which does not exist.", key);
+		return nullptr;
 	}
 	return _font.at(key);
 }
