@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "language.h"
 #include "fonts.h"
 #include "audio.h"
+#include "renderer.h"
 #include <filesystem>
 #include <iostream>
 
@@ -40,6 +41,7 @@ int test::test() {
 	testcases.push_back(new test::test_uuid(path));
 	testcases.push_back(new test::test_fonts(path));
 	testcases.push_back(new test::test_audio(path));
+	testcases.push_back(new test::test_renderer(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -460,12 +462,53 @@ void test::test_audio::audio() {
 
 void test::test_audio::longWait(const std::string& msg) noexcept {
 	std::cout << msg << " Waiting... 3 seconds." << std::endl;
+	return;
 	sf::Clock timer;
 	while (timer.getElapsedTime().asSeconds() < 3.0);
 }
 
 void test::test_audio::shortWait(const std::string& msg) noexcept {
 	std::cout << msg << " Waiting... 1 second." << std::endl;
+	return;
 	sf::Clock timer;
 	while (timer.getElapsedTime().asSeconds() < 3.0);
+}
+
+//******************
+//*RENDERER.H TESTS*
+//******************
+test::test_renderer::test_renderer(const std::string& path) noexcept : test_case(path + "renderer_test_case.log") {}
+
+void test::test_renderer::runTests() noexcept {
+	RUN_TEST(test::test_renderer::renderer);
+	endTesting();
+}
+
+void test::test_renderer::renderer() {
+	sfx::renderer window;
+	// test loading valid script
+	window.load("test/assets/renderer/renderer.json");
+	ASSERT_EQUAL(window.getSettings().caption, "Computer Wars");
+	// test loading faulty script ~ some properties should overwrite and others shouldn't
+	window.load("test/assets/renderer/faultyrenderer.json");
+	ASSERT_EQUAL(window.getSettings().caption, "Computer Wars");
+	window.load("test/assets/renderer/renderer.json");
+	// openWindow
+	window.openWindow();
+	ASSERT_EQUAL(window.getSize().x, 1408);
+	ASSERT_EQUAL(window.getSize().y, 795);
+	// change some properties on the fly
+	sfx::renderer_settings newSettings = window.getSettings();
+	newSettings.x = 50;
+	window.setSettings(newSettings);
+	ASSERT_EQUAL(window.getPosition().x, 50);
+	// test saving
+	window.save();
+	newSettings.x = 4;
+	window.setSettings(newSettings);
+	window.load();
+	ASSERT_EQUAL(window.getSettings().x, 50);
+	newSettings.x = 235;
+	window.setSettings(newSettings);
+	window.save();
 }

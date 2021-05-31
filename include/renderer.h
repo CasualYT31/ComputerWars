@@ -199,8 +199,8 @@ namespace sfx {
 		/**
 		 * Opens the render window using configurations.
 		 * Since this class is an \c sf::RenderWindow, the \c create() method can be used. However, only the size and position
-		 * of the window can be updated in the internal configurations if this done: any change in any other property
-		 * won't be saved.
+		 * of the window can be updated in the internal configurations if this is done: any change in any other property
+		 * won't be saved.\n
 		 * In addition to this, if the client uses \c create() to switch from windowed to fullscreen or vice versa,
 		 * positional data may not be saved correctly. For these reasons it is discouraged to use \c create() with this class.
 		 */
