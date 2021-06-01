@@ -32,9 +32,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * The entry point into the program.
  * A majority of the game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the \c awe::game_engine object is constructed.
+ * @param  file Temporary parameter storing a path to a binary map file to open.
  * @return The result of calling \c awe::game_engine::run(): by this point, the game has been shut down.
- *
-int game() {
+ */
+int game(const std::string& file) {
     // initialise the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
 
@@ -90,35 +91,35 @@ int game() {
     gui->load("assets/gui/gui.json");
 
     // initialise the countries
-    std::shared_ptr<awe::bank<const awe::country>> countries = std::make_shared<awe::bank<const awe::country>>();
+    std::shared_ptr<awe::bank<awe::country>> countries = std::make_shared<awe::bank<awe::country>>();
     countries->load("assets/property/country.json");
 
     // initialise the weathers
-    std::shared_ptr<awe::bank<const awe::weather>> weathers = std::make_shared<awe::bank<const awe::weather>>();
+    std::shared_ptr<awe::bank<awe::weather>> weathers = std::make_shared<awe::bank<awe::weather>>();
     weathers->load("assets/property/weather.json");
 
     // initialise the environments
-    std::shared_ptr<awe::bank<const awe::environment>> environments = std::make_shared<awe::bank<const awe::environment>>();
+    std::shared_ptr<awe::bank<awe::environment>> environments = std::make_shared<awe::bank<awe::environment>>();
     environments->load("assets/property/environment.json");
 
     // initialise the movements
-    std::shared_ptr<awe::bank<const awe::movement_type>> movements = std::make_shared<awe::bank<const awe::movement_type>>();
+    std::shared_ptr<awe::bank<awe::movement_type>> movements = std::make_shared<awe::bank<awe::movement_type>>();
     movements->load("assets/property/movement.json");
 
     // initialise the terrains
-    std::shared_ptr<awe::bank<const awe::terrain>> terrains = std::make_shared<awe::bank<const awe::terrain>>();
+    std::shared_ptr<awe::bank<awe::terrain>> terrains = std::make_shared<awe::bank<awe::terrain>>();
     terrains->load("assets/property/terrain.json");
 
     // initialise the tiles
-    std::shared_ptr<awe::bank<const awe::tile_type>> tiles = std::make_shared<awe::bank<const awe::tile_type>>();
+    std::shared_ptr<awe::bank<awe::tile_type>> tiles = std::make_shared<awe::bank<awe::tile_type>>();
     tiles->load("assets/property/tile.json");
 
     // initialise the units
-    std::shared_ptr<awe::bank<const awe::unit_type>> units = std::make_shared<awe::bank<const awe::unit_type>>();
+    std::shared_ptr<awe::bank<awe::unit_type>> units = std::make_shared<awe::bank<awe::unit_type>>();
     units->load("assets/property/unit.json");
 
     // initialise the COs
-    std::shared_ptr<awe::bank<const awe::commander>> commanders = std::make_shared<awe::bank<const awe::commander>>();
+    std::shared_ptr<awe::bank<awe::commander>> commanders = std::make_shared<awe::bank<awe::commander>>();
     commanders->load("assets/property/co.json");
 
     // setup banks
@@ -149,10 +150,10 @@ int game() {
     renderer->openWindow();
 
     // run game loop, then destroy the object once the loop terminates
-    return gameLoop.run();
-}*/
+    return gameLoop.run(file);
+}
 
-int main() {
-    // return game();
+int main(int argc, char* argv[]) {
+    return game(((argc < 2) ? ("assets/map/islandx.cwm") : (argv[1])));
     return test::test();
 }

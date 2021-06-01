@@ -26,6 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "audio.h"
 #include "renderer.h"
 #include "texture.h"
+#include "userinput.h"
 #include <filesystem>
 #include <iostream>
 
@@ -44,6 +45,7 @@ int test::test() {
 	testcases.push_back(new test::test_audio(path));
 	testcases.push_back(new test::test_renderer(path));
 	testcases.push_back(new test::test_texture(path));
+	testcases.push_back(new test::test_ui(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -526,8 +528,104 @@ void test::test_texture::runTests() noexcept {
 }
 
 void test::test_texture::animation() {
-	sfx::animated_spritesheet sheet;
+	std::shared_ptr<sfx::animated_spritesheet> sheet = std::make_shared<sfx::animated_spritesheet>();
 	// load good script
-	// load faulty script
+	sheet->load("test/assets/sprites/sheet.json");
+	try {
+		sheet->accessTexture(0);
+	} catch (std::out_of_range& e) {
+		ASSERT_EQUAL("sheet did not load", "frame 0 texture");
+	}
+	try {
+		sheet->accessTexture(1);
+		ASSERT_EQUAL("sheet did not throw", "even though there isn't any second frame");
+	} catch (std::out_of_range& e) {
+		// expected
+	}
+	// load faulty script ~ state should be retained if path key was invalid
+	sheet->load("test/assets/sprites/faultysheet.json");
+	sheet->resetState();
+	try {
+		sheet->accessTexture(0);
+	} catch (std::out_of_range& e) {
+		ASSERT_EQUAL("sheet object state", "was reset");
+	}
 	// test sprite
+	sfx::animated_sprite sprite(sheet, 0);
+	sfx::renderer window;
+	sf::Clock timer;
+	window.load("test/assets/renderer/renderer.json");
+	window.openWindow();
+	while (true) {
+		window.clear();
+		window.animate(sprite);
+		window.draw(sprite);
+		window.display();
+		if (timer.getElapsedTime().asSeconds() >= 1.0) {
+			if (sprite.getSprite() == 3) break;
+			sprite.setSprite(sprite.getSprite() + 1);
+			timer.restart();
+		}
+	}
+	// test animated sprite
+	std::shared_ptr<sfx::animated_spritesheet> ani = std::make_shared<sfx::animated_spritesheet>();
+	ani->load("test/assets/sprites/ani.json");
+	sprite.setSpritesheet(ani);
+	sprite.setSprite(0);
+	timer.restart();
+	while (timer.getElapsedTime().asSeconds() < 7.0) {
+		window.clear();
+		window.animate(sprite);
+		window.draw(sprite, sf::RenderStates().transform.translate(50.0, 50.0));
+		window.display();
+	}
+	// test increment and decrement operators
+	std::shared_ptr<sfx::animated_spritesheet> multi = std::make_shared<sfx::animated_spritesheet>();
+	multi->load("test/assets/sprites/multi.json");
+	sprite.setSpritesheet(multi);
+	sprite.setSprite(0);
+	timer.restart();
+	bool flip = false;
+	for (;;) {
+		window.clear();
+		window.animate(sprite);
+		window.draw(sprite, sf::RenderStates().transform.scale(1.25, 1.25));
+		window.display();
+		if (timer.getElapsedTime().asSeconds() >= 1.0) {
+			if (sprite.getCurrentFrame() == 5) flip = true;
+			if (flip) {
+				if (--sprite == 5) break;
+			} else {
+				sprite++;
+			}
+			timer.restart();
+		}
+	}
+}
+
+//*******************
+//*USERINPUT.H TESTS*
+//*******************
+test::test_ui::test_ui(const std::string& path) noexcept : test_case(path + "ui_test_case.log") {}
+
+void test::test_ui::runTests() noexcept {
+	RUN_TEST(test::test_ui::ui);
+	endTesting();
+}
+
+void test::test_ui::ui() {
+	sfx::renderer window;
+	window.load("test/assets/renderer/renderer.json");
+	sfx::user_input ui(window);
+	// test valid script
+	ui.load("test/assets/ui/ui.json");
+	ASSERT_EQUAL(ui.getJoystickAxisThreshold(), 25.0);
+	ASSERT_EQUAL(ui.getConfiguration("select").keyboard.size(), 1);
+	// test faulty script ~ state should be reset
+	ui.load("test/assets/ui/faultyui.json");
+	ASSERT_EQUAL(ui.getConfiguration("select").keyboard.size(), 0);
+	ui.load("test/assets/ui/ui.json");
+	// how the f*** do I even begin testing this file?
+	// looks like I need to make some amendments to it anyways,
+	// so I'll leave this test case for now
 }

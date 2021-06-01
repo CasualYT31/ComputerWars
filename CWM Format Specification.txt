@@ -45,22 +45,22 @@ Map Width: uint32
 Map Height: uint32
 Army Count: uint32
 FOR EACH Army:
-	Army Country ID: awe::UUIDValue
+	Army Country ID: awe::ArmyID
 	Army Funds: awe::Funds
 FOR EACH Tile Row (i.e. Y coordinate, starting at 0):
 	FOR EACH Tile Column (i.e. X coordinate, starting at 0):
-		Tile Type ID: awe::UUIDValue
+		Tile Type ID: awe::BankID
 		Tile HP: awe::HP
-		Tile Owner: awe::UUIDValue
-		Unit Owner: awe::UUIDValue
-		IF Unit Owner != engine::uuid<awe::country>::INVALID:
-			* Unit Type ID: awe::UUIDValue
+		Tile Owner: awe::ArmyID
+		Unit Owner: awe::ArmyID
+		IF Unit Owner != awe::army::NO_ARMY:
+			* Unit Type ID: awe::BankID
 			Unit HP: awe::HP
 			Unit Fuel: awe::Fuel
 			Unit Ammo: awe::Ammo
-			First Loaded Unit Owner: awe::UUIDValue
-			IF First Loaded Unit Owner != INVALID:
+			First Loaded Unit Owner: awe::ArmyID
+			IF First Loaded Unit Owner != NO_ARMY:
 				GOTO *
-			Nth Loaded Unit Owner: awe::UUIDValue
-			IF Nth Loaded Unit Owner != INVALID:
+			Nth Loaded Unit Owner: awe::ArmyID
+			IF Nth Loaded Unit Owner != NO_ARMY:
 				GOTO *

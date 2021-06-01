@@ -1,0 +1,8 @@
+{
+	"path": "test/assets/sprites/sheet.png",
+	"frames": 6,
+	"framerate": 0.0,
+	"sprites": [
+		[0,0,200,200]
+	]
+}

@@ -23,13 +23,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "bank.h"
 #include <algorithm>
 
-void awe::updateAllTerrains(awe::bank<const awe::tile_type>& tileBank, const awe::bank<const awe::terrain>& terrainBank) noexcept {
+void awe::updateAllTerrains(awe::bank<awe::tile_type>& tileBank, const awe::bank<awe::terrain>& terrainBank) noexcept {
 	for (awe::BankID i = 0; i < tileBank.size(); i++) {
 		tileBank[(awe::bank<awe::tile_type>::index)i]->updateTerrain(terrainBank);
 	}
 }
 
-void awe::updateAllMovementsAndLoadedUnits(awe::bank<const awe::unit_type>& unitBank, const awe::bank<const awe::movement_type>& movementBank) noexcept {
+void awe::updateAllMovementsAndLoadedUnits(awe::bank<awe::unit_type>& unitBank, const awe::bank<awe::movement_type>& movementBank) noexcept {
 	for (awe::BankID i = 0; i < unitBank.size(); i++) {
 		unitBank[(awe::bank<awe::unit_type>::index)i]->updateMovementType(movementBank);
 		unitBank[(awe::bank<awe::unit_type>::index)i]->updateUnitTypes(unitBank);
@@ -184,7 +184,7 @@ unsigned int awe::tile_type::getNeutralTile() const noexcept {
 std::shared_ptr<const awe::terrain> awe::tile_type::getType() const noexcept {
 	return _terrain;
 }
-void awe::tile_type::updateTerrain(const awe::bank<const awe::terrain>& terrainBank) const noexcept {
+void awe::tile_type::updateTerrain(const awe::bank<awe::terrain>& terrainBank) const noexcept {
 	_terrain = terrainBank[_terrainType];
 }
 bool awe::tile_type::operator==(const awe::tile_type& rhs) const noexcept {
@@ -223,7 +223,7 @@ awe::bank<awe::movement_type>::index awe::unit_type::getMovementTypeIndex() cons
 std::shared_ptr<const awe::movement_type> awe::unit_type::getMovementType() const noexcept {
 	return _movementType;
 }
-void awe::unit_type::updateMovementType(const awe::bank<const awe::movement_type>& movementBank) const noexcept {
+void awe::unit_type::updateMovementType(const awe::bank<awe::movement_type>& movementBank) const noexcept {
 	_movementType = movementBank[_movementTypeID];
 }
 unsigned int awe::unit_type::getPicture(awe::bank<awe::country>::index countryID) const noexcept {
@@ -280,7 +280,7 @@ unsigned int awe::unit_type::loadLimit() const noexcept {
 signed int awe::unit_type::fuelPerTurn() const noexcept {
 	return _fuelPerTurn;
 }
-void awe::unit_type::updateUnitTypes(const awe::bank<const awe::unit_type>& unitBank) const noexcept {
+void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank) const noexcept {
 	_canLoadTheseUnitTypes.clear();
 	for (awe::BankID i = 0; i < unitBank.size(); i++) {
 		for (auto& u : _canLoadThese) {

@@ -273,4 +273,26 @@ namespace test {
 		 */
 		void animation();
 	};
+
+	/**
+	 * Tests userinput.h classes.
+	 */
+	class test_ui : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "ui_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_ui(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c userinput class.
+		 */
+		void ui();
+	};
 }
