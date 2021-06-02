@@ -368,4 +368,30 @@ namespace test {
 		 */
 		void gui();
 	};
+
+	/**
+	 * Tests transitions.h classes.
+	 * The expectation for these tests is that transitions are drawn, fading out then
+	 * fading in, and then the tester can see the transitions, as well as compare the
+	 * expected duration of execution with the actual duration of execution, the latter
+	 * of which can be found in the test case log file.
+	 */
+	class test_transitions : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "transitions_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_transitions(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c rectangle class.
+		 */
+		void rectangle();
+	};
 }

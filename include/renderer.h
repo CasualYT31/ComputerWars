@@ -49,7 +49,8 @@ namespace sfx {
 	 * <ol><li>Inherit from \c animated_drawable just like you would with \c Drawable. Implement \c draw() as normal.</li>
 	 *     <li>Implement \c animate(): these are the calculations performed to make a drawable animate.</li>
 	 *     <li>Within \c animate(), if a delta timer is required, make sure to add the following line of code: <tt>float delta = calculateDelta();</tt></li>
-	 *     <li>When working with your \c animated_drawable object, \c animate() should be called within the draw loop at some point before the corresponding \c draw().</li></ol>
+	 *     <li>When working with your \c animated_drawable object, \c animate() should be called within the draw loop at some point before the corresponding \c draw().</li>
+	 *     <li>If a delta timer is used within your drawable, make sure to instantiate your drawable right before your drawing loop, otherwise the first delta calculation will be off (this behaviour should probably change...).</li></ol>
 	 */
 	class animated_drawable : public sf::Drawable {
 	public:

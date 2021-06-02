@@ -24,10 +24,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "language.h"
 #include "fonts.h"
 #include "audio.h"
-#include "renderer.h"
 #include "texture.h"
 #include "userinput.h"
 #include "file.h"
+#include "transitions.h"
 #include <filesystem>
 #include <iostream>
 
@@ -50,6 +50,7 @@ int test::test() {
 	testcases.push_back(new test::test_file(path));
 	testcases.push_back(new test::test_script(path));
 	testcases.push_back(new test::test_gui(path));
+	testcases.push_back(new test::test_transitions(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -739,4 +740,36 @@ void test::test_gui::bg() {
 
 void test::test_gui::gui() {
 
+}
+
+//*********************
+//*TRANSITIONS.H TESTS*
+//*********************
+test::test_transitions::test_transitions(const std::string& path) noexcept : test_case(path + "transitions_test_case.log") {}
+
+void test::test_transitions::runTests() noexcept {
+	RUN_TEST(test::test_transitions::rectangle);
+	endTesting();
+}
+
+void test::test_transitions::rectangle() {
+	sfx::renderer window;
+	window.load("test/assets/renderer/renderer.json");
+	transition::rectangle in(false, sf::seconds(4));
+	window.openWindow();
+	for (;;) {
+		window.clear(sf::Color::White);
+		if (window.animate(in)) break;
+		window.draw(in);
+		window.display();
+	}
+	// transition should use up same amount of time regardless of framerate
+	window.setFramerateLimit(5);
+	transition::rectangle out(true, sf::seconds(4));
+	for (;;) {
+		window.clear(sf::Color::White);
+		if (window.animate(out)) break;
+		window.draw(out);
+		window.display();
+	}
 }

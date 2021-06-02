@@ -35,8 +35,7 @@ bool transition::rectangle::animate(const sf::RenderTarget& target) noexcept {
 		if (_isFadingIn) {
 			_size.x = (float)target.getSize().x;
 			_size.y = (float)target.getSize().y;
-		}
-		else {
+		} else {
 			_size = sf::Vector2f(0.0, 0.0);
 		}
 		_isFirstCallToAnimate = false;
@@ -60,8 +59,6 @@ bool transition::rectangle::animate(const sf::RenderTarget& target) noexcept {
 		_finished = true;
 	} else if (!_isFadingIn && (_size.x >= target.getSize().x && _size.y >= target.getSize().y)) {
 		_finished = true;
-	} else {
-		_finished = false;
 	}
 	if (_finished) {
 		_size = sf::Vector2f(0.0, 0.0);
