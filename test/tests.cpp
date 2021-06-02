@@ -48,6 +48,8 @@ int test::test() {
 	// testcases.push_back(new test::test_texture(path));
 	testcases.push_back(new test::test_ui(path));
 	testcases.push_back(new test::test_file(path));
+	testcases.push_back(new test::test_script(path));
+	testcases.push_back(new test::test_gui(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -704,4 +706,37 @@ void test::test_file::file() {
 		log.error("{}", e.what());
 		ASSERT_EQUAL("output file could not be tested on:", "check log");
 	}
+}
+
+//****************
+//*SCRIPT.H TESTS*
+//****************
+test::test_script::test_script(const std::string& path) noexcept : test_case(path + "script_test_case.log") {}
+
+void test::test_script::runTests() noexcept {
+	RUN_TEST(test::test_script::scripts);
+	endTesting();
+}
+
+void test::test_script::scripts() {
+
+}
+
+//*************
+//*GUI.H TESTS*
+//*************
+test::test_gui::test_gui(const std::string& path) noexcept : test_case(path + "gui_test_case.log") {}
+
+void test::test_gui::runTests() noexcept {
+	RUN_TEST(test::test_gui::bg);
+	RUN_TEST(test::test_gui::gui);
+	endTesting();
+}
+
+void test::test_gui::bg() {
+
+}
+
+void test::test_gui::gui() {
+
 }

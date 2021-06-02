@@ -319,4 +319,53 @@ namespace test {
 		 */
 		void file();
 	};
+
+	/**
+	 * Tests script.h classes.
+	 */
+	class test_script : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "script_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_script(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c scripts class.
+		 */
+		void scripts();
+	};
+
+	/**
+	 * Tests gui.h classes.
+	 */
+	class test_gui : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "gui_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_gui(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c gui_background class.
+		 */
+		void bg();
+
+		/**
+		 * Runs tests related to the \c gui class.
+		 */
+		void gui();
+	};
 }
