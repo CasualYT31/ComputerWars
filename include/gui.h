@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -37,7 +37,6 @@ namespace engine {
 	 * Represents a GUI background.
 	 * The background of a GUI can be either a solid colour or a sprite from a separate \c sfx::animated_spritesheet.
 	 * This class manages switching from one to another so that the \c gui class knows which type of background to draw.
-	 * @todo Perhaps nest this class within \c gui?
 	 */
 	class gui_background {
 	public:
@@ -123,7 +122,6 @@ namespace engine {
 	 * Represents a collection of GUI menus.
 	 * This class can only display one menu at a time, however it loads all menus it is given via \c load() so that they can be switched quickly.
 	 * Each menu is given their own TGUI panel.
-	 * @todo \c i18n support must be given.
 	 */
 	class gui : public sfx::animated_drawable, public safe::json_script {
 	public:
@@ -245,7 +243,7 @@ namespace engine {
 		/**
 		 * The internal logger object.
 		 */
-		global::logger _logger;
+		mutable global::logger _logger;
 
 		/**
 		 * Stores all the GUI menus panels.

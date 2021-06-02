@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

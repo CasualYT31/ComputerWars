@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -67,19 +67,16 @@ float sfx::user_input::getJoystickAxisThreshold() const noexcept {
 	return _joystickAxisThreshold;
 }
 
-unsigned int sfx::user_input::setJoystickID(unsigned int newid) noexcept {
-	auto old = getJoystickID();
+void sfx::user_input::setJoystickID(unsigned int newid) noexcept {
 	if (sf::Joystick::isConnected(newid)) {
 		_joystickid = newid;
 	} else {
 		_logger.write("Attempted to set a joystick with ID {} that wasn't connected, resetting the ID to {}.", newid, old);
 		_joystickid = old;
 	}
-	return old;
 }
 
-float sfx::user_input::setJoystickAxisThreshold(float newthreshold) noexcept {
-	auto old = getJoystickAxisThreshold();
+void sfx::user_input::setJoystickAxisThreshold(float newthreshold) noexcept {
 	_joystickAxisThreshold = newthreshold;
 	if (_joystickAxisThreshold < 5.0) {
 		_logger.write("Attempted to set a joystick axis threshold of {}, reset to 5.0.", _joystickAxisThreshold);
@@ -87,9 +84,8 @@ float sfx::user_input::setJoystickAxisThreshold(float newthreshold) noexcept {
 	}
 	if (_joystickAxisThreshold > 95.0) {
 		_logger.write("Attempted to set a joystick axis threshold of {}, reset to 95.0.", _joystickAxisThreshold);
-		newthreshold = 95.0;
+		_joystickAxisThreshold = 95.0;
 	}
-	return old;
 }
 
 sfx::user_configuration sfx::user_input::getConfiguration(const std::string& name) const noexcept {
@@ -97,11 +93,8 @@ sfx::user_configuration sfx::user_input::getConfiguration(const std::string& nam
 	return _control.at(name).config;
 }
 
-sfx::user_configuration sfx::user_input::setConfiguration(const std::string& name, const sfx::user_configuration& uc) noexcept {
-	if (_control.find(name) == _control.end()) return sfx::user_configuration();
-	auto old = _control.at(name).config;
-	_control[name].config = uc;
-	return old;
+void sfx::user_input::setConfiguration(const std::string& name, const sfx::user_configuration& uc) noexcept {
+	if (_control.find(name) != _control.end()) _control[name].config = uc;
 }
 
 sf::Vector2i sfx::user_input::mousePosition() const noexcept {

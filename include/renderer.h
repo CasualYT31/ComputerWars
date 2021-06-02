@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -28,7 +28,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * different properties at runtime, which can then be saved to a JSON script.
  * The \c animated_drawable class is intended to introduce a unified approach to dealing with more
  * complex drawables that change state in a pre-determined way.
- * @todo REMEMBER TO ADD X-Y CONFIGURATION ISSUE TO USER DOCUMENTATION! If the window doesn't appear, the X and/or Y property will have to be amended manually. Explain why I chose against adding checks in the code.
  */
 
 #pragma once
@@ -272,7 +271,7 @@ namespace sfx {
 		/**
 		 * The internal logger object.
 		 */
-		global::logger _logger;
+		mutable global::logger _logger;
 		
 		/**
 		 * The settings of this renderer object.

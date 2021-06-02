@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -44,14 +44,14 @@ int test::test() {
 	testcases.push_back(new test::test_safejson(path));
 	testcases.push_back(new test::test_uuid(path));
 	testcases.push_back(new test::test_fonts(path));
-	// testcases.push_back(new test::test_audio(path));
-	// testcases.push_back(new test::test_renderer(path));
-	// testcases.push_back(new test::test_texture(path));
+	testcases.push_back(new test::test_audio(path));
+	testcases.push_back(new test::test_renderer(path));
+	testcases.push_back(new test::test_texture(path));
 	testcases.push_back(new test::test_ui(path));
 	testcases.push_back(new test::test_file(path));
 	testcases.push_back(new test::test_script(path));
 	testcases.push_back(new test::test_gui(path));
-	// testcases.push_back(new test::test_transitions(path));
+	testcases.push_back(new test::test_transitions(path));
 	testcases.push_back(new test::test_bank(path));
 	testcases.push_back(new test::test_tile(path));
 	testcases.push_back(new test::test_unit(path));

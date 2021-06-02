@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -121,11 +121,10 @@ namespace sfx {
 
 		/**
 		 * Updates the base volume of all audio objects.
-		 * @param  newvolume The new volume, a value between \c 0.0 and \c 100.0.
-		 * @return The old base volume.
-		 * @sa     _validateVolume()
+		 * @param newvolume The new volume, a value between \c 0.0 and \c 100.0.
+		 * @sa    _validateVolume()
 		 */
-		float setVolume(float newvolume) noexcept;
+		void setVolume(float newvolume) noexcept;
 
 		/**
 		 * Plays a specified audio object.
@@ -170,10 +169,9 @@ namespace sfx {
 		 * Defines how 'fine' the \c fadeout() method decreases the music volume.
 		 * The higher the value, the finer the fadeout.\n
 		 * Note that calling \c load() on this class will not reset the granularity.
-		 * @param  newval The new granularity value.
-		 * @return The old granularity value.
+		 * @param newval The new granularity value.
 		 */
-		float setGranularity(float newval) noexcept;
+		void setGranularity(float newval) noexcept;
 
 		/**
 		 * Gets the name of the current music, whether playing or paused.
@@ -238,7 +236,7 @@ namespace sfx {
 		/**
 		 * The internal logger object.
 		 */
-		global::logger _logger;
+		mutable global::logger _logger;
 
 		/**
 		 * The collection of sound objects.

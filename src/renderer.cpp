@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -27,7 +27,7 @@ sfx::renderer::renderer(const std::string& name) noexcept : _logger(name) {}
 void sfx::renderer::openWindow() noexcept {
 	sf::VideoMode mode(_settings.width, _settings.height);
 	if (_settings.style.fullscreen && !mode.isValid()) {
-		_logger.error("Invalid video mode for fullscreen ({}x{})! Reverting to windowed mode...", mode.width, mode.height);
+		_logger.warning("Invalid video mode for fullscreen ({}x{})! Reverting to windowed mode...", mode.width, mode.height);
 		boxer::show("The renderer's configurations contained an invalid width and height for fullscreen mode. The program has reverted to windowed mode.", "Error!");
 		_settings.style.fullscreen = false;
 	}
@@ -52,7 +52,7 @@ void sfx::renderer::openWindow() noexcept {
 		if (icon.loadFromFile(_settings.iconPath)) {
 			setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 		} else {
-			_logger.error("Unable to apply icon with path \"{}\" - unable to load file.", _settings.iconPath);
+			_logger.warning("Unable to apply icon with path \"{}\" - unable to load file.", _settings.iconPath);
 		}
 	}
 }

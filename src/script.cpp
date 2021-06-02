@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -67,8 +67,10 @@ engine::scripts::~scripts() noexcept {
 void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg, void* param) noexcept {
     if (msg->type == asMSGTYPE_INFORMATION) {
         _logger.write("INFO: (@{}:{},{}): {}.", msg->section, msg->row, msg->col, msg->message);
+    } else if (msg->type == asMSGTYPE_WARNING) {
+        _logger.warning("WARNING: (@{}:{},{}): {}.", msg->section, msg->row, msg->col, msg->message);
     } else {
-        _logger.error("{}: (@{}:{},{}): {}.", (msg->type==asMSGTYPE_WARNING?"WARN":"ERR "), msg->section, msg->row, msg->col, msg->message);
+        _logger.error("ERROR: (@{}:{},{}): {}.", msg->section, msg->row, msg->col, msg->message);
     }
 }
 

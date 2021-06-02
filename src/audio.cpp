@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -28,8 +28,7 @@ float sfx::audio::getVolume() const noexcept {
 	return _volume;
 }
 
-float sfx::audio::setVolume(float newvolume) noexcept {
-	auto old = getVolume();
+void sfx::audio::setVolume(float newvolume) noexcept {
 	_validateVolume(newvolume);
 	_volume = newvolume;
 	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; itr++) {
@@ -38,7 +37,6 @@ float sfx::audio::setVolume(float newvolume) noexcept {
 	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; itr++) {
 		itr->second.music.setVolume(_volumeAfterOffset(itr->first));
 	}
-	return old;
 }
 
 void sfx::audio::play(std::string name) noexcept {
@@ -106,10 +104,8 @@ float sfx::audio::getGranularity() const noexcept {
 	return _granularity;
 }
 
-float sfx::audio::setGranularity(float newval) noexcept {
-	auto old = getGranularity();
+void sfx::audio::setGranularity(float newval) noexcept {
 	_granularity = newval;
-	return old;
 }
 
 std::string sfx::audio::getCurrentMusic() const noexcept {
@@ -157,7 +153,7 @@ bool sfx::audio::_load(safe::json& j) noexcept {
 			std::string path;
 			j.apply(path, { i.key(), "path" });
 			if (!j.inGoodState()) {
-				_logger.error("Error: audio object \"{}\" was not given a valid \"path\" value, in script \"{}\".", i.key(), getScriptPath());
+				_logger.error("Audio object \"{}\" was not given a valid \"path\" value, in script \"{}\".", i.key(), getScriptPath());
 				j.resetState();
 				continue;
 			}
@@ -165,7 +161,7 @@ bool sfx::audio::_load(safe::json& j) noexcept {
 			std::string type = "sound";
 			j.apply(type, { i.key(), "type" }, &type, true);
 			if (type != "sound" && type != "music") {
-				_logger.error("Invalid type \"{}\" provided for audio object \"{}\" in script \"{}\", \"sound\" assumed.", type, i.key(), getScriptPath());
+				_logger.warning("Invalid type \"{}\" provided for audio object \"{}\" in script \"{}\", \"sound\" assumed.", type, i.key(), getScriptPath());
 				type = "sound";
 			}
 

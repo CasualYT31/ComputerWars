@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -49,7 +49,6 @@ namespace awe {
 	 * Despite this, banks can load any number of sets of static data during runtime, each load overwritting what was previously stored.\n
 	 * The classes declared in this header are intended to be used with this template class.
 	 * For example, \c awe::bank<awe::country> defines a bank of country properties.
-	 * @todo   Turn raw pointers into shared pointers.
 	 * @tparam T The type of static game property to store within this bank.
 	 */
 	template<typename T>

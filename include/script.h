@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -79,8 +79,6 @@ namespace engine {
 		 * Loads a folder of scripts.
 		 * A new module is built, and each file is attached to it. This means all scripts aren't separate, so all functions across all scripts should have a unique name (for example).
 		 * If the given path was blank, the last folder used with this method will be used.
-		 * @todo   What happens when I call this more than once? Is the previous ComputerWars module removed?
-		 *         If not, then odd behaviour could be experienced if script functions are removed in-between calls.
 		 * @param  folder The path containing all the script files to load.
 		 * @return \c TRUE if successful, \c FALSE if not.
 		 */
@@ -102,7 +100,6 @@ namespace engine {
 		 * Parameter pack method called when a script function requires parameters.
 		 * It is called recursively, so that each parameter is added, with the first parameter being the first parameter passed to the function, etc.
 		 * Upon the final call (no parameters left to add), the non-template version of this method is called.
-		 * @todo   A few more AngelScript types still need to be added, including "addresses of reference or handle," "object pointers," and strings (references).
 		 * @tparam T      The type of the first parameter to add.
 		 * @tparam Ts     The types of the next parameters to add, if any.
 		 * @param  name   The name of the script function to call.
@@ -137,7 +134,7 @@ namespace engine {
 		/**
 		 * The internal logger object.
 		 */
-		global::logger _logger;
+		mutable global::logger _logger;
 
 		/**
 		 * The folder containing all the scripts loaded.

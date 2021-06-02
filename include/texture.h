@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -122,7 +122,6 @@ namespace sfx {
 
 		/**
 		 * The internal logger object.
-		 * @todo Perhaps make most logger objects mutable?
 		 */
 		mutable global::logger _logger;
 
@@ -220,11 +219,10 @@ namespace sfx {
 		 * and you wish to choose the frame to display. If you wish to animate the sprite instead, please use \c animate().
 		 * If a frame ID outside of the range of frames is provided, \c _currentFrame will be set to \c 0!
 		 * In the event \c _sheet is NULL, the current frame will be returned only and no other calculations will be carried out.
-		 * @param  newFrame The ID of the new current frame.
-		 * @return The old current frame ID.
-		 * @sa     \c animate()
+		 * @param newFrame The ID of the new current frame.
+		 * @sa    \c animate()
 		 */
-		unsigned int setCurrentFrame(unsigned int newFrame) noexcept;
+		void setCurrentFrame(unsigned int newFrame) noexcept;
 
 		/**
 		 * The prefix frame increment operator.

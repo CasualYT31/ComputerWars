@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -22,7 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**@file dialogue.h
  * Allows the client to produce in-game dialogue boxes.
- * @todo COMPLETE DOC WHEN ALL CLASSES HAVE BEEN WRITTEN.
  */
 
 #pragma once
@@ -680,7 +679,7 @@ namespace engine {
 		std::size_t _currentBoxID = 0;
 		std::unique_ptr<dialogue_box> _currentBox;
 
-		global::logger _logger;
+		mutable global::logger _logger;
 	};
 }
 
@@ -783,7 +782,7 @@ namespace awe {
 		virtual bool _load(safe::json& j) noexcept;
 		virtual bool _save(nlohmann::ordered_json& j) noexcept;
 
-		global::logger _logger;
+		mutable global::logger _logger;
 		awe::dialogue* _diag = nullptr;
 		std::map<std::string, awe::dialogue_data> _diagdata;
 		std::map<std::string, awe::dialogue_data>::iterator _currentObject;

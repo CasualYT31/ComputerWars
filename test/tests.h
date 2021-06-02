@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -49,8 +49,6 @@ namespace test {
 
 	/**
 	 * Tests logger.h classes.
-	 * @todo Further tests required for better coverage include testing the date and time functionality,
-	 *       and the logger object count functionality.
 	 */
 	class test_logger : public test::test_case {
 	public:
@@ -194,8 +192,6 @@ namespace test {
 
 	/**
 	 * Tests audio.h classes.
-	 * @warning I've straight up disabled these tests for now to speed up test development
-	 *          elsewhere: don't forget to reenable these tests later!
 	 */
 	class test_audio : public test::test_case {
 	public:
@@ -230,8 +226,6 @@ namespace test {
 
 	/**
 	 * Tests renderer.h classes.
-	 * @warning I've straight up disabled these tests for now to speed up test development
-	 *          elsewhere: don't forget to reenable these tests later!
 	 */
 	class test_renderer : public test::test_case {
 	public:
@@ -254,8 +248,6 @@ namespace test {
 
 	/**
 	 * Tests texture.h classes.
-	 * @warning I've straight up disabled these tests for now to speed up test development
-	 *          elsewhere: don't forget to reenable these tests later!
 	 */
 	class test_texture : public test::test_case {
 	public:
@@ -375,8 +367,6 @@ namespace test {
 	 * fading in, and then the tester can see the transitions, as well as compare the
 	 * expected duration of execution with the actual duration of execution, the latter
 	 * of which can be found in the test case log file.
-	 * @warning I've straight up disabled these tests for now to speed up test development
-	 *          elsewhere: don't forget to reenable these tests later!
 	 */
 	class test_transitions : public test::test_case {
 	public:

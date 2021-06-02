@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -43,8 +43,6 @@ namespace safe {
 	 * This is a superclass for the other classes in this namespace. It provides
 	 * common error-tracking functionality using the error bit model found in the
 	 * STL.
-	 * @todo An alternative to error bits should be considered:
-	 *       exceptions could be appropriate here.
 	 */
 	class json_state {
 	public:
@@ -207,7 +205,6 @@ namespace safe {
 		 *          underlying JSON library only parses integers as signed if they are negative.
 		 *          This case mustn't be forgotten if another JSON library is used and this behaviour
 		 *          doesn't occur!
-		 * @todo    This should be made into a static method.
 		 * @param   dest The "destination" JSON value.
 		 * @param   src  The "source" JSON value.
 		 * @return  \c TRUE if the two JSON values are of compatible data types, \c FALSE if not.
@@ -219,7 +216,6 @@ namespace safe {
 		 * This method loops through each key in a key sequence and generates one long string
 		 * which lists all of them in this format: <tt>{"key1", "key2", "keyEtc"}</tt>.
 		 * This is helpful for debugging/logging purposes.
-		 * @todo   This should be made into a static method.
 		 * @param  keys The key sequence to convert.
 		 * @return The string containing all the keys in the sequence.
 		 */
@@ -265,8 +261,6 @@ namespace safe {
 		 * @warning The \c MISMATCHING_TYPE bit will be set if the value pointed to by
 		 *          the key sequence contained a value of an incompatible type to the
 		 *          destination object.
-		 * @todo    Is the default value system really required? Find a case where this
-		 *          parameter \e isn't just a pointer to destination...
 		 * @tparam  T             The type of the destination object. This parameter is
 		 *                        inferred so it does not usually need to be explicitly provided.
 		 * @param   dest          The destination object.
@@ -350,7 +344,6 @@ namespace safe {
 		 * Returns the data type of the value stored in a given \c nlohmann::ordered_json object as a string.
 		 * Internally, \c nlohmann::ordered_json's \c type_name() method is used. This private method only exists to return "float" in case the JSON number is indeed a float:
 		 * this method does not distinguish between different types of numbers.
-		 * @todo   This method should be made static.
 		 * @param  j The \c nlohmann::ordered_json object containing the JSON value to evaluate.
 		 * @return The string name of the JSON data type as defined by the nlohmann::ordered_json class (unless where specified in the detailed section).
 		 */
@@ -364,7 +357,7 @@ namespace safe {
 		/**
 		 * The internal logger object.
 		 */
-		global::logger _logger;
+		mutable global::logger _logger;
 	};
 
 	/**
@@ -373,12 +366,6 @@ namespace safe {
 	 * by reading values from the script via the \c safe::json class and applying
 	 * them to member fields. In addition to this, derived classes can also save these
 	 * values to a JSON script.
-	 * @todo Ideally, there should only be one "method" which outlines the
-	 * expected format of the JSON script. Then this class can, in some way, either
-	 * read or write using this method, instead of the programmer manually typing
-	 * out both the read and write methods themselves. This will help to reduce errors
-	 * but will end up with the programmer having less power. More analysis should be
-	 * conducted to see if this approach is viable.
 	 */
 	class json_script : public json_state {
 	public:
@@ -445,7 +432,6 @@ namespace safe {
 		 * It should, however, be consistent with the one implmented in the corresponding _load() method.
 		 * 
 		 * The return value should usually be \c TRUE: only under very rare circumstances should \c FALSE ever be returned.
-		 * @todo   Ensure that both loading and saving enforce the root object requirement!
 		 * @return \c TRUE if the method succeeded, or \c FALSE if a serious/unrecoverable error occurred.
 		 */
 		virtual bool _save(nlohmann::ordered_json&) noexcept = 0;
@@ -483,7 +469,7 @@ namespace safe {
 		/**
 		 * The internal logger object.
 		 */
-		global::logger _logger = global::logger("json_script");
+		mutable global::logger _logger = global::logger("json_script");
 	};
 }
 

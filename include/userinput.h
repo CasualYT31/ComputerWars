@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -265,10 +265,6 @@ namespace sfx {
 
 	/**
 	 * Represents a single user's controls.
-	 * @todo Window tying feature isn't good. Options should be available to ignore window tying altogether,
-	 *       as well as to change the tied window after construction.
-	 * @todo Error reporting and logging should be improved for this class.
-	 * @todo Consider commenting out \c listenForInput methods.
 	 */
 	class user_input : public safe::json_script {
 	public:
@@ -289,10 +285,9 @@ namespace sfx {
 		/**
 		 * Sets the joystick to associate with this user.
 		 * If the ID of a non-existent joystick was given, it will be reset to \c 0.
-		 * @param  newid The new ID of the joystick to associate with this user/object.
-		 * @return The old joystick ID.
+		 * @param newid The new ID of the joystick to associate with this user/object.
 		 */
-		unsigned int setJoystickID(unsigned int newid) noexcept;
+		void setJoystickID(unsigned int newid) noexcept;
 
 		/**
 		 * Retrieves the joystick axis threshold.
@@ -307,11 +302,10 @@ namespace sfx {
 		 * (or below, if going in the negative direction) the threshold value, and considered "pressed."
 		 * If the given value was below \c 5.0, it will be readjusted to \c 5.0 and a warning will be logged.
 		 * If the given value was above \c 95.0, it will be readjusted to \c 95.0 and a warning will be logged.
-		 * @param  newthreshold A value between \c 5.0 and \c 95.0.
-		 * @return The old threshold value.
-		 * @sa     getJoystickAxisThreshold()
+		 * @param newthreshold A value between \c 5.0 and \c 95.0.
+		 * @sa    getJoystickAxisThreshold()
 		 */
-		float setJoystickAxisThreshold(float newthreshold) noexcept;
+		void setJoystickAxisThreshold(float newthreshold) noexcept;
 
 		/**
 		 * Retrieves a copy of the user's control configurations for a given game control.
@@ -325,12 +319,10 @@ namespace sfx {
 		/**
 		 * Updates the user's control configurations for a given game control.
 		 * This does not reset signalling information.
-		 * @param  name The name identifying the game control.
-		 * @param  uc   The user configurations to set.
-		 * @return A copy of the old user configurations, or a blank object if the given \c name
-		 *         couldn't uniquely identify a previously configured game control.
+		 * @param name The name identifying the game control.
+		 * @param uc   The user configurations to set.
 		 */
-		sfx::user_configuration setConfiguration(const std::string& name, const sfx::user_configuration& uc) noexcept;
+		void setConfiguration(const std::string& name, const sfx::user_configuration& uc) noexcept;
 
 		/**
 		 * Retrieves the mouse position.
@@ -343,8 +335,6 @@ namespace sfx {
 		 * Updates the signalling information for all controls for this user.
 		 * Should be called only once every iteration of the game loop.
 		 * If not called, the class will not work and no controls will be registered.
-		 * @todo Low frame rates could kill user input.
-		 *       Is this good (makes sense) or bad (separate thread required)?
 		 */
 		void update() noexcept;
 
@@ -502,7 +492,7 @@ namespace sfx {
 		/**
 		 * The internal logger object.
 		 */
-		global::logger _logger;
+		mutable global::logger _logger;
 
 		/**
 		 * Stores the user's game controls (mappings and signalling data) by name.
@@ -511,8 +501,6 @@ namespace sfx {
 
 		/**
 		 * A reference to the window tied to this user.
-		 * @todo Smart pointers should replace 99% of raw pointers throughout the code anyway, but
-		 *       I'll mention it here since \c _window is a good example of where a \c weak_ptr would be useful.
 		 */
 		const sf::Window& _window;
 	};

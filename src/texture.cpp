@@ -1,4 +1,4 @@
-/*Copyright 2020 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -61,12 +61,12 @@ bool sfx::animated_spritesheet::_load(safe::json& j) noexcept {
 		return false;
 	}
 	if (temp_basepath.find('.') == std::string::npos) {
-		_logger.error("Invalid base path provided - '.' is required.");
+		_logger.error("Invalid base path provided - '.###' file format extension is required.");
 		return false;
 	}
 	j.apply(frameCount, { "frames" }, &frameCount, true);
 	if (frameCount == 0) {
-		_logger.error("Cannot have 0 frames: assuming 1...");
+		_logger.warning("Cannot have 0 frames: assuming 1...");
 		frameCount = 1;
 	}
 	j.apply(_framerate, { "framerate" }, &_framerate, true);
@@ -86,13 +86,13 @@ bool sfx::animated_spritesheet::_load(safe::json& j) noexcept {
 				t.height = jj[s][3];
 				_sprites.push_back(t);
 			} catch (std::exception& e) {
-				_logger.error("An error occurred when attempting to add sprite coordinates to the internal vector: {}.", e.what());
+				_logger.warning("An error occurred when attempting to add sprite coordinates to the internal vector: {}.", e.what());
 				_logger.write("The coordinates 0,0,0,0 will be given to sprite {}.", s);
 				_sprites.push_back(sf::IntRect());
 			}
 		}
 	} catch (std::exception& e) {
-		_logger.error("An error occurred when attempting to read sprite coordinates: {}.", e.what());
+		_logger.warning("An error occurred when attempting to read sprite coordinates: {}.", e.what());
 		_logger.write("The coordinates 0,0,0,0 will be given to the single sprite.");
 		_sprites.push_back(sf::IntRect());
 	}
@@ -185,12 +185,10 @@ unsigned int sfx::animated_sprite::getCurrentFrame() const noexcept {
 	return _currentFrame;
 }
 
-unsigned int sfx::animated_sprite::setCurrentFrame(unsigned int newFrame) noexcept {
-	if (!_sheet) return _currentFrame;
-	auto old = _currentFrame;
+void sfx::animated_sprite::setCurrentFrame(unsigned int newFrame) noexcept {
+	if (!_sheet) return;
 	if (newFrame >= _sheet->getFrameCount()) newFrame = 0;
 	_currentFrame = newFrame;
-	return old;
 }
 
 unsigned int sfx::animated_sprite::operator++() noexcept {
@@ -199,7 +197,9 @@ unsigned int sfx::animated_sprite::operator++() noexcept {
 }
 
 unsigned int sfx::animated_sprite::operator++(int) noexcept {
-	return setCurrentFrame(getCurrentFrame() + 1);
+	auto old = getCurrentFrame();
+	setCurrentFrame(getCurrentFrame() + 1);
+	return old;
 }
 
 unsigned int sfx::animated_sprite::operator--() noexcept {
