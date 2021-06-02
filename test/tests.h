@@ -375,6 +375,8 @@ namespace test {
 	 * fading in, and then the tester can see the transitions, as well as compare the
 	 * expected duration of execution with the actual duration of execution, the latter
 	 * of which can be found in the test case log file.
+	 * @warning I've straight up disabled these tests for now to speed up test development
+	 *          elsewhere: don't forget to reenable these tests later!
 	 */
 	class test_transitions : public test::test_case {
 	public:
@@ -393,5 +395,28 @@ namespace test {
 		 * Runs tests related to the \c rectangle class.
 		 */
 		void rectangle();
+	};
+
+	/**
+	 * Tests bank.h classes.
+	 * I will need to drastically improve test coverage in the future.
+	 */
+	class test_bank : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "bank_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_bank(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c bank and \c unit_type classes.
+		 */
+		void bank();
 	};
 }

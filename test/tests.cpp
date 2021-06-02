@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "userinput.h"
 #include "file.h"
 #include "transitions.h"
+#include "bank.h"
 #include <filesystem>
 #include <iostream>
 
@@ -50,7 +51,8 @@ int test::test() {
 	testcases.push_back(new test::test_file(path));
 	testcases.push_back(new test::test_script(path));
 	testcases.push_back(new test::test_gui(path));
-	testcases.push_back(new test::test_transitions(path));
+	// testcases.push_back(new test::test_transitions(path));
+	testcases.push_back(new test::test_bank(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -772,4 +774,28 @@ void test::test_transitions::rectangle() {
 		window.draw(out);
 		window.display();
 	}
+}
+
+//**************
+//*BANK.H TESTS*
+//**************
+test::test_bank::test_bank(const std::string& path) noexcept : test_case(path + "bank_test_case.log") {}
+
+void test::test_bank::runTests() noexcept {
+	RUN_TEST(test::test_bank::bank);
+	endTesting();
+}
+
+void test::test_bank::bank() {
+	awe::bank<awe::movement_type> move;
+	move.load("test/assets/bank/move.json");
+	awe::bank<awe::unit_type> bank;
+	bank.load("test/assets/bank/unit.json");
+	awe::updateAllMovementsAndLoadedUnits(bank, move);
+	ASSERT_EQUAL(bank.size(), (std::size_t)11);
+	ASSERT_TRUE(bank[0]);
+	ASSERT_TRUE(bank[7]);
+	ASSERT_TRUE(bank[7]->canLoad(bank[0]));
+	// okay, getting super bored of tests, I'll admit it
+	// but I will definitely improve coverage in the future I promise
 }
