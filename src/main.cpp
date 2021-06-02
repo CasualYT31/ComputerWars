@@ -154,6 +154,6 @@ int game(const std::string& file) {
 }
 
 int main(int argc, char* argv[]) {
-    return game(((argc < 2) ? ("assets/map/islandx.cwm") : (argv[1])));
+    // return game(((argc < 2) ? ("assets/map/islandx.cwm") : (argv[1])));
     return test::test();
 }

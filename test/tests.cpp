@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "renderer.h"
 #include "texture.h"
 #include "userinput.h"
+#include "file.h"
 #include <filesystem>
 #include <iostream>
 
@@ -42,10 +43,11 @@ int test::test() {
 	testcases.push_back(new test::test_safejson(path));
 	testcases.push_back(new test::test_uuid(path));
 	testcases.push_back(new test::test_fonts(path));
-	testcases.push_back(new test::test_audio(path));
-	testcases.push_back(new test::test_renderer(path));
-	testcases.push_back(new test::test_texture(path));
+	// testcases.push_back(new test::test_audio(path));
+	// testcases.push_back(new test::test_renderer(path));
+	// testcases.push_back(new test::test_texture(path));
 	testcases.push_back(new test::test_ui(path));
+	testcases.push_back(new test::test_file(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -466,14 +468,12 @@ void test::test_audio::audio() {
 
 void test::test_audio::longWait(const std::string& msg) noexcept {
 	std::cout << msg << " Waiting... 3 seconds." << std::endl;
-	return;
 	sf::Clock timer;
 	while (timer.getElapsedTime().asSeconds() < 3.0);
 }
 
 void test::test_audio::shortWait(const std::string& msg) noexcept {
 	std::cout << msg << " Waiting... 1 second." << std::endl;
-	return;
 	sf::Clock timer;
 	while (timer.getElapsedTime().asSeconds() < 3.0);
 }
@@ -533,21 +533,19 @@ void test::test_texture::animation() {
 	sheet->load("test/assets/sprites/sheet.json");
 	try {
 		sheet->accessTexture(0);
-	} catch (std::out_of_range& e) {
+	} catch (std::out_of_range&) {
 		ASSERT_EQUAL("sheet did not load", "frame 0 texture");
 	}
 	try {
 		sheet->accessTexture(1);
 		ASSERT_EQUAL("sheet did not throw", "even though there isn't any second frame");
-	} catch (std::out_of_range& e) {
-		// expected
-	}
+	} catch (std::out_of_range&) {}
 	// load faulty script ~ state should be retained if path key was invalid
 	sheet->load("test/assets/sprites/faultysheet.json");
 	sheet->resetState();
 	try {
 		sheet->accessTexture(0);
-	} catch (std::out_of_range& e) {
+	} catch (std::out_of_range&) {
 		ASSERT_EQUAL("sheet object state", "was reset");
 	}
 	// test sprite
@@ -628,4 +626,82 @@ void test::test_ui::ui() {
 	// how the f*** do I even begin testing this file?
 	// looks like I need to make some amendments to it anyways,
 	// so I'll leave this test case for now
+}
+
+//**************
+//*FILE.H TESTS*
+//**************
+test::test_file::test_file(const std::string& path) noexcept : test_case(path + "file_test_case.log") {}
+
+void test::test_file::runTests() noexcept {
+	RUN_TEST(test::test_file::file);
+	endTesting();
+}
+
+void test::test_file::file() {
+	// first, let's test the static method convertNumber
+	// these tests should work out regardless of the byte ordering on the running system
+	ASSERT_EQUAL(engine::binary_file::convertNumber<unsigned int>(255), (unsigned int)4278190080);
+	ASSERT_EQUAL(engine::binary_file::convertNumber<long long>(255), (long long)-72057594037927936);
+	ASSERT_NOT_EQUAL(engine::binary_file::convertNumber<float>(1.0), (float)1.0);
+	ASSERT_NOT_EQUAL(engine::binary_file::convertNumber<double>(1.0), (double)1.0);
+	// next, let's test opening a non-existent file to ensure an exception is thrown
+	engine::binary_file file;
+	try {
+		file.open("badfile.bin", true);
+		ASSERT_EQUAL("binary_file did not throw exception", "");
+	} catch (std::exception&) {}
+	// now, let's test a real file for input
+	try {
+		file.open("test/assets/file/test.bin", true);
+		sf::Int32 number = file.readNumber<sf::Int32>();
+		double decimal = file.readNumber<double>();
+		std::string str = file.readString();
+		bool flag = file.readBool();
+		ASSERT_EQUAL(number, 13463);
+		ASSERT_TRUE(decimal < -98.73 && decimal > -98.75); // -98.74
+		ASSERT_EQUAL(str, "Hello, World!");
+		ASSERT_TRUE(flag);
+		ASSERT_EQUAL(file.position(), 30);
+		file.close();
+	} catch (test::failed_assert& e) {
+		throw e;
+	} catch (std::exception& e) {
+		global::logger log("binary_file_test");
+		log.error("{}", e.what());
+		ASSERT_EQUAL("input file could not be tested on:", "check log");
+	}
+	// finally, let's test an output file
+	try {
+		file.open("test/assets/file/output.bin", false);
+		file.writeNumber<sf::Uint64>(7562);
+		file.writeBool(false);
+		file.writeBool(true);
+		file.writeNumber<float>((float)45.1);
+		file.writeString("this is a\ntest");
+		file.writeNumber<sf::Int8>(127);
+		ASSERT_EQUAL(file.position(), 33);
+		file.close();
+		file.open("test/assets/file/output.bin", true);
+		ASSERT_EQUAL(file.position(), 0);
+		ASSERT_EQUAL(file.readNumber<sf::Uint32>(), 7562);
+		ASSERT_EQUAL(file.readNumber<sf::Uint32>(), 0);
+		ASSERT_FALSE(file.readBool());
+		ASSERT_EQUAL(file.position(), 9);
+		ASSERT_TRUE(file.readBool());
+		float r = file.readNumber<float>();
+		ASSERT_TRUE(r > 45.0 && r < 45.2);
+		ASSERT_EQUAL(file.position(), 14);
+		ASSERT_EQUAL(file.readString(), "this is a\ntest");
+		ASSERT_EQUAL(file.position(), 32);
+		ASSERT_EQUAL(file.readNumber<sf::Int8>(), 127);
+		file.close();
+		ASSERT_EQUAL(file.position(), 33);
+	} catch (test::failed_assert& e) {
+		throw e;
+	} catch (std::exception& e) {
+		global::logger log("binary_file_test");
+		log.error("{}", e.what());
+		ASSERT_EQUAL("output file could not be tested on:", "check log");
+	}
 }

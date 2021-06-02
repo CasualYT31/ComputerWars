@@ -455,7 +455,7 @@ namespace awe {
 
 		/**
 		 * Determines the ID the next unit should have.
-		 * A unit ID cannot be 0
+		 * A unit ID cannot be \c 0.
 		 * Automatically assigns the returned value to \c _lastUnitID.
 		 * @warning \c UINT32_MAX is used interally to test if unit capacity has been reached.
 		 *          Don't forget to change this if you change the size of \c awe::UnitID!

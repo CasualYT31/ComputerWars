@@ -194,10 +194,8 @@ namespace test {
 
 	/**
 	 * Tests audio.h classes.
-	 * @warning For my own sanity whilst programming these tests, I've disabled the
-	 *          waiting for audio tests by default. To run the full tests, simply go
-	 *          into \c longWait() and \c shortWait() and remove the \c return
-	 *          statements you find there.
+	 * @warning I've straight up disabled these tests for now to speed up test development
+	 *          elsewhere: don't forget to reenable these tests later!
 	 */
 	class test_audio : public test::test_case {
 	public:
@@ -232,6 +230,8 @@ namespace test {
 
 	/**
 	 * Tests renderer.h classes.
+	 * @warning I've straight up disabled these tests for now to speed up test development
+	 *          elsewhere: don't forget to reenable these tests later!
 	 */
 	class test_renderer : public test::test_case {
 	public:
@@ -254,6 +254,8 @@ namespace test {
 
 	/**
 	 * Tests texture.h classes.
+	 * @warning I've straight up disabled these tests for now to speed up test development
+	 *          elsewhere: don't forget to reenable these tests later!
 	 */
 	class test_texture : public test::test_case {
 	public:
@@ -294,5 +296,27 @@ namespace test {
 		 * Runs tests related to the \c userinput class.
 		 */
 		void ui();
+	};
+
+	/**
+	 * Tests file.h classes.
+	 */
+	class test_file : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "file_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_file(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c binary_file class.
+		 */
+		void file();
 	};
 }
