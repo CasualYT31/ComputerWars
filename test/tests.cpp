@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "userinput.h"
 #include "file.h"
 #include "transitions.h"
-#include "bank.h"
+#include "map.h"
 #include <filesystem>
 #include <iostream>
 
@@ -53,6 +53,10 @@ int test::test() {
 	testcases.push_back(new test::test_gui(path));
 	// testcases.push_back(new test::test_transitions(path));
 	testcases.push_back(new test::test_bank(path));
+	testcases.push_back(new test::test_tile(path));
+	testcases.push_back(new test::test_unit(path));
+	testcases.push_back(new test::test_army(path));
+	testcases.push_back(new test::test_map(path));
 
 	// run the test cases
 	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
@@ -798,4 +802,64 @@ void test::test_bank::bank() {
 	ASSERT_TRUE(bank[7]->canLoad(bank[0]));
 	// okay, getting super bored of tests, I'll admit it
 	// but I will definitely improve coverage in the future I promise
+}
+
+//**************
+//*TILE.H TESTS*
+//**************
+test::test_tile::test_tile(const std::string& path) noexcept : test_case(path + "tile_test_case.log") {}
+
+void test::test_tile::runTests() noexcept {
+	RUN_TEST(test::test_tile::tile);
+	endTesting();
+}
+
+void test::test_tile::tile() {
+	awe::tile tile;
+	// yeah...
+}
+
+//**************
+//*UNIT.H TESTS*
+//**************
+test::test_unit::test_unit(const std::string& path) noexcept : test_case(path + "unit_test_case.log") {}
+
+void test::test_unit::runTests() noexcept {
+	RUN_TEST(test::test_unit::unit);
+	endTesting();
+}
+
+void test::test_unit::unit() {
+	awe::unit unit;
+	// yeah...
+}
+
+//**************
+//*ARMY.H TESTS*
+//**************
+test::test_army::test_army(const std::string& path) noexcept : test_case(path + "army_test_case.log") {}
+
+void test::test_army::runTests() noexcept {
+	RUN_TEST(test::test_army::army);
+	endTesting();
+}
+
+void test::test_army::army() {
+	awe::army army;
+	// yeah...
+}
+
+//*************
+//*MAP.H TESTS*
+//*************
+test::test_map::test_map(const std::string& path) noexcept : test_case(path + "map_test_case.log") {}
+
+void test::test_map::runTests() noexcept {
+	RUN_TEST(test::test_map::map);
+	endTesting();
+}
+
+void test::test_map::map() {
+	awe::map map;
+	// this one will be arduous...
 }

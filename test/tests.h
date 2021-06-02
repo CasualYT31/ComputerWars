@@ -419,4 +419,92 @@ namespace test {
 		 */
 		void bank();
 	};
+
+	/**
+	 * Tests tile.h classes.
+	 */
+	class test_tile : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "tile_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_tile(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c tile class.
+		 */
+		void tile();
+	};
+
+	/**
+	 * Tests unit.h classes.
+	 */
+	class test_unit : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "unit_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_unit(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c unit class.
+		 */
+		void unit();
+	};
+
+	/**
+	 * Tests army.h classes.
+	 */
+	class test_army : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "army_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_army(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c army class.
+		 */
+		void army();
+	};
+
+	/**
+	 * Tests map.h classes.
+	 */
+	class test_map : public test::test_case {
+	public:
+		/**
+		 * Assigns the name "map_test_case.log" to the output file.
+		 * @param path The path in which to save the output file.
+		 */
+		test_map(const std::string& path) noexcept;
+
+		/**
+		 * Runs all the tests defined in the private methods of this class.
+		 */
+		void runTests() noexcept;
+	private:
+		/**
+		 * Runs tests related to the \c map class.
+		 */
+		void map();
+	};
 }
