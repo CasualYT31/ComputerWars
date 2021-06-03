@@ -246,8 +246,7 @@ template<typename... Ts>
 void global::logger::write(const std::string& line, Ts... values) noexcept {
 	try {
 		_logger->info(line, values...);
-	}
-	catch (std::exception & e) {
+	} catch (std::exception & e) {
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
 }
@@ -256,8 +255,7 @@ template<typename... Ts>
 void global::logger::error(const std::string& line, Ts... values) noexcept {
 	try {
 		_logger->error(line, values...);
-	}
-	catch (std::exception & e) {
+	} catch (std::exception & e) {
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
 }
