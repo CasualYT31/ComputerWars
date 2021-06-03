@@ -322,17 +322,17 @@ namespace safe {
 		 * @warning The \c MISMATCHING_TYPE bit will be set if the value pointed to
 		 *          by the key sequence contained a value of an incompatible type
 		 *          to the destination object.
-		 * @tparam  T             The type of the destination object. This
-		 *                        parameter is inferred so it does not usually need
-		 *                        to be explicitly provided.
-		 * @param   dest          The destination object.
-		 * @param   keys          The key sequence uniquely identifying the JSON
-		 *                        value to apply to the C++ object.
-		 * @param   defval        Points to a C++ object containing the value to
-		 *                        assign to \c dest in case an error occurs. If
-		 *                        \c NULL, no default value is considered.
-		 * @param   supressErrors If \c TRUE, the error state of this object will
-		 *                        be reset at the end of the call.
+		 * @tparam  T              The type of the destination object. This
+		 *                         parameter is inferred so it does not usually
+		 *                         need to be explicitly provided.
+		 * @param   dest           The destination object.
+		 * @param   keys           The key sequence uniquely identifying the JSON
+		 *                         value to apply to the C++ object.
+		 * @param   defval         Points to a C++ object containing the value to
+		 *                         assign to \c dest in case an error occurs. If
+		 *                         \c NULL, no default value is considered.
+		 * @param   suppressErrors If \c TRUE, the error state of this object will
+		 *                         be reset at the end of the call.
 		 * @sa      applyArray()
 		 * @sa      applyColour()
 		 * @sa      applyVector()

@@ -361,7 +361,7 @@ namespace awe {
 
 		/**
 		 * Retrieves a tile's HP.
-		 * @param  post The X and Y coordinate of the tile to retrieve from.
+		 * @param  pos The X and Y coordinate of the tile to retrieve from.
 		 * @return The HP of the tile, or \c 0 if the given coordinate was out of
 		 *         bounds.
 		 */
@@ -528,7 +528,7 @@ namespace awe {
 		 * @param  units     Information on the unit types to index when reading
 		 *                   unit type IDs.
 		 * @param  version   If writing, the version should be given here.
-		 * @thorws std::exception if the header couldn't be read or written.
+		 * @throws std::exception if the header couldn't be read or written.
 		 */
 		void _CWM_Header(const bool isSave,
 			const std::shared_ptr<awe::bank<awe::country>>& countries,

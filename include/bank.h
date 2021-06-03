@@ -213,7 +213,8 @@ namespace awe {
 		 * <ul><li>\c "longname" = \c _name</li>
 		 *     <li>\c "shortname" = \c _shortName</li>
 		 *     <li>\c "icon" = \c _iconKey</li>
-		 *     <li>\c "description" = \c _description</li></ul>
+		 *     <li>\c "description" = \c _description</li>
+		 * </ul>
 		 * @param id The ID of this bank entry.
 		 * @param j  The object value containing the name, icon, and description
 		 *           properties, as well as any other properties subclasses need to

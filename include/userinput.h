@@ -252,7 +252,7 @@ namespace sfx {
 
 		/**
 		 * Converts an unsigned integer to a joystick axis ID.
-		 * @param  b The unsigned integer holding the axis ID.
+		 * @param  a The unsigned integer holding the axis ID.
 		 * @return The enum equivalent of the given axis ID.
 		 */
 		static sf::Joystick::Axis toaxis(unsigned int a) noexcept;
@@ -267,7 +267,7 @@ namespace sfx {
 
 		/**
 		 * Converts an unsigned integer to a control signal type ID.
-		 * @param  b The unsigned integer holding the type ID.
+		 * @param  s The unsigned integer holding the type ID.
 		 * @return The enum equivalent of the given type ID.
 		 */
 		static sfx::control_signal tosignaltype(unsigned int s) noexcept;
