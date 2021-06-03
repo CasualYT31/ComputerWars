@@ -42,26 +42,33 @@ void safe::json_state::_toggleState(safe::json_state::FailBits state) noexcept {
 
 safe::json::json(const std::string& name) noexcept : _logger(name) {}
 
-safe::json::json(const nlohmann::ordered_json& jobj, const std::string& name) noexcept : _logger(name) {
+safe::json::json(const nlohmann::ordered_json& jobj, const std::string& name)
+	noexcept : _logger(name) {
 	*this = jobj;
 }
 
-bool safe::json::equalType(nlohmann::ordered_json& dest, nlohmann::ordered_json& src) const noexcept {
+bool safe::json::equalType(nlohmann::ordered_json& dest,
+	nlohmann::ordered_json& src) const noexcept {
 	if (dest.type() == src.type()) return true;
-	//special case 1: unsigned onto signed
-	//when this JSON library parses a positive integer, it interrprets that as an unsigned integer
-	//however, so long as that positive integer is within the data limtis of int
-	//it could technically be used with signed integers as well
-	if (dest.is_number_integer() && src.is_number_unsigned() && src <= INT_MAX) return true;
-	//special case 2: integer or unsigned onto float
-	if (dest.is_number_float() && (src.is_number_integer() || src.is_number_unsigned())) return true;
-	//special case 3: float with a fraction of 0 onto integer or unsigned
+	// special case 1: unsigned onto signed
+	// when this JSON library parses a positive integer, it interrprets that as an
+	// unsigned integer
+	// however, so long as that positive integer is within the data limtis of int
+	// it could technically be used with signed integers as well
+	if (dest.is_number_integer() && src.is_number_unsigned() && src <= INT_MAX)
+		return true;
+	// special case 2: integer or unsigned onto float
+	if (dest.is_number_float() &&
+		(src.is_number_integer() || src.is_number_unsigned())) return true;
+	// special case 3: float with a fraction of 0 onto integer or unsigned
 	double temp;
-	if ((dest.is_number_integer() || dest.is_number_unsigned()) && src.is_number_float() && modf(src, &temp) == 0.0) return true;
+	if ((dest.is_number_integer() || dest.is_number_unsigned()) &&
+		src.is_number_float() && modf(src, &temp) == 0.0) return true;
 	return false;
 }
 
-bool safe::json::keysExist(safe::json::KeySequence keys, nlohmann::ordered_json* ret) const noexcept {
+bool safe::json::keysExist(safe::json::KeySequence keys,
+	nlohmann::ordered_json* ret) const noexcept {
 	if (!keys.empty()) {
 		nlohmann::ordered_json jCopy = _j;
 		for (auto itr = keys.begin(), enditr = keys.end(); itr != enditr; itr++) {
@@ -77,14 +84,19 @@ bool safe::json::keysExist(safe::json::KeySequence keys, nlohmann::ordered_json*
 	return false;
 }
 
-std::string safe::json::synthesiseKeySequence(safe::json::KeySequence& keys) const noexcept {
+std::string safe::json::synthesiseKeySequence(safe::json::KeySequence& keys) const
+	noexcept {
 	if (keys.empty()) {
 		return "";
 	} else {
 		std::string ret = "{";
-		for (safe::json::KeySequence::iterator itr = keys.begin(), enditr = keys.end(); itr != enditr; itr++) {
-			ret += '"' + *itr + '"';
-			if (itr + 1 != enditr) ret += ", ";
+		bool firstLoop = true;
+		for (auto& itr : keys) {
+			if (firstLoop)
+				firstLoop = false;
+			else
+				ret += ", ";
+			ret += '"' + itr + '"';
 		}
 		return ret + "}";
 	}
@@ -95,7 +107,8 @@ safe::json& safe::json::operator=(const nlohmann::ordered_json& jobj) noexcept {
 		_j = jobj;
 	} else {
 		_toggleState(safe::json_state::JSON_WAS_NOT_OBJECT);
-		_logger.error("Attempted to assign a nlohmann::ordered_json object which had no root object.");
+		_logger.error("Attempted to assign a nlohmann::ordered_json object which "
+			"had no root object.");
 	}
 	return *this;
 }
@@ -104,12 +117,15 @@ nlohmann::ordered_json safe::json::nlohmannJSON() const noexcept {
 	return _j;
 }
 
-void safe::json::applyColour(sf::Color& dest, safe::json::KeySequence keys, const sf::Color* defval, const bool suppressErrors) noexcept {
+void safe::json::applyColour(sf::Color& dest, safe::json::KeySequence keys,
+	const sf::Color* defval, const bool suppressErrors) noexcept {
 	std::array<unsigned int, 4> colour = { 0, 0, 0, 255 };
 	applyArray(colour, keys);
 	if (defval && !inGoodState()) {
 		dest = *defval;
-		_logger.write("{} colour property faulty: reset to the default of [{},{},{},{}].", synthesiseKeySequence(keys), defval->r, defval->g, defval->b, defval->a);
+		_logger.write("{} colour property faulty: reset to the default of "
+			"[{},{},{},{}].", synthesiseKeySequence(keys),
+			defval->r, defval->g, defval->b, defval->a);
 	} else {
 		dest = sf::Color(colour[0], colour[1], colour[2], colour[3]);
 	}
@@ -172,12 +188,14 @@ bool safe::json_script::_loadFromScript(nlohmann::ordered_json& jobj) noexcept {
 		catch (std::exception & e) {
 			_what = e.what();
 			_toggleState(safe::json_state::UNPARSABLE);
-			_logger.error("Provided JSON script \"{}\" has incorrect syntax: {}.", getScriptPath(), jsonwhat());
+			_logger.error("Provided JSON script \"{}\" has incorrect syntax: {}.",
+				getScriptPath(), jsonwhat());
 		}
 		jscript.close();
 	} else {
 		_toggleState(safe::json_state::FAILED_SCRIPT_LOAD);
-		_logger.error("Failed to open JSON script \"{}\" for reading.", getScriptPath());
+		_logger.error("Failed to open JSON script \"{}\" for reading.",
+			getScriptPath());
 	}
 	if (inGoodState()) return true;
 	return false;
@@ -192,12 +210,14 @@ bool safe::json_script::_saveToScript(nlohmann::ordered_json& jobj) noexcept {
 		catch (std::exception & e) {
 			_what = e.what();
 			_toggleState(safe::json_state::FAILED_SCRIPT_SAVE);
-			_logger.error("Could not write JSON object to JSON script \"{}\": {}.", getScriptPath(), jsonwhat());
+			_logger.error("Could not write JSON object to JSON script \"{}\": {}.",
+				getScriptPath(), jsonwhat());
 		}
 		jscript.close();
 	} else {
 		_toggleState(safe::json_state::FAILED_SCRIPT_SAVE);
-		_logger.error("Failed to open JSON script \"{}\" for writing.", getScriptPath());
+		_logger.error("Failed to open JSON script \"{}\" for writing.",
+			getScriptPath());
 	}
 	if (inGoodState()) return true;
 	return false;

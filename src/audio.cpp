@@ -43,12 +43,13 @@ void sfx::audio::play(std::string name) noexcept {
 	if (name == "") name = getCurrentMusic();
 	if (name == "") return;
 	if (_sound.find(name) != _sound.end()) {
-		//play the sound /*if not already playing*/
-		/*if (_sound[name].sound.getStatus() != sf::Sound::Playing)*/ _sound[name].sound.play();
+		// play the sound /*if not already playing*/
+		/*if (_sound[name].sound.getStatus() != sf::Sound::Playing)*/
+			_sound[name].sound.play();
 	} else if (_music.find(name) != _music.end()) {
-		//play the music if not already playing
-		//also stop the currently playing music if there is one
-		//if paused, resume
+		// play the music if not already playing
+		// also stop the currently playing music if there is one
+		// if paused, resume
 		if (_music[name].music.getStatus() == sf::Music::Paused) {
 			_music[name].music.play();
 		} else if (_music[name].music.getStatus() == sf::Music::Stopped) {
@@ -86,11 +87,16 @@ bool sfx::audio::fadeout(sf::Time length) noexcept {
 		_clock.restart();
 		_fadingOut = true;
 	}
-	if (_clock.getElapsedTime().asSeconds() >= length.asSeconds() / getGranularity()) {
-		_music[getCurrentMusic()].music.setVolume(_music[getCurrentMusic()].music.getVolume() - _volumeAfterOffset(getCurrentMusic()) / getGranularity());
+	if (_clock.getElapsedTime().asSeconds() >=
+		length.asSeconds() / getGranularity()) {
+		_music[getCurrentMusic()].music.setVolume(
+			_music[getCurrentMusic()].music.getVolume() -
+			_volumeAfterOffset(getCurrentMusic()) / getGranularity()
+		);
 		_clock.restart();
 	}
-	if (length.asMilliseconds() < 10 || _music[getCurrentMusic()].music.getVolume() < 1.0) {
+	if (length.asMilliseconds() < 10 ||
+		_music[getCurrentMusic()].music.getVolume() < 1.0) {
 		std::string temp = getCurrentMusic();
 		stop();
 		_music[temp].music.setVolume(_volumeAfterOffset(temp));
@@ -153,7 +159,8 @@ bool sfx::audio::_load(safe::json& j) noexcept {
 			std::string path;
 			j.apply(path, { i.key(), "path" });
 			if (!j.inGoodState()) {
-				_logger.error("Audio object \"{}\" was not given a valid \"path\" value, in script \"{}\".", i.key(), getScriptPath());
+				_logger.error("Audio object \"{}\" was not given a valid \"path\" "
+					"value, in script \"{}\".", i.key(), getScriptPath());
 				j.resetState();
 				continue;
 			}
@@ -161,18 +168,24 @@ bool sfx::audio::_load(safe::json& j) noexcept {
 			std::string type = "sound";
 			j.apply(type, { i.key(), "type" }, &type, true);
 			if (type != "sound" && type != "music") {
-				_logger.warning("Invalid type \"{}\" provided for audio object \"{}\" in script \"{}\", \"sound\" assumed.", type, i.key(), getScriptPath());
+				_logger.warning("Invalid type \"{}\" provided for audio object "
+					"\"{}\" in script \"{}\", \"sound\" assumed.", type, i.key(),
+					getScriptPath());
 				type = "sound";
 			}
 
 			if (type == "sound") {
 				_sound[i.key()].path = path;
-				j.apply(_sound[i.key()].volumeOffset, { i.key(), "offset" }, &_sound[i.key()].volumeOffset, true);
+				j.apply(_sound[i.key()].volumeOffset, { i.key(), "offset" },
+					&_sound[i.key()].volumeOffset, true);
 			} else if (type == "music") {
 				_music[i.key()].path = path;
-				j.apply(_music[i.key()].volumeOffset, { i.key(), "offset" }, &_music[i.key()].volumeOffset, true);
-				j.apply(_music[i.key()].loopTo, { i.key(), "loopto" }, &_music[i.key()].loopTo, true);
-				j.apply(_music[i.key()].loopWhen, { i.key(), "loopwhen" }, &_music[i.key()].loopWhen, true);
+				j.apply(_music[i.key()].volumeOffset, { i.key(), "offset" },
+					&_music[i.key()].volumeOffset, true);
+				j.apply(_music[i.key()].loopTo, { i.key(), "loopto" },
+					&_music[i.key()].loopTo, true);
+				j.apply(_music[i.key()].loopWhen, { i.key(), "loopwhen" },
+					&_music[i.key()].loopWhen, true);
 			}
 		}
 	}
@@ -201,7 +214,8 @@ bool sfx::audio::_loadAudio() noexcept {
 	bool ret = true;
 	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; itr++) {
 		if (!itr->second.buffer.loadFromFile(itr->second.path)) {
-			_logger.error("Audio file \"{}\" for sound object \"{}\" could not be loaded!", itr->second.path, itr->first);
+			_logger.error("Audio file \"{}\" for sound object \"{}\" could not be "
+				"loaded!", itr->second.path, itr->first);
 			ret = false;
 		} else {
 			itr->second.sound.setBuffer(itr->second.buffer);
@@ -209,17 +223,24 @@ bool sfx::audio::_loadAudio() noexcept {
 	}
 	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; itr++) {
 		if (!itr->second.music.openFromFile(itr->second.path)) {
-			_logger.error("Audio file \"{}\" for music object \"{}\" could not be loaded!", itr->second.path, itr->first);
+			_logger.error("Audio file \"{}\" for music object \"{}\" could not be "
+				"loaded!", itr->second.path, itr->first);
 			ret = false;
 		} else {
 			if (itr->second.loopTo < 0 && itr->second.loopWhen < 0) {
 				itr->second.music.setLoop(false);
 			} else if (itr->second.loopWhen < 0) {
 				itr->second.music.setLoop(true);
-				itr->second.music.setLoopPoints(sf::Music::TimeSpan(sf::milliseconds(itr->second.loopTo), itr->second.music.getDuration()));
+				itr->second.music.setLoopPoints(sf::Music::TimeSpan(
+					sf::milliseconds(itr->second.loopTo),
+					itr->second.music.getDuration()
+				));
 			} else {
 				itr->second.music.setLoop(true);
-				itr->second.music.setLoopPoints(sf::Music::TimeSpan(sf::milliseconds(itr->second.loopTo), sf::milliseconds(itr->second.loopWhen - itr->second.loopTo)));
+				itr->second.music.setLoopPoints(sf::Music::TimeSpan(
+					sf::milliseconds(itr->second.loopTo),
+					sf::milliseconds(itr->second.loopWhen - itr->second.loopTo)
+				));
 			}
 		}
 	}

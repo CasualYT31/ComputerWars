@@ -42,8 +42,8 @@ namespace std {
 		std::size_t operator()(sf::Vector2<T> const& s) const noexcept {
 			// I don't actually think they need to be separate...
 			// Only did it this way in order to preserve Elias' intended execution
-			// (since the actual hashing was in a function in his example, meaning there
-			// would be two separate hashers in execution)
+			// (since the actual hashing was in a function in their example,
+			// meaning there would be two separate hashers in execution)
 			std::hash<T> hasherX, hasherY;
 			std::size_t seed = 0;
 			seed ^= hasherX(s.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -69,7 +69,8 @@ namespace awe {
 		 * Constructs a new army.
 		 * @param country The country the army belongs to, which can't be changed.
 		 */
-		army(const std::shared_ptr<const awe::country>& country = nullptr) noexcept;
+		army(const std::shared_ptr<const awe::country>& country = nullptr)
+			noexcept;
 
 		/**
 		 * Gets the army's country information.

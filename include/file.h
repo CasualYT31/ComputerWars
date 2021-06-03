@@ -35,14 +35,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace engine {
 	/**
 	 * Represents a binary file written in little endian encoding.
-	 * This class can be used to ensure that binary files are written in a consistent encoding (which is little endian),
-	 * regardless of the byte ordering the running system uses internally.
+	 * This class can be used to ensure that binary files are written in a
+	 * consistent encoding (which is little endian), regardless of the byte
+	 * ordering the executing system uses internally.
 	 */
 	class binary_file : sf::NonCopyable {
 	public:
 		/**
 		 * Initialises the internal file stream.
-		 * The internal file stream will throw an exception when any of its fail, bad, and eof bits are set.
+		 * The internal file stream will throw an exception when any of its fail,
+		 * bad, and eof bits are set.
 		 */
 		binary_file() noexcept;
 
@@ -63,10 +65,11 @@ namespace engine {
 
 		/**
 		 * Opens a given file for either input or output.
-		 * This method also automatically closes the previously opened file, if any.
-		 * \c _bytes is only reset to \c 0 if opening the file was successful.
+		 * This method also automatically closes the previously opened file, if
+		 * any. \c _bytes is only reset to \c 0 if opening the file was successful.
 		 * @param  filepath The path of the file to open.
-		 * @param  forInput \c TRUE if the file is to be open for input, \c FALSE if for output.
+		 * @param  forInput \c TRUE if the file is to be open for input, \c FALSE
+		 *                  if for output.
 		 * @throws std::exception if the file couldn't be opened.
 		 */
 		void open(const std::string& filepath, const bool forInput);
@@ -79,15 +82,19 @@ namespace engine {
 
 		/**
 		 * Returns the current byte position of the file.
-		 * Read and write methods in this class count the number of bytes they read or write in a file.
-		 * @return The number of bytes read/written since the beginning of the file.
+		 * Read and write methods in this class count the number of bytes they read
+		 * or write in a file.
+		 * @return The number of bytes read/written since the beginning of the
+		 *         file.
+		 * @sa     engine::binary_file::open()
 		 */
 		sf::Uint64 position() const noexcept;
 
 		/**
 		 * Reads a number from the binary file.
 		 * @tparam The type of arithmetic value to read.
-		 * @return The number retrieved from the binary file, in the correct format.
+		 * @return The number retrieved from the binary file, in the correct
+		 *         format.
 		 * @throws std::exception if the number could not be read.
 		 */
 		template<typename T>
@@ -95,8 +102,10 @@ namespace engine {
 
 		/**
 		 * Reads a bool value from the binary file.
-		 * This class reads and writes bool values as single bytes. \c FALSE is represented by a value of \c 0,
-		 * whereas \c TRUE is a value of \c !0, with \c 0xFF being the value that is written.
+		 * This class reads and writes bool values as single bytes. \c FALSE is
+		 * represented by a value of \c 0, whereas \c TRUE is a value of \c !0,
+		 * with \c 0xFF being the value that is written by the \c writeBool()
+		 * method.
 		 * @return The boolean value retrieved from the binary file.
 		 * @throws std::exception if the bool could not be read.
 		 */
@@ -104,8 +113,8 @@ namespace engine {
 
 		/**
 		 * Reads a string from the binary file.
-		 * This class reads and writes strings as a list of bytes prepended by the length of the string,
-		 * which is stored as an unsigned 32-bit integer.
+		 * This class reads and writes strings as a list of bytes prepended by the
+		 * length of the string, which is stored as an unsigned 32-bit integer.
 		 * @return The string retrieved from the binary file.
 		 * @throws std::exception if the string could not be read.
 		 */
@@ -114,7 +123,8 @@ namespace engine {
 		/**
 		 * Writes a number value to the binary file.
 		 * @tparam The type of arithmetic value to write.
-		 * @param  number The arithmetic value to write, converted to little endian if required.
+		 * @param  number The arithmetic value to write, converted to little endian
+		 *                if required.
 		 * @throws std::exception if the number could not be written.
 		 */
 		template<typename T>
@@ -123,16 +133,16 @@ namespace engine {
 		/**
 		 * Writes a bool value to the binary file.
 		 * @param  val The bool value to write.
-		 * @sa     readBool()
 		 * @throws std::exception if the bool could not be written.
+		 * @sa     readBool()
 		 */
 		void writeBool(const bool val);
 
 		/**
 		 * Writes a string to the binary file.
 		 * @param  str The string to write.
-		 * @sa     readString()
 		 * @throws std::exception if the string could not be written.
+		 * @sa     readString()
 		 */
 		void writeString(const std::string& str);
 	private:
@@ -142,7 +152,8 @@ namespace engine {
 		std::fstream _file;
 
 		/**
-		 * Counts the number of bytes read and/or written since the last call to \c open().
+		 * Counts the number of bytes read and/or written since the last call to
+		 * \c open().
 		 */
 		sf::Uint64 _bytes = 0;
 	};
@@ -152,7 +163,8 @@ template<typename T>
 T engine::binary_file::convertNumber(T number) noexcept {
 	T copy = number;
 	for (std::size_t i = 0; i < sizeof(T); i++) {
-		*((unsigned char*)&number + i) = *((unsigned char*)&copy + sizeof(T) - i - 1);
+		*((unsigned char*)&number + i) =
+			*((unsigned char*)&copy + sizeof(T) - i - 1);
 	}
 	return number;
 }
@@ -166,7 +178,8 @@ T engine::binary_file::readNumber() {
 		if (sizeof(T) > 1 && isBigEndian()) ret = convertNumber(ret);
 		return ret;
 	} catch (std::exception& e) {
-		std::string w = "Failed to read number at position " + std::to_string(_bytes) + ": " + e.what();
+		std::string w = "Failed to read number at position " +
+			std::to_string(_bytes) + ": " + e.what();
 		throw std::exception(w.c_str());
 	}
 }
@@ -178,7 +191,8 @@ void engine::binary_file::writeNumber(T number) {
 		_file.write(reinterpret_cast<char*>(&number), sizeof(T));
 		_bytes += sizeof(T);
 	} catch (std::exception& e) {
-		std::string w = "Failed to write number to position " + std::to_string(_bytes) + ": " + e.what();
+		std::string w = "Failed to write number to position " +
+			std::to_string(_bytes) + ": " + e.what();
 		throw std::exception(w.c_str());
 	}
 }

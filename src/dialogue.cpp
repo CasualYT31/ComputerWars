@@ -24,13 +24,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // dialogue_sequence
 
-engine::dialogue_sequence::dialogue_sequence(const std::string& name) noexcept : _logger(name) {}
+engine::dialogue_sequence::dialogue_sequence(const std::string& name) noexcept :
+	_logger(name) {}
 
-void engine::dialogue_sequence::setLanguageDictionary(std::shared_ptr<i18n::language_dictionary> dict) noexcept {
+void engine::dialogue_sequence::setLanguageDictionary(
+	std::shared_ptr<i18n::language_dictionary> dict) noexcept {
 	_langDic = dict;
 }
 
-void engine::dialogue_sequence::setUserInput(std::shared_ptr<sfx::user_input> ui) noexcept {
+void engine::dialogue_sequence::setUserInput(std::shared_ptr<sfx::user_input> ui)
+	noexcept {
 	_userInput = ui;
 }
 
@@ -50,8 +53,11 @@ bool engine::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept
 				_currentBox->selectPreviousOption();
 			} else if ((*_userInput)[_selectControlKey]) {
 				if (_currentBox->optionCount() > 0) {
-					// this also conveniently makes it so that users can't skip any part of an option dialogue
-					// it allows users to become aware that they should stop spamming the "A" button since they could inadvertedly select something which they don't want to
+					// this also conveniently makes it so that users can't skip any
+					// part of an option dialogue
+					// it allows users to become aware that they should stop
+					// spamming the "A" button since they could inadvertedly select
+					// something which they don't want to
 					_currentBox->selectCurrentOption();
 				} else {
 					_currentBox->skipCurrentState();
@@ -66,20 +72,24 @@ bool engine::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept
 		if (_currentBox->animate(target)) {
 			// current box has ended, allocate next one
 			_currentBox = _allocateDialogueBox(++_currentBoxID);
-			// if nullptr is returned, the end of the sequence has been reached (hopefully it is not an allocation error, maybe move exception checking outside of that method?), return TRUE
+			// if nullptr is returned, the end of the sequence has been reached
+			// (hopefully it is not an allocation error, maybe move exception
+			// checking outside of that method?), return TRUE
 			if (!_currentBox) return true;
 		}
 	}
 	return false;
 }
 
-std::unique_ptr<engine::dialogue_box> engine::dialogue_sequence::_allocateDialogueBox(const std::size_t i) noexcept {
+std::unique_ptr<engine::dialogue_box>
+	engine::dialogue_sequence::_allocateDialogueBox(const std::size_t i) noexcept {
 	if (i >= _boxes.size()) return nullptr;
 	std::unique_ptr<engine::dialogue_box> ret;
 	try {
 		ret = std::make_unique<engine::dialogue_box>();
 	} catch (std::bad_alloc& e) {
-		_logger.error("Fatal allocation error of dialogue box {}: {}", i, e.what());
+		_logger.error("Fatal allocation error of dialogue box {}: {}",
+			i, e.what());
 		return nullptr;
 	}
 	engine::dialogue_sequence::dialogue_box_data& data = _boxes[i];
@@ -92,7 +102,8 @@ std::unique_ptr<engine::dialogue_box> engine::dialogue_sequence::_allocateDialog
 	ret->setSprite(nullptr, data.spriteID);
 	ret->setTransitionLength(data.transLength);
 	ret->setTypingDelay(data.typingDelay);
-	ret->setSounds(nullptr, data.typingSoundKey, data.moveSelSoundKey, data.selectSoundKey);
+	ret->setSounds(nullptr, data.typingSoundKey, data.moveSelSoundKey,
+		data.selectSoundKey);
 	ret->setThemeColour(data.themeColour);
 	ret->setNameText(data.nameText);
 	ret->setFont(nullptr);
@@ -100,7 +111,8 @@ std::unique_ptr<engine::dialogue_box> engine::dialogue_sequence::_allocateDialog
 	return ret;
 }
 
-void engine::dialogue_sequence::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+void engine::dialogue_sequence::draw(sf::RenderTarget& target,
+	sf::RenderStates states) const {
 	if (_currentBox) target.draw(*_currentBox, states);
 }
 
@@ -111,7 +123,8 @@ bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 	for (auto& i : jj.items()) {
 		// special keys
 		if (i.key() == "right") {
-			j.apply(_moveRightControlKey, { "right" }, &_moveRightControlKey, true);
+			j.apply(_moveRightControlKey, { "right" }, &_moveRightControlKey,
+				true);
 		} else if (i.key() == "left") {
 			j.apply(_moveLeftControlKey, { "left" }, &_moveLeftControlKey, true);
 		} else if (i.key() == "select") {
@@ -119,32 +132,46 @@ bool engine::dialogue_sequence::_load(safe::json& j) noexcept {
 		} else if (i.key() == "skip") {
 			j.apply(_skipControlKey, { "skip" }, &_skipControlKey, true);
 		} else { // other keys store dialogue boxes
-			_boxes.push_back(dialogue_box_data()); // in VS this line appears as an error sometimes but it compiles fine...
+			_boxes.push_back(dialogue_box_data());
 			std::size_t k = _boxes.size() - 1;
 
 			unsigned short pos = 0;
 			j.apply(pos, { i.key(), "position" }, &pos, true);
-			if (pos >= (unsigned short)engine::dialogue_box_position::NumberOfPositions) {
+			if (pos >=
+				(unsigned short)engine::dialogue_box_position::NumberOfPositions) {
 				pos = 0;
 			}
 			_boxes[k].position = static_cast<engine::dialogue_box_position>(pos);
 
 			j.apply(_boxes[k].size, { i.key(), "size" }, &_boxes[k].size, true);
-			j.apply(_boxes[k].flipped, { i.key(), "flipped" }, &_boxes[k].flipped, true);
-			j.apply(_boxes[k].mainText, { i.key(), "text" }, &_boxes[k].mainText, true);
-			j.apply(_boxes[k].skipTransIn, { i.key(), "skiptransin" }, &_boxes[k].skipTransIn, true);
-			j.apply(_boxes[k].skipTransOut, { i.key(), "skiptransout" }, &_boxes[k].skipTransOut, true);
-			// in order to achieve spritesheet key, we're going to need some kind of request system whereby a class requests a pointer to a spritesheet from awe::game...
-			// look at the Mediator design pattern
-			j.apply(_boxes[k].spriteID, { i.key(), "sprite" }, &_boxes[k].spriteID, true);
-			j.apply(_boxes[k].transLength, { i.key(), "translength" }, &_boxes[k].transLength, true);
-			j.apply(_boxes[k].typingDelay, { i.key(), "typingdelay" }, &_boxes[k].typingDelay, true);
+			j.apply(_boxes[k].flipped, { i.key(), "flipped" }, &_boxes[k].flipped,
+				true);
+			j.apply(_boxes[k].mainText, { i.key(), "text" }, &_boxes[k].mainText,
+				true);
+			j.apply(_boxes[k].skipTransIn, { i.key(), "skiptransin" },
+				&_boxes[k].skipTransIn, true);
+			j.apply(_boxes[k].skipTransOut, { i.key(), "skiptransout" },
+				&_boxes[k].skipTransOut, true);
+			// in order to achieve spritesheet key, we're going to need some kind
+			// of request system whereby a class requests a pointer to a
+			// spritesheet from awe::game... look at the Mediator design pattern
+			j.apply(_boxes[k].spriteID, { i.key(), "sprite" }, &_boxes[k].spriteID,
+				true);
+			j.apply(_boxes[k].transLength, { i.key(), "translength" },
+				&_boxes[k].transLength, true);
+			j.apply(_boxes[k].typingDelay, { i.key(), "typingdelay" },
+				&_boxes[k].typingDelay, true);
 			// see above, also applies to audio key
-			j.apply(_boxes[k].typingSoundKey, { i.key(), "typingsound" }, &_boxes[k].typingSoundKey, true);
-			j.apply(_boxes[k].moveSelSoundKey, { i.key(), "moveselsound" }, &_boxes[k].moveSelSoundKey, true);
-			j.apply(_boxes[k].selectSoundKey, { i.key(), "selectsound" }, &_boxes[k].selectSoundKey, true);
-			j.applyColour(_boxes[k].themeColour, { i.key(), "theme" }, &_boxes[k].themeColour, true);
-			j.apply(_boxes[k].nameText, { i.key(), "name" }, &_boxes[k].nameText, true);
+			j.apply(_boxes[k].typingSoundKey, { i.key(), "typingsound" },
+				&_boxes[k].typingSoundKey, true);
+			j.apply(_boxes[k].moveSelSoundKey, { i.key(), "moveselsound" },
+				&_boxes[k].moveSelSoundKey, true);
+			j.apply(_boxes[k].selectSoundKey, { i.key(), "selectsound" },
+				&_boxes[k].selectSoundKey, true);
+			j.applyColour(_boxes[k].themeColour, { i.key(), "theme" },
+				&_boxes[k].themeColour, true);
+			j.apply(_boxes[k].nameText, { i.key(), "name" }, &_boxes[k].nameText,
+				true);
 			// see above, also applies to font key
 			j.applyArray(_boxes[k].options, { i.key(), "options" });
 			j.resetState();
@@ -166,7 +193,9 @@ engine::dialogue_box::dialogue_box() noexcept {
 	setOutlineThickness(5.0f);
 }
 
-void engine::dialogue_box::setSounds(std::shared_ptr<sfx::audio> audioLibrary, const std::string& typing, const std::string& moveSelection, const std::string& select) noexcept {
+void engine::dialogue_box::setSounds(std::shared_ptr<sfx::audio> audioLibrary,
+	const std::string& typing, const std::string& moveSelection,
+	const std::string& select) noexcept {
 	_audioLibrary = audioLibrary;
 	_typingKey = typing;
 	_moveSelectionKey = moveSelection;
@@ -193,7 +222,8 @@ void engine::dialogue_box::setTypingDelay(const float seconds) noexcept {
 	_typingDelay = seconds;
 }
 
-void engine::dialogue_box::setPosition(const engine::dialogue_box_position position) noexcept {
+void engine::dialogue_box::setPosition(const engine::dialogue_box_position
+	position) noexcept {
 	_position = position;
 	if (_position == engine::dialogue_box_position::NumberOfPositions) {
 		_position = engine::dialogue_box_position::Bottom;
@@ -234,9 +264,12 @@ void engine::dialogue_box::setFont(std::shared_ptr<sf::Font> font) noexcept {
 	}
 }
 
-void engine::dialogue_box::setOptions(const std::string& option1, const std::string& option2, const std::string& option3) noexcept {
-	if (_option1Text.getString() == "" && (option1 != "" || option2 != "" || option3 != "")) {
-		// select first option if there were no options before and now we are adding options
+void engine::dialogue_box::setOptions(const std::string& option1,
+	const std::string& option2, const std::string& option3) noexcept {
+	if (_option1Text.getString() == "" &&
+		(option1 != "" || option2 != "" || option3 != "")) {
+		// select first option if there were no options before and now we are
+		// adding options
 		_currentOption = 1;
 	}
 	_option1Text.setString(option1);
@@ -264,7 +297,9 @@ void engine::dialogue_box::setSizeRatio(const float ratio) noexcept {
 	_sizeRatio = ratio;
 }
 
-void engine::dialogue_box::setSprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite) noexcept {
+void engine::dialogue_box::setSprite(
+	std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite)
+	noexcept {
 	_sheet = sheet;
 	_spriteID = sprite;
 	_spriteInfoChanged = true;
@@ -348,8 +383,8 @@ bool engine::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 	_updateMainText();
 	_updateCharacterSize(target);
 	_resizeIndicator(_option1Text.getCharacterSize() * 0.5f);
-	// practically all measurements are based on the main graphic of the dialogue box,
-	// so resize and reposition that next
+	// practically all measurements are based on the main graphic of the dialogue
+	// box, so resize and reposition that next
 	_updateBackground(target);
 	_updateNameBackground();
 	_updateCharacterSprite(target);
@@ -362,55 +397,98 @@ bool engine::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
 
 void engine::dialogue_box::_repositionIndicator() noexcept {
 	if (_currentOption == 1) {
-		_indicator.setPosition(_option1Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option1Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
+		_indicator.setPosition(_option1Text.getPosition() + sf::Vector2f(
+			-_indicatorSize * 1.5f,
+			_option1Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f
+		));
 	} else if (_currentOption == 2) {
-		_indicator.setPosition(_option2Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option2Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
+		_indicator.setPosition(_option2Text.getPosition() + sf::Vector2f(
+			-_indicatorSize * 1.5f,
+			_option2Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f
+		));
 	} else if (_currentOption == 3) {
-		_indicator.setPosition(_option3Text.getPosition() + sf::Vector2f(-_indicatorSize * 1.5f, _option3Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f));
+		_indicator.setPosition(_option3Text.getPosition() + sf::Vector2f(
+			-_indicatorSize * 1.5f,
+			_option3Text.getLocalBounds().height / 2.0f - _indicatorSize / 2.0f
+		));
 	}
 }
 
 void engine::dialogue_box::_updateTextPositions() noexcept {
-	_nameText.setPosition(_nameBackground.getPosition() + sf::Vector2f(_smallPadding, _smallPadding));
+	_nameText.setPosition(_nameBackground.getPosition() + sf::Vector2f(
+		_smallPadding, _smallPadding
+	));
 	
 	if (_flipped) {
-		_mainText.setPosition(_background.getPosition() + sf::Vector2f(_largePadding, _smallPadding));
+		_mainText.setPosition(_background.getPosition() + sf::Vector2f(
+			_largePadding, _smallPadding
+		));
 	} else {
-		_mainText.setPosition(_background.getPosition() + sf::Vector2f(_characterSprite.getPosition().x + _characterSprite.getSize().x + _largePadding, _smallPadding));
+		_mainText.setPosition(_background.getPosition() + sf::Vector2f(
+			_characterSprite.getPosition().x +
+			_characterSprite.getSize().x +
+			_largePadding,
+			_smallPadding
+		));
 	}
 
-	// I probably could've avoided having to take into account the position in some cases
-	// if I instead changed the origin and not the position of objects
-	_option1Text.setPosition(_mainText.getPosition().x + _indicatorSize * 1.5f, _background.getPosition().y + _background.getSize().y - _option1Text.getLocalBounds().height - _smallPadding);
+	// I probably could've avoided having to take into account the position in some
+	// cases if I instead changed the origin and not the position of objects
+	_option1Text.setPosition(
+		_mainText.getPosition().x + _indicatorSize * 1.5f,
+		_background.getPosition().y + _background.getSize().y -
+		_option1Text.getLocalBounds().height - _smallPadding
+	);
 
-	_option2Text.setPosition(_option1Text.getPosition().x + _option1Text.getLocalBounds().width + _indicatorSize * 2.5f, _option1Text.getPosition().y);
+	_option2Text.setPosition(
+		_option1Text.getPosition().x +
+		_option1Text.getLocalBounds().width +
+		_indicatorSize * 2.5f,
+		_option1Text.getPosition().y
+	);
 
-	_option3Text.setPosition(_option2Text.getPosition().x + _option2Text.getLocalBounds().width + _indicatorSize * 2.5f, _option2Text.getPosition().y);
+	_option3Text.setPosition(
+		_option2Text.getPosition().x +
+		_option2Text.getLocalBounds().width +
+		_indicatorSize * 2.5f,
+		_option2Text.getPosition().y
+	);
 }
 
-void engine::dialogue_box::_updateCharacterSprite(const sf::RenderTarget& target) noexcept {
+void engine::dialogue_box::_updateCharacterSprite(const sf::RenderTarget& target)
+	noexcept {
 	if (_state == engine::dialogue_box_state::Typing || _spriteInfoChanged) {
 		if (_spriteInfoChanged) {
 			_characterSprite.setSpritesheet(_sheet);
 			_characterSprite.setSprite(_spriteID);
 			_spriteInfoChanged = false;
-			// call animate once immediately so that even if the sprite isn't animated,
-			// it can still be setup
+			// call animate once immediately so that even if the sprite isn't
+			// animated, it can still be setup
 		}
 		_characterSprite.animate(target);
 	}
 
-	float y = _background.getPosition().y + (_background.getSize().y / 2.0f) - (_characterSprite.getSize().y / 2.0f);
+	float y = _background.getPosition().y + (_background.getSize().y / 2.0f) -
+		(_characterSprite.getSize().y / 2.0f);
 	if (_flipped) {
-		_characterSprite.setPosition(sf::Vector2f(_background.getPosition().x + _background.getSize().x - _characterSprite.getSize().x - _largePadding, y));
+		_characterSprite.setPosition(sf::Vector2f(
+			_background.getPosition().x + _background.getSize().x -
+			_characterSprite.getSize().x - _largePadding,
+			y
+		));
 	} else {
-		_characterSprite.setPosition(sf::Vector2f(_background.getPosition().x + _largePadding, y));
+		_characterSprite.setPosition(sf::Vector2f(
+			_background.getPosition().x + _largePadding, y
+		));
 	}
 }
 
 void engine::dialogue_box::_updateNameBackground() noexcept {
 	if (thereIsAName()) {
-		_nameBackground.setSize(sf::Vector2f(_nameText.getLocalBounds().width + _smallPadding * 2.0f, _nameText.getLocalBounds().height + _smallPadding * 2.0f));
+		_nameBackground.setSize(sf::Vector2f(
+			_nameText.getLocalBounds().width + _smallPadding * 2.0f,
+			_nameText.getLocalBounds().height + _smallPadding * 2.0f
+		));
 	} else {
 		_nameBackground.setSize(sf::Vector2f(0.0f, 0.0f));
 	}
@@ -418,29 +496,49 @@ void engine::dialogue_box::_updateNameBackground() noexcept {
 	sf::Vector2f origin = _background.getPosition();
 	origin.x += _nameBackground.getOutlineThickness();
 	origin.y -= _nameBackground.getOutlineThickness();
-	if (_flipped) origin.x += _background.getSize().x - _nameBackground.getSize().x - _nameBackground.getOutlineThickness() * 2.0f;
+	if (_flipped) {
+		origin.x += _background.getSize().x -
+			_nameBackground.getSize().x -
+			_nameBackground.getOutlineThickness() * 2.0f;
+	}
 	if (_position == engine::dialogue_box_position::Top) {
-		origin.y += _background.getSize().y + _nameBackground.getOutlineThickness() * 2.0f;
+		origin.y += _background.getSize().y +
+			_nameBackground.getOutlineThickness() * 2.0f;
 	} else {
 		origin.y -= _nameBackground.getSize().y;
 	}
 	_nameBackground.setPosition(origin);
 }
 
-void engine::dialogue_box::_updateBackground(const sf::RenderTarget& target) noexcept {
-	_background.setSize(sf::Vector2f((float)target.getSize().x, (float)target.getSize().y * _sizeRatio));
+void engine::dialogue_box::_updateBackground(const sf::RenderTarget& target)
+	noexcept {
+	_background.setSize(sf::Vector2f(
+		(float)target.getSize().x,
+		(float)target.getSize().y * _sizeRatio
+	));
 	if (_position == engine::dialogue_box_position::Top) {
-		_background.setPosition(0.0f, (0.0f - _background.getSize().y - _background.getOutlineThickness()) + (_background.getSize().y + _background.getOutlineThickness() * 2.0f) * _positionRatio);
+		_background.setPosition(0.0f,
+			(0.0f - _background.getSize().y - _background.getOutlineThickness())
+			+ (_background.getSize().y + _background.getOutlineThickness() * 2.0f)
+			* _positionRatio
+		);
 	} else if (_position == engine::dialogue_box_position::Bottom) {
-		_background.setPosition(0.0f, ((float)target.getSize().y + _background.getOutlineThickness()) - ((_background.getSize().y + _background.getOutlineThickness() * 2.0f) * _positionRatio));
+		_background.setPosition(0.0f,
+			((float)target.getSize().y + _background.getOutlineThickness()) -
+			((_background.getSize().y + _background.getOutlineThickness() * 2.0f) *
+				_positionRatio)
+		);
 	} else if (_position == engine::dialogue_box_position::Middle) {
-		_background.setPosition(0.0f, ((float)target.getSize().y / 2.0f) - ((_background.getSize().y + _background.getOutlineThickness() * 2.0f) / 2.0f) * _positionRatio);
+		_background.setPosition(0.0f, ((float)target.getSize().y / 2.0f) -
+			((_background.getSize().y + _background.getOutlineThickness() * 2.0f) /
+				2.0f) * _positionRatio);
 	} else {
 		_background.setPosition(0.0f, 0.0f);
 	}
 }
 
-float engine::dialogue_box::_calculatePositionRatioOffset(const float secondsElapsed) const noexcept {
+float engine::dialogue_box::_calculatePositionRatioOffset(const float
+	secondsElapsed) const noexcept {
 	return secondsElapsed / _transitionLength;
 }
 
@@ -476,7 +574,9 @@ void engine::dialogue_box::_fromTypingToStoppedTyping() noexcept {
 	if (_typingTimer.getElapsedTime().asSeconds() >= _typingDelay) {
 		_playSound(_typingKey);
 		if (_characterPosition < _fullText.size()) {
-			_characterPosition += (std::size_t)(_typingTimer.getElapsedTime().asSeconds() / _typingDelay);
+			_characterPosition +=
+				(std::size_t)(_typingTimer.getElapsedTime().asSeconds() /
+					_typingDelay);
 		}
 		_typingTimer.restart();
 	}
@@ -513,12 +613,13 @@ void engine::dialogue_box::_stateMachine() noexcept {
 	if (_state == engine::dialogue_box_state::Closed) {
 		_fromClosedToTransitioning();
 	} else if (_state == engine::dialogue_box_state::TransitioningIn) {
-		// must be else-if so that Closed doesn't immediately switch to TransitioningIn.
-		// this allows animate() to set the initial size of the dialogue box so that
-		// _calculatePositionRatioOffset() doesn't consider the dialogue box size to be 0,
-		// thus skipping this transition when first drawing
-		// this also fixes any potential delta-related problems:
-		// i.e. dialogue_box created, then animated seconds later resulting in a "skipped" first transition in
+		// must be else-if so that Closed doesn't immediately switch to
+		// TransitioningIn. This allows animate() to set the initial size of the
+		// dialogue box so that _calculatePositionRatioOffset() doesn't consider
+		// the dialogue box size to be 0, thus skipping this transition when first
+		// drawing this also fixes any potential delta-related problems:
+		// i.e. dialogue_box created, then animated seconds later resulting in a
+		// "skipped" first transition in
 		_fromTransitioningToTyping(delta);
 	}
 	if (_state == engine::dialogue_box_state::Typing) {
@@ -529,21 +630,26 @@ void engine::dialogue_box::_stateMachine() noexcept {
 		_state = engine::dialogue_box_state::Option1;
 		_skipCurrentState = false;
 	}
-	if (_state == engine::dialogue_box_state::Option1 || _state == engine::dialogue_box_state::Option2 || _state == engine::dialogue_box_state::Option3) {
+	if (_state == engine::dialogue_box_state::Option1 ||
+		_state == engine::dialogue_box_state::Option2 ||
+		_state == engine::dialogue_box_state::Option3) {
 		_fromOptionToTransitioning();
 	}
 	if (_state == engine::dialogue_box_state::TransitioningOut) {
 		_fromTransitioningToClosed(delta);
 	}
 	// this ensures changes in mainText apply to a pre-existing dialogue box
-	if (_state == engine::dialogue_box_state::StoppedTyping || _state == engine::dialogue_box_state::Option1 ||
-		_state == engine::dialogue_box_state::Option2 || _state == engine::dialogue_box_state::Option3 ||
+	if (_state == engine::dialogue_box_state::StoppedTyping ||
+		_state == engine::dialogue_box_state::Option1 ||
+		_state == engine::dialogue_box_state::Option2 ||
+		_state == engine::dialogue_box_state::Option3 ||
 		_state == engine::dialogue_box_state::TransitioningOut) {
 		_characterPosition = _fullText.size();
 	}
 }
 
-void engine::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+void engine::dialogue_box::draw(sf::RenderTarget& target, sf::RenderStates states)
+	const {
 	target.draw(_portion1, states);
 	if (_position == engine::dialogue_box_position::Middle) {
 		target.draw(_portion2, states);
@@ -554,7 +660,8 @@ void engine::dialogue_box::_updateMainText() noexcept {
 	_mainText.setString(_fullText.substr(0, _characterPosition));
 }
 
-void engine::dialogue_box::_updateCharacterSize(const sf::RenderTarget& target) noexcept {
+void engine::dialogue_box::_updateCharacterSize(const sf::RenderTarget& target)
+	noexcept {
 	_mainText.setCharacterSize((unsigned int)target.getSize().y / 27);
 	_nameText.setCharacterSize(_mainText.getCharacterSize());
 	_option1Text.setCharacterSize(_mainText.getCharacterSize());
@@ -570,14 +677,31 @@ void engine::dialogue_box::_drawToCanvas(const sf::RenderTarget& target) noexcep
 	_canvas.draw(_background);
 	if (thereIsAName()) {
 		_canvas.draw(_nameBackground);
-		_canvas.draw(_nameText, sf::RenderStates().transform.translate(sf::Vector2f(-_nameText.getLocalBounds().left, -_nameText.getLocalBounds().top)));
+		_canvas.draw(_nameText, sf::RenderStates().transform.translate(
+			sf::Vector2f(-_nameText.getLocalBounds().left,
+				-_nameText.getLocalBounds().top)));
 	}
 	_canvas.draw(_characterSprite);
-	_canvas.draw(_mainText, sf::RenderStates().transform.translate(sf::Vector2f(-_mainText.getLocalBounds().left, -_mainText.getLocalBounds().top)));
-	if (optionCount() > 0 && _state == engine::dialogue_box_state::StoppedTyping || _state == engine::dialogue_box_state::TransitioningOut) {
-		_canvas.draw(_option1Text, sf::RenderStates().transform.translate(sf::Vector2f(-_option1Text.getLocalBounds().left, -_option1Text.getLocalBounds().top)));
-		if (_option2Text.getString() != "") _canvas.draw(_option2Text, sf::RenderStates().transform.translate(sf::Vector2f(-_option2Text.getLocalBounds().left, -_option2Text.getLocalBounds().top)));
-		if (_option3Text.getString() != "") _canvas.draw(_option3Text, sf::RenderStates().transform.translate(sf::Vector2f(-_option3Text.getLocalBounds().left, -_option3Text.getLocalBounds().top)));
+	_canvas.draw(_mainText, sf::RenderStates().transform.translate(sf::Vector2f(
+		-_mainText.getLocalBounds().left,
+		-_mainText.getLocalBounds().top
+	)));
+	if (optionCount() > 0 && _state == engine::dialogue_box_state::StoppedTyping ||
+		_state == engine::dialogue_box_state::TransitioningOut) {
+		_canvas.draw(_option1Text, sf::RenderStates().transform.translate(
+			sf::Vector2f(-_option1Text.getLocalBounds().left,
+				-_option1Text.getLocalBounds().top)
+		));
+		if (_option2Text.getString() != "") _canvas.draw(_option2Text,
+			sf::RenderStates().transform.translate(sf::Vector2f(
+				-_option2Text.getLocalBounds().left,
+				-_option2Text.getLocalBounds().top))
+		);
+		if (_option3Text.getString() != "") _canvas.draw(_option3Text,
+			sf::RenderStates().transform.translate(sf::Vector2f(
+				-_option3Text.getLocalBounds().left,
+				-_option3Text.getLocalBounds().top))
+		);
 		_canvas.draw(_indicator);
 	}
 	_canvas.display();
@@ -590,21 +714,35 @@ void engine::dialogue_box::_prepareHalfSprites() noexcept {
 	_portion1.setPosition(0.0f, 0.0f);
 	if (_position == engine::dialogue_box_position::Middle) {
 		_portion2.setTexture(_canvas.getTexture());
-		int heightOfHalves = (int)(_background.getSize().y / 2.0f * _positionRatio);
+		int heightOfHalves = (int)(_background.getSize().y / 2.0f *
+			_positionRatio);
 		_portion1.setTextureRect(sf::IntRect(
 			(int)_background.getPosition().x,
-			(int)(_background.getPosition().y - _nameBackground.getSize().y - _nameBackground.getOutlineThickness() - _background.getOutlineThickness()),
+			(int)(_background.getPosition().y - _nameBackground.getSize().y -
+				_nameBackground.getOutlineThickness() -
+				_background.getOutlineThickness()),
 			(int)_background.getSize().x,
-			heightOfHalves + (int)(_nameBackground.getSize().y + _nameBackground.getOutlineThickness() + _background.getOutlineThickness())
+			heightOfHalves + (int)(_nameBackground.getSize().y +
+				_nameBackground.getOutlineThickness() +
+				_background.getOutlineThickness())
 		));
 		_portion2.setTextureRect(sf::IntRect(
 			(int)_background.getPosition().x,
-			(int)_background.getPosition().y + (int)_background.getSize().y - heightOfHalves,
+			(int)_background.getPosition().y + (int)_background.getSize().y -
+				heightOfHalves,
 			(int)_background.getSize().x,
 			heightOfHalves + (int)_background.getOutlineThickness()
 		));
-		_portion1.setPosition(_background.getPosition().x, _background.getPosition().y - _nameBackground.getSize().y - _background.getOutlineThickness() - _nameBackground.getOutlineThickness());
-		_portion2.setPosition(_background.getPosition().x, _portion1.getPosition().y + (float)heightOfHalves + _nameBackground.getSize().y + _background.getOutlineThickness() + _nameBackground.getOutlineThickness());
+		_portion1.setPosition(_background.getPosition().x,
+			_background.getPosition().y - _nameBackground.getSize().y -
+			_background.getOutlineThickness() -
+			_nameBackground.getOutlineThickness()
+		);
+		_portion2.setPosition(_background.getPosition().x,
+			_portion1.getPosition().y + (float)heightOfHalves +
+			_nameBackground.getSize().y + _background.getOutlineThickness() +
+			_nameBackground.getOutlineThickness()
+		);
 	}
 }
 

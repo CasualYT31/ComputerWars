@@ -21,9 +21,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**@file bank.h
- * This header file declares classes used to store static game information specific to Computer Wars.
- * Static game information describes information that doesn't usually change during execution.
- * These include, but are not limited to:
+ * This header file declares classes used to store static game information specific
+ * to Computer Wars.
+ * Static game information describes information that doesn't usually change during
+ * execution. These include, but are not limited to:
  * <ul><li>Types of weather.</li>
  * <li>The countries available.</li>
  * <li>Movement types.</li>
@@ -43,12 +44,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace awe {
 	/**
 	 * Template class used to store lists of game properties.
-	 * Static game informaion is stored in objects called \b banks, which are essentially glorified vectors.
-	 * Banks utilise \c safe::json_script to load member information during runtime.
-	 * Since they are intended to be "static," they cannot be saved (doing so wouldn't be very useful since they cannot be changed).
-	 * Despite this, banks can load any number of sets of static data during runtime, each load overwritting what was previously stored.\n
-	 * The classes declared in this header are intended to be used with this template class.
-	 * For example, \c awe::bank<awe::country> defines a bank of country properties.
+	 * Static game informaion is stored in objects called \b banks, which are
+	 * essentially glorified vectors. Banks utilise \c safe::json_script to load
+	 * member information during runtime. Since they are intended to be "static,"
+	 * they cannot be saved (doing so wouldn't be very useful since they cannot be
+	 * changed). However, banks can load any number of sets of static data during
+	 * runtime, each load overwritting what was previously stored.\n
+	 * The classes declared in this header are intended to be used with this
+	 * template class. For example, \c awe::bank<awe::country> defines a bank of
+	 * country properties. The only requirements that a class \c T needs to fulfil
+	 * are as follows:
+	 * <ol><li>There should be a constructor which accepts a <tt>const awe::BankID
+	 *         </tt> and a <tt>safe::json&</tt>. These parameters are intended to
+	 *         store the ID of the bank entry, and allow the constructor to read
+	 *         the JSON script object pertaining to the bank entry in order to
+	 *         initialise the object, respectively. You can automatically handle ID
+	 *         storage by inheriting from \c awe::bank_id.</li>
+	 *     <li>All instantiations of your class stored in the bank will be const.
+	 *         Therefore use the \c const modifier liberally with your class to
+	 *         allow it to be accessed appropriately via the bank. You should not
+	 *         design your class to be mutable.</li></ol>
 	 * @tparam T The type of static game property to store within this bank.
 	 */
 	template<typename T>
@@ -56,7 +71,8 @@ namespace awe {
 	public:
 		/**
 		 * Typedef used to identify members of the bank.
-		 * This acts as a way to ensure that IDs intended for different banks cannot be used with this one.
+		 * This acts as a way to ensure that IDs intended for different banks
+		 * cannot be used with this one.
 		 */
 		typedef awe::BankID index;
 
@@ -69,30 +85,37 @@ namespace awe {
 
 		/**
 		 * Calculates the size of the bank.
-		 * @return The number of members or elements of the internal vector \c _bank.
+		 * @return The number of members or elements of the internal vector \c
+		 *         _bank.
 		 */
 		std::size_t size() const noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.
-		 * All classes used with this template class should have a common JSON script format.\n
-		 * In the root object, key-value pairs list each member of the bank and their properties.
-		 * The key essentially represents the ID of the member, since the JSON backend stores key-value pairs in ASCII/UTF-8 order and not in the order defined within the script file.
-		 * This means keys in the root object should be a four or three digit code representing the ID. For example, the first member should have a key of \c "000" or \c "0000".
-		 * The next member should have a key of \c "001" or \c "0001", etc. The eleventh member would have a key of \c "010" or \c "0010". Keeping IDs in keys the same length gives a lot
-		 * of room for the programmer/modder to add new properties without worrying about changing hundreds of keys later to preserve alphabetical order. Keep in mind that the key doesn't
-		 * \b actually define the ID: it simply defines the order which values are read.\n
-		 * It is then up to the classes used with this template class to parse the object value of these keys. The constructor of the class must accept a \c safe::json& parameter only,
-		 * which it then uses to populate its members.
-		 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.
-		 * @return \c TRUE if all GUIs could be loaded, \c FALSE if at least one couldn't (\c _loadGUI() returned \c FALSE at least once).
+		 * All classes substituted for \c T should have a common JSON script
+		 * format. In the root object, key-value pairs list each member/entry of
+		 * the bank and their properties.\n
+		 * The key is essentially unused: it can be used to store an unofficial
+		 * name of the entry, or it could store a version of the entry's ID, but
+		 * since this class now uses \c nlohmann::orderer_json, the order of
+		 * key-value pairs as written in the JSON script will be retained, and as
+		 * such, each key-value pair will be added in the order they are written in
+		 * the script. E.g. the first object will have ID \c 0, the second object
+		 * will have ID \c 1, and so on.\n
+		 * It is then up to the classes used with this template class to parse the
+		 * object value of these keys in its constructor.
+		 * @param  j The \c safe::json object representing the contents of the
+		 *           loaded script which this method reads.
+		 * @return Always returns \c TRUE.
+		 * @sa     awe::bank<T>
 		 */
 		virtual bool _load(safe::json& j) noexcept;
 
 		/**
 		 * The JSON save method for this class.
 		 * This class does not have the ability to be saved.
-		 * @param  j The \c nlohmann::ordered_json object representing the JSON script which this method writes to.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON
+		 *           script which this method writes to.
 		 * @return Always returns \c FALSE.
 		 */
 		virtual bool _save(nlohmann::ordered_json& j) noexcept;
@@ -105,7 +128,8 @@ namespace awe {
 
 	/**
 	 * Base class for all game property classes.
-	 * Inheritance is to be used to implement these properties in your game property classes.
+	 * Inheritance is to be used to implement these properties in your game
+	 * property classes.
 	 */
 	class bank_id {
 	public:
@@ -115,16 +139,17 @@ namespace awe {
 		virtual ~bank_id() noexcept;
 
 		/**
-		 * Retrieves the ID of this bank entry as defined during allocation of the entry.
+		 * Retrieves the ID of this bank entry as defined during allocation of the
+		 * entry.
 		 * @return The 0-based ID.
 		 */
 		awe::BankID getID() const noexcept;
 	protected:
 		/**
 		 * Constructor which assigns the ID to the bank entry.
-		 * For classes that inherit from this one, this protected constructor is to be called,
-		 * either in the subclass' constructor definition's initialiser list,
-		 * or in the code block of the subclass constructor.
+		 * For classes that inherit from this one, this protected constructor is to
+		 * be called, either in the subclass' constructor definition's initialiser
+		 * list, or in the code block of the subclass constructor.
 		 * @param id The ID of this bank entry.
 		 */
 		bank_id(const awe::BankID id) noexcept;
@@ -136,8 +161,10 @@ namespace awe {
 	};
 
 	/**
-	 * Base class containing properties common to a majority of game property classes.
-	 * Inheritance is to be used to implement these properties in your game property classes.
+	 * Base class containing properties common to a majority of game property
+	 * classes.
+	 * Inheritance is to be used to implement these properties in your game
+	 * property classes.
 	 */
 	class common_properties : public awe::bank_id {
 	public:
@@ -148,13 +175,15 @@ namespace awe {
 
 		/**
 		 * Retrieves the long name property.
-		 * @return The long name property, which should be a language dictionary key.
+		 * @return The long name property, which should be a language dictionary
+		 *         key.
 		 */
 		const std::string& getName() const noexcept;
 
 		/**
 		 * Retrieves the short name property.
-		 * @return The short name property, which should be a language dictionary key.
+		 * @return The short name property, which should be a language dictionary
+		 *         key.
 		 */
 		const std::string& getShortName() const noexcept;
 
@@ -166,29 +195,31 @@ namespace awe {
 
 		/**
 		 * Retrieves the description property.
-		 * @return The description property, which should be a language dictionary key.
+		 * @return The description property, which should be a language dictionary
+		 *         key.
 		 */
 		const std::string& getDescription() const noexcept;
 	protected:
 		/**
-		 * Constructor which reads a given JSON script object and fills in the properties accordingly.
-		 * For classes that inherit from this one, this protected constructor is to be called,
-		 * either in the subclass' constructor definition's initialiser list, or in the code block of the subclass constructor.
-		 * The reference received in the subclass' constructor should be passed on directly without changes.\n
+		 * Constructor which reads a given JSON script object and fills in the
+		 * properties accordingly.
+		 * For classes that inherit from this one, this protected constructor is to
+		 * be called, either in the subclass' constructor definition's initialiser
+		 * list, or in the code block of the subclass constructor. The reference to
+		 * the \c safe::json object received in the subclass' constructor should be
+		 * passed on directly without changes.\n
+		 * 
 		 * The following keys correspond to the following properties:
 		 * <ul><li>\c "longname" = \c _name</li>
-		 * <li>\c "shortname" = \c _shortName</li>
-		 * <li>\c "icon" = \c _iconKey</li>
-		 * <li>\c "description" = \c _description</li></ul>
+		 *     <li>\c "shortname" = \c _shortName</li>
+		 *     <li>\c "icon" = \c _iconKey</li>
+		 *     <li>\c "description" = \c _description</li></ul>
 		 * @param id The ID of this bank entry.
-		 * @param j  The object value containing the name, icon, and description properties.
+		 * @param j  The object value containing the name, icon, and description
+		 *           properties, as well as any other properties subclasses need to
+		 *           store (which this class ignores).
 		 */
 		common_properties(const awe::BankID id, safe::json& j) noexcept;
-
-		/**
-		 * See \c awe::terrain::terrain(const awe::terrain*).
-		 */
-		common_properties(const awe::common_properties* old) noexcept;
 	private:
 		/**
 		 * The long name property.
@@ -212,16 +243,20 @@ namespace awe {
 	};
 
 	/**
-	 * A game property class which stores the information associated with a single country.
+	 * A game property class which stores the information associated with a single
+	 * country.
 	 * @sa \c awe::common_properties
 	 */
-	class country : public common_properties {
+	class country : public awe::common_properties {
 	public:
 		/**
 		 * Constructor which scans a JSON object for the colour property.
-		 * It also passes on the JSON object to the \c common_properties constructor.
-		 * In addition to the keys defined in the superclass, the following keys are required:
-		 * <ul><li>\c "colour" = \c _colour, <tt>([r,g,b,a])</tt></li></ul>
+		 * It also passes on the JSON object to the \c common_properties
+		 * constructor.\n
+		 * In addition to the keys defined in the superclass, the following keys
+		 * are required:
+		 * <ul><li>\c "colour" = \c _colour, in the format <tt>[r,g,b,a]</tt>
+		 *     </li></ul>
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the country's properties.
 		 */
@@ -248,7 +283,8 @@ namespace awe {
 		/**
 		 * Inverse comparison operator.
 		 * @param  rhs The \c country object to test against.
-		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if
+		 *         they are.
 		 */
 		bool operator!=(const awe::country& rhs) const noexcept;
 	private:
@@ -259,13 +295,15 @@ namespace awe {
 	};
 
 	/**
-	 * A game property class which stores the information associated with a single weather.
+	 * A game property class which stores the information associated with a single
+	 * weather.
 	 * @sa \c awe::common_properties
 	 */
-	class weather : public common_properties {
+	class weather : public awe::common_properties {
 	public:
 		/**
-		 * Constructor which passes on the JSON object to the \c common_properties constructor.
+		 * Constructor which passes on the JSON object to the \c common_properties
+		 * constructor.
 		 * No additional keys are required.
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the weather's properties.
@@ -287,20 +325,24 @@ namespace awe {
 		/**
 		 * Inverse comparison operator.
 		 * @param  rhs The \c weather object to test against.
-		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if
+		 *         they are.
 		 */
 		bool operator!=(const awe::weather& rhs) const noexcept;
 	};
 
 	/**
-	 * A game property class which stores the information associated with a single environment.
-	 * An environment defines the tileset to use for a map (for example, normal, desert, snowy, etc.).
+	 * A game property class which stores the information associated with a single
+	 * environment.
+	 * An environment defines the tileset to use for a map (for example, normal,
+	 * desert, snowy, etc.).
 	 * @sa \c awe::common_properties
 	 */
-	class environment : public common_properties {
+	class environment : public awe::common_properties {
 	public:
 		/**
-		 * Constructor which passes on the JSON object to the \c common_properties constructor.
+		 * Constructor which passes on the JSON object to the \c common_properties
+		 * constructor.
 		 * No additional keys are required.
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the environment's properties.
@@ -322,19 +364,22 @@ namespace awe {
 		/**
 		 * Inverse comparison operator.
 		 * @param  rhs The \c environment object to test against.
-		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if
+		 *         they are.
 		 */
 		bool operator!=(const awe::environment& rhs) const noexcept;
 	};
 
 	/**
-	 * A game property class which stores the information associated with a single movement type.
+	 * A game property class which stores the information associated with a single
+	 * movement type.
 	 * @sa \c awe::common_properties
 	 */
-	class movement_type : public common_properties {
+	class movement_type : public awe::common_properties {
 	public:
 		/**
-		 * Constructor which passes on the JSON object to the \c common_properties constructor.
+		 * Constructor which passes on the JSON object to the \c common_properties
+		 * constructor.
 		 * No additional keys are required.
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the movement type's properties.
@@ -356,31 +401,44 @@ namespace awe {
 		/**
 		 * Inverse comparison operator.
 		 * @param  rhs The \c environment object to test against.
-		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if
+		 *         they are.
 		 */
 		bool operator!=(const awe::movement_type& rhs) const noexcept;
 	};
 
 	/**
-	 * A game property class which stores the information associated with a single terrain type.
+	 * A game property class which stores the information associated with a single
+	 * terrain type.
 	 * @sa \c awe::common_properties
 	 */
-	class terrain : public common_properties {
+	class terrain : public awe::common_properties {
 	public:
 		/**
 		 * Constructor which scans a JSON object for the terrain type's properties.
-		 * It also passes on the JSON object to the \c common_properties constructor.
-		 * In addition to the keys defined in the superclass, the following keys are required:
-		 * <ul><li>\c "hp" = \c _maxHP, <tt>(unsigned 32-bit int - capped off at signed 32-bit int's maximum value)</tt></li>
-		 * <li>\c "defence" = \c _defenece, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "capturable" = \c _isCapturable, <tt>(bool)</tt></li>
-		 * <li>\c "movecosts" = \c _movecosts, <tt>([signed 32-bit int{, signed 32-bit int, etc.}])</tt></li>
-		 * <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li></ul>
-		 * The \c movecosts array stores a list of movement points associated with each movement type.
-		 * For example, the first value will store the number of movement points it takes for the first type of movement to traverse over it (in the default implementation, Infantry).\n
-		 * The \c pictures array stores a list of animated sprite IDs associated with each country.
-		 * For example, the first value will store the ID of the sprite shown when the first country owns it (in the default implementation, Neutral).
-		 * Not all countries have to be accounted for if the tile cannot be "owned," i.e. captured.
+		 * It also passes on the JSON object to the \c common_properties
+		 * constructor. In addition to the keys defined in the superclass, the
+		 * following keys are required:
+		 * 
+		 * <ul><li>\c "hp" = \c _maxHP, <tt>(unsigned 32-bit int - capped off at
+		 *         signed 32-bit int's maximum value)</tt></li>
+		 *     <li>\c "defence" = \c _defenece, <tt>(unsigned 32-bit int)</tt></li>
+		 *     <li>\c "capturable" = \c _isCapturable, <tt>(bool)</tt></li>
+		 *     <li>\c "movecosts" = \c _movecosts, <tt>([signed 32-bit int{,
+		 *         signed 32-bit int, etc.}])</tt></li>
+		 *     <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{,
+		 *         unsigned 32-bit int, etc.}])</tt></li></ul>
+		 * 
+		 * The \c movecosts array stores a list of movement points associated with
+		 * each movement type. For example, the first value will store the number
+		 * of movement points it takes for the first type of movement to traverse
+		 * over it (in the default implementation, Infantry).\n
+		 * 
+		 * The \c pictures array stores a list of animated sprite IDs associated
+		 * with each country. For example, the first value will store the ID of the
+		 * sprite shown when the first country owns it (in the default
+		 * implementation, Neutral). Not all countries have to be accounted for if
+		 * the tile cannot be "owned," i.e. captured.
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the terrain type's properties.
 		 */
@@ -388,7 +446,8 @@ namespace awe {
 
 		/**
 		 * Retrieves the maximum health property.
-		 * This can be the health points of a cannon, or the capture points of a property.
+		 * This can be the health points of a cannon, or the capture points of a
+		 * property.
 		 * @return The health points this terrain can have.
 		 */
 		unsigned int getMaxHP() const noexcept;
@@ -400,22 +459,26 @@ namespace awe {
 		unsigned int getDefence() const noexcept;
 
 		/**
-		 * Retrieves the movement point cost property associated with a given movement type.
+		 * Retrieves the movement point cost property associated with a given
+		 * movement type.
 		 * @param  movecostID The ID of the type of movement.
 		 * @return The movement point cost.
 		 */
-		int getMoveCost(const bank<movement_type>::index movecostID) const noexcept;
+		int getMoveCost(const bank<movement_type>::index movecostID) const
+			noexcept;
 
 		/**
 		 * Retrieves the sprite ID associated with a given country.
 		 * @param  countryID The ID of the country.
-		 * @return The sprite ID of the terrain picture, or \c UINT_MAX if the given country ID didn't identify a sprite ID.
+		 * @return The sprite ID of the terrain picture, or \c UINT_MAX if the
+		 *         given country ID didn't identify a sprite ID.
 		 */
-		unsigned int getPicture(const bank<country>::index countryID) const noexcept;
+		unsigned int getPicture(const bank<country>::index countryID) const
+			noexcept;
 
 		/**
-		 * Retrieves the capturable property.
-		 * @return The capturable property.
+		 * Determines if this property is capturable.
+		 * @return \c TRUE if capturable, \c FALSE if not.
 		 */
 		bool isCapturable() const noexcept;
 
@@ -426,7 +489,7 @@ namespace awe {
 		std::vector<int> copyMoveCosts() const noexcept;
 
 		/**
-		 * Copies the internal list of picture keys and returns it.
+		 * Copies the internal list of picture sprite IDs and returns it.
 		 * @return All the pictures assigned to this terrain.
 		 */
 		std::vector<unsigned int> copyPictures() const noexcept;
@@ -446,7 +509,8 @@ namespace awe {
 		/**
 		 * Inverse comparison operator.
 		 * @param  rhs The \c terrain object to test against.
-		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if
+		 *         they are.
 		 */
 		bool operator!=(const awe::terrain& rhs) const noexcept;
 	private:
@@ -477,10 +541,12 @@ namespace awe {
 	};
 
 	/**
-	 * A game property class which stores the information associated with a single type of tile.
-	 * Tiles and terrain types were separated in this way so that different visual representations
-	 * of the same terrain can be maintained.
-	 * For example, a road may be straight, a bend, a T-junction, or a crossroads.
+	 * A game property class which stores the information associated with a single
+	 * type of tile.
+	 * Tiles and terrain types were separated in this way so that different visual
+	 * representations of the same terrain can be maintained. For example, a road
+	 * may be straight, a bend, a T-junction, or a crossroads.
+	 * @sa awe::bank_id
 	 */
 	class tile_type : public awe::bank_id {
 	public:
@@ -488,40 +554,48 @@ namespace awe {
 		 * Constructor which reads the given JSON object for tile properties.
 		 * The following keys are required:
 		 * <ul><li>\c "type" = \c _terrainType, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "neutral" = \c _neutralTile, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "tiles" = \c _tiles, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li></ul>
-		 * The \c neutral key stores a sprite ID shown when the tile is not owned by any country. This should be given for
-		 * all tile types.\n
-		 * The \c tiles vector stores a list of animated sprite IDs associated with each country's version of the tile.
-		 * For example, the first value will store the ID of the sprite shown on the map when the first country owns it.
-		 * This vector does not have to be accounted for if the tile cannot be owned/captured. In which case, an empty
-		 * vector should be given in the script.
+		 *     <li>\c "neutral" = \c _neutralTile, <tt>(unsigned 32-bit int)</tt>
+		 *     </li>
+		 *     <li>\c "tiles" = \c _tiles, <tt>([unsigned 32-bit int{, unsigned
+		 *         32-bit int, etc.}])</tt></li></ul>
+		 * The \c neutral key stores a sprite ID shown when the tile is not owned
+		 * by any country. This should be given for all tile types.\n
+		 * The \c tiles vector stores a list of animated sprite IDs associated with
+		 * each country's version of the tile. For example, the first value will
+		 * store the ID of the sprite shown on the map when the first country owns
+		 * it (in the default implementation: Orange Star). This vector does not
+		 * have to be accounted for if the tile cannot be owned/captured. In which
+		 * case, an empty vector should be given in the script.
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the tile type's properties.
 		 */
 		tile_type(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
-		 * Retrieves the ID of the type of terrain this tile represents (i.e. "Plains" or "Road").
+		 * Retrieves the ID of the type of terrain this tile represents (i.e.
+		 * "Plains" or "Road").
 		 * @return The ID of the type of terrain.
 		 */
-		bank<terrain>::index getTypeIndex() const noexcept;
+		awe::bank<terrain>::index getTypeIndex() const noexcept;
 
 		/**
 		 * Retrieves the ID of the sprite that is shown for a given country.
 		 * @param  countryID The ID of the country.
-		 * @return The ID of the tile's sprite, or \c _neutralTile if the given country ID didn't identify a sprite ID.
+		 * @return The ID of the tile's sprite, or \c _neutralTile if the given
+		 *         country ID didn't identify a sprite ID.
 		 */
 		unsigned int getOwnedTile(bank<country>::index countryID) const noexcept;
 
 		/**
-		 * Retrieves the ID of the sprite that is shown when no country owns the tile.
+		 * Retrieves the ID of the sprite that is shown when no country owns the
+		 * tile.
 		 * @return The ID of the tile's neutral sprite.
 		 */
 		unsigned int getNeutralTile() const noexcept;
 
 		/**
-		 * Retrieves a pointer to the details of the type of terrain this tile represents.
+		 * Retrieves a pointer to the details of the type of terrain this tile
+		 * represents.
 		 * @return The pointer to the terrain type's properties.
 		 * @sa     updateTerrain()
 		 */
@@ -529,9 +603,11 @@ namespace awe {
 
 		/**
 		 * Updates the stored terrain type properties pointer.
-		 * @param terrainBank A reference to the terrain bank to pull the pointer from.
+		 * @param terrainBank A reference to the terrain bank to pull the pointer
+		 *        from.
 		 */
-		void updateTerrain(const bank<terrain>& terrainBank) const noexcept;
+		void updateTerrain(const awe::bank<awe::terrain>& terrainBank) const
+			noexcept;
 
 		/**
 		 * The object's UUID.
@@ -548,7 +624,8 @@ namespace awe {
 		/**
 		 * Inverse comparison operator.
 		 * @param  rhs The \c tile_type object to test against.
-		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if
+		 *         they are.
 		 */
 		bool operator!=(const awe::tile_type& rhs) const noexcept;
 	private:
@@ -559,7 +636,8 @@ namespace awe {
 
 		/**
 		 * Pointer to the properties of this tile's type of terrain.
-		 * It was made mutable so that it can be updated after construction if an instance of \c tile_type is constant.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateTerrain().
 		 */
 		mutable std::shared_ptr<const awe::terrain> _terrain;
 
@@ -575,76 +653,98 @@ namespace awe {
 	};
 
 	/**
-	 * A game property class which stores the information associated with type of unit.
+	 * A game property class which stores the information associated with types of
+	 * units.
 	 * @sa \c awe::common_properties
 	 */
 	class unit_type : public common_properties {
 	public:
 		/**
 		 * Constructor which scans a JSON object for the unit type's properties.
-		 * It also passes on the JSON object to the \c common_properties constructor.
-		 * In addition to the keys defined in the superclass, the following keys are required:
-		 * <ul><li>\c "movetype" = \c _movementTypeID, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "price" = \c _cost, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "fuel" = \c _maxFuel, <tt>(signed 32-bit int)</tt></li>
-		 * <li>\c "ammo" = \c _maxAmmo, <tt>(signed 32-bit int)</tt></li>
-		 * <li>\c "hp" = \c _maxHP, <tt>(unsigned 32-bit int - capped off at signed 32-bit int's maximum value)</tt></li>
-		 * <li>\c "mp" = \c _movementPoints, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "vision" = \c _vision, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "lowrange" = \c _lowerRange, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "highrange" = \c _higherRange, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li>
-		 * <li>\c "sprites" = \c _units, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li>
-		 * <li>\c "canload" = \c _canLoadThese, <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt></li>
-		 * <li>\c "loadlimit" = \c _loadLimit, <tt>(unsigned 32-bit int)</tt></li>
-		 * <li>\c "fuelperturn" = \c _fuelPerTurn, <tt>(signed 32-bit int)</tt></li></ul>
-		 * The \c movecosts array stores a list of movement points associated with each movement type.
-		 * For example, the first value will store the number of movement points it takes for the first type of movement to traverse over it (in the default implementation, Infantry).\n
-		 * The \c pictures array stores a list of animated sprite IDs associated with each country.
-		 * For example, the first value will store the ID of the sprite shown when the first country owns it (in the default implementation, Neutral).
-		 * Not all countries have to be accounted for if the tile cannot be "owned," i.e. captured.
-		 * Ranged values work by counting the number of tiles away from the unit's current tile.
-		 * If the tile is within both the lower and higher ranges inclusive, then the attack is valid. If not, the attack is awe::army::NO_ARMY.\n
-		 * Pictures is an array of sprite IDs corresponding to each country's portrait of the type of unit.\n
-		 * Sprites is an array of sprite IDs corresponding to each country's map representation of the type of unit.
+		 * It also passes on the JSON object to the \c common_properties
+		 * constructor. In addition to the keys defined in the superclass, the
+		 * following keys are required:
+		 * 
+		 * <ul><li>\c "movetype" = \c _movementTypeID, <tt>(unsigned 32-bit int)
+		 *     </tt></li>
+		 *     <li>\c "price" = \c _cost, <tt>(unsigned 32-bit int)</tt></li>
+		 *     <li>\c "fuel" = \c _maxFuel, <tt>(signed 32-bit int)</tt></li>
+		 *     <li>\c "ammo" = \c _maxAmmo, <tt>(signed 32-bit int)</tt></li>
+		 *     <li>\c "hp" = \c _maxHP, <tt>(unsigned 32-bit int - capped off at
+		 *         signed 32-bit int's maximum value)</tt></li>
+		 *     <li>\c "mp" = \c _movementPoints, <tt>(unsigned 32-bit int)</tt>
+		 *     </li>
+		 *     <li>\c "vision" = \c _vision, <tt>(unsigned 32-bit int)</tt></li>
+		 *     <li>\c "lowrange" = \c _lowerRange, <tt>(unsigned 32-bit int)</tt>
+		 *     </li>
+		 *     <li>\c "highrange" = \c _higherRange, <tt>(unsigned 32-bit int)</tt>
+		 *     </li>
+		 *     <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{,
+		 *         unsigned 32-bit int, etc.}])</tt></li>
+		 *     <li>\c "sprites" = \c _units, <tt>([unsigned 32-bit int{, unsigned
+		 *         32-bit int, etc.}])</tt></li>
+		 *     <li>\c "canload" = \c _canLoadThese, <tt>([unsigned 32-bit int{,
+		 *         unsigned 32-bit int, etc.}])</tt></li>
+		 *     <li>\c "loadlimit" = \c _loadLimit, <tt>(unsigned 32-bit int)</tt>
+		 *     </li>
+		 *     <li>\c "fuelperturn" = \c _fuelPerTurn, <tt>(signed 32-bit int)</tt>
+		 *     </li></ul>
+		 * 
+		 * Range values work by counting the number of tiles away from the unit's
+		 * current tile. If the tile is within both the lower and higher ranges
+		 * inclusive, then the attack is valid. If not, the attack is invalid.\n
+		 * 
+		 * Pictures is an array of sprite IDs corresponding to each country's
+		 * portrait of the type of unit.\n
+		 * 
+		 * Sprites is an array of sprite IDs corresponding to each country's map
+		 * representation of the type of unit.
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the terrain type's properties.
 		 * @sa    isInfiniteFuel()
-		 * @sa    isInfiniteAmmo()*/
+		 * @sa    isInfiniteAmmo()
+		 */
 		unit_type(const awe::BankID id, safe::json& j) noexcept;
 
 		/**
 		 * Retrieves the movement type of this unit.
 		 * @return The index of the movement type of this unit.
 		 */
-		bank<movement_type>::index getMovementTypeIndex() const noexcept;
+		awe::bank<movement_type>::index getMovementTypeIndex() const noexcept;
 
 		/**
-		 * Retrieves a pointer to the details of the type of movement this unit has.
+		 * Retrieves a pointer to the details of the type of movement this unit
+		 * has.
 		 * @return The pointer to the movement type's properties.
 		 * @sa     updateMovementType()
 		 */
-		std::shared_ptr<const movement_type> getMovementType() const noexcept;
+		std::shared_ptr<const awe::movement_type> getMovementType() const noexcept;
 
 		/**
 		 * Updates the stored movement type properties pointer.
-		 * @param movementBank A reference to the movement type bank to pull the pointer from.
+		 * @param movementBank A reference to the movement type bank to pull the
+		 * pointer from.
 		 */
-		void updateMovementType(const bank<movement_type>& movementBank) const noexcept;
+		void updateMovementType(const awe::bank<awe::movement_type>& movementBank)
+			const noexcept;
 
 		/**
 		 * Retrieves the sprite ID of a given country's portrait of this unit.
 		 * @param  countryID The ID of the country.
-		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't identify a sprite ID.
+		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't
+		 *         map to a sprite ID in the internal list.
 		 */
-		unsigned int getPicture(bank<country>::index countryID) const noexcept;
+		unsigned int getPicture(awe::bank<awe::country>::index countryID) const
+			noexcept;
 
 		/**
 		 * Retrieves the sprite ID of a given country's map sprite of this unit.
 		 * @param  countryID The ID of the country.
-		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't identify a sprite ID.
+		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't
+		 *         map to a sprite ID in the internal list.
 		 */
-		unsigned int getUnit(bank<country>::index countryID) const noexcept;
+		unsigned int getUnit(awe::bank<awe::country>::index countryID) const
+			noexcept;
 
 		/**
 		 * Retrieves the price property.
@@ -715,36 +815,63 @@ namespace awe {
 
 		/**
 		 * Overloaded version of \c canLoad() that checks using a given unit type.
-		 * @param  type The unit type to check for. Returns \c FALSE if empty.
-		 * @return \c TRUE if the given unit type can be loaded onto units of this type, \c FALSE if not.
+		 * @param  type The unit type to check for. Returns \c FALSE if \c nullptr.
+		 * @return \c TRUE if the given unit type can be loaded onto units of this
+		 *         type, \c FALSE if not.
 		 */
-		bool canLoad(const std::shared_ptr<const awe::unit_type>& type) const noexcept;
+		bool canLoad(const std::shared_ptr<const awe::unit_type>& type) const
+			noexcept;
 
 		/**
 		 * Retrieves the load limit of this unit type.
-		 * @return The maximum number of units this unit can hold at any given time.
+		 * @return The maximum number of units this unit can hold at any given
+		 *         time.
 		 */
 		unsigned int loadLimit() const noexcept;
 
 		/**
 		 * Retrieves the amount of fuel consumed at the beginning of each day.
-		 * @return The amount of fuel this unit type consumes at the beginning of each day.
+		 * @return The amount of fuel this unit type consumes at the beginning of
+		 *         each day.
 		 */
 		signed int fuelPerTurn() const noexcept;
 
 		/**
-		 * Updates the stored unit type properties pointers for units that can be loaded onto this one.
-		 * @param unitBank A reference to the unit type bank to pull the pointers from.
+		 * Updates the stored unit type properties pointers for units that can be
+		 * loaded onto this one.
+		 * @param unitBank A reference to the unit type bank to pull the pointers
+		 *                 from.
 		 */
 		void updateUnitTypes(const bank<unit_type>& unitBank) const noexcept;
 
+		/**
+		 * Copies the internal list of picture sprite IDs and returns it.
+		 * @return All the pictures assigned to this unit.
+		 */
 		std::vector<unsigned int> copyPictures() const noexcept;
 
+		/**
+		 * Copies the internal list of unit sprite IDs and returns it.
+		 * @return All the map sprites assigned to this unit.
+		 */
 		std::vector<unsigned int> copyUnits() const noexcept;
 
-		std::vector<awe::bank<unit_type>::index> copyLoadableUnitIDs() const noexcept;
+		/**
+		 * Copies the internal list of IDs of unit types this unit can hold and
+		 * returns it.
+		 * @return All the IDs of the types of units that can be loaded onto this
+		 *         unit.
+		 */
+		std::vector<awe::bank<unit_type>::index> copyLoadableUnitIDs() const
+			noexcept;
 
-		std::vector<std::shared_ptr<const awe::unit_type>> copyLoadableUnits() const noexcept;
+		/**
+		 * Copies the internal list of units that can be loaded onto this one and
+		 * returns it.
+		 * @return All the types of units that can be loaded onto this unit.
+		 */
+		std::vector<std::shared_ptr<const awe::unit_type>> copyLoadableUnits()
+			const noexcept;
 
 		/**
 		 * The object's UUID.
@@ -761,18 +888,20 @@ namespace awe {
 		/**
 		 * Inverse comparison operator.
 		 * @param  rhs The \c unit_type object to test against.
-		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if
+		 *         they are.
 		 */
 		bool operator!=(const awe::unit_type& rhs) const noexcept;
 	private:
 		/**
 		 * The movement type ID property.
 		 */
-		bank<movement_type>::index _movementTypeID = 0;
+		awe::bank<awe::movement_type>::index _movementTypeID = 0;
 
 		/**
 		 * Pointer to this unit's movement typre details.
-		 * It was made mutable so that it can be updated after construction if an instance of \c unit_type is constant.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateMovementType().
 		 */
 		mutable std::shared_ptr<const awe::movement_type> _movementType;
 
@@ -833,9 +962,11 @@ namespace awe {
 
 		/**
 		 * List of unit types that can be loaded onto this type of unit.
-		 * It was made mutable so that it can be updated after construction if an instance of \c unit_type is constant.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateUnitTypes().
 		 */
-		mutable std::vector<std::shared_ptr<const awe::unit_type>> _canLoadTheseUnitTypes;
+		mutable std::vector<std::shared_ptr<const awe::unit_type>>
+			_canLoadTheseUnitTypes;
 
 		/**
 		 * The maximum number of units this unit type can load.
@@ -843,22 +974,26 @@ namespace awe {
 		unsigned int _loadLimit = 0;
 
 		/**
-		 * The amount of fuel this unit type consumes at the beginning of every day.
+		 * The amount of fuel this unit type consumes at the beginning of every
+		 * day.
 		 */
 		signed int _fuelPerTurn = 0;
 	};
 
 	/**
-	 * A game property class which stores the information associated with a single commander.
+	 * A game property class which stores the information associated with a single
+	 * commander.
 	 * @sa \c awe::common_properties
 	 */
-	class commander : public common_properties {
+	class commander : public awe::common_properties {
 	public:
 		/**
 		 * Constructor which scans a JSON object for the portrait property.
-		 * It also passes on the JSON object to the \c common_properties constructor.
-		 * In addition to the keys defined in the superclass, the following keys are required:
-		 * <ul><li>\c "portrait" = \c _portrait, <tt>(unsigned 32-bit int)</tt></li></ul>
+		 * It also passes on the JSON object to the \c common_properties
+		 * constructor. In addition to the keys defined in the superclass, the
+		 * following keys are required:
+		 * <ul><li>\c "portrait" = \c _portrait, <tt>(unsigned 32-bit int)</tt>
+		 *     </li></ul>
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the commander's properties.
 		 */
@@ -885,7 +1020,8 @@ namespace awe {
 		/**
 		 * Inverse comparison operator.
 		 * @param  rhs The \c commander object to test against.
-		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if they are.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if
+		 *         they are.
 		 */
 		bool operator!=(const awe::commander& rhs) const noexcept;
 	private:
@@ -896,18 +1032,23 @@ namespace awe {
 	};
 
 	/**
-	 * Calls \c tile_type::updateTerrain() on an entire bank of \c tile_type objects.
+	 * Calls \c tile_type::updateTerrain() on an entire bank of \c tile_type
+	 * objects.
 	 * @param tileBank    The \c tile_type bank to update.
 	 * @param terrainBank The \c terrian bank to pull the pointers from.
 	 */
-	void updateAllTerrains(bank<tile_type>& tileBank, const awe::bank<awe::terrain>& terrainBank) noexcept;
+	void updateAllTerrains(bank<tile_type>& tileBank,
+		const awe::bank<awe::terrain>& terrainBank) noexcept;
 
 	/**
-	 * Calls \c unit_type::updateMovementType() and \c unit_type::updateUnitTypes on an entire bank of \c unit_type objects.
-	 * @param unitBank     The \c unit_type bank to update. Conversely the \c unit_type bank that is used to update itself.
+	 * Calls \c unit_type::updateMovementType() and \c unit_type::updateUnitTypes
+	 * on an entire bank of \c unit_type objects.
+	 * @param unitBank     The \c unit_type bank to update. Also the \c unit_type
+	 *                     bank that is used to update itself.
 	 * @param movementBank The \c movement_type bank to pull the pointers from.
 	 */
-	void updateAllMovementsAndLoadedUnits(bank<unit_type>& unitBank, const awe::bank<awe::movement_type>& movementBank) noexcept;
+	void updateAllMovementsAndLoadedUnits(bank<unit_type>& unitBank,
+		const awe::bank<awe::movement_type>& movementBank) noexcept;
 }
 
 template<typename T>
@@ -927,7 +1068,8 @@ bool awe::bank<T>::_load(safe::json& j) noexcept {
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	awe::BankID id = 0;
 	for (auto& i : jj.items()) {
-		//loop through each object, allowing the template type T to construct its values based on each object
+		// loop through each object, allowing the template type T to construct its
+		// values based on each object
 		safe::json input(i.value());
 		_bank.push_back(std::make_shared<const T>(id++, input));
 	}

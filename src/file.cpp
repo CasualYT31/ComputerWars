@@ -23,7 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "file.h"
 
 engine::binary_file::binary_file() noexcept {
-	_file.exceptions(std::fstream::failbit | std::fstream::badbit | std::fstream::eofbit);
+	_file.exceptions(std::fstream::failbit |
+		std::fstream::badbit | std::fstream::eofbit);
 }
 
 bool engine::binary_file::isBigEndian() noexcept {
@@ -31,9 +32,10 @@ bool engine::binary_file::isBigEndian() noexcept {
 	1. Define an integer holding the value 1.
 	2. Retrieve its address.
 	3. Convert that address to an address pointing to a single byte instead.
-	4. Access the value of the integer's first byte (the one with the smallest address).
-	5. If it is still 1, then we can be sure the system is running on little endian,
-	   as this signifies that the least significant byte is stored FIRST.
+	4. Access the value of the integer's first byte (the one with the smallest
+	   address).
+	5. If it is still 1, then we can be sure the system is running on little
+	   endian, as this signifies that the least significant byte is stored FIRST.
 	https://developer.ibm.com/articles/au-endianc/ */
 	static const int i = 1;
 	return (*(char*)&i) == 0;
@@ -45,7 +47,8 @@ void engine::binary_file::open(const std::string& filepath, const bool forInput)
 		if (forInput) {
 			_file.open(filepath, std::ios::binary | std::ios::in);
 		} else {
-			_file.open(filepath, std::ios::binary | std::ios::out | std::ios::trunc);
+			_file.open(filepath, std::ios::binary | std::ios::out |
+				std::ios::trunc);
 		}
 		_bytes = 0;
 	} catch (std::exception&) {
@@ -72,7 +75,8 @@ bool engine::binary_file::readBool() {
 		_bytes += sizeof(inp);
 		return inp;
 	} catch (std::exception& e) {
-		std::string w = "Failed to read bool at position " + std::to_string(_bytes) + ": " + e.what();
+		std::string w = "Failed to read bool at position " +
+			std::to_string(_bytes) + ": " + e.what();
 		throw std::exception(w.c_str());
 	}
 }
@@ -83,7 +87,8 @@ void engine::binary_file::writeBool(const bool val) {
 		_file.write(reinterpret_cast<char*>(&out), sizeof(out));
 		_bytes += sizeof(out);
 	} catch (std::exception& e) {
-		std::string w = "Failed to write bool to position " + std::to_string(_bytes) + ": " + e.what();
+		std::string w = "Failed to write bool to position " +
+			std::to_string(_bytes) + ": " + e.what();
 		throw std::exception(w.c_str());
 	}
 }
@@ -102,7 +107,8 @@ std::string engine::binary_file::readString() {
 		}
 		return ret;
 	} catch (std::exception& e) {
-		std::string w = "Failed to read string at position " + std::to_string(_bytes) + ": " + e.what();
+		std::string w = "Failed to read string at position " +
+			std::to_string(_bytes) + ": " + e.what();
 		throw std::exception(w.c_str());
 	}
 }
@@ -117,7 +123,8 @@ void engine::binary_file::writeString(const std::string& str) {
 			_bytes += 1;
 		}
 	} catch (std::exception& e) {
-		std::string w = "Failed to write string to position " + std::to_string(_bytes) + ": " + e.what();
+		std::string w = "Failed to write string to position " +
+			std::to_string(_bytes) + ": " + e.what();
 		throw std::exception(w.c_str());
 	}
 }

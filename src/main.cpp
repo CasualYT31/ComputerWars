@@ -22,8 +22,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**@file main.cpp
  * The entry point into the program.
- * Most of the initialisation occurs before handing control over to the sole awe::game_engine object.
- * See the documentation on \c main() for more information.
+ * Most of the initialisation occurs before handing control over to the sole
+ * \c awe::game_engine object. See the documentation on \c main() for more
+ * information.
  */
 
 #include "engine.h"
@@ -31,16 +32,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * The entry point into the program.
- * A majority of the game initialisation occurs here: the global sink is opened (which is the file all loggers output to), and the \c awe::game_engine object is constructed.
+ * A majority of the game initialisation occurs here: the global sink is opened
+ * (which is the file all loggers output to), and the \c awe::game_engine object is
+ * constructed.
  * @param  file Temporary parameter storing a path to a binary map file to open.
- * @return The result of calling \c awe::game_engine::run(): by this point, the game has been shut down.
+ * @return The result of calling \c awe::game_engine::run(): by this point, the
+ *         game has been shut down.
  */
 int game(const std::string& file) {
     // initialise the sink all loggers output to
     global::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false);
 
     // initialise the language dictionary
-    std::shared_ptr<i18n::language_dictionary> dictionary = std::make_shared<i18n::language_dictionary>();
+    std::shared_ptr<i18n::language_dictionary> dictionary =
+        std::make_shared<i18n::language_dictionary>();
     dictionary->load("assets/lang/lang.json");
 
     // initialise the fonts
@@ -60,66 +65,83 @@ int game(const std::string& file) {
     renderer->load("assets/renderer/renderer.json");
 
     // initialise the user input
-    std::shared_ptr<sfx::user_input> userInput = std::make_shared<sfx::user_input>(*renderer);
+    std::shared_ptr<sfx::user_input> userInput =
+        std::make_shared<sfx::user_input>(*renderer);
     userInput->load("assets/userinput/userinput.json");
 
     // initialise spritesheets
-    std::shared_ptr<awe::spritesheets> spritesheets = std::make_shared<awe::spritesheets>();
+    std::shared_ptr<awe::spritesheets> spritesheets =
+        std::make_shared<awe::spritesheets>();
     spritesheets->CO = std::make_shared<sfx::animated_spritesheet>();
     spritesheets->CO->load("assets/sprites/co/spritesco.json");
     spritesheets->unit = std::make_shared<awe::spritesheets::units>();
     spritesheets->unit->idle = std::make_shared<sfx::animated_spritesheet>();
-    spritesheets->unit->idle->load("assets/sprites/unit/idle/spritesunitidle.json");
+    spritesheets->unit->idle->load(
+        "assets/sprites/unit/idle/spritesunitidle.json");
     spritesheets->tile = std::make_shared<awe::spritesheets::tiles>();
     spritesheets->tile->normal = std::make_shared<sfx::animated_spritesheet>();
-    spritesheets->tile->normal->load("assets/sprites/tile/normal/spritestilenormal.json");
+    spritesheets->tile->normal->load(
+        "assets/sprites/tile/normal/spritestilenormal.json");
     spritesheets->unitPicture = std::make_shared<sfx::animated_spritesheet>();
-    spritesheets->unitPicture->load("assets/sprites/unit_picture/spritesunit_picture.json");
-    spritesheets->tilePicture = std::make_shared<awe::spritesheets::tile_pictures>();
-    spritesheets->tilePicture->normal = std::make_shared<sfx::animated_spritesheet>();
-    spritesheets->tilePicture->normal->load("assets/sprites/tile_picture/normal/spritestile_picturenormal.json");
+    spritesheets->unitPicture->load(
+        "assets/sprites/unit_picture/spritesunit_picture.json");
+    spritesheets->tilePicture =
+        std::make_shared<awe::spritesheets::tile_pictures>();
+    spritesheets->tilePicture->normal =
+        std::make_shared<sfx::animated_spritesheet>();
+    spritesheets->tilePicture->normal->load(
+        "assets/sprites/tile_picture/normal/spritestile_picturenormal.json");
     spritesheets->icon = std::make_shared<sfx::animated_spritesheet>();
     spritesheets->icon->load("assets/sprites/icon/spritesicon.json");
     spritesheets->GUI = std::make_shared<sfx::animated_spritesheet>();
     spritesheets->GUI->load("assets/sprites/gui/spritesgui.json");
 
     // initialise the scripts
-    std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>("assets/script/");
+    std::shared_ptr<engine::scripts> scripts =
+        std::make_shared<engine::scripts>("assets/script/");
 
     // initialise the GUI
     std::shared_ptr<engine::gui> gui = std::make_shared<engine::gui>(scripts);
     gui->load("assets/gui/gui.json");
 
     // initialise the countries
-    std::shared_ptr<awe::bank<awe::country>> countries = std::make_shared<awe::bank<awe::country>>();
+    std::shared_ptr<awe::bank<awe::country>> countries =
+        std::make_shared<awe::bank<awe::country>>();
     countries->load("assets/property/country.json");
 
     // initialise the weathers
-    std::shared_ptr<awe::bank<awe::weather>> weathers = std::make_shared<awe::bank<awe::weather>>();
+    std::shared_ptr<awe::bank<awe::weather>> weathers =
+        std::make_shared<awe::bank<awe::weather>>();
     weathers->load("assets/property/weather.json");
 
     // initialise the environments
-    std::shared_ptr<awe::bank<awe::environment>> environments = std::make_shared<awe::bank<awe::environment>>();
+    std::shared_ptr<awe::bank<awe::environment>> environments =
+        std::make_shared<awe::bank<awe::environment>>();
     environments->load("assets/property/environment.json");
 
     // initialise the movements
-    std::shared_ptr<awe::bank<awe::movement_type>> movements = std::make_shared<awe::bank<awe::movement_type>>();
+    std::shared_ptr<awe::bank<awe::movement_type>> movements =
+        std::make_shared<awe::bank<awe::movement_type>>();
     movements->load("assets/property/movement.json");
 
     // initialise the terrains
-    std::shared_ptr<awe::bank<awe::terrain>> terrains = std::make_shared<awe::bank<awe::terrain>>();
+    std::shared_ptr<awe::bank<awe::terrain>> terrains =
+        std::make_shared<awe::bank<awe::terrain>>();
     terrains->load("assets/property/terrain.json");
 
     // initialise the tiles
-    std::shared_ptr<awe::bank<awe::tile_type>> tiles = std::make_shared<awe::bank<awe::tile_type>>();
+    std::shared_ptr<awe::bank<awe::tile_type>> tiles =
+        std::make_shared<awe::bank<awe::tile_type>>();
     tiles->load("assets/property/tile.json");
 
     // initialise the units
-    std::shared_ptr<awe::bank<awe::unit_type>> units = std::make_shared<awe::bank<awe::unit_type>>();
+    std::shared_ptr<awe::bank<awe::unit_type>> units =
+        std::make_shared<awe::bank<awe::unit_type>>();
     units->load("assets/property/unit.json");
 
     // initialise the COs
-    std::shared_ptr<awe::bank<awe::commander>> commanders = std::make_shared<awe::bank<awe::commander>>();
+    std::shared_ptr<awe::bank<awe::commander>> commanders =
+        std::make_shared<awe::bank<awe::commander>>();
     commanders->load("assets/property/co.json");
 
     // setup banks
@@ -153,6 +175,12 @@ int game(const std::string& file) {
     return gameLoop.run(file);
 }
 
+/**
+ * Calls either \c game() or \c test::test().
+ * The second command-line argument contains the path to a binary map file to open.
+ * This will be a temporary measure: the command-line arguments will be reworked or
+ * ignored in the future.
+ */
 int main(int argc, char* argv[]) {
     // return game(((argc < 2) ? ("assets/map/islandx.cwm") : (argv[1])));
     return test::test();

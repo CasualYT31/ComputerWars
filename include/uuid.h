@@ -22,9 +22,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * @file uuid.h
- * Declares a simple UUID class that can be used to compare objects of
- * a particular type to see if they are the same, instead of comparing
- * each field of those objects, resulting in faster comparison checks.
+ * Declares a simple UUID class that can be used to compare objects of a
+ * particular type to see if they are the same, instead of comparing each field of
+ * those objects, resulting in faster comparison checks.
  */
 
 #pragma once
@@ -36,10 +36,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace engine {
 	/**
 	 * Class used to generate unique identifiers for objects of a given type.
-	 * I decided to create my own implementation of UUIDs because it's simple enough
-	 * to warrant not installing a dedicated backend for it.\n
-	 * It was designed to work via object composition: simply declare a public field of this
-	 * class within that class, like so:
+	 * I decided to create my own implementation of UUIDs because it's simple
+	 * enough to warrant not installing a dedicated backend for it.\n
+	 * It was designed to work via object composition: simply declare a public
+	 * field of this class within that class, like so:
 	 * @code{.cpp}
 	 * class Abcd {
 	 * public:
@@ -53,25 +53,28 @@ namespace engine {
 	public:
 		/**
 		 * Reserved value, can be used for error checking.
-		 * Used in the \c uuid implementation to know when to wrap UUIDs back around to 0.
+		 * Used in the \c uuid implementation to know when to wrap UUIDs back
+		 * around to \c 0.
 		 */
 		static const awe::UUIDValue INVALID = UINT32_MAX;
 
 		/**
 		 * Constructs a UUID.
-		 * @warning Note that once \c _id_counter reaches its maximum value, it will wrap
-		 *          around to \c 0 again. This can cause problems if previous objects with
-		 *          old IDs such as \c 1 and \c 2 have not been destroyed yet. However,
-		 *          since unsigned 32-bit integers can store very large values, for
-		 *          most cases the engine should not have to explicitly manage these cases:
-		 *          simply ensure that no more than \c 4294967295-1 units are in one
-		 *          game at a time, for example 😂.
-		 * @param   init Optionally initialise both \c _id_counter and \c _id to a given value.
-		 *               This should only be given once throughout the program for each type \c T.
-		 *               It is useful when you want to have UUIDs map directly to some other
-		 *               IDing system, such as unique vector indecies.
-		 *               If left to the default value, \c _id will be assigned \c _id_counter
-		 *               then the latter will increment.
+		 * @warning Note that once \c _id_counter reaches its maximum value, it
+		 *          will wrap around to \c 0 again. This can cause problems if
+		 *          previous objects with old IDs such as \c 1 and \c 2 have not
+		 *          been destroyed yet. However since unsigned 32-bit integers can
+		 *          store very large values, for most cases the engine should not
+		 *          have to explicitly manage these cases: simply ensure that no
+		 *          more than \c 4294967295-1 units are in one game at a time, for
+		 *          example 😂.
+		 * @param   init Optionally initialise both \c _id_counter and \c _id to a
+		 *               given value. This should only be given once throughout the
+		 *               program for each type \c T. It is useful when you want to
+		 *               have UUIDs map directly to some other IDing system, such
+		 *               as unique vector indecies. If left to the default value,
+		 *               \c _id will be assigned \c _id_counter then the latter
+		 *               will increment.
 		 */
 		uuid(const awe::UUIDValue init = 0) noexcept;
 

@@ -26,7 +26,8 @@ sfx::fonts::fonts(const std::string& name) noexcept : _logger(name) {}
 
 std::shared_ptr<sf::Font> sfx::fonts::operator[](const std::string& key) noexcept {
  	if (_font.find(key) == _font.end()) {
-		_logger.error("Attempting to access font with key \"{}\" which does not exist.", key);
+		_logger.error("Attempting to access font with key \"{}\" which does not "
+			"exist.", key);
 		return nullptr;
 	}
 	return _font.at(key);
@@ -41,7 +42,8 @@ bool sfx::fonts::_load(safe::json& j) noexcept {
 		std::string path = i.value();
 		_font[i.key()] = std::make_shared<sf::Font>();
 		if (!_font[i.key()]->loadFromFile(path)) {
-			_logger.error("Attempting to load font file \"{}\" which does not exist.", path);
+			_logger.error("Attempting to load font file \"{}\" which does not "
+				"exist.", path);
 			_font.erase(i.key());
 			ret = false;
 		}
@@ -51,8 +53,8 @@ bool sfx::fonts::_load(safe::json& j) noexcept {
 }
 
 bool sfx::fonts::_save(nlohmann::ordered_json& j) noexcept {
-	for (auto itr = _fontpath.begin(), enditr = _fontpath.end(); itr != enditr; itr++) {
-		j[itr->first] = itr->second;
+	for (auto& path : _fontpath) {
+		j[path.first] = path.second;
 	}
 	return true;
 }

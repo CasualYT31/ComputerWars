@@ -34,14 +34,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string>
 
 /**
- * Macro that allows implementations of test::test_case::runTests() to run a test and
- * automatically assign the name of the test as the test function's name.
- * @param test_function The full name of the method which contains the test to run, for example \c test::test_class::method.
+ * Macro that allows implementations of \c test::test_case::runTests() to run a
+ * test and automatically assign the name of the test as the test function's name.
+ * @param test_function The full name of the method which contains the test to run,
+ *                      for example \c test::test_class::method.
  */
-#define RUN_TEST(test_function) runTest(#test_function, std::bind(&test_function, this))
+#define RUN_TEST(test_function) \
+	runTest(#test_function, std::bind(&test_function, this))
 
 /**
- * Macro that allows tests to call test::test_case::assertEqual() with
+ * Macro that allows tests to call \c test::test_case::assertEqual() with
  * automatically stringified value names.
  * @param a The LHS value.
  * @param b The RHS value.
@@ -49,7 +51,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ASSERT_EQUAL(a, b) assertEqual(a, b, #a, #b, __LINE__)
 
 /**
-* Macro that allows tests to call test::test_case::assertNotEqual() with
+* Macro that allows tests to call \c test::test_case::assertNotEqual() with
 * automatically stringified value names.
 * @param a The LHS value.
 * @param b The RHS value.
@@ -57,21 +59,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ASSERT_NOT_EQUAL(a, b) assertNotEqual(a, b, #a, #b, __LINE__)
 
 /**
- * Macro that allows tests to call test::test_case::assertTrue() with
+ * Macro that allows tests to call \c test::test_case::assertTrue() with
  * automatically stringified value names.
  * @param a The value.
  */
 #define ASSERT_TRUE(a) assertTrue(a, #a, __LINE__)
 
 /**
-* Macro that allows tests to call test::test_case::assertFalse() with
+* Macro that allows tests to call \c test::test_case::assertFalse() with
 * automatically stringified value names.
 * @param a The value.
 */
 #define ASSERT_FALSE(a) assertFalse(a, #a, __LINE__)
 
 /**
- * Macro that allows tests to call test::test_case::assertInMap() with
+ * Macro that allows tests to call \c test::test_case::assertInMap() with
  * automatically stringified value names.
  * @param a The value to search for.
  * @param b The map to search in.
@@ -79,7 +81,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ASSERT_IN_MAP(a, b) assertInMap(a, b, #a, #b, __LINE__)
 
 /**
-* Macro that allows tests to call test::test_case::assertNotInMap() with
+* Macro that allows tests to call \c test::test_case::assertNotInMap() with
 * automatically stringified value names.
 * @param a The value to search for.
 * @param b The map to search in.
@@ -104,17 +106,23 @@ namespace test {
 
 	/**
 	 * Class which represents a set of unit tests.
-	 * Each derived class is a test case, with its unit tests executed within its implemented \c runTests().
-	 * Tests can be divided up within the subclass in whatever way the programmer sees fit, so long as they are executed within \c runTests(),
-	 * and remain within the subclass (as if they are outside of the subclass, the assert methods cannot be called).\n
-	 * Note also that tests cannot be specified with \c noexcept, as when an assertion fails, \c failed_assert is thrown,
-	 * and must be left alone for the \c test_case class to handle.
+	 * Each derived class is a test case, with its unit tests executed within its
+	 * implemented \c runTests(). Tests can be divided up within the subclass in
+	 * whatever way the programmer sees fit, so long as they are executed within
+	 * \c runTests(), and remain within the subclass (as if they are outside of the
+	 * subclass, the assert methods cannot be called).\n
+	 * Note also that tests cannot be specified with \c noexcept, as when an
+	 * assertion fails, \c failed_assert is thrown, and must be left alone for the
+	 * \c test_case class to handle. Care must be taken when catching exceptions
+	 * thrown by the classes that you test to ensure that \c failed_assert
+	 * exceptions are passed up the call chain.
 	 */
 	class test_case {
 	public:
 		/**
 		 * Initialises the internal file stream object.
-		 * @param name The name to give the resulting file. Defaults to "test_case.log."
+		 * @param name The name to give the resulting file. Defaults to
+		 *             "test_case.log."
 		 * @sa    \c global::logger
 		 */
 		test_case(const std::string& name = "test_case.log") noexcept;
@@ -126,29 +134,35 @@ namespace test {
 
 		/**
 		 * The method which will include this test case's tests.
-		 * @warning Care must be taken when writing the unit tests to \b not call this method within them,
-		 *          or else the stack will overflow (unless you implement a terminating condition).
+		 * @warning Care must be taken when writing the unit tests to \b not call
+		 *          this method within them, or else the stack will overflow
+		 *          (unless you implement a terminating condition, of course).
 		 */
 		virtual void runTests() noexcept = 0;
 	protected:
 		/**
 		 * Called to initialise a new unit test.
-		 * If an assert statement fails within \c test, it will stop immediately and the failure will be logged.
-		 * If \c test isn't a valid, callable object, the test will be classified as faulty and will be logged.
+		 * If an assert statement fails within \c test, it will stop immediately
+		 * and the failure will be logged. If \c test isn't a valid, callable
+		 * object, the test will be classified as faulty and will be logged.
 		 * @param name The name of the test.
-		 * @param test The test to execute. \c failed_assert exceptions will be automatically handled.
+		 * @param test The test to execute. \c failed_assert exceptions will be
+		 *             automatically handled.
 		 */
-		void runTest(const std::string& name, const std::function<void(void)>& test) noexcept;
+		void runTest(const std::string& name,
+			const std::function<void(void)>& test) noexcept;
 
 		/**
 		 * Called when all unit tests have been carried out.
-		 * Logs the total runtime of the test case, and the number of both faulty and failed tests.
-		 * Also resets \c _started to \c false so that the test case can be executed again.
+		 * Logs the total runtime of the test case, and the number of both faulty
+		 * and failed tests. Also resets \c _started to \c false so that the test
+		 * case can be executed again.
 		 */
 		void endTesting() noexcept;
 
 		/**
-		 * Asserts that two values are equivalent according to their comparison operator results (==).
+		 * Asserts that two values are equivalent according to their comparison
+		 * operator results (==).
 		 * @tparam T     The type of parameter \c a.
 		 * @tparam U     The type of parameter \c b.
 		 * @param  a     LHS value.
@@ -158,10 +172,12 @@ namespace test {
 		 * @throws failed_assert if \c a and \b are unequal.
 		 */
 		template<typename T, typename U>
-		void assertEqual(T a, U b, const std::string& aName, const std::string& bName, int line);
+		void assertEqual(T a, U b, const std::string& aName,
+			const std::string& bName, int line);
 
 		/**
-		 * Asserts that two values aren't equivalent according to their comparison operator results (!=).
+		 * Asserts that two values aren't equivalent according to their comparison
+		 * operator results (!=).
 		 * @tparam T     The type of parameter \c a.
 		 * @tparam U     The type of parameter \c b.
 		 * @param  a     LHS value.
@@ -171,10 +187,12 @@ namespace test {
 		 * @throws failed_assert if \c a and \b are equal.
 		 */
 		template<typename T, typename U>
-		void assertNotEqual(T a, U b, const std::string& aName, const std::string& bName, int line);
+		void assertNotEqual(T a, U b, const std::string& aName,
+			const std::string& bName, int line);
 
 		/**
-		 * Asserts that a value evaluates to true according to its boolean operator.
+		 * Asserts that a value evaluates to true according to its boolean
+		 * operator.
 		 * @tparam T     The type of parameter \c a.
 		 * @param  a     The value.
 		 * @param  aName The name of the value.
@@ -184,7 +202,8 @@ namespace test {
 		void assertTrue(T a, const std::string& aName, int line);
 
 		/**
-		 * Asserts that a value evaluates to false according to its boolean operator.
+		 * Asserts that a value evaluates to false according to its boolean
+		 * operator.
 		 * @tparam T     The type of parameter \c a.
 		 * @param  a     The value.
 		 * @param  aName The name of the value.
@@ -194,7 +213,8 @@ namespace test {
 		void assertFalse(T a, const std::string& aName, int line);
 
 		/**
-		 * Asserts that a given value (not key) is stored within a given \c unordered_map.
+		 * Asserts that a given value (not key) is stored within a given
+		 * \c unordered_map.
 		 * @tparam T     The type of values stored in the map.
 		 * @tparam U     The type of keys stored in the map.
 		 * @param  a     The value to test for.
@@ -204,10 +224,12 @@ namespace test {
 		 * @throws failed_assert if \c a is not within \b.
 		 */
 		template<typename T, typename U>
-		void assertInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName, int line);
+		void assertInMap(T a, const std::unordered_map<U, T>& b,
+			const std::string& aName, const std::string& bName, int line);
 
 		/**
-		 * Asserts that a given value (not key) isn't stored within a given \c unordered_map.
+		 * Asserts that a given value (not key) isn't stored within a given
+		 * \c unordered_map.
 		 * @tparam T     The type of values stored in the map.
 		 * @tparam U     The type of keys stored in the map.
 		 * @param  a     The value to test for.
@@ -217,7 +239,8 @@ namespace test {
 		 * @throws failed_assert if \c a is within \b.
 		 */
 		template<typename T, typename U>
-		void assertNotInMap(T a, const std::unordered_map<U, T>& b, const std::string & aName, const std::string & bName, int line);
+		void assertNotInMap(T a, const std::unordered_map<U, T>& b,
+			const std::string & aName, const std::string & bName, int line);
 	private:
 		/**
 		 * Throws a \c failed_assert exception.
@@ -264,36 +287,52 @@ namespace test {
 }
 
 template<typename T, typename U>
-void test::test_case::assertEqual(T a, U b, const std::string& aName, const std::string& bName, int line) {
-	if (!(a == b)) _failedTest("Line " + std::to_string(line) + ": " + aName + " is not equal to " + bName);
+void test::test_case::assertEqual(T a, U b, const std::string& aName,
+	const std::string& bName, int line) {
+	if (!(a == b)) {
+		_failedTest("Line " + std::to_string(line) + ": " + aName + " is not "
+			"equal to " + bName);
+	}
 }
 
 template<typename T, typename U>
-void test::test_case::assertNotEqual(T a, U b, const std::string& aName, const std::string& bName, int line) {
-	if (!(a != b)) _failedTest("Line " + std::to_string(line) + ": " + aName + " is equal to " + bName);
+void test::test_case::assertNotEqual(T a, U b, const std::string& aName,
+	const std::string& bName, int line) {
+	if (!(a != b)) {
+		_failedTest("Line " + std::to_string(line) + ": " + aName + " is equal to "
+			+ bName);
+	}
 }
 
 template<typename T>
 void test::test_case::assertTrue(T a, const std::string& aName, int line) {
-	if (!a) _failedTest("Line " + std::to_string(line) + ": " + aName + " is false");
+	if (!a)
+		_failedTest("Line " + std::to_string(line) + ": " + aName + " is false");
 }
 
 template<typename T>
 void test::test_case::assertFalse(T a, const std::string& aName, int line) {
-	if (a) _failedTest("Line " + std::to_string(line) + ": " + aName + " is true");
+	if (a)
+		_failedTest("Line " + std::to_string(line) + ": " + aName + " is true");
 }
 
 template<typename T, typename U>
-void test::test_case::assertInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName, int line) {
+void test::test_case::assertInMap(T a, const std::unordered_map<U, T>& b,
+	const std::string& aName, const std::string& bName, int line) {
 	for (auto itr = b.begin(), enditr = b.end(); itr != enditr; itr++) {
 		if (itr->second == a) return;
 	}
-	_failedTest("Line " + std::to_string(line) + ": " + aName + " is not in the map " + bName);
+	_failedTest("Line " + std::to_string(line) + ": " + aName + " is not in the "
+		"map " + bName);
 }
 
 template<typename T, typename U>
-void test::test_case::assertNotInMap(T a, const std::unordered_map<U, T>& b, const std::string& aName, const std::string& bName, int line) {
+void test::test_case::assertNotInMap(T a, const std::unordered_map<U, T>& b,
+	const std::string& aName, const std::string& bName, int line) {
 	for (auto itr = b.begin(), enditr = b.end(); itr != enditr; itr++) {
-		if (itr->second == a) _failedTest("Line " + std::to_string(line) + ": " + aName + " is in the map " + bName);
+		if (itr->second == a) {
+			_failedTest("Line " + std::to_string(line) + ": " + aName + " is in "
+				"the map " + bName);
+		}
 	}
 }

@@ -38,34 +38,44 @@ namespace sfx {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the log file. Defaults to "fonts."
+		 * @param name The name to give this particular instantiation within the
+		 *             log file. Defaults to "fonts."
 		 * @sa    \c global::logger
 		 */
 		fonts(const std::string& name = "fonts") noexcept;
 
 		/**
 		 * Accesses a previously loaded \c sf::Font object.
-		 * If a non-existent font is given, an error will be logged.
-		 * The \c font object may technically be amended but no edits will be saved in any way via \c save().
-		 * @param  key The string name of the font which was given in the JSON script.
-		 * @return The pointer to the \c sf::Font object, or \c nullptr if the font didn't exist.
+		 * If a non-existent font is given, an error will be logged.\n
+		 * The \c font object may technically be amended but no edits will be saved
+		 * in any way via \c save().
+		 * @param  key The string name of the font which was given in the JSON
+		 *             script.
+		 * @return The pointer to the \c sf::Font object, or \c nullptr if the font
+		 *         didn't exist.
 		 */
 		std::shared_ptr<sf::Font> operator[](const std::string& key) noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.
 		 * The root object is to contain a list of key-string value pairs only.
-		 * The key defines the name of the font object, and the value defines the absolute or relative path of the font file to load.
-		 * When called, the internal collection of font objects and their paths are cleared, even if the method returns \c FALSE.
-		 * @param  j The \c safe::json object representing the contents of the loaded script which this method reads.
-		 * @return \c TRUE if all font files could be loaded, \c FALSE if at least one could not be loaded.
+		 * The key defines the name of the font object, and the value defines the
+		 * absolute or relative path of the font file to load.
+		 * @warning When called, the internal collection of font objects and their
+		 *          paths are cleared, even if the method returns \c FALSE.
+		 * @param   j The \c safe::json object representing the contents of the
+		 *            loaded script which this method reads.
+		 * @return  \c TRUE if all font files could be loaded, \c FALSE if at least
+		 *          one could not be loaded.
 		 */
 		virtual bool _load(safe::json& j) noexcept;
 
 		/**
 		 * The JSON save method for this class.
-		 * Please see \c _load() for a detailed summary of the format of JSON script that this method produces.
-		 * @param  j The \c nlohmann::ordered_json object representing the JSON script which this method writes to.
+		 * Please see \c _load() for a detailed summary of the format of JSON
+		 * script that this method produces.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON
+		 *           script which this method writes to.
 		 * @return Always returns \c TRUE.
 		 */
 		virtual bool _save(nlohmann::ordered_json& j) noexcept;

@@ -48,18 +48,22 @@ namespace awe {
 		/**
 		 * Construct a new tile with a given type.
 		 * @param type  The type of tile to create.
-		 *              \c nullptr if you don't wish to provide a type at this time.
+		 *              \c nullptr if you don't wish to provide a type at this
+		 *              time.
 		 * @param sheet Pointer to the spritesheet to use with this tile.
 		 */
 		tile(const std::shared_ptr<const awe::tile_type>& type = nullptr,
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr) noexcept;
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr)
+			noexcept;
 
 		/**
 		 * Update's the tile's type.
-		 * This method does not handle any references to this tile in \c army objects. See \c map::setTileType().
+		 * This method does not handle any references to this tile in \c army
+		 * objects. See \c map::setTileType().
 		 * @param type The type to give to the tile.
 		 */
-		void setTileType(const std::shared_ptr<const awe::tile_type>& type) noexcept;
+		void setTileType(const std::shared_ptr<const awe::tile_type>& type)
+			noexcept;
 
 		/**
 		 * Returns the tile's type.
@@ -76,7 +80,8 @@ namespace awe {
 
 		/**
 		 * Retrieves the army ID of the army who owns this tile.
-		 * @return The army ID of the owning army. \c awe::army::NO_ARMY if the tile isn't owned.
+		 * @return The army ID of the owning army. \c awe::army::NO_ARMY if the
+		 *         tile isn't owned.
 		 */
 		awe::ArmyID getTileOwner() const noexcept;
 
@@ -95,13 +100,15 @@ namespace awe {
 
 		/**
 		 * Sets the unit currently occupying the tile.
-		 * @param id The ID of the unit now occupying the tile. \c 0 indicates this tile should be vacant.
+		 * @param id The ID of the unit now occupying the tile. \c 0 indicates this
+		 *           tile should be vacant.
 		 */
 		void setUnit(const awe::UnitID id) noexcept;
 
 		/**
 		 * Retrieves the ID of the unit currently occupying the tile.
-		 * @return The ID of the unit occupying the tile. \c 0 if the tile is vacant.
+		 * @return The ID of the unit occupying the tile. \c 0 if the tile is
+		 *         vacant.
 		 */
 		awe::UnitID getUnit() const noexcept;
 
@@ -109,7 +116,8 @@ namespace awe {
 		 * Sets the spritesheet to use with this tile.
 		 * @param sheet Pointer to the spritesheet to use with this tile.
 		 */
-		void setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+		void setSpritesheet(
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
 
 		/**
 		 * Sets the tile's pixel position to the internal sprite.
@@ -121,7 +129,8 @@ namespace awe {
 		/**
 		 * This drawable's \c animate() method.
 		 * Simply calls the internal sprite's \c animate() method.
-		 * @return The return value of <tt>animated_sprite</tt>'s \c animate() call.
+		 * @return The return value of <tt>animated_sprite</tt>'s \c animate()
+		 *         call.
 		 */
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
@@ -129,14 +138,17 @@ namespace awe {
 		 * This drawable's \c draw() method.
 		 * Simply draws \c _sprite to the screen.
 		 * @param target The target to render the tile to.
-		 * @param states The render states to apply to the tile. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 * @param states The render states to apply to the tile. Applying
+		 *               transforms is perfectly valid and will not alter the
+		 *               internal workings of the drawable.
 		 */
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
 		 * Updates the sprite ID to use with this tile.
-		 * This can change in a variety of different circumstances, and there are quite a few
-		 * conditions to check for, so it's best to keep it all in one method and call it where necessary.
+		 * This can change in a variety of different circumstances, and there are
+		 * quite a few conditions to check for, so it's best to keep it all in one
+		 * method and call it where necessary.
 		 */
 		void _updateSpriteID() noexcept;
 

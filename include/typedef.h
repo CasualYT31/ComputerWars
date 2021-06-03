@@ -22,8 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * @file typedef.h
- * Defines a series of typedefs specific to Computer Wars.
- * These were added so that the sizes of these values could be easily amended after implementation.
+ * Defines a series of typedefs specific to Computer Wars. These were added so that
+ * the sizes of these values could be easily amended after implementation.
  */
 
 #pragma once
@@ -48,10 +48,9 @@ namespace awe {
 
 	/**
 	 * Typedef representing funds.
-	 * I decided to make this signed because fund calculations
-	 * will result in negative values more often than not, and
-	 * they should be handled properly. This reasoning can be
-	 * applied to pretty much all of my signed int typedefs.
+	 * I decided to make this signed because fund calculations will result in
+	 * negative values more often than not, and they should be handled properly.
+	 * This reasoning can be applied to pretty much all of my signed int typedefs.
 	 */
 	typedef sf::Int32 Funds;
 

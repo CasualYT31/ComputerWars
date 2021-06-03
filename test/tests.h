@@ -31,18 +31,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "uuid.h"
 
 /**
- * Macro that allows tests which rely on the logger dependency to test if their naming functionality works.
- * @param n The string literal containing the name of the object used in the log file.
+ * Macro that allows tests which rely on the logger dependency to test if their
+ * naming functionality works.
+ * @param n The string literal containing the name of the object used in the log
+ *          file.
  */
-#define ASSERT_NAME_IN_LOG(n) ASSERT_NOT_EQUAL(global::sink::GetLog().find(n), std::string::npos);
+#define ASSERT_NAME_IN_LOG(n) \
+	ASSERT_NOT_EQUAL(global::sink::GetLog().find(n), std::string::npos);
 
 // for documentation on the test namespace, please see test.h
 namespace test {
 	/**
 	 * The entry point into the solution's tests.
-	 * The test results are output to a variety of log files in the path <tt>./test/results/</tt>.\n
-	 * When you write a new <tt>test_case</tt>-derived class, you need to add it to the list of test cases in this function.
-	 * You can do this my pushing back a <tt>new</tt>d instance of your class to the \c testcases vector.
+	 * The test results are output to a variety of log files in the path
+	 * <tt>./test/results/</tt>.\n
+	 * When you write a new <tt>test_case</tt>-derived class, you need to add it to
+	 * the list of test cases in this function. You can do this my pushing back a
+	 * <tt>new</tt>d instance of your class to the \c testcases vector.
 	 * @return The value ideally returned by \c main().
 	 */
 	int test();
@@ -53,7 +58,7 @@ namespace test {
 	class test_logger : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "logger_test_case.log" to the output file.
+		 * Assigns the name <tt>"logger_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_logger(const std::string& path) noexcept;
@@ -81,7 +86,7 @@ namespace test {
 	class test_safejson : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "safejson_test_case.log" to the output file.
+		 * Assigns the name <tt>"safejson_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_safejson(const std::string& path) noexcept;
@@ -103,7 +108,7 @@ namespace test {
 	class test_language : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "language_test_case.log" to the output file.
+		 * Assigns the name <tt>"language_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_language(const std::string& path) noexcept;
@@ -130,7 +135,8 @@ namespace test {
 		void language_dictionary();
 
 		/**
-		 * Runs tests related to the JSON script component of the \c language_dictionary class.
+		 * Runs tests related to the JSON script component of the
+		 * \c language_dictionary class.
 		 */
 		void language_dictionary_json();
 	};
@@ -141,7 +147,7 @@ namespace test {
 	class test_uuid : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "uuid_test_case.log" to the output file.
+		 * Assigns the name <tt>"uuid_test_case.log"</tt> to the output file.
 		 * Also initialises \c ID with \c UUID_INIT.
 		 * @param path The path in which to save the output file.
 		 */
@@ -155,7 +161,8 @@ namespace test {
 		/**
 		 * The initial value of the UUID.
 		 */
-		static const awe::UUIDValue UUID_INIT = engine::uuid<test::test_uuid>::INVALID - 1;
+		static const awe::UUIDValue UUID_INIT =
+			engine::uuid<test::test_uuid>::INVALID - 1;
 
 		/**
 		 * The \c uuid instantiation tested against.
@@ -174,7 +181,7 @@ namespace test {
 	class test_fonts : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "fonts_test_case.log" to the output file.
+		 * Assigns the name <tt>"fonts_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_fonts(const std::string& path) noexcept;
@@ -196,7 +203,7 @@ namespace test {
 	class test_audio : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "audio_test_case.log" to the output file.
+		 * Assigns the name <tt>"audio_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_audio(const std::string& path) noexcept;
@@ -230,7 +237,7 @@ namespace test {
 	class test_renderer : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "renderer_test_case.log" to the output file.
+		 * Assigns the name <tt>"renderer_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_renderer(const std::string& path) noexcept;
@@ -252,7 +259,7 @@ namespace test {
 	class test_texture : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "texture_test_case.log" to the output file.
+		 * Assigns the name <tt>"texture_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_texture(const std::string& path) noexcept;
@@ -263,7 +270,8 @@ namespace test {
 		void runTests() noexcept;
 	private:
 		/**
-		 * Runs tests related to the \c animated_spritesheet and \c animated_sprite classes.
+		 * Runs tests related to the \c animated_spritesheet and \c animated_sprite
+		 * classes.
 		 */
 		void animation();
 	};
@@ -274,7 +282,7 @@ namespace test {
 	class test_ui : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "ui_test_case.log" to the output file.
+		 * Assigns the name <tt>"ui_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_ui(const std::string& path) noexcept;
@@ -296,7 +304,7 @@ namespace test {
 	class test_file : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "file_test_case.log" to the output file.
+		 * Assigns the name <tt>"file_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_file(const std::string& path) noexcept;
@@ -318,7 +326,7 @@ namespace test {
 	class test_script : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "script_test_case.log" to the output file.
+		 * Assigns the name <tt>"script_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_script(const std::string& path) noexcept;
@@ -340,7 +348,7 @@ namespace test {
 	class test_gui : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "gui_test_case.log" to the output file.
+		 * Assigns the name <tt>"gui_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_gui(const std::string& path) noexcept;
@@ -363,15 +371,16 @@ namespace test {
 
 	/**
 	 * Tests transitions.h classes.
-	 * The expectation for these tests is that transitions are drawn, fading out then
-	 * fading in, and then the tester can see the transitions, as well as compare the
-	 * expected duration of execution with the actual duration of execution, the latter
-	 * of which can be found in the test case log file.
+	 * The expectation for these tests is that transitions are drawn, fading out
+	 * then fading in, and then the tester can see the transitions, as well as
+	 * compare the expected duration of execution with the actual duration of
+	 * execution, the latter of which can be found in the test case log file.
 	 */
 	class test_transitions : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "transitions_test_case.log" to the output file.
+		 * Assigns the name <tt>"transitions_test_case.log"</tt> to the output
+		 * file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_transitions(const std::string& path) noexcept;
@@ -394,7 +403,7 @@ namespace test {
 	class test_bank : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "bank_test_case.log" to the output file.
+		 * Assigns the name <tt>"bank_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_bank(const std::string& path) noexcept;
@@ -416,7 +425,7 @@ namespace test {
 	class test_tile : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "tile_test_case.log" to the output file.
+		 * Assigns the name <tt>"tile_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_tile(const std::string& path) noexcept;
@@ -438,7 +447,7 @@ namespace test {
 	class test_unit : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "unit_test_case.log" to the output file.
+		 * Assigns the name <tt>"unit_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_unit(const std::string& path) noexcept;
@@ -460,7 +469,7 @@ namespace test {
 	class test_army : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "army_test_case.log" to the output file.
+		 * Assigns the name <tt>"army_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_army(const std::string& path) noexcept;
@@ -482,7 +491,7 @@ namespace test {
 	class test_map : public test::test_case {
 	public:
 		/**
-		 * Assigns the name "map_test_case.log" to the output file.
+		 * Assigns the name <tt>"map_test_case.log"</tt> to the output file.
 		 * @param path The path in which to save the output file.
 		 */
 		test_map(const std::string& path) noexcept;

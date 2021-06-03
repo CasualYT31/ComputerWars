@@ -22,7 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "army.h"
 
-awe::army::army(const std::shared_ptr<const awe::country>& country) noexcept : _country(country) {}
+awe::army::army(const std::shared_ptr<const awe::country>& country) noexcept :
+	_country(country) {}
 
 std::shared_ptr<const awe::country> awe::army::getCountry() const noexcept {
 	return _country;

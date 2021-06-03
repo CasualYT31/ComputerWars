@@ -23,11 +23,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tile.h"
 
 awe::tile::tile(const std::shared_ptr<const awe::tile_type>& type,
-		const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept : _sprite(sheet, 0) {
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept :
+	_sprite(sheet, 0) {
 	setTileType(type);
 }
 
-void awe::tile::setTileType(const std::shared_ptr<const awe::tile_type>& type) noexcept {
+void awe::tile::setTileType(const std::shared_ptr<const awe::tile_type>& type)
+	noexcept {
 	_type = type;
 	_updateSpriteID();
 }
@@ -65,7 +67,8 @@ awe::UnitID awe::tile::getUnit() const noexcept {
 	return _unit;
 }
 
-void awe::tile::setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+void awe::tile::setSpritesheet(
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
 	_sprite.setSpritesheet(sheet);
 }
 

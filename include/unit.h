@@ -38,14 +38,16 @@ namespace awe {
 	public:
 		/**
 		 * Creates a new unit.
-		 * @warning \c army \b must hold a valid country ID: checks must be carried out outside of this class!
+		 * @warning \c army \b must hold a valid country ID: checks must be carried
+		 *          out outside of this class!
 		 * @param   type  The type of the unit, which can't be changed.
 		 * @param   army  The army the unit belongs to, which can't be changed.
 		 * @param   sheet Pointer to the spritesheet to use with this unit.
 		 */
 		unit(const std::shared_ptr<const awe::unit_type>& type = nullptr,
 			const awe::ArmyID army = 0,
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr) noexcept;
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr)
+			noexcept;
 
 		/**
 		 * Gets the unit's type.
@@ -80,7 +82,7 @@ namespace awe {
 
 		/**
 		 * Sets this unit's HP.
-		 * If < 0 is given, 0 will be stored.
+		 * If <tt>< 0</tt> is given, \c 0 will be stored.
 		 * @param hp The new HP of this unit.
 		 */
 		void setHP(const awe::HP hp) noexcept;
@@ -93,7 +95,7 @@ namespace awe {
 
 		/**
 		 * Sets this unit's fuel.
-		 * If < 0 is given, 0 will be stored.
+		 * If <tt>< 0</tt> is given, \c 0 will be stored.
 		 * @param fuel The new fuel of this unit.
 		 */
 		void setFuel(const awe::Fuel fuel) noexcept;
@@ -106,7 +108,7 @@ namespace awe {
 
 		/**
 		 * Sets this unit's ammo.
-		 * If < 0 is given, 0 will be stored.
+		 * If <tt>< 0</tt> is given, \c 0 will be stored.
 		 * @param ammo The new ammo of this unit.
 		 */
 		void setAmmo(const awe::Ammo ammo) noexcept;
@@ -126,7 +128,8 @@ namespace awe {
 		/**
 		 * Unloads a unit from this one, if it exists.
 		 * @param  id The ID of the unit to unload.
-		 * @return \c TRUE if the unit was unloaded successfully, \c FALSE if the unit wasn't loaded.
+		 * @return \c TRUE if the unit was unloaded successfully, \c FALSE if the
+		 *         unit wasn't loaded.
 		 */
 		bool unloadUnit(const awe::UnitID id) noexcept;
 
@@ -138,7 +141,8 @@ namespace awe {
 
 		/**
 		 * Loads this unit onto another.
-		 * Provide \c 0 to indicate that this unit is not to be loaded onto another unit.
+		 * Provide \c 0 to indicate that this unit is not to be loaded onto another
+		 * unit.
 		 * @param id The ID of the unit this one is loaded onto.
 		 */
 		void loadOnto(const awe::UnitID id) noexcept;
@@ -153,7 +157,8 @@ namespace awe {
 		 * Sets the spritesheet to use with this unit.
 		 * @param sheet Pointer to the spritesheet to use with this unit.
 		 */
-		void setSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+		void setSpritesheet(
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
 
 		/**
 		 * Sets the unit's pixel position to the internal sprite.
@@ -165,7 +170,8 @@ namespace awe {
 		/**
 		 * This drawable's \c animate() method.
 		 * Simply calls the internal sprite's \c animate() method.
-		 * @return The return value of <tt>animated_sprite</tt>'s \c animate() call.
+		 * @return The return value of <tt>animated_sprite</tt>'s \c animate()
+		 *         call.
 		 */
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
@@ -173,7 +179,9 @@ namespace awe {
 		 * This drawable's \c draw() method.
 		 * Simply draws \c _sprite to the screen.
 		 * @param target The target to render the tile to.
-		 * @param states The render states to apply to the tile. Applying transforms is perfectly valid and will not alter the internal workings of the drawable.
+		 * @param states The render states to apply to the tile. Applying
+		 *               transforms is perfectly valid and will not alter the
+		 *               internal workings of the drawable.
 		 */
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 

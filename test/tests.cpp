@@ -59,9 +59,9 @@ int test::test() {
 	testcases.push_back(new test::test_map(path));
 
 	// run the test cases
-	for (auto itr = testcases.begin(), enditr = testcases.end(); itr != enditr; itr++) {
-		(*itr)->runTests();
-		delete *itr;
+	for (auto& itr : testcases) {
+		itr->runTests();
+		delete itr;
 	}
 	return 0;
 }
@@ -69,7 +69,8 @@ int test::test() {
 //****************
 //*LOGGER.H TESTS*
 //****************
-test::test_logger::test_logger(const std::string& path) noexcept : test_case(path + "logger_test_case.log") {}
+test::test_logger::test_logger(const std::string& path) noexcept :
+	test_case(path + "logger_test_case.log") {}
 
 void test::test_logger::runTests() noexcept {
 	RUN_TEST(test::test_logger::sink);
@@ -80,7 +81,8 @@ void test::test_logger::runTests() noexcept {
 void test::test_logger::sink() {
 	// first Get should actually create the file, second should not
 	auto firstLog = global::sink::Get("Tests", "Dev", "./test/results/", false);
-	auto secondLog = global::sink::Get("Test Again", "Developer", "./test/", false);
+	auto secondLog =
+		global::sink::Get("Test Again", "Developer", "./test/", false);
 	ASSERT_EQUAL(firstLog, secondLog);
 	bool firstLogFileExists = std::filesystem::exists("./test/results/Log.log");
 	bool secondLogFileExists = std::filesystem::exists("./test/Log.log");
@@ -89,7 +91,8 @@ void test::test_logger::sink() {
 	// now test the properties
 	ASSERT_EQUAL(global::sink::ApplicationName(), "Tests");
 	ASSERT_EQUAL(global::sink::DeveloperName(), "Dev");
-	ASSERT_EQUAL(global::sink::GetYear(), "2021"); // obviously test is dependent on year of execution...
+	// obviously test is dependent on year of execution...
+	ASSERT_EQUAL(global::sink::GetYear(), "2021");
 	// has the file been written as expected so far?
 	// also implicitly tests that GetLog() is working as expected
 	std::string file = global::sink::GetLog();
@@ -111,20 +114,24 @@ void test::test_logger::logger() {
 	log.write("Number = {}", simple_int);
 	log.warning("{} text, {} = number", text, f_number);
 	log.error("Error is {}!", boolean);
-	// now search the log file to see if all of the previous writes were written as expected
+	// now search the log file to see if all of the previous writes were written as
+	// expected
 	std::string logFile = global::sink::GetLog();
 	ASSERT_NOT_EQUAL(logFile.find("[info] Hello World!"), std::string::npos);
-	ASSERT_NOT_EQUAL(logFile.find("[warning] We are currently testing!"), std::string::npos);
+	ASSERT_NOT_EQUAL(
+		logFile.find("[warning] We are currently testing!"), std::string::npos);
 	ASSERT_NOT_EQUAL(logFile.find("[error] Oh no!"), std::string::npos);
 	ASSERT_NOT_EQUAL(logFile.find("[info] Number = 8"), std::string::npos);
-	ASSERT_NOT_EQUAL(logFile.find("[warning] Inserted text, -79.5 = number"), std::string::npos);
+	ASSERT_NOT_EQUAL(logFile.find(
+		"[warning] Inserted text, -79.5 = number"), std::string::npos);
 	ASSERT_NOT_EQUAL(logFile.find("[error] Error is true!"), std::string::npos);
 }
 
 //******************
 //*SAFEJSON.H TESTS*
 //******************
-test::test_safejson::test_safejson(const std::string& path) noexcept : test_case(path + "safejson_test_case.log") {}
+test::test_safejson::test_safejson(const std::string& path) noexcept :
+	test_case(path + "safejson_test_case.log") {}
 
 void test::test_safejson::runTests() noexcept {
 	RUN_TEST(test::test_safejson::json);
@@ -209,7 +216,8 @@ void test::test_safejson::json() {
 //******************
 //*LANGUAGE.H TESTS*
 //******************
-test::test_language::test_language(const std::string& path) noexcept : test_case(path + "language_test_case.log") {}
+test::test_language::test_language(const std::string& path) noexcept :
+	test_case(path + "language_test_case.log") {}
 
 void test::test_language::runTests() noexcept {
 	RUN_TEST(test::test_language::expand_string);
@@ -247,15 +255,24 @@ void test::test_language::expand_string() {
 void test::test_language::expand_string_(const std::string& var) {
 	// see expand_string() ~ this method performs tests a-i
 	ASSERT_EQUAL(i18n::expand_string::insert("Hello World!"), "Hello World!");
-	ASSERT_EQUAL(i18n::expand_string::insert("Hello" + var + "World!"), "Hello" + var + "World!");
-	ASSERT_EQUAL(i18n::expand_string::insert("Hello" + var + "World!" + var), "Hello" + var + "World!" + var);
-	ASSERT_EQUAL(i18n::expand_string::insert("var1= var2=", 18, "Test"), "var1= var2=");
-	ASSERT_EQUAL(i18n::expand_string::insert("var1=" + var + " var2=", 18, "Test"), "var1=18 var2=");
-	ASSERT_EQUAL(i18n::expand_string::insert("var1=" + var + " var2=" + var, -18, "Test"), "var1=-18 var2=Test");
-	ASSERT_EQUAL(i18n::expand_string::insert(var + "var1=" + var + " var2=" + var, 0.5, "Testing"), "0.5var1=Testing var2=" + var);
-	ASSERT_EQUAL(i18n::expand_string::insert(var + var, true, false, 9.792), var);
-	ASSERT_EQUAL(i18n::expand_string::insert(var + var + var + " " + var + var + var + " " + var + var + var, 34, "LLL", 9.792),
-		                                     var + "34 " + var + "LLL " + var + "9.792");
+	ASSERT_EQUAL(i18n::expand_string::insert(
+		"Hello" + var + "World!"), "Hello" + var + "World!");
+	ASSERT_EQUAL(i18n::expand_string::insert(
+		"Hello" + var + "World!" + var), "Hello" + var + "World!" + var);
+	ASSERT_EQUAL(i18n::expand_string::insert(
+		"var1= var2=", 18, "Test"), "var1= var2=");
+	ASSERT_EQUAL(i18n::expand_string::insert(
+		"var1=" + var + " var2=", 18, "Test"), "var1=18 var2=");
+	ASSERT_EQUAL(i18n::expand_string::insert(
+		"var1=" + var + " var2=" + var, -18, "Test"), "var1=-18 var2=Test");
+	ASSERT_EQUAL(i18n::expand_string::insert(
+		var + "var1=" + var + " var2=" + var, 0.5, "Testing"),
+		"0.5var1=Testing var2=" + var);
+	ASSERT_EQUAL(i18n::expand_string::insert(
+		var + var, true, false, 9.792), var);
+	ASSERT_EQUAL(i18n::expand_string::insert(
+		var + var + var + " " + var + var + var + " " + var + var + var, 34, "LLL",
+		9.792), var + "34 " + var + "LLL " + var + "9.792");
 }
 
 void test::test_language::language_dictionary() {
@@ -293,10 +310,13 @@ void test::test_language::language_dictionary_json() {
 	// test non-existent file
 	i18n::language_dictionary jsonscripttest;
 	jsonscripttest.load("file");
-	ASSERT_TRUE(jsonscripttest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
-	// instantiate a fresh language_dictionary object and test the json_script methods
+	ASSERT_TRUE(
+		jsonscripttest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
+	// instantiate a fresh language_dictionary object and test the json_script
+	// methods
 	// common approach for json_script class:
-	// ensure load() works and that it completely replaces the state of the object as required
+	// ensure load() works and that it completely replaces the state of the object
+	// as required
 	// ensure that save() writes a JSON script as necessary in the correct format,
 	// this can easily be tested by using the verified load() method.
 	i18n::language_dictionary dict_js("test_dict_json_script");
@@ -318,7 +338,8 @@ void test::test_language::language_dictionary_json() {
 //**************
 //*UUID.H TESTS*
 //**************
-test::test_uuid::test_uuid(const std::string& path) noexcept : test_case(path + "uuid_test_case.log"), ID(UUID_INIT) {}
+test::test_uuid::test_uuid(const std::string& path) noexcept :
+	test_case(path + "uuid_test_case.log"), ID(UUID_INIT) {}
 
 void test::test_uuid::runTests() noexcept {
 	RUN_TEST(test::test_uuid::uuid);
@@ -344,7 +365,8 @@ void test::test_uuid::uuid() {
 //***************
 //*FONTS.H TESTS*
 //***************
-test::test_fonts::test_fonts(const std::string& path) noexcept : test_case(path + "fonts_test_case.log") {}
+test::test_fonts::test_fonts(const std::string& path) noexcept :
+	test_case(path + "fonts_test_case.log") {}
 
 void test::test_fonts::runTests() noexcept {
 	RUN_TEST(test::test_fonts::fonts);
@@ -364,12 +386,14 @@ void test::test_fonts::fonts() {
 	// test load() ~ existent file
 	fontstest.load("test/assets/fonts/fonts.json");
 	ASSERT_EQUAL(fontstest["dialogue"]->getInfo().family, "Advance Wars 2 GBA");
-	// test load() ~ non-existent file ~ ensure that state isn't overwritten (it shouldn't in this case)
+	// test load() ~ non-existent file ~ ensure that state isn't overwritten
+	// (it shouldn't in this case)
 	fontstest.load("anotherbadfile.json");
 	ASSERT_TRUE(fontstest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
 	fontstest.resetState();
 	ASSERT_EQUAL(fontstest["dialogue"]->getInfo().family, "Advance Wars 2 GBA");
-	// test load() ~ faulty file ~ ensure that state is overwritten (as per documentation)
+	// test load() ~ faulty file ~ ensure that state is overwritten
+	// (as per documentation)
 	fontstest.load("test/assets/fonts/faultyfonts.json");
 	fontstest.resetState();
 	ASSERT_EQUAL(fontstest["dialogue"], nullptr);
@@ -389,7 +413,8 @@ void test::test_fonts::fonts() {
 //***************
 //*AUDIO.H TESTS*
 //***************
-test::test_audio::test_audio(const std::string& path) noexcept : test_case(path + "audio_test_case.log") {}
+test::test_audio::test_audio(const std::string& path) noexcept :
+	test_case(path + "audio_test_case.log") {}
 
 void test::test_audio::runTests() noexcept {
 	RUN_TEST(test::test_audio::audio);
@@ -436,13 +461,15 @@ void test::test_audio::audio() {
 	audio.play("noco");
 	longWait("Now playing... noco.");
 	// test fadeout() and granularity stuff
-	std::cout << "Now fading out for... 3 seconds. With granularity... " << audio.getGranularity() << std::endl;
+	std::cout << "Now fading out for... 3 seconds. With granularity... " <<
+		audio.getGranularity() << std::endl;
 	while (!audio.fadeout(sf::seconds(3.0)));
 	shortWait("");
 	audio.play("noco");
 	longWait("Now playing... noco.");
 	audio.setGranularity(50.0);
-	std::cout << "Now fading out for... 3 seconds. With granularity... " << audio.getGranularity() << std::endl;
+	std::cout << "Now fading out for... 3 seconds. With granularity... " <<
+		audio.getGranularity() << std::endl;
 	while (!audio.fadeout(sf::seconds(3.0)));
 	shortWait("");
 	// test music playing behaviour
@@ -454,7 +481,8 @@ void test::test_audio::audio() {
 	longWait("Now pausing...");
 	audio.play("noco");
 	longWait("Now playing... noco.");
-	audio.play("jake"); // should start from the beginning again despite being paused previously
+	// should start from the beginning again despite being paused previously
+	audio.play("jake");
 	longWait("Now playing... jake.");
 	// test sound playing behaviour
 	longWait("Now testing sounds...");
@@ -490,7 +518,8 @@ void test::test_audio::shortWait(const std::string& msg) noexcept {
 //******************
 //*RENDERER.H TESTS*
 //******************
-test::test_renderer::test_renderer(const std::string& path) noexcept : test_case(path + "renderer_test_case.log") {}
+test::test_renderer::test_renderer(const std::string& path) noexcept :
+	test_case(path + "renderer_test_case.log") {}
 
 void test::test_renderer::runTests() noexcept {
 	RUN_TEST(test::test_renderer::renderer);
@@ -502,7 +531,8 @@ void test::test_renderer::renderer() {
 	// test loading valid script
 	window.load("test/assets/renderer/renderer.json");
 	ASSERT_EQUAL(window.getSettings().caption, "Computer Wars");
-	// test loading faulty script ~ some properties should overwrite and others shouldn't
+	// test loading faulty script ~ some properties should overwrite and others
+	// shouldn't
 	window.load("test/assets/renderer/faultyrenderer.json");
 	ASSERT_EQUAL(window.getSettings().caption, "Computer Wars");
 	window.load("test/assets/renderer/renderer.json");
@@ -529,7 +559,8 @@ void test::test_renderer::renderer() {
 //*****************
 //*TEXTURE.H TESTS*
 //*****************
-test::test_texture::test_texture(const std::string& path) noexcept : test_case(path + "texture_test_case.log") {}
+test::test_texture::test_texture(const std::string& path) noexcept :
+	test_case(path + "texture_test_case.log") {}
 
 void test::test_texture::runTests() noexcept {
 	RUN_TEST(test::test_texture::animation);
@@ -537,7 +568,8 @@ void test::test_texture::runTests() noexcept {
 }
 
 void test::test_texture::animation() {
-	std::shared_ptr<sfx::animated_spritesheet> sheet = std::make_shared<sfx::animated_spritesheet>();
+	std::shared_ptr<sfx::animated_spritesheet> sheet =
+		std::make_shared<sfx::animated_spritesheet>();
 	// load good script
 	sheet->load("test/assets/sprites/sheet.json");
 	try {
@@ -547,7 +579,8 @@ void test::test_texture::animation() {
 	}
 	try {
 		sheet->accessTexture(1);
-		ASSERT_EQUAL("sheet did not throw", "even though there isn't any second frame");
+		ASSERT_EQUAL("sheet did not throw",
+			"even though there isn't any second frame");
 	} catch (std::out_of_range&) {}
 	// load faulty script ~ state should be retained if path key was invalid
 	sheet->load("test/assets/sprites/faultysheet.json");
@@ -575,7 +608,8 @@ void test::test_texture::animation() {
 		}
 	}
 	// test animated sprite
-	std::shared_ptr<sfx::animated_spritesheet> ani = std::make_shared<sfx::animated_spritesheet>();
+	std::shared_ptr<sfx::animated_spritesheet> ani =
+		std::make_shared<sfx::animated_spritesheet>();
 	ani->load("test/assets/sprites/ani.json");
 	sprite.setSpritesheet(ani);
 	sprite.setSprite(0);
@@ -587,7 +621,8 @@ void test::test_texture::animation() {
 		window.display();
 	}
 	// test increment and decrement operators
-	std::shared_ptr<sfx::animated_spritesheet> multi = std::make_shared<sfx::animated_spritesheet>();
+	std::shared_ptr<sfx::animated_spritesheet> multi =
+		std::make_shared<sfx::animated_spritesheet>();
 	multi->load("test/assets/sprites/multi.json");
 	sprite.setSpritesheet(multi);
 	sprite.setSprite(0);
@@ -613,7 +648,8 @@ void test::test_texture::animation() {
 //*******************
 //*USERINPUT.H TESTS*
 //*******************
-test::test_ui::test_ui(const std::string& path) noexcept : test_case(path + "ui_test_case.log") {}
+test::test_ui::test_ui(const std::string& path) noexcept :
+	test_case(path + "ui_test_case.log") {}
 
 void test::test_ui::runTests() noexcept {
 	RUN_TEST(test::test_ui::ui);
@@ -640,7 +676,8 @@ void test::test_ui::ui() {
 //**************
 //*FILE.H TESTS*
 //**************
-test::test_file::test_file(const std::string& path) noexcept : test_case(path + "file_test_case.log") {}
+test::test_file::test_file(const std::string& path) noexcept :
+	test_case(path + "file_test_case.log") {}
 
 void test::test_file::runTests() noexcept {
 	RUN_TEST(test::test_file::file);
@@ -649,12 +686,16 @@ void test::test_file::runTests() noexcept {
 
 void test::test_file::file() {
 	// first, let's test the static method convertNumber
-	// these tests should work out regardless of the byte ordering on the running system
-	ASSERT_EQUAL(engine::binary_file::convertNumber<unsigned int>(255), (unsigned int)4278190080);
-	ASSERT_EQUAL(engine::binary_file::convertNumber<long long>(255), (long long)-72057594037927936);
+	// these tests should work out regardless of the byte ordering on the running
+	// system
+	ASSERT_EQUAL(engine::binary_file::convertNumber<unsigned int>(255),
+		(unsigned int)4278190080);
+	ASSERT_EQUAL(engine::binary_file::convertNumber<long long>(255),
+		(long long)-72057594037927936);
 	ASSERT_NOT_EQUAL(engine::binary_file::convertNumber<float>(1.0), (float)1.0);
 	ASSERT_NOT_EQUAL(engine::binary_file::convertNumber<double>(1.0), (double)1.0);
-	// next, let's test opening a non-existent file to ensure an exception is thrown
+	// next, let's test opening a non-existent file to ensure an exception is
+	// thrown
 	engine::binary_file file;
 	try {
 		file.open("badfile.bin", true);
@@ -718,7 +759,8 @@ void test::test_file::file() {
 //****************
 //*SCRIPT.H TESTS*
 //****************
-test::test_script::test_script(const std::string& path) noexcept : test_case(path + "script_test_case.log") {}
+test::test_script::test_script(const std::string& path) noexcept :
+	test_case(path + "script_test_case.log") {}
 
 void test::test_script::runTests() noexcept {
 	RUN_TEST(test::test_script::scripts);
@@ -732,7 +774,8 @@ void test::test_script::scripts() {
 //*************
 //*GUI.H TESTS*
 //*************
-test::test_gui::test_gui(const std::string& path) noexcept : test_case(path + "gui_test_case.log") {}
+test::test_gui::test_gui(const std::string& path) noexcept :
+	test_case(path + "gui_test_case.log") {}
 
 void test::test_gui::runTests() noexcept {
 	RUN_TEST(test::test_gui::bg);
@@ -751,7 +794,8 @@ void test::test_gui::gui() {
 //*********************
 //*TRANSITIONS.H TESTS*
 //*********************
-test::test_transitions::test_transitions(const std::string& path) noexcept : test_case(path + "transitions_test_case.log") {}
+test::test_transitions::test_transitions(const std::string& path) noexcept :
+	test_case(path + "transitions_test_case.log") {}
 
 void test::test_transitions::runTests() noexcept {
 	RUN_TEST(test::test_transitions::rectangle);
@@ -783,7 +827,8 @@ void test::test_transitions::rectangle() {
 //**************
 //*BANK.H TESTS*
 //**************
-test::test_bank::test_bank(const std::string& path) noexcept : test_case(path + "bank_test_case.log") {}
+test::test_bank::test_bank(const std::string& path) noexcept :
+	test_case(path + "bank_test_case.log") {}
 
 void test::test_bank::runTests() noexcept {
 	RUN_TEST(test::test_bank::bank);
@@ -807,7 +852,8 @@ void test::test_bank::bank() {
 //**************
 //*TILE.H TESTS*
 //**************
-test::test_tile::test_tile(const std::string& path) noexcept : test_case(path + "tile_test_case.log") {}
+test::test_tile::test_tile(const std::string& path) noexcept :
+	test_case(path + "tile_test_case.log") {}
 
 void test::test_tile::runTests() noexcept {
 	RUN_TEST(test::test_tile::tile);
@@ -822,7 +868,8 @@ void test::test_tile::tile() {
 //**************
 //*UNIT.H TESTS*
 //**************
-test::test_unit::test_unit(const std::string& path) noexcept : test_case(path + "unit_test_case.log") {}
+test::test_unit::test_unit(const std::string& path) noexcept :
+	test_case(path + "unit_test_case.log") {}
 
 void test::test_unit::runTests() noexcept {
 	RUN_TEST(test::test_unit::unit);
@@ -837,7 +884,8 @@ void test::test_unit::unit() {
 //**************
 //*ARMY.H TESTS*
 //**************
-test::test_army::test_army(const std::string& path) noexcept : test_case(path + "army_test_case.log") {}
+test::test_army::test_army(const std::string& path) noexcept :
+	test_case(path + "army_test_case.log") {}
 
 void test::test_army::runTests() noexcept {
 	RUN_TEST(test::test_army::army);
@@ -852,7 +900,8 @@ void test::test_army::army() {
 //*************
 //*MAP.H TESTS*
 //*************
-test::test_map::test_map(const std::string& path) noexcept : test_case(path + "map_test_case.log") {}
+test::test_map::test_map(const std::string& path) noexcept :
+	test_case(path + "map_test_case.log") {}
 
 void test::test_map::runTests() noexcept {
 	RUN_TEST(test::test_map::map);

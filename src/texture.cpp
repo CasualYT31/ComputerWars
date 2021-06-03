@@ -22,11 +22,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "texture.h"
 
-sfx::animated_spritesheet::animated_spritesheet(const std::string& name) noexcept : _logger(name) {}
+sfx::animated_spritesheet::animated_spritesheet(const std::string& name) noexcept :
+	_logger(name) {}
 
-const sf::Texture& sfx::animated_spritesheet::accessTexture(unsigned int frameID) const {
+const sf::Texture& sfx::animated_spritesheet::accessTexture(unsigned int frameID)
+	const {
 	if (frameID >= _frames.size()) {
-		std::string msg = "Attempted to access non-existent frame " + std::to_string(frameID) + ".";
+		std::string msg = "Attempted to access non-existent frame " +
+			std::to_string(frameID) + ".";
 		// _logger.error(msg);
 		throw std::out_of_range(msg);
 	} else {
@@ -36,7 +39,8 @@ const sf::Texture& sfx::animated_spritesheet::accessTexture(unsigned int frameID
 
 sf::IntRect sfx::animated_spritesheet::accessSprite(unsigned int spriteID) const {
 	if (spriteID >= _sprites.size()) {
-		std::string msg = "Attempted to access non-existent sprite " + std::to_string(spriteID) + ".";
+		std::string msg = "Attempted to access non-existent sprite " +
+			std::to_string(spriteID) + ".";
 		// _logger.error(msg);
 		throw std::out_of_range(msg);
 	} else {
@@ -61,7 +65,8 @@ bool sfx::animated_spritesheet::_load(safe::json& j) noexcept {
 		return false;
 	}
 	if (temp_basepath.find('.') == std::string::npos) {
-		_logger.error("Invalid base path provided - '.###' file format extension is required.");
+		_logger.error("Invalid base path provided - '.###' file format extension "
+			"is required.");
 		return false;
 	}
 	j.apply(frameCount, { "frames" }, &frameCount, true);
@@ -86,14 +91,18 @@ bool sfx::animated_spritesheet::_load(safe::json& j) noexcept {
 				t.height = jj[s][3];
 				_sprites.push_back(t);
 			} catch (std::exception& e) {
-				_logger.warning("An error occurred when attempting to add sprite coordinates to the internal vector: {}.", e.what());
-				_logger.write("The coordinates 0,0,0,0 will be given to sprite {}.", s);
+				_logger.warning("An error occurred when attempting to add sprite "
+					"coordinates to the internal vector: {}.", e.what());
+				_logger.write("The coordinates 0,0,0,0 will be given to sprite "
+					"{}.", s);
 				_sprites.push_back(sf::IntRect());
 			}
 		}
 	} catch (std::exception& e) {
-		_logger.warning("An error occurred when attempting to read sprite coordinates: {}.", e.what());
-		_logger.write("The coordinates 0,0,0,0 will be given to the single sprite.");
+		_logger.warning("An error occurred when attempting to read sprite "
+			"coordinates: {}.", e.what());
+		_logger.write("The coordinates 0,0,0,0 will be given to the single "
+			"sprite.");
 		_sprites.push_back(sf::IntRect());
 	}
 
@@ -104,12 +113,12 @@ bool sfx::animated_spritesheet::_save(nlohmann::ordered_json& j) noexcept {
 	j["path"] = _basepath;
 	j["frames"] = getFrameCount();
 	j["framerate"] = getFramerate();
-	for (auto itr = _sprites.begin(), enditr = _sprites.end(); itr != enditr; itr++) {
+	for (auto& itr : _sprites) {
 		std::array<int, 4> rect;
-		rect[0] = itr->left;
-		rect[1] = itr->top;
-		rect[2] = itr->width;
-		rect[3] = itr->height;
+		rect[0] = itr.left;
+		rect[1] = itr.top;
+		rect[2] = itr.width;
+		rect[3] = itr.height;
 		j["sprites"].push_back(rect);
 	}
 	return true;
@@ -131,14 +140,18 @@ bool sfx::animated_spritesheet::_loadImages(unsigned int expectedFrames) noexcep
 	return result;
 }
 
-sfx::animated_sprite::animated_sprite(const std::string& name) noexcept : _logger(name) {}
+sfx::animated_sprite::animated_sprite(const std::string& name) noexcept :
+	_logger(name) {}
 
-sfx::animated_sprite::animated_sprite(std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite, const std::string& name) noexcept : _logger(name) {
+sfx::animated_sprite::animated_sprite(
+	std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite,
+	const std::string& name) noexcept : _logger(name) {
 	setSpritesheet(sheet);
 	setSprite(sprite);
 }
 
-void sfx::animated_sprite::setSpritesheet(std::shared_ptr<const sfx::animated_spritesheet> sheet) noexcept {
+void sfx::animated_sprite::setSpritesheet(
+	std::shared_ptr<const sfx::animated_spritesheet> sheet) noexcept {
 	_sheet = sheet;
 	if (!_sheet) _sprite.setTextureRect(sf::IntRect(0,0,0,0));
 	_errored = false;
@@ -164,7 +177,9 @@ bool sfx::animated_sprite::animate(const sf::RenderTarget& target) noexcept {
 			_hasNotBeenDrawn = false;
 			_clock.restart();
 		} else {
-			if (_sheet->getFramerate() > 0.0 && _clock.getElapsedTime().asSeconds() >= 1.0 / _sheet->getFramerate()) {
+			if (_sheet->getFramerate() > 0.0 &&
+				_clock.getElapsedTime().asSeconds() >= 1.0 /
+				_sheet->getFramerate()) {
 				++(*this);
 				_clock.restart();
 			}
@@ -174,7 +189,8 @@ bool sfx::animated_sprite::animate(const sf::RenderTarget& target) noexcept {
 		return getCurrentFrame() == _sheet->getFrameCount() - 1;
 	} catch (std::out_of_range& e) {
 		if (!_errored) {
-			_logger.error("Attempted to access non-existent frame {} of sprite {}: {}", _currentFrame, _spriteID, e.what());
+			_logger.error("Attempted to access non-existent frame {} of sprite {}"
+				": {}", _currentFrame, _spriteID, e.what());
 			_errored = true;
 		}
 		return true;
@@ -219,7 +235,8 @@ unsigned int sfx::animated_sprite::operator--(int) noexcept {
 }
 
 sf::Vector2f sfx::animated_sprite::getSize() const noexcept {
-	return sf::Vector2f((float)_sprite.getTextureRect().width, (float)_sprite.getTextureRect().height);
+	return sf::Vector2f((float)_sprite.getTextureRect().width,
+		(float)_sprite.getTextureRect().height);
 }
 
 void sfx::animated_sprite::setPosition(const sf::Vector2f& newPosition) noexcept {
@@ -230,6 +247,7 @@ sf::Vector2f sfx::animated_sprite::getPosition() const noexcept {
 	return _sprite.getPosition();
 }
 
-void sfx::animated_sprite::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+void sfx::animated_sprite::draw(sf::RenderTarget& target, sf::RenderStates states)
+	const {
 	target.draw(_sprite, states);
 }

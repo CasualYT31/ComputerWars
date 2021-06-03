@@ -46,14 +46,18 @@ std::string i18n::expand_string::insert(const std::string& original) noexcept {
 	return finalString;
 }
 
-i18n::language_dictionary::language_dictionary(const std::string& name) noexcept : _logger(name) {}
+i18n::language_dictionary::language_dictionary(const std::string& name) noexcept :
+	_logger(name) {}
 
-bool i18n::language_dictionary::addLanguage(const std::string& id, const std::string& path) noexcept {
+bool i18n::language_dictionary::addLanguage(const std::string& id,
+	const std::string& path) noexcept {
 	if (id == _currentLanguage) {
-		_logger.warning("Attempted to replace the script path of the current language \"{}\".", id);
+		_logger.warning("Attempted to replace the script path of the current "
+			"language \"{}\".", id);
 		return false;
 	} else if (id == "") {
-		_logger.warning("Attempted to add a script path with a blank language ID.");
+		_logger.warning("Attempted to add a script path with a blank language "
+			"ID.");
 		return false;
 	} else {
 		_languageFiles[id] = path;
@@ -63,10 +67,12 @@ bool i18n::language_dictionary::addLanguage(const std::string& id, const std::st
 
 bool i18n::language_dictionary::removeLanguage(const std::string& id) noexcept {
 	if (_languageFiles.find(id) == _languageFiles.end()) {
-		_logger.warning("Attempted to remove non-existent language script path \"{}\".", id);
+		_logger.warning("Attempted to remove non-existent language script path "
+			"\"{}\".", id);
 		return false;
 	} else if (id == _currentLanguage) {
-		_logger.warning("Attempted to remove current language script path \"{}\".", id);
+		_logger.warning("Attempted to remove current language script path \"{}\".",
+			id);
 		return false;
 	} else {
 		_languageFiles.erase(id);
@@ -76,7 +82,8 @@ bool i18n::language_dictionary::removeLanguage(const std::string& id) noexcept {
 
 bool i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
 	if (id != "" && _languageFiles.find(id) == _languageFiles.end()) {
-		_logger.warning("Attempted to switch to non-existent string map \"{}\".", id);
+		_logger.warning("Attempted to switch to non-existent string map \"{}\".",
+			id);
 		return false;
 	} else {
 		if (id == "") {
@@ -86,9 +93,12 @@ bool i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
 		}
 		std::unique_ptr<i18n::language_dictionary::language> newMap = nullptr;
 		try {
-			newMap = std::make_unique<i18n::language_dictionary::language>("language_" + id);
+			newMap = std::make_unique<i18n::language_dictionary::language>(
+				"language_" + id
+			);
 		} catch (std::bad_alloc& e) {
-			_logger.error("Failed to allocate memory for the string map of langauage \"{}\": {}", id, e.what());
+			_logger.error("Failed to allocate memory for the string map of "
+				"langauage \"{}\": {}", id, e.what());
 			return false;
 		}
 		newMap->load(_languageFiles[id]);
@@ -97,7 +107,8 @@ bool i18n::language_dictionary::setLanguage(const std::string& id) noexcept {
 			_currentLanguage = id;
 			return true;
 		} else {
-			_logger.error("Failed to load string map script for language \"{}\".", id);
+			_logger.error("Failed to load string map script for language \"{}\".",
+				id);
 			return false;
 		}
 	}
@@ -134,13 +145,14 @@ bool i18n::language_dictionary::_load(safe::json& j) noexcept {
 
 bool i18n::language_dictionary::_save(nlohmann::ordered_json& j) noexcept {
 	j["lang"] = _currentLanguage;
-	for (auto itr = _languageFiles.begin(), enditr = _languageFiles.end(); itr != enditr; itr++) {
-		j[itr->first] = itr->second;
+	for (auto& itr : _languageFiles) {
+		j[itr.first] = itr.second;
 	}
 	return true;
 }
 
-i18n::language_dictionary::language::language(const std::string& name) noexcept : _logger(name) {}
+i18n::language_dictionary::language::language(const std::string& name) noexcept :
+	_logger(name) {}
 
 bool i18n::language_dictionary::language::_load(safe::json& j) noexcept {
 	_strings.clear();
@@ -155,9 +167,10 @@ bool i18n::language_dictionary::language::_load(safe::json& j) noexcept {
 	return true;
 }
 
-bool i18n::language_dictionary::language::_save(nlohmann::ordered_json& j) noexcept {
-	for (auto itr = _strings.begin(), enditr = _strings.end(); itr != enditr; itr++) {
-		j[itr->first] = itr->second;
+bool i18n::language_dictionary::language::_save(nlohmann::ordered_json& j)
+	noexcept {
+	for (auto& itr : _strings) {
+		j[itr.first] = itr.second;
 	}
 	return true;
 }

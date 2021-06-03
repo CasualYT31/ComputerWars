@@ -31,7 +31,8 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	awe::map map(file, _countries, _tiles, _units);
 	map.selectTile(sf::Vector2u(0, 0));
 	map.selectArmy(0);
-	map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, map.getMapSize().x, map.getMapSize().y));
+	map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, map.getMapSize().x,
+		map.getMapSize().y));
 	map.setTileSpritesheet(_sprites->tile->normal);
 	map.setUnitSpritesheet(_sprites->unit->idle);
 
@@ -78,7 +79,9 @@ int awe::game_engine::_initCheck() const noexcept {
 	if (!_scripts) errstring += "scripts\n";
 	if (!_gui) errstring += "gui\n";
 	if (errstring.length()) {
-		_logger.error("Fatal error: could not run the game engine due to the following objects not being allocated correctly:\n{}Game will now shut down.", errstring);
+		_logger.error("Fatal error: could not run the game engine due to the "
+			"following objects not being allocated correctly:\n{}Game will now "
+			"shut down.", errstring);
 		return 1;
 	}
 	return 0;
@@ -87,39 +90,48 @@ int awe::game_engine::_initCheck() const noexcept {
 
 // set methods
 
-void awe::game_engine::setCountries(const std::shared_ptr<awe::bank<awe::country>>& ptr) noexcept {
+void awe::game_engine::setCountries(
+	const std::shared_ptr<awe::bank<awe::country>>& ptr) noexcept {
 	_countries = ptr;
 }
 
-void awe::game_engine::setWeathers(const std::shared_ptr<awe::bank<awe::weather>>& ptr) noexcept {
+void awe::game_engine::setWeathers(
+	const std::shared_ptr<awe::bank<awe::weather>>& ptr) noexcept {
 	_weathers = ptr;
 }
 
-void awe::game_engine::setEnvironments(const std::shared_ptr<awe::bank<awe::environment>>& ptr) noexcept {
+void awe::game_engine::setEnvironments(
+	const std::shared_ptr<awe::bank<awe::environment>>& ptr) noexcept {
 	_environments = ptr;
 }
 
-void awe::game_engine::setMovements(const std::shared_ptr<awe::bank<awe::movement_type>>& ptr) noexcept {
+void awe::game_engine::setMovements(
+	const std::shared_ptr<awe::bank<awe::movement_type>>& ptr) noexcept {
 	_movements = ptr;
 }
 
-void awe::game_engine::setTerrains(const std::shared_ptr<awe::bank<awe::terrain>>& ptr) noexcept {
+void awe::game_engine::setTerrains(
+	const std::shared_ptr<awe::bank<awe::terrain>>& ptr) noexcept {
 	_terrains = ptr;
 }
 
-void awe::game_engine::setTiles(const std::shared_ptr<awe::bank<awe::tile_type>>& ptr) noexcept {
+void awe::game_engine::setTiles(
+	const std::shared_ptr<awe::bank<awe::tile_type>>& ptr) noexcept {
 	_tiles = ptr;
 }
 
-void awe::game_engine::setUnits(const std::shared_ptr<awe::bank<awe::unit_type>>& ptr) noexcept {
+void awe::game_engine::setUnits(
+	const std::shared_ptr<awe::bank<awe::unit_type>>& ptr) noexcept {
 	_units = ptr;
 }
 
-void awe::game_engine::setCommanders(const std::shared_ptr<awe::bank<awe::commander>>& ptr) noexcept {
+void awe::game_engine::setCommanders(
+	const std::shared_ptr<awe::bank<awe::commander>>& ptr) noexcept {
 	_commanders = ptr;
 }
 
-void awe::game_engine::setDictionary(const std::shared_ptr<i18n::language_dictionary>& ptr) noexcept {
+void awe::game_engine::setDictionary(
+	const std::shared_ptr<i18n::language_dictionary>& ptr) noexcept {
 	_dictionary = ptr;
 }
 
@@ -135,19 +147,23 @@ void awe::game_engine::setMusic(const std::shared_ptr<sfx::audio>& ptr) noexcept
 	_music = ptr;
 }
 
-void awe::game_engine::setRenderer(const std::shared_ptr<sfx::renderer>& ptr) noexcept {
+void awe::game_engine::setRenderer(const std::shared_ptr<sfx::renderer>& ptr)
+	noexcept {
 	_renderer = ptr;
 }
 
-void awe::game_engine::setUserInput(const std::shared_ptr<sfx::user_input>& ptr) noexcept {
+void awe::game_engine::setUserInput(const std::shared_ptr<sfx::user_input>& ptr)
+	noexcept {
 	_userinput = ptr;
 }
 
-void awe::game_engine::setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept {
+void awe::game_engine::setSpritesheets(
+	const std::shared_ptr<awe::spritesheets>& ptr) noexcept {
 	_sprites = ptr;
 }
 
-void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& ptr) noexcept {
+void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& ptr)
+	noexcept {
 	_scripts = ptr;
 }
 

@@ -22,7 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * @file engine.h
- * Declares the class which brings together all the others to maintain the engine as it executes.
+ * Declares the class which brings together all the others to maintain the engine
+ * as it executes.
  */
 
 #pragma once
@@ -46,16 +47,20 @@ namespace awe {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the log file. Defaults to "engine."
+		 * @param name The name to give this particular instantiation within the
+		 *             log file. Defaults to "engine."
 		 * @sa    \c global::logger
 		 */
 		game_engine(const std::string& name = "engine") noexcept;
 
 		/**
 		 * Executes the game based on given game data.
-		 * This method is blocking, meaning that it will not return so long as the game is still running.
-		 * @param  file Temporary parameter storing the file path to a binary map file to open.
-		 * @return \c 0 upon successful execution, \c !0 upon a fatal error occurring.
+		 * This method is blocking, meaning that it will not return so long as the
+		 * game is still running.
+		 * @param  file Temporary parameter storing the file path to a binary map
+		 *              file to open.
+		 * @return \c 0 upon successful execution, \c !0 upon a fatal error
+		 *         occurring.
 		 */
 		int run(const std::string& file) noexcept;
 
@@ -63,55 +68,64 @@ namespace awe {
 		 * Sets the engine's available countries.
 		 * @param ptr Pointer to the data.
 		 */
-		void setCountries(const std::shared_ptr<awe::bank<awe::country>>& ptr) noexcept;
+		void setCountries(const std::shared_ptr<awe::bank<awe::country>>& ptr)
+			noexcept;
 
 		/**
 		 * Sets the engine's available weather states.
 		 * @param ptr Pointer to the data.
 		 */
-		void setWeathers(const std::shared_ptr<awe::bank<awe::weather>>& ptr) noexcept;
+		void setWeathers(const std::shared_ptr<awe::bank<awe::weather>>& ptr)
+			noexcept;
 
 		/**
 		 * Sets the engine's available environments.
 		 * @param ptr Pointer to the data.
 		 */
-		void setEnvironments(const std::shared_ptr<awe::bank<awe::environment>>& ptr) noexcept;
+		void setEnvironments(const std::shared_ptr<awe::bank<awe::environment>>&
+			ptr) noexcept;
 
 		/**
 		 * Sets the engine's available movement types.
 		 * @param ptr Pointer to the data.
 		 */
-		void setMovements(const std::shared_ptr<awe::bank<awe::movement_type>>& ptr) noexcept;
+		void setMovements(const std::shared_ptr<awe::bank<awe::movement_type>>&
+			ptr) noexcept;
 
 		/**
 		 * Sets the engine's available terrain types.
 		 * @param ptr Pointer to the data.
 		 */
-		void setTerrains(const std::shared_ptr<awe::bank<awe::terrain>>& ptr) noexcept;
+		void setTerrains(const std::shared_ptr<awe::bank<awe::terrain>>& ptr)
+			noexcept;
 
 		/**
 		 * Sets the engine's available tiles.
 		 * @param ptr Pointer to the data.
 		 */
-		void setTiles(const std::shared_ptr<awe::bank<awe::tile_type>>& ptr) noexcept;
+		void setTiles(const std::shared_ptr<awe::bank<awe::tile_type>>& ptr)
+			noexcept;
 
 		/**
 		 * Sets the engine's available unit types.
 		 * @param ptr Pointer to the data.
 		 */
-		void setUnits(const std::shared_ptr<awe::bank<awe::unit_type>>& ptr) noexcept;
+		void setUnits(const std::shared_ptr<awe::bank<awe::unit_type>>& ptr)
+			noexcept;
 
 		/**
 		 * Sets the engine's available commanders.
 		 * @param ptr Pointer to the data.
 		 */
-		void setCommanders(const std::shared_ptr<awe::bank<awe::commander>>& ptr) noexcept;
+		void setCommanders(const std::shared_ptr<awe::bank<awe::commander>>& ptr)
+			noexcept;
 
 		/**
 		 * Sets the engine's available languages.
 		 * @param ptr Pointer to the data.
 		 */
-		void setDictionary(const std::shared_ptr<i18n::language_dictionary>& ptr) noexcept;
+		void setDictionary(const std::shared_ptr<i18n::language_dictionary>& ptr)
+			noexcept;
 
 		/**
 		 * Sets the engine's available fonts.
@@ -147,7 +161,8 @@ namespace awe {
 		 * Sets the engine's spritesheets.
 		 * @param ptr Pointer to the data.
 		 */
-		void setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr) noexcept;
+		void setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr)
+			noexcept;
 
 		/**
 		 * Sets the engine's available scripts.
@@ -162,15 +177,17 @@ namespace awe {
 		void setGUI(const std::shared_ptr<engine::gui>& ptr) noexcept;
 	private:
 		/**
-		 * Method called at the start of \c run() to make preliminary checks on internal data.
-		 * All shared pointers are tested here: if at least one of them is \c nullptr, \c 1 will be returned.
+		 * Method called at the start of \c run() to make preliminary checks on
+		 * internal data.
+		 * All shared pointers are tested here: if at least one of them is
+		 * \c nullptr, \c 1 will be returned.
 		 * @return \c 0 if all tests passed, \c 1 if not.
 		 */
 		int _initCheck() const noexcept;
 
-		//================================
-		//==========   GAME DATA==========
-		//================================
+		//=============================
+		//==========GAME DATA==========
+		//=============================
 		/**
 		 * Pointer to the static information on all the countries available.
 		 */
@@ -187,7 +204,8 @@ namespace awe {
 		std::shared_ptr<awe::bank<awe::environment>> _environments;
 
 		/**
-		 * Pointer to the static information on all the types of movement available.
+		 * Pointer to the static information on all the types of movement
+		 * available.
 		 */
 		std::shared_ptr<awe::bank<awe::movement_type>> _movements;
 
