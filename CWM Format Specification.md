@@ -4,9 +4,8 @@
 
 The different specifications for each version of the Computer Wars map
 format will make reference to the typedefs defined in the C++ header file
-[`typedef.h`]
-(https://github.com/CasualYT31/ComputerWars/blob/master/include/typedef.h),
-so knowledge on most of these typedefs is required to understand them.
+[typedef.h](./include/typedef.h), so knowledge on most of these typedefs is
+required to understand them.
 
 All map files in Computer Wars are written in binary, and are read from and
 written to using the `engine::binary_file` class. As such, familiarity with
