@@ -62,7 +62,7 @@ namespace awe {
 	public:
 		/**
 		 * Reserved value representing no army.
-		 * Assigned the maximum value of the unsigned type of ArmyID.
+		 * Assigned the maximum value of the unsigned type of \c awe::ArmyID.
 		 */
 		static const awe::ArmyID NO_ARMY = ~((awe::ArmyID)0);
 
