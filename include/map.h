@@ -564,6 +564,8 @@ namespace awe {
 		 * @param  units     Information on the unit types to index when reading
 		 *                   unit type IDs.
 		 * @param  id        The ID of the unit to write info on, if writing.
+		 * @param  curtile   The location of the tile to create the unit on, if
+		 *                   reading.
 		 * @throws std::exception if the unit info couldn't be read or written.
 		 * @return When loading, \c TRUE if there was a unit created, \c FALSE if
 		 *         no unit was created. When saving, always \c TRUE.
@@ -572,7 +574,7 @@ namespace awe {
 			const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
-			awe::UnitID id);
+			awe::UnitID id, const sf::Vector2u& curtile);
 
 		/**
 		 * File name of the binary file previously read from or written to.

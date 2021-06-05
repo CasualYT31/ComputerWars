@@ -578,7 +578,8 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
 				tile.setPixelPosition(tilex, tiley -
 					(float)(tileHeight - tile.MIN_HEIGHT));
-				_units[tile.getUnit()].setPixelPosition(tilex, tiley);
+				if (tile.getUnit())
+					_units[tile.getUnit()].setPixelPosition(tilex, tiley);
 				tilex += (float)tileWidth;
 			}
 		}
@@ -610,7 +611,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		y < _visiblePortion.top + _visiblePortion.height; y++) {
 		for (sf::Uint32 x = _visiblePortion.left;
 			x < _visiblePortion.left + _visiblePortion.width; x++) {
-			target.draw(_units.at(_tiles[x][y].getUnit()), states);
+			if (_tiles[x][y].getUnit())
+				target.draw(_units.at(_tiles[x][y].getUnit()), states);
 		}
 	}
 	// step 3. the cursor
@@ -689,7 +691,8 @@ void awe::map::_CWM_0(const bool isSave,
 				_file.writeNumber(tile.getTileHP());
 				_file.writeNumber(tile.getTileOwner());
 				if (tile.getUnit()) {
-					_CWM_0_Unit(isSave, countries, tiles, units, tile.getUnit());
+					_CWM_0_Unit(isSave, countries, tiles, units, tile.getUnit(),
+						sf::Vector2u(x, y));
 				} else {
 					_file.writeNumber(awe::army::NO_ARMY);
 				}
@@ -718,7 +721,8 @@ void awe::map::_CWM_0(const bool isSave,
 					setTileHP(pos, hp);
 					awe::ArmyID army = _file.readNumber<awe::ArmyID>();
 					setTileOwner(pos, army);
-					_CWM_0_Unit(isSave, countries, tiles, units, 0);
+					_CWM_0_Unit(isSave, countries, tiles, units, 0,
+						sf::Vector2u(x, y));
 				} else {
 					throw std::exception("read above");
 				}
@@ -730,7 +734,8 @@ void awe::map::_CWM_0(const bool isSave,
 bool awe::map::_CWM_0_Unit(const bool isSave,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-	const std::shared_ptr<awe::bank<awe::unit_type>>& units, awe::UnitID id) {
+	const std::shared_ptr<awe::bank<awe::unit_type>>& units, awe::UnitID id,
+	const sf::Vector2u& curtile) {
 	if (isSave) {
 		auto& unit = _units[id];
 		_file.writeNumber(unit.getArmy());
@@ -741,7 +746,8 @@ bool awe::map::_CWM_0_Unit(const bool isSave,
 		auto loaded = unit.loadedUnits();
 		if (loaded.size()) {
 			for (auto loadedUnitID : loaded) {
-				_CWM_0_Unit(isSave, countries, tiles, units, loadedUnitID);
+				_CWM_0_Unit(isSave, countries, tiles, units, loadedUnitID,
+					curtile);
 			}
 		} else {
 			_file.writeNumber(awe::army::NO_ARMY);
@@ -759,7 +765,8 @@ bool awe::map::_CWM_0_Unit(const bool isSave,
 				setUnitFuel(unitID, fuel);
 				auto ammo = _file.readNumber<awe::Ammo>();
 				setUnitAmmo(unitID, ammo);
-				while (_CWM_0_Unit(isSave, countries, tiles, units, id));
+				setUnitPosition(unitID, curtile);
+				while (_CWM_0_Unit(isSave, countries, tiles, units, id, curtile));
 			} else {
 				throw std::exception("read above");
 			}

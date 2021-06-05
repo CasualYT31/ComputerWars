@@ -101,7 +101,7 @@
 	"05Apipecornerdownright": {"type": 9, "neutral": 73, "tiles": []},
 	"05Bpipecornerdownleft": {"type": 9, "neutral": 74, "tiles": []},
 	"05Cpipecornerupleft": {"type": 9, "neutral": 75, "tiles": []},
-	"05Dpipecornerupright": {"type": 9, "neutral": 219 "tiles": []},
+	"05Dpipecornerupright": {"type": 9, "neutral": 219, "tiles": []},
 	"05Epipeseamhori": {"type": 10, "neutral": 66, "tiles": []},
 	"05Fpipeseamvert": {"type": 10, "neutral": 69, "tiles": []},
 	"060plainseamhori": {"type": 0, "neutral": 67, "tiles": []},
