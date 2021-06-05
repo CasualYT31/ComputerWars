@@ -56,7 +56,7 @@ namespace engine {
 		 * Used in the \c uuid implementation to know when to wrap UUIDs back
 		 * around to \c 0.
 		 */
-		static const awe::UUIDValue INVALID = UINT32_MAX;
+		static const awe::UUIDValue INVALID = ~((awe::UUIDValue)0);
 
 		/**
 		 * Constructs a UUID.

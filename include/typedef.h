@@ -38,6 +38,7 @@ namespace awe {
 
 	/**
 	 * Typedef representing an underlying UUID value.
+	 * @warning Do \b not make this a signed type!
 	 */
 	typedef sf::Uint32 UUIDValue;
 
@@ -72,14 +73,16 @@ namespace awe {
 	/**
 	 * Typedef representing a unit ID.
 	 * \c 0 should be reserved.
-	 * @sa awe::map::_findUnitID()
+	 * @warning Do \b not make this a signed type!
+	 * @sa      awe::map::_findUnitID()
 	 */
 	typedef sf::Uint32 UnitID;
 
 	/**
 	 * Typedef representing an army ID.
 	 * \c UINT32_MAX should be reserved, even if it isn't officially in bank.h...
-	 * @sa awe::army::NO_ARMY
+	 * @warning Do \b not make this a signed type!
+	 * @sa      awe::army::NO_ARMY
 	 */
 	typedef awe::BankID ArmyID;
 }

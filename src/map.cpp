@@ -635,12 +635,11 @@ bool awe::map::_isUnitPresent(const awe::UnitID id) const noexcept {
 awe::UnitID awe::map::_findUnitID() {
 	if (_units.size() == 0) return _lastUnitID;
 	// minus 1 to account for the reserved value, 0
-	if (_units.size() == pow(2, (sizeof awe::UnitID) * 8) - 1)
+	if (_units.size() == (~((awe::UnitID)0)) - 1) 
 		throw std::bad_alloc();
-	auto temp = _lastUnitID + 1;
+	awe::UnitID temp = _lastUnitID + 1;
 	while (_isUnitPresent(temp)) {
-		// manually handle overflow just to be safe
-		if (temp == UINT32_MAX)
+		if (temp == ~((awe::UnitID)0))
 			temp = 1;
 		else
 			temp++;
@@ -684,8 +683,8 @@ void awe::map::_CWM_0(const bool isSave,
 			_file.writeNumber(army.second.getCountry()->getID());
 			_file.writeNumber(army.second.getFunds());
 		}
-		for (sf::Uint64 y = 0; y < getMapSize().y; y++) {
-			for (sf::Uint64 x = 0; x < getMapSize().x; x++) {
+		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
+			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
 				auto& tile = _tiles[x][y];
 				_file.writeNumber(tile.getTileType()->getID());
 				_file.writeNumber(tile.getTileHP());
