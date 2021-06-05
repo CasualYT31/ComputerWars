@@ -67,7 +67,7 @@ these types to be a certain size...).
 | FOR EACH TileRow | | | TileRow = Y co-ordinate, starting at `0`. |
 | FOR EACH TileColumn | Tile Type ID | `awe::BankID` | TileColumn = X
 co-ordinate, starting at `0`. |
-| | Tile HP | `awe::HP` | This would be used for capturing and cannon HP
+| | Tile HP | `awe::HP` | This would be used for capturing and cannon HP \
 and stuff like this. |
 | | Tile Owner | `awe::ArmyID` | `0xFFFFFFFF` means no army owns the tile.|
 | | Unit Owner | `awe::ArmyID` | The owner of the unit on the tile.
