@@ -65,21 +65,13 @@ these types to be a certain size...).
 | FOR EACH Army | Army Country ID | `awe::ArmyID` | |
 | END LOOP | Army Funds | `awe::Funds` | |
 | FOR EACH TileRow | | | TileRow = Y co-ordinate, starting at `0`. |
-| FOR EACH TileColumn | Tile Type ID | `awe::BankID` | TileColumn = X
-co-ordinate, starting at `0`. |
-| | Tile HP | `awe::HP` | This would be used for capturing and cannon HP \
-and stuff like this. |
-| | Tile Owner | `awe::ArmyID` | `0xFFFFFFFF` means no army owns the tile.|
-| | Unit Owner | `awe::ArmyID` | The owner of the unit on the tile.
-`0xFFFFFFFF` means that the tile is vacant (or that there wasn't any loaded
-units, or there are no more loaded units: see below). |
+| FOR EACH TileColumn | Tile Type ID | `awe::BankID` | TileColumn = X co-ordinate, starting at `0`. |
+| | Tile HP | `awe::HP` | This would be used for capturing and cannon HP and stuff like this. |
+| | Tile Owner | `awe::ArmyID` | `0xFFFFFFFF` means no army owns the tile. |
+| | Unit Owner | `awe::ArmyID` | The owner of the unit on the tile. `0xFFFFFFFF` means that the tile is vacant (or that there wasn't any loaded units, or there are no more loaded units: see below). |
 | IF `UnitOwner != 0xFFFFFFFF` | Unit Type ID | `awe::BankID` | |
 | | Unit HP | `awe::HP` | |
 | | Unit Fuel | `awe::Fuel` | |
 | | Unit Ammo | `awe::Ammo` | |
-| END LOOP | First Loaded Unit's Owner | `awe::ArmyID` | At this point, the
-map loading code calls unit reading instructions recursively for each
-loaded unit, firstly calling the conditional statement four rows above.
-Execution continues as normal after the recursive call has been carried
-out. |
+| END LOOP | First Loaded Unit's Owner | `awe::ArmyID` | At this point, the map loading code calls unit reading instructions recursively for each loaded unit, firstly calling the conditional statement four rows above. Execution continues as normal after the recursive call has been carried out. |
 | END LOOP | | | |
