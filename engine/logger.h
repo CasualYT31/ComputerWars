@@ -37,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "boxer/boxer.h"
 #include <sstream>
 
- // for documentation on the engine namespace, please check "dialogue.h"
 namespace engine {
 	/**
 	 * This class represents the log file which all loggers output to.

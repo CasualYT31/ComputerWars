@@ -27,6 +27,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * information.
  */
 
+/**@namespace engine
+ * @brief     The \c engine namespace defines game code that isn't specific to
+ *            Computer Wars.
+ * @details   Code within this namespace utilises dependencies defined within
+ *            non-<tt>awe</tt> namespaces to define game-based classes that aren't
+ *            specific to Computer Wars. These could include script, GUI, and
+ *            dialogue management classes.
+ */
+
+/**@namespace sfx
+ * @brief     The \c sfx namespace contains components which build upon existing
+ *            SFML classes.
+ */
+
+/**@namespace awe
+ * @brief     The \c awe namespace contains Computer Wars-specific code.
+ */
+
+/**@namespace transition
+ * @brief     The \c transition namespace contains all the transition drawables.
+ */
+
 #include "awe/engine.h"
 // #include "tests.h"
 // for debugging measure

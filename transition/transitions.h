@@ -34,9 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "sfx/renderer.h"
 
-/**
- * The \c transition namespace contains all the transition drawables.
- */
 namespace transition {
 	/**
 	 * This transition uses two rectangles which grow or shrink from/to the upper

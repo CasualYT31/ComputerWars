@@ -31,7 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sfx/texture.h"
 #include "engine/script.h"
 
-// for documentation on the engine namespace, please see dialogue.h
 namespace engine {
 	/**
 	 * Represents a GUI background.

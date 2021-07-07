@@ -30,9 +30,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <cstdint>
-#include "typedef.h"
+#include "awe/typedef.h" // uuid.h is bad anyway... nevermind it depending on this
 
-// for documentation on the engine namespace, please see dialogue.h
 namespace engine {
 	/**
 	 * Class used to generate unique identifiers for objects of a given type.

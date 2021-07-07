@@ -33,7 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-// for documentation on the awe namespace, please see bank.h
 namespace awe {
 	/**
 	 * Class which represents a map, and the armies and units that play on it.

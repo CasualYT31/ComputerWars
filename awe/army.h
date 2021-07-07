@@ -53,7 +53,6 @@ namespace std {
 	};
 }
 
-// for documentation on the awe namespace, please see bank.h
 namespace awe {
 	/**
 	 * Class which represents a single army on a map.

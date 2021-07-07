@@ -31,7 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include "sfml/System/NonCopyable.hpp"
 
-// for documentation on the engine namespace, please see dialogue.h
 namespace engine {
 	/**
 	 * Represents a binary file written in little endian encoding.

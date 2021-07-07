@@ -32,7 +32,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine/safejson.h"
 #include "sfml/Audio.hpp"
 
-// for documentation on the sfx namespace, please see renderer.h
 namespace sfx {
 	/**
 	 * This structure is used to store information on a single sound object.

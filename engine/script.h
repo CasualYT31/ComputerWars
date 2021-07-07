@@ -33,7 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine/logger.h"
 #include <type_traits>
 
-// for documentation on the engine namespace, please see dialogue.h
 namespace engine {
 	/**
 	 * Class representing a layer of abstraction between a script engine and the

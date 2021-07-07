@@ -31,7 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "renderer.h"
 
-// for documentation on the sfx namespace, please see renderer.h
 namespace sfx {
 	/**
 	 * This class stores an animated spritesheet.

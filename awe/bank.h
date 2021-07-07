@@ -38,9 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sfx/texture.h"
 #include "engine/uuid.h"
 
-/**
- * The \c awe namespace contains Computer Wars-specific code.
- */
 namespace awe {
 	/**
 	 * Template class used to store lists of game properties.

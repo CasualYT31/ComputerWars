@@ -34,7 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <memory>
 
-// for documentation on the engine namespace, please check "dialogue.h"
 namespace engine {
 	/**
 	 * This class contains a small suite of functions used to insert variables into

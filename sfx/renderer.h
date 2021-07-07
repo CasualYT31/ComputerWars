@@ -36,9 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine/safejson.h"
 #include "sfml/Graphics.hpp"
 
-/**
- * The \c sfx namespace contains components which build upon existing SFML classes.
- */
 namespace sfx {
 	/**
 	 * \c sf::Drawable that animates.

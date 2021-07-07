@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine/safejson.h"
 #include "sfml/Graphics/Font.hpp"
 
-// for documentation on the sfx namespace, please see renderer.h
 namespace sfx {
 	/**
 	 * This class is used as a JSON-configured font collection.

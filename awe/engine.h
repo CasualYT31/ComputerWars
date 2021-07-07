@@ -38,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "awe/spritesheets.h"
 #include "awe/map.h"
 
-// for documentation on the awe namespace, please see bank.h
 namespace awe {
 	/**
 	 * The game engine class.

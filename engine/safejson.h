@@ -34,7 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "nlohmann/json.hpp"
 #include "sfml/Graphics/Color.hpp"
 
- // for documentation on the engine namespace, please check "dialogue.h"
 namespace engine {
 	/**
 	 * This class is used to track the error state of all JSON-based classes.
