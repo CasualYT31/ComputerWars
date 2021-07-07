@@ -503,7 +503,7 @@ namespace sfx {
 		 * @sa      sfx::convert
 		 * @sa      sfx::signal_properties
 		 */
-		virtual bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j) noexcept;
 
 		/**
 		 * The JSON save method for this class.
@@ -513,7 +513,7 @@ namespace sfx {
 		 *           script which this method writes to.
 		 * @return Always returns \c TRUE.
 		 */
-		virtual bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * Updates a given collection of control lists.

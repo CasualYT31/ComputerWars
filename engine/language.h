@@ -247,7 +247,7 @@ namespace engine {
 		 *         \c lang key could be loaded, \c FALSE if not, or
 		 *         if the current language ID could not identify a language.
 		 */
-		virtual bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j) noexcept;
 
 		/**
 		 * The JSON save method for this class.
@@ -257,7 +257,7 @@ namespace engine {
 		 *           the JSON script which this method writes to.
 		 * @return Always returns \c TRUE.
 		 */
-		virtual bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * This class represents the string map of a single language.
@@ -309,7 +309,7 @@ namespace engine {
 			 *            loaded script which this method reads.
 			 * @return  Always returns \c TRUE.
 			 */
-			virtual bool _load(engine::json& j) noexcept;
+			bool _load(engine::json& j) noexcept;
 
 			/**
 			 * The JSON save method for this class.
@@ -319,7 +319,7 @@ namespace engine {
 			 *           script which this method writes to.
 			 * @return Always returns \c TRUE.
 			*/
-			virtual bool _save(nlohmann::ordered_json& j) noexcept;
+			bool _save(nlohmann::ordered_json& j) noexcept;
 
 			/**
 			 * The string map.

@@ -254,7 +254,7 @@ namespace engine {
 		 * @return \c TRUE if all GUIs could be loaded, \c FALSE if at least one
 		 *         couldn't (\c _loadGUI() returned \c FALSE at least once).
 		 */
-		virtual bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j) noexcept;
 
 		/**
 		 * The JSON save method for this class.
@@ -263,7 +263,7 @@ namespace engine {
 		 *           script which this method writes to.
 		 * @return Always returns \c FALSE.
 		 */
-		virtual bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * Loads a GUI menu.

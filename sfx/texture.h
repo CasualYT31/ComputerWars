@@ -119,7 +119,7 @@ namespace sfx {
 		 * @return The result of \c _loadImages(). \c FALSE if an invalid \c path
 		 *         value was given.
 		 */
-		virtual bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j) noexcept;
 
 		/**
 		 * The JSON save method for this class.
@@ -129,7 +129,7 @@ namespace sfx {
 		 *           script which this method writes to.
 		 * @return Always returns \c TRUE.
 		 */
-		virtual bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * Loads each frame into memory during the call to \c load().

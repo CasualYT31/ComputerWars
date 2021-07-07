@@ -230,7 +230,7 @@ namespace sfx {
 		 *          \c FALSE if at least one couldn't be loaded.
 		 * @sa      setVolume()
 		 */
-		virtual bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j) noexcept;
 
 		/**
 		 * The JSON save method for this class.
@@ -240,7 +240,7 @@ namespace sfx {
 		 *           script which this method writes to.
 		 * @return Always returns \c TRUE.
 		 */
-		virtual bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * Helper method called in \c _load() which reads all paths for each audio
