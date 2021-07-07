@@ -21,14 +21,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "tests.h"
-#include "language.h"
-#include "fonts.h"
-#include "audio.h"
-#include "texture.h"
-#include "userinput.h"
-#include "file.h"
-#include "transitions.h"
-#include "map.h"
+#include "engine/language.h"
+#include "sfx/fonts.h"
+#include "sfx/audio.h"
+#include "sfx/texture.h"
+#include "sfx/userinput.h"
+#include "engine/file.h"
+#include "transition/transitions.h"
+#include "awe/map.h"
 #include <filesystem>
 #include <iostream>
 
@@ -80,28 +80,28 @@ void test::test_logger::runTests() noexcept {
 
 void test::test_logger::sink() {
 	// first Get should actually create the file, second should not
-	auto firstLog = global::sink::Get("Tests", "Dev", "./test/results/", false);
+	auto firstLog = engine::sink::Get("Tests", "Dev", "./test/results/", false);
 	auto secondLog =
-		global::sink::Get("Test Again", "Developer", "./test/", false);
+		engine::sink::Get("Test Again", "Developer", "./test/", false);
 	ASSERT_EQUAL(firstLog, secondLog);
 	bool firstLogFileExists = std::filesystem::exists("./test/results/Log.log");
 	bool secondLogFileExists = std::filesystem::exists("./test/Log.log");
 	ASSERT_TRUE(firstLogFileExists);
 	ASSERT_FALSE(secondLogFileExists);
 	// now test the properties
-	ASSERT_EQUAL(global::sink::ApplicationName(), "Tests");
-	ASSERT_EQUAL(global::sink::DeveloperName(), "Dev");
+	ASSERT_EQUAL(engine::sink::ApplicationName(), "Tests");
+	ASSERT_EQUAL(engine::sink::DeveloperName(), "Dev");
 	// obviously test is dependent on year of execution...
-	ASSERT_EQUAL(global::sink::GetYear(), "2021");
+	ASSERT_EQUAL(engine::sink::GetYear(), "2021");
 	// has the file been written as expected so far?
 	// also implicitly tests that GetLog() is working as expected
-	std::string file = global::sink::GetLog();
+	std::string file = engine::sink::GetLog();
 	std::string firstLine = file.substr(0, file.find('\n'));
 	ASSERT_EQUAL(firstLine, "Tests © 2021 Dev");
 }
 
 void test::test_logger::logger() {
-	global::logger log("logger_test");
+	engine::logger log("logger_test");
 	// test simple writes, errors, and warnings
 	log.write("Hello World!");
 	log.warning("We are currently testing!");
@@ -116,7 +116,7 @@ void test::test_logger::logger() {
 	log.error("Error is {}!", boolean);
 	// now search the log file to see if all of the previous writes were written as
 	// expected
-	std::string logFile = global::sink::GetLog();
+	std::string logFile = engine::sink::GetLog();
 	ASSERT_NOT_EQUAL(logFile.find("[info] Hello World!"), std::string::npos);
 	ASSERT_NOT_EQUAL(
 		logFile.find("[warning] We are currently testing!"), std::string::npos);
@@ -140,17 +140,17 @@ void test::test_safejson::runTests() noexcept {
 
 void test::test_safejson::json() {
 	// test empty json object
-	safe::json j(std::string("name:test_json"));
+	engine::json j(std::string("name:test_json"));
 	ASSERT_FALSE(j.keysExist({ "test", "test" }));
 	ASSERT_FALSE(j.keysExist({}));
 	// test apply() NO_KEYS_GIVEN
 	int holder = 0;
 	j.apply(holder, {});
-	ASSERT_TRUE(j.whatFailed() & safe::json_state::NO_KEYS_GIVEN);
+	ASSERT_TRUE(j.whatFailed() & engine::json_state::NO_KEYS_GIVEN);
 	j.resetState();
 	// test apply() KEYS_DID_NOT_EXIST
 	j.apply(holder, { "test" });
-	ASSERT_TRUE(j.whatFailed() & safe::json_state::KEYS_DID_NOT_EXIST);
+	ASSERT_TRUE(j.whatFailed() & engine::json_state::KEYS_DID_NOT_EXIST);
 	j.resetState();
 	// test assignment operator
 	j = R"(
@@ -173,10 +173,10 @@ void test::test_safejson::json() {
 	ASSERT_TRUE(j.keysExist({ "object", "value" }));
 	// test apply() MISMATCHING_TYPE
 	j.apply(holder, { "happy" });
-	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_TYPE);
+	ASSERT_TRUE(j.whatFailed() & engine::json_state::MISMATCHING_TYPE);
 	j.resetState();
 	j.apply(holder, { "pi" });
-	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_TYPE);
+	ASSERT_TRUE(j.whatFailed() & engine::json_state::MISMATCHING_TYPE);
 	j.resetState();
 	// test apply
 	j.apply(holder, { "answer", "everything" });
@@ -186,16 +186,16 @@ void test::test_safejson::json() {
 	// test applyArray() MISMATCHING_SIZE
 	std::array<int, 2> holderArrayError;
 	j.applyArray(holderArrayError, { "list" });
-	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_SIZE);
+	ASSERT_TRUE(j.whatFailed() & engine::json_state::MISMATCHING_SIZE);
 	j.resetState();
 	std::array<int, 4> holderArrayTooBig;
 	j.applyArray(holderArrayTooBig, { "list" });
-	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_SIZE);
+	ASSERT_TRUE(j.whatFailed() & engine::json_state::MISMATCHING_SIZE);
 	j.resetState();
 	// test applyArray() MISMATCHING_ELEMENT_TYPE
 	std::array<std::string, 3> holderArrayBadType;
 	j.applyArray(holderArrayBadType, { "list" });
-	ASSERT_TRUE(j.whatFailed() & safe::json_state::MISMATCHING_ELEMENT_TYPE);
+	ASSERT_TRUE(j.whatFailed() & engine::json_state::MISMATCHING_ELEMENT_TYPE);
 	j.resetState();
 	// test applyArray()
 	std::array<int, 3> holderArray;
@@ -241,42 +241,42 @@ void test::test_language::expand_string() {
 	// i. test 3 variables, 3 sets of 3 var chars next to each other
 	// 2. test get and set var char methods
 	// 3. repeat tests a-i with a new var char
-	ASSERT_EQUAL(i18n::expand_string::getVarChar(), '#');
+	ASSERT_EQUAL(engine::expand_string::getVarChar(), '#');
 	expand_string_("#");
-	i18n::expand_string::setVarChar('$');
-	ASSERT_EQUAL(i18n::expand_string::getVarChar(), '$');
+	engine::expand_string::setVarChar('$');
+	ASSERT_EQUAL(engine::expand_string::getVarChar(), '$');
 	expand_string_("$");
 	// ENSURE TO REVERT BACK TO THE OLD VAR CHAR TO
 	// ENSURE THAT FUTURE TESTS THAT MAY RELY ON IT WORK
-	i18n::expand_string::setVarChar('#');
-	ASSERT_EQUAL(i18n::expand_string::getVarChar(), '#');
+	engine::expand_string::setVarChar('#');
+	ASSERT_EQUAL(engine::expand_string::getVarChar(), '#');
 }
 
 void test::test_language::expand_string_(const std::string& var) {
 	// see expand_string() ~ this method performs tests a-i
-	ASSERT_EQUAL(i18n::expand_string::insert("Hello World!"), "Hello World!");
-	ASSERT_EQUAL(i18n::expand_string::insert(
+	ASSERT_EQUAL(engine::expand_string::insert("Hello World!"), "Hello World!");
+	ASSERT_EQUAL(engine::expand_string::insert(
 		"Hello" + var + "World!"), "Hello" + var + "World!");
-	ASSERT_EQUAL(i18n::expand_string::insert(
+	ASSERT_EQUAL(engine::expand_string::insert(
 		"Hello" + var + "World!" + var), "Hello" + var + "World!" + var);
-	ASSERT_EQUAL(i18n::expand_string::insert(
+	ASSERT_EQUAL(engine::expand_string::insert(
 		"var1= var2=", 18, "Test"), "var1= var2=");
-	ASSERT_EQUAL(i18n::expand_string::insert(
+	ASSERT_EQUAL(engine::expand_string::insert(
 		"var1=" + var + " var2=", 18, "Test"), "var1=18 var2=");
-	ASSERT_EQUAL(i18n::expand_string::insert(
+	ASSERT_EQUAL(engine::expand_string::insert(
 		"var1=" + var + " var2=" + var, -18, "Test"), "var1=-18 var2=Test");
-	ASSERT_EQUAL(i18n::expand_string::insert(
+	ASSERT_EQUAL(engine::expand_string::insert(
 		var + "var1=" + var + " var2=" + var, 0.5, "Testing"),
 		"0.5var1=Testing var2=" + var);
-	ASSERT_EQUAL(i18n::expand_string::insert(
+	ASSERT_EQUAL(engine::expand_string::insert(
 		var + var, true, false, 9.792), var);
-	ASSERT_EQUAL(i18n::expand_string::insert(
+	ASSERT_EQUAL(engine::expand_string::insert(
 		var + var + var + " " + var + var + var + " " + var + var + var, 34, "LLL",
 		9.792), var + "34 " + var + "LLL " + var + "9.792");
 }
 
 void test::test_language::language_dictionary() {
-	i18n::language_dictionary dict("name:test_dictionary");
+	engine::language_dictionary dict("name:test_dictionary");
 	// test behaviour when dictionary is empty
 	ASSERT_FALSE(dict.removeLanguage("test"));
 	ASSERT_FALSE(dict.removeLanguage(""));
@@ -308,10 +308,10 @@ void test::test_language::language_dictionary() {
 void test::test_language::language_dictionary_json() {
 	// do some json_script generic tests
 	// test non-existent file
-	i18n::language_dictionary jsonscripttest;
+	engine::language_dictionary jsonscripttest;
 	jsonscripttest.load("file");
 	ASSERT_TRUE(
-		jsonscripttest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
+		jsonscripttest.whatFailed() & engine::json_state::FAILED_SCRIPT_LOAD);
 	// instantiate a fresh language_dictionary object and test the json_script
 	// methods
 	// common approach for json_script class:
@@ -319,7 +319,7 @@ void test::test_language::language_dictionary_json() {
 	// as required
 	// ensure that save() writes a JSON script as necessary in the correct format,
 	// this can easily be tested by using the verified load() method.
-	i18n::language_dictionary dict_js("test_dict_json_script");
+	engine::language_dictionary dict_js("test_dict_json_script");
 	dict_js.load("test/assets/lang/lang.json");
 	ASSERT_EQUAL(dict_js.getLanguage(), "ENG_GB");
 	ASSERT_EQUAL(dict_js("language"), "English");
@@ -381,7 +381,7 @@ void test::test_fonts::fonts() {
 	ASSERT_NAME_IN_LOG("fonts");
 	// now test load() ~ non-existent file
 	fontstest.load("badfile.json");
-	ASSERT_TRUE(fontstest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
+	ASSERT_TRUE(fontstest.whatFailed() & engine::json_state::FAILED_SCRIPT_LOAD);
 	fontstest.resetState();
 	// test load() ~ existent file
 	fontstest.load("test/assets/fonts/fonts.json");
@@ -389,7 +389,7 @@ void test::test_fonts::fonts() {
 	// test load() ~ non-existent file ~ ensure that state isn't overwritten
 	// (it shouldn't in this case)
 	fontstest.load("anotherbadfile.json");
-	ASSERT_TRUE(fontstest.whatFailed() & safe::json_state::FAILED_SCRIPT_LOAD);
+	ASSERT_TRUE(fontstest.whatFailed() & engine::json_state::FAILED_SCRIPT_LOAD);
 	fontstest.resetState();
 	ASSERT_EQUAL(fontstest["dialogue"]->getInfo().family, "Advance Wars 2 GBA");
 	// test load() ~ faulty file ~ ensure that state is overwritten
@@ -422,6 +422,8 @@ void test::test_audio::runTests() noexcept {
 }
 
 void test::test_audio::audio() {
+	// MUST TEST THAT I'VE SUCCESSFULLY PROGRAMMED AGAINST FADE OUT UNDEFINED
+	// BEHAVIOUR!
 	sfx::audio audio;
 	// test valid load() script
 	audio.load("test/assets/audio/audio.json");
@@ -717,7 +719,7 @@ void test::test_file::file() {
 	} catch (test::failed_assert& e) {
 		throw e;
 	} catch (std::exception& e) {
-		global::logger log("binary_file_test");
+		engine::logger log("binary_file_test");
 		log.error("{}", e.what());
 		ASSERT_EQUAL("input file could not be tested on:", "check log");
 	}
@@ -750,7 +752,7 @@ void test::test_file::file() {
 	} catch (test::failed_assert& e) {
 		throw e;
 	} catch (std::exception& e) {
-		global::logger log("binary_file_test");
+		engine::logger log("binary_file_test");
 		log.error("{}", e.what());
 		ASSERT_EQUAL("output file could not be tested on:", "check log");
 	}

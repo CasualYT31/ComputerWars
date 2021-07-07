@@ -120,7 +120,11 @@ add_executable(ComputerWars "main.cpp"
 	awe/tile.h
 	awe/typedef.h
 	awe/unit.cpp
-	awe/unit.h)
+	awe/unit.h
+	test/test.cpp
+	test/test.h
+	test/tests.cpp
+	test/tests.h)
 set_target_properties(ComputerWars PROPERTIES CXX_STANDARD 17)
 target_include_directories(ComputerWars PRIVATE ${systeminfo_SOURCE_DIR}
 	${angelscript_SOURCE_DIR}/angelscript/include

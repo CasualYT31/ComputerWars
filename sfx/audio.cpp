@@ -32,10 +32,10 @@ void sfx::audio::setVolume(float newvolume) noexcept {
 	_validateVolume(newvolume);
 	_volume = newvolume;
 	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; itr++) {
-		itr->second.sound.setVolume(_volumeAfterOffset(itr->first));
+		itr->second.sound.setVolume(_volumeAfterOffset(itr->first, getVolume()));
 	}
 	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; itr++) {
-		itr->second.music.setVolume(_volumeAfterOffset(itr->first));
+		itr->second.music.setVolume(_volumeAfterOffset(itr->first, getVolume()));
 	}
 }
 
@@ -86,12 +86,15 @@ bool sfx::audio::fadeout(sf::Time length) noexcept {
 	if (!_fadingOut) {
 		_clock.restart();
 		_fadingOut = true;
+		_currentGranularity = _granularity;
+		_currentVolume = _volume;
 	}
 	if (_clock.getElapsedTime().asSeconds() >=
-		length.asSeconds() / getGranularity()) {
+		length.asSeconds() / _currentGranularity) {
 		_music[getCurrentMusic()].music.setVolume(
 			_music[getCurrentMusic()].music.getVolume() -
-			_volumeAfterOffset(getCurrentMusic()) / getGranularity()
+			_volumeAfterOffset(getCurrentMusic(), _currentVolume) /
+			_currentGranularity
 		);
 		_clock.restart();
 	}
@@ -99,7 +102,7 @@ bool sfx::audio::fadeout(sf::Time length) noexcept {
 		_music[getCurrentMusic()].music.getVolume() < 1.0) {
 		std::string temp = getCurrentMusic();
 		stop();
-		_music[temp].music.setVolume(_volumeAfterOffset(temp));
+		_music[temp].music.setVolume(_volumeAfterOffset(temp, getVolume()));
 		_fadingOut = false;
 		return true;
 	}
@@ -129,16 +132,17 @@ void sfx::audio::_validateVolume(float& v) noexcept {
 	}
 }
 
-float sfx::audio::_volumeAfterOffset(const std::string& name) const noexcept {
+float sfx::audio::_volumeAfterOffset(const std::string& name,
+	const float baseVolume) const noexcept {
 	if (_sound.find(name) != _sound.end()) {
-		if (getVolume() < 1.0) return 0.0;
-		float vol = getVolume() + _sound.at(name).volumeOffset;
+		if (baseVolume < 1.0) return 0.0;
+		float vol = baseVolume + _sound.at(name).volumeOffset;
 		if (vol < 1.0) vol = 1.0;
 		if (vol > 100.0) vol = 100.0;
 		return vol;
 	} else if (_music.find(name) != _music.end()) {
-		if (getVolume() < 1.0) return 0.0;
-		float vol = getVolume() + _music.at(name).volumeOffset;
+		if (baseVolume < 1.0) return 0.0;
+		float vol = baseVolume + _music.at(name).volumeOffset;
 		if (vol < 1.0) vol = 1.0;
 		if (vol > 100.0) vol = 100.0;
 		return vol;

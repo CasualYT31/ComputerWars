@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "test.h"
-#include "uuid.h"
+#include "engine/uuid.h"
 
 /**
  * Macro that allows tests which rely on the logger dependency to test if their
@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *          file.
  */
 #define ASSERT_NAME_IN_LOG(n) \
-	ASSERT_NOT_EQUAL(global::sink::GetLog().find(n), std::string::npos);
+	ASSERT_NOT_EQUAL(engine::sink::GetLog().find(n), std::string::npos);
 
 // for documentation on the test namespace, please see test.h
 namespace test {
