@@ -1,115 +1,61 @@
 Computer Wars © 2021 CasualYouTuber31
 ---------------
-Hardware Specifications:
-
-Host Name:                 DESKTOP-2EUG3V3
-OS Name:                   Microsoft Windows 10 Home
-OS Version:                10.0.19042 N/A Build 19042
-OS Manufacturer:           Microsoft Corporation
-OS Configuration:          Standalone Workstation
-OS Build Type:             Multiprocessor Free
-Registered Owner:          User
-Registered Organization:   HP
-Product ID:                00325-81413-85406-AAOEM
-Original Install Date:     12/03/2021, 13:41:08
-System Boot Time:          07/07/2021, 18:08:45
-System Manufacturer:       HP
-System Model:              HP ENVY x360 Convertible 15-ds0xxx
-System Type:               x64-based PC
-Processor(s):              1 Processor(s) Installed.
-                           [01]: AMD64 Family 23 Model 24 Stepping 1 AuthenticAMD ~2100 Mhz
-BIOS Version:              AMI F.17, 28/10/2019
-Windows Directory:         C:\WINDOWS
-System Directory:          C:\WINDOWS\system32
-Boot Device:               \Device\HarddiskVolume1
-System Locale:             en-gb;English (United Kingdom)
-Input Locale:              en-gb;English (United Kingdom)
-Time Zone:                 (UTC+00:00) Dublin, Edinburgh, Lisbon, London
-Total Physical Memory:     6,058 MB
-Available Physical Memory: 1,534 MB
-Virtual Memory: Max Size:  14,602 MB
-Virtual Memory: Available: 3,011 MB
-Virtual Memory: In Use:    11,591 MB
-Page File Location(s):     C:\pagefile.sys
-Domain:                    WORKGROUP
-Logon Server:              \\DESKTOP-2EUG3V3
-Hotfix(s):                 8 Hotfix(s) Installed.
-                           [01]: KB5003537
-                           [02]: KB4562830
-                           [03]: KB4577586
-                           [04]: KB4580325
-                           [05]: KB4589212
-                           [06]: KB5001679
-                           [07]: KB5003637
-                           [08]: KB5003503
-Network Card(s):           2 NIC(s) Installed.
-                           [01]: Realtek RTL8822BE 802.11ac PCIe Adapter
-                                 Connection Name: WiFi
-                                 DHCP Enabled:    Yes
-                                 DHCP Server:     192.168.1.254
-                                 IP address(es)
-                                 [01]: 192.168.1.247
-                                 [02]: fe80::c163:a7f0:fa08:fd66
-                           [02]: Bluetooth Device (Personal Area Network)
-                                 Connection Name: Bluetooth Network Connection
-                                 Status:          Media disconnected
-Hyper-V Requirements:      VM Monitor Mode Extensions: Yes
-                           Virtualization Enabled In Firmware: Yes
-                           Second Level Address Translation: Yes
-                           Data Execution Prevention Available: Yes
-
+Hardware Specification:
+CPU       AMD Ryzen 5 3500U with Radeon Vega Mobile Gfx
+Memory    8GB
+GPU       AMD Radeon(TM) Vega 8 Graphics
+Platform  Microsoft Windows 10 Home ~ 10.0.19042
 Gamepads  0
 ---------------
 Event Log:
-[2021-07-08 15:44:28.131] [json_script_0] [info] Loading JSON script assets/lang/lang.json...
-[2021-07-08 15:44:28.132] [json_script_3] [info] Loading JSON script ./assets/lang/ENG_GB.json...
-[2021-07-08 15:44:28.133] [json_script_3] [info] Finished loading JSON script ./assets/lang/ENG_GB.json.
-[2021-07-08 15:44:28.133] [json_script_0] [info] Finished loading JSON script assets/lang/lang.json.
-[2021-07-08 15:44:28.133] [json_script_6] [info] Loading JSON script assets/fonts/fonts.json...
-[2021-07-08 15:44:28.134] [json_script_6] [info] Finished loading JSON script assets/fonts/fonts.json.
-[2021-07-08 15:44:28.134] [json_script_9] [info] Loading JSON script assets/audio/sound/audiosound.json...
-[2021-07-08 15:44:29.177] [json_script_9] [info] Finished loading JSON script assets/audio/sound/audiosound.json.
-[2021-07-08 15:44:29.178] [json_script_12] [info] Loading JSON script assets/audio/music/audiomusic.json...
-[2021-07-08 15:44:29.191] [json_script_12] [info] Finished loading JSON script assets/audio/music/audiomusic.json.
-[2021-07-08 15:44:29.560] [json_script_15] [info] Loading JSON script assets/renderer/renderer.json...
-[2021-07-08 15:44:29.562] [json_script_15] [info] Finished loading JSON script assets/renderer/renderer.json.
-[2021-07-08 15:44:29.562] [json_script_18] [info] Loading JSON script assets/userinput/userinput.json...
-[2021-07-08 15:44:29.565] [user_input_19] [info] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
-[2021-07-08 15:44:29.567] [json_script_18] [info] Finished loading JSON script assets/userinput/userinput.json.
-[2021-07-08 15:44:29.568] [json_script_21] [info] Loading JSON script assets/sprites/co/spritesco.json...
-[2021-07-08 15:44:29.600] [json_script_21] [info] Finished loading JSON script assets/sprites/co/spritesco.json.
-[2021-07-08 15:44:29.600] [json_script_24] [info] Loading JSON script assets/sprites/unit/idle/spritesunitidle.json...
-[2021-07-08 15:44:29.740] [json_script_24] [info] Finished loading JSON script assets/sprites/unit/idle/spritesunitidle.json.
-[2021-07-08 15:44:29.751] [json_script_27] [info] Loading JSON script assets/sprites/tile/normal/spritestilenormal.json...
-[2021-07-08 15:44:29.795] [json_script_27] [info] Finished loading JSON script assets/sprites/tile/normal/spritestilenormal.json.
-[2021-07-08 15:44:29.803] [json_script_30] [info] Loading JSON script assets/sprites/unit_picture/spritesunit_picture.json...
-[2021-07-08 15:44:29.803] [json_script_30] [error] Failed to open JSON script "assets/sprites/unit_picture/spritesunit_picture.json" for reading.
-[2021-07-08 15:44:29.803] [json_script_32] [info] Loading JSON script assets/sprites/tile_picture/normal/spritestile_picturenormal.json...
-[2021-07-08 15:44:29.803] [json_script_32] [error] Failed to open JSON script "assets/sprites/tile_picture/normal/spritestile_picturenormal.json" for reading.
-[2021-07-08 15:44:29.803] [json_script_34] [info] Loading JSON script assets/sprites/icon/spritesicon.json...
-[2021-07-08 15:44:29.803] [json_script_34] [error] Failed to open JSON script "assets/sprites/icon/spritesicon.json" for reading.
-[2021-07-08 15:44:29.803] [json_script_36] [info] Loading JSON script assets/sprites/gui/spritesgui.json...
-[2021-07-08 15:44:29.980] [json_script_36] [info] Finished loading JSON script assets/sprites/gui/spritesgui.json.
-[2021-07-08 15:44:29.993] [scripts_39] [info] Registering script interface...
-[2021-07-08 15:44:29.993] [scripts_39] [info] Finished registering script interface.
-[2021-07-08 15:44:29.993] [scripts_39] [info] Loading scripts from "assets/script/"...
-[2021-07-08 15:44:30.001] [scripts_39] [info] Finished loading scripts.
-[2021-07-08 15:44:30.010] [json_script_40] [info] Loading JSON script assets/gui/gui.json...
-[2021-07-08 15:44:30.056] [json_script_40] [info] Finished loading JSON script assets/gui/gui.json.
-[2021-07-08 15:44:30.056] [json_script_44] [info] Loading JSON script assets/property/country.json...
-[2021-07-08 15:44:30.068] [json_script_44] [info] Finished loading JSON script assets/property/country.json.
-[2021-07-08 15:44:30.069] [json_script_62] [info] Loading JSON script assets/property/weather.json...
-[2021-07-08 15:44:30.072] [json_script_62] [info] Finished loading JSON script assets/property/weather.json.
-[2021-07-08 15:44:30.072] [json_script_71] [info] Loading JSON script assets/property/environment.json...
-[2021-07-08 15:44:30.074] [json_script_71] [info] Finished loading JSON script assets/property/environment.json.
-[2021-07-08 15:44:30.074] [json_script_77] [info] Loading JSON script assets/property/movement.json...
-[2021-07-08 15:44:30.078] [json_script_77] [info] Finished loading JSON script assets/property/movement.json.
-[2021-07-08 15:44:30.078] [json_script_88] [info] Loading JSON script assets/property/terrain.json...
-[2021-07-08 15:44:30.111] [json_script_88] [info] Finished loading JSON script assets/property/terrain.json.
-[2021-07-08 15:44:30.114] [json_script_110] [info] Loading JSON script assets/property/tile.json...
-[2021-07-08 15:44:30.146] [json_script_110] [info] Finished loading JSON script assets/property/tile.json.
-[2021-07-08 15:44:30.150] [json_script_235] [info] Loading JSON script assets/property/unit.json...
-[2021-07-08 15:44:30.247] [json_script_235] [info] Finished loading JSON script assets/property/unit.json.
-[2021-07-08 15:44:30.252] [json_script_264] [info] Loading JSON script assets/property/co.json...
-[2021-07-08 15:44:30.253] [json_script_264] [info] Finished loading JSON script assets/property/co.json.
-[2021-07-08 15:44:30.324] [renderer_16] [info] GPU: ATI Technologies Inc. ~ AMD Radeon(TM) Vega 8 Graphics ~ 4.6.13558 Compatibility Profile Context 26.20.11002.13003
+[2021-07-08 23:21:42.728] [json_script_0] [info] Loading JSON script assets/lang/lang.json...
+[2021-07-08 23:21:42.730] [json_script_3] [info] Loading JSON script ./assets/lang/ENG_GB.json...
+[2021-07-08 23:21:42.731] [json_script_3] [info] Finished loading JSON script ./assets/lang/ENG_GB.json.
+[2021-07-08 23:21:42.732] [json_script_0] [info] Finished loading JSON script assets/lang/lang.json.
+[2021-07-08 23:21:42.732] [json_script_6] [info] Loading JSON script assets/fonts/fonts.json...
+[2021-07-08 23:21:42.740] [json_script_6] [info] Finished loading JSON script assets/fonts/fonts.json.
+[2021-07-08 23:21:42.740] [json_script_9] [info] Loading JSON script assets/audio/sound/audiosound.json...
+[2021-07-08 23:21:43.951] [json_script_9] [info] Finished loading JSON script assets/audio/sound/audiosound.json.
+[2021-07-08 23:21:43.952] [json_script_12] [info] Loading JSON script assets/audio/music/audiomusic.json...
+[2021-07-08 23:21:43.969] [json_script_12] [info] Finished loading JSON script assets/audio/music/audiomusic.json.
+[2021-07-08 23:21:44.484] [json_script_15] [info] Loading JSON script assets/renderer/renderer.json...
+[2021-07-08 23:21:44.486] [json_script_15] [info] Finished loading JSON script assets/renderer/renderer.json.
+[2021-07-08 23:21:44.487] [json_script_18] [info] Loading JSON script assets/userinput/userinput.json...
+[2021-07-08 23:21:44.490] [user_input_19] [info] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
+[2021-07-08 23:21:44.493] [json_script_18] [info] Finished loading JSON script assets/userinput/userinput.json.
+[2021-07-08 23:21:44.493] [json_script_21] [info] Loading JSON script assets/sprites/co/spritesco.json...
+[2021-07-08 23:21:44.532] [json_script_21] [info] Finished loading JSON script assets/sprites/co/spritesco.json.
+[2021-07-08 23:21:44.532] [json_script_24] [info] Loading JSON script assets/sprites/unit/idle/spritesunitidle.json...
+[2021-07-08 23:21:44.716] [json_script_24] [info] Finished loading JSON script assets/sprites/unit/idle/spritesunitidle.json.
+[2021-07-08 23:21:44.732] [json_script_27] [info] Loading JSON script assets/sprites/tile/normal/spritestilenormal.json...
+[2021-07-08 23:21:44.781] [json_script_27] [info] Finished loading JSON script assets/sprites/tile/normal/spritestilenormal.json.
+[2021-07-08 23:21:44.787] [json_script_30] [info] Loading JSON script assets/sprites/unit_picture/spritesunit_picture.json...
+[2021-07-08 23:21:44.788] [json_script_30] [error] Failed to open JSON script "assets/sprites/unit_picture/spritesunit_picture.json" for reading.
+[2021-07-08 23:21:44.788] [json_script_32] [info] Loading JSON script assets/sprites/tile_picture/normal/spritestile_picturenormal.json...
+[2021-07-08 23:21:44.788] [json_script_32] [error] Failed to open JSON script "assets/sprites/tile_picture/normal/spritestile_picturenormal.json" for reading.
+[2021-07-08 23:21:44.788] [json_script_34] [info] Loading JSON script assets/sprites/icon/spritesicon.json...
+[2021-07-08 23:21:44.788] [json_script_34] [error] Failed to open JSON script "assets/sprites/icon/spritesicon.json" for reading.
+[2021-07-08 23:21:44.788] [json_script_36] [info] Loading JSON script assets/sprites/gui/spritesgui.json...
+[2021-07-08 23:21:44.981] [json_script_36] [info] Finished loading JSON script assets/sprites/gui/spritesgui.json.
+[2021-07-08 23:21:44.992] [scripts_39] [info] Registering script interface...
+[2021-07-08 23:21:44.992] [scripts_39] [info] Finished registering script interface.
+[2021-07-08 23:21:44.992] [scripts_39] [info] Loading scripts from "assets/script/"...
+[2021-07-08 23:21:45.000] [scripts_39] [info] Finished loading scripts.
+[2021-07-08 23:21:45.010] [json_script_40] [info] Loading JSON script assets/gui/gui.json...
+[2021-07-08 23:21:45.065] [json_script_40] [info] Finished loading JSON script assets/gui/gui.json.
+[2021-07-08 23:21:45.065] [json_script_44] [info] Loading JSON script assets/property/country.json...
+[2021-07-08 23:21:45.086] [json_script_44] [info] Finished loading JSON script assets/property/country.json.
+[2021-07-08 23:21:45.090] [json_script_62] [info] Loading JSON script assets/property/weather.json...
+[2021-07-08 23:21:45.093] [json_script_62] [info] Finished loading JSON script assets/property/weather.json.
+[2021-07-08 23:21:45.094] [json_script_71] [info] Loading JSON script assets/property/environment.json...
+[2021-07-08 23:21:45.096] [json_script_71] [info] Finished loading JSON script assets/property/environment.json.
+[2021-07-08 23:21:45.096] [json_script_77] [info] Loading JSON script assets/property/movement.json...
+[2021-07-08 23:21:45.101] [json_script_77] [info] Finished loading JSON script assets/property/movement.json.
+[2021-07-08 23:21:45.101] [json_script_88] [info] Loading JSON script assets/property/terrain.json...
+[2021-07-08 23:21:45.141] [json_script_88] [info] Finished loading JSON script assets/property/terrain.json.
+[2021-07-08 23:21:45.143] [json_script_110] [info] Loading JSON script assets/property/tile.json...
+[2021-07-08 23:21:45.178] [json_script_110] [info] Finished loading JSON script assets/property/tile.json.
+[2021-07-08 23:21:45.182] [json_script_235] [info] Loading JSON script assets/property/unit.json...
+[2021-07-08 23:21:45.343] [json_script_235] [info] Finished loading JSON script assets/property/unit.json.
+[2021-07-08 23:21:45.353] [json_script_264] [info] Loading JSON script assets/property/co.json...
+[2021-07-08 23:21:45.355] [json_script_264] [info] Finished loading JSON script assets/property/co.json.

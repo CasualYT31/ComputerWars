@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "logger.h"
 #include <fstream>
 #include <ctime>
-#include "SystemInfo.hpp"
+#include "SystemProperties.hpp"
 #include "SFML/Window/Joystick.hpp"
 
 std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::_sharedSink = nullptr;
@@ -47,7 +47,12 @@ std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 				DeveloperName() << std::endl;
 			_fileCopy << "---------------" << std::endl;
 			_fileCopy << "Hardware Specification:\n";
-			_fileCopy << GetHardwareDetails() << std::endl;
+			_fileCopy << "CPU       " << sys::cpu::model() << std::endl;
+			_fileCopy << "Memory    " << sys::mem::total() << std::endl;
+			_fileCopy << "GPU       " << sys::gpu::name() << std::endl;
+			// _fileCopy << "Storage   " <<  << std::endl;
+			_fileCopy << "Platform  " << sys::os::name() << " ~ " <<
+				sys::os::version() << std::endl;
 			_fileCopy << "Gamepads  " << GetJoystickCount() << std::endl;
 			_fileCopy << "---------------" << std::endl;
 			_fileCopy << "Event Log:" << std::endl;
@@ -109,29 +114,6 @@ unsigned int engine::sink::GetJoystickCount() noexcept {
 		if (sf::Joystick::isConnected(i)) counter++;
 	}
 	return counter;
-}
-
-// https://rosettacode.org/wiki/Get_system_command_output#C.2B.2B
-std::string engine::sink::GetHardwareDetails() noexcept {
-#ifdef _WIN32
-	system("systeminfo > temp.txt");
-	// powershell alternative: start /b powershell.exe "Get-CimInstance -ClassName Win32_VideoController | Select-Object name > temp.txt"
-#elif __linux__
-	// I will likely need a bit more info than this but this is a start
-	system("lscpu > temp.txt");
-#elif _OSX
-	// this outputs WAAAAAAY too much information
-	// I will have to figure out specific data types and incorporate them later
-	system("system_profiler > temp.txt");
-#endif
-	// this should be cross-platform
-	std::ifstream ifs("temp.txt");
-	std::string ret{ std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>() };
-	ifs.close(); // must close the inout stream so the file can be cleaned up
-	std::remove("temp.txt");
-	ret += "For GPU information please see When Window Is Initialised: Search For "
-				"\"[renderer\"}\n"
-	return ret;
 }
 
 std::size_t engine::logger::_objectCount = 0;

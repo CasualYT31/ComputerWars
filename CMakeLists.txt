@@ -1,7 +1,7 @@
 ﻿# minimum version required is 3.14 becuase of FetchContent_MakeAvailable
 cmake_minimum_required (VERSION 3.14)
-project("ComputerWars")
-include(FetchContent)
+project ("ComputerWars")
+include (FetchContent)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
@@ -14,15 +14,12 @@ FetchContent_Declare(googletest
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-# systemInfo
-FetchContent_Declare(systeminfo
-	GIT_REPOSITORY https://github.com/CasualYT31/systemInfo.git
-	GIT_TAG master
-	CONFIGURE_COMMAND ""
-	BUILD_COMMAND ""
+# SystemProperties
+FetchContent_Declare(systemproperties
+	GIT_REPOSITORY https://github.com/CasualYT31/SystemProperties.git
+	GIT_TAG 0.1
 )
-FetchContent_MakeAvailable(systeminfo)
-find_package(OpenGL REQUIRED)
+FetchContent_MakeAvailable(systemproperties)
 
 # Boxer
 FetchContent_Declare(boxer
@@ -70,8 +67,6 @@ FetchContent_MakeAvailable(angelscript)
 
 # source files
 add_executable(ComputerWars "main.cpp"
-	${systeminfo_SOURCE_DIR}/SystemInfo.cpp
-	${systeminfo_SOURCE_DIR}/SystemInfo.hpp
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.h
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.cpp
@@ -135,7 +130,7 @@ target_include_directories(ComputerWars PRIVATE ${systeminfo_SOURCE_DIR}
 # libraries
 target_link_libraries(ComputerWars
 	gtest_main
-	${OPENGL_gl_LIBRARY}
+	SystemProperties
 	Boxer
 	spdlog
 	nlohmann_json::nlohmann_json
@@ -146,10 +141,6 @@ target_link_libraries(ComputerWars
 	tgui
 	angelscript
 )
-IF (WIN32)
-	# required for systemInfo
-	target_link_libraries(ComputerWars version)
-ENDIF ()
 
 # copy SFML's openal.dll file depending on build type
 IF (WIN32)

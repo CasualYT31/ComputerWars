@@ -232,8 +232,6 @@ namespace sfx {
 		 * In addition to this, if the client uses \c create() to switch from
 		 * windowed to fullscreen or vice versa, positional data may not be saved
 		 * correctly.\n
-		 * Finally, this method will report GPU information to the log file after
-		 * window creation. \c create() will not accomplish this.\n
 		 * For these reasons it is discouraged to use \c create() with this class.
 		 */
 		void openWindow() noexcept;

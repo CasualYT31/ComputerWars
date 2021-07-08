@@ -21,7 +21,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "renderer.h"
-#include "SystemInfo.hpp"
 
 sfx::renderer::renderer(const std::string& name) noexcept : _logger(name) {}
 
@@ -62,9 +61,6 @@ void sfx::renderer::openWindow() noexcept {
 				"load file.", _settings.iconPath);
 		}
 	}
-	// since we now have a guaranteed OpenGL context, report GPU information
-	_logger.write("GPU: {} ~ {} ~ {}", dbr::sys::video::vendor(),
-		dbr::sys::video::name(), dbr::sys::video::driver());
 }
 
 const sfx::renderer_settings& sfx::renderer::getSettings() const noexcept {
