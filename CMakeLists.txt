@@ -16,7 +16,7 @@ FetchContent_MakeAvailable(googletest)
 
 # systemInfo
 FetchContent_Declare(systeminfo
-	GIT_REPOSITORY https://github.com/dabbertorres/systemInfo.git
+	GIT_REPOSITORY https://github.com/CasualYT31/systemInfo.git
 	GIT_TAG master
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
@@ -146,6 +146,10 @@ target_link_libraries(ComputerWars
 	tgui
 	angelscript
 )
+IF (WIN32)
+	# required for systemInfo
+	target_link_libraries(ComputerWars version)
+ENDIF ()
 
 # copy SFML's openal.dll file depending on build type
 IF (WIN32)

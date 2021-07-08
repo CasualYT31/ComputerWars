@@ -46,22 +46,8 @@ std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 			_fileCopy << ApplicationName() << " © " << GetYear() << " " <<
 				DeveloperName() << std::endl;
 			_fileCopy << "---------------" << std::endl;
-			_fileCopy << "Hardware Specifications:" << std::endl;
-			_fileCopy << "CPU       " << dbr::sys::cpuModel() << std::endl;
-			_fileCopy << "Memory    " << dbr::sys::totalRAM() << std::endl;
-			// unfortunately, the dependency I'm using relies on OpenGL to retrieve
-			// GPU information, and since OpenGL requires a context before it can
-			// be used - one which I haven't created yet at this point in
-			// execution - the game crashes when I attempt to retrieve GPU info at
-			// this time. Please see the implementation of
-			// sfx::renderer::openWindow() - we can "guarantee" that a context will
-			// have been initialised here
-			_fileCopy << "GPU       {See When Window Is Initialised: Search For "
-				"\"[renderer\"}\n";
-			// _fileCopy << "Storage   " <<  << std::endl;
-			_fileCopy << "Platform  " << dbr::sys::os::name() << " " <<
-				dbr::sys::os::version << " " << dbr::sys::os::architecture <<
-				std::endl;
+			_fileCopy << "Hardware Specification:\n";
+			_fileCopy << GetHardwareDetails() << std::endl;
 			_fileCopy << "Gamepads  " << GetJoystickCount() << std::endl;
 			_fileCopy << "---------------" << std::endl;
 			_fileCopy << "Event Log:" << std::endl;
@@ -123,6 +109,29 @@ unsigned int engine::sink::GetJoystickCount() noexcept {
 		if (sf::Joystick::isConnected(i)) counter++;
 	}
 	return counter;
+}
+
+// https://rosettacode.org/wiki/Get_system_command_output#C.2B.2B
+std::string engine::sink::GetHardwareDetails() noexcept {
+#ifdef _WIN32
+	system("systeminfo > temp.txt");
+	// powershell alternative: start /b powershell.exe "Get-CimInstance -ClassName Win32_VideoController | Select-Object name > temp.txt"
+#elif __linux__
+	// I will likely need a bit more info than this but this is a start
+	system("lscpu > temp.txt");
+#elif _OSX
+	// this outputs WAAAAAAY too much information
+	// I will have to figure out specific data types and incorporate them later
+	system("system_profiler > temp.txt");
+#endif
+	// this should be cross-platform
+	std::ifstream ifs("temp.txt");
+	std::string ret{ std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>() };
+	ifs.close(); // must close the inout stream so the file can be cleaned up
+	std::remove("temp.txt");
+	ret += "For GPU information please see When Window Is Initialised: Search For "
+				"\"[renderer\"}\n"
+	return ret;
 }
 
 std::size_t engine::logger::_objectCount = 0;

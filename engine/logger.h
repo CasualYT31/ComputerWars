@@ -119,6 +119,14 @@ namespace engine {
 		 * @return The number of connected joysticks.
 		 */
 		static unsigned int GetJoystickCount() noexcept;
+
+		/**
+		 * Retrieves hardware details of the machine running the game.
+		 * On Windows, the result of the \c systeminfo command-line utility will be
+		 * returned.
+		 * @return The hardware details of the machine.
+		 */
+		static std::string GetHardwareDetails() noexcept;
 	protected:
 		/**
 		 * This class cannot be instantiated by the client.
