@@ -26,19 +26,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 void awe::updateAllTerrains(awe::bank<awe::tile_type>& tileBank,
 	const awe::bank<awe::terrain>& terrainBank) noexcept {
 	for (awe::BankID i = 0; i < tileBank.size(); i++) {
-		tileBank[(awe::bank<awe::tile_type>::index)i]->updateTerrain(terrainBank);
+		tileBank[i]->updateTerrain(terrainBank);
 	}
 }
 
 void awe::updateAllMovementsAndLoadedUnits(awe::bank<awe::unit_type>& unitBank,
 	const awe::bank<awe::movement_type>& movementBank) noexcept {
 	for (awe::BankID i = 0; i < unitBank.size(); i++) {
-		unitBank[(awe::bank<awe::unit_type>::index)i]->updateMovementType(
-			movementBank
-		);
-		unitBank[(awe::bank<awe::unit_type>::index)i]->updateUnitTypes(
-			unitBank
-		);
+		unitBank[i]->updateMovementType(movementBank);
+		unitBank[i]->updateUnitTypes(unitBank);
 	}
 }
 
@@ -145,13 +141,11 @@ unsigned int awe::terrain::getMaxHP() const noexcept {
 unsigned int awe::terrain::getDefence() const noexcept {
 	return _defence;
 }
-int awe::terrain::getMoveCost(const awe::bank<awe::movement_type>::index
-	movecostID) const noexcept {
+int awe::terrain::getMoveCost(const awe::BankID movecostID) const noexcept {
 	if (movecostID >= _movecosts.size()) return -1;
 	return _movecosts[movecostID];
 }
-unsigned int awe::terrain::getPicture(const awe::bank<awe::country>::index
-	countryID) const noexcept {
+unsigned int awe::terrain::getPicture(const awe::BankID countryID) const noexcept {
 	if (countryID >= _pictures.size()) return UINT_MAX;
 	return _pictures[countryID];
 }
@@ -180,11 +174,11 @@ awe::tile_type::tile_type(const awe::BankID id, engine::json& j) noexcept :
 	j.applyVector(_tiles, { "tiles" });
 	j.apply(_neutralTile, { "neutral" }, &_neutralTile, true);
 }
-awe::bank<awe::terrain>::index awe::tile_type::getTypeIndex() const noexcept {
+awe::BankID awe::tile_type::getTypeIndex() const noexcept {
 	return _terrainType;
 }
-unsigned int awe::tile_type::getOwnedTile(awe::bank<awe::country>::index countryID)
-	const noexcept {
+unsigned int awe::tile_type::getOwnedTile(const awe::BankID countryID) const
+	noexcept {
 	if (countryID >= _tiles.size()) return _neutralTile;
 	return _tiles[countryID];
 }
@@ -229,8 +223,7 @@ awe::unit_type::unit_type(const awe::BankID id, engine::json& j) noexcept :
 	j.apply(_loadLimit, { "loadlimit" }, &_loadLimit, true);
 	j.apply(_fuelPerTurn, { "fuelperturn" }, &_fuelPerTurn, true);
 }
-awe::bank<awe::movement_type>::index awe::unit_type::getMovementTypeIndex() const
-	noexcept {
+awe::BankID awe::unit_type::getMovementTypeIndex() const noexcept {
 	return _movementTypeID;
 }
 std::shared_ptr<const awe::movement_type> awe::unit_type::getMovementType() const
@@ -241,13 +234,12 @@ void awe::unit_type::updateMovementType(const awe::bank<awe::movement_type>&
 	movementBank) const noexcept {
 	_movementType = movementBank[_movementTypeID];
 }
-unsigned int awe::unit_type::getPicture(awe::bank<awe::country>::index countryID)
-	const noexcept {
+unsigned int awe::unit_type::getPicture(const awe::BankID countryID) const
+	noexcept {
 	if (countryID >= _pictures.size()) return UINT_MAX;
 	return _pictures[countryID];
 }
-unsigned int awe::unit_type::getUnit(awe::bank<awe::country>::index countryID)
-	const noexcept {
+unsigned int awe::unit_type::getUnit(const awe::BankID countryID) const noexcept {
 	if (countryID >= _units.size()) return UINT_MAX;
 	return _units[countryID];
 }
@@ -281,8 +273,7 @@ bool awe::unit_type::hasInfiniteFuel() const noexcept {
 bool awe::unit_type::hasInfiniteAmmo() const noexcept {
 	return _maxAmmo < 0;
 }
-bool awe::unit_type::canLoad(const awe::bank<unit_type>::index typeID) const
-	noexcept {
+bool awe::unit_type::canLoad(const awe::BankID typeID) const noexcept {
 	return std::find(_canLoadThese.begin(), _canLoadThese.end(), typeID) !=
 		_canLoadThese.end();
 }
@@ -306,9 +297,7 @@ void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)
 	for (awe::BankID i = 0; i < unitBank.size(); i++) {
 		for (auto& u : _canLoadThese) {
 			if (i == u) {
-				_canLoadTheseUnitTypes.push_back(unitBank[
-					(awe::bank<awe::unit_type>::index)i
-				]);
+				_canLoadTheseUnitTypes.push_back(unitBank[i]);
 				break;
 			}
 		}
@@ -320,8 +309,7 @@ std::vector<unsigned int> awe::unit_type::copyPictures() const noexcept {
 std::vector<unsigned int> awe::unit_type::copyUnits() const noexcept {
 	return _units;
 }
-std::vector<awe::bank<awe::unit_type>::index> awe::unit_type::copyLoadableUnitIDs()
-	const noexcept {
+std::vector<awe::BankID> awe::unit_type::copyLoadableUnitIDs() const noexcept {
 	return _canLoadThese;
 }
 std::vector<std::shared_ptr<const awe::unit_type>>

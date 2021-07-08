@@ -37,12 +37,6 @@ namespace awe {
 	typedef sf::Uint8 TeamID;
 
 	/**
-	 * Typedef representing an underlying UUID value.
-	 * @warning Do \b not make this a signed type!
-	 */
-	typedef sf::Uint32 UUIDValue;
-
-	/**
 	 * Typedef representing a generic bank ID.
 	 */
 	typedef sf::Uint32 BankID;

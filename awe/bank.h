@@ -67,18 +67,11 @@ namespace awe {
 	class bank : public engine::json_script {
 	public:
 		/**
-		 * Typedef used to identify members of the bank.
-		 * This acts as a way to ensure that IDs intended for different banks
-		 * cannot be used with this one.
-		 */
-		typedef awe::BankID index;
-
-		/**
 		 * Allows the client to access the game properties of a bank member.
 		 * @param  id The ID of the member to access.
 		 * @return A pointer to the properties.
 		 */
-		std::shared_ptr<const T> operator[](index id) const noexcept;
+		std::shared_ptr<const T> operator[](const awe::BankID id) const noexcept;
 
 		/**
 		 * Calculates the size of the bank.
@@ -442,7 +435,7 @@ namespace awe {
 		 * @param  movecostID The ID of the type of movement.
 		 * @return The movement point cost.
 		 */
-		int getMoveCost(const bank<movement_type>::index movecostID) const
+		int getMoveCost(const awe::BankID movecostID) const
 			noexcept;
 
 		/**
@@ -451,7 +444,7 @@ namespace awe {
 		 * @return The sprite ID of the terrain picture, or \c UINT_MAX if the
 		 *         given country ID didn't identify a sprite ID.
 		 */
-		unsigned int getPicture(const bank<country>::index countryID) const
+		unsigned int getPicture(const awe::BankID countryID) const
 			noexcept;
 
 		/**
@@ -549,7 +542,7 @@ namespace awe {
 		 * "Plains" or "Road").
 		 * @return The ID of the type of terrain.
 		 */
-		awe::bank<terrain>::index getTypeIndex() const noexcept;
+		awe::BankID getTypeIndex() const noexcept;
 
 		/**
 		 * Retrieves the ID of the sprite that is shown for a given country.
@@ -557,7 +550,7 @@ namespace awe {
 		 * @return The ID of the tile's sprite, or \c _neutralTile if the given
 		 *         country ID didn't identify a sprite ID.
 		 */
-		unsigned int getOwnedTile(bank<country>::index countryID) const noexcept;
+		unsigned int getOwnedTile(const awe::BankID countryID) const noexcept;
 
 		/**
 		 * Retrieves the ID of the sprite that is shown when no country owns the
@@ -600,7 +593,7 @@ namespace awe {
 		/**
 		 * The ID of the type of terrain this tile represents.
 		 */
-		bank<terrain>::index _terrainType = 0;
+		awe::BankID _terrainType = 0;
 
 		/**
 		 * Pointer to the properties of this tile's type of terrain.
@@ -678,7 +671,7 @@ namespace awe {
 		 * Retrieves the movement type of this unit.
 		 * @return The index of the movement type of this unit.
 		 */
-		awe::bank<movement_type>::index getMovementTypeIndex() const noexcept;
+		awe::BankID getMovementTypeIndex() const noexcept;
 
 		/**
 		 * Retrieves a pointer to the details of the type of movement this unit
@@ -702,8 +695,7 @@ namespace awe {
 		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't
 		 *         map to a sprite ID in the internal list.
 		 */
-		unsigned int getPicture(awe::bank<awe::country>::index countryID) const
-			noexcept;
+		unsigned int getPicture(const awe::BankID countryID) const noexcept;
 
 		/**
 		 * Retrieves the sprite ID of a given country's map sprite of this unit.
@@ -711,8 +703,7 @@ namespace awe {
 		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't
 		 *         map to a sprite ID in the internal list.
 		 */
-		unsigned int getUnit(awe::bank<awe::country>::index countryID) const
-			noexcept;
+		unsigned int getUnit(const awe::BankID countryID) const noexcept;
 
 		/**
 		 * Retrieves the price property.
@@ -779,7 +770,7 @@ namespace awe {
 		 * @param  typeID The ID of the type of unit to test.
 		 * @return \c TRUE if yes, \c FALSE otherwise.
 		 */
-		bool canLoad(const awe::bank<unit_type>::index typeID) const noexcept;
+		bool canLoad(const awe::BankID typeID) const noexcept;
 
 		/**
 		 * Overloaded version of \c canLoad() that checks using a given unit type.
@@ -830,8 +821,7 @@ namespace awe {
 		 * @return All the IDs of the types of units that can be loaded onto this
 		 *         unit.
 		 */
-		std::vector<awe::bank<unit_type>::index> copyLoadableUnitIDs() const
-			noexcept;
+		std::vector<awe::BankID> copyLoadableUnitIDs() const noexcept;
 
 		/**
 		 * Copies the internal list of units that can be loaded onto this one and
@@ -859,7 +849,7 @@ namespace awe {
 		/**
 		 * The movement type ID property.
 		 */
-		awe::bank<awe::movement_type>::index _movementTypeID = 0;
+		awe::BankID _movementTypeID = 0;
 
 		/**
 		 * Pointer to this unit's movement typre details.
@@ -921,7 +911,7 @@ namespace awe {
 		/**
 		 * List of unit type IDs that can be loaded onto this type of unit.
 		 */
-		std::vector<awe::bank<unit_type>::index> _canLoadThese;
+		std::vector<awe::BankID> _canLoadThese;
 
 		/**
 		 * List of unit types that can be loaded onto this type of unit.
@@ -1010,7 +1000,8 @@ namespace awe {
 }
 
 template<typename T>
-std::shared_ptr<const T> awe::bank<T>::operator[](index id) const noexcept {
+std::shared_ptr<const T> awe::bank<T>::operator[](const awe::BankID id) const
+	noexcept {
 	if (id >= size()) return nullptr;
 	return _bank[id];
 }
