@@ -91,7 +91,6 @@ add_executable(ComputerWars "main.cpp"
 	engine/gui.cpp
 	engine/script.h
 	engine/script.cpp
-	engine/uuid.h
 	sfx/audio.cpp
 	sfx/audio.h
 	sfx/fonts.cpp

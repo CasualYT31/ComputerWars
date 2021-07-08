@@ -84,7 +84,7 @@ const sf::Color& awe::country::getColour() const noexcept {
 	return _colour;
 }
 bool awe::country::operator==(const awe::country& rhs) const noexcept {
-	return UUID == rhs.UUID;
+	return getID() == rhs.getID();
 }
 bool awe::country::operator!=(const awe::country& rhs) const noexcept {
 	return !(*this == rhs);
@@ -96,7 +96,7 @@ bool awe::country::operator!=(const awe::country& rhs) const noexcept {
 awe::weather::weather(const awe::BankID id, engine::json& j) noexcept :
 	common_properties(id, j) {}
 bool awe::weather::operator==(const awe::weather& rhs) const noexcept {
-	return UUID == rhs.UUID;
+	return getID() == rhs.getID();
 }
 bool awe::weather::operator!=(const awe::weather& rhs) const noexcept {
 	return !(*this == rhs);
@@ -108,7 +108,7 @@ bool awe::weather::operator!=(const awe::weather& rhs) const noexcept {
 awe::environment::environment(const awe::BankID id, engine::json& j) noexcept :
 	common_properties(id, j) {}
 bool awe::environment::operator==(const awe::environment& rhs) const noexcept {
-	return UUID == rhs.UUID;
+	return getID() == rhs.getID();
 }
 bool awe::environment::operator!=(const awe::environment& rhs) const noexcept {
 	return !(*this == rhs);
@@ -120,7 +120,7 @@ bool awe::environment::operator!=(const awe::environment& rhs) const noexcept {
 awe::movement_type::movement_type(const awe::BankID id, engine::json& j) noexcept :
 	common_properties(id, j) {}
 bool awe::movement_type::operator==(const awe::movement_type& rhs) const noexcept {
-	return UUID == rhs.UUID;
+	return getID() == rhs.getID();
 }
 bool awe::movement_type::operator!=(const awe::movement_type& rhs) const noexcept {
 	return !(*this == rhs);
@@ -165,7 +165,7 @@ std::vector<unsigned int> awe::terrain::copyPictures() const noexcept {
 	return _pictures;
 }
 bool awe::terrain::operator==(const awe::terrain& rhs) const noexcept {
-	return UUID == rhs.UUID;
+	return getID() == rhs.getID();
 }
 bool awe::terrain::operator!=(const awe::terrain& rhs) const noexcept {
 	return !(*this == rhs);
@@ -199,7 +199,7 @@ void awe::tile_type::updateTerrain(const awe::bank<awe::terrain>& terrainBank)
 	_terrain = terrainBank[_terrainType];
 }
 bool awe::tile_type::operator==(const awe::tile_type& rhs) const noexcept {
-	return UUID == rhs.UUID;
+	return getID() == rhs.getID();
 }
 bool awe::tile_type::operator!=(const awe::tile_type& rhs) const noexcept {
 	return !(*this == rhs);
@@ -329,7 +329,7 @@ std::vector<std::shared_ptr<const awe::unit_type>>
 	return _canLoadTheseUnitTypes;
 }
 bool awe::unit_type::operator==(const awe::unit_type& rhs) const noexcept {
-	return UUID == rhs.UUID;
+	return getID() == rhs.getID();
 }
 bool awe::unit_type::operator!=(const awe::unit_type& rhs) const noexcept {
 	return !(*this == rhs);
@@ -346,7 +346,7 @@ unsigned int awe::commander::getPortrait() const noexcept {
 	return _portrait;
 }
 bool awe::commander::operator==(const awe::commander& rhs) const noexcept {
-	return UUID == rhs.UUID;
+	return getID() == rhs.getID();
 }
 bool awe::commander::operator!=(const awe::commander& rhs) const noexcept {
 	return !(*this == rhs);

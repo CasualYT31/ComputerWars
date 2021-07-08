@@ -36,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "sfx/texture.h"
-#include "engine/uuid.h"
+#include "awe/typedef.h"
 
 namespace awe {
 	/**
@@ -267,11 +267,6 @@ namespace awe {
 		const sf::Color& getColour() const noexcept;
 
 		/**
-		 * The object's UUID.
-		 */
-		engine::uuid<awe::country> UUID;
-
-		/**
 		 * Comparison operator.
 		 * @param  rhs The \c country object to test against.
 		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
@@ -309,11 +304,6 @@ namespace awe {
 		weather(const awe::BankID id, engine::json& j) noexcept;
 
 		/**
-		 * The object's UUID.
-		 */
-		engine::uuid<awe::weather> UUID;
-
-		/**
 		 * Comparison operator.
 		 * @param  rhs The \c weather object to test against.
 		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
@@ -348,11 +338,6 @@ namespace awe {
 		environment(const awe::BankID id, engine::json& j) noexcept;
 
 		/**
-		 * The object's UUID.
-		 */
-		engine::uuid<awe::environment> UUID;
-
-		/**
 		 * Comparison operator.
 		 * @param  rhs The \c environment object to test against.
 		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
@@ -383,11 +368,6 @@ namespace awe {
 		 * @param j  The object value containing the movement type's properties.
 		 */
 		movement_type(const awe::BankID id, engine::json& j) noexcept;
-
-		/**
-		 * The object's UUID.
-		 */
-		engine::uuid<awe::movement_type> UUID;
 
 		/**
 		 * Comparison operator.
@@ -491,11 +471,6 @@ namespace awe {
 		 * @return All the pictures assigned to this terrain.
 		 */
 		std::vector<unsigned int> copyPictures() const noexcept;
-
-		/**
-		 * The object's UUID.
-		 */
-		engine::uuid<awe::terrain> UUID;
 
 		/**
 		 * Comparison operator.
@@ -606,11 +581,6 @@ namespace awe {
 		 */
 		void updateTerrain(const awe::bank<awe::terrain>& terrainBank) const
 			noexcept;
-
-		/**
-		 * The object's UUID.
-		 */
-		engine::uuid<awe::tile_type> UUID;
 
 		/**
 		 * Comparison operator.
@@ -872,11 +842,6 @@ namespace awe {
 			const noexcept;
 
 		/**
-		 * The object's UUID.
-		 */
-		engine::uuid<awe::unit_type> UUID;
-
-		/**
 		 * Comparison operator.
 		 * @param  rhs The \c unit_type object to test against.
 		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
@@ -1002,11 +967,6 @@ namespace awe {
 		 * @return The animated sprite ID.
 		 */
 		unsigned int getPortrait() const noexcept;
-
-		/**
-		 * The object's UUID.
-		 */
-		engine::uuid<awe::commander> UUID;
 
 		/**
 		 * Comparison operator.

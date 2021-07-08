@@ -28,7 +28,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "test.h"
-#include "engine/uuid.h"
 
 /**
  * Macro that allows tests which rely on the logger dependency to test if their
@@ -139,40 +138,6 @@ namespace test {
 		 * \c language_dictionary class.
 		 */
 		void language_dictionary_json();
-	};
-
-	/**
-	 * Tests uuid.h classes.
-	 */
-	class test_uuid : public test::test_case {
-	public:
-		/**
-		 * Assigns the name <tt>"uuid_test_case.log"</tt> to the output file.
-		 * Also initialises \c ID with \c UUID_INIT.
-		 * @param path The path in which to save the output file.
-		 */
-		test_uuid(const std::string& path) noexcept;
-
-		/**
-		 * Runs all the tests defined in the private methods of this class.
-		 */
-		void runTests() noexcept;
-
-		/**
-		 * The initial value of the UUID.
-		 */
-		static const awe::UUIDValue UUID_INIT =
-			engine::uuid<test::test_uuid>::INVALID - 1;
-
-		/**
-		 * The \c uuid instantiation tested against.
-		 */
-		engine::uuid<test::test_uuid> ID;
-	private:
-		/**
-		 * Runs tests related to the \c uuid class.
-		 */
-		void uuid();
 	};
 
 	/**
