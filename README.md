@@ -27,7 +27,7 @@ For information on the versions of libraries I have used for this project, pleas
 - [SPDLOG](https://github.com/gabime/spdlog)
 - [JSON for C++](https://github.com/nlohmann/json)
 - [GoogleTest](https://github.com/google/googletest)
-- [systemInfo](https://github.com/dabbertorres/systemInfo)
+- [SystemProperties](https://github.com/CasualYT31/SystemProperties)
 
 ### Links
 - [Trello Board](https://trello.com/b/GN25IV5j/computer-wars)
