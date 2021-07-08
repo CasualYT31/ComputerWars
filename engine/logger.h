@@ -73,7 +73,7 @@ namespace engine {
 		 *                included in the file name.
 		 * @return A pointer to the sink representing the log file.
 		 */
-		static std::shared_ptr<spdlog::sinks::dist_sink_mt> Get(
+		static std::shared_ptr<spdlog::sinks::dist_sink_st> Get(
 			const std::string& name = "Application",
 			const std::string& dev = "Developer",
 			const std::string& folder = ".",
@@ -113,6 +113,12 @@ namespace engine {
 		 * @return The date and time in string form.
 		 */
 		static std::string GetDateTime() noexcept;
+
+		/**
+		 * Counts the number of available joysticks.
+		 * @return The number of connected joysticks.
+		 */
+		static unsigned int GetJoystickCount() noexcept;
 	protected:
 		/**
 		 * This class cannot be instantiated by the client.
@@ -120,10 +126,10 @@ namespace engine {
 		sink() noexcept;
 	private:
 		/**
-		 * The thread safe distribution sink which outputs to a file and an
+		 * The non-thread safe distribution sink which outputs to a file and an
 		 * \c ostringstream.
 		 */
-		static std::shared_ptr<spdlog::sinks::dist_sink_mt> _sharedSink;
+		static std::shared_ptr<spdlog::sinks::dist_sink_st> _sharedSink;
 
 		/**
 		 * The \c ostringstream used to store a copy of the event log of the log

@@ -192,9 +192,6 @@ int game(const std::string& file) {
     gameLoop.setUnits(units);
     gameLoop.setCommanders(commanders);
 
-    // open renderer window
-    renderer->openWindow();
-
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run(file);
 }

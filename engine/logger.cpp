@@ -23,15 +23,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "logger.h"
 #include <fstream>
 #include <ctime>
+#include "SystemInfo.hpp"
+#include "SFML/Window/Joystick.hpp"
 
-std::shared_ptr<spdlog::sinks::dist_sink_mt> engine::sink::_sharedSink = nullptr;
+std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::_sharedSink = nullptr;
 std::ostringstream engine::sink::_fileCopy = std::ostringstream();
 std::string engine::sink::_appName = "";
 std::string engine::sink::_devName = "";
 
 engine::sink::sink() noexcept {}
 
-std::shared_ptr<spdlog::sinks::dist_sink_mt> engine::sink::Get(
+std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 	const std::string& name, const std::string& dev, const std::string& folder,
 	const bool date) noexcept {
 	if (!_sharedSink) {
@@ -44,26 +46,36 @@ std::shared_ptr<spdlog::sinks::dist_sink_mt> engine::sink::Get(
 			_fileCopy << ApplicationName() << " © " << GetYear() << " " <<
 				DeveloperName() << std::endl;
 			_fileCopy << "---------------" << std::endl;
-			/* logfile << "Hardware Specifications:" << std::endl;
-			_fileCopy << "CPU       " <<  << std::endl;
-			_fileCopy << "Memory    " <<  << std::endl;
-			_fileCopy << "GPU       " <<  << std::endl;
-			_fileCopy << "Storage   " <<  << std::endl;
-			_fileCopy << "Platform  " <<  << std::endl;
-			_fileCopy << "Gamepads  " <<  << std::endl;
-			_fileCopy << "---------------" << std::endl; */
+			_fileCopy << "Hardware Specifications:" << std::endl;
+			_fileCopy << "CPU       " << dbr::sys::cpuModel() << std::endl;
+			_fileCopy << "Memory    " << dbr::sys::totalRAM() << std::endl;
+			// unfortunately, the dependency I'm using relies on OpenGL to retrieve
+			// GPU information, and since OpenGL requires a context before it can
+			// be used - one which I haven't created yet at this point in
+			// execution - the game crashes when I attempt to retrieve GPU info at
+			// this time. Please see the implementation of
+			// sfx::renderer::openWindow() - we can "guarantee" that a context will
+			// have been initialised here
+			_fileCopy << "GPU       {See When Window Is Initialised: Search For "
+				"\"[renderer\"}\n";
+			// _fileCopy << "Storage   " <<  << std::endl;
+			_fileCopy << "Platform  " << dbr::sys::os::name() << " " <<
+				dbr::sys::os::version << " " << dbr::sys::os::architecture <<
+				std::endl;
+			_fileCopy << "Gamepads  " << GetJoystickCount() << std::endl;
+			_fileCopy << "---------------" << std::endl;
 			_fileCopy << "Event Log:" << std::endl;
 
 			std::ofstream logfile(filename);
 			logfile << _fileCopy.str();
 			logfile.close();
 
-			_sharedSink = std::make_shared<spdlog::sinks::dist_sink_mt>();
+			_sharedSink = std::make_shared<spdlog::sinks::dist_sink_st>();
 			_sharedSink->add_sink(
-				std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename)
+				std::make_shared<spdlog::sinks::basic_file_sink_st>(filename)
 			);
 			_sharedSink->add_sink(
-				std::make_shared<spdlog::sinks::ostream_sink_mt>(_fileCopy)
+				std::make_shared<spdlog::sinks::ostream_sink_st>(_fileCopy)
 			);
 		} catch (std::exception& e) {
 			boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
@@ -99,6 +111,18 @@ std::string engine::sink::ApplicationName() noexcept {
 
 std::string engine::sink::DeveloperName() noexcept {
 	return _devName;
+}
+
+unsigned int engine::sink::GetJoystickCount() noexcept {
+	// I have avoided assuming that the SFML doesn't leave out IDs:
+	// i.e. joystick 0 is connected, 1 is not connected, but 2 IS connected.
+	// I don't have 100% certainty regarding how the SFML deals with IDs,
+	// so I'd prefer to be safe even if it's not 100% efficient
+	unsigned int counter = 0;
+	for (unsigned int i = 0; i < sf::Joystick::Count; i++) {
+		if (sf::Joystick::isConnected(i)) counter++;
+	}
+	return counter;
 }
 
 std::size_t engine::logger::_objectCount = 0;
