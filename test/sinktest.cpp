@@ -29,11 +29,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 
 /**
- * This function tests the \c Get() method.
- * The first call to \c Get() should actually create the file. The second
- * call should not.
+ * This function tests the \c sink class.
  */
-TEST(SinkTest, GetTest) {
+TEST(SinkTest, SinkTest) {
+	// first ensure that the test folder has been removed
+	std::filesystem::remove_all(std::filesystem::current_path() / "test");
+	// carry out tests
+	// The first call to \c Get() should actually create the file
+	// the second call should not
 	auto firstLog = engine::sink::Get("Tests", "Dev", "./test/", false);
 	auto secondLog =
 		engine::sink::Get("Test Again", "Developer", "./test/results/", false);
@@ -42,4 +45,14 @@ TEST(SinkTest, GetTest) {
 	bool secondLogFileExists = std::filesystem::exists("./test/results/Log.log");
 	EXPECT_TRUE(firstLogFileExists);
 	EXPECT_FALSE(secondLogFileExists);
+	// now test the properties
+	EXPECT_EQ(engine::sink::ApplicationName(), "Tests");
+	EXPECT_EQ(engine::sink::DeveloperName(), "Dev");
+	// obviously test is dependent on year of execution...
+	EXPECT_EQ(engine::sink::GetYear(), "2021");
+	// has the file been written as expected so far?
+	// also implicitly tests that GetLog() is working as expected
+	std::string file = engine::sink::GetLog();
+	std::string firstLine = file.substr(0, file.find('\n'));
+	EXPECT_EQ(firstLine, "Tests © 2021 Dev");
 }

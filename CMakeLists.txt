@@ -27,14 +27,16 @@ FetchContent_Declare(googletest
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 enable_testing()
-add_executable(${PROJECT_NAME}Tests "test/sinktest.cpp")
+add_executable(${PROJECT_NAME}Tests
+	"test/sinktest.cpp"
+	"test/loggertest.cpp")
 set_target_properties(${PROJECT_NAME}Tests PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME}Tests PRIVATE
 	${ComputerWarsAWE_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME}Tests gtest gtest_main
 	ComputerWarsAWE)
 # https://cmake.org/cmake/help/latest/module/GoogleTest.html
-gtest_add_tests(TARGET ${PROJECT_NAME}Tests)
+gtest_discover_tests(${PROJECT_NAME}Tests)
 
 # application
 add_executable(${PROJECT_NAME} "main.cpp")
