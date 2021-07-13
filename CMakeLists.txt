@@ -5,15 +5,6 @@ include (FetchContent)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# GoogleTest
-FetchContent_Declare(googletest
-	# specify the commit you depend on and update it regularly.
-	URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
 # SystemProperties
 FetchContent_Declare(systemproperties
 	GIT_REPOSITORY https://github.com/CasualYT31/SystemProperties.git
@@ -65,6 +56,10 @@ FetchContent_Declare(angelscript
 FetchContent_MakeAvailable(angelscript)
 # to add add-ons, simply add relevant files to below add_executable statement
 
+# tests
+enable_testing()
+add_subdirectory("test")
+
 # source files
 add_executable(ComputerWars "main.cpp"
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp
@@ -114,13 +109,9 @@ add_executable(ComputerWars "main.cpp"
 	awe/tile.h
 	awe/typedef.h
 	awe/unit.cpp
-	awe/unit.h
-	test/test.cpp
-	test/test.h
-	test/tests.cpp
-	test/tests.h)
+	awe/unit.h)
 set_target_properties(ComputerWars PROPERTIES CXX_STANDARD 17)
-target_include_directories(ComputerWars PRIVATE ${systeminfo_SOURCE_DIR}
+target_include_directories(ComputerWars PRIVATE
 	${angelscript_SOURCE_DIR}/angelscript/include
 	${angelscript_SOURCE_DIR}/add_on/scriptarray
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring
@@ -129,7 +120,6 @@ target_include_directories(ComputerWars PRIVATE ${systeminfo_SOURCE_DIR}
 
 # libraries
 target_link_libraries(ComputerWars
-	gtest_main
 	SystemProperties
 	Boxer
 	spdlog

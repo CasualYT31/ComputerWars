@@ -50,7 +50,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "awe/engine.h"
-#include "test/tests.h"
 // for debugging measure
 #include <filesystem>
 
@@ -208,5 +207,4 @@ int main(int argc, char* argv[]) {
         std::filesystem::current_path().parent_path().parent_path().parent_path()
     );
     return game(((argc < 2) ? ("assets/map/moonisle.cwm") : (argv[1])));
-    return test::test();
 }
