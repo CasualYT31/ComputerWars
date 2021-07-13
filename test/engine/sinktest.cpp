@@ -20,8 +20,18 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/**@file sinktest.h
+ * Tests the \c engine::sink class.
+ */
+
+#include "engine/logger.h"
 #include "gtest/gtest.h"
 
+/**
+ * This function tests the \c Get() method.
+ * The first call to \c Get() should actually create the file. The second
+ * call should not.
+ */
 TEST(SinkTest, GetTest) {
 	EXPECT_EQ(5, 6) << "Testing, 1 2 3";
 }
