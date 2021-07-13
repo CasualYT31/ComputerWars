@@ -28,15 +28,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "engine/language.h"
-#include "sfx/fonts.h"
-#include "sfx/audio.h"
-#include "sfx/renderer.h"
-#include "sfx/userinput.h"
-#include "engine/gui.h"
-#include "awe/bank.h"
-#include "awe/spritesheets.h"
-#include "awe/map.h"
+#include "language.h"
+#include "fonts.h"
+#include "audio.h"
+#include "renderer.h"
+#include "userinput.h"
+#include "gui.h"
+#include "bank.h"
+#include "spritesheets.h"
+#include "map.h"
 
 namespace awe {
 	/**
@@ -173,7 +173,7 @@ namespace awe {
 		 * Sets the engine's available menus.
 		 * @param ptr Pointer to the data.
 		 */
-		void setGUI(const std::shared_ptr<engine::gui>& ptr) noexcept;
+		void setGUI(const std::shared_ptr<sfx::gui>& ptr) noexcept;
 	private:
 		/**
 		 * Method called at the start of \c run() to make preliminary checks on
@@ -284,6 +284,6 @@ namespace awe {
 		/**
 		 * Pointer to the GUI object containing all the menus.
 		 */
-		std::shared_ptr<engine::gui> _gui;
+		std::shared_ptr<sfx::gui> _gui;
 	};
 }

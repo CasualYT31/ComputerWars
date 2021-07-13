@@ -167,6 +167,6 @@ void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& ptr)
 	_scripts = ptr;
 }
 
-void awe::game_engine::setGUI(const std::shared_ptr<engine::gui>& ptr) noexcept {
+void awe::game_engine::setGUI(const std::shared_ptr<sfx::gui>& ptr) noexcept {
 	_gui = ptr;
 }

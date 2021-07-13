@@ -22,45 +22,45 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui.h"
 
-engine::gui_background::gui_background() noexcept {}
+sfx::gui_background::gui_background() noexcept {}
 
-engine::gui_background::gui_background(unsigned int key) noexcept {
+sfx::gui_background::gui_background(unsigned int key) noexcept {
 	set(key);
 }
 
-engine::gui_background::gui_background(sf::Color colour) noexcept {
+sfx::gui_background::gui_background(sf::Color colour) noexcept {
 	set(colour);
 }
 
-void engine::gui_background::set(unsigned int key) noexcept {
-	_flag = engine::gui_background::type::Sprite;
+void sfx::gui_background::set(unsigned int key) noexcept {
+	_flag = sfx::gui_background::type::Sprite;
 	_key = key;
 }
 
-void engine::gui_background::set(sf::Color colour) noexcept {
-	_flag = engine::gui_background::type::Colour;
+void sfx::gui_background::set(sf::Color colour) noexcept {
+	_flag = sfx::gui_background::type::Colour;
 	_colour = colour;
 }
 
-engine::gui_background::type engine::gui_background::getType() const noexcept {
+sfx::gui_background::type sfx::gui_background::getType() const noexcept {
 	return _flag;
 }
 
-unsigned int engine::gui_background::getSprite() const noexcept {
+unsigned int sfx::gui_background::getSprite() const noexcept {
 	return _key;
 }
 
-sf::Color engine::gui_background::getColour() const noexcept {
+sf::Color sfx::gui_background::getColour() const noexcept {
 	return _colour;
 }
 
-engine::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
+sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 	const std::string& name) noexcept : _scripts(scripts), _logger(name) {
 	if (!scripts) _logger.error("No scripts object has been provided to this GUI "
 		"object: no signals will be handled.");
 }
 
-void engine::gui::setGUI(const std::string& newPanel) noexcept {
+void sfx::gui::setGUI(const std::string& newPanel) noexcept {
 	auto old = getGUI();
 	if (_gui.get(old)) _gui.get(old)->setVisible(false);
 	try {
@@ -76,24 +76,24 @@ void engine::gui::setGUI(const std::string& newPanel) noexcept {
 	}
 }
 
-std::string engine::gui::getGUI() const noexcept {
+std::string sfx::gui::getGUI() const noexcept {
 	return _currentGUI;
 }
 
-void engine::gui::setSpritesheet(std::shared_ptr<sfx::animated_spritesheet> sheet)
+void sfx::gui::setSpritesheet(std::shared_ptr<sfx::animated_spritesheet> sheet)
 	noexcept {
 	_sheet = sheet;
 }
 
-void engine::gui::setTarget(sf::RenderTarget& newTarget) noexcept {
+void sfx::gui::setTarget(sf::RenderTarget& newTarget) noexcept {
 	_gui.setTarget(newTarget);
 }
 
-bool engine::gui::handleEvent(sf::Event e) noexcept {
+bool sfx::gui::handleEvent(sf::Event e) noexcept {
 	return _gui.handleEvent(e);
 }
 
-void engine::gui::signalHandler(tgui::Widget::Ptr widget,
+void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const std::string& signalName) noexcept {
 	std::string functionName = getGUI() + "_" + widget->getWidgetName() + "_" +
 		signalName;
@@ -101,11 +101,11 @@ void engine::gui::signalHandler(tgui::Widget::Ptr widget,
 		_scripts->callFunction(functionName);
 }
 
-bool engine::gui::animate(const sf::RenderTarget& target) noexcept {
+bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		// this GUI has a background to animate
 		if (_guiBackground[getGUI()].getType() ==
-			engine::gui_background::type::Colour) {
+			sfx::gui_background::type::Colour) {
 			_bgColour.setSize(sf::Vector2f(target.getSize().x,
 				target.getSize().y));
 			_bgColour.setFillColor(_guiBackground[getGUI()].getColour());
@@ -161,12 +161,12 @@ bool engine::gui::animate(const sf::RenderTarget& target) noexcept {
 	return false;
 }
 
-void engine::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// draw background
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		// this GUI has a background to animate
 		if (_guiBackground.at(getGUI()).getType() ==
-			engine::gui_background::type::Colour) {
+			sfx::gui_background::type::Colour) {
 			target.draw(_bgColour);
 		} else {
 			target.draw(_bgSprite);
@@ -176,7 +176,7 @@ void engine::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const 
 	_gui.draw();
 }
 
-bool engine::gui::_load(engine::json& j) noexcept {
+bool sfx::gui::_load(engine::json& j) noexcept {
 	bool ret = true;
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
@@ -216,11 +216,11 @@ bool engine::gui::_load(engine::json& j) noexcept {
 	return ret;
 }
 
-bool engine::gui::_save(nlohmann::ordered_json& j) noexcept {
+bool sfx::gui::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }
 
-bool engine::gui::_loadGUI(const std::string& name, const std::string& filepath)
+bool sfx::gui::_loadGUI(const std::string& name, const std::string& filepath)
 	noexcept {
 	tgui::Gui temp;
 	try {
@@ -251,11 +251,11 @@ bool engine::gui::_loadGUI(const std::string& name, const std::string& filepath)
 }
 
 // ALL SIGNALS NEED TO BE TESTED IDEALLY
-void engine::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
+void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	// connect common Widget signals
 	widget->connect({"PositionChanged", "SizeChanged", "Focused", "Unfocused",
 		"MouseEntered", "MouseLeft", "AnimationFinished"},
-		&engine::gui::signalHandler, this);
+		&sfx::gui::signalHandler, this);
 	// connect clickable widget signals
 	tgui::String type = widget->getWidgetType(); type = type.toLower();
 	if (type == "button" || type == "editbox" || type == "label" ||
@@ -263,49 +263,49 @@ void engine::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 		type == "spinbutton" || type == "panel") {
 		widget->connect({"MousePressed", "MouseReleased", "Clicked",
 			"RightMousePressed", "RightMouseReleased", "RightClicked"},
-			&engine::gui::signalHandler, this);
+			&sfx::gui::signalHandler, this);
 	}
 	// connect bespoke signals
 	if (type == "button") {
-		widget->connect({ "Pressed" }, &engine::gui::signalHandler, this);
+		widget->connect({ "Pressed" }, &sfx::gui::signalHandler, this);
 	} else if (type == "childwindow") {
 		widget->connect({ "MousePressed", "Closed", "Minimized", "Maximized",
-			"EscapeKeyPressed" }, &engine::gui::signalHandler, this);
+			"EscapeKeyPressed" }, &sfx::gui::signalHandler, this);
 	} else if (type == "combobox") {
-		widget->connect({ "ItemSelected" }, &engine::gui::signalHandler, this);
+		widget->connect({ "ItemSelected" }, &sfx::gui::signalHandler, this);
 	} else if (type == "editbox") {
 		widget->connect({ "TextChanged", "ReturnKeyPressed" },
-			&engine::gui::signalHandler, this);
+			&sfx::gui::signalHandler, this);
 	} else if (type == "knob" || type == "scrollbar" || type == "slider" ||
 		type == "spinbutton") {
-		widget->connect({ "ValueChanged" }, &engine::gui::signalHandler, this);
+		widget->connect({ "ValueChanged" }, &sfx::gui::signalHandler, this);
 	} else if (type == "label" || type == "picture") {
-		widget->connect({ "DoubleClicked" }, &engine::gui::signalHandler, this);
+		widget->connect({ "DoubleClicked" }, &sfx::gui::signalHandler, this);
 	} else if (type == "listbox") {
 		widget->connect({ "ItemSelected", "MousePressed", "MouseReleased",
-			"DoubleClicked" }, &engine::gui::signalHandler, this);
+			"DoubleClicked" }, &sfx::gui::signalHandler, this);
 	} else if (type == "listview") {
 		widget->connect({ "ItemSelected", "HeaderClicked", "RightClicked",
-			"DoubleClicked" }, &engine::gui::signalHandler, this);
+			"DoubleClicked" }, &sfx::gui::signalHandler, this);
 	} else if (type == "menubar") {
-		widget->connect({ "MenuItemClicked" }, &engine::gui::signalHandler, this);
+		widget->connect({ "MenuItemClicked" }, &sfx::gui::signalHandler, this);
 	} else if (type == "messagebox") {
-		widget->connect({ "ButtonPressed" }, &engine::gui::signalHandler, this);
+		widget->connect({ "ButtonPressed" }, &sfx::gui::signalHandler, this);
 	} else if (type == "progressbar") {
-		widget->connect({ "ValueChanged", "Full" }, &engine::gui::signalHandler,
+		widget->connect({ "ValueChanged", "Full" }, &sfx::gui::signalHandler,
 			this);
 	} else if (type == "radiobutton") {
 		widget->connect({ "Checked", "Unchecked", "Changed" },
-			&engine::gui::signalHandler, this);
+			&sfx::gui::signalHandler, this);
 	} else if (type == "rangeslider") {
-		widget->connect({ "RangeChanged" }, &engine::gui::signalHandler, this);
+		widget->connect({ "RangeChanged" }, &sfx::gui::signalHandler, this);
 	} else if (type == "tabs") {
-		widget->connect({ "TabSelected" }, &engine::gui::signalHandler, this);
+		widget->connect({ "TabSelected" }, &sfx::gui::signalHandler, this);
 	} else if (type == "textbox") {
 		widget->connect({ "TextChanged", "SelectionChanged" },
-			&engine::gui::signalHandler, this);
+			&sfx::gui::signalHandler, this);
 	} else if (type == "treeview") {
 		widget->connect({ "ItemSelected", "DoubleClicked", "Expanded",
-			"Collapsed" }, &engine::gui::signalHandler, this);
+			"Collapsed" }, &sfx::gui::signalHandler, this);
 	}
 }

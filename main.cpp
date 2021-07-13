@@ -124,7 +124,7 @@ int game(const std::string& file) {
         std::make_shared<engine::scripts>("assets/script/");
 
     // initialise the GUI
-    std::shared_ptr<engine::gui> gui = std::make_shared<engine::gui>(scripts);
+    std::shared_ptr<sfx::gui> gui = std::make_shared<sfx::gui>(scripts);
     gui->load("assets/gui/gui.json");
 
     // initialise the countries

@@ -25,11 +25,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Unit, armies, and tiles are all stored and managed here.
  */
 
-#include "awe/tile.h"
-#include "awe/unit.h"
-#include "awe/army.h"
-#include "engine/script.h"
-#include "engine/file.h"
+#include "tile.h"
+#include "unit.h"
+#include "army.h"
+#include "script.h"
+#include "file.h"
 
 #pragma once
 

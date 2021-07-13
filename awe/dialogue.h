@@ -26,10 +26,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "sfx/texture.h"
-#include "sfx/audio.h"
-#include "engine/language.h"
-#include "sfx/userinput.h"
+#include "texture.h"
+#include "audio.h"
+#include "language.h"
+#include "userinput.h"
 
 namespace awe {
 	/**

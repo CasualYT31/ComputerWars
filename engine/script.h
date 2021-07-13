@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "angelscript.h"
 #include "scriptbuilder.h"
 #include "scriptstdstring.h"
-#include "engine/logger.h"
+#include "logger.h"
 #include <type_traits>
 
 namespace engine {

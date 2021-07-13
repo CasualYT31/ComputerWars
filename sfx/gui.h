@@ -28,10 +28,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "tgui/tgui.hpp"
-#include "sfx/texture.h"
-#include "engine/script.h"
+#include "texture.h"
+#include "script.h"
 
-namespace engine {
+namespace sfx {
 	/**
 	 * Represents a GUI background.
 	 * The background of a GUI can be either a solid colour or a sprite from a

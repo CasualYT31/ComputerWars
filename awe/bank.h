@@ -35,8 +35,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "sfx/texture.h"
-#include "awe/typedef.h"
+#include "texture.h"
+#include "typedef.h"
 
 namespace awe {
 	/**
