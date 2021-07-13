@@ -31,7 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine/language.h"
 #include "sfx/userinput.h"
 
-namespace engine {
+namespace awe {
 	/**
 	 * Defines the different positions a dialogue box can have.
 	 * <ul><li>\c Bottom - Anchors the dialogue box to the bottom of the target.
@@ -187,7 +187,7 @@ namespace engine {
 		 * @param position The position to set.
 		 * @sa    dialogue_box_position
 		 */
-		void setPosition(const engine::dialogue_box_position position) noexcept;
+		void setPosition(const awe::dialogue_box_position position) noexcept;
 
 		/**
 		 * Sets the background colour of the dialogue box.
@@ -746,13 +746,13 @@ namespace engine {
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 		bool _load(engine::json& j) noexcept;
 		bool _save(nlohmann::ordered_json& j) noexcept;
-		std::unique_ptr<engine::dialogue_box> _allocateDialogueBox(
+		std::unique_ptr<awe::dialogue_box> _allocateDialogueBox(
 			const std::size_t i) noexcept;
 
 		// may need to combine this with dialogue_box class
 		struct dialogue_box_data {
-			engine::dialogue_box_position position =
-				engine::dialogue_box_position::Bottom;
+			awe::dialogue_box_position position =
+				awe::dialogue_box_position::Bottom;
 			float size = 0.15f;
 			bool flipped = false;
 			std::string mainText = "";
@@ -788,21 +788,21 @@ namespace engine {
 }
 
 template<typename... Ts>
-void engine::dialogue_sequence::updateMainText(Ts... values) noexcept {
+void awe::dialogue_sequence::updateMainText(Ts... values) noexcept {
 	if (_langDic && _currentBox) _currentBox->setMainText((*_langDic)(
 		_boxes[_currentBoxID].mainText, values...)
 	);
 }
 
 template<typename... Ts>
-void engine::dialogue_sequence::updateNameText(Ts... values) noexcept {
+void awe::dialogue_sequence::updateNameText(Ts... values) noexcept {
 	if (_langDic && _currentBox) _currentBox->setNameText((*_langDic)(
 		_boxes[_currentBoxID].nameText, values...)
 	);
 }
 
 template<typename... Ts>
-void engine::dialogue_sequence::updateOption1Text(Ts... values) noexcept {
+void awe::dialogue_sequence::updateOption1Text(Ts... values) noexcept {
 	if (_langDic && _currentBox) _currentBox->setOptions((*_langDic)(
 		_boxes[_currentBoxID].options[0], values...),
 		_currentBox->getOption2Text(), _currentBox->getOption3Text()
@@ -810,7 +810,7 @@ void engine::dialogue_sequence::updateOption1Text(Ts... values) noexcept {
 }
 
 template<typename... Ts>
-void engine::dialogue_sequence::updateOption2Text(Ts... values) noexcept {
+void awe::dialogue_sequence::updateOption2Text(Ts... values) noexcept {
 	if (_langDic && _currentBox) _currentBox->setOptions(
 		_currentBox->getOption1Text(),
 		(*_langDic)(_boxes[_currentBoxID].options[1], values...),
@@ -819,7 +819,7 @@ void engine::dialogue_sequence::updateOption2Text(Ts... values) noexcept {
 }
 
 template<typename... Ts>
-void engine::dialogue_sequence::updateOption3Text(Ts... values) noexcept {
+void awe::dialogue_sequence::updateOption3Text(Ts... values) noexcept {
 	if (_langDic && _currentBox) _currentBox->setOptions(
 		_currentBox->getOption1Text(), _currentBox->getOption2Text(),
 		(*_langDic)(_boxes[_currentBoxID].options[2], values...)

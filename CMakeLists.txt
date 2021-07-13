@@ -91,10 +91,10 @@ add_executable(ComputerWars "main.cpp"
 	sfx/texture.h
 	sfx/userinput.cpp
 	sfx/userinput.h
-	engine/dialogue.h
-	engine/dialogue.cpp
 	transition/transitions.cpp
 	transition/transitions.h
+	awe/dialogue.h
+	awe/dialogue.cpp
 	awe/army.cpp
 	awe/army.h
 	awe/bank.cpp
