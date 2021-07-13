@@ -24,8 +24,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Tests the \c engine::sink class.
  */
 
-#include "engine/logger.h"
+#include "logger.h"
 #include "gtest/gtest.h"
+#include <filesystem>
 
 /**
  * This function tests the \c Get() method.
@@ -33,5 +34,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * call should not.
  */
 TEST(SinkTest, GetTest) {
-	EXPECT_EQ(5, 6) << "Testing, 1 2 3";
+	auto firstLog = engine::sink::Get("Tests", "Dev", "./test/", false);
+	auto secondLog =
+		engine::sink::Get("Test Again", "Developer", "./test/results/", false);
+	EXPECT_EQ(firstLog, secondLog);
+	bool firstLogFileExists = std::filesystem::exists("./test/Log.log");
+	bool secondLogFileExists = std::filesystem::exists("./test/results/Log.log");
+	EXPECT_TRUE(firstLogFileExists);
+	EXPECT_FALSE(secondLogFileExists);
 }

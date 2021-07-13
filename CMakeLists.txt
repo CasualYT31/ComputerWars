@@ -1,7 +1,12 @@
-﻿project("ComputerWars")
+﻿# minimum version required is 3.14 because of FetchContent_MakeAvailable
+cmake_minimum_required (VERSION 3.14)
+project("ComputerWars")
 include(FetchContent)
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+include(GoogleTest)
+# I couldn't get CMake to not dump googletest libraries into bin, so I
+# decided to just put everything else into bin with it instead
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # engine namespace/library
 add_subdirectory("engine")
@@ -13,14 +18,27 @@ add_subdirectory("sfx")
 add_subdirectory("awe")
 
 # tests
+FetchContent_Declare(googletest
+	# specify the commit you depend on and update it regularly.
+	GIT_REPOSITORY https://github.com/google/googletest
+	GIT_TAG release-1.11.0
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
 enable_testing()
-add_subdirectory("test")
+add_executable(${PROJECT_NAME}Tests "test/sinktest.cpp")
+set_target_properties(${PROJECT_NAME}Tests PROPERTIES CXX_STANDARD 17)
+target_include_directories(${PROJECT_NAME}Tests PRIVATE
+	${ComputerWarsAWE_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME}Tests gtest gtest_main
+	ComputerWarsAWE)
+# https://cmake.org/cmake/help/latest/module/GoogleTest.html
+gtest_add_tests(TARGET ${PROJECT_NAME}Tests)
 
-# source files
+# application
 add_executable(${PROJECT_NAME} "main.cpp")
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME} PRIVATE
 	${ComputerWarsAWE_INCLUDE_DIRS})
-
-# libraries
 target_link_libraries(${PROJECT_NAME} ComputerWarsAWE)

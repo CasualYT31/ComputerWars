@@ -8,7 +8,14 @@
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "-Wno-dev",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "BUILD_GMOCK",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "x86-Debug",

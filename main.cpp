@@ -204,7 +204,7 @@ int game(const std::string& file) {
 int main(int argc, char* argv[]) {
     // debugging measure
     std::filesystem::current_path(
-        std::filesystem::current_path().parent_path().parent_path().parent_path()
+        std::filesystem::current_path().parent_path().parent_path().parent_path().parent_path()
     );
     return game(((argc < 2) ? ("assets/map/moonisle.cwm") : (argv[1])));
 }
