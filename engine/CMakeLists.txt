@@ -8,7 +8,7 @@ include(FetchContent)
 # SystemProperties
 FetchContent_Declare(systemproperties
 	GIT_REPOSITORY https://github.com/CasualYT31/SystemProperties.git
-	GIT_TAG 0.1
+	GIT_TAG 0.2
 )
 FetchContent_MakeAvailable(systemproperties)
 

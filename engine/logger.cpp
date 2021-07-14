@@ -50,7 +50,8 @@ std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 			_fileCopy << "CPU       " << sys::cpu::model() << std::endl;
 			_fileCopy << "Memory    " << sys::mem::total() << std::endl;
 			_fileCopy << "GPU       " << sys::gpu::name() << std::endl;
-			// _fileCopy << "Storage   " <<  << std::endl;
+			_fileCopy << "Storage   " << sys::storage::free(sys::unit::MB) <<
+				" out of " << sys::storage::capacity() << " is free" << std::endl;
 			_fileCopy << "Platform  " << sys::os::name() << " ~ " <<
 				sys::os::version() << std::endl;
 			_fileCopy << "---------------" << std::endl;
