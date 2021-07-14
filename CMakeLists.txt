@@ -27,7 +27,11 @@ FetchContent_Declare(googletest
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 enable_testing()
+# ensure that the first three source files REMAIN THE FIRST THREE SOURCE FILES!
+# this is because the sink class is a singleton and pretty much everything else
+# depends on it in some way, so set it up before carrying out any other tests
 add_executable(${PROJECT_NAME}Tests
+	"test/sharedfunctions.cpp"
 	"test/sinktest.cpp"
 	"test/loggertest.cpp")
 set_target_properties(${PROJECT_NAME}Tests PROPERTIES CXX_STANDARD 17)

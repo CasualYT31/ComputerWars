@@ -24,35 +24,75 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Tests the \c engine::logger class.
  */
 
-#include "logger.h"
-#include "gtest/gtest.h"
+#include "sharedfunctions.h"
 
- /**
-  * This function tests the \c logger class.
-  */
-TEST(LoggerTest, LoggerTest) {
+/**
+ * This function tests \c engine::logger::write(), with no variable insertion.
+ */
+TEST(LoggerTest, Write) {
 	engine::logger log("logger_test");
-	// test simple writes, errors, and warnings
 	log.write("Hello World!");
+	std::string logFile = engine::sink::GetLog();
+	EXPECT_IN_LOG("[info] Hello World!");
+}
+
+/**
+ * This function tests \c engine::logger::warning(), with no variable insertion.
+ */
+TEST(LoggerTest, Warning) {
+	engine::logger log("logger_test");
 	log.warning("We are currently testing!");
+	std::string logFile = engine::sink::GetLog();
+	EXPECT_IN_LOG("[warning] We are currently testing!");
+}
+
+/**
+ * This function tests \c engine::logger::error(), with no variable insertion.
+ */
+TEST(LoggerTest, Error) {
+	engine::logger log("logger_test");
 	log.error("Oh no!");
-	// test variable writes, errors, and warnings
+	std::string logFile = engine::sink::GetLog();
+	EXPECT_IN_LOG("[error] Oh no!");
+}
+
+/**
+ * This function tests \c engine::logger::write(), with variable insertion.
+ */
+TEST(LoggerTest, WriteVariables) {
+	engine::logger log("logger_test");
 	int simple_int = 8;
+	log.write("Number = {}", simple_int);
+	std::string logFile = engine::sink::GetLog();
+	EXPECT_IN_LOG("[info] Number = 8");
+}
+
+/**
+ * This function tests \c engine::logger::warning(), with variable insertion.
+ */
+TEST(LoggerTest, WarningVariables) {
+	engine::logger log("logger_test");
 	std::string text = "Inserted";
 	double f_number = -79.5;
-	bool boolean = true;
-	log.write("Number = {}", simple_int);
 	log.warning("{} text, {} = number", text, f_number);
-	log.error("Error is {}!", boolean);
-	// now search the log file to see if all of the previous writes were written as
-	// expected
 	std::string logFile = engine::sink::GetLog();
-	EXPECT_NE(logFile.find("[info] Hello World!"), std::string::npos);
-	EXPECT_NE(
-		logFile.find("[warning] We are currently testing!"), std::string::npos);
-	EXPECT_NE(logFile.find("[error] Oh no!"), std::string::npos);
-	EXPECT_NE(logFile.find("[info] Number = 8"), std::string::npos);
-	EXPECT_NE(logFile.find(
-		"[warning] Inserted text, -79.5 = number"), std::string::npos);
-	EXPECT_NE(logFile.find("[error] Error is true!"), std::string::npos);
+	EXPECT_IN_LOG("[warning] Inserted text, -79.5 = number");
+}
+
+/**
+ * This function tests \c engine::logger::error(), with variable insertion.
+ */
+TEST(LoggerTest, ErrorVariables) {
+	engine::logger log("logger_test");
+	bool boolean = true;
+	log.error("Error is {}!", boolean);
+	std::string logFile = engine::sink::GetLog();
+	EXPECT_IN_LOG("[error] Error is true!");
+}
+
+/**
+ * This function tests \c engine::logger::countCreated().
+ */
+TEST(LoggerTest, CountCreated) {
+	EXPECT_EQ(engine::logger::countCreated(), 6);
 }

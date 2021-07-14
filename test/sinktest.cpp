@@ -22,37 +22,64 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**@file sinktest.h
  * Tests the \c engine::sink class.
+ * Unfortunately, it is not very easy to perform date, time, and hardware
+ * specification tests, especially tests that work across any machine. The simplest
+ * thing to do is manually check these items yourself.
  */
 
-#include "logger.h"
-#include "gtest/gtest.h"
+#include "sharedfunctions.h"
 #include <filesystem>
 
 /**
- * This function tests the \c sink class.
+ * This function tests \c engine::sink::Get().
+ * The first call to \c Get() should actually create the file, the second call
+ * should not.
  */
-TEST(SinkTest, SinkTest) {
-	// first ensure that the test folder has been removed
-	std::filesystem::remove_all(std::filesystem::current_path() / "test");
-	// carry out tests
-	// The first call to \c Get() should actually create the file
-	// the second call should not
-	auto firstLog = engine::sink::Get("Tests", "Dev", "./test/", false);
+TEST(SinkTest, GetSink) {
+	// first ensure that the test folder has been removed to ensure the test's
+	// consistency
+	std::error_code ignored;
+	std::filesystem::remove("Log.log", ignored);
+	auto firstLog = engine::sink::Get("Tests", "Dev", ".", false);
 	auto secondLog =
-		engine::sink::Get("Test Again", "Developer", "./test/results/", false);
+		engine::sink::Get("Test Again", "Developer", "test", false);
+	// if sink creation failed altogether, then all future tests will fail in this
+	// suite, so make this an assertion
+	ASSERT_TRUE(firstLog);
 	EXPECT_EQ(firstLog, secondLog);
-	bool firstLogFileExists = std::filesystem::exists("./test/Log.log");
-	bool secondLogFileExists = std::filesystem::exists("./test/results/Log.log");
+	bool firstLogFileExists = std::filesystem::exists("./Log.log");
+	bool secondLogFileExists = std::filesystem::exists("test/Log.log");
 	EXPECT_TRUE(firstLogFileExists);
 	EXPECT_FALSE(secondLogFileExists);
-	// now test the properties
+}
+
+/**
+ * This function tests \c engine::sink::ApplicationName().
+ */
+TEST(SinkTest, ApplicationName) {
 	EXPECT_EQ(engine::sink::ApplicationName(), "Tests");
+}
+
+/**
+ * This function tests \c engine::sink::DeveloperName().
+ */
+TEST(SinkTest, DeveloperName) {
 	EXPECT_EQ(engine::sink::DeveloperName(), "Dev");
-	// obviously test is dependent on year of execution...
-	EXPECT_EQ(engine::sink::GetYear(), "2021");
-	// has the file been written as expected so far?
-	// also implicitly tests that GetLog() is working as expected
+}
+
+/**
+ * This function tests \c engine::sink::GetYear().
+ */
+TEST(SinkTest, GetYear) {
+	EXPECT_EQ(engine::sink::GetYear(), getYear());
+}
+
+/**
+ * This function tests \c engine::sink::GetLog().
+ * This function also tests that the log has been written as expected thus far.
+ */
+TEST(SinkTest, GetLog) {
 	std::string file = engine::sink::GetLog();
 	std::string firstLine = file.substr(0, file.find('\n'));
-	EXPECT_EQ(firstLine, "Tests © 2021 Dev");
+	EXPECT_EQ(firstLine, "Tests © " + getYear() + " Dev");
 }

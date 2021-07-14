@@ -63,15 +63,20 @@ namespace engine {
 		 * The log file has the following name: <tt>Log[ d-m-yyyy h-m-s].log</tt>.
 		 * The components within brackets are optional and can be toggled off, see
 		 * \c date below.
-		 * @param  name   The name of the application to write in the first line of
-		 *                the log file.
-		 * @param  dev    The name of the application developer/s to write in the
-		 *                first line of the log file.
-		 * @param  folder The directory, relative or absolute, to write the log
-		 *                file in.
-		 * @param  date   If \c TRUE, a short form of the date and time will be
-		 *                included in the file name.
-		 * @return A pointer to the sink representing the log file.
+		 * @warning Passing in a blank string to the \c folder parameter will
+		 *          attempt to write the log file to the root of the drive the
+		 *          program is executing on (at least on Windows, I think this will
+		 *          occur on Unix-based systems, too)!
+		 * @param   name   The name of the application to write in the first line
+		 *                 of the log file.
+		 * @param   dev    The name of the application developer/s to write in the
+		 *                 first line of the log file.
+		 * @param   folder The directory, relative or absolute, to write the log
+		 *                 file in.
+		 * @param   date   If \c TRUE, a short form of the date and time will be
+		 *                 included in the file name.
+		 * @return  A pointer to the sink representing the log file. If sink
+		 *          creation failed, \c nullptr is returned.
 		 */
 		static std::shared_ptr<spdlog::sinks::dist_sink_st> Get(
 			const std::string& name = "Application",
@@ -113,12 +118,6 @@ namespace engine {
 		 * @return The date and time in string form.
 		 */
 		static std::string GetDateTime() noexcept;
-
-		/**
-		 * Counts the number of available joysticks.
-		 * @return The number of connected joysticks.
-		 */
-		static unsigned int GetJoystickCount() noexcept;
 	protected:
 		/**
 		 * This class cannot be instantiated by the client.
@@ -222,6 +221,12 @@ namespace engine {
 		 */
 		template<typename... Ts>
 		void warning(const std::string& line, Ts... values) noexcept;
+
+		/**
+		 * Retrieves the number of logger objects created thus far.
+		 * @return The number of logger objects created thus far.
+		 */
+		static std::size_t countCreated() noexcept;
 	private:
 		/**
 		 * A pointer to the logger object.

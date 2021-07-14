@@ -53,7 +53,18 @@ std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 			// _fileCopy << "Storage   " <<  << std::endl;
 			_fileCopy << "Platform  " << sys::os::name() << " ~ " <<
 				sys::os::version() << std::endl;
-			_fileCopy << "Gamepads  " << GetJoystickCount() << std::endl;
+			_fileCopy << "---------------" << std::endl;
+			_fileCopy << "Gamepads" << std::endl;
+			// I have avoided assuming that the SFML doesn't leave out IDs:
+			// i.e. joystick 0 is connected, 1 is not connected, but 2 IS connected
+			// I don't have 100% certainty regarding how the SFML deals with IDs,
+			// so I'd prefer to be safe even if it's not 100% efficient
+			sf::Joystick::update();
+			for (unsigned int i = 0; i < sf::Joystick::Count; i++) {
+				_fileCopy << "Gamepad #" << i << " is " <<
+					( (sf::Joystick::isConnected(i)) ? ("") : ("not ")) <<
+					"connected" << std::endl;
+			}
 			_fileCopy << "---------------" << std::endl;
 			_fileCopy << "Event Log:" << std::endl;
 
@@ -104,18 +115,6 @@ std::string engine::sink::DeveloperName() noexcept {
 	return _devName;
 }
 
-unsigned int engine::sink::GetJoystickCount() noexcept {
-	// I have avoided assuming that the SFML doesn't leave out IDs:
-	// i.e. joystick 0 is connected, 1 is not connected, but 2 IS connected.
-	// I don't have 100% certainty regarding how the SFML deals with IDs,
-	// so I'd prefer to be safe even if it's not 100% efficient
-	unsigned int counter = 0;
-	for (unsigned int i = 0; i < sf::Joystick::Count; i++) {
-		if (sf::Joystick::isConnected(i)) counter++;
-	}
-	return counter;
-}
-
 std::size_t engine::logger::_objectCount = 0;
 
 engine::logger::logger(const std::string& name) noexcept {
@@ -137,4 +136,8 @@ engine::logger::~logger() noexcept {
 	} catch (std::exception& e) {
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
+}
+
+std::size_t engine::logger::countCreated() noexcept {
+	return _objectCount;
 }
