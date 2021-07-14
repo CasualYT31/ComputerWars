@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "sfx/renderer.h"
+#include "renderer.h"
 
 namespace transition {
 	/**

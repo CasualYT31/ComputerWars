@@ -10,10 +10,10 @@ add_library(${PROJECT_NAME} STATIC
 	"spritesheets.cpp"
 	"engine.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC ${PUBLIC_SOURCE_DIR}
-	${ComputerWarsSFX_INCLUDE_DIRS})
+	${ComputerWarsTransitions_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
-target_link_libraries(${PROJECT_NAME} ComputerWarsSFX)
+target_link_libraries(${PROJECT_NAME} ComputerWarsTransitions)
 
 set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
-	${ComputerWarsSFX_INCLUDE_DIRS}
+	${ComputerWarsTransitions_INCLUDE_DIRS}
 	CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
