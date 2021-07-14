@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "logger.h"
 #include "nlohmann/json.hpp"
-#include "sfml/Graphics/Color.hpp"
+#include "SFML/Graphics/Color.hpp"
 
 namespace engine {
 	/**
