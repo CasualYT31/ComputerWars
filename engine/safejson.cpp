@@ -48,7 +48,7 @@ engine::json::json(const nlohmann::ordered_json& jobj, const std::string& name)
 }
 
 bool engine::json::equalType(nlohmann::ordered_json& dest,
-	nlohmann::ordered_json& src) const noexcept {
+	nlohmann::ordered_json& src) noexcept {
 	if (dest.type() == src.type()) return true;
 	// special case 1: unsigned onto signed
 	// when this JSON library parses a positive integer, it interrprets that as an
@@ -84,7 +84,7 @@ bool engine::json::keysExist(engine::json::KeySequence keys,
 	return false;
 }
 
-std::string engine::json::synthesiseKeySequence(engine::json::KeySequence& keys) const
+std::string engine::json::synthesiseKeySequence(engine::json::KeySequence& keys)
 	noexcept {
 	if (keys.empty()) {
 		return "";
@@ -102,7 +102,8 @@ std::string engine::json::synthesiseKeySequence(engine::json::KeySequence& keys)
 	}
 }
 
-engine::json& engine::json::operator=(const nlohmann::ordered_json& jobj) noexcept {
+engine::json& engine::json::operator=(const nlohmann::ordered_json& jobj)
+	noexcept {
 	if (jobj.is_object()) {
 		_j = jobj;
 	} else {
@@ -118,21 +119,20 @@ nlohmann::ordered_json engine::json::nlohmannJSON() const noexcept {
 }
 
 void engine::json::applyColour(sf::Color& dest, engine::json::KeySequence keys,
-	const sf::Color* defval, const bool suppressErrors) noexcept {
+	const bool suppressErrors) noexcept {
 	std::array<unsigned int, 4> colour = { 0, 0, 0, 255 };
 	applyArray(colour, keys);
-	if (defval && !inGoodState()) {
-		dest = *defval;
-		_logger.write("{} colour property faulty: reset to the default of "
+	if (!inGoodState()) {
+		_logger.write("{} colour property faulty: left to the default of "
 			"[{},{},{},{}].", synthesiseKeySequence(keys),
-			defval->r, defval->g, defval->b, defval->a);
+			dest.r, dest.g, dest.b, dest.a);
 	} else {
 		dest = sf::Color(colour[0], colour[1], colour[2], colour[3]);
 	}
 	if (suppressErrors) resetState();
 }
 
-std::string engine::json::_getTypeName(nlohmann::ordered_json& j) const noexcept {
+std::string engine::json::_getTypeName(nlohmann::ordered_json& j) noexcept {
 	if (j.is_number_float()) return "float";
 	return j.type_name();
 }
@@ -153,11 +153,17 @@ void engine::json_script::load(const std::string script) noexcept {
 	nlohmann::ordered_json nlohmannJSON;
 	if (_loadFromScript(nlohmannJSON)) {
 		engine::json safeJSON = nlohmannJSON;
-		if (!_load(safeJSON)) {
-			_toggleState(engine::json_state::FAILED_LOAD_METHOD);
-			_logger.write("Failed to load JSON script {}.", getScriptPath());
+		if (safeJSON.whatFailed() & engine::json_state::JSON_WAS_NOT_OBJECT) {
+			_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
+			_logger.error("Failed to load JSON script {}: the JSON saved in the "
+				"script didn't contain a root object.", getScriptPath());
 		} else {
-			_logger.write("Finished loading JSON script {}.", getScriptPath());
+			if (!_load(safeJSON)) {
+				_toggleState(engine::json_state::FAILED_LOAD_METHOD);
+				_logger.write("Failed to load JSON script {}.", getScriptPath());
+			} else {
+				_logger.write("Finished loading JSON script {}.", getScriptPath());
+			}
 		}
 	}
 }
@@ -170,11 +176,17 @@ void engine::json_script::save(const std::string script) noexcept {
 		_toggleState(engine::json_state::FAILED_SAVE_METHOD);
 		_logger.write("Failed to save JSON script {}.", scriptPath);
 	} else {
-		_script = scriptPath;
-		if (_saveToScript(nlohmannJSON)) {
-			_logger.write("Finished saving JSON script {}.", scriptPath);
+		if (!nlohmannJSON.is_object()) {
+			_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
+			_logger.error("Failed to save JSON script {}: given JSON object did "
+				"not contain a root object.", scriptPath);
 		} else {
-			_logger.write("Failed to save JSON script {}.", scriptPath);
+			_script = scriptPath;
+			if (_saveToScript(nlohmannJSON)) {
+				_logger.write("Finished saving JSON script {}.", scriptPath);
+			} else {
+				_logger.write("Failed to save JSON script {}.", scriptPath);
+			}
 		}
 	}
 }
@@ -184,8 +196,7 @@ bool engine::json_script::_loadFromScript(nlohmann::ordered_json& jobj) noexcept
 	if (jscript.good()) {
 		try {
 			jscript >> jobj;
-		}
-		catch (std::exception & e) {
+		} catch (std::exception & e) {
 			_what = e.what();
 			_toggleState(engine::json_state::UNPARSABLE);
 			_logger.error("Provided JSON script \"{}\" has incorrect syntax: {}.",
@@ -206,8 +217,7 @@ bool engine::json_script::_saveToScript(nlohmann::ordered_json& jobj) noexcept {
 	if (jscript.good()) {
 		try {
 			jscript << jobj;
-		}
-		catch (std::exception & e) {
+		} catch (std::exception & e) {
 			_what = e.what();
 			_toggleState(engine::json_state::FAILED_SCRIPT_SAVE);
 			_logger.error("Could not write JSON object to JSON script \"{}\": {}.",

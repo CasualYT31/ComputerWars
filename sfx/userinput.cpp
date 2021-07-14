@@ -286,11 +286,10 @@ bool sfx::user_input::_load(engine::json& j) noexcept {
 
 	for (auto& i : jj.items()) {
 		if (i.key() == "joystickid") {
-			j.apply(_joystickid, { "joystickid" }, &_joystickid, true);
+			j.apply(_joystickid, { "joystickid" }, true);
 			setJoystickID(getJoystickID());
 		} else if (i.key() == "joystickaxis") {
-			j.apply(_joystickAxisThreshold, { "joystickaxis" },
-				&_joystickAxisThreshold, true);
+			j.apply(_joystickAxisThreshold, { "joystickaxis" }, true);
 			setJoystickAxisThreshold(getJoystickAxisThreshold());
 		} else {
 			try {
@@ -350,7 +349,7 @@ bool sfx::user_input::_load(engine::json& j) noexcept {
 			}
 
 			unsigned int sigtype = _control[i.key()].signal.type;
-			j.apply(sigtype, { i.key(), "type" }, &sigtype, true);
+			j.apply(sigtype, { i.key(), "type" }, true);
 			_control[i.key()].signal.type = sfx::convert::tosignaltype(sigtype);
 			if (_control[i.key()].signal.type == sfx::DelayedForm &&
 				i.value().find("delays") != i.value().end()) {

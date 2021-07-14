@@ -69,12 +69,12 @@ bool sfx::animated_spritesheet::_load(engine::json& j) noexcept {
 			"is required.");
 		return false;
 	}
-	j.apply(frameCount, { "frames" }, &frameCount, true);
+	j.apply(frameCount, { "frames" }, true);
 	if (frameCount == 0) {
 		_logger.warning("Cannot have 0 frames: assuming 1...");
 		frameCount = 1;
 	}
-	j.apply(_framerate, { "framerate" }, &_framerate, true);
+	j.apply(_framerate, { "framerate" }, true);
 	if (_framerate < 0.0) _framerate = 0.0;
 
 	_basepath = temp_basepath;

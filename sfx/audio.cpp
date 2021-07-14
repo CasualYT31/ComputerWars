@@ -151,7 +151,7 @@ float sfx::audio::_volumeAfterOffset(const std::string& name,
 }
 
 bool sfx::audio::_load(engine::json& j) noexcept {
-	j.apply(_volume, { "volume" }, &_volume, true);
+	j.apply(_volume, { "volume" }, true);
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	_sound.clear();
 	_music.clear();
@@ -170,7 +170,7 @@ bool sfx::audio::_load(engine::json& j) noexcept {
 			}
 
 			std::string type = "sound";
-			j.apply(type, { i.key(), "type" }, &type, true);
+			j.apply(type, { i.key(), "type" }, true);
 			if (type != "sound" && type != "music") {
 				_logger.warning("Invalid type \"{}\" provided for audio object "
 					"\"{}\" in script \"{}\", \"sound\" assumed.", type, i.key(),
@@ -180,16 +180,12 @@ bool sfx::audio::_load(engine::json& j) noexcept {
 
 			if (type == "sound") {
 				_sound[i.key()].path = path;
-				j.apply(_sound[i.key()].volumeOffset, { i.key(), "offset" },
-					&_sound[i.key()].volumeOffset, true);
+				j.apply(_sound[i.key()].volumeOffset, { i.key(), "offset" }, true);
 			} else if (type == "music") {
 				_music[i.key()].path = path;
-				j.apply(_music[i.key()].volumeOffset, { i.key(), "offset" },
-					&_music[i.key()].volumeOffset, true);
-				j.apply(_music[i.key()].loopTo, { i.key(), "loopto" },
-					&_music[i.key()].loopTo, true);
-				j.apply(_music[i.key()].loopWhen, { i.key(), "loopwhen" },
-					&_music[i.key()].loopWhen, true);
+				j.apply(_music[i.key()].volumeOffset, { i.key(), "offset" }, true);
+				j.apply(_music[i.key()].loopTo, { i.key(), "loopto" }, true);
+				j.apply(_music[i.key()].loopWhen, { i.key(), "loopwhen" }, true);
 			}
 		}
 	}

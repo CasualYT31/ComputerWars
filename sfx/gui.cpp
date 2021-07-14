@@ -190,12 +190,11 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 		if (i.value().find("background") != i.value().end()) {
 			if (i.value()["background"].is_array()) {
 				sf::Color newcolour = _guiBackground[i.key()].getColour();
-				j.applyColour(newcolour, { i.key(), "background" }, &newcolour,
-					true);
+				j.applyColour(newcolour, { i.key(), "background" }, true);
 				_guiBackground[i.key()].set(newcolour);
 			} else {
 				unsigned int newkey = _guiBackground[i.key()].getSprite();
-				j.apply(newkey, { i.key(), "background" }, &newkey, true);
+				j.apply(newkey, { i.key(), "background" }, true);
 				_guiBackground[i.key()].set(newkey);
 			}
 		} else {
@@ -209,7 +208,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 			if (ii.key() == "path" || ii.key() == "background") continue;
 			if (ii.value().find("sprite") != ii.value().end()) {
 				j.apply(_guiSpriteKeys[i.key()][ii.key()], { i.key(), ii.key(),
-					"sprite" }, &_guiSpriteKeys[i.key()][ii.key()], true);
+					"sprite" }, true);
 			}
 		}
 	}

@@ -123,55 +123,42 @@ bool awe::dialogue_sequence::_load(engine::json& j) noexcept {
 	for (auto& i : jj.items()) {
 		// special keys
 		if (i.key() == "right") {
-			j.apply(_moveRightControlKey, { "right" }, &_moveRightControlKey,
-				true);
+			j.apply(_moveRightControlKey, { "right" }, true);
 		} else if (i.key() == "left") {
-			j.apply(_moveLeftControlKey, { "left" }, &_moveLeftControlKey, true);
+			j.apply(_moveLeftControlKey, { "left" }, true);
 		} else if (i.key() == "select") {
-			j.apply(_selectControlKey, { "select" }, &_selectControlKey, true);
+			j.apply(_selectControlKey, { "select" }, true);
 		} else if (i.key() == "skip") {
-			j.apply(_skipControlKey, { "skip" }, &_skipControlKey, true);
+			j.apply(_skipControlKey, { "skip" }, true);
 		} else { // other keys store dialogue boxes
 			_boxes.push_back(dialogue_box_data());
 			std::size_t k = _boxes.size() - 1;
 
 			unsigned short pos = 0;
-			j.apply(pos, { i.key(), "position" }, &pos, true);
+			j.apply(pos, { i.key(), "position" }, true);
 			if (pos >=
 				(unsigned short)awe::dialogue_box_position::NumberOfPositions) {
 				pos = 0;
 			}
 			_boxes[k].position = static_cast<awe::dialogue_box_position>(pos);
 
-			j.apply(_boxes[k].size, { i.key(), "size" }, &_boxes[k].size, true);
-			j.apply(_boxes[k].flipped, { i.key(), "flipped" }, &_boxes[k].flipped,
-				true);
-			j.apply(_boxes[k].mainText, { i.key(), "text" }, &_boxes[k].mainText,
-				true);
-			j.apply(_boxes[k].skipTransIn, { i.key(), "skiptransin" },
-				&_boxes[k].skipTransIn, true);
-			j.apply(_boxes[k].skipTransOut, { i.key(), "skiptransout" },
-				&_boxes[k].skipTransOut, true);
+			j.apply(_boxes[k].size, { i.key(), "size" }, true);
+			j.apply(_boxes[k].flipped, { i.key(), "flipped" }, true);
+			j.apply(_boxes[k].mainText, { i.key(), "text" }, true);
+			j.apply(_boxes[k].skipTransIn, { i.key(), "skiptransin" }, true);
+			j.apply(_boxes[k].skipTransOut, { i.key(), "skiptransout" }, true);
 			// in order to achieve spritesheet key, we're going to need some kind
 			// of request system whereby a class requests a pointer to a
 			// spritesheet from awe::game... look at the Mediator design pattern
-			j.apply(_boxes[k].spriteID, { i.key(), "sprite" }, &_boxes[k].spriteID,
-				true);
-			j.apply(_boxes[k].transLength, { i.key(), "translength" },
-				&_boxes[k].transLength, true);
-			j.apply(_boxes[k].typingDelay, { i.key(), "typingdelay" },
-				&_boxes[k].typingDelay, true);
+			j.apply(_boxes[k].spriteID, { i.key(), "sprite" }, true);
+			j.apply(_boxes[k].transLength, { i.key(), "translength" }, true);
+			j.apply(_boxes[k].typingDelay, { i.key(), "typingdelay" }, true);
 			// see above, also applies to audio key
-			j.apply(_boxes[k].typingSoundKey, { i.key(), "typingsound" },
-				&_boxes[k].typingSoundKey, true);
-			j.apply(_boxes[k].moveSelSoundKey, { i.key(), "moveselsound" },
-				&_boxes[k].moveSelSoundKey, true);
-			j.apply(_boxes[k].selectSoundKey, { i.key(), "selectsound" },
-				&_boxes[k].selectSoundKey, true);
-			j.applyColour(_boxes[k].themeColour, { i.key(), "theme" },
-				&_boxes[k].themeColour, true);
-			j.apply(_boxes[k].nameText, { i.key(), "name" }, &_boxes[k].nameText,
-				true);
+			j.apply(_boxes[k].typingSoundKey, { i.key(), "typingsound" }, true);
+			j.apply(_boxes[k].moveSelSoundKey, { i.key(), "moveselsound" }, true);
+			j.apply(_boxes[k].selectSoundKey, { i.key(), "selectsound" }, true);
+			j.applyColour(_boxes[k].themeColour, { i.key(), "theme" }, true);
+			j.apply(_boxes[k].nameText, { i.key(), "name" }, true);
 			// see above, also applies to font key
 			j.applyArray(_boxes[k].options, { i.key(), "options" });
 			j.resetState();

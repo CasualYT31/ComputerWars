@@ -263,8 +263,8 @@ namespace engine {
 		 * @return  \c TRUE if the two JSON values are of compatible data types,
 		 *          \c FALSE if not.
 		 */
-		bool equalType(nlohmann::ordered_json& dest, nlohmann::ordered_json& src)
-			const noexcept;
+		static bool equalType(nlohmann::ordered_json& dest,
+			nlohmann::ordered_json& src) noexcept;
 
 		/**
 		 * Converts a key sequence into a single string.
@@ -274,7 +274,7 @@ namespace engine {
 		 * @param  keys The key sequence to convert.
 		 * @return The string containing all the keys in the sequence.
 		 */
-		std::string synthesiseKeySequence(KeySequence& keys) const noexcept;
+		static std::string synthesiseKeySequence(KeySequence& keys) noexcept;
 
 		/**
 		 * Returns the \c nlohmann::ordered_json object stored in this object.
@@ -290,19 +290,14 @@ namespace engine {
 		/**
 		 * Applies a value found within the JSON object to a given C++ object.
 		 * This method automatically checks for the existance of keys, that data
-		 * types match etc. and reports errors via the internal logging object if
+		 * types match, etc., and reports errors via the internal logging object if
 		 * these checks fail. The \c suppressErrors flag does not disable these
 		 * checks: rather it automatically resets the error state of this object by
 		 * the end of the call. This is helpful when a non-critical JSON value is
 		 * faulty. If this JSON value is indeed non-critical, then a fallback or
-		 * default value must be specified to ensure that the program executes as
-		 * smoothly as possible after this method is called. This is done by
-		 * providing a pointer to the value to set to the destination object in
-		 * case of an error. The destination object is usually initialised the
-		 * default value explicitly by the client, and a pointer to the object is
-		 * provided, though this is not always the case. If no default value is
-		 * given, and an error occurred, the destination object will remain
-		 * unamended.\n
+		 * default value must be set before calling this method to ensure that the
+		 * program executes as smoothly as possible after this method is called. If
+		 * an error occurred, the destination object will remain unamended.\n
 		 * It should be noted that only simple types are supported with this
 		 * method. Array and object values are not supported. However, if the
 		 * destination object can be reliably assigned signed and unsigned values,
@@ -324,9 +319,6 @@ namespace engine {
 		 * @param   dest           The destination object.
 		 * @param   keys           The key sequence uniquely identifying the JSON
 		 *                         value to apply to the C++ object.
-		 * @param   defval         Points to a C++ object containing the value to
-		 *                         assign to \c dest in case an error occurs. If
-		 *                         \c NULL, no default value is considered.
 		 * @param   suppressErrors If \c TRUE, the error state of this object will
 		 *                         be reset at the end of the call.
 		 * @sa      applyArray()
@@ -334,8 +326,8 @@ namespace engine {
 		 * @sa      applyVector()
 		 */
 		template<typename T>
-		void apply(T& dest, KeySequence keys, const T* defval = nullptr,
-			const bool suppressErrors = false) noexcept;
+		void apply(T& dest, KeySequence keys, const bool suppressErrors = false)
+			noexcept;
 
 		/**
 		 * Applies a JSON array of homogenous values to a given
@@ -381,30 +373,30 @@ namespace engine {
 		 * as follows: <tt>"key": [RED, GREEN, BLUE, ALPHA]</tt>, where each
 		 * variable is an integer between \c 0 and \c 255.\n
 		 * Please see \c apply() for a more in-depth explaination of the parameters
-		 * of this method.
+		 * of this method, as well as how this method should be used.
 		 * @warning The \c applyArray() method is used internally: please see the
 		 *          documentation for this method to see the error bits that can be
 		 *          set and their meanings.
 		 * @param   dest           The destination \c Color object.
 		 * @param   keys           The key sequence uniquely identifying the JSON
 		 *                         array to apply to the \c Color object.
-		 * @param   defval         A pointer to the default colour value to fall
-		 *                         back on in case of an error.
 		 * @param   suppressErrors Resets the error state of this object when the
 		 *                         call is finished.
 		 * @sa      apply()
 		 * @sa      applyArray()
 		 * @sa      applyVector()
 		 */
-		void applyColour(sf::Color& dest, KeySequence keys, const sf::Color* defval = nullptr, const bool suppressErrors = false) noexcept;
+		void applyColour(sf::Color& dest, KeySequence keys,
+			const bool suppressErrors = false) noexcept;
 		
 		/**
 		 * Applies a JSON array of a variable size to a given \c std::vector
 		 * object.
 		 * This method is similar to \c applyArray(), except no size checking
 		 * occurs. If the call will be successful, the vector is cleared and then
-		 * filled with the entire contents of the JSON array. Just like with the
-		 * \c applyArray() call, the JSON array must be homogenous.
+		 * filled with the entire contents of the JSON array. If the call won't be
+		 * successful, then the given destination vector won't be amended. Just
+		 * like with the \c applyArray() call, the JSON array must be homogenous.
 		 * @warning Please see the \c applyArray() method for information on the
 		 *          error bits that might be set for this method: all except the
 		 *          \c MISMATCHING_SIZE bit can be set by this method.
@@ -433,7 +425,7 @@ namespace engine {
 		 *         \c nlohmann::ordered_json class (unless where specified in the
 		 *         detailed section).
 		 */
-		std::string _getTypeName(nlohmann::ordered_json& j) const noexcept;
+		static std::string _getTypeName(nlohmann::ordered_json& j) noexcept;
 
 		/**
 		 * The \c nlohmann::ordered_json object stored internally.
@@ -488,6 +480,8 @@ namespace engine {
 		 * and ends.
 		 * @warning The \c FAILED_LOAD_METHOD bit will be set if the derived
 		 *          \c _load() method returned \c FALSE.
+		 * @warning The \c JSON_WAS_NOT_OBJECT bit will be set if the JSON in the
+		 *          given script did not contain a root object.
 		 * @warning Please see \c _loadFromScript() for more error bits.
 		 * @param   script The path of the script file to load. If a blank string,
 		 *                 the last opened script will be loaded.
@@ -502,6 +496,8 @@ namespace engine {
 		 * ends. Files will be \b overwritten if they exist.
 		 * @warning The \c FAILED_SAVE_METHOD bit will be set if the derived
 		 *          \c _save() method returned \c FALSE.
+		 * @warning The \c JSON_WAS_NOT_OBJECT bit will be set if the JSON given by
+		 *          the derived \c save() method did not contain a root object.
 		 * @warning Please see \c _saveToScript() for more error bits.
 		 * @param   script The path of the script file to load. If a blank string,
 		 *                 the last opened script will be written to.
@@ -590,7 +586,7 @@ namespace engine {
 }
 
 template<typename T>
-void engine::json::apply(T& dest, engine::json::KeySequence keys, const T* defval,
+void engine::json::apply(T& dest, engine::json::KeySequence keys,
 	const bool suppressErrors) noexcept {
 	nlohmann::ordered_json test;
 	if (keys.empty()) {
@@ -616,19 +612,15 @@ void engine::json::apply(T& dest, engine::json::KeySequence keys, const T* defva
 				synthesiseKeySequence(keys));
 		}
 	}
-	// something went wrong with the assignment, so fall back on the given default
-	// value if provided
-	if (defval) {
-		dest = *defval;
-		_logger.write("{} property faulty: reset to the default of {}.",
-			synthesiseKeySequence(keys), *defval);
-	}
+	// something went wrong with the assignment
+	_logger.write("{} property faulty: left to the default of {}.",
+		synthesiseKeySequence(keys), dest);
 	if (suppressErrors) resetState();
 }
 
 template<typename T, std::size_t N>
-void engine::json::applyArray(std::array<T, N>& dest, engine::json::KeySequence keys)
-	noexcept {
+void engine::json::applyArray(std::array<T, N>& dest,
+	engine::json::KeySequence keys) noexcept {
 	if (!N) return;
 	nlohmann::ordered_json test;
 	if (keys.empty()) {
@@ -682,7 +674,8 @@ void engine::json::applyArray(std::array<T, N>& dest, engine::json::KeySequence 
 }
 
 template<typename T>
-void engine::json::applyVector(std::vector<T>& dest, engine::json::KeySequence keys) {
+void engine::json::applyVector(std::vector<T>& dest,
+	engine::json::KeySequence keys) {
 	if (keys.empty()) {
 		_toggleState(NO_KEYS_GIVEN);
 		_logger.error("Attempted to assign a value to a vector without specifying "

@@ -78,26 +78,22 @@ bool sfx::renderer::animate(sfx::animated_drawable& drawable) const noexcept {
 }
 
 bool sfx::renderer::_load(engine::json& j) noexcept {
-	j.apply(_settings.width, { "width" }, &_settings.width, true);
-	j.apply(_settings.height, { "height" }, &_settings.height, true);
-	j.apply(_settings.x, { "x" }, &_settings.x, true);
-	j.apply(_settings.y, { "y" }, &_settings.y, true);
-	j.apply(_settings.framerate, { "framerate" }, &_settings.framerate, true);
-	j.apply(_settings.caption, { "caption" }, &_settings.caption, true);
-	j.apply(_settings.iconPath, { "icon" }, &_settings.iconPath, true);
-	j.apply(_settings.style.close, { "close" }, &_settings.style.close, true);
-	j.apply(_settings.style.def, { "def" }, &_settings.style.def, true);
-	j.apply(_settings.style.fullscreen, { "fullscreen" },
-		&_settings.style.fullscreen, true);
-	j.apply(_settings.style.none, { "none" }, &_settings.style.none, true);
-	j.apply(_settings.style.resize, { "resize" }, &_settings.style.resize, true);
-	j.apply(_settings.style.titlebar, { "titlebar" }, &_settings.style.titlebar,
-		true);
-	j.apply(_settings.style.vsync, { "vsync" }, &_settings.style.vsync, true);
-	j.apply(_settings.style.mouseVisible, { "cursor" },
-		&_settings.style.mouseVisible, true);
-	j.apply(_settings.style.mouseGrabbed, { "grabbedmouse" },
-		&_settings.style.mouseGrabbed, true);
+	j.apply(_settings.width, { "width" }, true);
+	j.apply(_settings.height, { "height" }, true);
+	j.apply(_settings.x, { "x" }, true);
+	j.apply(_settings.y, { "y" }, true);
+	j.apply(_settings.framerate, { "framerate" }, true);
+	j.apply(_settings.caption, { "caption" }, true);
+	j.apply(_settings.iconPath, { "icon" }, true);
+	j.apply(_settings.style.close, { "close" }, true);
+	j.apply(_settings.style.def, { "def" }, true);
+	j.apply(_settings.style.fullscreen, { "fullscreen" }, true);
+	j.apply(_settings.style.none, { "none" }, true);
+	j.apply(_settings.style.resize, { "resize" }, true);
+	j.apply(_settings.style.titlebar, { "titlebar" }, true);
+	j.apply(_settings.style.vsync, { "vsync" }, true);
+	j.apply(_settings.style.mouseVisible, { "cursor" }, true);
+	j.apply(_settings.style.mouseGrabbed, { "grabbedmouse" }, true);
 	return true;
 }
 
