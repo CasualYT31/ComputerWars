@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /**
  * This test fixture is used to initialise \c language_dictionary objects with a
  * name for the log file before testing.
+ * It also prepares any scripts required for testing.
  */
 class LanguageTest : public ::testing::Test {
 protected:
@@ -38,9 +39,7 @@ protected:
 	 * Prepares the lang/lang.json test script before the JSONLoadSave test.
 	 */
 	void SetUp() override {
-		const char* name =
-			testing::UnitTest::GetInstance()->current_test_info()->name();
-		if (!strcmp(name, "JSONLoadSave")) {
+		if (isTest({ "JSONLoadSave" })) {
 			nlohmann::json j = R"({
 				"lang": "ENG_GB",
 				"GER_DE": "",

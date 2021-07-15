@@ -52,3 +52,11 @@ std::string getYear() noexcept;
  * @return The path to the test asset folder the client requires.
  */
 std::string getTestAssetPath(const std::string& subdirs) noexcept;
+
+/**
+ * Determines if the current test is called a given name.
+ * @param  list The list of test names to test.
+ * @return \c TRUE if the current test's name matched at least one of the names
+ *         given, \c FALSE if it did not match any of the names given.
+ */
+bool isTest(const std::vector<const char*>& list) noexcept;

@@ -31,3 +31,12 @@ std::string getYear() noexcept {
 std::string getTestAssetPath(const std::string& subdirs) noexcept {
 	return COMPUTER_WARS_ROOT_TEST_ASSET_FOLDER + subdirs;
 }
+
+bool isTest(const std::vector<const char*>& list) noexcept {
+	const char* current =
+		testing::UnitTest::GetInstance()->current_test_info()->name();
+	for (auto& name : list) {
+		if (!strcmp(current, name)) return true;
+	}
+	return false;
+}
