@@ -217,7 +217,7 @@ bool engine::json_script::_saveToScript(nlohmann::ordered_json& jobj) noexcept {
 	if (jscript.good()) {
 		try {
 			jscript << jobj;
-		} catch (std::exception & e) {
+		} catch (std::exception& e) {
 			_what = e.what();
 			_toggleState(engine::json_state::FAILED_SCRIPT_SAVE);
 			_logger.error("Could not write JSON object to JSON script \"{}\": {}.",

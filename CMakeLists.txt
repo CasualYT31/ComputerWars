@@ -30,6 +30,10 @@ FetchContent_Declare(googletest
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 enable_testing()
+# add compile definition which stores the path to the asset folder to be used for
+# testing
+add_compile_definitions(
+	COMPUTER_WARS_ROOT_TEST_ASSET_FOLDER="${CMAKE_CURRENT_LIST_DIR}/test/assets/")
 # ensure that the first three source files REMAIN THE FIRST THREE SOURCE FILES!
 # this is because the sink class is a singleton and pretty much everything else
 # depends on it in some way, so set it up before carrying out any other tests
@@ -38,7 +42,8 @@ add_executable(${PROJECT_NAME}Tests
 	"test/sinktest.cpp"
 	"test/loggertest.cpp"
 	"test/jsontest.cpp"
-	"test/expandstringtest.cpp")
+	"test/expandstringtest.cpp"
+	"test/languagetest.cpp")
 set_target_properties(${PROJECT_NAME}Tests PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME}Tests PRIVATE
 	${ComputerWarsAWE_INCLUDE_DIRS})

@@ -43,3 +43,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @return  The current year in a string format expected to be found in the log.
  */
 std::string getYear() noexcept;
+
+/**
+ * Function used to find the path to a test assets folder.
+ * This function determines the root path, then the client can append more folders
+ * as required via the parameter. The root path will always end with a '/'.
+ * @param  subdirs The subdirectories to append to the root path.
+ * @return The path to the test asset folder the client requires.
+ */
+std::string getTestAssetPath(const std::string& subdirs) noexcept;

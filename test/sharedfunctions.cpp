@@ -27,3 +27,7 @@ std::string getYear() noexcept {
 	std::tm* const pTInfo = std::localtime(&t);
 	return std::to_string(1900 + pTInfo->tm_year);
 }
+
+std::string getTestAssetPath(const std::string& subdirs) noexcept {
+	return COMPUTER_WARS_ROOT_TEST_ASSET_FOLDER + subdirs;
+}
