@@ -40,3 +40,17 @@ bool isTest(const std::vector<const char*>& list) noexcept {
 	}
 	return false;
 }
+
+void setupJSONScript(const std::function<void(nlohmann::json&)>& f,
+	const std::string& p) {
+	nlohmann::json j;
+	f(j);
+	// save the json script
+	// if the test script can't be written, then the rest of the test won't likely
+	// work, so use assert here
+	ASSERT_NO_THROW({
+		std::ofstream jscript(getTestAssetPath(p), std::ios_base::trunc);
+		jscript << j;
+		jscript.close();
+	});
+}

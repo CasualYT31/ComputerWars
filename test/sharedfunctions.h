@@ -26,8 +26,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "logger.h"
+#include "nlohmann/json.hpp"
 #include "gtest/gtest.h"
+#include <fstream>
+#include <functional>
 
 /**
  * This macro is a short way to determine if a piece of text is in the log file.
@@ -60,3 +62,13 @@ std::string getTestAssetPath(const std::string& subdirs) noexcept;
  *         given, \c FALSE if it did not match any of the names given.
  */
 bool isTest(const std::vector<const char*>& list) noexcept;
+
+/**
+ * This function is used to setup a JSON script before testing.
+ * @param f Function which accepts a reference to a JSON object and writes to it
+ *          before saving as necessary.
+ * @param p The path of the JSON script <em>relative to</em> the root test asset
+ *          folder.
+ */
+void setupJSONScript(const std::function<void(nlohmann::json&)>& f,
+	const std::string& p);

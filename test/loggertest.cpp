@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "sharedfunctions.h"
+#include "logger.h"
 
 /**
  * This function tests \c engine::logger::write(), with no variable insertion.

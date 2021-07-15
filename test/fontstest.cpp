@@ -26,11 +26,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "sharedfunctions.h"
 #include "fonts.h"
-#include <fstream>
 
- /**
-  * This test fixture is used to initialise a \c fonts objects for testing.
-  */
+/**
+ * This test fixture is used to initialise a \c fonts object for testing.
+ */
 class FontsTest : public ::testing::Test {
 protected:
 	/**
@@ -39,24 +38,14 @@ protected:
 	void SetUp() override {
 		if (isTest({ "LoadExistentFile" })) {
 			// prepare fonts.json and otherfonts.json only once
-			nlohmann::json fonts, otherfonts;
-			// retrieve the correct path to the font file at runtime
-			fonts["dialogue"] = getTestAssetPath("fonts/AdvanceWars2.ttf");
-			otherfonts["text"] = getTestAssetPath("fonts/AdvanceWars2.ttf");
-			// save the json scripts
-			// if the test script can't be written, then the rest of the test won't
-			// work, so use assert here
-			ASSERT_NO_THROW({
-				std::ofstream fontsscript(getTestAssetPath("fonts/fonts.json"),
-					std::ios_base::trunc);
-				fontsscript << fonts;
-				fontsscript.close();
-				std::ofstream otherfontsscript(
-					getTestAssetPath("fonts/otherfonts.json"),
-					std::ios_base::trunc);
-				otherfontsscript << otherfonts;
-				otherfontsscript.close();
-			});
+			setupJSONScript([](nlohmann::json& j) {
+				// retrieve the correct path to the font file at runtime
+				j["dialogue"] = getTestAssetPath("fonts/AdvanceWars2.ttf");
+			}, "fonts/fonts.json");
+			setupJSONScript([](nlohmann::json& j) {
+				// retrieve the correct path to the font file at runtime
+				j["text"] = getTestAssetPath("fonts/AdvanceWars2.ttf");
+			}, "fonts/otherfonts.json");
 		}
 		if (!isTest({ "EmptyFonts", "LoadNonExistentFile" })) {
 			// load fonts.json

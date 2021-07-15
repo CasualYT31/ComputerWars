@@ -44,7 +44,8 @@ add_executable(${PROJECT_NAME}Tests
 	"test/jsontest.cpp"
 	"test/expandstringtest.cpp"
 	"test/languagetest.cpp"
-	"test/fontstest.cpp")
+	"test/fontstest.cpp"
+	"test/audiotest.cpp")
 set_target_properties(${PROJECT_NAME}Tests PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME}Tests PRIVATE
 	${ComputerWarsAWE_INCLUDE_DIRS})

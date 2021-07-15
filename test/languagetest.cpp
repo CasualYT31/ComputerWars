@@ -26,7 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "sharedfunctions.h"
 #include "language.h"
-#include <fstream>
 
 /**
  * This test fixture is used to initialise \c language_dictionary objects with a
@@ -40,23 +39,12 @@ protected:
 	 */
 	void SetUp() override {
 		if (isTest({ "JSONLoadSave" })) {
-			nlohmann::json j = R"({
-				"lang": "ENG_GB",
-				"GER_DE": "",
-				"ENG_GB": ""
-			})"_json;
-			// retrieve the correct paths to each script at runtime
-			j["GER_DE"] = getTestAssetPath("lang/GER_DE.json");
-			j["ENG_GB"] = getTestAssetPath("lang/ENG_GB.json");
-			// save the json script
-			// if the test script can't be written, then the rest of the test won't
-			// work, so use assert here
-			ASSERT_NO_THROW({
-				std::ofstream jscript(getTestAssetPath("lang/lang.json"),
-					std::ios_base::trunc);
-				jscript << j;
-				jscript.close();
-			});
+			setupJSONScript([](nlohmann::json& j) {
+				j["lang"] = "ENG_GB";
+				// retrieve the correct paths to each script at runtime
+				j["GER_DE"] = getTestAssetPath("lang/GER_DE.json");
+				j["ENG_GB"] = getTestAssetPath("lang/ENG_GB.json");
+			}, "lang/lang.json");
 		}
 	}
 
