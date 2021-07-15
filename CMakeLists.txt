@@ -37,7 +37,8 @@ add_executable(${PROJECT_NAME}Tests
 	"test/sharedfunctions.cpp"
 	"test/sinktest.cpp"
 	"test/loggertest.cpp"
-	"test/jsontest.cpp")
+	"test/jsontest.cpp"
+	"test/expandstringtest.cpp")
 set_target_properties(${PROJECT_NAME}Tests PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME}Tests PRIVATE
 	${ComputerWarsAWE_INCLUDE_DIRS})
