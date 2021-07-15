@@ -35,7 +35,7 @@ engine::sink::sink() noexcept {}
 
 std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 	const std::string& name, const std::string& dev, const std::string& folder,
-	const bool date) noexcept {
+	const bool date, const bool hardwareDetails) noexcept {
 	if (!_sharedSink) {
 		try {
 			_appName = name;
@@ -46,27 +46,31 @@ std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 			_fileCopy << ApplicationName() << " © " << GetYear() << " " <<
 				DeveloperName() << std::endl;
 			_fileCopy << "---------------" << std::endl;
-			_fileCopy << "Hardware Specification:\n";
-			_fileCopy << "CPU       " << sys::cpu::model() << std::endl;
-			_fileCopy << "Memory    " << sys::mem::total() << std::endl;
-			_fileCopy << "GPU       " << sys::gpu::name() << std::endl;
-			_fileCopy << "Storage   " << sys::storage::free(sys::unit::MB) <<
-				" out of " << sys::storage::capacity() << " is free" << std::endl;
-			_fileCopy << "Platform  " << sys::os::name() << " ~ " <<
-				sys::os::version() << std::endl;
-			_fileCopy << "---------------" << std::endl;
-			_fileCopy << "Gamepads" << std::endl;
-			// I have avoided assuming that the SFML doesn't leave out IDs:
-			// i.e. joystick 0 is connected, 1 is not connected, but 2 IS connected
-			// I don't have 100% certainty regarding how the SFML deals with IDs,
-			// so I'd prefer to be safe even if it's not 100% efficient
-			sf::Joystick::update();
-			for (unsigned int i = 0; i < sf::Joystick::Count; i++) {
-				_fileCopy << "Gamepad #" << i << " is " <<
-					( (sf::Joystick::isConnected(i)) ? ("") : ("not ")) <<
-					"connected" << std::endl;
+			if (hardwareDetails) {
+				_fileCopy << "Hardware Specification:\n";
+				_fileCopy << "CPU       " << sys::cpu::model() << std::endl;
+				_fileCopy << "Memory    " << sys::mem::total() << std::endl;
+				_fileCopy << "GPU       " << sys::gpu::name() << std::endl;
+				_fileCopy << "Storage   " << sys::storage::free(sys::unit::MB) <<
+					" out of " << sys::storage::capacity() << " is free" <<
+					std::endl;
+				_fileCopy << "Platform  " << sys::os::name() << " ~ " <<
+					sys::os::version() << std::endl;
+				_fileCopy << "---------------" << std::endl;
+				_fileCopy << "Gamepads" << std::endl;
+				// I have avoided assuming that the SFML doesn't leave out IDs:
+				// i.e. joystick 0 is connected, 1 is not connected, but 2 IS
+				// connected
+				// I don't have 100% certainty regarding how the SFML deals with
+				// IDs, so I'd prefer to be safe even if it's not 100% efficient
+				sf::Joystick::update();
+				for (unsigned int i = 0; i < sf::Joystick::Count; i++) {
+					_fileCopy << "Gamepad #" << i << " is " <<
+						((sf::Joystick::isConnected(i)) ? ("") : ("not ")) <<
+						"connected" << std::endl;
+				}
+				_fileCopy << "---------------" << std::endl;
 			}
-			_fileCopy << "---------------" << std::endl;
 			_fileCopy << "Event Log:" << std::endl;
 
 			std::ofstream logfile(filename);

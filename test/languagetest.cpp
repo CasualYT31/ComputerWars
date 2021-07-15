@@ -85,7 +85,6 @@ TEST_F(LanguageTest, EmptyDictionary) {
  * Test behaviour of a \c language_dictionary when individual languages are loaded.
  */
 TEST_F(LanguageTest, LoadDictionaries) {
-	std::cout << getTestAssetPath("") << std::endl;
 	EXPECT_TRUE(dict.addLanguage("test", "bad_path.json"));
 	EXPECT_FALSE(dict.addLanguage("", getTestAssetPath("lang/ENG_GB.json")));
 	EXPECT_FALSE(dict.setLanguage("test"));
