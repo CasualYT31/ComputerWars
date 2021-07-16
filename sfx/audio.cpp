@@ -22,6 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "audio.h"
 
+const float sfx::audio::_granularity = 100.0f;
+
 sfx::audio::audio(const std::string& name) noexcept : _logger(name) {}
 
 float sfx::audio::getVolume() const noexcept {
@@ -32,10 +34,10 @@ void sfx::audio::setVolume(float newvolume) noexcept {
 	_validateVolume(newvolume);
 	_volume = newvolume;
 	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; itr++) {
-		itr->second.sound.setVolume(_volumeAfterOffset(itr->first, getVolume()));
+		itr->second.sound.setVolume(_volumeAfterOffset(itr->first));
 	}
 	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; itr++) {
-		itr->second.music.setVolume(_volumeAfterOffset(itr->first, getVolume()));
+		itr->second.music.setVolume(_volumeAfterOffset(itr->first));
 	}
 }
 
@@ -86,35 +88,23 @@ bool sfx::audio::fadeout(sf::Time length) noexcept {
 	if (!_fadingOut) {
 		_clock.restart();
 		_fadingOut = true;
-		_currentGranularity = _granularity;
-		_currentVolume = _volume;
 	}
-	if (_clock.getElapsedTime().asSeconds() >=
-		length.asSeconds() / _currentGranularity) {
-		_music[getCurrentMusic()].music.setVolume(
-			_music[getCurrentMusic()].music.getVolume() -
-			_volumeAfterOffset(getCurrentMusic(), _currentVolume) /
-			_currentGranularity
-		);
+	if (_clock.getElapsedTime().asSeconds() >= length.asSeconds() / _granularity) {
+		float newVolume = _music[getCurrentMusic()].music.getVolume() -
+			_volumeAfterOffset(getCurrentMusic()) / _granularity;
+		if (newVolume <= 1.0f) newVolume = 0.0f;
+		_music[getCurrentMusic()].music.setVolume(newVolume);
 		_clock.restart();
 	}
 	if (length.asMilliseconds() < 10 ||
 		_music[getCurrentMusic()].music.getVolume() < 1.0) {
 		std::string temp = getCurrentMusic();
 		stop();
-		_music[temp].music.setVolume(_volumeAfterOffset(temp, getVolume()));
+		_music[temp].music.setVolume(_volumeAfterOffset(temp));
 		_fadingOut = false;
 		return true;
 	}
 	return !_fadingOut;
-}
-
-float sfx::audio::getGranularity() const noexcept {
-	return _granularity;
-}
-
-void sfx::audio::setGranularity(float newval) noexcept {
-	_granularity = newval;
 }
 
 std::string sfx::audio::getCurrentMusic() const noexcept {
@@ -132,17 +122,16 @@ void sfx::audio::_validateVolume(float& v) noexcept {
 	}
 }
 
-float sfx::audio::_volumeAfterOffset(const std::string& name,
-	const float baseVolume) const noexcept {
+float sfx::audio::_volumeAfterOffset(const std::string& name) const noexcept {
 	if (_sound.find(name) != _sound.end()) {
-		if (baseVolume < 1.0) return 0.0;
-		float vol = baseVolume + _sound.at(name).volumeOffset;
+		if (getVolume() < 1.0) return 0.0;
+		float vol = getVolume() + _sound.at(name).volumeOffset;
 		if (vol < 1.0) vol = 1.0;
 		if (vol > 100.0) vol = 100.0;
 		return vol;
 	} else if (_music.find(name) != _music.end()) {
-		if (baseVolume < 1.0) return 0.0;
-		float vol = baseVolume + _music.at(name).volumeOffset;
+		if (getVolume() < 1.0) return 0.0;
+		float vol = getVolume() + _music.at(name).volumeOffset;
 		if (vol < 1.0) vol = 1.0;
 		if (vol > 100.0) vol = 100.0;
 		return vol;

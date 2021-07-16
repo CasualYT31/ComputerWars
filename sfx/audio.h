@@ -166,31 +166,14 @@ namespace sfx {
 		 * Fades out the currently playing music until it is stopped.
 		 * This method is to be called within the game loop continuously until it
 		 * returns \c TRUE. It adjusts the specific music object's volume only and
-		 * not the overall volume.\n
-		 * Copies of the volume and granularity values are made on the first call
-		 * to a fadeout, so that any undefined behaviour that could have occurred
-		 * if either of these values were changed mid-fadeout is avoided. Any
-		 * changes to the base volume will take affect once the fadeout is over.
+		 * not the overall volume.
+		 * @warning Avoid changing any volume value during the fadeout: undefined
+		 *          behaviour will ensue.
 		 * @param   length The amount of time that passes between music volume to
 		 *                 zero volume.
 		 * @return  \c TRUE if the fadeout is complete, \c FALSE if not.
 		 */
 		bool fadeout(sf::Time length = sf::seconds(1.0)) noexcept;
-
-		/**
-		 * How finely the \c fadeout() method decreases the music volume.
-		 * @return The fadeout granularity value.
-		 */
-		float getGranularity() const noexcept;
-
-		/**
-		 * Defines how finely the \c fadeout() method decreases the music volume.
-		 * The higher the value, the finer the fadeout.\n
-		 * Note that calling \c load() on this class will not reset the
-		 * granularity.
-		 * @param newval The new granularity value.
-		 */
-		void setGranularity(float newval) noexcept;
 
 		/**
 		 * Gets the name of the current music, whether playing or paused.
@@ -270,14 +253,10 @@ namespace sfx {
 		 * If the corresponding base volume is below 1.0, 0.0 will always be
 		 * returned. The final volume value will never fall below 1.0 or rise above
 		 * 100.0.
-		 * @param  name       The name of the audio object to calculate the volume
-		 *                    offset of.
-		 * @param  baseVolume The base volume of all audio objects.
 		 * @return The volume of the audio object after its offset has been
 		 *         applied.
 		 */
-		float _volumeAfterOffset(const std::string& name, const float baseVolume)
-			const noexcept;
+		float _volumeAfterOffset(const std::string& name) const noexcept;
 
 		/**
 		 * The internal logger object.
@@ -317,18 +296,11 @@ namespace sfx {
 		sf::Clock _clock;
 
 		/**
-		 * The granularity of fadeouts.
+		 * The granularity of fadeouts, which is 100.0.
+		 * Setting this to very small values (< 10.0) doesn't sound very nice, and
+		 * anything higher sounds similar to \c 100.0 anyway, so I saw little point
+		 * in letting the client choose the granularity of fadeouts.
 		 */
-		float _granularity = 100.0;
-
-		/**
-		 * Granularity used with the current fadeout.
-		 */
-		float _currentGranularity = _granularity;
-
-		/**
-		 * Volume used with the current fadeout.
-		 */
-		float _currentVolume = _volume;
+		static const float _granularity;
 	};
 }
