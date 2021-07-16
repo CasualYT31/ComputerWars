@@ -14,6 +14,16 @@
           "name": "BUILD_GMOCK",
           "value": "True",
           "type": "BOOL"
+        },
+        {
+          "name": "CW_FULL_AUDIO_TESTING",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "CW_FULL_SINK_TESTING",
+          "value": "False",
+          "type": "BOOL"
         }
       ]
     },

@@ -21,6 +21,12 @@ add_subdirectory("transition")
 add_subdirectory("awe")
 
 # tests
+# first define options for full testing definitions
+# the following options are used to select which tests to build and execute; some
+# tests are lengthy and the user may wish to skip them by deselecting them
+option(CW_FULL_SINK_TESTING "Includes hardware spec in the log when testing" OFF)
+option(CW_FULL_AUDIO_TESTING "Includes live audio tests when testing" OFF)
+# GoogleTest
 FetchContent_Declare(googletest
 	# specify the commit you depend on and update it regularly.
 	GIT_REPOSITORY https://github.com/google/googletest
@@ -33,7 +39,14 @@ enable_testing()
 # add compile definition which stores the path to the asset folder to be used for
 # testing
 add_compile_definitions(
-	COMPUTER_WARS_ROOT_TEST_ASSET_FOLDER="${CMAKE_CURRENT_LIST_DIR}/test/assets/")
+	COMPUTER_WARS_ROOT_TEST_ASSET_FOLDER="${CMAKE_CURRENT_LIST_DIR}/test/assets/"
+)
+if(CW_FULL_SINK_TESTING)
+	add_compile_definitions(COMPUTER_WARS_FULL_SINK_TESTING)
+endif()
+if(CW_FULL_AUDIO_TESTING)
+	add_compile_definitions(COMPUTER_WARS_FULL_AUDIO_TESTING)
+endif()
 # ensure that the first three source files REMAIN THE FIRST THREE SOURCE FILES!
 # this is because the sink class is a singleton and pretty much everything else
 # depends on it in some way, so set it up before carrying out any other tests
@@ -45,7 +58,8 @@ add_executable(${PROJECT_NAME}Tests
 	"test/expandstringtest.cpp"
 	"test/languagetest.cpp"
 	"test/fontstest.cpp"
-	"test/audiotest.cpp")
+	"test/audiotest.cpp"
+	"test/filetest.cpp")
 set_target_properties(${PROJECT_NAME}Tests PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME}Tests PRIVATE
 	${ComputerWarsAWE_INCLUDE_DIRS})

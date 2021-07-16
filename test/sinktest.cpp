@@ -41,9 +41,17 @@ TEST(SinkTest, GetSink) {
 	// consistency
 	std::error_code ignored;
 	std::filesystem::remove("Log.log", ignored);
+
+#ifdef COMPUTER_WARS_FULL_SINK_TESTING
+	auto firstLog = engine::sink::Get("Tests", "Dev", ".", false);
+	auto secondLog =
+		engine::sink::Get("Test Again", "Developer", "test", false);
+#else
 	auto firstLog = engine::sink::Get("Tests", "Dev", ".", false, false);
 	auto secondLog =
 		engine::sink::Get("Test Again", "Developer", "test", false, false);
+#endif
+
 	// if sink creation failed altogether, then all future tests will fail in this
 	// suite, so make this an assertion
 	ASSERT_TRUE(firstLog);

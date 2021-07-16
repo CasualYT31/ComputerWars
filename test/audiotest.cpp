@@ -110,6 +110,8 @@ TEST_F(AudioTest, GetVolume) {
 	EXPECT_FLOAT_EQ(audio.getVolume(), 100.0);
 }
 
+#ifdef COMPUTER_WARS_FULL_AUDIO_TESTING
+
 /**
  * Tests the \c sfx::audio object as whole.
  * This function tests \c setVolume(), \c play(), \c pause(), \c stop(), and
@@ -175,6 +177,8 @@ TEST_F(AudioTest, SimultaneousMusicSound) {
 	audio.stop();
 	shortWait("Audio playback testing complete!");
 }
+
+#endif
 
 /**
  * Tests \c sfx::audio::save().
