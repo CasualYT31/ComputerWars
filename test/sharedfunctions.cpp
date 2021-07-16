@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "sharedfunctions.h"
+#include "SFML/System/Clock.hpp"
 
 std::string getYear() noexcept {
 	std::time_t t = std::time(nullptr);
@@ -53,4 +54,39 @@ void setupJSONScript(const std::function<void(nlohmann::json&)>& f,
 		jscript << j;
 		jscript.close();
 	});
+}
+
+void setupRendererJSONScript() {
+	setupJSONScript([](nlohmann::json& j) {
+		j["width"] = 1408;
+		j["height"] = 795;
+		j["x"] = 235;
+		j["y"] = 137;
+		j["framerate"] = 0;
+		j["caption"] = "Computer Wars";
+		j["icon"] = getTestAssetPath("renderer/icon.png");
+		j["close"] = false;
+		j["def"] = true;
+		j["fullscreen"] = false;
+		j["none"] = false;
+		j["resize"] = false;
+		j["titlebar"] = false;
+		j["vsync"] = false;
+		j["cursor"] = true;
+		j["grabbedmouse"] = false;
+	}, "renderer/renderer.json");
+}
+
+void longWait(std::string msg) noexcept {
+	if (msg != "") msg += " ";
+	std::cout << msg << "Waiting... 3 seconds." << std::endl;
+	sf::Clock timer;
+	while (timer.getElapsedTime().asSeconds() < 3.0);
+}
+
+void shortWait(std::string msg) noexcept {
+	if (msg != "") msg += " ";
+	std::cout << msg << "Waiting... 1 second." << std::endl;
+	sf::Clock timer;
+	while (timer.getElapsedTime().asSeconds() < 1.0);
 }

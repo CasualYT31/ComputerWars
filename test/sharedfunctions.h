@@ -72,3 +72,20 @@ bool isTest(const std::vector<const char*>& list) noexcept;
  */
 void setupJSONScript(const std::function<void(nlohmann::json&)>& f,
 	const std::string& p);
+
+/**
+ * Specifically sets up the <tt>renderer/renderer.json</tt> test JSON script.
+ */
+void setupRendererJSONScript();
+
+/**
+ * Waits for three seconds.
+ * @param msg Optional string message to write to standard output.
+ */
+void longWait(std::string msg = "") noexcept;
+
+/**
+ * Waits for one second.
+ * @param msg Optional string message to write to standard output.
+ */
+void shortWait(std::string msg = "") noexcept;

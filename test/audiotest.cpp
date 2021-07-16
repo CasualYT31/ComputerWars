@@ -70,18 +70,6 @@ protected:
 	sfx::audio audio;
 };
 
-void longWait(const std::string& msg) noexcept {
-	std::cout << msg << " Waiting... 3 seconds." << std::endl;
-	sf::Clock timer;
-	while (timer.getElapsedTime().asSeconds() < 3.0);
-}
-
-void shortWait(const std::string& msg) noexcept {
-	std::cout << msg << " Waiting... 1 second." << std::endl;
-	sf::Clock timer;
-	while (timer.getElapsedTime().asSeconds() < 1.0);
-}
-
 /**
  * Tests the behaviour of <tt>audio::load()</tt>ing a valid script.
  */
