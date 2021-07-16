@@ -25,8 +25,9 @@ add_subdirectory("awe")
 # the following options are used to select which tests to build and execute; some
 # tests are lengthy and the user may wish to skip them by deselecting them
 option(CW_FULL_SINK_TESTING "Includes hardware spec in the log when testing" OFF)
-option(CW_FULL_AUDIO_TESTING "Includes live audio tests when testing" OFF)
+option(CW_FULL_AUDIO_TESTING "Includes live audio tests" OFF)
 option(CW_FULL_RENDERER_TESTING "Includes some delays during renderer testing" OFF)
+option(CW_FULL_TEXTURE_TESTING "Includes live sprite tests" OFF)
 # GoogleTest
 FetchContent_Declare(googletest
 	# specify the commit you depend on and update it regularly.
@@ -51,6 +52,9 @@ endif()
 if(CW_FULL_RENDERER_TESTING)
 	add_compile_definitions(COMPUTER_WARS_FULL_RENDERER_TESTING)
 endif()
+if(CW_FULL_TEXTURE_TESTING)
+	add_compile_definitions(COMPUTER_WARS_FULL_TEXTURE_TESTING)
+endif()
 # ensure that the first three source files REMAIN THE FIRST THREE SOURCE FILES!
 # this is because the sink class is a singleton and pretty much everything else
 # depends on it in some way, so set it up before carrying out any other tests
@@ -64,7 +68,8 @@ add_executable(${PROJECT_NAME}Tests
 	"test/fontstest.cpp"
 	"test/audiotest.cpp"
 	"test/filetest.cpp"
-	"test/renderertest.cpp")
+	"test/renderertest.cpp"
+	"test/texturetest.cpp")
 set_target_properties(${PROJECT_NAME}Tests PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME}Tests PRIVATE
 	${ComputerWarsAWE_INCLUDE_DIRS})

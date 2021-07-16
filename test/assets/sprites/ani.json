@@ -1,8 +1,1 @@
-{
-	"path": "test/assets/sprites/sheet.png",
-	"frames": 6,
-	"framerate": 1.0,
-	"sprites": [
-		[0,0,200,200]
-	]
-}
+{"framerate":1.0,"frames":6,"path":"C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.png","sprites":[[0,0,200,200]]}

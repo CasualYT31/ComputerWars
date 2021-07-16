@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "renderer.h"
 
 /**
- * This test fixture is used to initialise n \c renderer object for testing.
+ * This test fixture is used to initialise a \c renderer object for testing.
  */
 class RendererTest : public ::testing::Test {
 protected:
@@ -43,7 +43,7 @@ protected:
 	}
 
 	/**
-	 * The \c audio object to test on.
+	 * The \c renderer object to test on.
 	 */
 	sfx::renderer window;
 };
