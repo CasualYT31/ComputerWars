@@ -40,14 +40,16 @@ TEST(SinkTest, GetSink) {
 	// first ensure that the test folder has been removed to ensure the test's
 	// consistency
 	std::error_code ignored;
-	std::filesystem::remove("Log.log", ignored);
+	std::filesystem::remove(getTestAssetPath("log"), ignored);
 
 #ifdef COMPUTER_WARS_FULL_SINK_TESTING
-	auto firstLog = engine::sink::Get("Tests", "Dev", ".", false);
+	auto firstLog =
+		engine::sink::Get("Tests", "Dev", getTestAssetPath("log"), false);
 	auto secondLog =
 		engine::sink::Get("Test Again", "Developer", "test", false);
 #else
-	auto firstLog = engine::sink::Get("Tests", "Dev", ".", false, false);
+	auto firstLog =
+		engine::sink::Get("Tests", "Dev", getTestAssetPath("log"), false, false);
 	auto secondLog =
 		engine::sink::Get("Test Again", "Developer", "test", false, false);
 #endif
@@ -56,7 +58,8 @@ TEST(SinkTest, GetSink) {
 	// suite, so make this an assertion
 	ASSERT_TRUE(firstLog);
 	EXPECT_EQ(firstLog, secondLog);
-	bool firstLogFileExists = std::filesystem::exists("./Log.log");
+	bool firstLogFileExists =
+		std::filesystem::exists(getTestAssetPath("log/Log.log"));
 	bool secondLogFileExists = std::filesystem::exists("test/Log.log");
 	EXPECT_TRUE(firstLogFileExists);
 	EXPECT_FALSE(secondLogFileExists);
