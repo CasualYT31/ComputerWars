@@ -22,37 +22,46 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "transitions.h"
 
+transition::base::base(const bool isFadingIn, const sf::Time& duration) noexcept :
+	_isFadingIn(isFadingIn), _duration(duration) {}
+
+bool transition::base::isFadingIn() const noexcept {
+	return _isFadingIn;
+}
+
+sf::Time transition::base::duration() const noexcept {
+	return _duration;
+}
+
 transition::rectangle::rectangle(const bool isFadingIn, const sf::Time& duration,
-	const sf::Color& colour) noexcept :
-	_isFadingIn(isFadingIn), _duration(duration) {
+	const sf::Color& colour) noexcept : base(isFadingIn, duration) {
 	_toprect.setFillColor(colour);
 	_bottomrect.setFillColor(colour);
 }
 
 bool transition::rectangle::animate(const sf::RenderTarget& target) noexcept {
-	if (_finished) return true;
+	if (isFinished()) return true;
 	// initialise animation
-	if (_isFirstCallToAnimate) {
-		if (_isFadingIn) {
+	if (firstTimeAnimated()) {
+		if (isFadingIn()) {
 			_size.x = (float)target.getSize().x;
 			_size.y = (float)target.getSize().y;
 		} else {
 			_size = sf::Vector2f(0.0, 0.0);
 		}
-		_isFirstCallToAnimate = false;
 	}
 	// animate
 	float delta = calculateDelta();
-	if (_isFadingIn) {
-		_size.x -= (((float)target.getSize().y / _duration.asSeconds()) *
+	if (isFadingIn()) {
+		_size.x -= (((float)target.getSize().y / duration().asSeconds()) *
 			((float)target.getSize().x / (float)target.getSize().y)) * delta;
-		_size.y -= (((float)target.getSize().x / _duration.asSeconds()) *
+		_size.y -= (((float)target.getSize().x / duration().asSeconds()) *
 			((float)target.getSize().y / (float)target.getSize().x)) * delta;
 	}
 	else {
-		_size.x += (((float)target.getSize().y / _duration.asSeconds()) *
+		_size.x += (((float)target.getSize().y / duration().asSeconds()) *
 			((float)target.getSize().x / (float)target.getSize().y)) * delta;
-		_size.y += (((float)target.getSize().x / _duration.asSeconds()) *
+		_size.y += (((float)target.getSize().x / duration().asSeconds()) *
 			((float)target.getSize().y / (float)target.getSize().x)) * delta;
 	}
 	_toprect.setSize(_size);
@@ -61,18 +70,18 @@ bool transition::rectangle::animate(const sf::RenderTarget& target) noexcept {
 	_bottomrect.setPosition(target.getSize().x - _size.x,
 		target.getSize().y - _size.y);
 	// check to see if transition has completed
-	if (_isFadingIn && (_size.x <= 0.0f && _size.y <= 0.0f)) {
-		_finished = true;
-	} else if (!_isFadingIn && (_size.x >= target.getSize().x &&
+	if (isFadingIn() && (_size.x <= 0.0f && _size.y <= 0.0f)) {
+		finish();
+	} else if (!isFadingIn() && (_size.x >= target.getSize().x &&
 		_size.y >= target.getSize().y)) {
-		_finished = true;
+		finish();
 	}
-	if (_finished) {
+	if (isFinished()) {
 		_size = sf::Vector2f(0.0, 0.0);
 		_toprect.setSize(_size);
 		_bottomrect.setSize(_size);
 	}
-	return _finished;
+	return isFinished();
 }
 
 void transition::rectangle::draw(sf::RenderTarget& target, sf::RenderStates states)

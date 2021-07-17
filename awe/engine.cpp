@@ -37,7 +37,6 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	map.setUnitSpritesheet(_sprites->unit->idle);
 
 	try {
-		_renderer->openWindow();
 		while (_renderer->isOpen()) {
 			sf::Event event;
 			while (_renderer->pollEvent(event)) {

@@ -24,6 +24,11 @@
           "name": "CW_FULL_SINK_TESTING",
           "value": "False",
           "type": "BOOL"
+        },
+        {
+          "name": "CW_FULL_TEXTURE_TESTING",
+          "value": "False",
+          "type": "BOOL"
         }
       ]
     },

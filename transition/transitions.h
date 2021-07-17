@@ -36,21 +36,67 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace transition {
 	/**
+	 * Defines the blueprint all transitions should conform to.
+	 * All transitions should be single-use animations that do not repeat.
+	 * Therefore, basic properties of transitions cannot be amended after
+	 * construction.
+	 */
+	class base : public sfx::animated_drawable {
+	public:
+		/**
+		 * Sets the basic properties of the transition.
+		 * @param isFadingIn If \c TRUE, the transition should be fading \em in
+		 *                   (that is, the transition should be used when the
+		 *                   client wishes to fade the screen into view). If
+		 *                   \c FALSE, the transition should be fading \em out
+		 *                   (that is, the transition should be used when the
+		 *                   client wishes to fade the screen out of view).
+		 * @param duration   The approximate duration of the transition, from start
+		 *                   to finish.
+		 */
+		base(const bool isFadingIn, const sf::Time& duration = sf::seconds(1.0f))
+			noexcept;
+
+		/**
+		 * Finds out if this transition should fade in or fade out.
+		 * @return \c TRUE if the transition should fade in, \c FALSE if it should
+		 *         fade out.
+		 * @sa     sfx::base::base()
+		 */
+		bool isFadingIn() const noexcept;
+
+		/**
+		 * Finds out the duration of this transition.
+		 * @return The approximate duration of this transition.
+		 * @sa     sfx::base::base()
+		 */
+		sf::Time duration() const noexcept;
+	private:
+		/**
+		 * Stores the fade-in property of this transition.
+		 */
+		bool _isFadingIn;
+
+		/**
+		 * Stores the duration property of this transition.
+		 */
+		sf::Time _duration;
+	};
+
+	/**
 	 * This transition uses two rectangles which grow or shrink from/to the upper
 	 * left and lower right corners of the screen.
 	 * @sa sfx::animated_drawable
+	 * @sa sfx::base
 	 */
-	class rectangle : public sfx::animated_drawable {
+	class rectangle : public transition::base {
 	public:
 		/**
 		 * Sets the transition up, ready for drawing.
-		 * @param isFadingIn \c TRUE if the transition fades in (i.e. the
-		 *                   rectangles shrink to "reveal" the screen), \c FALSE if
-		 *                   the transition fades out (i.e. the rectangles grow to
-		 *                   "cover up" the screen).
-		 * @param duration   The approximate duration of the transition, from start
-		 *                   to finish.
+		 * @param isFadingIn The fade in property of this transition.
+		 * @param duration   The duration of this transition.
 		 * @param colour     The colour of the two rectangles.
+		 * @sa    sfx::base::base()
 		 */
 		rectangle(const bool isFadingIn, const sf::Time& duration = sf::seconds(1),
 			const sf::Color& colour = sf::Color()) noexcept;
@@ -74,27 +120,6 @@ namespace transition {
 		 *               internal workings of the drawable.
 		 */
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-		
-		/**
-		 * Stores the fade-in property of this transition.
-		 */
-		bool _isFadingIn;
-
-		/**
-		 * Stores the duration property of this transition.
-		 */
-		sf::Time _duration;
-		
-		/**
-		 * If \c animate() is called for the first time, initialisation steps will
-		 * be taken and this field will be set to \c FALSE.
-		 */
-		bool _isFirstCallToAnimate = true;
-		
-		/**
-		 * Keeps track of whether or not the transition has finished.
-		 */
-		bool _finished = false;
 		
 		/**
 		 * Tracks the size of both rectangles.

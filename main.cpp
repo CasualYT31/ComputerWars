@@ -86,6 +86,9 @@ int game(const std::string& file) {
     // initialise the renderer
     std::shared_ptr<sfx::renderer> renderer = std::make_shared<sfx::renderer>();
     renderer->load("assets/renderer/renderer.json");
+    // opening the renderer now will prevent glFlush() SFML errors from plaguing
+    // standard output when I load images in the animated_spritesheet objects below
+    renderer->openWindow();
 
     // initialise the user input
     std::shared_ptr<sfx::user_input> userInput =

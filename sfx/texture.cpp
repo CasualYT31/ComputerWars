@@ -52,8 +52,8 @@ double sfx::animated_spritesheet::getFramerate() const noexcept {
 	return _framerate;
 }
 
-unsigned long long sfx::animated_spritesheet::getFrameCount() const noexcept {
-	return _frames.size();
+unsigned int sfx::animated_spritesheet::getFrameCount() const noexcept {
+	return static_cast<unsigned int>(_frames.size());
 }
 
 bool sfx::animated_spritesheet::_load(engine::json& j) noexcept {
@@ -155,14 +155,12 @@ void sfx::animated_sprite::setSpritesheet(
 	_sheet = sheet;
 	if (!_sheet) _sprite.setTextureRect(sf::IntRect(0,0,0,0));
 	_errored = false;
-	_hasNotBeenDrawn = true;
 	_currentFrame = 0;
 }
 
 void sfx::animated_sprite::setSprite(unsigned int sprite) noexcept {
 	_spriteID = sprite;
 	_errored = false;
-	_hasNotBeenDrawn = true;
 	_currentFrame = 0;
 }
 
@@ -173,16 +171,11 @@ unsigned int sfx::animated_sprite::getSprite() const noexcept {
 bool sfx::animated_sprite::animate(const sf::RenderTarget& target) noexcept {
 	if (!_sheet) return true;
 	try {
-		if (_hasNotBeenDrawn) {
-			_hasNotBeenDrawn = false;
-			_clock.restart();
-		} else {
-			if (_sheet->getFramerate() > 0.0 &&
-				_clock.getElapsedTime().asSeconds() >= 1.0 /
-				_sheet->getFramerate()) {
-				++(*this);
-				_clock.restart();
-			}
+		if (_sheet->getFramerate() > 0.0) {
+			auto framesToAdvance = static_cast<std::uint64_t>(
+				accumulatedDelta() / (1.0 / _sheet->getFramerate()));
+			if (framesToAdvance) resetDeltaAccumulation();
+			for (std::uint64_t x = 0; x < framesToAdvance; x++) ++(*this);
 		}
 		_sprite.setTexture(_sheet->accessTexture(_currentFrame));
 		_sprite.setTextureRect(_sheet->accessSprite(_spriteID));

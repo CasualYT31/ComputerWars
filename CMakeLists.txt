@@ -75,6 +75,7 @@ add_executable(${PROJECT_NAME}Tests
 	"test/audiotest.cpp"
 	"test/filetest.cpp"
 	"test/renderertest.cpp"
+	"test/drawabletest.cpp"
 	"test/texturetest.cpp"
 	"test/joysticktest.cpp"
 	"test/converttest.cpp"

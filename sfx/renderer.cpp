@@ -123,6 +123,36 @@ bool sfx::renderer::_save(nlohmann::ordered_json& j) noexcept {
 	return true;
 }
 
-float sfx::animated_drawable::calculateDelta() noexcept {
+float sfx::animated_drawable::calculateDelta(const sf::Time& timeout) noexcept {
+	_firsttime = false;
+	// if the delta timer has timed out, restart the delta timer twice to
+	// achieved the desired effect
+	if (_deltaTimer.getElapsedTime() >= timeout) _deltaTimer.restart();
 	return _deltaTimer.restart().asSeconds();
+}
+
+float sfx::animated_drawable::accumulatedDelta(const sf::Time& timeout) noexcept {
+	_delta += calculateDelta(timeout);
+	return _delta;
+}
+
+void sfx::animated_drawable::resetDeltaAccumulation() noexcept {
+	_delta = 0.0f;
+}
+
+void sfx::animated_drawable::finish() noexcept {
+	_finished = true;
+}
+
+bool sfx::animated_drawable::isFinished() const noexcept {
+	return _finished;
+}
+
+bool sfx::animated_drawable::firstTimeAnimated() const noexcept {
+	return _firsttime;
+}
+
+void sfx::animated_drawable::resetAnimation() noexcept {
+	_finished = false;
+	_firsttime = true;
 }

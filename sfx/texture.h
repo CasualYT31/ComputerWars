@@ -76,7 +76,7 @@ namespace sfx {
 		 * Each sprite has the same number of frames.
 		 * @return The number of frames.
 		 */
-		unsigned long long getFrameCount() const noexcept;
+		unsigned int getFrameCount() const noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -232,8 +232,10 @@ namespace sfx {
 		 * This drawable's \c animate() method.
 		 * This method will look up the assigned sprite's details (such as frame
 		 * rate) and will advance the current frame based on these details. This
-		 * method also assigns the necessary texture and texture rectangle to the
-		 * internal \c sf::Sprite object, so it must be called even if a
+		 * method may advance multiple frames if the time between \c animate()
+		 * calls is long enough.\n
+		 * This method also assigns the necessary texture and texture rectangle to
+		 * the internal \c sf::Sprite object, so it must be called even if a
 		 * non-animated spritesheet is being used so that the object will render
 		 * properly. If no sheet was given, this method will return \c TRUE and
 		 * will not perform any other operations. If the sprite ID
@@ -361,20 +363,8 @@ namespace sfx {
 		unsigned int _currentFrame = 0;
 
 		/**
-		 * Flag representing if \c animate() has not yet been called with the
-		 * current sheet-spriteID configuration.
-		 */
-		bool _hasNotBeenDrawn = true;
-
-		/**
 		 * Flag tracking \c animate() errors so they don't spam the log file.
 		 */
 		bool _errored = false;
-
-		/**
-		 * Time frame increments so that \c animate() follows the frame rate of
-		 * the spritesheet given to it.
-		 */
-		sf::Clock _clock;
 	};
 }

@@ -49,14 +49,13 @@ namespace sfx {
 	 *         a drawable animate.</li>
 	 *     <li>Within \c animate(), if a delta timer is required, make sure to add
 	 *         the following line of code: <tt>float delta = calculateDelta();</tt>
-	 *         </li>
+	 *         If you need to accumulate delta overtime and reset the timer under
+	 *         specific conditions, replace \c calculateDelta() with
+	 *         \c accumulateDelta() and ensure to reset the accumulation using
+	 *         \c resetDeltaAccumulation() at some point within the method.</li>
 	 *     <li>When working with your \c animated_drawable object, \c animate()
 	 *         should be called within the draw loop at some point before the
-	 *         corresponding \c draw().</li>
-	 *     <li>If a delta timer is used within your drawable, make sure to
-	 *         instantiate your drawable right before your drawing loop, otherwise
-	 *         the first delta calculation will be off (this behaviour will
-	 *         probably change).</li></ol>
+	 *         corresponding \c draw().</li></ol>
 	 */
 	class animated_drawable : public sf::Drawable {
 	public:
@@ -80,21 +79,119 @@ namespace sfx {
 	protected:
 		/**
 		 * Calculates the time elapsed from the last call to this method.
-		 * The \c animate() method should animate things independent from the
+		 * The \c animate() method should animate things independently from the
 		 * render target's frame rate. In order to achieve this, the time since the
 		 * last frame update is measured, and any calculations in transforms etc.
 		 * can include this value to ensure animations play out in a consistent
 		 * time frame. A local variable, preferably called \c delta, should be
-		 * declared in \c animate(), and it should store the result of this method.
-		 * The unit used with this method is \b seconds.
-		 * @return The time elapsed since the last call to \c calculateDelta().
+		 * declared in \c animate(), and it should store the result of this
+		 * method.\n
+		 * There is an additional feature incorporated within the delta timer, and
+		 * that is the delta timeout mechanic. After a certain length of time has
+		 * elapsed since the last call to this method, or since the
+		 * \c animated_drawable object was constructed, the delta timer will be
+		 * reset upon the next call to this method, instead of this method
+		 * returning the length of time that has elapsed since the last call or
+		 * since object construction (returning \c 0 time instead). This feature
+		 * was added so that the client could instantiate an \c animated_drawable
+		 * whenever it wanted or needed to, and then animate and draw it later
+		 * without any repercussions. It also removes after effects visible when
+		 * the same \c animated_drawable is animated and drawn, then not drawn,
+		 * then animated and drawn again some time later.
+		 * @param  timeout In the case that your \c animated_drawable animates at a
+		 *                 frame rate slower than the default timeout duration, you
+		 *                 can provide a different duration here.
+		 * @return The time elapsed since the last call to \c calculateDelta(), in
+		 *         seconds.
+		 * @sa     sfx::animated_drawable::_timeout
 		 */
-		float calculateDelta() noexcept;
+		float calculateDelta(const sf::Time& timeout = sf::seconds(1.0f)) noexcept;
+
+		/**
+		 * Retrieves the delta accumulated overtime.
+		 * This method calls \c calculateDelta() once.\n
+		 * Upon every call to \c calculateDelta(), the return value is added to
+		 * \c _delta internally. This is useful for drawables that don't act on
+		 * delta directly, but overtime (i.e. can't reset the delta timer every
+		 * single time they call \c calculateDelta()).
+		 * @param  timeout See \c calculateDelta().
+		 * @return The delta accumulated since the object's construction, or since
+		 *         the last call to \c resetDeltaAccumulation().
+		 * @sa     calculateDelta()
+		 * @sa     resetDeltaAccumulation()
+		 */
+		float accumulatedDelta(const sf::Time& timeout = sf::seconds(1.0f))
+			noexcept;
+
+		/**
+		 * Resets delta accumulation to \c 0.
+		 * @sa accumulatedDelta()
+		 */
+		void resetDeltaAccumulation() noexcept;
+
+		/**
+		 * Can be used to designate an animation finished.
+		 * This method is paired with the \c isFinished() method to created
+		 * \c animated_drawable classes that are intended to represent a single-use
+		 * animation that does not loop. This feature is completely optional and
+		 * can be ignored entirely by subclasses if so desired.
+		 * @sa isFinished()
+		 */
+		void finish() noexcept;
+
+		/**
+		 * Finds out if this animation is finished.
+		 * This method is paired with the \c finish() method. It allows subclasses
+		 * to prevent further animation and/or drawing if the animation is
+		 * finished. This method will always return \c FALSE if \c finish() has not
+		 * been called.
+		 * @return \c TRUE if the animation is finished, \c FALSE if not.
+		 * @sa     finish()
+		 */
+		bool isFinished() const noexcept;
+
+		/**
+		 * Determines if the animated drawable hasn't been animated yet.
+		 * Whilst setting up an \c animated_drawable should preferably be carried
+		 * out in its constructor, this mechanic can be useful in the case where
+		 * doing so is not as convenient. Instead, a subclass' \c animate() method
+		 * can call this method in the first line to determine if further setup is
+		 * required (for example, setup relying on the specific target provided).
+		 * @return \c TRUE if \c calculateDelta() hasn't been called yet, \c FALSE
+		 *         otherwise.
+		 */
+		bool firstTimeAnimated() const noexcept;
+
+		/**
+		 * Resets the animation so that it is unfinished and has not yet been
+		 * animated.
+		 * This method can be used with non-single-use \c animated_drawables to
+		 * treat the drawable as if it hadn't yet been animated. This is useful
+		 * when the drawable has been given different properties and so it must be
+		 * reinitialised in \c animate() appropriately.
+		 * @sa firstTimeAnimated()
+		 */
+		void resetAnimation() noexcept;
 	private:
 		/**
 		 * Clock used to measure time between frames.
 		 */
 		sf::Clock _deltaTimer;
+
+		/**
+		 * Accumulates delta overtime.
+		 */
+		float _delta = 0.0f;
+
+		/**
+		 * Flag used to determine if the animation is finished or not.
+		 */
+		bool _finished = false;
+
+		/**
+		 * Flag used to determine if the animation hasn't been animated yet.
+		 */
+		bool _firsttime = true;
 	};
 
 	/**
