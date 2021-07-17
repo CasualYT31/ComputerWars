@@ -33,25 +33,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "safejson.h"
 #include "SFML/Graphics.hpp"
+#include <memory>
 
 namespace sfx {
 	/**
 	 * Value representing an invalid mouse position.
-	 * @sa user_input.mousePosition()
+	 * @sa user_input::mousePosition()
 	 */
 	const sf::Vector2i INVALID_MOUSE = sf::Vector2i(-1, -1);
 
 	/**
 	 * The different types of control signal.
-	 * \c FreeForm (\c 0) triggers game controls so longer as a configured
-	 * key/button is pressed or held.\n
+	 * \c FreeForm (\c 0) triggers game controls so long as a configured key/button
+	 * is pressed or held.\n
 	 * \c ButtonForm (\c 1) triggers game controls only when a configured
 	 * key/button is initially pressed, and not when held.\n
 	 * \c DelayedForm (\c 2) triggers game controls at configured intervals if a
 	 * configured key/button is being held.\n
 	 * \c SignalTypeCount stores the number of control signal types and must
 	 * \b remain as the last member of \c control_signal.
-	 * @sa user_input.operator[]()
+	 * @sa user_input::operator[]()
 	 */
 	enum control_signal {
 		FreeForm,
@@ -74,7 +75,7 @@ namespace sfx {
 	/**
 	 * Represents a joystick axis.
 	 * The axis ID and the axis direction are both stored.
-	 * @sa axis_direction
+	 * @sa sfx::axis_direction
 	 */
 	struct joystick {
 		/**
@@ -145,13 +146,13 @@ namespace sfx {
 		/**
 		 * Stores the signal that was current at the last call to \c operator[]().
 		 * @sa current
-		 * @sa user_input.operator[]()
+		 * @sa user_input::operator[]()
 		 */
 		bool previous = false;
 
 		/**
-		 * Stores the current signal. \c TRUE if a key/button is being pressed,
-		 * \c FALSE if not.
+		 * Stores the current signal.
+		 * \c TRUE if a key/button is being pressed, \c FALSE if not.
 		 * @sa previous
 		 */
 		bool current = false;
@@ -231,30 +232,40 @@ namespace sfx {
 	 * For all the methods except \c toaxisdir(), if an unsigned value is beyond
 	 * the enum's limits, it will be automatically brought back into the enum's
 	 * limits by removing one from the associated \c Count enum member and
-	 * returning this value.
+	 * returning this value. If this occurs, a warning will be logged if a logger
+	 * object is given.
 	 */
 	class convert {
 	public:
 		/**
 		 * Converts an unsigned integer to a keyboard key ID.
-		 * @param  k The unsigned integer holding the key ID.
+		 * @param  k      The unsigned integer holding the key ID.
+		 * @param  logger Optional pointer to the logger object.
 		 * @return The enum equivalent of the given key ID.
+		 * @sa     sfx::convert
 		 */
-		static sf::Keyboard::Key tokeycode(unsigned int k) noexcept;
+		static sf::Keyboard::Key tokeycode(unsigned int k,
+			engine::logger *const logger = nullptr) noexcept;
 
 		/**
 		 * Converts an unsigned integer to a mouse button ID.
-		 * @param  b The unsigned integer holding the button ID.
+		 * @param  b      The unsigned integer holding the button ID.
+		 * @param  logger Optional pointer to the logger object.
 		 * @return The enum equivalent of the given button ID.
+		 * @sa     sfx::convert
 		 */
-		static sf::Mouse::Button tomousebtn(unsigned int b) noexcept;
+		static sf::Mouse::Button tomousebtn(unsigned int b,
+			engine::logger *const logger = nullptr) noexcept;
 
 		/**
 		 * Converts an unsigned integer to a joystick axis ID.
-		 * @param  a The unsigned integer holding the axis ID.
+		 * @param  a      The unsigned integer holding the axis ID.
+		 * @param  logger Optional pointer to the logger object.
 		 * @return The enum equivalent of the given axis ID.
+		 * @sa     sfx::convert
 		 */
-		static sf::Joystick::Axis toaxis(unsigned int a) noexcept;
+		static sf::Joystick::Axis toaxis(unsigned int a,
+			engine::logger *const logger = nullptr) noexcept;
 
 		/**
 		 * Converts an integer to a joystick axis direction.
@@ -266,10 +277,13 @@ namespace sfx {
 
 		/**
 		 * Converts an unsigned integer to a control signal type ID.
-		 * @param  s The unsigned integer holding the type ID.
+		 * @param  s      The unsigned integer holding the type ID.
+		 * @param  logger Optional pointer to the logger object.
 		 * @return The enum equivalent of the given type ID.
+		 * @sa     sfx::convert
 		 */
-		static sfx::control_signal tosignaltype(unsigned int s) noexcept;
+		static sfx::control_signal tosignaltype(unsigned int s,
+			engine::logger *const logger = nullptr) noexcept;
 	protected:
 		/**
 		 * This class cannot be instantiated by the client.
@@ -283,16 +297,31 @@ namespace sfx {
 	class user_input : public engine::json_script {
 	public:
 		/**
-		 * Initialises the internal logger object, and ties an \c sf::Window to
-		 * this object.
-		 * @param window The \c sf::Window to tie to this instance of the
-		 *               \c user_input object.
-		 * @param name   The name to give this particular instantiation within the
-		 *               log file. Defaults to "user_input."
+		 * Initialises the internal logger object.
+		 * @param name The name to give this particular instantiation within the
+		 *             log file. Defaults to "user_input."
 		 * @sa    \c engine::logger
 		 */
-		user_input(sf::Window& window, const std::string& name = "user_input")
-			noexcept;
+		user_input(const std::string& name = "user_input") noexcept;
+
+		/**
+		 * Sets the window that this \c user_input object is tied to.
+		 * Tying user input to a window will have the following effects:
+		 * <ol><li>\c mousePosition() will return the mouse position relative to
+		 *         the window instead of relative to the upper left corner of the
+		 *         screen, and will return \c sfx::INVALID_MOUSE in case the window
+		 *         does not have focus.</li>
+		 *     <li>\c keyboardKeysBeingPressed(), \c mouseButtonsBeingPressed(),
+		 *         \c joystickButtonsBeingPressed(), and
+		 *         \c joystickAxesBeingPressed() will return empty lists if the
+		 *         window does not have focus. This can be used to automatically
+		 *         ignore input that is not meant for the window or the process as
+		 *         a whole.</li></ol>
+		 * It is recommended to tie a window to a \c user_input object.
+		 * @param window Pointer to the window to tie to this object. If it is
+		 *               \c nullptr, this object will be untied from any window.
+		 */
+		void tieWindow(const std::shared_ptr<const sf::Window>& window) noexcept;
 
 		/**
 		 * Retrieves the joystick ID associated with this user.
@@ -336,14 +365,17 @@ namespace sfx {
 		 * @param  name The name identifying the game control.
 		 * @return The user's configured profile for the given game control, or a
 		 *         blank object if \c name couldn't uniquely identify a game
-		 *         control.
+		 *         control (an error will be logged).
 		 */
 		sfx::user_configuration getConfiguration(const std::string& name) const
 			noexcept;
 
 		/**
 		 * Updates the user's control configurations for a given game control.
-		 * This does not reset signalling information.
+		 * This does not reset signalling information.\n
+		 * This \b cannot be used to create new game controls on the fly. If a
+		 * non-existent game control is referenced via \c name, an error will be
+		 * logged.
 		 * @param name The name identifying the game control.
 		 * @param uc   The user configurations to set.
 		 */
@@ -351,11 +383,15 @@ namespace sfx {
 			const sfx::user_configuration& uc) noexcept;
 
 		/**
-		 * Retrieves the mouse position.
-		 * The position returned is relative to the window tied upon construction,
-		 * and is measured in pixels.
-		 * @return The mouse position, or \c sfx::INVALID_MOUSE if the window is
-		 *         out of focus.
+		 * Retrieves the mouse position in pixels.
+		 * If a window has been tied to this object, the returned position will be
+		 * relative to that window. If the window does not have focus,
+		 * \c sfx::INVALID_MOUSE will be returned.\n
+		 * If no window has been tied to this object, then the mouse position
+		 * relative to the upper left corner of the primary monitor will be
+		 * returned.
+		 * @return The mouse position as described above.
+		 * @sa     tieWindow()
 		 */
 		sf::Vector2i mousePosition() const noexcept;
 
@@ -375,80 +411,36 @@ namespace sfx {
 		bool operator[](const std::string& name) noexcept;
 
 		/**
-		 * Retrieves the first recognised keyboard key being pressed.
-		 * The reference will not be written to in case no keys are being pressed.
-		 * @param  input A reference to the key ID object to update with the
-		 *               currently pressed key, if any.
-		 * @return \c TRUE if at least one key was being pressed, \c FALSE if no
-		 *         keys were being pressed. Also returns \c FALSE if the window is
-		 *         not in focus.
-		 */
-		bool listenForInput(sf::Keyboard::Key& input) const noexcept;
-
-		/**
-		 * Retrieves the first recognised mouse button being pressed.
-		 * The reference will not be written to in case no mouse buttons are being
-		 * pressed.
-		 * @param  input A reference to the mouse button ID object to update with
-		 *               the currently pressed button, if any.
-		 * @return \c TRUE if at least one mouse button was being pressed, \c FALSE
-		 *         if no buttons were being pressed. Also returns \c FALSE if the
-		 *         window is not in focus.
-		 */
-		bool listenForInput(sf::Mouse::Button& input) const noexcept;
-
-		/**
-		 * Retrieves the first recognised joystick button being pressed.
-		 * The reference will not be written to in case no buttons are being
-		 * pressed.
-		 * @param  input A reference to the button ID object to update with the
-		 *               currently pressed button, if any.
-		 * @return \c TRUE if at least one button was being pressed, \c FALSE if no
-		 *         buttons were being pressed. Also returns \c FALSE if the window
-		 *         is not in focus.
-		 */
-		bool listenForInput(unsigned int& input) const noexcept;
-
-		/**
-		 * Retrieves the first recognised joystick axis being pressed.
-		 * The reference will not be written to in case no axes are being pressed.
-		 * @param  input A reference to the axes object to update with the
-		 *               currently pressed axes, if any.
-		 * @return \c TRUE if at least one axes was being pressed, \c FALSE if no
-		 *         axes were being pressed. Also returns \c FALSE if the window is
-		 *         not in focus.
-		 */
-		bool listenForInput(sfx::joystick& input) const noexcept;
-
-		/**
 		 * Returns a list of keys being pressed.
 		 * @return A list of all the keys being pressed at the time of calling. An
-		 *         empty list is returned in all cases if the window is not in
-		 *         focus.
+		 *         empty list is returned if this object is tied to a window and
+		 *         that window is not in focus.
+		 * @sa     tieWindow()
 		 */
 		sfx::KeyboardKeyList keyboardKeysBeingPressed() const noexcept;
 
 		/**
 		 * Returns a list of mouse buttons being pressed.
 		 * @return A list of all the mouse buttons being pressed at the time of
-		 *         calling. An empty list is returned in all cases if the window is
-		 *         not in focus.
+		 *         calling. If \c mousePosition() returns \c sfx::INVALID_MOUSE,
+		 *         then an empty list is returned.
+		 * @sa     mousePosition()
 		 */
 		sfx::MouseButtonList mouseButtonsBeingPressed() const noexcept;
 
 		/**
 		 * Returns a list of joystick buttons being pressed.
 		 * @return A list of all the joystick buttons being pressed at the time of
-		 *         calling. An empty list is returned in all cases if the window is
-		 *         not in focus.
+		 *         calling. An empty list is returned if this object is tied to a
+		 *         window and that window is not in focus.
 		 */
 		sfx::JoystickButtonList joystickButtonsBeingPressed() const noexcept;
 
 		/**
 		 * Returns a list of joystick axes being pressed.
 		 * @return A list of all the joystick axes being pressed at the time of
-		 *         calling. An empty list is returned in all cases if the window is
-		 *         not in focus.
+		 *         calling. An empty list is returned if this object is tied to a
+		 *         window and that window is not in focus.
 		 */
 		sfx::JoystickAxisList joystickAxesBeingPressed() const noexcept;
 	private:
@@ -522,8 +514,11 @@ namespace sfx {
 		 * pressed at the time of calling.
 		 * @param  ref The control lists to update.
 		 * @return \c TRUE if at least one key/button/axis was being pressed,
-		 *         \c FALSE if nothing was registered. Also returns \c FALSE if the
-		 *         window was out of focus.
+		 *         \c FALSE if nothing was registered.
+		 * @sa     keyboardKeysBeingPressed()
+		 * @sa     mouseButtonsBeingPressed()
+		 * @sa     joystickButtonsBeingPressed()
+		 * @sa     joystickAxesBeingPressed()
 		 */
 		bool _scanInput(sfx::user_configuration& ref) const noexcept;
 
@@ -577,9 +572,9 @@ namespace sfx {
 		std::unordered_map<std::string, sfx::user_control> _control;
 
 		/**
-		 * A reference to the window tied to this user.
+		 * A pointer to the window tied to this \c user_input object.
 		 */
-		const sf::Window& _window;
+		std::shared_ptr<const sf::Window> _window;
 	};
 }
 

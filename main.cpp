@@ -89,7 +89,8 @@ int game(const std::string& file) {
 
     // initialise the user input
     std::shared_ptr<sfx::user_input> userInput =
-        std::make_shared<sfx::user_input>(*renderer);
+        std::make_shared<sfx::user_input>();
+    userInput->tieWindow(renderer);
     userInput->load("assets/userinput/userinput.json");
 
     // initialise spritesheets
