@@ -63,14 +63,14 @@ protected:
 			setupJSONScript([](nlohmann::json& j) {
 				j["path"] = getTestAssetPath("sprites/sheet.png");
 				j["frames"] = 6;
-				j["framerate"] = 1.0;
+				j["framerate"] = 2.0;
 				j["sprites"] = R"([
 					[0,0,200,200]
 				])"_json;
 			}, "sprites/ani.json");
 		}
 		// always load the texture script at the beginning of every test
-		if (isTest({ "AnimatedSprite" })) {
+		if (isTest({ "AnimatedSprite", "AnimatedSpriteLaggy" })) {
 			sheet->load(getTestAssetPath("sprites/ani.json"));
 		} else if (isTest({ "ManualFrameSelection" })) {
 			sheet->load(getTestAssetPath("sprites/multi.json"));
@@ -153,9 +153,35 @@ TEST_F(TextureTest, OrdinarySprites) {
 TEST_F(TextureTest, AnimatedSprite) {
 	window.openWindow();
 	timer.restart();
-	while (timer.getElapsedTime().asSeconds() < 7.0) {
+	while (timer.getElapsedTime().asSeconds() < 3.5) {
 		window.clear();
 		window.animate(sprite);
+		window.draw(sprite, sf::RenderStates().transform.translate(50.0, 50.0));
+		window.display();
+	}
+}
+
+/**
+ * Tests the behaviour of an animated sprite in a laggy environment.
+ * Frames should be skipped.
+ */
+TEST_F(TextureTest, AnimatedSpriteLaggy) {
+	window.openWindow();
+	timer.restart();
+	int counter = 0;
+	while (counter < 4) {
+		window.clear();
+		if (!counter) {
+			window.animate(sprite);
+			counter++;
+		}
+		// can't be >= 1.0f because that's the delta timeout,
+		// then the animation won't progress at all
+		if (timer.getElapsedTime().asSeconds() >= 0.9f) {
+			window.animate(sprite);
+			timer.restart();
+			counter++;
+		}
 		window.draw(sprite, sf::RenderStates().transform.translate(50.0, 50.0));
 		window.display();
 	}

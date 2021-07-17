@@ -121,6 +121,8 @@ protected:
 	test_drawable drawable;
 };
 
+#ifdef COMPUTER_WARS_FULL_DRAWABLE_TESTING
+
 /**
  * Tests \c sfx::animated_drawable::calculateDelta().
  */
@@ -146,6 +148,8 @@ TEST_F(DrawableTest, AccumulateDelta) {
 	longWait();
 	EXPECT_EQ(3, static_cast<int>(accumulatedDelta(sf::seconds(5.0f))));
 }
+
+#endif
 
 /**
  * Tests \c sfx::animated_drawable::finish(),

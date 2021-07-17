@@ -173,7 +173,8 @@ bool sfx::animated_sprite::animate(const sf::RenderTarget& target) noexcept {
 	try {
 		if (_sheet->getFramerate() > 0.0) {
 			auto framesToAdvance = static_cast<std::uint64_t>(
-				accumulatedDelta() / (1.0 / _sheet->getFramerate()));
+				static_cast<double>(accumulatedDelta()) /
+				(1.0 / _sheet->getFramerate()));
 			if (framesToAdvance) resetDeltaAccumulation();
 			for (std::uint64_t x = 0; x < framesToAdvance; x++) ++(*this);
 		}

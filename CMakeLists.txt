@@ -27,6 +27,8 @@ add_subdirectory("awe")
 option(CW_FULL_SINK_TESTING "Includes hardware spec in the log when testing" OFF)
 option(CW_FULL_AUDIO_TESTING "Includes live audio tests" OFF)
 option(CW_FULL_RENDERER_TESTING "Includes some delays during renderer testing" OFF)
+option(CW_FULL_DRAWABLE_TESTING
+	"Includes calculateDelta() and accumulateDelta() tests" OFF)
 option(CW_FULL_TEXTURE_TESTING "Includes live sprite tests" OFF)
 option(CW_FULL_USERINPUT_TESTING
 	"Includes mouse position tests as well as a testing environment in which to test user input"
@@ -54,6 +56,9 @@ if(CW_FULL_AUDIO_TESTING)
 endif()
 if(CW_FULL_RENDERER_TESTING)
 	add_compile_definitions(COMPUTER_WARS_FULL_RENDERER_TESTING)
+endif()
+if(CW_FULL_DRAWABLE_TESTING)
+	add_compile_definitions(COMPUTER_WARS_FULL_DRAWABLE_TESTING)
 endif()
 if(CW_FULL_TEXTURE_TESTING)
 	add_compile_definitions(COMPUTER_WARS_FULL_TEXTURE_TESTING)
