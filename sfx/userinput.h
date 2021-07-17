@@ -277,6 +277,8 @@ namespace sfx {
 
 		/**
 		 * Converts an unsigned integer to a control signal type ID.
+		 * If an out-or-range \c s parameter is given, \c sfx::ButtonForm will be
+		 * returned.
 		 * @param  s      The unsigned integer holding the type ID.
 		 * @param  logger Optional pointer to the logger object.
 		 * @return The enum equivalent of the given type ID.

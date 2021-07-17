@@ -69,7 +69,10 @@ add_executable(${PROJECT_NAME}Tests
 	"test/audiotest.cpp"
 	"test/filetest.cpp"
 	"test/renderertest.cpp"
-	"test/texturetest.cpp")
+	"test/texturetest.cpp"
+	"test/joysticktest.cpp"
+	"test/converttest.cpp"
+	"test/userinputtest.cpp")
 set_target_properties(${PROJECT_NAME}Tests PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME}Tests PRIVATE
 	${ComputerWarsAWE_INCLUDE_DIRS})
