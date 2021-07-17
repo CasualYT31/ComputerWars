@@ -333,8 +333,10 @@ namespace sfx {
 
 		/**
 		 * Sets the joystick to associate with this user.
-		 * If the ID of a non-existent joystick was given, it will be reset to
-		 * \c 0.
+		 * If the ID of a non-existent joystick was given, it will be reset to the
+		 * old joystick ID. This will also happen if a joystick ID with an ID
+		 * greater than \c sf::Joystick::Count is given, as undefined behaviour
+		 * occurs if those larger values are processed within the SFML.
 		 * @param newid The new ID of the joystick to associate with this
 		 *              user/object.
 		 */

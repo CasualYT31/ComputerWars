@@ -42,6 +42,11 @@ bool isTest(const std::vector<const char*>& list) noexcept {
 	return false;
 }
 
+bool testNameContains(const char* str) noexcept {
+	return strstr(testing::UnitTest::GetInstance()->current_test_info()->name(),
+		str);
+}
+
 void setupJSONScript(const std::function<void(nlohmann::json&)>& f,
 	const std::string& p) {
 	nlohmann::json j;

@@ -104,7 +104,7 @@ float sfx::user_input::getJoystickAxisThreshold() const noexcept {
 
 void sfx::user_input::setJoystickID(unsigned int newid) noexcept {
 	auto old = getJoystickID();
-	if (sf::Joystick::isConnected(newid)) {
+	if (newid <= sf::Joystick::Count && sf::Joystick::isConnected(newid)) {
 		_joystickid = newid;
 	} else {
 		_logger.warning("Attempted to set a joystick with ID {} that wasn't "
@@ -116,13 +116,13 @@ void sfx::user_input::setJoystickID(unsigned int newid) noexcept {
 void sfx::user_input::setJoystickAxisThreshold(float newthreshold) noexcept {
 	_joystickAxisThreshold = newthreshold;
 	if (_joystickAxisThreshold < 5.0) {
-		_logger.write("Attempted to set a joystick axis threshold of {}, reset to "
-			"5.0.", _joystickAxisThreshold);
+		_logger.warning("Attempted to set a joystick axis threshold of {}, reset "
+			"to 5.0.", _joystickAxisThreshold);
 		_joystickAxisThreshold = 5.0;
 	}
 	if (_joystickAxisThreshold > 95.0) {
-		_logger.write("Attempted to set a joystick axis threshold of {}, reset to "
-			"95.0.", _joystickAxisThreshold);
+		_logger.warning("Attempted to set a joystick axis threshold of {}, reset "
+			"to 95.0.", _joystickAxisThreshold);
 		_joystickAxisThreshold = 95.0;
 	}
 }

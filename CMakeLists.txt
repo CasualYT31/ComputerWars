@@ -28,6 +28,9 @@ option(CW_FULL_SINK_TESTING "Includes hardware spec in the log when testing" OFF
 option(CW_FULL_AUDIO_TESTING "Includes live audio tests" OFF)
 option(CW_FULL_RENDERER_TESTING "Includes some delays during renderer testing" OFF)
 option(CW_FULL_TEXTURE_TESTING "Includes live sprite tests" OFF)
+option(CW_FULL_USERINPUT_TESTING
+	"Includes mouse position tests as well as a testing environment in which to test user input"
+	OFF)
 # GoogleTest
 FetchContent_Declare(googletest
 	# specify the commit you depend on and update it regularly.
@@ -54,6 +57,9 @@ if(CW_FULL_RENDERER_TESTING)
 endif()
 if(CW_FULL_TEXTURE_TESTING)
 	add_compile_definitions(COMPUTER_WARS_FULL_TEXTURE_TESTING)
+endif()
+if(CW_FULL_USERINPUT_TESTING)
+	add_compile_definitions(COMPUTER_WARS_FULL_USERINPUT_TESTING)
 endif()
 # ensure that the first three source files REMAIN THE FIRST THREE SOURCE FILES!
 # this is because the sink class is a singleton and pretty much everything else

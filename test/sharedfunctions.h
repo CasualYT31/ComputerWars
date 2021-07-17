@@ -64,6 +64,14 @@ std::string getTestAssetPath(const std::string& subdirs) noexcept;
 bool isTest(const std::vector<const char*>& list) noexcept;
 
 /**
+ * Determines if the current test name contains a given string.
+ * @param  str The string to search for in the current test name.
+ * @return \c TRUE if the current test's name contained the given string, \c FALSE
+ *         otherwise.
+ */
+bool testNameContains(const char* str) noexcept;
+
+/**
  * This function is used to setup a JSON script before testing.
  * @param f Function which accepts a reference to a JSON object and writes to it
  *          before saving as necessary.
