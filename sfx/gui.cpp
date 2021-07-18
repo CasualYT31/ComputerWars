@@ -106,8 +106,8 @@ bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 		// this GUI has a background to animate
 		if (_guiBackground[getGUI()].getType() ==
 			sfx::gui_background::type::Colour) {
-			_bgColour.setSize(sf::Vector2f(target.getSize().x,
-				target.getSize().y));
+			_bgColour.setSize(sf::Vector2f(static_cast<float>(target.getSize().x),
+				static_cast<float>(target.getSize().y)));
 			_bgColour.setFillColor(_guiBackground[getGUI()].getColour());
 		} else {
 			_bgSprite.setSpritesheet(_sheet);
@@ -134,7 +134,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 					_widgetPictures.push_back(tgui::Texture(_sheet->accessTexture(
 						_widgetSprites[i].getCurrentFrame()),
 						_sheet->accessSprite(_widgetSprites[i].getSprite())));
-				} catch (std::out_of_range& e) {
+				} catch (std::out_of_range&) {
 					i++;
 					continue;
 				}
