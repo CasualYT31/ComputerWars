@@ -265,6 +265,18 @@ namespace awe {
 		void _script_saveSoundConfig();
 
 		/**
+		 * Calls \c _userinput->load().
+		 * @sa \c _script_loadMusicConfig()
+		 */
+		void _script_loadUIConfig();
+
+		/**
+		 * Calls \c _userinput->save().
+		 * @sa \c _script_loadMusicConfig()
+		 */
+		void _script_saveUIConfig();
+
+		/**
 		 * Essentially calls \c _renderer->load().
 		 * @sa \c _script_loadMusicConfig()
 		 */

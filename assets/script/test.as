@@ -5,6 +5,8 @@ void main(string &in param, int8 negative, uint64 positive, bool t) {
 	info("" + getJoystickAxisThreshold());
 	setJoystickAxisThreshold(89.6);
 	info("" + getJoystickAxisThreshold());
+	loadUIConfig();
+	info("" + getJoystickAxisThreshold());
 }
 
 void add(int a, int b) {

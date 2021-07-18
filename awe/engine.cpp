@@ -150,6 +150,12 @@ void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void setJoystickAxisThreshold(float)",
 		asMETHOD(sfx::user_input, setJoystickAxisThreshold),
 		asCALL_THISCALL_ASGLOBAL, _userinput.get());
+	engine->RegisterGlobalFunction("void loadUIConfig()",
+		asMETHOD(awe::game_engine, _script_loadUIConfig),
+		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void saveUIConfig()",
+		asMETHOD(awe::game_engine, _script_saveUIConfig),
+		asCALL_THISCALL_ASGLOBAL, this);
 }
 
 void awe::game_engine::_script_setFullscreen(const bool in) {
@@ -193,6 +199,14 @@ void awe::game_engine::_script_loadRendererConfig() {
 void awe::game_engine::_script_saveRendererConfig() {
 	_renderer->setSettings(_tempRendererSettings);
 	_renderer->save();
+}
+
+void awe::game_engine::_script_loadUIConfig() {
+	_userinput->load();
+}
+
+void awe::game_engine::_script_saveUIConfig() {
+	_userinput->save();
 }
 
 // initCheck()
