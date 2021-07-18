@@ -50,7 +50,8 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	map.setUnitSpritesheet(_sprites->unit->idle);
 
 	// test scripts
-	_scripts->callFunction("main");
+	std::string temp = "test";
+	_scripts->callFunction("main", &temp, (asBYTE)-9, (asQWORD)UINT64_MAX, false);
 
 	try {
 		while (_renderer->isOpen()) {

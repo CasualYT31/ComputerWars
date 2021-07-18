@@ -56,12 +56,9 @@ add_library(${PROJECT_NAME} STATIC
 	"file.cpp"
 	"script.cpp"
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp
-	# ${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.h
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring_utils.cpp
-	# ${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.h
 	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/scriptbuilder.cpp)
-	# ${angelscript_SOURCE_DIR}/add_on/scriptbuilder/scriptbuilder.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}
 	${SystemProperties_INCLUDE_DIRS}
 	${Boxer_INCLUDE_DIRS}

@@ -137,7 +137,16 @@ namespace engine {
 		 * It is called recursively, so that each parameter is added, with the
 		 * first parameter being the first parameter passed to the function, etc.
 		 * Upon the final call (no parameters left to add), the non-template
-		 * version of this method is called.
+		 * version of this method is called.\n
+		 * All primitive data types are supported (including \c bool, all integral
+		 * types, \c float, and \c double). Objects are also supported, \b however,
+		 * they \b must be passed in as a pointer, and the object's class \b must
+		 * have its own \c fmt::formatter code (this is because this method expects
+		 * your object type to be able to output to the log via spdlog, which uses
+		 * fmt). Your object type must also be copyable. Expect seemingly unrelated
+		 * [template] build errors if these conditions aren't met. Strings are also
+		 * supported, \b however, string literals are not. This may change in the
+		 * future.
 		 * @tparam T      The type of the first parameter to add.
 		 * @tparam Ts     The types of the next parameters to add, if any.
 		 * @param  name   The name of the script function to call.
@@ -215,31 +224,20 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 	// or the non-template version if there are no more paramters remaining to be
 	// added (this is decided for us implicitly)
 	int r = 0;
-	if (std::is_integral<T>::value) {
+	if constexpr (std::is_integral<T>::value) {
+		// this also conveniently covers bool for us
 		switch (sizeof value) {
 		case 1:
-			if (std::is_signed<T>::value)
-				r = _context->SetArgByte(_argumentID, (asINT8)value);
-			else
-				r = _context->SetArgByte(_argumentID, (asBYTE)value);
+			r = _context->SetArgByte(_argumentID, (asBYTE)value);
 			break;
 		case 2:
-			if (std::is_signed<T>::value)
-				r = _context->SetArgWord(_argumentID, (asINT16)value);
-			else
-				r = _context->SetArgWord(_argumentID, (asWORD)value);
+			r = _context->SetArgWord(_argumentID, (asWORD)value);
 			break;
 		case 4:
-			if (std::is_signed<T>::value)
-				r = _context->SetArgDWord(_argumentID, (asINT32)value);
-			else
-				r = _context->SetArgDWord(_argumentID, (asDWORD)value);
+			r = _context->SetArgDWord(_argumentID, (asDWORD)value);
 			break;
 		case 8:
-			if (std::is_signed<T>::value)
-				r = _context->SetArgQWord(_argumentID, (asINT64)value);
-			else
-				r = _context->SetArgQWord(_argumentID, (asQWORD)value);
+			r = _context->SetArgQWord(_argumentID, (asQWORD)value);
 			break;
 		default:
 			_logger.error("Unexpected length {} of integer variable {}, it will "
@@ -247,16 +245,23 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 				"point.", sizeof value, value, _argumentID);
 			break;
 		}
-	} else if (std::is_floating_point<T>::value) {
+	} else if constexpr (std::is_floating_point<T>::value) {
 		if (sizeof value == 4) {
 			r = _context->SetArgFloat(_argumentID, (float)value);
 		} else {
 			r = _context->SetArgDouble(_argumentID, (double)value);
 		}
+	} else if constexpr (std::is_pointer<T>::value) {
+		r = _context->SetArgObject(_argumentID, value);
 	}
 	if (r < 0) {
-		_logger.error("Failed to set argument {} to the value \"{}\": code {}.",
-			_argumentID, value, r);
+		if constexpr (std::is_pointer<T>::value) {
+			_logger.error("Failed to set argument {} to the value \"{}\": code "
+				"{}.", _argumentID, *value, r);
+		} else {
+			_logger.error("Failed to set argument {} to the value \"{}\": code "
+				"{}.", _argumentID, value, r);
+		}
 		_argumentID = 0;
 		_callFunction_TemplateCall = false;
 		return false;
