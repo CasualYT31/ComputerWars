@@ -173,6 +173,7 @@ void awe::game_engine::_script_saveSoundConfig() {
 
 void awe::game_engine::_script_loadRendererConfig() {
 	_renderer->load();
+	_renderer->openWindow();
 	_tempRendererSettings = _renderer->getSettings();
 }
 
