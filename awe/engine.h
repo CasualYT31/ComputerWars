@@ -197,12 +197,42 @@ namespace awe {
 		//=============================
 		/**
 		 * Callback given to \c engine::scripts::registerInterface().
-		 * For a full rundown of the interface, please read the Script Interface
-		 * Specification.md file in the root of the repository.
+		 * For a full rundown of the interface, please read <a
+		 * href="https://github.com/CasualYT31/ComputerWars/wiki/Script-Interface"
+		 * target="_blank">the GitHub repository wiki</a>.
 		 * @param engine Pointer to the engine to register the interface with.
-		 * @sa    engine::scripts::registerInterface()
+		 * @sa    \c engine::scripts::registerInterface()
 		 */
 		void _registerInterface(asIScriptEngine* engine) noexcept;
+
+		/**
+		 * Calls \c _music->load().
+		 * I wanted to make the mapping directly, however, I have to define the
+		 * string parameter in the AngelScript declaration explicitly, otherwise
+		 * the engine will crash, and that has the problem of letting scripts load
+		 * and save the JSON script from and to anywhere. So I have to write this
+		 * intermediary method to avoid crashing the engine and avoid giving
+		 * scripts more power than they need.
+		 */
+		void _script_loadMusicConfig();
+
+		/**
+		 * Calls \c _music->save().
+		 * @sa \c _script_loadMusicConfig()
+		 */
+		void _script_saveMusicConfig();
+
+		/**
+		 * Calls \c _sounds->load().
+		 * @sa \c _script_loadMusicConfig()
+		 */
+		void _script_loadSoundConfig();
+
+		/**
+		 * Calls \c _sounds->save().
+		 * @sa \c _script_loadMusicConfig()
+		 */
+		void _script_saveSoundConfig();
 
 		//=============================
 		//==========GAME DATA==========

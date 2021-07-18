@@ -6,7 +6,15 @@ void main() {
 	error("Error in script! " + getSoundVolume());
 	setMusicVolume(-9);
 	warn("Music volume: " + getMusicVolume());
-	// printno(2+2);
+	saveMusicConfig();
+	loadMusicConfig();
+	info("" + getMusicVolume());
+	setMusicVolume(100.0);
+	saveMusicConfig();
+	info("" + getSoundVolume());
+	loadSoundConfig();
+	info("" + getSoundVolume());
+	saveSoundConfig();
 }
 
 void add(int a, int b) {

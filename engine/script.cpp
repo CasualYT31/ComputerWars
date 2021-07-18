@@ -142,7 +142,7 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
     }
     _callFunction_TemplateCall = false;
     _argumentID = 0;
-    //execute the function and return if it worked or not
+    // execute the function and return if it worked or not
     int r = _context->Execute();
     if (r != asEXECUTION_FINISHED) {
         _logger.error("Failed to execute function \"{}\": code {}.", name, r);

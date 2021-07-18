@@ -107,6 +107,34 @@ void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void setMusicVolume(const float)",
 		asMETHOD(sfx::audio, setVolume),
 		asCALL_THISCALL_ASGLOBAL, _music.get());
+	engine->RegisterGlobalFunction("void loadMusicConfig()",
+		asMETHOD(awe::game_engine, _script_loadMusicConfig),
+		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void saveMusicConfig()",
+		asMETHOD(awe::game_engine, _script_saveMusicConfig),
+		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void loadSoundConfig()",
+		asMETHOD(awe::game_engine, _script_loadSoundConfig),
+		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void saveSoundConfig()",
+		asMETHOD(awe::game_engine, _script_saveSoundConfig),
+		asCALL_THISCALL_ASGLOBAL, this);
+}
+
+void awe::game_engine::_script_loadMusicConfig() {
+	_music->load();
+}
+
+void awe::game_engine::_script_saveMusicConfig() {
+	_music->save();
+}
+
+void awe::game_engine::_script_loadSoundConfig() {
+	_sounds->load();
+}
+
+void awe::game_engine::_script_saveSoundConfig() {
+	_sounds->save();
 }
 
 // initCheck()
