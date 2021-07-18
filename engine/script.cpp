@@ -140,8 +140,7 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
         // version then we must set up the context
         if (!_setupContext(name)) return false;
     }
-    _callFunction_TemplateCall = false;
-    _argumentID = 0;
+    _resetCallFunctionVariables();
     // execute the function and return if it worked or not
     int r = _context->Execute();
     if (r != asEXECUTION_FINISHED) {
@@ -168,4 +167,9 @@ bool engine::scripts::_setupContext(const std::string& name) noexcept {
         return false;
     }
     return true;
+}
+
+void engine::scripts::_resetCallFunctionVariables() noexcept {
+    _callFunction_TemplateCall = false;
+    _argumentID = 0;
 }

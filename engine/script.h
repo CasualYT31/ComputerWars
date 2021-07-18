@@ -177,6 +177,12 @@ namespace engine {
 		bool _setupContext(const std::string& name) noexcept;
 
 		/**
+		 * Resets \c callFunction() variables.
+		 * Call this method just before a call to \c callFunction() is over.
+		 */
+		void _resetCallFunctionVariables() noexcept;
+
+		/**
 		 * The internal logger object.
 		 */
 		mutable engine::logger _logger;
@@ -262,8 +268,7 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 			_logger.error("Failed to set argument {} to the value \"{}\": code "
 				"{}.", _argumentID, value, r);
 		}
-		_argumentID = 0;
-		_callFunction_TemplateCall = false;
+		_resetCallFunctionVariables();
 		return false;
 	}
 	_argumentID++;
