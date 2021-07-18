@@ -49,6 +49,9 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	map.setTileSpritesheet(_sprites->tile->normal);
 	map.setUnitSpritesheet(_sprites->unit->idle);
 
+	// test scripts
+	_scripts->callFunction("main");
+
 	try {
 		while (_renderer->isOpen()) {
 			sf::Event event;
@@ -82,7 +85,25 @@ void awe::game_engine::initialiseScripts(const std::string& folder) noexcept {
 }
 
 void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
-	boxer::show("Test", "Testing");
+	// register the global functions
+	engine->RegisterGlobalFunction("void info(const string& in)",
+		asMETHOD(awe::game_engine, _script_info), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void warn(const string& in)",
+		asMETHOD(awe::game_engine, _script_warn), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void error(const string& in)",
+		asMETHOD(awe::game_engine, _script_error), asCALL_THISCALL_ASGLOBAL, this);
+}
+
+void awe::game_engine::_script_info(std::string& in) {
+	_logger.write(in);
+}
+
+void awe::game_engine::_script_warn(std::string& in) {
+	_logger.warning(in);
+}
+
+void awe::game_engine::_script_error(std::string& in) {
+	_logger.error(in);
 }
 
 // initCheck()
