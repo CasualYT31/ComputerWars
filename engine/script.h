@@ -86,7 +86,11 @@ namespace engine {
 		 * A new module is built, and each file is attached to it. This means all
 		 * scripts aren't separate, so all functions across all scripts should have
 		 * a unique name. If the given path was blank, the last folder used with
-		 * this method will be used.
+		 * this method will be used.\n
+		 * Every time this method is called, the previous module is discarded. This
+		 * means any functions registered in the old module can no longer be
+		 * called. Note that the previous module is discarded regardless of the
+		 * outcome of this method.
 		 * @param  folder The path containing all the script files to load.
 		 * @return \c TRUE if successful, \c FALSE if not.
 		 */

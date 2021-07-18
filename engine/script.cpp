@@ -101,6 +101,10 @@ bool engine::scripts::reloadScripts(std::string folder) noexcept {
     _logger.write("Loading scripts from \"{}\"...", folder);
     if (folder == "" || !_engine) return false;
     CScriptBuilder builder;
+    // before starting a new module, if it already exists, the ComputerWars module
+    // should be discarded before being replaced
+    // if it doesn't yet exist, then the negative return value is ignored
+    _engine->DiscardModule("ComputerWars");
     int r = builder.StartNewModule(_engine, "ComputerWars");
     if (r < 0) {
         _logger.error("Failure to start a new module while loading scripts: code "
