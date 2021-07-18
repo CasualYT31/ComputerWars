@@ -87,23 +87,26 @@ void awe::game_engine::initialiseScripts(const std::string& folder) noexcept {
 void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
 	// register the global functions
 	engine->RegisterGlobalFunction("void info(const string& in)",
-		asMETHOD(awe::game_engine, _script_info), asCALL_THISCALL_ASGLOBAL, this);
+		asMETHODPR(engine::logger, write, (const std::string&), void),
+		asCALL_THISCALL_ASGLOBAL, &_logger);
 	engine->RegisterGlobalFunction("void warn(const string& in)",
-		asMETHOD(awe::game_engine, _script_warn), asCALL_THISCALL_ASGLOBAL, this);
+		asMETHODPR(engine::logger, warning, (const std::string&), void),
+		asCALL_THISCALL_ASGLOBAL, &_logger);
 	engine->RegisterGlobalFunction("void error(const string& in)",
-		asMETHOD(awe::game_engine, _script_error), asCALL_THISCALL_ASGLOBAL, this);
-}
-
-void awe::game_engine::_script_info(std::string& in) {
-	_logger.write(in);
-}
-
-void awe::game_engine::_script_warn(std::string& in) {
-	_logger.warning(in);
-}
-
-void awe::game_engine::_script_error(std::string& in) {
-	_logger.error(in);
+		asMETHODPR(engine::logger, error, (const std::string&), void),
+		asCALL_THISCALL_ASGLOBAL, &_logger);
+	engine->RegisterGlobalFunction("float getSoundVolume()",
+		asMETHOD(sfx::audio, getVolume),
+		asCALL_THISCALL_ASGLOBAL, _sounds.get());
+	engine->RegisterGlobalFunction("void setSoundVolume(const float)",
+		asMETHOD(sfx::audio, setVolume),
+		asCALL_THISCALL_ASGLOBAL, _sounds.get());
+	engine->RegisterGlobalFunction("float getMusicVolume()",
+		asMETHOD(sfx::audio, getVolume),
+		asCALL_THISCALL_ASGLOBAL, _music.get());
+	engine->RegisterGlobalFunction("void setMusicVolume(const float)",
+		asMETHOD(sfx::audio, setVolume),
+		asCALL_THISCALL_ASGLOBAL, _music.get());
 }
 
 // initCheck()

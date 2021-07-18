@@ -197,39 +197,12 @@ namespace awe {
 		//=============================
 		/**
 		 * Callback given to \c engine::scripts::registerInterface().
-		 * For a full rundown of the interface, please see all the private methods
-		 * labelled with \c _script_ in this class.
+		 * For a full rundown of the interface, please read the Script Interface
+		 * Specification.md file in the root of the repository.
 		 * @param engine Pointer to the engine to register the interface with.
 		 * @sa    engine::scripts::registerInterface()
 		 */
 		void _registerInterface(asIScriptEngine* engine) noexcept;
-
-		/**
-		 * Script global function that lets the script write to the log file.
-		 * This global function has the following script declaration: <tt>void
-		 * info(const string& in)</tt>\n
-		 * Calls \c _logger.write(in).
-		 * @param in The string to write to the log file.
-		 */
-		void _script_info(std::string& in);
-
-		/**
-		 * Script global function that lets the script write to the log file.
-		 * This global function has the following script declaration: <tt>void
-		 * warn(const string& in)</tt>\n
-		 * Calls \c _logger.warning(in).
-		 * @param in The string to write to the log file.
-		 */
-		void _script_warn(std::string& in);
-
-		/**
-		 * Script global function that lets the script write to the log file.
-		 * This global function has the following script declaration: <tt>void
-		 * error(const string& in)</tt>\n
-		 * Calls \c _logger.error(in).
-		 * @param in The string to write to the log file.
-		 */
-		void _script_error(std::string& in);
 
 		//=============================
 		//==========GAME DATA==========
