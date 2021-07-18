@@ -86,6 +86,15 @@ void awe::game_engine::initialiseScripts(const std::string& folder) noexcept {
 }
 
 void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
+	// register the object types
+	engine->RegisterObjectType("joystick_axis", sizeof(sfx::joystick),
+		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sfx::joystick>() |
+		asOBJ_APP_CLASS_ALLINTS);
+	engine->RegisterObjectProperty("joystick_axis", "uint axis",
+		asOFFSET(sfx::joystick, axis));
+	engine->RegisterObjectProperty("joystick_axis", "int direction",
+		asOFFSET(sfx::joystick, direction));
+
 	// register the global functions
 	engine->RegisterGlobalFunction("void info(const string& in)",
 		asMETHODPR(engine::logger, write, (const std::string&), void),
