@@ -22,6 +22,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.h"
 
+/*// INCOMPLETE: functionality will be added as and when necessary, print methods
+// will be removed at some point
+void engine::scripts::_registerInterface() noexcept {
+    _logger.write("Registering script interface...");
+    _engine->RegisterGlobalFunction("void print(const string &in)",
+        asFUNCTION(print), asCALL_CDECL);
+    _engine->RegisterGlobalFunction("void printno(const int)",
+        asFUNCTION(printNumber), asCALL_CDECL);
+    _engine->RegisterGlobalFunction("void printfloat(const float)",
+        asFUNCTION(printFloat), asCALL_CDECL);
+    _logger.write("Finished registering script interface.");
+}*/
+
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
 int awe::game_engine::run(const std::string& file) noexcept {
@@ -53,6 +66,26 @@ int awe::game_engine::run(const std::string& file) noexcept {
 
 	return 0;
 }
+
+// script interface
+
+void awe::game_engine::initialiseScripts(const std::string& folder) noexcept {
+	if (_scripts) {
+		_scripts->registerInterface(
+			std::bind(&awe::game_engine::_registerInterface, this,
+				std::placeholders::_1));
+		_scripts->loadScripts(folder);
+	} else {
+		_logger.error("initialiseScripts() was called before setting a scripts "
+			"object!");
+	}
+}
+
+void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
+	boxer::show("Test", "Testing");
+}
+
+// initCheck()
 
 int awe::game_engine::_initCheck() const noexcept {
 	std::string errstring = "";

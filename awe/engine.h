@@ -64,6 +64,14 @@ namespace awe {
 		int run(const std::string& file) noexcept;
 
 		/**
+		 * Registers the script interface and loads the script files.
+		 * \c setScripts() must be called before calling this method. If
+		 * \c _scripts is \c nullptr, an error will be logged.
+		 * @param folder The folder containing the script files to load.
+		 */
+		void initialiseScripts(const std::string& folder) noexcept;
+
+		/**
 		 * Sets the engine's available countries.
 		 * @param ptr Pointer to the data.
 		 */
@@ -183,6 +191,15 @@ namespace awe {
 		 * @return \c 0 if all tests passed, \c 1 if not.
 		 */
 		int _initCheck() const noexcept;
+		//=============================
+		//======SCRIPT INTERFACE=======
+		//=============================
+		/**
+		 * Callback given to \c engine::scripts::registerInterface().
+		 * @param engine Pointer to the engine to register the interface with.
+		 * @sa    engine::scripts::registerInterface()
+		 */
+		void _registerInterface(asIScriptEngine* engine) noexcept;
 
 		//=============================
 		//==========GAME DATA==========

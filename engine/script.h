@@ -48,22 +48,41 @@ namespace engine {
 		 * The following steps are carried out:
 		 * <ol><li>The script engine is loaded.</li>
 		 *     <li>Error callbacks and extra modules are added to the engine.</li>
-		 *     <li>The interface is registered - this includes registering all
-		 *         functions that can be called in the scripts.</li>
 		 *     <li>The scripts are loaded if \c folder is not blank.</li>
 		 *     <li>The function context is initialised.</li></ol>
-		 * @param folder The folder containing all the scripts to load.
-		 * @param name   The name to give this particular instantiation within the
-		 *               log file. Defaults to "scripts."
+		 * The only steps the constructor does not carry out are registering the
+		 * interface, and loading the script files. This is because the interface
+		 * will likely require access to code outside of the \c engine
+		 * namespace/library, so it is carried out separately using the
+		 * \c registerInterface() method. In addition, loading and building scripts
+		 * relies on the interface being established, so it is carried out
+		 * afterwards using the \c loadScripts() method.
+		 * @param name The name to give this particular instantiation within the
+		 *             log file. Defaults to "scripts."
 		 * @sa    \c engine::logger
+		 * @sa    \c engine::scripts::registerInterface()
 		 */
-		scripts(const std::string& folder = "",
-			const std::string& name = "scripts") noexcept;
+		scripts(const std::string& name = "scripts") noexcept;
 
 		/**
 		 * Releases the sole function context and shuts down the engine.
 		 */
 		~scripts() noexcept;
+
+		/**
+		 * Registers the interface between the client and the scripts.
+		 * The callback must accept a pointer to the script engine. Using this
+		 * pointer, the callback is to register the interface directly to the
+		 * script engine. See <a
+		 * href="https://www.angelcode.com/angelscript/sdk/docs/manual/classas_i_script_engine.html"
+		 * target="_blank">the documentation on asIScriptEngine</a> for help on how
+		 * to register the interface.
+		 * @warning This method must be called before loading scripts, or else
+		 *          building the scripts will likely fail.
+		 * @param   callback The function which registers the interface.
+		 */
+		void registerInterface(
+			const std::function<void(asIScriptEngine*)>& callback) noexcept;
 
 		/**
 		 * The message callback assigned to the script engine.
@@ -85,19 +104,23 @@ namespace engine {
 		 * Loads a folder of scripts.
 		 * A new module is built, and each file is attached to it. This means all
 		 * scripts aren't separate, so all functions across all scripts should have
-		 * a unique name. If the given path was blank, the last folder used with
-		 * this method will be used.\n
+		 * a unique name.\n
 		 * Every time this method is called, the previous module is discarded. This
 		 * means any functions registered in the old module can no longer be
 		 * called. Note that the previous module is discarded regardless of the
 		 * outcome of this method.
-		 * @param  folder The path containing all the script files to load.
-		 * @return \c TRUE if successful, \c FALSE if not.
+		 * @warning It is imperative that the interface is registered \em before
+		 *          loading scripts.
+		 * @param   folder The path containing all the script files to load. If
+		 *                 blank, the last folder used with this method will be
+		 *                 substituted.
+		 * @return  \c TRUE if successful, \c FALSE if not.
+		 * @sa      engine::scripts::registerInterface()
 		 */
-		bool reloadScripts(std::string folder = "") noexcept;
+		bool loadScripts(std::string folder = "") noexcept;
 
 		/**
-		 * Retrieves the last path used with \c reloadScripts().
+		 * Retrieves the last path used with \c loadScripts().
 		 * @return The path containing all the loaded scripts.
 		 */
 		const std::string& getScriptsFolder() const noexcept;
@@ -136,16 +159,6 @@ namespace engine {
 		 */
 		bool callFunction(const std::string& name) noexcept;
 	private:
-		/**
-		 * The method called when registering the interface between the client and
-		 * the scripts.
-		 * See <a
-		 * href="https://www.angelcode.com/angelscript/sdk/docs/manual/classas_i_script_engine.html"
-		 * target="_blank">the documentation on asIScriptEngine</a> for help on how
-		 * to register the interface.
-		 */
-		void _registerInterface() noexcept;
-
 		/**
 		 * Prepares the function context when making a call to \c callFunction().
 		 * @param  name The name of the function to call.

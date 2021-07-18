@@ -123,9 +123,9 @@ int game(const std::string& file) {
     spritesheets->GUI = std::make_shared<sfx::animated_spritesheet>();
     spritesheets->GUI->load("assets/sprites/gui/spritesgui.json");
 
-    // initialise the scripts
-    std::shared_ptr<engine::scripts> scripts =
-        std::make_shared<engine::scripts>("assets/script/");
+    // initialise the script engine, but let game_engine register the interface and
+    // load the script files
+    std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>();
 
     // initialise the GUI
     std::shared_ptr<sfx::gui> gui = std::make_shared<sfx::gui>(scripts);
@@ -194,6 +194,7 @@ int game(const std::string& file) {
     gameLoop.setTiles(tiles);
     gameLoop.setUnits(units);
     gameLoop.setCommanders(commanders);
+    gameLoop.initialiseScripts("assets/script");
 
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run(file);

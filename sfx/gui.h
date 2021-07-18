@@ -133,7 +133,10 @@ namespace sfx {
 		 * a name for the internal logger object.
 		 * @param scripts Pointer to a scripts object containing functions to
 		 *                handle GUI signals. An error is logged if \c nullptr is
-		 *                given.
+		 *                given. Note that the scripts only have to be loaded by
+		 *                the time signals are emitted; the given object does not
+		 *                have to be fully initialised (i.e. interface registered
+		 *                and scripts loaded) upon \c gui construction.
 		 * @param name    The name to give this particular instantiation within the
 		 *                log file. Defaults to "gui."
 		 * @sa    \c engine::logger

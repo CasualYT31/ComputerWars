@@ -22,22 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "script.h"
 #include <filesystem>
-#include <iostream>
 
-void print(std::string& in) {
-    std::cout << in;
-}
-
-void printNumber(int in) {
-    std::cout << in << std::endl;
-}
-
-void printFloat(float in) {
-    std::cout << in << std::endl;
-}
-
-engine::scripts::scripts(const std::string& folder, const std::string& name)
-    noexcept : _logger(name) {
+engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
     _engine = asCreateScriptEngine();
     if (_engine) {
         int r = _engine->SetMessageCallback(asMETHOD(engine::scripts,
@@ -47,8 +33,6 @@ engine::scripts::scripts(const std::string& folder, const std::string& name)
                 "routine - this is likely a faulty engine build. Code {}.", r);
         }
         RegisterStdString(_engine);
-        _registerInterface();
-        if (folder != "") reloadScripts(folder);
         _context = _engine->CreateContext();
         if (_context) {
             if ((r = _context->SetExceptionCallback(asMETHOD(engine::scripts,
@@ -71,6 +55,13 @@ engine::scripts::scripts(const std::string& folder, const std::string& name)
 engine::scripts::~scripts() noexcept {
     if (_context) _context->Release();
     if (_engine) _engine->ShutDownAndRelease();
+}
+
+void engine::scripts::registerInterface(
+    const std::function<void(asIScriptEngine*)>& callback) noexcept {
+    _logger.write("Registering script interface...");
+    callback(_engine);
+    _logger.write("Finished registering script interface.");
 }
 
 void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg, void* param)
@@ -96,7 +87,7 @@ void engine::scripts::contextExceptionCallback(asIScriptContext* context)
         context->GetExceptionLineNumber(), context->GetExceptionString());
 }
 
-bool engine::scripts::reloadScripts(std::string folder) noexcept {
+bool engine::scripts::loadScripts(std::string folder) noexcept {
     if (folder == "") folder = getScriptsFolder();
     _logger.write("Loading scripts from \"{}\"...", folder);
     if (folder == "" || !_engine) return false;
@@ -177,17 +168,4 @@ bool engine::scripts::_setupContext(const std::string& name) noexcept {
         return false;
     }
     return true;
-}
-
-// INCOMPLETE: functionality will be added as and when necessary, print methods
-// will be removed at some point
-void engine::scripts::_registerInterface() noexcept {
-    _logger.write("Registering script interface...");
-    _engine->RegisterGlobalFunction("void print(const string &in)",
-        asFUNCTION(print), asCALL_CDECL);
-    _engine->RegisterGlobalFunction("void printno(const int)",
-        asFUNCTION(printNumber), asCALL_CDECL);
-    _engine->RegisterGlobalFunction("void printfloat(const float)",
-        asFUNCTION(printFloat), asCALL_CDECL);
-    _logger.write("Finished registering script interface.");
 }
