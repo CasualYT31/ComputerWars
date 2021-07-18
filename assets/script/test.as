@@ -15,6 +15,9 @@ void main() {
 	loadSoundConfig();
 	info("" + getSoundVolume());
 	saveSoundConfig();*/
+	setFullscreen(true);
+	info(getFullscreen() + " " + getVSync());
+	loadRendererConfig();
 	info(getFullscreen() + " " + getVSync());
 }
 

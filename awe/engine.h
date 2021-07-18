@@ -264,6 +264,18 @@ namespace awe {
 		 */
 		void _script_saveSoundConfig();
 
+		/**
+		 * Essentially calls \c _renderer->load().
+		 * @sa \c _script_loadMusicConfig()
+		 */
+		void _script_loadRendererConfig();
+
+		/**
+		 * Essentially calls \c _renderer->save().
+		 * @sa \c _script_loadMusicConfig()
+		 */
+		void _script_saveRendererConfig();
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================

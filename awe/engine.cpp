@@ -131,6 +131,12 @@ void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void saveSoundConfig()",
 		asMETHOD(awe::game_engine, _script_saveSoundConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void loadRendererConfig()",
+		asMETHOD(awe::game_engine, _script_loadRendererConfig),
+		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void saveRendererConfig()",
+		asMETHOD(awe::game_engine, _script_saveRendererConfig),
+		asCALL_THISCALL_ASGLOBAL, this);
 }
 
 void awe::game_engine::_script_setFullscreen(const bool in) {
@@ -163,6 +169,16 @@ void awe::game_engine::_script_loadSoundConfig() {
 
 void awe::game_engine::_script_saveSoundConfig() {
 	_sounds->save();
+}
+
+void awe::game_engine::_script_loadRendererConfig() {
+	_renderer->load();
+	_tempRendererSettings = _renderer->getSettings();
+}
+
+void awe::game_engine::_script_saveRendererConfig() {
+	_renderer->setSettings(_tempRendererSettings);
+	_renderer->save();
 }
 
 // initCheck()
