@@ -206,6 +206,36 @@ namespace awe {
 		void _registerInterface(asIScriptEngine* engine) noexcept;
 
 		/**
+		 * Updates the temporary fullscreen renderer setting.
+		 * I decided to not make these temporary renderer settings global
+		 * properties so that I could remain consistent with the way audio works
+		 * in scripts (with accessor methods, e.g. setMusicVolume()).
+		 * @param in The new fullscreen setting.
+		 */
+		void _script_setFullscreen(const bool in);
+
+		/**
+		 * Retrieves the temporary fullscreen renderer setting.
+		 * @return The fullscreen renderer setting.
+		 * @sa     \c _script_setFullscreen()
+		 */
+		bool _script_getFullscreen();
+
+		/**
+		 * Updates the temporary v-sync renderer setting.
+		 * @param in The new v-sync setting.
+		 * @sa    \c _script_setFullscreen()
+		 */
+		void _script_setVSync(const bool in);
+
+		/**
+		 * Retrieves the temporary v-sync renderer setting.
+		 * @return The v-sync renderer setting.
+		 * @sa     \c _script_setFullscreen()
+		 */
+		bool _script_getVSync();
+
+		/**
 		 * Calls \c _music->load().
 		 * I wanted to make the mapping directly, however, I have to define the
 		 * string parameter in the AngelScript declaration explicitly, otherwise
@@ -315,6 +345,14 @@ namespace awe {
 		 * Pointer to the renderer to render to.
 		 */
 		std::shared_ptr<sfx::renderer> _renderer;
+
+		/**
+		 * Intermediary renderer settings object.
+		 * This is used to allow scripts to change settings but not apply them
+		 * until required. Is initialised when \c _renderer is set using
+		 * \c setRenderer().
+		 */
+		sfx::renderer_settings _tempRendererSettings;
 		
 		/**
 		 * Pointer to the player's user input information.

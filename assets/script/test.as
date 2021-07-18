@@ -1,5 +1,5 @@
 void main() {
-	int var = 5;
+	/*int var = 5;
 	info("Hello, World!\n");
 	warn("New line character used!");
 	setSoundVolume(89.5);
@@ -14,7 +14,8 @@ void main() {
 	info("" + getSoundVolume());
 	loadSoundConfig();
 	info("" + getSoundVolume());
-	saveSoundConfig();
+	saveSoundConfig();*/
+	info(getFullscreen() + " " + getVSync());
 }
 
 void add(int a, int b) {

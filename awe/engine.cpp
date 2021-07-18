@@ -107,6 +107,18 @@ void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void setMusicVolume(const float)",
 		asMETHOD(sfx::audio, setVolume),
 		asCALL_THISCALL_ASGLOBAL, _music.get());
+	engine->RegisterGlobalFunction("void setFullscreen(const bool)",
+		asMETHOD(awe::game_engine, _script_setFullscreen),
+		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("bool getFullscreen()",
+		asMETHOD(awe::game_engine, _script_getFullscreen),
+		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setVSync(const bool)",
+		asMETHOD(awe::game_engine, _script_setVSync),
+		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("bool getVSync()",
+		asMETHOD(awe::game_engine, _script_getVSync),
+		asCALL_THISCALL_ASGLOBAL, this);
 	engine->RegisterGlobalFunction("void loadMusicConfig()",
 		asMETHOD(awe::game_engine, _script_loadMusicConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -119,6 +131,22 @@ void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void saveSoundConfig()",
 		asMETHOD(awe::game_engine, _script_saveSoundConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
+}
+
+void awe::game_engine::_script_setFullscreen(const bool in) {
+	_tempRendererSettings.style.fullscreen = in;
+}
+
+bool awe::game_engine::_script_getFullscreen() {
+	return _tempRendererSettings.style.fullscreen;
+}
+
+void awe::game_engine::_script_setVSync(const bool in) {
+	_tempRendererSettings.style.vsync = in;
+}
+
+bool awe::game_engine::_script_getVSync() {
+	return _tempRendererSettings.style.vsync;
 }
 
 void awe::game_engine::_script_loadMusicConfig() {
@@ -234,6 +262,7 @@ void awe::game_engine::setMusic(const std::shared_ptr<sfx::audio>& ptr) noexcept
 void awe::game_engine::setRenderer(const std::shared_ptr<sfx::renderer>& ptr)
 	noexcept {
 	_renderer = ptr;
+	if (_renderer) _tempRendererSettings = _renderer->getSettings();
 }
 
 void awe::game_engine::setUserInput(const std::shared_ptr<sfx::user_input>& ptr)
