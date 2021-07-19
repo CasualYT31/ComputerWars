@@ -22,35 +22,35 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui.h"
 
-sfx::gui_background::gui_background() noexcept {}
+sfx::gui::gui_background::gui_background() noexcept {}
 
-sfx::gui_background::gui_background(unsigned int key) noexcept {
+sfx::gui::gui_background::gui_background(unsigned int key) noexcept {
 	set(key);
 }
 
-sfx::gui_background::gui_background(sf::Color colour) noexcept {
+sfx::gui::gui_background::gui_background(sf::Color colour) noexcept {
 	set(colour);
 }
 
-void sfx::gui_background::set(unsigned int key) noexcept {
-	_flag = sfx::gui_background::type::Sprite;
+void sfx::gui::gui_background::set(unsigned int key) noexcept {
+	_flag = sfx::gui::gui_background::type::Sprite;
 	_key = key;
 }
 
-void sfx::gui_background::set(sf::Color colour) noexcept {
-	_flag = sfx::gui_background::type::Colour;
+void sfx::gui::gui_background::set(sf::Color colour) noexcept {
+	_flag = sfx::gui::gui_background::type::Colour;
 	_colour = colour;
 }
 
-sfx::gui_background::type sfx::gui_background::getType() const noexcept {
+sfx::gui::gui_background::type sfx::gui::gui_background::getType() const noexcept {
 	return _flag;
 }
 
-unsigned int sfx::gui_background::getSprite() const noexcept {
+unsigned int sfx::gui::gui_background::getSprite() const noexcept {
 	return _key;
 }
 
-sf::Color sfx::gui_background::getColour() const noexcept {
+sf::Color sfx::gui::gui_background::getColour() const noexcept {
 	return _colour;
 }
 
@@ -105,7 +105,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		// this GUI has a background to animate
 		if (_guiBackground[getGUI()].getType() ==
-			sfx::gui_background::type::Colour) {
+			sfx::gui::gui_background::type::Colour) {
 			_bgColour.setSize(sf::Vector2f(static_cast<float>(target.getSize().x),
 				static_cast<float>(target.getSize().y)));
 			_bgColour.setFillColor(_guiBackground[getGUI()].getColour());
@@ -166,7 +166,7 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		// this GUI has a background to animate
 		if (_guiBackground.at(getGUI()).getType() ==
-			sfx::gui_background::type::Colour) {
+			sfx::gui::gui_background::type::Colour) {
 			target.draw(_bgColour);
 		} else {
 			target.draw(_bgSprite);

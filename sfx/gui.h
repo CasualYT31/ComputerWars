@@ -33,94 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace sfx {
 	/**
-	 * Represents a GUI background.
-	 * The background of a GUI can be either a solid colour or a sprite from a
-	 * separate \c sfx::animated_spritesheet. This class manages switching from one
-	 * to another so that the \c gui class knows which type of background to draw.
-	 */
-	class gui_background {
-	public:
-		/**
-		 * Used to identify which type of background this instantiation represents.
-		 */
-		enum class type {
-			Sprite,
-			Colour
-		};
-
-		/**
-		 * Default constructor.
-		 * By default, a GUI background is a solid colour of black.
-		 */
-		gui_background() noexcept;
-
-		/**
-		 * Initialises the GUI background with a sprite ID.
-		 * @param key The ID to set.
-		 */
-		gui_background(unsigned int key) noexcept;
-
-		/**
-		 * Initialises the GUI background with a solid colour.
-		 * @param colour The colour to set.
-		 */
-		gui_background(sf::Color colour) noexcept;
-
-		/**
-		 * Sets this GUI background to be a sprite.
-		 * The stored colour value is then ignored.
-		 * @param key The sprite ID to set.
-		 */
-		void set(unsigned int key) noexcept;
-
-		/**
-		 * Sets this GUI background to be a solid colour.
-		 * The stored sprite ID is then ignored.
-		 * @param colour The colour to set.
-		 */
-		void set(sf::Color colour) noexcept;
-
-		/**
-		 * Retrieves the type of this GUI background.
-		 * @return The type.
-		 */
-		type getType() const noexcept;
-
-		/**
-		 * Retrieves the assigned sprite ID.
-		 * This method will simply return the ID that was last assigned. Therefore,
-		 * you should use \c getType() to first test if this GUI background is
-		 * actually meant to represent a sprite background.
-		 * @return The sprite ID that was last assigned.
-		 */
-		unsigned int getSprite() const noexcept;
-
-		/**
-		 * Retrieves the assigned colour value.
-		 * This method will simply return the colour that was last assigned.
-		 * Therefore, you should use \c getType() to first test if this GUI
-		 * background is actually meant to represent a solid colour background.
-		 * @return The colour that was last assigned.
-		 */
-		sf::Color getColour() const noexcept;
-	private:
-		/**
-		 * Tracks the type of background this instantiation represents.
-		 */
-		type _flag = type::Colour;
-
-		/**
-		 * The sprite ID.
-		 */
-		unsigned int _key = 0;
-
-		/**
-		 * The solid colour value.
-		 */
-		sf::Color _colour;
-	};
-
-	/**
 	 * Represents a collection of GUI menus.
 	 * This class can only display one menu at a time, however it loads all menus
 	 * it is given via \c load() so that they can be switched quickly. Each menu is
@@ -219,6 +131,96 @@ namespace sfx {
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
 		/**
+		 * Represents a GUI background.
+		 * The background of a GUI can be either a solid colour or a sprite from a
+		 * separate \c sfx::animated_spritesheet. This class manages switching from
+		 * one to another so that the \c gui class knows which type of background
+		 * to draw.
+		 */
+		class gui_background {
+		public:
+			/**
+			 * Used to identify which type of background this instantiation
+			 * represents.
+			 */
+			enum class type {
+				Sprite,
+				Colour
+			};
+
+			/**
+			 * Default constructor.
+			 * By default, a GUI background is a solid colour of black.
+			 */
+			gui_background() noexcept;
+
+			/**
+			 * Initialises the GUI background with a sprite ID.
+			 * @param key The ID to set.
+			 */
+			gui_background(unsigned int key) noexcept;
+
+			/**
+			 * Initialises the GUI background with a solid colour.
+			 * @param colour The colour to set.
+			 */
+			gui_background(sf::Color colour) noexcept;
+
+			/**
+			 * Sets this GUI background to be a sprite.
+			 * The stored colour value is then ignored.
+			 * @param key The sprite ID to set.
+			 */
+			void set(unsigned int key) noexcept;
+
+			/**
+			 * Sets this GUI background to be a solid colour.
+			 * The stored sprite ID is then ignored.
+			 * @param colour The colour to set.
+			 */
+			void set(sf::Color colour) noexcept;
+
+			/**
+			 * Retrieves the type of this GUI background.
+			 * @return The type.
+			 */
+			type getType() const noexcept;
+
+			/**
+			 * Retrieves the assigned sprite ID.
+			 * This method will simply return the ID that was last assigned.
+			 * Therefore, you should use \c getType() to first test if this GUI
+			 * background is actually meant to represent a sprite background.
+			 * @return The sprite ID that was last assigned.
+			 */
+			unsigned int getSprite() const noexcept;
+
+			/**
+			 * Retrieves the assigned colour value.
+			 * This method will simply return the colour that was last assigned.
+			 * Therefore, you should use \c getType() to first test if this GUI
+			 * background is actually meant to represent a solid colour background.
+			 * @return The colour that was last assigned.
+			 */
+			sf::Color getColour() const noexcept;
+		private:
+			/**
+			 * Tracks the type of background this instantiation represents.
+			 */
+			type _flag = type::Colour;
+
+			/**
+			 * The sprite ID.
+			 */
+			unsigned int _key = 0;
+
+			/**
+			 * The solid colour value.
+			 */
+			sf::Color _colour;
+		};
+
+		/**
 		 * Draws the current GUI menu.
 		 * @warning It is to be noted that this implementation of \c draw()
 		 *          \b ignores any given render states. This was done to remain
@@ -306,7 +308,7 @@ namespace sfx {
 		/**
 		 * Stores the background information for each GUI menu.
 		 */
-		std::unordered_map<std::string, gui_background> _guiBackground;
+		std::unordered_map<std::string, gui::gui_background> _guiBackground;
 
 		/**
 		 * Pointer to the scripts object containing the signal handler functions.
