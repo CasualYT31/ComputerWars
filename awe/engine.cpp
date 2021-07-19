@@ -22,19 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.h"
 
-/*// INCOMPLETE: functionality will be added as and when necessary, print methods
-// will be removed at some point
-void engine::scripts::_registerInterface() noexcept {
-    _logger.write("Registering script interface...");
-    _engine->RegisterGlobalFunction("void print(const string &in)",
-        asFUNCTION(print), asCALL_CDECL);
-    _engine->RegisterGlobalFunction("void printno(const int)",
-        asFUNCTION(printNumber), asCALL_CDECL);
-    _engine->RegisterGlobalFunction("void printfloat(const float)",
-        asFUNCTION(printFloat), asCALL_CDECL);
-    _logger.write("Finished registering script interface.");
-}*/
-
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
 int awe::game_engine::run(const std::string& file) noexcept {
@@ -50,8 +37,8 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	map.setUnitSpritesheet(_sprites->unit->idle);
 
 	// test scripts
-	std::string temp = "test";
-	_scripts->callFunction("main", &temp, (asBYTE)-9, (asQWORD)UINT64_MAX, false);
+	std::string& temp = std::string("test");
+	_scripts->callFunction("main", temp, (asBYTE)-9, (asQWORD)UINT64_MAX, false);
 
 	try {
 		while (_renderer->isOpen()) {

@@ -1,8 +1,13 @@
+enum TestingEnum {
+	Val1,
+	Val2
+}
+
 void main(string &in param, int8 negative, uint64 positive, bool t) {
 	info(param + "," + negative + "," + positive + "," + t);
 	
 	joystick_axis test;
-	test.axis = 1;
+	test.axis = Val2;
 	test.direction = -10000;
 	info(test.axis + ", " + test.direction);
 }

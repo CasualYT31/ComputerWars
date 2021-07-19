@@ -230,6 +230,7 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 	// or the non-template version if there are no more paramters remaining to be
 	// added (this is decided for us implicitly)
 	int r = 0;
+	bool skip = false;
 	if constexpr (std::is_integral<T>::value) {
 		// this also conveniently covers bool for us
 		switch (sizeof value) {
@@ -259,8 +260,12 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 		}
 	} else if constexpr (std::is_pointer<T>::value) {
 		r = _context->SetArgObject(_argumentID, value);
+	} else if constexpr (std::is_object<T>::value || std::is_reference<T>::value) {
+		_logger.error("Attempted to add an object to argument {}, which is not "
+			"supported: behaviour is undefined after this point.", _argumentID);
+		skip = true;
 	}
-	if (r < 0) {
+	if (!skip && r < 0) {
 		if constexpr (std::is_pointer<T>::value) {
 			_logger.error("Failed to set argument {} to the value \"{}\": code "
 				"{}.", _argumentID, *value, r);
