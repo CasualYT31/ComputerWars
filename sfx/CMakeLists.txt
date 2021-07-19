@@ -24,3 +24,10 @@ set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
 	${ComputerWarsEngine_INCLUDE_DIRS}
 	${tgui_INCLUDE_DIRS}
 	CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
+
+# in order for the TGUI gui builder to work, we need to copy the resources and
+# themes folders into the same directory as it may later be built into
+file(COPY ${tgui_SOURCE_DIR}/gui-builder/resources
+	DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(COPY ${tgui_SOURCE_DIR}/gui-builder/themes
+	DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
