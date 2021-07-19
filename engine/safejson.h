@@ -428,6 +428,24 @@ namespace engine {
 		static std::string _getTypeName(nlohmann::ordered_json& j) noexcept;
 
 		/**
+		 * Performs preliminary checks before continuing with the \c apply() call.
+		 * Checks for the \c NO_KEYS_GIVEN, \c KEYS_DID_NOT_EXIST, and
+		 * \c MISMATCHING_TYPE conditions for all \c apply() methods.
+		 * @param  keys The key sequence containing the key-value pair to check.
+		 * @param  test If the checks were carried out successfully, this object
+		 *              will contain the value stored at the given key-value pair.
+		 * @param  dest <tt>apply()</tt>'s \c dest object should be given here:
+		 *              this allows the method to compare the data type of the
+		 *              destination object with the data type of the value found.
+		 * @param  type The name of the data type of the destination object. If
+		 *              blank, \c _getTypeName(dest) will be called.
+		 * @return \c TRUE if all checks passed, \c FALSE if at least one failed.
+		 */
+		bool _performInitialChecks(engine::json::KeySequence& keys,
+			nlohmann::ordered_json& test,
+			nlohmann::ordered_json dest, std::string type = "") noexcept;
+
+		/**
 		 * The \c nlohmann::ordered_json object stored internally.
 		 */
 		nlohmann::ordered_json _j;
@@ -589,33 +607,13 @@ template<typename T>
 void engine::json::apply(T& dest, engine::json::KeySequence keys,
 	const bool suppressErrors) noexcept {
 	nlohmann::ordered_json test;
-	if (keys.empty()) {
-		_toggleState(NO_KEYS_GIVEN);
-		_logger.error("Attempted to assign a value to a variable without "
-			"specifying a key sequence.");
+	if (_performInitialChecks(keys, test, dest)) {
+		dest = test.get<T>();
 	} else {
-		if (keysExist(keys, &test)) {
-			nlohmann::ordered_json testDataType = dest;
-			if (equalType(testDataType, test)) {
-				dest = test.get<T>();
-				return;
-			} else {
-				_toggleState(MISMATCHING_TYPE);
-				_logger.error("Attempted to assign a value of data type \"{}\" to "
-					"a destination of type \"{}\", in the key sequence {}.",
-					_getTypeName(test), _getTypeName(testDataType),
-					synthesiseKeySequence(keys));
-			}
-		} else {
-			_toggleState(KEYS_DID_NOT_EXIST);
-			_logger.error("The key sequence {} does not exist in the JSON object.",
-				synthesiseKeySequence(keys));
-		}
+		_logger.write("{} property faulty: left to the default of {}.",
+			synthesiseKeySequence(keys), dest);
+		if (suppressErrors) resetState();
 	}
-	// something went wrong with the assignment
-	_logger.write("{} property faulty: left to the default of {}.",
-		synthesiseKeySequence(keys), dest);
-	if (suppressErrors) resetState();
 }
 
 template<typename T, std::size_t N>
@@ -623,52 +621,31 @@ void engine::json::applyArray(std::array<T, N>& dest,
 	engine::json::KeySequence keys) noexcept {
 	if (!N) return;
 	nlohmann::ordered_json test;
-	if (keys.empty()) {
-		_toggleState(NO_KEYS_GIVEN);
-		_logger.error("Attempted to assign a value to an array without specifying "
-			"a key sequence.");
-	} else {
-		if (keysExist(keys, &test)) {
-			if (test.is_array()) {
-				if (test.size() == N) {
-					nlohmann::ordered_json testDataType = dest[0];
-					// loop through each element in the JSON array to see if it
-					// matches completely in data type
-					for (std::size_t i = 0; i < N; i++) {
-						// if the JSON array is homogeneous, assign it to the
-						// destination array
-						if (i == N - 1 && equalType(testDataType, test[i])) {
-							for (std::size_t j = 0; j < N; j++) {
-								dest[j] = test[j].get<T>();
-							}
-						} else if (!equalType(testDataType, test[i])) {
-							_toggleState(MISMATCHING_ELEMENT_TYPE);
-							_logger.error("The specified JSON array was not "
-								"homogeneous, found an element of data type "
-								"\"{}\" when attempting to assign to an array of "
-								"data type \"{}\", in the key sequence {}.",
-								_getTypeName(test[i]), _getTypeName(testDataType),
-								synthesiseKeySequence(keys));
-							break;
-						}
-					}
-				} else {
-					_toggleState(MISMATCHING_SIZE);
-					_logger.error("The size of the JSON array specified ({}) does "
-						"not match with the size of the provided array ({}), in "
-						"the key sequence {}.", test.size(), N,
-						synthesiseKeySequence(keys));
+	if (_performInitialChecks(keys, test, dest, "array")) {
+		if (test.size() == N) {
+			nlohmann::ordered_json testDataType = dest[0];
+			// loop through each element in the JSON array to see if it matches
+			// completely in data type
+			for (std::size_t i = 0; i < N; i++) {
+				// if the JSON array is homogeneous, assign it to the destination
+				// array
+				if (i == N - 1 && equalType(testDataType, test[i])) {
+					for (std::size_t j = 0; j < N; j++) dest[j] = test[j].get<T>();
+				} else if (!equalType(testDataType, test[i])) {
+					_toggleState(MISMATCHING_ELEMENT_TYPE);
+					_logger.error("The specified JSON array was not homogeneous, "
+						"found an element of data type \"{}\" when attempting to "
+						"assign to an array of data type \"{}\", in the key "
+						"sequence {}.", _getTypeName(test[i]),
+						_getTypeName(testDataType), synthesiseKeySequence(keys));
+					break;
 				}
-			} else {
-				_toggleState(MISMATCHING_TYPE);
-				_logger.error("Attempted to assign a value of data type \"{}\" to "
-					"an array, in the key sequence {}.", _getTypeName(test),
-					synthesiseKeySequence(keys));
 			}
 		} else {
-			_toggleState(KEYS_DID_NOT_EXIST);
-			_logger.error("The key sequence {} does not exist in the JSON object.",
-				synthesiseKeySequence(keys));
+			_toggleState(MISMATCHING_SIZE);
+			_logger.error("The size of the JSON array specified ({}) does not "
+				"match with the size of the provided array ({}), in the key "
+				"sequence {}.", test.size(), N, synthesiseKeySequence(keys));
 		}
 	}
 }
@@ -676,42 +653,24 @@ void engine::json::applyArray(std::array<T, N>& dest,
 template<typename T>
 void engine::json::applyVector(std::vector<T>& dest,
 	engine::json::KeySequence keys) {
-	if (keys.empty()) {
-		_toggleState(NO_KEYS_GIVEN);
-		_logger.error("Attempted to assign a value to a vector without specifying "
-			"a key sequence.");
-	} else {
-		nlohmann::ordered_json test;
-		if (keysExist(keys, &test)) {
-			if (test.is_array()) {
-				nlohmann::ordered_json testDataType = T();
-				for (std::size_t i = 0; i < test.size(); i++) {
-					if (i == test.size() - 1 && equalType(testDataType, test[i])) {
-						dest.clear();
-						for (std::size_t j = 0; j < test.size(); j++) {
-							dest.push_back(test[j].get<T>());
-						}
-					} else if (!equalType(testDataType, test[i])) {
-						_toggleState(MISMATCHING_ELEMENT_TYPE);
-						_logger.error("The specified JSON array was not "
-							"homogeneous, found an element of data type \"{}\" "
-							"when attempting to assign to a vector of data type "
-							"\"{}\", in the key sequence {}.",
-							_getTypeName(test[i]), _getTypeName(testDataType),
-							synthesiseKeySequence(keys));
-						break;
-					}
+	nlohmann::ordered_json test;
+	if (_performInitialChecks(keys, test, dest, "vector")) {
+		nlohmann::ordered_json testDataType = T();
+		for (std::size_t i = 0; i < test.size(); i++) {
+			if (i == test.size() - 1 && equalType(testDataType, test[i])) {
+				dest.clear();
+				for (std::size_t j = 0; j < test.size(); j++) {
+					dest.push_back(test[j].get<T>());
 				}
-			} else {
-				_toggleState(MISMATCHING_TYPE);
-				_logger.error("Attempted to assign a value of data type \"{}\" to "
-					"a vector, in the key sequence {}.", _getTypeName(test),
+			} else if (!equalType(testDataType, test[i])) {
+				_toggleState(MISMATCHING_ELEMENT_TYPE);
+				_logger.error("The specified JSON array was not homogeneous, "
+					"found an element of data type \"{}\" when attempting to "
+					"assign to a vector of data type \"{}\", in the key sequence "
+					"{}.", _getTypeName(test[i]), _getTypeName(testDataType),
 					synthesiseKeySequence(keys));
+				break;
 			}
-		} else {
-			_toggleState(KEYS_DID_NOT_EXIST);
-			_logger.error("The key sequence {} does not exist in the JSON object.",
-				synthesiseKeySequence(keys));
 		}
 	}
 }

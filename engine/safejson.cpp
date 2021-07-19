@@ -137,6 +137,33 @@ std::string engine::json::_getTypeName(nlohmann::ordered_json& j) noexcept {
 	return j.type_name();
 }
 
+bool engine::json::_performInitialChecks(engine::json::KeySequence& keys,
+	nlohmann::ordered_json& test, nlohmann::ordered_json dest,
+	std::string type) noexcept {
+	if (type == "") type = _getTypeName(dest);
+	if (keys.empty()) {
+		_toggleState(NO_KEYS_GIVEN);
+		_logger.error("Attempted to assign a value to a destination of type "
+			"\"{}\" without specifying a key sequence.", type);
+	} else {
+		if (keysExist(keys, &test)) {
+			if (equalType(dest, test)) {
+				return true;
+			} else {
+				_toggleState(MISMATCHING_TYPE);
+				_logger.error("Attempted to assign a value of data type \"{}\" to "
+					"a destination of type \"{}\", in the key sequence {}.",
+					_getTypeName(test), type, synthesiseKeySequence(keys));
+			}
+		} else {
+			_toggleState(KEYS_DID_NOT_EXIST);
+			_logger.error("The key sequence {} does not exist in the JSON object.",
+				synthesiseKeySequence(keys));
+		}
+	}
+	return false;
+}
+
 engine::json_script::~json_script() noexcept {}
 
 std::string engine::json_script::getScriptPath() const noexcept {
