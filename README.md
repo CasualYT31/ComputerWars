@@ -19,15 +19,15 @@ Okay, I've officially converted the project to use CMake. This should theoretica
 The project has now entered the alpha stage :smile:! [Here's a small demo](https://youtu.be/p96ly3l8YBo) of the project so far. Not much, true, but development should be fairly rapid once I find more time to dedicate to the project in the near future. The engine can load basic maps and display/animate them, but not much else yet. It's far from a complete product, so if you really want an Advance Wars engine **now**, then you can check out [Robosturm's project](https://github.com/Robosturm/Commander_Wars): it might be one of the only AW engine out there of this flavour that's still being actively developed, so go check it out. [This project by ThislsAUsername](https://github.com/ThislsAUsername/DefendPeace) is also worth mentioning. [Custom Wars Tactics](https://github.com/ctomni231/cwtactics) is a web-based Advance Wars engine that you should check out, too :smile:!
 
 ### Dependencies
-For information on the versions of libraries I have used for this project, please check the `FetchContent_Declare` statements in the `CMakeLists.txt`, `engine/CMakeLists.txt`, and `sfx/CMakeLists.txt` files.
-- [SFML](https://github.com/SFML/SFML)
-- [TGUI](https://github.com/texus/TGUI)
-- [AngelScript](https://www.angelcode.com/angelscript/)
-- [Boxer](https://github.com/aaronmjacobs/Boxer)
-- [SPDLOG](https://github.com/gabime/spdlog)
-- [JSON for C++](https://github.com/nlohmann/json)
-- [GoogleTest](https://github.com/google/googletest)
-- [SystemProperties](https://github.com/CasualYT31/SystemProperties)
+For information on the versions of libraries I have used for this project, please check the `FetchContent_Declare` statements in the referenced `CMakeLists.txt` files.
+- [SFML](https://github.com/SFML/SFML) (check `engine/CMakeLists.txt`)
+- [TGUI](https://github.com/texus/TGUI) (check `sfx/CMakeLists.txt`)
+- [AngelScript](https://www.angelcode.com/angelscript/) (check `engine/CMakeLists.txt`)
+- [Boxer](https://github.com/aaronmjacobs/Boxer) (check `engine/CMakeLists.txt`)
+- [SPDLOG](https://github.com/gabime/spdlog) (check `engine/CMakeLists.txt`)
+- [JSON for C++](https://github.com/nlohmann/json) (check `engine/CMakeLists.txt`)
+- [GoogleTest](https://github.com/google/googletest) (check `test/CMakeLists.txt`)
+- [SystemProperties](https://github.com/CasualYT31/SystemProperties) (check `engine/CMakeLists.txt`)
 
 ### Links
 - [Trello Board](https://trello.com/b/GN25IV5j/computer-wars)
