@@ -82,10 +82,10 @@ namespace sfx {
 
 		/**
 		 * Sets the target to draw the GUI menus to.
-		 * @remark This method was introduced because of limitations of the TGUI
-		 *         Ideally, this method should be removed altogether if at all
-		 *         possible in the future. Please see engine::gui::draw() for more
-		 *         details.
+		 * @remark This method was introduced because of the limitations of the
+		 *         TGUI. Ideally, this method should be removed altogether if at
+		 *         all possible in the future. Please see \c engine::gui::draw()
+		 *         for more details.
 		 * @param  newTarget Reference to the new target to set.
 		 */
 		void setTarget(sf::RenderTarget& newTarget) noexcept;
