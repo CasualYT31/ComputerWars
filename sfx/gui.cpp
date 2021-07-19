@@ -22,6 +22,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui.h"
 
+/**
+ * Used to loop through all of a given type of widget for translation purposes.
+ * The \c ptr variable is used to access each widget of the given type in a loop.
+ * @param t The type of widget to effect. Must be a TGUI C++ class name.
+ * @param b The statement/s to execute within the loop.
+ */
+#define TRANSLATION_LOOP(t, b) \
+	for (tgui::t::Ptr ptr = _getNextWidget<tgui::t>(#t); ptr; \
+		ptr = _getNextWidget<tgui::t>(#t)) { \
+		b; \
+	}
+
 sfx::gui::gui_background::gui_background() noexcept {}
 
 sfx::gui::gui_background::gui_background(unsigned int key) noexcept {
@@ -70,6 +82,8 @@ void sfx::gui::setGUI(const std::string& newPanel) noexcept {
 		// clear widget sprites
 		_widgetSprites.clear();
 		_currentGUI = newPanel;
+		// reset _getNextWidget index field
+		_widgetIndex = 0;
 	} catch (tgui::Exception& e) {
 		_logger.error("{}", e.what());
 		_gui.get(old)->setVisible(true);
@@ -101,6 +115,11 @@ void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 		_scripts->callFunction(functionName);
 }
 
+void sfx::gui::setLanguageDictionary(
+	const std::shared_ptr<engine::language_dictionary>& lang) noexcept {
+	_langdict = lang;
+}
+
 bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		// this GUI has a background to animate
@@ -119,9 +138,70 @@ bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 	_widgetPictures.clear();
 	std::size_t i = 0;
 	if (_sheet && getGUI() != "") {
-		// update bitmapbutton and picture sprites
 		auto& widgetList = _gui.get<tgui::Group>(getGUI())->getWidgets();
 		for (auto& widget : widgetList) {
+			// translate captions
+			if (_langdict) {
+				// translate captions
+				TRANSLATION_LOOP(Button,
+					ptr->setText((*_langdict)(ptr->getText())));
+				TRANSLATION_LOOP(BitmapButton,
+					ptr->setText((*_langdict)(ptr->getText())));
+				TRANSLATION_LOOP(Label,
+					ptr->setText((*_langdict)(ptr->getText())));
+				TRANSLATION_LOOP(ProgressBar,
+					ptr->setText((*_langdict)(ptr->getText())));
+				TRANSLATION_LOOP(RadioButton,
+					ptr->setText((*_langdict)(ptr->getText())));
+				TRANSLATION_LOOP(CheckBox,
+					ptr->setText((*_langdict)(ptr->getText())));
+				TRANSLATION_LOOP(MessageBox,
+					ptr->setText((*_langdict)(ptr->getText())));
+				// for other types of controls, we need to iterate through a list
+				TRANSLATION_LOOP(ComboBox, {
+					for (std::size_t i = 0; i <= ptr->getItemCount(); i++) {
+						ptr->changeItemByIndex(i,
+							(*_langdict)(ptr->getItems().at(i)));
+					}
+				});
+				TRANSLATION_LOOP(ListBox, {
+					for (std::size_t i = 0; i <= ptr->getItemCount(); i++) {
+						ptr->changeItemByIndex(i,
+							(*_langdict)(ptr->getItems().at(i)));
+					}
+				});
+				// for a listview, we need to translate all the columns as well as
+				// each item
+				TRANSLATION_LOOP(ListView, {
+					for (std::size_t i = 0; i <= ptr->getColumnCount(); i++) {
+						ptr->setColumnText(i, (*_langdict)(ptr->getColumnText(i)));
+						for (std::size_t j = 0; i <= ptr->getItemCount(); j++) {
+							ptr->changeSubItem(j, i,
+								(*_langdict)(ptr->getItemCell(j, i)));
+						}
+					}
+				});
+				// for container types, we need to translate the title instead of
+				// the "text" (sometimes as well as the "text")
+				TRANSLATION_LOOP(ChildWindow,
+					ptr->setTitle((*_langdict)(ptr->getTitle())));
+				TRANSLATION_LOOP(MessageBox,
+					ptr->setTitle((*_langdict)(ptr->getTitle())));
+				TRANSLATION_LOOP(ColorPicker,
+					ptr->setTitle((*_langdict)(ptr->getTitle())));
+				// we also need to translate menus
+				// damn, that's not even possible as of TGUI 0.8.9...
+
+				// we also need to translate tabs
+				TRANSLATION_LOOP(Tabs, {
+					for (std::size_t i = 0; i <= ptr->getTabsCount(); i++) {
+						ptr->changeText(i, (*_langdict)(ptr->getText(i)));
+					}
+					});
+				// we *also* need to translate treeviews
+				// possible, but so not worth it....
+			}
+			// update bitmapbutton and picture sprites
 			if (widget->getWidgetType() == "BitmapButton" ||
 				widget->getWidgetType() == "Picture") {
 				if (i == _widgetSprites.size()) {

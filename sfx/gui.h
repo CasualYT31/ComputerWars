@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tgui/tgui.hpp"
 #include "texture.h"
 #include "script.h"
+#include "language.h"
 
 namespace sfx {
 	/**
@@ -123,10 +124,24 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Sets the \c language_dictionary object to use with these GUI menus.
+		 * If a language dictionary is given, all GUI captions will be feeded into
+		 * it for translation purposes, during the call to \c animate(). If one is
+		 * not given, which is the default, GUI text will not be translated or
+		 * amended.
+		 * @param lang Pointer to the \c language_dictionary to use. \c nullptr can
+		 *             be given to disable translation.
+		 */
+		void setLanguageDictionary(
+			const std::shared_ptr<engine::language_dictionary>& lang) noexcept;
+
+		/**
 		 * Animates the current GUI menu.
 		 * Any sprites are animated, and the colour background (if there is one) is
-		 * resized to match the size of the target.
+		 * resized to match the size of the target. In addition, if a langauge
+		 * dictionary has been given, all captions will be translated.
 		 * @return Always returns \c FALSE.
+		 * @sa     sfx::gui::setLanguageDictionary()
 		 */
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
@@ -288,6 +303,34 @@ namespace sfx {
 		void _connectSignals(tgui::Widget::Ptr widget) noexcept;
 
 		/**
+		 * Retrieves the next widget within the current GUI that is of a specified
+		 * type.
+		 * If the type given was different from the type given in the last call to
+		 * this method, searching will start from the beginning of the widget list.
+		 * This is also the case if it's the first time that this method is being
+		 * called, or if the last returned value was \c nullptr.
+		 * @tparam T    The type of TGUI widget to search for.
+		 * @param  type The TGUI's string name for the type of widget to search
+		 *              for. This needs to match with \c T.
+		 * @return Pointer to the next widget in the current GUI's list that
+		 *         matches the given type, or \c nullptr if the end of the list has
+		 *         been reached and a matching widget was not found.
+		 */
+		template<typename T>
+		std::shared_ptr<T> _getNextWidget(const std::string& type) noexcept;
+
+		/**
+		 * The TGUI widget type last provided to \c _getNextWidget().
+		 */
+		std::string _lastWidgetType = "";
+
+		/**
+		 * The vector index keeping track of \c _getNextWidget() progress.
+		 * Is reset whenever a new type is given, or whenever a new GUI is set.
+		 */
+		std::size_t _widgetIndex = 0;
+
+		/**
 		 * The internal logger object.
 		 */
 		mutable engine::logger _logger;
@@ -352,5 +395,28 @@ namespace sfx {
 		 */
 		std::unordered_map<std::string,
 			std::unordered_map<std::string, unsigned int>> _guiSpriteKeys;
+
+		/**
+		 * Pointer to the language dictionary used to translate all captions.
+		 */
+		std::shared_ptr<engine::language_dictionary> _langdict = nullptr;
 	};
+}
+
+template<typename T>
+std::shared_ptr<T> sfx::gui::_getNextWidget(const std::string& type) noexcept {
+	if (_lastWidgetType != type) {
+		_widgetIndex = 0;
+		_lastWidgetType = type;
+	}
+	auto& widgetList = _gui.get<tgui::Group>(getGUI())->getWidgets();
+	while (_widgetIndex < widgetList.size()) {
+		auto& widget = widgetList.at(_widgetIndex++);
+		if (widget->getWidgetType() == _lastWidgetType) {
+			return std::dynamic_pointer_cast<T>(widget);
+		}
+	}
+	// no match found
+	_widgetIndex = 0;
+	return nullptr;
 }

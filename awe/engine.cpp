@@ -28,6 +28,9 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	auto r = _initCheck();
 	if (r) return r;
 
+	// assign the language dictionary to the GUI object
+	_gui->setLanguageDictionary(_dictionary);
+
 	awe::map map(file, _countries, _tiles, _units);
 	map.selectTile(sf::Vector2u(0, 0));
 	map.selectArmy(0);
