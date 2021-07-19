@@ -120,8 +120,8 @@ namespace sfx {
 		 * @param widget     The widget sending the signal.
 		 * @param signalName The name of the signal being sent.
 		 */
-		void signalHandler(tgui::Widget::Ptr widget, const std::string& signalName)
-			noexcept;
+		void signalHandler(tgui::Widget::Ptr widget,
+			const tgui::String& signalName) noexcept;
 
 		/**
 		 * Sets the \c language_dictionary object to use with these GUI menus.

@@ -3,7 +3,7 @@ project("ComputerWarsSFX")
 # TGUI
 FetchContent_Declare(tgui
 	GIT_REPOSITORY https://github.com/texus/TGUI.git
-	GIT_TAG v0.8.9
+	GIT_TAG v0.9.1
 )
 FetchContent_MakeAvailable(tgui)
 

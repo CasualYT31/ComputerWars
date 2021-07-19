@@ -108,9 +108,9 @@ bool sfx::gui::handleEvent(sf::Event e) noexcept {
 }
 
 void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
-	const std::string& signalName) noexcept {
-	std::string functionName = getGUI() + "_" + widget->getWidgetName() + "_" +
-		signalName;
+	const tgui::String& signalName) noexcept {
+	std::string functionName = getGUI() + "_" +
+		widget->getWidgetName().toStdString() + "_" + signalName.toStdString();
 	if (_scripts && getGUI() != "" && _scripts->functionExists(functionName))
 		_scripts->callFunction(functionName);
 }
@@ -142,58 +142,70 @@ bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 		if (_langdict) {
 			// translate captions
 			TRANSLATION_LOOP(Button,
-				ptr->setText((*_langdict)(ptr->getText())));
+				ptr->setText((*_langdict)(ptr->getText().toStdString())));
 			TRANSLATION_LOOP(BitmapButton,
-				ptr->setText((*_langdict)(ptr->getText())));
+				ptr->setText((*_langdict)(ptr->getText().toStdString())));
+			TRANSLATION_LOOP(ToggleButton,
+				ptr->setText((*_langdict)(ptr->getText().toStdString())));
 			TRANSLATION_LOOP(Label,
-				ptr->setText((*_langdict)(ptr->getText())));
+				ptr->setText((*_langdict)(ptr->getText().toStdString())));
 			TRANSLATION_LOOP(ProgressBar,
-				ptr->setText((*_langdict)(ptr->getText())));
+				ptr->setText((*_langdict)(ptr->getText().toStdString())));
 			TRANSLATION_LOOP(RadioButton,
-				ptr->setText((*_langdict)(ptr->getText())));
+				ptr->setText((*_langdict)(ptr->getText().toStdString())));
 			TRANSLATION_LOOP(CheckBox,
-				ptr->setText((*_langdict)(ptr->getText())));
+				ptr->setText((*_langdict)(ptr->getText().toStdString())));
 			TRANSLATION_LOOP(MessageBox,
-				ptr->setText((*_langdict)(ptr->getText())));
+				ptr->setText((*_langdict)(ptr->getText().toStdString())));
 			// for other types of controls, we need to iterate through a list
 			TRANSLATION_LOOP(ComboBox, {
 				for (std::size_t i = 0; i <= ptr->getItemCount(); i++) {
 					ptr->changeItemByIndex(i,
-						(*_langdict)(ptr->getItems().at(i)));
+						(*_langdict)(ptr->getItems().at(i).toStdString()));
 				}
 				});
 			TRANSLATION_LOOP(ListBox, {
 				for (std::size_t i = 0; i <= ptr->getItemCount(); i++) {
 					ptr->changeItemByIndex(i,
-						(*_langdict)(ptr->getItems().at(i)));
+						(*_langdict)(ptr->getItems().at(i).toStdString()));
 				}
 				});
 			// for a listview, we need to translate all the columns as well as each
 			// item
 			TRANSLATION_LOOP(ListView, {
 				for (std::size_t i = 0; i <= ptr->getColumnCount(); i++) {
-					ptr->setColumnText(i, (*_langdict)(ptr->getColumnText(i)));
+					ptr->setColumnText(i,
+						(*_langdict)(ptr->getColumnText(i).toStdString()));
 					for (std::size_t j = 0; i <= ptr->getItemCount(); j++) {
 						ptr->changeSubItem(j, i,
-							(*_langdict)(ptr->getItemCell(j, i)));
+							(*_langdict)(ptr->getItemCell(j, i).toStdString()));
 					}
 				}
 				});
 			// for container types, we need to translate the title instead of the
 			// "text" (sometimes as well as the "text")
 			TRANSLATION_LOOP(ChildWindow,
-				ptr->setTitle((*_langdict)(ptr->getTitle())));
+				ptr->setTitle((*_langdict)(ptr->getTitle().toStdString())));
 			TRANSLATION_LOOP(MessageBox,
-				ptr->setTitle((*_langdict)(ptr->getTitle())));
+				ptr->setTitle((*_langdict)(ptr->getTitle().toStdString())));
 			TRANSLATION_LOOP(ColorPicker,
-				ptr->setTitle((*_langdict)(ptr->getTitle())));
+				ptr->setTitle((*_langdict)(ptr->getTitle().toStdString())));
+			TRANSLATION_LOOP(FileDialog,
+				ptr->setTitle((*_langdict)(ptr->getTitle().toStdString())));
 			// we also need to translate menus
 			// damn, that's not even possible as of TGUI 0.8.9...
 
 			// we also need to translate tabs
 			TRANSLATION_LOOP(Tabs, {
 				for (std::size_t i = 0; i <= ptr->getTabsCount(); i++) {
-					ptr->changeText(i, (*_langdict)(ptr->getText(i)));
+					ptr->changeText(i,
+						(*_langdict)(ptr->getText(i).toStdString()));
+				}
+				});
+			TRANSLATION_LOOP(TabContainer, {
+				for (std::size_t i = 0; i <= ptr->getTabs()->getTabsCount(); i++) {
+					ptr->changeTabText(i,
+						(*_langdict)(ptr->getTabs()->getText(i).toStdString()));
 				}
 				});
 			// we *also* need to translate treeviews
@@ -208,13 +220,23 @@ bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 				if (i == _widgetSprites.size()) {
 					// animated sprite doesn't yet exist, allocate it
 					_widgetSprites.push_back(sfx::animated_sprite(_sheet,
-						_guiSpriteKeys[getGUI()][widget->getWidgetName()]));
+						_guiSpriteKeys[getGUI()]
+						[widget->getWidgetName().toStdString()]));
 				}
 				_widgetSprites[i].animate(target);
 				try {
-					_widgetPictures.push_back(tgui::Texture(_sheet->accessTexture(
-						_widgetSprites[i].getCurrentFrame()),
-						_sheet->accessSprite(_widgetSprites[i].getSprite())));
+					tgui::Texture tex;
+					auto iRect =
+						_sheet->accessSprite(_widgetSprites[i].getSprite());
+					tgui::UIntRect rect;
+					rect.left = iRect.left;
+					rect.top = iRect.top;
+					rect.width = iRect.width;
+					rect.height = iRect.height;
+					tex.load(
+						_sheet->accessTexture(_widgetSprites[i].getCurrentFrame()),
+						rect);
+					_widgetPictures.push_back(tex);
 				} catch (std::out_of_range&) {
 					i++;
 					continue;
@@ -319,7 +341,7 @@ bool sfx::gui::_loadGUI(const std::string& name, const std::string& filepath)
 			group->add(copy, (*itr)->getWidgetName());
 		}
 	} catch (tgui::Exception& e) {
-		std::string widgetName = (*itr)->getWidgetName();
+		std::string widgetName = (*itr)->getWidgetName().toStdString();
 		_logger.error("Error while copying GUI widget with the name \"{}\" from "
 			"GUI \"{}\": {}", widgetName, name, e.what());
 		return false;
@@ -333,59 +355,143 @@ bool sfx::gui::_loadGUI(const std::string& name, const std::string& filepath)
 // ALL SIGNALS NEED TO BE TESTED IDEALLY
 void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	// connect common Widget signals
-	widget->connect({"PositionChanged", "SizeChanged", "Focused", "Unfocused",
-		"MouseEntered", "MouseLeft", "AnimationFinished"},
-		&sfx::gui::signalHandler, this);
+	widget->getSignal("PositionChanged").
+		connectEx(&sfx::gui::signalHandler, this);
+	widget->getSignal("SizeChanged").
+		connectEx(&sfx::gui::signalHandler, this);
+	widget->getSignal("Focused").
+		connectEx(&sfx::gui::signalHandler, this);
+	widget->getSignal("Unfocused").
+		connectEx(&sfx::gui::signalHandler, this);
+	widget->getSignal("MouseEntered").
+		connectEx(&sfx::gui::signalHandler, this);
+	widget->getSignal("MouseLeft").
+		connectEx(&sfx::gui::signalHandler, this);
+	widget->getSignal("AnimationFinished").
+		connectEx(&sfx::gui::signalHandler, this);
 	// connect clickable widget signals
-	tgui::String type = widget->getWidgetType(); type = type.toLower();
+	tgui::String type = widget->getWidgetType().toLower();
 	if (type == "button" || type == "editbox" || type == "label" ||
 		type == "picture" || type == "progressbar" || type == "radiobutton" ||
 		type == "spinbutton" || type == "panel") {
-		widget->connect({"MousePressed", "MouseReleased", "Clicked",
-			"RightMousePressed", "RightMouseReleased", "RightClicked"},
-			&sfx::gui::signalHandler, this);
+		widget->getSignal("MousePressed").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("MouseReleased").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Clicked").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("RightMousePressed").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("RightMouseReleased").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("RightClicked").
+			connectEx(&sfx::gui::signalHandler, this);
 	}
 	// connect bespoke signals
 	if (type == "button") {
-		widget->connect({ "Pressed" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("Pressed").connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "childwindow") {
-		widget->connect({ "MousePressed", "Closed", "Minimized", "Maximized",
-			"EscapeKeyPressed" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("MousePressed").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Closed").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Minimized").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Maximized").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("EscapeKeyPressed").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Closing").
+			connectEx(&sfx::gui::signalHandler, this);
+	} else if (type == "colorpicker") {
+		widget->getSignal("ColorChanged").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("OkPress").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "combobox") {
-		widget->connect({ "ItemSelected" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("ItemSelected").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "editbox") {
-		widget->connect({ "TextChanged", "ReturnKeyPressed" },
-			&sfx::gui::signalHandler, this);
+		widget->getSignal("TextChanged").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("ReturnKeyPressed").
+			connectEx(&sfx::gui::signalHandler, this);
+	} else if (type == "filedialog") {
+		widget->getSignal("FileSelected").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "knob" || type == "scrollbar" || type == "slider" ||
-		type == "spinbutton") {
-		widget->connect({ "ValueChanged" }, &sfx::gui::signalHandler, this);
+		type == "spinbutton" || type == "spincontrol") {
+		widget->getSignal("ValueChanged").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "label" || type == "picture") {
-		widget->connect({ "DoubleClicked" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("DoubleClicked").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "listbox") {
-		widget->connect({ "ItemSelected", "MousePressed", "MouseReleased",
-			"DoubleClicked" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("ItemSelected").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("MousePressed").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("MouseReleased").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("DoubleClicked").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "listview") {
-		widget->connect({ "ItemSelected", "HeaderClicked", "RightClicked",
-			"DoubleClicked" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("ItemSelected").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("HeaderClicked").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("RightClicked").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("DoubleClicked").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "menubar") {
-		widget->connect({ "MenuItemClicked" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("MenuItemClicked").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "messagebox") {
-		widget->connect({ "ButtonPressed" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("ButtonPressed").
+			connectEx(&sfx::gui::signalHandler, this);
+	} else if (type == "panel") {
+		widget->getSignal("DoubleClicked").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "progressbar") {
-		widget->connect({ "ValueChanged", "Full" }, &sfx::gui::signalHandler,
-			this);
+		widget->getSignal("ValueChanged").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Full").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "radiobutton") {
-		widget->connect({ "Checked", "Unchecked", "Changed" },
-			&sfx::gui::signalHandler, this);
+		widget->getSignal("Checked").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Unchecked").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Changed").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "rangeslider") {
-		widget->connect({ "RangeChanged" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("RangeChanged").
+			connectEx(&sfx::gui::signalHandler, this);
+	} else if (type == "tabcontainer") {
+		widget->getSignal("SeletionChanging").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("SelectionChanged").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "tabs") {
-		widget->connect({ "TabSelected" }, &sfx::gui::signalHandler, this);
-	} else if (type == "textbox") {
-		widget->connect({ "TextChanged", "SelectionChanged" },
-			&sfx::gui::signalHandler, this);
+		widget->getSignal("TabSelected").
+			connectEx(&sfx::gui::signalHandler, this);
+	} else if (type == "textarea") {
+		widget->getSignal("TextChanged").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("SelectionChanged").
+			connectEx(&sfx::gui::signalHandler, this);
+	} else if (type == "togglebutton") {
+		widget->getSignal("Checked").
+			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "treeview") {
-		widget->connect({ "ItemSelected", "DoubleClicked", "Expanded",
-			"Collapsed" }, &sfx::gui::signalHandler, this);
+		widget->getSignal("ItemSelected").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("DoubleClicked").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Expanded").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("Collapsed").
+			connectEx(&sfx::gui::signalHandler, this);
 	}
 }
