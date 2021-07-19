@@ -39,10 +39,6 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	map.setTileSpritesheet(_sprites->tile->normal);
 	map.setUnitSpritesheet(_sprites->unit->idle);
 
-	// test scripts
-	std::string& temp = std::string("test");
-	_scripts->callFunction("main", temp, (asBYTE)-9, (asQWORD)UINT64_MAX, false);
-
 	try {
 		while (_renderer->isOpen()) {
 			sf::Event event;
@@ -305,7 +301,10 @@ void awe::game_engine::setMusic(const std::shared_ptr<sfx::audio>& ptr) noexcept
 void awe::game_engine::setRenderer(const std::shared_ptr<sfx::renderer>& ptr)
 	noexcept {
 	_renderer = ptr;
-	if (_renderer) _tempRendererSettings = _renderer->getSettings();
+	if (_renderer)
+		_tempRendererSettings = _renderer->getSettings();
+	else
+		_tempRendererSettings = sfx::renderer_settings(); // blank settings object
 }
 
 void awe::game_engine::setUserInput(const std::shared_ptr<sfx::user_input>& ptr)
