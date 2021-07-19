@@ -94,23 +94,23 @@ TEST_F(ScriptTest, FunctionExists) {
  * Tests correct calls to \c engine::scripts::callFunction().
  */
 TEST_F(ScriptTest, CorrectFunctionCalls) {
-	_scripts.callFunction("overloadedFunction", 9);
+	EXPECT_FALSE(_scripts.callFunction("overloadedFunction", 9));
 	EXPECT_IN_LOG("Failed to access function \"overloadedFunction\": ");
-	_scripts.callFunction("printInt", 9);
+	EXPECT_TRUE(_scripts.callFunction("printInt", 9));
 	EXPECT_IN_LOG("scriptanswer: 9");
-	_scripts.callFunction("printFloat", -56.9f);
+	EXPECT_TRUE(_scripts.callFunction("printFloat", -56.9f));
 	EXPECT_IN_LOG("scriptanswer: -56.9");
-	_scripts.callFunction("add", (short)7, (short)-8);
+	EXPECT_TRUE(_scripts.callFunction("add", (short)7, (short)-8));
 	EXPECT_IN_LOG("scriptanswer: -1");
 	std::string str = "ScriptTestCorrectFunctionCalls is working!";
-	_scripts.callFunction("print", &str);
+	EXPECT_TRUE(_scripts.callFunction("print", &str));
 	EXPECT_IN_LOG(str);
-	_scripts.loadScripts(getTestAssetPath("script2/"));
-	_scripts.callFunction("add", (short)89, (short)-34);
+	ASSERT_TRUE(_scripts.loadScripts(getTestAssetPath("script2/")));
+	EXPECT_FALSE(_scripts.callFunction("add", (short)89, (short)-34));
 	EXPECT_IN_LOG("Failed to access function \"add\": ");
-	_scripts.callFunction("subtract", (short)4, (short)-4);
+	EXPECT_TRUE(_scripts.callFunction("subtract", (short)4, (short)-4));
 	EXPECT_IN_LOG("scriptanswer: 8");
-	_scripts.callFunction("printHello");
+	EXPECT_TRUE(_scripts.callFunction("printHello"));
 	EXPECT_IN_LOG("Hello, World! from script");
 }
 
