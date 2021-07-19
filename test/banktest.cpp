@@ -27,3 +27,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sharedfunctions.h"
 #include "bank.h"
 
+TEST(BankTest, OldTest) {
+	awe::bank<awe::movement_type> move;
+	move.load(getTestAssetPath("bank/move.json"));
+	awe::bank<awe::unit_type> bank;
+	bank.load(getTestAssetPath("bank/unit.json"));
+	awe::updateAllMovementsAndLoadedUnits(bank, move);
+	EXPECT_EQ(bank.size(), (std::size_t)11);
+	EXPECT_TRUE(bank[0]);
+	EXPECT_TRUE(bank[7]);
+	EXPECT_TRUE(bank[7]->canLoad(bank[0]));
+}
