@@ -114,13 +114,17 @@ namespace engine {
 		 * @param   folder The path containing all the script files to load. If
 		 *                 blank, the last folder used with this method will be
 		 *                 substituted.
-		 * @return  \c TRUE if successful, \c FALSE if not.
+		 * @return  \c TRUE if successful, \c FALSE if not. Note that this method
+		 *          returns \c TRUE even if the given folder did not exist or could
+		 *          not be read.
 		 * @sa      engine::scripts::registerInterface()
 		 */
 		bool loadScripts(std::string folder = "") noexcept;
 
 		/**
 		 * Retrieves the last path used with \c loadScripts().
+		 * Even if the path did not exist, it will be internally assigned and
+		 * returned here.
 		 * @return The path containing all the loaded scripts.
 		 */
 		const std::string& getScriptsFolder() const noexcept;
@@ -128,7 +132,10 @@ namespace engine {
 		/**
 		 * Tests to see if a function with the given name exists in any of the
 		 * loaded scripts.
-		 * @return \c TRUE if the function exists, \c FALSE if not.
+		 * @param  name The name of the function. Note that this is not the full
+		 *              AngelScript declaration.
+		 * @return \c TRUE if the function exists, \c FALSE if not, or if there
+		 *         were multiple matches.
 		 */
 		bool functionExists(const std::string& name) const noexcept;
 
@@ -140,13 +147,13 @@ namespace engine {
 		 * version of this method is called.\n
 		 * All primitive data types are supported (including \c bool, all integral
 		 * types, \c float, and \c double). Objects are also supported, \b however,
-		 * they \b must be passed in as a pointer, and the object's class \b must
-		 * have its own \c fmt::formatter code (this is because this method expects
-		 * your object type to be able to output to the log via spdlog, which uses
-		 * fmt). Your object type must also be copyable. Expect seemingly unrelated
-		 * [template] build errors if these conditions aren't met. Strings are also
-		 * supported, \b however, string literals are not. This may change in the
-		 * future.
+		 * they \b must be passed in as a raw pointer, and the object's class
+		 * \b must have its own \c fmt::formatter code (this is because this method
+		 * expects your object type to be able to output to the log via spdlog,
+		 * which uses fmt). Your object type must also be copyable. Expect
+		 * seemingly unrelated [template] build errors if these conditions aren't
+		 * met. Strings are also supported, \b however, string literals are not.
+		 * This may change in the future.
 		 * @tparam T      The type of the first parameter to add.
 		 * @tparam Ts     The types of the next parameters to add, if any.
 		 * @param  name   The name of the script function to call.
@@ -230,7 +237,6 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 	// or the non-template version if there are no more paramters remaining to be
 	// added (this is decided for us implicitly)
 	int r = 0;
-	bool skip = false;
 	if constexpr (std::is_integral<T>::value) {
 		// this also conveniently covers bool for us
 		switch (sizeof value) {
@@ -248,9 +254,10 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 			break;
 		default:
 			_logger.error("Unexpected length {} of integer variable {}, it will "
-				"not be set to argument {} - behaviour is undefined after this "
-				"point.", sizeof value, value, _argumentID);
-			break;
+				"not be set to argument {} of function \"{}\": function call "
+				"aborted.", sizeof value, value, _argumentID, name);
+			_resetCallFunctionVariables();
+			return false;
 		}
 	} else if constexpr (std::is_floating_point<T>::value) {
 		if (sizeof value == 4) {
@@ -259,19 +266,28 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 			r = _context->SetArgDouble(_argumentID, (double)value);
 		}
 	} else if constexpr (std::is_pointer<T>::value) {
+		if (!value) {
+			_logger.error("Attempted to assign a null pointer to argument {} of "
+				"function \"{}\": function call aborted.", _argumentID, name);
+			_resetCallFunctionVariables();
+			return false;
+		}
 		r = _context->SetArgObject(_argumentID, value);
 	} else if constexpr (std::is_object<T>::value || std::is_reference<T>::value) {
-		_logger.error("Attempted to add an object to argument {}, which is not "
-			"supported: behaviour is undefined after this point.", _argumentID);
-		skip = true;
+		_logger.error("Attempted to add an object to argument {} of function "
+			"\"{}\", which is not supported: function call aborted.", _argumentID,
+			name);
+		_resetCallFunctionVariables();
+		return false;
 	}
-	if (!skip && r < 0) {
+	if (r < 0) {
 		if constexpr (std::is_pointer<T>::value) {
-			_logger.error("Failed to set argument {} to the value \"{}\": code "
-				"{}.", _argumentID, *value, r);
+			_logger.error("Failed to set argument {} of function \"{}\" to the "
+				"value \"{}\": code {}.", _argumentID, name,
+				((value) ? (*value) : ("nullptr")), r);
 		} else {
-			_logger.error("Failed to set argument {} to the value \"{}\": code "
-				"{}.", _argumentID, value, r);
+			_logger.error("Failed to set argument {} of function \"{}\" to the "
+				"value \"{}\": code {}.", _argumentID, name, value, r);
 		}
 		_resetCallFunctionVariables();
 		return false;

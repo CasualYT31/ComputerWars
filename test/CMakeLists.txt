@@ -75,7 +75,8 @@ add_executable(${PROJECT_NAME}
 	"joysticktest.cpp"
 	"converttest.cpp"
 	"userinputtest.cpp"
-	"transitiontest.cpp")
+	"transitiontest.cpp"
+	"scripttest.cpp")
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME} PRIVATE ${ComputerWarsAWE_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} gtest gtest_main ComputerWarsAWE)

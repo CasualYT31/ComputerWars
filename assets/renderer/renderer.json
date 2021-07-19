@@ -1,1 +1,18 @@
-{"width":1280,"height":720,"x":235,"y":137,"framerate":0,"caption":"Computer Wars","icon":"./assets/renderer/icon.png","close":false,"def":true,"fullscreen":false,"none":false,"resize":false,"titlebar":false,"vsync":true,"cursor":true,"grabbedmouse":false}
+{
+	"width": 1280,
+	"height": 720,
+	"x": 235,
+	"y": 137,
+	"framerate": 0,
+	"caption": "Computer Wars",
+	"icon": "./assets/renderer/icon.png",
+	"close": false,
+	"def": true,
+	"fullscreen": false,
+	"none": false,
+	"resize": false,
+	"titlebar": false,
+	"vsync": true,
+	"cursor": true,
+	"grabbedmouse": false
+}

@@ -140,6 +140,21 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
         // version then we must set up the context
         if (!_setupContext(name)) return false;
     }
+    // first check that all parameters have been accounted for
+    // passing too few arguments is dangerous when object pointer paramters haven't
+    // been given as this will cause the program to crash
+    // _setupContext() ensures that the function exists
+    auto expected = _engine->GetModule("ComputerWars")->
+        GetFunctionByName(name.c_str())->GetParamCount();
+    if (expected != _argumentID) {
+        // passing in too many arguments would have caused an error earlier
+        _logger.error("Too few arguments have been given to function call \"{}\": "
+            "{} {} been given, but {} {} expected: function call aborted.", name,
+            _argumentID, ((_argumentID == 1) ? ("has") : ("have")), expected,
+            ((expected == 1) ? ("was") : ("were")));
+        _resetCallFunctionVariables();
+        return false;
+    }
     _resetCallFunctionVariables();
     // execute the function and return if it worked or not
     int r = _context->Execute();

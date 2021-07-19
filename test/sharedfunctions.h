@@ -39,6 +39,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	EXPECT_NE(engine::sink::GetLog().find(n), std::string::npos);
 
 /**
+ * This macro is a short way to determine if a piece of text is not in the log
+ * file.
+ * @param n The string to search for in the log file.
+ */
+#define EXPECT_NOT_IN_LOG(n) \
+	EXPECT_EQ(engine::sink::GetLog().find(n), std::string::npos);
+
+/**
  * Helper function which gets the current year.
  * @warning Yeah, tests can fail if the log file is created on the last second of
  *          the year... But I'm not faffing around to take that into account.
