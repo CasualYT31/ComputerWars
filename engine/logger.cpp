@@ -47,15 +47,15 @@ std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 				DeveloperName() << std::endl;
 			_fileCopy << "---------------" << std::endl;
 			if (hardwareDetails) {
+				System::Properties sys;
 				_fileCopy << "Hardware Specification:\n";
-				_fileCopy << "CPU       " << sys::cpu::model() << std::endl;
-				_fileCopy << "Memory    " << sys::mem::total() << std::endl;
-				_fileCopy << "GPU       " << sys::gpu::name() << std::endl;
-				_fileCopy << "Storage   " << sys::storage::free(sys::unit::MB) <<
-					" out of " << sys::storage::capacity() << " is free" <<
-					std::endl;
-				_fileCopy << "Platform  " << sys::os::name() << " ~ " <<
-					sys::os::version() << std::endl;
+				_fileCopy << "CPU       " << sys.CPUModel() << std::endl;
+				_fileCopy << "Memory    " << sys.RAMTotal() << std::endl;
+				_fileCopy << "GPU       " << sys.GPUName() << std::endl;
+				_fileCopy << "Storage   " << sys.StorageFree(System::Unit::MB) <<
+					" out of " << sys.StorageTotal() << " is free" << std::endl;
+				_fileCopy << "Platform  " << sys.OSName() << " ~ " <<
+					sys.OSVersion() << std::endl;
 				_fileCopy << "---------------" << std::endl;
 				_fileCopy << "Gamepads" << std::endl;
 				// I have avoided assuming that the SFML doesn't leave out IDs:

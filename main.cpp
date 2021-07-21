@@ -65,7 +65,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 int game(const std::string& file) {
     // initialise the sink all loggers output to
     engine::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false,
-        false);
+        true);
 
     // initialise the language dictionary
     std::shared_ptr<engine::language_dictionary> dictionary =
