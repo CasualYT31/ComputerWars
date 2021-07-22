@@ -4,3 +4,5 @@ doc/
 out/
 *.lnk
 *.pdb
+build/
+.vscode/
