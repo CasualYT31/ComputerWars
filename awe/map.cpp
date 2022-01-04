@@ -78,9 +78,9 @@ void awe::map::setMapSize(const sf::Vector2u dim,
 	if (mapHasShrunk) {
 		// then, go through all owned tiles in each army and delete those that are
 		// now out of bounds
-		for (auto army : _armys) {
+		for (auto& army : _armys) {
 			auto tiles = army.second.getTiles();
-			for (auto tile : tiles) {
+			for (auto& tile : tiles) {
 				if (_isOutOfBounds(tile)) army.second.removeTile(tile);
 			}
 		}
@@ -132,7 +132,7 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)
 			country->getName());
 		return false;
 	}
-	_armys.insert(std::pair<awe::BankID, awe::army>(country->getID(), country));
+	_armys.insert(std::pair<awe::BankID, awe::army>(country->getID(), awe::army(country)));
 	return true;
 }
 
@@ -143,13 +143,13 @@ void awe::map::deleteArmy(const awe::ArmyID army) noexcept {
 		return;
 	}
 	// firstly, delete all units belonging to the army
-	auto units = _armys[army].getUnits();
+	auto units = _armys.at(army).getUnits();
 	for (auto unit : units) {
 		deleteUnit(unit);
 	}
 	// then, disown all tiles
-	auto tiles = _armys[army].getTiles();
-	for (auto tile : tiles) {
+	auto tiles = _armys.at(army).getTiles();
+	for (auto& tile : tiles) {
 		_tiles[tile.x][tile.y].setTileOwner(awe::army::NO_ARMY);
 	}
 	// finally, delete the army from the army list
@@ -159,7 +159,7 @@ void awe::map::deleteArmy(const awe::ArmyID army) noexcept {
 void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds)
 	noexcept {
 	if (_isArmyPresent(army)) {
-		_armys[army].setFunds(funds);
+		_armys.at(army).setFunds(funds);
 	} else {
 		_logger.error("setArmyFunds operation cancelled: attempted to set {} "
 			"funds to an army, {}, that didn't exist!", funds, army);
@@ -221,17 +221,18 @@ void awe::map::deleteUnit(const awe::UnitID id) noexcept {
 	// we don't need to check if the unit "is actually on the map or not"
 	// since the tile will always hold the index to the unit in either case:
 	// which is why we need the "actually" check to begin with
-	if (!_isOutOfBounds(_units[id].getPosition()))
-		_tiles[_units[id].getPosition().x][_units[id].getPosition().y].setUnit(0);
+	if (!_isOutOfBounds(_units.at(id).getPosition()))
+		_tiles[_units.at(id).getPosition().x]
+		      [_units.at(id).getPosition().y].setUnit(0);
 	// secondly, remove the unit from the army's list
-	if (_isArmyPresent(_units[id].getArmy())) {
-		_armys[_units[id].getArmy()].removeUnit(id);
+	if (_isArmyPresent(_units.at(id).getArmy())) {
+		_armys.at(_units.at(id).getArmy()).removeUnit(id);
 	} else {
 		_logger.warning("deleteUnit warning: unit with ID {} didn't have a valid "
-			"owning army ID, which was {}", id, _units[id].getArmy());
+			"owning army ID, which was {}", id, _units.at(id).getArmy());
 	}
 	// thirdly, delete all units that are loaded onto this one
-	auto loaded = _units[id].loadedUnits();
+	auto loaded = _units.at(id).loadedUnits();
 	for (awe::UnitID unit : loaded) {
 		deleteUnit(unit);
 	}
@@ -265,10 +266,11 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u pos)
 	// make old tile vacant
 	// don't make tile vacant if a loaded unit also occupies the same tile
 	// internally, just to be safe
-	if (_units[id].isOnMap())
-		_tiles[_units[id].getPosition().x][_units[id].getPosition().y].setUnit(0);
+	if (_units.at(id).isOnMap())
+		_tiles[_units.at(id).getPosition().x]
+		      [_units.at(id).getPosition().y].setUnit(0);
 	// assign new location to unit
-	_units[id].setPosition(pos);
+	_units.at(id).setPosition(pos);
 }
 
 sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const noexcept {
@@ -291,7 +293,7 @@ bool awe::map::isUnitOnMap(const awe::UnitID id) const noexcept {
 
 void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) noexcept {
 	if (_isUnitPresent(id)) {
-		_units[id].setHP(hp);
+		_units.at(id).setHP(hp);
 	} else {
 		_logger.error("setUnitHP operation cancelled: attempted to assign HP {} "
 			"to unit with ID {}, which doesn't exist!", hp, id);
@@ -307,7 +309,7 @@ awe::HP awe::map::getUnitHP(const awe::UnitID id) const noexcept {
 
 void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept {
 	if (_isUnitPresent(id)) {
-		_units[id].setFuel(fuel);
+		_units.at(id).setFuel(fuel);
 	} else {
 		_logger.error("setUnitFuel operation cancelled: attempted to assign fuel "
 			"{} to unit with ID {}, which doesn't exist!", fuel, id);
@@ -323,7 +325,7 @@ awe::Fuel awe::map::getUnitFuel(const awe::UnitID id) const noexcept {
 
 void awe::map::setUnitAmmo(const awe::UnitID id, const awe::Ammo ammo) noexcept {
 	if (_isUnitPresent(id)) {
-		_units[id].setAmmo(ammo);
+		_units.at(id).setAmmo(ammo);
 	} else {
 		_logger.error("setUnitAmmo operation cancelled: attempted to assign ammo "
 			"{} to unit with ID {}, which doesn't exist!", ammo, id);
@@ -349,13 +351,13 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) noexcept
 			load);
 		return;
 	}
-	if (_units[load].loadedOnto()) {
+	if (_units.at(load).loadedOnto()) {
 		_logger.warning("loadUnit warning: unit with ID {} was already loaded "
 			"onto unit with ID {}", load, onto);
 		return;
 	}
-	_units[onto].loadUnit(load);
-	_units[load].loadOnto(onto);
+	_units.at(onto).loadUnit(load);
+	_units.at(load).loadOnto(onto);
 }
 
 void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
@@ -385,9 +387,9 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 		}
 		return;
 	}
-	if (_units[from].unloadUnit(unload)) {
+	if (_units.at(from).unloadUnit(unload)) {
 		// unload successful, continue with operation
-		_units[unload].loadOnto(0);
+		_units.at(unload).loadOnto(0);
 		setUnitPosition(unload, onto);
 	} else {
 		_logger.error("unloadUnit operation failed: unit with ID {} was not "
@@ -462,9 +464,9 @@ void awe::map::setTileOwner(const sf::Vector2u pos, awe::ArmyID army) noexcept {
 	auto& tile = _tiles[pos.x][pos.y];
 	// first, remove the tile from the army who currently owns it
 	if (_isArmyPresent(tile.getTileOwner()))
-		_armys[tile.getTileOwner()].removeTile(pos);
+		_armys.at(tile.getTileOwner()).removeTile(pos);
 	// now assign it to the real owner, if any
-	if (_isArmyPresent(army)) _armys[army].addTile(pos);
+	if (_isArmyPresent(army)) _armys.at(army).addTile(pos);
 	// update the actual tile now
 	tile.setTileOwner(army);
 }
@@ -579,7 +581,7 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 				tile.setPixelPosition(tilex, tiley -
 					(float)(tileHeight - tile.MIN_HEIGHT));
 				if (tile.getUnit())
-					_units[tile.getUnit()].setPixelPosition(tilex, tiley);
+					_units.at(tile.getUnit()).setPixelPosition(tilex, tiley);
 				tilex += (float)tileWidth;
 			}
 		}
@@ -736,7 +738,7 @@ bool awe::map::_CWM_0_Unit(const bool isSave,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units, awe::UnitID id,
 	const sf::Vector2u& curtile) {
 	if (isSave) {
-		auto& unit = _units[id];
+		auto& unit = _units.at(id);
 		_file.writeNumber(unit.getArmy());
 		_file.writeNumber(unit.getType()->getID());
 		_file.writeNumber(unit.getHP());

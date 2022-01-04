@@ -32,6 +32,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace awe {
 	/**
 	 * Class which represents a single unit on a map.
+	 * @warning Note that, since this class does not have a default constructor, if
+	 *          it is used with a \c map container, the \c operator[]() method
+	 *          cannot be used with that map. Use \c at() instead.
 	 */
 	class unit : public sfx::animated_drawable {
 	public:
@@ -43,7 +46,7 @@ namespace awe {
 		 * @param   army  The army the unit belongs to, which can't be changed.
 		 * @param   sheet Pointer to the spritesheet to use with this unit.
 		 */
-		unit(const std::shared_ptr<const awe::unit_type>& type = nullptr,
+		unit(const std::shared_ptr<const awe::unit_type>& type,
 			const awe::ArmyID army = 0,
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr)
 			noexcept;
@@ -187,12 +190,12 @@ namespace awe {
 		/**
 		 * The type of the unit.
 		 */
-		const std::shared_ptr<const awe::unit_type> _type;
+		std::shared_ptr<const awe::unit_type> _type;
 
 		/**
 		 * The ID of the army the unit belongs to.
 		 */
-		const awe::ArmyID _army = awe::army::NO_ARMY;
+		awe::ArmyID _army = awe::army::NO_ARMY;
 
 		/**
 		 * The tile this unit occupies.

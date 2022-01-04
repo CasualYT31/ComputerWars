@@ -56,6 +56,9 @@ namespace std {
 namespace awe {
 	/**
 	 * Class which represents a single army on a map.
+	 * @warning Note that, since this class does not have a default constructor, if
+	 *          it is used with a \c map container, the \c operator[]() method
+	 *          cannot be used with that map. Use \c at() instead.
 	 */
 	class army {
 	public:
@@ -69,8 +72,7 @@ namespace awe {
 		 * Constructs a new army.
 		 * @param country The country the army belongs to, which can't be changed.
 		 */
-		army(const std::shared_ptr<const awe::country>& country = nullptr)
-			noexcept;
+		army(const std::shared_ptr<const awe::country>& country) noexcept;
 
 		/**
 		 * Gets the army's country information.
@@ -131,7 +133,7 @@ namespace awe {
 		/**
 		 * The country of the army.
 		 */
-		const std::shared_ptr<const awe::country> _country;
+		std::shared_ptr<const awe::country> _country;
 
 		/**
 		 * The funds this army obtains.
