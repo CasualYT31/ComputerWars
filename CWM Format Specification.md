@@ -75,3 +75,13 @@ these types to be a certain size...).
 | | Unit Ammo | `awe::Ammo` | |
 | END LOOP | First Loaded Unit's Owner | `awe::ArmyID` | At this point, the map loading code calls unit reading instructions recursively for each loaded unit, firstly calling the conditional statement four rows above. Execution continues as normal after the recursive call has been carried out. |
 | END LOOP | | | |
+
+## 1CWM
+
+This section contains the specification for the next iteration of the alpha
+release version of the Computer Wars map format. It is the same as the
+first version, with the following additions:
+
+ - In between `Map Height` and `Army Count`, two new `uint32` fields were
+   added: `Selected Tile X` and `Selected Tile Y`. They store the X and Y
+   location of the tile the cursor was last on.

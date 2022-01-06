@@ -62,6 +62,20 @@ namespace awe {
 		static const sf::Uint32 FIRST_FILE_VERSION = 1297564416;
 
 		/**
+		 * The latest version of the CWM format.
+		 * Can be used with calls to the constructor and the \c save() method.
+		 */
+		static const unsigned char LATEST_VERSION = 1;
+
+		/**
+		 * Version number of the CWM format representing the latest version.
+		 * @sa \c awe::map::FIRST_FILE_VERSION
+		 * @sa \c awe::map::LATEST_VERSION
+		 */
+		static const sf::Uint32 LATEST_FILE_VERSION =
+			FIRST_FILE_VERSION + LATEST_VERSION;
+
+		/**
 		 * Loads a given binary file containing map data and initialises this map
 		 * based off this data.
 		 * Also initialises the internal logger object.\n
@@ -84,7 +98,8 @@ namespace awe {
 			const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
-			const unsigned char version = 0, const std::string& name = "map")
+			const unsigned char version = LATEST_VERSION,
+			const std::string& name = "map")
 			noexcept;
 
 		/**
@@ -97,7 +112,8 @@ namespace awe {
 		 * @return \c TRUE if the save was successful, \c FALSE if the file
 		 *         couldn't be saved (reason will be logged).
 		 */
-		bool save(std::string file, const unsigned char version = 0) noexcept;
+		bool save(std::string file,
+			const unsigned char version = LATEST_VERSION) noexcept;
 
 		////////////////////
 		// MAP OPERATIONS //
@@ -404,7 +420,13 @@ namespace awe {
 		 * call will be ignored.
 		 * @param pos The X and Y location of the tile which is selected.
 		 */
-		void selectTile(const sf::Vector2u pos) noexcept;
+		void setSelectedTile(const sf::Vector2u pos) noexcept;
+
+		/**
+		 * Gets the position of the currently selected tile.
+		 * @return The X and Y location of the selected tile.
+		 */
+		sf::Vector2u getSelectedTile() const noexcept;
 
 		/**
 		 * Selects an army from the map.
@@ -446,6 +468,13 @@ namespace awe {
 			sheet) noexcept;
 
 		/**
+		 * Sets the spritesheet used for drawing map icons.
+		 * @param sheet Pointer to the animated spritesheet to use for icons.
+		 */
+		void setIconSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
+			sheet) noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
 		 * @param  target The target to render the map to.
 		 * @return \c FALSE, for now.
@@ -483,6 +512,15 @@ namespace awe {
 		 * @return \c TRUE if the position is out of bounds, \c FALSE if not.
 		 */
 		bool _isOutOfBounds(const sf::Vector2u pos) const noexcept;
+
+		/**
+		 * Checks if a given X and Y coordinate are within the visible portion of
+		 * the map as defined by \c _visiblePortion.
+		 * @param  pos The position to test.
+		 * @return \c TRUE if the position is within the visible portion, \c FALSE
+		 *         if not.
+		 */
+		bool _tileIsVisible(const sf::Vector2u pos) const noexcept;
 
 		/**
 		 * Checks if a given army ID is present on the map.
@@ -576,6 +614,23 @@ namespace awe {
 			awe::UnitID id, const sf::Vector2u& curtile);
 
 		/**
+		 * Second version of the CWM format.
+		 * @param  isSave    \c TRUE if the file is to be written to, \c FALSE if
+		 *                   the file is to be read from.
+		 * @param  countries Information on the countries to index when reading
+		 *                   country IDs.
+		 * @param  tiles     Information on the tile types to index when reading
+		 *                   tile type IDs.
+		 * @param  units     Information on the unit types to index when reading
+		 *                   unit type IDs.
+		 * @throws std::exception if the file couldn't be read or written.
+		 */
+		void _CWM_1(const bool isSave,
+			const std::shared_ptr<awe::bank<awe::country>>& countries,
+			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+			const std::shared_ptr<awe::bank<awe::unit_type>>& units);
+
+		/**
 		 * File name of the binary file previously read from or written to.
 		 */
 		std::string _filename = "";
@@ -644,6 +699,13 @@ namespace awe {
 		 */
 		sf::Rect<sf::Uint32> _visiblePortion = sf::Rect<sf::Uint32>(0, 0, 0, 0);
 
+		/**
+		 * The animated sprite representing the cursor.
+		 * The cursor sprite is currently hard-coded to always be the first sprite
+		 * of the icon spritesheet provided later.
+		 */
+		sfx::animated_sprite _cursor = sfx::animated_sprite(nullptr, 0);
+
 		//////////////////
 		// SPRITESHEETS //
 		//////////////////
@@ -656,5 +718,10 @@ namespace awe {
 		 * Spritesheet used with all units.
 		 */
 		std::shared_ptr<sfx::animated_spritesheet> _sheet_unit = nullptr;
+
+		/**
+		 * Spritesheet used with all map icons.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _sheet_icon = nullptr;
 	};
 }

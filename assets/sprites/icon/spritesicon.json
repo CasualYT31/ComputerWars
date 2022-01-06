@@ -1,0 +1,8 @@
+{
+	"path": "assets/sprites/icon/icon.png",
+	"frames": 18,
+	"framerate": 30.0,
+	"sprites": [
+		[0,0,28,31]
+	]
+}

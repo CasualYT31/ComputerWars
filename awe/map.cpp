@@ -493,8 +493,12 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u pos) const noexcept {
 	return 0;
 }
 
-void awe::map::selectTile(const sf::Vector2u pos) noexcept {
+void awe::map::setSelectedTile(const sf::Vector2u pos) noexcept {
 	if (!_isOutOfBounds(pos)) _sel = pos;
+}
+
+sf::Vector2u awe::map::getSelectedTile() const noexcept {
+	return _sel;
 }
 
 void awe::map::selectArmy(const awe::ArmyID army) noexcept {
@@ -544,19 +548,25 @@ void awe::map::setUnitSpritesheet(
 	}
 }
 
+void awe::map::setIconSpritesheet(
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_sheet_icon = sheet;
+	_cursor.setSpritesheet(sheet);
+	_cursor.setSprite(0);
+}
+
 bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 	// step 1. the tiles
+	// also update the position of the cursor here!
 	float tiley = 0.0;
 	for (sf::Uint32 y = 0, height = getMapSize().y; y < height; y++) {
 		float tilex = 0.0;
 		for (sf::Uint32 x = 0, width = getMapSize().x; x < width; x++) {
 			auto& tile = _tiles[x][y];
 			tile.animate(target);
-			// position them and their unit if they are in the visible portion
-			if (x >= _visiblePortion.left &&
-				x < _visiblePortion.left + _visiblePortion.width &&
-				y >= _visiblePortion.top &&
-				y < _visiblePortion.top + _visiblePortion.height) {
+			sf::Vector2u tilePos = sf::Vector2u(x, y);
+			// position the tile and their unit if they are in the visible portion
+			if (_tileIsVisible(tilePos)) {
 				sf::Uint32 tileWidth = 0, tileHeight = 0;
 				auto type = tile.getTileType();
 				if (type) {
@@ -582,6 +592,10 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 					(float)(tileHeight - tile.MIN_HEIGHT));
 				if (tile.getUnit())
 					_units.at(tile.getUnit()).setPixelPosition(tilex, tiley);
+				// update cursor position
+				if (getSelectedTile() == tilePos) {
+					_cursor.setPosition(sf::Vector2f(tilex, tiley));
+				}
 				tilex += (float)tileWidth;
 			}
 		}
@@ -592,6 +606,9 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 	for (auto& unit : _units) {
 		unit.second.animate(target);
 	}
+	// step 3. the cursor
+	_cursor.animate(target);
+	// end
 	return false;
 }
 
@@ -618,12 +635,25 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		}
 	}
 	// step 3. the cursor
+	// but only if it is within the visible portion!
+	// to tell the truth the cursor should never be not visible...
+	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, states);
 	// step 4. army pane
 	// step 5. tile + unit pane
 }
 
 bool awe::map::_isOutOfBounds(const sf::Vector2u pos) const noexcept {
 	return pos.x >= getMapSize().x || pos.y >= getMapSize().y;
+}
+
+bool awe::map::_tileIsVisible(const sf::Vector2u pos) const noexcept {
+	if (pos.x >= _visiblePortion.left &&
+		pos.x < _visiblePortion.left + _visiblePortion.width &&
+		pos.y >= _visiblePortion.top &&
+		pos.y < _visiblePortion.top + _visiblePortion.height) {
+		return true;
+	}
+	return false;
 }
 
 bool awe::map::_isArmyPresent(const awe::ArmyID id) const noexcept {
@@ -666,6 +696,9 @@ void awe::map::_CWM_Header(const bool isSave,
 	case 0:
 		_CWM_0(isSave, countries, tiles, units);
 		break;
+	case 1:
+		_CWM_1(isSave, countries, tiles, units);
+		break;
 	default:
 		_logger.error("CWM version {} is unrecognised!", version);
 		throw std::exception("read above");
@@ -704,6 +737,72 @@ void awe::map::_CWM_0(const bool isSave,
 		sf::Uint32 width = _file.readNumber<sf::Uint32>();
 		sf::Uint32 height = _file.readNumber<sf::Uint32>();
 		setMapSize(sf::Vector2u(width, height));
+		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
+		for (sf::Uint64 army = 0; army < armyCount; army++) {
+			auto pCountry = (*countries)[_file.readNumber<awe::BankID>()];
+			if (createArmy(pCountry)) {
+				awe::Funds funds = _file.readNumber<awe::Funds>();
+				setArmyFunds(pCountry->getID(), funds);
+			} else {
+				throw std::exception("read above");
+			}
+		}
+		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
+			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
+				auto pos = sf::Vector2u(x, y);
+				if (setTileType(pos, (*tiles)[_file.readNumber<awe::BankID>()])) {
+					awe::HP hp = _file.readNumber<awe::HP>();
+					setTileHP(pos, hp);
+					awe::ArmyID army = _file.readNumber<awe::ArmyID>();
+					setTileOwner(pos, army);
+					_CWM_0_Unit(isSave, countries, tiles, units, 0,
+						sf::Vector2u(x, y));
+				} else {
+					throw std::exception("read above");
+				}
+			}
+		}
+	}
+}
+
+// do not forget to update _CWM_0_Unit() calls if needed!
+void awe::map::_CWM_1(const bool isSave,
+	const std::shared_ptr<awe::bank<awe::country>>& countries,
+	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+	const std::shared_ptr<awe::bank<awe::unit_type>>& units) {
+	if (isSave) {
+		_file.writeString(getMapName());
+		_file.writeNumber((sf::Uint32)getMapSize().x);
+		_file.writeNumber((sf::Uint32)getMapSize().y);
+		_file.writeNumber((sf::Uint32)getSelectedTile().x);
+		_file.writeNumber((sf::Uint32)getSelectedTile().y);
+		_file.writeNumber((sf::Uint32)_armys.size());
+		for (auto& army : _armys) {
+			_file.writeNumber(army.second.getCountry()->getID());
+			_file.writeNumber(army.second.getFunds());
+		}
+		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
+			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
+				auto& tile = _tiles[x][y];
+				_file.writeNumber(tile.getTileType()->getID());
+				_file.writeNumber(tile.getTileHP());
+				_file.writeNumber(tile.getTileOwner());
+				if (tile.getUnit()) {
+					_CWM_0_Unit(isSave, countries, tiles, units, tile.getUnit(),
+						sf::Vector2u(x, y));
+				} else {
+					_file.writeNumber(awe::army::NO_ARMY);
+				}
+			}
+		}
+	} else {
+		setMapName(_file.readString());
+		sf::Uint32 width = _file.readNumber<sf::Uint32>();
+		sf::Uint32 height = _file.readNumber<sf::Uint32>();
+		setMapSize(sf::Vector2u(width, height));
+		sf::Uint32 sel_x = _file.readNumber<sf::Uint32>();
+		sf::Uint32 sel_y = _file.readNumber<sf::Uint32>();
+		setSelectedTile(sf::Vector2u(sel_x, sel_y));
 		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
 		for (sf::Uint64 army = 0; army < armyCount; army++) {
 			auto pCountry = (*countries)[_file.readNumber<awe::BankID>()];

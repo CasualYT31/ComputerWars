@@ -76,6 +76,10 @@ void awe::tile::setPixelPosition(float x, float y) noexcept {
 	_sprite.setPosition(sf::Vector2f(x, y));
 }
 
+sf::Vector2f awe::tile::getPixelPosition() const noexcept {
+	return _sprite.getPosition();
+}
+
 bool awe::tile::animate(const sf::RenderTarget& target) noexcept {
 	return _sprite.animate(target);
 }

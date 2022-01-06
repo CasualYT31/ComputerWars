@@ -126,6 +126,12 @@ namespace awe {
 		void setPixelPosition(float x, float y) noexcept;
 
 		/**
+		 * Gets the tile's current pixel position.
+		 * @return The tile's pixel position.
+		 */
+		sf::Vector2f getPixelPosition() const noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
 		 * Simply calls the internal sprite's \c animate() method.
 		 * @return The return value of <tt>animated_sprite</tt>'s \c animate()

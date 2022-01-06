@@ -32,12 +32,12 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	_gui->setLanguageDictionary(_dictionary);
 
 	awe::map map(file, _countries, _tiles, _units);
-	map.selectTile(sf::Vector2u(0, 0));
 	map.selectArmy(0);
 	map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, map.getMapSize().x,
 		map.getMapSize().y));
 	map.setTileSpritesheet(_sprites->tile->normal);
 	map.setUnitSpritesheet(_sprites->unit->idle);
+	map.setIconSpritesheet(_sprites->icon);
 
 	try {
 		while (_renderer->isOpen()) {
@@ -45,6 +45,26 @@ int awe::game_engine::run(const std::string& file) noexcept {
 			while (_renderer->pollEvent(event)) {
 				if (event.type == sf::Event::Closed) _renderer->close();
 			}
+
+			// test cursor with basic ui
+			_userinput->update();
+
+			if (_userinput->operator[]("left")) {
+				map.setSelectedTile(sf::Vector2u(map.getSelectedTile().x - 1,
+					map.getSelectedTile().y));
+			} else if ((*_userinput)["right"]) {
+				map.setSelectedTile(sf::Vector2u(map.getSelectedTile().x + 1,
+					map.getSelectedTile().y));
+			} else if ((*_userinput)["up"]) {
+				map.setSelectedTile(sf::Vector2u(map.getSelectedTile().x,
+					map.getSelectedTile().y - 1));
+			} else if ((*_userinput)["down"]) {
+				map.setSelectedTile(sf::Vector2u(map.getSelectedTile().x,
+					map.getSelectedTile().y + 1));
+			} else if ((*_userinput)["select"]) {
+				map.save("");
+			}
+
 			_renderer->clear();
 			_renderer->animate(map);
 			_renderer->draw(map);
