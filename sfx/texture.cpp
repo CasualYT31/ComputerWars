@@ -34,8 +34,9 @@ std::size_t sfx::animated_spritesheet::getFrameCount(
 	try {
 		return _frames.at(sprite).size();
 	} catch (std::out_of_range&) {
+		/*
 		_logger.error("Error whilst attempting to retrieve the frame count of the "
-			"sprite \"{}\": it does not exist!", sprite);
+			"sprite \"{}\": it does not exist!", sprite); */
 	}
 	return 0;
 }
@@ -47,13 +48,15 @@ sf::IntRect sfx::animated_spritesheet::getFrameRect(const std::string& sprite,
 		try {
 			return frames.at(frame);
 		} catch (std::out_of_range&) {
+			/*
 			_logger.error("Error whilst attempting to retrieve the rect of frame "
 				"{} of the sprite \"{}\": the frame does not exist!", frame,
-				sprite);
+				sprite); */
 		}
 	} catch (std::out_of_range&) {
+		/*
 		_logger.error("Error whilst attempting to retrieve the rect of frame {} "
-			"of the sprite \"{}\": the sprite does not exist!", frame, sprite);
+			"of the sprite \"{}\": the sprite does not exist!", frame, sprite); */
 	}
 	return sf::IntRect();
 }
@@ -65,13 +68,16 @@ sf::Time sfx::animated_spritesheet::getFrameDuration(const std::string& sprite,
 		try {
 			return frames.at(frame);
 		} catch (std::out_of_range&) {
+			/*
 			_logger.error("Error whilst attempting to retrieve the duration of "
 				"frame {} of the sprite \"{}\": the frame does not exist!", frame,
-				sprite);
+				sprite); */
 		}
 	} catch (std::out_of_range&) {
+		/*
 		_logger.error("Error whilst attempting to retrieve the duration of frame "
 			"{} of the sprite \"{}\": the sprite does not exist!", frame, sprite);
+			*/
 	}
 	return sf::Time();
 }
