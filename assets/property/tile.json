@@ -25,7 +25,7 @@
 	"016seavertexupleftright": {"type": 1, "neutral": "seavertexupleftright", "tiles": []},
 	"017seavertexdownrightedgetop": {"type": 1, "neutral": "seavertexdownrightedgetop", "tiles": []},
 	"018seavertexleftupdown": {"type": 1, "neutral": "seavertexleftupdown", "tiles": []},
-	"019seavertexuprightedgedown": {"type": 1, "neutral": "seavertextuprightedgedown", "tiles": []},
+	"019seavertexuprightedgedown": {"type": 1, "neutral": "seavertexuprightedgedown", "tiles": []},
 	"01Aseavertexdownleftedgetop": {"type": 1, "neutral": "seavertexdownleftedgetop", "tiles": []},
 	"01Bseavertexrightupdown": {"type": 1, "neutral": "seavertexrightupdown", "tiles": []},
 	"01Cseaedgeright": {"type": 1, "neutral": "seaedgeright", "tiles": []},
