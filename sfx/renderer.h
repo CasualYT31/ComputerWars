@@ -117,17 +117,18 @@ namespace sfx {
 		 * @param  timeout See \c calculateDelta().
 		 * @return The delta accumulated since the object's construction, or since
 		 *         the last call to \c resetDeltaAccumulation().
-		 * @sa     calculateDelta()
-		 * @sa     resetDeltaAccumulation()
+		 * @sa     \c calculateDelta()
+		 * @sa     \c resetDeltaAccumulation()
 		 */
 		float accumulatedDelta(const sf::Time& timeout = sf::seconds(1.0f))
 			noexcept;
 
 		/**
-		 * Resets delta accumulation to \c 0.
-		 * @sa accumulatedDelta()
+		 * Resets delta accumulation.
+		 * @param to The value to reset delta to. Defaults to \c 0.
+		 * @sa    \c accumulatedDelta()
 		 */
-		void resetDeltaAccumulation() noexcept;
+		void resetDeltaAccumulation(const float to = 0.0f) noexcept;
 
 		/**
 		 * Can be used to designate an animation finished.

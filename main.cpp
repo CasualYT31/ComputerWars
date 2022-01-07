@@ -119,8 +119,8 @@ int game(const std::string& file) {
         std::make_shared<sfx::animated_spritesheet>();
     spritesheets->tilePicture->normal->load(
         "assets/sprites/tile_picture/normal/spritestile_picturenormal.json");
-    spritesheets->icon = std::make_shared<sfx::animated_spritesheet>();
-    spritesheets->icon->load("assets/sprites/icon/spritesicon.json");
+    spritesheets->icon = std::make_shared<sfx::new_animated_spritesheet>();
+    spritesheets->icon->load("assets/sprites/icon/newspritesicon.json");
     spritesheets->GUI = std::make_shared<sfx::animated_spritesheet>();
     spritesheets->GUI->load("assets/sprites/gui/spritesgui.json");
 

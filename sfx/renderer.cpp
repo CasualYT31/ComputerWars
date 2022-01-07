@@ -136,8 +136,8 @@ float sfx::animated_drawable::accumulatedDelta(const sf::Time& timeout) noexcept
 	return _delta;
 }
 
-void sfx::animated_drawable::resetDeltaAccumulation() noexcept {
-	_delta = 0.0f;
+void sfx::animated_drawable::resetDeltaAccumulation(const float to) noexcept {
+	_delta = to;
 }
 
 void sfx::animated_drawable::finish() noexcept {

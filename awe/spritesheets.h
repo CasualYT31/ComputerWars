@@ -100,7 +100,7 @@ namespace awe {
 		/**
 		 * Pointer to the icon spritesheet.
 		 */
-		std::shared_ptr<sfx::animated_spritesheet> icon;
+		std::shared_ptr<sfx::new_animated_spritesheet> icon;
 
 		/**
 		 * Pointer to the GUI spritesheet.

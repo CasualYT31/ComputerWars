@@ -471,7 +471,7 @@ namespace awe {
 		 * Sets the spritesheet used for drawing map icons.
 		 * @param sheet Pointer to the animated spritesheet to use for icons.
 		 */
-		void setIconSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
+		void setIconSpritesheet(const std::shared_ptr<sfx::new_animated_spritesheet>&
 			sheet) noexcept;
 
 		/**
@@ -704,7 +704,7 @@ namespace awe {
 		 * The cursor sprite is currently hard-coded to always be the first sprite
 		 * of the icon spritesheet provided later.
 		 */
-		sfx::animated_sprite _cursor = sfx::animated_sprite(nullptr, 0);
+		sfx::new_animated_sprite _cursor;
 
 		//////////////////
 		// SPRITESHEETS //
@@ -722,6 +722,6 @@ namespace awe {
 		/**
 		 * Spritesheet used with all map icons.
 		 */
-		std::shared_ptr<sfx::animated_spritesheet> _sheet_icon = nullptr;
+		std::shared_ptr<sfx::new_animated_spritesheet> _sheet_icon = nullptr;
 	};
 }

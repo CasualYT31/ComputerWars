@@ -549,10 +549,10 @@ void awe::map::setUnitSpritesheet(
 }
 
 void awe::map::setIconSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	const std::shared_ptr<sfx::new_animated_spritesheet>& sheet) noexcept {
 	_sheet_icon = sheet;
 	_cursor.setSpritesheet(sheet);
-	_cursor.setSprite(0);
+	_cursor.setSprite("cursor");
 }
 
 bool awe::map::animate(const sf::RenderTarget& target) noexcept {
