@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -130,6 +130,12 @@ namespace awe {
 		 * @return The tile's pixel position.
 		 */
 		sf::Vector2f getPixelPosition() const noexcept;
+
+		/**
+		 * Gets the tile's current pixel size.
+		 * @return The tile's pixel size.
+		 */
+		sf::Vector2f getPixelSize() const noexcept;
 
 		/**
 		 * This drawable's \c animate() method.

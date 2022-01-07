@@ -1,8 +1,19 @@
 {
 	"path": "assets/sprites/icon/icon.png",
-	"frames": 18,
-	"framerate": 30.0,
-	"sprites": [
-		[0,0,28,31]
-	]
+	"sprites": {
+		"cursor": {
+			"frames": [
+				[0,0,28,31],
+				[28,0,28,31],
+				[56,0,28,31],
+				[28,0,28,31]
+			],
+			"durations": [
+				660,
+				60,
+				90,
+				60
+			]
+		}
+	}
 }

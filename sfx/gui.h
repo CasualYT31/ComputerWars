@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -170,10 +170,10 @@ namespace sfx {
 			gui_background() noexcept;
 
 			/**
-			 * Initialises the GUI background with a sprite ID.
-			 * @param key The ID to set.
+			 * Initialises the GUI background with a sprite name.
+			 * @param key The name to set.
 			 */
-			gui_background(unsigned int key) noexcept;
+			gui_background(const std::string& key) noexcept;
 
 			/**
 			 * Initialises the GUI background with a solid colour.
@@ -184,9 +184,9 @@ namespace sfx {
 			/**
 			 * Sets this GUI background to be a sprite.
 			 * The stored colour value is then ignored.
-			 * @param key The sprite ID to set.
+			 * @param key The sprite name to set.
 			 */
-			void set(unsigned int key) noexcept;
+			void set(const std::string& key) noexcept;
 
 			/**
 			 * Sets this GUI background to be a solid colour.
@@ -203,12 +203,12 @@ namespace sfx {
 
 			/**
 			 * Retrieves the assigned sprite ID.
-			 * This method will simply return the ID that was last assigned.
+			 * This method will simply return the name that was last assigned.
 			 * Therefore, you should use \c getType() to first test if this GUI
 			 * background is actually meant to represent a sprite background.
-			 * @return The sprite ID that was last assigned.
+			 * @return The sprite name that was last assigned.
 			 */
-			unsigned int getSprite() const noexcept;
+			std::string getSprite() const noexcept;
 
 			/**
 			 * Retrieves the assigned colour value.
@@ -227,7 +227,7 @@ namespace sfx {
 			/**
 			 * The sprite ID.
 			 */
-			unsigned int _key = 0;
+			std::string _key = "";
 
 			/**
 			 * The solid colour value.
@@ -387,14 +387,14 @@ namespace sfx {
 		std::vector<sfx::animated_sprite> _widgetSprites;
 
 		/**
-		 * Stores the sprite IDs of all the widgets containing pictures that are
+		 * Stores the sprite names of all the widgets containing pictures that are
 		 * configured to be animated.
 		 * It stores them by panel, then by widget. The name of the GUI menu is to
 		 * be specified first, then the name of the animated widget.
 		 * @remark Only \c BitmapButtons and \c Pictures can animate!
 		 */
 		std::unordered_map<std::string,
-			std::unordered_map<std::string, unsigned int>> _guiSpriteKeys;
+			std::unordered_map<std::string, std::string>> _guiSpriteKeys;
 
 		/**
 		 * Pointer to the language dictionary used to translate all captions.

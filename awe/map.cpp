@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -549,7 +549,7 @@ void awe::map::setUnitSpritesheet(
 }
 
 void awe::map::setIconSpritesheet(
-	const std::shared_ptr<sfx::new_animated_spritesheet>& sheet) noexcept {
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
 	_sheet_icon = sheet;
 	_cursor.setSpritesheet(sheet);
 	_cursor.setSprite("cursor");
@@ -571,19 +571,23 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 				auto type = tile.getTileType();
 				if (type) {
 					if (tile.getTileOwner() == awe::army::NO_ARMY) {
-						tileWidth = (sf::Uint32)_sheet_tile->accessSprite(
+						tileWidth = tile.getPixelSize().x;
+						tileHeight = tile.getPixelSize().y;
+						/*tileWidth = (sf::Uint32)_sheet_tile->getFrameRect(
 							type->getNeutralTile()
 						).width;
 						tileHeight = (sf::Uint32)_sheet_tile->accessSprite(
 							type->getNeutralTile()
-						).height;
+						).height;*/
 					} else {
-						tileWidth = (sf::Uint32)_sheet_tile->accessSprite(
+						tileWidth = tile.getPixelSize().x;
+						tileHeight = tile.getPixelSize().y;
+						/*tileWidth = (sf::Uint32)_sheet_tile->accessSprite(
 							type->getOwnedTile(tile.getTileOwner())
 						).width;
 						tileHeight = (sf::Uint32)_sheet_tile->accessSprite(
 							type->getOwnedTile(tile.getTileOwner())
-						).height;
+						).height;*/
 					}
 				}
 				if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;

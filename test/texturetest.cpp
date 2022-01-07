@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -41,49 +41,86 @@ protected:
 			// setup the standard texture test script
 			setupJSONScript([](nlohmann::json& j) {
 				j["path"] = getTestAssetPath("sprites/sheet.png");
-				j["frames"] = 1;
-				j["framerate"] = 0.0;
-				j["sprites"] = R"([
-					[0,0,100,100],
-					[100,0,100,100],
-					[0,100,100,100],
-					[100,100,100,100]
-				])"_json;
+				j["sprites"] = R"({
+					"red": {
+						"frames": [
+							[0,0,100,100]
+						],
+						"durations": [0]
+					},
+					"blue": {
+						"frames": [
+							[100,0,100,100]
+						],
+						"durations": [0]
+					},
+					"green": {
+						"frames": [
+							[0,100,100,100]
+						],
+						"durations": [0]
+					},
+					"yellow": {
+						"frames": [
+							[100,100,100,100]
+						],
+						"durations": [0]
+					}
+				})"_json;
 			}, "sprites/sheet.json");
 			// setup the multi-frame texture test script
 			setupJSONScript([](nlohmann::json& j) {
 				j["path"] = getTestAssetPath("sprites/sheet.png");
-				j["frames"] = 6;
-				j["framerate"] = 0.0;
-				j["sprites"] = R"([
-					[0,0,200,200]
-				])"_json;
+				j["sprites"] = R"({
+					"sprite": {
+						"frames": [
+							[0,0,200,200],
+							[200,0,200,200],
+							[400,0,200,200],
+							[0,200,200,200],
+							[200,200,200,200],
+							[400,200,200,200]
+						],
+						"durations": [0,0,0,0,0,0]
+					}
+				})"_json;
 			}, "sprites/multi.json");
 			// setup the animated texture test script
 			setupJSONScript([](nlohmann::json& j) {
 				j["path"] = getTestAssetPath("sprites/sheet.png");
-				j["frames"] = 6;
-				j["framerate"] = 2.0;
-				j["sprites"] = R"([
-					[0,0,200,200]
-				])"_json;
+				j["sprites"] = R"({
+					"sprite": {
+						"frames": [
+							[0,0,200,200],
+							[200,0,200,200],
+							[400,0,200,200],
+							[0,200,200,200],
+							[200,200,200,200],
+							[400,200,200,200]
+						],
+						"durations": [500,500,500,500,500,500]
+					}
+				})"_json;
 			}, "sprites/ani.json");
 		}
 		// always load the texture script at the beginning of every test
 		if (isTest({ "AnimatedSprite", "AnimatedSpriteLaggy" })) {
 			sheet->load(getTestAssetPath("sprites/ani.json"));
+			sprite.setSpritesheet(sheet);
+			sprite.setSprite("sprite");
 		} else if (isTest({ "ManualFrameSelection" })) {
 			sheet->load(getTestAssetPath("sprites/multi.json"));
+			sprite.setSpritesheet(sheet);
+			sprite.setSprite("sprite");
 		} else {
 			sheet->load(getTestAssetPath("sprites/sheet.json"));
+			sprite.setSpritesheet(sheet);
+			sprite.setSprite("red");
 		}
 		// load the renderer script at the beginning of most tests
 		if (!isTest({ "LoadValidScript", "LoadInvalidScript" })) {
 			window.load(getTestAssetPath("renderer/renderer.json"));
 		}
-		// setup animated_sprite
-		sprite.setSpritesheet(sheet);
-		sprite.setSprite(0);
 	}
 
 	/**
@@ -112,8 +149,7 @@ protected:
  * Tests the behaviour of \c sfx::animated_spritesheet::load().
  */
 TEST_F(TextureTest, LoadValidScript) {
-	EXPECT_NO_THROW(sheet->accessTexture(0));
-	EXPECT_THROW(sheet->accessTexture(1), std::out_of_range);
+	EXPECT_EQ(sheet->getFrameCount("red"), 1);
 }
 
 /**
@@ -123,7 +159,8 @@ TEST_F(TextureTest, LoadValidScript) {
  */
 TEST_F(TextureTest, LoadInvalidScript) {
 	sheet->load(getTestAssetPath("sprites/faultysheet.json"));
-	EXPECT_NO_THROW(sheet->accessTexture(0));
+	EXPECT_EQ(sheet->getTexture().getSize().x, 600);
+	EXPECT_EQ(sheet->getFrameRect("red", 0).width, 100);
 }
 
 #ifdef COMPUTER_WARS_FULL_TEXTURE_TESTING
@@ -134,14 +171,28 @@ TEST_F(TextureTest, LoadInvalidScript) {
 TEST_F(TextureTest, OrdinarySprites) {
 	window.openWindow();
 	timer.restart();
+	int cursprite = 0;
 	for (;;) {
 		window.clear();
 		window.animate(sprite);
 		window.draw(sprite);
 		window.display();
 		if (timer.getElapsedTime().asSeconds() >= 1.0) {
-			if (sprite.getSprite() == 3) break;
-			sprite.setSprite(sprite.getSprite() + 1);
+			if (cursprite++ == 3) break;
+			switch (cursprite) {
+			case 0:
+				sprite.setSprite("red");
+				break;
+			case 1:
+				sprite.setSprite("blue");
+				break;
+			case 2:
+				sprite.setSprite("green");
+				break;
+			case 3:
+				sprite.setSprite("yellow");
+				break;
+			}
 			timer.restart();
 		}
 	}

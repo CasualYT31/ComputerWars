@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -62,7 +62,7 @@ const std::string& awe::common_properties::getName() const noexcept {
 const std::string& awe::common_properties::getShortName() const noexcept {
 	return _shortName;
 }
-unsigned int awe::common_properties::getIconKey() const noexcept {
+const std::string& awe::common_properties::getIconName() const noexcept {
 	return _iconKey;
 }
 const std::string& awe::common_properties::getDescription() const noexcept {
@@ -145,8 +145,9 @@ int awe::terrain::getMoveCost(const awe::BankID movecostID) const noexcept {
 	if (movecostID >= _movecosts.size()) return -1;
 	return _movecosts[movecostID];
 }
-unsigned int awe::terrain::getPicture(const awe::BankID countryID) const noexcept {
-	if (countryID >= _pictures.size()) return UINT_MAX;
+const std::string& awe::terrain::getPicture(const awe::BankID countryID) const
+	noexcept {
+	if (countryID >= _pictures.size()) return "";
 	return _pictures[countryID];
 }
 bool awe::terrain::isCapturable() const noexcept {
@@ -155,7 +156,7 @@ bool awe::terrain::isCapturable() const noexcept {
 std::vector<int> awe::terrain::copyMoveCosts() const noexcept {
 	return _movecosts;
 }
-std::vector<unsigned int> awe::terrain::copyPictures() const noexcept {
+std::vector<std::string> awe::terrain::copyPictures() const noexcept {
 	return _pictures;
 }
 bool awe::terrain::operator==(const awe::terrain& rhs) const noexcept {
@@ -177,12 +178,12 @@ awe::tile_type::tile_type(const awe::BankID id, engine::json& j) noexcept :
 awe::BankID awe::tile_type::getTypeIndex() const noexcept {
 	return _terrainType;
 }
-unsigned int awe::tile_type::getOwnedTile(const awe::BankID countryID) const
+const std::string& awe::tile_type::getOwnedTile(const awe::BankID countryID) const
 	noexcept {
 	if (countryID >= _tiles.size()) return _neutralTile;
 	return _tiles[countryID];
 }
-unsigned int awe::tile_type::getNeutralTile() const noexcept {
+const std::string& awe::tile_type::getNeutralTile() const noexcept {
 	return _neutralTile;
 }
 std::shared_ptr<const awe::terrain> awe::tile_type::getType() const noexcept {
@@ -234,13 +235,14 @@ void awe::unit_type::updateMovementType(const awe::bank<awe::movement_type>&
 	movementBank) const noexcept {
 	_movementType = movementBank[_movementTypeID];
 }
-unsigned int awe::unit_type::getPicture(const awe::BankID countryID) const
+const std::string& awe::unit_type::getPicture(const awe::BankID countryID) const
 	noexcept {
-	if (countryID >= _pictures.size()) return UINT_MAX;
+	if (countryID >= _pictures.size()) return "";
 	return _pictures[countryID];
 }
-unsigned int awe::unit_type::getUnit(const awe::BankID countryID) const noexcept {
-	if (countryID >= _units.size()) return UINT_MAX;
+const std::string& awe::unit_type::getUnit(const awe::BankID countryID) const
+	noexcept {
+	if (countryID >= _units.size()) return "";
 	return _units[countryID];
 }
 unsigned int awe::unit_type::getCost() const noexcept {
@@ -303,10 +305,10 @@ void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)
 		}
 	}
 }
-std::vector<unsigned int> awe::unit_type::copyPictures() const noexcept {
+std::vector<std::string> awe::unit_type::copyPictures() const noexcept {
 	return _pictures;
 }
-std::vector<unsigned int> awe::unit_type::copyUnits() const noexcept {
+std::vector<std::string> awe::unit_type::copyUnits() const noexcept {
 	return _units;
 }
 std::vector<awe::BankID> awe::unit_type::copyLoadableUnitIDs() const noexcept {
@@ -330,7 +332,7 @@ awe::commander::commander(const awe::BankID id, engine::json& j) noexcept :
 	common_properties(id, j) {
 	j.apply(_portrait, { "portrait" }, true);
 }
-unsigned int awe::commander::getPortrait() const noexcept {
+const std::string& awe::commander::getPortrait() const noexcept {
 	return _portrait;
 }
 bool awe::commander::operator==(const awe::commander& rhs) const noexcept {

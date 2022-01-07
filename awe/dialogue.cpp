@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -285,8 +285,8 @@ void awe::dialogue_box::setSizeRatio(const float ratio) noexcept {
 }
 
 void awe::dialogue_box::setSprite(
-	std::shared_ptr<const sfx::animated_spritesheet> sheet, unsigned int sprite)
-	noexcept {
+	std::shared_ptr<const sfx::animated_spritesheet> sheet,
+	const std::string& sprite) noexcept {
 	_sheet = sheet;
 	_spriteID = sprite;
 	_spriteInfoChanged = true;

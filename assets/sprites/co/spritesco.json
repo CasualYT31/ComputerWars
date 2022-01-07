@@ -1,11 +1,23 @@
 {
 	"path": "assets/sprites/co/co.png",
-	"frames": 1,
-	"framerate": 0.0,
-	"sprites": [
-		[0,487,90,20],
-		
-		[0,0,139,487],
-		[20,30,90,20]
-	]
+	"sprites": {
+		"noco": {
+			"frames": [
+				[0,487,90,20]
+			],
+			"durations": [0]
+		},
+		"jake": {
+			"frames": [
+				[0,0,139,487]
+			],
+			"durations": [0]
+		},
+		"jakeface": {
+			"frames": [
+				[20,30,90,20]
+			],
+			"durations": [0]
+		}
+	}
 }

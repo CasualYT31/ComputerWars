@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -119,8 +119,8 @@ int game(const std::string& file) {
         std::make_shared<sfx::animated_spritesheet>();
     spritesheets->tilePicture->normal->load(
         "assets/sprites/tile_picture/normal/spritestile_picturenormal.json");
-    spritesheets->icon = std::make_shared<sfx::new_animated_spritesheet>();
-    spritesheets->icon->load("assets/sprites/icon/newspritesicon.json");
+    spritesheets->icon = std::make_shared<sfx::animated_spritesheet>();
+    spritesheets->icon->load("assets/sprites/icon/spritesicon.json");
     spritesheets->GUI = std::make_shared<sfx::animated_spritesheet>();
     spritesheets->GUI->load("assets/sprites/gui/spritesgui.json");
 

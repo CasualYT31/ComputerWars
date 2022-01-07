@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -100,7 +100,7 @@ namespace awe {
 		/**
 		 * Pointer to the icon spritesheet.
 		 */
-		std::shared_ptr<sfx::new_animated_spritesheet> icon;
+		std::shared_ptr<sfx::animated_spritesheet> icon;
 
 		/**
 		 * Pointer to the GUI spritesheet.

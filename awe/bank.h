@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -178,10 +178,10 @@ namespace awe {
 		const std::string& getShortName() const noexcept;
 
 		/**
-		 * Retrieves the sprite ID of the icon associated with this property.
-		 * @return The sprite ID.
+		 * Retrieves the sprite name of the icon associated with this property.
+		 * @return The sprite name.
 		 */
-		unsigned int getIconKey() const noexcept;
+		const std::string& getIconName() const noexcept;
 
 		/**
 		 * Retrieves the description property.
@@ -196,8 +196,8 @@ namespace awe {
 		 * For classes that inherit from this one, this protected constructor is to
 		 * be called, either in the subclass' constructor definition's initialiser
 		 * list, or in the code block of the subclass constructor. The reference to
-		 * the \c engine::json object received in the subclass' constructor should be
-		 * passed on directly without changes.\n
+		 * the \c engine::json object received in the subclass' constructor should
+		 * be passed on directly without changes.\n
 		 * 
 		 * The following keys correspond to the following properties:
 		 * <ul><li>\c "longname" = \c _name</li>
@@ -225,7 +225,7 @@ namespace awe {
 		/**
 		 * The icon property.
 		 */
-		unsigned int _iconKey = 0;
+		std::string _iconKey = "";
 
 		/**
 		 * The description property.
@@ -397,17 +397,17 @@ namespace awe {
 		 *     <li>\c "capturable" = \c _isCapturable, <tt>(bool)</tt></li>
 		 *     <li>\c "movecosts" = \c _movecosts, <tt>([signed 32-bit int{,
 		 *         signed 32-bit int, etc.}])</tt></li>
-		 *     <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{,
-		 *         unsigned 32-bit int, etc.}])</tt></li></ul>
+		 *     <li>\c "pictures" = \c _pictures, <tt>([string{, string, etc.}])
+		 *         </tt></li></ul>
 		 * 
 		 * The \c movecosts array stores a list of movement points associated with
 		 * each movement type. For example, the first value will store the number
 		 * of movement points it takes for the first type of movement to traverse
 		 * over it (in the default implementation, Infantry).\n
 		 * 
-		 * The \c pictures array stores a list of animated sprite IDs associated
-		 * with each country. For example, the first value will store the ID of the
-		 * sprite shown when the first country owns it (in the default
+		 * The \c pictures array stores a list of animated sprite names associated
+		 * with each country. For example, the first value will store the name of
+		 * the sprite shown when the first country owns it (in the default
 		 * implementation, Neutral). Not all countries have to be accounted for if
 		 * the tile cannot be "owned," i.e. captured.
 		 * @param id The ID of the bank entry.
@@ -439,13 +439,12 @@ namespace awe {
 			noexcept;
 
 		/**
-		 * Retrieves the sprite ID associated with a given country.
+		 * Retrieves the sprite name associated with a given country.
 		 * @param  countryID The ID of the country.
-		 * @return The sprite ID of the terrain picture, or \c UINT_MAX if the
-		 *         given country ID didn't identify a sprite ID.
+		 * @return The sprite name of the terrain picture, or a blank string if the
+		 *         given country ID didn't identify a sprite name.
 		 */
-		unsigned int getPicture(const awe::BankID countryID) const
-			noexcept;
+		const std::string& getPicture(const awe::BankID countryID) const noexcept;
 
 		/**
 		 * Determines if this property is capturable.
@@ -460,10 +459,10 @@ namespace awe {
 		std::vector<int> copyMoveCosts() const noexcept;
 
 		/**
-		 * Copies the internal list of picture sprite IDs and returns it.
+		 * Copies the internal list of picture sprite names and returns it.
 		 * @return All the pictures assigned to this terrain.
 		 */
-		std::vector<unsigned int> copyPictures() const noexcept;
+		std::vector<std::string> copyPictures() const noexcept;
 
 		/**
 		 * Comparison operator.
@@ -498,7 +497,7 @@ namespace awe {
 		/**
 		 * Picture properties.
 		 */
-		std::vector<unsigned int> _pictures;
+		std::vector<std::string> _pictures;
 
 		/**
 		 * Capturable property.
@@ -510,7 +509,7 @@ namespace awe {
 	 * A game property class which stores the information associated with a single
 	 * type of tile.
 	 * Tiles and terrain types were separated in this way so that different visual
-	 * representations of the same terrain can be maintained. For example, a road
+	 * representations of the same terrain can be supported. For example, a road
 	 * may be straight, a bend, a T-junction, or a crossroads.
 	 * @sa awe::bank_id
 	 */
@@ -520,18 +519,18 @@ namespace awe {
 		 * Constructor which reads the given JSON object for tile properties.
 		 * The following keys are required:
 		 * <ul><li>\c "type" = \c _terrainType, <tt>(unsigned 32-bit int)</tt></li>
-		 *     <li>\c "neutral" = \c _neutralTile, <tt>(unsigned 32-bit int)</tt>
-		 *     </li>
-		 *     <li>\c "tiles" = \c _tiles, <tt>([unsigned 32-bit int{, unsigned
-		 *         32-bit int, etc.}])</tt></li></ul>
-		 * The \c neutral key stores a sprite ID shown when the tile is not owned
+		 *     <li>\c "neutral" = \c _neutralTile, <tt>(string)</tt></li>
+		 *     <li>\c "tiles" = \c _tiles, <tt>([string{, string, etc.}])
+		 *         </tt></li></ul>
+		 * The \c neutral key stores a sprite name shown when the tile is not owned
 		 * by any country. This should be given for all tile types.\n
-		 * The \c tiles vector stores a list of animated sprite IDs associated with
-		 * each country's version of the tile. For example, the first value will
-		 * store the ID of the sprite shown on the map when the first country owns
-		 * it (in the default implementation: Orange Star). This vector does not
-		 * have to be accounted for if the tile cannot be owned/captured. In which
-		 * case, an empty vector should be given in the script.
+		 * The \c tiles vector stores a list of animated sprite names associated
+		 * with each country's version of the tile. For example, the first value
+		 * will store the name of the sprite shown on the map when the first
+		 * country owns it (in the default implementation: Orange Star). This
+		 * vector does not have to be accounted for if the tile cannot be
+		 * owned/captured. In which case, an empty vector should be given in the
+		 * script.
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the tile type's properties.
 		 */
@@ -545,19 +544,20 @@ namespace awe {
 		awe::BankID getTypeIndex() const noexcept;
 
 		/**
-		 * Retrieves the ID of the sprite that is shown for a given country.
+		 * Retrieves the name of the sprite that is shown for a given country.
 		 * @param  countryID The ID of the country.
-		 * @return The ID of the tile's sprite, or \c _neutralTile if the given
-		 *         country ID didn't identify a sprite ID.
+		 * @return The name of the tile's sprite, or \c _neutralTile if the given
+		 *         country ID didn't identify a sprite name.
 		 */
-		unsigned int getOwnedTile(const awe::BankID countryID) const noexcept;
+		const std::string& getOwnedTile(const awe::BankID countryID) const
+			noexcept;
 
 		/**
-		 * Retrieves the ID of the sprite that is shown when no country owns the
+		 * Retrieves the name of the sprite that is shown when no country owns the
 		 * tile.
-		 * @return The ID of the tile's neutral sprite.
+		 * @return The name of the tile's neutral sprite.
 		 */
-		unsigned int getNeutralTile() const noexcept;
+		const std::string& getNeutralTile() const noexcept;
 
 		/**
 		 * Retrieves a pointer to the details of the type of terrain this tile
@@ -565,7 +565,7 @@ namespace awe {
 		 * @return The pointer to the terrain type's properties.
 		 * @sa     updateTerrain()
 		 */
-		std::shared_ptr<const terrain> getType() const noexcept;
+		std::shared_ptr<const awe::terrain> getType() const noexcept;
 
 		/**
 		 * Updates the stored terrain type properties pointer.
@@ -603,14 +603,14 @@ namespace awe {
 		mutable std::shared_ptr<const awe::terrain> _terrain;
 
 		/**
-		 * The sprite IDs of the tile corresponding to each country.
+		 * The sprite names of the tile corresponding to each country.
 		 */
-		std::vector<unsigned int> _tiles;
+		std::vector<std::string> _tiles;
 
 		/**
-		 * The sprite ID of the tile with no owner.
+		 * The sprite name of the tile with no owner.
 		 */
-		unsigned int _neutralTile = 0;
+		std::string _neutralTile = "";
 	};
 
 	/**
@@ -640,10 +640,10 @@ namespace awe {
 		 *     </li>
 		 *     <li>\c "highrange" = \c _higherRange, <tt>(unsigned 32-bit int)</tt>
 		 *     </li>
-		 *     <li>\c "pictures" = \c _pictures, <tt>([unsigned 32-bit int{,
-		 *         unsigned 32-bit int, etc.}])</tt></li>
-		 *     <li>\c "sprites" = \c _units, <tt>([unsigned 32-bit int{, unsigned
-		 *         32-bit int, etc.}])</tt></li>
+		 *     <li>\c "pictures" = \c _pictures, <tt>([string{, string, etc.}])
+		 *         </tt></li>
+		 *     <li>\c "sprites" = \c _units, <tt>([string{, string, etc.}])
+		 *         </tt></li>
 		 *     <li>\c "canload" = \c _canLoadThese, <tt>([unsigned 32-bit int{,
 		 *         unsigned 32-bit int, etc.}])</tt></li>
 		 *     <li>\c "loadlimit" = \c _loadLimit, <tt>(unsigned 32-bit int)</tt>
@@ -655,10 +655,10 @@ namespace awe {
 		 * current tile. If the tile is within both the lower and higher ranges
 		 * inclusive, then the attack is valid. If not, the attack is invalid.\n
 		 * 
-		 * Pictures is an array of sprite IDs corresponding to each country's
+		 * Pictures is an array of sprite names corresponding to each country's
 		 * portrait of the type of unit.\n
 		 * 
-		 * Sprites is an array of sprite IDs corresponding to each country's map
+		 * Sprites is an array of sprite names corresponding to each country's map
 		 * representation of the type of unit.
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the terrain type's properties.
@@ -690,20 +690,20 @@ namespace awe {
 			const noexcept;
 
 		/**
-		 * Retrieves the sprite ID of a given country's portrait of this unit.
+		 * Retrieves the sprite name of a given country's portrait of this unit.
 		 * @param  countryID The ID of the country.
-		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't
-		 *         map to a sprite ID in the internal list.
+		 * @return The sprite name, or a blank string if the given country ID
+		 *         didn't map to a sprite name in the internal list.
 		 */
-		unsigned int getPicture(const awe::BankID countryID) const noexcept;
+		const std::string& getPicture(const awe::BankID countryID) const noexcept;
 
 		/**
-		 * Retrieves the sprite ID of a given country's map sprite of this unit.
+		 * Retrieves the sprite name of a given country's map sprite of this unit.
 		 * @param  countryID The ID of the country.
-		 * @return The sprite ID, or \c UINT_MAX if the given country ID didn't
-		 *         map to a sprite ID in the internal list.
+		 * @return The sprite name, or a blank string if the given country ID
+		 *         didn't map to a sprite name in the internal list.
 		 */
-		unsigned int getUnit(const awe::BankID countryID) const noexcept;
+		const std::string& getUnit(const awe::BankID countryID) const noexcept;
 
 		/**
 		 * Retrieves the price property.
@@ -804,16 +804,16 @@ namespace awe {
 		void updateUnitTypes(const bank<unit_type>& unitBank) const noexcept;
 
 		/**
-		 * Copies the internal list of picture sprite IDs and returns it.
+		 * Copies the internal list of picture sprite names and returns it.
 		 * @return All the pictures assigned to this unit.
 		 */
-		std::vector<unsigned int> copyPictures() const noexcept;
+		std::vector<std::string> copyPictures() const noexcept;
 
 		/**
-		 * Copies the internal list of unit sprite IDs and returns it.
+		 * Copies the internal list of unit sprite names and returns it.
 		 * @return All the map sprites assigned to this unit.
 		 */
-		std::vector<unsigned int> copyUnits() const noexcept;
+		std::vector<std::string> copyUnits() const noexcept;
 
 		/**
 		 * Copies the internal list of IDs of unit types this unit can hold and
@@ -861,12 +861,12 @@ namespace awe {
 		/**
 		 * The portrait IDs.
 		 */
-		std::vector<unsigned int> _pictures;
+		std::vector<std::string> _pictures;
 
 		/**
 		 * The sprite IDs.
 		 */
-		std::vector<unsigned int> _units;
+		std::vector<std::string> _units;
 
 		/**
 		 * The price property.
@@ -945,18 +945,17 @@ namespace awe {
 		 * It also passes on the JSON object to the \c common_properties
 		 * constructor. In addition to the keys defined in the superclass, the
 		 * following keys are required:
-		 * <ul><li>\c "portrait" = \c _portrait, <tt>(unsigned 32-bit int)</tt>
-		 *     </li></ul>
+		 * <ul><li>\c "portrait" = \c _portrait, <tt>(string)</tt></li></ul>
 		 * @param id The ID of the bank entry.
 		 * @param j  The object value containing the commander's properties.
 		 */
 		commander(const awe::BankID id, engine::json& j) noexcept;
 
 		/**
-		 * Retrieves the animated sprite ID of this commander's portrait.
+		 * Retrieves the animated sprite name of this commander's portrait.
 		 * @return The animated sprite ID.
 		 */
-		unsigned int getPortrait() const noexcept;
+		const std::string& getPortrait() const noexcept;
 
 		/**
 		 * Comparison operator.
@@ -976,7 +975,7 @@ namespace awe {
 		/**
 		 * The portrait property.
 		 */
-		unsigned int _portrait = 0;
+		std::string _portrait = "";
 	};
 
 	/**

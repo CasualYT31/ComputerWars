@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -36,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 sfx::gui::gui_background::gui_background() noexcept {}
 
-sfx::gui::gui_background::gui_background(unsigned int key) noexcept {
+sfx::gui::gui_background::gui_background(const std::string& key) noexcept {
 	set(key);
 }
 
@@ -44,7 +44,7 @@ sfx::gui::gui_background::gui_background(sf::Color colour) noexcept {
 	set(colour);
 }
 
-void sfx::gui::gui_background::set(unsigned int key) noexcept {
+void sfx::gui::gui_background::set(const std::string& key) noexcept {
 	_flag = sfx::gui::gui_background::type::Sprite;
 	_key = key;
 }
@@ -58,7 +58,7 @@ sfx::gui::gui_background::type sfx::gui::gui_background::getType() const noexcep
 	return _flag;
 }
 
-unsigned int sfx::gui::gui_background::getSprite() const noexcept {
+std::string sfx::gui::gui_background::getSprite() const noexcept {
 	return _key;
 }
 
@@ -227,15 +227,14 @@ bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 				try {
 					tgui::Texture tex;
 					auto iRect =
-						_sheet->accessSprite(_widgetSprites[i].getSprite());
+						_sheet->getFrameRect(_widgetSprites[i].getSprite(),
+							_widgetSprites[i].getCurrentFrame());
 					tgui::UIntRect rect;
 					rect.left = iRect.left;
 					rect.top = iRect.top;
 					rect.width = iRect.width;
 					rect.height = iRect.height;
-					tex.load(
-						_sheet->accessTexture(_widgetSprites[i].getCurrentFrame()),
-						rect);
+					tex.load(_sheet->getTexture(), rect);
 					_widgetPictures.push_back(tex);
 				} catch (std::out_of_range&) {
 					i++;
@@ -296,7 +295,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 				j.applyColour(newcolour, { i.key(), "background" }, true);
 				_guiBackground[i.key()].set(newcolour);
 			} else {
-				unsigned int newkey = _guiBackground[i.key()].getSprite();
+				std::string newkey = _guiBackground[i.key()].getSprite();
 				j.apply(newkey, { i.key(), "background" }, true);
 				_guiBackground[i.key()].set(newkey);
 			}

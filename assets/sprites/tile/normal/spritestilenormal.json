@@ -1,227 +1,1325 @@
 {
 	"path": "assets/sprites/tile/normal/tilenormal.png",
-	"frames": 1,
-	"framerate": 0.0,
-	"sprites": [
-		[0,0,16,16],
-		[16,0,16,16],
-		[32,0,16,16],
-		[48,0,16,16],
-		[64,0,16,16],
-		[80,0,16,16],
-		[96,0,16,16],
-		[112,0,16,16],
-		[128,0,16,16],
-		[144,0,16,16],
-		[160,0,16,16],
-		[176,0,16,16],
-		[192,0,16,16],
-		[208,0,16,16],
-		[224,0,16,16],
-		[0,16,16,19],
-		[16,19,16,16],
-		[32,19,16,16],
-		[48,19,16,16],
-		[64,19,16,16],
-		[80,19,16,16],
-		[96,19,16,16],
-		[112,19,16,16],
-		[128,19,16,16],
-		[144,19,16,16],
-		[160,19,16,16],
-		[176,19,16,16],
-		[192,19,16,16],
-		[208,19,16,16],
-		[224,19,16,16],
-		[240,19,16,16],
-		[256,19,16,16],
-		[240,0,16,16],
-		[0,35,16,16],
-		[16,35,16,16],
-		[32,35,16,16],
-		[48,35,16,16],
-		[64,35,16,16],
-		[80,35,16,16],
-		[96,35,16,16],
-		[112,35,16,16],
-		[256,0,16,16],
-		[128,35,16,16],
-		[144,35,16,16],
-		[160,35,16,16],
-		[176,35,16,16],
-		[192,35,16,16],
-		[208,35,16,16],
-		[224,35,16,16],
-		[240,35,16,16],
-		[256,35,16,16],
-		[0,51,16,16],
-		[16,51,16,16],
-		[32,51,16,16],
-		[48,51,16,16],
-		[64,51,16,16],
-		[80,51,16,16],
-		[96,51,16,16],
-		[112,51,16,16],
-		[128,51,16,16],
-		[144,51,16,16],
-		[160,51,16,16],
-		[176,51,16,16],
-		[192,51,16,16],
-		[208,51,16,16],
-		[224,51,16,16],
-		[240,51,16,16],
-		[256,51,16,16],
-		[0,67,16,16],
-		[16,67,16,16],
-		[32,67,16,16],
-		[48,67,16,16],
-		[64,67,16,16],
-		[80,67,16,16],
-		[96,67,16,16],
-		[112,67,16,16],
-		[0,83,16,24],
-		[16,86,16,21],
-		[112,86,16,21],
-		[128,86,16,21],
-		[304,22,16,21],
-		[384,0,16,21],
-		[384,81,16,21],
-		[144,139,16,20],
-		[160,139,16,20],
-		[176,139,16,20],
-		[192,139,16,20],
-		[208,139,16,20],
-		[224,139,16,20],
-		[240,139,16,20],
-		[256,139,16,20],
-		[272,139,16,20],
-		[32,91,16,16],
-		[272,0,16,27],
-		[288,47,16,27],
-		[304,43,16,27],
-		[352,80,16,27],
-		[400,0,16,27],
-		[0,132,16,27],
-		[16,132,16,27],
-		[32,132,16,27],
-		[48,132,16,27],
-		[64,132,16,27],
-		[80,132,16,27],
-		[96,132,16,27],
-		[112,132,16,27],
-		[128,132,16,27],
-		[48,89,16,18],
-		[272,87,16,18],
-		[288,74,16,18],
-		[304,70,16,18],
-		[368,38,16,18],
-		[400,27,16,18],
-		[224,114,16,18],
-		[240,114,16,18],
-		[256,114,16,18],
-		[272,114,16,18],
-		[288,114,16,18],
-		[304,114,16,18],
-		[320,114,16,18],
-		[336,114,16,18],
-		[352,114,16,18],
-		[64,85,16,22],
-		[288,25,16,22],
-		[304,0,16,22],
-		[320,0,16,22],
-		[368,0,16,22],
-		[400,45,16,22],
-		[288,137,16,22],
-		[304,137,16,22],
-		[320,137,16,22],
-		[336,137,16,22],
-		[352,137,16,22],
-		[368,137,16,22],
-		[384,137,16,22],
-		[400,137,16,22],
-		[80,85,16,22],
-		[80,107,16,25],
-		[400,67,16,25],
-		[0,107,16,25],
-		[16,107,16,25],
-		[32,107,16,25],
-		[48,107,16,25],
-		[64,107,16,25],
-		[96,107,16,25],
-		[112,107,16,25],
-		[128,107,16,25],
-		[144,107,16,25],
-		[160,107,16,25],
-		[176,107,16,25],
-		[192,107,16,25],
-		[208,107,16,25],
-		[96,84,16,23],
-		[144,166,16,24],
-		[160,166,16,24],
-		[176,166,16,24],
-		[192,166,16,24],
-		[208,166,16,24],
-		[224,166,16,24],
-		[240,166,16,24],
-		[256,166,16,24],
-		[272,166,16,24],
-		[288,166,16,24],
-		[304,166,16,24],
-		[320,166,16,24],
-		[336,166,16,24],
-		[352,166,16,24],
-		[144,67,16,16],
-		[160,67,16,16],
-		[176,67,16,16],
-		[192,67,16,16],
-		[208,67,16,16],
-		[224,67,16,16],
-		[240,67,16,16],
-		[256,67,16,16],
-		[144,83,16,16],
-		[160,83,16,16],
-		[176,83,16,16],
-		[192,83,16,16],
-		[208,83,16,16],
-		[224,83,16,16],
-		[240,83,16,16],
-		[256,83,16,16],
-		[272,27,16,29],
-		[272,56,16,31],
-		[288,0,16,25],
-		[384,21,16,30],
-		[384,51,16,30],
-		[0,159,16,31],
-		[16,160,16,30],
-		[32,163,16,27],
-		[48,159,16,31],
-		[64,162,16,28],
-		[80,161,16,29],
-		[96,163,16,27],
-		[112,164,16,26],
-		[128,159,16,31],
-		[304,88,16,16],
-		[320,22,16,16],
-		[320,37,16,16],
-		[320,53,16,16],
-		[320,69,16,16],
-		[320,85,16,16],
-		[336,0,16,16],
-		[336,16,16,16],
-		[336,32,16,16],
-		[336,48,16,16],
-		[336,64,16,16],
-		[336,80,16,16],
-		[352,0,16,16],
-		[352,16,16,16],
-		[352,32,16,16],
-		[352,48,16,16],
-		[352,64,16,16],
-		[368,22,16,16],
-		[368,56,16,16],
-		[368,72,16,16],
-		[368,88,16,16],
-		[288,92,16,16],
-		[128,67,16,16]
-	]
+	"sprites": {
+		"plain": {
+			"frames": [
+				[0,0,16,16]
+			],
+			"durations": [0]
+		},
+		"sea": {
+			"frames": [
+				[16,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roadvert": {
+			"frames": [
+				[32,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roadhori": {
+			"frames": [
+				[48,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roadcross": {
+			"frames": [
+				[64,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roaddownright": {
+			"frames": [
+				[80,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roadleftdownright": {
+			"frames": [
+				[96,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roaddownleft": {
+			"frames": [
+				[112,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roaduprightdown": {
+			"frames": [
+				[128,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roadupleftdown": {
+			"frames": [
+				[144,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roadupright": {
+			"frames": [
+				[160,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roadleftupright": {
+			"frames": [
+				[176,0,16,16]
+			],
+			"durations": [0]
+		},
+		"roadupleft": {
+			"frames": [
+				[192,0,16,16]
+			],
+			"durations": [0]
+		},
+		"bridgevert": {
+			"frames": [
+				[208,0,16,16]
+			],
+			"durations": [0]
+		},
+		"bridgehori": {
+			"frames": [
+				[224,0,16,16]
+			],
+			"durations": [0]
+		},
+		"mtn": {
+			"frames": [
+				[0,16,16,19]
+			],
+			"durations": [0]
+		},
+		"wood": {
+			"frames": [
+				[16,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riverhori": {
+			"frames": [
+				[32,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riververt": {
+			"frames": [
+				[48,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riveruprightdown": {
+			"frames": [
+				[64,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riverleftupright": {
+			"frames": [
+				[80,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riverleftupdown": {
+			"frames": [
+				[96,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riverleftdownright": {
+			"frames": [
+				[112,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riverleftup": {
+			"frames": [
+				[128,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riverleftdown": {
+			"frames": [
+				[144,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riverdownright": {
+			"frames": [
+				[160,19,16,16]
+			],
+			"durations": [0]
+		},
+		"riverupright": {
+			"frames": [
+				[176,19,16,16]
+			],
+			"durations": [0]
+		},
+		"rivercross": {
+			"frames": [
+				[192,19,16,16]
+			],
+			"durations": [0]
+		},
+		"seariverexitleft": {
+			"frames": [
+				[208,19,16,16]
+			],
+			"durations": [0]
+		},
+		"seariverexitdown": {
+			"frames": [
+				[224,19,16,16]
+			],
+			"durations": [0]
+		},
+		"seariverexitright": {
+			"frames": [
+				[240,19,16,16]
+			],
+			"durations": [0]
+		},
+		"seariverexitup": {
+			"frames": [
+				[256,19,16,16]
+			],
+			"durations": [0]
+		},
+		"reef": {
+			"frames": [
+				[240,0,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalup": {
+			"frames": [
+				[0,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalright": {
+			"frames": [
+				[16,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoaldown": {
+			"frames": [
+				[32,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalleft": {
+			"frames": [
+				[48,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalupleft": {
+			"frames": [
+				[64,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalupright": {
+			"frames": [
+				[80,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoaldownright": {
+			"frames": [
+				[96,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoaldownleft": {
+			"frames": [
+				[112,35,16,16]
+			],
+			"durations": [0]
+		},
+		"plainruin": {
+			"frames": [
+				[256,0,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalleftupdown": {
+			"frames": [
+				[128,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoaluprightdown": {
+			"frames": [
+				[144,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalleftdownright": {
+			"frames": [
+				[160,35,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalleftupright": {
+			"frames": [
+				[176,35,16,16]
+			],
+			"durations": [0]
+		},
+		"seasingle": {
+			"frames": [
+				[192,35,16,16]
+			],
+			"durations": [0]
+		},
+		"seaopeningleft": {
+			"frames": [
+				[208,35,16,16]
+			],
+			"durations": [0]
+		},
+		"seaopeningright": {
+			"frames": [
+				[224,35,16,16]
+			],
+			"durations": [0]
+		},
+		"seaopeningup": {
+			"frames": [
+				[240,35,16,16]
+			],
+			"durations": [0]
+		},
+		"seaopeningdown": {
+			"frames": [
+				[256,35,16,16]
+			],
+			"durations": [0]
+		},
+		"seacornerupright": {
+			"frames": [
+				[0,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexupright": {
+			"frames": [
+				[16,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seacornerupleft": {
+			"frames": [
+				[32,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexupleft": {
+			"frames": [
+				[48,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seacornerdownleft": {
+			"frames": [
+				[64,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexdownleft": {
+			"frames": [
+				[80,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seacornerdownright": {
+			"frames": [
+				[96,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexdownright": {
+			"frames": [
+				[112,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seaedgeright": {
+			"frames": [
+				[128,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seaedgedown": {
+			"frames": [
+				[144,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seaedgeleft": {
+			"frames": [
+				[160,51,16,16]
+			],
+			"durations": [0]
+		},
+		"seaedgetop": {
+			"frames": [
+				[176,51,16,16]
+			],
+			"durations": [0]
+		},
+		"pipehori": {
+			"frames": [
+				[192,51,16,16]
+			],
+			"durations": [0]
+		},
+		"pipedeadendright": {
+			"frames": [
+				[208,51,16,16]
+			],
+			"durations": [0]
+		},
+		"pipedeadendleft": {
+			"frames": [
+				[224,51,16,16]
+			],
+			"durations": [0]
+		},
+		"pipeseamhori": {
+			"frames": [
+				[240,51,16,16]
+			],
+			"durations": [0]
+		},
+		"plainseamhori": {
+			"frames": [
+				[256,51,16,16]
+			],
+			"durations": [0]
+		},
+		"plainseamvert": {
+			"frames": [
+				[0,67,16,16]
+			],
+			"durations": [0]
+		},
+		"pipeseamvert": {
+			"frames": [
+				[16,67,16,16]
+			],
+			"durations": [0]
+		},
+		"pipevert": {
+			"frames": [
+				[32,67,16,16]
+			],
+			"durations": [0]
+		},
+		"pipedeadenddown": {
+			"frames": [
+				[48,67,16,16]
+			],
+			"durations": [0]
+		},
+		"pipedeadendup": {
+			"frames": [
+				[64,67,16,16]
+			],
+			"durations": [0]
+		},
+		"pipecornerdownright": {
+			"frames": [
+				[80,67,16,16]
+			],
+			"durations": [0]
+		},
+		"pipecornerdownleft": {
+			"frames": [
+				[96,67,16,16]
+			],
+			"durations": [0]
+		},
+		"pipecornerupleft": {
+			"frames": [
+				[112,67,16,16]
+			],
+			"durations": [0]
+		},
+		"missilesilo": {
+			"frames": [
+				[0,83,16,24]
+			],
+			"durations": [0]
+		},
+		"city": {
+			"frames": [
+				[16,86,16,21]
+			],
+			"durations": [0]
+		},
+		"cityos": {
+			"frames": [
+				[112,86,16,21]
+			],
+			"durations": [0]
+		},
+		"citybm": {
+			"frames": [
+				[128,86,16,21]
+			],
+			"durations": [0]
+		},
+		"cityge": {
+			"frames": [
+				[304,22,16,21]
+			],
+			"durations": [0]
+		},
+		"cityyc": {
+			"frames": [
+				[384,0,16,21]
+			],
+			"durations": [0]
+		},
+		"citybh": {
+			"frames": [
+				[384,81,16,21]
+			],
+			"durations": [0]
+		},
+		"cityrf": {
+			"frames": [
+				[144,139,16,20]
+			],
+			"durations": [0]
+		},
+		"citygs": {
+			"frames": [
+				[160,139,16,20]
+			],
+			"durations": [0]
+		},
+		"citybd": {
+			"frames": [
+				[176,139,16,20]
+			],
+			"durations": [0]
+		},
+		"cityab": {
+			"frames": [
+				[192,139,16,20]
+			],
+			"durations": [0]
+		},
+		"cityjs": {
+			"frames": [
+				[208,139,16,20]
+			],
+			"durations": [0]
+		},
+		"cityci": {
+			"frames": [
+				[224,139,16,20]
+			],
+			"durations": [0]
+		},
+		"citypc": {
+			"frames": [
+				[240,139,16,20]
+			],
+			"durations": [0]
+		},
+		"citytg": {
+			"frames": [
+				[256,139,16,20]
+			],
+			"durations": [0]
+		},
+		"citypl": {
+			"frames": [
+				[272,139,16,20]
+			],
+			"durations": [0]
+		},
+		"base": {
+			"frames": [
+				[32,91,16,16]
+			],
+			"durations": [0]
+		},
+		"baseos": {
+			"frames": [
+				[272,0,16,27]
+			],
+			"durations": [0]
+		},
+		"basebm": {
+			"frames": [
+				[288,47,16,27]
+			],
+			"durations": [0]
+		},
+		"basege": {
+			"frames": [
+				[304,43,16,27]
+			],
+			"durations": [0]
+		},
+		"baseyc": {
+			"frames": [
+				[352,80,16,27]
+			],
+			"durations": [0]
+		},
+		"basebh": {
+			"frames": [
+				[400,0,16,27]
+			],
+			"durations": [0]
+		},
+		"baserf": {
+			"frames": [
+				[0,132,16,27]
+			],
+			"durations": [0]
+		},
+		"basegs": {
+			"frames": [
+				[16,132,16,27]
+			],
+			"durations": [0]
+		},
+		"basebd": {
+			"frames": [
+				[32,132,16,27]
+			],
+			"durations": [0]
+		},
+		"baseab": {
+			"frames": [
+				[48,132,16,27]
+			],
+			"durations": [0]
+		},
+		"basejs": {
+			"frames": [
+				[64,132,16,27]
+			],
+			"durations": [0]
+		},
+		"baseci": {
+			"frames": [
+				[80,132,16,27]
+			],
+			"durations": [0]
+		},
+		"basepc": {
+			"frames": [
+				[96,132,16,27]
+			],
+			"durations": [0]
+		},
+		"basetg": {
+			"frames": [
+				[112,132,16,27]
+			],
+			"durations": [0]
+		},
+		"basepl": {
+			"frames": [
+				[128,132,16,27]
+			],
+			"durations": [0]
+		},
+		"airport": {
+			"frames": [
+				[48,89,16,18]
+			],
+			"durations": [0]
+		},
+		"airportos": {
+			"frames": [
+				[272,87,16,18]
+			],
+			"durations": [0]
+		},
+		"airportbm": {
+			"frames": [
+				[288,74,16,18]
+			],
+			"durations": [0]
+		},
+		"airportge": {
+			"frames": [
+				[304,70,16,18]
+			],
+			"durations": [0]
+		},
+		"airportyc": {
+			"frames": [
+				[368,38,16,18]
+			],
+			"durations": [0]
+		},
+		"airportbh": {
+			"frames": [
+				[400,27,16,18]
+			],
+			"durations": [0]
+		},
+		"airportrf": {
+			"frames": [
+				[224,114,16,18]
+			],
+			"durations": [0]
+		},
+		"airportgs": {
+			"frames": [
+				[240,114,16,18]
+			],
+			"durations": [0]
+		},
+		"airportbd": {
+			"frames": [
+				[256,114,16,18]
+			],
+			"durations": [0]
+		},
+		"airportab": {
+			"frames": [
+				[272,114,16,18]
+			],
+			"durations": [0]
+		},
+		"airportjs": {
+			"frames": [
+				[288,114,16,18]
+			],
+			"durations": [0]
+		},
+		"airportci": {
+			"frames": [
+				[304,114,16,18]
+			],
+			"durations": [0]
+		},
+		"airportpc": {
+			"frames": [
+				[320,114,16,18]
+			],
+			"durations": [0]
+		},
+		"airporttg": {
+			"frames": [
+				[336,114,16,18]
+			],
+			"durations": [0]
+		},
+		"airportpl": {
+			"frames": [
+				[352,114,16,18]
+			],
+			"durations": [0]
+		},
+		"port": {
+			"frames": [
+				[64,85,16,22]
+			],
+			"durations": [0]
+		},
+		"portos": {
+			"frames": [
+				[288,25,16,22]
+			],
+			"durations": [0]
+		},
+		"portbm": {
+			"frames": [
+				[304,0,16,22]
+			],
+			"durations": [0]
+		},
+		"portge": {
+			"frames": [
+				[320,0,16,22]
+			],
+			"durations": [0]
+		},
+		"portyc": {
+			"frames": [
+				[368,0,16,22]
+			],
+			"durations": [0]
+		},
+		"portbh": {
+			"frames": [
+				[400,45,16,22]
+			],
+			"durations": [0]
+		},
+		"portrf": {
+			"frames": [
+				[288,137,16,22]
+			],
+			"durations": [0]
+		},
+		"portgs": {
+			"frames": [
+				[304,137,16,22]
+			],
+			"durations": [0]
+		},
+		"portbd": {
+			"frames": [
+				[320,137,16,22]
+			],
+			"durations": [0]
+		},
+		"portab": {
+			"frames": [
+				[336,137,16,22]
+			],
+			"durations": [0]
+		},
+		"portjs": {
+			"frames": [
+				[352,137,16,22]
+			],
+			"durations": [0]
+		},
+		"portci": {
+			"frames": [
+				[368,137,16,22]
+			],
+			"durations": [0]
+		},
+		"portpc": {
+			"frames": [
+				[384,137,16,22]
+			],
+			"durations": [0]
+		},
+		"porttg": {
+			"frames": [
+				[400,137,16,22]
+			],
+			"durations": [0]
+		},
+		"portpl": {
+			"frames": [
+				[80,85,16,22]
+			],
+			"durations": [0]
+		},
+		"com": {
+			"frames": [
+				[80,107,16,25]
+			],
+			"durations": [0]
+		},
+		"comos": {
+			"frames": [
+				[400,67,16,25]
+			],
+			"durations": [0]
+		},
+		"combm": {
+			"frames": [
+				[0,107,16,25]
+			],
+			"durations": [0]
+		},
+		"comge": {
+			"frames": [
+				[16,107,16,25]
+			],
+			"durations": [0]
+		},
+		"comyc": {
+			"frames": [
+				[32,107,16,25]
+			],
+			"durations": [0]
+		},
+		"combh": {
+			"frames": [
+				[48,107,16,25]
+			],
+			"durations": [0]
+		},
+		"comrf": {
+			"frames": [
+				[64,107,16,25]
+			],
+			"durations": [0]
+		},
+		"comgs": {
+			"frames": [
+				[96,107,16,25]
+			],
+			"durations": [0]
+		},
+		"combd": {
+			"frames": [
+				[112,107,16,25]
+			],
+			"durations": [0]
+		},
+		"comab": {
+			"frames": [
+				[128,107,16,25]
+			],
+			"durations": [0]
+		},
+		"comjs": {
+			"frames": [
+				[144,107,16,25]
+			],
+			"durations": [0]
+		},
+		"comci": {
+			"frames": [
+				[160,107,16,25]
+			],
+			"durations": [0]
+		},
+		"compc": {
+			"frames": [
+				[176,107,16,25]
+			],
+			"durations": [0]
+		},
+		"comtg": {
+			"frames": [
+				[192,107,16,25]
+			],
+			"durations": [0]
+		},
+		"compl": {
+			"frames": [
+				[208,107,16,25]
+			],
+			"durations": [0]
+		},
+		"lab": {
+			"frames": [
+				[96,84,16,23]
+			],
+			"durations": [0]
+		},
+		"labos": {
+			"frames": [
+				[144,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labbm": {
+			"frames": [
+				[160,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labge": {
+			"frames": [
+				[176,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labyc": {
+			"frames": [
+				[192,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labbh": {
+			"frames": [
+				[208,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labrf": {
+			"frames": [
+				[224,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labgs": {
+			"frames": [
+				[240,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labbd": {
+			"frames": [
+				[256,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labab": {
+			"frames": [
+				[272,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labjs": {
+			"frames": [
+				[288,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labci": {
+			"frames": [
+				[304,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labpc": {
+			"frames": [
+				[320,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labtg": {
+			"frames": [
+				[336,166,16,24]
+			],
+			"durations": [0]
+		},
+		"labpl": {
+			"frames": [
+				[352,166,16,24]
+			],
+			"durations": [0]
+		},
+		"volcano0,0": {
+			"frames": [
+				[144,67,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano1,0": {
+			"frames": [
+				[160,67,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano2,0": {
+			"frames": [
+				[176,67,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano3,0": {
+			"frames": [
+				[192,67,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano0,1": {
+			"frames": [
+				[208,67,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano1,1": {
+			"frames": [
+				[224,67,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano2,1": {
+			"frames": [
+				[240,67,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano3,1": {
+			"frames": [
+				[256,67,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano0,2": {
+			"frames": [
+				[144,83,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano1,2": {
+			"frames": [
+				[160,83,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano2,2": {
+			"frames": [
+				[176,83,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano3,2": {
+			"frames": [
+				[192,83,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano0,3": {
+			"frames": [
+				[208,83,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano1,3": {
+			"frames": [
+				[224,83,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano2,3": {
+			"frames": [
+				[240,83,16,16]
+			],
+			"durations": [0]
+		},
+		"volcano3,3": {
+			"frames": [
+				[256,83,16,16]
+			],
+			"durations": [0]
+		},
+		"hqos": {
+			"frames": [
+				[272,27,16,29]
+			],
+			"durations": [0]
+		},
+		"hqbm": {
+			"frames": [
+				[272,56,16,31]
+			],
+			"durations": [0]
+		},
+		"hqge": {
+			"frames": [
+				[288,0,16,25]
+			],
+			"durations": [0]
+		},
+		"hqyc": {
+			"frames": [
+				[384,21,16,30]
+			],
+			"durations": [0]
+		},
+		"hqbh": {
+			"frames": [
+				[384,51,16,30]
+			],
+			"durations": [0]
+		},
+		"hqrf": {
+			"frames": [
+				[0,159,16,31]
+			],
+			"durations": [0]
+		},
+		"hqgs": {
+			"frames": [
+				[16,160,16,30]
+			],
+			"durations": [0]
+		},
+		"hqbd": {
+			"frames": [
+				[32,163,16,27]
+			],
+			"durations": [0]
+		},
+		"hqab": {
+			"frames": [
+				[48,159,16,31]
+			],
+			"durations": [0]
+		},
+		"hqjs": {
+			"frames": [
+				[64,162,16,28]
+			],
+			"durations": [0]
+		},
+		"hqci": {
+			"frames": [
+				[80,161,16,29]
+			],
+			"durations": [0]
+		},
+		"hqpc": {
+			"frames": [
+				[96,163,16,27]
+			],
+			"durations": [0]
+		},
+		"hqtg": {
+			"frames": [
+				[112,164,16,26]
+			],
+			"durations": [0]
+		},
+		"hqpl": {
+			"frames": [
+				[128,159,16,31]
+			],
+			"durations": [0]
+		},
+		"seavertexdownleftright": {
+			"frames": [
+				[304,88,16,16]
+			],
+			"durations": [0]
+		},
+		"seaedgeleftright": {
+			"frames": [
+				[320,22,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexupleftright": {
+			"frames": [
+				[320,37,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexdownrightedgetop": {
+			"frames": [
+				[320,53,16,16]
+			],
+			"durations": [0]
+		},
+		"seaedgetopdown": {
+			"frames": [
+				[320,69,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexleftupdown": {
+			"frames": [
+				[320,85,16,16]
+			],
+			"durations": [0]
+		},
+		"plainshadow": {
+			"frames": [
+				[336,0,16,16]
+			],
+			"durations": [0]
+		},
+		"shoaldownendright": {
+			"frames": [
+				[336,16,16,16]
+			],
+			"durations": [0]
+		},
+		"shoaldownendleft": {
+			"frames": [
+				[336,32,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalrightendtop": {
+			"frames": [
+				[336,48,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalrightenddown": {
+			"frames": [
+				[336,64,16,16]
+			],
+			"durations": [0]
+		},
+		"roadvertshadow": {
+			"frames": [
+				[336,80,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexuprightedgedown": {
+			"frames": [
+				[352,0,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalupendleft": {
+			"frames": [
+				[352,16,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalupendright": {
+			"frames": [
+				[352,32,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexdownleftedgetop": {
+			"frames": [
+				[352,48,16,16]
+			],
+			"durations": [0]
+		},
+		"seavertexrightupdown": {
+			"frames": [
+				[352,64,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalleftendtop": {
+			"frames": [
+				[368,22,16,16]
+			],
+			"durations": [0]
+		},
+		"roadhorishadow": {
+			"frames": [
+				[368,56,16,16]
+			],
+			"durations": [0]
+		},
+		"shoalleftenddown": {
+			"frames": [
+				[368,72,16,16]
+			],
+			"durations": [0]
+		},
+		"roaddownrightshadow": {
+			"frames": [
+				[368,88,16,16]
+			],
+			"durations": [0]
+		},
+		"missilesiloempty": {
+			"frames": [
+				[288,92,16,16]
+			],
+			"durations": [0]
+		},
+		"pipecornerupright": {
+			"frames": [
+				[128,67,16,16]
+			],
+			"durations": [0]
+		}
+	}
 }

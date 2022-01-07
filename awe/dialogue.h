@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -282,11 +282,11 @@ namespace awe {
 		 * Afterwards its current frame will be reset to 0.</b>
 		 * @param sheet  The \c sfx::animated_spritesheet which contains the
 		 *               character sprites.
-		 * @param sprite The ID of the character sprite to draw with this dialogue
-		 *               box.
+		 * @param sprite The name of the character sprite to draw with this
+		 *               dialogue box.
 		 */
 		void setSprite(std::shared_ptr<const sfx::animated_spritesheet> sheet,
-			unsigned int sprite) noexcept;
+			const std::string& sprite) noexcept;
 
 		/**
 		 * Dictates whether the dialogue box skips transitioning in or not.
@@ -670,9 +670,9 @@ namespace awe {
 		std::shared_ptr<const sfx::animated_spritesheet> _sheet = nullptr;
 
 		/**
-		 * The ID of the sprite from \c _sheet to assign to \c _characterSprite.
+		 * The name of the sprite from \c _sheet to assign to \c _characterSprite.
 		 */
-		unsigned int _spriteID = 0;
+		std::string _spriteID = 0;
 
 		/**
 		 * To be set to \c TRUE when \c _sheet and/or \c _spriteID are changed.
@@ -759,7 +759,7 @@ namespace awe {
 			bool skipTransIn = false;
 			bool skipTransOut = false;
 			std::shared_ptr<sfx::animated_spritesheet> sheet = nullptr;
-			unsigned int spriteID = 0;
+			std::string spriteID = "";
 			float transLength = 1.0f;
 			float typingDelay = 0.05f;
 			std::shared_ptr<sfx::audio> audio = nullptr;

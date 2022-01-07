@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -26,7 +26,7 @@ awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type,
 	const awe::ArmyID army,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept :
 	_type(type), _army(army),
-	_sprite(sheet, ((type) ? (type->getUnit(army)) : (0))) {}
+	_sprite(sheet, ((type) ? (type->getUnit(army)) : (""))) {}
 
 std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept {
 	return _type;

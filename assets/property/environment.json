@@ -1,22 +1,22 @@
 {
 	"000": {"longname": "Normal",
 		"shortname": "Nrml",
-		"icon": 0,
+		"icon": "",
 		"description": "Normal environment."
 	},
 	"001": {"longname": "Wasteland",
 		"shortname": "Wstl",
-		"icon": 0,
+		"icon": "",
 		"description": "Wasteland environment."
 	},
 	"002": {"longname": "Snowy",
 		"shortname": "Snow",
-		"icon": 0,
+		"icon": "",
 		"description": "Snowy environment."
 	},
 	"003": {"longname": "Sandy",
 		"shortname": "Sand",
-		"icon": 0,
+		"icon": "",
 		"description": "Desert environment."
 	}
 }

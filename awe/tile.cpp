@@ -1,4 +1,4 @@
-/*Copyright 2019-2021 CasualYouTuber31 <naysar@protonmail.com>
+/*Copyright 2019-2022 CasualYouTuber31 <naysar@protonmail.com>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 awe::tile::tile(const std::shared_ptr<const awe::tile_type>& type,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept :
-	_sprite(sheet, 0) {
+	_sprite(sheet, "") {
 	setTileType(type);
 }
 
@@ -78,6 +78,10 @@ void awe::tile::setPixelPosition(float x, float y) noexcept {
 
 sf::Vector2f awe::tile::getPixelPosition() const noexcept {
 	return _sprite.getPosition();
+}
+
+sf::Vector2f awe::tile::getPixelSize() const noexcept {
+	return _sprite.getSize();
 }
 
 bool awe::tile::animate(const sf::RenderTarget& target) noexcept {
