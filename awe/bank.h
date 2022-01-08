@@ -143,6 +143,15 @@ namespace awe {
 		 * @param id The ID of this bank entry.
 		 */
 		bank_id(const awe::BankID id) noexcept;
+
+		/**
+		 * Used by subclasses to return an empty string when attempting to retrieve
+		 * a string property that doesn't exist.
+		 * Should be initialised to an empty string. Note that this is not
+		 * thread-safe (https://stackoverflow.com/questions/30239268/how-can-i-return-a-const-reference-to-an-empty-string-without-a-compiler-warning),
+		 * but honestly none of my code is up to this point so I don't care.
+		 */
+		static const std::string emptyString;
 	private:
 		/**
 		 * The ID of this bank entry.

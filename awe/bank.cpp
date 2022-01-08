@@ -41,6 +41,7 @@ void awe::updateAllMovementsAndLoadedUnits(awe::bank<awe::unit_type>& unitBank,
 //*********
 //*BANK ID*
 //*********
+const std::string awe::bank_id::emptyString = "";
 awe::bank_id::bank_id(const awe::BankID id) noexcept : _id(id) {}
 awe::bank_id::~bank_id() noexcept {}
 awe::BankID awe::bank_id::getID() const noexcept { return _id; }
@@ -147,7 +148,7 @@ int awe::terrain::getMoveCost(const awe::BankID movecostID) const noexcept {
 }
 const std::string& awe::terrain::getPicture(const awe::BankID countryID) const
 	noexcept {
-	if (countryID >= _pictures.size()) return "";
+	if (countryID >= _pictures.size()) return emptyString;
 	return _pictures[countryID];
 }
 bool awe::terrain::isCapturable() const noexcept {
@@ -237,12 +238,12 @@ void awe::unit_type::updateMovementType(const awe::bank<awe::movement_type>&
 }
 const std::string& awe::unit_type::getPicture(const awe::BankID countryID) const
 	noexcept {
-	if (countryID >= _pictures.size()) return "";
+	if (countryID >= _pictures.size()) return emptyString;
 	return _pictures[countryID];
 }
 const std::string& awe::unit_type::getUnit(const awe::BankID countryID) const
 	noexcept {
-	if (countryID >= _units.size()) return "";
+	if (countryID >= _units.size()) return emptyString;
 	return _units[countryID];
 }
 unsigned int awe::unit_type::getCost() const noexcept {

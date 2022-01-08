@@ -39,10 +39,12 @@ bool awe::army_pane::animate(const sf::RenderTarget& target) noexcept {
 		_bg.setFillColor(sf::Color::White);
 		_rounded_bg.setFillColor(sf::Color::White);
 	}
+	// ensure original transform has been cleared
+	_position = sf::Transform();
 	if (_location == awe::army_pane::location::Left) {
 		_animateLeft();
 	} else if (_location == awe::army_pane::location::Right) {
-		_animateRight();
+		_animateRight(target);
 	}
 	return true;
 }
@@ -54,7 +56,7 @@ void awe::army_pane::_animateLeft() noexcept {
 	_bg.setPosition(origin);
 	_bg.setSize(size);
 	_rounded_bg.setPosition(
-		sf::Vector2f(origin.x + size.x, origin.y + size.y / 2.0f)
+		sf::Vector2f(origin.x + size.x - size.y / 2.0f, origin.y)
 	);
 	_rounded_bg.setRadius(size.y / 2.0f);
 	// step 2: CO face
@@ -62,14 +64,15 @@ void awe::army_pane::_animateLeft() noexcept {
 	// step 4: power meter
 }
 
-void awe::army_pane::_animateRight() noexcept {
+void awe::army_pane::_animateRight(const sf::RenderTarget& target) noexcept {
 	sf::Vector2f size = sf::Vector2f(200.0f, 50.0f);
 	sf::Vector2f origin = sf::Vector2f(size.x + size.y / 2.0f, 0.0f);
+	_position.translate(sf::Vector2f(target.getSize().x - origin.x, 0.0f));
 	// step 1: pane background
 	_bg.setPosition(sf::Vector2f(origin.x - size.x, origin.y));
 	_bg.setSize(size);
 	_rounded_bg.setPosition(
-		sf::Vector2f(origin.x - size.x, origin.y + size.y / 2.0f)
+		sf::Vector2f(origin.x - size.x - size.y / 2.0f, origin.y)
 	);
 	_rounded_bg.setRadius(size.y / 2.0f);
 	// step 2: CO face
@@ -79,8 +82,11 @@ void awe::army_pane::_animateRight() noexcept {
 
 void awe::army_pane::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	{
+	// combine translation with given states
+	states.transform.combine(_position);
+	// draw
 	target.draw(_rounded_bg, states);
 	target.draw(_bg, states);
-	target.draw(_co);
-	target.draw(_funds);
+	target.draw(_co, states);
+	target.draw(_funds, states);
 }

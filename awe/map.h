@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tile.h"
 #include "unit.h"
-#include "army.h"
+#include "army_pane.h"
 #include "script.h"
 #include "file.h"
 
@@ -705,6 +705,11 @@ namespace awe {
 		 * of the icon spritesheet provided later.
 		 */
 		sfx::animated_sprite _cursor;
+
+		/**
+		 * The pane representing the current army.
+		 */
+		awe::army_pane _armyPane;
 
 		//////////////////
 		// SPRITESHEETS //

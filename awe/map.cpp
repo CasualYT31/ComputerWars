@@ -610,6 +610,14 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 	}
 	// step 3. the cursor
 	_cursor.animate(target);
+	// step 4. the army pane
+	if (_cursor.getPosition().x < target.getSize().x) {
+		_armyPane.setGeneralLocation(awe::army_pane::location::Right);
+	} else {
+		_armyPane.setGeneralLocation(awe::army_pane::location::Left);
+	}
+	_armyPane.setArmy(_armys.at(_currentArmy));
+	_armyPane.animate(target);
 	// end
 	return false;
 }
@@ -641,6 +649,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// to tell the truth the cursor should never be not visible...
 	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, states);
 	// step 4. army pane
+	target.draw(_armyPane, states);
 	// step 5. tile + unit pane
 }
 

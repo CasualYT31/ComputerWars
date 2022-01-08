@@ -38,6 +38,7 @@ namespace awe {
 	 * I could just store it all once and update it as required.
 	 */
 	class army_pane : public sfx::animated_drawable {
+	public:
 		/**
 		 * Defines the different types of army pane that can be drawn.
 		 * The pane can either be drawn onto the left side of a target, or onto the
@@ -101,8 +102,9 @@ namespace awe {
 
 		/**
 		 * Called to animate this pane if it is to the right.
+		 * @param target The target which this pane will be drawn upon later.
 		 */
-		void _animateRight() noexcept;
+		void _animateRight(const sf::RenderTarget& target) noexcept;
 		
 		/**
 		 * Pointer to the army whose information is being drawn in the pane.
@@ -113,6 +115,11 @@ namespace awe {
 		 * Defines the type of army pane to draw.
 		 */
 		awe::army_pane::location _location = awe::army_pane::location::Left;
+
+		/**
+		 * The translation transform to apply to the pane.
+		 */
+		sf::Transform _position;
 
 		/**
 		 * The rectangle of the pane.
