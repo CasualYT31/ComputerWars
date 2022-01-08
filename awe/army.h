@@ -95,6 +95,37 @@ namespace awe {
 		awe::Funds getFunds() const noexcept;
 
 		/**
+		 * Sets the COs that are in charge of this army.
+		 * If \c current is \c nullptr, but \c tag is not, then \c tag will be
+		 * assigned as the primary CO and there will be no secondary CO.
+		 * @param current The primary CO in charge of this army.
+		 * @param tag     The secondary CO who is currently not the one in charge,
+		 *                yet could be after a call to \c tagCOs(). If there will
+		 *                be no secondary CO, \c nullptr can be passed.
+		 */
+		void setCOs(const std::shared_ptr<const awe::commander>& current,
+			const std::shared_ptr<const awe::commander>& tag = nullptr) noexcept;
+
+		/**
+		 * Swaps the two COs of this army.
+		 * This call will be ignored if there is no secondary CO to tag with.
+		 */
+		void tagCOs() noexcept;
+
+		/**
+		 * Retrieves a pointer to the information on the CO currently in charge of
+		 * this army.
+		 * @return Information on the current CO, or \c nullptr if there is none.
+		 */
+		std::shared_ptr<const awe::commander> getCurrentCO() const noexcept;
+
+		/**
+		 * Retrieves a pointer to the information on the tag CO of this army.
+		 * @return Information on the tag CO, or \c nullptr if there is none.
+		 */
+		std::shared_ptr<const awe::commander> getTagCO() const noexcept;
+
+		/**
 		 * Adds a unit to this army's unit list.
 		 * @param unit The ID of the unit to add.
 		 */
@@ -139,6 +170,16 @@ namespace awe {
 		 * The funds this army obtains.
 		 */
 		awe::Funds _funds = 0;
+
+		/**
+		 * The primary/current CO.
+		 */
+		std::shared_ptr<const awe::commander> _co_1 = nullptr;
+
+		/**
+		 * The secondary/tag CO.
+		 */
+		std::shared_ptr<const awe::commander> _co_2 = nullptr;
 
 		/**
 		 * The units that belong to this army.

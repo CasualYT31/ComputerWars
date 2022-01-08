@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "army.h"
+#include <algorithm>
 
 awe::army::army(const std::shared_ptr<const awe::country>& country) noexcept :
 	_country(country) {}
@@ -39,6 +40,29 @@ void awe::army::setFunds(const awe::Funds funds) noexcept {
 
 awe::Funds awe::army::getFunds() const noexcept {
 	return _funds;
+}
+
+void awe::army::setCOs(const std::shared_ptr<const awe::commander>& current,
+	const std::shared_ptr<const awe::commander>& tag) noexcept {
+	if (!current && tag) {
+		_co_1 = tag;
+		_co_2 = nullptr;
+	} else {
+		_co_1 = current;
+		_co_2 = tag;
+	}
+}
+
+void awe::army::tagCOs() noexcept {
+	if (_co_2) std::swap(_co_1, _co_2);
+}
+
+std::shared_ptr<const awe::commander> awe::army::getCurrentCO() const noexcept {
+	return _co_1;
+}
+
+std::shared_ptr<const awe::commander> awe::army::getTagCO() const noexcept {
+	return _co_2;
 }
 
 void awe::army::addUnit(const awe::UnitID unit) noexcept {
