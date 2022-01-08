@@ -132,7 +132,7 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)
 			country->getName());
 		return false;
 	}
-	_armys.insert(std::pair<awe::BankID, awe::army>(country->getID(), awe::army(country)));
+	_armys.insert(std::pair<awe::BankID, awe::army>(country->getID(), country));
 	return true;
 }
 
@@ -570,25 +570,23 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 				sf::Uint32 tileWidth = 0, tileHeight = 0;
 				auto type = tile.getTileType();
 				if (type) {
-					if (tile.getTileOwner() == awe::army::NO_ARMY) {
-						tileWidth = tile.getPixelSize().x;
-						tileHeight = tile.getPixelSize().y;
-						/*tileWidth = (sf::Uint32)_sheet_tile->getFrameRect(
+					tileWidth = (sf::Uint32)tile.getPixelSize().x;
+					tileHeight = (sf::Uint32)tile.getPixelSize().y;
+					/*if (tile.getTileOwner() == awe::army::NO_ARMY) {
+						tileWidth = (sf::Uint32)_sheet_tile->getFrameRect(
 							type->getNeutralTile()
 						).width;
 						tileHeight = (sf::Uint32)_sheet_tile->accessSprite(
 							type->getNeutralTile()
-						).height;*/
+						).height;
 					} else {
-						tileWidth = tile.getPixelSize().x;
-						tileHeight = tile.getPixelSize().y;
-						/*tileWidth = (sf::Uint32)_sheet_tile->accessSprite(
+						tileWidth = (sf::Uint32)_sheet_tile->accessSprite(
 							type->getOwnedTile(tile.getTileOwner())
 						).width;
 						tileHeight = (sf::Uint32)_sheet_tile->accessSprite(
 							type->getOwnedTile(tile.getTileOwner())
-						).height;*/
-					}
+						).height;
+					}*/
 				}
 				if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;
 				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;

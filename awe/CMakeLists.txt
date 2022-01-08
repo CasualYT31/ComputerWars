@@ -6,6 +6,7 @@ add_library(${PROJECT_NAME} STATIC
 	"tile.cpp"
 	"unit.cpp"
 	"army.cpp"
+	"army_pane.cpp"
 	"map.cpp"
 	"spritesheets.cpp"
 	"engine.cpp")
