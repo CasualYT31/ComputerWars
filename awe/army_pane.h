@@ -54,6 +54,11 @@ namespace awe {
 		};
 
 		/**
+		 * Sets up the static properties of the drawable.
+		 */
+		army_pane() noexcept;
+
+		/**
 		 * Sets this pane's army.
 		 * A shared pointer is created from the given object, so even if it goes
 		 * out of scope the army pane should still function as if it existed.
@@ -68,6 +73,20 @@ namespace awe {
 		 * @sa    \c awe::army_pane::location
 		 */
 		void setGeneralLocation(const awe::army_pane::location& location) noexcept;
+		
+		/**
+		 * Sets the CO spritesheet to use with this army pane.
+		 * @param sheet Pointer to the spritesheet to use with this army pane.
+		 */
+		void setSpritesheet(
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+
+		/**
+		 * Sets the font used with this army pane.
+		 * If \c nullptr is given, the call will be ignored.
+		 * @param font Pointer to the font to use with this army pane.
+		 */
+		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
 
 		/**
 		 * This drawable's \c animate() method.
@@ -97,14 +116,20 @@ namespace awe {
 
 		/**
 		 * Called to animate this pane if it is to the left.
+		 * @param target The target which this pane will be drawn upon later.
 		 */
-		void _animateLeft() noexcept;
+		void _animateLeft(const sf::RenderTarget& target) noexcept;
 
 		/**
 		 * Called to animate this pane if it is to the right.
 		 * @param target The target which this pane will be drawn upon later.
 		 */
 		void _animateRight(const sf::RenderTarget& target) noexcept;
+
+		/**
+		 * The thickness of the background border.
+		 */
+		static const float _outlineThickness;
 		
 		/**
 		 * Pointer to the army whose information is being drawn in the pane.
@@ -131,6 +156,11 @@ namespace awe {
 		 * Makes either the left or right side of the pane rounded when drawn.
 		 */
 		sf::CircleShape _rounded_bg;
+
+		/**
+		 * Used to cover the background outline that crosses over the circle.
+		 */
+		sf::RectangleShape _outlineCover;
 
 		/**
 		 * Sprite representing the current CO's face.

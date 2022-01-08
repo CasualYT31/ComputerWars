@@ -31,13 +31,15 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	// assign the language dictionary to the GUI object
 	_gui->setLanguageDictionary(_dictionary);
 
-	awe::map map(file, _countries, _tiles, _units);
+	awe::map map(file, _countries, _tiles, _units, _commanders);
 	map.selectArmy(0);
 	map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, map.getMapSize().x,
 		map.getMapSize().y));
 	map.setTileSpritesheet(_sprites->tile->normal);
 	map.setUnitSpritesheet(_sprites->unit->idle);
 	map.setIconSpritesheet(_sprites->icon);
+	map.setCOSpritesheet(_sprites->CO);
+	map.setFont((*_fonts)["dialogue"]);
 
 	try {
 		while (_renderer->isOpen()) {

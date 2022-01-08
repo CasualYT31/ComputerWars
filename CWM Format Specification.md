@@ -85,3 +85,7 @@ first version, with the following additions:
  - In between `Map Height` and `Army Count`, two new `uint32` fields were
    added: `Selected Tile X` and `Selected Tile Y`. They store the X and Y
    location of the tile the cursor was last on.
+ - For each army, after their funds, `Current CO` and `Tag CO` are stored
+   in that order. Both are `awe::BankID` fields, storing the IDs of the CO
+   types. If there is no tag CO, the `awe::army::NO_ARMY` value should be
+   stored in that field. This should *not* be the case for the current CO.

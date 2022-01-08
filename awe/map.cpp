@@ -28,13 +28,14 @@ awe::map::map(const std::string& file,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
+	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const unsigned char version, const std::string& name) noexcept :
 	_logger(name) {
 	try {
 		if (!countries) throw std::exception("no country bank provided!");
 		_file.open(file, true);
 		_filename = file;
-		_CWM_Header(false, countries, tiles, units, version);
+		_CWM_Header(false, countries, tiles, units, commanders, version);
 		_file.close();
 	} catch (std::exception& e) {
 		_logger.error("Map loading operation: couldn't load map file \"{}\": {}",
@@ -48,7 +49,7 @@ bool awe::map::save(std::string file, const unsigned char version) noexcept {
 	try {
 		_file.open(file, false);
 		_filename = file;
-		_CWM_Header(true, nullptr, nullptr, nullptr, version);
+		_CWM_Header(true, nullptr, nullptr, nullptr, nullptr, version);
 		_file.close();
 	} catch (std::exception& e) {
 		_logger.error("Map saving operation: couldn't save map file \"{}\": {}",
@@ -171,6 +172,57 @@ awe::Funds awe::map::getArmyFunds(const awe::ArmyID army) const noexcept {
 	_logger.error("getArmyFunds operation failed: army with ID {} didn't exist at "
 		"the time of calling!", army);
 	return 0;
+}
+
+void awe::map::setArmyCOs(const awe::ArmyID army,
+	const std::shared_ptr<const awe::commander>& current,
+	const std::shared_ptr<const awe::commander>& tag) noexcept {
+	if (_isArmyPresent(army)) {
+		if (!current && !tag) {
+			_logger.error("setCOs operation failed: army with ID {} was given no "
+				"COs!", army);
+		} else {
+			if (!current && tag) {
+				_logger.warning("setCOs operation: army with ID {} was given a "
+					"tag CO but not current CO! The army will instead be assigned "
+					"a current CO and it will not be assigned a tag CO.", army);
+			}
+			_armys.at(army).setCOs(current, tag);
+		}
+	} else {
+		_logger.error("setCOs operation failed: army with ID {} didn't exist at "
+			"the time of calling!", army);
+	}
+}
+
+void awe::map::tagArmyCOs(const awe::ArmyID army) noexcept {
+	if (!_isArmyPresent(army)) {
+		_logger.error("tagCOs operation failed: army with ID {} didn't exist at "
+			"the time of calling!", army);
+	} else {
+		if (_armys.at(army).getTagCO()) {
+			_armys.at(army).tagCOs();
+		} else {
+			_logger.error("tagCOs operation failed: army with ID {} didn't have a "
+				"secondary CO at the time of calling!", army);
+		}
+	}
+}
+
+std::shared_ptr<const awe::commander> awe::map::getArmyCurrentCO(
+	const awe::ArmyID army) const noexcept {
+	if (_isArmyPresent(army)) return _armys.at(army).getCurrentCO();
+	_logger.error("getCurrentCO operation failed: army with ID {} didn't exist at "
+		"the time of calling!", army);
+	return nullptr;
+}
+
+std::shared_ptr<const awe::commander> awe::map::getArmyTagCO(
+	const awe::ArmyID army) const noexcept {
+	if (_isArmyPresent(army)) return _armys.at(army).getTagCO();
+	_logger.error("getTagCO operation failed: army with ID {} didn't exist at the "
+		"time of calling!", army);
+	return nullptr;
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army)
@@ -555,6 +607,20 @@ void awe::map::setIconSpritesheet(
 	_cursor.setSprite("cursor");
 }
 
+void awe::map::setCOSpritesheet(
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_sheet_co = sheet;
+	_armyPane.setSpritesheet(sheet);
+}
+
+void awe::map::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
+	if (!font) {
+		_logger.error("setFont operation failed: nullptr was given!");
+		return;
+	}
+	_armyPane.setFont(font);
+}
+
 bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 	// step 1. the tiles
 	// also update the position of the cursor here!
@@ -695,6 +761,7 @@ void awe::map::_CWM_Header(const bool isSave,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
+	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	unsigned char version) {
 	sf::Uint32 finalVersion = FIRST_FILE_VERSION + version;
 	if (isSave) {
@@ -708,7 +775,7 @@ void awe::map::_CWM_Header(const bool isSave,
 		_CWM_0(isSave, countries, tiles, units);
 		break;
 	case 1:
-		_CWM_1(isSave, countries, tiles, units);
+		_CWM_1(isSave, countries, tiles, units, commanders);
 		break;
 	default:
 		_logger.error("CWM version {} is unrecognised!", version);
@@ -780,7 +847,8 @@ void awe::map::_CWM_0(const bool isSave,
 void awe::map::_CWM_1(const bool isSave,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-	const std::shared_ptr<awe::bank<awe::unit_type>>& units) {
+	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
+	const std::shared_ptr<awe::bank<awe::commander>>& commanders) {
 	if (isSave) {
 		_file.writeString(getMapName());
 		_file.writeNumber((sf::Uint32)getMapSize().x);
@@ -791,6 +859,17 @@ void awe::map::_CWM_1(const bool isSave,
 		for (auto& army : _armys) {
 			_file.writeNumber(army.second.getCountry()->getID());
 			_file.writeNumber(army.second.getFunds());
+			// there should always be a current CO...
+			if (army.second.getCurrentCO()) {
+				_file.writeNumber(army.second.getCurrentCO()->getID());
+			} else {
+				_file.writeNumber(awe::army::NO_ARMY);
+			}
+			if (army.second.getTagCO()) {
+				_file.writeNumber(army.second.getTagCO()->getID());
+			} else {
+				_file.writeNumber(awe::army::NO_ARMY);
+			}
 		}
 		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
 			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
@@ -820,6 +899,17 @@ void awe::map::_CWM_1(const bool isSave,
 			if (createArmy(pCountry)) {
 				awe::Funds funds = _file.readNumber<awe::Funds>();
 				setArmyFunds(pCountry->getID(), funds);
+				awe::BankID currentCO = _file.readNumber<awe::BankID>();
+				awe::BankID tagCO = _file.readNumber<awe::BankID>();
+				std::shared_ptr<const awe::commander> primaryCO = nullptr,
+					secondaryCO = nullptr;
+				if (currentCO != awe::army::NO_ARMY) {
+					primaryCO = (*commanders)[currentCO];
+				}
+				if (tagCO != awe::army::NO_ARMY) {
+					secondaryCO = (*commanders)[tagCO];
+				}
+				setArmyCOs(pCountry->getID(), primaryCO, secondaryCO);
 			} else {
 				throw std::exception("read above");
 			}

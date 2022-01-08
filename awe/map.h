@@ -81,23 +81,26 @@ namespace awe {
 		 * Also initialises the internal logger object.\n
 		 * For full documentation on Computer Wars' map file format, please see the
 		 * CWM Format Specification.md file in the root folder of the repository.
-		 * @param file      Path to the binary file to load.
-		 * @param countries Information on the countries to search through when
-		 *                  reading country IDs.
-		 * @param tiles     Information on the tile types to search through when
-		 *                  reading tile type IDs.
-		 * @param units     Information on the unit types to search through when
-		 *                  reading unit type IDs.
-		 * @param version   The 0-based number identifying the iteration of the
-		 *                  format to use.
-		 * @param name      The name to give this particular instantiation within
-		 *                  the log file. Defaults to "map."
+		 * @param file       Path to the binary file to load.
+		 * @param countries  Information on the countries to search through when
+		 *                   reading country IDs.
+		 * @param tiles      Information on the tile types to search through when
+		 *                   reading tile type IDs.
+		 * @param units      Information on the unit types to search through when
+		 *                   reading unit type IDs.
+		 * @param commanders Information on the commanders to search through when
+		 *                   reading CO IDs.
+		 * @param version    The 0-based number identifying the iteration of the
+		 *                   format to use.
+		 * @param name       The name to give this particular instantiation within
+		 *                   the log file. Defaults to "map."
 		 * @sa    \c engine::logger
 		 */
 		map(const std::string& file,
 			const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
+			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 			const unsigned char version = LATEST_VERSION,
 			const std::string& name = "map")
 			noexcept;
@@ -195,6 +198,49 @@ namespace awe {
 		 *         army doesn't exist.
 		 */
 		awe::Funds getArmyFunds(const awe::ArmyID army) const noexcept;
+
+		/**
+		 * Sets the COs that are in charge of a specified army.
+		 * If \c current was \c nullptr, but \c tag was not, the current CO will be
+		 * assigned \c tag and a warning will be logged. If both pointer parameters
+		 * are \c nullptr, an error will be logged. If the specified army did not
+		 * exist at the time of calling, an error will be logged.
+		 * @param army    The ID of the army to set the COs of.
+		 * @param current The primary CO of the specified army.
+		 * @param tag     The tag CO of the specified army. Should be \c nullptr if
+		 *                there will not be one.
+		 */
+		void setArmyCOs(const awe::ArmyID army,
+			const std::shared_ptr<const awe::commander>& current,
+			const std::shared_ptr<const awe::commander>& tag = nullptr) noexcept;
+
+		/**
+		 * Performs a tag on a given army.
+		 * If the given army ID did not identify an army, or if there were not two
+		 * COs to perform the tag with, then an error will be logged.
+		 * @param army The ID of the army to perform the tag on.
+		 */
+		void tagArmyCOs(const awe::ArmyID army) noexcept;
+
+		/**
+		 * Retrieves an army's primary/current CO.
+		 * @param  army The ID of the army to retrieve the current CO of.
+		 * @return Pointer to the information on the given army's current CO.
+		 *         \c nullptr is returned if the given army did not exist at the
+		 *         time of calling, or if there was no current CO.
+		 */
+		std::shared_ptr<const awe::commander> getArmyCurrentCO(
+			const awe::ArmyID army) const noexcept;
+
+		/**
+		 * Retrieves an army's secondary/tag CO.
+		 * @param  army The ID of the army to retrieve the tag CO of.
+		 * @return Pointer to the information on the given army's tag CO.
+		 *         \c nullptr is returned if the given army did not exist at the
+		 *         time of calling, or if there was no tag CO.
+		 */
+		std::shared_ptr<const awe::commander> getArmyTagCO(const awe::ArmyID army)
+			const noexcept;
 
 		/**
 		 * Retrieves a list of tiles that belong to a specified army.
@@ -475,6 +521,20 @@ namespace awe {
 			sheet) noexcept;
 
 		/**
+		 * Sets the spritesheet used for drawing COs.
+		 * @param sheet Pointer to the animated spritesheet to use for COs.
+		 */
+		void setCOSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
+			sheet) noexcept;
+
+		/**
+		 * Sets the font used with this map.
+		 * If \c nullptr is given, an error will be logged.
+		 * @param font Pointer to the font to use with this map.
+		 */
+		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
 		 * @param  target The target to render the map to.
 		 * @return \c FALSE, for now.
@@ -556,21 +616,24 @@ namespace awe {
 		/**
 		 * Either reads from or writes to a binary file.
 		 * Also deduces the format which this file is to have or has.
-		 * @param  isSave    \c TRUE if the file is to be written to, \c FALSE if
-		 *                   the file is to be read from.
-		 * @param  countries Information on the countries to index when reading
-		 *                   country IDs.
-		 * @param  tiles     Information on the tile types to index when reading
-		 *                   tile type IDs.
-		 * @param  units     Information on the unit types to index when reading
-		 *                   unit type IDs.
-		 * @param  version   If writing, the version should be given here.
+		 * @param  isSave     \c TRUE if the file is to be written to, \c FALSE if
+		 *                    the file is to be read from.
+		 * @param  countries  Information on the countries to index when reading
+		 *                    country IDs.
+		 * @param  tiles      Information on the tile types to index when reading
+		 *                    tile type IDs.
+		 * @param  units      Information on the unit types to index when reading
+		 *                    unit type IDs.
+		 * @param  commanders Information on the CO types to index when reading CO
+		 *                    type IDs.
+		 * @param  version    If writing, the version should be given here.
 		 * @throws std::exception if the header couldn't be read or written.
 		 */
 		void _CWM_Header(const bool isSave,
 			const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
+			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 			unsigned char version);
 
 		/**
@@ -615,20 +678,23 @@ namespace awe {
 
 		/**
 		 * Second version of the CWM format.
-		 * @param  isSave    \c TRUE if the file is to be written to, \c FALSE if
-		 *                   the file is to be read from.
-		 * @param  countries Information on the countries to index when reading
-		 *                   country IDs.
-		 * @param  tiles     Information on the tile types to index when reading
-		 *                   tile type IDs.
-		 * @param  units     Information on the unit types to index when reading
-		 *                   unit type IDs.
+		 * @param  isSave     \c TRUE if the file is to be written to, \c FALSE if
+		 *                    the file is to be read from.
+		 * @param  countries  Information on the countries to index when reading
+		 *                    country IDs.
+		 * @param  tiles      Information on the tile types to index when reading
+		 *                    tile type IDs.
+		 * @param  units      Information on the unit types to index when reading
+		 *                    unit type IDs.
+		 * @param  commanders Information on the CO types to index when reading CO
+		 *                    type IDs.
 		 * @throws std::exception if the file couldn't be read or written.
 		 */
 		void _CWM_1(const bool isSave,
 			const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-			const std::shared_ptr<awe::bank<awe::unit_type>>& units);
+			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
+			const std::shared_ptr<awe::bank<awe::commander>>& commanders);
 
 		/**
 		 * File name of the binary file previously read from or written to.
@@ -728,5 +794,10 @@ namespace awe {
 		 * Spritesheet used with all map icons.
 		 */
 		std::shared_ptr<sfx::animated_spritesheet> _sheet_icon = nullptr;
+
+		/**
+		 * Spritesheet used with all armies.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _sheet_co = nullptr;
 	};
 }
