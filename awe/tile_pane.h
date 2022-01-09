@@ -80,6 +80,13 @@ namespace awe {
 		void setGeneralLocation(const awe::tile_pane::location& location) noexcept;
 
 		/**
+		 * Sets the font used with this tile pane.
+		 * If \c nullptr is given, the call will be ignored.
+		 * @param font Pointer to the font to use with this tile pane.
+		 */
+		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
 		 * @return Always returns \c TRUE.
 		 */

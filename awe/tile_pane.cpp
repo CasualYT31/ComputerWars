@@ -25,12 +25,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 awe::tile_pane::tile_pane() noexcept {
 	_bg.setFillColor(sf::Color(250,250,250,128));
 	_rounded_bg.setFillColor(_bg.getFillColor());
+	_tileName.setCharacterSize(16);
+	_tileName.setFillColor(sf::Color::White);
+	_tileName.setOutlineColor(sf::Color::Black);
+	_tileName.setOutlineThickness(1.5f);
 }
 
 void awe::tile_pane::setTile(const awe::tile& tile) noexcept {
 	_tile = std::make_shared<const awe::tile>(tile);
-	_tileIcon.setSpritesheet(tile.getSpritesheet());
-	_tileIcon.setSprite(tile.getSprite());
 }
 
 void awe::tile_pane::addUnit(const awe::unit& unit) noexcept {
@@ -44,6 +46,10 @@ void awe::tile_pane::clearUnits() noexcept {
 void awe::tile_pane::setGeneralLocation(const awe::tile_pane::location& location)
 	noexcept {
 	_location = location;
+}
+
+void awe::tile_pane::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
+	if (font) _tileName.setFont(*font);
 }
 
 bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
@@ -60,11 +66,24 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	_rounded_bg.setPointCount(points.size());
 	for (std::size_t p = 0; p < points.size(); p++)
 		_rounded_bg.setPoint(p, points.at(p));
+	const float centre = _bg.getPosition().x + size.x / 2.0f;
 	// tile
+	if (_tileIcon.getSpritesheet() != _tile->getSpritesheet()) {
+		_tileIcon.setSpritesheet(_tile->getSpritesheet());
+	}
+	if (_tileIcon.getSprite() != _tile->getSprite()) {
+		_tileIcon.setSprite(_tile->getSprite());
+	}
 	_tileIcon.animate(target);
 	_tileIcon.setPosition(
-		sf::Vector2f(_bg.getPosition().x + size.x / 2.0f -
-			_tileIcon.getSize().x / 2.0f, _bg.getPosition().y + 10.0f)
+		sf::Vector2f(centre - _tileIcon.getSize().x / 2.0f,
+			_bg.getPosition().y + 10.0f)
+	);
+	// tile name
+	_tileName.setString(_tile->getTileType()->getType()->getShortName());
+	_tileName.setPosition(
+		sf::Vector2f(centre - _tileName.getGlobalBounds().width / 2.0f,
+			_tileIcon.getPosition().y + _tileIcon.getSize().y)
 	);
 	return true;
 }

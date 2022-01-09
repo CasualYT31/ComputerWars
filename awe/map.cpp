@@ -624,6 +624,7 @@ void awe::map::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
 		return;
 	}
 	_armyPane.setFont(font);
+	_tilePane.setFont(font);
 }
 
 bool awe::map::animate(const sf::RenderTarget& target) noexcept {
