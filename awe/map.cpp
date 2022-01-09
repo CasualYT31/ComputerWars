@@ -546,7 +546,12 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u pos) const noexcept {
 }
 
 void awe::map::setSelectedTile(const sf::Vector2u pos) noexcept {
-	if (!_isOutOfBounds(pos)) _sel = pos;
+	if (!_isOutOfBounds(pos)) {
+		if (_sel != pos) {
+			_sel = pos;
+			_updateTilePane = true;
+		}
+	}
 }
 
 sf::Vector2u awe::map::getSelectedTile() const noexcept {
@@ -684,6 +689,20 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 	}
 	_armyPane.setArmy(_armys.at(_currentArmy));
 	_armyPane.animate(target);
+	// step 5. the tile pane
+	if (_updateTilePane) {
+		const awe::tile& tile = _tiles[_sel.x][_sel.y];
+		_tilePane.setTile(tile);
+		_tilePane.clearUnits();
+		if (tile.getUnit()) {
+			const awe::unit& unit = _units.at(tile.getUnit());
+			_tilePane.addUnit(unit);
+			std::unordered_set<awe::UnitID> loaded = unit.loadedUnits();
+			for (auto& u : loaded) _tilePane.addUnit(_units.at(u));
+		}
+		_updateTilePane = false;
+	}
+	_tilePane.animate(target);
 	// end
 	return false;
 }
@@ -716,7 +735,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, states);
 	// step 4. army pane
 	target.draw(_armyPane, states);
-	// step 5. tile + unit pane
+	// step 5. tile pane
+	target.draw(_tilePane, states);
 }
 
 bool awe::map::_isOutOfBounds(const sf::Vector2u pos) const noexcept {

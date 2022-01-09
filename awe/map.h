@@ -25,8 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Unit, armies, and tiles are all stored and managed here.
  */
 
-#include "tile.h"
-#include "unit.h"
+#include "tile_pane.h"
 #include "army_pane.h"
 #include "script.h"
 #include "file.h"
@@ -776,6 +775,17 @@ namespace awe {
 		 * The pane representing the current army.
 		 */
 		awe::army_pane _armyPane;
+
+		/**
+		 * The pane displaying information on the selected tile.
+		 */
+		awe::tile_pane _tilePane;
+
+		/**
+		 * Flag used to update \c _tilePane.
+		 * When the selected tile is changed, this will be set to \c TRUE.
+		 */
+		bool _updateTilePane = false;
 
 		//////////////////
 		// SPRITESHEETS //
