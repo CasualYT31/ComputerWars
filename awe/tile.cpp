@@ -72,6 +72,15 @@ void awe::tile::setSpritesheet(
 	_sprite.setSpritesheet(sheet);
 }
 
+std::shared_ptr<const sfx::animated_spritesheet> awe::tile::getSpritesheet() const
+	noexcept {
+	return _sprite.getSpritesheet();
+}
+
+std::string awe::tile::getSprite() const noexcept {
+	return _sprite.getSprite();
+}
+
 void awe::tile::setPixelPosition(float x, float y) noexcept {
 	_sprite.setPosition(sf::Vector2f(x, y));
 }

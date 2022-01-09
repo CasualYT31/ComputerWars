@@ -126,5 +126,15 @@ namespace awe {
 		 * Defines the type of tile pane to draw.
 		 */
 		awe::tile_pane::location _location = awe::tile_pane::location::Left;
+
+		/**
+		 * The tile graphic.
+		 */
+		sfx::animated_sprite _tileIcon;
+
+		/**
+		 * The tile's short name.
+		 */
+		sf::Text _tileName;
 	};
 }

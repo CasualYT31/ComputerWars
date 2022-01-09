@@ -29,6 +29,8 @@ awe::tile_pane::tile_pane() noexcept {
 
 void awe::tile_pane::setTile(const awe::tile& tile) noexcept {
 	_tile = std::make_shared<const awe::tile>(tile);
+	_tileIcon.setSpritesheet(tile.getSpritesheet());
+	_tileIcon.setSprite(tile.getSprite());
 }
 
 void awe::tile_pane::addUnit(const awe::unit& unit) noexcept {
@@ -46,6 +48,7 @@ void awe::tile_pane::setGeneralLocation(const awe::tile_pane::location& location
 
 bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	sf::Vector2f size = sf::Vector2f(60.0f, 100.0f);
+	// background
 	_bg.setSize(size);
 	if (_location == awe::tile_pane::location::Left) {
 		_bg.setPosition(sf::Vector2f(0.0f, target.getSize().y - size.y));
@@ -57,6 +60,12 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	_rounded_bg.setPointCount(points.size());
 	for (std::size_t p = 0; p < points.size(); p++)
 		_rounded_bg.setPoint(p, points.at(p));
+	// tile
+	_tileIcon.animate(target);
+	_tileIcon.setPosition(
+		sf::Vector2f(_bg.getPosition().x + size.x / 2.0f -
+			_tileIcon.getSize().x / 2.0f, _bg.getPosition().y + 10.0f)
+	);
 	return true;
 }
 
@@ -64,6 +73,8 @@ void awe::tile_pane::draw(sf::RenderTarget& target, sf::RenderStates states) con
 	{
 	target.draw(_rounded_bg, states);
 	target.draw(_bg, states);
+	target.draw(_tileIcon, states);
+	target.draw(_tileName, states);
 }
 
 std::vector<sf::Vector2f> awe::tile_pane::_calculateCurvePoints() const noexcept {

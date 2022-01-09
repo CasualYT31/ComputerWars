@@ -157,6 +157,11 @@ void sfx::animated_sprite::setSpritesheet(
 	_currentFrame = 0;
 }
 
+std::shared_ptr<const sfx::animated_spritesheet>
+	sfx::animated_sprite::getSpritesheet() const noexcept {
+	return _sheet;
+}
+
 void sfx::animated_sprite::setSprite(const std::string& sprite) noexcept {
 	_spriteID = sprite;
 	_errored = false;

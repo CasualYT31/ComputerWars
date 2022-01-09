@@ -187,6 +187,14 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Retrieves the spritesheet used with this sprite.
+		 * @return Pointer to the spritesheet used with this sprite. \c nullptr if
+		 *         no spritesheet has been assigned.
+		 */
+		std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet() const
+			noexcept;
+
+		/**
 		 * Updates the sprite to animate and draw with this object.
 		 * This method also updates \c _hasNotBeenDrawn and \c _currentFrame so
 		 * that the animated sprite will start from the beginning of the animation.
