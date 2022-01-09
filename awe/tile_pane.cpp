@@ -39,10 +39,20 @@ void awe::tile_pane::clearUnits() noexcept {
 	_units.clear();
 }
 
+void awe::tile_pane::setGeneralLocation(const awe::tile_pane::location& location)
+	noexcept {
+	_location = location;
+}
+
 bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	sf::Vector2f size = sf::Vector2f(60.0f, 100.0f);
 	_bg.setSize(size);
-	_bg.setPosition(sf::Vector2f(0.0f, target.getSize().y - size.y));
+	if (_location == awe::tile_pane::location::Left) {
+		_bg.setPosition(sf::Vector2f(0.0f, target.getSize().y - size.y));
+	} else if (_location == awe::tile_pane::location::Right) {
+		_bg.setPosition(sf::Vector2f(target.getSize().x - size.x,
+			target.getSize().y - size.y));
+	}
 	std::vector<sf::Vector2f> points = _calculateCurvePoints();
 	_rounded_bg.setPointCount(points.size());
 	for (std::size_t p = 0; p < points.size(); p++)
@@ -59,10 +69,19 @@ void awe::tile_pane::draw(sf::RenderTarget& target, sf::RenderStates states) con
 std::vector<sf::Vector2f> awe::tile_pane::_calculateCurvePoints() const noexcept {
 	std::vector<sf::Vector2f> ret;
 	// https://math.stackexchange.com/questions/1643836/how-do-i-find-the-equation-for-a-semicircle-with-a-radius-of-2-on-the-x-axis
-	for (float y = -(_bg.getSize().y / 2.0f); y <= _bg.getSize().y / 2.0f; y += 1.0f) {
+	for (float y = -(_bg.getSize().y / 2.0f); y <= _bg.getSize().y / 2.0f; y++) {
 		const float radius = _bg.getSize().y / 2.0f;
-		const float x = std::sqrtf(radius * radius - y * y) * 0.25f;
-		ret.push_back(sf::Vector2f(x, y) + sf::Vector2f(_bg.getSize().x, _bg.getPosition().y + _bg.getSize().y / 2.0f));
+		float x = std::sqrtf(radius * radius - y * y) * 0.25f;
+		if (_location == awe::tile_pane::location::Right) x = -x;
+		sf::Vector2f p = sf::Vector2f(x, y);
+		if (_location == awe::tile_pane::location::Left) {
+			p += sf::Vector2f(_bg.getSize().x,
+				_bg.getPosition().y + _bg.getSize().y / 2.0f);
+		} else if (_location == awe::tile_pane::location::Right) {
+			p += sf::Vector2f(_bg.getPosition().x,
+				_bg.getPosition().y + _bg.getSize().y / 2.0f);
+		}
+		ret.push_back(p);
 	}
 	return ret;
 }

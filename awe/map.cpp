@@ -681,12 +681,15 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 	}
 	// step 3. the cursor
 	_cursor.animate(target);
-	// step 4. the army pane
+	// step 3.5. set the general location of the panes
 	if (_cursor.getPosition().x < target.getSize().x / 2.0f) {
 		_armyPane.setGeneralLocation(awe::army_pane::location::Right);
+		_tilePane.setGeneralLocation(awe::tile_pane::location::Right);
 	} else {
 		_armyPane.setGeneralLocation(awe::army_pane::location::Left);
+		_tilePane.setGeneralLocation(awe::tile_pane::location::Left);
 	}
+	// step 4. the army pane
 	_armyPane.setArmy(_armys.at(_currentArmy));
 	_armyPane.animate(target);
 	// step 5. the tile pane

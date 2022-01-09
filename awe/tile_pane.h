@@ -36,6 +36,20 @@ namespace awe {
 	class tile_pane : public sfx::animated_drawable {
 	public:
 		/**
+		 * Defines the different types of tile pane that can be drawn.
+		 * The pane can either be drawn onto the left side of a target, or onto the
+		 * right side. These values are intended to be used with
+		 * \c setGeneralLocation() to determine if the pane should be rounded on
+		 * the left or right.
+		 * @sa setGeneralLocation()
+		 * @sa draw()
+		 */
+		enum class location {
+			Left,
+			Right
+		};
+
+		/**
 		 * Sets up the static properties of the internal drawing objects.
 		 */
 		tile_pane() noexcept;
@@ -56,6 +70,14 @@ namespace awe {
 		 * Clears the list of units whose information is displayed.
 		 */
 		void clearUnits() noexcept;
+
+		/**
+		 * Sets this pane's general location.
+		 * The default location of a tile pane is left.
+		 * @param location The location property of this tile pane.
+		 * @sa    \c awe::tile_pane::location
+		 */
+		void setGeneralLocation(const awe::tile_pane::location& location) noexcept;
 
 		/**
 		 * This drawable's \c animate() method.
@@ -98,7 +120,11 @@ namespace awe {
 		/**
 		 * The curve on the edge of the pane.
 		 */
-		// sf::CircleShape _rounded_bg;
 		sf::ConvexShape _rounded_bg;
+
+		/**
+		 * Defines the type of tile pane to draw.
+		 */
+		awe::tile_pane::location _location = awe::tile_pane::location::Left;
 	};
 }

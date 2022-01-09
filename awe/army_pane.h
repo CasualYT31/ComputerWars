@@ -69,7 +69,7 @@ namespace awe {
 		/**
 		 * Sets this pane's general location.
 		 * The default location of an army pane is left.
-		 * @param location The location property of this army.
+		 * @param location The location property of this army pane.
 		 * @sa    \c awe::army_pane::location
 		 */
 		void setGeneralLocation(const awe::army_pane::location& location) noexcept;
