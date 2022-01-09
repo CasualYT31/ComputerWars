@@ -14,6 +14,30 @@
 				90,
 				60
 			]
+		},
+		"defstar": {
+			"frames": [
+				[0,31,9,9]
+			],
+			"durations": [0]
+		},
+		"hp": {
+			"frames": [
+				[9,31,9,9]
+			],
+			"durations": [0]
+		},
+		"fuel": {
+			"frames": [
+				[18,31,9,9]
+			],
+			"durations": [0]
+		},
+		"ammo": {
+			"frames": [
+				[27,31,9,9]
+			],
+			"durations": [0]
 		}
 	}
 }
