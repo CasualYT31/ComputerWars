@@ -90,10 +90,9 @@ namespace awe {
 
 		/**
 		 * This drawable's \c animate() method.
-		 * Used to set the CO sprite: it does not actually animate the sprite. In
-		 * the future, this will also animate the CO power meter.\n
-		 * This method also queries the army object for updated information.
-		 * @return Always returns \c TRUE. This will change in the future.
+		 * This method queries the army object for updated information, so that any
+		 * updates made to the given army object will be reflected in the pane.
+		 * @return Always returns \c TRUE.
 		 */
 		virtual bool animate(const sf::RenderTarget& target) noexcept;
 	private:
@@ -105,12 +104,10 @@ namespace awe {
 		 * If the pane is drawn to the left side of the target, the right side of
 		 * the pane will be rounded. If the pane is drawn to the right side of the
 		 * target, the left side of the pane will be rounded.
-		 * @remark To position this army pane onto the screen, use the \c states
-		 *         parameter.
-		 * @param  target The target to render the army pane to.
-		 * @param  states The render states to apply to the tile. Applying
-		 *                transforms is perfectly valid and will not alter the
-		 *                internal workings of the drawable.
+		 * @param target The target to render the army pane to.
+		 * @param states The render states to apply to the pane. Applying
+		 *               transforms is perfectly valid and will not alter the
+		 *               internal workings of the drawable.
 		 */
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
