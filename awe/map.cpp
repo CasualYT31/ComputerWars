@@ -610,6 +610,7 @@ void awe::map::setIconSpritesheet(
 	_sheet_icon = sheet;
 	_cursor.setSpritesheet(sheet);
 	_cursor.setSprite("cursor");
+	_tilePane.setSpritesheet(sheet);
 }
 
 void awe::map::setCOSpritesheet(

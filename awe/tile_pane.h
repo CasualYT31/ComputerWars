@@ -80,6 +80,14 @@ namespace awe {
 		void setGeneralLocation(const awe::tile_pane::location& location) noexcept;
 
 		/**
+		 * Sets the icon spritesheet to use with this tile pane.
+		 * @param sheet Pointer to the icon spritesheet to use with this tile pane.
+		 */
+		void setSpritesheet(
+			const std::shared_ptr<const sfx::animated_spritesheet>& sheet)
+			noexcept;
+
+		/**
 		 * Sets the font used with this tile pane.
 		 * If \c nullptr is given, the call will be ignored.
 		 * @param font Pointer to the font to use with this tile pane.
@@ -108,6 +116,11 @@ namespace awe {
 		 *          this method!
 		 */
 		std::vector<sf::Vector2f> _calculateCurvePoints() const noexcept;
+
+		/**
+		 * The icon spritesheet to use with this pane.
+		 */
+		std::shared_ptr<const sfx::animated_spritesheet> _icons = nullptr;
 
 		/**
 		 * Pointer to the tile to draw information on.
@@ -143,5 +156,25 @@ namespace awe {
 		 * The tile's short name.
 		 */
 		sf::Text _tileName;
+
+		/**
+		 * The tile's defence icon.
+		 */
+		sfx::animated_sprite _tileDefIcon;
+
+		/**
+		 * The tile's HP icon.
+		 */
+		sfx::animated_sprite _tileHPIcon;
+
+		/**
+		 * The tile's defence stat.
+		 */
+		sf::Text _tileDef;
+
+		/**
+		 * The tile's HP stat.
+		 */
+		sf::Text _tileHP;
 	};
 }

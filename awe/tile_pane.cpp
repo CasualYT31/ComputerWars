@@ -29,6 +29,14 @@ awe::tile_pane::tile_pane() noexcept {
 	_tileName.setFillColor(sf::Color::White);
 	_tileName.setOutlineColor(sf::Color::Black);
 	_tileName.setOutlineThickness(1.5f);
+	_tileDef.setCharacterSize(12);
+	_tileDef.setFillColor(sf::Color::White);
+	_tileDef.setOutlineColor(sf::Color::Black);
+	_tileDef.setOutlineThickness(1.5f);
+	_tileHP.setCharacterSize(12);
+	_tileHP.setFillColor(sf::Color::White);
+	_tileHP.setOutlineColor(sf::Color::Black);
+	_tileHP.setOutlineThickness(1.5f);
 }
 
 void awe::tile_pane::setTile(const awe::tile& tile) noexcept {
@@ -48,8 +56,21 @@ void awe::tile_pane::setGeneralLocation(const awe::tile_pane::location& location
 	_location = location;
 }
 
+void awe::tile_pane::setSpritesheet(
+	const std::shared_ptr<const sfx::animated_spritesheet>& sheet) noexcept {
+	_icons = sheet;
+	_tileDefIcon.setSpritesheet(sheet);
+	_tileDefIcon.setSprite("defstar");
+	_tileHPIcon.setSpritesheet(sheet);
+	_tileHPIcon.setSprite("hp");
+}
+
 void awe::tile_pane::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
-	if (font) _tileName.setFont(*font);
+	if (font) {
+		_tileName.setFont(*font);
+		_tileDef.setFont(*font);
+		_tileHP.setFont(*font);
+	}
 }
 
 bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
@@ -85,6 +106,39 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 		sf::Vector2f(centre - _tileName.getGlobalBounds().width / 2.0f,
 			_tileIcon.getPosition().y + _tileIcon.getSize().y)
 	);
+	// tile defence
+	_tileDefIcon.setPosition(
+		sf::Vector2f(_bg.getPosition().x + 10.0f,
+			_bg.getPosition().y + _bg.getSize().y -
+			_tileDefIcon.getSize().y - 10.0f)
+	);
+	_tileDefIcon.animate(target);
+	_tileDef.setString(std::to_string(
+		_tile->getTileType()->getType()->getDefence()
+	));
+	_tileDef.setPosition(
+		sf::Vector2f(_bg.getPosition().x + _bg.getSize().x -
+			_tileDef.getLocalBounds().width - 10.0f,
+			_tileDefIcon.getPosition().y - 2.5f)
+	);
+	// tile HP
+	if (_tile->getTileType()->getType()->getMaxHP() > 0) {
+		if (!_tileHPIcon.getSpritesheet()) _tileHPIcon.setSpritesheet(_icons);
+		_tileHPIcon.setPosition(
+			sf::Vector2f(_tileDefIcon.getPosition().x,
+				_tileDefIcon.getPosition().y - _tileHPIcon.getSize().y - 10.0f)
+		);
+		_tileHP.setString(std::to_string(_tile->getTileHP()));
+		_tileHP.setPosition(
+			sf::Vector2f(_bg.getPosition().x + _bg.getSize().x -
+				_tileHP.getLocalBounds().width - 10.0f,
+				_tileHPIcon.getPosition().y - 2.5f)
+		);
+	} else {
+		_tileHPIcon.setSpritesheet(nullptr);
+		_tileHP.setString("");
+	}
+	_tileHPIcon.animate(target);
 	return true;
 }
 
@@ -94,6 +148,10 @@ void awe::tile_pane::draw(sf::RenderTarget& target, sf::RenderStates states) con
 	target.draw(_bg, states);
 	target.draw(_tileIcon, states);
 	target.draw(_tileName, states);
+	target.draw(_tileDefIcon, states);
+	target.draw(_tileHPIcon, states);
+	target.draw(_tileDef, states);
+	target.draw(_tileHP, states);
 }
 
 std::vector<sf::Vector2f> awe::tile_pane::_calculateCurvePoints() const noexcept {
