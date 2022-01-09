@@ -168,6 +168,11 @@ namespace awe {
 		sfx::animated_sprite _co;
 
 		/**
+		 * The ID of the CO being drawn.
+		 */
+		awe::BankID _oldCoSprite = awe::army::NO_ARMY;
+
+		/**
 		 * Text displaying the funds that the army obtains.
 		 */
 		sf::Text _funds;

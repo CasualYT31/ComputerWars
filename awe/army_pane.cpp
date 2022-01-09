@@ -62,12 +62,12 @@ bool awe::army_pane::animate(const sf::RenderTarget& target) noexcept {
 		_outlineCover.setFillColor(sf::Color::White);
 	}
 	// CO (minus positioning)
-	if (_army && _army->getCurrentCO()) {
-		// setting the sprite each time will reset any animation, which is the
-		// desired effect
+	if (_army && _army->getCurrentCO() &&
+		_army->getCurrentCO()->getID() != _oldCoSprite) {
+		_oldCoSprite = _army->getCurrentCO()->getID();
 		_co.setSprite(_army->getCurrentCO()->getIconName());
-		_co.animate(target);
 	}
+	_co.animate(target);
 	// funds (minus positioning)
 	if (_army)
 		_funds.setString("G. " + std::to_string(_army->getFunds()));
