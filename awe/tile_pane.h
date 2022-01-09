@@ -36,6 +36,11 @@ namespace awe {
 	class tile_pane : public sfx::animated_drawable {
 	public:
 		/**
+		 * Sets up the static properties of the internal drawing objects.
+		 */
+		tile_pane() noexcept;
+
+		/**
 		 * Sets the tile that this pane displays information on.
 		 * @param tile The tile to draw information on.
 		 */
@@ -68,6 +73,14 @@ namespace awe {
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
+		 * Calculates the points which are used to draw the curve on the edge of
+		 * the pane.
+		 * @warning Make sure to set \c _bg's size and position \em before calling
+		 *          this method!
+		 */
+		std::vector<sf::Vector2f> _calculateCurvePoints() const noexcept;
+
+		/**
 		 * Pointer to the tile to draw information on.
 		 */
 		std::shared_ptr<const awe::tile> _tile = nullptr;
@@ -76,5 +89,16 @@ namespace awe {
 		 * Pointers to units to draw information on.
 		 */
 		std::vector<std::shared_ptr<const awe::unit>> _units;
+
+		/**
+		 * The main body of the pane.
+		 */
+		sf::RectangleShape _bg;
+
+		/**
+		 * The curve on the edge of the pane.
+		 */
+		// sf::CircleShape _rounded_bg;
+		sf::ConvexShape _rounded_bg;
 	};
 }

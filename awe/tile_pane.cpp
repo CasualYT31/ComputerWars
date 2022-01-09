@@ -22,6 +22,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tile_pane.h"
 
+awe::tile_pane::tile_pane() noexcept {
+	_bg.setFillColor(sf::Color(250,250,250,128));
+	_rounded_bg.setFillColor(_bg.getFillColor());
+}
+
 void awe::tile_pane::setTile(const awe::tile& tile) noexcept {
 	_tile = std::make_shared<const awe::tile>(tile);
 }
@@ -35,10 +40,29 @@ void awe::tile_pane::clearUnits() noexcept {
 }
 
 bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
+	sf::Vector2f size = sf::Vector2f(60.0f, 100.0f);
+	_bg.setSize(size);
+	_bg.setPosition(sf::Vector2f(0.0f, target.getSize().y - size.y));
+	std::vector<sf::Vector2f> points = _calculateCurvePoints();
+	_rounded_bg.setPointCount(points.size());
+	for (std::size_t p = 0; p < points.size(); p++)
+		_rounded_bg.setPoint(p, points.at(p));
 	return true;
 }
 
 void awe::tile_pane::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	{
+	target.draw(_rounded_bg, states);
+	target.draw(_bg, states);
+}
 
+std::vector<sf::Vector2f> awe::tile_pane::_calculateCurvePoints() const noexcept {
+	std::vector<sf::Vector2f> ret;
+	// https://math.stackexchange.com/questions/1643836/how-do-i-find-the-equation-for-a-semicircle-with-a-radius-of-2-on-the-x-axis
+	for (float y = -(_bg.getSize().y / 2.0f); y <= _bg.getSize().y / 2.0f; y += 1.0f) {
+		const float radius = _bg.getSize().y / 2.0f;
+		const float x = std::sqrtf(radius * radius - y * y) * 0.25f;
+		ret.push_back(sf::Vector2f(x, y) + sf::Vector2f(_bg.getSize().x, _bg.getPosition().y + _bg.getSize().y / 2.0f));
+	}
+	return ret;
 }
