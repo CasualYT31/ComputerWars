@@ -961,7 +961,7 @@ bool awe::map::_CWM_0_Unit(const bool isSave,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units, awe::UnitID id,
-	const sf::Vector2u& curtile) {
+	const sf::Vector2u& curtile, const awe::UnitID loadOnto) {
 	if (isSave) {
 		auto& unit = _units.at(id);
 		_file.writeNumber(unit.getArmy());
@@ -991,8 +991,12 @@ bool awe::map::_CWM_0_Unit(const bool isSave,
 				setUnitFuel(unitID, fuel);
 				auto ammo = _file.readNumber<awe::Ammo>();
 				setUnitAmmo(unitID, ammo);
-				setUnitPosition(unitID, curtile);
-				while (_CWM_0_Unit(isSave, countries, tiles, units, id, curtile));
+				if (loadOnto)
+					loadUnit(unitID, loadOnto);
+				else
+					setUnitPosition(unitID, curtile);
+				while (_CWM_0_Unit(isSave, countries, tiles, units, id, curtile,
+					((loadOnto) ? (loadOnto) : (unitID))));
 			} else {
 				throw std::exception("read above");
 			}

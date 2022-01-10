@@ -4,7 +4,7 @@ Hardware Specification:
 CPU       AMD Ryzen 5 1600X Six-Core Processor           
 Memory    16GB
 GPU       NVIDIA GeForce GTX 1050 Ti
-Storage   158562MB out of 464GB is free
+Storage   157750MB out of 464GB is free
 Platform  Microsoft Windows 10 Pro ~ 10.0.19042
 ---------------
 Gamepads
@@ -18,307 +18,342 @@ Gamepad #6 is not connected
 Gamepad #7 is not connected
 ---------------
 Event Log:
-[2022-01-10 16:17:01.134] [json_script_0] [info] Loading JSON script assets/lang/lang.json...
-[2022-01-10 16:17:01.134] [json_script_3] [info] Loading JSON script ./assets/lang/ENG_GB.json...
-[2022-01-10 16:17:01.135] [json_script_3] [info] Finished loading JSON script ./assets/lang/ENG_GB.json.
-[2022-01-10 16:17:01.135] [json_script_0] [info] Finished loading JSON script assets/lang/lang.json.
-[2022-01-10 16:17:01.135] [json_script_6] [info] Loading JSON script assets/fonts/fonts.json...
-[2022-01-10 16:17:01.136] [json_script_6] [info] Finished loading JSON script assets/fonts/fonts.json.
-[2022-01-10 16:17:01.136] [json_script_9] [info] Loading JSON script assets/audio/sound/audiosound.json...
-[2022-01-10 16:17:01.353] [json_script_9] [info] Finished loading JSON script assets/audio/sound/audiosound.json.
-[2022-01-10 16:17:01.354] [json_script_12] [info] Loading JSON script assets/audio/music/audiomusic.json...
-[2022-01-10 16:17:01.361] [json_script_12] [info] Finished loading JSON script assets/audio/music/audiomusic.json.
-[2022-01-10 16:17:01.575] [json_script_15] [info] Loading JSON script assets/renderer/renderer.json...
-[2022-01-10 16:17:01.577] [json_script_15] [info] Finished loading JSON script assets/renderer/renderer.json.
-[2022-01-10 16:17:01.857] [json_script_18] [info] Loading JSON script assets/userinput/userinput.json...
-[2022-01-10 16:17:01.861] [json_script_18] [info] Finished loading JSON script assets/userinput/userinput.json.
-[2022-01-10 16:17:01.862] [json_script_21] [info] Loading JSON script assets/sprites/co/spritesco.json...
-[2022-01-10 16:17:01.870] [json_script_21] [info] Finished loading JSON script assets/sprites/co/spritesco.json.
-[2022-01-10 16:17:01.871] [json_script_24] [info] Loading JSON script assets/sprites/unit/idle/spritesunitidle.json...
-[2022-01-10 16:17:02.076] [spritesheet_25] [warning] The number of frames for sprite "mechwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.077] [spritesheet_25] [warning] The number of frames for sprite "reconrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.077] [spritesheet_25] [warning] The number of frames for sprite "recongs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.077] [spritesheet_25] [warning] The number of frames for sprite "reconbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.077] [spritesheet_25] [warning] The number of frames for sprite "reconab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.077] [spritesheet_25] [warning] The number of frames for sprite "reconjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.077] [spritesheet_25] [warning] The number of frames for sprite "reconci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.077] [spritesheet_25] [warning] The number of frames for sprite "reconpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.077] [spritesheet_25] [warning] The number of frames for sprite "recontg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.077] [spritesheet_25] [warning] The number of frames for sprite "reconpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.078] [spritesheet_25] [warning] The number of frames for sprite "reconar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.078] [spritesheet_25] [warning] The number of frames for sprite "reconwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.078] [spritesheet_25] [warning] The number of frames for sprite "tankbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.078] [spritesheet_25] [warning] The number of frames for sprite "tankrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.078] [spritesheet_25] [warning] The number of frames for sprite "tankgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.078] [spritesheet_25] [warning] The number of frames for sprite "tankbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.078] [spritesheet_25] [warning] The number of frames for sprite "tankab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.079] [spritesheet_25] [warning] The number of frames for sprite "tankjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.079] [spritesheet_25] [warning] The number of frames for sprite "tankci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.079] [spritesheet_25] [warning] The number of frames for sprite "tankpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.079] [spritesheet_25] [warning] The number of frames for sprite "tanktg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.079] [spritesheet_25] [warning] The number of frames for sprite "tankpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.079] [spritesheet_25] [warning] The number of frames for sprite "tankar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.079] [spritesheet_25] [warning] The number of frames for sprite "tankwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.079] [spritesheet_25] [warning] The number of frames for sprite "mdbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdtg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.080] [spritesheet_25] [warning] The number of frames for sprite "mdwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neobh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neorf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neogs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neobd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neoab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neojs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neoci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neopc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neotg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neopl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.081] [spritesheet_25] [warning] The number of frames for sprite "neoar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "neown" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "megabh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "megarf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "megags" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "megabd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "megaab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "megajs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "megaci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "megapc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.082] [spritesheet_25] [warning] The number of frames for sprite "megatg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.083] [spritesheet_25] [warning] The number of frames for sprite "megapl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.083] [spritesheet_25] [warning] The number of frames for sprite "megaar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.083] [spritesheet_25] [warning] The number of frames for sprite "megawn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.083] [spritesheet_25] [warning] The number of frames for sprite "apcrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.083] [spritesheet_25] [warning] The number of frames for sprite "apcgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.083] [spritesheet_25] [warning] The number of frames for sprite "apcbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.083] [spritesheet_25] [warning] The number of frames for sprite "apcab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.084] [spritesheet_25] [warning] The number of frames for sprite "apcjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.084] [spritesheet_25] [warning] The number of frames for sprite "apcci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.084] [spritesheet_25] [warning] The number of frames for sprite "apcpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.084] [spritesheet_25] [warning] The number of frames for sprite "apctg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.084] [spritesheet_25] [warning] The number of frames for sprite "apcpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.084] [spritesheet_25] [warning] The number of frames for sprite "apcar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.084] [spritesheet_25] [warning] The number of frames for sprite "apcwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antibh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antirf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antigs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antibd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antiab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antijs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antici" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antipc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antitg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antipl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antiar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.085] [spritesheet_25] [warning] The number of frames for sprite "antiwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "artbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "artrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "artgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "artbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "artab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "artjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "artci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "artpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "arttg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.086] [spritesheet_25] [warning] The number of frames for sprite "artpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.087] [spritesheet_25] [warning] The number of frames for sprite "artar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.087] [spritesheet_25] [warning] The number of frames for sprite "artwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.087] [spritesheet_25] [warning] The number of frames for sprite "rocketbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.087] [spritesheet_25] [warning] The number of frames for sprite "rocketrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.087] [spritesheet_25] [warning] The number of frames for sprite "rocketgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.087] [spritesheet_25] [warning] The number of frames for sprite "rocketbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.087] [spritesheet_25] [warning] The number of frames for sprite "rocketab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.088] [spritesheet_25] [warning] The number of frames for sprite "rocketjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.088] [spritesheet_25] [warning] The number of frames for sprite "rocketci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.088] [spritesheet_25] [warning] The number of frames for sprite "rocketpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.088] [spritesheet_25] [warning] The number of frames for sprite "rockettg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.088] [spritesheet_25] [warning] The number of frames for sprite "rocketpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.088] [spritesheet_25] [warning] The number of frames for sprite "rocketar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.088] [spritesheet_25] [warning] The number of frames for sprite "rocketwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.088] [spritesheet_25] [warning] The number of frames for sprite "missbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.088] [spritesheet_25] [warning] The number of frames for sprite "missrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "missgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "missbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "missab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "missjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "missci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "misspc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "misstg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "misspl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "missar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.089] [spritesheet_25] [warning] The number of frames for sprite "misswn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipebh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "piperf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipegs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipebd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipeab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipejs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipeci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipepc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipetg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipepl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipear" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.090] [spritesheet_25] [warning] The number of frames for sprite "pipewn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "tbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "trf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "tgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "tbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "tab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "tjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "tci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "tpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "ttg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "tpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.091] [spritesheet_25] [warning] The number of frames for sprite "tar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "twn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "bbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "brf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "bgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "bbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "bab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "bjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "bci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "bpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.092] [spritesheet_25] [warning] The number of frames for sprite "btg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "bpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "bar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "bwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "fighterbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "fighterrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "fightergs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "fighterbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "fighterab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "fighterjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.093] [spritesheet_25] [warning] The number of frames for sprite "fighterci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.094] [spritesheet_25] [warning] The number of frames for sprite "fighterpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.094] [spritesheet_25] [warning] The number of frames for sprite "fightertg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.094] [spritesheet_25] [warning] The number of frames for sprite "fighterpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.094] [spritesheet_25] [warning] The number of frames for sprite "fighterar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.094] [spritesheet_25] [warning] The number of frames for sprite "fighterwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.094] [spritesheet_25] [warning] The number of frames for sprite "bomberbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.094] [spritesheet_25] [warning] The number of frames for sprite "bomberrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.094] [spritesheet_25] [warning] The number of frames for sprite "bombergs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.095] [spritesheet_25] [warning] The number of frames for sprite "bomberbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.095] [spritesheet_25] [warning] The number of frames for sprite "bomberab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.095] [spritesheet_25] [warning] The number of frames for sprite "bomberjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.095] [spritesheet_25] [warning] The number of frames for sprite "bomberci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.095] [spritesheet_25] [warning] The number of frames for sprite "bomberpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.095] [spritesheet_25] [warning] The number of frames for sprite "bombertg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.095] [spritesheet_25] [warning] The number of frames for sprite "bomberpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.095] [spritesheet_25] [warning] The number of frames for sprite "bomberar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.095] [spritesheet_25] [warning] The number of frames for sprite "bomberwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthtg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.096] [spritesheet_25] [warning] The number of frames for sprite "stealthwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombtg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.097] [spritesheet_25] [warning] The number of frames for sprite "bbombwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.098] [spritesheet_25] [warning] The number of frames for sprite "bboatbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.098] [spritesheet_25] [warning] The number of frames for sprite "bboatrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.098] [spritesheet_25] [warning] The number of frames for sprite "bboatgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.098] [spritesheet_25] [warning] The number of frames for sprite "bboatbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.098] [spritesheet_25] [warning] The number of frames for sprite "bboatab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.098] [spritesheet_25] [warning] The number of frames for sprite "bboatjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.098] [spritesheet_25] [warning] The number of frames for sprite "bboatci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.098] [spritesheet_25] [warning] The number of frames for sprite "bboatpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.098] [spritesheet_25] [warning] The number of frames for sprite "bboattg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "bboatpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "bboatar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "bboatwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "landerbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "landerrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "landergs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "landerbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "landerab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "landerjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.099] [spritesheet_25] [warning] The number of frames for sprite "landerci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.100] [spritesheet_25] [warning] The number of frames for sprite "landerpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.100] [spritesheet_25] [warning] The number of frames for sprite "landertg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.100] [spritesheet_25] [warning] The number of frames for sprite "landerpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.100] [spritesheet_25] [warning] The number of frames for sprite "landerar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.100] [spritesheet_25] [warning] The number of frames for sprite "landerwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.100] [spritesheet_25] [warning] The number of frames for sprite "cruiserbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.100] [spritesheet_25] [warning] The number of frames for sprite "cruiserrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.100] [spritesheet_25] [warning] The number of frames for sprite "cruisergs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "cruiserbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "cruiserab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "cruiserjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "cruiserci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "cruiserpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "cruisertg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "cruiserpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "cruiserar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "cruiserwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.101] [spritesheet_25] [warning] The number of frames for sprite "subbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subtg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.102] [spritesheet_25] [warning] The number of frames for sprite "subwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battlebh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battlerf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battlegs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battlebd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battleab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battlejs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battleci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battlepc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battletg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battlepl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battlear" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.103] [spritesheet_25] [warning] The number of frames for sprite "battlewn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.104] [spritesheet_25] [warning] The number of frames for sprite "carrierbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.104] [spritesheet_25] [warning] The number of frames for sprite "carrierrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.104] [spritesheet_25] [warning] The number of frames for sprite "carriergs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.104] [spritesheet_25] [warning] The number of frames for sprite "carrierbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.104] [spritesheet_25] [warning] The number of frames for sprite "carrierab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.104] [spritesheet_25] [warning] The number of frames for sprite "carrierjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.104] [spritesheet_25] [warning] The number of frames for sprite "carrierci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.104] [spritesheet_25] [warning] The number of frames for sprite "carrierpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.104] [spritesheet_25] [warning] The number of frames for sprite "carriertg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "carrierpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "carrierar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "carrierwn" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "ooziumbh" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "ooziumrf" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "ooziumgs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "ooziumbd" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "ooziumab" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "ooziumjs" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.105] [spritesheet_25] [warning] The number of frames for sprite "ooziumci" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.106] [spritesheet_25] [warning] The number of frames for sprite "ooziumpc" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.106] [spritesheet_25] [warning] The number of frames for sprite "ooziumtg" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.106] [spritesheet_25] [warning] The number of frames for sprite "ooziumpl" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.106] [spritesheet_25] [warning] The number of frames for sprite "ooziumar" was 1 and the number of durations was 5.
-[2022-01-10 16:17:02.106] [spritesheet_25] [warning] The number of frames for sprite
+[2022-01-10 17:02:46.412] [json_script_0] [info] Loading JSON script assets/lang/lang.json...
+[2022-01-10 17:02:46.412] [json_script_3] [info] Loading JSON script ./assets/lang/ENG_GB.json...
+[2022-01-10 17:02:46.412] [json_script_3] [info] Finished loading JSON script ./assets/lang/ENG_GB.json.
+[2022-01-10 17:02:46.413] [json_script_0] [info] Finished loading JSON script assets/lang/lang.json.
+[2022-01-10 17:02:46.413] [json_script_6] [info] Loading JSON script assets/fonts/fonts.json...
+[2022-01-10 17:02:46.413] [json_script_6] [info] Finished loading JSON script assets/fonts/fonts.json.
+[2022-01-10 17:02:46.413] [json_script_9] [info] Loading JSON script assets/audio/sound/audiosound.json...
+[2022-01-10 17:02:46.648] [json_script_9] [info] Finished loading JSON script assets/audio/sound/audiosound.json.
+[2022-01-10 17:02:46.649] [json_script_12] [info] Loading JSON script assets/audio/music/audiomusic.json...
+[2022-01-10 17:02:46.655] [json_script_12] [info] Finished loading JSON script assets/audio/music/audiomusic.json.
+[2022-01-10 17:02:46.831] [json_script_15] [info] Loading JSON script assets/renderer/renderer.json...
+[2022-01-10 17:02:46.832] [json_script_15] [info] Finished loading JSON script assets/renderer/renderer.json.
+[2022-01-10 17:02:47.283] [json_script_18] [info] Loading JSON script assets/userinput/userinput.json...
+[2022-01-10 17:02:47.288] [json_script_18] [info] Finished loading JSON script assets/userinput/userinput.json.
+[2022-01-10 17:02:47.289] [json_script_21] [info] Loading JSON script assets/sprites/co/spritesco.json...
+[2022-01-10 17:02:47.298] [json_script_21] [info] Finished loading JSON script assets/sprites/co/spritesco.json.
+[2022-01-10 17:02:47.298] [json_script_24] [info] Loading JSON script assets/sprites/unit/idle/spritesunitidle.json...
+[2022-01-10 17:02:47.541] [spritesheet_25] [warning] The number of frames for sprite "mechwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.542] [spritesheet_25] [warning] The number of frames for sprite "reconrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.542] [spritesheet_25] [warning] The number of frames for sprite "recongs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.542] [spritesheet_25] [warning] The number of frames for sprite "reconbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.542] [spritesheet_25] [warning] The number of frames for sprite "reconab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.542] [spritesheet_25] [warning] The number of frames for sprite "reconjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.542] [spritesheet_25] [warning] The number of frames for sprite "reconci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.542] [spritesheet_25] [warning] The number of frames for sprite "reconpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.542] [spritesheet_25] [warning] The number of frames for sprite "recontg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.543] [spritesheet_25] [warning] The number of frames for sprite "reconpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.543] [spritesheet_25] [warning] The number of frames for sprite "reconar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.543] [spritesheet_25] [warning] The number of frames for sprite "reconwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.544] [spritesheet_25] [warning] The number of frames for sprite "tankbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.544] [spritesheet_25] [warning] The number of frames for sprite "tankrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.544] [spritesheet_25] [warning] The number of frames for sprite "tankgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.544] [spritesheet_25] [warning] The number of frames for sprite "tankbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.544] [spritesheet_25] [warning] The number of frames for sprite "tankab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.544] [spritesheet_25] [warning] The number of frames for sprite "tankjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.545] [spritesheet_25] [warning] The number of frames for sprite "tankci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.545] [spritesheet_25] [warning] The number of frames for sprite "tankpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.545] [spritesheet_25] [warning] The number of frames for sprite "tanktg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.545] [spritesheet_25] [warning] The number of frames for sprite "tankpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.545] [spritesheet_25] [warning] The number of frames for sprite "tankar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.545] [spritesheet_25] [warning] The number of frames for sprite "tankwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.546] [spritesheet_25] [warning] The number of frames for sprite "mdbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.546] [spritesheet_25] [warning] The number of frames for sprite "mdrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.546] [spritesheet_25] [warning] The number of frames for sprite "mdgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.546] [spritesheet_25] [warning] The number of frames for sprite "mdbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.546] [spritesheet_25] [warning] The number of frames for sprite "mdab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.547] [spritesheet_25] [warning] The number of frames for sprite "mdjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.547] [spritesheet_25] [warning] The number of frames for sprite "mdci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.547] [spritesheet_25] [warning] The number of frames for sprite "mdpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.547] [spritesheet_25] [warning] The number of frames for sprite "mdtg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.547] [spritesheet_25] [warning] The number of frames for sprite "mdpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.547] [spritesheet_25] [warning] The number of frames for sprite "mdar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.547] [spritesheet_25] [warning] The number of frames for sprite "mdwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.548] [spritesheet_25] [warning] The number of frames for sprite "neobh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.548] [spritesheet_25] [warning] The number of frames for sprite "neorf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.548] [spritesheet_25] [warning] The number of frames for sprite "neogs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.548] [spritesheet_25] [warning] The number of frames for sprite "neobd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.548] [spritesheet_25] [warning] The number of frames for sprite "neoab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.548] [spritesheet_25] [warning] The number of frames for sprite "neojs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.549] [spritesheet_25] [warning] The number of frames for sprite "neoci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.549] [spritesheet_25] [warning] The number of frames for sprite "neopc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.549] [spritesheet_25] [warning] The number of frames for sprite "neotg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.549] [spritesheet_25] [warning] The number of frames for sprite "neopl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.549] [spritesheet_25] [warning] The number of frames for sprite "neoar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.549] [spritesheet_25] [warning] The number of frames for sprite "neown" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.550] [spritesheet_25] [warning] The number of frames for sprite "megabh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.550] [spritesheet_25] [warning] The number of frames for sprite "megarf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.550] [spritesheet_25] [warning] The number of frames for sprite "megags" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.550] [spritesheet_25] [warning] The number of frames for sprite "megabd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.550] [spritesheet_25] [warning] The number of frames for sprite "megaab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.550] [spritesheet_25] [warning] The number of frames for sprite "megajs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.550] [spritesheet_25] [warning] The number of frames for sprite "megaci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.550] [spritesheet_25] [warning] The number of frames for sprite "megapc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.551] [spritesheet_25] [warning] The number of frames for sprite "megatg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.551] [spritesheet_25] [warning] The number of frames for sprite "megapl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.551] [spritesheet_25] [warning] The number of frames for sprite "megaar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.551] [spritesheet_25] [warning] The number of frames for sprite "megawn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apctg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.552] [spritesheet_25] [warning] The number of frames for sprite "apcwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antibh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antirf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antigs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antibd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antiab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antijs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antici" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antipc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antitg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antipl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antiar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.553] [spritesheet_25] [warning] The number of frames for sprite "antiwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.554] [spritesheet_25] [warning] The number of frames for sprite "artbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.554] [spritesheet_25] [warning] The number of frames for sprite "artrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.554] [spritesheet_25] [warning] The number of frames for sprite "artgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.554] [spritesheet_25] [warning] The number of frames for sprite "artbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.554] [spritesheet_25] [warning] The number of frames for sprite "artab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.554] [spritesheet_25] [warning] The number of frames for sprite "artjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.554] [spritesheet_25] [warning] The number of frames for sprite "artci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.554] [spritesheet_25] [warning] The number of frames for sprite "artpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "arttg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "artpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "artar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "artwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "rocketbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "rocketrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "rocketgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "rocketbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "rocketab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.555] [spritesheet_25] [warning] The number of frames for sprite "rocketjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.556] [spritesheet_25] [warning] The number of frames for sprite "rocketci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.556] [spritesheet_25] [warning] The number of frames for sprite "rocketpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.556] [spritesheet_25] [warning] The number of frames for sprite "rockettg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.556] [spritesheet_25] [warning] The number of frames for sprite "rocketpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.556] [spritesheet_25] [warning] The number of frames for sprite "rocketar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.556] [spritesheet_25] [warning] The number of frames for sprite "rocketwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.556] [spritesheet_25] [warning] The number of frames for sprite "missbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "missrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "missgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "missbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "missab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "missjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "missci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "misspc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "misstg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "misspl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "missar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.557] [spritesheet_25] [warning] The number of frames for sprite "misswn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipebh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "piperf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipegs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipebd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipeab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipejs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipeci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipepc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipetg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipepl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.558] [spritesheet_25] [warning] The number of frames for sprite "pipear" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.559] [spritesheet_25] [warning] The number of frames for sprite "pipewn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.559] [spritesheet_25] [warning] The number of frames for sprite "tbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.559] [spritesheet_25] [warning] The number of frames for sprite "trf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.559] [spritesheet_25] [warning] The number of frames for sprite "tgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.559] [spritesheet_25] [warning] The number of frames for sprite "tbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.559] [spritesheet_25] [warning] The number of frames for sprite "tab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.559] [spritesheet_25] [warning] The number of frames for sprite "tjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.559] [spritesheet_25] [warning] The number of frames for sprite "tci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.560] [spritesheet_25] [warning] The number of frames for sprite "tpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.560] [spritesheet_25] [warning] The number of frames for sprite "ttg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.560] [spritesheet_25] [warning] The number of frames for sprite "tpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.560] [spritesheet_25] [warning] The number of frames for sprite "tar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.560] [spritesheet_25] [warning] The number of frames for sprite "twn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.560] [spritesheet_25] [warning] The number of frames for sprite "bbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.560] [spritesheet_25] [warning] The number of frames for sprite "brf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.560] [spritesheet_25] [warning] The number of frames for sprite "bgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.561] [spritesheet_25] [warning] The number of frames for sprite "bbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.561] [spritesheet_25] [warning] The number of frames for sprite "bab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.561] [spritesheet_25] [warning] The number of frames for sprite "bjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.561] [spritesheet_25] [warning] The number of frames for sprite "bci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.561] [spritesheet_25] [warning] The number of frames for sprite "bpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.561] [spritesheet_25] [warning] The number of frames for sprite "btg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.561] [spritesheet_25] [warning] The number of frames for sprite "bpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.561] [spritesheet_25] [warning] The number of frames for sprite "bar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.561] [spritesheet_25] [warning] The number of frames for sprite "bwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fightergs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fightertg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.562] [spritesheet_25] [warning] The number of frames for sprite "fighterwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bomberbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bomberrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bombergs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bomberbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bomberab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bomberjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bomberci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bomberpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bombertg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bomberpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.563] [spritesheet_25] [warning] The number of frames for sprite "bomberar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.564] [spritesheet_25] [warning] The number of frames for sprite "bomberwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.564] [spritesheet_25] [warning] The number of frames for sprite "stealthbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.564] [spritesheet_25] [warning] The number of frames for sprite "stealthrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.564] [spritesheet_25] [warning] The number of frames for sprite "stealthgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.564] [spritesheet_25] [warning] The number of frames for sprite "stealthbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.564] [spritesheet_25] [warning] The number of frames for sprite "stealthab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.564] [spritesheet_25] [warning] The number of frames for sprite "stealthjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.565] [spritesheet_25] [warning] The number of frames for sprite "stealthci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.565] [spritesheet_25] [warning] The number of frames for sprite "stealthpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.565] [spritesheet_25] [warning] The number of frames for sprite "stealthtg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.565] [spritesheet_25] [warning] The number of frames for sprite "stealthpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.565] [spritesheet_25] [warning] The number of frames for sprite "stealthar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.565] [spritesheet_25] [warning] The number of frames for sprite "stealthwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.565] [spritesheet_25] [warning] The number of frames for sprite "bbombbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.565] [spritesheet_25] [warning] The number of frames for sprite "bbombrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombtg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.566] [spritesheet_25] [warning] The number of frames for sprite "bbombwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.567] [spritesheet_25] [warning] The number of frames for sprite "bboatbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.567] [spritesheet_25] [warning] The number of frames for sprite "bboatrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.567] [spritesheet_25] [warning] The number of frames for sprite "bboatgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.567] [spritesheet_25] [warning] The number of frames for sprite "bboatbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.567] [spritesheet_25] [warning] The number of frames for sprite "bboatab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.568] [spritesheet_25] [warning] The number of frames for sprite "bboatjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.568] [spritesheet_25] [warning] The number of frames for sprite "bboatci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.568] [spritesheet_25] [warning] The number of frames for sprite "bboatpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.568] [spritesheet_25] [warning] The number of frames for sprite "bboattg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.568] [spritesheet_25] [warning] The number of frames for sprite "bboatpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.568] [spritesheet_25] [warning] The number of frames for sprite "bboatar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.568] [spritesheet_25] [warning] The number of frames for sprite "bboatwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.569] [spritesheet_25] [warning] The number of frames for sprite "landerbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.569] [spritesheet_25] [warning] The number of frames for sprite "landerrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.569] [spritesheet_25] [warning] The number of frames for sprite "landergs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.569] [spritesheet_25] [warning] The number of frames for sprite "landerbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.569] [spritesheet_25] [warning] The number of frames for sprite "landerab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.569] [spritesheet_25] [warning] The number of frames for sprite "landerjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.569] [spritesheet_25] [warning] The number of frames for sprite "landerci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.569] [spritesheet_25] [warning] The number of frames for sprite "landerpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.569] [spritesheet_25] [warning] The number of frames for sprite "landertg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.570] [spritesheet_25] [warning] The number of frames for sprite "landerpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.570] [spritesheet_25] [warning] The number of frames for sprite "landerar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.570] [spritesheet_25] [warning] The number of frames for sprite "landerwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.570] [spritesheet_25] [warning] The number of frames for sprite "cruiserbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruiserrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruisergs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruiserbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruiserab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruiserjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruiserci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruiserpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruisertg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruiserpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruiserar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.571] [spritesheet_25] [warning] The number of frames for sprite "cruiserwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subtg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.572] [spritesheet_25] [warning] The number of frames for sprite "subwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.573] [spritesheet_25] [warning] The number of frames for sprite "battlebh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.573] [spritesheet_25] [warning] The number of frames for sprite "battlerf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.573] [spritesheet_25] [warning] The number of frames for sprite "battlegs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.573] [spritesheet_25] [warning] The number of frames for sprite "battlebd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.573] [spritesheet_25] [warning] The number of frames for sprite "battleab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.573] [spritesheet_25] [warning] The number of frames for sprite "battlejs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.573] [spritesheet_25] [warning] The number of frames for sprite "battleci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.573] [spritesheet_25] [warning] The number of frames for sprite "battlepc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.574] [spritesheet_25] [warning] The number of frames for sprite "battletg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.574] [spritesheet_25] [warning] The number of frames for sprite "battlepl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.574] [spritesheet_25] [warning] The number of frames for sprite "battlear" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.574] [spritesheet_25] [warning] The number of frames for sprite "battlewn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.574] [spritesheet_25] [warning] The number of frames for sprite "carrierbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.574] [spritesheet_25] [warning] The number of frames for sprite "carrierrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.574] [spritesheet_25] [warning] The number of frames for sprite "carriergs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.575] [spritesheet_25] [warning] The number of frames for sprite "carrierbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.575] [spritesheet_25] [warning] The number of frames for sprite "carrierab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.575] [spritesheet_25] [warning] The number of frames for sprite "carrierjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.575] [spritesheet_25] [warning] The number of frames for sprite "carrierci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.575] [spritesheet_25] [warning] The number of frames for sprite "carrierpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.575] [spritesheet_25] [warning] The number of frames for sprite "carriertg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.575] [spritesheet_25] [warning] The number of frames for sprite "carrierpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.576] [spritesheet_25] [warning] The number of frames for sprite "carrierar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.576] [spritesheet_25] [warning] The number of frames for sprite "carrierwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.576] [spritesheet_25] [warning] The number of frames for sprite "ooziumbh" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.576] [spritesheet_25] [warning] The number of frames for sprite "ooziumrf" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.577] [spritesheet_25] [warning] The number of frames for sprite "ooziumgs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.577] [spritesheet_25] [warning] The number of frames for sprite "ooziumbd" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.577] [spritesheet_25] [warning] The number of frames for sprite "ooziumab" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.577] [spritesheet_25] [warning] The number of frames for sprite "ooziumjs" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.577] [spritesheet_25] [warning] The number of frames for sprite "ooziumci" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.577] [spritesheet_25] [warning] The number of frames for sprite "ooziumpc" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.577] [spritesheet_25] [warning] The number of frames for sprite "ooziumtg" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.577] [spritesheet_25] [warning] The number of frames for sprite "ooziumpl" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.578] [spritesheet_25] [warning] The number of frames for sprite "ooziumar" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.578] [spritesheet_25] [warning] The number of frames for sprite "ooziumwn" was 1 and the number of durations was 5.
+[2022-01-10 17:02:47.604] [json_script_24] [info] Finished loading JSON script assets/sprites/unit/idle/spritesunitidle.json.
+[2022-01-10 17:02:47.651] [json_script_27] [info] Loading JSON script assets/sprites/tile/normal/spritestilenormal.json...
+[2022-01-10 17:02:47.734] [json_script_27] [info] Finished loading JSON script assets/sprites/tile/normal/spritestilenormal.json.
+[2022-01-10 17:02:47.747] [json_script_30] [info] Loading JSON script assets/sprites/unit_picture/spritesunit_picture.json...
+[2022-01-10 17:02:47.747] [json_script_30] [error] Failed to open JSON script "assets/sprites/unit_picture/spritesunit_picture.json" for reading.
+[2022-01-10 17:02:47.747] [json_script_32] [info] Loading JSON script assets/sprites/tile_picture/normal/spritestile_picturenormal.json...
+[2022-01-10 17:02:47.747] [json_script_32] [error] Failed to open JSON script "assets/sprites/tile_picture/normal/spritestile_picturenormal.json" for reading.
+[2022-01-10 17:02:47.747] [json_script_34] [info] Loading JSON script assets/sprites/icon/spritesicon.json...
+[2022-01-10 17:02:47.749] [json_script_34] [info] Finished loading JSON script assets/sprites/icon/spritesicon.json.
+[2022-01-10 17:02:47.750] [json_script_37] [info] Loading JSON script assets/sprites/gui/spritesgui.json...
+[2022-01-10 17:02:47.849] [json_script_37] [info] Finished loading JSON script assets/sprites/gui/spritesgui.json.
+[2022-01-10 17:02:47.851] [json_script_41] [info] Loading JSON script assets/gui/gui.json...
+[2022-01-10 17:02:47.863] [gui_42] [error] Error while loading GUI from assets/gui/main.txt: Could not set property 'backgroundcolor', widget of type 'Button' does not has this property.
+[2022-01-10 17:02:47.869] [gui_42] [error] Error while loading GUI from assets/gui/settings.txt: Could not set property 'backgroundcolor', widget of type 'Button' does not has this property.
+[2022-01-10 17:02:47.870] [json_script_41] [info] Failed to load JSON script assets/gui/gui.json.
+[2022-01-10 17:02:47.870] [json_script_45] [info] Loading JSON script assets/property/country.json...
+[2022-01-10 17:02:47.881] [json_script_45] [info] Finished loading JSON script assets/property/country.json.
+[2022-01-10 17:02:47.882] [json_script_63] [info] Loading JSON script assets/property/weather.json...
+[2022-01-10 17:02:47.885] [json_script_63] [info] Finished loading JSON script assets/property/weather.json.
+[2022-01-10 17:02:47.885] [json_script_72] [info] Loading JSON script assets/property/environment.json...
+[2022-01-10 17:02:47.886] [json_script_72] [info] Finished loading JSON script assets/property/environment.json.
+[2022-01-10 17:02:47.887] [json_script_78] [info] Loading JSON script assets/property/movement.json...
+[2022-01-10 17:02:47.890] [json_script_78] [info] Finished loading JSON script assets/property/movement.json.
+[2022-01-10 17:02:47.890] [json_script_89] [info] Loading JSON script assets/property/terrain.json...
+[2022-01-10 17:02:47.921] [json_script_89] [info] Finished loading JSON script assets/property/terrain.json.
+[2022-01-10 17:02:47.924] [json_script_111] [info] Loading JSON script assets/property/tile.json...
+[2022-01-10 17:02:47.960] [json_script_111] [info] Finished loading JSON script assets/property/tile.json.
+[2022-01-10 17:02:47.964] [json_script_236] [info] Loading JSON script assets/property/unit.json...
+[2022-01-10 17:02:48.079] [json_script_236] [info] Finished loading JSON script assets/property/unit.json.
+[2022-01-10 17:02:48.085] [json_script_265] [info] Loading JSON script assets/property/co.json...
+[2022-01-10 17:02:48.086] [json_script_265] [info] Finished loading JSON script assets/property/co.json.
+[2022-01-10 17:02:48.086] [scripts_40] [info] Registering script interface...
+[2022-01-10 17:02:48.086] [scripts_40] [info] Finished registering script interface.
+[2022-01-10 17:02:48.086] [scripts_40] [info] Loading scripts from "assets/script"...
+[2022-01-10 17:02:48.088] [scripts_40] [info] Finished loading scripts.

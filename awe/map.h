@@ -599,8 +599,8 @@ namespace awe {
 		 * Determines the ID the next unit should have.
 		 * A unit ID cannot be \c 0. Automatically assigns the returned value to
 		 * \c _lastUnitID.
-		 * @throws  std::bad_alloc in the [practically impossible] case that a new
-		 *                         unique unit ID cannot be generated.
+		 * @throws std::bad_alloc in the [practically impossible] case that a new
+		 *                        unique unit ID cannot be generated.
 		 */
 		awe::UnitID _findUnitID();
 
@@ -665,6 +665,8 @@ namespace awe {
 		 * @param  id        The ID of the unit to write info on, if writing.
 		 * @param  curtile   The location of the tile to create the unit on, if
 		 *                   reading.
+		 * @param  loadOnto  The ID of the unit to load the new unit onto. \c 0 if
+		 *                   the unit should not be loaded onto another one.
 		 * @throws std::exception if the unit info couldn't be read or written.
 		 * @return When loading, \c TRUE if there was a unit created, \c FALSE if
 		 *         no unit was created. When saving, always \c TRUE.
@@ -673,7 +675,8 @@ namespace awe {
 			const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
-			awe::UnitID id, const sf::Vector2u& curtile);
+			awe::UnitID id, const sf::Vector2u& curtile,
+			const awe::UnitID loadOnto = 0);
 
 		/**
 		 * Second version of the CWM format.
