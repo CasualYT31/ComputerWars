@@ -120,12 +120,12 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 			_tileIcon.getPosition().y + _tileIcon.getSize().y)
 	);
 	// tile defence
+	_tileDefIcon.animate(target);
 	_tileDefIcon.setPosition(
 		sf::Vector2f(tileCentre - sectionWidth / 2.0f + 10.0f,
 			_bg.getPosition().y + _bg.getSize().y -
 			_tileDefIcon.getSize().y - 10.0f)
 	);
-	_tileDefIcon.animate(target);
 	_tileDef.setString(std::to_string(
 		_tile->getTileType()->getType()->getDefence()
 	));
@@ -137,6 +137,7 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	// tile HP
 	if (_tile->getTileType()->getType()->getMaxHP() > 0) {
 		if (!_tileHPIcon.getSpritesheet()) _tileHPIcon.setSpritesheet(_icons);
+		_tileHPIcon.animate(target);
 		_tileHPIcon.setPosition(
 			sf::Vector2f(_tileDefIcon.getPosition().x,
 				_tileDefIcon.getPosition().y - _tileHPIcon.getSize().y - 5.0f)
@@ -150,8 +151,8 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	} else {
 		_tileHPIcon.setSpritesheet(nullptr);
 		_tileHP.setString("");
+		_tileHPIcon.animate(target);
 	}
-	_tileHPIcon.animate(target);
 	// units
 	std::size_t i = 1;
 	for (auto& u : _units) {

@@ -89,9 +89,9 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target) noexcept {
 			_unitIcon.getPosition().y + _unitIcon.getSize().y)
 	);
 	// ammo
+	_unitAmmoIcon.animate(target);
 	_unitAmmoIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_rect.top + _rect.height - 10.0f - _unitAmmoIcon.getSize().y));
-	_unitAmmoIcon.animate(target);
 	_unitAmmo.setString(std::to_string(_unit->getAmmo()));
 	_unitAmmo.setPosition(
 		sf::Vector2f(_rect.left + _rect.width -
@@ -99,9 +99,9 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target) noexcept {
 			_unitAmmoIcon.getPosition().y - 3.0f)
 	);
 	// fuel
+	_unitFuelIcon.animate(target);
 	_unitFuelIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_unitAmmoIcon.getPosition().y - 5.0f - _unitFuelIcon.getSize().y));
-	_unitFuelIcon.animate(target);
 	_unitFuel.setString(std::to_string(_unit->getFuel()));
 	_unitFuel.setPosition(
 		sf::Vector2f(_rect.left + _rect.width -
@@ -109,9 +109,9 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target) noexcept {
 			_unitFuelIcon.getPosition().y - 3.0f)
 	);
 	// HP
+	_unitHPIcon.animate(target);
 	_unitHPIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_unitFuelIcon.getPosition().y - 5.0f - _unitHPIcon.getSize().y));
-	_unitHPIcon.animate(target);
 	_unitHP.setString(std::to_string(_unit->getHP()));
 	_unitHP.setPosition(
 		sf::Vector2f(_rect.left + _rect.width -
