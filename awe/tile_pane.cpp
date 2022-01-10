@@ -74,7 +74,8 @@ void awe::tile_pane::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
 }
 
 bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
-	sf::Vector2f size = sf::Vector2f(60.0f, 100.0f);
+	const float sectionWidth = 60.0f;
+	sf::Vector2f size = sf::Vector2f(sectionWidth * (_units.size() + 1), 100.0f);
 	// background
 	_bg.setSize(size);
 	if (_location == awe::tile_pane::location::Left) {
@@ -87,7 +88,12 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	_rounded_bg.setPointCount(points.size());
 	for (std::size_t p = 0; p < points.size(); p++)
 		_rounded_bg.setPoint(p, points.at(p));
-	const float centre = _bg.getPosition().x + size.x / 2.0f;
+	float tileCentre = 0.0f;
+	if (_location == awe::tile_pane::location::Left) {
+		tileCentre = _bg.getPosition().x + sectionWidth / 2.0f;
+	} else if (_location == awe::tile_pane::location::Right) {
+		tileCentre = _bg.getPosition().x + size.x - sectionWidth / 2.0f;
+	}
 	// tile
 	if (_tileIcon.getSpritesheet() != _tile->getSpritesheet()) {
 		_tileIcon.setSpritesheet(_tile->getSpritesheet());
@@ -97,18 +103,18 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	}
 	_tileIcon.animate(target);
 	_tileIcon.setPosition(
-		sf::Vector2f(centre - _tileIcon.getSize().x / 2.0f,
+		sf::Vector2f(tileCentre - _tileIcon.getSize().x / 2.0f,
 			_bg.getPosition().y + 10.0f)
 	);
 	// tile name
 	_tileName.setString(_tile->getTileType()->getType()->getShortName());
 	_tileName.setPosition(
-		sf::Vector2f(centre - _tileName.getGlobalBounds().width / 2.0f,
+		sf::Vector2f(tileCentre - _tileName.getLocalBounds().width / 2.0f,
 			_tileIcon.getPosition().y + _tileIcon.getSize().y)
 	);
 	// tile defence
 	_tileDefIcon.setPosition(
-		sf::Vector2f(_bg.getPosition().x + 10.0f,
+		sf::Vector2f(tileCentre - sectionWidth / 2.0f + 10.0f,
 			_bg.getPosition().y + _bg.getSize().y -
 			_tileDefIcon.getSize().y - 10.0f)
 	);
@@ -117,9 +123,9 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 		_tile->getTileType()->getType()->getDefence()
 	));
 	_tileDef.setPosition(
-		sf::Vector2f(_bg.getPosition().x + _bg.getSize().x -
+		sf::Vector2f(tileCentre + sectionWidth / 2.0f -
 			_tileDef.getLocalBounds().width - 10.0f,
-			_tileDefIcon.getPosition().y - 2.5f)
+			_tileDefIcon.getPosition().y - 3.0f)
 	);
 	// tile HP
 	if (_tile->getTileType()->getType()->getMaxHP() > 0) {
@@ -130,9 +136,9 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 		);
 		_tileHP.setString(std::to_string(_tile->getTileHP()));
 		_tileHP.setPosition(
-			sf::Vector2f(_bg.getPosition().x + _bg.getSize().x -
+			sf::Vector2f(tileCentre + sectionWidth / 2.0f -
 				_tileHP.getLocalBounds().width - 10.0f,
-				_tileHPIcon.getPosition().y - 2.5f)
+				_tileHPIcon.getPosition().y - 3.0f)
 		);
 	} else {
 		_tileHPIcon.setSpritesheet(nullptr);
