@@ -830,9 +830,12 @@ void awe::map::_CWM_0(const bool isSave,
 				if (tile.getUnit()) {
 					_CWM_0_Unit(isSave, countries, tiles, units, tile.getUnit(),
 						sf::Vector2u(x, y));
-				} else {
-					_file.writeNumber(awe::army::NO_ARMY);
 				}
+				// covers the following cases:
+				// 1. tile is vacant
+				// 2. unit has no loaded units on it
+				// 3. unit has loaded units on it, but there are no more to load
+				_file.writeNumber(awe::army::NO_ARMY);
 			}
 		}
 	} else {
@@ -905,9 +908,12 @@ void awe::map::_CWM_1(const bool isSave,
 				if (tile.getUnit()) {
 					_CWM_0_Unit(isSave, countries, tiles, units, tile.getUnit(),
 						sf::Vector2u(x, y));
-				} else {
-					_file.writeNumber(awe::army::NO_ARMY);
 				}
+				// covers the following cases:
+				// 1. tile is vacant
+				// 2. unit has no loaded units on it
+				// 3. unit has loaded units on it, but there are no more to load
+				_file.writeNumber(awe::army::NO_ARMY);
 			}
 		}
 	} else {
@@ -975,7 +981,6 @@ bool awe::map::_CWM_0_Unit(const bool isSave,
 				_CWM_0_Unit(isSave, countries, tiles, units, loadedUnitID,
 					curtile);
 			}
-		} else {
 			_file.writeNumber(awe::army::NO_ARMY);
 		}
 		return true;
