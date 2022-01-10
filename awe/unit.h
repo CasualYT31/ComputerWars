@@ -163,6 +163,19 @@ namespace awe {
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
 
 		/**
+		 * Gets the spritesheet used with this unit.
+		 * @return Pointer to the spritesheet used with this unit.
+		 */
+		std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet() const
+			noexcept;
+
+		/**
+		 * Finds out the sprite name used with this unit's internal sprite.
+		 * @return The name of the sprite from the spritesheet used with this unit.
+		 */
+		std::string getSprite() const noexcept;
+
+		/**
 		 * Sets the unit's pixel position to the internal sprite.
 		 * @param x The X position of the tile.
 		 * @param y The Y position of the tile.

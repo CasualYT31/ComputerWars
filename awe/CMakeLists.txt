@@ -5,6 +5,7 @@ add_library(${PROJECT_NAME} STATIC
 	"bank.cpp"
 	"tile.cpp"
 	"unit.cpp"
+	"unit_pane.cpp"
 	"tile_pane.cpp"
 	"army.cpp"
 	"army_pane.cpp"

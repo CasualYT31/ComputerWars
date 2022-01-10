@@ -86,7 +86,7 @@ namespace awe {
 		 * If \c nullptr is given, the call will be ignored.
 		 * @param font Pointer to the font to use with this army pane.
 		 */
-		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
+		void setFont(const std::shared_ptr<const sf::Font>& font) noexcept;
 
 		/**
 		 * This drawable's \c animate() method.

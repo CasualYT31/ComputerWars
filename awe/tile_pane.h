@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "tile.h"
-#include "unit.h"
+#include "unit_pane.h"
 
 #pragma once
 
@@ -92,7 +92,7 @@ namespace awe {
 		 * If \c nullptr is given, the call will be ignored.
 		 * @param font Pointer to the font to use with this tile pane.
 		 */
-		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
+		void setFont(const std::shared_ptr<const sf::Font>& font) noexcept;
 
 		/**
 		 * This drawable's \c animate() method.
@@ -123,14 +123,19 @@ namespace awe {
 		std::shared_ptr<const sfx::animated_spritesheet> _icons = nullptr;
 
 		/**
+		 * The font to use with this pane.
+		 */
+		std::shared_ptr<const sf::Font> _font = nullptr;
+
+		/**
 		 * Pointer to the tile to draw information on.
 		 */
 		std::shared_ptr<const awe::tile> _tile = nullptr;
 
 		/**
-		 * Pointers to units to draw information on.
+		 * The panes which will display information on units.
 		 */
-		std::vector<std::shared_ptr<const awe::unit>> _units;
+		std::vector<awe::unit_pane> _units;
 
 		/**
 		 * The main body of the pane.

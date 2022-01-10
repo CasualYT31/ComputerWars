@@ -47,7 +47,8 @@ void awe::army_pane::setSpritesheet(
 	_co.setSpritesheet(sheet);
 }
 
-void awe::army_pane::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
+void awe::army_pane::setFont(const std::shared_ptr<const sf::Font>& font) noexcept
+	{
 	if (font) _funds.setFont(*font);
 }
 
