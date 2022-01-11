@@ -84,7 +84,9 @@ namespace awe {
 
 		/**
 		 * Sets this unit's HP.
-		 * If <tt>< 0</tt> is given, \c 0 will be stored.
+		 * If <tt>< 0</tt> is given, \c 0 will be stored.\n
+		 * Note that this method expects an internal HP value, and not one that
+		 * the user would see (see \c getDisplayedHP()).
 		 * @param hp The new HP of this unit.
 		 */
 		void setHP(const awe::HP hp) noexcept;
@@ -94,6 +96,17 @@ namespace awe {
 		 * @return The current HP of this unit.
 		 */
 		awe::HP getHP() const noexcept;
+
+		/**
+		 * Gets this unit's HP as displayed to the user.
+		 * This method will divide the internal HP value by the granularity of HP
+		 * values and round up to return what the user should see as this unit's
+		 * HP (unless this unit's HP is at its maximum, in which case the result
+		 * will be rounded down).
+		 * @return The current HP of this unit in a user-friendly format.
+		 * @sa     awe::unit_type::HP_GRANULARITY
+		 */
+		awe::HP getDisplayedHP() const noexcept;
 
 		/**
 		 * Sets this unit's fuel.

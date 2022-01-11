@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "unit.h"
+#include <cmath>
 
 awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type,
 	const awe::ArmyID army,
@@ -58,6 +59,13 @@ void awe::unit::setHP(const awe::HP hp) noexcept {
 
 awe::HP awe::unit::getHP() const noexcept {
 	return _hp;
+}
+
+awe::HP awe::unit::getDisplayedHP() const noexcept {
+	awe::HP ret = (awe::HP)floor((double)_hp /
+		(double)awe::unit_type::HP_GRANULARITY);
+	if (_hp < _type->getMaxHP()) ret += 1;
+	return ret;
 }
 
 void awe::unit::setFuel(const awe::Fuel fuel) noexcept {

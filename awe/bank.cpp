@@ -204,6 +204,7 @@ bool awe::tile_type::operator!=(const awe::tile_type& rhs) const noexcept {
 //******
 //*UNIT*
 //******
+const unsigned int awe::unit_type::HP_GRANULARITY = 10;
 awe::unit_type::unit_type(const awe::BankID id, engine::json& j) noexcept :
 	common_properties(id, j) {
 	j.apply(_movementTypeID, { "movetype" }, true);
@@ -211,7 +212,8 @@ awe::unit_type::unit_type(const awe::BankID id, engine::json& j) noexcept :
 	j.apply(_maxFuel, { "fuel" }, true);
 	j.apply(_maxAmmo, { "ammo" }, true);
 	j.apply(_maxHP, { "hp" }, true);
-	if (_maxHP > INT_MAX) _maxHP = INT_MAX;
+	if (_maxHP > INT_MAX / HP_GRANULARITY) _maxHP = INT_MAX / HP_GRANULARITY;
+	_maxHP *= HP_GRANULARITY;
 	j.apply(_movementPoints, { "mp" }, true);
 	j.apply(_vision, { "vision" }, true);
 	j.apply(_lowerRange, { "lowrange" }, true);

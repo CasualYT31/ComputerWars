@@ -630,6 +630,20 @@ namespace awe {
 	class unit_type : public common_properties {
 	public:
 		/**
+		 * The granularity of HP values that this engine works with internally.
+		 * This engine calculates health to a finer granularity than 0-10 for units
+		 * (I would be surprised if the original games did not do this). Instead,
+		 * in the original version of this game, HP is calculated from 0-100, or 0
+		 * to whatever the max HP of a unit type is multiplied by this granularity
+		 * value. The higher the granularity, the higher the precision of HP
+		 * calculations.\n
+		 * I chose against using floating point values for HP values to remain as
+		 * precise as possible, at least internally.
+		 * @sa awe::unit::getDisplayedHP()
+		 */
+		static const unsigned int HP_GRANULARITY;
+
+		/**
 		 * Constructor which scans a JSON object for the unit type's properties.
 		 * It also passes on the JSON object to the \c common_properties
 		 * constructor. In addition to the keys defined in the superclass, the
@@ -734,6 +748,8 @@ namespace awe {
 
 		/**
 		 * Retrieves the max HP property.
+		 * Note that the value returned will be an \em internal HP value, and not
+		 * one that should be displayed to the user.
 		 * @return The max HP property.
 		 */
 		unsigned int getMaxHP() const noexcept;
