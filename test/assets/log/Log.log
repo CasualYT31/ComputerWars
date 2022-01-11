@@ -1,277 +1,267 @@
 Tests © 2022 Dev
 ---------------
 Event Log:
-[2022-01-11 05:39:11.938] [logger_test_0] [info] Hello World!
-[2022-01-11 05:39:11.938] [logger_test_1] [warning] We are currently testing!
-[2022-01-11 05:39:11.939] [logger_test_2] [error] Oh no!
-[2022-01-11 05:39:11.940] [logger_test_3] [info] Number = 8
-[2022-01-11 05:39:11.941] [logger_test_4] [warning] Inserted text, -79.5 = number
-[2022-01-11 05:39:11.944] [logger_test_5] [error] Error is true!
-[2022-01-11 05:39:11.960] [name:test_apply_json_9] [error] Attempted to assign a value to a destination of type "number" without specifying a key sequence.
-[2022-01-11 05:39:11.960] [name:test_apply_json_9] [info]  property faulty: left to the default of 0.
-[2022-01-11 05:39:11.960] [name:test_apply_json_9] [error] The key sequence {"test"} does not exist in the JSON object.
-[2022-01-11 05:39:11.960] [name:test_apply_json_9] [info] {"test"} property faulty: left to the default of 0.
-[2022-01-11 05:39:11.997] [name:test_json_11] [error] Attempted to assign a value of data type "boolean" to a destination of type "number", in the key sequence {"happy"}.
-[2022-01-11 05:39:11.997] [name:test_json_11] [info] {"happy"} property faulty: left to the default of 0.
-[2022-01-11 05:39:11.997] [name:test_json_11] [error] Attempted to assign a value of data type "float" to a destination of type "number", in the key sequence {"pi"}.
-[2022-01-11 05:39:11.997] [name:test_json_11] [info] {"pi"} property faulty: left to the default of 0.
-[2022-01-11 05:39:12.017] [name:test_json_13] [error] The size of the JSON array specified (3) does not match with the size of the provided array (2), in the key sequence {"list"}.
-[2022-01-11 05:39:12.017] [name:test_json_13] [error] The size of the JSON array specified (3) does not match with the size of the provided array (4), in the key sequence {"list"}.
-[2022-01-11 05:39:12.020] [name:test_json_14] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to an array of data type "string", in the key sequence {"list"}.
-[2022-01-11 05:39:12.062] [name:test_dictionary_18] [warning] Attempted to remove non-existent language script path "test".
-[2022-01-11 05:39:12.062] [name:test_dictionary_18] [warning] Attempted to remove non-existent language script path "".
-[2022-01-11 05:39:12.062] [name:test_dictionary_18] [warning] Attempted to switch to non-existent string map "testing".
-[2022-01-11 05:39:12.065] [name:test_dictionary_20] [warning] Attempted to replace the script path of the current language "".
-[2022-01-11 05:39:12.065] [json_script_21] [info] Loading JSON script bad_path.json...
-[2022-01-11 05:39:12.065] [json_script_21] [error] Failed to open JSON script "bad_path.json" for reading.
-[2022-01-11 05:39:12.065] [name:test_dictionary_20] [error] Failed to load string map script for language "test".
-[2022-01-11 05:39:12.065] [json_script_23] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
-[2022-01-11 05:39:12.075] [json_script_23] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
-[2022-01-11 05:39:12.075] [name:test_dictionary_20] [warning] Attempted to replace the script path of the current language "test".
-[2022-01-11 05:39:12.075] [json_script_26] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/GER_DE.json...
-[2022-01-11 05:39:12.084] [json_script_26] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/GER_DE.json.
-[2022-01-11 05:39:12.084] [json_script_29] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
-[2022-01-11 05:39:12.085] [json_script_29] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
-[2022-01-11 05:39:12.087] [json_script_34] [info] Loading JSON script file...
-[2022-01-11 05:39:12.087] [json_script_34] [error] Failed to open JSON script "file" for reading.
-[2022-01-11 05:39:12.092] [json_script_36] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json...
-[2022-01-11 05:39:12.100] [json_script_39] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
-[2022-01-11 05:39:12.101] [json_script_39] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
-[2022-01-11 05:39:12.101] [json_script_36] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json.
-[2022-01-11 05:39:12.101] [json_script_42] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/GER_DE.json...
-[2022-01-11 05:39:12.102] [json_script_42] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/GER_DE.json.
-[2022-01-11 05:39:12.102] [json_script_36] [info] Saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json...
-[2022-01-11 05:39:12.104] [json_script_36] [info] Finished saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json.
-[2022-01-11 05:39:12.104] [json_script_45] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
-[2022-01-11 05:39:12.105] [json_script_45] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
-[2022-01-11 05:39:12.105] [json_script_36] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json...
-[2022-01-11 05:39:12.115] [json_script_36] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json.
-[2022-01-11 05:39:12.115] [json_script_49] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
-[2022-01-11 05:39:12.116] [json_script_49] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
-[2022-01-11 05:39:12.116] [json_script_36] [info] Saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json...
-[2022-01-11 05:39:12.117] [json_script_36] [info] Finished saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json.
-[2022-01-11 05:39:12.122] [fonts_53] [error] Attempting to access font with key "test" which does not exist.
-[2022-01-11 05:39:12.125] [json_script_54] [info] Loading JSON script badfile.json...
-[2022-01-11 05:39:12.125] [json_script_54] [error] Failed to open JSON script "badfile.json" for reading.
-[2022-01-11 05:39:12.130] [json_script_56] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
-[2022-01-11 05:39:12.150] [json_script_56] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
-[2022-01-11 05:39:12.152] [json_script_59] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
-[2022-01-11 05:39:12.153] [json_script_59] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
-[2022-01-11 05:39:12.153] [json_script_59] [info] Loading JSON script anotherbadfile.json...
-[2022-01-11 05:39:12.153] [json_script_59] [error] Failed to open JSON script "anotherbadfile.json" for reading.
-[2022-01-11 05:39:12.157] [json_script_62] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
-[2022-01-11 05:39:12.159] [json_script_62] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
-[2022-01-11 05:39:12.159] [json_script_62] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/faultyfonts.json...
-[2022-01-11 05:39:12.167] [fonts_63] [error] Attempting to load font file "badpath.ttf" which does not exist.
-[2022-01-11 05:39:12.167] [json_script_62] [info] Failed to load JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/faultyfonts.json.
-[2022-01-11 05:39:12.167] [fonts_63] [error] Attempting to access font with key "dialogue" which does not exist.
-[2022-01-11 05:39:12.172] [json_script_66] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
-[2022-01-11 05:39:12.173] [json_script_66] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
-[2022-01-11 05:39:12.173] [json_script_66] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/otherfonts.json...
-[2022-01-11 05:39:12.174] [json_script_66] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/otherfonts.json.
-[2022-01-11 05:39:12.174] [fonts_67] [error] Attempting to access font with key "dialogue" which does not exist.
-[2022-01-11 05:39:12.176] [json_script_70] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
-[2022-01-11 05:39:12.177] [json_script_70] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
-[2022-01-11 05:39:12.177] [json_script_70] [info] Saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts_save.json...
-[2022-01-11 05:39:12.178] [json_script_70] [info] Finished saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts_save.json.
-[2022-01-11 05:39:12.179] [json_script_73] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts_save.json...
-[2022-01-11 05:39:12.180] [json_script_73] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts_save.json.
-[2022-01-11 05:39:12.187] [json_script_76] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
-[2022-01-11 05:39:13.085] [json_script_76] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
-[2022-01-11 05:39:13.134] [json_script_79] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
-[2022-01-11 05:39:13.215] [json_script_79] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
-[2022-01-11 05:39:13.215] [json_script_79] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/faultyaudio.json...
-[2022-01-11 05:39:13.300] [audio_80] [error] Audio file "paths" for sound object "load" could not be loaded!
-[2022-01-11 05:39:13.303] [audio_80] [error] Audio file "r us" for sound object "unload" could not be loaded!
-[2022-01-11 05:39:13.306] [audio_80] [error] Audio file "bad" for music object "noco" could not be loaded!
-[2022-01-11 05:39:13.306] [json_script_79] [info] Failed to load JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/faultyaudio.json.
-[2022-01-11 05:39:13.306] [audio_80] [error] Audio object "jake" could not be found.
-[2022-01-11 05:39:13.337] [json_script_83] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
-[2022-01-11 05:39:13.408] [json_script_83] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
-[2022-01-11 05:39:13.438] [json_script_86] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
-[2022-01-11 05:39:13.510] [json_script_86] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
-[2022-01-11 05:39:13.510] [json_script_86] [info] Saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
-[2022-01-11 05:39:13.513] [json_script_86] [info] Finished saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
-[2022-01-11 05:39:13.513] [json_script_86] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
-[2022-01-11 05:39:13.626] [json_script_86] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
-[2022-01-11 05:39:14.218] [json_script_90] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json...
-[2022-01-11 05:39:14.229] [json_script_90] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json.
-[2022-01-11 05:39:14.316] [json_script_93] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json...
-[2022-01-11 05:39:14.319] [json_script_93] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json.
-[2022-01-11 05:39:14.320] [json_script_93] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/faultyrenderer.json...
-[2022-01-11 05:39:14.330] [json_96] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"caption"}.
-[2022-01-11 05:39:14.330] [json_96] [info] {"caption"} property faulty: left to the default of Computer Wars.
-[2022-01-11 05:39:14.331] [json_script_93] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/faultyrenderer.json.
-[2022-01-11 05:39:14.418] [json_script_97] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json...
-[2022-01-11 05:39:14.440] [json_script_97] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json.
-[2022-01-11 05:39:14.512] [json_script_103] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json...
-[2022-01-11 05:39:14.523] [json_script_103] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json.
-[2022-01-11 05:39:14.524] [json_script_103] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/faultysheet.json...
-[2022-01-11 05:39:14.533] [json_109] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"path"}.
-[2022-01-11 05:39:14.533] [json_109] [info] {"path"} property faulty: left to the default of .
-[2022-01-11 05:39:14.533] [spritesheet_104] [error] No path to a spritesheet graphic has been provided - aborting load attempt.
-[2022-01-11 05:39:14.533] [json_script_103] [info] Failed to load JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/faultysheet.json.
-[2022-01-11 05:39:14.601] [json_script_110] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json...
-[2022-01-11 05:39:14.612] [json_script_110] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json.
-[2022-01-11 05:39:14.613] [json_script_112] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json...
-[2022-01-11 05:39:14.615] [json_script_112] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json.
-[2022-01-11 05:39:18.900] [json_script_117] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/ani.json...
-[2022-01-11 05:39:18.908] [json_script_117] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/ani.json.
-[2022-01-11 05:39:18.909] [json_script_119] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json...
-[2022-01-11 05:39:18.913] [json_script_119] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json.
-[2022-01-11 05:39:22.595] [json_script_124] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/ani.json...
-[2022-01-11 05:39:22.604] [json_script_124] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/ani.json.
-[2022-01-11 05:39:22.604] [json_script_126] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json...
-[2022-01-11 05:39:22.607] [json_script_126] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json.
-[2022-01-11 05:39:25.485] [json_script_131] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/multi.json...
-[2022-01-11 05:39:25.493] [json_script_131] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/multi.json.
-[2022-01-11 05:39:25.494] [json_script_133] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json...
-[2022-01-11 05:39:25.496] [json_script_133] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json.
-[2022-01-11 05:39:36.625] [keycodetesting_138] [warning] Given keycode 500 is larger than the maximum keycode of 100: int 500 will be converted to enum 100.
-[2022-01-11 05:39:36.628] [mousebtntesting_139] [warning] Given mouse button ID 500 is larger than the maximum mouse button ID of 4: int 500 will be converted to enum 4.
-[2022-01-11 05:39:36.634] [axistesting_140] [warning] Given gamepad axis ID 500 is larger than the maximum gamepad axis ID of 7: int 500 will be converted to enum 7.
-[2022-01-11 05:39:36.637] [signaltypetesting_141] [warning] Given signal type ID 500 is larger than the maximum signal type ID of 1: int 500 will be converted to enum 1.
-[2022-01-11 05:39:36.685] [json_script_142] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
-[2022-01-11 05:39:36.695] [user_input_143] [warning] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
-[2022-01-11 05:39:36.696] [json_script_142] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
-[2022-01-11 05:39:36.768] [json_script_147] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
-[2022-01-11 05:39:36.770] [user_input_148] [warning] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
-[2022-01-11 05:39:36.771] [json_script_147] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
-[2022-01-11 05:39:36.771] [json_script_147] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/faultyui.json...
-[2022-01-11 05:39:36.779] [user_input_148] [warning] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
-[2022-01-11 05:39:36.779] [json_script_147] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/faultyui.json.
-[2022-01-11 05:39:36.779] [user_input_148] [error] Could not retrieve configurations for non-existent control called "up".
-[2022-01-11 05:39:36.846] [json_script_153] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
-[2022-01-11 05:39:36.848] [user_input_154] [warning] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
-[2022-01-11 05:39:36.849] [json_script_153] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
-[2022-01-11 05:39:36.850] [user_input_154] [warning] Attempted to set a joystick with ID 9 that wasn't connected, resetting the ID to 0.
-[2022-01-11 05:39:36.914] [json_script_158] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
-[2022-01-11 05:39:36.916] [user_input_159] [warning] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
-[2022-01-11 05:39:36.917] [json_script_158] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
-[2022-01-11 05:39:36.918] [user_input_159] [warning] Attempted to set a joystick axis threshold of 1, reset to 5.0.
-[2022-01-11 05:39:36.918] [user_input_159] [warning] Attempted to set a joystick axis threshold of 500, reset to 95.0.
-[2022-01-11 05:39:36.981] [json_script_163] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
-[2022-01-11 05:39:36.983] [user_input_164] [warning] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
-[2022-01-11 05:39:36.983] [json_script_163] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
-[2022-01-11 05:39:36.984] [json_script_163] [info] Saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
-[2022-01-11 05:39:36.985] [json_script_163] [info] Finished saving JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
-[2022-01-11 05:39:36.986] [json_script_163] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
-[2022-01-11 05:39:36.992] [user_input_164] [warning] Attempted to set a joystick with ID 0 that wasn't connected, resetting the ID to 0.
-[2022-01-11 05:39:36.994] [json_script_163] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
-[2022-01-11 05:39:37.027] [scripts_169] [info] Registering script interface...
-[2022-01-11 05:39:37.027] [scripts_169] [info] Finished registering script interface.
-[2022-01-11 05:39:37.027] [scripts_169] [info] Loading scripts from "C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
-[2022-01-11 05:39:37.034] [scripts_169] [info] Finished loading scripts.
-[2022-01-11 05:39:37.035] [scripts_169] [info] Loading scripts from "badpath"...
-[2022-01-11 05:39:37.037] [scripts_169] [error] Failed to interact with directory entry: directory_iterator::directory_iterator: The system cannot find the path specified.: "badpath".
-[2022-01-11 05:39:37.037] [scripts_169] [info] Finished loading scripts.
-[2022-01-11 05:39:37.037] [scripts_169] [info] Loading scripts from "C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
-[2022-01-11 05:39:37.038] [scripts_169] [info] Finished loading scripts.
-[2022-01-11 05:39:37.043] [scripts_171] [info] Registering script interface...
-[2022-01-11 05:39:37.043] [scripts_171] [info] Finished registering script interface.
-[2022-01-11 05:39:37.043] [scripts_171] [info] Loading scripts from "C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
-[2022-01-11 05:39:37.045] [scripts_171] [info] Finished loading scripts.
-[2022-01-11 05:39:37.045] [scripts_171] [info] Loading scripts from "C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script2/"...
-[2022-01-11 05:39:37.048] [scripts_171] [info] Finished loading scripts.
-[2022-01-11 05:39:37.050] [scripts_172] [info] Registering script interface...
-[2022-01-11 05:39:37.050] [scripts_172] [info] Finished registering script interface.
-[2022-01-11 05:39:37.050] [scripts_172] [info] Loading scripts from "C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
-[2022-01-11 05:39:37.052] [scripts_172] [info] Finished loading scripts.
-[2022-01-11 05:39:37.052] [scripts_172] [error] Failed to access function "overloadedFunction": either it was not defined in any of the scripts or it was defined more than once.
-[2022-01-11 05:39:37.052] [from_script_170] [info] scriptanswer: 9
-[2022-01-11 05:39:37.052] [from_script_170] [info] scriptanswer: -56.9
-[2022-01-11 05:39:37.052] [from_script_170] [info] scriptanswer: -1
-[2022-01-11 05:39:37.052] [from_script_170] [info] ScriptTestCorrectFunctionCalls is working!
-[2022-01-11 05:39:37.053] [scripts_172] [info] Loading scripts from "C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script2/"...
-[2022-01-11 05:39:37.054] [scripts_172] [info] Finished loading scripts.
-[2022-01-11 05:39:37.054] [scripts_172] [error] Failed to access function "add": either it was not defined in any of the scripts or it was defined more than once.
-[2022-01-11 05:39:37.054] [from_script_170] [info] scriptanswer: 8
-[2022-01-11 05:39:37.054] [from_script_170] [info] Hello, World! from script
-[2022-01-11 05:39:37.057] [scripts_173] [info] Registering script interface...
-[2022-01-11 05:39:37.057] [scripts_173] [info] Finished registering script interface.
-[2022-01-11 05:39:37.057] [scripts_173] [info] Loading scripts from "C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
-[2022-01-11 05:39:37.058] [scripts_173] [info] Finished loading scripts.
-[2022-01-11 05:39:37.058] [b_174] [info] Starting...
-[2022-01-11 05:39:37.058] [scripts_173] [error] Too few arguments have been given to function call "printInt": 0 have been given, but 1 was expected: function call aborted.
-[2022-01-11 05:39:37.058] [scripts_173] [error] Too few arguments have been given to function call "add": 1 has been given, but 2 were expected: function call aborted.
-[2022-01-11 05:39:37.058] [scripts_173] [error] Too few arguments have been given to function call "print": 0 have been given, but 1 was expected: function call aborted.
-[2022-01-11 05:39:37.058] [scripts_173] [error] Failed to set argument 1 of function "printInt" to the value "9": code -5.
-[2022-01-11 05:39:37.059] [scripts_173] [info] Loading scripts from "C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script2/"...
-[2022-01-11 05:39:37.060] [scripts_173] [info] Finished loading scripts.
-[2022-01-11 05:39:37.060] [scripts_173] [error] Failed to set argument 0 of function "printHello" to the value "4.5": code -5.
-[2022-01-11 05:39:37.060] [scripts_173] [error] Failed to set argument 0 of function "subtract" to the value "4": code -12.
-[2022-01-11 05:39:37.060] [scripts_173] [error] Failed to set argument 0 of function "print" to the value "45.12": code -12.
-[2022-01-11 05:39:37.060] [scripts_173] [error] Failed to set argument 0 of function "printFloat" to the value "ScriptTestIncorrectFunctionCalls in working!": code -12.
-[2022-01-11 05:39:37.060] [scripts_173] [error] Attempted to add an object to argument 0 of function "print", which is not supported: function call aborted.
-[2022-01-11 05:39:37.060] [scripts_173] [error] Attempted to add an object to argument 0 of function "print", which is not supported: function call aborted.
-[2022-01-11 05:39:37.060] [scripts_173] [error] Attempted to assign a null pointer to argument 0 of function "print": function call aborted.
-[2022-01-11 05:39:37.067] [scripts_175] [info] Registering script interface...
-[2022-01-11 05:39:37.067] [scripts_175] [info] Finished registering script interface.
-[2022-01-11 05:39:37.067] [scripts_175] [info] Loading scripts from "C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/gui/"...
-[2022-01-11 05:39:37.067] [scripts_175] [info] Finished loading scripts.
-[2022-01-11 05:39:37.080] [json_script_179] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/bank/move.json...
-[2022-01-11 05:39:37.089] [json_181] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.089] [json_181] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.089] [json_182] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.090] [json_182] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.090] [json_183] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.090] [json_183] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.090] [json_184] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.090] [json_184] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.090] [json_185] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.090] [json_185] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.091] [json_186] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.091] [json_186] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.091] [json_187] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.091] [json_187] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.091] [json_188] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.091] [json_188] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.092] [json_189] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.092] [json_189] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.092] [json_script_179] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/bank/move.json.
-[2022-01-11 05:39:37.093] [json_script_190] [info] Loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/bank/unit.json...
-[2022-01-11 05:39:37.113] [json_192] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.113] [json_192] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.115] [json_192] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.116] [json_192] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.117] [json_193] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.117] [json_193] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.118] [json_193] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.119] [json_193] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.119] [json_194] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.119] [json_194] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.121] [json_194] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.121] [json_194] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.121] [json_195] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.121] [json_195] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.122] [json_195] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.123] [json_195] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.123] [json_196] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.123] [json_196] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.125] [json_196] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.125] [json_196] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.126] [json_197] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.127] [json_197] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.128] [json_197] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.129] [json_197] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.130] [json_198] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.130] [json_198] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.131] [json_198] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.131] [json_198] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.132] [json_199] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.132] [json_199] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.133] [json_199] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.133] [json_199] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.134] [json_200] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.134] [json_200] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.135] [json_200] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.135] [json_200] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.136] [json_201] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.136] [json_201] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.137] [json_201] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.137] [json_201] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.138] [json_202] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
-[2022-01-11 05:39:37.138] [json_202] [info] {"icon"} property faulty: left to the default of .
-[2022-01-11 05:39:37.139] [json_202] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
-[2022-01-11 05:39:37.139] [json_202] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
-[2022-01-11 05:39:37.140] [json_script_190] [info] Finished loading JSON script C:/Users/User/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/bank/unit.json.
+[2022-01-11 14:59:31.484] [logger_test_0] [info] Hello World!
+[2022-01-11 14:59:31.485] [logger_test_1] [warning] We are currently testing!
+[2022-01-11 14:59:31.485] [logger_test_2] [error] Oh no!
+[2022-01-11 14:59:31.486] [logger_test_3] [info] Number = 8
+[2022-01-11 14:59:31.486] [logger_test_4] [warning] Inserted text, -79.5 = number
+[2022-01-11 14:59:31.486] [logger_test_5] [error] Error is true!
+[2022-01-11 14:59:31.495] [name:test_apply_json_9] [error] Attempted to assign a value to a destination of type "number" without specifying a key sequence.
+[2022-01-11 14:59:31.495] [name:test_apply_json_9] [info]  property faulty: left to the default of 0.
+[2022-01-11 14:59:31.495] [name:test_apply_json_9] [error] The key sequence {"test"} does not exist in the JSON object.
+[2022-01-11 14:59:31.495] [name:test_apply_json_9] [info] {"test"} property faulty: left to the default of 0.
+[2022-01-11 14:59:31.500] [name:test_json_11] [error] Attempted to assign a value of data type "boolean" to a destination of type "number", in the key sequence {"happy"}.
+[2022-01-11 14:59:31.500] [name:test_json_11] [info] {"happy"} property faulty: left to the default of 0.
+[2022-01-11 14:59:31.500] [name:test_json_11] [error] Attempted to assign a value of data type "float" to a destination of type "number", in the key sequence {"pi"}.
+[2022-01-11 14:59:31.500] [name:test_json_11] [info] {"pi"} property faulty: left to the default of 0.
+[2022-01-11 14:59:31.504] [name:test_json_13] [error] The size of the JSON array specified (3) does not match with the size of the provided array (2), in the key sequence {"list"}.
+[2022-01-11 14:59:31.504] [name:test_json_13] [error] The size of the JSON array specified (3) does not match with the size of the provided array (4), in the key sequence {"list"}.
+[2022-01-11 14:59:31.505] [name:test_json_14] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to an array of data type "string", in the key sequence {"list"}.
+[2022-01-11 14:59:31.518] [name:test_dictionary_18] [warning] Attempted to remove non-existent language script path "test".
+[2022-01-11 14:59:31.518] [name:test_dictionary_18] [warning] Attempted to remove non-existent language script path "".
+[2022-01-11 14:59:31.518] [name:test_dictionary_18] [warning] Attempted to switch to non-existent string map "testing".
+[2022-01-11 14:59:31.519] [name:test_dictionary_20] [warning] Attempted to replace the script path of the current language "".
+[2022-01-11 14:59:31.519] [json_script_21] [info] Loading JSON script bad_path.json...
+[2022-01-11 14:59:31.519] [json_script_21] [error] Failed to open JSON script "bad_path.json" for reading.
+[2022-01-11 14:59:31.519] [name:test_dictionary_20] [error] Failed to load string map script for language "test".
+[2022-01-11 14:59:31.519] [json_script_23] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
+[2022-01-11 14:59:31.519] [json_script_23] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
+[2022-01-11 14:59:31.520] [name:test_dictionary_20] [warning] Attempted to replace the script path of the current language "test".
+[2022-01-11 14:59:31.520] [json_script_26] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/GER_DE.json...
+[2022-01-11 14:59:31.520] [json_script_26] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/GER_DE.json.
+[2022-01-11 14:59:31.520] [json_script_29] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
+[2022-01-11 14:59:31.521] [json_script_29] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
+[2022-01-11 14:59:31.521] [json_script_34] [info] Loading JSON script file...
+[2022-01-11 14:59:31.522] [json_script_34] [error] Failed to open JSON script "file" for reading.
+[2022-01-11 14:59:31.525] [json_script_36] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json...
+[2022-01-11 14:59:31.526] [json_script_39] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
+[2022-01-11 14:59:31.526] [json_script_39] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
+[2022-01-11 14:59:31.526] [json_script_36] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json.
+[2022-01-11 14:59:31.526] [json_script_42] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/GER_DE.json...
+[2022-01-11 14:59:31.527] [json_script_42] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/GER_DE.json.
+[2022-01-11 14:59:31.527] [json_script_36] [info] Saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json...
+[2022-01-11 14:59:31.528] [json_script_36] [info] Finished saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json.
+[2022-01-11 14:59:31.528] [json_script_45] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
+[2022-01-11 14:59:31.528] [json_script_45] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
+[2022-01-11 14:59:31.528] [json_script_36] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json...
+[2022-01-11 14:59:31.529] [json_script_36] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json.
+[2022-01-11 14:59:31.529] [json_script_49] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json...
+[2022-01-11 14:59:31.529] [json_script_49] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/ENG_GB.json.
+[2022-01-11 14:59:31.529] [json_script_36] [info] Saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json...
+[2022-01-11 14:59:31.530] [json_script_36] [info] Finished saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/lang/lang.json.
+[2022-01-11 14:59:31.533] [fonts_53] [error] Attempting to access font with key "test" which does not exist.
+[2022-01-11 14:59:31.535] [json_script_54] [info] Loading JSON script badfile.json...
+[2022-01-11 14:59:31.535] [json_script_54] [error] Failed to open JSON script "badfile.json" for reading.
+[2022-01-11 14:59:31.540] [json_script_56] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
+[2022-01-11 14:59:31.541] [json_script_56] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
+[2022-01-11 14:59:31.542] [json_script_59] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
+[2022-01-11 14:59:31.543] [json_script_59] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
+[2022-01-11 14:59:31.543] [json_script_59] [info] Loading JSON script anotherbadfile.json...
+[2022-01-11 14:59:31.543] [json_script_59] [error] Failed to open JSON script "anotherbadfile.json" for reading.
+[2022-01-11 14:59:31.545] [json_script_62] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
+[2022-01-11 14:59:31.546] [json_script_62] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
+[2022-01-11 14:59:31.546] [json_script_62] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/faultyfonts.json...
+[2022-01-11 14:59:31.546] [fonts_63] [error] Attempting to load font file "badpath.ttf" which does not exist.
+[2022-01-11 14:59:31.546] [json_script_62] [info] Failed to load JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/faultyfonts.json.
+[2022-01-11 14:59:31.547] [fonts_63] [error] Attempting to access font with key "dialogue" which does not exist.
+[2022-01-11 14:59:31.550] [json_script_66] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
+[2022-01-11 14:59:31.551] [json_script_66] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
+[2022-01-11 14:59:31.551] [json_script_66] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/otherfonts.json...
+[2022-01-11 14:59:31.552] [json_script_66] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/otherfonts.json.
+[2022-01-11 14:59:31.552] [fonts_67] [error] Attempting to access font with key "dialogue" which does not exist.
+[2022-01-11 14:59:31.553] [json_script_70] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json...
+[2022-01-11 14:59:31.554] [json_script_70] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts.json.
+[2022-01-11 14:59:31.554] [json_script_70] [info] Saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts_save.json...
+[2022-01-11 14:59:31.555] [json_script_70] [info] Finished saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts_save.json.
+[2022-01-11 14:59:31.555] [json_script_73] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts_save.json...
+[2022-01-11 14:59:31.556] [json_script_73] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/fonts/fonts_save.json.
+[2022-01-11 14:59:31.560] [json_script_76] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
+[2022-01-11 14:59:31.860] [json_script_76] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
+[2022-01-11 14:59:31.891] [json_script_79] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
+[2022-01-11 14:59:31.965] [json_script_79] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
+[2022-01-11 14:59:31.965] [json_script_79] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/faultyaudio.json...
+[2022-01-11 14:59:32.044] [audio_80] [error] Audio file "paths" for sound object "load" could not be loaded!
+[2022-01-11 14:59:32.046] [audio_80] [error] Audio file "r us" for sound object "unload" could not be loaded!
+[2022-01-11 14:59:32.047] [audio_80] [error] Audio file "bad" for music object "noco" could not be loaded!
+[2022-01-11 14:59:32.047] [json_script_79] [info] Failed to load JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/faultyaudio.json.
+[2022-01-11 14:59:32.047] [audio_80] [error] Audio object "jake" could not be found.
+[2022-01-11 14:59:32.070] [json_script_83] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
+[2022-01-11 14:59:32.165] [json_script_83] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
+[2022-01-11 14:59:32.185] [json_script_86] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
+[2022-01-11 14:59:32.279] [json_script_86] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
+[2022-01-11 14:59:32.280] [json_script_86] [info] Saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
+[2022-01-11 14:59:32.281] [json_script_86] [info] Finished saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
+[2022-01-11 14:59:32.282] [json_script_86] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json...
+[2022-01-11 14:59:32.377] [json_script_86] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/audio/audio.json.
+[2022-01-11 14:59:32.832] [json_script_90] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json...
+[2022-01-11 14:59:32.834] [json_script_90] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json.
+[2022-01-11 14:59:32.861] [json_script_93] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json...
+[2022-01-11 14:59:32.862] [json_script_93] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/renderer.json.
+[2022-01-11 14:59:32.863] [json_script_93] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/faultyrenderer.json...
+[2022-01-11 14:59:32.863] [json_96] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"caption"}.
+[2022-01-11 14:59:32.863] [json_96] [info] {"caption"} property faulty: left to the default of Computer Wars.
+[2022-01-11 14:59:32.864] [json_script_93] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/renderer/faultyrenderer.json.
+[2022-01-11 14:59:32.912] [json_script_97] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json...
+[2022-01-11 14:59:32.921] [json_script_97] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json.
+[2022-01-11 14:59:32.951] [json_script_103] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json...
+[2022-01-11 14:59:32.959] [json_script_103] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/sheet.json.
+[2022-01-11 14:59:32.959] [json_script_103] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/faultysheet.json...
+[2022-01-11 14:59:32.960] [json_109] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"path"}.
+[2022-01-11 14:59:32.960] [json_109] [info] {"path"} property faulty: left to the default of .
+[2022-01-11 14:59:32.960] [spritesheet_104] [error] No path to a spritesheet graphic has been provided - aborting load attempt.
+[2022-01-11 14:59:32.960] [json_script_103] [info] Failed to load JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/sprites/faultysheet.json.
+[2022-01-11 14:59:32.976] [keycodetesting_110] [warning] Given keycode 500 is larger than the maximum keycode of 100: int 500 will be converted to enum 100.
+[2022-01-11 14:59:32.978] [mousebtntesting_111] [warning] Given mouse button ID 500 is larger than the maximum mouse button ID of 4: int 500 will be converted to enum 4.
+[2022-01-11 14:59:32.983] [axistesting_112] [warning] Given gamepad axis ID 500 is larger than the maximum gamepad axis ID of 7: int 500 will be converted to enum 7.
+[2022-01-11 14:59:32.987] [signaltypetesting_113] [warning] Given signal type ID 500 is larger than the maximum signal type ID of 1: int 500 will be converted to enum 1.
+[2022-01-11 14:59:33.230] [json_script_114] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
+[2022-01-11 14:59:33.232] [json_script_114] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
+[2022-01-11 14:59:33.257] [json_script_119] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
+[2022-01-11 14:59:33.259] [json_script_119] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
+[2022-01-11 14:59:33.259] [json_script_119] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/faultyui.json...
+[2022-01-11 14:59:33.259] [json_script_119] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/faultyui.json.
+[2022-01-11 14:59:33.259] [user_input_120] [error] Could not retrieve configurations for non-existent control called "up".
+[2022-01-11 14:59:33.285] [json_script_125] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
+[2022-01-11 14:59:33.287] [json_script_125] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
+[2022-01-11 14:59:33.287] [user_input_126] [warning] Attempted to set a joystick with ID 9 that wasn't connected, resetting the ID to 0.
+[2022-01-11 14:59:33.315] [json_script_130] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
+[2022-01-11 14:59:33.317] [json_script_130] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
+[2022-01-11 14:59:33.317] [user_input_131] [warning] Attempted to set a joystick axis threshold of 1, reset to 5.0.
+[2022-01-11 14:59:33.317] [user_input_131] [warning] Attempted to set a joystick axis threshold of 500, reset to 95.0.
+[2022-01-11 14:59:33.345] [json_script_135] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
+[2022-01-11 14:59:33.347] [json_script_135] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
+[2022-01-11 14:59:33.347] [json_script_135] [info] Saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
+[2022-01-11 14:59:33.349] [json_script_135] [info] Finished saving JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
+[2022-01-11 14:59:33.349] [json_script_135] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json...
+[2022-01-11 14:59:33.351] [json_script_135] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/ui/ui.json.
+[2022-01-11 14:59:33.358] [scripts_141] [info] Registering script interface...
+[2022-01-11 14:59:33.358] [scripts_141] [info] Finished registering script interface.
+[2022-01-11 14:59:33.358] [scripts_141] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
+[2022-01-11 14:59:33.360] [scripts_141] [info] Finished loading scripts.
+[2022-01-11 14:59:33.360] [scripts_141] [info] Loading scripts from "badpath"...
+[2022-01-11 14:59:33.361] [scripts_141] [error] Failed to interact with directory entry: directory_iterator::directory_iterator: The system cannot find the path specified.: "badpath".
+[2022-01-11 14:59:33.361] [scripts_141] [info] Finished loading scripts.
+[2022-01-11 14:59:33.361] [scripts_141] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
+[2022-01-11 14:59:33.362] [scripts_141] [info] Finished loading scripts.
+[2022-01-11 14:59:33.365] [scripts_143] [info] Registering script interface...
+[2022-01-11 14:59:33.365] [scripts_143] [info] Finished registering script interface.
+[2022-01-11 14:59:33.365] [scripts_143] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
+[2022-01-11 14:59:33.366] [scripts_143] [info] Finished loading scripts.
+[2022-01-11 14:59:33.366] [scripts_143] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script2/"...
+[2022-01-11 14:59:33.368] [scripts_143] [info] Finished loading scripts.
+[2022-01-11 14:59:33.370] [scripts_144] [info] Registering script interface...
+[2022-01-11 14:59:33.370] [scripts_144] [info] Finished registering script interface.
+[2022-01-11 14:59:33.370] [scripts_144] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
+[2022-01-11 14:59:33.371] [scripts_144] [info] Finished loading scripts.
+[2022-01-11 14:59:33.371] [scripts_144] [error] Failed to access function "overloadedFunction": either it was not defined in any of the scripts or it was defined more than once.
+[2022-01-11 14:59:33.371] [from_script_142] [info] scriptanswer: 9
+[2022-01-11 14:59:33.372] [from_script_142] [info] scriptanswer: -56.9
+[2022-01-11 14:59:33.372] [from_script_142] [info] scriptanswer: -1
+[2022-01-11 14:59:33.372] [from_script_142] [info] ScriptTestCorrectFunctionCalls is working!
+[2022-01-11 14:59:33.372] [scripts_144] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script2/"...
+[2022-01-11 14:59:33.373] [scripts_144] [info] Finished loading scripts.
+[2022-01-11 14:59:33.373] [scripts_144] [error] Failed to access function "add": either it was not defined in any of the scripts or it was defined more than once.
+[2022-01-11 14:59:33.373] [from_script_142] [info] scriptanswer: 8
+[2022-01-11 14:59:33.373] [from_script_142] [info] Hello, World! from script
+[2022-01-11 14:59:33.375] [scripts_145] [info] Registering script interface...
+[2022-01-11 14:59:33.375] [scripts_145] [info] Finished registering script interface.
+[2022-01-11 14:59:33.375] [scripts_145] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script/"...
+[2022-01-11 14:59:33.376] [scripts_145] [info] Finished loading scripts.
+[2022-01-11 14:59:33.376] [b_146] [info] Starting...
+[2022-01-11 14:59:33.377] [scripts_145] [error] Too few arguments have been given to function call "printInt": 0 have been given, but 1 was expected: function call aborted.
+[2022-01-11 14:59:33.377] [scripts_145] [error] Too few arguments have been given to function call "add": 1 has been given, but 2 were expected: function call aborted.
+[2022-01-11 14:59:33.377] [scripts_145] [error] Too few arguments have been given to function call "print": 0 have been given, but 1 was expected: function call aborted.
+[2022-01-11 14:59:33.377] [scripts_145] [error] Failed to set argument 1 of function "printInt" to the value "9": code -5.
+[2022-01-11 14:59:33.377] [scripts_145] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/script2/"...
+[2022-01-11 14:59:33.378] [scripts_145] [info] Finished loading scripts.
+[2022-01-11 14:59:33.378] [scripts_145] [error] Failed to set argument 0 of function "printHello" to the value "4.5": code -5.
+[2022-01-11 14:59:33.378] [scripts_145] [error] Failed to set argument 0 of function "subtract" to the value "4": code -12.
+[2022-01-11 14:59:33.378] [scripts_145] [error] Failed to set argument 0 of function "print" to the value "45.12": code -12.
+[2022-01-11 14:59:33.378] [scripts_145] [error] Failed to set argument 0 of function "printFloat" to the value "ScriptTestIncorrectFunctionCalls in working!": code -12.
+[2022-01-11 14:59:33.378] [scripts_145] [error] Attempted to add an object to argument 0 of function "print", which is not supported: function call aborted.
+[2022-01-11 14:59:33.378] [scripts_145] [error] Attempted to add an object to argument 0 of function "print", which is not supported: function call aborted.
+[2022-01-11 14:59:33.378] [scripts_145] [error] Attempted to assign a null pointer to argument 0 of function "print": function call aborted.
+[2022-01-11 14:59:33.381] [scripts_147] [info] Registering script interface...
+[2022-01-11 14:59:33.382] [scripts_147] [info] Finished registering script interface.
+[2022-01-11 14:59:33.382] [scripts_147] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/gui/"...
+[2022-01-11 14:59:33.382] [scripts_147] [info] Finished loading scripts.
+[2022-01-11 14:59:33.384] [gui_149] [error] GUI with name "testing" does not exist.
+[2022-01-11 14:59:33.391] [scripts_151] [info] Registering script interface...
+[2022-01-11 14:59:33.391] [scripts_151] [info] Finished registering script interface.
+[2022-01-11 14:59:33.391] [scripts_151] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/gui/"...
+[2022-01-11 14:59:33.391] [scripts_151] [info] Finished loading scripts.
+[2022-01-11 14:59:33.394] [scripts_155] [info] Registering script interface...
+[2022-01-11 14:59:33.394] [scripts_155] [info] Finished registering script interface.
+[2022-01-11 14:59:33.394] [scripts_155] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/gui/"...
+[2022-01-11 14:59:33.395] [scripts_155] [info] Finished loading scripts.
+[2022-01-11 14:59:33.397] [scripts_159] [info] Registering script interface...
+[2022-01-11 14:59:33.397] [scripts_159] [info] Finished registering script interface.
+[2022-01-11 14:59:33.397] [scripts_159] [info] Loading scripts from "C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/gui/"...
+[2022-01-11 14:59:33.397] [scripts_159] [info] Finished loading scripts.
+[2022-01-11 14:59:33.401] [json_script_163] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/bank/move.json...
+[2022-01-11 14:59:33.402] [json_165] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.402] [json_165] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.402] [json_166] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.402] [json_166] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.403] [json_167] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.403] [json_167] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.403] [json_168] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.403] [json_168] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.403] [json_169] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.403] [json_169] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.403] [json_170] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.403] [json_170] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.403] [json_171] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.403] [json_171] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.404] [json_172] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.404] [json_172] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.404] [json_173] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.404] [json_173] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.404] [json_script_163] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/bank/move.json.
+[2022-01-11 14:59:33.404] [json_script_174] [info] Loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/bank/unit.json...
+[2022-01-11 14:59:33.411] [json_176] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.411] [json_176] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.412] [json_176] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.412] [json_176] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.413] [json_177] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.413] [json_177] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.414] [json_177] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.414] [json_177] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.415] [json_178] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.415] [json_178] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.416] [json_178] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.416] [json_178] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.417] [json_179] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.417] [json_179] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.418] [json_179] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.418] [json_179] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.419] [json_180] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.419] [json_180] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.419] [json_180] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.420] [json_180] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.420] [json_181] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.420] [json_181] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.421] [json_181] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.421] [json_181] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.422] [json_182] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.422] [json_182] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.423] [json_182] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.423] [json_182] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.423] [json_183] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.423] [json_183] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.424] [json_183] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.425] [json_183] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.425] [json_184] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.425] [json_184] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.426] [json_184] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.426] [json_184] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.427] [json_185] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.427] [json_185] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.428] [json_185] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.428] [json_185] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.429] [json_186] [error] Attempted to assign a value of data type "number" to a destination of type "string", in the key sequence {"icon"}.
+[2022-01-11 14:59:33.429] [json_186] [info] {"icon"} property faulty: left to the default of .
+[2022-01-11 14:59:33.430] [json_186] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"pictures"}.
+[2022-01-11 14:59:33.430] [json_186] [error] The specified JSON array was not homogeneous, found an element of data type "number" when attempting to assign to a vector of data type "string", in the key sequence {"sprites"}.
+[2022-01-11 14:59:33.431] [json_script_174] [info] Finished loading JSON script C:/Users/Daniel/Documents/Visual Studio 2019/Solutions/ComputerWars/test/assets/bank/unit.json.

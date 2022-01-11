@@ -86,7 +86,7 @@ void sfx::gui::setGUI(const std::string& newPanel) noexcept {
 		_widgetIndex = 0;
 	} catch (tgui::Exception& e) {
 		_logger.error("{}", e.what());
-		_gui.get(old)->setVisible(true);
+		if (_gui.get(old)) _gui.get(old)->setVisible(true);
 	}
 }
 
