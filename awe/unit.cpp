@@ -65,10 +65,7 @@ awe::HP awe::unit::getHP() const noexcept {
 }
 
 awe::HP awe::unit::getDisplayedHP() const noexcept {
-	awe::HP ret = (awe::HP)floor((double)_hp /
-		(double)awe::unit_type::HP_GRANULARITY);
-	if (_hp < _type->getMaxHP()) ret += 1;
-	return ret;
+	return (awe::HP)ceil((double)_hp / (double)awe::unit_type::HP_GRANULARITY);
 }
 
 void awe::unit::setFuel(const awe::Fuel fuel) noexcept {

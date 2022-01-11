@@ -655,7 +655,8 @@ namespace awe {
 		 *     <li>\c "fuel" = \c _maxFuel, <tt>(signed 32-bit int)</tt></li>
 		 *     <li>\c "ammo" = \c _maxAmmo, <tt>(signed 32-bit int)</tt></li>
 		 *     <li>\c "hp" = \c _maxHP, <tt>(unsigned 32-bit int - capped off at
-		 *         signed 32-bit int's maximum value)</tt></li>
+		 *         signed 32-bit int's maximum value divided by the HP granularity
+		 *         value)</tt></li>
 		 *     <li>\c "mp" = \c _movementPoints, <tt>(unsigned 32-bit int)</tt>
 		 *     </li>
 		 *     <li>\c "vision" = \c _vision, <tt>(unsigned 32-bit int)</tt></li>

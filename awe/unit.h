@@ -103,8 +103,7 @@ namespace awe {
 		 * Gets this unit's HP as displayed to the user.
 		 * This method will divide the internal HP value by the granularity of HP
 		 * values and round up to return what the user should see as this unit's
-		 * HP (unless this unit's HP is at its maximum, in which case the result
-		 * will be rounded down).
+		 * HP.
 		 * @return The current HP of this unit in a user-friendly format.
 		 * @sa     awe::unit_type::HP_GRANULARITY
 		 */
