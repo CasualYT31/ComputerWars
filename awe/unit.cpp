@@ -25,9 +25,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type,
 	const awe::ArmyID army,
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept :
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet,
+	const std::shared_ptr<sfx::animated_spritesheet>& icons) noexcept :
 	_type(type), _army(army),
-	_sprite(sheet, ((type) ? (type->getUnit(army)) : (""))) {}
+	_sprite(sheet, ((type) ? (type->getUnit(army)) : (""))),
+	_hpIcon(icons, "nohpicon"), _fuelAmmoIcon(icons, "nostatusicon"),
+	_loadedIcon(icons, "nostatusicon") {}
 
 std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept {
 	return _type;
@@ -117,6 +120,13 @@ void awe::unit::setSpritesheet(
 	_sprite.setSpritesheet(sheet);
 }
 
+void awe::unit::setIconSpritesheet(
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_hpIcon.setSpritesheet(sheet);
+	_fuelAmmoIcon.setSpritesheet(sheet);
+	_loadedIcon.setSpritesheet(sheet);
+}
+
 std::shared_ptr<const sfx::animated_spritesheet> awe::unit::getSpritesheet() const
 	noexcept {
 	return _sprite.getSpritesheet();
@@ -131,9 +141,51 @@ void awe::unit::setPixelPosition(float x, float y) noexcept {
 }
 
 bool awe::unit::animate(const sf::RenderTarget& target) noexcept {
-	return _sprite.animate(target);
+	// determine which icons to set
+	if (getDisplayedHP() == 0 || getDisplayedHP() > 9) {
+		_hpIcon.setSprite("nohpicon");
+	} else {
+		_hpIcon.setSprite(std::to_string(getDisplayedHP()));
+	}
+	if (_loaded.size()) {
+		_loadedIcon.setSprite("loaded");
+	} else {
+		_loadedIcon.setSprite("nostatusicon");
+	}
+	const bool lowFuel =
+		(!_type->hasInfiniteFuel() && getFuel() <= _type->getMaxFuel() / 2);
+	const bool lowAmmo =
+		(!_type->hasInfiniteAmmo() && _type->getMaxAmmo() &&
+			getAmmo() <= _type->getMaxAmmo() / 2);
+	if (lowFuel && lowAmmo) {
+		_fuelAmmoIcon.setSprite("fuelammolow");
+	} else if (lowFuel) {
+		_fuelAmmoIcon.setSprite("fuellow");
+	} else if (lowAmmo) {
+		_fuelAmmoIcon.setSprite("ammolow");
+	} else {
+		_fuelAmmoIcon.setSprite("nostatusicon");
+	}
+	// animate sprites
+	_hpIcon.animate(target);
+	_fuelAmmoIcon.animate(target);
+	_loadedIcon.animate(target);
+	bool ret = _sprite.animate(target);
+	// calculate icon positions
+	sf::Vector2f pos = _sprite.getPosition();
+	sf::Vector2f size = _sprite.getSize();
+	_hpIcon.setPosition(sf::Vector2f(pos.x + size.x - _hpIcon.getSize().x,
+		pos.y + size.y - _hpIcon.getSize().y));
+	_fuelAmmoIcon.setPosition(sf::Vector2f(pos.x, pos.y + size.y -
+		_fuelAmmoIcon.getSize().y));
+	_loadedIcon.setPosition(pos);
+	// return main unit graphic animation result
+	return ret;
 }
 
 void awe::unit::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_sprite, states);
+	target.draw(_loadedIcon, states);
+	target.draw(_fuelAmmoIcon, states);
+	target.draw(_hpIcon, states);
 }

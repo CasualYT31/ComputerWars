@@ -38,6 +38,97 @@
 				[27,31,9,9]
 			],
 			"durations": [0]
+		},
+		"nohpicon": {
+			"frames": [
+				[0,40,7,8]
+			],
+			"durations": [0]
+		},
+		"1": {
+			"frames": [
+				[7,40,7,8]
+			],
+			"durations": [0]
+		},
+		"2": {
+			"frames": [
+				[14,40,7,8]
+			],
+			"durations": [0]
+		},
+		"3": {
+			"frames": [
+				[21,40,7,8]
+			],
+			"durations": [0]
+		},
+		"4": {
+			"frames": [
+				[28,40,7,8]
+			],
+			"durations": [0]
+		},
+		"5": {
+			"frames": [
+				[35,40,7,8]
+			],
+			"durations": [0]
+		},
+		"6": {
+			"frames": [
+				[42,40,7,8]
+			],
+			"durations": [0]
+		},
+		"7": {
+			"frames": [
+				[49,40,7,8]
+			],
+			"durations": [0]
+		},
+		"8": {
+			"frames": [
+				[56,40,7,8]
+			],
+			"durations": [0]
+		},
+		"9": {
+			"frames": [
+				[63,40,7,8]
+			],
+			"durations": [0]
+		},
+		"loaded": {
+			"frames": [
+				[60,32,8,8]
+			],
+			"durations": [0]
+		},
+		"fuellow": {
+			"frames": [
+				[68,32,8,8],
+				[36,32,8,8]
+			],
+			"durations": [750,750]
+		},
+		"ammolow": {
+			"frames": [
+				[76,32,8,8],
+				[36,32,8,8]
+			],
+			"durations": [750,750]
+		},
+		"fuelammolow": {
+			"frames": [
+				[68,32,8,8],
+				[76,32,8,8]
+			],
+			"durations": [750,750]
+		},
+		"nostatusicon": {
+			"frames": [[36,32,8,8]],
+			"durations": [0]
 		}
 	}
 }

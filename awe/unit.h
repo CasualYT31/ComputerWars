@@ -45,10 +45,12 @@ namespace awe {
 		 * @param   type  The type of the unit, which can't be changed.
 		 * @param   army  The army the unit belongs to, which can't be changed.
 		 * @param   sheet Pointer to the spritesheet to use with this unit.
+		 * @param   icons Pointer to the icon spritesheet to use with this unit.
 		 */
 		unit(const std::shared_ptr<const awe::unit_type>& type,
 			const awe::ArmyID army = 0,
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr)
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr,
+			const std::shared_ptr<sfx::animated_spritesheet>& icons = nullptr)
 			noexcept;
 
 		/**
@@ -176,6 +178,13 @@ namespace awe {
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
 
 		/**
+		 * Sets the icon spritesheet to use with this unit.
+		 * @param sheet Pointer to the icon spritesheet to use with this unit.
+		 */
+		void setIconSpritesheet(
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+
+		/**
 		 * Gets the spritesheet used with this unit.
 		 * @return Pointer to the spritesheet used with this unit.
 		 */
@@ -257,5 +266,20 @@ namespace awe {
 		 * The unit's animated sprite object.
 		 */
 		sfx::animated_sprite _sprite;
+
+		/**
+		 * The unit's HP icon sprite object.
+		 */
+		sfx::animated_sprite _hpIcon;
+
+		/**
+		 * The unit's fuel and ammo shortage icon sprite object.
+		 */
+		sfx::animated_sprite _fuelAmmoIcon;
+
+		/**
+		 * The unit's loaded icon sprite object.
+		 */
+		sfx::animated_sprite _loadedIcon;
 	};
 }

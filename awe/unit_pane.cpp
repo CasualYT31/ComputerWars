@@ -112,7 +112,7 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target) noexcept {
 	_unitHPIcon.animate(target);
 	_unitHPIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_unitFuelIcon.getPosition().y - 5.0f - _unitHPIcon.getSize().y));
-	_unitHP.setString(std::to_string(_unit->getHP()));
+	_unitHP.setString(std::to_string(_unit->getDisplayedHP()));
 	_unitHP.setPosition(
 		sf::Vector2f(_rect.left + _rect.width -
 			_unitHP.getLocalBounds().width - 10.0f,

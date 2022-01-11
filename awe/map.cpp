@@ -259,7 +259,7 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 			"a new unit. There are too many units allocated!");
 		return 0;
 	}
-	_units.insert({ id, awe::unit(type, army, _sheet_unit) });
+	_units.insert({ id, awe::unit(type, army, _sheet_unit, _sheet_icon) });
 	return id;
 }
 
@@ -599,10 +599,8 @@ void awe::map::setTileSpritesheet(
 void awe::map::setUnitSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
 	_sheet_unit = sheet;
-	// go through all of the units and set the new spritesheet to each one
-	for (auto& unit : _units) {
-		unit.second.setSpritesheet(sheet);
-	}
+	// go through all of the units and set the new icon spritesheet to each one
+	for (auto& unit : _units) unit.second.setSpritesheet(sheet);
 }
 
 void awe::map::setIconSpritesheet(
@@ -611,6 +609,8 @@ void awe::map::setIconSpritesheet(
 	_cursor.setSpritesheet(sheet);
 	_cursor.setSprite("cursor");
 	_tilePane.setSpritesheet(sheet);
+	// go through all of the units and set the new spritesheet to each one
+	for (auto& unit : _units) unit.second.setIconSpritesheet(sheet);
 }
 
 void awe::map::setCOSpritesheet(
