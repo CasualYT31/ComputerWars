@@ -126,8 +126,12 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 		// this GUI has a background to animate
 		if (_guiBackground[getGUI()].getType() ==
 			sfx::gui::gui_background::type::Colour) {
-			_bgColour.setSize(sf::Vector2f(static_cast<float>(target.getSize().x),
-				static_cast<float>(target.getSize().y)));
+			_bgColour.setSize(
+				sf::Vector2f(static_cast<float>(target.getSize().x) /
+					static_cast<float>(scaling),
+					static_cast<float>(target.getSize().y) /
+					static_cast<float>(scaling))
+			);
 			_bgColour.setFillColor(_guiBackground[getGUI()].getColour());
 		} else {
 			_bgSprite.setSpritesheet(_sheet);

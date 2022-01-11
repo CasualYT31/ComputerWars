@@ -27,7 +27,7 @@
         },
         {
           "name": "CW_FULL_TEXTURE_TESTING",
-          "value": "True",
+          "value": "False",
           "type": "BOOL"
         }
       ]

@@ -17,6 +17,7 @@ option(CW_FULL_TEXTURE_TESTING "Includes live sprite tests" OFF)
 option(CW_FULL_USERINPUT_TESTING "Includes mouse position tests as well as a \
 testing environment in which to test user input" OFF)
 option(CW_FULL_TRANSITION_TESTING "Includes transitions tests" OFF)
+option(CW_FULL_GUI_TESTING "Includes GUI testing environment" ON)
 
 # GoogleTest
 FetchContent_Declare(googletest
@@ -54,6 +55,9 @@ if(CW_FULL_USERINPUT_TESTING)
 endif()
 if(CW_FULL_TRANSITION_TESTING)
 	add_compile_definitions(COMPUTER_WARS_FULL_TRANSITION_TESTING)
+endif()
+if(CW_FULL_GUI_TESTING)
+	add_compile_definitions(COMPUTER_WARS_FULL_GUI_TESTING)
 endif()
 
 # ensure that the first three source files REMAIN THE FIRST THREE SOURCE FILES!
