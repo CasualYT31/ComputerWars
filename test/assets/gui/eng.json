@@ -1,0 +1,21 @@
+{
+	"button": "Button",
+	"label": "Testing Environment",
+	"child": "Child Window",
+	"paragraph": "Hello World!\nThe quick brown fox jumps over the lazy dog",
+	"opt1": "Option 1",
+	"opt2": "Option 2",
+	"opt3": "Option 3",
+	"radio1": "Radio 1",
+	"radio2": "Radio 2",
+	"radio3": "Radio 3",
+	"radio4": "Radio 4",
+	"radio5": "Radio 5",
+	"radio6": "Radio 6",
+	"radio7": "Radio 7",
+	"checkbox": "Checkbox",
+	"editbox": "Type here...",
+	"lang1": "English",
+	"lang2": "Gibberish",
+	"progress": "Progress..."
+}

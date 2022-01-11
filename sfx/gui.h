@@ -321,6 +321,18 @@ namespace sfx {
 		std::shared_ptr<T> _getNextWidget(const std::string& type) noexcept;
 
 		/**
+		 * Converts a generic widget pointer to a pointer of the correct type for
+		 * the given widget.
+		 * @warning This method assumes that a GUI menu has already been set!
+		 *          Behaviour is undefined if one has not already been set and this
+		 *          method is called.
+		 * @param   widget The generic widget pointer to convert.
+		 * @return  The correctly-typed widget pointer.
+		 */
+		template<typename T>
+		typename T::Ptr _getPtr(const tgui::Widget::Ptr& widget) const noexcept;
+
+		/**
 		 * The TGUI widget type last provided to \c _getNextWidget().
 		 */
 		std::string _lastWidgetType = "";
@@ -398,9 +410,20 @@ namespace sfx {
 			std::unordered_map<std::string, std::string>> _guiSpriteKeys;
 
 		/**
+		 * Stores the original captions assigned to each widget.
+		 * The key to the map is a long string pin-pointing the exact
+		 */
+		std::unordered_map<std::string, std::vector<std::string>> _originalStrings;
+
+		/**
 		 * Pointer to the language dictionary used to translate all captions.
 		 */
 		std::shared_ptr<engine::language_dictionary> _langdict = nullptr;
+
+		/**
+		 * The last known language set in \c _langdict.
+		 */
+		std::string _lastlang = "";
 	};
 }
 
@@ -420,4 +443,9 @@ std::shared_ptr<T> sfx::gui::_getNextWidget(const std::string& type) noexcept {
 	// no match found
 	_widgetIndex = 0;
 	return nullptr;
+}
+
+template<typename T>
+typename T::Ptr sfx::gui::_getPtr(const tgui::Widget::Ptr& widget) const noexcept {
+	return _gui.get<tgui::Group>(getGUI())->get<T>(widget->getWidgetName());
 }

@@ -1,0 +1,6 @@
+{
+	"test": {
+		"path": "assets/gui/nonexistent.txt",
+		"background": [255,0,0,255]
+	}
+}

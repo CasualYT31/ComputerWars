@@ -3,7 +3,7 @@ project("ComputerWarsSFX")
 # TGUI
 FetchContent_Declare(tgui
 	GIT_REPOSITORY https://github.com/texus/TGUI.git
-	GIT_TAG v0.9.1
+	GIT_TAG v0.9.2
 )
 FetchContent_MakeAvailable(tgui)
 
@@ -29,5 +29,5 @@ set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
 # themes folders into the same directory as it may later be built into
 file(COPY ${tgui_SOURCE_DIR}/gui-builder/resources
 	DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-#file(COPY ${tgui_SOURCE_DIR}/gui-builder/themes
-#	DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(COPY ${tgui_SOURCE_DIR}/themes
+	DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

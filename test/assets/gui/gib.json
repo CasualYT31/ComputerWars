@@ -1,0 +1,21 @@
+{
+	"button": "asdf",
+	"label": "Yooooooo",
+	"child": "This is a child window",
+	"paragraph": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+	"opt1": "Ein",
+	"opt2": "Zwei",
+	"opt3": "Drei",
+	"radio1": "Ein",
+	"radio2": "Zwei",
+	"radio3": "Drei",
+	"radio4": "Vier",
+	"radio5": "Fünf",
+	"radio6": "Sechs",
+	"radio7": "Sieben",
+	"checkbox": "Click me!",
+	"editbox": "Please input some text",
+	"lang1": "English",
+	"lang2": "Gibberish",
+	"progress": "no progress"
+}
