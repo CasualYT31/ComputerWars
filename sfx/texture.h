@@ -198,6 +198,7 @@ namespace sfx {
 		 * Updates the sprite to animate and draw with this object.
 		 * This method also updates \c _hasNotBeenDrawn and \c _currentFrame so
 		 * that the animated sprite will start from the beginning of the animation.
+		 * \n The call will be ignored if the given sprite was already assigned.
 		 * @param sprite The name of the sprite to animate and draw.
 		 */
 		void setSprite(const std::string& sprite) noexcept;
