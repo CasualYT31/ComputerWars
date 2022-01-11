@@ -212,7 +212,8 @@ namespace awe {
 		 * @return The return value of <tt>animated_sprite</tt>'s \c animate()
 		 *         call.
 		 */
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target,
+			const double scaling = 1.0) noexcept;
 	private:
 		/**
 		 * This drawable's \c draw() method.

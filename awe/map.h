@@ -538,7 +538,8 @@ namespace awe {
 		 * @param  target The target to render the map to.
 		 * @return \c FALSE, for now.
 		 */
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target,
+			const double scaling = 1.0) noexcept;
 	private:
 		/**
 		 * This drawable's \c draw() method.

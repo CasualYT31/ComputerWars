@@ -43,7 +43,8 @@ public:
 	 * implementations of this method must be tested in the test suite dedicated to
 	 * their subclass, and not here.
 	 */
-	bool animate(const sf::RenderTarget& target) noexcept { return true; }
+	bool animate(const sf::RenderTarget& target, const double scaling = 1.0)
+		noexcept { return true; }
 private:
 	/**
 	 * Empty \c draw() method.

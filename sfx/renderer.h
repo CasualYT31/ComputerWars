@@ -68,14 +68,18 @@ namespace sfx {
 		 * internal state, ready for drawing later. It is to accompany the
 		 * \c draw() method, so it should be called within the draw loop, before
 		 * it's drawn.
-		 * @param  target The render target which the drawable is to be later drawn
-		 *                to.
+		 * @param  target  The render target which the drawable is to be later
+		 *                 drawn to.
+		 * @param  scaling Any scaling factor applied separately to \c target that
+		 *                 this method should factor in when making calculations
+		 *                 based off of the \c target's dimensions.
 		 * @return This method can optionally return \c TRUE to signify that an
 		 *         animation has completed, or \c FALSE if it has not.
 		 *         Alternatively, subclasses can ignore this return value if it's
 		 *         unimportant to them.
 		 */
-		virtual bool animate(const sf::RenderTarget& target) noexcept = 0;
+		virtual bool animate(const sf::RenderTarget& target,
+			const double scaling = 1.0) noexcept = 0;
 	protected:
 		/**
 		 * Calculates the time elapsed from the last call to this method.
@@ -363,8 +367,12 @@ namespace sfx {
 		 * \c sfx::animated_drawable's \c animate() method remains public, so that
 		 * it can remain compatible with \c sf::RenderWindow.
 		 * @param drawable The animated drawable to animate.
+		 * @param scaling  Any scaling factor that should be considered when
+		 *                 animating
+		 * @sa    sfx::animated_drawable::animate()
 		 */
-		bool animate(sfx::animated_drawable& drawable) const noexcept;
+		bool animate(sfx::animated_drawable& drawable,
+			const double scaling = 1.0) const noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.

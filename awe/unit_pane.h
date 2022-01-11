@@ -72,7 +72,8 @@ namespace awe {
 		 * @warning Make sure to call \c setRect() \b before calling this method!
 		 * @return  Always returns \c TRUE.
 		 */
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target,
+			const double scaling = 1.0) noexcept;
 	private:
 		/**
 		 * This drawable's \c draw() method.

@@ -52,7 +52,8 @@ void awe::army_pane::setFont(const std::shared_ptr<const sf::Font>& font) noexce
 	if (font) _funds.setFont(*font);
 }
 
-bool awe::army_pane::animate(const sf::RenderTarget& target) noexcept {
+bool awe::army_pane::animate(const sf::RenderTarget& target, const double scaling)
+	noexcept {
 	if (_army) {
 		_bg.setFillColor(_army->getCountry()->getColour());
 		_rounded_bg.setFillColor(_army->getCountry()->getColour());
@@ -68,7 +69,7 @@ bool awe::army_pane::animate(const sf::RenderTarget& target) noexcept {
 		_oldCoSprite = _army->getCurrentCO()->getID();
 		_co.setSprite(_army->getCurrentCO()->getIconName());
 	}
-	_co.animate(target);
+	_co.animate(target, scaling);
 	// funds (minus positioning)
 	if (_army)
 		_funds.setString("G. " + std::to_string(_army->getFunds()));
@@ -77,14 +78,14 @@ bool awe::army_pane::animate(const sf::RenderTarget& target) noexcept {
 	// ensure original transform has been cleared
 	_position = sf::Transform();
 	if (_location == awe::army_pane::location::Left) {
-		_animateLeft(target);
+		_animateLeft();
 	} else if (_location == awe::army_pane::location::Right) {
-		_animateRight(target);
+		_animateRight(target, scaling);
 	}
 	return true;
 }
 
-void awe::army_pane::_animateLeft(const sf::RenderTarget& target) noexcept {
+void awe::army_pane::_animateLeft() noexcept {
 	sf::Vector2f size = sf::Vector2f(200.0f, 50.0f);
 	sf::Vector2f origin = sf::Vector2f(0.0f, 0.0f);
 	// step 1: pane background
@@ -105,10 +106,13 @@ void awe::army_pane::_animateLeft(const sf::RenderTarget& target) noexcept {
 	// step 4: power meter
 }
 
-void awe::army_pane::_animateRight(const sf::RenderTarget& target) noexcept {
+void awe::army_pane::_animateRight(const sf::RenderTarget& target,
+	const double scaling) noexcept {
 	sf::Vector2f size = sf::Vector2f(200.0f, 50.0f);
 	sf::Vector2f origin = sf::Vector2f(size.x + size.y / 2.0f, 0.0f);
-	_position.translate(sf::Vector2f(target.getSize().x - origin.x, 0.0f));
+	_position.translate(
+		sf::Vector2f(target.getSize().x / (float)scaling - origin.x, 0.0f)
+	);
 	// step 1: pane background
 	_bg.setPosition(sf::Vector2f(origin.x - size.x, origin.y));
 	_bg.setSize(size);

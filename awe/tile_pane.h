@@ -98,7 +98,8 @@ namespace awe {
 		 * This drawable's \c animate() method.
 		 * @return Always returns \c TRUE.
 		 */
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target,
+			const double scaling = 1.0) noexcept;
 	private:
 		/**
 		 * This drawable's \c draw() method.

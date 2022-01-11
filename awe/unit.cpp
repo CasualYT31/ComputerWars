@@ -137,7 +137,8 @@ void awe::unit::setPixelPosition(float x, float y) noexcept {
 	_sprite.setPosition(sf::Vector2f(x, y));
 }
 
-bool awe::unit::animate(const sf::RenderTarget& target) noexcept {
+bool awe::unit::animate(const sf::RenderTarget& target, const double scaling)
+	noexcept {
 	// determine which icons to set
 	if (getDisplayedHP() == 0 || getDisplayedHP() > 9) {
 		_hpIcon.setSprite("nohpicon");
@@ -164,10 +165,10 @@ bool awe::unit::animate(const sf::RenderTarget& target) noexcept {
 		_fuelAmmoIcon.setSprite("nostatusicon");
 	}
 	// animate sprites
-	_hpIcon.animate(target);
-	_fuelAmmoIcon.animate(target);
-	_loadedIcon.animate(target);
-	bool ret = _sprite.animate(target);
+	_hpIcon.animate(target, scaling);
+	_fuelAmmoIcon.animate(target, scaling);
+	_loadedIcon.animate(target, scaling);
+	bool ret = _sprite.animate(target, scaling);
 	// calculate icon positions
 	sf::Vector2f pos = _sprite.getPosition();
 	sf::Vector2f size = _sprite.getSize();

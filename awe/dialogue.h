@@ -91,9 +91,9 @@ namespace awe {
 	 *     box.setNameText(etc);
 	 *     
 	 *     sfxTarget.clear();
-	 *     sfxTarget.animate(box); // animate the dialogue box, returns TRUE once
-	 *                             // it is over
-	 *     sfxTarget.draw(box);    // draw the dialogue box
+	 *     sfxTarget.animate(box[, scaling]); // animate the dialogue box, returns
+	 *                                        // TRUE once it is over
+	 *     sfxTarget.draw(box);               // draw the dialogue box
 	 *     sfxTarget.display();
 	 *     
 	 *     // code...
@@ -398,7 +398,8 @@ namespace awe {
 		 *         animated and rendered, \c FALSE if the dialogue box' animation
 		 *         is still in progress.
 		 */
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target,
+			const double scaling = 1.0) noexcept;
 	private:
 		/**
 		 * Draws the dialogue box.
@@ -741,7 +742,7 @@ namespace awe {
 		void updateOption2Text(Ts... values) noexcept;
 		template<typename... Ts>
 		void updateOption3Text(Ts... values) noexcept;
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target, const double scaling = 1.0) noexcept;
 	private:
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 		bool _load(engine::json& j) noexcept;
@@ -852,13 +853,13 @@ namespace awe {
 
 	class dialogue_sequence : public sfx::animated_drawable, public engine::json_script {
 	public:
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target, const double scaling = 1.0) noexcept;
 		template<typename... Ts>
 		void updateText(const engine::language_dictionary& dict, Ts... values) noexcept;
 	private:
 		class dialogue : public sfx::animated_drawable {
 		public:
-			virtual bool animate(const sf::RenderTarget& target) noexcept;
+			virtual bool animate(const sf::RenderTarget& target, const double scaling = 1.0) noexcept;
 			template <typename... Ts>
 			void updateText(const engine::language_dictionary& dict, Ts... values) noexcept;
 		private:

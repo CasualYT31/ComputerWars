@@ -628,7 +628,8 @@ void awe::map::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
 	_tilePane.setFont(font);
 }
 
-bool awe::map::animate(const sf::RenderTarget& target) noexcept {
+bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
+	noexcept {
 	// step 1. the tiles
 	// also update the position of the cursor here!
 	float tiley = 0.0;
@@ -636,7 +637,7 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 		float tilex = 0.0;
 		for (sf::Uint32 x = 0, width = getMapSize().x; x < width; x++) {
 			auto& tile = _tiles[x][y];
-			tile.animate(target);
+			tile.animate(target, scaling);
 			sf::Vector2u tilePos = sf::Vector2u(x, y);
 			// position the tile and their unit if they are in the visible portion
 			if (_tileIsVisible(tilePos)) {
@@ -679,12 +680,12 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 	// step 2. the units
 	// note that unit positioning was carried out in step 1
 	for (auto& unit : _units) {
-		unit.second.animate(target);
+		unit.second.animate(target, scaling);
 	}
 	// step 3. the cursor
-	_cursor.animate(target);
+	_cursor.animate(target, scaling);
 	// step 3.5. set the general location of the panes
-	if (_cursor.getPosition().x < target.getSize().x / 2.0f) {
+	if (_cursor.getPosition().x < target.getSize().x / (float)scaling / 2.0f) {
 		_armyPane.setGeneralLocation(awe::army_pane::location::Right);
 		_tilePane.setGeneralLocation(awe::tile_pane::location::Right);
 	} else {
@@ -693,7 +694,7 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 	}
 	// step 4. the army pane
 	_armyPane.setArmy(_armys.at(_currentArmy));
-	_armyPane.animate(target);
+	_armyPane.animate(target, scaling);
 	// step 5. the tile pane
 	if (_updateTilePane) {
 		const awe::tile& tile = _tiles[_sel.x][_sel.y];
@@ -707,7 +708,7 @@ bool awe::map::animate(const sf::RenderTarget& target) noexcept {
 		}
 		_updateTilePane = false;
 	}
-	_tilePane.animate(target);
+	_tilePane.animate(target, scaling);
 	// end
 	return false;
 }

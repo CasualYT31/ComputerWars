@@ -174,7 +174,8 @@ std::string sfx::animated_sprite::getSprite() const noexcept {
 	return _spriteID;
 }
 
-bool sfx::animated_sprite::animate(const sf::RenderTarget& target) noexcept {
+bool sfx::animated_sprite::animate(const sf::RenderTarget& target,
+	const double scaling) noexcept {
 	if (!_sheet) return true;
 	try {
 		if (_sheet->getFrameDuration(_spriteID, _currentFrame).asMilliseconds()

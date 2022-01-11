@@ -143,7 +143,8 @@ namespace sfx {
 		 * @return Always returns \c FALSE.
 		 * @sa     sfx::gui::setLanguageDictionary()
 		 */
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target,
+			const double scaling = 1.0) noexcept;
 	private:
 		/**
 		 * Represents a GUI background.

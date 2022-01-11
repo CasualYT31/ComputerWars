@@ -73,8 +73,9 @@ void sfx::renderer::setSettings(const sfx::renderer_settings& newSettings)
 	openWindow();
 }
 
-bool sfx::renderer::animate(sfx::animated_drawable& drawable) const noexcept {
-	return drawable.animate(*this);
+bool sfx::renderer::animate(sfx::animated_drawable& drawable, const double scaling)
+	const noexcept {
+	return drawable.animate(*this, scaling);
 }
 
 bool sfx::renderer::_load(engine::json& j) noexcept {

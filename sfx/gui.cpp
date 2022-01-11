@@ -120,7 +120,8 @@ void sfx::gui::setLanguageDictionary(
 	_langdict = lang;
 }
 
-bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
+bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
+	noexcept {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		// this GUI has a background to animate
 		if (_guiBackground[getGUI()].getType() ==
@@ -131,7 +132,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 		} else {
 			_bgSprite.setSpritesheet(_sheet);
 			_bgSprite.setSprite(_guiBackground[getGUI()].getSprite());
-			_bgSprite.animate(target);
+			_bgSprite.animate(target, scaling);
 		}
 	}
 
@@ -223,7 +224,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target) noexcept {
 						_guiSpriteKeys[getGUI()]
 						[widget->getWidgetName().toStdString()]));
 				}
-				_widgetSprites[i].animate(target);
+				_widgetSprites[i].animate(target, scaling);
 				try {
 					tgui::Texture tex;
 					auto iRect =

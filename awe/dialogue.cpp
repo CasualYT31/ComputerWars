@@ -37,7 +37,8 @@ void awe::dialogue_sequence::setUserInput(std::shared_ptr<sfx::user_input> ui)
 	_userInput = ui;
 }
 
-bool awe::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept {
+bool awe::dialogue_sequence::animate(const sf::RenderTarget& target,
+	const double scaling) noexcept {
 	if (!_currentBox) {
 		// if no box has ever been allocated yet, attempt to allocate the first one
 		_currentBox = _allocateDialogueBox(_currentBoxID = 0);
@@ -362,7 +363,8 @@ void awe::dialogue_box::skipCurrentState() noexcept {
 	_skipCurrentState = true;
 }
 
-bool awe::dialogue_box::animate(const sf::RenderTarget& target) noexcept {
+bool awe::dialogue_box::animate(const sf::RenderTarget& target,
+	const double scaling) noexcept {
 	// manage the state of the dialogue box first
 	_stateMachine();
 	// quite a few measurements are based on the bounding box of the text,
@@ -452,7 +454,7 @@ void awe::dialogue_box::_updateCharacterSprite(const sf::RenderTarget& target)
 			// call animate once immediately so that even if the sprite isn't
 			// animated, it can still be setup
 		}
-		_characterSprite.animate(target);
+		_characterSprite.animate(target); // scaling!!!
 	}
 
 	float y = _background.getPosition().y + (_background.getSize().y / 2.0f) -
@@ -740,7 +742,7 @@ void awe::dialogue_box::_playSound(const std::string& key) noexcept {
 /*
 // CONSTRUCTION ZONE
 
-bool awe::dialogue_sequence::dialogue::animate(const sf::RenderTarget& target) noexcept {
+bool awe::dialogue_sequence::dialogue::animate(const sf::RenderTarget& target, const double scaling) noexcept {
 	float delta = calculateDelta();
 	// _sprite.animate(target);
 
@@ -807,7 +809,7 @@ void awe::dialogue_sequence::dialogue::draw(sf::RenderTarget& target, sf::Render
 	target.draw(_indicator, states);
 }
 
-bool awe::dialogue_sequence::animate(const sf::RenderTarget& target) noexcept {
+bool awe::dialogue_sequence::animate(const sf::RenderTarget& target, const double scaling) noexcept {
 	_dialogue->animate(target);
 }
 

@@ -303,7 +303,8 @@ namespace sfx {
 		 *         is \c NULL, or if there was an error in retrieving the sprite
 		 *         information, \c FALSE otherwise.
 		 */
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target,
+			const double scaling = 1.0) noexcept;
 	private:
 		/**
 		 * This drawable's \c draw() method.

@@ -94,7 +94,8 @@ namespace awe {
 		 * updates made to the given army object will be reflected in the pane.
 		 * @return Always returns \c TRUE.
 		 */
-		virtual bool animate(const sf::RenderTarget& target) noexcept;
+		virtual bool animate(const sf::RenderTarget& target,
+			const double scaling = 1.0) noexcept;
 	private:
 		/**
 		 * This drawable's \c draw() method.
@@ -113,15 +114,16 @@ namespace awe {
 
 		/**
 		 * Called to animate this pane if it is to the left.
-		 * @param target The target which this pane will be drawn upon later.
 		 */
-		void _animateLeft(const sf::RenderTarget& target) noexcept;
+		void _animateLeft() noexcept;
 
 		/**
 		 * Called to animate this pane if it is to the right.
-		 * @param target The target which this pane will be drawn upon later.
+		 * @param target  The target which this pane will be drawn upon later.
+		 * @param scaling The scaling factor applied to this target later.
 		 */
-		void _animateRight(const sf::RenderTarget& target) noexcept;
+		void _animateRight(const sf::RenderTarget& target, const double scaling)
+			noexcept;
 
 		/**
 		 * The thickness of the background border.

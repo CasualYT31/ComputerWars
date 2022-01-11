@@ -69,7 +69,8 @@ void awe::unit_pane::setFont(const std::shared_ptr<const sf::Font>& font) noexce
 	}
 }
 
-bool awe::unit_pane::animate(const sf::RenderTarget& target) noexcept {
+bool awe::unit_pane::animate(const sf::RenderTarget& target, const double scaling)
+	noexcept {
 	const float tileCentre = _rect.left + _rect.width / 2.0f;
 	// icon
 	if (_unitIcon.getSpritesheet() != _unit->getSpritesheet()) {
@@ -78,7 +79,7 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target) noexcept {
 	if (_unitIcon.getSprite() != _unit->getSprite()) {
 		_unitIcon.setSprite(_unit->getSprite());
 	}
-	_unitIcon.animate(target);
+	_unitIcon.animate(target, scaling);
 	_unitIcon.setPosition(
 		sf::Vector2f(tileCentre - _unitIcon.getSize().x / 2.0f, _rect.top + 10.0f)
 	);
@@ -89,7 +90,7 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target) noexcept {
 			_unitIcon.getPosition().y + _unitIcon.getSize().y)
 	);
 	// ammo
-	_unitAmmoIcon.animate(target);
+	_unitAmmoIcon.animate(target, scaling);
 	_unitAmmoIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_rect.top + _rect.height - 10.0f - _unitAmmoIcon.getSize().y));
 	_unitAmmo.setString(std::to_string(_unit->getAmmo()));
@@ -99,7 +100,7 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target) noexcept {
 			_unitAmmoIcon.getPosition().y - 3.0f)
 	);
 	// fuel
-	_unitFuelIcon.animate(target);
+	_unitFuelIcon.animate(target, scaling);
 	_unitFuelIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_unitAmmoIcon.getPosition().y - 5.0f - _unitFuelIcon.getSize().y));
 	_unitFuel.setString(std::to_string(_unit->getFuel()));
@@ -109,7 +110,7 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target) noexcept {
 			_unitFuelIcon.getPosition().y - 3.0f)
 	);
 	// HP
-	_unitHPIcon.animate(target);
+	_unitHPIcon.animate(target, scaling);
 	_unitHPIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_unitFuelIcon.getPosition().y - 5.0f - _unitHPIcon.getSize().y));
 	_unitHP.setString(std::to_string(_unit->getDisplayedHP()));

@@ -93,8 +93,9 @@ sf::Vector2f awe::tile::getPixelSize() const noexcept {
 	return _sprite.getSize();
 }
 
-bool awe::tile::animate(const sf::RenderTarget& target) noexcept {
-	return _sprite.animate(target);
+bool awe::tile::animate(const sf::RenderTarget& target, const double scaling)
+	noexcept {
+	return _sprite.animate(target, scaling);
 }
 
 void awe::tile::draw(sf::RenderTarget& target, sf::RenderStates states) const {

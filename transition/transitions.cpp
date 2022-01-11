@@ -39,7 +39,8 @@ transition::rectangle::rectangle(const bool isFadingIn, const sf::Time& duration
 	_bottomrect.setFillColor(colour);
 }
 
-bool transition::rectangle::animate(const sf::RenderTarget& target) noexcept {
+bool transition::rectangle::animate(const sf::RenderTarget& target,
+	const double scaling) noexcept {
 	if (isFinished()) return true;
 	// initialise animation
 	if (firstTimeAnimated()) {

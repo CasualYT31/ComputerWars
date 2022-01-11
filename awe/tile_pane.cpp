@@ -80,16 +80,19 @@ void awe::tile_pane::setFont(const std::shared_ptr<const sf::Font>& font) noexce
 	}
 }
 
-bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
+bool awe::tile_pane::animate(const sf::RenderTarget& target, const double scaling)
+	noexcept {
 	const float sectionWidth = 60.0f;
 	sf::Vector2f size = sf::Vector2f(sectionWidth * (_units.size() + 1), 100.0f);
 	// background
 	_bg.setSize(size);
 	if (_location == awe::tile_pane::location::Left) {
-		_bg.setPosition(sf::Vector2f(0.0f, target.getSize().y - size.y));
+		_bg.setPosition(
+			sf::Vector2f(0.0f, target.getSize().y / (float)scaling - size.y)
+		);
 	} else if (_location == awe::tile_pane::location::Right) {
-		_bg.setPosition(sf::Vector2f(target.getSize().x - size.x,
-			target.getSize().y - size.y));
+		_bg.setPosition(sf::Vector2f(target.getSize().x / (float)scaling - size.x,
+			target.getSize().y / (float)scaling - size.y));
 	}
 	std::vector<sf::Vector2f> points = _calculateCurvePoints();
 	_rounded_bg.setPointCount(points.size());
@@ -108,7 +111,7 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	if (_tileIcon.getSprite() != _tile->getSprite()) {
 		_tileIcon.setSprite(_tile->getSprite());
 	}
-	_tileIcon.animate(target);
+	_tileIcon.animate(target, scaling);
 	_tileIcon.setPosition(
 		sf::Vector2f(tileCentre - _tileIcon.getSize().x / 2.0f,
 			_bg.getPosition().y + 10.0f)
@@ -120,7 +123,7 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 			_tileIcon.getPosition().y + _tileIcon.getSize().y)
 	);
 	// tile defence
-	_tileDefIcon.animate(target);
+	_tileDefIcon.animate(target, scaling);
 	_tileDefIcon.setPosition(
 		sf::Vector2f(tileCentre - sectionWidth / 2.0f + 10.0f,
 			_bg.getPosition().y + _bg.getSize().y -
@@ -137,7 +140,7 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	// tile HP
 	if (_tile->getTileType()->getType()->getMaxHP() > 0) {
 		if (!_tileHPIcon.getSpritesheet()) _tileHPIcon.setSpritesheet(_icons);
-		_tileHPIcon.animate(target);
+		_tileHPIcon.animate(target, scaling);
 		_tileHPIcon.setPosition(
 			sf::Vector2f(_tileDefIcon.getPosition().x,
 				_tileDefIcon.getPosition().y - _tileHPIcon.getSize().y - 5.0f)
@@ -151,7 +154,7 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 	} else {
 		_tileHPIcon.setSpritesheet(nullptr);
 		_tileHP.setString("");
-		_tileHPIcon.animate(target);
+		_tileHPIcon.animate(target, scaling);
 	}
 	// units
 	std::size_t i = 1;
@@ -165,7 +168,7 @@ bool awe::tile_pane::animate(const sf::RenderTarget& target) noexcept {
 		u.setRect(
 			sf::FloatRect(unitPaneX, _bg.getPosition().y, sectionWidth, size.y)
 		);
-		u.animate(target);
+		u.animate(target, scaling);
 		i++;
 	}
 	return true;

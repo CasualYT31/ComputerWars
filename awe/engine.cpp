@@ -68,8 +68,8 @@ int awe::game_engine::run(const std::string& file) noexcept {
 			}
 
 			_renderer->clear();
-			_renderer->animate(map);
-			_renderer->draw(map);
+			_renderer->animate(map, 2.0);
+			_renderer->draw(map, sf::RenderStates().transform.scale(2.0f, 2.0f));
 			_renderer->display();
 		}
 	} catch (std::exception&) {
