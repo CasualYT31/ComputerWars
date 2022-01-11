@@ -205,7 +205,10 @@ namespace awe {
 
 		/**
 		 * This drawable's \c animate() method.
-		 * Simply calls the internal sprite's \c animate() method.
+		 * Calls the internal sprite's \c animate() method. Also determines which
+		 * icons to display and animates them.
+		 * @remark Idea for future optimisation: move \c setSprite() calls to other
+		 *         methods, e.g. move \c _loadedIcon.setSprite() to \c loadUnit().
 		 * @return The return value of <tt>animated_sprite</tt>'s \c animate()
 		 *         call.
 		 */
@@ -213,7 +216,7 @@ namespace awe {
 	private:
 		/**
 		 * This drawable's \c draw() method.
-		 * Simply draws \c _sprite to the screen.
+		 * Draws the unit to the screen along with any icons it should display.
 		 * @param target The target to render the tile to.
 		 * @param states The render states to apply to the tile. Applying
 		 *               transforms is perfectly valid and will not alter the
