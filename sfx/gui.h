@@ -338,8 +338,12 @@ namespace sfx {
 
 		/**
 		 * Callback given to \c engine::scripts::registerInterface().
-		 * @param engine Pointer to the engine to register the interface with.
-		 * @sa    \c engine::scripts::registerInterface()
+		 * @warning Do not allow scripts to destroy widgets! At least not widgets
+		 *          from the current GUI. This is because my animated sprite code
+		 *          for BitmapButtons and Pictures relies on the order of widget
+		 *          retrieval to remain the same.
+		 * @param   engine Pointer to the engine to register the interface with.
+		 * @sa      \c engine::scripts::registerInterface()
 		 */
 		void _registerInterface(asIScriptEngine* engine) noexcept;
 

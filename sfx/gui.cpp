@@ -499,5 +499,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 }
 
 void sfx::gui::_registerInterface(asIScriptEngine* engine) noexcept {
-
+	engine->RegisterGlobalFunction("void setGUI(const string& in)",
+		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
+		asCALL_THISCALL_ASGLOBAL, this);
 }
