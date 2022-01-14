@@ -76,7 +76,9 @@ namespace engine {
 		 * script engine. See <a
 		 * href="https://www.angelcode.com/angelscript/sdk/docs/manual/classas_i_script_engine.html"
 		 * target="_blank">the documentation on asIScriptEngine</a> for help on how
-		 * to register the interface.
+		 * to register the interface.\n
+		 * The client is permitted to call this method multiple times with
+		 * different functions, if it so wishes.
 		 * @warning This method must be called before loading scripts, or else
 		 *          building the scripts will likely fail.
 		 * @param   callback The function which registers the interface.
