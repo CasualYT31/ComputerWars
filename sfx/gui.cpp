@@ -62,7 +62,7 @@ sf::Color sfx::gui::gui_background::getColour() const noexcept {
 }
 
 bool sfx::gui::gui_background::animate(const sf::RenderTarget& target,
-	const double scaling = 1.0) noexcept {
+	const double scaling) noexcept {
 	if (_flag == sfx::gui::gui_background::type::Sprite) {
 		return _bgSprite.animate(target, scaling);
 	} else if (_flag == sfx::gui::gui_background::type::Colour) {
@@ -530,7 +530,43 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 }
 
 void sfx::gui::_registerInterface(asIScriptEngine* engine) noexcept {
+	// register non-widget global functions
 	engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, this);
+	// register listbox global functions
+	engine->RegisterGlobalFunction("void addListBox(const string& in, const float "
+		"x, const float y, const float w, const float h)",
+		asMETHOD(sfx::gui, _addListbox), asCALL_THISCALL_ASGLOBAL, this);
+}
+
+void sfx::gui::_addListbox(const std::string& name, const float x, const float y,
+	const float w, const float h) noexcept {
+	std::vector<std::string> fullname;
+	if (_findWidget<Widget>(name, &fullname)) {
+		_logger.error("Attempted to create a new listbox with name \"{}\": a "
+			"widget with that name already exists!", name);
+	} else {
+		auto widget = tgui::ListBox::create();
+		widget->setPosition(tgui::Vector2f(x, y));
+		widget->setSize(tgui::Vector2f(w, h));
+		auto container = _gui.get<Container>(fullname[0]);
+		if (!container) {
+			_logger.error("Attempted to add a listbox \"{}\" to the menu \"{}\". "
+				"This menu does not exist.", name, fullname[0]);
+			return;
+		}
+		if (fullname.size() > 2) {
+			for (std::size_t i = 1; i < fullname.size() - 1; i++) {
+				if (!container) {
+					_logger.error("Attempted to add a listbox \"{}\" to the "
+						"container \"{}\" within menu \"{}\". This container does "
+						"not exist.", name, fullname[i - 1], fullname[0]);
+					return;
+				}
+				container = container->get<Container>(fullname[i]);
+			}
+		}
+		container->add(widget, name);
+	}
 }
