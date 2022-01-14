@@ -78,12 +78,15 @@ namespace sfx {
 		std::string getGUI() const noexcept;
 
 		/**
-		 * Sets the spritesheet to use with the GUI menus.
+		 * Adds a spritesheet which can be uses with the GUI menus.
+		 * If a spritesheet with the given name already exists, a warning will be
+		 * logged and the spritesheet will be updated.
+		 * @param name  The name which scripts use to reference the spritesheet.
 		 * @param sheet A pointer to the \c animated_spritesheet to use with these
 		 *              GUI menus.
 		 */
-		void setSpritesheet(std::shared_ptr<sfx::animated_spritesheet> sheet)
-			noexcept;
+		void addSpritesheet(const std::string& name,
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
 
 		/**
 		 * Sets the target to draw the GUI menus to.
@@ -335,9 +338,11 @@ namespace sfx {
 		std::shared_ptr<engine::scripts> _scripts = nullptr;
 
 		/**
-		 * Pointer to the animated spritesheet to use with the GUI menus.
+		 * Pointer to the animated spritesheets that can be used with the GUI
+		 * menus.
 		 */
-		std::shared_ptr<sfx::animated_spritesheet> _sheet = nullptr;
+		std::unordered_map<std::string, std::shared_ptr<sfx::animated_spritesheet>>
+			_sheet;
 
 		/**
 		 * Used to paint the solid colour background of a GUI menu.

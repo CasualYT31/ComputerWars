@@ -88,9 +88,12 @@ std::string sfx::gui::getGUI() const noexcept {
 	return _currentGUI;
 }
 
-void sfx::gui::setSpritesheet(std::shared_ptr<sfx::animated_spritesheet> sheet)
-	noexcept {
-	_sheet = sheet;
+void sfx::gui::addSpritesheet(const std::string& name,
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	if (_sheet.find(name) != _sheet.end()) {
+		_logger.warning("Updated the spritesheet named {}!", name);
+	}
+	_sheet[name] = sheet;
 }
 
 void sfx::gui::setTarget(sf::RenderTarget& newTarget) noexcept {
@@ -116,7 +119,7 @@ void sfx::gui::setLanguageDictionary(
 }
 
 bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
-	noexcept {
+noexcept {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		// this GUI has a background to animate
 		if (_guiBackground[getGUI()].getType() ==
@@ -129,7 +132,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 			);
 			_bgColour.setFillColor(_guiBackground[getGUI()].getColour());
 		} else {
-			_bgSprite.setSpritesheet(_sheet);
+			_bgSprite.setSpritesheet(_sheet[""]);
 			_bgSprite.setSprite(_guiBackground[getGUI()].getSprite());
 			_bgSprite.animate(target, scaling);
 		}
@@ -231,7 +234,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 		// it doesn't look like the TXT files even fully support tree views
 		// anyway...
 	} */
-	if (_sheet && getGUI() != "") {
+	if (_sheet[""] && getGUI() != "") {
 		auto& widgetList = _gui.get<tgui::Group>(getGUI())->getWidgets();
 		for (auto& widget : widgetList) {
 			// update bitmapbutton and picture sprites
@@ -239,7 +242,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 				widget->getWidgetType() == "Picture") {
 				if (i == _widgetSprites.size()) {
 					// animated sprite doesn't yet exist, allocate it
-					_widgetSprites.push_back(sfx::animated_sprite(_sheet,
+					_widgetSprites.push_back(sfx::animated_sprite(_sheet[""],
 						_guiSpriteKeys[getGUI()]
 						[widget->getWidgetName().toStdString()]));
 				}
@@ -247,14 +250,14 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 				try {
 					tgui::Texture tex;
 					auto iRect =
-						_sheet->getFrameRect(_widgetSprites[i].getSprite(),
+						_sheet[""]->getFrameRect(_widgetSprites[i].getSprite(),
 							_widgetSprites[i].getCurrentFrame());
 					tgui::UIntRect rect;
 					rect.left = iRect.left;
 					rect.top = iRect.top;
 					rect.width = iRect.width;
 					rect.height = iRect.height;
-					tex.load(_sheet->getTexture(), rect);
+					tex.load(_sheet[""]->getTexture(), rect);
 					_widgetPictures.push_back(tex);
 				} catch (std::out_of_range&) {
 					i++;
