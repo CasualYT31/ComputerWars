@@ -42,14 +42,19 @@ namespace sfx {
 	class gui : public sfx::animated_drawable, public engine::json_script {
 	public:
 		/**
-		 * Initialises the GUI object with a pointer to a collection of scripts and
-		 * a name for the internal logger object.
+		 * Initialises the GUI object with a pointer to a \c scripts object and a
+		 * name for the internal logger object.
 		 * @param scripts Pointer to a scripts object containing functions to
 		 *                handle GUI signals. An error is logged if \c nullptr is
-		 *                given. Note that the scripts only have to be loaded by
-		 *                the time signals are emitted; the given object does not
-		 *                have to be fully initialised (i.e. interface registered
-		 *                and scripts loaded) upon \c gui construction.
+		 *                given. <b>It is important to note that the given scripts
+		 *                object should <em>not</em> have any scripts loaded, as
+		 *                this constructor adds to the scripts' interface.</b>
+		 *                Scripts must be loaded \em after this class is
+		 *                instantiated. <b>It is also important to note that there
+		 *                should only be <em>one</em> instance of \c scripts for
+		 *                every instance of \c gui,</b> as the different \c gui
+		 *                functions belonging to the different instances will
+		 *                conflict with each other.
 		 * @param name    The name to give this particular instantiation within the
 		 *                log file. Defaults to "gui."
 		 * @sa    \c engine::logger
@@ -331,6 +336,21 @@ namespace sfx {
 		 */
 		template<typename T>
 		typename T::Ptr _getPtr(const tgui::Widget::Ptr& widget) const noexcept;
+
+		//////////////////////
+		// SCRIPT INTERFACE //
+		//////////////////////
+
+		/**
+		 * Callback given to \c engine::scripts::registerInterface().
+		 * @param engine Pointer to the engine to register the interface with.
+		 * @sa    \c engine::scripts::registerInterface()
+		 */
+		void _registerInterface(asIScriptEngine* engine) noexcept;
+
+		//////////
+		// DATA //
+		//////////
 
 		/**
 		 * The TGUI widget type last provided to \c _getNextWidget().

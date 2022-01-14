@@ -70,8 +70,14 @@ sf::Color sfx::gui::gui_background::getColour() const noexcept {
 
 sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 	const std::string& name) noexcept : _scripts(scripts), _logger(name) {
-	if (!scripts) _logger.error("No scripts object has been provided to this GUI "
-		"object: no signals will be handled.");
+	if (!scripts) {
+		_logger.error("No scripts object has been provided to this GUI object: no "
+			"menus will be loaded.");
+	} else {
+		_scripts->registerInterface(
+			std::bind(&sfx::gui::_registerInterface, this, std::placeholders::_1)
+		);
+	}
 }
 
 void sfx::gui::setGUI(const std::string& newPanel) noexcept {
@@ -525,4 +531,8 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 		widget->getSignal("Collapsed").
 			connectEx(&sfx::gui::signalHandler, this);
 	}
+}
+
+void sfx::gui::_registerInterface(asIScriptEngine* engine) noexcept {
+
 }
