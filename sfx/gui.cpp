@@ -24,18 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using namespace tgui;
 
-/**
- * Used to loop through all of a given type of widget for translation purposes.
- * The \c ptr variable is used to access each widget of the given type in a loop.
- * @param t The type of widget to effect. Must be a TGUI C++ class name.
- * @param b The statement/s to execute within the loop.
- */
-#define TRANSLATION_LOOP(t, b) \
-	for (tgui::t::Ptr ptr = _getNextWidget<tgui::t>(#t); ptr; \
-		ptr = _getNextWidget<tgui::t>(#t)) { \
-		b; \
-	}
-
 sfx::gui::gui_background::gui_background() noexcept {}
 
 sfx::gui::gui_background::gui_background(const std::string& key) noexcept {
@@ -90,8 +78,6 @@ void sfx::gui::setGUI(const std::string& newPanel) noexcept {
 		// clear widget sprites
 		_widgetSprites.clear();
 		_currentGUI = newPanel;
-		// reset _getNextWidget index field
-		_widgetIndex = 0;
 	} catch (tgui::Exception& e) {
 		_logger.error("{}", e.what());
 		if (_gui.get(old)) _gui.get(old)->setVisible(true);
