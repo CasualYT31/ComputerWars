@@ -155,7 +155,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 	}
 
 	_widgetPictures.clear();
-	std::size_t i = 0;
+	std::size_t animatedSprite = 0;
 
 	if (getGUI() != "") {
 		// lang == true if the language has been changed
@@ -163,15 +163,72 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 		if (lang) _lastlang = _langdict->getLanguage();
 		// go through each control and perform changes
 		auto& widgetList = _gui.get<Group>(getGUI())->getWidgets();
+		std::string guiName = getGUI() + ".";
 		for (auto& widget : widgetList) {
+			std::string widgetName =
+				guiName + widget->getWidgetName().toStdString();
 			String type = widget->getWidgetType();
-			if (type == "Button") {
-				Button::Ptr w = _getPtr<Button>(widget);
-				if (lang) w->setText((*_langdict)(w->getText().toStdString()));
-			} else if (type == "BitmapButton") {
-				BitmapButton::Ptr w = _getPtr<BitmapButton>(widget);
-				if (lang) w->setText((*_langdict)(w->getText().toStdString()));
+			// if the widget deals with animated sprites then deal with it
+			bool updateTexture = true;
+			if (type == "BitmapButton" || type == "Picture") {
+				if (_guiSpriteKeys.find(widgetName) == _guiSpriteKeys.end() ||
+					_sheet.find(_guiSpriteKeys.at(widgetName).first) ==
+					_sheet.end()) {
+					updateTexture = false;
+				} else {
+					std::shared_ptr<sfx::animated_spritesheet> sheet =
+						_sheet[_guiSpriteKeys[widgetName].first];
+					if (animatedSprite == _widgetSprites.size()) {
+						// animated sprite for this widget doesn't exist yet, so
+						// allocate it
+						_widgetSprites.emplace_back(
+							sheet, _guiSpriteKeys[widgetName].second
+						);
+					}
+					_widgetSprites[animatedSprite].animate(target, scaling);
+					try {
+						tgui::Texture tex;
+						auto iRect = sheet->getFrameRect(
+							_widgetSprites[animatedSprite].getSprite(),
+							_widgetSprites[animatedSprite].getCurrentFrame()
+						);
+						tgui::UIntRect rect;
+						rect.left = iRect.left;
+						rect.top = iRect.top;
+						rect.width = iRect.width;
+						rect.height = iRect.height;
+						tex.load(sheet->getTexture(), rect);
+						_widgetPictures.push_back(tex);
+					} catch (std::out_of_range&) {
+						updateTexture = false;
+					}
+				}
 			}
+			// widget-specific code
+			if (type == "Button") {
+				auto w = _findWidget<Button>(widgetName);
+				if (lang) {
+					w->setText(
+						(*_langdict)(_originalStrings[widgetName][0])
+					);
+				}
+			} else if (type == "BitmapButton") {
+				auto w = _findWidget<BitmapButton>(widgetName);
+				if (lang) {
+					w->setText(
+						(*_langdict)(_originalStrings[widgetName][0])
+					);
+				}
+				if (updateTexture) w->setImage(_widgetPictures[animatedSprite]);
+			} else if (type == "Picture") {
+				auto w = _findWidget<Picture>(widgetName);
+				if (updateTexture) {
+					auto newRenderer = tgui::PictureRenderer();
+					newRenderer.setTexture(_widgetPictures[animatedSprite]);
+					w->setRenderer(newRenderer.getData());
+				}
+			}
+			animatedSprite++;
 		}
 	}
 	// translate captions
@@ -250,54 +307,6 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 		// it doesn't look like the TXT files even fully support tree views
 		// anyway...
 	} */
-	if (_sheet[""] && getGUI() != "") {
-		auto& widgetList = _gui.get<tgui::Group>(getGUI())->getWidgets();
-		for (auto& widget : widgetList) {
-			// update bitmapbutton and picture sprites
-			if (widget->getWidgetType() == "BitmapButton" ||
-				widget->getWidgetType() == "Picture") {
-				if (i == _widgetSprites.size()) {
-					// animated sprite doesn't yet exist, allocate it
-					/*_widgetSprites.push_back(sfx::animated_sprite(_sheet[""],
-						_guiSpriteKeys[getGUI()]
-						[widget->getWidgetName().toStdString()]));*/
-				}
-				_widgetSprites[i].animate(target, scaling);
-				try {
-					tgui::Texture tex;
-					auto iRect =
-						_sheet[""]->getFrameRect(_widgetSprites[i].getSprite(),
-							_widgetSprites[i].getCurrentFrame());
-					tgui::UIntRect rect;
-					rect.left = iRect.left;
-					rect.top = iRect.top;
-					rect.width = iRect.width;
-					rect.height = iRect.height;
-					tex.load(_sheet[""]->getTexture(), rect);
-					_widgetPictures.push_back(tex);
-				} catch (std::out_of_range&) {
-					i++;
-					continue;
-				}
-
-				// apply new texture
-				if (widget->getWidgetType() == "BitmapButton") {
-					auto bitmapbutton = _gui.get<tgui::BitmapButton>(
-						widget->getWidgetName()
-					);
-					bitmapbutton->setImage(_widgetPictures[i]);
-				} else {
-					auto newRenderer = tgui::PictureRenderer();
-					newRenderer.setTexture(_widgetPictures[i]);
-					_gui.get<tgui::Picture>(widget->getWidgetName())->setRenderer(
-						newRenderer.getData()
-					);
-				}
-
-				i++;
-			}
-		}
-	}
 
 	return false;
 }
