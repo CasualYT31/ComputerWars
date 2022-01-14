@@ -26,22 +26,27 @@ using namespace tgui;
 
 sfx::gui::gui_background::gui_background() noexcept {}
 
-sfx::gui::gui_background::gui_background(const std::string& key) noexcept {
-	set(key);
+sfx::gui::gui_background::gui_background(
+	const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
+	const std::string& key) noexcept {
+	set(sheet, key);
 }
 
 sfx::gui::gui_background::gui_background(sf::Color colour) noexcept {
 	set(colour);
 }
 
-void sfx::gui::gui_background::set(const std::string& key) noexcept {
+void sfx::gui::gui_background::set(
+	const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
+	const std::string& key) noexcept {
 	_flag = sfx::gui::gui_background::type::Sprite;
-	_key = key;
+	if (sheet) _bgSprite.setSpritesheet(sheet);
+	_bgSprite.setSprite(key);
 }
 
 void sfx::gui::gui_background::set(sf::Color colour) noexcept {
 	_flag = sfx::gui::gui_background::type::Colour;
-	_colour = colour;
+	_bgColour.setFillColor(colour);
 }
 
 sfx::gui::gui_background::type sfx::gui::gui_background::getType() const noexcept {
@@ -49,11 +54,36 @@ sfx::gui::gui_background::type sfx::gui::gui_background::getType() const noexcep
 }
 
 std::string sfx::gui::gui_background::getSprite() const noexcept {
-	return _key;
+	return _bgSprite.getSprite();
 }
 
 sf::Color sfx::gui::gui_background::getColour() const noexcept {
-	return _colour;
+	return _bgColour.getFillColor();
+}
+
+bool sfx::gui::gui_background::animate(const sf::RenderTarget& target,
+	const double scaling = 1.0) noexcept {
+	if (_flag == sfx::gui::gui_background::type::Sprite) {
+		return _bgSprite.animate(target, scaling);
+	} else if (_flag == sfx::gui::gui_background::type::Colour) {
+		_bgColour.setSize(
+			sf::Vector2f(static_cast<float>(target.getSize().x),
+				static_cast<float>(target.getSize().y))
+		);
+	}
+	return false;
+}
+
+void sfx::gui::gui_background::draw(sf::RenderTarget& target,
+	sf::RenderStates states) const {
+	switch (_flag) {
+	case sfx::gui::gui_background::type::Sprite:
+		target.draw(_bgSprite, states);
+		break;
+	case sfx::gui::gui_background::type::Colour:
+		target.draw(_bgColour, states);
+		break;
+	}
 }
 
 sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
@@ -119,23 +149,9 @@ void sfx::gui::setLanguageDictionary(
 }
 
 bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
-noexcept {
+	noexcept {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
-		// this GUI has a background to animate
-		if (_guiBackground[getGUI()].getType() ==
-			sfx::gui::gui_background::type::Colour) {
-			_bgColour.setSize(
-				sf::Vector2f(static_cast<float>(target.getSize().x) /
-					static_cast<float>(scaling),
-					static_cast<float>(target.getSize().y) /
-					static_cast<float>(scaling))
-			);
-			_bgColour.setFillColor(_guiBackground[getGUI()].getColour());
-		} else {
-			_bgSprite.setSpritesheet(_sheet[""]);
-			_bgSprite.setSprite(_guiBackground[getGUI()].getSprite());
-			_bgSprite.animate(target, scaling);
-		}
+		_guiBackground.at(getGUI()).animate(target, scaling);
 	}
 
 	_widgetPictures.clear();
@@ -290,12 +306,7 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// draw background
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		// this GUI has a background to animate
-		if (_guiBackground.at(getGUI()).getType() ==
-			sfx::gui::gui_background::type::Colour) {
-			target.draw(_bgColour);
-		} else {
-			target.draw(_bgSprite);
-		}
+		target.draw(_guiBackground.at(getGUI()), states);
 	}
 	// draw foreground
 	_gui.draw();

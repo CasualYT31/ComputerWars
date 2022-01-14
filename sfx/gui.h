@@ -161,7 +161,7 @@ namespace sfx {
 		 * one to another so that the \c gui class knows which type of background
 		 * to draw.
 		 */
-		class gui_background {
+		class gui_background : public sfx::animated_drawable {
 		public:
 			/**
 			 * Used to identify which type of background this instantiation
@@ -179,10 +179,13 @@ namespace sfx {
 			gui_background() noexcept;
 
 			/**
-			 * Initialises the GUI background with a sprite name.
-			 * @param key The name to set.
+			 * Initialises the GUI background with a sprite.
+			 * @param sheet The sheet containing the sprite.
+			 * @param key   The name of the sprite to set.
 			 */
-			gui_background(const std::string& key) noexcept;
+			gui_background(
+				const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
+				const std::string& key) noexcept;
 
 			/**
 			 * Initialises the GUI background with a solid colour.
@@ -193,9 +196,14 @@ namespace sfx {
 			/**
 			 * Sets this GUI background to be a sprite.
 			 * The stored colour value is then ignored.
-			 * @param key The sprite name to set.
+			 * @param sheet Pointer to the spritesheet containing the sprite. If
+			 *              \c nullptr is given, a new spritesheet won't be
+			 *              applied. This can be used to set a new sprite on the
+			 *              same sheet.
+			 * @param key   The sprite name to set.
 			 */
-			void set(const std::string& key) noexcept;
+			void set(const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
+				const std::string& key) noexcept;
 
 			/**
 			 * Sets this GUI background to be a solid colour.
@@ -227,21 +235,38 @@ namespace sfx {
 			 * @return The colour that was last assigned.
 			 */
 			sf::Color getColour() const noexcept;
+
+			/**
+			 * Animates this background.
+			 * Any sprites are animated, and the colour background (if there is
+			 * one) is resized to match the size of the target.
+			 * @return Always returns \c FALSE if a colour background. Returns the
+			 *         result of the call to the sprite's \c animate() method if a
+			 *         sprite background.
+			 */
+			virtual bool animate(const sf::RenderTarget& target,
+				const double scaling = 1.0) noexcept;
 		private:
+			/**
+			 * Draws the GUI background.
+			 */
+			virtual void draw(sf::RenderTarget& target, sf::RenderStates states)
+				const;
+
 			/**
 			 * Tracks the type of background this instantiation represents.
 			 */
 			type _flag = type::Colour;
 
 			/**
-			 * The sprite ID.
+			 * Used to paint the solid colour background.
 			 */
-			std::string _key = "";
+			sf::RectangleShape _bgColour;
 
 			/**
-			 * The solid colour value.
+			 * Used to paint the animated sprite background.
 			 */
-			sf::Color _colour;
+			sfx::animated_sprite _bgSprite;
 		};
 
 		/**
@@ -343,16 +368,6 @@ namespace sfx {
 		 */
 		std::unordered_map<std::string, std::shared_ptr<sfx::animated_spritesheet>>
 			_sheet;
-
-		/**
-		 * Used to paint the solid colour background of a GUI menu.
-		 */
-		sf::RectangleShape _bgColour;
-
-		/**
-		 * Used to paint the animated sprite background of a GUI menu.
-		 */
-		sfx::animated_sprite _bgSprite;
 
 		/**
 		 * Stores a list of TGUI textures to draw with the animated widgets.
