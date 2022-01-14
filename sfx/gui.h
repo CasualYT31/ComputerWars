@@ -313,11 +313,24 @@ namespace sfx {
 		 * @warning This method assumes that a GUI menu has already been set!
 		 *          Behaviour is undefined if one has not already been set and this
 		 *          method is called.
+		 * @tparam  T      The type of widget pointer to retrieve.
 		 * @param   widget The generic widget pointer to convert.
 		 * @return  The correctly-typed widget pointer.
 		 */
 		template<typename T>
 		typename T::Ptr _getPtr(const tgui::Widget::Ptr& widget) const noexcept;
+
+		/**
+		 * Finds a widget in the root GUI object and returns it.
+		 * The name of the widget should be in the format
+		 * "[MenuName[.ContainerNames].]WidgetName". If MenuName is not given,
+		 * whatever is in \c _currentGUI will be inserted.
+		 * @tparam T    The type of widget to find.
+		 * @param  name The name of the widget to find.
+		 * @return The pointer to the widget.
+		 */
+		template<typename T>
+		typename T::Ptr _findWidget(std::string name) const noexcept;
 
 		//////////////////////
 		// SCRIPT INTERFACE //
@@ -413,4 +426,30 @@ namespace sfx {
 template<typename T>
 typename T::Ptr sfx::gui::_getPtr(const tgui::Widget::Ptr& widget) const noexcept {
 	return _gui.get<tgui::Group>(getGUI())->get<T>(widget->getWidgetName());
+}
+
+template<typename T>
+typename T::Ptr sfx::gui::_findWidget(std::string name) const noexcept {
+	// split string
+	std::vector<std::string> names;
+	std::size_t pos = 0;
+	do {
+		pos = name.find('.');
+		names.push_back(name.substr(0, pos));
+		if (pos != std::string::npos) name = name.substr(pos + 1);
+	} while (pos != std::string::npos);
+	// if group name was not given, insert it
+	if (!_gui.get<tgui::Group>(names[0])) names.insert(names.begin(), _currentGUI);
+	// find it
+	tgui::Container::Ptr container = _gui.get<tgui::Container>(names[0]);
+	if (names.size() > 2) {
+		for (std::size_t w = 1; w < names.size() - 1; w++) {
+			if (!container) return nullptr;
+			container = container->get<tgui::Container>(names[w]);
+		}
+	}
+	if (container)
+		return container->get<T>(names[names.size() - 1]);
+	else
+		return nullptr;
 }
