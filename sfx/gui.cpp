@@ -534,10 +534,56 @@ void sfx::gui::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBackground(const string& in = \"\"",
+		asMETHOD(sfx::gui, _noBackground), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBackground(const string& in, const "
+		"string& in, const string& in = \"\"",
+		asMETHOD(sfx::gui, _spriteBackground), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBackground(const uint, const uint, "
+		"const uint, const uint, const string& in)",
+		asMETHOD(sfx::gui, _colourBackground), asCALL_THISCALL_ASGLOBAL, this);
 	// register listbox global functions
 	engine->RegisterGlobalFunction("void addListBox(const string& in, const float "
 		"x, const float y, const float w, const float h)",
 		asMETHOD(sfx::gui, _addListbox), asCALL_THISCALL_ASGLOBAL, this);
+}
+
+void sfx::gui::_noBackground(const std::string& menu) noexcept {
+	if (menu == "") {
+		_guiBackground.erase(getGUI());
+	} else {
+		_guiBackground.erase(menu);
+	}
+}
+
+void sfx::gui::_spriteBackground(const std::string& sheet,
+	const std::string& sprite, std::string menu) noexcept {
+	if (menu == "") menu = getGUI();
+	try {
+		_guiBackground.at(menu).set(_sheet.at(sheet), sprite);
+	} catch (std::out_of_range&) {
+		if (_sheet.find(sheet) == _sheet.end()) {
+			_logger.error("Attempted to set sprite \"{}\" from sheet \"{}\" to "
+				"the background of menu \"{}\". The sheet does not exist!", sprite,
+				sheet, menu);
+		} else {
+			_logger.error("Attempted to set sprite \"{}\" from sheet \"{}\" to "
+				"the background of menu \"{}\". The menu does not exist!", sprite,
+				sheet, menu);
+		}
+	}
+}
+
+void sfx::gui::_colourBackground(const unsigned int r, const unsigned int g,
+	const unsigned int b, const unsigned int a,
+	std::string menu) noexcept {
+	if (menu == "") menu = getGUI();
+	try {
+		_guiBackground.at(menu).set(sf::Color(r, g, b, a));
+	} catch (std::out_of_range&) {
+		_logger.error("Attempted to set colour [{},{},{},{}] to the background of "
+			"menu \"{}\". The menu does not exist!", r, g, b, a, menu);
+	}
 }
 
 void sfx::gui::_addListbox(const std::string& name, const float x, const float y,

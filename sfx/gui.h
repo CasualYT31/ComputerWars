@@ -366,6 +366,34 @@ namespace sfx {
 		 */
 		void _registerInterface(asIScriptEngine* engine) noexcept;
 
+		// BACKGROUND //
+
+		/**
+		 * Removes a menu's background.
+		 * @param menu The name of the menu whose background is to be removed. If a
+		 *             blank string is given, the current menu is chosen.
+		 */
+		void _noBackground(const std::string& menu = "") noexcept;
+
+		/**
+		 * Makes a menu have an animated sprite for a background.
+		 * @param sheet  The name of the spritesheet which contains the sprite to
+		 *               draw.
+		 * @param sprite The name of the sprite to draw.
+		 * @param menu   The name of the menu to apply the animated sprite to the
+		 *               background of. If a blank string is given, the current
+		 *               menu is chosen.
+		 */
+		void _spriteBackground(const std::string& sheet, const std::string& sprite,
+			std::string menu = "") noexcept;
+
+		/**
+		 * Makes a menu have a solid colour background.
+		 */
+		void _colourBackground(const unsigned int r, const unsigned int g,
+			const unsigned int b, const unsigned int a,
+			std::string menu = "") noexcept;
+
 		// LISTBOX //
 
 		/**
