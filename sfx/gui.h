@@ -50,11 +50,11 @@ namespace sfx {
 		 *                object should <em>not</em> have any scripts loaded, as
 		 *                this constructor adds to the scripts' interface.</b>
 		 *                Scripts must be loaded \em after this class is
-		 *                instantiated. <b>It is also important to note that there
-		 *                should only be <em>one</em> instance of \c scripts for
-		 *                every instance of \c gui,</b> as the different \c gui
-		 *                functions belonging to the different instances will
-		 *                conflict with each other.
+		 *                instantiated but \em before it is <tt>load()</tt>ed.
+		 *                <b>It is also important to note that there should only be
+		 *                <em>one</em> instance of \c scripts for every instance of
+		 *                \c gui,</b> as the different \c gui functions belonging
+		 *                to the different instances will conflict with each other.
 		 * @param name    The name to give this particular instantiation within the
 		 *                log file. Defaults to "gui."
 		 * @sa    \c engine::logger
@@ -254,31 +254,12 @@ namespace sfx {
 
 		/**
 		 * The JSON load method for this class.
-		 * All key-value pairs within the root object store information related to
-		 * each GUI menu. The key holds the name of the GUI, and the value, an
-		 * object, lists details of the menu.\n
-		 * 
-		 * The following key-value pairs should be specified in this object value:
-		 * <ul><li>\c path - The path of the TXT script containing the details of
-		 *         the menu's widgets. If none is given, a warning will be logged,
-		 *         and the GUI will not be loaded (does \b not mean \c _load()
-		 *         returns \c FALSE, however).</li>
-		 *     <li>\c background - Must either be a colour value ([r,g,b,a]), or an
-		 *         unsigned integer representing the ID of a sprite. Defaults to
-		 *         solid black.</li>
-		 *     <li>Additional keys must be valid animated widget names having an
-		 *         object value containing a \c "sprite" key and value pair
-		 *         specifying the ID of the sprite to animate and draw with that
-		 *         widget (see \c _guiSpriteKeys).</li></ul>
-		 * 
-		 * The TXT scripts can be written by hand, but it is a lot easier to create
-		 * and edit them using the bundled \c gui-builder application (developed by
-		 * the sole maintainer of TGUI, Bruno Van de Velde), and then make a few
-		 * small changes in a text editor as necessary.
+		 * There should be only one key-value pair in this script called "menus".
+		 * The value should be an array of string names, each one naming a menu.
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
-		 * @return \c TRUE if all GUIs could be loaded, \c FALSE if at least one
-		 *         couldn't (\c _loadGUI() returned \c FALSE at least once).
+		 * @return \c TRUE if all existing menus before the call were deleted, \c
+		 *         FALSE if not.
 		 */
 		bool _load(engine::json& j) noexcept;
 
@@ -290,16 +271,6 @@ namespace sfx {
 		 * @return Always returns \c FALSE.
 		 */
 		bool _save(nlohmann::ordered_json& j) noexcept;
-
-		/**
-		 * Loads a GUI menu.
-		 * @param  name     The name of the GUI menu to load.
-		 * @param  filepath The path of the TXT script which contains the details
-		 *                  of the menu.
-		 * @return \c TRUE if loading was successful, \c FALSE if not.
-		 */
-		bool _loadGUI(const std::string& name, const std::string& filepath)
-			noexcept;
 
 		/**
 		 * Connects all signals of a widget to this class' \c signalHandler()

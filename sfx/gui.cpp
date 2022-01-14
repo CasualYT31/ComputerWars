@@ -313,76 +313,32 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 }
 
 bool sfx::gui::_load(engine::json& j) noexcept {
-	bool ret = true;
-	nlohmann::ordered_json jj = j.nlohmannJSON();
-	for (auto& i : jj.items()) {
-		if (i.value().find("path") != i.value().end() &&
-			i.value()["path"].is_string()) {
-			if (!_loadGUI(i.key(), i.value()["path"])) ret = false;
-		} else {
-			_logger.write("Warning - GUI with the name \"{}\" did not refer to a "
-				"valid string path within its required object value.", i.key());
+	std::vector<std::string> names;
+	j.applyVector(names, { "menus" });
+	if (j.inGoodState()) {
+		// clear state
+		_gui.removeAllWidgets();
+		_currentGUI = "";
+		_guiBackground.clear();
+		_widgetPictures.clear();
+		_widgetSprites.clear();
+		_guiSpriteKeys.clear();
+		_originalStrings.clear();
+		// create each menu
+		for (auto& m : names) {
+			tgui::Group::Ptr menu = tgui::Group::create();
+			menu->setVisible(false);
+			_gui.add(menu, m);
+			if (_scripts) _scripts->callFunction(m + "SetUp");
 		}
-		if (i.value().find("background") != i.value().end()) {
-			if (i.value()["background"].is_array()) {
-				sf::Color newcolour = _guiBackground[i.key()].getColour();
-				j.applyColour(newcolour, { i.key(), "background" }, true);
-				_guiBackground[i.key()].set(newcolour);
-			} else {
-				std::string newkey = _guiBackground[i.key()].getSprite();
-				j.apply(newkey, { i.key(), "background" }, true);
-				_guiBackground[i.key()].set(newkey);
-			}
-		} else {
-			_logger.write("Warning - no background given for the GUI \"{}\": "
-				"black background provided.", i.key());
-			_guiBackground[i.key()].set(sf::Color(0,0,0,255));
-		}
-
-		nlohmann::ordered_json jjj = i.value();
-		for (auto& ii : jjj.items()) {
-			if (ii.key() == "path" || ii.key() == "background") continue;
-			if (ii.value().find("sprite") != ii.value().end()) {
-				j.apply(_guiSpriteKeys[i.key()][ii.key()], { i.key(), ii.key(),
-					"sprite" }, true);
-			}
-		}
+		return true;
+	} else {
+		return false;
 	}
-	return ret;
 }
 
 bool sfx::gui::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
-}
-
-bool sfx::gui::_loadGUI(const std::string& name, const std::string& filepath)
-	noexcept {
-	tgui::Gui temp;
-	try {
-		temp.loadWidgetsFromFile(filepath);
-	} catch (tgui::Exception& e) {
-		_logger.error("Error while loading GUI from {}: {}", filepath, e.what());
-		return false;
-	}
-	auto group = tgui::Group::create();
-	auto& widgetList = temp.getWidgets();
-	auto itr = widgetList.begin();
-	try {
-		for (auto enditr = widgetList.end(); itr != enditr; itr++) {
-			auto copy = (*itr)->clone();
-			_connectSignals(copy);
-			group->add(copy, (*itr)->getWidgetName());
-		}
-	} catch (tgui::Exception& e) {
-		std::string widgetName = (*itr)->getWidgetName().toStdString();
-		_logger.error("Error while copying GUI widget with the name \"{}\" from "
-			"GUI \"{}\": {}", widgetName, name, e.what());
-		return false;
-	}
-	temp.removeAllWidgets();
-	group->setVisible(false);
-	_gui.add(group, name);
-	return true;
 }
 
 // ALL SIGNALS NEED TO BE TESTED IDEALLY
