@@ -398,16 +398,12 @@ namespace sfx {
 		/**
 		 * Stores the sprite names of all the widgets containing pictures that are
 		 * configured to be animated.
-		 * It stores them by panel, then by widget. The name of the GUI menu is to
-		 * be specified first, then the name of the animated widget.
 		 * @remark Only \c BitmapButtons and \c Pictures can animate!
 		 */
-		std::unordered_map<std::string,
-			std::unordered_map<std::string, std::string>> _guiSpriteKeys;
+		std::unordered_map<std::string, std::string> _guiSpriteKeys;
 
 		/**
 		 * Stores the original captions assigned to each widget.
-		 * The key to the map is a long string pin-pointing the exact
 		 */
 		std::unordered_map<std::string, std::vector<std::string>> _originalStrings;
 

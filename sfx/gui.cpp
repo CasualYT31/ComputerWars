@@ -258,9 +258,9 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 				widget->getWidgetType() == "Picture") {
 				if (i == _widgetSprites.size()) {
 					// animated sprite doesn't yet exist, allocate it
-					_widgetSprites.push_back(sfx::animated_sprite(_sheet[""],
+					/*_widgetSprites.push_back(sfx::animated_sprite(_sheet[""],
 						_guiSpriteKeys[getGUI()]
-						[widget->getWidgetName().toStdString()]));
+						[widget->getWidgetName().toStdString()]));*/
 				}
 				_widgetSprites[i].animate(target, scaling);
 				try {
