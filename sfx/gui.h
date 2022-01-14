@@ -270,6 +270,21 @@ namespace sfx {
 		};
 
 		/**
+		 * Performs animation calculations on a container of widgets.
+		 * @param target         The target which the GUI will be drawn to later.
+		 * @param scaling        Scaling factor which will be applied when drawing.
+		 * @param container      Pointer to the container widget.
+		 * @param baseName       The name of the container widget.
+		 * @param lang           \c TRUE if widget strings need to be translated,
+		 *                       \c FALSE if they should not be renamed.
+		 * @param animatedSprite Counter which keeps track of which animated sprite
+		 *                       from the internal vector to work with.
+		 */
+		void _animate(const sf::RenderTarget& target, const double scaling,
+			tgui::Container::Ptr container, std::string baseName, const bool lang,
+			std::size_t& animatedSprite) noexcept;
+
+		/**
 		 * Draws the current GUI menu.
 		 * @warning It is to be noted that this implementation of \c draw()
 		 *          \b ignores any given render states. This was done to remain

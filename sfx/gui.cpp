@@ -155,160 +155,191 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 	}
 
 	_widgetPictures.clear();
-	std::size_t animatedSprite = 0;
 
 	if (getGUI() != "") {
 		// lang == true if the language has been changed
 		const bool lang = (_langdict && _langdict->getLanguage() != _lastlang);
 		if (lang) _lastlang = _langdict->getLanguage();
-		// go through each control and perform changes
-		auto& widgetList = _gui.get<Group>(getGUI())->getWidgets();
-		std::string guiName = getGUI() + ".";
-		for (auto& widget : widgetList) {
-			std::string widgetName =
-				guiName + widget->getWidgetName().toStdString();
-			String type = widget->getWidgetType();
-			// if the widget deals with animated sprites then deal with it
-			bool updateTexture = true;
-			if (type == "BitmapButton" || type == "Picture") {
-				if (_guiSpriteKeys.find(widgetName) == _guiSpriteKeys.end() ||
-					_sheet.find(_guiSpriteKeys.at(widgetName).first) ==
-					_sheet.end()) {
-					updateTexture = false;
-				} else {
-					std::shared_ptr<sfx::animated_spritesheet> sheet =
-						_sheet[_guiSpriteKeys[widgetName].first];
-					if (animatedSprite == _widgetSprites.size()) {
-						// animated sprite for this widget doesn't exist yet, so
-						// allocate it
-						_widgetSprites.emplace_back(
-							sheet, _guiSpriteKeys[widgetName].second
-						);
-					}
-					_widgetSprites[animatedSprite].animate(target, scaling);
-					try {
-						tgui::Texture tex;
-						auto iRect = sheet->getFrameRect(
-							_widgetSprites[animatedSprite].getSprite(),
-							_widgetSprites[animatedSprite].getCurrentFrame()
-						);
-						tgui::UIntRect rect;
-						rect.left = iRect.left;
-						rect.top = iRect.top;
-						rect.width = iRect.width;
-						rect.height = iRect.height;
-						tex.load(sheet->getTexture(), rect);
-						_widgetPictures.push_back(tex);
-					} catch (std::out_of_range&) {
-						updateTexture = false;
-					}
-				}
-			}
-			// widget-specific code
-			if (type == "Button") {
-				auto w = _findWidget<Button>(widgetName);
-				if (lang) {
-					w->setText(
-						(*_langdict)(_originalStrings[widgetName][0])
-					);
-				}
-			} else if (type == "BitmapButton") {
-				auto w = _findWidget<BitmapButton>(widgetName);
-				if (lang) {
-					w->setText(
-						(*_langdict)(_originalStrings[widgetName][0])
-					);
-				}
-				if (updateTexture) w->setImage(_widgetPictures[animatedSprite]);
-			} else if (type == "Picture") {
-				auto w = _findWidget<Picture>(widgetName);
-				if (updateTexture) {
-					auto newRenderer = tgui::PictureRenderer();
-					newRenderer.setTexture(_widgetPictures[animatedSprite]);
-					w->setRenderer(newRenderer.getData());
-				}
-			}
-			animatedSprite++;
-		}
+		std::size_t animatedSprite = 0;
+		_animate(target, scaling, _gui.get<Container>(getGUI()), getGUI(), lang,
+			animatedSprite);
 	}
-	// translate captions
-	/*if (_langdict && getGUI() != "" && _langdict->getLanguage() != _lastlang) {
-		_lastlang = _langdict->getLanguage();
-		// translate captions
-		TRANSLATION_LOOP(Button,
-			ptr->setText((*_langdict)(ptr->getText().toStdString())));
-		TRANSLATION_LOOP(BitmapButton,
-			ptr->setText((*_langdict)(ptr->getText().toStdString())));
-		TRANSLATION_LOOP(ToggleButton,
-			ptr->setText((*_langdict)(ptr->getText().toStdString())));
-		TRANSLATION_LOOP(Label,
-			ptr->setText((*_langdict)(ptr->getText().toStdString())));
-		TRANSLATION_LOOP(ProgressBar,
-			ptr->setText((*_langdict)(ptr->getText().toStdString())));
-		TRANSLATION_LOOP(RadioButton,
-			ptr->setText((*_langdict)(ptr->getText().toStdString())));
-		TRANSLATION_LOOP(CheckBox,
-			ptr->setText((*_langdict)(ptr->getText().toStdString())));
-		TRANSLATION_LOOP(MessageBox,
-			ptr->setText((*_langdict)(ptr->getText().toStdString())));
-		// for other types of controls, we need to iterate through a list
-		TRANSLATION_LOOP(ComboBox, {
-			for (std::size_t i = 0; i < ptr->getItemCount(); i++) {
-				ptr->changeItemByIndex(i,
-					(*_langdict)(ptr->getItems().at(i).toStdString()));
-			}
-			});
-		TRANSLATION_LOOP(ListBox, {
-			for (std::size_t i = 0; i < ptr->getItemCount(); i++) {
-				ptr->changeItemByIndex(i,
-					(*_langdict)(ptr->getItems().at(i).toStdString()));
-			}
-			});
-		// for a listview, we need to translate all the columns as well as each
-		// item
-		TRANSLATION_LOOP(ListView, {
-			for (std::size_t i = 0; i < ptr->getColumnCount(); i++) {
-				ptr->setColumnText(i,
-					(*_langdict)(ptr->getColumnText(i).toStdString()));
-				for (std::size_t j = 0; i <= ptr->getItemCount(); j++) {
-					ptr->changeSubItem(j, i,
-						(*_langdict)(ptr->getItemCell(j, i).toStdString()));
-				}
-			}
-			});
-		// for container types, we need to translate the title instead of the
-		// "text" (sometimes as well as the "text")
-		TRANSLATION_LOOP(ChildWindow,
-			ptr->setTitle((*_langdict)(ptr->getTitle().toStdString())));
-		TRANSLATION_LOOP(MessageBox,
-			ptr->setTitle((*_langdict)(ptr->getTitle().toStdString())));
-		TRANSLATION_LOOP(ColorPicker,
-			ptr->setTitle((*_langdict)(ptr->getTitle().toStdString())));
-		TRANSLATION_LOOP(FileDialog,
-			ptr->setTitle((*_langdict)(ptr->getTitle().toStdString())));
-		// we also need to translate menus
-		// damn, that's not even possible as of TGUI 0.8.9...
-
-		// we also need to translate tabs
-		TRANSLATION_LOOP(Tabs, {
-			for (std::size_t i = 0; i < ptr->getTabsCount(); i++) {
-				ptr->changeText(i,
-					(*_langdict)(ptr->getText(i).toStdString()));
-			}
-			});
-		TRANSLATION_LOOP(TabContainer, {
-			for (std::size_t i = 0; i < ptr->getTabs()->getTabsCount(); i++) {
-				ptr->changeTabText(i,
-					(*_langdict)(ptr->getTabs()->getText(i).toStdString()));
-			}
-			});
-		// we *also* need to translate treeviews
-		// possible, but so not worth it....
-		// it doesn't look like the TXT files even fully support tree views
-		// anyway...
-	} */
 
 	return false;
+}
+
+void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
+	tgui::Container::Ptr container, std::string baseName, const bool lang,
+	std::size_t& animatedSprite) noexcept {
+	auto& widgetList = container->getWidgets();
+	baseName += ".";
+	for (auto& widget : widgetList) {
+		std::string widgetName = baseName + widget->getWidgetName().toStdString();
+		String type = widget->getWidgetType();
+		// if the widget deals with animated sprites then handle them
+		bool updateTexture = true;
+		if (type == "BitmapButton" || type == "Picture") {
+			if (_guiSpriteKeys.find(widgetName) == _guiSpriteKeys.end() ||
+				_sheet.find(_guiSpriteKeys.at(widgetName).first) == _sheet.end()) {
+				updateTexture = false;
+			} else {
+				std::shared_ptr<sfx::animated_spritesheet> sheet =
+					_sheet[_guiSpriteKeys[widgetName].first];
+				if (animatedSprite == _widgetSprites.size()) {
+					// animated sprite for this widget doesn't exist yet, so
+					// allocate it
+					_widgetSprites.emplace_back(
+						sheet, _guiSpriteKeys[widgetName].second
+					);
+				}
+				_widgetSprites[animatedSprite].animate(target, scaling);
+				try {
+					tgui::Texture tex;
+					auto iRect = sheet->getFrameRect(
+						_widgetSprites[animatedSprite].getSprite(),
+						_widgetSprites[animatedSprite].getCurrentFrame()
+					);
+					tgui::UIntRect rect;
+					rect.left = iRect.left;
+					rect.top = iRect.top;
+					rect.width = iRect.width;
+					rect.height = iRect.height;
+					tex.load(sheet->getTexture(), rect);
+					_widgetPictures.push_back(tex);
+				} catch (std::out_of_range&) {
+					updateTexture = false;
+				}
+			}
+		}
+		// widget-specific code
+		if (type == "Button") {
+			auto w = _findWidget<Button>(widgetName);
+			if (lang) {
+				w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			}
+		} else if (type == "BitmapButton") {
+			auto w = _findWidget<BitmapButton>(widgetName);
+			if (lang) {
+				w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			}
+			if (updateTexture) w->setImage(_widgetPictures[animatedSprite]);
+		} else if (type == "CheckBox") {
+			auto w = _findWidget<CheckBox>(widgetName);
+			if (lang) {
+				w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			}
+		} else if (type == "ChildWindow") {
+			auto w = _findWidget<ChildWindow>(widgetName);
+			if (lang) {
+				w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+			}
+		} else if (type == "ColorPicker") {
+			auto w = _findWidget<ColorPicker>(widgetName);
+			if (lang) {
+				w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+			}
+		} else if (type == "ComboBox") {
+			auto w = _findWidget<ComboBox>(widgetName);
+			if (lang) {
+				for (std::size_t i = 0; i < w->getItemCount(); i++) {
+					w->changeItemByIndex(i,
+						(*_langdict)(_originalStrings[widgetName][i]));
+				}
+			}
+		} else if (type == "FileDialog") {
+			auto w = _findWidget<FileDialog>(widgetName);
+			if (lang) {
+				w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+			}
+		} else if (type == "Label") {
+			auto w = _findWidget<Label>(widgetName);
+			if (lang) {
+				w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			}
+		} else if (type == "ListBox") {
+			auto w = _findWidget<ListBox>(widgetName);
+			if (lang) {
+				for (std::size_t i = 0; i < w->getItemCount(); i++) {
+					w->changeItemByIndex(i,
+						(*_langdict)(_originalStrings[widgetName][i]));
+				}
+			}
+		} else if (type == "ListView") {
+			auto w = _findWidget<ListView>(widgetName);
+			if (lang) {
+				std::size_t colCount = w->getColumnCount();
+				for (std::size_t i = 0; i < colCount; i++) {
+					w->setColumnText(i,
+						(*_langdict)(_originalStrings[widgetName][i]));
+					for (std::size_t j = 0; j <= w->getItemCount(); j++) {
+						w->changeSubItem(i, j, (*_langdict)
+							(_originalStrings[widgetName][colCount * (i + 1) + j])
+						);
+					}
+				}
+			}
+		} else if (type == "Picture") {
+			auto w = _findWidget<Picture>(widgetName);
+			if (updateTexture) {
+				auto newRenderer = tgui::PictureRenderer();
+				newRenderer.setTexture(_widgetPictures[animatedSprite]);
+				w->setRenderer(newRenderer.getData());
+			}
+		} else if (type == "MenuBar") {
+			auto w = _findWidget<MenuBar>(widgetName);
+			if (lang) {
+				// it's possible, but we would somehow need to store the menu
+				// hierarchy separately to keep this as simple as possible.
+				// potentially multiple menu hierarchies would have to be stored,
+				// though...
+			}
+		} else if (type == "MessageBox") {
+			auto w = _findWidget<MessageBox>(widgetName);
+			if (lang) {
+				w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+				w->setText((*_langdict)(_originalStrings[widgetName][1]));
+			}
+			// don't know how I'm going to translate buttons
+		} else if (type == "ProgressBar") {
+			auto w = _findWidget<ProgressBar>(widgetName);
+			if (lang) {
+				w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			}
+		} else if (type == "RadioButton") {
+			auto w = _findWidget<RadioButton>(widgetName);
+			if (lang) {
+				w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			}
+		} else if (type == "TabContainer") {
+			auto w = _findWidget<TabContainer>(widgetName);
+			if (lang) {
+				for (std::size_t i = 0; i < w->getTabs()->getTabsCount(); i++) {
+					w->changeTabText(i,
+						(*_langdict)(_originalStrings[widgetName][i]));
+				}
+			}
+		} else if (type == "Tabs") {
+			auto w = _findWidget<Tabs>(widgetName);
+			if (lang) {
+				for (std::size_t i = 0; i < w->getTabsCount(); i++) {
+					w->changeText(i,
+						(*_langdict)(_originalStrings[widgetName][i]));
+				}
+			}
+		} else if (type == "ToggleButton") {
+			auto w = _findWidget<ToggleButton>(widgetName);
+			if (lang) {
+				w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			}
+		}
+		// container types - not all of them are here for future reference
+		if (type == "ChildWindow" || type == "Grid" || type == "Group" ||
+			type == "RadioButtonGroup") {
+			auto w = _findWidget<Container>(widgetName);
+			_animate(target, scaling, w, widgetName, lang, animatedSprite);
+		}
+		animatedSprite++;
+	}
 }
 
 void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
