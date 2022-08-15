@@ -419,6 +419,16 @@ namespace sfx {
 		void _addListboxItem(const std::string& name, const std::string& item)
 			noexcept;
 
+		/**
+		 * Retrieves the currently selected item of a listbox.
+		 * This method writes an error to the log file if a listbox with the given
+		 * name could not be found.
+		 * @param  name The name of the listbox.
+		 * @return The text of the selected item. When an error is logged, a blank
+		 *         string is returned.
+		 */
+		std::string _getListboxSelectedItem(const std::string& name) noexcept;
+
 		//////////
 		// DATA //
 		//////////
