@@ -390,7 +390,7 @@ std::string engine::language_dictionary::language::get(
 	if (_strings.find(nativeString) == _strings.end()) {
 		_logger.error("Native string \"{}\" does not exist in this string map.",
 			nativeString);
-		return "<error>";
+		return nativeString;
 	} else {
 		return engine::expand_string::insert(_strings.at(nativeString), values...);
 	}

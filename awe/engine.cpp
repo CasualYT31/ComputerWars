@@ -31,7 +31,7 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	// assign the language dictionary to the GUI object
 	_gui->setLanguageDictionary(_dictionary);
 
-	awe::map map(file, _countries, _tiles, _units, _commanders);
+	/* awe::map map(file, _countries, _tiles, _units, _commanders);
 	map.selectArmy(0);
 	map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, map.getMapSize().x,
 		map.getMapSize().y));
@@ -74,6 +74,21 @@ int awe::game_engine::run(const std::string& file) noexcept {
 		}
 	} catch (std::exception&) {
 		
+	} */
+
+	_gui->setTarget(*_renderer);
+
+	while (_renderer->isOpen()) {
+		sf::Event event;
+		while (_renderer->pollEvent(event)) {
+			_gui->handleEvent(event);
+			if (event.type == sf::Event::Closed) _renderer->close();
+		}
+
+		_renderer->clear();
+		_renderer->animate(*_gui);
+		_renderer->draw(*_gui);
+		_renderer->display();
 	}
 
 	return 0;

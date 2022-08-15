@@ -1,16 +1,3 @@
 {
-	"main": {
-		"path": "assets/gui/main.txt",
-		"background": [255,0,0,255],
-		"BitmapButton1": {
-			"sprite": "bg"
-		},
-		"Picture1": {
-			"sprite": "square"
-		}
-	},
-	"settings": {
-		"path": "assets/gui/settings.txt",
-		"background": "bg"
-	}
+	"menus":  []
 }

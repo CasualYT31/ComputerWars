@@ -373,7 +373,7 @@ namespace sfx {
 		 * @param menu The name of the menu whose background is to be removed. If a
 		 *             blank string is given, the current menu is chosen.
 		 */
-		void _noBackground(const std::string& menu = "") noexcept;
+		void _noBackground(const std::string& menu) noexcept;
 
 		/**
 		 * Makes a menu have an animated sprite for a background.
@@ -385,14 +385,14 @@ namespace sfx {
 		 *               menu is chosen.
 		 */
 		void _spriteBackground(const std::string& sheet, const std::string& sprite,
-			std::string menu = "") noexcept;
+			const std::string& menu) noexcept;
 
 		/**
 		 * Makes a menu have a solid colour background.
 		 */
 		void _colourBackground(const unsigned int r, const unsigned int g,
-			const unsigned int b, const unsigned int a,
-			std::string menu = "") noexcept;
+			const unsigned int b, const unsigned int a, const std::string& menu)
+			noexcept;
 
 		// LISTBOX //
 

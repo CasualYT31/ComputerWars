@@ -129,8 +129,10 @@ int game(const std::string& file) {
     std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>();
 
     // initialise the GUI
+    // let game_engine perform gui->load()
+    // this is because we can't call the SetUp() functions for menus before
+    // game_engine has initialised the script interface and loaded the script files
     std::shared_ptr<sfx::gui> gui = std::make_shared<sfx::gui>(scripts);
-    gui->load("assets/gui/gui.json");
 
     // initialise the countries
     std::shared_ptr<awe::bank<awe::country>> countries =
@@ -196,6 +198,9 @@ int game(const std::string& file) {
     gameLoop.setUnits(units);
     gameLoop.setCommanders(commanders);
     gameLoop.initialiseScripts("assets/script");
+
+    // now load gui
+    gui->load("assets/gui/gui.json");
 
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run(file);

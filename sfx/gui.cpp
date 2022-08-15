@@ -258,7 +258,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 			}
 		} else if (type == "ListBox") {
 			auto w = _findWidget<ListBox>(widgetName);
-			if (lang) {
+			if (lang && w) {
 				for (std::size_t i = 0; i < w->getItemCount(); i++) {
 					w->changeItemByIndex(i,
 						(*_langdict)(_originalStrings[widgetName][i]));
@@ -358,19 +358,29 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 	if (j.inGoodState()) {
 		// clear state
 		_gui.removeAllWidgets();
-		_currentGUI = "";
 		_guiBackground.clear();
 		_widgetPictures.clear();
 		_widgetSprites.clear();
 		_guiSpriteKeys.clear();
 		_originalStrings.clear();
+		// create the main menu that always exists
+		tgui::Group::Ptr menu = tgui::Group::create();
+		menu->setVisible(false);
+		_gui.add(menu, "MainMenu");
+		setGUI("MainMenu");
+		if (_scripts) _scripts->callFunction("MainMenuSetUp");
 		// create each menu
 		for (auto& m : names) {
-			tgui::Group::Ptr menu = tgui::Group::create();
+			menu = tgui::Group::create();
 			menu->setVisible(false);
 			_gui.add(menu, m);
+			// temporarily set the current GUI to this one to make _findWidget()
+			// work with relative widget names in SetUp() functions
+			setGUI(m);
 			if (_scripts) _scripts->callFunction(m + "SetUp");
 		}
+		// leave with the current menu being MainMenu
+		setGUI("MainMenu");
 		return true;
 	} else {
 		return false;
@@ -534,10 +544,10 @@ void sfx::gui::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBackground(const string& in = \"\"",
+	engine->RegisterGlobalFunction("void setBackground(const string& in)",
 		asMETHOD(sfx::gui, _noBackground), asCALL_THISCALL_ASGLOBAL, this);
 	engine->RegisterGlobalFunction("void setBackground(const string& in, const "
-		"string& in, const string& in = \"\"",
+		"string& in, const string& in)",
 		asMETHOD(sfx::gui, _spriteBackground), asCALL_THISCALL_ASGLOBAL, this);
 	engine->RegisterGlobalFunction("void setBackground(const uint, const uint, "
 		"const uint, const uint, const string& in)",
@@ -555,41 +565,23 @@ void sfx::gui::_registerInterface(asIScriptEngine* engine) noexcept {
 }
 
 void sfx::gui::_noBackground(const std::string& menu) noexcept {
-	if (menu == "") {
-		_guiBackground.erase(getGUI());
-	} else {
-		_guiBackground.erase(menu);
-	}
+	_guiBackground.erase(menu);
 }
 
 void sfx::gui::_spriteBackground(const std::string& sheet,
-	const std::string& sprite, std::string menu) noexcept {
-	if (menu == "") menu = getGUI();
+	const std::string& sprite, const std::string& menu) noexcept {
 	try {
-		_guiBackground.at(menu).set(_sheet.at(sheet), sprite);
+		_guiBackground[menu].set(_sheet.at(sheet), sprite);
 	} catch (std::out_of_range&) {
-		if (_sheet.find(sheet) == _sheet.end()) {
-			_logger.error("Attempted to set sprite \"{}\" from sheet \"{}\" to "
-				"the background of menu \"{}\". The sheet does not exist!", sprite,
-				sheet, menu);
-		} else {
-			_logger.error("Attempted to set sprite \"{}\" from sheet \"{}\" to "
-				"the background of menu \"{}\". The menu does not exist!", sprite,
-				sheet, menu);
-		}
+		_logger.error("Attempted to set sprite \"{}\" from sheet \"{}\" to the "
+			"background of menu \"{}\". The sheet does not exist!", sprite, sheet,
+			menu);
 	}
 }
 
 void sfx::gui::_colourBackground(const unsigned int r, const unsigned int g,
-	const unsigned int b, const unsigned int a,
-	std::string menu) noexcept {
-	if (menu == "") menu = getGUI();
-	try {
-		_guiBackground.at(menu).set(sf::Color(r, g, b, a));
-	} catch (std::out_of_range&) {
-		_logger.error("Attempted to set colour [{},{},{},{}] to the background of "
-			"menu \"{}\". The menu does not exist!", r, g, b, a, menu);
-	}
+	const unsigned int b, const unsigned int a, const std::string& menu) noexcept {
+	_guiBackground[menu].set(sf::Color(r, g, b, a));
 }
 
 void sfx::gui::_addListbox(const std::string& name, const float x, const float y,
@@ -620,6 +612,7 @@ void sfx::gui::_addListbox(const std::string& name, const float x, const float y
 			}
 		}
 		container->add(widget, name);
+		_connectSignals(widget);
 	}
 }
 
@@ -629,6 +622,12 @@ void sfx::gui::_addListboxItem(const std::string& name, const std::string& item)
 	ListBox::Ptr listbox = _findWidget<ListBox>(name, &fullname);
 	if (listbox) {
 		listbox->addItem(item);
+		std::string widgetFullname = "";
+		for (auto& n : fullname) {
+			widgetFullname += n + ".";
+		}
+		if (widgetFullname.size() > 0) widgetFullname.pop_back();
+		_originalStrings[widgetFullname].push_back(item);
 	} else {
 		_logger.error("Attempted to add a new listbox item \"{}\" to a listbox "
 			"\"{}\" within menu \"{}\". This listbox does not exist.", item,
@@ -646,4 +645,5 @@ std::string sfx::gui::_getListboxSelectedItem(const std::string& name) noexcept 
 			"item, within menu \"{}\". This listbox does not exist.", name,
 			fullname[0]);
 	}
+	return "";
 }
