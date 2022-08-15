@@ -546,6 +546,9 @@ void sfx::gui::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void addListBox(const string& in, const float "
 		"x, const float y, const float w, const float h)",
 		asMETHOD(sfx::gui, _addListbox), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void addListBoxItem(const string& in, const "
+		"string& in)",
+		asMETHOD(sfx::gui, _addListboxItem), asCALL_THISCALL_ASGLOBAL, this);
 }
 
 void sfx::gui::_noBackground(const std::string& menu) noexcept {
@@ -614,5 +617,18 @@ void sfx::gui::_addListbox(const std::string& name, const float x, const float y
 			}
 		}
 		container->add(widget, name);
+	}
+}
+
+void sfx::gui::_addListboxItem(const std::string& name, const std::string& item)
+	noexcept {
+	std::vector<std::string> fullname;
+	ListBox::Ptr listbox = _findWidget<ListBox>(name, &fullname);
+	if (listbox) {
+		listbox->addItem(item);
+	} else {
+		_logger.error("Attempted to add a new listbox item \"{}\" to a listbox "
+			"\"{}\" within menu \"{}\". This listbox does not exist.", item,
+			name, fullname[0]);
 	}
 }

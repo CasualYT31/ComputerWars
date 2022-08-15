@@ -409,6 +409,16 @@ namespace sfx {
 		void _addListbox(const std::string& name, const float x, const float y,
 			const float w, const float h) noexcept;
 
+		/**
+		 * Appends a new item to a listbox.
+		 * This method writes an error to the log file if a listbox with the given
+		 * name could not be found. When an error is logged, no item is added.
+		 * @param name The name of the listbox to amend.
+		 * @param item The text of the new item.
+		 */
+		void _addListboxItem(const std::string& name, const std::string& item)
+			noexcept;
+
 		//////////
 		// DATA //
 		//////////
