@@ -58,7 +58,8 @@ add_library(${PROJECT_NAME} STATIC
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring_utils.cpp
-	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/scriptbuilder.cpp)
+	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/scriptbuilder.cpp
+	${angelscript_SOURCE_DIR}/add_on/scriptfile/scriptfilesystem.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}
 	${SystemProperties_INCLUDE_DIRS}
 	${Boxer_INCLUDE_DIRS}
@@ -68,7 +69,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}
 	${angelscript_SOURCE_DIR}/angelscript/include
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/
-	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/)
+	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/
+	${angelscript_SOURCE_DIR}/add_on/scriptfile/)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_link_libraries(${PROJECT_NAME}
 	SystemProperties
