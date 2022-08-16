@@ -35,3 +35,6 @@ For information on the versions of libraries I have used for this project, pleas
 
 ### Licence
 Despite its incomplete state, you are free to work with some or all of my code for your own projects, so long as you follow the MIT licence attached to this repository.
+
+### Gitmoji
+I like the idea of Gitmoji, but I find that there are a lot of emoji for the same thing, and some that are missing, in my opinion. So I decided to use my own emoji:
