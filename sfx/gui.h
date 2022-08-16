@@ -37,7 +37,10 @@ namespace sfx {
 	 * Represents a collection of GUI menus.
 	 * This class can only display one menu at a time, however it loads all menus
 	 * it is given via \c load() so that they can be switched quickly. Each menu is
-	 * given their own TGUI group to achieve this.
+	 * given their own TGUI group to achieve this.\n
+	 * @b Important! There is always @b one menu defined, called \c MainMenu. This
+	 * will be the menu that is displayed by the @c gui instance once
+	 * <tt>load()</tt>ed.
 	 */
 	class gui : public sfx::animated_drawable, public engine::json_script {
 	public:
@@ -112,8 +115,8 @@ namespace sfx {
 		 * Handles all widget signals by attempting to invoke the necessary script
 		 * function.
 		 * In order to react to widget signals (such as button presses), nothing
-		 * has to be changed within any JSON or TXT script. Instead, within one of
-		 * your \c engine::scripts, the following function should be defined:
+		 * has to be changed within any JSON script. Instead, within one of your
+		 * \c engine::scripts, the following function should be defined:
 		 * \code
 		 * void GUIName_WidgetName_SignalName() {
 		 *     // code
@@ -133,10 +136,9 @@ namespace sfx {
 
 		/**
 		 * Sets the \c language_dictionary object to use with these GUI menus.
-		 * If a language dictionary is given, all GUI captions will be feeded into
-		 * it for translation purposes, during the call to \c animate(). If one is
-		 * not given, which is the default, GUI text will not be translated or
-		 * amended.
+		 * If a language dictionary is given, all GUI captions will be fed into it
+		 * for translation purposes, during the call to \c animate(). If one is not
+		 * given, which is the default, GUI text will not be translated or amended.
 		 * @param lang Pointer to the \c language_dictionary to use. \c nullptr can
 		 *             be given to disable translation.
 		 */
@@ -298,7 +300,13 @@ namespace sfx {
 		/**
 		 * The JSON load method for this class.
 		 * There should be only one key-value pair in this script called "menus".
-		 * The value should be an array of string names, each one naming a menu.
+		 * The value should be an array of string names, each one naming a menu.\n
+		 * For each menu defined, the script function <tt><em>MenuName</em>
+		 * SetUp()</tt> is called, which accepts no parameters and does not return
+		 * any value. This is intended to be used to setup that menu, such as
+		 * adding all of its controls, and setting the background. If an
+		 * <tt>engine::script</tt> object was not given, then this function will
+		 * not be called, and the menu will remain empty.
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return \c TRUE if all existing menus before the call were deleted, \c
