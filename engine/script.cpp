@@ -33,6 +33,9 @@ engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
                 "routine - this is likely a faulty engine build. Code {}.", r);
         }
         RegisterStdString(_engine);
+        RegisterScriptArray(_engine, false);
+        RegisterScriptDateTime(_engine);
+        RegisterScriptFileSystem(_engine);
         _context = _engine->CreateContext();
         if (_context) {
             if ((r = _context->SetExceptionCallback(asMETHOD(engine::scripts,

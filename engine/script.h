@@ -30,6 +30,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "angelscript.h"
 #include "scriptbuilder.h"
 #include "scriptstdstring.h"
+#include "scriptarray.h"
+#include "scriptfilesystem.h"
 #include "logger.h"
 #include <type_traits>
 
