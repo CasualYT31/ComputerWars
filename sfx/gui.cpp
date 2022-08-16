@@ -258,7 +258,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 			}
 		} else if (type == "ListBox") {
 			auto w = _findWidget<ListBox>(widgetName);
-			if (lang && w) {
+			if (lang) {
 				for (std::size_t i = 0; i < w->getItemCount(); i++) {
 					w->changeItemByIndex(i,
 						(*_langdict)(_originalStrings[widgetName][i]));

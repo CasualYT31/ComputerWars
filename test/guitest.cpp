@@ -28,14 +28,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui.h"
 
 /**
- * Registers the interface.
- * @param engine Pointer to the script engine to register the interface with.
- */
-void registerInterfaceGUI(asIScriptEngine* engine) {
-
-}
-
-/**
  * This test fixture is used to initialise a \c gui object for testing.
  */
 class GUITest : public ::testing::Test {
@@ -44,17 +36,21 @@ protected:
 	 * Registers the GUI object.
 	 */
 	void SetUp() override {
-		_scripts->registerInterface(registerInterfaceGUI);
-		EXPECT_TRUE(_scripts->loadScripts(getTestAssetPath("gui/scripts/")));
+		_scripts->registerInterface([&](asIScriptEngine* engine) -> void {
+			engine->RegisterGlobalFunction(
+				"bool TEST_changeLanguage(const string& in)",
+				asMETHOD(engine::language_dictionary, setLanguage),
+				asCALL_THISCALL_ASGLOBAL, lang.get()
+			);
+		});
 		_gui = std::make_shared<sfx::gui>(_scripts);
+		EXPECT_TRUE(_scripts->loadScripts(getTestAssetPath("gui/scripts/")));
 		// setup testing environment script
 		if (isTest({ "Environment" })) {
 			setupRendererJSONScript();
 			setupJSONScript([](nlohmann::json& j) {
-				nlohmann::json test;
-				test["path"] = getTestAssetPath("gui/form.txt");
-				test["background"] = R"([200,200,200,255])"_json;
-				j["test"] = test;
+				std::vector<std::string> menus;
+				j["menus"] = menus;
 			}, "gui/good.json");
 			setupJSONScript([](nlohmann::json& j) {
 				j["lang"] = "eng";
@@ -105,7 +101,6 @@ TEST_F(GUITest, EmptyGUI) {
 TEST_F(GUITest, InvalidJSONScript) {
 	_gui->load(getTestAssetPath("gui/bad.json"));
 	EXPECT_FALSE(_gui->inGoodState());
-	_gui->setGUI("test");
 }
 
 #ifdef COMPUTER_WARS_FULL_GUI_TESTING
@@ -116,11 +111,10 @@ TEST_F(GUITest, InvalidJSONScript) {
  * @todo Add button which toggles language dictionary.
  */
 TEST_F(GUITest, Environment) {
+	window.openWindow();
 	_gui->load(getTestAssetPath("gui/good.json"));
 	_gui->setTarget(window);
 	_gui->setLanguageDictionary(lang);
-	_gui->setGUI("test");
-	window.openWindow();
 	while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
