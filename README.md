@@ -66,8 +66,8 @@ I like the idea of Gitmoji, but I find that there are a lot of emoji for the sam
 | Assets | Emoji | Name | Meaning |
 | --- | ---: | :---: | :--- |
 | | :wrench: | wrench | Add or update development scripts. |
-| | 🖼️ | framed_picture | Add or update art assets. |
-| | 📜 | scroll | Add or update JSON assets. |
+| | :framed_picture: | framed_picture | Add or update art assets. |
+| | :scroll: | scroll | Add or update JSON assets. |
 
 | Dependencies | Emoji | Name | Meaning |
 | --- | ---: | :---: | :--- |
