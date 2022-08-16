@@ -174,3 +174,5 @@ bool engine::language_dictionary::language::_save(nlohmann::ordered_json& j)
 	}
 	return true;
 }
+
+const char engine::language_dictionary::language::TRANSLATION_OVERRIDE = '~';

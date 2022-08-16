@@ -267,6 +267,12 @@ namespace engine {
 		class language : public engine::json_script {
 		public:
 			/**
+			 * The character which tells \c get() not to translate a given string.
+			 * Set to '~'.
+			 */
+			static const char TRANSLATION_OVERRIDE;
+
+			/**
 			 * Initialises the internal logger object.
 			 * @param name The name to give this particular instantiation
 			 *             within the log file. Defaults to "language."
@@ -283,6 +289,10 @@ namespace engine {
 			 * "<error>" can be amended by the
 			 * \c engine::language_dictionary::operator() method if any of
 			 * its characters is set as a var char (see \c engine::expand_string).
+			 * However, if \c nativeString begins with the character stored within
+			 * \c TRANSLATION_OVERRIDE, that first character is removed from
+			 * \c nativeString and then the final \c nativeString is returned. If
+			 * this character is given, no variables will be inserted.
 			 * @tparam Ts           The types of the variables to insert into
 			 *                      the language string, if any are given.
 			 * @param  nativeString The key uniquely identifying the language
@@ -388,9 +398,13 @@ template<typename... Ts>
 std::string engine::language_dictionary::language::get(
 	const std::string& nativeString, Ts... values) noexcept {
 	if (_strings.find(nativeString) == _strings.end()) {
-		_logger.error("Native string \"{}\" does not exist in this string map.",
-			nativeString);
-		return nativeString;
+		if (nativeString.size() > 0 && nativeString[0] == TRANSLATION_OVERRIDE) {
+			return nativeString.substr(1);
+		} else {
+			_logger.error("Native string \"{}\" does not exist in this string map.",
+				nativeString);
+			return "<error>";
+		}
 	} else {
 		return engine::expand_string::insert(_strings.at(nativeString), values...);
 	}
