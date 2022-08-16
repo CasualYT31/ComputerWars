@@ -6,3 +6,4 @@ out/
 *.pdb
 build/
 .vscode/
+*.log
