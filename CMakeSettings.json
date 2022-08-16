@@ -29,6 +29,11 @@
           "name": "CW_FULL_TEXTURE_TESTING",
           "value": "False",
           "type": "BOOL"
+        },
+        {
+          "name": "TGUI_BUILD_GUI_BUILDER",
+          "value": "False",
+          "type": "BOOL"
         }
       ]
     },
