@@ -41,8 +41,6 @@ namespace awe {
 		 * Sets up a game based on what @c map requires.
 		 * Also initialises the internal logger object.
 		 * @param file       Path to the binary file containing the map to play on.
-		 * @param ui         Pointer to the user input class used to provide input
-		 *                   for this game.
 		 * @param countries  Information on the countries to search through when
 		 *                   reading country IDs from the map file.
 		 * @param tiles      Information on the tile types to search through when
@@ -54,7 +52,6 @@ namespace awe {
 		 * @sa @c engine::logger
 		 */
 		game(const std::string& file,
-			 const std::shared_ptr<sfx::user_input>& ui,
 			 const std::shared_ptr<awe::bank<awe::country>>& countries,
 			 const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			 const std::shared_ptr<awe::bank<awe::unit_type>>& units,
@@ -73,6 +70,13 @@ namespace awe {
 		 * @sa @c awe::map::save()
 		 */
 		bool save() noexcept;
+
+		/**
+		 * Handles user input.
+		 * @param ui A user input object to read from. Should already have been
+		 *           <tt>update()</tt>d.
+		 */
+		void handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept;
 
 		/**
 		 * Sets the spritesheet used for drawing tiles.
@@ -141,10 +145,5 @@ namespace awe {
 		 * Stores the filepath of the map file this @c game object is working with.
 		 */
 		std::string _mapFileName;
-
-		/**
-		 * Pointer to the user input object.
-		 */
-		std::shared_ptr<sfx::user_input> _userInput;
 	};
 }

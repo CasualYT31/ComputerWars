@@ -23,7 +23,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 
 awe::game::game(const std::string& file,
-	const std::shared_ptr<sfx::user_input>& ui,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
@@ -42,6 +41,26 @@ bool awe::game::load() noexcept {
 
 bool awe::game::save() noexcept {
 	return _map.save(_mapFileName);
+}
+
+void awe::game::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept {
+	if ((*ui)["left"]) {
+		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x - 1,
+			_map.getSelectedTile().y));
+	} else if ((*ui)["right"]) {
+		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x + 1,
+			_map.getSelectedTile().y));
+	} else if ((*ui)["up"]) {
+		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x,
+			_map.getSelectedTile().y - 1));
+	} else if ((*ui)["down"]) {
+		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x,
+			_map.getSelectedTile().y + 1));
+	} else if ((*ui)["select"]) {
+		_map.load("");
+		_map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0,
+			_map.getMapSize().x, _map.getMapSize().y));
+	}
 }
 
 void awe::game::setTileSpritesheet(
