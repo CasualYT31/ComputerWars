@@ -32,7 +32,8 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setTarget(*_renderer);
 
-	/* awe::map map(file, _countries, _tiles, _units, _commanders);
+	awe::map map(_countries, _tiles, _units, _commanders);
+	map.load(file);
 	map.selectArmy(0);
 	map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, map.getMapSize().x,
 		map.getMapSize().y));
@@ -65,7 +66,9 @@ int awe::game_engine::run(const std::string& file) noexcept {
 				map.setSelectedTile(sf::Vector2u(map.getSelectedTile().x,
 					map.getSelectedTile().y + 1));
 			} else if ((*_userinput)["select"]) {
-				map.save("");
+				map.load("");
+				map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0,
+					map.getMapSize().x, map.getMapSize().y));
 			}
 
 			_renderer->clear();
@@ -75,7 +78,7 @@ int awe::game_engine::run(const std::string& file) noexcept {
 		}
 	} catch (std::exception&) {
 		
-	} */
+	}
 
 	return 0;
 }

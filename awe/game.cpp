@@ -28,8 +28,11 @@ awe::game::game(const std::string& file,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const std::string& name) noexcept :
-	_logger(name), _map(file, countries, tiles, units, commanders),
-	_mapFileName(file) {}
+	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file) {}
+
+bool awe::game::load() noexcept {
+	return _map.load(_mapFileName);
+}
 
 bool awe::game::save() noexcept {
 	return _map.save(_mapFileName);
@@ -37,7 +40,7 @@ bool awe::game::save() noexcept {
 
 bool awe::game::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
-	_map.animate(target, scaling);
+	return _map.animate(target, scaling);
 }
 
 void awe::game::draw(sf::RenderTarget& target, sf::RenderStates states) const {

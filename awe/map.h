@@ -76,47 +76,56 @@ namespace awe {
 			FIRST_FILE_VERSION + LATEST_VERSION;
 
 		/**
-		 * Loads a given binary file containing map data and initialises this map
-		 * based off this data.
+		 * Initialises this object with \c bank pointers.
 		 * Also initialises the internal logger object.\n
-		 * For full documentation on Computer Wars' map file format, please see the
-		 * CWM Format Specification.md file in the root folder of the repository.
-		 * @param file       Path to the binary file to load.
 		 * @param countries  Information on the countries to search through when
-		 *                   reading country IDs.
+		 *                   reading country IDs from map files.
 		 * @param tiles      Information on the tile types to search through when
-		 *                   reading tile type IDs.
+		 *                   reading tile type IDs from map files.
 		 * @param units      Information on the unit types to search through when
-		 *                   reading unit type IDs.
+		 *                   reading unit type IDs from map files.
 		 * @param commanders Information on the commanders to search through when
-		 *                   reading CO IDs.
-		 * @param version    The 0-based number identifying the iteration of the
-		 *                   format to use.
+		 *                   reading CO IDs from map files.
 		 * @param name       The name to give this particular instantiation within
 		 *                   the log file. Defaults to "map."
 		 * @sa    \c engine::logger
 		 */
-		map(const std::string& file,
-			const std::shared_ptr<awe::bank<awe::country>>& countries,
+		map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-			const unsigned char version = LATEST_VERSION,
 			const std::string& name = "map")
+			noexcept;
+
+		/**
+		 * Replaces the state of this object with that given in the binary file.
+		 * For full documentation on Computer Wars' map file format, please see the
+		 * CWM Format Specification.md file in the root folder of the repository.\n
+		 * Note that the original state of the @c map object will be lost,
+		 * regardless of whether or not loading succeeds.
+		 * @param  file    Path to the binary file to load from. If a blank string,
+		 *                 the file given previously, in either a call to \c load()
+		 *                 or a call to \c save(), will be used.
+		 * @param  version The 0-based number identifying the iteration of the
+		 *                 format to use.
+		 * @return \c TRUE if the load was successful, \c FALSE if the file
+		 *         couldn't be loaded (reason will be logged).
+		 */
+		bool load(std::string file, const unsigned char version = LATEST_VERSION)
 			noexcept;
 
 		/**
 		 * Saves this \c map object's state to a given binary file.
 		 * @param  file    Path to the binary file to save to. If a blank string,
-		 *                 the file given previously, in either the constructor or
-		 *                 a call to \c save(), will be used.
+		 *                 the file given previously, in either a call to \c load()
+		 *                 or a call to \c save(), will be used.
 		 * @param  version The 0-based number identifying the iteration of the
 		 *                 format to use.
 		 * @return \c TRUE if the save was successful, \c FALSE if the file
 		 *         couldn't be saved (reason will be logged).
 		 */
-		bool save(std::string file,
-			const unsigned char version = LATEST_VERSION) noexcept;
+		bool save(std::string file, const unsigned char version = LATEST_VERSION)
+			noexcept;
 
 		////////////////////
 		// MAP OPERATIONS //
@@ -617,88 +626,44 @@ namespace awe {
 		/**
 		 * Either reads from or writes to a binary file.
 		 * Also deduces the format which this file is to have or has.
-		 * @param  isSave     \c TRUE if the file is to be written to, \c FALSE if
-		 *                    the file is to be read from.
-		 * @param  countries  Information on the countries to index when reading
-		 *                    country IDs.
-		 * @param  tiles      Information on the tile types to index when reading
-		 *                    tile type IDs.
-		 * @param  units      Information on the unit types to index when reading
-		 *                    unit type IDs.
-		 * @param  commanders Information on the CO types to index when reading CO
-		 *                    type IDs.
-		 * @param  version    If writing, the version should be given here.
+		 * @param  isSave  \c TRUE if the file is to be written to, \c FALSE if the
+		 *                 file is to be read from.
+		 * @param  version If writing, the version should be given here.
 		 * @throws std::exception if the header couldn't be read or written.
 		 */
-		void _CWM_Header(const bool isSave,
-			const std::shared_ptr<awe::bank<awe::country>>& countries,
-			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
-			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-			unsigned char version);
+		void _CWM_Header(const bool isSave, unsigned char version);
 
 		/**
 		 * First version of the CWM format.
-		 * @param  isSave    \c TRUE if the file is to be written to, \c FALSE if
-		 *                   the file is to be read from.
-		 * @param  countries Information on the countries to index when reading
-		 *                   country IDs.
-		 * @param  tiles     Information on the tile types to index when reading
-		 *                   tile type IDs.
-		 * @param  units     Information on the unit types to index when reading
-		 *                   unit type IDs.
+		 * @param  isSave \c TRUE if the file is to be written to, \c FALSE if the
+		 *                file is to be read from.
 		 * @throws std::exception if the file couldn't be read or written.
 		 */
-		void _CWM_0(const bool isSave,
-			const std::shared_ptr<awe::bank<awe::country>>& countries,
-			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-			const std::shared_ptr<awe::bank<awe::unit_type>>& units);
+		void _CWM_0(const bool isSave);
 
 		/**
 		 * Reads or writes information pertaining to a unit in 0CWM format.
-		 * @param  isSave    \c TRUE if the file is to be written to, \c FALSE if
-		 *                   the file is to be read from.
-		 * @param  countries Information on the countries to index when reading
-		 *                   country IDs.
-		 * @param  tiles     Information on the tile types to index when reading
-		 *                   tile type IDs.
-		 * @param  units     Information on the unit types to index when reading
-		 *                   unit type IDs.
-		 * @param  id        The ID of the unit to write info on, if writing.
-		 * @param  curtile   The location of the tile to create the unit on, if
-		 *                   reading.
-		 * @param  loadOnto  The ID of the unit to load the new unit onto. \c 0 if
-		 *                   the unit should not be loaded onto another one.
+		 * @param  isSave   \c TRUE if the file is to be written to, \c FALSE if
+		 *                  the file is to be read from.
+		 * @param  id       The ID of the unit to write info on, if writing.
+		 * @param  curtile  The location of the tile to create the unit on, if
+		 *                  reading.
+		 * @param  loadOnto The ID of the unit to load the new unit onto. \c 0 if
+		 *                  the unit should not be loaded onto another one.
 		 * @throws std::exception if the unit info couldn't be read or written.
 		 * @return When loading, \c TRUE if there was a unit created, \c FALSE if
 		 *         no unit was created. When saving, always \c TRUE.
 		 */
-		bool _CWM_0_Unit(const bool isSave,
-			const std::shared_ptr<awe::bank<awe::country>>& countries,
-			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
-			awe::UnitID id, const sf::Vector2u& curtile,
-			const awe::UnitID loadOnto = 0);
+		bool _CWM_0_Unit(const bool isSave, awe::UnitID id,
+			const sf::Vector2u& curtile, const awe::UnitID loadOnto = 0);
 
 		/**
 		 * Second version of the CWM format.
-		 * @param  isSave     \c TRUE if the file is to be written to, \c FALSE if
-		 *                    the file is to be read from.
-		 * @param  countries  Information on the countries to index when reading
-		 *                    country IDs.
-		 * @param  tiles      Information on the tile types to index when reading
-		 *                    tile type IDs.
-		 * @param  units      Information on the unit types to index when reading
-		 *                    unit type IDs.
-		 * @param  commanders Information on the CO types to index when reading CO
-		 *                    type IDs.
+		 * @param  isSave \c TRUE if the file is to be written to, \c FALSE if the
+		 *                file is to be read from.
 		 * @throws std::exception if the file couldn't be read or written.
 		 */
-		void _CWM_1(const bool isSave,
-			const std::shared_ptr<awe::bank<awe::country>>& countries,
-			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
-			const std::shared_ptr<awe::bank<awe::commander>>& commanders);
+		void _CWM_1(const bool isSave);
 
 		/**
 		 * File name of the binary file previously read from or written to.
@@ -716,7 +681,7 @@ namespace awe {
 		/**
 		 * Stores the map's name.
 		 */
-		std::string _mapName = "";
+		std::string _mapName;
 
 		/**
 		 * The tiles in this map.
@@ -746,7 +711,7 @@ namespace awe {
 		 * The ID of the last unit created.
 		 * Used to generate unit IDs once the initial unit has been created.
 		 */
-		awe::UnitID _lastUnitID = 1;
+		awe::UnitID _lastUnitID;
 
 		/////////////
 		// DRAWING //
@@ -754,20 +719,21 @@ namespace awe {
 		/**
 		 * The currently selected tile.
 		 */
-		sf::Vector2u _sel = sf::Vector2u(0, 0);
+		sf::Vector2u _sel;
 
 		/**
 		 * The army who is having their turn.
+		 * This field is initialised to \c awe::army::NO_ARMY in \c load().
 		 * @warning The initial state of \c awe::army::NO_ARMY cannot be set again
 		 *          by the client. However, the drawing code must still check for
 		 *          it and act accordingly!
 		 */
-		awe::ArmyID _currentArmy = awe::army::NO_ARMY;
+		awe::ArmyID _currentArmy;
 
 		/**
 		 * The visible portion of the map.
 		 */
-		sf::Rect<sf::Uint32> _visiblePortion = sf::Rect<sf::Uint32>(0, 0, 0, 0);
+		sf::Rect<sf::Uint32> _visiblePortion;
 
 		/**
 		 * The animated sprite representing the cursor.
@@ -814,5 +780,28 @@ namespace awe {
 		 * Spritesheet used with all armies.
 		 */
 		std::shared_ptr<sfx::animated_spritesheet> _sheet_co = nullptr;
+
+		///////////
+		// BANKS //
+		///////////
+		/**
+		 * The country data to read from when reading map files.
+		 */
+		std::shared_ptr<awe::bank<awe::country>> _countries = nullptr;
+
+		/**
+		 * The tile type data to read from when reading map files.
+		 */
+		std::shared_ptr<awe::bank<awe::tile_type>> _tileTypes = nullptr;
+
+		/**
+		 * The unit type data to read from when reading map files.
+		 */
+		std::shared_ptr<awe::bank<awe::unit_type>> _unitTypes = nullptr;
+
+		/**
+		 * The CO data to read from when reading map files.
+		 */
+		std::shared_ptr<awe::bank<awe::commander>> _commanders = nullptr;
 	};
 }

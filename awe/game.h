@@ -59,6 +59,12 @@ namespace awe {
 			 noexcept;
 
 		/**
+		 * Reloads the state of the map from the previously given binary file.
+		 * @sa @c awe::map::load()
+		 */
+		bool load() noexcept;
+
+		/**
 		 * Saves the state of the map to the previously given binary file.
 		 * @sa @c awe::map::save()
 		 */
