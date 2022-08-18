@@ -37,6 +37,7 @@ namespace awe {
 	 * Class which represents a map, and the armies and units that play on it.
 	 * Only basic checks are carried out in this class; all game logic is separate.
 	 * If any of these basic checks fail, they will be logged.
+	 * @sa @c awe::game
 	 */
 	class map : sf::NonCopyable, public sfx::animated_drawable {
 	public:
