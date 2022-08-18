@@ -44,6 +44,26 @@ bool awe::game::save() noexcept {
 	return _map.save(_mapFileName);
 }
 
+void awe::game::setTileSpritesheet(
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_map.setTileSpritesheet(sheet);
+}
+
+void awe::game::setUnitSpritesheet(
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_map.setUnitSpritesheet(sheet);
+}
+
+void awe::game::setIconSpritesheet(
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_map.setIconSpritesheet(sheet);
+}
+
+void awe::game::setCOSpritesheet(
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	_map.setCOSpritesheet(sheet);
+}
+
 bool awe::game::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
 	return _map.animate(target, scaling);

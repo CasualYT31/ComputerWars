@@ -75,6 +75,34 @@ namespace awe {
 		bool save() noexcept;
 
 		/**
+		 * Sets the spritesheet used for drawing tiles.
+		 * @param sheet Pointer to the animated spritesheet to use for tiles.
+		 */
+		void setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
+			sheet) noexcept;
+
+		/**
+		 * Sets the spritesheet used for drawing units.
+		 * @param sheet Pointer to the animated spritesheet to use for units.
+		 */
+		void setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
+			sheet) noexcept;
+
+		/**
+		 * Sets the spritesheet used for drawing map icons.
+		 * @param sheet Pointer to the animated spritesheet to use for icons.
+		 */
+		void setIconSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
+			sheet) noexcept;
+
+		/**
+		 * Sets the spritesheet used for drawing COs.
+		 * @param sheet Pointer to the animated spritesheet to use for COs.
+		 */
+		void setCOSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
+			sheet) noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
 		 * @param  target The target to render the map to.
 		 * @return \c FALSE, for now.
