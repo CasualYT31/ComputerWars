@@ -23,12 +23,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 
 awe::game::game(const std::string& file,
+	const std::shared_ptr<sfx::user_input>& ui,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const std::string& name) noexcept :
-	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file) {}
+	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file),
+	_userInput(ui) {
+	_map.selectArmy(0);
+	_map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, _map.getMapSize().x,
+		_map.getMapSize().y));
+}
 
 bool awe::game::load() noexcept {
 	return _map.load(_mapFileName);
