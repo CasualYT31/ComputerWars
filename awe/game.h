@@ -103,6 +103,13 @@ namespace awe {
 			sheet) noexcept;
 
 		/**
+		 * Sets the font used with this map.
+		 * If \c nullptr is given, an error will be logged.
+		 * @param font Pointer to the font to use with this map.
+		 */
+		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
 		 * @param  target The target to render the map to.
 		 * @return \c FALSE, for now.

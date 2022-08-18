@@ -64,6 +64,10 @@ void awe::game::setCOSpritesheet(
 	_map.setCOSpritesheet(sheet);
 }
 
+void awe::game::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
+	_map.setFont(font);
+}
+
 bool awe::game::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
 	return _map.animate(target, scaling);
