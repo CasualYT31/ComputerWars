@@ -611,7 +611,7 @@ void sfx::gui::_addListbox(const std::string& name, const float x, const float y
 				container = container->get<Container>(fullname[i]);
 			}
 		}
-		container->add(widget, name);
+		container->add(widget, fullname.back());
 		_connectSignals(widget);
 	}
 }
