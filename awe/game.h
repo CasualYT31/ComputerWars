@@ -37,9 +37,17 @@ namespace awe {
 	class game : sf::NonCopyable, public sfx::animated_drawable {
 	public:
 		/**
-		 * Sets up a game based on what `map` requires.
+		 * Sets up a game based on what @c map requires.
 		 * Also initialises the internal logger object.
-		 * @sa @c awe::map::map()
+		 * @param file       Path to the binary file containing the map to play on.
+		 * @param countries  Information on the countries to search through when
+		 *                   reading country IDs from the map file.
+		 * @param tiles      Information on the tile types to search through when
+		 *                   reading tile type IDs from the map file.
+		 * @param units      Information on the unit types to search through when
+		 *                   reading unit type IDs from the map file.
+		 * @param commanders Information on the commanders to search through when
+		 *                   reading CO IDs from the map file.
 		 * @sa @c engine::logger
 		 */
 		game(const std::string& file,
@@ -47,16 +55,14 @@ namespace awe {
 			 const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			 const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 			 const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-			 const unsigned char version = awe::map::LATEST_VERSION,
 			 const std::string& name = "map")
 			 noexcept;
 
 		/**
-		 * Saves the state of the map to a given binary file.
+		 * Saves the state of the map to the previously given binary file.
 		 * @sa @c awe::map::save()
 		 */
-		bool save(std::string file,
-			const unsigned char version = awe::map::LATEST_VERSION) noexcept;
+		bool save() noexcept;
 
 		/**
 		 * This drawable's \c animate() method.
@@ -85,5 +91,10 @@ namespace awe {
 		 * Stores the map.
 		 */
 		awe::map _map;
+
+		/**
+		 * Stores the filepath of the map file this @c game object is working with.
+		 */
+		std::string _mapFileName;
 	};
 }

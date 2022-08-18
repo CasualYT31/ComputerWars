@@ -27,13 +27,12 @@ awe::game::game(const std::string& file,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-	const unsigned char version, const std::string& name) noexcept :
-	_logger(name), _map(file, countries, tiles, units, commanders, version, name) {
+	const std::string& name) noexcept :
+	_logger(name), _map(file, countries, tiles, units, commanders),
+	_mapFileName(file) {}
 
-}
-
-bool awe::game::save(std::string file, const unsigned char version) noexcept {
-	return _map.save(file, version);
+bool awe::game::save() noexcept {
+	return _map.save(_mapFileName);
 }
 
 bool awe::game::animate(const sf::RenderTarget& target, const double scaling)
