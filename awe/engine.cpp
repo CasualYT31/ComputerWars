@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "engine.h"
+#include "game.h"
 
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
@@ -32,11 +33,8 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setTarget(*_renderer);
 
-	awe::map map(_countries, _tiles, _units, _commanders);
-	map.load(file);
-	map.selectArmy(0);
-	map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, map.getMapSize().x,
-		map.getMapSize().y));
+	awe::game map(file, _countries, _tiles, _units, _commanders);
+	map.load();
 	map.setTileSpritesheet(_sprites->tile->normal);
 	map.setUnitSpritesheet(_sprites->unit->idle);
 	map.setIconSpritesheet(_sprites->icon);
@@ -53,23 +51,7 @@ int awe::game_engine::run(const std::string& file) noexcept {
 			// test cursor with basic ui
 			_userinput->update();
 
-			if (_userinput->operator[]("left")) {
-				map.setSelectedTile(sf::Vector2u(map.getSelectedTile().x - 1,
-					map.getSelectedTile().y));
-			} else if ((*_userinput)["right"]) {
-				map.setSelectedTile(sf::Vector2u(map.getSelectedTile().x + 1,
-					map.getSelectedTile().y));
-			} else if ((*_userinput)["up"]) {
-				map.setSelectedTile(sf::Vector2u(map.getSelectedTile().x,
-					map.getSelectedTile().y - 1));
-			} else if ((*_userinput)["down"]) {
-				map.setSelectedTile(sf::Vector2u(map.getSelectedTile().x,
-					map.getSelectedTile().y + 1));
-			} else if ((*_userinput)["select"]) {
-				map.load("");
-				map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0,
-					map.getMapSize().x, map.getMapSize().y));
-			}
+			map.handleInput(_userinput);
 
 			_renderer->clear();
 			_renderer->animate(map, 2.0);

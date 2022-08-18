@@ -56,7 +56,7 @@ namespace awe {
 			 const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			 const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 			 const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-			 const std::string& name = "map")
+			 const std::string& name = "game")
 			 noexcept;
 
 		/**

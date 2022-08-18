@@ -28,15 +28,14 @@ awe::game::game(const std::string& file,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const std::string& name) noexcept :
-	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file),
-	_userInput(ui) {
+	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file) {}
+
+bool awe::game::load() noexcept {
+	auto ret = _map.load(_mapFileName);
 	_map.selectArmy(0);
 	_map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, _map.getMapSize().x,
 		_map.getMapSize().y));
-}
-
-bool awe::game::load() noexcept {
-	return _map.load(_mapFileName);
+	return ret;
 }
 
 bool awe::game::save() noexcept {
@@ -57,9 +56,7 @@ void awe::game::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept
 		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x,
 			_map.getSelectedTile().y + 1));
 	} else if ((*ui)["select"]) {
-		_map.load("");
-		_map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0,
-			_map.getMapSize().x, _map.getMapSize().y));
+		load();
 	}
 }
 
