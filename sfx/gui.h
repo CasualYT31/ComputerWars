@@ -402,6 +402,59 @@ namespace sfx {
 			const unsigned int b, const unsigned int a, const std::string& menu)
 			noexcept;
 
+		// BITMAPBUTTON //
+
+		/**
+		 * Creates a bitmap button.
+		 * This method writes an error to the log file if a widget with the given
+		 * name already exists. When an error is logged, no bitmap button is
+		 * created.
+		 * @param name The name of the bitmap button.
+		 * @param x    The X location of the bitmap button.
+		 * @param y    The Y location of the bitmap button.
+		 * @param w    The width of the bitmap button.
+		 * @param h    The height of the bitmap button.
+		 */
+		void _addBitmapButton(const std::string& name, const float x,
+			const float y, const float w, const float h) noexcept;
+
+		/**
+		 * Updates a bitmap button's text.
+		 * This method writes an error to the log file if a bitmap button with the
+		 * given name could not be found. When an error is logged, no text is
+		 * updated.
+		 * @param name The name of the bitmap button to amend.
+		 * @param text The next text of the bitmap button.
+		 */
+		void _setBitmapButtonText(const std::string& name, const std::string& text)
+			noexcept;
+
+		/**
+		 * Updates a bitmap button's sprite.
+		 * This method writes an error to the log file if a bitmap button with the
+		 * given name could not be found. When an error is logged, no sprite is
+		 * set.
+		 * @param name   The name of the bitmap button to amend.
+		 * @param sprite The name of the sprite to set to the bitmap button.
+		 */
+		void _setBitmapButtonSprite(const std::string& name,
+			const std::string& sprite) noexcept;
+
+		// VERTICALLAYOUT //
+
+		/**
+		 * Creates a vertical layout container.
+		 * This method writes an error to the log file if a widget with the given
+		 * name already exists. When an error is logged, no container is created.
+		 * @param name The name of the container.
+		 * @param x    The X location of the container.
+		 * @param y    The Y location of the container.
+		 * @param w    The width of the container.
+		 * @param h    The height of the container.
+		 */
+		void _addVerticalLayout(const std::string& name, const float x,
+			const float y, const float w, const float h) noexcept;
+
 		// LISTBOX //
 
 		/**
@@ -484,7 +537,7 @@ namespace sfx {
 
 		/**
 		 * Stores a list of animated sprites associated with each animated widget.
-		 * Cleared every call to \c setGUI(). Refilled once upon the first call to
+		 * Cleared upon a call to \c setGUI(). Refilled once upon the first call to
 		 * \c animate() since \c setGUI() was last called.
 		 */
 		std::vector<sfx::animated_sprite> _widgetSprites;

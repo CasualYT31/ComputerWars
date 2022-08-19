@@ -288,6 +288,11 @@ namespace awe {
 		 */
 		void _script_saveRendererConfig();
 
+		/**
+		 * Quits the current map and goes back to the previous menu.
+		 */
+		void _script_quitMap();
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================

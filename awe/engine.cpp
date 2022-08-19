@@ -159,6 +159,9 @@ void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void saveUIConfig()",
 		asMETHOD(awe::game_engine, _script_saveUIConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void quitMap()",
+		asMETHOD(awe::game_engine, _script_quitMap),
+		asCALL_THISCALL_ASGLOBAL, this);
 }
 
 void awe::game_engine::_script_setFullscreen(const bool in) {
@@ -210,6 +213,10 @@ void awe::game_engine::_script_loadUIConfig() {
 
 void awe::game_engine::_script_saveUIConfig() {
 	_userinput->save();
+}
+
+void awe::game_engine::_script_quitMap() {
+
 }
 
 // initCheck()

@@ -552,6 +552,20 @@ void sfx::gui::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void setBackground(const uint, const uint, "
 		"const uint, const uint, const string& in)",
 		asMETHOD(sfx::gui, _colourBackground), asCALL_THISCALL_ASGLOBAL, this);
+	// register bitmap button global functions
+	engine->RegisterGlobalFunction("void addBitmapButton(const string& in, "
+		"const float x, const float y, const float w, const float h)",
+		asMETHOD(sfx::gui, _addBitmapButton), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBitmapButtonText(const string& in, "
+		"const string& in)",
+		asMETHOD(sfx::gui, _setBitmapButtonText), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBitmapButtonSprite(const string& in, "
+		"const string& in)", asMETHOD(sfx::gui, _setBitmapButtonSprite),
+		asCALL_THISCALL_ASGLOBAL, this);
+	// register vertical layout container global functions
+	engine->RegisterGlobalFunction("void addVerticalLayout(const string& in, "
+		"const float x, const float y, const float w, const float h)",
+		asMETHOD(sfx::gui, _addVerticalLayout), asCALL_THISCALL_ASGLOBAL, this);
 	// register listbox global functions
 	engine->RegisterGlobalFunction("void addListBox(const string& in, const float "
 		"x, const float y, const float w, const float h)",
@@ -582,6 +596,111 @@ void sfx::gui::_spriteBackground(const std::string& sheet,
 void sfx::gui::_colourBackground(const unsigned int r, const unsigned int g,
 	const unsigned int b, const unsigned int a, const std::string& menu) noexcept {
 	_guiBackground[menu].set(sf::Color(r, g, b, a));
+}
+
+void sfx::gui::_addBitmapButton(const std::string& name, const float x,
+	const float y, const float w, const float h) noexcept {
+	std::vector<std::string> fullname;
+	if (_findWidget<Widget>(name, &fullname)) {
+		_logger.error("Attempted to create a new bitmap button with name \"{}\": "
+			"a widget with that name already exists!", name);
+	} else {
+		auto widget = tgui::BitmapButton::create();
+		widget->setPosition(tgui::Vector2f(x, y));
+		widget->setSize(tgui::Vector2f(w, h));
+		auto container = _gui.get<Container>(fullname[0]);
+		if (!container) {
+			_logger.error("Attempted to add a bitmap button \"{}\" to the menu "
+				"\"{}\". This menu does not exist.", name, fullname[0]);
+			return;
+		}
+		if (fullname.size() > 2) {
+			for (std::size_t i = 1; i < fullname.size() - 1; i++) {
+				if (!container) {
+					_logger.error("Attempted to add a bitmap button \"{}\" to the "
+						"container \"{}\" within menu \"{}\". This container does "
+						"not exist.", name, fullname[i - 1], fullname[0]);
+					return;
+				}
+				container = container->get<Container>(fullname[i]);
+			}
+		}
+		container->add(widget, fullname.back());
+		_connectSignals(widget);
+	}
+}
+
+void sfx::gui::_setBitmapButtonText(const std::string& name,
+	const std::string& text) noexcept {
+	std::vector<std::string> fullname;
+	BitmapButton::Ptr button = _findWidget<BitmapButton>(name, &fullname);
+	if (button) {
+		button->setText(text);
+		std::string widgetFullname = "";
+		for (auto& n : fullname) {
+			widgetFullname += n + ".";
+		}
+		if (widgetFullname.size() > 0) widgetFullname.pop_back();
+		if (_originalStrings[widgetFullname].size() == 0) {
+			_originalStrings[widgetFullname].push_back(text);
+		} else {
+			_originalStrings[widgetFullname][0] = text;
+		}
+	} else {
+		_logger.error("Attempted to set the text \"{}\" to a bitmap button "
+			"\"{}\" within menu \"{}\". This bitmap button does not exist.", text,
+			name, fullname[0]);
+	}
+}
+
+void sfx::gui::_setBitmapButtonSprite(const std::string& name,
+	const std::string& sprite) noexcept {
+	std::vector<std::string> fullname;
+	if (_findWidget<BitmapButton>(name, &fullname)) {
+		std::string widgetFullname = "";
+		for (auto& n : fullname) {
+			widgetFullname += n + ".";
+		}
+		if (widgetFullname.size() > 0) widgetFullname.pop_back();
+		_guiSpriteKeys[widgetFullname] = std::make_pair("icon", sprite);
+	} else {
+		_logger.error("Attempted to set the sprite \"{}\" to a bitmap button "
+			"\"{}\" within menu \"{}\". This bitmap button does not exist.",
+			sprite, name, fullname[0]);
+	}
+}
+
+void sfx::gui::_addVerticalLayout(const std::string& name, const float x,
+	const float y, const float w, const float h) noexcept {
+	std::vector<std::string> fullname;
+	if (_findWidget<Widget>(name, &fullname)) {
+		_logger.error("Attempted to create a new vertical layout container with "
+			"name \"{}\": a widget with that name already exists!", name);
+	} else {
+		auto widget = tgui::VerticalLayout::create();
+		widget->setPosition(tgui::Vector2f(x, y));
+		widget->setSize(tgui::Vector2f(w, h));
+		auto container = _gui.get<Container>(fullname[0]);
+		if (!container) {
+			_logger.error("Attempted to add a vertical layout container \"{}\" to "
+				"the menu \"{}\". This menu does not exist.", name, fullname[0]);
+			return;
+		}
+		if (fullname.size() > 2) {
+			for (std::size_t i = 1; i < fullname.size() - 1; i++) {
+				if (!container) {
+					_logger.error("Attempted to add a vertical layout container "
+						"\"{}\" to the container \"{}\" within menu \"{}\". This "
+						"container does not exist.", name, fullname[i - 1],
+						fullname[0]);
+					return;
+				}
+				container = container->get<Container>(fullname[i]);
+			}
+		}
+		container->add(widget, fullname.back());
+		_connectSignals(widget);
+	}
 }
 
 void sfx::gui::_addListbox(const std::string& name, const float x, const float y,

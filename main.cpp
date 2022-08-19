@@ -133,6 +133,7 @@ int game(const std::string& file) {
     // this is because we can't call the SetUp() functions for menus before
     // game_engine has initialised the script interface and loaded the script files
     std::shared_ptr<sfx::gui> gui = std::make_shared<sfx::gui>(scripts);
+    gui->addSpritesheet("icon", spritesheets->icon);
 
     // initialise the countries
     std::shared_ptr<awe::bank<awe::country>> countries =
