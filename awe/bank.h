@@ -134,22 +134,31 @@ namespace awe {
 		 * @return The 0-based ID.
 		 */
 		awe::BankID getID() const noexcept;
+
+		/**
+		 * Retrieves the script name of this bank entry as defined by the JSON
+		 * script it is loaded with.
+		 * @return The string identifier used in @c engine::script scripts.
+		 */
+		std::string getScriptName() const noexcept;
 	protected:
 		/**
 		 * Constructor which assigns the ID to the bank entry.
 		 * For classes that inherit from this one, this protected constructor is to
 		 * be called, either in the subclass' constructor definition's initialiser
 		 * list, or in the code block of the subclass constructor.
-		 * @param id The ID of this bank entry.
+		 * @param id         The ID of this bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
 		 */
-		bank_id(const awe::BankID id) noexcept;
+		bank_id(const awe::BankID id, const std::string& scriptName) noexcept;
 
 		/**
 		 * Used by subclasses to return an empty string when attempting to retrieve
 		 * a string property that doesn't exist.
 		 * Should be initialised to an empty string. Note that this is not
 		 * thread-safe (https://stackoverflow.com/questions/30239268/how-can-i-return-a-const-reference-to-an-empty-string-without-a-compiler-warning),
-		 * but honestly none of my code is up to this point so I don't care.
+		 * but honestly none of my code has been up to this point so I don't care.
 		 */
 		static const std::string emptyString;
 	private:
@@ -157,6 +166,11 @@ namespace awe {
 		 * The ID of this bank entry.
 		 */
 		awe::BankID _id = 0;
+
+		/**
+		 * The script name/identifier of this bank entry.
+		 */
+		std::string _scriptName = "";
 	};
 
 	/**
@@ -214,12 +228,16 @@ namespace awe {
 		 *     <li>\c "icon" = \c _iconKey</li>
 		 *     <li>\c "description" = \c _description</li>
 		 * </ul>
-		 * @param id The ID of this bank entry.
-		 * @param j  The object value containing the name, icon, and description
-		 *           properties, as well as any other properties subclasses need to
-		 *           store (which this class ignores).
+		 * @param id         The ID of this bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the name, icon, and
+		 *                   description properties, as well as any other
+		 *                   properties subclasses need to store (which this class
+		 *                   ignores).
 		 */
-		common_properties(const awe::BankID id, engine::json& j) noexcept;
+		common_properties(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
 	private:
 		/**
 		 * The long name property.
@@ -257,10 +275,13 @@ namespace awe {
 		 * are required:
 		 * <ul><li>\c "colour" = \c _colour, in the format <tt>[r,g,b,a]</tt>
 		 *     </li></ul>
-		 * @param id The ID of the bank entry.
-		 * @param j  The object value containing the country's properties.
+		 * @param id         The ID of the bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the country's properties.
 		 */
-		country(const awe::BankID id, engine::json& j) noexcept;
+		country(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
 
 		/**
 		 * Retrieves the colour property.
@@ -300,10 +321,13 @@ namespace awe {
 		 * Constructor which passes on the JSON object to the \c common_properties
 		 * constructor.
 		 * No additional keys are required.
-		 * @param id The ID of the bank entry.
-		 * @param j  The object value containing the weather's properties.
+		 * @param id         The ID of the bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the weather's properties.
 		 */
-		weather(const awe::BankID id, engine::json& j) noexcept;
+		weather(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
 
 		/**
 		 * Comparison operator.
@@ -334,10 +358,14 @@ namespace awe {
 		 * Constructor which passes on the JSON object to the \c common_properties
 		 * constructor.
 		 * No additional keys are required.
-		 * @param id The ID of the bank entry.
-		 * @param j  The object value containing the environment's properties.
+		 * @param id         The ID of the bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the environment's
+		 *                   properties.
 		 */
-		environment(const awe::BankID id, engine::json& j) noexcept;
+		environment(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
 
 		/**
 		 * Comparison operator.
@@ -366,10 +394,14 @@ namespace awe {
 		 * Constructor which passes on the JSON object to the \c common_properties
 		 * constructor.
 		 * No additional keys are required.
-		 * @param id The ID of the bank entry.
-		 * @param j  The object value containing the movement type's properties.
+		 * @param id         The ID of the bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the movement type's
+		 *                   properties.
 		 */
-		movement_type(const awe::BankID id, engine::json& j) noexcept;
+		movement_type(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
 
 		/**
 		 * Comparison operator.
@@ -419,10 +451,14 @@ namespace awe {
 		 * the sprite shown when the first country owns it (in the default
 		 * implementation, Neutral). Not all countries have to be accounted for if
 		 * the tile cannot be "owned," i.e. captured.
-		 * @param id The ID of the bank entry.
-		 * @param j  The object value containing the terrain type's properties.
+		 * @param id         The ID of the bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the terrain type's
+		 *                   properties.
 		 */
-		terrain(const awe::BankID id, engine::json& j) noexcept;
+		terrain(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
 
 		/**
 		 * Retrieves the maximum health property.
@@ -540,10 +576,14 @@ namespace awe {
 		 * vector does not have to be accounted for if the tile cannot be
 		 * owned/captured. In which case, an empty vector should be given in the
 		 * script.
-		 * @param id The ID of the bank entry.
-		 * @param j  The object value containing the tile type's properties.
+		 * @param id         The ID of the bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the tile type's
+		 *                   properties.
 		 */
-		tile_type(const awe::BankID id, engine::json& j) noexcept;
+		tile_type(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
 
 		/**
 		 * Retrieves the ID of the type of terrain this tile represents (i.e.
@@ -684,12 +724,16 @@ namespace awe {
 		 * 
 		 * Sprites is an array of sprite names corresponding to each country's map
 		 * representation of the type of unit.
-		 * @param id The ID of the bank entry.
-		 * @param j  The object value containing the terrain type's properties.
+		 * @param id         The ID of the bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the unit type's
+		 *                   properties.
 		 * @sa    isInfiniteFuel()
 		 * @sa    isInfiniteAmmo()
 		 */
-		unit_type(const awe::BankID id, engine::json& j) noexcept;
+		unit_type(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
 
 		/**
 		 * Retrieves the movement type of this unit.
@@ -972,10 +1016,14 @@ namespace awe {
 		 * constructor. In addition to the keys defined in the superclass, the
 		 * following keys are required:
 		 * <ul><li>\c "portrait" = \c _portrait, <tt>(string)</tt></li></ul>
-		 * @param id The ID of the bank entry.
-		 * @param j  The object value containing the commander's properties.
+		 * @param id         The ID of the bank entry.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the commander's
+		 *                   properties.
 		 */
-		commander(const awe::BankID id, engine::json& j) noexcept;
+		commander(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
 
 		/**
 		 * Retrieves the animated sprite name of this commander's portrait.
@@ -1045,7 +1093,7 @@ bool awe::bank<T>::_load(engine::json& j) noexcept {
 		// loop through each object, allowing the template type T to construct its
 		// values based on each object
 		engine::json input(i.value());
-		_bank.push_back(std::make_shared<const T>(id++, input));
+		_bank.push_back(std::make_shared<const T>(id++, i.key(), input));
 	}
 	return true;
 }

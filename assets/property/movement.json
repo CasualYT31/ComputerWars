@@ -1,45 +1,45 @@
 {
-	"001": {"longname": "Infantry",
+	"INFANTRY": {"longname": "Infantry",
 		"shortname": "Inftry",
 		"icon": "",
 		"description": "Infantry movement type."
 	},
-	"002": {"longname": "Mech",
+	"MECH": {"longname": "Mech",
 		"shortname": "Mech",
 		"icon": "",
 		"description": "Mech movement type."
 	},
-	"003": {"longname": "Tires",
+	"TIRES": {"longname": "Tires",
 		"shortname": "Tires",
 		"icon": "",
 		"description": "This unit uses tires to move."
 	},
-	"004": {"longname": "Tread",
+	"TREAD": {"longname": "Tread",
 		"shortname": "Tread",
 		"icon": "",
 		"description": "This unit uses treads to move."
 	},
-	"005": {"longname": "Air",
+	"AIR": {"longname": "Air",
 		"shortname": "Air",
 		"icon": "",
 		"description": "This unit flies through the air."
 	},
-	"006": {"longname": "Pipeline",
+	"PIPELINE": {"longname": "Pipeline",
 		"shortname": "Pipe",
 		"icon": "",
 		"description": "This unit moves along pipes."
 	},
-	"007": {"longname": "Ships",
+	"SHIPS": {"longname": "Ships",
 		"shortname": "Ships",
 		"icon": "",
 		"description": "This unit sails through sea."
 	},
-	"008": {"longname": "Transport",
+	"TRANSPORT": {"longname": "Transport",
 		"shortname": "Trans",
 		"icon": "",
 		"description": "This unit can stop at shoals."
 	},
-	"009": {"longname": "Slime",
+	"SLIME": {"longname": "Slime",
 		"shortname": "Slime",
 		"icon": "",
 		"description": "This unit is made out of slime."

@@ -1,5 +1,5 @@
 ﻿{
-	"000": {"longname": "Infantry",
+	"INFANTRY": {"longname": "Infantry",
 		"shortname": "Inft",
 		"icon": "",
 		"sprites": ["infos","infbm","infge","infyc","infbh","infrf","infgs","infbd","infab","infjs","infci","infpc","inftg","infpl","infar","infwn"],
@@ -18,7 +18,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"001": {"longname": "Mech",
+	"MECH": {"longname": "Mech",
 		"shortname": "Mech",
 		"icon": "",
 		"sprites": ["mechos","mechbm","mechge","mechyc","mechbh","mechrf","mechgs","mechbd","mechab","mechjs","mechci","mechpc","mechtg","mechpl","mechar","mechwn"],
@@ -37,7 +37,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"002": {"longname": "Recon",
+	"RECON": {"longname": "Recon",
 		"shortname": "Recn",
 		"icon": "",
 		"sprites": ["reconos","reconbm","reconge","reconyc","reconbh","reconrf","recongs","reconbd","reconab","reconjs","reconci","reconpc","recontg","reconpl","reconar","reconwn"],
@@ -56,7 +56,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"003": {"longname": "Tank",
+	"TANK": {"longname": "Tank",
 		"shortname": "Tank",
 		"icon": "",
 		"sprites": ["tankos","tankbm","tankge","tankyc","tankbh","tankrf","tankgs","tankbd","tankab","tankjs","tankci","tankpc","tanktg","tankpl","tankar","tankwn"],
@@ -75,7 +75,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"004": {"longname": "MD Tank",
+	"MDTANK": {"longname": "MD Tank",
 		"shortname": "MTnk",
 		"icon": "",
 		"sprites": ["mdos","mdbm","mdge","mdyc","mdbh","mdrf","mdgs","mdbd","mdab","mdjs","mdci","mdpc","mdtg","mdpl","mdar","mdwn"],
@@ -94,7 +94,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"005": {"longname": "Neo Tank",
+	"NEOTANK": {"longname": "Neo Tank",
 		"shortname": "Neo",
 		"icon": "",
 		"sprites": ["neoos","neobm","neoge","neoyc","neobh","neorf","neogs","neobd","neoab","neojs","neoci","neopc","neotg","neopl","neoar","neown"],
@@ -113,7 +113,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"006": {"longname": "Megatank",
+	"MEGATANK": {"longname": "Megatank",
 		"shortname": "Mega",
 		"icon": "",
 		"sprites": ["megaos","megabm","megage","megayc","megabh","megarf","megags","megabd","megaab","megajs","megaci","megapc","megatg","megapl","megaar","megawn"],
@@ -132,7 +132,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"007": {"longname": "APC",
+	"APC": {"longname": "APC",
 		"shortname": "APC",
 		"icon": "",
 		"sprites": ["apcos","apcbm","apcge","apcyc","apcbh","apcrf","apcgs","apcbd","apcab","apcjs","apcci","apcpc","apctg","apcpl","apcar","apcwn"],
@@ -151,7 +151,7 @@
 		"loadlimit": 1,
 		"fuelperturn": 0
 	},
-	"008": {"longname": "Anti-Air",
+	"ANTIAIR": {"longname": "Anti-Air",
 		"shortname": "AAir",
 		"icon": "",
 		"sprites": ["antios","antibm","antige","antiyc","antibh","antirf","antigs","antibd","antiab","antijs","antici","antipc","antitg","antipl","antiar","antiwn"],
@@ -170,7 +170,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"009": {"longname": "Artillery",
+	"ARTILLERY": {"longname": "Artillery",
 		"shortname": "Artl",
 		"icon": "",
 		"sprites": ["artos","artbm","artge","artyc","artbh","artrf","artgs","artbd","artab","artjs","artci","artpc","arttg","artpl","artar","artwn"],
@@ -189,7 +189,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"00A": {"longname": "Rockets",
+	"ROCKETS": {"longname": "Rockets",
 		"shortname": "Rokt",
 		"icon": "",
 		"sprites": ["rocketos","rocketbm","rocketge","rocketyc","rocketbh","rocketrf","rocketgs","rocketbd","rocketab","rocketjs","rocketci","rocketpc","rockettg","rocketpl","rocketar","rocketwn"],
@@ -208,7 +208,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"00B": {"longname": "Missiles",
+	"MISSILES": {"longname": "Missiles",
 		"shortname": "Misi",
 		"icon": "",
 		"sprites": ["missos","missbm","missge","missyc","missbh","missrf","missgs","missbd","missab","missjs","missci","misspc","misstg","misspl","missar","misswn"],
@@ -227,7 +227,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"00C": {"longname": "Piperunner",
+	"PIPERUNNER": {"longname": "Piperunner",
 		"shortname": "Pipe",
 		"icon": "",
 		"sprites": ["pipeos","pipebm","pipege","pipeyc","pipebh","piperf","pipegs","pipebd","pipeab","pipejs","pipeci","pipepc","pipetg","pipepl","pipear","pipewn"],
@@ -246,7 +246,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"00D": {"longname": "T Copter",
+	"TCOPTER": {"longname": "T Copter",
 		"shortname": "TCop",
 		"icon": "",
 		"sprites": ["tos","tbm","tge","tyc","tbh","trf","tgs","tbd","tab","tjs","tci","tpc","ttg","tpl","tar","twn"],
@@ -265,7 +265,7 @@
 		"loadlimit": 1,
 		"fuelperturn": 2
 	},
-	"00E": {"longname": "B Copter",
+	"BCOPTER": {"longname": "B Copter",
 		"shortname": "BCop",
 		"icon": "",
 		"sprites": ["bos","bbm","bge","byc","bbh","brf","bgs","bbd","bab","bjs","bci","bpc","btg","bpl","bar","bwn"],
@@ -284,7 +284,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 2
 	},
-	"00F": {"longname": "Fighter",
+	"FIGHTER": {"longname": "Fighter",
 		"shortname": "Fitr",
 		"icon": "",
 		"sprites": ["fighteros","fighterbm","fighterge","fighteryc","fighterbh","fighterrf","fightergs","fighterbd","fighterab","fighterjs","fighterci","fighterpc","fightertg","fighterpl","fighterar","fighterwn"],
@@ -303,7 +303,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 5
 	},
-	"010": {"longname": "Bomber",
+	"BOMBER": {"longname": "Bomber",
 		"shortname": "Bomb",
 		"icon": "",
 		"sprites": ["bomberos","bomberbm","bomberge","bomberyc","bomberbh","bomberrf","bombergs","bomberbd","bomberab","bomberjs","bomberci","bomberpc","bombertg","bomberpl","bomberar","bomberwn"],
@@ -322,7 +322,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 5
 	},
-	"011": {"longname": "Stealth",
+	"STEALTH": {"longname": "Stealth",
 		"shortname": "Stea",
 		"icon": "",
 		"sprites": ["stealthos","stealthbm","stealthge","stealthyc","stealthbh","stealthrf","stealthgs","stealthbd","stealthab","stealthjs","stealthci","stealthpc","stealthtg","stealthpl","stealthar","stealthwn"],
@@ -341,7 +341,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 5
 	},
-	"012": {"longname": "Black Bomb",
+	"BLACKBOMB": {"longname": "Black Bomb",
 		"shortname": "BBom",
 		"icon": "",
 		"sprites": ["bbombos","bbombbm","bbombge","bbombyc","bbombbh","bbombrf","bbombgs","bbombbd","bbombab","bbombjs","bbombci","bbombpc","bbombtg","bbombpl","bbombar","bbombwn"],
@@ -360,7 +360,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 5
 	},
-	"013": {"longname": "Black Boat",
+	"BLACKBOAT": {"longname": "Black Boat",
 		"shortname": "Boat",
 		"icon": "",
 		"sprites": ["bboatos","bboatbm","bboatge","bboatyc","bboatbh","bboatrf","bboatgs","bboatbd","bboatab","bboatjs","bboatci","bboatpc","bboattg","bboatpl","bboatar","bboatwn"],
@@ -379,7 +379,7 @@
 		"loadlimit": 2,
 		"fuelperturn": 1
 	},
-	"014": {"longname": "Lander",
+	"LANDER": {"longname": "Lander",
 		"shortname": "Land",
 		"icon": "",
 		"sprites": ["landeros","landerbm","landerge","landeryc","landerbh","landerrf","landergs","landerbd","landerab","landerjs","landerci","landerpc","landertg","landerpl","landerar","landerwn"],
@@ -398,7 +398,7 @@
 		"loadlimit": 2,
 		"fuelperturn": 1
 	},
-	"015": {"longname": "Cruiser",
+	"CRUISER": {"longname": "Cruiser",
 		"shortname": "Crus",
 		"icon": "",
 		"sprites": ["cruiseros","cruiserbm","cruiserge","cruiseryc","cruiserbh","cruiserrf","cruisergs","cruiserbd","cruiserab","cruiserjs","cruiserci","cruiserpc","cruisertg","cruiserpl","cruiserar","cruiserwn"],
@@ -417,7 +417,7 @@
 		"loadlimit": 2,
 		"fuelperturn": 1
 	},
-	"016": {"longname": "Sub",
+	"SUB": {"longname": "Sub",
 		"shortname": "Sub",
 		"icon": "",
 		"sprites": ["subos","subbm","subge","subyc","subbh","subrf","subgs","subbd","subab","subjs","subci","subpc","subtg","subpl","subar","subwn"],
@@ -436,7 +436,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 1
 	},
-	"017": {"longname": "Battleship",
+	"BATTLESHIP": {"longname": "Battleship",
 		"shortname": "Bshp",
 		"icon": "",
 		"sprites": ["battleos","battlebm","battlege","battleyc","battlebh","battlerf","battlegs","battlebd","battleab","battlejs","battleci","battlepc","battletg","battlepl","battlear","battlewn"],
@@ -455,7 +455,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 1
 	},
-	"018": {"longname": "Carrier",
+	"CARRIER": {"longname": "Carrier",
 		"shortname": "Cari",
 		"icon": "",
 		"sprites": ["carrieros","carrierbm","carrierge","carrieryc","carrierbh","carrierrf","carriergs","carrierbd","carrierab","carrierjs","carrierci","carrierpc","carriertg","carrierpl","carrierar","carrierwn"],
@@ -474,7 +474,7 @@
 		"loadlimit": 2,
 		"fuelperturn": 1
 	},
-	"019": {"longname": "Pipe Seam",
+	"PIPESEAM": {"longname": "Pipe Seam",
 		"shortname": "Seam",
 		"icon": "",
 		"sprites": [""],
@@ -493,7 +493,7 @@
 		"loadlimit": 0,
 		"fuelperturn": 0
 	},
-	"01A": {"longname": "Oozium 238",
+	"OOZIUM": {"longname": "Oozium 238",
 		"shortname": "Ozzi",
 		"icon": "",
 		"sprites": ["ooziumos","ooziumbm","ooziumge","ooziumyc","ooziumbh","ooziumrf","ooziumgs","ooziumbd","ooziumab","ooziumjs","ooziumci","ooziumpc","ooziumtg","ooziumpl","ooziumar","ooziumwn"],
