@@ -66,6 +66,18 @@ namespace sfx {
 			const std::string& name = "gui") noexcept;
 
 		/**
+		 * Callback given to \c engine::scripts::registerInterface() to register
+		 * GUI functions with a \c scripts object.
+		 * @warning Do not allow scripts to destroy widgets! At least not widgets
+		 *          from the current GUI. This is because my animated sprite code
+		 *          for BitmapButtons and Pictures relies on the order of widget
+		 *          retrieval to remain the same.
+		 * @param   engine Pointer to the engine to register the interface with.
+		 * @sa      \c engine::scripts::registerInterface()
+		 */
+		void registerInterface(asIScriptEngine* engine) noexcept;
+
+		/**
 		 * Sets the GUI menu to display.
 		 * No widgets are actually destroyed: they are only made visible/invisible.
 		 * @param newPanel The name of the menu to display. If a menu with the
@@ -362,17 +374,6 @@ namespace sfx {
 		//////////////////////
 		// SCRIPT INTERFACE //
 		//////////////////////
-
-		/**
-		 * Callback given to \c engine::scripts::registerInterface().
-		 * @warning Do not allow scripts to destroy widgets! At least not widgets
-		 *          from the current GUI. This is because my animated sprite code
-		 *          for BitmapButtons and Pictures relies on the order of widget
-		 *          retrieval to remain the same.
-		 * @param   engine Pointer to the engine to register the interface with.
-		 * @sa      \c engine::scripts::registerInterface()
-		 */
-		void _registerInterface(asIScriptEngine* engine) noexcept;
 
 		// BACKGROUND //
 

@@ -27,10 +27,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "renderer.h"
 #include "map.h"
 #include "userinput.h"
+#include "gui.h"
 
 #pragma once
 
 namespace awe {
+	class game_engine;
+
 	/**
 	 * Class which represents a map with game logic and user input.
 	 * @sa @c awe::map
@@ -51,7 +54,7 @@ namespace awe {
 		 *                   reading CO IDs from the map file.
 		 * @sa @c engine::logger
 		 */
-		game(const std::string& file,
+		game(const std::string& file, sfx::gui* gui, awe::game_engine* engine,
 			 const std::shared_ptr<awe::bank<awe::country>>& countries,
 			 const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			 const std::shared_ptr<awe::bank<awe::unit_type>>& units,
@@ -132,6 +135,13 @@ namespace awe {
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
+		 * Initialise the script interface for maps.
+		 * @param engine Pointer to the engine to register the interface with.
+		 * @sa    \c engine::scripts::registerInterface()
+		 */
+		void _registerInterface(asIScriptEngine* engine) noexcept;
+
+		/**
 		 * Internal logger object.
 		 */
 		mutable engine::logger _logger;
@@ -145,5 +155,10 @@ namespace awe {
 		 * Stores the filepath of the map file this @c game object is working with.
 		 */
 		std::string _mapFileName;
+
+		/**
+		 * Stores all the scripts needed to run a game.
+		 */
+		engine::scripts _scripts;
 	};
 }

@@ -32,34 +32,44 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	// assign the language dictionary and target to the GUI object
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setTarget(*_renderer);
+	_gui->setGUI("Map");
 
-	awe::game map(file, _countries, _tiles, _units, _commanders);
-	map.load();
-	map.setTileSpritesheet(_sprites->tile->normal);
-	map.setUnitSpritesheet(_sprites->unit->idle);
-	map.setIconSpritesheet(_sprites->icon);
-	map.setCOSpritesheet(_sprites->CO);
-	map.setFont((*_fonts)["dialogue"]);
+	// setup the game object straight away for development purposes
+	_currentGame = std::make_unique<awe::game>(file, _gui.get(), this, _countries,
+		_tiles, _units, _commanders);
+	_currentGame->load();
+	_currentGame->setTileSpritesheet(_sprites->tile->normal);
+	_currentGame->setUnitSpritesheet(_sprites->unit->idle);
+	_currentGame->setIconSpritesheet(_sprites->icon);
+	_currentGame->setCOSpritesheet(_sprites->CO);
+	_currentGame->setFont((*_fonts)["dialogue"]);
 
 	try {
 		while (_renderer->isOpen()) {
 			sf::Event event;
 			while (_renderer->pollEvent(event)) {
 				if (event.type == sf::Event::Closed) _renderer->close();
+				_gui->handleEvent(event);
 			}
-
-			// test cursor with basic ui
 			_userinput->update();
 
-			map.handleInput(_userinput);
+			if (_currentGame) {
+				_currentGame->handleInput(_userinput);
+			}
 
 			_renderer->clear();
-			_renderer->animate(map, 2.0);
-			_renderer->draw(map, sf::RenderStates().transform.scale(2.0f, 2.0f));
+			_renderer->animate(*_gui, 2.0);
+			if (_currentGame) {
+				_renderer->animate(*_currentGame, 2.0);
+				_renderer->draw(*_currentGame,
+					sf::RenderStates().transform.scale(2.0f, 2.0f));
+			}
+			_renderer->draw(*_gui,
+				sf::RenderStates().transform.scale(2.0f, 2.0f));
 			_renderer->display();
 		}
-	} catch (std::exception&) {
-		
+	} catch (std::exception& e) {
+		_logger.error("Exception: {}", e.what());
 	}
 
 	return 0;
@@ -70,7 +80,7 @@ int awe::game_engine::run(const std::string& file) noexcept {
 void awe::game_engine::initialiseScripts(const std::string& folder) noexcept {
 	if (_scripts) {
 		_scripts->registerInterface(
-			std::bind(&awe::game_engine::_registerInterface, this,
+			std::bind(&awe::game_engine::registerInterface, this,
 				std::placeholders::_1));
 		_scripts->loadScripts(folder);
 	} else {
@@ -79,7 +89,7 @@ void awe::game_engine::initialiseScripts(const std::string& folder) noexcept {
 	}
 }
 
-void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
+void awe::game_engine::registerInterface(asIScriptEngine* engine) noexcept {
 	// register the object types
 	engine->RegisterObjectType("joystick_axis", sizeof(sfx::joystick),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sfx::joystick>() |
@@ -159,6 +169,9 @@ void awe::game_engine::_registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void saveUIConfig()",
 		asMETHOD(awe::game_engine, _script_saveUIConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void saveMap()",
+		asMETHOD(awe::game_engine, _script_saveMap),
+		asCALL_THISCALL_ASGLOBAL, this);
 	engine->RegisterGlobalFunction("void quitMap()",
 		asMETHOD(awe::game_engine, _script_quitMap),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -215,8 +228,21 @@ void awe::game_engine::_script_saveUIConfig() {
 	_userinput->save();
 }
 
-void awe::game_engine::_script_quitMap() {
+void awe::game_engine::_script_saveMap() {
+	if (_currentGame) {
+		if (!_currentGame->save()) {
+			_logger.error("Call to \"saveMap()\" couldn't save the current map.");
+		}
+	} else {
+		_logger.warning("Called \"saveMap()\" without there being a map loaded.");
+	}
+}
 
+void awe::game_engine::_script_quitMap() {
+	if (!_currentGame) {
+		_logger.warning("Called \"quitMap()\" without there being a map loaded.");
+	}
+	_currentGame = nullptr;
 }
 
 // initCheck()

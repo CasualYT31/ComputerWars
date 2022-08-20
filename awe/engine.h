@@ -36,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui.h"
 #include "bank.h"
 #include "spritesheets.h"
-#include "map.h"
+#include "game.h"
 
 namespace awe {
 	/**
@@ -70,6 +70,17 @@ namespace awe {
 		 * @param folder The folder containing the script files to load.
 		 */
 		void initialiseScripts(const std::string& folder) noexcept;
+
+		/**
+		 * Callback given to \c engine::scripts::registerInterface() to register
+		 * game engine functions with a \c scripts object.
+		 * For a full rundown of the interface, please read <a
+		 * href="https://github.com/CasualYT31/ComputerWars/wiki/Script-Interface"
+		 * target="_blank">the GitHub repository wiki</a>.
+		 * @param engine Pointer to the engine to register the interface with.
+		 * @sa    \c engine::scripts::registerInterface()
+		 */
+		void registerInterface(asIScriptEngine* engine) noexcept;
 
 		/**
 		 * Sets the engine's available countries.
@@ -196,16 +207,6 @@ namespace awe {
 		//======SCRIPT INTERFACE=======
 		//=============================
 		/**
-		 * Callback given to \c engine::scripts::registerInterface().
-		 * For a full rundown of the interface, please read <a
-		 * href="https://github.com/CasualYT31/ComputerWars/wiki/Script-Interface"
-		 * target="_blank">the GitHub repository wiki</a>.
-		 * @param engine Pointer to the engine to register the interface with.
-		 * @sa    \c engine::scripts::registerInterface()
-		 */
-		void _registerInterface(asIScriptEngine* engine) noexcept;
-
-		/**
 		 * Updates the temporary fullscreen renderer setting.
 		 * I decided to not make these temporary renderer settings global
 		 * properties so that I could remain consistent with the way audio works
@@ -289,6 +290,11 @@ namespace awe {
 		void _script_saveRendererConfig();
 
 		/**
+		 * Saves the current map.
+		 */
+		void _script_saveMap();
+
+		/**
 		 * Quits the current map and goes back to the previous menu.
 		 */
 		void _script_quitMap();
@@ -340,7 +346,7 @@ namespace awe {
 		/**
 		 * Stores a game's data, including its map and the armies.
 		 */
-		// awe::game later...
+		std::unique_ptr<awe::game> _currentGame;
 
 		//================================
 		//==========BACKEND DATA==========

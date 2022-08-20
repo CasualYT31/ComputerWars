@@ -93,9 +93,48 @@ sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 			"menus will be loaded.");
 	} else {
 		_scripts->registerInterface(
-			std::bind(&sfx::gui::_registerInterface, this, std::placeholders::_1)
+			std::bind(&sfx::gui::registerInterface, this, std::placeholders::_1)
 		);
 	}
+}
+
+void sfx::gui::registerInterface(asIScriptEngine* engine) noexcept {
+	// register non-widget global functions
+	engine->RegisterGlobalFunction("void setGUI(const string& in)",
+		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
+		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBackground(const string& in)",
+		asMETHOD(sfx::gui, _noBackground), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBackground(const string& in, const "
+		"string& in, const string& in)",
+		asMETHOD(sfx::gui, _spriteBackground), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBackground(const uint, const uint, "
+		"const uint, const uint, const string& in)",
+		asMETHOD(sfx::gui, _colourBackground), asCALL_THISCALL_ASGLOBAL, this);
+	// register bitmap button global functions
+	engine->RegisterGlobalFunction("void addBitmapButton(const string& in, "
+		"const float x, const float y, const float w, const float h)",
+		asMETHOD(sfx::gui, _addBitmapButton), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBitmapButtonText(const string& in, "
+		"const string& in)",
+		asMETHOD(sfx::gui, _setBitmapButtonText), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setBitmapButtonSprite(const string& in, "
+		"const string& in)", asMETHOD(sfx::gui, _setBitmapButtonSprite),
+		asCALL_THISCALL_ASGLOBAL, this);
+	// register vertical layout container global functions
+	engine->RegisterGlobalFunction("void addVerticalLayout(const string& in, "
+		"const float x, const float y, const float w, const float h)",
+		asMETHOD(sfx::gui, _addVerticalLayout), asCALL_THISCALL_ASGLOBAL, this);
+	// register listbox global functions
+	engine->RegisterGlobalFunction("void addListBox(const string& in, const float "
+		"x, const float y, const float w, const float h)",
+		asMETHOD(sfx::gui, _addListbox), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void addListBoxItem(const string& in, const "
+		"string& in)",
+		asMETHOD(sfx::gui, _addListboxItem), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("string getListBoxSelectedItem(const string& "
+		"in)", asMETHOD(sfx::gui, _getListboxSelectedItem),
+		asCALL_THISCALL_ASGLOBAL, this);
 }
 
 void sfx::gui::setGUI(const std::string& newPanel) noexcept {
@@ -537,45 +576,6 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 		widget->getSignal("Collapsed").
 			connectEx(&sfx::gui::signalHandler, this);
 	}
-}
-
-void sfx::gui::_registerInterface(asIScriptEngine* engine) noexcept {
-	// register non-widget global functions
-	engine->RegisterGlobalFunction("void setGUI(const string& in)",
-		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
-		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBackground(const string& in)",
-		asMETHOD(sfx::gui, _noBackground), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBackground(const string& in, const "
-		"string& in, const string& in)",
-		asMETHOD(sfx::gui, _spriteBackground), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBackground(const uint, const uint, "
-		"const uint, const uint, const string& in)",
-		asMETHOD(sfx::gui, _colourBackground), asCALL_THISCALL_ASGLOBAL, this);
-	// register bitmap button global functions
-	engine->RegisterGlobalFunction("void addBitmapButton(const string& in, "
-		"const float x, const float y, const float w, const float h)",
-		asMETHOD(sfx::gui, _addBitmapButton), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBitmapButtonText(const string& in, "
-		"const string& in)",
-		asMETHOD(sfx::gui, _setBitmapButtonText), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBitmapButtonSprite(const string& in, "
-		"const string& in)", asMETHOD(sfx::gui, _setBitmapButtonSprite),
-		asCALL_THISCALL_ASGLOBAL, this);
-	// register vertical layout container global functions
-	engine->RegisterGlobalFunction("void addVerticalLayout(const string& in, "
-		"const float x, const float y, const float w, const float h)",
-		asMETHOD(sfx::gui, _addVerticalLayout), asCALL_THISCALL_ASGLOBAL, this);
-	// register listbox global functions
-	engine->RegisterGlobalFunction("void addListBox(const string& in, const float "
-		"x, const float y, const float w, const float h)",
-		asMETHOD(sfx::gui, _addListbox), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void addListBoxItem(const string& in, const "
-		"string& in)",
-		asMETHOD(sfx::gui, _addListboxItem), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("string getListBoxSelectedItem(const string& "
-		"in)", asMETHOD(sfx::gui, _getListboxSelectedItem),
-		asCALL_THISCALL_ASGLOBAL, this);
 }
 
 void sfx::gui::_noBackground(const std::string& menu) noexcept {
