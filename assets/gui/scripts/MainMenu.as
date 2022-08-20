@@ -19,5 +19,3 @@ void MainMenu_FileSelect_ItemSelected() {
 	string item = getListBoxSelectedItem("FileSelect");
 	info(item);
 }
-
-void MapSetUp() {}

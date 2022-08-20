@@ -64,13 +64,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 int game(const std::string& file) {
     // initialise the sink all loggers output to
-    engine::sink::Get("Computer Wars", "CasualYouTuber31", "assets/log", false,
+    engine::sink::Get("Computer Wars", "CasualYouTuber31", ".", false,
         true);
 
     // initialise the language dictionary
     std::shared_ptr<engine::language_dictionary> dictionary =
         std::make_shared<engine::language_dictionary>();
-    dictionary->load("assets/lang/lang.json");
+    dictionary->load("assets/lang/langs.json");
 
     // initialise the fonts
     std::shared_ptr<sfx::fonts> fonts = std::make_shared<sfx::fonts>();
@@ -78,7 +78,7 @@ int game(const std::string& file) {
 
     // initialise the sounds
     std::shared_ptr<sfx::audio> sounds = std::make_shared<sfx::audio>();
-    sounds->load("assets/audio/sound/audiosound.json");
+    sounds->load("assets/audio/sounds.json");
 
     // initialise the BGM
     std::shared_ptr<sfx::audio> music = std::make_shared<sfx::audio>();
@@ -201,7 +201,7 @@ int game(const std::string& file) {
     gameLoop.initialiseScripts("assets/script");
 
     // now load gui
-    gui->load("assets/gui/gui.json");
+    gui->load("assets/gui/menus.json");
 
     // run game loop, then destroy the object once the loop terminates
     return gameLoop.run(file);
