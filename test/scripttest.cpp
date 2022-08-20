@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**@file scripttest.h
- * Tests the \c engine::scripts class.
+ * Tests the \c sfx::scripts class.
  */
 
 #include "sharedfunctions.h"
@@ -58,12 +58,12 @@ protected:
 	/**
 	 * The \c scripts object to test on.
 	 */
-	engine::scripts _scripts;
+	sfx::scripts _scripts;
 };
 
 /**
- * Tests behaviour of \c engine::scripts::loadScripts() and
- * \c engine::scripts::getScriptsFolder().
+ * Tests behaviour of \c sfx::scripts::loadScripts() and
+ * \c sfx::scripts::getScriptsFolder().
  */
 TEST_F(ScriptTest, GetScriptsFolder) {
 	EXPECT_EQ(getTestAssetPath("script/"), _scripts.getScriptsFolder());
@@ -74,7 +74,7 @@ TEST_F(ScriptTest, GetScriptsFolder) {
 }
 
 /**
- * Tests behaviour of \c engine::scripts::functionExists().
+ * Tests behaviour of \c sfx::scripts::functionExists().
  */
 TEST_F(ScriptTest, FunctionExists) {
 	EXPECT_FALSE(_scripts.functionExists("overloadedFunction"));
@@ -91,7 +91,7 @@ TEST_F(ScriptTest, FunctionExists) {
 }
 
 /**
- * Tests correct calls to \c engine::scripts::callFunction().
+ * Tests correct calls to \c sfx::scripts::callFunction().
  */
 TEST_F(ScriptTest, CorrectFunctionCalls) {
 	EXPECT_FALSE(_scripts.callFunction("overloadedFunction", 9));
@@ -115,7 +115,7 @@ TEST_F(ScriptTest, CorrectFunctionCalls) {
 }
 
 /**
- * Tests incorrect calls to \c engine::scripts::callFunction().
+ * Tests incorrect calls to \c sfx::scripts::callFunction().
  */
 TEST_F(ScriptTest, IncorrectFunctionCalls) {
 	engine::logger temp("b");

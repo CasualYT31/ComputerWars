@@ -86,7 +86,7 @@ void sfx::gui::gui_background::draw(sf::RenderTarget& target,
 	}
 }
 
-sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
+sfx::gui::gui(const std::shared_ptr<sfx::scripts>& scripts,
 	const std::string& name) noexcept : _scripts(scripts), _logger(name) {
 	if (!scripts) {
 		_logger.error("No scripts object has been provided to this GUI object: no "

@@ -35,7 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "logger.h"
 #include <type_traits>
 
-namespace engine {
+namespace sfx {
 	/**
 	 * Interface which allows a subclass to register functions, object types, etc.
 	 * with a \c scripts object.
@@ -84,7 +84,7 @@ namespace engine {
 		 * @param name The name to give this particular instantiation within the
 		 *             log file. Defaults to "scripts."
 		 * @sa    \c engine::logger
-		 * @sa    \c engine::scripts::registerInterface()
+		 * @sa    \c sfx::scripts::registerInterface()
 		 */
 		scripts(const std::string& name = "scripts") noexcept;
 
@@ -111,7 +111,7 @@ namespace engine {
 		 * @param   r Pointer to the script registrant to add. If @c nullptr is
 		 *            provided, it won't be added and an error will be logged.
 		 */
-		void addRegistrant(engine::script_registrant* const r)
+		void addRegistrant(sfx::script_registrant* const r)
 			noexcept;
 
 		/**
@@ -147,7 +147,7 @@ namespace engine {
 		 * @return  \c TRUE if successful, \c FALSE if not. Note that this method
 		 *          returns \c TRUE even if the given folder did not exist or could
 		 *          not be read.
-		 * @sa      engine::scripts::addRegistrant()
+		 * @sa      sfx::scripts::addRegistrant()
 		 */
 		bool loadScripts(std::string folder = "") noexcept;
 
@@ -255,12 +255,12 @@ namespace engine {
 		/**
 		 * The set of registrants.
 		 */
-		std::set<engine::script_registrant*> _registrants;
+		std::set<sfx::script_registrant*> _registrants;
 	};
 }
 
 template<typename T, typename... Ts>
-bool engine::scripts::callFunction(const std::string& name, T value, Ts... values)
+bool sfx::scripts::callFunction(const std::string& name, T value, Ts... values)
 	noexcept {
 	if (!_callFunction_TemplateCall) {
 		// first call to the template version, setup the context

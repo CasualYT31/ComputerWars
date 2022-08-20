@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine.h"
 
 awe::game::game(const std::string& file,
-	const std::shared_ptr<engine::scripts>& ptr,
+	const std::shared_ptr<sfx::scripts>& ptr,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,

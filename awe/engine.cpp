@@ -360,8 +360,8 @@ void awe::game_engine::setSpritesheets(
 	_sprites = ptr;
 }
 
-void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& ptr,
-	const std::shared_ptr<engine::scripts>& guiPtr)	noexcept {
+void awe::game_engine::setScripts(const std::shared_ptr<sfx::scripts>& ptr,
+	const std::shared_ptr<sfx::scripts>& guiPtr)	noexcept {
 	_scripts = ptr;
 	_guiScripts = guiPtr;
 }
