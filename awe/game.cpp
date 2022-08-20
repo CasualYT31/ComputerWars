@@ -38,7 +38,16 @@ awe::game::game(const std::string& file,
 }
 
 void awe::game::registerInterface(asIScriptEngine* engine) noexcept {
+	// VECTOR2 TYPE
+	engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
+		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());
+	engine->RegisterObjectProperty("Vector2", "uint x", asOFFSET(sf::Vector2u, x));
+	engine->RegisterObjectProperty("Vector2", "uint y", asOFFSET(sf::Vector2u, y));
 
+	// MAP FUNCTIONS
+	engine->RegisterGlobalFunction(
+		asUnitID.substr().append(" getUnitOnTile(const Vector2)").c_str(),
+		asMETHOD(awe::map, getUnitOnTile), asCALL_THISCALL_ASGLOBAL, &_map);
 }
 
 bool awe::game::load() noexcept {
@@ -69,7 +78,7 @@ void awe::game::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept
 	} else if ((*ui)["select"]) {
 		// load();
 		_scripts->callFunction("tileHasBeenSelected",
-			(bool)_map.getUnitOnTile(_map.getSelectedTile()));
+			&_map.getSelectedTile());
 	}
 }
 

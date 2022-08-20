@@ -68,9 +68,14 @@ namespace awe {
 	 * Typedef representing a unit ID.
 	 * \c 0 should be reserved.
 	 * @warning Do \b not make this a signed type!
-	 * @sa      awe::map::_findUnitID()
+	 * @sa      @c awe::map::_findUnitID()
 	 */
 	typedef sf::Uint32 UnitID;
+	/**
+	 * The AngelScript typedef for a unit ID.
+	 * @sa @c awe::UnitID
+	 */
+	const std::string asUnitID = "uint ";
 
 	/**
 	 * Typedef representing an army ID.
