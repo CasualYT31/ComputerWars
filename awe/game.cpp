@@ -77,8 +77,7 @@ void awe::game::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept
 			_map.getSelectedTile().y + 1));
 	} else if ((*ui)["select"]) {
 		// load();
-		_scripts->callFunction("tileHasBeenSelected",
-			&_map.getSelectedTile());
+		_scripts->callFunction("tileHasBeenSelected", &_map.getSelectedTile());
 	}
 }
 

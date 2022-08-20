@@ -34,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "scriptfilesystem.h"
 #include "logger.h"
 #include <type_traits>
+#include "fmtformatter.h"
 
 namespace sfx {
 	/**
@@ -220,6 +221,25 @@ namespace sfx {
 		void _resetCallFunctionVariables() noexcept;
 
 		/**
+		 * Used to dereference a pointer to avoid template errors with fmt in
+		 * @c callFunction().
+		 * The second form of this method simply returns @c value without
+		 * dereferencing so that @c callFunction() can differentiate between the
+		 * two.
+		 * @param  value The pointer to dereference.
+		 * @return The value stored at the pointer.
+		 */
+		template<typename T>
+		static inline T _fmtValue(T* value) noexcept;
+
+		/**
+		 * Returns @c value.
+		 * @sa sfx::scripts::_fmtValue(T*)
+		 */
+		template<typename T>
+		static inline T _fmtValue(T value) noexcept;
+
+		/**
 		 * The internal logger object.
 		 */
 		mutable engine::logger _logger;
@@ -259,6 +279,16 @@ namespace sfx {
 	};
 }
 
+template<typename T>
+inline T sfx::scripts::_fmtValue(T* value) noexcept {
+	return *value;
+}
+
+template<typename T>
+inline T sfx::scripts::_fmtValue(T value) noexcept {
+	return value;
+}
+
 template<typename T, typename... Ts>
 bool sfx::scripts::callFunction(const std::string& name, T value, Ts... values)
 	noexcept {
@@ -290,7 +320,7 @@ bool sfx::scripts::callFunction(const std::string& name, T value, Ts... values)
 		default:
 			_logger.error("Unexpected length {} of integer variable {}, it will "
 				"not be set to argument {} of function \"{}\": function call "
-				"aborted.", sizeof value, value, _argumentID, name);
+				"aborted.", sizeof value, _fmtValue(value), _argumentID, name);
 			_resetCallFunctionVariables();
 			return false;
 		}
@@ -317,13 +347,15 @@ bool sfx::scripts::callFunction(const std::string& name, T value, Ts... values)
 	}
 	if (r < 0) {
 		if constexpr (std::is_pointer<T>::value) {
-			_logger.error("Failed to set argument {} of function \"{}\" to the "
-				"value \"{}\": code {}.", _argumentID, name,
-				((value) ? (*value) : ("nullptr")), r);
-		} else {
-			_logger.error("Failed to set argument {} of function \"{}\" to the "
-				"value \"{}\": code {}.", _argumentID, name, value, r);
+			if (!value) {
+				_logger.error("Failed to set argument {} of function \"{}\" to "
+					"the value nullptr: code {}.", _argumentID, name, r);
+				_resetCallFunctionVariables();
+				return false;
+			}
 		}
+		_logger.error("Failed to set argument {} of function \"{}\" to the value "
+			"\"{}\": code {}.", _argumentID, name, _fmtValue(value), r);
 		_resetCallFunctionVariables();
 		return false;
 	}
