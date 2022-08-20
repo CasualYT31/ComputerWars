@@ -92,9 +92,7 @@ sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 		_logger.error("No scripts object has been provided to this GUI object: no "
 			"menus will be loaded.");
 	} else {
-		_scripts->registerInterface(
-			std::bind(&sfx::gui::registerInterface, this, std::placeholders::_1)
-		);
+		_scripts->addRegistrant(this);
 	}
 }
 

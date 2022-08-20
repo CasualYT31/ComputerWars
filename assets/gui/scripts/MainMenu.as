@@ -1,5 +1,5 @@
 void MainMenuSetUp() {
-	setBackground(200, 200, 200, 255, "MainMenu");
+	setBackground(200, 200, 200, 0, "MainMenu");
 	addListBox("FileSelect", 5.0, 5.0, 200.0, 100.0);
 	// Collect a list of available map files and add them to the listbox.
 	filesystem cwd;

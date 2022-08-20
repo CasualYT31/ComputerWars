@@ -35,8 +35,8 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	_gui->setGUI("Map");
 
 	// setup the game object straight away for development purposes
-	_currentGame = std::make_unique<awe::game>(file, _gui.get(), this, _countries,
-		_tiles, _units, _commanders);
+	_currentGame = std::make_unique<awe::game>(file, _scripts, _countries, _tiles,
+		_units, _commanders);
 	_currentGame->load();
 	_currentGame->setTileSpritesheet(_sprites->tile->normal);
 	_currentGame->setUnitSpritesheet(_sprites->unit->idle);
@@ -77,15 +77,17 @@ int awe::game_engine::run(const std::string& file) noexcept {
 
 // script interface
 
-void awe::game_engine::initialiseScripts(const std::string& folder) noexcept {
-	if (_scripts) {
-		_scripts->registerInterface(
-			std::bind(&awe::game_engine::registerInterface, this,
-				std::placeholders::_1));
-		_scripts->loadScripts(folder);
+void awe::game_engine::initialiseScripts(const std::string& folder,
+	const std::string& guiFolder) noexcept {
+	if (_scripts && _guiScripts) {
+		// Add the registrants, then only load scripts for GUI.
+		_scripts->addRegistrant(this);
+		_scripts->addRegistrant(_gui.get());
+		_guiScripts->addRegistrant(this);
+		_guiScripts->loadScripts(guiFolder);
 	} else {
-		_logger.error("initialiseScripts() was called before setting a scripts "
-			"object!");
+		_logger.error("initialiseScripts() was called before setting both game "
+			"and GUI scripts objects!");
 	}
 }
 
@@ -358,9 +360,10 @@ void awe::game_engine::setSpritesheets(
 	_sprites = ptr;
 }
 
-void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& ptr)
-	noexcept {
+void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& ptr,
+	const std::shared_ptr<engine::scripts>& guiPtr)	noexcept {
 	_scripts = ptr;
+	_guiScripts = guiPtr;
 }
 
 void awe::game_engine::setGUI(const std::shared_ptr<sfx::gui>& ptr) noexcept {

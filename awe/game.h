@@ -38,12 +38,15 @@ namespace awe {
 	 * Class which represents a map with game logic and user input.
 	 * @sa @c awe::map
 	 */
-	class game : sf::NonCopyable, public sfx::animated_drawable {
+	class game : sf::NonCopyable, public engine::script_registrant,
+		public sfx::animated_drawable {
 	public:
 		/**
 		 * Sets up a game based on what @c map requires.
 		 * Also initialises the internal logger object.
 		 * @param file       Path to the binary file containing the map to play on.
+		 * @param ptr        Pointer to the @c scripts object, with most of the
+		 *                   necessary registrants already added.
 		 * @param countries  Information on the countries to search through when
 		 *                   reading country IDs from the map file.
 		 * @param tiles      Information on the tile types to search through when
@@ -54,13 +57,20 @@ namespace awe {
 		 *                   reading CO IDs from the map file.
 		 * @sa @c engine::logger
 		 */
-		game(const std::string& file, sfx::gui* gui, awe::game_engine* engine,
+		game(const std::string& file, const std::shared_ptr<engine::scripts>& ptr,
 			 const std::shared_ptr<awe::bank<awe::country>>& countries,
 			 const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			 const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 			 const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 			 const std::string& name = "game")
 			 noexcept;
+
+		/**
+		 * Initialise the script interface for maps.
+		 * @param engine Pointer to the engine to register the interface with.
+		 * @sa    \c engine::scripts::registerInterface()
+		 */
+		void registerInterface(asIScriptEngine* engine) noexcept;
 
 		/**
 		 * Reloads the state of the map from the previously given binary file.
@@ -135,13 +145,6 @@ namespace awe {
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
-		 * Initialise the script interface for maps.
-		 * @param engine Pointer to the engine to register the interface with.
-		 * @sa    \c engine::scripts::registerInterface()
-		 */
-		void _registerInterface(asIScriptEngine* engine) noexcept;
-
-		/**
 		 * Internal logger object.
 		 */
 		mutable engine::logger _logger;
@@ -159,6 +162,6 @@ namespace awe {
 		/**
 		 * Stores all the scripts needed to run a game.
 		 */
-		engine::scripts _scripts;
+		std::shared_ptr<engine::scripts> _scripts;
 	};
 }

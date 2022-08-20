@@ -37,6 +37,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace engine {
 	/**
+	 * Interface which allows a subclass to register functions, object types, etc.
+	 * with a \c scripts object.
+	 */
+	class script_registrant {
+	public:
+		/**
+		 * Polymorphic base classes should have virtual destructors.
+		 */
+		virtual ~script_registrant() noexcept = default;
+
+		/**
+		 * Adds to the interface between a \c scripts object and the game engine.
+		 * See <a
+		 * href="https://www.angelcode.com/angelscript/sdk/docs/manual/classas_i_script_engine.html"
+		 * target="_blank">the documentation on asIScriptEngine</a> for help on how
+		 * to register the interface.
+		 * @param engine Pointer to the AngelScript script engine to register with.
+		 */
+		virtual void registerInterface(asIScriptEngine* engine) noexcept = 0;
+	};
+
+	/**
 	 * Class representing a layer of abstraction between a script engine and the
 	 * client.
 	 * A folder of scripts is loaded from disc. This class can then be used to call
@@ -72,21 +94,25 @@ namespace engine {
 		~scripts() noexcept;
 
 		/**
-		 * Registers the interface between the client and the scripts.
-		 * The callback must accept a pointer to the script engine. Using this
-		 * pointer, the callback is to register the interface directly to the
-		 * script engine. See <a
-		 * href="https://www.angelcode.com/angelscript/sdk/docs/manual/classas_i_script_engine.html"
-		 * target="_blank">the documentation on asIScriptEngine</a> for help on how
-		 * to register the interface.\n
-		 * The client is permitted to call this method multiple times with
-		 * different functions, if it so wishes.
-		 * @warning This method must be called before loading scripts, or else
-		 *          building the scripts will likely fail.
-		 * @param   callback The function which registers the interface.
+		 * Adds a script interface registrant to the list.
+		 * Upon the first call to @c loadScripts(), the interface between the game
+		 * engine and the scripts is registered. In order to achieve this,
+		 * @c scripts needs access to the different classes that will contain the
+		 * functionality that needs to be registered with the script engine so that
+		 * scripts can access that functionality. By giving a list of registrants
+		 * before calling @c loadScripts(), you can tell @c scripts exactly which
+		 * objects to invoke the methods of.\n
+		 * After the call to @c loadScripts(), the internal list of registrants
+		 * will be cleared. This is because once the interface has been registered,
+		 * it does not need to be registered again.
+		 * @warning You must ensure that the registrants you give remain alive for
+		 *          the lifetime of the @c scripts instance, if you have registered
+		 *          a class' methods with the interface.
+		 * @param   r Pointer to the script registrant to add. If @c nullptr is
+		 *            provided, it won't be added and an error will be logged.
 		 */
-		void registerInterface(
-			const std::function<void(asIScriptEngine*)>& callback) noexcept;
+		void addRegistrant(engine::script_registrant* const r)
+			noexcept;
 
 		/**
 		 * The message callback assigned to the script engine.
@@ -114,14 +140,14 @@ namespace engine {
 		 * called. Note that the previous module is discarded regardless of the
 		 * outcome of this method.
 		 * @warning It is imperative that the interface is registered \em before
-		 *          loading scripts.
+		 *          loading scripts by adding registrants!
 		 * @param   folder The path containing all the script files to load. If
 		 *                 blank, the last folder used with this method will be
 		 *                 substituted.
 		 * @return  \c TRUE if successful, \c FALSE if not. Note that this method
 		 *          returns \c TRUE even if the given folder did not exist or could
 		 *          not be read.
-		 * @sa      engine::scripts::registerInterface()
+		 * @sa      engine::scripts::addRegistrant()
 		 */
 		bool loadScripts(std::string folder = "") noexcept;
 
@@ -225,6 +251,11 @@ namespace engine {
 		 * function.
 		 */
 		asUINT _argumentID = 0;
+
+		/**
+		 * The set of registrants.
+		 */
+		std::set<engine::script_registrant*> _registrants;
 	};
 }
 

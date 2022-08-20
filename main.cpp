@@ -64,8 +64,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 int game(const std::string& file) {
     // initialise the sink all loggers output to
-    engine::sink::Get("Computer Wars", "CasualYouTuber31", ".", false,
-        true);
+    engine::sink::Get("Computer Wars", "CasualYouTuber31", ".", false, true);
 
     // initialise the language dictionary
     std::shared_ptr<engine::language_dictionary> dictionary =
@@ -82,7 +81,7 @@ int game(const std::string& file) {
 
     // initialise the BGM
     std::shared_ptr<sfx::audio> music = std::make_shared<sfx::audio>();
-    music->load("assets/audio/music/audiomusic.json");
+    music->load("assets/audio/music.json");
 
     // initialise the renderer
     std::shared_ptr<sfx::renderer> renderer = std::make_shared<sfx::renderer>();
@@ -126,13 +125,17 @@ int game(const std::string& file) {
 
     // initialise the script engine, but let game_engine register the interface and
     // load the script files
-    std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>();
+    // Initialise scripts objects.
+    std::shared_ptr<engine::scripts> guiScripts =
+        std::make_shared<engine::scripts>();
+    std::shared_ptr<engine::scripts> gameScripts =
+        std::make_shared<engine::scripts>();
 
     // initialise the GUI
     // let game_engine perform gui->load()
     // this is because we can't call the SetUp() functions for menus before
     // game_engine has initialised the script interface and loaded the script files
-    std::shared_ptr<sfx::gui> gui = std::make_shared<sfx::gui>(scripts);
+    std::shared_ptr<sfx::gui> gui = std::make_shared<sfx::gui>(guiScripts);
     gui->addSpritesheet("icon", spritesheets->icon);
 
     // initialise the countries
@@ -188,7 +191,7 @@ int game(const std::string& file) {
     gameLoop.setRenderer(renderer);
     gameLoop.setUserInput(userInput);
     gameLoop.setSpritesheets(spritesheets);
-    gameLoop.setScripts(scripts);
+    gameLoop.setScripts(gameScripts, guiScripts);
     gameLoop.setGUI(gui);
     gameLoop.setCountries(countries);
     gameLoop.setWeathers(weathers);
@@ -198,7 +201,7 @@ int game(const std::string& file) {
     gameLoop.setTiles(tiles);
     gameLoop.setUnits(units);
     gameLoop.setCommanders(commanders);
-    gameLoop.initialiseScripts("assets/script");
+    gameLoop.initialiseScripts("assets/scripts", "assets/gui/scripts");
 
     // now load gui
     gui->load("assets/gui/menus.json");

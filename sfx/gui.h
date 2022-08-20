@@ -42,7 +42,8 @@ namespace sfx {
 	 * will be the menu that is displayed by the @c gui instance once
 	 * <tt>load()</tt>ed.
 	 */
-	class gui : public sfx::animated_drawable, public engine::json_script {
+	class gui : public sfx::animated_drawable, public engine::script_registrant,
+		public engine::json_script {
 	public:
 		/**
 		 * Initialises the GUI object with a pointer to a \c scripts object and a

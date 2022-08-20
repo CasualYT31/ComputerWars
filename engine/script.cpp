@@ -60,11 +60,12 @@ engine::scripts::~scripts() noexcept {
     if (_engine) _engine->ShutDownAndRelease();
 }
 
-void engine::scripts::registerInterface(
-    const std::function<void(asIScriptEngine*)>& callback) noexcept {
-    _logger.write("Registering script interface...");
-    callback(_engine);
-    _logger.write("Finished registering script interface.");
+void engine::scripts::addRegistrant(engine::script_registrant* const r) noexcept {
+    if (r) {
+        _registrants.insert(r);
+    } else {
+        _logger.warning("Attempted to add a nullptr script registrant!");
+    }
 }
 
 void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg, void* param)
@@ -91,6 +92,14 @@ void engine::scripts::contextExceptionCallback(asIScriptContext* context)
 }
 
 bool engine::scripts::loadScripts(std::string folder) noexcept {
+    // First check if the interface has been registered, and if not, register it.
+    if (_registrants.size() > 0) {
+        _logger.write("Registering the script interface...");
+        for (auto& reg : _registrants) reg->registerInterface(_engine);
+        _logger.write("Finished registering the script interface.");
+        _registrants.clear();
+    }
+    // Now load the scripts.
     if (folder == "") folder = getScriptsFolder();
     _logger.write("Loading scripts from \"{}\"...", folder);
     if (folder == "" || !_engine) return false;

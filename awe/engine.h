@@ -42,7 +42,7 @@ namespace awe {
 	/**
 	 * The game engine class.
 	 */
-	class game_engine : sf::NonCopyable {
+	class game_engine : sf::NonCopyable, public engine::script_registrant {
 	public:
 		/**
 		 * Initialises the internal logger object.
@@ -64,12 +64,14 @@ namespace awe {
 		int run(const std::string& file) noexcept;
 
 		/**
-		 * Registers the script interface and loads the script files.
-		 * \c setScripts() must be called before calling this method. If
-		 * \c _scripts is \c nullptr, an error will be logged.
-		 * @param folder The folder containing the script files to load.
+		 * Registers the script interfaces and loads the script files.
+		 * \c setScripts() must be called before calling this method. If either
+		 * \c scripts pointers are \c nullptr, an error will be logged.
+		 * @param folder    The folder containing the game script files to load.
+		 * @param guiFolder The folder containing the GUI script files to load.
 		 */
-		void initialiseScripts(const std::string& folder) noexcept;
+		void initialiseScripts(const std::string& folder,
+			const std::string& guiFolder) noexcept;
 
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
@@ -184,9 +186,11 @@ namespace awe {
 
 		/**
 		 * Sets the engine's available scripts.
-		 * @param ptr Pointer to the data.
+		 * @param ptr    Pointer to the game scripts.
+		 * @param guiPtr Pointer to the GUI scripts.
 		 */
-		void setScripts(const std::shared_ptr<engine::scripts>& ptr) noexcept;
+		void setScripts(const std::shared_ptr<engine::scripts>& ptr,
+			const std::shared_ptr<engine::scripts>& guiPtr) noexcept;
 
 		/**
 		 * Sets the engine's available menus.
@@ -400,9 +404,14 @@ namespace awe {
 		std::shared_ptr<awe::spritesheets> _sprites;
 
 		/**
-		 * Pointer to the scripts object containing all the scripts.
+		 * Pointer to the @c scripts object containing all the game scripts.
 		 */
 		std::shared_ptr<engine::scripts> _scripts;
+
+		/**
+		 * Pointer to the @c scripts object containing all the GUI scripts.
+		 */
+		std::shared_ptr<engine::scripts> _guiScripts;
 		
 		/**
 		 * Pointer to the GUI object containing all the menus.

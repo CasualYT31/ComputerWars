@@ -23,25 +23,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 #include "engine.h"
 
-awe::game::game(const std::string& file, sfx::gui* gui, awe::game_engine* engine,
+awe::game::game(const std::string& file,
+	const std::shared_ptr<engine::scripts>& ptr,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const std::string& name) noexcept :
-	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file) {
-	// Initialise the scripts now. Register the interface, then load the scripts.
-	_scripts.registerInterface(
-		std::bind(&sfx::gui::registerInterface, gui, std::placeholders::_1)
-	);
-	_scripts.registerInterface(
-		std::bind(&awe::game_engine::registerInterface, engine,
-			std::placeholders::_1)
-	);
-	_scripts.registerInterface(
-		std::bind(&awe::game::_registerInterface, this, std::placeholders::_1)
-	);
-	_scripts.loadScripts("assets/script/map"); // Add parameter for this soon.
+	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file),
+	_scripts(ptr) {
+	// Register the interface, then load the scripts.
+	_scripts->addRegistrant(this);
+	_scripts->loadScripts("assets/scripts"); // Add parameter for this soon.
+}
+
+void awe::game::registerInterface(asIScriptEngine* engine) noexcept {
+
 }
 
 bool awe::game::load() noexcept {
@@ -71,7 +68,7 @@ void awe::game::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept
 			_map.getSelectedTile().y + 1));
 	} else if ((*ui)["select"]) {
 		// load();
-		_scripts.callFunction("tileHasBeenSelected",
+		_scripts->callFunction("tileHasBeenSelected",
 			(bool)_map.getUnitOnTile(_map.getSelectedTile()));
 	}
 }
@@ -107,20 +104,4 @@ bool awe::game::animate(const sf::RenderTarget& target, const double scaling)
 
 void awe::game::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_map, states);
-}
-
-void Tile_freed(awe::tile* tile) {
-	if (tile) delete tile;
-}
-
-bool isOccupied(awe::tile* tile) {
-	return tile->getUnit();
-}
-
-void awe::game::_registerInterface(asIScriptEngine* engine) noexcept {
-	engine->RegisterObjectType("Tile", 0, asOBJ_REF | asOBJ_SCOPED);
-	engine->RegisterObjectBehaviour("Tile", asBEHAVE_RELEASE, "void f()",
-		asFUNCTION(Tile_freed), asCALL_CDECL_OBJLAST);
-	engine->RegisterObjectMethod("Tile", "bool isOccupied()",
-		asFUNCTION(isOccupied), asCALL_CDECL_OBJLAST);
 }
