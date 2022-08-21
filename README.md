@@ -50,6 +50,7 @@ I like the idea of Gitmoji, but I find that there are a lot of emoji for the sam
 | | :recycle: | recycle | Refactor code. |
 | | :boom: | boom | Introduce breaking changes. |
 | | :fire: | fire | Remove code, tests, or files. |
+| | :warning: | warning | Fix code causing compiler warnings. |
 
 | Testing | Emoji | Name | Meaning |
 | --- | ---: | :---: | :--- |
