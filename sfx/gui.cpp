@@ -138,7 +138,6 @@ void sfx::gui::registerInterface(asIScriptEngine* engine) noexcept {
 void sfx::gui::setGUI(const std::string& newPanel) noexcept {
 	auto old = getGUI();
 	if (_gui.get(old)) {
-		_logger.write("Setting {} invisible.", old);
 		_gui.get(old)->setVisible(false);
 	}
 	try {
