@@ -197,11 +197,16 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 	_widgetPictures.clear();
 
 	if (getGUI() != "") {
-		// lang == true if the language has been changed
-		const bool lang = (_langdict && _langdict->getLanguage() != _lastlang);
-		if (lang) _lastlang = _langdict->getLanguage();
+		if (_langdict && _langdict->getLanguage() != _lastlang) {
+			_lastlang = _langdict->getLanguage();
+			auto& widgetList = _gui.getWidgets();
+			for (auto& widget : widgetList) {
+				auto w = _gui.get<tgui::Container>(widget->getWidgetName());
+				_translateWidgets(w, widget->getWidgetName().toStdString());
+			}
+		}
 		std::size_t animatedSprite = 0;
-		_animate(target, scaling, _gui.get<Container>(getGUI()), getGUI(), lang,
+		_animate(target, scaling, _gui.get<Container>(getGUI()), getGUI(),
 			animatedSprite);
 	}
 
@@ -209,14 +214,14 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 }
 
 void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
-	tgui::Container::Ptr container, std::string baseName, const bool lang,
+	tgui::Container::Ptr container, std::string baseName,
 	std::size_t& animatedSprite) noexcept {
 	auto& widgetList = container->getWidgets();
 	baseName += ".";
 	for (auto& widget : widgetList) {
 		std::string widgetName = baseName + widget->getWidgetName().toStdString();
 		String type = widget->getWidgetType();
-		// if the widget deals with animated sprites then handle them
+		// If the widget deals with animated sprites then handle them.
 		bool updateTexture = true;
 		if (type == "BitmapButton" || type == "Picture") {
 			if (_guiSpriteKeys.find(widgetName) == _guiSpriteKeys.end() ||
@@ -226,8 +231,8 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 				std::shared_ptr<sfx::animated_spritesheet> sheet =
 					_sheet[_guiSpriteKeys[widgetName].first];
 				if (animatedSprite == _widgetSprites.size()) {
-					// animated sprite for this widget doesn't exist yet, so
-					// allocate it
+					// Animated sprite for this widget doesn't exist yet, so
+					// allocate it.
 					_widgetSprites.emplace_back(
 						sheet, _guiSpriteKeys[widgetName].second
 					);
@@ -252,73 +257,28 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 				}
 			}
 		}
-		// widget-specific code
+		// Widget-specific code.
 		if (type == "Button") {
-			auto w = _findWidget<Button>(widgetName);
-			if (lang) {
-				w->setText((*_langdict)(_originalStrings[widgetName][0]));
-			}
+			// auto w = _findWidget<Button>(widgetName);
 		} else if (type == "BitmapButton") {
 			auto w = _findWidget<BitmapButton>(widgetName);
-			if (lang) {
-				w->setText((*_langdict)(_originalStrings[widgetName][0]));
-			}
 			if (updateTexture) w->setImage(_widgetPictures[animatedSprite]);
 		} else if (type == "CheckBox") {
-			auto w = _findWidget<CheckBox>(widgetName);
-			if (lang) {
-				w->setText((*_langdict)(_originalStrings[widgetName][0]));
-			}
+			// auto w = _findWidget<CheckBox>(widgetName);
 		} else if (type == "ChildWindow") {
-			auto w = _findWidget<ChildWindow>(widgetName);
-			if (lang) {
-				w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
-			}
+			// auto w = _findWidget<ChildWindow>(widgetName);
 		} else if (type == "ColorPicker") {
-			auto w = _findWidget<ColorPicker>(widgetName);
-			if (lang) {
-				w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
-			}
+			// auto w = _findWidget<ColorPicker>(widgetName);
 		} else if (type == "ComboBox") {
-			auto w = _findWidget<ComboBox>(widgetName);
-			if (lang) {
-				for (std::size_t i = 0; i < w->getItemCount(); i++) {
-					w->changeItemByIndex(i,
-						(*_langdict)(_originalStrings[widgetName][i]));
-				}
-			}
+			// auto w = _findWidget<ComboBox>(widgetName);
 		} else if (type == "FileDialog") {
-			auto w = _findWidget<FileDialog>(widgetName);
-			if (lang) {
-				w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
-			}
+			// auto w = _findWidget<FileDialog>(widgetName);
 		} else if (type == "Label") {
-			auto w = _findWidget<Label>(widgetName);
-			if (lang) {
-				w->setText((*_langdict)(_originalStrings[widgetName][0]));
-			}
+			// auto w = _findWidget<Label>(widgetName);
 		} else if (type == "ListBox") {
-			auto w = _findWidget<ListBox>(widgetName);
-			if (lang) {
-				for (std::size_t i = 0; i < w->getItemCount(); i++) {
-					w->changeItemByIndex(i,
-						(*_langdict)(_originalStrings[widgetName][i]));
-				}
-			}
+			// auto w = _findWidget<ListBox>(widgetName);
 		} else if (type == "ListView") {
-			auto w = _findWidget<ListView>(widgetName);
-			if (lang) {
-				std::size_t colCount = w->getColumnCount();
-				for (std::size_t i = 0; i < colCount; i++) {
-					w->setColumnText(i,
-						(*_langdict)(_originalStrings[widgetName][i]));
-					for (std::size_t j = 0; j <= w->getItemCount(); j++) {
-						w->changeSubItem(i, j, (*_langdict)
-							(_originalStrings[widgetName][colCount * (i + 1) + j])
-						);
-					}
-				}
-			}
+			// auto w = _findWidget<ListView>(widgetName);
 		} else if (type == "Picture") {
 			auto w = _findWidget<Picture>(widgetName);
 			if (updateTexture) {
@@ -327,59 +287,117 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 				w->setRenderer(newRenderer.getData());
 			}
 		} else if (type == "MenuBar") {
-			auto w = _findWidget<MenuBar>(widgetName);
-			if (lang) {
-				// it's possible, but we would somehow need to store the menu
-				// hierarchy separately to keep this as simple as possible.
-				// potentially multiple menu hierarchies would have to be stored,
-				// though...
-			}
+			// auto w = _findWidget<MenuBar>(widgetName);
 		} else if (type == "MessageBox") {
-			auto w = _findWidget<MessageBox>(widgetName);
-			if (lang) {
-				w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
-				w->setText((*_langdict)(_originalStrings[widgetName][1]));
-			}
-			// don't know how I'm going to translate buttons
+			// auto w = _findWidget<MessageBox>(widgetName);
 		} else if (type == "ProgressBar") {
-			auto w = _findWidget<ProgressBar>(widgetName);
-			if (lang) {
-				w->setText((*_langdict)(_originalStrings[widgetName][0]));
-			}
+			// auto w = _findWidget<ProgressBar>(widgetName);
 		} else if (type == "RadioButton") {
-			auto w = _findWidget<RadioButton>(widgetName);
-			if (lang) {
-				w->setText((*_langdict)(_originalStrings[widgetName][0]));
-			}
+			// auto w = _findWidget<RadioButton>(widgetName);
 		} else if (type == "TabContainer") {
-			auto w = _findWidget<TabContainer>(widgetName);
-			if (lang) {
-				for (std::size_t i = 0; i < w->getTabs()->getTabsCount(); i++) {
-					w->changeTabText(i,
-						(*_langdict)(_originalStrings[widgetName][i]));
-				}
-			}
+			// auto w = _findWidget<TabContainer>(widgetName);
 		} else if (type == "Tabs") {
-			auto w = _findWidget<Tabs>(widgetName);
-			if (lang) {
-				for (std::size_t i = 0; i < w->getTabsCount(); i++) {
-					w->changeText(i,
-						(*_langdict)(_originalStrings[widgetName][i]));
-				}
-			}
+			// auto w = _findWidget<Tabs>(widgetName);
 		} else if (type == "ToggleButton") {
-			auto w = _findWidget<ToggleButton>(widgetName);
-			if (lang) {
-				w->setText((*_langdict)(_originalStrings[widgetName][0]));
-			}
+			// auto w = _findWidget<ToggleButton>(widgetName);
 		}
-		// container types - not all of them are here for future reference
+		// Container types - not all of them are here for future reference.
 		if (type == "ChildWindow" || type == "Grid" || type == "Group" ||
 			type == "RadioButtonGroup" || type == "VerticalLayout") {
 			auto w = _findWidget<Container>(widgetName);
-			_animate(target, scaling, w, widgetName, lang, animatedSprite);
+			_animate(target, scaling, w, widgetName, animatedSprite);
 		}
 		animatedSprite++;
+	}
+}
+
+void sfx::gui::_translateWidgets(tgui::Container::Ptr container,
+	std::string baseName) noexcept {
+	auto& widgetList = container->getWidgets();
+	baseName += ".";
+	for (auto& widget : widgetList) {
+		std::string widgetName = baseName + widget->getWidgetName().toStdString();
+		String type = widget->getWidgetType();
+		if (type == "Button") {
+			auto w = _findWidget<Button>(widgetName);
+			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+		} else if (type == "BitmapButton") {
+			auto w = _findWidget<BitmapButton>(widgetName);
+			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+		} else if (type == "CheckBox") {
+			auto w = _findWidget<CheckBox>(widgetName);
+			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+		} else if (type == "ChildWindow") {
+			auto w = _findWidget<ChildWindow>(widgetName);
+			w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+		} else if (type == "ColorPicker") {
+			auto w = _findWidget<ColorPicker>(widgetName);
+			w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+		} else if (type == "ComboBox") {
+			auto w = _findWidget<ComboBox>(widgetName);
+			for (std::size_t i = 0; i < w->getItemCount(); i++) {
+				w->changeItemByIndex(i,
+					(*_langdict)(_originalStrings[widgetName][i]));
+			}
+		} else if (type == "FileDialog") {
+			auto w = _findWidget<FileDialog>(widgetName);
+			w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+		} else if (type == "Label") {
+			auto w = _findWidget<Label>(widgetName);
+			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+		} else if (type == "ListBox") {
+			auto w = _findWidget<ListBox>(widgetName);
+			for (std::size_t i = 0; i < w->getItemCount(); i++) {
+				w->changeItemByIndex(i,
+					(*_langdict)(_originalStrings[widgetName][i]));
+			}
+		} else if (type == "ListView") {
+			auto w = _findWidget<ListView>(widgetName);
+			std::size_t colCount = w->getColumnCount();
+			for (std::size_t i = 0; i < colCount; i++) {
+				w->setColumnText(i, (*_langdict)(_originalStrings[widgetName][i]));
+				for (std::size_t j = 0; j <= w->getItemCount(); j++) {
+					w->changeSubItem(i, j, (*_langdict)
+						(_originalStrings[widgetName][colCount * (i + 1) + j])
+					);
+				}
+			}
+		} else if (type == "MenuBar") {
+			auto w = _findWidget<MenuBar>(widgetName);
+			// It's possible, but we would somehow need to store the menu hierarchy
+			// separately to keep this as simple as possible. Potentially multiple
+			// menu hierarchies would have to be stored, though...
+		} else if (type == "MessageBox") {
+			auto w = _findWidget<MessageBox>(widgetName);
+			w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+			w->setText((*_langdict)(_originalStrings[widgetName][1]));
+			// Don't know how I'm going to translate buttons.
+		} else if (type == "ProgressBar") {
+			auto w = _findWidget<ProgressBar>(widgetName);
+			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+		} else if (type == "RadioButton") {
+			auto w = _findWidget<RadioButton>(widgetName);
+			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+		} else if (type == "TabContainer") {
+			auto w = _findWidget<TabContainer>(widgetName);
+			for (std::size_t i = 0; i < w->getTabs()->getTabsCount(); i++) {
+				w->changeTabText(i, (*_langdict)(_originalStrings[widgetName][i]));
+			}
+		} else if (type == "Tabs") {
+			auto w = _findWidget<Tabs>(widgetName);
+			for (std::size_t i = 0; i < w->getTabsCount(); i++) {
+				w->changeText(i, (*_langdict)(_originalStrings[widgetName][i]));
+			}
+		} else if (type == "ToggleButton") {
+			auto w = _findWidget<ToggleButton>(widgetName);
+			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+		}
+		// Container types - not all of them are here for future reference.
+		if (type == "ChildWindow" || type == "Grid" || type == "Group" ||
+			type == "RadioButtonGroup" || type == "VerticalLayout") {
+			auto w = _findWidget<Container>(widgetName);
+			_translateWidgets(w, widgetName);
+		}
 	}
 }
 
@@ -397,30 +415,30 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 	std::vector<std::string> names;
 	j.applyVector(names, { "menus" });
 	if (j.inGoodState()) {
-		// clear state
+		// Clear state.
 		_gui.removeAllWidgets();
 		_guiBackground.clear();
 		_widgetPictures.clear();
 		_widgetSprites.clear();
 		_guiSpriteKeys.clear();
 		_originalStrings.clear();
-		// create the main menu that always exists
+		// Create the main menu that always exists.
 		tgui::Group::Ptr menu = tgui::Group::create();
 		menu->setVisible(false);
 		_gui.add(menu, "MainMenu");
 		setGUI("MainMenu");
 		if (_scripts) _scripts->callFunction("MainMenuSetUp");
-		// create each menu
+		// Create each menu.
 		for (auto& m : names) {
 			menu = tgui::Group::create();
 			menu->setVisible(false);
 			_gui.add(menu, m);
-			// temporarily set the current GUI to this one to make _findWidget()
-			// work with relative widget names in SetUp() functions
+			// Temporarily set the current GUI to this one to make _findWidget()
+			// work with relative widget names in SetUp() functions.
 			setGUI(m);
 			if (_scripts) _scripts->callFunction(m + "SetUp");
 		}
-		// leave with the current menu being MainMenu
+		// Leave with the current menu being MainMenu.
 		setGUI("MainMenu");
 		return true;
 	} else {
@@ -434,7 +452,7 @@ bool sfx::gui::_save(nlohmann::ordered_json& j) noexcept {
 
 // ALL SIGNALS NEED TO BE TESTED IDEALLY
 void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
-	// connect common Widget signals
+	// Connect common widget signals.
 	widget->getSignal("PositionChanged").
 		connectEx(&sfx::gui::signalHandler, this);
 	widget->getSignal("SizeChanged").

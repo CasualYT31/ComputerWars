@@ -56,6 +56,10 @@ int awe::game_engine::run(const std::string& file) noexcept {
 				_currentGame->handleInput(_userinput);
 			}
 
+			if (_userinput->operator[]("back")) {
+				_dictionary->setLanguage("ENG_GB");
+			}
+
 			_renderer->clear();
 			_renderer->animate(*_gui, 2.0);
 			if (_currentGame) {

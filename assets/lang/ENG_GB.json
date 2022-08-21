@@ -1,5 +1,7 @@
 {
 	"day": "Day #",
 	"greeting": "Hello, World!",
-	"cancel": "Cancel"
+	"cancel": "Cancel",
+	"save": "Save",
+	"quit": "Quit"
 }

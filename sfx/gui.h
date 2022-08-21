@@ -290,14 +290,20 @@ namespace sfx {
 		 * @param scaling        Scaling factor which will be applied when drawing.
 		 * @param container      Pointer to the container widget.
 		 * @param baseName       The name of the container widget.
-		 * @param lang           \c TRUE if widget strings need to be translated,
-		 *                       \c FALSE if they should not be renamed.
 		 * @param animatedSprite Counter which keeps track of which animated sprite
 		 *                       from the internal vector to work with.
 		 */
 		void _animate(const sf::RenderTarget& target, const double scaling,
-			tgui::Container::Ptr container, std::string baseName, const bool lang,
+			tgui::Container::Ptr container, std::string baseName,
 			std::size_t& animatedSprite) noexcept;
+
+		/**
+		 * Reapplies all the translations across an entire container.
+		 * @param container Pointer to the container to translate.
+		 * @param baseName  The full name of the container widget.
+		 */
+		void _translateWidgets(tgui::Container::Ptr container,
+			std::string baseName) noexcept;
 
 		/**
 		 * Draws the current GUI menu.

@@ -3,10 +3,10 @@ void MapMenuSetUp() {
 	// The vertical layout container will resize and reposition all of the buttons.
 	addBitmapButton("MapMenu.Menu.Save", 0, 0, 0, 0);
 	setBitmapButtonSprite("MapMenu.Menu.Save", "saveicon");
-	setBitmapButtonText("MapMenu.Menu.Save", "Save");
+	setBitmapButtonText("MapMenu.Menu.Save", "save");
 	addBitmapButton("MapMenu.Menu.Quit", 0, 0, 0, 0);
 	setBitmapButtonSprite("MapMenu.Menu.Quit", "quiticon");
-	setBitmapButtonText("MapMenu.Menu.Quit", "Quit");
+	setBitmapButtonText("MapMenu.Menu.Quit", "quit");
 }
 
 void MapMenu_Save_Clicked() {
