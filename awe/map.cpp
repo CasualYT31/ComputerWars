@@ -572,6 +572,22 @@ void awe::map::setSelectedTile(const sf::Vector2u pos) noexcept {
 	}
 }
 
+void awe::map::moveSelectedTileUp() noexcept {
+	setSelectedTile(sf::Vector2u(getSelectedTile().x, getSelectedTile().y - 1));
+}
+
+void awe::map::moveSelectedTileDown() noexcept {
+	setSelectedTile(sf::Vector2u(getSelectedTile().x, getSelectedTile().y + 1));
+}
+
+void awe::map::moveSelectedTileLeft() noexcept {
+	setSelectedTile(sf::Vector2u(getSelectedTile().x - 1, getSelectedTile().y));
+}
+
+void awe::map::moveSelectedTileRight() noexcept {
+	setSelectedTile(sf::Vector2u(getSelectedTile().x + 1, getSelectedTile().y));
+}
+
 sf::Vector2u awe::map::getSelectedTile() const noexcept {
 	return _sel;
 }

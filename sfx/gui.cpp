@@ -173,6 +173,26 @@ bool sfx::gui::handleEvent(sf::Event e) noexcept {
 	return _gui.handleEvent(e);
 }
 
+void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept {
+	if (ui) {
+		if (_scripts->functionExists(getGUI() + "HandleInput")) {
+			_handleInputErrorLogged = false;
+			// Construct the dictionary.
+			CScriptDictionary* controls = _scripts->createDictionary();
+			auto controlKeys = ui->getControls();
+			for (auto& key : controlKeys)
+				controls->Set(key, (asINT64)ui->operator[](key));
+			// Invoke the function.
+			_scripts->callFunction(getGUI() + "HandleInput", controls);
+			controls->Release();
+		}
+	} else if (!_handleInputErrorLogged) {
+		_logger.error("Called handleInput() with nullptr user_input object for "
+			"menu \"{}\"!", getGUI());
+		_handleInputErrorLogged = true;
+	}
+}
+
 void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const tgui::String& signalName) noexcept {
 	std::string functionName = getGUI() + "_" +

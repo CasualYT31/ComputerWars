@@ -86,6 +86,12 @@ sfx::control_signal sfx::convert::tosignaltype(unsigned int s,
 
 sfx::user_input::user_input(const std::string& name) noexcept : _logger(name) {}
 
+std::unordered_set<std::string> sfx::user_input::getControls() const noexcept {
+	std::unordered_set<std::string> ret;
+	for (auto control : _control) ret.insert(control.first);
+	return ret;
+}
+
 void sfx::user_input::tieWindow(const std::shared_ptr<const sf::Window>& window)
 	noexcept {
 	if (_window && !window)

@@ -87,13 +87,6 @@ namespace awe {
 		bool save() noexcept;
 
 		/**
-		 * Handles user input.
-		 * @param ui A user input object to read from. Should already have been
-		 *           <tt>update()</tt>d.
-		 */
-		void handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept;
-
-		/**
 		 * Sets the spritesheet used for drawing tiles.
 		 * @param sheet Pointer to the animated spritesheet to use for tiles.
 		 */

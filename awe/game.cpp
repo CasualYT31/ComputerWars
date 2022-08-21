@@ -45,6 +45,17 @@ void awe::game::registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterObjectProperty("Vector2", "uint y", asOFFSET(sf::Vector2u, y));
 
 	// MAP FUNCTIONS
+	engine->RegisterGlobalFunction("void moveSelectedTileUp()",
+		asMETHOD(awe::map, moveSelectedTileUp), asCALL_THISCALL_ASGLOBAL, &_map);
+	engine->RegisterGlobalFunction("void moveSelectedTileDown()",
+		asMETHOD(awe::map, moveSelectedTileDown), asCALL_THISCALL_ASGLOBAL, &_map);
+	engine->RegisterGlobalFunction("void moveSelectedTileLeft()",
+		asMETHOD(awe::map, moveSelectedTileLeft), asCALL_THISCALL_ASGLOBAL, &_map);
+	engine->RegisterGlobalFunction("void moveSelectedTileRight()",
+		asMETHOD(awe::map, moveSelectedTileRight),
+		asCALL_THISCALL_ASGLOBAL, &_map);
+	engine->RegisterGlobalFunction("Vector2 getSelectedTile()",
+		asMETHOD(awe::map, getSelectedTile), asCALL_THISCALL_ASGLOBAL, &_map);
 	engine->RegisterGlobalFunction(
 		asUnitID.substr().append(" getUnitOnTile(const Vector2)").c_str(),
 		asMETHOD(awe::map, getUnitOnTile), asCALL_THISCALL_ASGLOBAL, &_map);
@@ -60,27 +71,6 @@ bool awe::game::load() noexcept {
 
 bool awe::game::save() noexcept {
 	return _map.save(_mapFileName);
-}
-
-void awe::game::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept {
-	// Drop all input if the current menu isn't "Map".
-	if (_gui->getGUI() != "Map") return;
-	if ((*ui)["left"]) {
-		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x - 1,
-			_map.getSelectedTile().y));
-	} else if ((*ui)["right"]) {
-		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x + 1,
-			_map.getSelectedTile().y));
-	} else if ((*ui)["up"]) {
-		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x,
-			_map.getSelectedTile().y - 1));
-	} else if ((*ui)["down"]) {
-		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x,
-			_map.getSelectedTile().y + 1));
-	} else if ((*ui)["select"]) {
-		// load();
-		_scripts->callFunction("tileHasBeenSelected", &_map.getSelectedTile());
-	}
 }
 
 void awe::game::setTileSpritesheet(

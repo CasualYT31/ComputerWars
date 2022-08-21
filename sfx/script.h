@@ -206,6 +206,13 @@ namespace sfx {
 		 * @return See the template version of \c callFunction().
 		 */
 		bool callFunction(const std::string& name) noexcept;
+
+		/**
+		 * Creates a @c CScriptDictionary object.
+		 * @returns Pointer to a new AngelScript @c dictionary object that's been
+		 *          registered with this engine.
+		 */
+		CScriptDictionary* createDictionary() noexcept;
 	private:
 		/**
 		 * Prepares the function context when making a call to \c callFunction().
@@ -319,9 +326,9 @@ bool sfx::scripts::callFunction(const std::string& name, T value, Ts... values)
 			r = _context->SetArgQWord(_argumentID, (asQWORD)value);
 			break;
 		default:
-			_logger.error("Unexpected length {} of integer variable {}, it will "
-				"not be set to argument {} of function \"{}\": function call "
-				"aborted.", sizeof value, _fmtValue(value), _argumentID, name);
+			_logger.error("Unexpected length {} of integer variable, it will not "
+				"be set to argument {} of function \"{}\": function call aborted.",
+				sizeof value, _argumentID, name);
 			_resetCallFunctionVariables();
 			return false;
 		}
@@ -355,8 +362,8 @@ bool sfx::scripts::callFunction(const std::string& name, T value, Ts... values)
 				return false;
 			}
 		}
-		_logger.error("Failed to set argument {} of function \"{}\" to the value "
-			"\"{}\": code {}.", _argumentID, name, _fmtValue(value), r);
+		_logger.error("Failed to set argument {} of function \"{}\": code {}.",
+			_argumentID, name, r);
 		_resetCallFunctionVariables();
 		return false;
 	}

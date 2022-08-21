@@ -34,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "safejson.h"
 #include "SFML/Graphics.hpp"
 #include <memory>
+#include <unordered_set>
 
 namespace sfx {
 	/**
@@ -305,6 +306,11 @@ namespace sfx {
 		 * @sa    \c engine::logger
 		 */
 		user_input(const std::string& name = "user_input") noexcept;
+
+		/**
+		 * Returns a set of controls that have been registered with this object.
+		 */
+		std::unordered_set<std::string> getControls() const noexcept;
 
 		/**
 		 * Sets the window that this \c user_input object is tied to.

@@ -45,19 +45,21 @@ int awe::game_engine::run(const std::string& file) noexcept {
 
 	try {
 		while (_renderer->isOpen()) {
+			// Handle menu user input first before handling the events.
+			// Use case: Map menu and MapMenu menu. Selecting a vacant tile in Map
+			// will trigger the MapMenu menu. Clicking on the save button will
+			// trigger the Map menu. But then a click could be configured to be
+			// "select" for Map, so then the Map menu sees the select immediately
+			// after and triggers MapMenu again, ensuring the MapMenu never goes
+			// away. By handling the click in MapMenu last, Map doesn't get to see
+			// the click and so safely ignores it for that iteration.
+			_userinput->update();
+			_gui->handleInput(_userinput);
+			// Now handle the events.
 			sf::Event event;
 			while (_renderer->pollEvent(event)) {
 				if (event.type == sf::Event::Closed) _renderer->close();
 				_gui->handleEvent(event);
-			}
-			_userinput->update();
-
-			if (_currentGame) {
-				_currentGame->handleInput(_userinput);
-			}
-
-			if (_userinput->operator[]("back")) {
-				_dictionary->setLanguage("ENG_GB");
 			}
 
 			_renderer->clear();
@@ -180,6 +182,9 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void quitMap()",
 		asMETHOD(awe::game_engine, _script_quitMap),
 		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void handleMapInput(const dictionary@)",
+		asMETHOD(awe::game_engine, _script_handleMapInput),
+		asCALL_THISCALL_ASGLOBAL, this);
 }
 
 void awe::game_engine::_script_setFullscreen(const bool in) {
@@ -248,6 +253,16 @@ void awe::game_engine::_script_quitMap() {
 		_logger.warning("Called \"quitMap()\" without there being a map loaded.");
 	}
 	_currentGame = nullptr;
+}
+
+void awe::game_engine::_script_handleMapInput(CScriptDictionary* controls) {
+	if (controls) {
+		if (_scripts->functionExists("handleInput")) {
+			_scripts->callFunction("handleInput", controls);
+		}
+		// When finished with the object handle it must be released.
+		controls->Release();
+	}
 }
 
 // initCheck()

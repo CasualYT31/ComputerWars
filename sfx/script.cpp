@@ -178,6 +178,10 @@ bool sfx::scripts::callFunction(const std::string& name) noexcept {
     return true;
 }
 
+CScriptDictionary* sfx::scripts::createDictionary() noexcept {
+    return CScriptDictionary::Create(_engine);
+}
+
 bool sfx::scripts::_setupContext(const std::string& name) noexcept {
     if (!_engine) return false;
     asIScriptFunction* func =

@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "texture.h"
 #include "script.h"
 #include "language.h"
+#include "userinput.h"
 
 namespace sfx {
 	/**
@@ -123,6 +124,23 @@ namespace sfx {
 		 *         otherwise.
 		 */
 		bool handleEvent(sf::Event e) noexcept;
+
+		/**
+		 * Allows the current menu to handle input via AngelScript.
+		 * Each menu should have a function called
+		 * <tt><em>MenuName</em>HandleInput(const dictionary in)</tt> which accepts
+		 * a dictionary of control inputs (as defined by the @c user_input instance
+		 * given) which map to <tt>bool</tt>s. For example, if some control
+		 * @c "select" maps to @c TRUE, then you can handle the @c "select"
+		 * control. @c user_input handles all the details of when a control is
+		 * triggered, so you don't have to worry about tracking the state of a
+		 * particular control, e.g. to ensure that it is only triggered "once."
+		 * You can just check for it directly and perform code whenever it happens.
+		 * @param ui Pointer to the @c user_input instance to send information on.
+		 *           Note that the @c user_input::update() method should already
+		 *           have been called before a call to @c handleInput().
+		 */
+		void handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept;
 
 		/**
 		 * Handles all widget signals by attempting to invoke the necessary script
@@ -575,6 +593,12 @@ namespace sfx {
 		 * The last known language set in \c _langdict.
 		 */
 		std::string _lastlang = "";
+
+		/**
+		 * Ensures that handleInput() errors are only written to the log once at a
+		 * time.
+		 */
+		bool _handleInputErrorLogged = false;
 	};
 }
 

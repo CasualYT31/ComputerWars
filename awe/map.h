@@ -478,6 +478,30 @@ namespace awe {
 		void setSelectedTile(const sf::Vector2u pos) noexcept;
 
 		/**
+		 * Moves the cursor up one tile, if possible.
+		 * If not possible, the call is ignored.
+		 */
+		void moveSelectedTileUp() noexcept;
+
+		/**
+		 * Moves the cursor down one tile, if possible.
+		 * If not possible, the call is ignored.
+		 */
+		void moveSelectedTileDown() noexcept;
+
+		/**
+		 * Moves the cursor left one tile, if possible.
+		 * If not possible, the call is ignored.
+		 */
+		void moveSelectedTileLeft() noexcept;
+
+		/**
+		 * Moves the cursor right one tile, if possible.
+		 * If not possible, the call is ignored.
+		 */
+		void moveSelectedTileRight() noexcept;
+
+		/**
 		 * Gets the position of the currently selected tile.
 		 * @return The X and Y location of the selected tile.
 		 */

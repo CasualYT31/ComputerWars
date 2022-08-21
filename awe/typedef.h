@@ -75,7 +75,7 @@ namespace awe {
 	 * The AngelScript typedef for a unit ID.
 	 * @sa @c awe::UnitID
 	 */
-	const std::string asUnitID = "uint ";
+	const std::string asUnitID = " uint ";
 
 	/**
 	 * Typedef representing an army ID.

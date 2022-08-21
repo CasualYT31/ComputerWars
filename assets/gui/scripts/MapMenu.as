@@ -9,12 +9,12 @@ void MapMenuSetUp() {
 	setBitmapButtonText("MapMenu.Menu.Quit", "quit");
 }
 
-void MapMenu_Save_Clicked() {
+void MapMenu_Save_Pressed() {
 	saveMap();
 	setGUI("Map");
 }
 
-void MapMenu_Quit_Clicked() {
+void MapMenu_Quit_Pressed() {
 	quitMap();
 	// quitMap() will switch to a different menu for us in the future.
 	setGUI("MainMenu");
