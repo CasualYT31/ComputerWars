@@ -34,6 +34,7 @@ sfx::scripts::scripts(const std::string& name) noexcept : _logger(name) {
         }
         RegisterStdString(_engine);
         RegisterScriptArray(_engine, false);
+        RegisterScriptDictionary(_engine);
         RegisterScriptDateTime(_engine);
         RegisterScriptFileSystem(_engine);
         _context = _engine->CreateContext();

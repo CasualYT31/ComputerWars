@@ -20,6 +20,7 @@ add_library(${PROJECT_NAME} STATIC
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring_utils.cpp
+	${angelscript_SOURCE_DIR}/add_on/scriptdictionary/scriptdictionary.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/scriptbuilder.cpp
 	${angelscript_SOURCE_DIR}/add_on/datetime/datetime.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptfile/scriptfilesystem.cpp
@@ -34,6 +35,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}
 	${angelscript_SOURCE_DIR}/angelscript/include
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/
+	${angelscript_SOURCE_DIR}/add_on/scriptdictionary/
 	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/
 	${angelscript_SOURCE_DIR}/add_on/datetime/
 	${angelscript_SOURCE_DIR}/add_on/scriptfile/
