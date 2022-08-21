@@ -30,13 +30,12 @@ int awe::game_engine::run(const std::string& file) noexcept {
 	if (r) return r;
 
 	// assign the language dictionary and target to the GUI object
-	_gui->setLanguageDictionary(_dictionary);
 	_gui->setTarget(*_renderer);
 	_gui->setGUI("Map");
 
 	// setup the game object straight away for development purposes
-	_currentGame = std::make_unique<awe::game>(file, _scripts, _countries, _tiles,
-		_units, _commanders);
+	_currentGame = std::make_unique<awe::game>(file, _gui, _scripts, _countries,
+		_tiles, _units, _commanders);
 	_currentGame->load();
 	_currentGame->setTileSpritesheet(_sprites->tile->normal);
 	_currentGame->setUnitSpritesheet(_sprites->unit->idle);

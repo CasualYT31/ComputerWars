@@ -454,8 +454,9 @@ namespace sfx {
 		 * @param w    The width of the container.
 		 * @param h    The height of the container.
 		 */
-		void _addVerticalLayout(const std::string& name, const float x,
-			const float y, const float w, const float h) noexcept;
+		void _addVerticalLayout(const std::string& name, const std::string& x,
+			const std::string& y, const std::string& w, const std::string& h)
+			noexcept;
 
 		// LISTBOX //
 

@@ -131,11 +131,11 @@
 			"durations": [0]
 		},
 		"saveicon": {
-			"frames": [[0,84,14,15]],
+			"frames": [[84,0,14,15]],
 			"durations": [0]
 		},
 		"quiticon": {
-			"frames": [[15,84,14,15]],
+			"frames": [[84,15,14,15]],
 			"durations": [0]
 		}
 	}

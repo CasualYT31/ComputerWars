@@ -137,6 +137,7 @@ int game(const std::string& file) {
     // game_engine has initialised the script interface and loaded the script files
     std::shared_ptr<sfx::gui> gui = std::make_shared<sfx::gui>(guiScripts);
     gui->addSpritesheet("icon", spritesheets->icon);
+    gui->setLanguageDictionary(dictionary);
 
     // initialise the countries
     std::shared_ptr<awe::bank<awe::country>> countries =

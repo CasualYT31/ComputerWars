@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 #include "engine.h"
 
-awe::game::game(const std::string& file,
+awe::game::game(const std::string& file, const std::shared_ptr<sfx::gui>& gui,
 	const std::shared_ptr<sfx::scripts>& ptr,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
@@ -31,7 +31,7 @@ awe::game::game(const std::string& file,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const std::string& name) noexcept :
 	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file),
-	_scripts(ptr) {
+	_scripts(ptr), _gui(gui) {
 	// Register the interface, then load the scripts.
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts("assets/scripts"); // Add parameter for this soon.
@@ -63,6 +63,8 @@ bool awe::game::save() noexcept {
 }
 
 void awe::game::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept {
+	// Drop all input if the current menu isn't "Map".
+	if (_gui->getGUI() != "Map") return;
 	if ((*ui)["left"]) {
 		_map.setSelectedTile(sf::Vector2u(_map.getSelectedTile().x - 1,
 			_map.getSelectedTile().y));

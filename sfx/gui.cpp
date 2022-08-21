@@ -121,7 +121,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine) noexcept {
 		asCALL_THISCALL_ASGLOBAL, this);
 	// register vertical layout container global functions
 	engine->RegisterGlobalFunction("void addVerticalLayout(const string& in, "
-		"const float x, const float y, const float w, const float h)",
+		"const string& in, const string& in, const string& in, const string& in)",
 		asMETHOD(sfx::gui, _addVerticalLayout), asCALL_THISCALL_ASGLOBAL, this);
 	// register listbox global functions
 	engine->RegisterGlobalFunction("void addListBox(const string& in, const float "
@@ -137,7 +137,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine) noexcept {
 
 void sfx::gui::setGUI(const std::string& newPanel) noexcept {
 	auto old = getGUI();
-	if (_gui.get(old)) _gui.get(old)->setVisible(false);
+	if (_gui.get(old)) {
+		_logger.write("Setting {} invisible.", old);
+		_gui.get(old)->setVisible(false);
+	}
 	try {
 		if (!_gui.get(newPanel)) throw tgui::Exception("GUI with name \"" +
 			newPanel + "\" does not exist.");
@@ -231,7 +234,6 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 				}
 				_widgetSprites[animatedSprite].animate(target, scaling);
 				try {
-					tgui::Texture tex;
 					auto iRect = sheet->getFrameRect(
 						_widgetSprites[animatedSprite].getSprite(),
 						_widgetSprites[animatedSprite].getCurrentFrame()
@@ -241,10 +243,12 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 					rect.top = iRect.top;
 					rect.width = iRect.width;
 					rect.height = iRect.height;
-					tex.load(sheet->getTexture(), rect);
-					_widgetPictures.push_back(tex);
+					_widgetPictures.emplace_back();
+					_widgetPictures.back().load(sheet->getTexture(), rect);
 				} catch (std::out_of_range&) {
 					updateTexture = false;
+					// Remove widget's sprite if its picture couldn't be allocated.
+					_widgetSprites.pop_back();
 				}
 			}
 		}
@@ -371,7 +375,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 		}
 		// container types - not all of them are here for future reference
 		if (type == "ChildWindow" || type == "Grid" || type == "Group" ||
-			type == "RadioButtonGroup") {
+			type == "RadioButtonGroup" || type == "VerticalLayout") {
 			auto w = _findWidget<Container>(widgetName);
 			_animate(target, scaling, w, widgetName, lang, animatedSprite);
 		}
@@ -449,7 +453,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	tgui::String type = widget->getWidgetType().toLower();
 	if (type == "button" || type == "editbox" || type == "label" ||
 		type == "picture" || type == "progressbar" || type == "radiobutton" ||
-		type == "spinbutton" || type == "panel") {
+		type == "spinbutton" || type == "panel" || type == "bitmapbutton") {
 		widget->getSignal("MousePressed").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("MouseReleased").
@@ -464,7 +468,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 			connectEx(&sfx::gui::signalHandler, this);
 	}
 	// connect bespoke signals
-	if (type == "button") {
+	if (type == "button" || type == "bitmapbutton") {
 		widget->getSignal("Pressed").connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "childwindow") {
 		widget->getSignal("MousePressed").
@@ -668,16 +672,16 @@ void sfx::gui::_setBitmapButtonSprite(const std::string& name,
 	}
 }
 
-void sfx::gui::_addVerticalLayout(const std::string& name, const float x,
-	const float y, const float w, const float h) noexcept {
+void sfx::gui::_addVerticalLayout(const std::string& name, const std::string& x,
+	const std::string& y, const std::string& w, const std::string& h) noexcept {
 	std::vector<std::string> fullname;
 	if (_findWidget<Widget>(name, &fullname)) {
 		_logger.error("Attempted to create a new vertical layout container with "
 			"name \"{}\": a widget with that name already exists!", name);
 	} else {
 		auto widget = tgui::VerticalLayout::create();
-		widget->setPosition(tgui::Vector2f(x, y));
-		widget->setSize(tgui::Vector2f(w, h));
+		widget->setPosition(x.c_str(), y.c_str());
+		widget->setSize(w.c_str(), h.c_str());
 		auto container = _gui.get<Container>(fullname[0]);
 		if (!container) {
 			_logger.error("Attempted to add a vertical layout container \"{}\" to "
