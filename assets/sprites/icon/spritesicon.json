@@ -129,6 +129,14 @@
 		"nostatusicon": {
 			"frames": [[36,32,8,8]],
 			"durations": [0]
+		},
+		"saveicon": {
+			"frames": [[0,84,14,15]],
+			"durations": [0]
+		},
+		"quiticon": {
+			"frames": [[15,84,14,15]],
+			"durations": [0]
 		}
 	}
 }
