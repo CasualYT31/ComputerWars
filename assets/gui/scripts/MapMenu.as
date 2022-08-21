@@ -16,6 +16,4 @@ void MapMenu_Save_Pressed() {
 
 void MapMenu_Quit_Pressed() {
 	quitMap();
-	// quitMap() will switch to a different menu for us in the future.
-	setGUI("MainMenu");
 }

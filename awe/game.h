@@ -122,6 +122,12 @@ namespace awe {
 		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
 
 		/**
+		 * Invokes the game script's @c handleInput() function.
+		 * @param controls The object handle to the control dictionary.
+		 */
+		void handleInput(CScriptDictionary* controls) noexcept;
+
+		/**
 		 * This drawable's \c animate() method.
 		 * @param  target The target to render the map to.
 		 * @return \c FALSE, for now.

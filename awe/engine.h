@@ -65,13 +65,11 @@ namespace awe {
 
 		/**
 		 * Registers the script interfaces and loads the script files.
-		 * \c setScripts() must be called before calling this method. If either
-		 * \c scripts pointers are \c nullptr, an error will be logged.
-		 * @param folder    The folder containing the game script files to load.
+		 * \c setScripts() must be called before calling this method. If the
+		 * \c scripts pointer is \c nullptr, an error will be logged.
 		 * @param guiFolder The folder containing the GUI script files to load.
 		 */
-		void initialiseScripts(const std::string& folder,
-			const std::string& guiFolder) noexcept;
+		void initialiseScripts(const std::string& guiFolder) noexcept;
 
 		/**
 		 * Callback given to \c sfx::scripts::registerInterface() to register
@@ -186,11 +184,9 @@ namespace awe {
 
 		/**
 		 * Sets the engine's available scripts.
-		 * @param ptr    Pointer to the game scripts.
 		 * @param guiPtr Pointer to the GUI scripts.
 		 */
-		void setScripts(const std::shared_ptr<sfx::scripts>& ptr,
-			const std::shared_ptr<sfx::scripts>& guiPtr) noexcept;
+		void setScripts(const std::shared_ptr<sfx::scripts>& guiPtr) noexcept;
 
 		/**
 		 * Sets the engine's available menus.
@@ -292,6 +288,13 @@ namespace awe {
 		 * @sa \c _script_loadMusicConfig()
 		 */
 		void _script_saveRendererConfig();
+
+		/**
+		 * Loads a map.
+		 * @param file The map file to load.
+		 * @param menu The menu to switch to once loading finishes.
+		 */
+		void _script_loadMap(const std::string& file, const std::string& menu);
 
 		/**
 		 * Saves the current map.
@@ -413,11 +416,6 @@ namespace awe {
 		std::shared_ptr<awe::spritesheets> _sprites;
 
 		/**
-		 * Pointer to the @c scripts object containing all the game scripts.
-		 */
-		std::shared_ptr<sfx::scripts> _scripts;
-
-		/**
 		 * Pointer to the @c scripts object containing all the GUI scripts.
 		 */
 		std::shared_ptr<sfx::scripts> _guiScripts;
@@ -426,5 +424,13 @@ namespace awe {
 		 * Pointer to the GUI object containing all the menus.
 		 */
 		std::shared_ptr<sfx::gui> _gui;
+
+		//================================
+		//==========ENGINE DATA===========
+		//================================
+		/**
+		 * The name of the menu that was showing before a map was loaded.
+		 */
+		std::string _menuBeforeMapLoad;
 	};
 }

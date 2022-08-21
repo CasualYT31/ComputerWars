@@ -15,7 +15,7 @@ void MainMenuSetUp() {
 	}
 }
 
-void MainMenu_FileSelect_ItemSelected() {
+void MainMenu_FileSelect_MouseReleased() {
 	string item = getListBoxSelectedItem("FileSelect");
-	info(item);
+	loadMap("assets/map/" + item, "Map");
 }

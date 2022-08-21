@@ -28,20 +28,7 @@ awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) 
 int awe::game_engine::run(const std::string& file) noexcept {
 	auto r = _initCheck();
 	if (r) return r;
-
-	// assign the language dictionary and target to the GUI object
 	_gui->setTarget(*_renderer);
-	_gui->setGUI("Map");
-
-	// setup the game object straight away for development purposes
-	_currentGame = std::make_unique<awe::game>(file, _gui, _scripts, _countries,
-		_tiles, _units, _commanders);
-	_currentGame->load();
-	_currentGame->setTileSpritesheet(_sprites->tile->normal);
-	_currentGame->setUnitSpritesheet(_sprites->unit->idle);
-	_currentGame->setIconSpritesheet(_sprites->icon);
-	_currentGame->setCOSpritesheet(_sprites->CO);
-	_currentGame->setFont((*_fonts)["dialogue"]);
 
 	try {
 		while (_renderer->isOpen()) {
@@ -55,6 +42,7 @@ int awe::game_engine::run(const std::string& file) noexcept {
 			// the click and so safely ignores it for that iteration.
 			_userinput->update();
 			_gui->handleInput(_userinput);
+			_userinput->update();
 			// Now handle the events.
 			sf::Event event;
 			while (_renderer->pollEvent(event)) {
@@ -82,17 +70,14 @@ int awe::game_engine::run(const std::string& file) noexcept {
 
 // script interface
 
-void awe::game_engine::initialiseScripts(const std::string& folder,
-	const std::string& guiFolder) noexcept {
-	if (_scripts && _guiScripts) {
+void awe::game_engine::initialiseScripts(const std::string& guiFolder) noexcept {
+	if (_guiScripts) {
 		// Add the registrants, then only load scripts for GUI.
-		_scripts->addRegistrant(this);
-		_scripts->addRegistrant(_gui.get());
 		_guiScripts->addRegistrant(this);
 		_guiScripts->loadScripts(guiFolder);
 	} else {
-		_logger.error("initialiseScripts() was called before setting both game "
-			"and GUI scripts objects!");
+		_logger.error("initialiseScripts() was called before setting the GUI "
+			"scripts object!");
 	}
 }
 
@@ -176,6 +161,10 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine) noexcept {
 	engine->RegisterGlobalFunction("void saveUIConfig()",
 		asMETHOD(awe::game_engine, _script_saveUIConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction(
+		"void loadMap(const string& in, const string& in)",
+		asMETHOD(awe::game_engine, _script_loadMap),
+		asCALL_THISCALL_ASGLOBAL, this);
 	engine->RegisterGlobalFunction("void saveMap()",
 		asMETHOD(awe::game_engine, _script_saveMap),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -238,6 +227,34 @@ void awe::game_engine::_script_saveUIConfig() {
 	_userinput->save();
 }
 
+void awe::game_engine::_script_loadMap(const std::string& file,
+	const std::string& menu) {
+	// If there is already a map loaded, log an error, otherwise continue.
+	if (_currentGame) {
+		_logger.error("Attempted to load a new map \"{}\" when map \"{}\" was "
+			"already loaded!", file, "implement getMapName() in game");
+	} else {
+		// Make a new scripts instance for this new game.
+		std::shared_ptr<sfx::scripts> gameScripts =
+			std::make_shared<sfx::scripts>();
+		gameScripts->addRegistrant(this);
+		gameScripts->addRegistrant(_gui.get());
+		// Create the game.
+		_currentGame = std::make_unique<awe::game>(file, _gui, gameScripts,
+			_countries, _tiles, _units, _commanders);
+		_currentGame->load();
+		_currentGame->setTileSpritesheet(_sprites->tile->normal);
+		_currentGame->setUnitSpritesheet(_sprites->unit->idle);
+		_currentGame->setIconSpritesheet(_sprites->icon);
+		_currentGame->setCOSpritesheet(_sprites->CO);
+		_currentGame->setFont((*_fonts)["dialogue"]);
+		// Remember what the last menu was so that we can easily go back to it when
+		// the user quits.
+		_menuBeforeMapLoad = _gui->getGUI();
+		_gui->setGUI(menu);
+	}
+}
+
 void awe::game_engine::_script_saveMap() {
 	if (_currentGame) {
 		if (!_currentGame->save()) {
@@ -251,15 +268,15 @@ void awe::game_engine::_script_saveMap() {
 void awe::game_engine::_script_quitMap() {
 	if (!_currentGame) {
 		_logger.warning("Called \"quitMap()\" without there being a map loaded.");
+	} else {
+		_currentGame = nullptr;
+		_gui->setGUI(_menuBeforeMapLoad);
 	}
-	_currentGame = nullptr;
 }
 
 void awe::game_engine::_script_handleMapInput(CScriptDictionary* controls) {
-	if (controls) {
-		if (_scripts->functionExists("handleInput")) {
-			_scripts->callFunction("handleInput", controls);
-		}
+	if (controls && _currentGame) {
+		_currentGame->handleInput(controls);
 		// When finished with the object handle it must be released.
 		controls->Release();
 	}
@@ -288,7 +305,7 @@ int awe::game_engine::_initCheck() const noexcept {
 	} else {
 		_sprites->test(errstring);
 	}
-	if (!_scripts) errstring += "scripts\n";
+	if (!_guiScripts) errstring += "gui scripts\n";
 	if (!_gui) errstring += "gui\n";
 	if (errstring.length()) {
 		_logger.error("Fatal error: could not run the game engine due to the "
@@ -378,9 +395,8 @@ void awe::game_engine::setSpritesheets(
 	_sprites = ptr;
 }
 
-void awe::game_engine::setScripts(const std::shared_ptr<sfx::scripts>& ptr,
-	const std::shared_ptr<sfx::scripts>& guiPtr)	noexcept {
-	_scripts = ptr;
+void awe::game_engine::setScripts(const std::shared_ptr<sfx::scripts>& guiPtr)
+	noexcept {
 	_guiScripts = guiPtr;
 }
 

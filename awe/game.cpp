@@ -41,16 +41,21 @@ void awe::game::registerInterface(asIScriptEngine* engine) noexcept {
 	// VECTOR2 TYPE
 	engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());
-	engine->RegisterObjectProperty("Vector2", "uint x", asOFFSET(sf::Vector2u, x));
-	engine->RegisterObjectProperty("Vector2", "uint y", asOFFSET(sf::Vector2u, y));
+	engine->RegisterObjectProperty("Vector2", "uint x",
+		asOFFSET(sf::Vector2u, x));
+	engine->RegisterObjectProperty("Vector2", "uint y",
+		asOFFSET(sf::Vector2u, y));
 
 	// MAP FUNCTIONS
 	engine->RegisterGlobalFunction("void moveSelectedTileUp()",
-		asMETHOD(awe::map, moveSelectedTileUp), asCALL_THISCALL_ASGLOBAL, &_map);
+		asMETHOD(awe::map, moveSelectedTileUp),
+		asCALL_THISCALL_ASGLOBAL, &_map);
 	engine->RegisterGlobalFunction("void moveSelectedTileDown()",
-		asMETHOD(awe::map, moveSelectedTileDown), asCALL_THISCALL_ASGLOBAL, &_map);
+		asMETHOD(awe::map, moveSelectedTileDown),
+		asCALL_THISCALL_ASGLOBAL, &_map);
 	engine->RegisterGlobalFunction("void moveSelectedTileLeft()",
-		asMETHOD(awe::map, moveSelectedTileLeft), asCALL_THISCALL_ASGLOBAL, &_map);
+		asMETHOD(awe::map, moveSelectedTileLeft),
+		asCALL_THISCALL_ASGLOBAL, &_map);
 	engine->RegisterGlobalFunction("void moveSelectedTileRight()",
 		asMETHOD(awe::map, moveSelectedTileRight),
 		asCALL_THISCALL_ASGLOBAL, &_map);
@@ -95,6 +100,12 @@ void awe::game::setCOSpritesheet(
 
 void awe::game::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
 	_map.setFont(font);
+}
+
+void awe::game::handleInput(CScriptDictionary* controls) noexcept {
+	if (_scripts->functionExists("handleInput")) {
+		_scripts->callFunction("handleInput", controls);
+	}
 }
 
 bool awe::game::animate(const sf::RenderTarget& target, const double scaling)

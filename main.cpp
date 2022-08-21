@@ -125,10 +125,7 @@ int game(const std::string& file) {
 
     // initialise the script engine, but let game_engine register the interface and
     // load the script files
-    // Initialise scripts objects.
     std::shared_ptr<sfx::scripts> guiScripts =
-        std::make_shared<sfx::scripts>();
-    std::shared_ptr<sfx::scripts> gameScripts =
         std::make_shared<sfx::scripts>();
 
     // initialise the GUI
@@ -192,7 +189,7 @@ int game(const std::string& file) {
     gameLoop.setRenderer(renderer);
     gameLoop.setUserInput(userInput);
     gameLoop.setSpritesheets(spritesheets);
-    gameLoop.setScripts(gameScripts, guiScripts);
+    gameLoop.setScripts(guiScripts);
     gameLoop.setGUI(gui);
     gameLoop.setCountries(countries);
     gameLoop.setWeathers(weathers);
@@ -202,7 +199,7 @@ int game(const std::string& file) {
     gameLoop.setTiles(tiles);
     gameLoop.setUnits(units);
     gameLoop.setCommanders(commanders);
-    gameLoop.initialiseScripts("assets/scripts", "assets/gui/scripts");
+    gameLoop.initialiseScripts("assets/gui/scripts");
 
     // now load gui
     gui->load("assets/gui/menus.json");
