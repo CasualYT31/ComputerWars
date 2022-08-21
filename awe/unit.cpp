@@ -49,7 +49,7 @@ sf::Vector2u awe::unit::getPosition() const noexcept {
 }
 
 bool awe::unit::isOnMap() const noexcept {
-	return loadedOnto() != 0;
+	return loadedOnto() == 0;
 }
 
 void awe::unit::setHP(const awe::HP hp) noexcept {

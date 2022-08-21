@@ -554,9 +554,8 @@ awe::ArmyID awe::map::getTileOwner(const sf::Vector2u pos) const noexcept {
 
 awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u pos) const noexcept {
 	if (_isOutOfBounds(pos)) {
-		_logger.error("getUnitOnTile operation failed: tile at position ({},{}) "
-			"is out of bounds with the map's size of ({},{})!",
-			pos.x, pos.y, getMapSize().x, getMapSize().y);
+		_logger.error("getUnitOnTile operation failed: tile at position {} is out "
+			"of bounds with the map's size of {}!", pos, getMapSize());
 		return 0;
 	}
 	auto u = _tiles[pos.x][pos.y].getUnit();
@@ -752,7 +751,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		y < _visiblePortion.top + _visiblePortion.height; y++) {
 		for (sf::Uint32 x = _visiblePortion.left;
 			x < _visiblePortion.left + _visiblePortion.width; x++) {
-			if (_tiles[x][y].getUnit())
+			if (_tiles[x][y].getUnit() && isUnitOnMap(_tiles[x][y].getUnit()))
 				target.draw(_units.at(_tiles[x][y].getUnit()), states);
 		}
 	}

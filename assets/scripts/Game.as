@@ -1,3 +1,5 @@
 void tileHasBeenSelected(Vector2 tile) {
-	info(formatInt(tile.x) + ", " + formatInt(tile.y));
+	if (getUnitOnTile(tile) == 0) {
+		setGUI("MainMenu");
+	}
 }
