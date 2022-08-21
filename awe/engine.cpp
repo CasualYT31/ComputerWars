@@ -235,8 +235,8 @@ void awe::game_engine::_script_loadMap(const std::string& file,
 			"already loaded!", file, "implement getMapName() in game");
 	} else {
 		// Make a new scripts instance for this new game.
-		std::shared_ptr<sfx::scripts> gameScripts =
-			std::make_shared<sfx::scripts>();
+		std::shared_ptr<engine::scripts> gameScripts =
+			std::make_shared<engine::scripts>();
 		gameScripts->addRegistrant(this);
 		gameScripts->addRegistrant(_gui.get());
 		// Create the game.
@@ -395,7 +395,7 @@ void awe::game_engine::setSpritesheets(
 	_sprites = ptr;
 }
 
-void awe::game_engine::setScripts(const std::shared_ptr<sfx::scripts>& guiPtr)
+void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& guiPtr)
 	noexcept {
 	_guiScripts = guiPtr;
 }

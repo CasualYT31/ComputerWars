@@ -70,8 +70,8 @@ protected:
 	/**
 	 * The \c scripts object containing the signal handlers.
 	 */
-	std::shared_ptr<sfx::scripts> _scripts =
-		std::make_shared<sfx::scripts>();
+	std::shared_ptr<engine::scripts> _scripts =
+		std::make_shared<engine::scripts>();
 
 	/**
 	 * The \c renderer object to test the GUI class with.

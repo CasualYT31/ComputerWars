@@ -38,7 +38,7 @@ namespace awe {
 	 * Class which represents a map with game logic and user input.
 	 * @sa @c awe::map
 	 */
-	class game : sf::NonCopyable, public sfx::script_registrant,
+	class game : sf::NonCopyable, public engine::script_registrant,
 		public sfx::animated_drawable {
 	public:
 		/**
@@ -59,7 +59,7 @@ namespace awe {
 		 * @sa @c engine::logger
 		 */
 		game(const std::string& file, const std::shared_ptr<sfx::gui>& gui,
-			 const std::shared_ptr<sfx::scripts>& ptr,
+			 const std::shared_ptr<engine::scripts>& ptr,
 			 const std::shared_ptr<awe::bank<awe::country>>& countries,
 			 const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			 const std::shared_ptr<awe::bank<awe::unit_type>>& units,
@@ -70,7 +70,7 @@ namespace awe {
 		/**
 		 * Initialise the script interface for maps.
 		 * @param engine Pointer to the engine to register the interface with.
-		 * @sa    \c sfx::scripts::registerInterface()
+		 * @sa    \c engine::scripts::registerInterface()
 		 */
 		void registerInterface(asIScriptEngine* engine) noexcept;
 
@@ -163,7 +163,7 @@ namespace awe {
 		/**
 		 * Stores all the scripts needed to run a game.
 		 */
-		std::shared_ptr<sfx::scripts> _scripts;
+		std::shared_ptr<engine::scripts> _scripts;
 
 		/**
 		 * Used to identify which menu is currently being displayed.

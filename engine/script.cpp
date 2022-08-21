@@ -23,10 +23,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "script.h"
 #include <filesystem>
 
-sfx::scripts::scripts(const std::string& name) noexcept : _logger(name) {
+engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
     _engine = asCreateScriptEngine();
     if (_engine) {
-        int r = _engine->SetMessageCallback(asMETHOD(sfx::scripts,
+        int r = _engine->SetMessageCallback(asMETHOD(engine::scripts,
             scriptMessageCallback), this, asCALL_THISCALL);
         if (r < 0) {
             _logger.error("Fatal error: failed to assign the message callback "
@@ -39,7 +39,7 @@ sfx::scripts::scripts(const std::string& name) noexcept : _logger(name) {
         RegisterScriptFileSystem(_engine);
         _context = _engine->CreateContext();
         if (_context) {
-            if ((r = _context->SetExceptionCallback(asMETHOD(sfx::scripts,
+            if ((r = _context->SetExceptionCallback(asMETHOD(engine::scripts,
                 contextExceptionCallback), this, asCALL_THISCALL)) < 0) {
                 _logger.error("Fatal error: failed to assign the exception "
                     "callback routine - this is likely a faulty engine build. "
@@ -56,12 +56,12 @@ sfx::scripts::scripts(const std::string& name) noexcept : _logger(name) {
     }
 }
 
-sfx::scripts::~scripts() noexcept {
+engine::scripts::~scripts() noexcept {
     if (_context) _context->Release();
     if (_engine) _engine->ShutDownAndRelease();
 }
 
-void sfx::scripts::addRegistrant(sfx::script_registrant* const r) noexcept {
+void engine::scripts::addRegistrant(engine::script_registrant* const r) noexcept {
     if (r) {
         _registrants.insert(r);
     } else {
@@ -69,7 +69,7 @@ void sfx::scripts::addRegistrant(sfx::script_registrant* const r) noexcept {
     }
 }
 
-void sfx::scripts::scriptMessageCallback(const asSMessageInfo* msg, void* param)
+void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg, void* param)
     noexcept {
     if (msg->type == asMSGTYPE_INFORMATION) {
         _logger.write("INFO: (@{}:{},{}): {}.",
@@ -83,7 +83,7 @@ void sfx::scripts::scriptMessageCallback(const asSMessageInfo* msg, void* param)
     }
 }
 
-void sfx::scripts::contextExceptionCallback(asIScriptContext* context)
+void engine::scripts::contextExceptionCallback(asIScriptContext* context)
     noexcept {
     if (!context) return;
     _logger.error("RUNTIME ERROR: (@{}:{}:{}): {}.",
@@ -92,7 +92,7 @@ void sfx::scripts::contextExceptionCallback(asIScriptContext* context)
         context->GetExceptionLineNumber(), context->GetExceptionString());
 }
 
-bool sfx::scripts::loadScripts(std::string folder) noexcept {
+bool engine::scripts::loadScripts(std::string folder) noexcept {
     // First check if the interface has been registered, and if not, register it.
     if (_registrants.size() > 0) {
         _logger.write("Registering the script interface...");
@@ -139,15 +139,15 @@ bool sfx::scripts::loadScripts(std::string folder) noexcept {
     return true;
 }
 
-const std::string& sfx::scripts::getScriptsFolder() const noexcept {
+const std::string& engine::scripts::getScriptsFolder() const noexcept {
     return _scriptsFolder;
 }
 
-bool sfx::scripts::functionExists(const std::string& name) const noexcept {
+bool engine::scripts::functionExists(const std::string& name) const noexcept {
     return _engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
 }
 
-bool sfx::scripts::callFunction(const std::string& name) noexcept {
+bool engine::scripts::callFunction(const std::string& name) noexcept {
     if (!_callFunction_TemplateCall) {
         // if this method is being called directly and not from the template
         // version then we must set up the context
@@ -178,11 +178,11 @@ bool sfx::scripts::callFunction(const std::string& name) noexcept {
     return true;
 }
 
-CScriptDictionary* sfx::scripts::createDictionary() noexcept {
+CScriptDictionary* engine::scripts::createDictionary() noexcept {
     return CScriptDictionary::Create(_engine);
 }
 
-bool sfx::scripts::_setupContext(const std::string& name) noexcept {
+bool engine::scripts::_setupContext(const std::string& name) noexcept {
     if (!_engine) return false;
     asIScriptFunction* func =
         _engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
@@ -201,7 +201,7 @@ bool sfx::scripts::_setupContext(const std::string& name) noexcept {
     return true;
 }
 
-void sfx::scripts::_resetCallFunctionVariables() noexcept {
+void engine::scripts::_resetCallFunctionVariables() noexcept {
     _callFunction_TemplateCall = false;
     _argumentID = 0;
 }

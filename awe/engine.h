@@ -42,7 +42,7 @@ namespace awe {
 	/**
 	 * The game engine class.
 	 */
-	class game_engine : sf::NonCopyable, public sfx::script_registrant {
+	class game_engine : sf::NonCopyable, public engine::script_registrant {
 	public:
 		/**
 		 * Initialises the internal logger object.
@@ -72,13 +72,13 @@ namespace awe {
 		void initialiseScripts(const std::string& guiFolder) noexcept;
 
 		/**
-		 * Callback given to \c sfx::scripts::registerInterface() to register
+		 * Callback given to \c engine::scripts::registerInterface() to register
 		 * game engine functions with a \c scripts object.
 		 * For a full rundown of the interface, please read <a
 		 * href="https://github.com/CasualYT31/ComputerWars/wiki/Script-Interface"
 		 * target="_blank">the GitHub repository wiki</a>.
 		 * @param engine Pointer to the engine to register the interface with.
-		 * @sa    \c sfx::scripts::registerInterface()
+		 * @sa    \c engine::scripts::registerInterface()
 		 */
 		void registerInterface(asIScriptEngine* engine) noexcept;
 
@@ -186,7 +186,7 @@ namespace awe {
 		 * Sets the engine's available scripts.
 		 * @param guiPtr Pointer to the GUI scripts.
 		 */
-		void setScripts(const std::shared_ptr<sfx::scripts>& guiPtr) noexcept;
+		void setScripts(const std::shared_ptr<engine::scripts>& guiPtr) noexcept;
 
 		/**
 		 * Sets the engine's available menus.
@@ -418,7 +418,7 @@ namespace awe {
 		/**
 		 * Pointer to the @c scripts object containing all the GUI scripts.
 		 */
-		std::shared_ptr<sfx::scripts> _guiScripts;
+		std::shared_ptr<engine::scripts> _guiScripts;
 		
 		/**
 		 * Pointer to the GUI object containing all the menus.

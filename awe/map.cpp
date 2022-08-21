@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "map.h"
+#include "fmtformatter.h"
 
 awe::map::map(const std::string& name) noexcept : _logger(name) {}
 

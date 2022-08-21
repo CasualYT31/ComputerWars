@@ -125,8 +125,8 @@ int game(const std::string& file) {
 
     // initialise the script engine, but let game_engine register the interface and
     // load the script files
-    std::shared_ptr<sfx::scripts> guiScripts =
-        std::make_shared<sfx::scripts>();
+    std::shared_ptr<engine::scripts> guiScripts =
+        std::make_shared<engine::scripts>();
 
     // initialise the GUI
     // let game_engine perform gui->load()

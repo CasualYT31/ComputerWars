@@ -35,9 +35,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "scriptfilesystem.h"
 #include "logger.h"
 #include <type_traits>
-#include "fmtformatter.h"
 
-namespace sfx {
+namespace engine {
 	/**
 	 * Interface which allows a subclass to register functions, object types, etc.
 	 * with a \c scripts object.
@@ -86,7 +85,7 @@ namespace sfx {
 		 * @param name The name to give this particular instantiation within the
 		 *             log file. Defaults to "scripts."
 		 * @sa    \c engine::logger
-		 * @sa    \c sfx::scripts::registerInterface()
+		 * @sa    \c engine::scripts::registerInterface()
 		 */
 		scripts(const std::string& name = "scripts") noexcept;
 
@@ -113,7 +112,7 @@ namespace sfx {
 		 * @param   r Pointer to the script registrant to add. If @c nullptr is
 		 *            provided, it won't be added and an error will be logged.
 		 */
-		void addRegistrant(sfx::script_registrant* const r)
+		void addRegistrant(engine::script_registrant* const r)
 			noexcept;
 
 		/**
@@ -149,7 +148,7 @@ namespace sfx {
 		 * @return  \c TRUE if successful, \c FALSE if not. Note that this method
 		 *          returns \c TRUE even if the given folder did not exist or could
 		 *          not be read.
-		 * @sa      sfx::scripts::addRegistrant()
+		 * @sa      engine::scripts::addRegistrant()
 		 */
 		bool loadScripts(std::string folder = "") noexcept;
 
@@ -229,25 +228,6 @@ namespace sfx {
 		void _resetCallFunctionVariables() noexcept;
 
 		/**
-		 * Used to dereference a pointer to avoid template errors with fmt in
-		 * @c callFunction().
-		 * The second form of this method simply returns @c value without
-		 * dereferencing so that @c callFunction() can differentiate between the
-		 * two.
-		 * @param  value The pointer to dereference.
-		 * @return The value stored at the pointer.
-		 */
-		template<typename T>
-		static inline T _fmtValue(T* value) noexcept;
-
-		/**
-		 * Returns @c value.
-		 * @sa sfx::scripts::_fmtValue(T*)
-		 */
-		template<typename T>
-		static inline T _fmtValue(T value) noexcept;
-
-		/**
 		 * The internal logger object.
 		 */
 		mutable engine::logger _logger;
@@ -283,22 +263,12 @@ namespace sfx {
 		/**
 		 * The set of registrants.
 		 */
-		std::set<sfx::script_registrant*> _registrants;
+		std::set<engine::script_registrant*> _registrants;
 	};
 }
 
-template<typename T>
-inline T sfx::scripts::_fmtValue(T* value) noexcept {
-	return *value;
-}
-
-template<typename T>
-inline T sfx::scripts::_fmtValue(T value) noexcept {
-	return value;
-}
-
 template<typename T, typename... Ts>
-bool sfx::scripts::callFunction(const std::string& name, T value, Ts... values)
+bool engine::scripts::callFunction(const std::string& name, T value, Ts... values)
 	noexcept {
 	if (!_callFunction_TemplateCall) {
 		// first call to the template version, setup the context

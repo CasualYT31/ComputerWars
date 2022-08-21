@@ -41,17 +41,40 @@ FetchContent_Declare(sfml
 )
 FetchContent_MakeAvailable(sfml)
 
+# AngelScript
+FetchContent_Declare(angelscript
+	URL https://www.angelcode.com/angelscript/sdk/files/angelscript_2.35.0.zip
+	SOURCE_SUBDIR angelscript/projects/cmake
+)
+FetchContent_MakeAvailable(angelscript)
+# to add add-ons, simply add relevant files to below add_library statement
+
 add_library(${PROJECT_NAME} STATIC
 	"logger.cpp"
 	"safejson.cpp"
 	"language.cpp"
-	"file.cpp")
+	"file.cpp"
+	"script.cpp"
+	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp
+	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.cpp
+	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring_utils.cpp
+	${angelscript_SOURCE_DIR}/add_on/scriptdictionary/scriptdictionary.cpp
+	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/scriptbuilder.cpp
+	${angelscript_SOURCE_DIR}/add_on/datetime/datetime.cpp
+	${angelscript_SOURCE_DIR}/add_on/scriptfile/scriptfilesystem.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}
 	${SystemProperties_INCLUDE_DIRS}
 	${Boxer_INCLUDE_DIRS}
 	${spdlog_INCLUDE_DIRS}
 	${nlohmann_json_INCLUDE_DIRS}
-	${sfml_INCLUDE_DIRS})
+	${sfml_INCLUDE_DIRS}
+	${angelscript_SOURCE_DIR}/angelscript/include
+	${angelscript_SOURCE_DIR}/add_on/scriptarray/
+	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/
+	${angelscript_SOURCE_DIR}/add_on/scriptdictionary/
+	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/
+	${angelscript_SOURCE_DIR}/add_on/datetime/
+	${angelscript_SOURCE_DIR}/add_on/scriptfile/)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_link_libraries(${PROJECT_NAME}
 	SystemProperties
@@ -61,7 +84,8 @@ target_link_libraries(${PROJECT_NAME}
 	sfml-audio
 	sfml-window
 	sfml-graphics
-	sfml-system)
+	sfml-system
+	angelscript)
 
 # expose public includes to other projects through cache variable
 set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
@@ -70,6 +94,7 @@ set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
 	${spdlog_INCLUDE_DIRS}
 	${nlohmann_json_INCLUDE_DIRS}
 	${sfml_INCLUDE_DIRS}
+	${angelscript_INCLUDE_DIRS}
 	CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 # copy SFML's openal.dll file depending on build type

@@ -43,7 +43,7 @@ namespace sfx {
 	 * will be the menu that is displayed by the @c gui instance once
 	 * <tt>load()</tt>ed.
 	 */
-	class gui : public sfx::animated_drawable, public sfx::script_registrant,
+	class gui : public sfx::animated_drawable, public engine::script_registrant,
 		public engine::json_script {
 	public:
 		/**
@@ -64,18 +64,18 @@ namespace sfx {
 		 *                log file. Defaults to "gui."
 		 * @sa    \c engine::logger
 		 */
-		gui(const std::shared_ptr<sfx::scripts>& scripts,
+		gui(const std::shared_ptr<engine::scripts>& scripts,
 			const std::string& name = "gui") noexcept;
 
 		/**
-		 * Callback given to \c sfx::scripts::registerInterface() to register
+		 * Callback given to \c engine::scripts::registerInterface() to register
 		 * GUI functions with a \c scripts object.
 		 * @warning Do not allow scripts to destroy widgets! At least not widgets
 		 *          from the current GUI. This is because my animated sprite code
 		 *          for BitmapButtons and Pictures relies on the order of widget
 		 *          retrieval to remain the same.
 		 * @param   engine Pointer to the engine to register the interface with.
-		 * @sa      \c sfx::scripts::registerInterface()
+		 * @sa      \c engine::scripts::registerInterface()
 		 */
 		void registerInterface(asIScriptEngine* engine) noexcept;
 
@@ -147,7 +147,7 @@ namespace sfx {
 		 * function.
 		 * In order to react to widget signals (such as button presses), nothing
 		 * has to be changed within any JSON script. Instead, within one of your
-		 * \c sfx::scripts, the following function should be defined:
+		 * \c engine::scripts, the following function should be defined:
 		 * \code
 		 * void GUIName_WidgetName_SignalName() {
 		 *     // code
@@ -547,7 +547,7 @@ namespace sfx {
 		/**
 		 * Pointer to the scripts object containing the signal handler functions.
 		 */
-		std::shared_ptr<sfx::scripts> _scripts = nullptr;
+		std::shared_ptr<engine::scripts> _scripts = nullptr;
 
 		/**
 		 * Pointer to the animated spritesheets that can be used with the GUI
