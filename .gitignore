@@ -7,3 +7,5 @@ out/
 build/
 .vscode/
 *.log
+*.html
+*.htm
