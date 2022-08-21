@@ -5,7 +5,7 @@
 	"y": 137,
 	"framerate": 0,
 	"caption": "Computer Wars",
-	"icon": "./assets/renderer/icon.png",
+	"icon": "./renderer/icon.png",
 	"close": false,
 	"def": true,
 	"fullscreen": false,

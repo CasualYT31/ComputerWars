@@ -1,5 +1,5 @@
 {
-	"basepath": "assets/sprites/tile/fow/tilefow",
+	"basepath": "sprites/tile/fow/tilefow",
 	"format": "png",
 	"frames": 1,
 	"framerate": 0.0,

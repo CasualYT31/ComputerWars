@@ -1,5 +1,5 @@
 {
-	"path": "assets/sprites/unit/idle/unitidle.png",
+	"path": "sprites/unit/idle/unitidle.png",
 	"frames": 5,
 	"framerate": 6.25,
 	"sprites": {

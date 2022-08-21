@@ -1,0 +1,32 @@
+{
+  "languages": "lang/langs.json",
+  "fonts": "fonts/fonts.json",
+  "sounds": "audio/sounds.json",
+  "music": "audio/music.json",
+  "renderer": "renderer/renderer.json",
+  "userinput": "userinput/userinput.json",
+  "spritesheets": {
+    "co": "sprites/co/spritesco.json",
+    "unit": {
+      "idle": "sprites/unit/idle/spritesunitidle.json",
+      "pictures": "sprites/unit_picture/spritesunit_picture.json"
+    },
+    "tile": {
+      "normal": "sprites/tile/normal/spritestilenormal.json",
+      "normalpictures": "sprites/tile_picture/normal/spritestile_picturenormal.json"
+    },
+    "icon": "sprites/icon/spritesicon.json",
+    "gui": "sprites/gui/spritesgui.json"
+  },
+  "countries": "property/country.json",
+  "weathers": "property/weather.json",
+  "environments": "property/environment.json",
+  "movements": "property/movement.json",
+  "terrains": "property/terrain.json",
+  "tiles": "property/tile.json",
+  "units": "property/unit.json",
+  "commanders": "property/co.json",
+  "guiscripts": "gui/scripts",
+  "gui": "gui/menus.json",
+  "gamescripts": "scripts"
+}

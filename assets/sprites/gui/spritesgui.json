@@ -1,5 +1,5 @@
 {
-	"path": "assets/sprites/gui/gui.png",
+	"path": "sprites/gui/gui.png",
 	"sprites": {
 		"bg": {
 			"frames": [

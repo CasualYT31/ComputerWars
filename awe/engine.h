@@ -37,12 +37,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "bank.h"
 #include "spritesheets.h"
 #include "game.h"
+#include <filesystem>
 
 namespace awe {
 	/**
 	 * The game engine class.
 	 */
-	class game_engine : sf::NonCopyable, public engine::script_registrant {
+	class game_engine : sf::NonCopyable, public engine::script_registrant,
+		public engine::json_script {
 	public:
 		/**
 		 * Initialises the internal logger object.
@@ -56,20 +58,10 @@ namespace awe {
 		 * Executes the game based on given game data.
 		 * This method is blocking, meaning that it will not return so long as the
 		 * game is still running.
-		 * @param  file Temporary parameter storing the file path to a binary map
-		 *              file to open.
 		 * @return \c 0 upon successful execution, \c !0 upon a fatal error
 		 *         occurring.
 		 */
-		int run(const std::string& file) noexcept;
-
-		/**
-		 * Registers the script interfaces and loads the script files.
-		 * \c setScripts() must be called before calling this method. If the
-		 * \c scripts pointer is \c nullptr, an error will be logged.
-		 * @param guiFolder The folder containing the GUI script files to load.
-		 */
-		void initialiseScripts(const std::string& guiFolder) noexcept;
+		int run() noexcept;
 
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
@@ -81,119 +73,72 @@ namespace awe {
 		 * @sa    \c engine::scripts::registerInterface()
 		 */
 		void registerInterface(asIScriptEngine* engine) noexcept;
-
-		/**
-		 * Sets the engine's available countries.
-		 * @param ptr Pointer to the data.
-		 */
-		void setCountries(const std::shared_ptr<awe::bank<awe::country>>& ptr)
-			noexcept;
-
-		/**
-		 * Sets the engine's available weather states.
-		 * @param ptr Pointer to the data.
-		 */
-		void setWeathers(const std::shared_ptr<awe::bank<awe::weather>>& ptr)
-			noexcept;
-
-		/**
-		 * Sets the engine's available environments.
-		 * @param ptr Pointer to the data.
-		 */
-		void setEnvironments(const std::shared_ptr<awe::bank<awe::environment>>&
-			ptr) noexcept;
-
-		/**
-		 * Sets the engine's available movement types.
-		 * @param ptr Pointer to the data.
-		 */
-		void setMovements(const std::shared_ptr<awe::bank<awe::movement_type>>&
-			ptr) noexcept;
-
-		/**
-		 * Sets the engine's available terrain types.
-		 * @param ptr Pointer to the data.
-		 */
-		void setTerrains(const std::shared_ptr<awe::bank<awe::terrain>>& ptr)
-			noexcept;
-
-		/**
-		 * Sets the engine's available tiles.
-		 * @param ptr Pointer to the data.
-		 */
-		void setTiles(const std::shared_ptr<awe::bank<awe::tile_type>>& ptr)
-			noexcept;
-
-		/**
-		 * Sets the engine's available unit types.
-		 * @param ptr Pointer to the data.
-		 */
-		void setUnits(const std::shared_ptr<awe::bank<awe::unit_type>>& ptr)
-			noexcept;
-
-		/**
-		 * Sets the engine's available commanders.
-		 * @param ptr Pointer to the data.
-		 */
-		void setCommanders(const std::shared_ptr<awe::bank<awe::commander>>& ptr)
-			noexcept;
-
-		/**
-		 * Sets the engine's available languages.
-		 * @param ptr Pointer to the data.
-		 */
-		void setDictionary(const std::shared_ptr<engine::language_dictionary>& ptr)
-			noexcept;
-
-		/**
-		 * Sets the engine's available fonts.
-		 * @param ptr Pointer to the data.
-		 */
-		void setFonts(const std::shared_ptr<sfx::fonts>& ptr) noexcept;
-
-		/**
-		 * Sets the engine's available sounds.
-		 * @param ptr Pointer to the data.
-		 */
-		void setSounds(const std::shared_ptr<sfx::audio>& ptr) noexcept;
-
-		/**
-		 * Sets the engine's available BGM.
-		 * @param ptr Pointer to the data.
-		 */
-		void setMusic(const std::shared_ptr<sfx::audio>& ptr) noexcept;
-
-		/**
-		 * Sets the engine's renderer.
-		 * @param ptr Pointer to the data.
-		 */
-		void setRenderer(const std::shared_ptr<sfx::renderer>& ptr) noexcept;
-
-		/**
-		 * Sets the engine's user input object.
-		 * @param ptr Pointer to the data.
-		 */
-		void setUserInput(const std::shared_ptr<sfx::user_input>& ptr) noexcept;
-
-		/**
-		 * Sets the engine's spritesheets.
-		 * @param ptr Pointer to the data.
-		 */
-		void setSpritesheets(const std::shared_ptr<awe::spritesheets>& ptr)
-			noexcept;
-
-		/**
-		 * Sets the engine's available scripts.
-		 * @param guiPtr Pointer to the GUI scripts.
-		 */
-		void setScripts(const std::shared_ptr<engine::scripts>& guiPtr) noexcept;
-
-		/**
-		 * Sets the engine's available menus.
-		 * @param ptr Pointer to the data.
-		 */
-		void setGUI(const std::shared_ptr<sfx::gui>& ptr) noexcept;
 	private:
+		/**
+		 * The JSON load method for this class.
+		 * This JSON configuration contains all the paths leading to the JSON
+		 * scripts which will be used to configure each component of the game
+		 * engine. If even one is missing, an error will be logged, and execution
+		 * behaviour becomes undefined. Each key (with the exception of one) has a
+		 * string value which holds the path to the JSON script configuring the
+		 * corresponding component of the game engine:
+		 * <tt><ul><li>"countries"</li><li>"weathers"</li><li>"environments"</li>
+		 * <li>"movements"</li><li>"terrains"</li><li>"tiles"</li><li>"units"</li>
+		 * <li>"commanders"</li><li>"languages"</li><li>"fonts"</li>
+		 * <li>"sounds"</li><li>"music"</li><li>"renderer"</li><li>"userinput"</li>
+		 * <li>"gui"</li><li>"guiscripts"</li><li>"spritesheets"</li>
+		 * <li>"gamescripts"</li></ul></tt>
+		 * The @c "spritesheets" key instead stores an object with the following
+		 * key-value pairs, all the values of which are strings containing the
+		 * paths of JSON scripts.
+		 * <tt><ul><li>"co"</li><li>"unit"</li><li>"tile"</li><li>"icon"</li>
+		 * <li>"gui"</li></ul></tt>
+		 * The @c "unit" key stores an object containing more key-string pairs:
+		 * <tt><ul><li>"idle"</li><li>"pictures"</li></ul></tt>
+		 * The @c "tile" key stores an object containing more key-string pairs:
+		 * <tt><ul><li>"normal"</li><li>"normalpictures"</li></ul></tt>
+		 * If a key-value pair is given more than once, only the first instance
+		 * will count and all subsequent pairs will be ignored.
+		 * @warning Note that the @c load() function for this class will change
+		 *          the current working directory to whatever folder the given
+		 *          configuration script was in at the time of calling.
+		 * @param   j The \c engine::json object representing the contents of the
+		 *            loaded script which this method reads.
+		 * @return Always returns \c TRUE.
+		 */
+		bool _load(engine::json& j) noexcept;
+
+		/**
+		 * Loads an @c engine::json_script object using a path stored at @c keys.
+		 * @tparam T                 The type of object to load.
+		 * @tparam Ts                The types of the object's constructor
+		 *                           parameters.
+		 * @param  ptr               Stores a pointer to the newly created object
+		 *                           in here.
+		 * @param  j                 The JSON script containing the path of the
+		 *                           JSON script.
+		 * @param  keys              Key sequence leading to the path of the JSON
+		 *                           script to load with.
+		 * @param  constructorParams Additional objects that can be passed to the
+		 *                           constructor of the object that @c ptr will
+		 *                           point to.
+		 * @return @c TRUE if @c j and @c *ptr are in a good state, @c FALSE if at
+		 *         least one of them is not.
+		 */
+		template<typename T, typename... Ts>
+		bool _loadObject(std::shared_ptr<T>& ptr, engine::json& j,
+			const engine::json::KeySequence& keys, Ts... constructorParams)
+			noexcept;
+
+		/**
+		 * The JSON save method for this class.
+		 * This class does not have the ability to be saved.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON
+		 *           script which this method writes to.
+		 * @return Always returns \c FALSE.
+		 */
+		bool _save(nlohmann::ordered_json& j) noexcept;
+
 		/**
 		 * Method called at the start of \c run() to make preliminary checks on
 		 * internal data.
@@ -425,6 +370,11 @@ namespace awe {
 		 */
 		std::shared_ptr<sfx::gui> _gui;
 
+		/**
+		 * Stores the folder containing all of the game's scripts.
+		 */
+		std::string _gameScriptsFolder;
+
 		//================================
 		//==========ENGINE DATA===========
 		//================================
@@ -433,4 +383,14 @@ namespace awe {
 		 */
 		std::string _menuBeforeMapLoad;
 	};
+}
+
+template<typename T, typename... Ts>
+bool awe::game_engine::_loadObject(std::shared_ptr<T>& ptr, engine::json& j,
+	const engine::json::KeySequence& keys, Ts... constructorParams) noexcept {
+	std::string path;
+	j.apply(path, keys);
+	ptr = std::make_shared<T>(constructorParams...);
+	ptr->load(path);
+	return j.inGoodState() && ptr->inGoodState();
 }

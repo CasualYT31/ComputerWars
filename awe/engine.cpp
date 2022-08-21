@@ -25,10 +25,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
-int awe::game_engine::run(const std::string& file) noexcept {
+int awe::game_engine::run() noexcept {
 	auto r = _initCheck();
 	if (r) return r;
-	_gui->setTarget(*_renderer);
 
 	try {
 		while (_renderer->isOpen()) {
@@ -69,17 +68,6 @@ int awe::game_engine::run(const std::string& file) noexcept {
 }
 
 // script interface
-
-void awe::game_engine::initialiseScripts(const std::string& guiFolder) noexcept {
-	if (_guiScripts) {
-		// Add the registrants, then only load scripts for GUI.
-		_guiScripts->addRegistrant(this);
-		_guiScripts->loadScripts(guiFolder);
-	} else {
-		_logger.error("initialiseScripts() was called before setting the GUI "
-			"scripts object!");
-	}
-}
 
 void awe::game_engine::registerInterface(asIScriptEngine* engine) noexcept {
 	// register the object types
@@ -176,6 +164,85 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine) noexcept {
 		asCALL_THISCALL_ASGLOBAL, this);
 }
 
+bool awe::game_engine::_load(engine::json& j) noexcept {
+	// Find the base path of the assets folder and make it the CWD.
+	std::filesystem::path basePath = getScriptPath();
+	basePath = basePath.parent_path();
+	std::filesystem::current_path(basePath);
+	// Retrieve a few of the paths manually instead of via _loadObject().
+	// Don't forget to apply the base path to them.
+	std::string guiScriptsPath, guiPath;
+	j.apply(guiScriptsPath, { "guiscripts" });
+	j.apply(guiPath, { "gui" });
+	j.apply(_gameScriptsFolder, { "gamescripts" });
+	if (!j.inGoodState()) return false;
+	// Allocate spritesheets object.
+	_sprites = std::make_shared<awe::spritesheets>();
+	_sprites->unit = std::make_shared<awe::spritesheets::units>();
+	_sprites->tile = std::make_shared<awe::spritesheets::tiles>();
+	_sprites->tilePicture = std::make_shared<awe::spritesheets::tile_pictures>();
+	// Load most of the objects.
+	bool ret = _loadObject(_dictionary, j, { "languages" })
+		&& _loadObject(_fonts, j, { "fonts" })
+		&& _loadObject(_sounds, j, { "sounds" })
+		&& _loadObject(_music, j, { "music" })
+		&& _loadObject(_renderer, j, { "renderer" });
+	if (!ret) return false;
+	// Opening the renderer now will prevent glFlush() SFML errors from plaguing
+	// standard output when I load images in the animated_spritesheet objects
+	// below.
+	_renderer->openWindow();
+	// Continue loading most of the objects.
+	ret =  _loadObject(_userinput, j, { "userinput" })
+		&& _loadObject(_sprites->CO, j, { "spritesheets", "co" })
+		&& _loadObject(_sprites->unit->idle, j,
+			{ "spritesheets", "unit", "idle" })
+		&& _loadObject(_sprites->tile->normal, j,
+			{ "spritesheets", "tile", "normal" })
+		// && _loadObject(_sprites->unitPicture, j,
+			// { "spritesheets", "unit", "pictures" })
+		// && _loadObject(_sprites->tilePicture->normal, j,
+			// { "spritesheets", "tile", "normalpictures" })
+		&& _loadObject(_sprites->icon, j, { "spritesheets", "icon" })
+		&& _loadObject(_sprites->GUI, j, { "spritesheets", "gui" })
+		&& _loadObject(_countries, j, { "countries" })
+		&& _loadObject(_weathers, j, { "weathers" })
+		&& _loadObject(_environments, j, { "environments" })
+		&& _loadObject(_movements, j, { "movements" })
+		&& _loadObject(_terrains, j, { "terrains" })
+		&& _loadObject(_tiles, j, { "tiles" })
+		&& _loadObject(_units, j, { "units" })
+		&& _loadObject(_commanders, j, { "commanders" });
+	if (!ret) return false;
+	// Ignore the state of these objects for now. Can't load them currently
+	// because I have no tile or unit pictures to configure with.
+	_loadObject(_sprites->unitPicture, j,
+		{ "spritesheets", "unit", "pictures" });
+	_loadObject(_sprites->tilePicture->normal, j,
+		{ "spritesheets", "tile", "normalpictures" });
+	j.resetState();
+	// Allocate GUIs and their scripts.
+	_guiScripts = std::make_shared<engine::scripts>();
+	_gui = std::make_shared<sfx::gui>(_guiScripts);
+	_guiScripts->addRegistrant(this);
+	_guiScripts->loadScripts(guiScriptsPath);
+	_gui->addSpritesheet("icon", _sprites->icon);
+	_gui->setLanguageDictionary(_dictionary);
+	_gui->setTarget(*_renderer);
+	_gui->load(guiPath);
+	if (!_gui->inGoodState()) return false;
+	// Finish initialisation of banks.
+	awe::updateAllTerrains(*_tiles, *_terrains);
+	awe::updateAllMovementsAndLoadedUnits(*_units, *_movements);
+	// If one of the objects failed to initialise properly, return FALSE.
+	_userinput->tieWindow(_renderer);
+	return true;
+}
+
+bool awe::game_engine::_save(nlohmann::ordered_json& j) noexcept {
+	return false;
+}
+
 void awe::game_engine::_script_setFullscreen(const bool in) {
 	_tempRendererSettings.style.fullscreen = in;
 }
@@ -240,8 +307,8 @@ void awe::game_engine::_script_loadMap(const std::string& file,
 		gameScripts->addRegistrant(this);
 		gameScripts->addRegistrant(_gui.get());
 		// Create the game.
-		_currentGame = std::make_unique<awe::game>(file, _gui, gameScripts,
-			_countries, _tiles, _units, _commanders);
+		_currentGame = std::make_unique<awe::game>(file, _gameScriptsFolder,
+			gameScripts, _countries, _tiles, _units, _commanders);
 		_currentGame->load();
 		_currentGame->setTileSpritesheet(_sprites->tile->normal);
 		_currentGame->setUnitSpritesheet(_sprites->unit->idle);
@@ -314,92 +381,4 @@ int awe::game_engine::_initCheck() const noexcept {
 		return 1;
 	}
 	return 0;
-}
-
-
-// set methods
-
-void awe::game_engine::setCountries(
-	const std::shared_ptr<awe::bank<awe::country>>& ptr) noexcept {
-	_countries = ptr;
-}
-
-void awe::game_engine::setWeathers(
-	const std::shared_ptr<awe::bank<awe::weather>>& ptr) noexcept {
-	_weathers = ptr;
-}
-
-void awe::game_engine::setEnvironments(
-	const std::shared_ptr<awe::bank<awe::environment>>& ptr) noexcept {
-	_environments = ptr;
-}
-
-void awe::game_engine::setMovements(
-	const std::shared_ptr<awe::bank<awe::movement_type>>& ptr) noexcept {
-	_movements = ptr;
-}
-
-void awe::game_engine::setTerrains(
-	const std::shared_ptr<awe::bank<awe::terrain>>& ptr) noexcept {
-	_terrains = ptr;
-}
-
-void awe::game_engine::setTiles(
-	const std::shared_ptr<awe::bank<awe::tile_type>>& ptr) noexcept {
-	_tiles = ptr;
-}
-
-void awe::game_engine::setUnits(
-	const std::shared_ptr<awe::bank<awe::unit_type>>& ptr) noexcept {
-	_units = ptr;
-}
-
-void awe::game_engine::setCommanders(
-	const std::shared_ptr<awe::bank<awe::commander>>& ptr) noexcept {
-	_commanders = ptr;
-}
-
-void awe::game_engine::setDictionary(
-	const std::shared_ptr<engine::language_dictionary>& ptr) noexcept {
-	_dictionary = ptr;
-}
-
-void awe::game_engine::setFonts(const std::shared_ptr<sfx::fonts>& ptr) noexcept {
-	_fonts = ptr;
-}
-
-void awe::game_engine::setSounds(const std::shared_ptr<sfx::audio>& ptr) noexcept {
-	_sounds = ptr;
-}
-
-void awe::game_engine::setMusic(const std::shared_ptr<sfx::audio>& ptr) noexcept {
-	_music = ptr;
-}
-
-void awe::game_engine::setRenderer(const std::shared_ptr<sfx::renderer>& ptr)
-	noexcept {
-	_renderer = ptr;
-	if (_renderer)
-		_tempRendererSettings = _renderer->getSettings();
-	else
-		_tempRendererSettings = sfx::renderer_settings(); // blank settings object
-}
-
-void awe::game_engine::setUserInput(const std::shared_ptr<sfx::user_input>& ptr)
-	noexcept {
-	_userinput = ptr;
-}
-
-void awe::game_engine::setSpritesheets(
-	const std::shared_ptr<awe::spritesheets>& ptr) noexcept {
-	_sprites = ptr;
-}
-
-void awe::game_engine::setScripts(const std::shared_ptr<engine::scripts>& guiPtr)
-	noexcept {
-	_guiScripts = guiPtr;
-}
-
-void awe::game_engine::setGUI(const std::shared_ptr<sfx::gui>& ptr) noexcept {
-	_gui = ptr;
 }

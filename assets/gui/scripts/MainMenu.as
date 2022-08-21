@@ -3,7 +3,7 @@ void MainMenuSetUp() {
 	addListBox("FileSelect", 5.0, 5.0, 200.0, 100.0);
 	// Collect a list of available map files and add them to the listbox.
 	filesystem cwd;
-	cwd.changeCurrentPath("./assets/map");
+	cwd.changeCurrentPath("./map");
 	array<string> files = cwd.getFiles();
 	for (uint f = 0; f < files.length(); f++) {
 		// Only look for *.cwm files!
@@ -17,5 +17,5 @@ void MainMenuSetUp() {
 
 void MainMenu_FileSelect_MouseReleased() {
 	string item = getListBoxSelectedItem("FileSelect");
-	loadMap("assets/map/" + item, "Map");
+	loadMap("map/" + item, "Map");
 }

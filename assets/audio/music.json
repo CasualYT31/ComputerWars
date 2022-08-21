@@ -2,14 +2,14 @@
 	"volume": 100.0,
 	"noco": {
 		"type": "music",
-		"path": "assets/audio/music/NoCO.ogg",
+		"path": "audio/music/NoCO.ogg",
 		"offset": 0.0,
 		"loopto": 5400,
 		"loopwhen": 69335
 	},
 	"jake": {
 		"type": "music",
-		"path": "assets/audio/music/Jake.ogg",
+		"path": "audio/music/Jake.ogg",
 		"offset": 1.0,
 		"loopto": 0,
 		"loopwhen": 90706

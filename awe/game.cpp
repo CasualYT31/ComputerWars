@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 #include "engine.h"
 
-awe::game::game(const std::string& file, const std::shared_ptr<sfx::gui>& gui,
+awe::game::game(const std::string& file, const std::string& scripts,
 	const std::shared_ptr<engine::scripts>& ptr,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
@@ -31,10 +31,9 @@ awe::game::game(const std::string& file, const std::shared_ptr<sfx::gui>& gui,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const std::string& name) noexcept :
 	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file),
-	_scripts(ptr), _gui(gui) {
-	// Register the interface, then load the scripts.
+	_scripts(ptr) {
 	_scripts->addRegistrant(this);
-	_scripts->loadScripts("assets/scripts"); // Add parameter for this soon.
+	_scripts->loadScripts(scripts);
 }
 
 void awe::game::registerInterface(asIScriptEngine* engine) noexcept {

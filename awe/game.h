@@ -45,7 +45,7 @@ namespace awe {
 		 * Sets up a game based on what @c map requires.
 		 * Also initialises the internal logger object.
 		 * @param file       Path to the binary file containing the map to play on.
-		 * @param gui        Pointer to the @c gui object containing all the menus.
+		 * @param scripts    Folder containing the game scripts to load.
 		 * @param ptr        Pointer to the @c scripts object, with most of the
 		 *                   necessary registrants already added.
 		 * @param countries  Information on the countries to search through when
@@ -58,7 +58,7 @@ namespace awe {
 		 *                   reading CO IDs from the map file.
 		 * @sa @c engine::logger
 		 */
-		game(const std::string& file, const std::shared_ptr<sfx::gui>& gui,
+		game(const std::string& file, const std::string& scripts,
 			 const std::shared_ptr<engine::scripts>& ptr,
 			 const std::shared_ptr<awe::bank<awe::country>>& countries,
 			 const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
@@ -164,11 +164,5 @@ namespace awe {
 		 * Stores all the scripts needed to run a game.
 		 */
 		std::shared_ptr<engine::scripts> _scripts;
-
-		/**
-		 * Used to identify which menu is currently being displayed.
-		 * Will likely be replaced by functionality written in scripts.
-		 */
-		std::shared_ptr<sfx::gui> _gui;
 	};
 }

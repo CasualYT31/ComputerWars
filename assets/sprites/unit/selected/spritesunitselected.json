@@ -1,5 +1,5 @@
 {
-	"basepath": "assets/sprites/unit/selected/unitselected",
+	"basepath": "sprites/unit/selected/unitselected",
 	"format": "png",
 	"frames": 1,
 	"framerate": 0.0,

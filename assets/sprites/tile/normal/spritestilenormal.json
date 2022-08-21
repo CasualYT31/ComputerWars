@@ -1,5 +1,5 @@
 {
-	"path": "assets/sprites/tile/normal/tilenormal.png",
+	"path": "sprites/tile/normal/tilenormal.png",
 	"sprites": {
 		"plain": {
 			"frames": [

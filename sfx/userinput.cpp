@@ -373,8 +373,8 @@ bool sfx::user_input::_load(engine::json& j) noexcept {
 				sfx::convert::tosignaltype(sigtype, &_logger);
 			if (_control[i.key()].signal.type == sfx::DelayedForm &&
 				i.value().find("delays") != i.value().end()) {
-				// if delays aren't given for a delayed-form control, they will be
-				// generated in operator[]
+				// If delays aren't given for a delayed-form control, they will be
+				// generated in operator[].
 				try {
 					for (auto d = i.value()["delays"].begin(),
 						ed = i.value()["delays"].end(); d != ed; d++) {
