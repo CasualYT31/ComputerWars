@@ -126,8 +126,8 @@ bool sfx::renderer::_save(nlohmann::ordered_json& j) noexcept {
 
 float sfx::animated_drawable::calculateDelta(const sf::Time& timeout) noexcept {
 	_firsttime = false;
-	// if the delta timer has timed out, restart the delta timer twice to
-	// achieved the desired effect
+	// If the delta timer has timed out, restart the delta timer twice to
+	// achieved the desired effect.
 	if (_deltaTimer.getElapsedTime() >= timeout) _deltaTimer.restart();
 	return _deltaTimer.restart().asSeconds();
 }

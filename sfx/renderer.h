@@ -102,12 +102,14 @@ namespace sfx {
 		 * without any repercussions. It also removes after effects visible when
 		 * the same \c animated_drawable is animated and drawn, then not drawn,
 		 * then animated and drawn again some time later.
-		 * @param  timeout In the case that your \c animated_drawable animates at a
-		 *                 frame rate slower than the default timeout duration, you
-		 *                 can provide a different duration here.
-		 * @return The time elapsed since the last call to \c calculateDelta(), in
-		 *         seconds.
-		 * @sa     sfx::animated_drawable::_timeout
+		 * @warning Do not forget to handle cases where the \c delta returned is
+		 *          @c 0!
+		 * @param   timeout In the case that your \c animated_drawable animates at
+		 *                  a frame rate slower than the default timeout duration,
+		 *                  you can provide a different duration here.
+		 * @return  The time elapsed since the last call to \c calculateDelta(), in
+		 *          seconds.
+		 * @sa      sfx::animated_drawable::_timeout
 		 */
 		float calculateDelta(const sf::Time& timeout = sf::seconds(1.0f)) noexcept;
 
@@ -118,11 +120,13 @@ namespace sfx {
 		 * \c _delta internally. This is useful for drawables that don't act on
 		 * delta directly, but overtime (i.e. can't reset the delta timer every
 		 * single time they call \c calculateDelta()).
-		 * @param  timeout See \c calculateDelta().
-		 * @return The delta accumulated since the object's construction, or since
-		 *         the last call to \c resetDeltaAccumulation().
-		 * @sa     \c calculateDelta()
-		 * @sa     \c resetDeltaAccumulation()
+		 * @warning Do not forget to handle cases where the \c delta returned is
+		 *          @c 0!
+		 * @param   timeout See \c calculateDelta().
+		 * @return  The delta accumulated since the object's construction, or since
+		 *          the last call to \c resetDeltaAccumulation().
+		 * @sa      \c calculateDelta()
+		 * @sa      \c resetDeltaAccumulation()
 		 */
 		float accumulatedDelta(const sf::Time& timeout = sf::seconds(1.0f))
 			noexcept;
