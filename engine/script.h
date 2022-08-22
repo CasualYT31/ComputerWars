@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "scriptfilesystem.h"
 #include "logger.h"
 #include <type_traits>
+#include "docgen.h"
 
 namespace engine {
 	/**
@@ -54,9 +55,13 @@ namespace engine {
 		 * href="https://www.angelcode.com/angelscript/sdk/docs/manual/classas_i_script_engine.html"
 		 * target="_blank">the documentation on asIScriptEngine</a> for help on how
 		 * to register the interface.
-		 * @param engine Pointer to the AngelScript script engine to register with.
+		 * @param engine   Pointer to the AngelScript script engine to register
+		 *                 with.
+		 * @param document Pointer to the AngelScript documentation generator to
+		 *                 register script interface documentation with.
 		 */
-		virtual void registerInterface(asIScriptEngine* engine) noexcept = 0;
+		virtual void registerInterface(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept = 0;
 	};
 
 	/**
@@ -151,6 +156,16 @@ namespace engine {
 		 * @sa      engine::scripts::addRegistrant()
 		 */
 		bool loadScripts(std::string folder = "") noexcept;
+
+		/**
+		 * Generate the documentation for this @c scripts instance.
+		 * Can only be called after at least one call to @c loadScripts(), since
+		 * the script interface is only registered in that method.
+		 * @return The result of the generation operation. @c INT_MIN if the
+		 *         document generator object couldn't be initialised in the
+		 *         constructor (this is also logged).
+		 */
+		int generateDocumentation() noexcept;
 
 		/**
 		 * Retrieves the last path used with \c loadScripts().
@@ -264,6 +279,11 @@ namespace engine {
 		 * The set of registrants.
 		 */
 		std::set<engine::script_registrant*> _registrants;
+
+		/**
+		 * Used to generate documentation on the script interface.
+		 */
+		std::shared_ptr<DocumentationGenerator> _document;
 	};
 }
 

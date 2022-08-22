@@ -74,10 +74,10 @@ namespace sfx {
 		 *          from the current GUI. This is because my animated sprite code
 		 *          for BitmapButtons and Pictures relies on the order of widget
 		 *          retrieval to remain the same.
-		 * @param   engine Pointer to the engine to register the interface with.
 		 * @sa      \c engine::scripts::registerInterface()
 		 */
-		void registerInterface(asIScriptEngine* engine) noexcept;
+		void registerInterface(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 		/**
 		 * Sets the GUI menu to display.

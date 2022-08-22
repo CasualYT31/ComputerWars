@@ -69,7 +69,8 @@ int awe::game_engine::run() noexcept {
 
 // script interface
 
-void awe::game_engine::registerInterface(asIScriptEngine* engine) noexcept {
+void awe::game_engine::registerInterface(asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	// register the object types
 	engine->RegisterObjectType("joystick_axis", sizeof(sfx::joystick),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sfx::joystick>() |

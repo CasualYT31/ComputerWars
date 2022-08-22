@@ -66,13 +66,10 @@ namespace awe {
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
 		 * game engine functions with a \c scripts object.
-		 * For a full rundown of the interface, please read <a
-		 * href="https://github.com/CasualYT31/ComputerWars/wiki/Script-Interface"
-		 * target="_blank">the GitHub repository wiki</a>.
-		 * @param engine Pointer to the engine to register the interface with.
-		 * @sa    \c engine::scripts::registerInterface()
+		 * @sa \c engine::scripts::registerInterface()
 		 */
-		void registerInterface(asIScriptEngine* engine) noexcept;
+		void registerInterface(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.

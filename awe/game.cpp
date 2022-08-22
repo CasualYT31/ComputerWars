@@ -23,6 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 #include "engine.h"
 
+bool awe::game::_documentationHasBeenGenerated = false;
+
 awe::game::game(const std::string& file, const std::string& scripts,
 	const std::shared_ptr<engine::scripts>& ptr,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
@@ -34,9 +36,20 @@ awe::game::game(const std::string& file, const std::string& scripts,
 	_scripts(ptr) {
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scripts);
+	// Generate the script interface documentation. We have to employ the macro
+	// here to prevent logging about documentation generation if the game was
+	// configured not to generate it. If the macro is set to 0, no documentation
+	// will be generated anyway, but we still have to prevent logging explicitly.
+#if AS_GENERATE_DOCUMENTATION == 1
+	if (!_documentationHasBeenGenerated) {
+		_scripts->generateDocumentation();
+		_documentationHasBeenGenerated = true;
+	}
+#endif
 }
 
-void awe::game::registerInterface(asIScriptEngine* engine) noexcept {
+void awe::game::registerInterface(asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	// VECTOR2 TYPE
 	engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());

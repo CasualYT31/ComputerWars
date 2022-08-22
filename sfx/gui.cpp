@@ -96,7 +96,8 @@ sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 	}
 }
 
-void sfx::gui::registerInterface(asIScriptEngine* engine) noexcept {
+void sfx::gui::registerInterface(asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	// Register non-widget global functions.
 	engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),

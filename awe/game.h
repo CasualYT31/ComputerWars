@@ -43,7 +43,11 @@ namespace awe {
 	public:
 		/**
 		 * Sets up a game based on what @c map requires.
-		 * Also initialises the internal logger object.
+		 * Also initialises the internal logger object, and generates the script
+		 * interface documentation if the build has been configured to generate the
+		 * documentation. We do it here because the game scripts will have access
+		 * to everything and so the documentation can be generated all at once, in
+		 * one place, one time.
 		 * @param file       Path to the binary file containing the map to play on.
 		 * @param scripts    Folder containing the game scripts to load.
 		 * @param ptr        Pointer to the @c scripts object, with most of the
@@ -69,10 +73,10 @@ namespace awe {
 
 		/**
 		 * Initialise the script interface for maps.
-		 * @param engine Pointer to the engine to register the interface with.
-		 * @sa    \c engine::scripts::registerInterface()
+		 * @sa \c engine::scripts::registerInterface()
 		 */
-		void registerInterface(asIScriptEngine* engine) noexcept;
+		void registerInterface(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 		/**
 		 * Reloads the state of the map from the previously given binary file.
@@ -164,5 +168,12 @@ namespace awe {
 		 * Stores all the scripts needed to run a game.
 		 */
 		std::shared_ptr<engine::scripts> _scripts;
+
+		/**
+		 * Flag for documentation generation.
+		 * Used to ensure that the script interface documentation is only ever
+		 * generated once during execution.
+		 */
+		static bool _documentationHasBeenGenerated;
 	};
 }

@@ -26,6 +26,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
     _engine = asCreateScriptEngine();
     if (_engine) {
+        // Allocate the documentation generator.
+        ScriptDocumentationOptions options;
+        options.htmlSafe = false;
+        options.projectName = "Computer Wars";
+        options.outputFile = "Script Interface Documentation.html";
+        _document = std::make_shared<DocumentationGenerator>(_engine, options);
+        // Allocate the script engine.
         int r = _engine->SetMessageCallback(asMETHOD(engine::scripts,
             scriptMessageCallback), this, asCALL_THISCALL);
         if (r < 0) {
@@ -96,7 +103,7 @@ bool engine::scripts::loadScripts(std::string folder) noexcept {
     // First check if the interface has been registered, and if not, register it.
     if (_registrants.size() > 0) {
         _logger.write("Registering the script interface...");
-        for (auto& reg : _registrants) reg->registerInterface(_engine);
+        for (auto& reg : _registrants) reg->registerInterface(_engine, _document);
         _logger.write("Finished registering the script interface.");
         _registrants.clear();
     }
@@ -137,6 +144,19 @@ bool engine::scripts::loadScripts(std::string folder) noexcept {
     _scriptsFolder = folder;
     _logger.write("Finished loading scripts.");
     return true;
+}
+
+int engine::scripts::generateDocumentation() noexcept {
+    if (_document) {
+        _logger.write("Generating the script interface documentation...");
+        auto ret = _document->Generate();
+        _logger.write("Finished generating the script interface documentation.");
+        return ret;
+    } else {
+        _logger.error("Couldn't generate script interface documentation; the "
+            "DocumentationGenerator object was uninitialised!");
+        return INT_MIN;
+    }
 }
 
 const std::string& engine::scripts::getScriptsFolder() const noexcept {
