@@ -44,10 +44,8 @@ namespace awe {
 		/**
 		 * Sets up a game based on what @c map requires.
 		 * Also initialises the internal logger object, and generates the script
-		 * interface documentation if the build has been configured to generate the
-		 * documentation. We do it here because the game scripts will have access
-		 * to everything and so the documentation can be generated all at once, in
-		 * one place, one time.
+		 * interface documentation for game scripts if the build has been
+		 * configured to generate the documentation.
 		 * @param file       Path to the binary file containing the map to play on.
 		 * @param scripts    Folder containing the game scripts to load.
 		 * @param ptr        Pointer to the @c scripts object, with most of the

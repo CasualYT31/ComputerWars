@@ -223,10 +223,11 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 		{ "spritesheets", "tile", "normalpictures" });
 	j.resetState();
 	// Allocate GUIs and their scripts.
-	_guiScripts = std::make_shared<engine::scripts>();
+	_guiScripts = std::make_shared<engine::scripts>("gui_scripts");
 	_gui = std::make_shared<sfx::gui>(_guiScripts);
 	_guiScripts->addRegistrant(this);
 	_guiScripts->loadScripts(guiScriptsPath);
+	_guiScripts->generateDocumentation();
 	_gui->addSpritesheet("icon", _sprites->icon);
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setTarget(*_renderer);
@@ -304,7 +305,7 @@ void awe::game_engine::_script_loadMap(const std::string& file,
 	} else {
 		// Make a new scripts instance for this new game.
 		std::shared_ptr<engine::scripts> gameScripts =
-			std::make_shared<engine::scripts>();
+			std::make_shared<engine::scripts>("game_scripts");
 		gameScripts->addRegistrant(this);
 		gameScripts->addRegistrant(_gui.get());
 		// Create the game.

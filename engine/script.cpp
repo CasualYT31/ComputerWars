@@ -30,7 +30,8 @@ engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
         ScriptDocumentationOptions options;
         options.htmlSafe = false;
         options.projectName = "Computer Wars";
-        options.outputFile = "Script Interface Documentation.html";
+        std::string filename = name + " Script Interface Documentation.html";
+        options.outputFile = filename;
         _document = std::make_shared<DocumentationGenerator>(_engine, options);
         // Allocate the script engine.
         int r = _engine->SetMessageCallback(asMETHOD(engine::scripts,

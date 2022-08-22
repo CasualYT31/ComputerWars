@@ -95,7 +95,9 @@ namespace awe {
 		 * The @c "tile" key stores an object containing more key-string pairs:
 		 * <tt><ul><li>"normal"</li><li>"normalpictures"</li></ul></tt>
 		 * If a key-value pair is given more than once, only the first instance
-		 * will count and all subsequent pairs will be ignored.
+		 * will count and all subsequent pairs will be ignored.\n
+		 * Loading a game engine instance will also generate the documentation for
+		 * the script interface available to GUI scripts.
 		 * @warning Note that the @c load() function for this class will change
 		 *          the current working directory to whatever folder the given
 		 *          configuration script was in at the time of calling.

@@ -99,9 +99,11 @@ sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 void sfx::gui::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	// Register non-widget global functions.
-	engine->RegisterGlobalFunction("void setGUI(const string& in)",
+	int r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Hides the current menu and shows the "
+		"menu given.");
 	engine->RegisterGlobalFunction("void setBackground(string)",
 		asMETHOD(sfx::gui, _noBackground), asCALL_THISCALL_ASGLOBAL, this);
 	engine->RegisterGlobalFunction("void setBackground(string, const "
