@@ -1,29 +1,36 @@
-﻿# minimum version required is 3.14 because of FetchContent_MakeAvailable
+﻿# Minimum version required is 3.14 because of FetchContent_MakeAvailable.
 cmake_minimum_required (VERSION 3.14)
 project("ComputerWars")
 include(FetchContent)
 include(GoogleTest)
 # I couldn't get CMake to not dump googletest libraries into bin, so I
-# decided to just put everything else into bin with it instead
+# decided to just put everything else into bin with it instead.
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# engine namespace/library
+# Determine if this is a debug or release build.
+if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
+	add_compile_definitions(COMPUTER_WARS_DEBUG)
+else()
+	add_compile_definitions(COMPUTER_WARS_RELEASE)
+endif()
+
+# engine namespace/library.
 add_subdirectory("engine")
 
-# sfx namespace/library
+# sfx namespace/library.
 add_subdirectory("sfx")
 
-# transition namespace/library
+# transition namespace/library.
 add_subdirectory("transition")
 
-# awe namespace/library
+# awe namespace/library.
 add_subdirectory("awe")
 
-# tests
+# Tests.
 add_subdirectory("test")
 
-# application
+# Application.
 add_executable(${PROJECT_NAME} "main.cpp")
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_include_directories(${PROJECT_NAME} PRIVATE

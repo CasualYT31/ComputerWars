@@ -1,38 +1,38 @@
 # https://stackoverflow.com/questions/16398937/cmake-and-finding-other-projects-and-their-dependencies/16404000
 
-# minimum version required is 3.14 because of FetchContent_MakeAvailable
+# Minimum version required is 3.14 because of FetchContent_MakeAvailable.
 cmake_minimum_required(VERSION 3.14)
 project("ComputerWarsEngine")
 include(FetchContent)
 
-# SystemProperties
+# SystemProperties.
 FetchContent_Declare(systemproperties
 	GIT_REPOSITORY https://github.com/CasualYT31/SystemProperties.git
 	GIT_TAG 0.6
 )
 FetchContent_MakeAvailable(systemproperties)
 
-# Boxer
+# Boxer.
 FetchContent_Declare(boxer
 	GIT_REPOSITORY https://github.com/aaronmjacobs/Boxer.git
 	GIT_TAG master
 )
 FetchContent_MakeAvailable(boxer)
 
-# SPDLOG
+# SPDLOG.
 FetchContent_Declare(spdlog
 	URL https://github.com/gabime/spdlog/archive/refs/tags/v1.8.5.zip
 )
 FetchContent_MakeAvailable(spdlog)
 
-# Nlohmann JSON
+# Nlohmann JSON.
 FetchContent_Declare(json
 	GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent.git
 	GIT_TAG v3.9.1
 )
 FetchContent_MakeAvailable(json)
 
-# SFML
+# SFML.
 # Note: Linux requires us to manually install packages?
 # https://www.sfml-dev.org/tutorials/2.5/compile-with-cmake.php
 FetchContent_Declare(sfml
@@ -47,9 +47,9 @@ FetchContent_Declare(angelscript
 	SOURCE_SUBDIR angelscript/projects/cmake
 )
 FetchContent_MakeAvailable(angelscript)
-# to add add-ons, simply add relevant files to below add_library statement
+# To add add-ons, simply add relevant files to below add_library statement.
 
-# AngelScript Docgen
+# AngelScript Docgen.
 FetchContent_Declare(docgen
 	GIT_REPOSITORY https://github.com/CasualYT31/angelscript-docgen.git
 	GIT_TAG master
@@ -96,7 +96,7 @@ target_link_libraries(${PROJECT_NAME}
 	sfml-system
 	angelscript)
 
-# expose public includes to other projects through cache variable
+# Expose public includes to other projects through cache variable.
 set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
 	${SystemProperties_INCLUDE_DIRS}
 	${Boxer_INCLUDE_DIRS}
@@ -106,7 +106,7 @@ set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
 	${angelscript_INCLUDE_DIRS}
 	CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
-# copy SFML's openal.dll file depending on build type
+# Copy SFML's openal.dll file depending on build type.
 IF (WIN32)
 	IF (CMAKE_SIZEOF_VOID_P EQUAL 4) # 32-bit
 		file(COPY ${sfml_SOURCE_DIR}/extlibs/bin/x86/openal32.dll

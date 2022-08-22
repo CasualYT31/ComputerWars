@@ -67,7 +67,11 @@ int main(int argc, char* argv[]) {
         parent_path()
     );
     // Initialise the sink all loggers output to.
-    engine::sink::Get("Computer Wars", "CasualYouTuber31", ".", false, true);
+#ifdef COMPUTER_WARS_DEBUG
+    engine::sink::Get("Computer Wars", "CasualYouTuber31", ".", false, false);
+#else
+    engine::sink::Get("Computer Wars", "CasualYouTuber31", ".");
+#endif
     engine::logger rootLogger("main");
     // Allocate the game engine.
     awe::game_engine engine;
