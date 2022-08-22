@@ -98,41 +98,77 @@ sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 
 void sfx::gui::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	/* Extra stuff to document:
+	1. Widget names.
+	2. "Default to current menu" behaviour.
+	3. Widget types.
+	4. Position and size expressions.
+	5. If an error occurs, nothing will be changed.
+	6. Text translation.
+	*/
 	// Register non-widget global functions.
 	int r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Hides the current menu and shows the "
 		"menu given.");
-	engine->RegisterGlobalFunction("void setBackground(string)",
+	r = engine->RegisterGlobalFunction("void setBackground(string)",
 		asMETHOD(sfx::gui, _noBackground), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBackground(string, const "
+	document->DocumentGlobalFunction(r, "Removes the background from the given "
+		"menu.");
+	r = engine->RegisterGlobalFunction("void setBackground(string, const "
 		"string& in, const string& in)",
 		asMETHOD(sfx::gui, _spriteBackground), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBackground(string, const uint, "
+	document->DocumentGlobalFunction(r, "Sets the given menu's background to be "
+		"an animated sprite from the given sprite sheet.\n<ol><li>The name of the "
+		"menu to set the background of.</li><li>The name of the spritesheet which "
+		"contains the sprite to apply.</li><li>The name of the sprite to apply."
+		"</li></ol>");
+	r = engine->RegisterGlobalFunction("void setBackground(string, const uint, "
 		"const uint, const uint, const uint)",
 		asMETHOD(sfx::gui, _colourBackground), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the given menu's background to a "
+		"solid colour. The name of the menu is given, then the R, G, B and A "
+		"components of the colour, respectively.");
 	// Register widget global functions.
-	engine->RegisterGlobalFunction("void addWidget(const string& in, const "
+	r = engine->RegisterGlobalFunction("void addWidget(const string& in, const "
 		"string& in)",
 		asMETHOD(sfx::gui, _addWidget), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setWidgetPosition(const string& in, "
+	document->DocumentGlobalFunction(r, "Creates a new widget and adds it to a "
+		"menu. The type of widget is given, then the name of the new widget. If "
+		"the name of the new widget is a full name, it will be added in the "
+		"specified container. If it is not a full name, it will be added to the "
+		"current menu.");
+	r = engine->RegisterGlobalFunction("void setWidgetPosition(const string& in, "
 		"const string& in, const string& in)",
 		asMETHOD(sfx::gui, _setWidgetPosition), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setWidgetSize(const string& in, const "
-		"string& in, const string& in)",
+	document->DocumentGlobalFunction(r, "Sets a widget's position. The name of "
+		"the widget is given, then the X position, then the Y position.");
+	r = engine->RegisterGlobalFunction("void setWidgetSize(const string& in, "
+		"const string& in, const string& in)",
 		asMETHOD(sfx::gui, _setWidgetSize), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setWidgetText(const string& in, const "
-		"string& in)",
+	document->DocumentGlobalFunction(r, "Sets a widget's size. The name of the "
+		"widget is given, then the width, then the height.");
+	r = engine->RegisterGlobalFunction("void setWidgetText(const string& in, "
+		"const string& in)",
 		asMETHOD(sfx::gui, _setWidgetText), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setWidgetSprite(const string& in, const "
-		"string& in, const string& in)",
+	document->DocumentGlobalFunction(r, "Sets a widget's text. The name of the "
+		"widget is given, then its new text.");
+	r = engine->RegisterGlobalFunction("void setWidgetSprite(const string& in, "
+		"const string& in, const string& in)",
 		asMETHOD(sfx::gui, _setWidgetSprite), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void addItem(const string& in, const "
+	document->DocumentGlobalFunction(r, "Sets a widget's sprite. The name of "
+		"the widget is given, then the name of the sprite sheet, then the name of "
+		"the sprite.");
+	r = engine->RegisterGlobalFunction("void addItem(const string& in, const "
 		"string& in)",
 		asMETHOD(sfx::gui, _addItem), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("string getSelectedItemText(const string& in)",
+	document->DocumentGlobalFunction(r, "Appends a new item to a widget. The name "
+		"of the widget is given, then the text of the new item.");
+	r = engine->RegisterGlobalFunction("string getSelectedItemText(const string& "
+		"in)",
 		asMETHOD(sfx::gui, _getSelectedItemText), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's selected item's text.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel) noexcept {
