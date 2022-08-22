@@ -97,42 +97,39 @@ sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 }
 
 void sfx::gui::registerInterface(asIScriptEngine* engine) noexcept {
-	// register non-widget global functions
+	// Register non-widget global functions.
 	engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBackground(const string& in)",
+	engine->RegisterGlobalFunction("void setBackground(string)",
 		asMETHOD(sfx::gui, _noBackground), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBackground(const string& in, const "
+	engine->RegisterGlobalFunction("void setBackground(string, const "
 		"string& in, const string& in)",
 		asMETHOD(sfx::gui, _spriteBackground), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBackground(const uint, const uint, "
-		"const uint, const uint, const string& in)",
+	engine->RegisterGlobalFunction("void setBackground(string, const uint, "
+		"const uint, const uint, const uint)",
 		asMETHOD(sfx::gui, _colourBackground), asCALL_THISCALL_ASGLOBAL, this);
-	// register bitmap button global functions
-	engine->RegisterGlobalFunction("void addBitmapButton(const string& in, "
-		"const float x, const float y, const float w, const float h)",
-		asMETHOD(sfx::gui, _addBitmapButton), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBitmapButtonText(const string& in, "
-		"const string& in)",
-		asMETHOD(sfx::gui, _setBitmapButtonText), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setBitmapButtonSprite(const string& in, "
-		"const string& in)", asMETHOD(sfx::gui, _setBitmapButtonSprite),
-		asCALL_THISCALL_ASGLOBAL, this);
-	// register vertical layout container global functions
-	engine->RegisterGlobalFunction("void addVerticalLayout(const string& in, "
-		"const string& in, const string& in, const string& in, const string& in)",
-		asMETHOD(sfx::gui, _addVerticalLayout), asCALL_THISCALL_ASGLOBAL, this);
-	// register listbox global functions
-	engine->RegisterGlobalFunction("void addListBox(const string& in, const float "
-		"x, const float y, const float w, const float h)",
-		asMETHOD(sfx::gui, _addListbox), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void addListBoxItem(const string& in, const "
+	// Register widget global functions.
+	engine->RegisterGlobalFunction("void addWidget(const string& in, const "
 		"string& in)",
-		asMETHOD(sfx::gui, _addListboxItem), asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("string getListBoxSelectedItem(const string& "
-		"in)", asMETHOD(sfx::gui, _getListboxSelectedItem),
-		asCALL_THISCALL_ASGLOBAL, this);
+		asMETHOD(sfx::gui, _addWidget), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setWidgetPosition(const string& in, "
+		"const string& in, const string& in)",
+		asMETHOD(sfx::gui, _setWidgetPosition), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setWidgetSize(const string& in, const "
+		"string& in, const string& in)",
+		asMETHOD(sfx::gui, _setWidgetSize), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setWidgetText(const string& in, const "
+		"string& in)",
+		asMETHOD(sfx::gui, _setWidgetText), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void setWidgetSprite(const string& in, const "
+		"string& in, const string& in)",
+		asMETHOD(sfx::gui, _setWidgetSprite), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("void addItem(const string& in, const "
+		"string& in)",
+		asMETHOD(sfx::gui, _addItem), asCALL_THISCALL_ASGLOBAL, this);
+	engine->RegisterGlobalFunction("string getSelectedItemText(const string& in)",
+		asMETHOD(sfx::gui, _getSelectedItemText), asCALL_THISCALL_ASGLOBAL, this);
 }
 
 void sfx::gui::setGUI(const std::string& newPanel) noexcept {
@@ -617,12 +614,14 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	}
 }
 
-void sfx::gui::_noBackground(const std::string& menu) noexcept {
+void sfx::gui::_noBackground(std::string menu) noexcept {
+	if (menu == "") menu = getGUI();
 	_guiBackground.erase(menu);
 }
 
-void sfx::gui::_spriteBackground(const std::string& sheet,
-	const std::string& sprite, const std::string& menu) noexcept {
+void sfx::gui::_spriteBackground(std::string menu, const std::string& sheet,
+	const std::string& sprite) noexcept {
+	if (menu == "") menu = getGUI();
 	try {
 		_guiBackground[menu].set(_sheet.at(sheet), sprite);
 	} catch (std::out_of_range&) {
@@ -632,105 +631,45 @@ void sfx::gui::_spriteBackground(const std::string& sheet,
 	}
 }
 
-void sfx::gui::_colourBackground(const unsigned int r, const unsigned int g,
-	const unsigned int b, const unsigned int a, const std::string& menu) noexcept {
+void sfx::gui::_colourBackground(std::string menu, const unsigned int r,
+	const unsigned int g, const unsigned int b, const unsigned int a) noexcept {
+	if (menu == "") menu = getGUI();
 	_guiBackground[menu].set(sf::Color(r, g, b, a));
 }
 
-void sfx::gui::_addBitmapButton(const std::string& name, const float x,
-	const float y, const float w, const float h) noexcept {
+void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name)
+	noexcept {
+	std::string type = String(widgetType).toLower().toStdString();
 	std::vector<std::string> fullname;
 	if (_findWidget<Widget>(name, &fullname)) {
-		_logger.error("Attempted to create a new bitmap button with name \"{}\": "
-			"a widget with that name already exists!", name);
+		_logger.error("Attempted to create a new \"{}\" widget with name \"{}\": "
+			"a widget with that name already exists!", type, name);
 	} else {
-		auto widget = tgui::BitmapButton::create();
-		widget->setPosition(tgui::Vector2f(x, y));
-		widget->setSize(tgui::Vector2f(w, h));
-		auto container = _gui.get<Container>(fullname[0]);
-		if (!container) {
-			_logger.error("Attempted to add a bitmap button \"{}\" to the menu "
-				"\"{}\". This menu does not exist.", name, fullname[0]);
-			return;
-		}
-		if (fullname.size() > 2) {
-			for (std::size_t i = 1; i < fullname.size() - 1; i++) {
-				if (!container) {
-					_logger.error("Attempted to add a bitmap button \"{}\" to the "
-						"container \"{}\" within menu \"{}\". This container does "
-						"not exist.", name, fullname[i - 1], fullname[0]);
-					return;
-				}
-				container = container->get<Container>(fullname[i]);
-			}
-		}
-		container->add(widget, fullname.back());
-		_connectSignals(widget);
-	}
-}
-
-void sfx::gui::_setBitmapButtonText(const std::string& name,
-	const std::string& text) noexcept {
-	std::vector<std::string> fullname;
-	BitmapButton::Ptr button = _findWidget<BitmapButton>(name, &fullname);
-	if (button) {
-		button->setText(text);
-		std::string widgetFullname = "";
-		for (auto& n : fullname) {
-			widgetFullname += n + ".";
-		}
-		if (widgetFullname.size() > 0) widgetFullname.pop_back();
-		if (_originalStrings[widgetFullname].size() == 0) {
-			_originalStrings[widgetFullname].push_back(text);
+		tgui::Widget::Ptr widget;
+		if (type == "bitmapbutton") {
+			widget = tgui::BitmapButton::create();
+		} else if (type == "listbox") {
+			widget = tgui::ListBox::create();
+		} else if (type == "verticallayout") {
+			widget = tgui::VerticalLayout::create();
 		} else {
-			_originalStrings[widgetFullname][0] = text;
+			_logger.error("Attempted to create a widget of type \"{}\" with name "
+				"\"{}\" for menu \"{}\": that widget type is not supported.", type,
+				name, fullname[0]);
+			return;
 		}
-	} else {
-		_logger.error("Attempted to set the text \"{}\" to a bitmap button "
-			"\"{}\" within menu \"{}\". This bitmap button does not exist.", text,
-			name, fullname[0]);
-	}
-}
-
-void sfx::gui::_setBitmapButtonSprite(const std::string& name,
-	const std::string& sprite) noexcept {
-	std::vector<std::string> fullname;
-	if (_findWidget<BitmapButton>(name, &fullname)) {
-		std::string widgetFullname = "";
-		for (auto& n : fullname) {
-			widgetFullname += n + ".";
-		}
-		if (widgetFullname.size() > 0) widgetFullname.pop_back();
-		_guiSpriteKeys[widgetFullname] = std::make_pair("icon", sprite);
-	} else {
-		_logger.error("Attempted to set the sprite \"{}\" to a bitmap button "
-			"\"{}\" within menu \"{}\". This bitmap button does not exist.",
-			sprite, name, fullname[0]);
-	}
-}
-
-void sfx::gui::_addVerticalLayout(const std::string& name, const std::string& x,
-	const std::string& y, const std::string& w, const std::string& h) noexcept {
-	std::vector<std::string> fullname;
-	if (_findWidget<Widget>(name, &fullname)) {
-		_logger.error("Attempted to create a new vertical layout container with "
-			"name \"{}\": a widget with that name already exists!", name);
-	} else {
-		auto widget = tgui::VerticalLayout::create();
-		widget->setPosition(x.c_str(), y.c_str());
-		widget->setSize(w.c_str(), h.c_str());
 		auto container = _gui.get<Container>(fullname[0]);
 		if (!container) {
-			_logger.error("Attempted to add a vertical layout container \"{}\" to "
-				"the menu \"{}\". This menu does not exist.", name, fullname[0]);
+			_logger.error("Attempted to add a \"{}\" widget called \"{}\" to the "
+				"menu \"{}\". This menu does not exist.", name, fullname[0]);
 			return;
 		}
 		if (fullname.size() > 2) {
 			for (std::size_t i = 1; i < fullname.size() - 1; i++) {
 				if (!container) {
-					_logger.error("Attempted to add a vertical layout container "
-						"\"{}\" to the container \"{}\" within menu \"{}\". This "
-						"container does not exist.", name, fullname[i - 1],
+					_logger.error("Attempted to add a \"{}\" widget called \"{}\" "
+						"to the container \"{}\" within menu \"{}\". This "
+						"container does not exist.", type, name, fullname[i - 1],
 						fullname[0]);
 					return;
 				}
@@ -742,65 +681,127 @@ void sfx::gui::_addVerticalLayout(const std::string& name, const std::string& x,
 	}
 }
 
-void sfx::gui::_addListbox(const std::string& name, const float x, const float y,
-	const float w, const float h) noexcept {
+void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,
+	const std::string& y) noexcept {
 	std::vector<std::string> fullname;
-	if (_findWidget<Widget>(name, &fullname)) {
-		_logger.error("Attempted to create a new listbox with name \"{}\": a "
-			"widget with that name already exists!", name);
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		widget->setPosition(x.c_str(), y.c_str());
 	} else {
-		auto widget = tgui::ListBox::create();
-		widget->setPosition(tgui::Vector2f(x, y));
-		widget->setSize(tgui::Vector2f(w, h));
-		auto container = _gui.get<Container>(fullname[0]);
-		if (!container) {
-			_logger.error("Attempted to add a listbox \"{}\" to the menu \"{}\". "
-				"This menu does not exist.", name, fullname[0]);
-			return;
-		}
-		if (fullname.size() > 2) {
-			for (std::size_t i = 1; i < fullname.size() - 1; i++) {
-				if (!container) {
-					_logger.error("Attempted to add a listbox \"{}\" to the "
-						"container \"{}\" within menu \"{}\". This container does "
-						"not exist.", name, fullname[i - 1], fullname[0]);
-					return;
-				}
-				container = container->get<Container>(fullname[i]);
-			}
-		}
-		container->add(widget, fullname.back());
-		_connectSignals(widget);
+		_logger.error("Attempted to set the position (\"{}\",\"{}\") to a widget "
+			"\"{}\" within menu \"{}\". This widget does not exist.", x, y, name,
+			fullname[0]);
 	}
 }
 
-void sfx::gui::_addListboxItem(const std::string& name, const std::string& item)
+void sfx::gui::_setWidgetSize(const std::string& name, const std::string& w,
+	const std::string& h) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		widget->setSize(w.c_str(), h.c_str());
+	} else {
+		_logger.error("Attempted to set the size (\"{}\",\"{}\") to a widget "
+			"\"{}\" within menu \"{}\". This widget does not exist.", w, h, name,
+			fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 	noexcept {
 	std::vector<std::string> fullname;
-	ListBox::Ptr listbox = _findWidget<ListBox>(name, &fullname);
-	if (listbox) {
-		listbox->addItem(item);
-		std::string widgetFullname = "";
-		for (auto& n : fullname) {
-			widgetFullname += n + ".";
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "bitmapbutton") {
+			_findWidget<BitmapButton>(name)->setText(text);
+		} else {
+			_logger.error("Attempted to set the caption \"{}\" to widget \"{}\" "
+				"which is of type \"{}\", within menu \"{}\". This operation is "
+				"not supported for this type of widget.", text, name, type,
+				fullname[0]);
+			return;
 		}
-		if (widgetFullname.size() > 0) widgetFullname.pop_back();
-		_originalStrings[widgetFullname].push_back(item);
+		// Store the item's text in the _originalStrings container.
+		if (_originalStrings[fullnameAsString].size() == 0) {
+			_originalStrings[fullnameAsString].push_back(text);
+		} else {
+			_originalStrings[fullnameAsString][0] = text;
+		}
 	} else {
-		_logger.error("Attempted to add a new listbox item \"{}\" to a listbox "
-			"\"{}\" within menu \"{}\". This listbox does not exist.", item,
-			name, fullname[0]);
+		_logger.error("Attempted to set the caption \"{}\" to a widget \"{}\" "
+			"within menu \"{}\". This widget does not exist.", text, name,
+			fullname[0]);
 	}
 }
 
-std::string sfx::gui::_getListboxSelectedItem(const std::string& name) noexcept {
+void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& sheet,
+	const std::string& key) noexcept {
 	std::vector<std::string> fullname;
-	ListBox::Ptr listbox = _findWidget<ListBox>(name, &fullname);
-	if (listbox) {
-		return listbox->getSelectedItem().toStdString();
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type != "bitmapbutton") {
+			_logger.error("Attempted to set the sprite \"{}\" from sheet \"{}\" "
+				"to widget \"{}\" which is of type \"{}\", within menu \"{}\". "
+				"This operation is not supported for this type of widget.", key,
+				sheet, name, type, fullname[0]);
+			return;
+		}
+		_guiSpriteKeys[fullnameAsString] = std::make_pair(sheet, key);
 	} else {
-		_logger.error("Attempted to get a listbox \"{}\"'s currently selected "
-			"item, within menu \"{}\". This listbox does not exist.", name,
+		_logger.error("Attempted to set the sprite \"{}\" from sheet \"{}\" to a "
+			"widget \"{}\" within menu \"{}\". This widget does not exist.", key,
+			sheet, name, fullname[0]);
+	}
+}
+
+void sfx::gui::_addItem(const std::string& name, const std::string& text)
+	noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		// Add the item differently depending on the type the widget is.
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "listbox") {
+			_findWidget<ListBox>(name)->addItem(text);
+		} else {
+			_logger.error("Attempted to add an item \"{}\" to widget \"{}\" which "
+				"is of type \"{}\", within menu \"{}\". This operation is not "
+				"supported for this type of widget.", text, name, type,
+				fullname[0]);
+			return;
+		}
+		// Store the item's text in the _originalStrings container.
+		_originalStrings[fullnameAsString].push_back(text);
+	} else {
+		_logger.error("Attempted to add a new item \"{}\" to a widget \"{}\" "
+			"within menu \"{}\". This widget does not exist.", text, name,
+			fullname[0]);
+	}
+}
+
+std::string sfx::gui::_getSelectedItemText(const std::string& name) noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		// Get the item text differently depending on the type the widget is.
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "listbox") {
+			return _findWidget<ListBox>(name)->getSelectedItem().toStdString();
+		} else {
+			_logger.error("Attempted to get the text of the selected item of a "
+				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "
+				"operation is not supported for this type of widget.", name, type,
+				fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to get the text of the selected item of a widget "
+			"\"{}\" within menu \"{}\". This widget does not exist.", name,
 			fullname[0]);
 	}
 	return "";
