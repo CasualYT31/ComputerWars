@@ -60,6 +60,11 @@ namespace sfx {
 	class animated_drawable : public sf::Drawable {
 	public:
 		/**
+		 * Polymorphic base classes should have virtual destructors.
+		 */
+		virtual ~animated_drawable() noexcept = default;
+
+		/**
 		 * Method which performs calculations on a drawable before drawing it.
 		 * \c Drawable rightly prevents a subclass from changing its state within
 		 * its \c draw() implementation. However, in some cases, drawables have a

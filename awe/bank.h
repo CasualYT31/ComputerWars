@@ -126,7 +126,7 @@ namespace awe {
 		/**
 		 * Polymorphic base classes should have virtual destructors.
 		 */
-		virtual ~bank_id() noexcept;
+		virtual ~bank_id() noexcept = default;
 
 		/**
 		 * Retrieves the ID of this bank entry as defined during allocation of the
@@ -184,7 +184,7 @@ namespace awe {
 		/**
 		 * Polymorphic base classes should have virtual destructors.
 		 */
-		virtual ~common_properties() noexcept;
+		virtual ~common_properties() noexcept = default;
 
 		/**
 		 * Retrieves the long name property.

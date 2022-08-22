@@ -44,7 +44,6 @@ void awe::updateAllMovementsAndLoadedUnits(awe::bank<awe::unit_type>& unitBank,
 const std::string awe::bank_id::emptyString = "";
 awe::bank_id::bank_id(const awe::BankID id, const std::string& scriptName)
 	noexcept : _id(id), _scriptName(scriptName) {}
-awe::bank_id::~bank_id() noexcept {}
 awe::BankID awe::bank_id::getID() const noexcept { return _id; }
 std::string awe::bank_id::getScriptName() const noexcept { return _scriptName; }
 
@@ -59,7 +58,6 @@ awe::common_properties::common_properties(const awe::BankID id,
 	j.apply(_iconKey, { "icon" }, true);
 	j.apply(_description, { "description" }, true);
 }
-awe::common_properties::~common_properties() noexcept {}
 const std::string& awe::common_properties::getName() const noexcept {
 	return _name;
 }

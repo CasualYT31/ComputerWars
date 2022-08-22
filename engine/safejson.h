@@ -46,7 +46,7 @@ namespace engine {
 		/**
 		 * Polymorphic base classes should have virtual destructors.
 		 */
-		virtual ~json_state() noexcept;
+		virtual ~json_state() noexcept = default;
 
 		/**
 		 * Typedef representing a set of error bits stored within a \c json_state
@@ -149,7 +149,7 @@ namespace engine {
 		/**
 		 * This class cannot be instantiated by the client.
 		 */
-		json_state() noexcept;
+		json_state() noexcept = default;
 
 		/**
 		 * Sets the error state of the object.
@@ -468,7 +468,7 @@ namespace engine {
 		/**
 		 * Polymorphic base classes should have virtual destructors.
 		 */
-		virtual ~json_script() noexcept;
+		virtual ~json_script() noexcept = default;
 
 		/**
 		 * Retrieves a copy of the path of the last opened script file.

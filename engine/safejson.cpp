@@ -25,8 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "safejson.h"
 #include <fstream>
 
-engine::json_state::~json_state() noexcept {}
-engine::json_state::json_state() noexcept {}
 bool engine::json_state::inGoodState() const noexcept {
 	return _bits == engine::json_state::SUCCESS;
 }
@@ -163,8 +161,6 @@ bool engine::json::_performInitialChecks(engine::json::KeySequence& keys,
 	}
 	return false;
 }
-
-engine::json_script::~json_script() noexcept {}
 
 std::string engine::json_script::getScriptPath() const noexcept {
 	return _script;
