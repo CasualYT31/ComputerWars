@@ -49,6 +49,13 @@ FetchContent_Declare(angelscript
 FetchContent_MakeAvailable(angelscript)
 # to add add-ons, simply add relevant files to below add_library statement
 
+# AngelScript Docgen
+FetchContent_Declare(docgen
+	GIT_REPOSITORY https://github.com/CasualYT31/angelscript-docgen.git
+	GIT_TAG master
+)
+FetchContent_MakeAvailable(docgen)
+
 add_library(${PROJECT_NAME} STATIC
 	"logger.cpp"
 	"safejson.cpp"
@@ -61,7 +68,8 @@ add_library(${PROJECT_NAME} STATIC
 	${angelscript_SOURCE_DIR}/add_on/scriptdictionary/scriptdictionary.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/scriptbuilder.cpp
 	${angelscript_SOURCE_DIR}/add_on/datetime/datetime.cpp
-	${angelscript_SOURCE_DIR}/add_on/scriptfile/scriptfilesystem.cpp)
+	${angelscript_SOURCE_DIR}/add_on/scriptfile/scriptfilesystem.cpp
+	${docgen_SOURCE_DIR}/source/docgen.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}
 	${SystemProperties_INCLUDE_DIRS}
 	${Boxer_INCLUDE_DIRS}
@@ -74,7 +82,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}
 	${angelscript_SOURCE_DIR}/add_on/scriptdictionary/
 	${angelscript_SOURCE_DIR}/add_on/scriptbuilder/
 	${angelscript_SOURCE_DIR}/add_on/datetime/
-	${angelscript_SOURCE_DIR}/add_on/scriptfile/)
+	${angelscript_SOURCE_DIR}/add_on/scriptfile/
+	${docgen_SOURCE_DIR}/source/)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_link_libraries(${PROJECT_NAME}
 	SystemProperties

@@ -28,6 +28,7 @@ For information on the versions of libraries I have used for this project, pleas
 - [JSON for C++](https://github.com/nlohmann/json) (check `engine/CMakeLists.txt`)
 - [GoogleTest](https://github.com/google/googletest) (check `test/CMakeLists.txt`)
 - [SystemProperties](https://github.com/CasualYT31/SystemProperties) (check `engine/CMakeLists.txt`)
+- [AngelScript Docgen](https://github.com/CasualYT31/angelscript-docgen) (check `engine/CMakeLists.txt`)
 
 ### Links
 - [Trello Board](https://trello.com/b/GN25IV5j/computer-wars)
