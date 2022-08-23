@@ -98,14 +98,89 @@ sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 
 void sfx::gui::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
-	/* Extra stuff to document:
-	1. Widget names.
-	2. "Default to current menu" behaviour.
-	3. Widget types.
-	4. Position and size expressions.
-	5. If an error occurs, nothing will be changed.
-	6. Text translation.
-	*/
+	// Document GUI behaviours.
+	document->DocumentExpectedFunction("WidgetNames",
+		"Widgets have both a short name and a long name. The long name describes "
+		"the full path of the widget from its menu down to the widget itself. For "
+		"example, a widget named \"WidgetName\" within a layout container "
+		"\"Layout\", which is within a child window \"Child\", which is in the "
+		"menu \"ComplexMenu\", will have a long/full name of <tt>ComplexMenu."
+		"Child.Layout.WidgetName</tt>. A widget's short name doesn't include the "
+		"menu it is within. The short name of the previously mentioned widget "
+		"would be <tt>Child.Layout.WidgetName</tt>.\n"
+		"All widget name parameters, unless specified otherwise, can accept both "
+		"full and short names for widgets. If a short name is given, it will be "
+		"mapped to its full name by the engine by prefixing it with the name of "
+		"the menu currently open. In order to add a widget to a container, it "
+		"becomes necessary to explicitly include the container at all times "
+		"within the widget's name. <b>This only isn't the case with signal "
+		"handler function names, which always exclude container names, unless the "
+		"signal handler is connected to a container itself.</b>");
+	document->DocumentExpectedFunction("GUIErrorBehaviour",
+		"Whenever an error is logged by GUI global functions, no changes will "
+		"occur. If an error was logged during a query call, a blank object will "
+		"be returned, unless specified otherwise.");
+	document->DocumentExpectedFunction("GUITextTranslation",
+		"Unless specified otherwise, string parameters given to the engine that "
+		"represent captions, labels, or text that is displayed to the user, are "
+		"language dictionary keys that are first translated before being "
+		"displayed. More obvious exceptions to this rule are functions that allow "
+		"you to set a textbox' typable contents.");
+	document->DocumentExpectedFunction("GUISizeAndPosition",
+		"The GUI backend used by the game engine allows you to specify "
+		"expressions for the size and position of widgets. For an introduction "
+		"into this topic, see https://tgui.eu/tutorials/0.9/layouts/. To specify "
+		"pixel values, you can issue \"5px\", for example.");
+	document->DocumentExpectedFunction("WidgetTypes",
+		"Widget types are essentially the GUI backend's class names but in string "
+		"form. https://tgui.eu/documentation/0.9/annotated.html is the backend's "
+		"reference documentation, which lists all of the widgets available. Note "
+		"that support might be patchy, though. If you find a widget or an "
+		"operation that is not supported, you will have to add support yourself.");
+
+	// Document expected functions.
+	document->DocumentExpectedFunction("void MainMenuSetUp()",
+		"Regardless of how the game is modded, there will <b>always</b> be a menu "
+		"called \"MainMenu\". Therefore, this function must be defined somewhere "
+		"within the GUI scripts.\n\n"
+		"All menus have a <tt>SetUp()</tt> function which has the same "
+		"declaration as this one, except it is called MenuName<tt>SetUp()</tt>. "
+		"They are called when the game's GUI JSON configuration script is loaded, "
+		"as and when each menu name is read from the script. This means that a "
+		"menu defined later in the <tt>menus</tt> list won't exist when an "
+		"earlier menu's <tt>SetUp()</tt> function is called.");
+	document->DocumentExpectedFunction(
+		"void MainMenuHandleInput(const dictionary)",
+		"Regardless of how the game is modded, there will <b>always</b> be a menu "
+		"called \"MainMenu\". Therefore, this function must be defined somewhere "
+		"within the GUI scripts.\n\n"
+		"All menus have a <tt>HandleInput()</tt> function which has the same "
+		"declaration as this one, except it is called "
+		"MenuName<tt>HandleInput()</tt>. They are called as part of the game "
+		"engine's main loop, with the aim of allowing the menu to react to any "
+		"controls that the user may be inputting. Note that all the typical GUI "
+		"input management (e.g. handling clicking of buttons, typing in "
+		"textboxes) is carried out by the game engine and does not need to be "
+		"handled by the scripts.\n\n"
+		"The given <tt>dictionary</tt> maps control names—which are strings "
+		"defined by the UI JSON configuration script—to booleans, where "
+		"<tt>TRUE</tt> means that the control should be reacted to (if you are "
+		"interested in it), and <tt>FALSE</tt> means that you should ignore the "
+		"control for that iteration of the game loop.");
+	document->DocumentExpectedFunction("void MenuName_WidgetName_SignalName()",
+		"All GUI scripts can react to widget events by writing functions for "
+		"any signals they are interested in. If a signal handler isn't defined, "
+		"the signal will be silently ignored.\n\n"
+		"For example, to see if a bitmap button called <tt>ButtonName</tt>, "
+		"within a vertical layout container called <tt>MenuLayout</tt>, which is "
+		"in a menu called <tt>GameMenu</tt>, has been clicked, the following "
+		"function can be defined:\n"
+		"<pre><code>void GameMenu_ButtonName_Pressed() {\n"
+"\tinfo(\"I have been pressed!\");\n"
+"}</code></pre>\n"
+		"A list of supported signals can be found be in the "
+		"<tt>sfx::gui::_connectSignals()</tt> method in the game engine's code.");
+
 	// Register non-widget global functions.
 	int r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
