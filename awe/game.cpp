@@ -50,6 +50,14 @@ awe::game::game(const std::string& file, const std::string& scripts,
 
 void awe::game::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	// Expected functions.
+	document->DocumentExpectedFunction(
+		"void handleInput(const dictionary@ controls)",
+		"Called indirectly by the \"map\" menu, via the <tt>handleMapInput()</tt> "
+		"global function. This function needs to be defined within one of the "
+		"game scripts so that it can handle input when on a map without any menu "
+		"displayed.");
+
 	// VECTOR2 TYPE
 	int r = engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());
