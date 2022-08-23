@@ -72,97 +72,186 @@ int awe::game_engine::run() noexcept {
 void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	// register the object types
-	engine->RegisterObjectType("joystick_axis", sizeof(sfx::joystick),
+	int r = engine->RegisterObjectType("joystick_axis", sizeof(sfx::joystick),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sfx::joystick>() |
 		asOBJ_APP_CLASS_ALLINTS);
 	engine->RegisterObjectProperty("joystick_axis", "uint axis",
 		asOFFSET(sfx::joystick, axis));
 	engine->RegisterObjectProperty("joystick_axis", "int direction",
 		asOFFSET(sfx::joystick, direction));
+	document->DocumentObjectType(r, "Represents a joystick axis input. This class "
+		"stores the ID of the axis being input, and which direction the axis is "
+		"currently being pressed (either -1 or 1).");
 
 	// register the global functions
-	engine->RegisterGlobalFunction("void info(const string& in)",
+	r = engine->RegisterGlobalFunction("void info(const string& in)",
 		asMETHODPR(engine::logger, write, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, &_logger);
-	engine->RegisterGlobalFunction("void warn(const string& in)",
+	document->DocumentGlobalFunction(r, "Writes to the log using the info level.");
+
+	r = engine->RegisterGlobalFunction("void warn(const string& in)",
 		asMETHODPR(engine::logger, warning, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, &_logger);
-	engine->RegisterGlobalFunction("void error(const string& in)",
+	document->DocumentGlobalFunction(r, "Writes to the log using the warning "
+		"level.");
+
+	r = engine->RegisterGlobalFunction("void error(const string& in)",
 		asMETHODPR(engine::logger, error, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, &_logger);
-	engine->RegisterGlobalFunction("float getSoundVolume()",
+	document->DocumentGlobalFunction(r, "Writes to the log using the error "
+		"level.");
+
+	r = engine->RegisterGlobalFunction("float getSoundVolume()",
 		asMETHOD(sfx::audio, getVolume),
 		asCALL_THISCALL_ASGLOBAL, _sounds.get());
-	engine->RegisterGlobalFunction("void setSoundVolume(const float)",
+	document->DocumentGlobalFunction(r, "Gets the current sound volume.");
+
+	r = engine->RegisterGlobalFunction("void setSoundVolume(const float)",
 		asMETHOD(sfx::audio, setVolume),
 		asCALL_THISCALL_ASGLOBAL, _sounds.get());
-	engine->RegisterGlobalFunction("float getMusicVolume()",
+	document->DocumentGlobalFunction(r, "Sets the current sound volume.");
+
+	r = engine->RegisterGlobalFunction("float getMusicVolume()",
 		asMETHOD(sfx::audio, getVolume),
 		asCALL_THISCALL_ASGLOBAL, _music.get());
-	engine->RegisterGlobalFunction("void setMusicVolume(const float)",
+	document->DocumentGlobalFunction(r, "Gets the current music volume.");
+
+	r = engine->RegisterGlobalFunction("void setMusicVolume(const float)",
 		asMETHOD(sfx::audio, setVolume),
 		asCALL_THISCALL_ASGLOBAL, _music.get());
-	engine->RegisterGlobalFunction("void setFullscreen(const bool)",
+	document->DocumentGlobalFunction(r, "Sets the current music volume.");
+
+	r = engine->RegisterGlobalFunction("void setFullscreen(const bool)",
 		asMETHOD(awe::game_engine, _script_setFullscreen),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("bool getFullscreen()",
+	document->DocumentGlobalFunction(r, "Sets the full screen setting. See "
+		"saveRendererConfig() for more information.");
+
+	r = engine->RegisterGlobalFunction("bool getFullscreen()",
 		asMETHOD(awe::game_engine, _script_getFullscreen),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void setVSync(const bool)",
+	document->DocumentGlobalFunction(r, "Gets the full screen setting.");
+
+	r = engine->RegisterGlobalFunction("void setVSync(const bool)",
 		asMETHOD(awe::game_engine, _script_setVSync),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("bool getVSync()",
+	document->DocumentGlobalFunction(r, "Sets the V-sync setting. See "
+		"saveRendererConfig() for more information.");
+
+	r = engine->RegisterGlobalFunction("bool getVSync()",
 		asMETHOD(awe::game_engine, _script_getVSync),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void loadMusicConfig()",
+	document->DocumentGlobalFunction(r, "Gets the V-sync setting.");
+
+	r = engine->RegisterGlobalFunction("void loadMusicConfig()",
 		asMETHOD(awe::game_engine, _script_loadMusicConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void saveMusicConfig()",
+	document->DocumentGlobalFunction(r, "Loads the music configuration script. "
+		"This will replace all of the configurations that are currently loaded "
+		"(including the music volume).");
+
+	r = engine->RegisterGlobalFunction("void saveMusicConfig()",
 		asMETHOD(awe::game_engine, _script_saveMusicConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void loadSoundConfig()",
+	document->DocumentGlobalFunction(r, "Saves the music configuration (i.e. the "
+		"music volume).");
+
+	r = engine->RegisterGlobalFunction("void loadSoundConfig()",
 		asMETHOD(awe::game_engine, _script_loadSoundConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void saveSoundConfig()",
+	document->DocumentGlobalFunction(r, "Loads the sound configuration script. "
+		"This will replace all of the configurations that are currently loaded "
+		"(including the sound volume).");
+
+	r = engine->RegisterGlobalFunction("void saveSoundConfig()",
 		asMETHOD(awe::game_engine, _script_saveSoundConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void loadRendererConfig()",
+	document->DocumentGlobalFunction(r, "Saves the sound configuration (i.e. the "
+		"sound volume).");
+
+	r = engine->RegisterGlobalFunction("void loadRendererConfig()",
 		asMETHOD(awe::game_engine, _script_loadRendererConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void saveRendererConfig()",
+	document->DocumentGlobalFunction(r, "Restores the renderer settings from the "
+		"configuration script. See saveRendererConfig() for more information.");
+
+	r = engine->RegisterGlobalFunction("void saveRendererConfig()",
 		asMETHOD(awe::game_engine, _script_saveRendererConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("uint getJoystickID()",
+	document->DocumentGlobalFunction(r, "All of the renderer settings (e.g. the "
+		"full screen setting, V-sync) are only temporarily stored and are not "
+		"applied when they are set via the script. To apply them, the script has "
+		"to save them using this function. This is not the case for other "
+		"configurations.");
+
+	r = engine->RegisterGlobalFunction("uint getJoystickID()",
 		asMETHOD(sfx::user_input, getJoystickID), asCALL_THISCALL_ASGLOBAL,
 		_userinput.get());
-	engine->RegisterGlobalFunction("void setJoystickID(uint)",
+	document->DocumentGlobalFunction(r, "Gets the ID of the joystick that is "
+		"currently configured to provide input to the game.");
+
+	r = engine->RegisterGlobalFunction("void setJoystickID(uint)",
 		asMETHOD(sfx::user_input, setJoystickID), asCALL_THISCALL_ASGLOBAL,
 		_userinput.get());
-	engine->RegisterGlobalFunction("float getJoystickAxisThreshold()",
+	document->DocumentGlobalFunction(r, "Sets the ID of the joystick that will "
+		"provide input to the game. Does not make any changes if the given ID "
+		"could not identify a joystick.");
+
+	r = engine->RegisterGlobalFunction("float getJoystickAxisThreshold()",
 		asMETHOD(sfx::user_input, getJoystickAxisThreshold),
 		asCALL_THISCALL_ASGLOBAL, _userinput.get());
-	engine->RegisterGlobalFunction("void setJoystickAxisThreshold(float)",
+	document->DocumentGlobalFunction(r, "Gets the configured axis threashold. "
+		"Axis inputs will only be recognised by the game if they are at or over "
+		"this threshold.");
+
+	r = engine->RegisterGlobalFunction("void setJoystickAxisThreshold(float)",
 		asMETHOD(sfx::user_input, setJoystickAxisThreshold),
 		asCALL_THISCALL_ASGLOBAL, _userinput.get());
-	engine->RegisterGlobalFunction("void loadUIConfig()",
+	document->DocumentGlobalFunction(r, "Updates the axis threshold "
+		"configuration.");
+
+	r = engine->RegisterGlobalFunction("void loadUIConfig()",
 		asMETHOD(awe::game_engine, _script_loadUIConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void saveUIConfig()",
+	document->DocumentGlobalFunction(r, "Loads the UI configuration script. This "
+		"will replace all of the configurations that are currently loaded "
+		"(including the joystick ID and axis threashold).");
+
+	r = engine->RegisterGlobalFunction("void saveUIConfig()",
 		asMETHOD(awe::game_engine, _script_saveUIConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction(
+	document->DocumentGlobalFunction(r, "Saves the UI configuration (i.e. the "
+		"joystick ID and axis threashold).");
+
+	r = engine->RegisterGlobalFunction(
 		"void loadMap(const string& in, const string& in)",
 		asMETHOD(awe::game_engine, _script_loadMap),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void saveMap()",
+	document->DocumentGlobalFunction(r, "Opens a map (its file path being the "
+		"first parameter), and then switches to the menu given in the second "
+		"parameter. The menu should be \"empty\" so as to display the map on the "
+		"screen. If there is already a map open at the time of the call, then an "
+		"error will be logged and no changes will occur.");
+
+	r = engine->RegisterGlobalFunction("void saveMap()",
 		asMETHOD(awe::game_engine, _script_saveMap),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void quitMap()",
+	document->DocumentGlobalFunction(r, "Saves the currently open map. If there "
+		"is no open map, then an error will be logged.");
+
+	r = engine->RegisterGlobalFunction("void quitMap()",
 		asMETHOD(awe::game_engine, _script_quitMap),
 		asCALL_THISCALL_ASGLOBAL, this);
-	engine->RegisterGlobalFunction("void handleMapInput(const dictionary@)",
+	document->DocumentGlobalFunction(r, "Closes the currently open map and "
+		"switches back to the menu that was being displayed when loadMap() was "
+		"originally called. If there is no open map, then an error will be "
+		"logged.");
+
+	r = engine->RegisterGlobalFunction("void handleMapInput(const dictionary@)",
 		asMETHOD(awe::game_engine, _script_handleMapInput),
 		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Should be called by the \"map\" menu's "
+		"HandleInput() function to allow the game scripts to handle user input.");
 }
 
 bool awe::game_engine::_load(engine::json& j) noexcept {
