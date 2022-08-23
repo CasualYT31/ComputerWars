@@ -51,31 +51,48 @@ awe::game::game(const std::string& file, const std::string& scripts,
 void awe::game::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	// VECTOR2 TYPE
-	engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
+	int r = engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());
 	engine->RegisterObjectProperty("Vector2", "uint x",
 		asOFFSET(sf::Vector2u, x));
 	engine->RegisterObjectProperty("Vector2", "uint y",
 		asOFFSET(sf::Vector2u, y));
+	document->DocumentObjectType(r, "Represents a 2D vector.");
 
 	// MAP FUNCTIONS
-	engine->RegisterGlobalFunction("void moveSelectedTileUp()",
+	r = engine->RegisterGlobalFunction("void moveSelectedTileUp()",
 		asMETHOD(awe::map, moveSelectedTileUp),
 		asCALL_THISCALL_ASGLOBAL, &_map);
-	engine->RegisterGlobalFunction("void moveSelectedTileDown()",
+	document->DocumentGlobalFunction(r, "Moves the cursor to the tile above the "
+		"tile where the cursor is currently located. If this is not possible, the "
+		"call will be ignored.");
+	r = engine->RegisterGlobalFunction("void moveSelectedTileDown()",
 		asMETHOD(awe::map, moveSelectedTileDown),
 		asCALL_THISCALL_ASGLOBAL, &_map);
-	engine->RegisterGlobalFunction("void moveSelectedTileLeft()",
+	document->DocumentGlobalFunction(r, "Moves the cursor to the tile below the "
+		"tile where the cursor is currently located. If this is not possible, the "
+		"call will be ignored.");
+	r = engine->RegisterGlobalFunction("void moveSelectedTileLeft()",
 		asMETHOD(awe::map, moveSelectedTileLeft),
 		asCALL_THISCALL_ASGLOBAL, &_map);
-	engine->RegisterGlobalFunction("void moveSelectedTileRight()",
+	document->DocumentGlobalFunction(r, "Moves the cursor to the tile to the left "
+		"of the tile where the cursor is currently located. If this is not "
+		"possible, the call will be ignored.");
+	r = engine->RegisterGlobalFunction("void moveSelectedTileRight()",
 		asMETHOD(awe::map, moveSelectedTileRight),
 		asCALL_THISCALL_ASGLOBAL, &_map);
-	engine->RegisterGlobalFunction("Vector2 getSelectedTile()",
+	document->DocumentGlobalFunction(r, "Moves the cursor to the tile to the "
+		"right of the tile where the cursor is currently located. If this is not "
+		"possible, the call will be ignored.");
+	r = engine->RegisterGlobalFunction("Vector2 getSelectedTile()",
 		asMETHOD(awe::map, getSelectedTile), asCALL_THISCALL_ASGLOBAL, &_map);
-	engine->RegisterGlobalFunction(
+	document->DocumentGlobalFunction(r, "Returns the location of the cursor, in "
+		"tiles. The coordinates are 0-based.");
+	r = engine->RegisterGlobalFunction(
 		asUnitID.substr().append(" getUnitOnTile(const Vector2)").c_str(),
 		asMETHOD(awe::map, getUnitOnTile), asCALL_THISCALL_ASGLOBAL, &_map);
+	document->DocumentGlobalFunction(r, "Retrieves the ID of the unit on the "
+		"specified tile. If 0, then the tile is unoccupied.");
 }
 
 bool awe::game::load() noexcept {
