@@ -115,7 +115,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"becomes necessary to explicitly include the container at all times "
 		"within the widget's name. <b>This only isn't the case with signal "
 		"handler function names, which always exclude container names, unless the "
-		"signal handler is connected to a container itself.</b>");
+		"signal handler is connected to a container itself.</b>\n"
+		"It's worth noting, however, that if a container has the same name as a "
+		"menu, then the engine will assume that the first name before the "
+		"<tt>.</tt> is a menu name, and you will encounter unexpected results.");
 	document->DocumentExpectedFunction("GUIErrorBehaviour",
 		"Whenever an error is logged by GUI global functions, no changes will "
 		"occur. If an error was logged during a query call, a blank object will "

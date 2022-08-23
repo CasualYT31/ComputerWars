@@ -81,7 +81,13 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asOFFSET(sfx::joystick, direction));
 	document->DocumentObjectType(r, "Represents a joystick axis input. This class "
 		"stores the ID of the axis being input, and which direction the axis is "
-		"currently being pressed (either -1 or 1).");
+		"currently being pressed.\n"
+		"<tt>axis</tt> is an <tt>sf::Joystick::Axis</tt> value. If too large of "
+		"an ID is given, via this object, into a function, it will be lowered "
+		"down to the maximum possible value and a warning will be logged.\n"
+		"A positive <tt>direction</tt> value represents the positive direction "
+		"(including <tt>0</tt>), and a negative value represents the negative "
+		"direction.");
 
 	// register the global functions
 	r = engine->RegisterGlobalFunction("void info(const string& in)",
@@ -109,7 +115,10 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	r = engine->RegisterGlobalFunction("void setSoundVolume(const float)",
 		asMETHOD(sfx::audio, setVolume),
 		asCALL_THISCALL_ASGLOBAL, _sounds.get());
-	document->DocumentGlobalFunction(r, "Sets the current sound volume.");
+	document->DocumentGlobalFunction(r, "Sets the current sound volume. The value "
+		"must be between <tt>0.0</tt> and <tt>100.0</tt>. If under or over the "
+		"bounds, it will be adjusted upwards or downwards to the bound "
+		"accordingly, and a warning will be logged.");
 
 	r = engine->RegisterGlobalFunction("float getMusicVolume()",
 		asMETHOD(sfx::audio, getVolume),
@@ -119,7 +128,10 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	r = engine->RegisterGlobalFunction("void setMusicVolume(const float)",
 		asMETHOD(sfx::audio, setVolume),
 		asCALL_THISCALL_ASGLOBAL, _music.get());
-	document->DocumentGlobalFunction(r, "Sets the current music volume.");
+	document->DocumentGlobalFunction(r, "Sets the current music volume. The value "
+		"must be between <tt>0.0</tt> and <tt>100.0</tt>. If under or over the "
+		"bounds, it will be adjusted upwards or downwards to the bound "
+		"accordingly, and a warning will be logged.");
 
 	r = engine->RegisterGlobalFunction("void setFullscreen(const bool)",
 		asMETHOD(awe::game_engine, _script_setFullscreen),
@@ -173,7 +185,8 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game_engine, _script_loadRendererConfig),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Restores the renderer settings from the "
-		"configuration script. See saveRendererConfig() for more information.");
+		"configuration script. Also reopens the render window. See "
+		"<tt>saveRendererConfig()</tt> for more information.");
 
 	r = engine->RegisterGlobalFunction("void saveRendererConfig()",
 		asMETHOD(awe::game_engine, _script_saveRendererConfig),
@@ -208,7 +221,9 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::user_input, setJoystickAxisThreshold),
 		asCALL_THISCALL_ASGLOBAL, _userinput.get());
 	document->DocumentGlobalFunction(r, "Updates the axis threshold "
-		"configuration.");
+		"configuration. The value must be between <tt>5.0</tt> and <tt>95.0</tt>. "
+		"If under or over the bounds, it will be adjusted upwards or downwards to "
+		"the bound accordingly, and a warning will be logged.");
 
 	r = engine->RegisterGlobalFunction("void loadUIConfig()",
 		asMETHOD(awe::game_engine, _script_loadUIConfig),
@@ -237,14 +252,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game_engine, _script_saveMap),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Saves the currently open map. If there "
-		"is no open map, then an error will be logged.");
+		"is no open map, then a warning will be logged.");
 
 	r = engine->RegisterGlobalFunction("void quitMap()",
 		asMETHOD(awe::game_engine, _script_quitMap),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Closes the currently open map and "
 		"switches back to the menu that was being displayed when loadMap() was "
-		"originally called. If there is no open map, then an error will be "
+		"originally called. If there is no open map, then a warning will be "
 		"logged.");
 
 	r = engine->RegisterGlobalFunction("void handleMapInput(const dictionary@)",
