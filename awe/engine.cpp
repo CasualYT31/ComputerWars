@@ -433,8 +433,9 @@ void awe::game_engine::_script_quitMap() {
 }
 
 void awe::game_engine::_script_handleMapInput(CScriptDictionary* controls) {
-	if (controls && _currentGame) {
-		_currentGame->handleInput(controls);
+	if (controls) {
+		if (_currentGame)
+			_currentGame->handleInput(controls);
 		// When finished with the object handle it must be released.
 		controls->Release();
 	}
