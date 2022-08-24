@@ -83,8 +83,7 @@ namespace awe {
 		 * <li>"movements"</li><li>"terrains"</li><li>"tiles"</li><li>"units"</li>
 		 * <li>"commanders"</li><li>"languages"</li><li>"fonts"</li>
 		 * <li>"sounds"</li><li>"music"</li><li>"renderer"</li><li>"userinput"</li>
-		 * <li>"gui"</li><li>"guiscripts"</li><li>"spritesheets"</li>
-		 * <li>"gamescripts"</li></ul></tt>
+		 * <li>"gui"</li><li>"scripts"</li><li>"spritesheets"</li></ul></tt>
 		 * The @c "spritesheets" key instead stores an object with the following
 		 * key-value pairs, all the values of which are strings containing the
 		 * paths of JSON scripts.
@@ -96,8 +95,8 @@ namespace awe {
 		 * <tt><ul><li>"normal"</li><li>"normalpictures"</li></ul></tt>
 		 * If a key-value pair is given more than once, only the first instance
 		 * will count and all subsequent pairs will be ignored.\n
-		 * Loading a game engine instance will also generate the documentation for
-		 * the script interface available to GUI scripts.
+		 * Loading a game engine instance will also generate the documentation of
+		 * the script interface.
 		 * @warning Note that the @c load() function for this class will change
 		 *          the current working directory to whatever folder the given
 		 *          configuration script was in at the time of calling.
@@ -306,7 +305,7 @@ namespace awe {
 		/**
 		 * Stores a game's data, including its map and the armies.
 		 */
-		std::unique_ptr<awe::game> _currentGame;
+		awe::game _game;
 
 		//================================
 		//==========BACKEND DATA==========
@@ -360,19 +359,14 @@ namespace awe {
 		std::shared_ptr<awe::spritesheets> _sprites;
 
 		/**
-		 * Pointer to the @c scripts object containing all the GUI scripts.
+		 * Pointer to the @c scripts object containing all the scripts.
 		 */
-		std::shared_ptr<engine::scripts> _guiScripts;
+		std::shared_ptr<engine::scripts> _scripts;
 		
 		/**
 		 * Pointer to the GUI object containing all the menus.
 		 */
 		std::shared_ptr<sfx::gui> _gui;
-
-		/**
-		 * Stores the folder containing all of the game's scripts.
-		 */
-		std::string _gameScriptsFolder;
 
 		//================================
 		//==========ENGINE DATA===========

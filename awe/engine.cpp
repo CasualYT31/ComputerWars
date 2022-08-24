@@ -51,11 +51,9 @@ int awe::game_engine::run() noexcept {
 
 			_renderer->clear();
 			_renderer->animate(*_gui, 2.0);
-			if (_currentGame) {
-				_renderer->animate(*_currentGame, 2.0);
-				_renderer->draw(*_currentGame,
-					sf::RenderStates().transform.scale(2.0f, 2.0f));
-			}
+			_renderer->animate(_game, 2.0);
+			_renderer->draw(_game,
+				sf::RenderStates().transform.scale(2.0f, 2.0f));
 			_renderer->draw(*_gui,
 				sf::RenderStates().transform.scale(2.0f, 2.0f));
 			_renderer->display();
@@ -71,7 +69,7 @@ int awe::game_engine::run() noexcept {
 
 void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
-	// register the object types
+	// Register the object types.
 	int r = engine->RegisterObjectType("joystick_axis", sizeof(sfx::joystick),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sfx::joystick>() |
 		asOBJ_APP_CLASS_ALLINTS);
@@ -89,7 +87,59 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"(including <tt>0</tt>), and a negative value represents the negative "
 		"direction.");
 
-	// register the global functions
+	r = engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
+		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());
+	engine->RegisterObjectProperty("Vector2", "uint x",
+		asOFFSET(sf::Vector2u, x));
+	engine->RegisterObjectProperty("Vector2", "uint y",
+		asOFFSET(sf::Vector2u, y));
+	document->DocumentObjectType(r, "Represents a 2D vector.");
+
+	// game_interface.
+	r = engine->RegisterObjectType("game_interface", 0,
+		asOBJ_REF | asOBJ_NOHANDLE);
+	document->DocumentObjectType(r, "Provides access to a game of Computer Wars.\n"
+		"A global property called <tt>game</tt> is available to all scripts. If a "
+		"map has been loaded, this property can be used to interact with the map. "
+		"If a map hasn't been loaded or has been quit from, then functions won't "
+		"have any effect, and if they return a value, they will return a blank "
+		"value.");
+	r = engine->RegisterObjectMethod("game_interface", "void moveSelectedTileUp()",
+		asMETHOD(awe::game, moveSelectedTileUp), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Moves the cursor to the tile above the "
+		"tile where the cursor is currently located. If this is not possible, the "
+		"call will be ignored.");
+	r = engine->RegisterObjectMethod("game_interface",
+		"void moveSelectedTileDown()",
+		asMETHOD(awe::game, moveSelectedTileDown), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Moves the cursor to the tile below the "
+		"tile where the cursor is currently located. If this is not possible, the "
+		"call will be ignored.");
+	r = engine->RegisterObjectMethod("game_interface",
+		"void moveSelectedTileLeft()",
+		asMETHOD(awe::game, moveSelectedTileLeft), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Moves the cursor to the tile to the left "
+		"of the tile where the cursor is currently located. If this is not "
+		"possible, the call will be ignored.");
+	r = engine->RegisterObjectMethod("game_interface",
+		"void moveSelectedTileRight()",
+		asMETHOD(awe::game, moveSelectedTileRight), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Moves the cursor to the tile to the "
+		"right of the tile where the cursor is currently located. If this is not "
+		"possible, the call will be ignored.");
+	r = engine->RegisterObjectMethod("game_interface", "Vector2 getSelectedTile()",
+		asMETHOD(awe::game, getSelectedTile), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the location of the cursor, in "
+		"tiles. The coordinates are 0-based.");
+	r = engine->RegisterObjectMethod("game_interface", 
+		asUnitID.substr().append(" getUnitOnTile(const Vector2)").c_str(),
+		asMETHOD(awe::game, getUnitOnTile), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Retrieves the ID of the unit on the "
+		"specified tile. If 0, then the tile is unoccupied.");
+	// Register game global property.
+	r = engine->RegisterGlobalProperty("game_interface game", &_game);
+
+	// Register the global functions.
 	r = engine->RegisterGlobalFunction("void info(const string& in)",
 		asMETHODPR(engine::logger, write, (const std::string&), void),
 		asCALL_THISCALL_ASGLOBAL, &_logger);
@@ -261,12 +311,6 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"switches back to the menu that was being displayed when loadMap() was "
 		"originally called. If there is no open map, then a warning will be "
 		"logged.");
-
-	r = engine->RegisterGlobalFunction("void handleMapInput(const dictionary@)",
-		asMETHOD(awe::game_engine, _script_handleMapInput),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Should be called by the \"map\" menu's "
-		"HandleInput() function to allow the game scripts to handle user input.");
 }
 
 bool awe::game_engine::_load(engine::json& j) noexcept {
@@ -276,10 +320,9 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	std::filesystem::current_path(basePath);
 	// Retrieve a few of the paths manually instead of via _loadObject().
 	// Don't forget to apply the base path to them.
-	std::string guiScriptsPath, guiPath;
-	j.apply(guiScriptsPath, { "guiscripts" });
+	std::string scriptsPath, guiPath;
+	j.apply(scriptsPath, { "scripts" });
 	j.apply(guiPath, { "gui" });
-	j.apply(_gameScriptsFolder, { "gamescripts" });
 	if (!j.inGoodState()) return false;
 	// Allocate spritesheets object.
 	_sprites = std::make_shared<awe::spritesheets>();
@@ -326,12 +369,12 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_loadObject(_sprites->tilePicture->normal, j,
 		{ "spritesheets", "tile", "normalpictures" });
 	j.resetState();
-	// Allocate GUIs and their scripts.
-	_guiScripts = std::make_shared<engine::scripts>("gui_scripts");
-	_gui = std::make_shared<sfx::gui>(_guiScripts);
-	_guiScripts->addRegistrant(this);
-	_guiScripts->loadScripts(guiScriptsPath);
-	_guiScripts->generateDocumentation();
+	// Allocate GUIs and the scripts.
+	_scripts = std::make_shared<engine::scripts>();
+	_gui = std::make_shared<sfx::gui>(_scripts);
+	_scripts->addRegistrant(this);
+	_scripts->loadScripts(scriptsPath);
+	_scripts->generateDocumentation();
 	_gui->addSpritesheet("icon", _sprites->icon);
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setTarget(*_renderer);
@@ -402,58 +445,24 @@ void awe::game_engine::_script_saveUIConfig() {
 
 void awe::game_engine::_script_loadMap(const std::string& file,
 	const std::string& menu) {
-	// If there is already a map loaded, log an error, otherwise continue.
-	if (_currentGame) {
-		_logger.error("Attempted to load a new map \"{}\" when map \"{}\" was "
-			"already loaded!", file, "implement getMapName() in game");
-	} else {
-		// Make a new scripts instance for this new game.
-		std::shared_ptr<engine::scripts> gameScripts =
-			std::make_shared<engine::scripts>("game_scripts");
-		gameScripts->addRegistrant(this);
-		gameScripts->addRegistrant(_gui.get());
-		// Create the game.
-		_currentGame = std::make_unique<awe::game>(file, _gameScriptsFolder,
-			gameScripts, _countries, _tiles, _units, _commanders);
-		_currentGame->load();
-		_currentGame->setTileSpritesheet(_sprites->tile->normal);
-		_currentGame->setUnitSpritesheet(_sprites->unit->idle);
-		_currentGame->setIconSpritesheet(_sprites->icon);
-		_currentGame->setCOSpritesheet(_sprites->CO);
-		_currentGame->setFont((*_fonts)["dialogue"]);
-		// Remember what the last menu was so that we can easily go back to it when
-		// the user quits.
-		_menuBeforeMapLoad = _gui->getGUI();
-		_gui->setGUI(menu);
-	}
+	// Create the game.
+	_game.load(file, _countries, _tiles, _units, _commanders,
+		_sprites->tile->normal, _sprites->unit->idle, _sprites->icon, _sprites->CO,
+		(*_fonts)["dialogue"]);
+	// Remember what the last menu was so that we can easily go back to it when
+	// the user quits.
+	_menuBeforeMapLoad = _gui->getGUI();
+	_gui->setGUI(menu);
 }
 
 void awe::game_engine::_script_saveMap() {
-	if (_currentGame) {
-		if (!_currentGame->save()) {
-			_logger.error("Call to \"saveMap()\" couldn't save the current map.");
-		}
-	} else {
-		_logger.warning("Called \"saveMap()\" without there being a map loaded.");
-	}
+	if (!_game.save())
+		_logger.error("Call to \"saveMap()\" couldn't save the current map.");
 }
 
 void awe::game_engine::_script_quitMap() {
-	if (!_currentGame) {
-		_logger.warning("Called \"quitMap()\" without there being a map loaded.");
-	} else {
-		_currentGame = nullptr;
-		_gui->setGUI(_menuBeforeMapLoad);
-	}
-}
-
-void awe::game_engine::_script_handleMapInput(CScriptDictionary* controls) {
-	if (controls) {
-		if (_currentGame)
-			_currentGame->handleInput(controls);
-		// When finished with the object handle it must be released.
-		controls->Release();
-	}
+	_game.quit();
+	_gui->setGUI(_menuBeforeMapLoad);
 }
 
 // initCheck()
@@ -479,7 +488,7 @@ int awe::game_engine::_initCheck() const noexcept {
 	} else {
 		_sprites->test(errstring);
 	}
-	if (!_guiScripts) errstring += "gui scripts\n";
+	if (!_scripts) errstring += "scripts\n";
 	if (!_gui) errstring += "gui\n";
 	if (errstring.length()) {
 		_logger.error("Fatal error: could not run the game engine due to the "

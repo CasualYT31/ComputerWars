@@ -137,7 +137,10 @@ namespace engine {
 		void contextExceptionCallback(asIScriptContext* context) noexcept;
 
 		/**
-		 * Loads a folder of scripts.
+		 * Loads a folder of scripts recursively.
+		 * Note that this function expects every file within the folder
+		 * (recursively) to be a valid AngelScript file. If one file couldn't be
+		 * loaded, this function will return @c FALSE.\n
 		 * A new module is built, and each file is attached to it. This means all
 		 * scripts aren't separate, so all functions across all scripts should have
 		 * a unique name.\n

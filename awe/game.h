@@ -38,18 +38,19 @@ namespace awe {
 	 * Class which represents a map with game logic and user input.
 	 * @sa @c awe::map
 	 */
-	class game : sf::NonCopyable, public engine::script_registrant,
-		public sfx::animated_drawable {
+	class game : sf::NonCopyable, public sfx::animated_drawable {
 	public:
 		/**
+		 * Initialises the internal logger object.
+		 * @param name The name to give this particular instantiation within the
+		 *             log file. Defaults to "game."
+		 * @sa    \c engine::logger
+		 */
+		game(const std::string& name = "game") noexcept;
+
+		/**
 		 * Sets up a game based on what @c map requires.
-		 * Also initialises the internal logger object, and generates the script
-		 * interface documentation for game scripts if the build has been
-		 * configured to generate the documentation.
 		 * @param file       Path to the binary file containing the map to play on.
-		 * @param scripts    Folder containing the game scripts to load.
-		 * @param ptr        Pointer to the @c scripts object, with most of the
-		 *                   necessary registrants already added.
 		 * @param countries  Information on the countries to search through when
 		 *                   reading country IDs from the map file.
 		 * @param tiles      Information on the tile types to search through when
@@ -58,76 +59,73 @@ namespace awe {
 		 *                   reading unit type IDs from the map file.
 		 * @param commanders Information on the commanders to search through when
 		 *                   reading CO IDs from the map file.
-		 * @sa @c engine::logger
+		 * @param tile_sheet Pointer to the animated spritesheet to use for tiles.
+		 * @param unit_sheet Pointer to the animated spritesheet to use for units.
+		 * @param icon_sheet Pointer to the animated spritesheet to use for icons.
+		 * @param co_sheet   Pointer to the animated spritesheet to use for COs.
+		 * @param font       Pointer to the font to use with this map.
+		 * @sa    @c awe::map::load()
 		 */
-		game(const std::string& file, const std::string& scripts,
-			 const std::shared_ptr<engine::scripts>& ptr,
-			 const std::shared_ptr<awe::bank<awe::country>>& countries,
-			 const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-			 const std::shared_ptr<awe::bank<awe::unit_type>>& units,
-			 const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-			 const std::string& name = "game")
-			 noexcept;
-
-		/**
-		 * Initialise the script interface for maps.
-		 * @sa \c engine::scripts::registerInterface()
-		 */
-		void registerInterface(asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
-
-		/**
-		 * Reloads the state of the map from the previously given binary file.
-		 * @sa @c awe::map::load()
-		 */
-		bool load() noexcept;
+		bool load(const std::string& file,
+			const std::shared_ptr<awe::bank<awe::country>>& countries,
+			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
+			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
+			const std::shared_ptr<sfx::animated_spritesheet>& tile_sheet,
+			const std::shared_ptr<sfx::animated_spritesheet>& unit_sheet,
+			const std::shared_ptr<sfx::animated_spritesheet>& icon_sheet,
+			const std::shared_ptr<sfx::animated_spritesheet>& co_sheet,
+			const std::shared_ptr<sf::Font>& font) noexcept;
 
 		/**
 		 * Saves the state of the map to the previously given binary file.
+		 * Returns @c FALSE if the map hasn't been previously <tt>load()</tt>ed.
 		 * @sa @c awe::map::save()
 		 */
 		bool save() noexcept;
 
 		/**
-		 * Sets the spritesheet used for drawing tiles.
-		 * @param sheet Pointer to the animated spritesheet to use for tiles.
+		 * Destroys the map object.
 		 */
-		void setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
-			sheet) noexcept;
+		void quit() noexcept;
+
+		/////////////////////
+		// BEGIN INTERFACE //
+		/////////////////////
 
 		/**
-		 * Sets the spritesheet used for drawing units.
-		 * @param sheet Pointer to the animated spritesheet to use for units.
+		 * @sa @c awe::map::moveSelectedTileUp().
 		 */
-		void setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
-			sheet) noexcept;
+		void moveSelectedTileUp() noexcept;
 
 		/**
-		 * Sets the spritesheet used for drawing map icons.
-		 * @param sheet Pointer to the animated spritesheet to use for icons.
+		 * @sa @c awe::map::moveSelectedTileDown().
 		 */
-		void setIconSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
-			sheet) noexcept;
+		void moveSelectedTileDown() noexcept;
 
 		/**
-		 * Sets the spritesheet used for drawing COs.
-		 * @param sheet Pointer to the animated spritesheet to use for COs.
+		 * @sa @c awe::map::moveSelectedTileLeft().
 		 */
-		void setCOSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
-			sheet) noexcept;
+		void moveSelectedTileLeft() noexcept;
 
 		/**
-		 * Sets the font used with this map.
-		 * If \c nullptr is given, an error will be logged.
-		 * @param font Pointer to the font to use with this map.
+		 * @sa @c awe::map::moveSelectedTileRight().
 		 */
-		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
+		void moveSelectedTileRight() noexcept;
 
 		/**
-		 * Invokes the game script's @c handleInput() function.
-		 * @param controls The object handle to the control dictionary.
+		 * @sa @c awe::map::getSelectedTile().
 		 */
-		void handleInput(CScriptDictionary* controls) noexcept;
+		sf::Vector2u getSelectedTile() const noexcept;
+
+		/**
+		 * @sa @c awe::map::getUnitOnTile().
+		 */
+		awe::UnitID getUnitOnTile(const sf::Vector2u tile) const noexcept;
+
+		/////////////////////
+		//  END  INTERFACE //
+		/////////////////////
 
 		/**
 		 * This drawable's \c animate() method.
@@ -155,23 +153,6 @@ namespace awe {
 		/**
 		 * Stores the map.
 		 */
-		awe::map _map;
-
-		/**
-		 * Stores the filepath of the map file this @c game object is working with.
-		 */
-		std::string _mapFileName;
-
-		/**
-		 * Stores all the scripts needed to run a game.
-		 */
-		std::shared_ptr<engine::scripts> _scripts;
-
-		/**
-		 * Flag for documentation generation.
-		 * Used to ensure that the script interface documentation is only ever
-		 * generated once during execution.
-		 */
-		static bool _documentationHasBeenGenerated;
+		std::unique_ptr<awe::map> _map = nullptr;
 	};
 }

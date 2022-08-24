@@ -26,7 +26,6 @@
   "tiles": "property/tile.json",
   "units": "property/unit.json",
   "commanders": "property/co.json",
-  "guiscripts": "gui/scripts",
   "gui": "gui/menus.json",
-  "gamescripts": "scripts"
+  "scripts": "scripts"
 }

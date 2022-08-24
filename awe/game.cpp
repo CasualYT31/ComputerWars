@@ -23,133 +23,92 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 #include "engine.h"
 
-bool awe::game::_documentationHasBeenGenerated = false;
+awe::game::game(const std::string& name) noexcept : _logger(name) {}
 
-awe::game::game(const std::string& file, const std::string& scripts,
-	const std::shared_ptr<engine::scripts>& ptr,
+bool awe::game::load(const std::string& file,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-	const std::string& name) noexcept :
-	_logger(name), _map(countries, tiles, units, commanders), _mapFileName(file),
-	_scripts(ptr) {
-	_scripts->addRegistrant(this);
-	_scripts->loadScripts(scripts);
-	// Generate the script interface documentation. We have to employ the macro
-	// here to prevent logging about documentation generation if the game was
-	// configured not to generate it. If the macro is set to 0, no documentation
-	// will be generated anyway, but we still have to prevent logging explicitly.
-#if AS_GENERATE_DOCUMENTATION == 1
-	if (!_documentationHasBeenGenerated) {
-		_scripts->generateDocumentation();
-		_documentationHasBeenGenerated = true;
+	const std::shared_ptr<sfx::animated_spritesheet>& tile_sheet,
+	const std::shared_ptr<sfx::animated_spritesheet>& unit_sheet,
+	const std::shared_ptr<sfx::animated_spritesheet>& icon_sheet,
+	const std::shared_ptr<sfx::animated_spritesheet>& co_sheet,
+	const std::shared_ptr<sf::Font>& font) noexcept {
+	try {
+		_map = std::make_unique<awe::map>(countries, tiles, units, commanders);
+	} catch (std::bad_alloc) {
+		_logger.error("Couldn't allocate the map object for the game object.");
+		return false;
 	}
-#endif
-}
-
-void awe::game::registerInterface(asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
-	// Expected functions.
-	document->DocumentExpectedFunction(
-		"void handleInput(const dictionary@ controls)",
-		"Called indirectly by the \"map\" menu, via the <tt>handleMapInput()</tt> "
-		"global function. This function needs to be defined within one of the "
-		"game scripts so that it can handle input when on a map without any menu "
-		"displayed.");
-
-	// VECTOR2 TYPE
-	int r = engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
-		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());
-	engine->RegisterObjectProperty("Vector2", "uint x",
-		asOFFSET(sf::Vector2u, x));
-	engine->RegisterObjectProperty("Vector2", "uint y",
-		asOFFSET(sf::Vector2u, y));
-	document->DocumentObjectType(r, "Represents a 2D vector.");
-
-	// MAP FUNCTIONS
-	r = engine->RegisterGlobalFunction("void moveSelectedTileUp()",
-		asMETHOD(awe::map, moveSelectedTileUp),
-		asCALL_THISCALL_ASGLOBAL, &_map);
-	document->DocumentGlobalFunction(r, "Moves the cursor to the tile above the "
-		"tile where the cursor is currently located. If this is not possible, the "
-		"call will be ignored.");
-	r = engine->RegisterGlobalFunction("void moveSelectedTileDown()",
-		asMETHOD(awe::map, moveSelectedTileDown),
-		asCALL_THISCALL_ASGLOBAL, &_map);
-	document->DocumentGlobalFunction(r, "Moves the cursor to the tile below the "
-		"tile where the cursor is currently located. If this is not possible, the "
-		"call will be ignored.");
-	r = engine->RegisterGlobalFunction("void moveSelectedTileLeft()",
-		asMETHOD(awe::map, moveSelectedTileLeft),
-		asCALL_THISCALL_ASGLOBAL, &_map);
-	document->DocumentGlobalFunction(r, "Moves the cursor to the tile to the left "
-		"of the tile where the cursor is currently located. If this is not "
-		"possible, the call will be ignored.");
-	r = engine->RegisterGlobalFunction("void moveSelectedTileRight()",
-		asMETHOD(awe::map, moveSelectedTileRight),
-		asCALL_THISCALL_ASGLOBAL, &_map);
-	document->DocumentGlobalFunction(r, "Moves the cursor to the tile to the "
-		"right of the tile where the cursor is currently located. If this is not "
-		"possible, the call will be ignored.");
-	r = engine->RegisterGlobalFunction("Vector2 getSelectedTile()",
-		asMETHOD(awe::map, getSelectedTile), asCALL_THISCALL_ASGLOBAL, &_map);
-	document->DocumentGlobalFunction(r, "Returns the location of the cursor, in "
-		"tiles. The coordinates are 0-based.");
-	r = engine->RegisterGlobalFunction(
-		asUnitID.substr().append(" getUnitOnTile(const Vector2)").c_str(),
-		asMETHOD(awe::map, getUnitOnTile), asCALL_THISCALL_ASGLOBAL, &_map);
-	document->DocumentGlobalFunction(r, "Retrieves the ID of the unit on the "
-		"specified tile. If 0, then the tile is unoccupied.");
-}
-
-bool awe::game::load() noexcept {
-	auto ret = _map.load(_mapFileName);
-	_map.selectArmy(0);
-	_map.setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0, _map.getMapSize().x,
-		_map.getMapSize().y));
-	return ret;
+	if (_map) {
+		_map->setTileSpritesheet(tile_sheet);
+		_map->setUnitSpritesheet(unit_sheet);
+		_map->setIconSpritesheet(icon_sheet);
+		_map->setCOSpritesheet(co_sheet);
+		_map->setFont(font);
+		auto r = _map->load(file);
+		_map->selectArmy(0);
+		_map->setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0,
+			_map->getMapSize().x, _map->getMapSize().y));
+		return r;
+	}
+	return false;
 }
 
 bool awe::game::save() noexcept {
-	return _map.save(_mapFileName);
+	if (_map)
+		return _map->save("");
+	else
+		return false;
 }
 
-void awe::game::setTileSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
-	_map.setTileSpritesheet(sheet);
-}
-
-void awe::game::setUnitSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
-	_map.setUnitSpritesheet(sheet);
-}
-
-void awe::game::setIconSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
-	_map.setIconSpritesheet(sheet);
-}
-
-void awe::game::setCOSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
-	_map.setCOSpritesheet(sheet);
-}
-
-void awe::game::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
-	_map.setFont(font);
-}
-
-void awe::game::handleInput(CScriptDictionary* controls) noexcept {
-	if (_scripts->functionExists("handleInput")) {
-		_scripts->callFunction("handleInput", controls);
-	}
+void awe::game::quit() noexcept {
+	_map = nullptr;
 }
 
 bool awe::game::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
-	return _map.animate(target, scaling);
+	if (_map)
+		return _map->animate(target, scaling);
+	else
+		return false;
 }
 
 void awe::game::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	target.draw(_map, states);
+	if (_map) target.draw(*_map, states);
+}
+
+//////////////////////
+// SCRIPT INTERFACE //
+//////////////////////
+
+void awe::game::moveSelectedTileUp() noexcept {
+	if (_map) _map->moveSelectedTileUp();
+}
+
+void awe::game::moveSelectedTileDown() noexcept {
+	if (_map) _map->moveSelectedTileDown();
+}
+
+void awe::game::moveSelectedTileLeft() noexcept {
+	if (_map) _map->moveSelectedTileLeft();
+}
+
+void awe::game::moveSelectedTileRight() noexcept {
+	if (_map) _map->moveSelectedTileRight();
+}
+
+sf::Vector2u awe::game::getSelectedTile() const noexcept {
+	if (_map)
+		return _map->getSelectedTile();
+	else
+		return sf::Vector2u();
+}
+
+awe::UnitID awe::game::getUnitOnTile(const sf::Vector2u tile) const noexcept {
+	if (_map)
+		return _map->getUnitOnTile(tile);
+	else
+		return awe::UnitID{};
 }

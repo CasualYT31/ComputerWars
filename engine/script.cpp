@@ -113,9 +113,9 @@ bool engine::scripts::loadScripts(std::string folder) noexcept {
     _logger.write("Loading scripts from \"{}\"...", folder);
     if (folder == "" || !_engine) return false;
     CScriptBuilder builder;
-    // before starting a new module, if it already exists, the ComputerWars module
-    // should be discarded before being replaced
-    // if it doesn't yet exist, then the negative return value is ignored
+    // Before starting a new module, if it already exists, the ComputerWars module
+    // should be discarded before being replaced. If it doesn't yet exist, then the
+    // negative value returned is ignored.
     _engine->DiscardModule("ComputerWars");
     int r = builder.StartNewModule(_engine, "ComputerWars");
     if (r < 0) {
@@ -124,16 +124,24 @@ bool engine::scripts::loadScripts(std::string folder) noexcept {
         return false;
     }
     try {
-        for (const auto& entry : std::filesystem::directory_iterator(folder)) {
-            if (entry.is_regular_file()) {
-                if ((r = builder.AddSectionFromFile(entry.path().string().c_str()))
-                    < 0) {
-                    _logger.error("Failed to add script \"{}\" to the module: "
-                        "code {}.", entry.path().string().c_str(), r);
-                    return false;
+        std::function<bool(const std::string&)> directoryIterator =
+            [&](const std::string& dir) -> bool {
+            for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+                if (entry.is_regular_file()) {
+                    if ((r =
+                        builder.AddSectionFromFile(entry.path().string().c_str()))
+                        < 0) {
+                        _logger.error("Failed to add script \"{}\" to the module: "
+                            "code {}.", entry.path().string().c_str(), r);
+                        return false;
+                    }
+                } else if (entry.is_directory()) {
+                    if (!directoryIterator(entry.path().string())) return false;
                 }
             }
-        }
+            return true;
+        };
+        if (!directoryIterator(folder)) return false;
     } catch (std::exception& e) {
         _logger.error("Failed to interact with directory entry: {}.",
             e.what());
