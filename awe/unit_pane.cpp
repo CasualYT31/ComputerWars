@@ -77,7 +77,7 @@ void awe::unit_pane::setLanguageDictionary(
 bool awe::unit_pane::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
 	const float tileCentre = _rect.left + _rect.width / 2.0f;
-	// icon
+	// Icon.
 	if (_unitIcon.getSpritesheet() != _unit->getSpritesheet()) {
 		_unitIcon.setSpritesheet(_unit->getSpritesheet());
 	}
@@ -88,13 +88,17 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target, const double scalin
 	_unitIcon.setPosition(
 		sf::Vector2f(tileCentre - _unitIcon.getSize().x / 2.0f, _rect.top + 10.0f)
 	);
-	// name
-	_unitName.setString(_unit->getType()->getShortName());
+	// Name.
+	if (_dict) {
+		_unitName.setString((*_dict)(_unit->getType()->getShortName()));
+	} else {
+		_unitName.setString(_unit->getType()->getShortName());
+	}
 	_unitName.setPosition(
 		sf::Vector2f(tileCentre - _unitName.getLocalBounds().width / 2.0f,
 			_unitIcon.getPosition().y + _unitIcon.getSize().y)
 	);
-	// ammo
+	// Ammo.
 	_unitAmmoIcon.animate(target, scaling);
 	_unitAmmoIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_rect.top + _rect.height - 10.0f - _unitAmmoIcon.getSize().y));
@@ -104,7 +108,7 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target, const double scalin
 			_unitAmmo.getLocalBounds().width - 10.0f,
 			_unitAmmoIcon.getPosition().y - 3.0f)
 	);
-	// fuel
+	// Fuel.
 	_unitFuelIcon.animate(target, scaling);
 	_unitFuelIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_unitAmmoIcon.getPosition().y - 5.0f - _unitFuelIcon.getSize().y));
@@ -114,7 +118,7 @@ bool awe::unit_pane::animate(const sf::RenderTarget& target, const double scalin
 			_unitFuel.getLocalBounds().width - 10.0f,
 			_unitFuelIcon.getPosition().y - 3.0f)
 	);
-	// HP
+	// HP.
 	_unitHPIcon.animate(target, scaling);
 	_unitHPIcon.setPosition(sf::Vector2f(_rect.left + 10.0f,
 		_unitFuelIcon.getPosition().y - 5.0f - _unitHPIcon.getSize().y));
