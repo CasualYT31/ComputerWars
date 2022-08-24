@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "army_pane.h"
 #include "script.h"
 #include "file.h"
+#include "language.h"
 
 #pragma once
 
@@ -566,6 +567,14 @@ namespace awe {
 		 * @param font Pointer to the font to use with this map.
 		 */
 		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
+
+		/**
+		 * Sets the language dictionary to use with this map.
+		 * If \c nullptr is given, an error will be logged.
+		 * @param dict Pointer to the dictionary to use with this map.
+		 */
+		void setLanguageDictionary(
+			const std::shared_ptr<engine::language_dictionary>& dict) noexcept;
 
 		/**
 		 * This drawable's \c animate() method.

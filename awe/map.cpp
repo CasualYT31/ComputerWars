@@ -663,6 +663,16 @@ void awe::map::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
 	_tilePane.setFont(font);
 }
 
+void awe::map::setLanguageDictionary(
+	const std::shared_ptr<engine::language_dictionary>& dict) noexcept {
+	if (!dict) {
+		_logger.error("setLanguageDictionary operation failed: nullptr was "
+			"given!");
+		return;
+	}
+	_tilePane.setLanguageDictionary(dict);
+}
+
 bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
 	// step 1. the tiles

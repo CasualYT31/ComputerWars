@@ -80,6 +80,14 @@ void awe::tile_pane::setFont(const std::shared_ptr<const sf::Font>& font) noexce
 	}
 }
 
+void awe::tile_pane::setLanguageDictionary(
+	const std::shared_ptr<engine::language_dictionary>& dict) noexcept {
+	if (dict) {
+		_dict = dict;
+		for (auto& u : _units) u.setLanguageDictionary(dict);
+	}
+}
+
 bool awe::tile_pane::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
 	const float sectionWidth = 60.0f;

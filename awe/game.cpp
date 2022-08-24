@@ -34,7 +34,8 @@ bool awe::game::load(const std::string& file,
 	const std::shared_ptr<sfx::animated_spritesheet>& unit_sheet,
 	const std::shared_ptr<sfx::animated_spritesheet>& icon_sheet,
 	const std::shared_ptr<sfx::animated_spritesheet>& co_sheet,
-	const std::shared_ptr<sf::Font>& font) noexcept {
+	const std::shared_ptr<sf::Font>& font,
+	const std::shared_ptr<engine::language_dictionary>& dict) noexcept {
 	try {
 		_map = std::make_unique<awe::map>(countries, tiles, units, commanders);
 	} catch (std::bad_alloc) {
@@ -47,6 +48,7 @@ bool awe::game::load(const std::string& file,
 		_map->setIconSpritesheet(icon_sheet);
 		_map->setCOSpritesheet(co_sheet);
 		_map->setFont(font);
+		_map->setLanguageDictionary(dict);
 		auto r = _map->load(file);
 		_map->selectArmy(0);
 		_map->setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0,

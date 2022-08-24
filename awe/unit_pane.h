@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "unit.h"
+#include "language.h"
 
 #pragma once
 
@@ -66,6 +67,14 @@ namespace awe {
 		 * @param font Pointer to the font to use with this unit pane.
 		 */
 		void setFont(const std::shared_ptr<const sf::Font>& font) noexcept;
+
+		/**
+		 * Sets the language dictionary to use with this unit pane.
+		 * If \c nullptr is given, the call will be ignored.
+		 * @param dict Pointer to the dictionary to use with this unit pane.
+		 */
+		void setLanguageDictionary(
+			const std::shared_ptr<engine::language_dictionary>& dict) noexcept;
 
 		/**
 		 * This drawable's \c animate() method.
@@ -133,5 +142,10 @@ namespace awe {
 		 * The ammo.
 		 */
 		sf::Text _unitAmmo;
+
+		/**
+		 * Pointer to the language dictionary to use.
+		 */
+		std::shared_ptr<engine::language_dictionary> _dict;
 	};
 }

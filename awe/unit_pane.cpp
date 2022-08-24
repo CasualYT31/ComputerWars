@@ -69,6 +69,11 @@ void awe::unit_pane::setFont(const std::shared_ptr<const sf::Font>& font) noexce
 	}
 }
 
+void awe::unit_pane::setLanguageDictionary(
+	const std::shared_ptr<engine::language_dictionary>& dict) noexcept {
+	if (dict) _dict = dict;
+}
+
 bool awe::unit_pane::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
 	const float tileCentre = _rect.left + _rect.width / 2.0f;

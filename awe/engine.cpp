@@ -448,7 +448,7 @@ void awe::game_engine::_script_loadMap(const std::string& file,
 	// Create the game.
 	_game.load(file, _countries, _tiles, _units, _commanders,
 		_sprites->tile->normal, _sprites->unit->idle, _sprites->icon, _sprites->CO,
-		(*_fonts)["dialogue"]);
+		(*_fonts)["dialogue"], _dictionary);
 	// Remember what the last menu was so that we can easily go back to it when
 	// the user quits.
 	_menuBeforeMapLoad = _gui->getGUI();

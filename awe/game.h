@@ -75,7 +75,8 @@ namespace awe {
 			const std::shared_ptr<sfx::animated_spritesheet>& unit_sheet,
 			const std::shared_ptr<sfx::animated_spritesheet>& icon_sheet,
 			const std::shared_ptr<sfx::animated_spritesheet>& co_sheet,
-			const std::shared_ptr<sf::Font>& font) noexcept;
+			const std::shared_ptr<sf::Font>& font,
+			const std::shared_ptr<engine::language_dictionary>& dict) noexcept;
 
 		/**
 		 * Saves the state of the map to the previously given binary file.
