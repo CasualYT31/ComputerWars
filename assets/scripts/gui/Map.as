@@ -2,9 +2,7 @@ void MapSetUp() {}
 
 void MapHandleInput(const dictionary controls) {
 	if (bool(controls["select"])) {
-		Vector2 sel = game.getSelectedTile();
-		info(formatInt(sel.x));
-		if (game.getUnitOnTile(sel) == 0) {
+		if (game.getUnitOnTile(game.getSelectedTile()) == 0) {
 			setGUI("MapMenu");
 		}
 	} else if (bool(controls["up"])) {
