@@ -3,5 +3,97 @@
 	"greeting": "Hello, World!",
 	"cancel": "Cancel",
 	"save": "Save",
-	"quit": "Quit"
+	"quit": "Quit",
+
+	"PLAINS_shortname": "Plns",
+
+	"SEA_shortname": "Sea",
+
+	"ROAD_shortname": "Road",
+
+	"BRIDGE_shortname": "Brdg",
+
+	"MOUNTAIN_shortname": "Mont",
+
+	"WOODS_shortname": "Wood",
+
+	"RIVER_shortname": "Rivr",
+
+	"REEF_shortname": "Reef",
+
+	"SHOAL_shortname": "Shol",
+
+	"PIPE_shortname": "Pipe",
+
+	"PIPESEAM_shortname": "Seam",
+
+	"MISSILESILO_shortname": "Silo",
+
+	"CITY_shortname": "City",
+
+	"BASE_shortname": "Base",
+
+	"AIRPORT_shortname": "Arpt",
+
+	"PORT_shortname": "Port",
+
+	"COMTOWER_shortname": "COM",
+
+	"LAB_shortname": "Lab",
+
+	"VOLCANO_shortname": "Vlcn",
+
+	"HQ_shortname": "HQ",
+	
+	"INFANTRY_shortname": "Inft",
+
+	"MECH_shortname": "Mech",
+
+	"RECON_shortname": "Recn",
+
+	"TANK_shortname": "Tank",
+
+	"MDTANK_shortname": "MTnk",
+
+	"NEOTANK_shortname": "Neo",
+
+	"MEGATANK_shortname": "Mega",
+
+	"APC_shortname": "APC",
+
+	"ANTIAIR_shortname": "AAir",
+
+	"ARTILLERY_shortname": "Artl",
+
+	"ROCKETS_shortname": "Rokt",
+
+	"MISSILES_shortname": "Misl",
+
+	"PIPERUNNER_shortname": "Runr",
+
+	"TCOPTER_shortname": "TCop",
+
+	"BCOPTER_shortname": "BCop",
+
+	"FIGHTER_shortname": "Fitr",
+
+	"BOMBER_shortname": "Bmbr",
+
+	"STEALTH_shortname": "Stea",
+
+	"BLACKBOMB_shortname": "Bomb",
+
+	"BLACKBOAT_shortname": "Boat",
+
+	"LANDER_shortname": "Lndr",
+
+	"CRUISER_shortname": "Crui",
+
+	"SUB_shortname": "Sub",
+
+	"BATTLESHIP_shortname": "Bshp",
+
+	"CARRIER_shortname": "Cari",
+
+	"OOZIUM_shortname": "Oozi"
 }
