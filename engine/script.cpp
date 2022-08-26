@@ -156,6 +156,7 @@ bool engine::scripts::loadScripts(std::string folder) noexcept {
 }
 
 int engine::scripts::generateDocumentation() noexcept {
+#if AS_GENERATE_DOCUMENTATION == 1
     if (_document) {
         _logger.write("Generating the script interface documentation...");
         auto ret = _document->Generate();
@@ -164,8 +165,9 @@ int engine::scripts::generateDocumentation() noexcept {
     } else {
         _logger.error("Couldn't generate script interface documentation; the "
             "DocumentationGenerator object was uninitialised!");
-        return INT_MIN;
     }
+#endif
+    return INT_MIN + 1;
 }
 
 const std::string& engine::scripts::getScriptsFolder() const noexcept {
