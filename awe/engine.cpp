@@ -95,8 +95,8 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asOFFSET(sf::Vector2u, y));
 	document->DocumentObjectType(r, "Represents a 2D vector.");
 
-	// game_interface.
-	r = engine->RegisterObjectType("game_interface", 0,
+	// GameInterface.
+	r = engine->RegisterObjectType("GameInterface", 0,
 		asOBJ_REF | asOBJ_NOHANDLE);
 	document->DocumentObjectType(r, "Provides access to a game of Computer Wars.\n"
 		"A global property called <tt>game</tt> is available to all scripts. If a "
@@ -104,40 +104,40 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"If a map hasn't been loaded or has been quit from, then functions won't "
 		"have any effect, and if they return a value, they will return a blank "
 		"value.");
-	r = engine->RegisterObjectMethod("game_interface", "void moveSelectedTileUp()",
+	r = engine->RegisterObjectMethod("GameInterface", "void moveSelectedTileUp()",
 		asMETHOD(awe::game, moveSelectedTileUp), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Moves the cursor to the tile above the "
 		"tile where the cursor is currently located. If this is not possible, the "
 		"call will be ignored.");
-	r = engine->RegisterObjectMethod("game_interface",
+	r = engine->RegisterObjectMethod("GameInterface",
 		"void moveSelectedTileDown()",
 		asMETHOD(awe::game, moveSelectedTileDown), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Moves the cursor to the tile below the "
 		"tile where the cursor is currently located. If this is not possible, the "
 		"call will be ignored.");
-	r = engine->RegisterObjectMethod("game_interface",
+	r = engine->RegisterObjectMethod("GameInterface",
 		"void moveSelectedTileLeft()",
 		asMETHOD(awe::game, moveSelectedTileLeft), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Moves the cursor to the tile to the left "
 		"of the tile where the cursor is currently located. If this is not "
 		"possible, the call will be ignored.");
-	r = engine->RegisterObjectMethod("game_interface",
+	r = engine->RegisterObjectMethod("GameInterface",
 		"void moveSelectedTileRight()",
 		asMETHOD(awe::game, moveSelectedTileRight), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Moves the cursor to the tile to the "
 		"right of the tile where the cursor is currently located. If this is not "
 		"possible, the call will be ignored.");
-	r = engine->RegisterObjectMethod("game_interface", "Vector2 getSelectedTile()",
+	r = engine->RegisterObjectMethod("GameInterface", "Vector2 getSelectedTile()",
 		asMETHOD(awe::game, getSelectedTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the location of the cursor, in "
 		"tiles. The coordinates are 0-based.");
-	r = engine->RegisterObjectMethod("game_interface", 
+	r = engine->RegisterObjectMethod("GameInterface", 
 		asUnitID.substr().append(" getUnitOnTile(const Vector2)").c_str(),
 		asMETHOD(awe::game, getUnitOnTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Retrieves the ID of the unit on the "
 		"specified tile. If 0, then the tile is unoccupied.");
 	// Register game global property.
-	r = engine->RegisterGlobalProperty("game_interface game", &_game);
+	r = engine->RegisterGlobalProperty("GameInterface game", &_game);
 
 	// Register the global functions.
 	r = engine->RegisterGlobalFunction("void info(const string& in)",
