@@ -51,8 +51,6 @@ bool awe::game::load(const std::string& file,
 		_map->setLanguageDictionary(dict);
 		auto r = _map->load(file);
 		_map->selectArmy(0);
-		_map->setVisiblePortionOfMap(sf::Rect<sf::Uint32>(0, 0,
-			_map->getMapSize().x, _map->getMapSize().y));
 		return r;
 	}
 	return false;
@@ -71,10 +69,8 @@ void awe::game::quit() noexcept {
 
 bool awe::game::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
-	if (_map)
-		return _map->animate(target, scaling);
-	else
-		return false;
+	if (_map) return _map->animate(target, scaling);
+	return false;
 }
 
 void awe::game::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -130,3 +126,7 @@ void awe::game::zoomOut() noexcept {
 		_map->setMapScalingFactor(_mapScalingFactor);
 	}
 }
+
+//////////////////////////////
+// INTERFACE HELPER METHODS //
+//////////////////////////////

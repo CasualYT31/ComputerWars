@@ -518,22 +518,6 @@ namespace awe {
 		void selectArmy(const awe::ArmyID army) noexcept;
 
 		/**
-		 * Sets the drawn portion of the map.
-		 * To save resources, not all of a map should be drawn. Instead, only the
-		 * portion visible to the user via the render window should be drawn.
-		 * Everything will always be animated, though animation calculation should
-		 * not take up nearly as many resources.\n
-		 * If the given portion is at least partly out of bounds, an error
-		 * will be logged and the visible portion will not be changed. A \c width
-		 * and/or \c height of \c 0 will be rejected and logged.
-		 * @warning By default, none of the map is selected to be rendered! Make
-		 *          sure to call this method before you draw the map, and after
-		 *          you've set the size of the map!
-		 * @param   rect The portion of the map to render, in tiles.
-		 */
-		void setVisiblePortionOfMap(const sf::Rect<sf::Uint32>& rect) noexcept;
-
-		/**
 		 * Sets the amount by which the map is scaled.
 		 * Any scaling factors that are provided in @c animate() and @c draw() are
 		 * combined with this one (map scaling factor is applied /em before the
@@ -771,11 +755,6 @@ namespace awe {
 		 *          it and act accordingly!
 		 */
 		awe::ArmyID _currentArmy;
-
-		/**
-		 * The visible portion of the map.
-		 */
-		sf::Rect<sf::Uint32> _visiblePortion;
 
 		/**
 		 * The animated sprite representing the cursor.

@@ -42,7 +42,6 @@ bool awe::map::load(std::string file, const unsigned char version) noexcept {
 	// clear state
 	_sel = sf::Vector2u(0, 0);
 	_currentArmy = awe::army::NO_ARMY;
-	_visiblePortion = sf::Rect<sf::Uint32>(0, 0, 0, 0);
 	_updateTilePane = false;
 	_lastUnitID = 1;
 	_armys.clear();
@@ -601,25 +600,6 @@ void awe::map::selectArmy(const awe::ArmyID army) noexcept {
 			"exist!", army);
 }
 
-void awe::map::setVisiblePortionOfMap(const sf::Rect<sf::Uint32>& rect) noexcept {
-	if (rect.width == 0 || rect.height == 0) {
-		_logger.error("setVisiblePortionOfMap operation cancelled: attempted to "
-			"set a portion of {} width and {} height: 0 in either of these "
-			"dimensions is not accepted!",
-			rect.width, rect.height);
-	} else if (_isOutOfBounds(sf::Vector2u(rect.left + rect.width - 1,
-		rect.top + rect.height - 1))) {
-		// we should only need to check the most bottom right corner
-		_logger.error("setVisiblePortionOfMap operation cancelled: attempted to "
-			"set portion to ({} by {}) starting at ({},{}), which is out of "
-			"bounds with the map's size of ({},{})!",
-			rect.width, rect.height, rect.left, rect.top, getMapSize().x,
-			getMapSize().y);
-	} else {
-		_visiblePortion = rect;
-	}
-}
-
 void awe::map::setMapScalingFactor(const float factor) noexcept {
 	_mapScalingFactor = factor;
 }
@@ -680,11 +660,14 @@ void awe::map::setLanguageDictionary(
 bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
 	// Step 0. calculate offset to make map central to the render target.
+	auto mapSize = getMapSize();
 	sf::Vector2f mapCenterOffset = sf::Vector2f(
 		(float)target.getSize().x / 2.0f -
-			_visiblePortion.width * awe::tile::MIN_WIDTH * _mapScalingFactor * (float)scaling / 2.0f,
+			mapSize.x * awe::tile::MIN_WIDTH *
+			_mapScalingFactor * (float)scaling / 2.0f,
 		(float)target.getSize().y / 2.0f -
-			_visiblePortion.height * awe::tile::MIN_HEIGHT * _mapScalingFactor * (float)scaling / 2.0f
+			mapSize.y * awe::tile::MIN_HEIGHT *
+			_mapScalingFactor * (float)scaling / 2.0f
 	);
 	mapCenterOffset /= _mapScalingFactor;
 	mapCenterOffset /= (float)scaling;
@@ -785,10 +768,9 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	mapStates.transform = sf::Transform().scale(sf::Vector2f(_mapScalingFactor,
 		_mapScalingFactor)).combine(states.transform);
 	// step 1. the tiles
-	for (sf::Uint32 y = _visiblePortion.top;
-		y < _visiblePortion.top + _visiblePortion.height; y++) {
-		for (sf::Uint32 x = _visiblePortion.left;
-			x < _visiblePortion.left + _visiblePortion.width; x++) {
+	auto mapSize = getMapSize();
+	for (sf::Uint32 y = 0; y < mapSize.y; y++) {
+		for (sf::Uint32 x = 0; x < mapSize.x; x++) {
 			target.draw(_tiles[x][y], mapStates);
 		}
 	}
@@ -797,10 +779,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// looping through all units
 	// unfortunately they have to be looped through separately to prevent tiles
 	// taller than the minimum height from drawing over units
-	for (sf::Uint32 y = _visiblePortion.top;
-		y < _visiblePortion.top + _visiblePortion.height; y++) {
-		for (sf::Uint32 x = _visiblePortion.left;
-			x < _visiblePortion.left + _visiblePortion.width; x++) {
+	for (sf::Uint32 y = 0; y < mapSize.y; y++) {
+		for (sf::Uint32 x = 0; x < mapSize.x; x++) {
 			if (_tiles[x][y].getUnit() && isUnitOnMap(_tiles[x][y].getUnit()))
 				target.draw(_units.at(_tiles[x][y].getUnit()), mapStates);
 		}
@@ -820,13 +800,7 @@ bool awe::map::_isOutOfBounds(const sf::Vector2u pos) const noexcept {
 }
 
 bool awe::map::_tileIsVisible(const sf::Vector2u pos) const noexcept {
-	if (pos.x >= _visiblePortion.left &&
-		pos.x < _visiblePortion.left + _visiblePortion.width &&
-		pos.y >= _visiblePortion.top &&
-		pos.y < _visiblePortion.top + _visiblePortion.height) {
-		return true;
-	}
-	return false;
+	return true;
 }
 
 bool awe::map::_isArmyPresent(const awe::ArmyID id) const noexcept {
