@@ -124,6 +124,20 @@ namespace awe {
 		 */
 		awe::UnitID getUnitOnTile(const sf::Vector2u tile) const noexcept;
 
+		/**
+		 * Increases the map scaling factor by @c 1.0.
+		 * The map scaling factor does not go above @c 3.0.
+		 * @sa @c awe::map::setMapScalingFactor().
+		 */
+		void zoomIn() noexcept;
+
+		/**
+		 * Decreases the map scaling factor by @c 1.0.
+		 * The map scaling factor does not go below @c 1.0.
+		 * @sa @c awe::map::setMapScalingFactor().
+		 */
+		void zoomOut() noexcept;
+
 		/////////////////////
 		//  END  INTERFACE //
 		/////////////////////
@@ -155,5 +169,10 @@ namespace awe {
 		 * Stores the map.
 		 */
 		std::unique_ptr<awe::map> _map = nullptr;
+
+		/**
+		 * Stores the current map scaling factor.
+		 */
+		float _mapScalingFactor = 2.0f;
 	};
 }

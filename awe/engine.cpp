@@ -137,6 +137,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game, getUnitOnTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Retrieves the ID of the unit on the "
 		"specified tile. If 0, then the tile is unoccupied.");
+	r = engine->RegisterObjectMethod("GameInterface", "void zoomIn()",
+		asMETHOD(awe::game, zoomIn), asCALL_THISCALL);
+	document->DocumentInterfaceMethod(r, "Zooms the map in by a scaling factor of "
+		"1. The map scaling factor does not go above 3.");
+	r = engine->RegisterObjectMethod("GameInterface", "void zoomOut()",
+		asMETHOD(awe::game, zoomOut), asCALL_THISCALL);
+	document->DocumentInterfaceMethod(r, "Zooms the map out by a scaling factor "
+		"of 1. The map scaling factor does not go below 1.");
 	// Register game global property.
 	r = engine->RegisterGlobalProperty("GameInterface game", &_game);
 

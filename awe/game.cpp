@@ -114,3 +114,19 @@ awe::UnitID awe::game::getUnitOnTile(const sf::Vector2u tile) const noexcept {
 	else
 		return awe::UnitID{};
 }
+
+void awe::game::zoomIn() noexcept {
+	if (_map) {
+		_mapScalingFactor += 1.0f;
+		if (_mapScalingFactor >= 3.9f) _mapScalingFactor = 3.0f;
+		_map->setMapScalingFactor(_mapScalingFactor);
+	}
+}
+
+void awe::game::zoomOut() noexcept {
+	if (_map) {
+		_mapScalingFactor -= 1.0f;
+		if (_mapScalingFactor < 0.9f) _mapScalingFactor = 1.0f;
+		_map->setMapScalingFactor(_mapScalingFactor);
+	}
+}
