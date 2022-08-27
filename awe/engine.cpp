@@ -29,6 +29,7 @@ int awe::game_engine::run() noexcept {
 	auto r = _initCheck();
 	if (r) return r;
 
+	const float scaling = 2.0f;
 	try {
 		while (_renderer->isOpen()) {
 			// Handle menu user input first before handling the events.
@@ -50,12 +51,12 @@ int awe::game_engine::run() noexcept {
 			}
 
 			_renderer->clear();
-			_renderer->animate(*_gui, 2.0);
-			_renderer->animate(_game, 2.0);
+			_renderer->animate(*_gui, scaling);
+			_renderer->animate(_game, scaling);
 			_renderer->draw(_game,
-				sf::RenderStates().transform.scale(2.0f, 2.0f));
+				sf::RenderStates().transform.scale(scaling, scaling));
 			_renderer->draw(*_gui,
-				sf::RenderStates().transform.scale(2.0f, 2.0f));
+				sf::RenderStates().transform.scale(scaling, scaling));
 			_renderer->display();
 		}
 	} catch (std::exception& e) {

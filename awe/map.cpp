@@ -675,8 +675,16 @@ void awe::map::setLanguageDictionary(
 
 bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
-	// step 1. the tiles
-	// also update the position of the cursor here!
+	// Step 0. calculate offset to make map central to the render target.
+	sf::Vector2f mapCenterOffset = sf::Vector2f(
+		(float)target.getSize().x / 2.0f -
+			_visiblePortion.width * awe::tile::MIN_WIDTH * scaling / 2.0f,
+		(float)target.getSize().y / 2.0f -
+			_visiblePortion.height * awe::tile::MIN_HEIGHT * scaling / 2.0f
+	);
+	mapCenterOffset /= (float)scaling;
+	// Step 1. the tiles.
+	// Also update the position of the cursor here!
 	float tiley = 0.0;
 	for (sf::Uint32 y = 0, height = getMapSize().y; y < height; y++) {
 		float tilex = 0.0;
@@ -709,27 +717,33 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 				}
 				if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;
 				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
-				tile.setPixelPosition(tilex, tiley -
-					(float)(tileHeight - tile.MIN_HEIGHT));
-				if (tile.getUnit())
-					_units.at(tile.getUnit()).setPixelPosition(tilex, tiley);
+				tile.setPixelPosition(tilex + mapCenterOffset.x, tiley -
+					(float)(tileHeight - tile.MIN_HEIGHT) + mapCenterOffset.y);
+				if (tile.getUnit()) {
+					_units.at(tile.getUnit()).setPixelPosition(
+						tilex + mapCenterOffset.x, tiley + mapCenterOffset.y
+					);
+				}
 				// update cursor position
 				if (getSelectedTile() == tilePos) {
-					_cursor.setPosition(sf::Vector2f(tilex, tiley));
+					_cursor.setPosition(
+						sf::Vector2f(tilex + mapCenterOffset.x,
+							tiley + mapCenterOffset.y)
+					);
 				}
 				tilex += (float)tileWidth;
 			}
 		}
 		tiley += (float)awe::tile::MIN_HEIGHT;
 	}
-	// step 2. the units
-	// note that unit positioning was carried out in step 1
+	// Step 2. the units.
+	// Note that unit positioning was carried out in step 1.
 	for (auto& unit : _units) {
 		unit.second.animate(target, scaling);
 	}
-	// step 3. the cursor
+	// Step 3. the cursor.
 	_cursor.animate(target, scaling);
-	// step 3.5. set the general location of the panes
+	// Step 3.5. set the general location of the panes.
 	if (_cursor.getPosition().x < target.getSize().x / (float)scaling / 2.0f) {
 		_armyPane.setGeneralLocation(awe::army_pane::location::Right);
 		_tilePane.setGeneralLocation(awe::tile_pane::location::Right);
@@ -737,12 +751,12 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 		_armyPane.setGeneralLocation(awe::army_pane::location::Left);
 		_tilePane.setGeneralLocation(awe::tile_pane::location::Left);
 	}
-	// step 4. the army pane
+	// Step 4. the army pane.
 	if (_currentArmy != awe::army::NO_ARMY) {
 		_armyPane.setArmy(_armys.at(_currentArmy));
 		_armyPane.animate(target, scaling);
 	}
-	// step 5. the tile pane
+	// Step 5. the tile pane.
 	if (_updateTilePane) {
 		const awe::tile& tile = _tiles[_sel.x][_sel.y];
 		_tilePane.setTile(tile);
@@ -756,7 +770,7 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 		_updateTilePane = false;
 	}
 	_tilePane.animate(target, scaling);
-	// end
+	// End.
 	return false;
 }
 
