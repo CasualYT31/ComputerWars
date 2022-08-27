@@ -39,7 +39,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 
 bool awe::map::load(std::string file, const unsigned char version) noexcept {
 	if (file == "") file = _filename;
-	// clear state
+	// Clear state.
 	_sel = sf::Vector2u(0, 0);
 	_currentArmy = awe::army::NO_ARMY;
 	_updateTilePane = false;
@@ -48,7 +48,8 @@ bool awe::map::load(std::string file, const unsigned char version) noexcept {
 	_units.clear();
 	_tiles.clear();
 	_mapName = "";
-	// load new state
+	_mapOffset = sf::Vector2f(0.0f, 0.0f);
+	// Load new state.
 	try {
 		_file.open(file, true);
 		_filename = file;
@@ -565,6 +566,7 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u pos) const noexcept {
 
 void awe::map::setSelectedTile(const sf::Vector2u pos) noexcept {
 	if (!_isOutOfBounds(pos)) {
+		_sel_old = _sel;
 		if (_sel != pos) {
 			_sel = pos;
 			_updateTilePane = true;
@@ -602,6 +604,9 @@ void awe::map::selectArmy(const awe::ArmyID army) noexcept {
 
 void awe::map::setMapScalingFactor(const float factor) noexcept {
 	_mapScalingFactor = factor;
+	_updateTilePane = true;
+	_changedScaleFactor = true;
+	_mapOffset = sf::Vector2f(0.0f, 0.0f);
 }
 
 void awe::map::setTileSpritesheet(
@@ -659,18 +664,67 @@ void awe::map::setLanguageDictionary(
 
 bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
-	// Step 0. calculate offset to make map central to the render target.
 	auto mapSize = getMapSize();
+	auto REAL_TILE_MIN_WIDTH = awe::tile::MIN_WIDTH * _mapScalingFactor *
+		(float)scaling;
+	auto REAL_TILE_MIN_HEIGHT = awe::tile::MIN_HEIGHT * _mapScalingFactor *
+		(float)scaling;
+	if (_updateTilePane) {
+		if (_changedScaleFactor) {
+			// If the scale factor has changed, ensure that the cursor appears
+			// central to the screen.
+			auto cursorX = _sel.x * REAL_TILE_MIN_WIDTH + (_mapOffset.x),
+				cursorY = _sel.y * REAL_TILE_MIN_HEIGHT + (_mapOffset.y);
+			_mapOffset.x = (((float)target.getSize().x - REAL_TILE_MIN_WIDTH * 2) / 2.0f) -
+				((float)mapSize.x / 2.0f) - REAL_TILE_MIN_WIDTH / 2.0f;
+			_mapOffset.y = (((float)target.getSize().y - REAL_TILE_MIN_HEIGHT * 2) / 2.0f) -
+				((float)mapSize.y / 2.0f) - REAL_TILE_MIN_HEIGHT / 2.0f;
+			_mapOffset.x -= cursorX;
+			_mapOffset.y -= cursorY;
+			_changedScaleFactor = false;
+		}
+		// Predict the cursor's new position
+		auto newCursorX = _sel.x * REAL_TILE_MIN_WIDTH + (_mapOffset.x),
+			newCursorY = _sel.y * REAL_TILE_MIN_HEIGHT + (_mapOffset.y);
+		auto sel_old_cpyX = _sel_old.x * REAL_TILE_MIN_WIDTH + (_mapOffset.x),
+			sel_old_cpyY = _sel_old.y * REAL_TILE_MIN_HEIGHT + (_mapOffset.y);
+		// Update _mapOffset if the new selected tile is outside of the screen.
+		if (newCursorX < REAL_TILE_MIN_WIDTH) {
+			_mapOffset.x += (sel_old_cpyX - newCursorX);
+		}
+		if (newCursorY < REAL_TILE_MIN_HEIGHT) {
+			_mapOffset.y += (sel_old_cpyY - newCursorY);
+		}
+		if (newCursorX > target.getSize().x - REAL_TILE_MIN_WIDTH * 2) {
+			_mapOffset.x -= (newCursorX - sel_old_cpyX);
+		}
+		if (newCursorY > target.getSize().y - REAL_TILE_MIN_HEIGHT * 2) {
+			_mapOffset.y -= (newCursorY - sel_old_cpyY);
+		}
+	}
+	// Calculate if any of the screen would be left black by the current
+	// _mapOffset, and adjust the offset so that all of the screen is drawn over if
+	// this offset is used.
+	if (_mapOffset.x > 0.0f) _mapOffset.x = 0.0f;
+	if (_mapOffset.y > 0.0f) _mapOffset.y = 0.0f;
+	sf::Vector2f _mapOffsetLL(_mapOffset.x + mapSize.x * REAL_TILE_MIN_WIDTH,
+		_mapOffset.y + mapSize.y * REAL_TILE_MIN_HEIGHT);
+	if (_mapOffsetLL.x < target.getSize().x)
+		_mapOffset.x = target.getSize().x - mapSize.x * REAL_TILE_MIN_WIDTH;
+	if (_mapOffsetLL.y < target.getSize().y)
+		_mapOffset.y = target.getSize().y - mapSize.y * REAL_TILE_MIN_HEIGHT;
+	// Step 0. calculate offset to make map central to the render target.
 	sf::Vector2f mapCenterOffset = sf::Vector2f(
-		(float)target.getSize().x / 2.0f -
-			mapSize.x * awe::tile::MIN_WIDTH *
-			_mapScalingFactor * (float)scaling / 2.0f,
-		(float)target.getSize().y / 2.0f -
-			mapSize.y * awe::tile::MIN_HEIGHT *
-			_mapScalingFactor * (float)scaling / 2.0f
+		(float)target.getSize().x / 2.0f - mapSize.x * REAL_TILE_MIN_WIDTH / 2.0f,
+		(float)target.getSize().y / 2.0f - mapSize.y * REAL_TILE_MIN_HEIGHT / 2.0f
 	);
 	mapCenterOffset /= _mapScalingFactor;
 	mapCenterOffset /= (float)scaling;
+	// Replace map centre offset values with _mapOffset if either of them are -ive.
+	if (mapCenterOffset.x < 0.0f)
+		mapCenterOffset.x = _mapOffset.x / _mapScalingFactor / (float)scaling;
+	if (mapCenterOffset.y < 0.0f)
+		mapCenterOffset.y = _mapOffset.y / _mapScalingFactor / (float)scaling;
 	// Step 1. the tiles.
 	// Also update the position of the cursor here!
 	float tiley = 0.0;

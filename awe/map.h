@@ -748,6 +748,16 @@ namespace awe {
 		sf::Vector2u _sel;
 
 		/**
+		 * The tile that was selected before @c _sel.
+		 */
+		sf::Vector2u _sel_old;
+
+		/**
+		 * Flag used to inform _mapOffset that the map scaling factor has changed.
+		 */
+		bool _changedScaleFactor = false;
+
+		/**
 		 * The army who is having their turn.
 		 * This field is initialised to \c awe::army::NO_ARMY in \c load().
 		 * @warning The initial state of \c awe::army::NO_ARMY cannot be set again
@@ -783,6 +793,13 @@ namespace awe {
 		 * Scales the map by an additional factor.
 		 */
 		float _mapScalingFactor = 2.0f;
+
+		/**
+		 * The offset to apply to the map if it can't be fully drawn to the screen
+		 * along either dimension. In pixels.
+		 * This has NO scaling applied to it when stored here.
+		 */
+		sf::Vector2f _mapOffset;
 
 		//////////////////
 		// SPRITESHEETS //
