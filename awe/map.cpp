@@ -620,6 +620,10 @@ void awe::map::setVisiblePortionOfMap(const sf::Rect<sf::Uint32>& rect) noexcept
 	}
 }
 
+void awe::map::setMapScalingFactor(const float factor) noexcept {
+	_mapScalingFactor = factor;
+}
+
 void awe::map::setTileSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
 	_sheet_tile = sheet;
@@ -678,10 +682,11 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	// Step 0. calculate offset to make map central to the render target.
 	sf::Vector2f mapCenterOffset = sf::Vector2f(
 		(float)target.getSize().x / 2.0f -
-			_visiblePortion.width * awe::tile::MIN_WIDTH * scaling / 2.0f,
+			_visiblePortion.width * awe::tile::MIN_WIDTH * _mapScalingFactor * (float)scaling / 2.0f,
 		(float)target.getSize().y / 2.0f -
-			_visiblePortion.height * awe::tile::MIN_HEIGHT * scaling / 2.0f
+			_visiblePortion.height * awe::tile::MIN_HEIGHT * _mapScalingFactor * (float)scaling / 2.0f
 	);
+	mapCenterOffset /= _mapScalingFactor;
 	mapCenterOffset /= (float)scaling;
 	// Step 1. the tiles.
 	// Also update the position of the cursor here!
@@ -744,7 +749,8 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	// Step 3. the cursor.
 	_cursor.animate(target, scaling);
 	// Step 3.5. set the general location of the panes.
-	if (_cursor.getPosition().x < target.getSize().x / (float)scaling / 2.0f) {
+	if (_cursor.getPosition().x < target.getSize().x / _mapScalingFactor /
+		(float)scaling / 2.0f) {
 		_armyPane.setGeneralLocation(awe::army_pane::location::Right);
 		_tilePane.setGeneralLocation(awe::tile_pane::location::Right);
 	} else {
@@ -775,12 +781,15 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 }
 
 void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	sf::RenderStates mapStates = states;
+	mapStates.transform = sf::Transform().scale(sf::Vector2f(_mapScalingFactor,
+		_mapScalingFactor)).combine(states.transform);
 	// step 1. the tiles
 	for (sf::Uint32 y = _visiblePortion.top;
 		y < _visiblePortion.top + _visiblePortion.height; y++) {
 		for (sf::Uint32 x = _visiblePortion.left;
 			x < _visiblePortion.left + _visiblePortion.width; x++) {
-			target.draw(_tiles[x][y], states);
+			target.draw(_tiles[x][y], mapStates);
 		}
 	}
 	// step 2. the units
@@ -793,13 +802,13 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		for (sf::Uint32 x = _visiblePortion.left;
 			x < _visiblePortion.left + _visiblePortion.width; x++) {
 			if (_tiles[x][y].getUnit() && isUnitOnMap(_tiles[x][y].getUnit()))
-				target.draw(_units.at(_tiles[x][y].getUnit()), states);
+				target.draw(_units.at(_tiles[x][y].getUnit()), mapStates);
 		}
 	}
 	// step 3. the cursor
 	// but only if it is within the visible portion!
 	// to tell the truth the cursor should never be not visible...
-	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, states);
+	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, mapStates);
 	// step 4. army pane
 	target.draw(_armyPane, states);
 	// step 5. tile pane

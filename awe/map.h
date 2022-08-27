@@ -534,6 +534,15 @@ namespace awe {
 		void setVisiblePortionOfMap(const sf::Rect<sf::Uint32>& rect) noexcept;
 
 		/**
+		 * Sets the amount by which the map is scaled.
+		 * Any scaling factors that are provided in @c animate() and @c draw() are
+		 * combined with this one (map scaling factor is applied /em before the
+		 * transforms given).
+		 * @param factor The factor by which to scale the map.
+		 */
+		void setMapScalingFactor(const float factor) noexcept;
+
+		/**
 		 * Sets the spritesheet used for drawing tiles.
 		 * @param sheet Pointer to the animated spritesheet to use for tiles.
 		 */
@@ -790,6 +799,11 @@ namespace awe {
 		 * When the selected tile is changed, this will be set to \c TRUE.
 		 */
 		bool _updateTilePane = false;
+
+		/**
+		 * Scales the map by an additional factor.
+		 */
+		float _mapScalingFactor = 2.0f;
 
 		//////////////////
 		// SPRITESHEETS //
