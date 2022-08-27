@@ -151,10 +151,28 @@ namespace awe {
 		sf::RectangleShape _bg;
 
 		/**
+		 * The rectangle to act as the border of the pane.
+		 * Need to draw this separately as the circle shape representing the curve
+		 * clashes with the side of the rectangle it is drawn over.
+		 */
+		sf::RectangleShape _bg_border;
+
+		/**
 		 * The circle of the pane.
 		 * Makes either the left or right side of the pane rounded when drawn.
 		 */
 		sf::CircleShape _rounded_bg;
+
+		/**
+		 * Used to draw only half of the circle shape to the renderer by drawing
+		 * it onto here in such a way that half of the circle is outside of it.
+		 */
+		sf::RenderTexture _rounded_bg_texture;
+
+		/**
+		 * The sprite used to render the render texture above.
+		 */
+		sf::Sprite _rounded_bg_sprite;
 
 		/**
 		 * Used to cover the background outline that crosses over the circle.

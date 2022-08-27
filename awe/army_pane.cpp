@@ -27,10 +27,11 @@ const float awe::army_pane::_outlineThickness = 2.0f;
 awe::army_pane::army_pane() noexcept {
 	_funds.setCharacterSize(22);
 	_funds.setFillColor(sf::Color::Black);
-	_bg.setOutlineColor(sf::Color(65,65,65));
-	_bg.setOutlineThickness(_outlineThickness);
-	_rounded_bg.setOutlineColor(sf::Color(65,65,65));
+	_bg_border.setFillColor(sf::Color(65, 65, 65, 128));
+	_rounded_bg.setOutlineColor(sf::Color(65,65,65,128));
 	_rounded_bg.setOutlineThickness(_outlineThickness);
+	_rounded_bg_texture.create(25.0f + _outlineThickness * 2.0f,
+		50.0f + _outlineThickness * 2.0f);
 }
 
 void awe::army_pane::setArmy(const awe::army& army) noexcept {
@@ -54,15 +55,12 @@ void awe::army_pane::setFont(const std::shared_ptr<const sf::Font>& font) noexce
 
 bool awe::army_pane::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
-	if (_army) {
-		_bg.setFillColor(_army->getCountry()->getColour());
-		_rounded_bg.setFillColor(_army->getCountry()->getColour());
-		_outlineCover.setFillColor(_army->getCountry()->getColour());
-	} else {
-		_bg.setFillColor(sf::Color::White);
-		_rounded_bg.setFillColor(sf::Color::White);
-		_outlineCover.setFillColor(sf::Color::White);
-	}
+	sf::Color bgColour = sf::Color::White;
+	if (_army) bgColour = _army->getCountry()->getColour();
+	bgColour.a = 128;
+	_bg.setFillColor(bgColour);
+	_rounded_bg.setFillColor(bgColour);
+	_outlineCover.setFillColor(bgColour);
 	// CO (minus positioning)
 	if (_army && _army->getCurrentCO() &&
 		_army->getCurrentCO()->getID() != _oldCoSprite) {
@@ -86,15 +84,27 @@ bool awe::army_pane::animate(const sf::RenderTarget& target, const double scalin
 }
 
 void awe::army_pane::_animateLeft() noexcept {
+	// _rounded_bg_texture.create() relies on size!
 	sf::Vector2f size = sf::Vector2f(200.0f, 50.0f);
 	sf::Vector2f origin = sf::Vector2f(0.0f, 0.0f);
 	// step 1: pane background
 	_bg.setPosition(origin);
 	_bg.setSize(size);
+	_bg_border.setPosition(sf::Vector2f(origin.x, origin.y + size.y));
+	_bg_border.setSize(
+		sf::Vector2f(size.x + _outlineThickness, _outlineThickness)
+	);
 	_rounded_bg.setPosition(
-		sf::Vector2f(origin.x + size.x - size.y / 2.0f, origin.y)
+		sf::Vector2f(0.0f - size.y / 2.0f, 0.0f)
 	);
 	_rounded_bg.setRadius(size.y / 2.0f);
+	_rounded_bg_texture.clear(sf::Color(0, 0, 0, 0));
+	_rounded_bg_texture.draw(_rounded_bg, sf::BlendNone);
+	_rounded_bg_texture.display();
+	_rounded_bg_sprite.setPosition(
+		sf::Vector2f(origin.x + size.x + _outlineThickness, origin.y)
+	);
+	_rounded_bg_sprite.setTexture(_rounded_bg_texture.getTexture());
 	_outlineCover.setPosition(sf::Vector2f(origin.x + size.x, origin.y));
 	_outlineCover.setSize(sf::Vector2f(_outlineThickness, size.y));
 	// step 2: CO face
@@ -108,6 +118,7 @@ void awe::army_pane::_animateLeft() noexcept {
 
 void awe::army_pane::_animateRight(const sf::RenderTarget& target,
 	const double scaling) noexcept {
+	// _rounded_bg_texture.create() relies on size!
 	sf::Vector2f size = sf::Vector2f(200.0f, 50.0f);
 	sf::Vector2f origin = sf::Vector2f(size.x + size.y / 2.0f, 0.0f);
 	_position.translate(
@@ -116,10 +127,23 @@ void awe::army_pane::_animateRight(const sf::RenderTarget& target,
 	// step 1: pane background
 	_bg.setPosition(sf::Vector2f(origin.x - size.x, origin.y));
 	_bg.setSize(size);
+	_bg_border.setPosition(sf::Vector2f(origin.x - size.x - _outlineThickness,
+		origin.y + size.y));
+	_bg_border.setSize(
+		sf::Vector2f(size.x + _outlineThickness, _outlineThickness)
+	);
 	_rounded_bg.setPosition(
-		sf::Vector2f(origin.x - size.x - size.y / 2.0f, origin.y)
+		sf::Vector2f(0.0f + _outlineThickness, 0.0f)
 	);
 	_rounded_bg.setRadius(size.y / 2.0f);
+	_rounded_bg_texture.clear(sf::Color(0, 0, 0, 0));
+	_rounded_bg_texture.draw(_rounded_bg, sf::BlendNone);
+	_rounded_bg_texture.display();
+	_rounded_bg_sprite.setPosition(
+		sf::Vector2f(origin.x - size.x - size.y / 2.0f - _outlineThickness * 3.0f,
+			origin.y)
+	);
+	_rounded_bg_sprite.setTexture(_rounded_bg_texture.getTexture());
 	_outlineCover.setPosition(
 		sf::Vector2f(origin.x - size.x - _outlineThickness, origin.y)
 	);
@@ -138,7 +162,8 @@ void awe::army_pane::draw(sf::RenderTarget& target, sf::RenderStates states) con
 	// combine translation with given states
 	states.transform.combine(_position);
 	// draw
-	target.draw(_rounded_bg, states);
+	target.draw(_rounded_bg_sprite, states);
+	target.draw(_bg_border, states);
 	target.draw(_bg, states);
 	target.draw(_outlineCover, states);
 	target.draw(_co, states);
