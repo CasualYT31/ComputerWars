@@ -15,6 +15,14 @@ else()
 	add_compile_definitions(COMPUTER_WARS_RELEASE)
 endif()
 
+# Generate script interface documentation if set to ON.
+option(CW_GENERATE_SCRIPT_DOC "Generates the game engine's script interface documentation" OFF)
+if(CW_GENERATE_SCRIPT_DOC)
+	add_compile_definitions(AS_GENERATE_DOCUMENTATION=1)
+else()
+	add_compile_definitions(AS_GENERATE_DOCUMENTATION=0)
+endif()
+
 # engine namespace/library.
 add_subdirectory("engine")
 

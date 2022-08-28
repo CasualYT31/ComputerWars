@@ -56,13 +56,6 @@ FetchContent_Declare(docgen
 )
 FetchContent_MakeAvailable(docgen)
 
-# Generate script interface documentation if on a debug build.
-if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
-	add_compile_definitions(AS_GENERATE_DOCUMENTATION=1)
-else()
-	add_compile_definitions(AS_GENERATE_DOCUMENTATION=0)
-endif()
-
 add_library(${PROJECT_NAME} STATIC
 	"logger.cpp"
 	"safejson.cpp"
