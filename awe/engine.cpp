@@ -23,6 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine.h"
 #include "game.h"
 
+sf::Vector2i awe::game_engine::_INVALID_MOUSE = sfx::INVALID_MOUSE;
+
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
 int awe::game_engine::run() noexcept {
@@ -103,6 +105,8 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	engine->RegisterObjectProperty("MousePosition", "int y",
 		asOFFSET(sf::Vector2i, y));
 	document->DocumentObjectType(r, "Represents a mouse position.");
+	r = engine->RegisterGlobalProperty("const MousePosition INVALID_MOUSE",
+		&awe::game_engine::_INVALID_MOUSE);
 
 	// GameInterface.
 	r = engine->RegisterObjectType("GameInterface", 0,
@@ -328,6 +332,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"switches back to the menu that was being displayed when loadMap() was "
 		"originally called. If there is no open map, then a warning will be "
 		"logged.");
+
+	r = engine->RegisterGlobalFunction("MousePosition mousePosition()",
+		asMETHOD(sfx::user_input, mousePosition),
+		asCALL_THISCALL_ASGLOBAL, _userinput.get());
+	document->DocumentGlobalFunction(r, "Retrieves the current position of the "
+		"mouse, in pixels, relative to the game window's upper left corner of the "
+		"client area. Will return INVALID_MOUSE if the game's window does not "
+		"have focus.");
 }
 
 bool awe::game_engine::_load(engine::json& j) noexcept {

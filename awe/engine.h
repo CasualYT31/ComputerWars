@@ -250,13 +250,10 @@ namespace awe {
 		void _script_quitMap();
 
 		/**
-		 * Lets @c game scripts handle input.
-		 * Used within the @c Map menu to pass input data from the GUI subsystem to
-		 * the game one.
-		 * @param controls Pointer to the controls map to pass along.
-		 * @sa    @c sfx::gui::handleInput
+		 * Used to hold a copy of @c sfx::INVALID_MOUSE that can be used with the
+		 * script interface (it can't accept pointers to constants).
 		 */
-		void _script_handleMapInput(CScriptDictionary* controls);
+		static sf::Vector2i _INVALID_MOUSE;
 
 		//=============================
 		//==========GAME DATA==========

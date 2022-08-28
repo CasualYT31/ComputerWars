@@ -41,7 +41,7 @@ namespace sfx {
 	 * Value representing an invalid mouse position.
 	 * @sa user_input::mousePosition()
 	 */
-	const sf::Vector2i INVALID_MOUSE = sf::Vector2i(-1, -1);
+	const sf::Vector2i INVALID_MOUSE = sf::Vector2i(INT_MIN, INT_MIN);
 
 	/**
 	 * The different types of control signal.
