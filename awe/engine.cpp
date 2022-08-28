@@ -96,6 +96,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asOFFSET(sf::Vector2u, y));
 	document->DocumentObjectType(r, "Represents a 2D vector.");
 
+	r = engine->RegisterObjectType("MousePosition", sizeof(sf::Vector2i),
+		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2i>());
+	engine->RegisterObjectProperty("MousePosition", "int x",
+		asOFFSET(sf::Vector2i, x));
+	engine->RegisterObjectProperty("MousePosition", "int y",
+		asOFFSET(sf::Vector2i, y));
+	document->DocumentObjectType(r, "Represents a mouse position.");
+
 	// GameInterface.
 	r = engine->RegisterObjectType("GameInterface", 0,
 		asOBJ_REF | asOBJ_NOHANDLE);
