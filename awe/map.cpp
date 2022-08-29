@@ -594,6 +594,35 @@ sf::Vector2u awe::map::getSelectedTile() const noexcept {
 	return _sel;
 }
 
+void awe::map::setSelectedTileByPixel(const sf::Vector2i pixel) noexcept {
+	const auto MAP_SIZE = getMapSize();
+	const auto REAL_TILE_MIN_WIDTH = awe::tile::MIN_WIDTH * _mapScalingFactor
+		* _scalingCache;
+	const auto REAL_TILE_MIN_HEIGHT = awe::tile::MIN_HEIGHT * _mapScalingFactor
+		* _scalingCache;
+	sf::Vector2f pixelF(pixel);
+	// Can the map fit on the screen?
+	sf::Vector2f mapCenterOffset = sf::Vector2f(
+		_targetSizeCache.x / 2.0f - MAP_SIZE.x * REAL_TILE_MIN_WIDTH / 2.0f,
+		_targetSizeCache.y / 2.0f - MAP_SIZE.y * REAL_TILE_MIN_HEIGHT / 2.0f
+	);
+	// X
+	if (mapCenterOffset.x < 0.0f)
+		pixelF.x -= _mapOffset.x;
+	else
+		pixelF.x -= mapCenterOffset.x;
+	pixelF.x /= REAL_TILE_MIN_WIDTH;
+	// Y
+	if (mapCenterOffset.y < 0.0f)
+		pixelF.y -= _mapOffset.y;
+	else
+		pixelF.y -= mapCenterOffset.y;
+	pixelF.y /= REAL_TILE_MIN_HEIGHT;
+	// Select the tile.
+	setSelectedTile(sf::Vector2u(pixelF));
+
+}
+
 void awe::map::selectArmy(const awe::ArmyID army) noexcept {
 	if (_isArmyPresent(army))
 		_currentArmy = army;
@@ -607,6 +636,11 @@ void awe::map::setMapScalingFactor(const float factor) noexcept {
 	_updateTilePane = true;
 	_changedScaleFactor = true;
 	_mapOffset = sf::Vector2f(0.0f, 0.0f);
+}
+
+sf::Vector2u awe::map::getTileSize() const noexcept {
+	return sf::Vector2u(awe::tile::MIN_WIDTH * _scalingCache * _mapScalingFactor,
+		awe::tile::MIN_HEIGHT * _scalingCache * _mapScalingFactor);
 }
 
 void awe::map::setTileSpritesheet(
@@ -664,6 +698,8 @@ void awe::map::setLanguageDictionary(
 
 bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	noexcept {
+	_scalingCache = (float)scaling;
+	_targetSizeCache = sf::Vector2f(target.getSize());
 	auto mapSize = getMapSize();
 	auto REAL_TILE_MIN_WIDTH = awe::tile::MIN_WIDTH * _mapScalingFactor *
 		(float)scaling;
@@ -818,6 +854,7 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 }
 
 void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	_transformCache = states.transform;
 	sf::RenderStates mapStates = states;
 	mapStates.transform = sf::Transform().scale(sf::Vector2f(_mapScalingFactor,
 		_mapScalingFactor)).combine(states.transform);

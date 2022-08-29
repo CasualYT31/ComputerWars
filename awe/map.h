@@ -503,6 +503,14 @@ namespace awe {
 		void moveSelectedTileRight() noexcept;
 
 		/**
+		 * Selects a tile on the map based on a pixel.
+		 * The tile that is drawn underneath the pixel will be selected.
+		 * @param pixel The pixel relative to the render target to use to identify
+		 *              a tile to select.
+		 */
+		void setSelectedTileByPixel(const sf::Vector2i pixel) noexcept;
+
+		/**
 		 * Gets the position of the currently selected tile.
 		 * @return The X and Y location of the selected tile.
 		 */
@@ -525,6 +533,12 @@ namespace awe {
 		 * @param factor The factor by which to scale the map.
 		 */
 		void setMapScalingFactor(const float factor) noexcept;
+
+		/**
+		 * Calculates the minimum pixel size of a tile as seen by the user.
+		 * @return The minimum size of a tile, after scaling has been applied.
+		 */
+		sf::Vector2u getTileSize() const noexcept;
 
 		/**
 		 * Sets the spritesheet used for drawing tiles.
@@ -800,6 +814,25 @@ namespace awe {
 		 * This has NO scaling applied to it when stored here.
 		 */
 		sf::Vector2f _mapOffset;
+
+		/**
+		 * Cache of the @c sf::Transform previously used with @c draw().
+		 * Used in `setSelectedTileByPixel()` calculations. Can only be
+		 * conveniently cached in @c draw() so it needs to be mutable. The scaling
+		 * value given to @c animate() must be the same as the one given with
+		 * @c draw().
+		 */
+		mutable sf::Transform _transformCache;
+
+		/**
+		 * Cache of the @scaling parameter last given to @animate().
+		 */
+		float _scalingCache;
+
+		/**
+		 * Cache of the last known render target size.
+		 */
+		sf::Vector2f _targetSizeCache;
 
 		//////////////////
 		// SPRITESHEETS //

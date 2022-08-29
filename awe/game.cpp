@@ -127,6 +127,17 @@ void awe::game::zoomOut() noexcept {
 	}
 }
 
+void awe::game::setSelectedTileByPixel(const sf::Vector2i pixel) noexcept {
+	if (_map) _map->setSelectedTileByPixel(pixel);
+}
+
+sf::Vector2u awe::game::getTileSize() const noexcept {
+	if (_map)
+		return _map->getTileSize();
+	else
+		return sf::Vector2u();
+}
+
 //////////////////////////////
 // INTERFACE HELPER METHODS //
 //////////////////////////////

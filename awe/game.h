@@ -138,6 +138,16 @@ namespace awe {
 		 */
 		void zoomOut() noexcept;
 
+		/**
+		 * @sa @c awe::map::setSelectedTileByPixel().
+		 */
+		void setSelectedTileByPixel(const sf::Vector2i pixel) noexcept;
+
+		/**
+		 * @sa @c awe::map::getTileSize().
+		 */
+		sf::Vector2u getTileSize() const noexcept;
+
 		/////////////////////
 		//  END  INTERFACE //
 		/////////////////////

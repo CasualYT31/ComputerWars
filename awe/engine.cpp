@@ -68,7 +68,26 @@ int awe::game_engine::run() noexcept {
 	return 0;
 }
 
-// script interface
+// Script interface.
+
+// Wrapper for Vector2u and Vector2i operator==s.
+// Using them directly doesn't work... No idea why.
+
+bool iEqI(const sf::Vector2i lhs, const sf::Vector2i rhs) noexcept {
+	return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+bool iEqU(const sf::Vector2i lhs, const sf::Vector2u rhs) noexcept {
+	return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+bool uEqI(const sf::Vector2u lhs, const sf::Vector2i rhs) noexcept {
+	return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+bool uEqU(const sf::Vector2u lhs, const sf::Vector2u rhs) noexcept {
+	return lhs.x == rhs.x && lhs.y == rhs.y;
+}
 
 void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
@@ -100,13 +119,73 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 
 	r = engine->RegisterObjectType("MousePosition", sizeof(sf::Vector2i),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2i>());
+	document->DocumentObjectType(r, "Represents a mouse position.");
+	r = engine->RegisterGlobalProperty("const MousePosition INVALID_MOUSE",
+		&awe::game_engine::_INVALID_MOUSE);
 	engine->RegisterObjectProperty("MousePosition", "int x",
 		asOFFSET(sf::Vector2i, x));
 	engine->RegisterObjectProperty("MousePosition", "int y",
 		asOFFSET(sf::Vector2i, y));
-	document->DocumentObjectType(r, "Represents a mouse position.");
-	r = engine->RegisterGlobalProperty("const MousePosition INVALID_MOUSE",
-		&awe::game_engine::_INVALID_MOUSE);
+	r = engine->RegisterObjectMethod("MousePosition",
+		"bool opEquals(MousePosition) const",
+		asFUNCTIONPR(iEqI, (const sf::Vector2i, const sf::Vector2i), bool),
+		asCALL_CDECL_OBJFIRST);
+	r = engine->RegisterObjectMethod("MousePosition",
+		"bool opEquals(Vector2) const",
+		asFUNCTIONPR(iEqU, (const sf::Vector2i, const sf::Vector2u), bool),
+		asCALL_CDECL_OBJFIRST);
+
+	// Vector 2 opEquals
+	r = engine->RegisterObjectMethod("Vector2",
+		"bool opEquals(Vector2) const",
+		asFUNCTIONPR(uEqU, (const sf::Vector2u, const sf::Vector2u), bool),
+		asCALL_CDECL_OBJFIRST);
+	r = engine->RegisterObjectMethod("Vector2",
+		"bool opEquals(MousePosition) const",
+		asFUNCTIONPR(uEqI, (const sf::Vector2u, const sf::Vector2i), bool),
+		asCALL_CDECL_OBJFIRST);
+
+	// Time class.
+	r = engine->RegisterObjectType("Time", sizeof(sf::Time),
+		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Time>());
+	document->DocumentObjectType(r, "Represents a time value.");
+	r = engine->RegisterObjectMethod("Time", "float asSeconds()",
+		asMETHOD(sf::Time, asSeconds), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Return the time value as a number of "
+		"seconds.");
+	r = engine->RegisterObjectMethod("Time", "int32 asMilliseconds()",
+		asMETHOD(sf::Time, asMilliseconds), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Return the time value as a number of "
+		"milliseconds.");
+	r = engine->RegisterObjectMethod("Time", "int64 asMicroseconds()",
+		asMETHOD(sf::Time, asMicroseconds), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Return the time value as a number of "
+		"microseconds.");
+	// Time class factory functions.
+	r = engine->RegisterGlobalFunction("Time seconds(const float)",
+		asFUNCTION(sf::seconds), asCALL_CDECL);
+	document->DocumentGlobalFunction(r, "Constructs a Time object using seconds.");
+	r = engine->RegisterGlobalFunction("Time milliseconds(const int32)",
+		asFUNCTION(sf::milliseconds), asCALL_CDECL);
+	document->DocumentGlobalFunction(r, "Constructs a Time object using "
+		"milliseconds.");
+	r = engine->RegisterGlobalFunction("Time microseconds(const int64)",
+		asFUNCTION(sf::microseconds), asCALL_CDECL);
+	document->DocumentGlobalFunction(r, "Constructs a Time object using "
+		"microseconds.");
+
+	// Clock class.
+	r = engine->RegisterObjectType("Clock", sizeof(sf::Clock),
+		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Clock>());
+	document->DocumentObjectType(r, "Used to calculate elapsed time.");
+	r = engine->RegisterObjectMethod("Clock", "Time getElapsedTime()",
+		asMETHOD(sf::Clock, getElapsedTime), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Calculates the elapsed time since the "
+		"clock was constructed or since <tt>restart()</tt> was called.");
+	r = engine->RegisterObjectMethod("Clock", "Time restart()",
+		asMETHOD(sf::Clock, restart), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Restarts the clock. Returns the time "
+		"elapsed.");
 
 	// GameInterface.
 	r = engine->RegisterObjectType("GameInterface", 0,
@@ -151,12 +230,23 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"specified tile. If 0, then the tile is unoccupied.");
 	r = engine->RegisterObjectMethod("GameInterface", "void zoomIn()",
 		asMETHOD(awe::game, zoomIn), asCALL_THISCALL);
-	document->DocumentInterfaceMethod(r, "Zooms the map in by a scaling factor of "
+	document->DocumentObjectMethod(r, "Zooms the map in by a scaling factor of "
 		"1. The map scaling factor does not go above 3.");
 	r = engine->RegisterObjectMethod("GameInterface", "void zoomOut()",
 		asMETHOD(awe::game, zoomOut), asCALL_THISCALL);
-	document->DocumentInterfaceMethod(r, "Zooms the map out by a scaling factor "
+	document->DocumentObjectMethod(r, "Zooms the map out by a scaling factor "
 		"of 1. The map scaling factor does not go below 1.");
+	r = engine->RegisterObjectMethod("GameInterface",
+		"void setSelectedTileByPixel(const MousePosition)",
+		asMETHOD(awe::game, setSelectedTileByPixel), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Selects a tile based on a given mouse "
+		"position. Note that cases of <tt>INVALID_MOUSE</tt>, etc., should be "
+		"accounted for within the scripts.");
+	r = engine->RegisterObjectMethod("GameInterface",
+		"Vector2 getTileSize()",
+		asMETHOD(awe::game, getTileSize), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the minimum pixel size of a tile "
+		"after scaling has been applied.");
 	// Register game global property.
 	r = engine->RegisterGlobalProperty("GameInterface game", &_game);
 
@@ -338,8 +428,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, _userinput.get());
 	document->DocumentGlobalFunction(r, "Retrieves the current position of the "
 		"mouse, in pixels, relative to the game window's upper left corner of the "
-		"client area. Will return INVALID_MOUSE if the game's window does not "
-		"have focus.");
+		"client area. Will return <tt>INVALID_MOUSE</tt> if the game's window "
+		"does not have focus.");
+
+	r = engine->RegisterGlobalFunction("Vector2 getWindowSize()",
+		asMETHOD(sfx::renderer, getSize),
+		asCALL_THISCALL_ASGLOBAL, _renderer.get());
+	document->DocumentGlobalFunction(r, "Returns the render window's client "
+		"region's size, in pixels.");
 }
 
 bool awe::game_engine::_load(engine::json& j) noexcept {

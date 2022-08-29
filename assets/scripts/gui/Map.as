@@ -1,6 +1,27 @@
 void MapSetUp() {}
 
+// Holds the previous mouse position.
+MousePosition previousPosition;
+
 void MapHandleInput(const dictionary controls) {
+	// Handle mouse input.
+	MousePosition currentPosition = mousePosition();
+	// Ignore the mouse if the game doesn't have focus.
+	if (currentPosition != INVALID_MOUSE) {
+		// Ignore the mouse if it's outside of the window.
+		Vector2 windowSize = getWindowSize();
+		if (currentPosition.x >= 0 && currentPosition.y >= 0
+			&& currentPosition.x <= windowSize.x
+			&& currentPosition.y <= windowSize.y) {
+			// Only consider the mouse if it has moved.
+			if (currentPosition.x != previousPosition.x) {
+				game.setSelectedTileByPixel(currentPosition);
+			}
+		}
+	}
+	previousPosition = currentPosition;
+
+	// Handle controls.
 	if (bool(controls["up"])) {
 		game.moveSelectedTileUp();
 	} else if (bool(controls["down"])) {
@@ -20,5 +41,8 @@ void MapHandleInput(const dictionary controls) {
 		if (game.getUnitOnTile(game.getSelectedTile()) == 0) {
 			setGUI("MapMenu");
 		}
+	}
+	if (bool(controls["info"])) {
+		setGUI("DetailedInfoMenu");
 	}
 }
