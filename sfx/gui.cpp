@@ -152,6 +152,14 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"as and when each menu name is read from the script. This means that a "
 		"menu defined later in the <tt>menus</tt> list won't exist when an "
 		"earlier menu's <tt>SetUp()</tt> function is called.");
+	document->DocumentExpectedFunction("void MainMenuOpen(const string&in)",
+		"When switching to the \"MainMenu\", its \"Open()\" function will be "
+		"called, if it has been defined. The parameter holds the name of the "
+		"previous menu. This will be blank when the main menu is opened for the "
+		"very first time.\n\n"
+		"All menus have an <tt>Open()</tt> function which has the same "
+		"declaration and behaviour as this one, except it is called "
+		"MenuName<tt>Open()</tt>.");
 	document->DocumentExpectedFunction(
 		"void MainMenuHandleInput(const dictionary)",
 		"Regardless of how the game is modded, there will <b>always</b> be a menu "
@@ -186,8 +194,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 
 	// Register non-widget global functions.
 	int r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
-		asMETHODPR(sfx::gui, setGUI, (const std::string&), void),
-		asCALL_THISCALL_ASGLOBAL, this);
+		asMETHOD(sfx::gui, _setGUI), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Hides the current menu and shows the "
 		"menu given.");
 	r = engine->RegisterGlobalFunction("void setBackground(string)",
@@ -249,7 +256,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Gets a widget's selected item's text.");
 }
 
-void sfx::gui::setGUI(const std::string& newPanel) noexcept {
+void sfx::gui::setGUI(const std::string& newPanel, const bool callOpen) noexcept {
 	auto old = getGUI();
 	if (_gui.get(old)) {
 		_gui.get(old)->setVisible(false);
@@ -258,9 +265,13 @@ void sfx::gui::setGUI(const std::string& newPanel) noexcept {
 		if (!_gui.get(newPanel)) throw tgui::Exception("GUI with name \"" +
 			newPanel + "\" does not exist.");
 		_gui.get(newPanel)->setVisible(true);
-		// clear widget sprites
+		// Clear widget sprites.
 		_widgetSprites.clear();
 		_currentGUI = newPanel;
+		// Call NewPanelOpen() script function, if it has been defined.
+		auto funcName = newPanel + "Open";
+		if (callOpen && _scripts->functionExists(funcName))
+			_scripts->callFunction(funcName, &old);
 	} catch (tgui::Exception& e) {
 		_logger.error("{}", e.what());
 		if (_gui.get(old)) _gui.get(old)->setVisible(true);
@@ -559,7 +570,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 		tgui::Group::Ptr menu = tgui::Group::create();
 		menu->setVisible(false);
 		_gui.add(menu, "MainMenu");
-		setGUI("MainMenu");
+		setGUI("MainMenu", false);
 		if (_scripts) _scripts->callFunction("MainMenuSetUp");
 		// Create each menu.
 		for (auto& m : names) {
@@ -568,11 +579,11 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 			_gui.add(menu, m);
 			// Temporarily set the current GUI to this one to make _findWidget()
 			// work with relative widget names in SetUp() functions.
-			setGUI(m);
+			setGUI(m, false);
 			if (_scripts) _scripts->callFunction(m + "SetUp");
 		}
 		// Leave with the current menu being MainMenu.
-		setGUI("MainMenu");
+		setGUI("MainMenu", false);
 		return true;
 	} else {
 		return false;
@@ -731,6 +742,10 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	}
 }
 
+void sfx::gui::_setGUI(const std::string& name) noexcept {
+	setGUI(name, true);
+}
+
 void sfx::gui::_noBackground(std::string menu) noexcept {
 	if (menu == "") menu = getGUI();
 	_guiBackground.erase(menu);
@@ -769,6 +784,14 @@ void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name
 			widget = tgui::ListBox::create();
 		} else if (type == "verticallayout") {
 			widget = tgui::VerticalLayout::create();
+		} else if (type == "horizontallayout") {
+			widget = tgui::HorizontalLayout::create();
+		} else if (type == "picture") {
+			widget = tgui::Picture::create();
+		} else if (type == "label") {
+			widget = tgui::Label::create();
+		} else if (type == "scrollablepanel") {
+			widget = tgui::ScrollablePanel::create();
 		} else {
 			_logger.error("Attempted to create a widget of type \"{}\" with name "
 				"\"{}\" for menu \"{}\": that widget type is not supported.", type,
@@ -833,6 +856,8 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "bitmapbutton") {
 			_findWidget<BitmapButton>(name)->setText(text);
+		} else if (type == "label") {
+			_findWidget<Label>(name)->setText(text);
 		} else {
 			_logger.error("Attempted to set the caption \"{}\" to widget \"{}\" "
 				"which is of type \"{}\", within menu \"{}\". This operation is "
@@ -860,7 +885,7 @@ void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& shee
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type != "bitmapbutton") {
+		if (type != "bitmapbutton" || type != "picture") {
 			_logger.error("Attempted to set the sprite \"{}\" from sheet \"{}\" "
 				"to widget \"{}\" which is of type \"{}\", within menu \"{}\". "
 				"This operation is not supported for this type of widget.", key,

@@ -85,8 +85,11 @@ namespace sfx {
 		 * @param newPanel The name of the menu to display. If a menu with the
 		 *                 given name does not exist, an error will be logged and
 		 *                 no other changes will occur.
+		 * @param callOpen If @c TRUE, the new menu's respective @c Open() script
+		 *                 function will be called, if it exists.
 		 */
-		void setGUI(const std::string& newPanel) noexcept;
+		void setGUI(const std::string& newPanel, const bool callOpen = true)
+			noexcept;
 
 		/**
 		 * Gets the name of the menu currently showing.
@@ -403,6 +406,14 @@ namespace sfx {
 		//////////////////////
 		// SCRIPT INTERFACE //
 		//////////////////////
+
+		// SET GUI //
+
+		/**
+		 * Calls @c setGUI(), passing @c TRUE to @c callOpen.
+		 * @sa @c sfx::gui::setGUI()
+		 */
+		void _setGUI(const std::string& name) noexcept;
 
 		// BACKGROUND //
 

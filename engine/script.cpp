@@ -45,18 +45,6 @@ engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
         RegisterScriptDictionary(_engine);
         RegisterScriptDateTime(_engine);
         RegisterScriptFileSystem(_engine);
-        _context = _engine->CreateContext();
-        if (_context) {
-            if ((r = _context->SetExceptionCallback(asMETHOD(engine::scripts,
-                contextExceptionCallback), this, asCALL_THISCALL)) < 0) {
-                _logger.error("Fatal error: failed to assign the exception "
-                    "callback routine - this is likely a faulty engine build. "
-                    "Code {}.", r);
-            }
-        } else {
-            _logger.error("Fatal error: failed to allocate the context for this "
-                "script engine.");
-        }
     } else {
         _logger.error("Fatal error: script engine failed to load. Ensure that "
             "version \"{}\" of AngelScript is being loaded (DLL).",
@@ -65,7 +53,7 @@ engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
 }
 
 engine::scripts::~scripts() noexcept {
-    if (_context) _context->Release();
+    for (auto context : _context) context->Release();
     if (_engine) _engine->ShutDownAndRelease();
 }
 
@@ -180,8 +168,8 @@ bool engine::scripts::functionExists(const std::string& name) const noexcept {
 
 bool engine::scripts::callFunction(const std::string& name) noexcept {
     if (!_callFunction_TemplateCall) {
-        // if this method is being called directly and not from the template
-        // version then we must set up the context
+        // If this method is being called directly and not from the template
+        // version then we must set up the context.
         if (!_setupContext(name)) return false;
     }
     // first check that all parameters have been accounted for
@@ -191,7 +179,7 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
     auto expected = _engine->GetModule("ComputerWars")->
         GetFunctionByName(name.c_str())->GetParamCount();
     if (expected != _argumentID) {
-        // passing in too many arguments would have caused an error earlier
+        // Passing in too many arguments would have caused an error earlier.
         _logger.error("Too few arguments have been given to function call \"{}\": "
             "{} {} been given, but {} {} expected: function call aborted.", name,
             _argumentID, ((_argumentID == 1) ? ("has") : ("have")), expected,
@@ -200,8 +188,13 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
         return false;
     }
     _resetCallFunctionVariables();
-    // execute the function and return if it worked or not
-    int r = _context->Execute();
+    // Increment the context ID now so that future calls will recognise that this
+    // context is in use now.
+    _contextId++;
+    // Execute the function and return if it worked or not.
+    int r = _context[_contextId - 1]->Execute();
+    // This context is free now.
+    _contextId--;
     if (r != asEXECUTION_FINISHED) {
         _logger.error("Failed to execute function \"{}\": code {}.", name, r);
         return false;
@@ -211,6 +204,26 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
 
 CScriptDictionary* engine::scripts::createDictionary() noexcept {
     return CScriptDictionary::Create(_engine);
+}
+
+int engine::scripts::_allocateContext() noexcept {
+    asIScriptContext* context = _engine->CreateContext();
+    if (context) {
+        int r = context->SetExceptionCallback(asMETHOD(engine::scripts,
+            contextExceptionCallback), this, asCALL_THISCALL);
+        if (r < 0) {
+            _logger.error("Fatal error: failed to assign the exception "
+                "callback routine for context {} - this is likely a faulty engine "
+                "build. Code {}.", _context.size(), r);
+            return r;
+        }
+        _context.emplace_back(context);
+        return 0;
+    } else {
+        _logger.error("Fatal error: failed to allocate context {} for this "
+            "script engine.", _context.size());
+        return INT_MIN;
+    }
 }
 
 bool engine::scripts::_setupContext(const std::string& name) noexcept {
@@ -223,10 +236,21 @@ bool engine::scripts::_setupContext(const std::string& name) noexcept {
             name);
         return false;
     }
-    int r = _context->Prepare(func);
+
+    static const std::string errorMsg = "Failed to prepare context for function "
+        "\"{}\": code {}.";
+    int r = 0;
+    if (_contextId >= _context.size()) {
+        // All the existing contexts are in use, so allocate a new one.
+        r = _allocateContext();
+        if (r < 0) {
+            _logger.error(errorMsg, name, r);
+            return false;
+        }
+    }
+    r = _context[_contextId]->Prepare(func);
     if (r < 0) {
-        _logger.error("Failed to prepare context for function \"{}\": code {}.",
-            name, r);
+        _logger.error(errorMsg, name, r);
         return false;
     }
     return true;

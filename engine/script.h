@@ -226,11 +226,17 @@ namespace engine {
 
 		/**
 		 * Creates a @c CScriptDictionary object.
-		 * @returns Pointer to a new AngelScript @c dictionary object that's been
-		 *          registered with this engine.
+		 * @return Pointer to a new AngelScript @c dictionary object that's been
+		 *         registered with this engine.
 		 */
 		CScriptDictionary* createDictionary() noexcept;
 	private:
+		/**
+		 * Allocates a new function context.
+		 * @return The error code.
+		 */
+		int _allocateContext() noexcept;
+
 		/**
 		 * Prepares the function context when making a call to \c callFunction().
 		 * @param  name The name of the function to call.
@@ -261,10 +267,15 @@ namespace engine {
 		asIScriptEngine* _engine = nullptr;
 
 		/**
-		 * Pointer to the function context, used to carry out script function
+		 * Pointers to the function contexts, used to carry out script function
 		 * calls.
 		 */
-		asIScriptContext* _context = nullptr;
+		std::vector<asIScriptContext*> _context;
+
+		/**
+		 * Keeps track of which context object to use when making a function call.
+		 */
+		std::size_t _contextId = 0;
 
 		/**
 		 * Flag used to keep track of whether the template version of
@@ -307,16 +318,16 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 		// this also conveniently covers bool for us
 		switch (sizeof value) {
 		case 1:
-			r = _context->SetArgByte(_argumentID, (asBYTE)value);
+			r = _context[_contextId]->SetArgByte(_argumentID, (asBYTE)value);
 			break;
 		case 2:
-			r = _context->SetArgWord(_argumentID, (asWORD)value);
+			r = _context[_contextId]->SetArgWord(_argumentID, (asWORD)value);
 			break;
 		case 4:
-			r = _context->SetArgDWord(_argumentID, (asDWORD)value);
+			r = _context[_contextId]->SetArgDWord(_argumentID, (asDWORD)value);
 			break;
 		case 8:
-			r = _context->SetArgQWord(_argumentID, (asQWORD)value);
+			r = _context[_contextId]->SetArgQWord(_argumentID, (asQWORD)value);
 			break;
 		default:
 			_logger.error("Unexpected length {} of integer variable, it will not "
@@ -327,9 +338,9 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 		}
 	} else if constexpr (std::is_floating_point<T>::value) {
 		if (sizeof value == 4) {
-			r = _context->SetArgFloat(_argumentID, (float)value);
+			r = _context[_contextId]->SetArgFloat(_argumentID, (float)value);
 		} else {
-			r = _context->SetArgDouble(_argumentID, (double)value);
+			r = _context[_contextId]->SetArgDouble(_argumentID, (double)value);
 		}
 	} else if constexpr (std::is_pointer<T>::value) {
 		if (!value) {
@@ -338,7 +349,7 @@ bool engine::scripts::callFunction(const std::string& name, T value, Ts... value
 			_resetCallFunctionVariables();
 			return false;
 		}
-		r = _context->SetArgObject(_argumentID, value);
+		r = _context[_contextId]->SetArgObject(_argumentID, value);
 	} else if constexpr (std::is_object<T>::value || std::is_reference<T>::value) {
 		_logger.error("Attempted to add an object to argument {} of function "
 			"\"{}\", which is not supported: function call aborted.", _argumentID,
