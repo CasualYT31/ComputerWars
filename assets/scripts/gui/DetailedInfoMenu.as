@@ -1,6 +1,43 @@
-void setUpArmyPanel(string baseLayout) {
+/**
+ * Adds an army widget to a given container.
+ * Here are the widgets that are created in this function:
+ * Widget Type  --- Full Name
+ * Panel        --- baseName
+ * |	Picture --- baseName.currentCO
+ * |	Picture --- baseName.tagCO
+ * |	Label   --- baseName.funds
+ * You can
+ * @param baseName The full name of the army widget.
+ */
+void addArmyWidget(const string&in baseName) {
+	addWidget("Panel", baseLayout + "army1");
+	baseLayout += "army1";
+	setWidgetBackgroundColour(baseLayout, );
 	baseLayout += ".";
-	addWidget("ScrollablePanel", baseLayout + "armyPanel");
+	addWidget("Picture", baseLayout + "currentCO");
+	addWidget("Picture", baseLayout + "tagCO");
+	addWidget("Label", baseLayout + "funds");
+}
+
+void setUpArmyPanel(string baseLayout) {
+	baseLayout += ".armyPanel";
+	addWidget("ScrollablePanel", baseLayout);
+	baseLayout += ".";
+
+	// Refactor later: just draws the first army.
+	/*
+	Panel // rounded rectangle with radius of half of the height of the Panel,
+	|	  // bg is colour of army.
+	|	Picture // current CO
+	|	Picture // tag CO
+	|	Label   // funds
+	*/
+
+	addWidget("Panel", baseLayout + "army1");
+	baseLayout += "army1.";
+	addWidget("Picture", baseLayout + "currentCO");
+	addWidget("Picture", baseLayout + "tagCO");
+	addWidget("Label", baseLayout + "funds");
 }
 
 void setUpTerrainPanel(string baseLayout) {

@@ -192,8 +192,18 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"A list of supported signals can be found be in the "
 		"<tt>sfx::gui::_connectSignals()</tt> method in the game engine's code.");
 
+	// Register types.
+	int r = engine->RegisterObjectType("Colour", sizeof(sf::Color),
+		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Color>());
+	engine->RegisterObjectProperty("Colour", "r", asOFFSET(sf::Color, r));
+	engine->RegisterObjectProperty("Colour", "g", asOFFSET(sf::Color, g));
+	engine->RegisterObjectProperty("Colour", "b", asOFFSET(sf::Color, b));
+	engine->RegisterObjectProperty("Colour", "a", asOFFSET(sf::Color, a));
+	// engine->RegisterObjectBehaviour("Colour", asBEHAVE_CONSTRUCT, "", , );
+	document->DocumentObjectType(r, "Represents a colour value.");
+
 	// Register non-widget global functions.
-	int r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
+	r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHOD(sfx::gui, _setGUI), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Hides the current menu and shows the "
 		"menu given.");
@@ -245,6 +255,15 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Sets a widget's sprite. The name of "
 		"the widget is given, then the name of the sprite sheet, then the name of "
 		"the sprite.");
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetBackgroundColour(const string&in, const Colour)",
+		asMETHOD(sfx::gui, _setWidgetBgColour), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's background colour.");
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetBorderRadius(const string&in, const float)",
+		asMETHOD(sfx::gui, _setWidgetBorderRadius),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's rounded border radius.");
 	r = engine->RegisterGlobalFunction("void addItem(const string& in, const "
 		"string& in)",
 		asMETHOD(sfx::gui, _addItem), asCALL_THISCALL_ASGLOBAL, this);
@@ -792,6 +811,8 @@ void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name
 			widget = tgui::Label::create();
 		} else if (type == "scrollablepanel") {
 			widget = tgui::ScrollablePanel::create();
+		} else if (type == "panel") {
+			widget = tgui::Panel::create();
 		} else {
 			_logger.error("Attempted to create a widget of type \"{}\" with name "
 				"\"{}\" for menu \"{}\": that widget type is not supported.", type,
@@ -897,6 +918,52 @@ void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& shee
 		_logger.error("Attempted to set the sprite \"{}\" from sheet \"{}\" to a "
 			"widget \"{}\" within menu \"{}\". This widget does not exist.", key,
 			sheet, name, fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetBgColour(const std::string& name, const sf::Color& colour)
+	noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "panel") {
+			auto panel = _findWidget<Panel>(name);
+			panel->getRenderer()->setBackgroundColor(colour);
+		} else {
+			_logger.error("Attempted to set the background colour \"{}\" to "
+				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
+				"This operation is not supported for this type of widget.", colour,
+				name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the background colour \"{}\" to a widget "
+			"\"{}\" within menu \"{}\". This widget does not exist.", colour, name,
+			fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetBorderRadius(const std::string& name, const float radius)
+	noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "panel") {
+			auto panel = _findWidget<Panel>(name);
+			// panel->getRenderer()->setRoundedBorderRadius(radius);
+		} else {
+			_logger.error("Attempted to set the border radius {} to "
+				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
+				"This operation is not supported for this type of widget.", radius,
+				name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the border radius {} to a widget "
+			"\"{}\" within menu \"{}\". This widget does not exist.", radius, name,
+			fullname[0]);
 	}
 }
 

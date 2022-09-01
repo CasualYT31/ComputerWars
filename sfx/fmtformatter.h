@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <spdlog/fmt/bundled/format.h>
 #include "sfml/system/Vector2.hpp"
+#include "SFML/Graphics/Color.hpp"
 
 /**
  * Fmt formatter for the sf::Vector2u type.
@@ -46,5 +47,22 @@ template <> struct fmt::formatter<sf::Vector2u> {
 	auto format(const sf::Vector2u& p, FormatContext& ctx) const ->
 		decltype(ctx.out()) {
 		return fmt::format_to(ctx.out(), "({}, {})", p.x, p.y);
+	}
+};
+
+/**
+ * Fmt formatter for the sf::Color type.
+ */
+template <> struct fmt::formatter<sf::Color> {
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		auto it = ctx.begin(), end = ctx.end();
+		if (it != end && *it != '}') throw format_error("invalid format");
+		return it;
+	}
+
+	template <typename FormatContext>
+	auto format(const sf::Color& p, FormatContext& ctx) const ->
+		decltype(ctx.out()) {
+		return fmt::format_to(ctx.out(), "[{}, {}, {}, {}]", p.r, p.g, p.b, p.a);
 	}
 };
