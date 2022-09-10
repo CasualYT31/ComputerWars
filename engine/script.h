@@ -39,6 +39,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace engine {
 	/**
+	 * Registers and documents the \c Colour script type, if it hasn't already been
+	 * registered.
+	 */
+	void RegisterColourType(asIScriptEngine* engine,
+		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+	/**
 	 * Interface which allows a subclass to register functions, object types, etc.
 	 * with a \c scripts object.
 	 */

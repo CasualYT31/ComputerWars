@@ -51,7 +51,7 @@ std::string awe::bank_id::getScriptName() const noexcept { return _scriptName; }
 //*COMMON PROPERTIES*
 //*******************
 awe::common_properties::common_properties(const awe::BankID id,
-	const std::string& scriptName,  engine::json& j) noexcept :
+	const std::string& scriptName, engine::json& j) noexcept :
 	bank_id(id, scriptName) {
 	j.apply(_name, { "longname" }, true);
 	j.apply(_shortName, { "shortname" }, true);

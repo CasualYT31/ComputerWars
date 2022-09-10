@@ -22,6 +22,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "script.h"
 #include <filesystem>
+#include "SFML/Graphics/Color.hpp"
+
+void engine::RegisterColourType(asIScriptEngine* engine,
+    const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+    if (!engine->GetTypeInfoByName("Colour")) {
+        auto r = engine->RegisterObjectType("Colour", sizeof(sf::Color),
+            asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Color>());
+        engine->RegisterObjectProperty("Colour", "uint8 r",
+            asOFFSET(sf::Color, r));
+        engine->RegisterObjectProperty("Colour", "uint8 g",
+            asOFFSET(sf::Color, g));
+        engine->RegisterObjectProperty("Colour", "uint8 b",
+            asOFFSET(sf::Color, b));
+        engine->RegisterObjectProperty("Colour", "uint8 a",
+            asOFFSET(sf::Color, a));
+        // engine->RegisterObjectBehaviour("Colour", asBEHAVE_CONSTRUCT, "", , );
+        document->DocumentObjectType(r, "Represents a colour value.");
+    }
+}
 
 engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
     _engine = asCreateScriptEngine();

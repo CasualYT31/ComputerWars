@@ -465,6 +465,9 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	// standard output when I load images in the animated_spritesheet objects
 	// below.
 	_renderer->openWindow();
+	// Allocate GUI and scripts objects, but don't initialise yet.
+	_scripts = std::make_shared<engine::scripts>();
+	_gui = std::make_shared<sfx::gui>(_scripts);
 	// Continue loading most of the objects.
 	ret =  _loadObject(_userinput, j, { "userinput" })
 		&& _loadObject(_sprites->CO, j, { "spritesheets", "co" })
@@ -478,14 +481,14 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 			// { "spritesheets", "tile", "normalpictures" })
 		&& _loadObject(_sprites->icon, j, { "spritesheets", "icon" })
 		&& _loadObject(_sprites->GUI, j, { "spritesheets", "gui" })
-		&& _loadObject(_countries, j, { "countries" })
-		&& _loadObject(_weathers, j, { "weathers" })
-		&& _loadObject(_environments, j, { "environments" })
-		&& _loadObject(_movements, j, { "movements" })
-		&& _loadObject(_terrains, j, { "terrains" })
-		&& _loadObject(_tiles, j, { "tiles" })
-		&& _loadObject(_units, j, { "units" })
-		&& _loadObject(_commanders, j, { "commanders" });
+		&& _loadObject(_countries, j, { "countries" }, _scripts, "Country")
+		&& _loadObject(_weathers, j, { "weathers" }, _scripts, "Weather")
+	&& _loadObject(_environments, j, { "environments" }, _scripts, "Environment")
+		&& _loadObject(_movements, j, { "movements" }, _scripts, "Movement")
+		&& _loadObject(_terrains, j, { "terrains" }, _scripts, "Terrain")
+		&& _loadObject(_tiles, j, { "tiles" }, _scripts, "Tile")
+		&& _loadObject(_units, j, { "units" }, _scripts, "Unit")
+		&& _loadObject(_commanders, j, { "commanders" }, _scripts, "Commander");
 	if (!ret) return false;
 	// Ignore the state of these objects for now. Can't load them currently
 	// because I have no tile or unit pictures to configure with.
@@ -494,9 +497,7 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_loadObject(_sprites->tilePicture->normal, j,
 		{ "spritesheets", "tile", "normalpictures" });
 	j.resetState();
-	// Allocate GUIs and the scripts.
-	_scripts = std::make_shared<engine::scripts>();
-	_gui = std::make_shared<sfx::gui>(_scripts);
+	// Initialise GUIs and the scripts.
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scriptsPath);
 	_scripts->generateDocumentation();

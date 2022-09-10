@@ -37,6 +37,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "texture.h"
 #include "typedef.h"
+#include "script.h"
+#include "TGUI/String.hpp"
 
 namespace awe {
 	/**
@@ -60,12 +62,34 @@ namespace awe {
 	 *     <li>All instantiations of your class stored in the bank will be const.
 	 *         Therefore use the \c const modifier liberally with your class to
 	 *         allow it to be accessed appropriately via the bank. You should not
-	 *         design your class to be mutable.</li></ol>
+	 *         design your class to be mutable.</li>
+	 *     <li>Your class needs to inherit from @c awe::bank_id. This is so that
+	 *         the string version of \c operator[] can be supported.</li>
+	 *     <li>In addition, your class needs to define a static method: <tt>void
+	 *         registerInterface(const std::string& type, asIScriptEngine* engine,
+	 *         const std::shared_ptr<DocumentationGenerator>& document)
+	 *         noexcept</tt>. This method should register your T reference type
+	 *         with the given script engine so that the scripts can all the get
+	 *         methods.</ol>
 	 * @tparam T The type of static game property to store within this bank.
 	 */
 	template<typename T>
-	class bank : public engine::json_script {
+	class bank : public engine::script_registrant, public engine::json_script {
 	public:
+		/**
+		 * Provides script interface details to this @c bank instance.
+		 * @param scripts Pointer to the @c scripts object to register this bank
+		 *                with. If @c nullptr, the bank won't be registered with
+		 *                any script interface.
+		 * @param name    The base name of the script interface's new type that
+		 *                will be registered. The bank type's name will be the one
+		 *                given but with \c "Bank" appended, and the single global
+		 *                property of this bank type will be called the given name,
+		 *                but in lowercase.
+		 */
+		bank(const std::shared_ptr<engine::scripts>& scripts,
+			const std::string& name) noexcept;
+
 		/**
 		 * Allows the client to access the game properties of a bank member.
 		 * @param  id The ID of the member to access.
@@ -74,11 +98,26 @@ namespace awe {
 		std::shared_ptr<const T> operator[](const awe::BankID id) const noexcept;
 
 		/**
+		 * Allows the client to access the game properties of a bank member.
+		 * @param  sn The script name of the member to access.
+		 * @return A pointer to the properties.
+		 */
+		std::shared_ptr<const T> operator[](const std::string& sn) const noexcept;
+
+		/**
 		 * Calculates the size of the bank.
 		 * @return The number of members or elements of the internal vector \c
 		 *         _bank.
 		 */
 		std::size_t size() const noexcept;
+
+		/**
+		 * Callback given to \c engine::scripts::registerInterface() to register
+		 * game engine functions with a \c scripts object.
+		 * @sa \c engine::scripts::registerInterface()
+		 */
+		void registerInterface(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -97,7 +136,7 @@ namespace awe {
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return Always returns \c TRUE.
-		 * @sa     awe::bank<T>
+		 * @sa     @c awe::bank<T>
 		 */
 		bool _load(engine::json& j) noexcept;
 
@@ -111,9 +150,31 @@ namespace awe {
 		bool _save(nlohmann::ordered_json& j) noexcept;
 
 		/**
+		 * Script's integer index operator.
+		 * @sa @c awe::bank<T>::operator[](const awe::BankID)
+		 */
+		const T _opIndexInt(const awe::BankID id) const noexcept;
+
+		/**
+		 * Script's string index operator.
+		 * @sa @c awe::bank<T>::operator[](const std::string&)
+		 */
+		const T _opIndexStr(const std::string name) const noexcept;
+
+		/**
 		 * The internal vector of game properties.
 		 */
 		std::vector<std::shared_ptr<const T>> _bank;
+
+		/**
+		 * The pointer to the @c scripts instance.
+		 */
+		std::shared_ptr<engine::scripts> _scripts;
+
+		/**
+		 * The name of the single global property.
+		 */
+		std::string _propertyName;
 	};
 
 	/**
@@ -127,6 +188,21 @@ namespace awe {
 		 * Polymorphic base classes should have virtual destructors.
 		 */
 		virtual ~bank_id() noexcept = default;
+
+		/**
+		 * Registers \c bank_id with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c bank_id in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 		/**
 		 * Retrieves the ID of this bank entry as defined during allocation of the
@@ -185,6 +261,21 @@ namespace awe {
 		 * Polymorphic base classes should have virtual destructors.
 		 */
 		virtual ~common_properties() noexcept = default;
+
+		/**
+		 * Registers \c common_properties with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c common_properties in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string & type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>&document) noexcept;
 
 		/**
 		 * Retrieves the long name property.
@@ -284,6 +375,21 @@ namespace awe {
 			engine::json& j) noexcept;
 
 		/**
+		 * Registers \c country with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c country in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+		/**
 		 * Retrieves the colour property.
 		 * @return The colour of the country.
 		 */
@@ -330,6 +436,21 @@ namespace awe {
 			engine::json& j) noexcept;
 
 		/**
+		 * Registers \c weather with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c weather in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+		/**
 		 * Comparison operator.
 		 * @param  rhs The \c weather object to test against.
 		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
@@ -368,6 +489,21 @@ namespace awe {
 			engine::json& j) noexcept;
 
 		/**
+		 * Registers \c environment with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c environment in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+		/**
 		 * Comparison operator.
 		 * @param  rhs The \c environment object to test against.
 		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
@@ -402,6 +538,21 @@ namespace awe {
 		 */
 		movement_type(const awe::BankID id, const std::string& scriptName,
 			engine::json& j) noexcept;
+
+		/**
+		 * Registers \c movement_type with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c movement_type in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 		/**
 		 * Comparison operator.
@@ -459,6 +610,21 @@ namespace awe {
 		 */
 		terrain(const awe::BankID id, const std::string& scriptName,
 			engine::json& j) noexcept;
+
+		/**
+		 * Registers \c terrain with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c terrain in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 		/**
 		 * Retrieves the maximum health property.
@@ -584,6 +750,21 @@ namespace awe {
 		 */
 		tile_type(const awe::BankID id, const std::string& scriptName,
 			engine::json& j) noexcept;
+
+		/**
+		 * Registers \c tile_type with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c tile_type in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 		/**
 		 * Retrieves the ID of the type of terrain this tile represents (i.e.
@@ -734,6 +915,21 @@ namespace awe {
 		 */
 		unit_type(const awe::BankID id, const std::string& scriptName,
 			engine::json& j) noexcept;
+
+		/**
+		 * Registers \c unit_type with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c unit_type in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 		/**
 		 * Retrieves the movement type of this unit.
@@ -1026,6 +1222,21 @@ namespace awe {
 			engine::json& j) noexcept;
 
 		/**
+		 * Registers \c commander with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c commander in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void registerInterface(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+		/**
 		 * Retrieves the animated sprite name of this commander's portrait.
 		 * @return The animated sprite ID.
 		 */
@@ -1073,10 +1284,23 @@ namespace awe {
 }
 
 template<typename T>
+awe::bank<T>::bank(const std::shared_ptr<engine::scripts>& scripts,
+	const std::string& name) noexcept : _scripts(scripts), _propertyName(name) {
+	if (scripts) _scripts->addRegistrant(this);
+}
+
+template<typename T>
 std::shared_ptr<const T> awe::bank<T>::operator[](const awe::BankID id) const
 	noexcept {
 	if (id >= size()) return nullptr;
 	return _bank[id];
+}
+
+template<typename T>
+std::shared_ptr<const T> awe::bank<T>::operator[](const std::string& sn) const
+	noexcept {
+	for (auto& prop : _bank) if (prop->getScriptName() == sn) return prop;
+	return nullptr;
 }
 
 template<typename T>
@@ -1085,13 +1309,36 @@ std::size_t awe::bank<T>::size() const noexcept {
 }
 
 template<typename T>
+void awe::bank<T>::registerInterface(asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	// 1. Register the value type that this bank stores (i.e. T).
+	engine->RegisterObjectType(_propertyName.c_str(), sizeof(T),
+		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<T>());
+	T::registerInterface<T>(_propertyName, engine, document);
+	// 2. Register a single reference type, called _propertyName + "Bank".
+	const std::string bankTypeName(_propertyName + "Bank"),
+		indexOpIntDecl("const " + _propertyName + " opIndex(uint32)"),
+		indexOpStrDecl("const " + _propertyName + " opIndex(string)"),
+		globalPropDecl(bankTypeName + " " +
+			tgui::String(_propertyName).toLower().toStdString());
+	engine->RegisterObjectType(bankTypeName.c_str(), 0,
+		asOBJ_REF | asOBJ_NOHANDLE);
+	engine->RegisterObjectMethod(bankTypeName.c_str(), indexOpIntDecl.c_str(),
+		asMETHOD(awe::bank<T>, _opIndexInt), asCALL_THISCALL);
+	engine->RegisterObjectMethod(bankTypeName.c_str(), indexOpStrDecl.c_str(),
+		asMETHOD(awe::bank<T>, _opIndexStr), asCALL_THISCALL);
+	// 3. Register the global point of access to the _propertyName + "Bank" object.
+	engine->RegisterGlobalProperty(globalPropDecl.c_str(), this);
+}
+
+template<typename T>
 bool awe::bank<T>::_load(engine::json& j) noexcept {
 	_bank.clear();
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	awe::BankID id = 0;
 	for (auto& i : jj.items()) {
-		// loop through each object, allowing the template type T to construct its
-		// values based on each object
+		// Loop through each object, allowing the template type T to construct its
+		// values based on each object.
 		engine::json input(i.value());
 		_bank.push_back(std::make_shared<const T>(id++, i.key(), input));
 	}
@@ -1101,4 +1348,124 @@ bool awe::bank<T>::_load(engine::json& j) noexcept {
 template<typename T>
 bool awe::bank<T>::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
+}
+
+template<typename T>
+const T awe::bank<T>::_opIndexInt(const awe::BankID id) const noexcept {
+	return *operator[](id);
+}
+
+template<typename T>
+const T awe::bank<T>::_opIndexStr(const std::string name) const noexcept {
+	return *operator[](name);
+}
+
+template<typename T>
+void awe::bank_id::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	auto r = engine->RegisterObjectMethod(type.c_str(), "uint32 get_ID() const property",
+		asMETHOD(T, getID), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"string get_scriptName() const property",
+		asMETHOD(T, getScriptName), asCALL_THISCALL);
+}
+
+template<typename T>
+void awe::common_properties::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::bank_id::registerInterface<T>(type, engine, document);
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_name() const property",
+		asMETHOD(T, getName), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_shortName() const property",
+		asMETHOD(T, getShortName), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_iconName() const property",
+		asMETHOD(T, getIconName), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_description() const property",
+		asMETHOD(T, getDescription), asCALL_THISCALL);
+}
+
+template<typename T>
+void awe::country::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::common_properties::registerInterface<T>(type, engine, document);
+	engine::RegisterColourType(engine, document);
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"const Colour& get_colour() const property",
+		asMETHOD(T, getColour), asCALL_THISCALL);
+}
+
+template<typename T>
+void awe::weather::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::common_properties::registerInterface<T>(type, engine, document);
+}
+
+template<typename T>
+void awe::environment::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::common_properties::registerInterface<T>(type, engine, document);
+}
+
+template<typename T>
+void awe::movement_type::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::common_properties::registerInterface<T>(type, engine, document);
+}
+
+template<typename T>
+void awe::terrain::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::common_properties::registerInterface<T>(type, engine, document);
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_maxHP() const property",
+		asMETHOD(T, getMaxHP), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(), "uint get_defence() const property",
+		asMETHOD(T, getDefence), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"int get_moveCost(const uint) const property",
+		asMETHOD(T, getMoveCost), asCALL_THISCALL);
+	// Do the rest later.
+}
+
+template<typename T>
+void awe::tile_type::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::bank_id::registerInterface<T>(type, engine, document);
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_typeIndex() const property",
+		asMETHOD(T, getTypeIndex), asCALL_THISCALL);
+	// Do the rest later.
+}
+
+template<typename T>
+void awe::unit_type::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::common_properties::registerInterface<T>(type, engine, document);
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_movementTypeIndex() const property", asMETHOD(T, getMovementTypeIndex),
+		asCALL_THISCALL);
+	// Do the rest later.
+}
+
+template<typename T>
+void awe::commander::registerInterface(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::common_properties::registerInterface<T>(type, engine, document);
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_portrait() const property",
+		asMETHOD(T, getPortrait), asCALL_THISCALL);
 }

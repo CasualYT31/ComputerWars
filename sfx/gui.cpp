@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "gui.h"
+#include "fmtformatter.h"
 
 using namespace tgui;
 
@@ -193,17 +194,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"<tt>sfx::gui::_connectSignals()</tt> method in the game engine's code.");
 
 	// Register types.
-	int r = engine->RegisterObjectType("Colour", sizeof(sf::Color),
-		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Color>());
-	engine->RegisterObjectProperty("Colour", "r", asOFFSET(sf::Color, r));
-	engine->RegisterObjectProperty("Colour", "g", asOFFSET(sf::Color, g));
-	engine->RegisterObjectProperty("Colour", "b", asOFFSET(sf::Color, b));
-	engine->RegisterObjectProperty("Colour", "a", asOFFSET(sf::Color, a));
-	// engine->RegisterObjectBehaviour("Colour", asBEHAVE_CONSTRUCT, "", , );
-	document->DocumentObjectType(r, "Represents a colour value.");
+	engine::RegisterColourType(engine, document);
 
 	// Register non-widget global functions.
-	r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
+	auto r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHOD(sfx::gui, _setGUI), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Hides the current menu and shows the "
 		"menu given.");
@@ -906,7 +900,7 @@ void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& shee
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type != "bitmapbutton" || type != "picture") {
+		if (type != "bitmapbutton" && type != "picture") {
 			_logger.error("Attempted to set the sprite \"{}\" from sheet \"{}\" "
 				"to widget \"{}\" which is of type \"{}\", within menu \"{}\". "
 				"This operation is not supported for this type of widget.", key,
