@@ -52,6 +52,7 @@ I like the idea of Gitmoji, but I find that there are a lot of emoji for the sam
 | | :boom: | boom | Introduce breaking changes. |
 | | :fire: | fire | Remove code, tests, or files. |
 | | :warning: | warning | Fix code causing compiler warnings. |
+| | :no_entry: | no_entry | Fix code causing compiler errors. |
 
 | Testing | Emoji | Name | Meaning |
 | --- | ---: | :---: | :--- |
