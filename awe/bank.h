@@ -1462,7 +1462,7 @@ void awe::terrain::registerInterface(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets the movement cost of this terrain "
 		"type, given a unit index.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const String& get_picture(const uint) const property",
+		"const string& get_picture(const uint) const property",
 		asMETHOD(T, getPicture), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this terrain type's "
 		"picture, given a country index.");
@@ -1485,12 +1485,12 @@ void awe::tile_type::registerInterface(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets the index of this tile's terrain "
 		"type.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const String& get_ownedTileSprite(const uint) const property",
+		"const string& get_ownedTileSprite(const uint) const property",
 		asMETHOD(T, getOwnedTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's owned "
 		"tile that is displayed on the map, given a country index.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const String& get_neutralTileSprite() const property",
+		"const string& get_neutralTileSprite() const property",
 		asMETHOD(T, getNeutralTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's tile "
 		"graphic that is displayed on the map.");
@@ -1506,12 +1506,12 @@ void awe::unit_type::registerInterface(const std::string& type,
 		asMETHOD(T, getMovementTypeIndex), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit's movement type index.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const String& get_pictureSprite(const uint) const property",
+		"const string& get_pictureSprite(const uint) const property",
 		asMETHOD(T, getPicture), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's "
 		"picture, given a country index.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const String& get_unitSprite(const uint) const property",
+		"const string& get_unitSprite(const uint) const property",
 		asMETHOD(T, getUnit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's tile "
 		"graphic that is displayed on the map, given a country index.");
@@ -1555,7 +1555,7 @@ void awe::unit_type::registerInterface(const std::string& type,
 		"is less than 0.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"bool get_canLoad(const uint) const property",
-		asMETHOD(T, canLoad), asCALL_THISCALL);
+		asMETHODPR(T, canLoad, (const awe::BankID) const, bool), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit can load another "
 		"type of unit, whose index is given.");
 	r = engine->RegisterObjectMethod(type.c_str(),

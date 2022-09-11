@@ -4,6 +4,14 @@
  */
 
 /**
+ * The different alignment options available to army widgets.
+ */
+enum ArmyWidgetAlignment {
+	Left,
+	Right
+}
+
+/**
  * Used to create the widgets that represent an army panel in-game.
  */
 class ArmyWidget {
@@ -14,10 +22,24 @@ class ArmyWidget {
 	 */
 	ArmyWidget(const string&in panelName) explicit {
 		addWidget("Panel", panelName);
-		setWidgetBackgroundColour(panelName, Colour());
+		// setWidgetBackgroundColour(panelName, );
 		addWidget("Picture", panelName + ".currentCO");
 		addWidget("Picture", panelName + ".tagCO");
 		addWidget("Label", panelName + ".funds");
+	}
+
+	/**
+	 * Configures an army widget to display information on a given army.
+	 * @param armyID The ID of the army on the current map to display information
+	 *               on.
+	 */
+	void update(const uint armyID) {
+	}
+
+	/**
+	 * Configures an army widget to be either left-aligned or right-aligned.
+	 */
+	void setAlignment(const ArmyWidgetAlignment alignment) {
 	}
 
 	/**
