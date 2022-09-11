@@ -191,7 +191,15 @@ awe::Funds awe::map::getArmyFunds(const awe::ArmyID army) const noexcept {
 	if (_isArmyPresent(army)) return _armys.at(army).getFunds();
 	_logger.error("getArmyFunds operation failed: army with ID {} didn't exist at "
 		"the time of calling!", army);
-	return 0;
+	return -1;
+}
+
+std::shared_ptr<const awe::country>
+	awe::map::getArmyCountry(const awe::ArmyID army) const noexcept {
+	if (_isArmyPresent(army)) return _armys.at(army).getCountry();
+	_logger.error("getArmyCountry operation failed: army with ID {} didn't exist "
+		"at the time of calling!", army);
+	return nullptr;
 }
 
 void awe::map::setArmyCOs(const awe::ArmyID army,
@@ -243,6 +251,13 @@ std::shared_ptr<const awe::commander> awe::map::getArmyTagCO(
 	_logger.error("getTagCO operation failed: army with ID {} didn't exist at the "
 		"time of calling!", army);
 	return nullptr;
+}
+
+bool awe::map::tagCOIsPresent(const awe::ArmyID army) const noexcept {
+	if (_isArmyPresent(army)) return _armys.at(army).getTagCO().operator bool();
+	_logger.error("tagCOIsPresent operation failed: army with ID {} didn't exist "
+		"at the time of calling!", army);
+	return false;
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army)

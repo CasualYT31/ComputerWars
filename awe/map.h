@@ -204,10 +204,20 @@ namespace awe {
 		/**
 		 * Retrieves an army's fund count.
 		 * @param  army The ID of the army to inspect.
-		 * @return The amount of funds this army possesses, or \c 0 if the given
+		 * @return The amount of funds this army possesses, or < 0 if the given
 		 *         army doesn't exist.
 		 */
 		awe::Funds getArmyFunds(const awe::ArmyID army) const noexcept;
+
+		/**
+		 * Retrieves an army's country.
+		 * @param  army The ID of the army whose country is to be retrieved.
+		 * @return Pointer to the information on the given army's country.
+		 *         \c nullptr is returned if the given army did not exist at the
+		 *         time of calling.
+		 */
+		std::shared_ptr<const awe::country> getArmyCountry(const awe::ArmyID army)
+			const noexcept;
 
 		/**
 		 * Sets the COs that are in charge of a specified army.
@@ -251,6 +261,15 @@ namespace awe {
 		 */
 		std::shared_ptr<const awe::commander> getArmyTagCO(const awe::ArmyID army)
 			const noexcept;
+
+		/**
+		 * Finds out if an army has a tag CO.
+		 * @param  army The ID of the army who should be queried.
+		 * @return \c TRUE if the specified army has two COs, \c FALSE if it only
+		 *         has one (or if the specified army didn't exist at the time of
+		 *         calling).
+		 */
+		bool tagCOIsPresent(const awe::ArmyID army) const noexcept;
 
 		/**
 		 * Retrieves a list of tiles that belong to a specified army.

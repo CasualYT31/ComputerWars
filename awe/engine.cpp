@@ -247,6 +247,32 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game, getTileSize), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the minimum pixel size of a tile "
 		"after scaling has been applied.");
+	r = engine->RegisterObjectMethod("GameInterface",
+		"const Commander getArmyCurrentCO(const uint)",
+		asMETHOD(awe::game, getArmyCurrentCO), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the properties of the army's current "
+		"CO.");
+	r = engine->RegisterObjectMethod("GameInterface",
+		"const Commander getArmyTagCO(const uint)",
+		asMETHOD(awe::game, getArmyTagCO), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the properties of the army's tag CO. "
+		"<b>Warning:</b> if an army doesn't have a tag CO, the game engine will "
+		"throw an exception which will halt script execution! Check if an army "
+		"has a tag CO first using <tt>tagCOIsPresent()</tt>.");
+	r = engine->RegisterObjectMethod("GameInterface",
+		"const Country getArmyCountry(const uint)",
+		asMETHOD(awe::game, getArmyCountry), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the properties of the army's "
+		"country.");
+	r = engine->RegisterObjectMethod("GameInterface",
+		"int getArmyFunds(const uint)",
+		asMETHOD(awe::game, getArmyFunds), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets an army's fund count.");
+	r = engine->RegisterObjectMethod("GameInterface",
+		"bool tagCOIsPresent(const uint)",
+		asMETHOD(awe::game, tagCOIsPresent), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns <tt>true</tt> if the specified "
+		"army has a tag CO, <tt>false</tt> in all other cases.");
 	// Register game global property.
 	r = engine->RegisterGlobalProperty("GameInterface game", &_game);
 
@@ -502,6 +528,7 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_scripts->loadScripts(scriptsPath);
 	_scripts->generateDocumentation();
 	_gui->addSpritesheet("icon", _sprites->icon);
+	_gui->addSpritesheet("co", _sprites->CO);
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setTarget(*_renderer);
 	_gui->load(guiPath);

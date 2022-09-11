@@ -59,11 +59,18 @@ engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
             _logger.error("Fatal error: failed to assign the message callback "
                 "routine - this is likely a faulty engine build. Code {}.", r);
         }
+        r = _engine->SetTranslateAppExceptionCallback(asMETHOD(engine::scripts,
+            translateExceptionCallback), this, asCALL_THISCALL);
+        if (r < 0) {
+            _logger.error("Fatal error: failed to assign the translate exception "
+                "callback - this is likely a faulty engine build. Code {}.", r);
+        }
         RegisterStdString(_engine);
         RegisterScriptArray(_engine, false);
         RegisterScriptDictionary(_engine);
         RegisterScriptDateTime(_engine);
         RegisterScriptFileSystem(_engine);
+        RegisterExceptionRoutines(_engine);
     } else {
         _logger.error("Fatal error: script engine failed to load. Ensure that "
             "version \"{}\" of AngelScript is being loaded (DLL).",
@@ -78,7 +85,7 @@ engine::scripts::~scripts() noexcept {
 
 void engine::scripts::addRegistrant(engine::script_registrant* const r) noexcept {
     if (r) {
-        _registrants.insert(r);
+        _registrants.push_back(r);
     } else {
         _logger.warning("Attempted to add a nullptr script registrant!");
     }
@@ -105,6 +112,17 @@ void engine::scripts::contextExceptionCallback(asIScriptContext* context)
         context->GetExceptionFunction()->GetScriptSectionName(),
         context->GetExceptionFunction()->GetDeclaration(),
         context->GetExceptionLineNumber(), context->GetExceptionString());
+}
+
+void engine::scripts::translateExceptionCallback(asIScriptContext* context, void*)
+    noexcept {
+    if (!context) return;
+    //https://www.angelcode.com/angelscript/sdk/docs/manual/doc_cpp_exceptions.html
+    try {
+        throw;
+    } catch (std::exception& e) {
+        context->SetException(e.what());
+    } catch (...) {}
 }
 
 bool engine::scripts::loadScripts(std::string folder) noexcept {

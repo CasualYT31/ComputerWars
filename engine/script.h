@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "scriptdictionary.h"
 #include "scriptarray.h"
 #include "scriptfilesystem.h"
+#include "scripthelper.h"
 #include "logger.h"
 #include <type_traits>
 #include "docgen.h"
@@ -142,6 +143,13 @@ namespace engine {
 		 *                an error during runtime.
 		 */
 		void contextExceptionCallback(asIScriptContext* context) noexcept;
+
+		/**
+		 * Used to translate application exceptions into AngelScript exceptions.
+		 * @param context The pointer to the function context which has encountered
+		 *                an application exception during runtime.
+		 */
+		void translateExceptionCallback(asIScriptContext* context, void*) noexcept;
 
 		/**
 		 * Loads a folder of scripts recursively.
@@ -297,9 +305,9 @@ namespace engine {
 		asUINT _argumentID = 0;
 
 		/**
-		 * The set of registrants.
+		 * The list of registrants.
 		 */
-		std::set<engine::script_registrant*> _registrants;
+		std::vector<engine::script_registrant*> _registrants;
 
 		/**
 		 * Used to generate documentation on the script interface.

@@ -238,6 +238,11 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _setWidgetSize), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's size. The name of the "
 		"widget is given, then the width, then the height.");
+	r = engine->RegisterGlobalFunction("void setWidgetVisibility(const string&in, "
+		"const bool)",
+		asMETHOD(sfx::gui, _setWidgetVisibility), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's visibility. The name of "
+		"the widget is given, then if it should be visible or not.");
 	r = engine->RegisterGlobalFunction("void setWidgetText(const string& in, "
 		"const string& in)",
 		asMETHOD(sfx::gui, _setWidgetText), asCALL_THISCALL_ASGLOBAL, this);
@@ -859,6 +864,18 @@ void sfx::gui::_setWidgetSize(const std::string& name, const std::string& w,
 		_logger.error("Attempted to set the size (\"{}\",\"{}\") to a widget "
 			"\"{}\" within menu \"{}\". This widget does not exist.", w, h, name,
 			fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible)
+	noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		widget->setVisible(visible);
+	} else {
+		_logger.error("Attempted to update widget \"{}\"'s visibility, within "
+			"menu \"{}\". This widget does not exist.", name, fullname[0]);
 	}
 }
 

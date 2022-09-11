@@ -23,6 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 #include "engine.h"
 
+const std::runtime_error NO_MAP("No map is currently loaded");
+
 awe::game::game(const std::string& name) noexcept : _logger(name) {}
 
 bool awe::game::load(const std::string& file,
@@ -81,61 +83,131 @@ void awe::game::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 // SCRIPT INTERFACE //
 //////////////////////
 
-void awe::game::moveSelectedTileUp() noexcept {
-	if (_map) _map->moveSelectedTileUp();
+void awe::game::moveSelectedTileUp() {
+	if (_map)
+		_map->moveSelectedTileUp();
+	else
+		throw NO_MAP;
 }
 
-void awe::game::moveSelectedTileDown() noexcept {
-	if (_map) _map->moveSelectedTileDown();
+void awe::game::moveSelectedTileDown() {
+	if (_map)
+		_map->moveSelectedTileDown();
+	else
+		throw NO_MAP;
 }
 
-void awe::game::moveSelectedTileLeft() noexcept {
-	if (_map) _map->moveSelectedTileLeft();
+void awe::game::moveSelectedTileLeft() {
+	if (_map)
+		_map->moveSelectedTileLeft();
+	else
+		throw NO_MAP;
 }
 
-void awe::game::moveSelectedTileRight() noexcept {
-	if (_map) _map->moveSelectedTileRight();
+void awe::game::moveSelectedTileRight() {
+	if (_map)
+		_map->moveSelectedTileRight();
+	else
+		throw NO_MAP;
 }
 
-sf::Vector2u awe::game::getSelectedTile() const noexcept {
+sf::Vector2u awe::game::getSelectedTile() const {
 	if (_map)
 		return _map->getSelectedTile();
 	else
-		return sf::Vector2u();
+		throw NO_MAP;
 }
 
-awe::UnitID awe::game::getUnitOnTile(const sf::Vector2u tile) const noexcept {
+awe::UnitID awe::game::getUnitOnTile(const sf::Vector2u tile) const {
 	if (_map)
 		return _map->getUnitOnTile(tile);
 	else
-		return awe::UnitID{};
+		throw NO_MAP;
 }
 
-void awe::game::zoomIn() noexcept {
+void awe::game::zoomIn() {
 	if (_map) {
 		_mapScalingFactor += 1.0f;
 		if (_mapScalingFactor >= 3.9f) _mapScalingFactor = 3.0f;
 		_map->setMapScalingFactor(_mapScalingFactor);
+	} else {
+		throw NO_MAP;
 	}
 }
 
-void awe::game::zoomOut() noexcept {
+void awe::game::zoomOut() {
 	if (_map) {
 		_mapScalingFactor -= 1.0f;
 		if (_mapScalingFactor < 0.9f) _mapScalingFactor = 1.0f;
 		_map->setMapScalingFactor(_mapScalingFactor);
+	} else {
+		throw NO_MAP;
 	}
 }
 
-void awe::game::setSelectedTileByPixel(const sf::Vector2i pixel) noexcept {
-	if (_map) _map->setSelectedTileByPixel(pixel);
+void awe::game::setSelectedTileByPixel(const sf::Vector2i pixel) {
+	if (_map)
+		_map->setSelectedTileByPixel(pixel);
+	else
+		throw NO_MAP;
 }
 
-sf::Vector2u awe::game::getTileSize() const noexcept {
+sf::Vector2u awe::game::getTileSize() const {
 	if (_map)
 		return _map->getTileSize();
 	else
-		return sf::Vector2u();
+		throw NO_MAP;
+}
+
+const awe::commander awe::game::getArmyCurrentCO(const awe::ArmyID army) const {
+	if (_map) {
+		auto co = _map->getArmyCurrentCO(army);
+		if (co)
+			return *co;
+		else
+			throw std::runtime_error("Could not retrieve the army's current CO");
+	}
+	throw NO_MAP;
+}
+
+const awe::commander awe::game::getArmyTagCO(const awe::ArmyID army) const {
+	if (_map) {
+		auto co = _map->getArmyTagCO(army);
+		if (co)
+			return *co;
+		else
+			throw std::runtime_error("Could not retrieve the army's tag CO");
+	}
+	throw NO_MAP;
+}
+
+const awe::country awe::game::getArmyCountry(const awe::ArmyID army) const {
+	if (_map) {
+		auto country = _map->getArmyCountry(army);
+		if (country)
+			return *country;
+		else
+			throw std::runtime_error("Could not retrieve the army's country");
+	}
+	throw NO_MAP;
+}
+
+awe::Funds awe::game::getArmyFunds(const awe::ArmyID army) const {
+	if (_map) {
+		auto funds = _map->getArmyFunds(army);
+		if (funds >= 0)
+			return funds;
+		else
+			throw std::runtime_error("Could not retrieve the army's funds");
+	}
+	throw NO_MAP;
+}
+
+bool awe::game::tagCOIsPresent(const awe::ArmyID army) const {
+	if (_map)
+		return _map->tagCOIsPresent(army);
+	else
+		throw NO_MAP;
 }
 
 //////////////////////////////

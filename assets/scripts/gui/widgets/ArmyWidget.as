@@ -17,15 +17,25 @@ enum ArmyWidgetAlignment {
 class ArmyWidget {
 	/**
 	 * Creates the widgets that represent an army panel.
+	 * Defaults to left alignment.
 	 * @param panelName The full name of the panel which contains all of the
 	 *                  other widgets.
 	 */
 	ArmyWidget(const string&in panelName) explicit {
-		addWidget("Panel", panelName);
-		// setWidgetBackgroundColour(panelName, );
-		addWidget("Picture", panelName + ".currentCO");
-		addWidget("Picture", panelName + ".tagCO");
-		addWidget("Label", panelName + ".funds");
+		panel = panelName;
+		addWidget("Panel", panel);
+		setWidgetSize(panel, "200px", "50px");
+
+		currentCO = panelName + ".currentCO";
+		addWidget("Picture", currentCO);
+
+		tagCO = panelName + ".tagCO";
+		addWidget("Picture", tagCO);
+
+		funds = panelName + ".funds";
+		addWidget("Label", funds);
+
+		setAlignment(ArmyWidgetAlignment::Left);
 	}
 
 	/**
@@ -34,12 +44,37 @@ class ArmyWidget {
 	 *               on.
 	 */
 	void update(const uint armyID) {
+		setWidgetBackgroundColour(panel, game.getArmyCountry(armyID).colour);
+
+		Commander currentCommander = game.getArmyCurrentCO(armyID);
+		setWidgetSprite(currentCO, "co", currentCommander.iconName);
+
+		if (game.tagCOIsPresent(armyID)) {
+			Commander tagCommander = game.getArmyTagCO(armyID);
+			setWidgetSprite(tagCO, "co", tagCommander.iconName);
+			setWidgetVisibility(tagCO, true);
+		} else {
+			setWidgetVisibility(tagCO, false);
+		}
+
+		setWidgetText(funds, "~G. " + formatInt(game.getArmyFunds(armyID)));
 	}
 
 	/**
 	 * Configures an army widget to be either left-aligned or right-aligned.
+	 * @param alignment The alignment. If an invalid value is given, an error will
+	 *                  be logged and the widget will not be changed.
 	 */
 	void setAlignment(const ArmyWidgetAlignment alignment) {
+		switch (alignment) {
+			case ArmyWidgetAlignment::Left:
+				break;
+			case ArmyWidgetAlignment::Right:
+				break;
+			default:
+				error("Attempted to set the ArmyWidget \"" + panel + "\"'s "
+					"alignment to " + alignment + ", which is invalid.");
+		}
 	}
 
 	/**

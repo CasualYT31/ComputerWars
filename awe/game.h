@@ -95,58 +95,102 @@ namespace awe {
 		/////////////////////
 
 		/**
-		 * @sa @c awe::map::moveSelectedTileUp().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::moveSelectedTileUp().
 		 */
-		void moveSelectedTileUp() noexcept;
+		void moveSelectedTileUp();
 
 		/**
-		 * @sa @c awe::map::moveSelectedTileDown().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::moveSelectedTileDown().
 		 */
-		void moveSelectedTileDown() noexcept;
+		void moveSelectedTileDown();
 
 		/**
-		 * @sa @c awe::map::moveSelectedTileLeft().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::moveSelectedTileLeft().
 		 */
-		void moveSelectedTileLeft() noexcept;
+		void moveSelectedTileLeft();
 
 		/**
-		 * @sa @c awe::map::moveSelectedTileRight().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::moveSelectedTileRight().
 		 */
-		void moveSelectedTileRight() noexcept;
+		void moveSelectedTileRight();
 
 		/**
-		 * @sa @c awe::map::getSelectedTile().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getSelectedTile().
 		 */
-		sf::Vector2u getSelectedTile() const noexcept;
+		sf::Vector2u getSelectedTile() const;
 
 		/**
-		 * @sa @c awe::map::getUnitOnTile().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getUnitOnTile().
 		 */
-		awe::UnitID getUnitOnTile(const sf::Vector2u tile) const noexcept;
+		awe::UnitID getUnitOnTile(const sf::Vector2u tile) const;
 
 		/**
 		 * Increases the map scaling factor by @c 1.0.
 		 * The map scaling factor does not go above @c 3.0.
-		 * @sa @c awe::map::setMapScalingFactor().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::setMapScalingFactor().
 		 */
-		void zoomIn() noexcept;
+		void zoomIn();
 
 		/**
 		 * Decreases the map scaling factor by @c 1.0.
 		 * The map scaling factor does not go below @c 1.0.
-		 * @sa @c awe::map::setMapScalingFactor().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::setMapScalingFactor().
 		 */
-		void zoomOut() noexcept;
+		void zoomOut();
 
 		/**
-		 * @sa @c awe::map::setSelectedTileByPixel().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::setSelectedTileByPixel().
 		 */
-		void setSelectedTileByPixel(const sf::Vector2i pixel) noexcept;
+		void setSelectedTileByPixel(const sf::Vector2i pixel);
 
 		/**
-		 * @sa @c awe::map::getTileSize().
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getTileSize().
 		 */
-		sf::Vector2u getTileSize() const noexcept;
+		sf::Vector2u getTileSize() const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded, or if the
+		 *                            current CO couldn't be retrieved.
+		 * @sa     @c awe::map::getArmyCurrentCO().
+		 */
+		const awe::commander getArmyCurrentCO(const awe::ArmyID army) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded, or if the
+		 *                            tag CO couldn't be retrieved.
+		 * @sa     @c awe::map::getArmyTagCO().
+		 */
+		const awe::commander getArmyTagCO(const awe::ArmyID army) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded, or if the
+		 *                            country couldn't be retrieved.
+		 * @sa     @c awe::map::getArmyCountry().
+		 */
+		const awe::country getArmyCountry(const awe::ArmyID army) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded, or if the
+		 *                            funds couldn't be retrieved.
+		 * @sa     @c awe::map::getArmyFunds().
+		 */
+		awe::Funds getArmyFunds(const awe::ArmyID army) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::tagCOIsPresent().
+		 */
+		bool tagCOIsPresent(const awe::ArmyID army) const;
 
 		/////////////////////
 		//  END  INTERFACE //

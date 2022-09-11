@@ -487,6 +487,17 @@ namespace sfx {
 			const std::string& h) noexcept;
 
 		/**
+		 * Updates a widget's visibility property.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be changed.
+		 * @param name    The name of the widget to show/hide.
+		 * @param visible \c TRUE if the widget should be shown, \c FALSE if it
+		 *                should be hidden.
+		 */
+		void _setWidgetVisibility(const std::string& name, const bool visible)
+			noexcept;
+
+		/**
 		 * Updates a widget's caption.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no caption will be changed.
