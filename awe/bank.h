@@ -1364,7 +1364,8 @@ template<typename T>
 void awe::bank_id::registerInterface(const std::string& type,
 	asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
-	auto r = engine->RegisterObjectMethod(type.c_str(), "uint32 get_ID() const property",
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"uint32 get_ID() const property",
 		asMETHOD(T, getID), asCALL_THISCALL);
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"string get_scriptName() const property",
@@ -1430,12 +1431,18 @@ void awe::terrain::registerInterface(const std::string& type,
 	auto r = engine->RegisterObjectMethod(type.c_str(),
 		"uint get_maxHP() const property",
 		asMETHOD(T, getMaxHP), asCALL_THISCALL);
-	r = engine->RegisterObjectMethod(type.c_str(), "uint get_defence() const property",
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_defence() const property",
 		asMETHOD(T, getDefence), asCALL_THISCALL);
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"int get_moveCost(const uint) const property",
 		asMETHOD(T, getMoveCost), asCALL_THISCALL);
-	// Do the rest later.
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const String& get_picture(const uint) const property",
+		asMETHOD(T, getPicture), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_isCapturable() const property",
+		asMETHOD(T, isCapturable), asCALL_THISCALL);
 }
 
 template<typename T>
@@ -1446,7 +1453,12 @@ void awe::tile_type::registerInterface(const std::string& type,
 	auto r = engine->RegisterObjectMethod(type.c_str(),
 		"uint get_typeIndex() const property",
 		asMETHOD(T, getTypeIndex), asCALL_THISCALL);
-	// Do the rest later.
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const String& get_ownedTileSprite(const uint) const property",
+		asMETHOD(T, getOwnedTile), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const String& get_neutralTileSprite() const property",
+		asMETHOD(T, getNeutralTile), asCALL_THISCALL);
 }
 
 template<typename T>
@@ -1455,9 +1467,50 @@ void awe::unit_type::registerInterface(const std::string& type,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	awe::common_properties::registerInterface<T>(type, engine, document);
 	auto r = engine->RegisterObjectMethod(type.c_str(),
-		"uint get_movementTypeIndex() const property", asMETHOD(T, getMovementTypeIndex),
-		asCALL_THISCALL);
-	// Do the rest later.
+		"uint get_movementType() const property",
+		asMETHOD(T, getMovementTypeIndex), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const String& get_pictureSprite(const uint) const property",
+		asMETHOD(T, getPicture), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const String& get_unitSprite(const uint) const property",
+		asMETHOD(T, getUnit), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_cost() const property",
+		asMETHOD(T, getCost), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"int get_maxFuel() const property",
+		asMETHOD(T, getMaxFuel), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"int get_maxAmmo() const property",
+		asMETHOD(T, getMaxAmmo), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_movementPoints() const property",
+		asMETHOD(T, getMovementPoints), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_vision() const property",
+		asMETHOD(T, getVision), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_lowerRange() const property",
+		asMETHOD(T, getLowerRange), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_higherRange() const property",
+		asMETHOD(T, getHigherRange), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasInfiniteFuel() const property",
+		asMETHOD(T, hasInfiniteFuel), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasInfiniteAmmo() const property",
+		asMETHOD(T, hasInfiniteAmmo), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_canLoad(const uint) const property",
+		asMETHOD(T, canLoad), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_loadLimit() const property",
+		asMETHOD(T, loadLimit), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"int get_fuelPerTurn() const property",
+		asMETHOD(T, fuelPerTurn), asCALL_THISCALL);
 }
 
 template<typename T>
