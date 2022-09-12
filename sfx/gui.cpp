@@ -964,7 +964,7 @@ void sfx::gui::_setWidgetBorderRadius(const std::string& name, const float radiu
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "panel") {
 			auto panel = _findWidget<Panel>(name);
-			// panel->getRenderer()->setRoundedBorderRadius(radius);
+			panel->getRenderer()->setRoundedBorderRadius(radius);
 		} else {
 			_logger.error("Attempted to set the border radius {} to "
 				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "

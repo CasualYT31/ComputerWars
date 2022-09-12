@@ -25,6 +25,7 @@ class ArmyWidget {
 		panel = panelName;
 		addWidget("Panel", panel);
 		setWidgetSize(panel, "200px", "50px");
+		setWidgetBorderRadius(panel, 25.0);
 
 		currentCO = panelName + ".currentCO";
 		addWidget("Picture", currentCO);
