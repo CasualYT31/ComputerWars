@@ -54,7 +54,6 @@ class ArmyWidget {
 		setWidgetBackgroundColour(panel, game.getArmyCountry(armyID).colour);
 
 		Commander currentCommander = game.getArmyCurrentCO(armyID);
-		info(currentCommander.iconName);
 		setWidgetSprite(currentCO, "co", currentCommander.iconName);
 
 		if (game.tagCOIsPresent(armyID)) {
