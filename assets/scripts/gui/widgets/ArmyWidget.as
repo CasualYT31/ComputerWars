@@ -62,18 +62,20 @@ class ArmyWidget {
 
 	/**
 	 * Configures an army widget to be either left-aligned or right-aligned.
+	 * This method will reposition the panel, as well as everything inside the
+	 * panel, but the panel itself can be repositioned safely after the call.
 	 * @param alignment The alignment. If an invalid value is given, an error will
 	 *                  be logged and the widget will not be changed.
 	 */
 	void setAlignment(const ArmyWidgetAlignment alignment) {
 		switch (alignment) {
-			case ArmyWidgetAlignment::Left:
-				break;
-			case ArmyWidgetAlignment::Right:
-				break;
-			default:
-				error("Attempted to set the ArmyWidget \"" + panel + "\"'s "
-					"alignment to " + alignment + ", which is invalid.");
+		case ArmyWidgetAlignment::Left:
+			break;
+		case ArmyWidgetAlignment::Right:
+			break;
+		default:
+			error("Attempted to set the ArmyWidget \"" + panel + "\"'s alignment "
+				"to " + alignment + ", which is invalid.");
 		}
 	}
 
