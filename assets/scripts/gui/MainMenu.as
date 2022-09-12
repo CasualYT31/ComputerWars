@@ -3,7 +3,11 @@ void MainMenuSetUp() {
 	addWidget("ListBox", "FileSelect");
 	setWidgetPosition("FileSelect", "5px", "5px");
 	setWidgetSize("FileSelect", "200px", "200px");
+}
+
+void MainMenuOpen(const string&in prev) {
 	// Collect a list of available map files and add them to the listbox.
+	clearItems("FileSelect");
 	filesystem cwd;
 	cwd.changeCurrentPath("./map");
 	array<string> files = cwd.getFiles();

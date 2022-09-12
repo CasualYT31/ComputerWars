@@ -12,6 +12,12 @@ void MapMenuSetUp() {
 	setWidgetText("MapMenu.Menu.Quit", "quit");
 }
 
+void MapMenuHandleInput(const dictionary controls) {
+	if (bool(controls["back"])) {
+		setGUI("Map");
+	}
+}
+
 void MapMenu_Save_Pressed() {
 	saveMap();
 	setGUI("Map");

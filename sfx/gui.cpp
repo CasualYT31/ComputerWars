@@ -274,6 +274,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _addItem), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Appends a new item to a widget. The name "
 		"of the widget is given, then the text of the new item.");
+	r = engine->RegisterGlobalFunction("void clearItems(const string& in)",
+		asMETHOD(sfx::gui, _clearItems), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Removes all items from a given widget. "
+		"The name of the widget should be given.");
 	r = engine->RegisterGlobalFunction("string getSelectedItemText(const string& "
 		"in)",
 		asMETHOD(sfx::gui, _getSelectedItemText), asCALL_THISCALL_ASGLOBAL, this);
@@ -368,10 +372,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 		if (_langdict && _langdict->getLanguage() != _lastlang) {
 			_lastlang = _langdict->getLanguage();
 			auto& widgetList = _gui.getWidgets();
-			for (auto& widget : widgetList) {
-				auto w = _gui.get<tgui::Container>(widget->getWidgetName());
-				_translateWidgets(w, widget->getWidgetName().toStdString());
-			}
+			for (auto& widget : widgetList) _translateWidget(widget, "");
 		}
 		std::size_t animatedSprite = 0;
 		_animate(target, scaling, _gui.get<Container>(getGUI()), getGUI(),
@@ -469,9 +470,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 		} else if (type == "ToggleButton") {
 			// auto w = _findWidget<ToggleButton>(widgetName);
 		}
-		// Container types - not all of them are here for future reference.
-		if (type == "ChildWindow" || type == "Grid" || type == "Group" ||
-			type == "RadioButtonGroup" || type == "VerticalLayout") {
+		if (_isContainerWidget(type)) {
 			auto w = _findWidget<Container>(widgetName);
 			_animate(target, scaling, w, widgetName, animatedSprite);
 		}
@@ -479,13 +478,12 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 	}
 }
 
-void sfx::gui::_translateWidgets(tgui::Container::Ptr container,
-	std::string baseName) noexcept {
-	auto& widgetList = container->getWidgets();
-	baseName += ".";
-	for (auto& widget : widgetList) {
-		std::string widgetName = baseName + widget->getWidgetName().toStdString();
-		String type = widget->getWidgetType();
+void sfx::gui::_translateWidget(tgui::Widget::Ptr widget,
+	const std::string& baseName) noexcept {
+	std::string widgetName = baseName + ((baseName.empty()) ? ("") : ("."))
+		+ widget->getWidgetName().toStdString();
+	String type = widget->getWidgetType();
+	if (!_originalStrings[widgetName].empty()) {
 		if (type == "Button") {
 			auto w = _findWidget<Button>(widgetName);
 			w->setText((*_langdict)(_originalStrings[widgetName][0]));
@@ -560,12 +558,11 @@ void sfx::gui::_translateWidgets(tgui::Container::Ptr container,
 			auto w = _findWidget<ToggleButton>(widgetName);
 			w->setText((*_langdict)(_originalStrings[widgetName][0]));
 		}
-		// Container types - not all of them are here for future reference.
-		if (type == "ChildWindow" || type == "Grid" || type == "Group" ||
-			type == "RadioButtonGroup" || type == "VerticalLayout") {
-			auto w = _findWidget<Container>(widgetName);
-			_translateWidgets(w, widgetName);
-		}
+	}
+	if (_isContainerWidget(type)) {
+		auto w = _findWidget<Container>(widgetName);
+		auto& widgetList = w->getWidgets();
+		for (auto& w : widgetList) _translateWidget(w, widgetName);
 	}
 }
 
@@ -607,7 +604,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 			if (_scripts) _scripts->callFunction(m + "SetUp");
 		}
 		// Leave with the current menu being MainMenu.
-		setGUI("MainMenu", false);
+		setGUI("MainMenu", true);
 		return true;
 	} else {
 		return false;
@@ -766,6 +763,14 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	}
 }
 
+bool sfx::gui::_isContainerWidget(const tgui::String& type) noexcept {
+	// Not all of them are here for future reference!
+	return type == "ChildWindow" || type == "Grid" || type == "Group" ||
+		type == "RadioButtonGroup" || type == "VerticalLayout" ||
+		type == "HorizontalLayout" || type == "Panel" ||
+		type == "ScrollablePanel";
+}
+
 void sfx::gui::_setGUI(const std::string& name) noexcept {
 	setGUI(name, true);
 }
@@ -892,11 +897,7 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "bitmapbutton") {
-			_findWidget<BitmapButton>(name)->setText(text);
-		} else if (type == "label") {
-			_findWidget<Label>(name)->setText(text);
-		} else {
+		if (type != "bitmapbutton" && type != "label") {
 			_logger.error("Attempted to set the caption \"{}\" to widget \"{}\" "
 				"which is of type \"{}\", within menu \"{}\". This operation is "
 				"not supported for this type of widget.", text, name, type,
@@ -909,6 +910,9 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 		} else {
 			_originalStrings[fullnameAsString][0] = text;
 		}
+		// Set it by translating it.
+		_translateWidget(widget,
+			fullnameAsString.substr(0, fullnameAsString.rfind('.')));
 	} else {
 		_logger.error("Attempted to set the caption \"{}\" to a widget \"{}\" "
 			"within menu \"{}\". This widget does not exist.", text, name,
@@ -1026,10 +1030,37 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text)
 		}
 		// Store the item's text in the _originalStrings container.
 		_originalStrings[fullnameAsString].push_back(text);
+		// Translate the new item.
+		// We still have to add the new item itself so keep the code above!
+		_translateWidget(widget,
+			fullnameAsString.substr(0, fullnameAsString.rfind('.')));
 	} else {
 		_logger.error("Attempted to add a new item \"{}\" to a widget \"{}\" "
 			"within menu \"{}\". This widget does not exist.", text, name,
 			fullname[0]);
+	}
+}
+
+void sfx::gui::_clearItems(const std::string& name) noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		// Remove all the items differently depending on the type the widget is.
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "listbox") {
+			_findWidget<ListBox>(name)->removeAllItems();
+		} else {
+			_logger.error("Attempted to clear all items from widget \"{}\" which "
+				"is of type \"{}\", within menu \"{}\". This operation is not "
+				"supported for this type of widget.", name, type, fullname[0]);
+			return;
+		}
+		// Clear this widget's entry in the _originalStrings container.
+		_originalStrings[fullnameAsString].clear();
+	} else {
+		_logger.error("Attempted to clear all items from a widget \"{}\" within "
+			"menu \"{}\". This widget does not exist.", name, fullname[0]);
 	}
 }
 

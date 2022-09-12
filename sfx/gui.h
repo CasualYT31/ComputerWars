@@ -319,12 +319,14 @@ namespace sfx {
 			std::size_t& animatedSprite) noexcept;
 
 		/**
-		 * Reapplies all the translations across an entire container.
-		 * @param container Pointer to the container to translate.
-		 * @param baseName  The full name of the container widget.
+		 * Reapplies all the translations to a widget recursively.
+		 * @param container Pointer to the widget to translate.
+		 * @param baseName  The full name of the container containing the given
+		 *                  widget, \b without the final dot. If an entire menu is
+		 *                  given, this needs to be a blank string.
 		 */
-		void _translateWidgets(tgui::Container::Ptr container,
-			std::string baseName) noexcept;
+		void _translateWidget(tgui::Widget::Ptr widget,
+			const std::string& baseName) noexcept;
 
 		/**
 		 * Draws the current GUI menu.
@@ -369,6 +371,13 @@ namespace sfx {
 		 * @param widget The widget whose signals are to be connected.
 		 */
 		void _connectSignals(tgui::Widget::Ptr widget) noexcept;
+
+		/**
+		 * Determines whether or not the given widget type is a container type.
+		 * @param  type The TGUI widget type.
+		 * @return \c TRUE if the widget type is a container, \c FALSE otherwise.
+		 */
+		static inline bool _isContainerWidget(const tgui::String& type) noexcept;
 
 		/**
 		 * Converts a generic widget pointer to a pointer of the correct type for
@@ -561,6 +570,14 @@ namespace sfx {
 		void _addItem(const std::string& name, const std::string& text) noexcept;
 
 		/**
+		 * Clears all items from a widget.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no item will be removed.
+		 * @param name The name of the widget to add the item to.
+		 */
+		void _clearItems(const std::string& name) noexcept;
+
+		/**
 		 * Retrieves the text of the currently selected item of a widget.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and a blank string will be
@@ -672,7 +689,13 @@ typename T::Ptr sfx::gui::_findWidget(std::string name,
 		if (pos != std::string::npos) name = name.substr(pos + 1);
 	} while (pos != std::string::npos);
 	// If group name was not given, insert it.
-	if (!_gui.get<tgui::Group>(names[0])) names.insert(names.begin(), _currentGUI);
+	tgui::Group::Ptr groupPtr = _gui.get<tgui::Group>(names[0]);
+	if (!groupPtr) {
+		names.insert(names.begin(), _currentGUI);
+	} else if (groupPtr && names.size() == 1) {
+		// If the group name is all that was given, then simply return the group.
+		return _gui.get<T>(names[0]);
+	}
 	if (namesList) {
 		namesList->clear();
 		*namesList = names;
