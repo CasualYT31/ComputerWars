@@ -255,9 +255,15 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"the widget is given, then the name of the sprite sheet, then the name of "
 		"the sprite.");
 	r = engine->RegisterGlobalFunction(
-		"void setWidgetBackgroundColour(const string&in, const Colour)",
+		"void setWidgetBackgroundColour(const string&in, const Colour&in)",
 		asMETHOD(sfx::gui, _setWidgetBgColour), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's background colour.");
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetBorderSize(const string&in, const float)",
+		asMETHOD(sfx::gui, _setWidgetBorderSize),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's border size. Applies the "
+		"same size to each side of the widget.");
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetBorderRadius(const string&in, const float)",
 		asMETHOD(sfx::gui, _setWidgetBorderRadius),
@@ -951,6 +957,29 @@ void sfx::gui::_setWidgetBgColour(const std::string& name, const sf::Color& colo
 	} else {
 		_logger.error("Attempted to set the background colour \"{}\" to a widget "
 			"\"{}\" within menu \"{}\". This widget does not exist.", colour, name,
+			fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetBorderSize(const std::string& name, const float size)
+	noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "panel") {
+			auto panel = _findWidget<Panel>(name);
+			panel->getRenderer()->setBorders(size);
+		} else {
+			_logger.error("Attempted to set a border size of {} to widget \"{}\" "
+				"which is of type \"{}\", within menu \"{}\". This operation is "
+				"not supported for this type of widget.", size, name, type,
+				fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set a border size of {} to a widget \"{}\" "
+			"within menu \"{}\". This widget does not exist.", size, name,
 			fullname[0]);
 	}
 }

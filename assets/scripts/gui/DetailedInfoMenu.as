@@ -1,24 +1,32 @@
+/**
+ * Holds names pertaining to each subwidget of the ArmyWidget.
+ */
+ArmyWidget armyWidget;
+
 void setUpArmyPanel(string baseLayout) {
 	baseLayout += ".armyPanel";
 	addWidget("Panel", baseLayout);
+	setWidgetSize(baseLayout, "33.33%", "100%");
 	baseLayout += ".";
-	ArmyWidget armyWidget(baseLayout + "army1");
-	armyWidget.update(0);
+	armyWidget = ArmyWidget(baseLayout + "army1");
 }
 
 void setUpTerrainPanel(string baseLayout) {
-	baseLayout += ".";
-	addWidget("ScrollablePanel", baseLayout + "terrainPanel");
+	baseLayout += ".terrainPanel";
+	addWidget("ScrollablePanel", baseLayout);
+	setWidgetSize(baseLayout, "33.33%", "100%");
 }
 
 void setUpUnitPanel(string baseLayout) {
-	baseLayout += ".";
-	addWidget("ScrollablePanel", baseLayout + "unitPanel");
+	baseLayout += ".unitPanel";
+	addWidget("ScrollablePanel", baseLayout);
+	setWidgetSize(baseLayout, "33.33%", "100%");
 }
 
 void DetailedInfoMenuSetUp() {
-	string baseLayout = "baseLayout";
+	string baseLayout = "DetailedInfoMenu.baseLayout";
 	addWidget("HorizontalLayout", baseLayout);
+	setWidgetSize(baseLayout, "100%", "100%");
 	setUpArmyPanel(baseLayout);
 	setUpTerrainPanel(baseLayout);
 	setUpUnitPanel(baseLayout);
@@ -31,6 +39,7 @@ string previousMenu;
 // displays detailed information on them.
 void DetailedInfoMenuOpen(const string&in previous) {
 	previousMenu = previous;
+	armyWidget.update(0);
 }
 
 void DetailedInfoMenuHandleInput(const dictionary controls) {

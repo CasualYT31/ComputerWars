@@ -16,6 +16,11 @@ enum ArmyWidgetAlignment {
  */
 class ArmyWidget {
 	/**
+	 * Doesn't create any widgets.
+	 */
+	ArmyWidget() {}
+
+	/**
 	 * Creates the widgets that represent an army panel.
 	 * Defaults to left alignment.
 	 * @param panelName The full name of the panel which contains all of the
@@ -25,6 +30,7 @@ class ArmyWidget {
 		panel = panelName;
 		addWidget("Panel", panel);
 		setWidgetSize(panel, "200px", "50px");
+		setWidgetBorderSize(panel, 2.0f);
 		setWidgetBorderRadius(panel, 25.0);
 
 		currentCO = panelName + ".currentCO";
@@ -44,10 +50,11 @@ class ArmyWidget {
 	 * @param armyID The ID of the army on the current map to display information
 	 *               on.
 	 */
-	void update(const uint armyID) {
+	void update(const ArmyID armyID) {
 		setWidgetBackgroundColour(panel, game.getArmyCountry(armyID).colour);
 
 		Commander currentCommander = game.getArmyCurrentCO(armyID);
+		info(currentCommander.iconName);
 		setWidgetSprite(currentCO, "co", currentCommander.iconName);
 
 		if (game.tagCOIsPresent(armyID)) {
@@ -71,6 +78,10 @@ class ArmyWidget {
 	void setAlignment(const ArmyWidgetAlignment alignment) {
 		switch (alignment) {
 		case ArmyWidgetAlignment::Left:
+			setWidgetPosition(panel, "0px", "0px");
+			setWidgetPosition(currentCO, "30px", "5px");
+			setWidgetPosition(tagCO, "30px", "30px");
+			setWidgetPosition(funds, "150px", "5px");
 			break;
 		case ArmyWidgetAlignment::Right:
 			break;

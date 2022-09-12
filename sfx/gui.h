@@ -530,6 +530,17 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Sets a widget's border size.
+		 * Sets each side's border to the same size.\n
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no border size will be set.
+		 * @param name The name of the widget to change.
+		 * @param size The size to set to the widget's border.
+		 */
+		void _setWidgetBorderSize(const std::string& name, const float size)
+			noexcept;
+
+		/**
 		 * Sets a widget's rounded border radius.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no radius will be set.
