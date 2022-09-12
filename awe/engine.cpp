@@ -188,6 +188,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"elapsed.");
 
 	// GameInterface.
+	awe::RegisterGameTypedefs(engine);
 	r = engine->RegisterObjectType("GameInterface", 0,
 		asOBJ_REF | asOBJ_NOHANDLE);
 	document->DocumentObjectType(r, "Provides access to a game of Computer Wars.\n"
@@ -224,7 +225,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Returns the location of the cursor, in "
 		"tiles. The coordinates are 0-based.");
 	r = engine->RegisterObjectMethod("GameInterface", 
-		asUnitID.substr().append(" getUnitOnTile(const Vector2)").c_str(),
+		"UnitID getUnitOnTile(const Vector2)",
 		asMETHOD(awe::game, getUnitOnTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Retrieves the ID of the unit on the "
 		"specified tile. If 0, then the tile is unoccupied.");
@@ -248,28 +249,28 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Gets the minimum pixel size of a tile "
 		"after scaling has been applied.");
 	r = engine->RegisterObjectMethod("GameInterface",
-		"const Commander getArmyCurrentCO(const uint)",
+		"const Commander getArmyCurrentCO(const ArmyID)",
 		asMETHOD(awe::game, getArmyCurrentCO), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the properties of the army's current "
 		"CO.");
 	r = engine->RegisterObjectMethod("GameInterface",
-		"const Commander getArmyTagCO(const uint)",
+		"const Commander getArmyTagCO(const ArmyID)",
 		asMETHOD(awe::game, getArmyTagCO), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the properties of the army's tag CO. "
 		"<b>Warning:</b> if an army doesn't have a tag CO, the game engine will "
 		"throw an exception which will halt script execution! Check if an army "
 		"has a tag CO first using <tt>tagCOIsPresent()</tt>.");
 	r = engine->RegisterObjectMethod("GameInterface",
-		"const Country getArmyCountry(const uint)",
+		"const Country getArmyCountry(const ArmyID)",
 		asMETHOD(awe::game, getArmyCountry), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the properties of the army's "
 		"country.");
 	r = engine->RegisterObjectMethod("GameInterface",
-		"int getArmyFunds(const uint)",
+		"int getArmyFunds(const ArmyID)",
 		asMETHOD(awe::game, getArmyFunds), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets an army's fund count.");
 	r = engine->RegisterObjectMethod("GameInterface",
-		"bool tagCOIsPresent(const uint)",
+		"bool tagCOIsPresent(const ArmyID)",
 		asMETHOD(awe::game, tagCOIsPresent), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns <tt>true</tt> if the specified "
 		"army has a tag CO, <tt>false</tt> in all other cases.");

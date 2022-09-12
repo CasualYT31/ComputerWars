@@ -34,6 +34,11 @@
           "name": "TGUI_BUILD_GUI_BUILDER",
           "value": "False",
           "type": "BOOL"
+        },
+        {
+          "name": "CW_GENERATE_SCRIPT_DOC",
+          "value": "False",
+          "type": "BOOL"
         }
       ]
     },

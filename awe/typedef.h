@@ -29,6 +29,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "sfml/Config.hpp"
+#include "angelscript.h"
+#include <memory>
+#include "docgen.h"
 
 namespace awe {
 	/**
@@ -71,11 +74,6 @@ namespace awe {
 	 * @sa      @c awe::map::_findUnitID()
 	 */
 	typedef sf::Uint32 UnitID;
-	/**
-	 * The AngelScript typedef for a unit ID.
-	 * @sa @c awe::UnitID
-	 */
-	const std::string asUnitID = " uint ";
 
 	/**
 	 * Typedef representing an army ID.
@@ -84,4 +82,10 @@ namespace awe {
 	 * @sa      awe::army::NO_ARMY
 	 */
 	typedef awe::BankID ArmyID;
+
+	/**
+	 * Registers game-related typedefs with a given AngelScript engine, if any of
+	 * them haven't already been registered.
+	 */
+	void RegisterGameTypedefs(asIScriptEngine* engine) noexcept;
 }

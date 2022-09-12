@@ -1311,13 +1311,15 @@ std::size_t awe::bank<T>::size() const noexcept {
 template<typename T>
 void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
-	// 1. Register the value type that this bank stores (i.e. T).
+	// 1. Register the game typedefs to ensure that they are defined.
+	awe::RegisterGameTypedefs(engine);
+	// 2. Register the value type that this bank stores (i.e. T).
 	auto r = engine->RegisterObjectType(_propertyName.c_str(), sizeof(T),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<T>());
 	T::registerInterface<T>(_propertyName, engine, document);
-	// 2. Register a single reference type, called _propertyName + "Bank".
+	// 3. Register a single reference type, called _propertyName + "Bank".
 	const std::string bankTypeName(_propertyName + "Bank"),
-		indexOpIntDecl("const " + _propertyName + " opIndex(uint32)"),
+		indexOpIntDecl("const " + _propertyName + " opIndex(BankID)"),
 		indexOpStrDecl("const " + _propertyName + " opIndex(string)"),
 		globalPropDecl(bankTypeName + " " +
 			tgui::String(_propertyName).toLower().toStdString());
@@ -1332,7 +1334,7 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::bank<T>, _opIndexStr), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Access a game property by its script "
 		"name.");
-	// 3. Register the global point of access to the _propertyName + "Bank" object.
+	// 4. Register the global point of access to the _propertyName + "Bank" object.
 	engine->RegisterGlobalProperty(globalPropDecl.c_str(), this);
 	document->DocumentExpectedFunction(globalPropDecl, "The single point of "
 		"access to the relevant game properties. Declared by the game engine.");
@@ -1372,7 +1374,7 @@ void awe::bank_id::registerInterface(const std::string& type,
 	asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	auto r = engine->RegisterObjectMethod(type.c_str(),
-		"uint get_ID() const property",
+		"BankID get_ID() const property",
 		asMETHOD(T, getID), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the index of this game property.");
 	r = engine->RegisterObjectMethod(type.c_str(),
@@ -1457,12 +1459,12 @@ void awe::terrain::registerInterface(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets the number of defence stars that this "
 		"terrain type has.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"int get_moveCost(const uint) const property",
+		"int get_moveCost(const BankID) const property",
 		asMETHOD(T, getMoveCost), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the movement cost of this terrain "
-		"type, given a unit index.");
+		"type, given a movement type index.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_picture(const uint) const property",
+		"const string& get_picture(const BankID) const property",
 		asMETHOD(T, getPicture), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this terrain type's "
 		"picture, given a country index.");
@@ -1480,12 +1482,12 @@ void awe::tile_type::registerInterface(const std::string& type,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	awe::bank_id::registerInterface<T>(type, engine, document);
 	auto r = engine->RegisterObjectMethod(type.c_str(),
-		"uint get_typeIndex() const property",
+		"BankID get_typeIndex() const property",
 		asMETHOD(T, getTypeIndex), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the index of this tile's terrain "
 		"type.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_ownedTileSprite(const uint) const property",
+		"const string& get_ownedTileSprite(const BankID) const property",
 		asMETHOD(T, getOwnedTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's owned "
 		"tile that is displayed on the map, given a country index.");
@@ -1502,16 +1504,16 @@ void awe::unit_type::registerInterface(const std::string& type,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	awe::common_properties::registerInterface<T>(type, engine, document);
 	auto r = engine->RegisterObjectMethod(type.c_str(),
-		"uint get_movementType() const property",
+		"BankID get_movementType() const property",
 		asMETHOD(T, getMovementTypeIndex), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit's movement type index.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_pictureSprite(const uint) const property",
+		"const string& get_pictureSprite(const BankID) const property",
 		asMETHOD(T, getPicture), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's "
 		"picture, given a country index.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_unitSprite(const uint) const property",
+		"const string& get_unitSprite(const BankID) const property",
 		asMETHOD(T, getUnit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's tile "
 		"graphic that is displayed on the map, given a country index.");
@@ -1554,7 +1556,7 @@ void awe::unit_type::registerInterface(const std::string& type,
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit's maximum ammo "
 		"is less than 0.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool get_canLoad(const uint) const property",
+		"bool get_canLoad(const BankID) const property",
 		asMETHODPR(T, canLoad, (const awe::BankID) const, bool), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit can load another "
 		"type of unit, whose index is given.");

@@ -12,7 +12,8 @@ add_library(${PROJECT_NAME} STATIC
 	"map.cpp"
 	"spritesheets.cpp"
 	"engine.cpp"
-	"game.cpp")
+	"game.cpp"
+	"typedef.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC ${PUBLIC_SOURCE_DIR}
 	${ComputerWarsTransitions_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
