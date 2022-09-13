@@ -1,8 +1,9 @@
 void MainMenuSetUp() {
 	setBackground("", 200, 200, 200, 0);
 	addWidget("ListBox", "FileSelect");
-	setWidgetPosition("FileSelect", "5px", "5px");
-	setWidgetSize("FileSelect", "200px", "200px");
+	setWidgetSize("FileSelect", "50%", "50%");
+	setWidgetPosition("FileSelect", "25%", "50%");
+	setWidgetOrigin("FileSelect", 0.25, 0.5);
 }
 
 void MainMenuOpen(const string&in prev) {

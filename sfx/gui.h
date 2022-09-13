@@ -377,7 +377,7 @@ namespace sfx {
 		 * @param  type The TGUI widget type.
 		 * @return \c TRUE if the widget type is a container, \c FALSE otherwise.
 		 */
-		static inline bool _isContainerWidget(const tgui::String& type) noexcept;
+		static inline bool _isContainerWidget(tgui::String type) noexcept;
 
 		/**
 		 * Converts a generic widget pointer to a pointer of the correct type for
@@ -485,6 +485,17 @@ namespace sfx {
 			const std::string& y) noexcept;
 
 		/**
+		 * Updates a widget's origin.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be updated.
+		 * @param name The name of the widget to update.
+		 * @param x    The new origin to set along the widget's X axis (0.0-1.0).
+		 * @param y    The new origin to set along the widget's Y axis (0.0-1.0).
+		 */
+		void _setWidgetOrigin(const std::string& name, const float x,
+			const float y) noexcept;
+
+		/**
 		 * Updates a widget's size.
 		 * If no widget exists with the given name, then an error will be logged
 		 * and no widget will be resized.
@@ -586,6 +597,15 @@ namespace sfx {
 		 * @return The translated text of the item.
 		 */
 		std::string _getSelectedItemText(const std::string& name) noexcept;
+
+		/**
+		 * Returns the number of widgets within a container.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and 0 will be returned.
+		 * @param  name The name of the container to query.
+		 * @return The number of widgets within the container.
+		 */
+		std::size_t _getWidgetCount(const std::string& name) noexcept;
 
 		//////////
 		// DATA //

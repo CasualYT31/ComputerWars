@@ -6,7 +6,7 @@ ArmyWidget armyWidget;
 void setUpArmyPanel(string baseLayout) {
 	baseLayout += ".armyPanel";
 	addWidget("Panel", baseLayout);
-	setWidgetSize(baseLayout, "33.33%", "100%");
+	setWidgetSize(baseLayout, "33.333%", "100%");
 	baseLayout += ".";
 	armyWidget = ArmyWidget(baseLayout + "army1");
 }
@@ -14,13 +14,13 @@ void setUpArmyPanel(string baseLayout) {
 void setUpTerrainPanel(string baseLayout) {
 	baseLayout += ".terrainPanel";
 	addWidget("ScrollablePanel", baseLayout);
-	setWidgetSize(baseLayout, "33.33%", "100%");
+	setWidgetSize(baseLayout, "33.333%", "100%");
 }
 
 void setUpUnitPanel(string baseLayout) {
 	baseLayout += ".unitPanel";
 	addWidget("ScrollablePanel", baseLayout);
-	setWidgetSize(baseLayout, "33.33%", "100%");
+	setWidgetSize(baseLayout, "33.333%", "100%");
 }
 
 void DetailedInfoMenuSetUp() {

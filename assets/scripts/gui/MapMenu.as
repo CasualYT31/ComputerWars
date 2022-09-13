@@ -1,7 +1,5 @@
 void MapMenuSetUp() {
 	addWidget("VerticalLayout", "Menu");
-	setWidgetPosition("MapMenu.Menu", "(parent.innersize-size)/2", "5px");
-	setWidgetSize("MapMenu.Menu", "25%", "10%");
 
 	addWidget("BitmapButton", "MapMenu.Menu.Save");
 	setWidgetSprite("MapMenu.Menu.Save", "icon", "saveicon");
@@ -10,6 +8,11 @@ void MapMenuSetUp() {
 	addWidget("BitmapButton", "MapMenu.Menu.Quit");
 	setWidgetSprite("MapMenu.Menu.Quit", "icon", "quiticon");
 	setWidgetText("MapMenu.Menu.Quit", "quit");
+	
+	string height = formatUInt(getWidgetCount("MapMenu.Menu") * 25) + "px";
+	setWidgetSize("MapMenu.Menu", "25%", height);
+	setWidgetPosition("MapMenu.Menu", "50%", "10px");
+	setWidgetOrigin("MapMenu.Menu", 0.5, 0.0);
 }
 
 void MapMenuHandleInput(const dictionary controls) {

@@ -228,60 +228,84 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"the name of the new widget is a full name, it will be added in the "
 		"specified container. If it is not a full name, it will be added to the "
 		"current menu.");
-	r = engine->RegisterGlobalFunction("void setWidgetPosition(const string& in, "
-		"const string& in, const string& in)",
+
+	r = engine->RegisterGlobalFunction("void setWidgetPosition(const string&in, "
+		"const string&in, const string&in)",
 		asMETHOD(sfx::gui, _setWidgetPosition), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's position. The name of "
 		"the widget is given, then the X position, then the Y position.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetOrigin(const string&in, "
+		"const float, const float)",
+		asMETHOD(sfx::gui, _setWidgetOrigin), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's origin. The name of "
+		"the widget is given first. Then the new origin is given: along the X "
+		"axis, and then along the Y axis. Each origin is a value between 0 and 1, "
+		"and represents a percentage, from left/top to right/bottom.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetSize(const string& in, "
 		"const string& in, const string& in)",
 		asMETHOD(sfx::gui, _setWidgetSize), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's size. The name of the "
 		"widget is given, then the width, then the height.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetVisibility(const string&in, "
 		"const bool)",
 		asMETHOD(sfx::gui, _setWidgetVisibility), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's visibility. The name of "
 		"the widget is given, then if it should be visible or not.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetText(const string& in, "
 		"const string& in)",
 		asMETHOD(sfx::gui, _setWidgetText), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's text. The name of the "
 		"widget is given, then its new text.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetSprite(const string& in, "
 		"const string& in, const string& in)",
 		asMETHOD(sfx::gui, _setWidgetSprite), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's sprite. The name of "
 		"the widget is given, then the name of the sprite sheet, then the name of "
 		"the sprite.");
+
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetBackgroundColour(const string&in, const Colour&in)",
 		asMETHOD(sfx::gui, _setWidgetBgColour), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's background colour.");
+
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetBorderSize(const string&in, const float)",
 		asMETHOD(sfx::gui, _setWidgetBorderSize),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's border size. Applies the "
 		"same size to each side of the widget.");
+
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetBorderRadius(const string&in, const float)",
 		asMETHOD(sfx::gui, _setWidgetBorderRadius),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's rounded border radius.");
+
 	r = engine->RegisterGlobalFunction("void addItem(const string& in, const "
 		"string& in)",
 		asMETHOD(sfx::gui, _addItem), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Appends a new item to a widget. The name "
 		"of the widget is given, then the text of the new item.");
+
 	r = engine->RegisterGlobalFunction("void clearItems(const string& in)",
 		asMETHOD(sfx::gui, _clearItems), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Removes all items from a given widget. "
 		"The name of the widget should be given.");
+
 	r = engine->RegisterGlobalFunction("string getSelectedItemText(const string& "
 		"in)",
 		asMETHOD(sfx::gui, _getSelectedItemText), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's selected item's text.");
+
+	r = engine->RegisterGlobalFunction("uint getWidgetCount(const string&in)",
+		asMETHOD(sfx::gui, _getWidgetCount), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets the number of widgets that are in "
+		"the specified container. Does not count recursively.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callOpen) noexcept {
@@ -375,8 +399,16 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 			for (auto& widget : widgetList) _translateWidget(widget, "");
 		}
 		std::size_t animatedSprite = 0;
-		_animate(target, scaling, _gui.get<Container>(getGUI()), getGUI(),
-			animatedSprite);
+		// Update the menu's scaling factor.
+		// We also need to update the size of the group container, as percentage
+		// calculations made within the script setWidgetSize() calls will be off
+		// otherwise.
+		auto menu = _gui.get<Container>(getGUI());
+		menu->setScale((float)scaling);
+		tgui::String percentage(100.0f / (float)scaling);
+		percentage += "%";
+		menu->setSize(percentage);
+		_animate(target, scaling, menu, getGUI(), animatedSprite);
 	}
 
 	return false;
@@ -385,6 +417,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 	tgui::Container::Ptr container, std::string baseName,
 	std::size_t& animatedSprite) noexcept {
+	// Animate each widget.
 	auto& widgetList = container->getWidgets();
 	baseName += ".";
 	for (auto& widget : widgetList) {
@@ -567,12 +600,12 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget,
 }
 
 void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	// draw background
+	// Draw background.
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		// this GUI has a background to animate
 		target.draw(_guiBackground.at(getGUI()), states);
 	}
-	// draw foreground
+	// Draw foreground.
 	_gui.draw();
 }
 
@@ -763,12 +796,13 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
 	}
 }
 
-bool sfx::gui::_isContainerWidget(const tgui::String& type) noexcept {
+bool sfx::gui::_isContainerWidget(tgui::String type) noexcept {
+	type = type.trim().toLower();
 	// Not all of them are here for future reference!
-	return type == "ChildWindow" || type == "Grid" || type == "Group" ||
-		type == "RadioButtonGroup" || type == "VerticalLayout" ||
-		type == "HorizontalLayout" || type == "Panel" ||
-		type == "ScrollablePanel";
+	return type == "childwindow" || type == "grid" || type == "group" ||
+		type == "radiobuttongroup" || type == "verticallayout" ||
+		type == "horizontallayout" || type == "panel" ||
+		type == "scrollablepanel";
 }
 
 void sfx::gui::_setGUI(const std::string& name) noexcept {
@@ -860,6 +894,19 @@ void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,
 		widget->setPosition(x.c_str(), y.c_str());
 	} else {
 		_logger.error("Attempted to set the position (\"{}\",\"{}\") to a widget "
+			"\"{}\" within menu \"{}\". This widget does not exist.", x, y, name,
+			fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetOrigin(const std::string& name, const float x,
+	const float y) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		widget->setOrigin(x, y);
+	} else {
+		_logger.error("Attempted to set the origin (\"{}\",\"{}\") to a widget "
 			"\"{}\" within menu \"{}\". This widget does not exist.", x, y, name,
 			fullname[0]);
 	}
@@ -1085,4 +1132,25 @@ std::string sfx::gui::_getSelectedItemText(const std::string& name) noexcept {
 			fullname[0]);
 	}
 	return "";
+}
+
+std::size_t sfx::gui::_getWidgetCount(const std::string& name) noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		// Get the item text differently depending on the type the widget is.
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (_isContainerWidget(type)) {
+			return _findWidget<Container>(name)->getWidgets().size();
+		} else {
+			_logger.error("Attempted to get the widget count of a widget \"{}\" "
+				"which is of type \"{}\", within menu \"{}\". This operation is "
+				"not supported for this type of widget.", name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to get the widget count of a widget \"{}\" "
+			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
+	}
+	return 0;
 }
