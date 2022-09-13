@@ -29,9 +29,9 @@ class ArmyWidget {
 	ArmyWidget(const string&in panelName) explicit {
 		panel = panelName;
 		addWidget("Panel", panel);
-		setWidgetSize(panel, "200px", "50px");
-		setWidgetBorderSize(panel, 2.0f);
-		setWidgetBorderRadius(panel, 25.0);
+		setWidgetSize(panel, "200px", "60px");
+		setWidgetBorderSize(panel, 2.0);
+		setWidgetBorderRadius(panel, 30.0);
 
 		currentCO = panelName + ".currentCO";
 		addWidget("Picture", currentCO);
@@ -78,9 +78,9 @@ class ArmyWidget {
 		switch (alignment) {
 		case ArmyWidgetAlignment::Left:
 			setWidgetPosition(panel, "0px", "0px");
-			setWidgetPosition(currentCO, "30px", "5px");
-			setWidgetPosition(tagCO, "30px", "30px");
-			setWidgetPosition(funds, "150px", "5px");
+			setWidgetPosition(currentCO, "10px", "5px");
+			setWidgetPosition(tagCO, "10px", "30px");
+			setWidgetPosition(funds, "100px", "5px");
 			break;
 		case ArmyWidgetAlignment::Right:
 			break;
