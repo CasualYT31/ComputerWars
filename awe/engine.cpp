@@ -188,7 +188,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"elapsed.");
 
 	// GameInterface.
-	awe::RegisterGameTypedefs(engine);
+	awe::RegisterGameTypedefs(engine, document);
 	r = engine->RegisterObjectType("GameInterface", 0,
 		asOBJ_REF | asOBJ_NOHANDLE);
 	document->DocumentObjectType(r, "Provides access to a game of Computer Wars.\n"

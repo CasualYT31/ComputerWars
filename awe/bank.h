@@ -1312,7 +1312,7 @@ template<typename T>
 void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	// 1. Register the game typedefs to ensure that they are defined.
-	awe::RegisterGameTypedefs(engine);
+	awe::RegisterGameTypedefs(engine, document);
 	// 2. Register the value type that this bank stores (i.e. T).
 	auto r = engine->RegisterObjectType(_propertyName.c_str(), sizeof(T),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<T>());
