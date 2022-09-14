@@ -1,9 +1,9 @@
 {
 	"PLAINS": {
-		"longname": "Plains",
+		"longname": "PLAINS_longname",
 		"shortname": "PLAINS_shortname",
 		"icon": "",
-		"description": "A rich, green plain. Easy to traverse, but offers little defensive cover.",
+		"description": "PLAINS_description",
 		"hp": 0,
 		"defence": 1,
 		"movecosts": [ 1, 1, 2, 1, 1, -1, -1, -1, 1 ],
@@ -11,10 +11,10 @@
 		"capturable": false
 	},
 	"SEA": {
-		"longname": "Sea",
+		"longname": "SEA_longname",
 		"shortname": "SEA_shortname",
 		"icon": "",
-		"description": "A body of water. Only naval and air units can traverse seas.",
+		"description": "SEA_description",
 		"hp": 0,
 		"defence": 0,
 		"movecosts": [ -1, -1, -1, -1, 1, -1, 1, 1, -1 ],
@@ -22,10 +22,10 @@
 		"capturable": false
 	},
 	"ROAD": {
-		"longname": "Road",
+		"longname": "ROAD_longname",
 		"shortname": "ROAD_shortname",
 		"icon": "",
-		"description": "A paved road. Easy to traverse, but offers little protection.",
+		"description": "ROAD_description",
 		"hp": 0,
 		"defence": 0,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
@@ -33,10 +33,10 @@
 		"capturable": false
 	},
 	"BRIDGE": {
-		"longname": "Bridge",
+		"longname": "BRIDGE_longname",
 		"shortname": "BRIDGE_shortname",
 		"icon": "",
-		"description": "A paved road. Easy to traverse, but offers little protection.",
+		"description": "BRIDGE_description",
 		"hp": 0,
 		"defence": 0,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
@@ -44,10 +44,10 @@
 		"capturable": false
 	},
 	"MOUNTAIN": {
-		"longname": "Mountain",
+		"longname": "MOUNTAIN_longname",
 		"shortname": "MOUNTAIN_shortname",
 		"icon": "",
-		"description": "A steep mountain. Infantry units add 3 to their vision range from here.",
+		"description": "MOUNTAIN_description",
 		"hp": 0,
 		"defence": 4,
 		"movecosts": [ 2, 1, -1, -1, 1, -1, -1, -1, 1 ],
@@ -55,10 +55,10 @@
 		"capturable": false
 	},
 	"WOODS": {
-		"longname": "Woods",
+		"longname": "WOODS_longname",
 		"shortname": "WOODS_shortname",
 		"icon": "",
-		"description": "In Fog of War, units hidden here can only be seen by adjacent units and air units.",
+		"description": "WOODS_description",
 		"hp": 0,
 		"defence": 2,
 		"movecosts": [ 1, 1, 3, 2, 1, -1, -1, -1, 1 ],
@@ -66,10 +66,10 @@
 		"capturable": false
 	},
 	"RIVER": {
-		"longname": "River",
+		"longname": "RIVER_longname",
 		"shortname": "RIVER_shortname",
 		"icon": "",
-		"description": "A gentle flowing river. Only infantry units can ford rivers.",
+		"description": "RIVER_description",
 		"hp": 0,
 		"defence": 0,
 		"movecosts": [ 1, 1, -1, -1, 1, -1, -1, -1, 1 ],
@@ -77,10 +77,10 @@
 		"capturable": false
 	},
 	"REEF": {
-		"longname": "Reef",
+		"longname": "REEF_longname",
 		"shortname": "REEF_shortname",
 		"icon": "",
-		"description": "In Fog of War, units hidden here can only be seen by adjacent units and air units.",
+		"description": "REEF_description",
 		"hp": 0,
 		"defence": 1,
 		"movecosts": [ -1, -1, -1, -1, 1, -1, 2, 2, -1 ],
@@ -88,10 +88,10 @@
 		"capturable": false
 	},
 	"SHOAL": {
-		"longname": "Shoal",
+		"longname": "SHOAL_longname",
 		"shortname": "SHOAL_shortname",
 		"icon": "",
-		"description": "A sandy shoal. Lander units load and unload units here.",
+		"description": "SHOAL_description",
 		"hp": 0,
 		"defence": 0,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, 1, 1 ],
@@ -99,10 +99,10 @@
 		"capturable": false
 	},
 	"PIPE": {
-		"longname": "Pipe",
+		"longname": "PIPE_longname",
 		"shortname": "PIPE_shortname",
 		"icon": "",
-		"description": "A Black Hole pipeline. Thick armour renders it indestructible. No units can pass it.",
+		"description": "PIPE_description",
 		"hp": 0,
 		"defence": 0,
 		"movecosts": [ -1, -1, -1, -1, -1, 1, -1, -1, -1 ],
@@ -110,10 +110,10 @@
 		"capturable": false
 	},
 	"PIPESEAM": {
-		"longname": "Pipe Seam",
+		"longname": "PIPESEAM_longname",
 		"shortname": "PIPESEAM_shortname",
 		"icon": "",
-		"description": "A Black Hole pipeline. The armor is weaker here than on other sections of the pipe.",
+		"description": "PIPESEAM_description",
 		"hp": 99,
 		"defence": 0,
 		"movecosts": [ -1, -1, -1, -1, -1, 1, -1, -1, -1 ],
@@ -121,10 +121,10 @@
 		"capturable": false
 	},
 	"MISSILESILO": {
-		"longname": "Missile Silo",
+		"longname": "MISSILESILO_longname",
 		"shortname": "MISSILESILO_shortname",
 		"icon": "",
-		"description": "A missile silo. Has a huge blast radius & unlimited range, but it can only fire once.",
+		"description": "MISSILESILO_description",
 		"hp": 0,
 		"defence": 3,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
@@ -132,10 +132,10 @@
 		"capturable": false
 	},
 	"CITY": {
-		"longname": "City",
+		"longname": "CITY_longname",
 		"shortname": "CITY_shortname",
 		"icon": "",
-		"description": "A normal city. Ground units gain supplies and HP in allied cities.",
+		"description": "CITY_description",
 		"hp": 20,
 		"defence": 3,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
@@ -143,10 +143,10 @@
 		"capturable": true
 	},
 	"BASE": {
-		"longname": "Base",
+		"longname": "BASE_longname",
 		"shortname": "BASE_shortname",
 		"icon": "",
-		"description": "A base. Allied bases deploy, supply, and restore HP to ground units.",
+		"description": "BASE_description",
 		"hp": 20,
 		"defence": 3,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
@@ -154,10 +154,10 @@
 		"capturable": true
 	},
 	"AIRPORT": {
-		"longname": "Airport",
+		"longname": "AIRPORT_longname",
 		"shortname": "AIRPORT_shortname",
 		"icon": "",
-		"description": "An air base. Allied bases deploy, supply, and restore HP to air units.",
+		"description": "AIRPORT_description",
 		"hp": 20,
 		"defence": 3,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
@@ -165,21 +165,21 @@
 		"capturable": true
 	},
 	"PORT": {
-		"longname": "Port",
+		"longname": "PORT_longname",
 		"shortname": "PORT_shortname",
 		"icon": "",
-		"description": "A naval base. Allied bases deploy, supply and restore HP to naval units.",
+		"description": "PORT_description",
 		"hp": 20,
 		"defence": 3,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
+		"movecosts": [ 1, 1, 1, 1, 1, -1, 1, 1, 1 ],
 		"pictures": [ "" ],
 		"capturable": true
 	},
 	"COMTOWER": {
-		"longname": "COM Tower",
+		"longname": "COMTOWER_longname",
 		"shortname": "COMTOWER_shortname",
 		"icon": "",
-		"description": "Controlling a tower will grant all units you control +10% attack.",
+		"description": "COMTOWER_description",
 		"hp": 20,
 		"defence": 3,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
@@ -187,10 +187,10 @@
 		"capturable": true
 	},
 	"LAB": {
-		"longname": "Lab",
+		"longname": "LAB_longname",
 		"shortname": "LAB_shortname",
 		"icon": "",
-		"description": "Similar to an HQ. A place where units are designed and developed.",
+		"description": "LAB_description",
 		"hp": 20,
 		"defence": 3,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
@@ -198,10 +198,10 @@
 		"capturable": true
 	},
 	"VOLCANO": {
-		"longname": "Volcano",
+		"longname": "VOLCANO_longname",
 		"shortname": "VOLCANO_shortname",
 		"icon": "",
-		"description": "A dangerous volcano that spews out molten magma on a daily basis.",
+		"description": "VOLCANO_description",
 		"hp": 0,
 		"defence": 0,
 		"movecosts": [ -1, -1, -1, -1, -1, -1, -1, -1, -1 ],
@@ -209,10 +209,10 @@
 		"capturable": false
 	},
 	"HQ": {
-		"longname": "Headquarters",
+		"longname": "HQ_longname",
 		"shortname": "HQ_shortname",
 		"icon": "",
-		"description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",
+		"description": "HQ_description",
 		"hp": 20,
 		"defence": 4,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],

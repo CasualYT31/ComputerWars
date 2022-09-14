@@ -1,47 +1,56 @@
 {
-	"INFANTRY": {"longname": "Infantry",
-		"shortname": "Inftry",
+	"INFANTRY": {
+		"longname": "INFANTRY_MOVEMENT_longname",
+		"shortname": "INFANTRY_MOVEMENT_shortname",
 		"icon": "",
-		"description": "Infantry movement type."
+		"description": "INFANTRY_MOVEMENT_description"
 	},
-	"MECH": {"longname": "Mech",
-		"shortname": "Mech",
+	"MECH": {
+		"longname": "MECH_MOVEMENT_longname",
+		"shortname": "MECH_MOVEMENT_shortname",
 		"icon": "",
-		"description": "Mech movement type."
+		"description": "MECH_MOVEMENT_description"
 	},
-	"TIRES": {"longname": "Tires",
-		"shortname": "Tires",
+	"TIRES": {
+		"longname": "TIRES_MOVEMENT_longname",
+		"shortname": "TIRES_MOVEMENT_shortname",
 		"icon": "",
-		"description": "This unit uses tires to move."
+		"description": "TIRES_MOVEMENT_description"
 	},
-	"TREAD": {"longname": "Tread",
-		"shortname": "Tread",
+	"TREAD": {
+		"longname": "TREAD_MOVEMENT_shortname",
+		"shortname": "TREAD_MOVEMENT_longname",
 		"icon": "",
-		"description": "This unit uses treads to move."
+		"description": "TREAD_MOVEMENT_description"
 	},
-	"AIR": {"longname": "Air",
-		"shortname": "Air",
+	"AIR": {
+		"longname": "AIR_MOVEMENT_longname",
+		"shortname": "AIR_MOVEMENT_shortname",
 		"icon": "",
-		"description": "This unit flies through the air."
+		"description": "AIR_MOVEMENT_description"
 	},
-	"PIPELINE": {"longname": "Pipeline",
-		"shortname": "Pipe",
+	"PIPELINE": {
+		"longname": "PIPELINE_MOVEMENT_longname",
+		"shortname": "PIPELINE_MOVEMENT_shortname",
 		"icon": "",
-		"description": "This unit moves along pipes."
+		"description": "PIPELINE_MOVEMENT_description"
 	},
-	"SHIPS": {"longname": "Ships",
-		"shortname": "Ships",
+	"SHIPS": {
+		"longname": "SHIPS_MOVEMENT_longname",
+		"shortname": "SHIPS_MOVEMENT_shortname",
 		"icon": "",
-		"description": "This unit sails through sea."
+		"description": "SHIPS_MOVEMENT_description"
 	},
-	"TRANSPORT": {"longname": "Transport",
-		"shortname": "Trans",
+	"TRANSPORT": {
+		"longname": "TRANSPORT_MOVEMENT_longname",
+		"shortname": "TRANSPORT_MOVEMENT_shortname",
 		"icon": "",
-		"description": "This unit can stop at shoals."
+		"description": "TRANSPORT_MOVEMENT_description"
 	},
-	"SLIME": {"longname": "Slime",
-		"shortname": "Slime",
+	"SLIME": {
+		"longname": "SLIME_MOVEMENT_longname",
+		"shortname": "SLIME_MOVEMENT_shortname",
 		"icon": "",
-		"description": "This unit is made out of slime."
+		"description": "SLIME_MOVEMENT_description"
 	}
 }

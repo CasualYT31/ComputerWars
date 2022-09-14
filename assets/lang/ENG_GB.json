@@ -5,46 +5,122 @@
 	"save": "Save",
 	"quit": "Quit",
 
+	"INFANTRY_MOVEMENT_longname": "Infantry",
+	"INFANTRY_MOVEMENT_shortname": "Inftry",
+	"INFANTRY_MOVEMENT_description": "Infantry movement type.",
+
+	"MECH_MOVEMENT_longname": "Mech",
+	"MECH_MOVEMENT_shortname": "Mech",
+	"MECH_MOVEMENT_description": "Mech movement type.",
+
+	"TIRES_MOVEMENT_longname": "Tires",
+	"TIRES_MOVEMENT_shortname": "Tires",
+	"TIRES_MOVEMENT_description": "This unit uses tires to move.",
+
+	"TREAD_MOVEMENT_longname": "Tread",
+	"TREAD_MOVEMENT_shortname": "Tread",
+	"TREAD_MOVEMENT_description": "This unit uses treads to move.",
+
+	"AIR_MOVEMENT_longname": "Air",
+	"AIR_MOVEMENT_shortname": "Air",
+	"AIR_MOVEMENT_description": "This unit flies through the air.",
+
+	"PIPELINE_MOVEMENT_longname": "Pipeline",
+	"PIPELINE_MOVEMENT_shortname": "Pipe",
+	"PIPELINE_MOVEMENT_description": "This unit moves along pipes.",
+
+	"SHIPS_MOVEMENT_longname": "Ships",
+	"SHIPS_MOVEMENT_shortname": "Ships",
+	"SHIPS_MOVEMENT_description": "This unit sails through the sea.",
+
+	"TRANSPORT_MOVEMENT_longname": "Transport",
+	"TRANSPORT_MOVEMENT_shortname": "Trans",
+	"TRANSPORT_MOVEMENT_description": "This unit can stop at shoals.",
+
+	"SLIME_MOVEMENT_longname": "Slime",
+	"SLIME_MOVEMENT_shortname": "Slime",
+	"SLIME_MOVEMENT_description": "This unit is made out of slime.",
+
+	"PLAINS_longname": "Plains",
 	"PLAINS_shortname": "Plns",
+	"PLAINS_description": "A rich, green plain. Easy to traverse, but offers little defensive cover.",
 
+	"SEA_longname": "Sea",
 	"SEA_shortname": "Sea",
+	"SEA_description": "A body of water. Only naval and air units can traverse seas.",
 
+	"ROAD_longname": "Road",
 	"ROAD_shortname": "Road",
+	"ROAD_description": "A paved road. Easy to traverse, but offers little protection.",
 
+	"BRIDGE_longname": "Bridge",
 	"BRIDGE_shortname": "Brdg",
+	"BRIDGE_description": "A paved road. Easy to traverse, but offers little protection.",
 
+	"MOUNTAIN_longname": "Mountain",
 	"MOUNTAIN_shortname": "Mont",
+	"MOUNTAIN_description": "A steep mountain. Infantry units add 3 to their vision range from here.",
 
+	"WOODS_longname": "Woods",
 	"WOODS_shortname": "Wood",
+	"WOODS_description": "In Fog of War, units hidden here can only be seen by adjacent units.",
 
+	"RIVER_longname": "River",
 	"RIVER_shortname": "Rivr",
+	"RIVER_description": "A gentle flowing river. Only infantry units can ford rivers.",
 
+	"REEF_longname": "Reef",
 	"REEF_shortname": "Reef",
+	"REEF_description": "In Fog of War, units hidden here can only be seen by adjacent units.",
 
+	"SHOAL_longname": "Shoal",
 	"SHOAL_shortname": "Shol",
+	"SHOAL_description": "A sandy shoal. Lander units load and unload units here.",
 
+	"PIPE_longname": "Pipe",
 	"PIPE_shortname": "Pipe",
+	"PIPE_description": "A Black Hole pipeline. Thick armour renders it indestructible. No units can pass it.",
 
+	"PIPESEAM_longname": "Pipe Seam",
 	"PIPESEAM_shortname": "Seam",
+	"PIPESEAM_description": "A Black Hole pipeline. The armor is weaker here than on other sections of the pipe.",
 
+	"MISSILESILO_longname": "Missile Silo",
 	"MISSILESILO_shortname": "Silo",
+	"MISSILESILO_description": "A missile silo. Has a huge blast radius & unlimited range, but it can only fire once.",
 
+	"CITY_longname": "City",
 	"CITY_shortname": "City",
+	"CITY_description": "A normal city. Ground units gain supplies and HP in allied cities.",
 
+	"BASE_longname": "Base",
 	"BASE_shortname": "Base",
+	"BASE_description": "A base. Allied bases deploy, supply, and restore HP to ground units.",
 
+	"AIRPORT_longname": "Airport",
 	"AIRPORT_shortname": "Arpt",
+	"AIRPORT_description": "An air base. Allied bases deploy, supply, and restore HP to air units.",
 
+	"PORT_longname": "Port",
 	"PORT_shortname": "Port",
+	"PORT_description": "A naval base. Allied bases deploy, supply and restore HP to naval units.",
 
+	"COMTOWER_longname": "COM Tower",
 	"COMTOWER_shortname": "COM",
+	"COMTOWER_description": "Controlling a tower will grant all units you control +10% attack.",
 
+	"LAB_longname": "Lab",
 	"LAB_shortname": "Lab",
+	"LAB_description": "Similar to an HQ. A place where units are designed and developed.",
 
+	"VOLCANO_longname": "Volcano",
 	"VOLCANO_shortname": "Vlcn",
+	"VOLCANO_description": "A dangerous volcano that spews out molten magma on a daily basis.",
 
+	"HQ_longname": "Headquarters",
 	"HQ_shortname": "HQ",
-	
+	"HQ_description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",
+
 	"INFANTRY_shortname": "Inft",
 
 	"MECH_shortname": "Mech",
