@@ -408,15 +408,14 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 		tgui::String percentage(100.0f / (float)scaling);
 		percentage += "%";
 		menu->setSize(percentage);
-		_animate(target, scaling, menu, getGUI(), animatedSprite);
+		_animate(target, scaling, menu, getGUI());
 	}
 
 	return false;
 }
 
 void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
-	tgui::Container::Ptr container, std::string baseName,
-	std::size_t& animatedSprite) noexcept {
+	tgui::Container::Ptr container, std::string baseName) noexcept {
 	// Animate each widget.
 	auto& widgetList = container->getWidgets();
 	baseName += ".";
@@ -432,30 +431,28 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 			} else {
 				std::shared_ptr<sfx::animated_spritesheet> sheet =
 					_sheet[_guiSpriteKeys[widgetName].first];
-				if (animatedSprite == _widgetSprites.size()) {
+				if (_widgetSprites.find(widgetName) == _widgetSprites.end()) {
 					// Animated sprite for this widget doesn't exist yet, so
 					// allocate it.
-					_widgetSprites.emplace_back(
-						sheet, _guiSpriteKeys[widgetName].second
-					);
+					_widgetSprites.insert({ widgetName, sfx::animated_sprite(sheet,
+						_guiSpriteKeys[widgetName].second) });
 				}
-				_widgetSprites[animatedSprite].animate(target, scaling);
+				_widgetSprites[widgetName].animate(target, scaling);
 				try {
 					auto iRect = sheet->getFrameRect(
-						_widgetSprites[animatedSprite].getSprite(),
-						_widgetSprites[animatedSprite].getCurrentFrame()
+						_widgetSprites[widgetName].getSprite(),
+						_widgetSprites[widgetName].getCurrentFrame()
 					);
 					tgui::UIntRect rect;
 					rect.left = iRect.left;
 					rect.top = iRect.top;
 					rect.width = iRect.width;
 					rect.height = iRect.height;
-					_widgetPictures.emplace_back();
-					_widgetPictures.back().load(sheet->getTexture(), rect);
+					_widgetPictures[widgetName].load(sheet->getTexture(), rect);
 				} catch (std::out_of_range&) {
 					updateTexture = false;
 					// Remove widget's sprite if its picture couldn't be allocated.
-					_widgetSprites.pop_back();
+					_widgetSprites.erase(widgetName);
 				}
 			}
 		}
@@ -464,7 +461,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 			// auto w = _findWidget<Button>(widgetName);
 		} else if (type == "BitmapButton") {
 			auto w = _findWidget<BitmapButton>(widgetName);
-			if (updateTexture) w->setImage(_widgetPictures[animatedSprite]);
+			if (updateTexture) w->setImage(_widgetPictures[widgetName]);
 		} else if (type == "CheckBox") {
 			// auto w = _findWidget<CheckBox>(widgetName);
 		} else if (type == "ChildWindow") {
@@ -485,7 +482,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 			auto w = _findWidget<Picture>(widgetName);
 			if (updateTexture) {
 				auto newRenderer = tgui::PictureRenderer();
-				newRenderer.setTexture(_widgetPictures[animatedSprite]);
+				newRenderer.setTexture(_widgetPictures[widgetName]);
 				w->setRenderer(newRenderer.getData());
 			}
 		} else if (type == "MenuBar") {
@@ -505,9 +502,8 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 		}
 		if (_isContainerWidget(type)) {
 			auto w = _findWidget<Container>(widgetName);
-			_animate(target, scaling, w, widgetName, animatedSprite);
+			_animate(target, scaling, w, widgetName);
 		}
-		animatedSprite++;
 	}
 }
 

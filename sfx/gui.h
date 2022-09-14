@@ -70,11 +70,7 @@ namespace sfx {
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
 		 * GUI functions with a \c scripts object.
-		 * @warning Do not allow scripts to destroy widgets! At least not widgets
-		 *          from the current GUI. This is because my animated sprite code
-		 *          for BitmapButtons and Pictures relies on the order of widget
-		 *          retrieval to remain the same.
-		 * @sa      \c engine::scripts::registerInterface()
+		 * @sa \c engine::scripts::registerInterface()
 		 */
 		void registerInterface(asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
@@ -307,16 +303,13 @@ namespace sfx {
 
 		/**
 		 * Performs animation calculations on a container of widgets.
-		 * @param target         The target which the GUI will be drawn to later.
-		 * @param scaling        Scaling factor which will be applied when drawing.
-		 * @param container      Pointer to the container widget.
-		 * @param baseName       The name of the container widget.
-		 * @param animatedSprite Counter which keeps track of which animated sprite
-		 *                       from the internal vector to work with.
+		 * @param target    The target which the GUI will be drawn to later.
+		 * @param scaling   Scaling factor which will be applied when drawing.
+		 * @param container Pointer to the container widget.
+		 * @param baseName  The name of the container widget.
 		 */
 		void _animate(const sf::RenderTarget& target, const double scaling,
-			tgui::Container::Ptr container, std::string baseName,
-			std::size_t& animatedSprite) noexcept;
+			tgui::Container::Ptr container, std::string baseName) noexcept;
 
 		/**
 		 * Reapplies all the translations to a widget recursively.
@@ -650,14 +643,14 @@ namespace sfx {
 		 * Stores a list of TGUI textures to draw with the animated widgets.
 		 * Cleared and refilled upon every call to \c animate().
 		 */
-		std::vector<tgui::Texture> _widgetPictures;
+		std::unordered_map<std::string, tgui::Texture> _widgetPictures;
 
 		/**
 		 * Stores a list of animated sprites associated with each animated widget.
 		 * Cleared upon a call to \c setGUI(). Refilled once upon the first call to
 		 * \c animate() since \c setGUI() was last called.
 		 */
-		std::vector<sfx::animated_sprite> _widgetSprites;
+		std::unordered_map<std::string, sfx::animated_sprite> _widgetSprites;
 
 		/**
 		 * Stores the sprite names of all the widgets containing pictures that are
