@@ -637,6 +637,16 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Sets a widget's border colour.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no colour will be set.
+		 * @param name   The name of the widget to change.
+		 * @param colour The colour to set to the widget's border.
+		 */
+		void _setWidgetBorderColour(const std::string& name,
+			const sf::Color& colour) noexcept;
+
+		/**
 		 * Sets a widget's rounded border radius.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no radius will be set.

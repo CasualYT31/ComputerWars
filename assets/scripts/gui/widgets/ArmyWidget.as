@@ -17,6 +17,11 @@ enum ArmyWidgetAlignment {
 const uint ARMYWIDGET_HEIGHT = 60;
 
 /**
+ * Stores the radius of an ArmyWidget's border.
+ */
+const float ARMYWIDGET_RADIUS = ARMYWIDGET_HEIGHT / 2.0;
+
+/**
  * Used to create the widgets that represent an army panel in-game.
  */
 class ArmyWidget {
@@ -28,15 +33,20 @@ class ArmyWidget {
 	/**
 	 * Creates the widgets that represent an army panel.
 	 * Defaults to left alignment.
-	 * @param panelName The full name of the panel which contains all of the
-	 *                  other widgets.
+	 * @param panelName    The full name of the panel which contains all of the
+	 *                     other widgets.
+	 * @param transparency The alpha value to assign to the panel's colour.
 	 */
-	ArmyWidget(const string&in panelName) explicit {
+	ArmyWidget(const string&in panelName,
+		const uint8 transparency = 255) explicit {
+		alpha = transparency;
+
 		panel = panelName;
 		addWidget("Panel", panel);
-		setWidgetSize(panel, "200px", formatUInt(ARMYWIDGET_HEIGHT) + "px");
+		setWidgetSize(panel, "250px", formatUInt(ARMYWIDGET_HEIGHT) + "px");
 		setWidgetBorderSize(panel, 2.0);
-		setWidgetBorderRadius(panel, 30.0);
+		setWidgetBorderRadius(panel, ARMYWIDGET_RADIUS);
+		setWidgetBorderColour(panel, Colour(0,0,0,alpha));
 
 		currentCO = panelName + ".currentCO";
 		addWidget("Picture", currentCO);
@@ -66,7 +76,9 @@ class ArmyWidget {
 	 *               on.
 	 */
 	void update(const ArmyID armyID) {
-		setWidgetBackgroundColour(panel, game.getArmyCountry(armyID).colour);
+		Colour colour = game.getArmyCountry(armyID).colour;
+		colour.a = alpha;
+		setWidgetBackgroundColour(panel, colour);
 
 		Commander currentCommander = game.getArmyCurrentCO(armyID);
 		setWidgetSprite(currentCO, "co", currentCommander.iconName);
@@ -90,12 +102,13 @@ class ArmyWidget {
 	 *                  be logged and the widget will not be changed.
 	 */
 	void setAlignment(const ArmyWidgetAlignment alignment) {
+		const float coX = ARMYWIDGET_RADIUS + 5;
 		switch (alignment) {
 		case ArmyWidgetAlignment::Left:
 			setWidgetPosition(panel, "0px", "0px");
-			setWidgetPosition(currentCO, "10px", "5px");
-			setWidgetPosition(tagCO, "10px", "30px");
-			setWidgetPosition(funds, "100px", "5px");
+			setWidgetPosition(currentCO, formatFloat(coX) + "px", "5px");
+			setWidgetPosition(tagCO, formatFloat(coX) + "px", "30px");
+			setWidgetPosition(funds, "140px", "5px");
 			break;
 		case ArmyWidgetAlignment::Right:
 			break;
@@ -124,4 +137,9 @@ class ArmyWidget {
 	 * Holds the name of the funds label widget.
 	 */
 	string funds;
+
+	/**
+	 * Holds the alpha that's been assigned to the panel.
+	 */
+	uint8 alpha;
 }
