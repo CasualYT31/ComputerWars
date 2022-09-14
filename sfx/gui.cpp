@@ -403,7 +403,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept 
 void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const tgui::String& signalName) noexcept {
 	std::string functionName = getGUI() + "_" +
-		widget->getWidgetName().toStdString() + "_" + signalName.toStdString();
+		_extractWidgetName(widget->getWidgetName()) + "_" + signalName.toStdString();
 	if (_scripts && getGUI() != "" && _scripts->functionExists(functionName))
 		_scripts->callFunction(functionName);
 }
@@ -426,7 +426,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 		if (_langdict && _langdict->getLanguage() != _lastlang) {
 			_lastlang = _langdict->getLanguage();
 			auto& widgetList = _gui.getWidgets();
-			for (auto& widget : widgetList) _translateWidget(widget, "");
+			for (auto& widget : widgetList) _translateWidget(widget);
 		}
 		std::size_t animatedSprite = 0;
 		// Update the menu's scaling factor.
@@ -438,19 +438,18 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 		tgui::String percentage(100.0f / (float)scaling);
 		percentage += "%";
 		menu->setSize(percentage);
-		_animate(target, scaling, menu, getGUI());
+		_animate(target, scaling, menu);
 	}
 
 	return false;
 }
 
 void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
-	tgui::Container::Ptr container, std::string baseName) noexcept {
+	tgui::Container::Ptr container) noexcept {
 	// Animate each widget.
 	auto& widgetList = container->getWidgets();
-	baseName += ".";
 	for (auto& widget : widgetList) {
-		std::string widgetName = baseName + widget->getWidgetName().toStdString();
+		std::string widgetName = widget->getWidgetName().toStdString();
 		String type = widget->getWidgetType();
 		// If the widget deals with animated sprites then handle them.
 		bool updateTexture = true;
@@ -532,15 +531,13 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 		}
 		if (_isContainerWidget(type)) {
 			auto w = _findWidget<Container>(widgetName);
-			_animate(target, scaling, w, widgetName);
+			_animate(target, scaling, w);
 		}
 	}
 }
 
-void sfx::gui::_translateWidget(tgui::Widget::Ptr widget,
-	const std::string& baseName) noexcept {
-	std::string widgetName = baseName + ((baseName.empty()) ? ("") : ("."))
-		+ widget->getWidgetName().toStdString();
+void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) noexcept {
+	std::string widgetName = widget->getWidgetName().toStdString();
 	String type = widget->getWidgetType();
 	if (!_originalStrings[widgetName].empty()) {
 		if (type == "Button") {
@@ -621,7 +618,7 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget,
 	if (_isContainerWidget(type)) {
 		auto w = _findWidget<Container>(widgetName);
 		auto& widgetList = w->getWidgets();
-		for (auto& w : widgetList) _translateWidget(w, widgetName);
+		for (auto& w : widgetList) _translateWidget(w);
 	}
 }
 
@@ -857,6 +854,14 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	}
 }
 
+std::string sfx::gui::_extractWidgetName(const tgui::String& fullname) noexcept {
+	if (fullname.rfind('.') == String::npos) {
+		return fullname.toStdString();
+	} else {
+		return fullname.substr(fullname.rfind('.') + 1).toStdString();
+	}
+}
+
 //////////////////////
 // SCRIPT INTERFACE //
 //////////////////////
@@ -892,7 +897,8 @@ void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name
 	noexcept {
 	std::string type = String(widgetType).toLower().toStdString();
 	std::vector<std::string> fullname;
-	if (_findWidget<Widget>(name, &fullname)) {
+	std::string fullnameAsString;
+	if (_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
 		_logger.error("Attempted to create a new \"{}\" widget with name \"{}\": "
 			"a widget with that name already exists!", type, name);
 	} else {
@@ -919,25 +925,16 @@ void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name
 				name, fullname[0]);
 			return;
 		}
-		auto container = _gui.get<Container>(fullname[0]);
+		const auto containerName =
+			fullnameAsString.substr(0, fullnameAsString.rfind('.'));
+		auto container = _findWidget<Container>(containerName);
 		if (!container) {
 			_logger.error("Attempted to add a \"{}\" widget called \"{}\" to the "
-				"menu \"{}\". This menu does not exist.", name, fullname[0]);
+				"container \"{}\". This container does not exist.", type, name,
+				containerName);
 			return;
 		}
-		if (fullname.size() > 2) {
-			for (std::size_t i = 1; i < fullname.size() - 1; i++) {
-				if (!container) {
-					_logger.error("Attempted to add a \"{}\" widget called \"{}\" "
-						"to the container \"{}\" within menu \"{}\". This "
-						"container does not exist.", type, name, fullname[i - 1],
-						fullname[0]);
-					return;
-				}
-				container = container->get<Container>(fullname[i]);
-			}
-		}
-		container->add(widget, fullname.back());
+		container->add(widget, fullnameAsString);
 		_connectSignals(widget);
 	}
 }
@@ -1061,8 +1058,7 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 			_originalStrings[fullnameAsString][0] = text;
 		}
 		// Set it by translating it.
-		_translateWidget(widget,
-			fullnameAsString.substr(0, fullnameAsString.rfind('.')));
+		_translateWidget(widget);
 	} else {
 		_logger.error("Attempted to set the caption \"{}\" to a widget \"{}\" "
 			"within menu \"{}\". This widget does not exist.", text, name,
@@ -1182,8 +1178,7 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text)
 		_originalStrings[fullnameAsString].push_back(text);
 		// Translate the new item.
 		// We still have to add the new item itself so keep the code above!
-		_translateWidget(widget,
-			fullnameAsString.substr(0, fullnameAsString.rfind('.')));
+		_translateWidget(widget);
 	} else {
 		_logger.error("Attempted to add a new item \"{}\" to a widget \"{}\" "
 			"within menu \"{}\". This widget does not exist.", text, name,

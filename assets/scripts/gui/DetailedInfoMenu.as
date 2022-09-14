@@ -1,14 +1,12 @@
 /**
- * Holds names pertaining to each subwidget of the ArmyWidget.
+ * Holds names pertaining to each subwidget of each ArmyWidget.
  */
-ArmyWidget armyWidget;
+array<ArmyWidget> armyWidgets;
 
 void setUpArmyPanel(string baseLayout) {
 	baseLayout += ".armyPanel";
 	addWidget("Panel", baseLayout);
 	setWidgetSize(baseLayout, "33.333%", "100%");
-	baseLayout += ".";
-	armyWidget = ArmyWidget(baseLayout + "army1");
 }
 
 void setUpTerrainPanel(string baseLayout) {
@@ -39,15 +37,29 @@ string previousMenu;
 // displays detailed information on them.
 void DetailedInfoMenuOpen(const string&in previous) {
 	previousMenu = previous;
-	armyWidget.update(0);
+	const uint armyCount = game.getArmyCount();
+	for (uint a = 0; a < armyCount; a++) {
+		armyWidgets.insertLast(ArmyWidget(
+			"DetailedInfoMenu.baseLayout.armyPanel.army" + formatUInt(a)));
+		armyWidgets[a].update(a);
+		setWidgetPosition(armyWidgets[a].panel, "2%", "2% + " +
+			formatUInt((ARMYWIDGET_HEIGHT + 10) * a) + "px");
+	}
+}
+
+/**
+ * Deletes all ArmyWidgets.
+ */
+void DetailedInfoMenuClose(const string&in next) {
+	const uint armyCount = game.getArmyCount();
+	for (uint a = 0; a < armyCount; a++) {
+		armyWidgets[a].remove();
+	}
+	armyWidgets.removeRange(0, armyWidgets.length());
 }
 
 void DetailedInfoMenuHandleInput(const dictionary controls) {
 	if (bool(controls["info"]) || bool(controls["back"])) {
 		setGUI(previousMenu);
-	} else if (bool(controls["up"])) {
-		removeWidget("DetailedInfoMenu");
-	} else if (bool(controls["down"])) {
-		removeWidgetsFromContainer("DetailedInfoMenu");
 	}
 }

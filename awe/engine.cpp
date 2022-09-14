@@ -197,62 +197,74 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"If a map hasn't been loaded or has been quit from, then functions won't "
 		"have any effect, and if they return a value, they will return a blank "
 		"value.");
+
 	r = engine->RegisterObjectMethod("GameInterface", "void moveSelectedTileUp()",
 		asMETHOD(awe::game, moveSelectedTileUp), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Moves the cursor to the tile above the "
 		"tile where the cursor is currently located. If this is not possible, the "
 		"call will be ignored.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"void moveSelectedTileDown()",
 		asMETHOD(awe::game, moveSelectedTileDown), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Moves the cursor to the tile below the "
 		"tile where the cursor is currently located. If this is not possible, the "
 		"call will be ignored.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"void moveSelectedTileLeft()",
 		asMETHOD(awe::game, moveSelectedTileLeft), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Moves the cursor to the tile to the left "
 		"of the tile where the cursor is currently located. If this is not "
 		"possible, the call will be ignored.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"void moveSelectedTileRight()",
 		asMETHOD(awe::game, moveSelectedTileRight), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Moves the cursor to the tile to the "
 		"right of the tile where the cursor is currently located. If this is not "
 		"possible, the call will be ignored.");
+
 	r = engine->RegisterObjectMethod("GameInterface", "Vector2 getSelectedTile()",
 		asMETHOD(awe::game, getSelectedTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the location of the cursor, in "
 		"tiles. The coordinates are 0-based.");
+
 	r = engine->RegisterObjectMethod("GameInterface", 
 		"UnitID getUnitOnTile(const Vector2)",
 		asMETHOD(awe::game, getUnitOnTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Retrieves the ID of the unit on the "
 		"specified tile. If 0, then the tile is unoccupied.");
+
 	r = engine->RegisterObjectMethod("GameInterface", "void zoomIn()",
 		asMETHOD(awe::game, zoomIn), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Zooms the map in by a scaling factor of "
 		"1. The map scaling factor does not go above 3.");
+
 	r = engine->RegisterObjectMethod("GameInterface", "void zoomOut()",
 		asMETHOD(awe::game, zoomOut), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Zooms the map out by a scaling factor "
 		"of 1. The map scaling factor does not go below 1.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"void setSelectedTileByPixel(const MousePosition)",
 		asMETHOD(awe::game, setSelectedTileByPixel), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Selects a tile based on a given mouse "
 		"position. Note that cases of <tt>INVALID_MOUSE</tt>, etc., should be "
 		"accounted for within the scripts.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"Vector2 getTileSize()",
 		asMETHOD(awe::game, getTileSize), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the minimum pixel size of a tile "
 		"after scaling has been applied.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"const Commander getArmyCurrentCO(const ArmyID)",
 		asMETHOD(awe::game, getArmyCurrentCO), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the properties of the army's current "
 		"CO.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"const Commander getArmyTagCO(const ArmyID)",
 		asMETHOD(awe::game, getArmyTagCO), asCALL_THISCALL);
@@ -260,20 +272,30 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"<b>Warning:</b> if an army doesn't have a tag CO, the game engine will "
 		"throw an exception which will halt script execution! Check if an army "
 		"has a tag CO first using <tt>tagCOIsPresent()</tt>.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"const Country getArmyCountry(const ArmyID)",
 		asMETHOD(awe::game, getArmyCountry), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the properties of the army's "
 		"country.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"int getArmyFunds(const ArmyID)",
 		asMETHOD(awe::game, getArmyFunds), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets an army's fund count.");
+
 	r = engine->RegisterObjectMethod("GameInterface",
 		"bool tagCOIsPresent(const ArmyID)",
 		asMETHOD(awe::game, tagCOIsPresent), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns <tt>true</tt> if the specified "
 		"army has a tag CO, <tt>false</tt> in all other cases.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"uint getArmyCount()",
+		asMETHOD(awe::game, getArmyCount), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the number of armies currently in "
+		"play.");
+
 	// Register game global property.
 	r = engine->RegisterGlobalProperty("GameInterface game", &_game);
 

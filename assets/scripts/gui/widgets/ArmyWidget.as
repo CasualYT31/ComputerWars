@@ -12,6 +12,11 @@ enum ArmyWidgetAlignment {
 }
 
 /**
+ * Stores the height of an ArmyWidget.
+ */
+const uint ARMYWIDGET_HEIGHT = 60;
+
+/**
  * Used to create the widgets that represent an army panel in-game.
  */
 class ArmyWidget {
@@ -29,7 +34,7 @@ class ArmyWidget {
 	ArmyWidget(const string&in panelName) explicit {
 		panel = panelName;
 		addWidget("Panel", panel);
-		setWidgetSize(panel, "200px", "60px");
+		setWidgetSize(panel, "200px", formatUInt(ARMYWIDGET_HEIGHT) + "px");
 		setWidgetBorderSize(panel, 2.0);
 		setWidgetBorderRadius(panel, 30.0);
 
@@ -43,6 +48,13 @@ class ArmyWidget {
 		addWidget("Label", funds);
 
 		setAlignment(ArmyWidgetAlignment::Left);
+	}
+
+	/**
+	 * Removes the widgets from the menu.
+	 */
+	void remove() {
+		removeWidget(panel);
 	}
 
 	/**

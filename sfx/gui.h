@@ -308,20 +308,15 @@ namespace sfx {
 		 * @param target    The target which the GUI will be drawn to later.
 		 * @param scaling   Scaling factor which will be applied when drawing.
 		 * @param container Pointer to the container widget.
-		 * @param baseName  The name of the container widget.
 		 */
 		void _animate(const sf::RenderTarget& target, const double scaling,
-			tgui::Container::Ptr container, std::string baseName) noexcept;
+			tgui::Container::Ptr container) noexcept;
 
 		/**
 		 * Reapplies all the translations to a widget recursively.
 		 * @param container Pointer to the widget to translate.
-		 * @param baseName  The full name of the container containing the given
-		 *                  widget, \b without the final dot. If an entire menu is
-		 *                  given, this needs to be a blank string.
 		 */
-		void _translateWidget(tgui::Widget::Ptr widget,
-			const std::string& baseName) noexcept;
+		void _translateWidget(tgui::Widget::Ptr widget) noexcept;
 
 		/**
 		 * Draws the current GUI menu.
@@ -389,17 +384,12 @@ namespace sfx {
 			const tgui::Container::Ptr& container, const bool removeIt) noexcept;
 
 		/**
-		 * Converts a generic widget pointer to a pointer of the correct type for
-		 * the given widget.
-		 * @warning This method assumes that a GUI menu has already been set!
-		 *          Behaviour is undefined if one has not already been set and this
-		 *          method is called.
-		 * @tparam  T      The type of widget pointer to retrieve.
-		 * @param   widget The generic widget pointer to convert.
-		 * @return  The correctly-typed widget pointer.
+		 * Extracts a widget's short name from its full name.
+		 * @param  fullname The full name of the widget.
+		 * @return The short name of the widget.
 		 */
-		template<typename T>
-		typename T::Ptr _getPtr(const tgui::Widget::Ptr& widget) const noexcept;
+		static inline std::string _extractWidgetName(const tgui::String& fullname)
+			noexcept;
 
 		/**
 		 * Finds a widget in the root GUI object and returns it.
@@ -718,11 +708,6 @@ namespace sfx {
 }
 
 template<typename T>
-typename T::Ptr sfx::gui::_getPtr(const tgui::Widget::Ptr& widget) const noexcept {
-	return _gui.get<tgui::Group>(getGUI())->get<T>(widget->getWidgetName());
-}
-
-template<typename T>
 typename T::Ptr sfx::gui::_findWidget(std::string name,
 	std::vector<std::string>* namesList, std::string* fullname) const noexcept {
 	// Split string.
@@ -758,13 +743,24 @@ typename T::Ptr sfx::gui::_findWidget(std::string name,
 	// Find it.
 	tgui::Container::Ptr container = _gui.get<tgui::Container>(names[0]);
 	if (names.size() > 2) {
-		for (std::size_t w = 1; w < names.size() - 1; w++) {
+		for (std::size_t w = 1; w < names.size() - 1; ++w) {
 			if (!container) return nullptr;
-			container = container->get<tgui::Container>(names[w]);
+			tgui::String containerName;
+			for (std::size_t v = 0; v <= w; ++v) {
+				containerName += names[v] + ".";
+			}
+			containerName.pop_back();
+			container = container->get<tgui::Container>(containerName);
 		}
 	}
-	if (container)
-		return container->get<T>(names[names.size() - 1]);
-	else
+	if (container) {
+		tgui::String widgetName;
+		for (std::size_t v = 0; v < names.size(); ++v) {
+			widgetName += names[v] + ".";
+		}
+		widgetName.pop_back();
+		return container->get<T>(widgetName);
+	} else {
 		return nullptr;
+	}
 }

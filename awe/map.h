@@ -194,6 +194,12 @@ namespace awe {
 		void deleteArmy(const awe::ArmyID army) noexcept;
 
 		/**
+		 * Retrieves the number of armies currently on the map.
+		 * @return The number of armies currently in play.
+		 */
+		std::size_t getArmyCount() const noexcept;
+
+		/**
 		 * Sets the amount of funds a specified army obtains.
 		 * If \c 0 or less is given, \c 0 will be stored.
 		 * @param army  The ID of the army to amend.

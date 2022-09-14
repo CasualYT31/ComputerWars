@@ -210,6 +210,13 @@ bool awe::game::tagCOIsPresent(const awe::ArmyID army) const {
 		throw NO_MAP;
 }
 
+std::size_t awe::game::getArmyCount() const {
+	if (_map)
+		return _map->getArmyCount();
+	else
+		throw NO_MAP;
+}
+
 //////////////////////////////
 // INTERFACE HELPER METHODS //
 //////////////////////////////

@@ -192,6 +192,12 @@ namespace awe {
 		 */
 		bool tagCOIsPresent(const awe::ArmyID army) const;
 
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getArmyCount().
+		 */
+		std::size_t getArmyCount() const;
+
 		/////////////////////
 		//  END  INTERFACE //
 		/////////////////////

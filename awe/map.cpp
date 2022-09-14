@@ -163,18 +163,22 @@ void awe::map::deleteArmy(const awe::ArmyID army) noexcept {
 			"army, {}, that didn't exist on the map!", army);
 		return;
 	}
-	// firstly, delete all units belonging to the army
+	// Firstly, delete all units belonging to the army.
 	auto units = _armys.at(army).getUnits();
 	for (auto unit : units) {
 		deleteUnit(unit);
 	}
-	// then, disown all tiles
+	// Then, disown all tiles.
 	auto tiles = _armys.at(army).getTiles();
 	for (auto& tile : tiles) {
 		_tiles[tile.x][tile.y].setTileOwner(awe::army::NO_ARMY);
 	}
-	// finally, delete the army from the army list
+	// Finally, delete the army from the army list.
 	_armys.erase(army);
+}
+
+std::size_t awe::map::getArmyCount() const noexcept {
+	return _armys.size();
 }
 
 void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds)
