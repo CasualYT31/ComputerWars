@@ -13,7 +13,7 @@
     },
     "tile": {
       "normal": "sprites/tile/normal/spritestilenormal.json",
-      "normalpictures": "sprites/tile_picture/normal/spritestile_picturenormal.json"
+      "normalpictures": "sprites/tile_picture/normal/normal.json"
     },
     "icon": "sprites/icon/spritesicon.json",
     "gui": "sprites/gui/spritesgui.json"

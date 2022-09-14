@@ -23,6 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "army.h"
 #include <algorithm>
 
+awe::ArmyID awe::army::NO_ARMY_SCRIPT = ~((awe::ArmyID)0);
+
 awe::army::army(const std::shared_ptr<const awe::country>& country) noexcept :
 	_country(country) {}
 

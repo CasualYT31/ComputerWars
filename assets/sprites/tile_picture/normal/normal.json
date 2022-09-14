@@ -1,0 +1,17 @@
+{
+  "path": "sprites/tile_picture/normal/normal.png",
+  "sprites": {
+    "sea": {
+      "frames": [ [ 0, 0, 48, 64 ] ],
+      "durations": [ 0 ]
+    },
+    "oshq": {
+      "frames": [ [ 48, 0, 48, 64 ] ],
+      "durations": [ 0 ]
+    },
+    "noentry": {
+      "frames": [ [ 96, 0, 48, 64 ] ],
+      "durations": [ 0 ]
+    }
+  }
+}

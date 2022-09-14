@@ -58,8 +58,30 @@ void DetailedInfoMenuSetUp() {
 // Remembers the previous menu so that it can go back to it.
 string previousMenu;
 
-// Retrieves all the details on the current armies and the current tile and
-// displays detailed information on them.
+/**
+ * Determines which tile picture to present to the user.
+ * @param  pos The location of the tile whose picture is to be shown.
+ * @return The \c tilePicture.normal sprite to show.
+ */
+const string tilePicture(const Vector2&in pos) {
+	const Terrain t = game.getTerrainOfTile(pos);
+	// If the tile is owned, attempt to retrieve the owned terrain picture.
+	const auto ownerID = game.getTileOwner(pos);
+	if (ownerID != NO_ARMY) {
+		const auto owned = t.picture[game.getArmyCountry(ownerID).ID];
+		if (!owned.isEmpty()) {
+			return owned;
+		}
+	}
+	// If it can't be retrieved, or if the tile isn't owned, present the icon
+	// instead.
+	return t.iconName;
+}
+
+/**
+ * Retrieves all the details on the current armies and the current tile and
+ * displays detailed information on them.
+ */
 void DetailedInfoMenuOpen(const string&in previous) {
 	previousMenu = previous;
 
@@ -84,6 +106,8 @@ void DetailedInfoMenuOpen(const string&in previous) {
 	setWidgetSprite(base + "detailsAndPicture.details.hp.icon", "icon", "hp");
 	setWidgetText(base + "detailsAndPicture.details.hp.label", "~" +
 		formatUInt(terrainType.maxHP));
+	setWidgetSprite(base + "detailsAndPicture.picture", "tilePicture.normal",
+		tilePicture(game.getSelectedTile()));
 	setWidgetText(base + "description", terrainType.description);
 	base += "moveCosts.";
 	for (BankID moveID = 0; moveID < movement.length(); ++moveID) {

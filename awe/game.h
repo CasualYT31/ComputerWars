@@ -212,6 +212,12 @@ namespace awe {
 		 */
 		const awe::terrain getTerrainOfTile(const sf::Vector2u& pos) const;
 
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getTileOwner().
+		 */
+		const awe::ArmyID getTileOwner(const sf::Vector2u& pos) const;
+
 		/////////////////////
 		//  END  INTERFACE //
 		/////////////////////

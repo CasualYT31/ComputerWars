@@ -475,7 +475,7 @@ namespace awe {
 		/**
 		 * Gets a tile's owner.
 		 * If the coorindate is out of bounds, \c awe::army::NO_ARMY is returned.
-		 * @param  pos The X and Y coordinate of the tile to change.
+		 * @param  pos The X and Y coordinate of the tile to query.
 		 * @return The ID of the army who owns this tile, or \c awe::army::NO_ARMY
 		 *         if no army owns it.
 		 */

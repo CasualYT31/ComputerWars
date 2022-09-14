@@ -234,6 +234,13 @@ const awe::terrain awe::game::getTerrainOfTile(const sf::Vector2u& pos) const {
 	return *getTileType(pos).getType();
 }
 
+const awe::ArmyID awe::game::getTileOwner(const sf::Vector2u& pos) const {
+	if (_map)
+		return _map->getTileOwner(pos);
+	else
+		throw NO_MAP;
+}
+
 //////////////////////////////
 // INTERFACE HELPER METHODS //
 //////////////////////////////

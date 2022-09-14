@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.h"
 #include "game.h"
+#include "army.h"
 
 sf::Vector2i awe::game_engine::_INVALID_MOUSE = sfx::INVALID_MOUSE;
 
@@ -307,7 +308,16 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Returns properties on a given tile's "
 		"terrain type.");
 
-	// Register game global property.
+	r = engine->RegisterObjectMethod("GameInterface",
+		"ArmyID getTileOwner(const Vector2&in)",
+		asMETHOD(awe::game, getTileOwner), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the ArmyID of the army who owns "
+		"the specified tile. <tt>NO_ARMY</tt> is returned if either the position "
+		"was out of range, or if no army owns the tile.");
+
+	// Register game global property and related constants.
+	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
+		&awe::army::NO_ARMY_SCRIPT);
 	r = engine->RegisterGlobalProperty("GameInterface game", &_game);
 
 	// Register the global functions.
@@ -537,8 +547,8 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 			{ "spritesheets", "tile", "normal" })
 		// && _loadObject(_sprites->unitPicture, j,
 			// { "spritesheets", "unit", "pictures" })
-		// && _loadObject(_sprites->tilePicture->normal, j,
-			// { "spritesheets", "tile", "normalpictures" })
+		&& _loadObject(_sprites->tilePicture->normal, j,
+			{ "spritesheets", "tile", "normalpictures" })
 		&& _loadObject(_sprites->icon, j, { "spritesheets", "icon" })
 		&& _loadObject(_sprites->GUI, j, { "spritesheets", "gui" })
 		&& _loadObject(_countries, j, { "countries" }, _scripts, "Country")
@@ -563,6 +573,7 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_scripts->generateDocumentation();
 	_gui->addSpritesheet("icon", _sprites->icon);
 	_gui->addSpritesheet("co", _sprites->CO);
+	_gui->addSpritesheet("tilePicture.normal", _sprites->tilePicture->normal);
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setFonts(_fonts);
 	_gui->setTarget(*_renderer);

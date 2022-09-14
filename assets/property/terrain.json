@@ -13,7 +13,7 @@
 	"SEA": {
 		"longname": "SEA_longname",
 		"shortname": "SEA_shortname",
-		"icon": "",
+		"icon": "sea",
 		"description": "SEA_description",
 		"hp": 0,
 		"defence": 0,
@@ -200,7 +200,7 @@
 	"VOLCANO": {
 		"longname": "VOLCANO_longname",
 		"shortname": "VOLCANO_shortname",
-		"icon": "",
+		"icon": "noentry",
 		"description": "VOLCANO_description",
 		"hp": 0,
 		"defence": 0,
@@ -216,7 +216,7 @@
 		"hp": 20,
 		"defence": 4,
 		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ],
+		"pictures": [ "oshq" ],
 		"capturable": true
 	}
 }
