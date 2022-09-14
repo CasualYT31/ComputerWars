@@ -373,6 +373,20 @@ namespace sfx {
 		static inline bool _isContainerWidget(tgui::String type) noexcept;
 
 		/**
+		 * Removes widgets from \c _gui.
+		 * @param widget    Pointer to the widget to delete.
+		 * @param container Pointer to the container which holds the widget.
+		 * @param removeIt  This parameter is ignored if the given widget is not a
+		 *                  container. If \c FALSE, this will only remove all the
+		 *                  widgets within a container, but not the container
+		 *                  itself. If \c TRUE, this will ensure that the container
+		 *                  itself is also deleted, as well as all of its child
+		 *                  widgets.
+		 */
+		void _removeWidgets(const tgui::Widget::Ptr& widget,
+			const tgui::Container::Ptr& container, const bool removeIt) noexcept;
+
+		/**
 		 * Converts a generic widget pointer to a pointer of the correct type for
 		 * the given widget.
 		 * @warning This method assumes that a GUI menu has already been set!
@@ -465,6 +479,22 @@ namespace sfx {
 		 */
 		void _addWidget(const std::string& widgetType, const std::string& name)
 			noexcept;
+
+		/**
+		 * Removes a specified widget, and all the widgets that are within it.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be removed.
+		 * @param name The name of the widget to remove.
+		 */
+		void _removeWidget(const std::string& name) noexcept;
+
+		/**
+		 * Removes all the widgets from a given container.
+		 * If no widget exists with the given name, or if the widget wasn't a
+		 * container, then an error will be logged and no widget will be removed.
+		 * @param name The name of the container whose widgets are to be removed.
+		 */
+		void _removeWidgetsFromContainer(const std::string& name) noexcept;
 
 		/**
 		 * Updates a widget's location.
@@ -707,6 +737,11 @@ typename T::Ptr sfx::gui::_findWidget(std::string name,
 		names.insert(names.begin(), _currentGUI);
 	} else if (groupPtr && names.size() == 1) {
 		// If the group name is all that was given, then simply return the group.
+		if (namesList) {
+			namesList->clear();
+			*namesList = names;
+		}
+		if (fullname) *fullname = name;
 		return _gui.get<T>(names[0]);
 	}
 	if (namesList) {

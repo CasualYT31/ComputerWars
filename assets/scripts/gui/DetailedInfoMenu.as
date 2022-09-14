@@ -45,5 +45,9 @@ void DetailedInfoMenuOpen(const string&in previous) {
 void DetailedInfoMenuHandleInput(const dictionary controls) {
 	if (bool(controls["info"]) || bool(controls["back"])) {
 		setGUI(previousMenu);
+	} else if (bool(controls["up"])) {
+		removeWidget("DetailedInfoMenu");
+	} else if (bool(controls["down"])) {
+		removeWidgetsFromContainer("DetailedInfoMenu");
 	}
 }

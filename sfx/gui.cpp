@@ -201,10 +201,12 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _setGUI), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Hides the current menu and shows the "
 		"menu given.");
+
 	r = engine->RegisterGlobalFunction("void setBackground(string)",
 		asMETHOD(sfx::gui, _noBackground), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Removes the background from the given "
 		"menu.");
+
 	r = engine->RegisterGlobalFunction("void setBackground(string, const "
 		"string& in, const string& in)",
 		asMETHOD(sfx::gui, _spriteBackground), asCALL_THISCALL_ASGLOBAL, this);
@@ -213,12 +215,14 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"menu to set the background of.</li><li>The name of the spritesheet which "
 		"contains the sprite to apply.</li><li>The name of the sprite to apply."
 		"</li></ol>");
+
 	r = engine->RegisterGlobalFunction("void setBackground(string, const uint, "
 		"const uint, const uint, const uint)",
 		asMETHOD(sfx::gui, _colourBackground), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets the given menu's background to a "
 		"solid colour. The name of the menu is given, then the R, G, B and A "
 		"components of the colour, respectively.");
+
 	// Register widget global functions.
 	r = engine->RegisterGlobalFunction("void addWidget(const string& in, const "
 		"string& in)",
@@ -228,6 +232,18 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"the name of the new widget is a full name, it will be added in the "
 		"specified container. If it is not a full name, it will be added to the "
 		"current menu.");
+
+	r = engine->RegisterGlobalFunction("void removeWidget(const string&in)",
+		asMETHOD(sfx::gui, _removeWidget), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Removes a given widget. If the given "
+		"widget is a container, then all of its widgets will be removed "
+		"recursively.");
+
+	r = engine->RegisterGlobalFunction("void removeWidgetsFromContainer("
+		"const string&in)", asMETHOD(sfx::gui, _removeWidgetsFromContainer),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Removes all the widgets from a given "
+		"container/menu, but does not remove the container/menu itself.");
 
 	r = engine->RegisterGlobalFunction("void setWidgetPosition(const string&in, "
 		"const string&in, const string&in)",
@@ -801,6 +817,36 @@ bool sfx::gui::_isContainerWidget(tgui::String type) noexcept {
 		type == "scrollablepanel";
 }
 
+void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
+	const tgui::Container::Ptr& container, const bool removeIt) noexcept {
+	if (_isContainerWidget(widget->getWidgetType())) {
+		auto container = _findWidget<Container>(
+			widget->getWidgetName().toStdString());
+		auto widgetsInContainer = container->getWidgets();
+		for (auto& widgetInContainer : widgetsInContainer)
+			_removeWidgets(widgetInContainer, container, true);
+		if (!removeIt) return;
+	}
+	// Remove widget.
+	const std::string name = widget->getWidgetName().toStdString();
+	if (container) {
+		if (_widgetSprites.find(name) != _widgetSprites.end())
+			_widgetSprites.erase(name);
+		if (_guiSpriteKeys.find(name) != _guiSpriteKeys.end())
+			_guiSpriteKeys.erase(name);
+		if (_originalStrings.find(name) != _originalStrings.end())
+			_originalStrings.erase(name);
+		container->remove(widget);
+	} else {
+		_logger.error("Attempted to remove a widget \"{}\", which did not have a "
+			"container!", name);
+	}
+}
+
+//////////////////////
+// SCRIPT INTERFACE //
+//////////////////////
+
 void sfx::gui::_setGUI(const std::string& name) noexcept {
 	setGUI(name, true);
 }
@@ -880,6 +926,53 @@ void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name
 		container->add(widget, fullname.back());
 		_connectSignals(widget);
 	}
+}
+
+void sfx::gui::_removeWidget(const std::string& name) noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		if (fullname.size() < 2) {
+			_logger.error("Attempted to remove the \"{}\" menu using "
+				"removeWidget(), which is not supported.", fullname[0]);
+		} else {
+			auto container = _findWidget<Container>(
+				fullnameAsString.substr(0, fullnameAsString.rfind('.')));
+			_removeWidgets(widget, container, true);
+		}
+	} else {
+		_logger.error("Attempted to remove a widget \"{}\" within menu \"{}\". "
+			"This widget does not exist.", name, fullname[0]);
+	}
+}
+
+void sfx::gui::_removeWidgetsFromContainer(const std::string& name) noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		if (fullname.size() < 2) {
+			_removeWidgets(widget, nullptr, false);
+		} else {
+			const std::string type =
+				widget->getWidgetType().toLower().toStdString();
+			if (_isContainerWidget(type)) {
+				auto container = _findWidget<Container>(
+					fullnameAsString.substr(0, fullnameAsString.rfind('.')));
+				_removeWidgets(widget, container, false);
+			} else {
+				_logger.error("Attempted to remove the widgets from a widget "
+					"\"{}\" which is of type \"{}\", within menu \"{}\". This "
+					"operation is not supported for this type of widget.", name,
+					type, fullname[0]);
+			}
+		}
+	} else {
+		_logger.error("Attempted to remove the widgets from a widget \"{}\" "
+			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
+	}
+
 }
 
 void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,
@@ -1135,7 +1228,6 @@ std::size_t sfx::gui::_getWidgetCount(const std::string& name) noexcept {
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
 	if (widget) {
-		// Get the item text differently depending on the type the widget is.
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (_isContainerWidget(type)) {
 			return _findWidget<Container>(name)->getWidgets().size();
