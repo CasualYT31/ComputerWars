@@ -51,7 +51,7 @@ void DetailedInfoMenuOpen(const string&in previous) {
 /**
  * Deletes all ArmyWidgets.
  */
-void DetailedInfoMenuClose(const string&in next) {
+void DetailedInfoMenuClose() {
 	const uint armyCount = game.getArmyCount();
 	for (uint a = 0; a < armyCount; a++) {
 		armyWidgets[a].remove();

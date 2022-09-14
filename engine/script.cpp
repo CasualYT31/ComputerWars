@@ -210,6 +210,10 @@ bool engine::scripts::functionExists(const std::string& name) const noexcept {
     return _engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
 }
 
+bool engine::scripts::functionDeclExists(const std::string& decl) const noexcept {
+    return _engine->GetModule("ComputerWars")->GetFunctionByDecl(decl.c_str());
+}
+
 bool engine::scripts::callFunction(const std::string& name) noexcept {
     if (!_callFunction_TemplateCall) {
         // If this method is being called directly and not from the template

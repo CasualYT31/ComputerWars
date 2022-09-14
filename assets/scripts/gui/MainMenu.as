@@ -7,7 +7,7 @@ void MainMenuSetUp() {
 	setWidgetOrigin("FileSelect", 0.25, 0.5);
 }
 
-void MainMenuOpen(const string&in prev) {
+void MainMenuOpen() {
 	// Collect a list of available map files and add them to the listbox.
 	clearItems("FileSelect");
 	filesystem cwd;

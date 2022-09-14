@@ -153,18 +153,20 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"as and when each menu name is read from the script. This means that a "
 		"menu defined later in the <tt>menus</tt> list won't exist when an "
 		"earlier menu's <tt>SetUp()</tt> function is called.");
-	document->DocumentExpectedFunction("void MainMenuOpen(const string&in)",
+	document->DocumentExpectedFunction("void MainMenuOpen([const string&in])",
 		"When switching to the \"MainMenu\", its \"Open()\" function will be "
 		"called, if it has been defined. The parameter holds the name of the "
 		"previous menu. This will be blank when the main menu is opened for the "
-		"very first time.\n\n"
+		"very first time. It is optional, i.e. you don't have to declare it as a "
+		"parameter and the function will still be called.\n\n"
 		"All menus have an <tt>Open()</tt> function which has the same "
 		"declaration and behaviour as this one, except it is called "
 		"MenuName<tt>Open()</tt>.");
-	document->DocumentExpectedFunction("void MainMenuClose(const string&in)",
+	document->DocumentExpectedFunction("void MainMenuClose([const string&in])",
 		"When switching from the \"MainMenu\", its \"Close()\" function will be "
 		"called, if it has been defined. The parameter holds the name of the menu "
-		"being opened next.\n\n"
+		"being opened next. It is optional, i.e. you don't have to declare it as "
+		"a parameter and the function will still be called.\n\n"
 		"All menus have a <tt>Close()</tt> function which has the same "
 		"declaration and behaviour as this one, except it is called "
 		"MenuName<tt>Close()</tt>.");
@@ -385,17 +387,30 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 		_gui.get(newPanel)->setVisible(true);
 		// Call CurrentPanelClose() script function, if it has been defined.
 		auto closeFuncName = _currentGUI + "Close",
+			closeFuncEmptyDecl = "void " + _currentGUI + "Close()",
+			closeFuncDecl = "void " + _currentGUI + "Close(const string&in)",
 			newMenu = newPanel;
-		if (callClose && !_currentGUI.empty() &&
-			_scripts->functionExists(closeFuncName))
-			_scripts->callFunction(closeFuncName, &newMenu);
+		if (callClose && !_currentGUI.empty()) {
+			if (_scripts->functionDeclExists(closeFuncDecl)) {
+				_scripts->callFunction(closeFuncName, &newMenu);
+			} else if (_scripts->functionDeclExists(closeFuncEmptyDecl)) {
+				_scripts->callFunction(closeFuncName);
+			}
+		}
 		// Clear widget sprites.
 		_widgetSprites.clear();
 		_currentGUI = newPanel;
 		// Call NewPanelOpen() script function, if it has been defined.
-		auto openFuncName = newPanel + "Open";
-		if (callOpen && _scripts->functionExists(openFuncName))
-			_scripts->callFunction(openFuncName, &old);
+		auto openFuncName = newPanel + "Open",
+			openFuncEmptyDecl = "void " + _currentGUI + "Open()",
+			openFuncDecl = "void " + _currentGUI + "Open(const string&in)";
+		if (callOpen) {
+			if (_scripts->functionDeclExists(openFuncDecl)) {
+				_scripts->callFunction(openFuncName, &old);
+			} else if (_scripts->functionDeclExists(openFuncEmptyDecl)) {
+				_scripts->callFunction(openFuncName);
+			}
+		}
 	} catch (tgui::Exception& e) {
 		_logger.error("{}", e.what());
 		if (_gui.get(old)) _gui.get(old)->setVisible(true);

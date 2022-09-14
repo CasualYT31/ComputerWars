@@ -196,12 +196,19 @@ namespace engine {
 		/**
 		 * Tests to see if a function with the given name exists in any of the
 		 * loaded scripts.
-		 * @param  name The name of the function. Note that this is not the full
-		 *              AngelScript declaration.
+		 * @param  name The name of the function.
 		 * @return \c TRUE if the function exists, \c FALSE if not, or if there
 		 *         were multiple matches.
 		 */
 		bool functionExists(const std::string& name) const noexcept;
+
+		/**
+		 * Tests to see if a function with the given declaration exists in any of
+		 * the loaded scripts.
+		 * @param  name The declaration of the function.
+		 * @return \c TRUE if the function exists, \c FALSE otherwise.
+		 */
+		bool functionDeclExists(const std::string& decl) const noexcept;
 
 		/**
 		 * Parameter pack method called when a script function requires parameters.
