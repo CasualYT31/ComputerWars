@@ -14,6 +14,30 @@ void setUpTerrainPanel(string baseLayout) {
 	baseLayout += ".terrainPanel";
 	addWidget("ScrollablePanel", baseLayout);
 	setWidgetSize(baseLayout, "33.333%", "100%");
+	baseLayout += ".terrainLayout";
+	addWidget("VerticalLayout", baseLayout);
+	baseLayout += ".";
+
+	addWidget("HorizontalLayout", baseLayout + "detailsAndPicture");
+	addWidget("VerticalLayout", baseLayout + "detailsAndPicture.details");
+	addWidget("Label", baseLayout + "detailsAndPicture.details.longName");
+	addWidget("VerticalLayout",
+		baseLayout + "detailsAndPicture.details.defence");
+	addWidget("Picture",
+		baseLayout + "detailsAndPicture.details.defence.icon");
+	addWidget("Label",
+		baseLayout + "detailsAndPicture.details.defence.label");
+	addWidget("VerticalLayout",
+		baseLayout + "detailsAndPicture.details.hp");
+	addWidget("Picture",
+		baseLayout + "detailsAndPicture.details.hp.icon");
+	addWidget("Label",
+		baseLayout + "detailsAndPicture.details.hp.label");
+	addWidget("Picture", baseLayout + "detailsAndPicture.picture");
+
+	addWidget("Label", baseLayout + "description");
+
+	// Add in movement types.
 }
 
 void setUpUnitPanel(string baseLayout) {
