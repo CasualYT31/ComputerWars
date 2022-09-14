@@ -693,6 +693,16 @@ namespace sfx {
 		 */
 		std::size_t _getWidgetCount(const std::string& name) noexcept;
 
+		/**
+		 * Sets the scroll amount for a scrollable panel's horizontal scrollbar.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no amount will be changed.
+		 * @param name   The name of the widget to edit.
+		 * @param amount The amount the scrollbar should scroll by.
+		 */
+		void _setHorizontalScrollbarAmount(const std::string& name,
+			const unsigned int amount) noexcept;
+
 		//////////
 		// DATA //
 		//////////

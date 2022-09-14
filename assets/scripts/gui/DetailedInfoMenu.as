@@ -5,8 +5,9 @@ array<ArmyWidget> armyWidgets;
 
 void setUpArmyPanel(string baseLayout) {
 	baseLayout += ".armyPanel";
-	addWidget("Panel", baseLayout);
+	addWidget("ScrollablePanel", baseLayout);
 	setWidgetSize(baseLayout, "33.333%", "100%");
+	setHorizontalScrollbarAmount(baseLayout, 100);
 }
 
 void setUpTerrainPanel(string baseLayout) {

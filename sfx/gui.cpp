@@ -364,6 +364,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _getWidgetCount), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets the number of widgets that are in "
 		"the specified container. Does not count recursively.");
+
+	r = engine->RegisterGlobalFunction("void setHorizontalScrollbarAmount("
+		"const string&in, const uint)",
+		asMETHOD(sfx::gui, _setHorizontalScrollbarAmount),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's horizontal "
+		"scrollbar's scroll amount.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -1407,4 +1414,26 @@ std::size_t sfx::gui::_getWidgetCount(const std::string& name) noexcept {
 			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
 	}
 	return 0;
+}
+
+void sfx::gui::_setHorizontalScrollbarAmount(const std::string& name,
+	const unsigned int amount) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "scrollablepanel") {
+			std::dynamic_pointer_cast<ScrollablePanel>(widget)->
+				setHorizontalScrollAmount(amount);
+		} else {
+			_logger.error("Attempted to set the horizontal scrollbar amount {} to "
+				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
+				"This operation is not supported for this type of widget.", amount,
+				name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the horizontal scrollbar amount {} to a "
+			"widget \"{}\" within menu \"{}\". This widget does not exist.",
+			amount, name, fullname[0]);
+	}
 }
