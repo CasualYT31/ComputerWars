@@ -53,7 +53,18 @@ namespace sfx {
 		 * @return The pointer to the \c sf::Font object, or \c nullptr if the font
 		 *         didn't exist.
 		 */
-		std::shared_ptr<sf::Font> operator[](const std::string& key) noexcept;
+		std::shared_ptr<sf::Font> operator[](const std::string& key)
+			const noexcept;
+
+		/**
+		 * Accesses a previously loaded font file path.
+		 * If a non-existent font is given, an error will be logged.
+		 * @param  key The string name of the font which was given in the JSON
+		 *             script.
+		 * @return The file path of the font, or an empty string if the font didn't
+		 *         exist.
+		 */
+		std::string getFontPath(const std::string& key) const noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.

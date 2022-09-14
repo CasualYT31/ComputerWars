@@ -252,6 +252,18 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Removes all the widgets from a given "
 		"container/menu, but does not remove the container/menu itself.");
 
+	r = engine->RegisterGlobalFunction("void setWidgetFont(const string&in, "
+		"const string&in)",
+		asMETHOD(sfx::gui, _setWidgetFont), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's font. The name of "
+		"the widget is given, then the name of the font, as defined in the "
+		"fonts.json script.");
+
+	r = engine->RegisterGlobalFunction("void setGlobalFont(const string&in)",
+		asMETHOD(sfx::gui, _setGlobalFont), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the global font. The name of the "
+		"font is given, as defined in the fonts.json script.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetPosition(const string&in, "
 		"const string&in, const string&in)",
 		asMETHOD(sfx::gui, _setWidgetPosition), asCALL_THISCALL_ASGLOBAL, this);
@@ -429,6 +441,10 @@ void sfx::gui::setLanguageDictionary(
 	const std::shared_ptr<engine::language_dictionary>& lang) noexcept {
 	_langdict = lang;
 	_lastlang = "";
+}
+
+void sfx::gui::setFonts(const std::shared_ptr<sfx::fonts>& fonts) noexcept {
+	_fonts = fonts;
 }
 
 bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
@@ -1001,6 +1017,39 @@ void sfx::gui::_removeWidgetsFromContainer(const std::string& name) noexcept {
 			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
 	}
 
+}
+
+void sfx::gui::_setWidgetFont(const std::string& name, const std::string& fontName)
+	noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		if (_fonts) {
+			auto fontPath = _fonts->getFontPath(fontName);
+			// Invalid font name will be logged by fonts class.
+			if (!fontPath.empty())
+				widget->getRenderer()->setFont(tgui::Font(fontPath));
+		} else {
+			_logger.error("Attempted to set the font \"{}\" to a widget \"{}\" "
+				"within menu \"{}\". No fonts object has been given to this gui "
+				"object.", fontName, name, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the font \"{}\" to a widget \"{}\" within "
+			"menu \"{}\". This widget does not exist.", fontName, name,
+			fullname[0]);
+	}
+}
+
+void sfx::gui::_setGlobalFont(const std::string& fontName) noexcept {
+	if (_fonts) {
+		auto fontPath = _fonts->getFontPath(fontName);
+		// Invalid font name will be logged by fonts class.
+		if (!fontPath.empty()) _gui.setFont(tgui::Font(fontPath));
+	} else {
+		_logger.error("Attempted to update the global font without this gui "
+			"object having a fonts object!");
+	}
 }
 
 void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,

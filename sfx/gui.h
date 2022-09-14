@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "script.h"
 #include "language.h"
 #include "userinput.h"
+#include "fonts.h"
 
 namespace sfx {
 	/**
@@ -176,6 +177,18 @@ namespace sfx {
 		 */
 		void setLanguageDictionary(
 			const std::shared_ptr<engine::language_dictionary>& lang) noexcept;
+
+		/**
+		 * Sets the \c fonts object to use with these GUI menus.
+		 * If a \c fonts object isn't given to a \c gui object, then the default
+		 * font will be used for all GUI text.\n
+		 * Setting a new \c fonts object will not update any of the fonts in use,
+		 * i.e. the old fonts will still be active. Fonts will have to be
+		 * manually reapplied as necessary.
+		 * @param fonts Pointer to the \c fonts object to use. \c nullptr can be
+		 *              given is so desired.
+		 */
+		void setFonts(const std::shared_ptr<sfx::fonts>& fonts) noexcept;
 
 		/**
 		 * Animates the current GUI menu.
@@ -489,6 +502,24 @@ namespace sfx {
 		void _removeWidgetsFromContainer(const std::string& name) noexcept;
 
 		/**
+		 * Sets a widget's font.
+		 * If no widget or font exists with the given name, then an error will be
+		 * logged and no font will be changed.
+		 * @param name     The name of the widget to change.
+		 * @param fontName The name of the font to assign to the widget.
+		 */
+		void _setWidgetFont(const std::string& name, const std::string& fontName)
+			noexcept;
+
+		/**
+		 * Sets the global UI font.
+		 * If no font exists with the given name, then an error will be logged and
+		 * no font will be changed.
+		 * @param fontName The name of the font to assign.
+		 */
+		void _setGlobalFont(const std::string& fontName) noexcept;
+
+		/**
 		 * Updates a widget's location.
 		 * If no widget exists with the given name, then an error will be logged
 		 * and no widget will be moved.
@@ -728,6 +759,14 @@ namespace sfx {
 		 * The last known language set in \c _langdict.
 		 */
 		std::string _lastlang = "";
+
+		/**
+		 * Pointer to the fonts used with this GUI.
+		 * Potential optimisation: if the same font is given for a widget more than
+		 * once, then pull it from an internal list rather than constructing it
+		 * again.
+		 */
+		std::shared_ptr<sfx::fonts> _fonts = nullptr;
 
 		/**
 		 * Ensures that handleInput() errors are only written to the log once at a

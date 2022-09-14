@@ -553,6 +553,7 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_gui->addSpritesheet("icon", _sprites->icon);
 	_gui->addSpritesheet("co", _sprites->CO);
 	_gui->setLanguageDictionary(_dictionary);
+	_gui->setFonts(_fonts);
 	_gui->setTarget(*_renderer);
 	_gui->load(guiPath);
 	if (!_gui->inGoodState()) return false;
@@ -624,7 +625,7 @@ void awe::game_engine::_script_loadMap(const std::string& file,
 	// Create the game.
 	_game.load(file, _countries, _tiles, _units, _commanders,
 		_sprites->tile->normal, _sprites->unit->idle, _sprites->icon, _sprites->CO,
-		(*_fonts)["dialogue"], _dictionary);
+		(*_fonts)["AW2"], _dictionary);
 	// Remember what the last menu was so that we can easily go back to it when
 	// the user quits.
 	_menuBeforeMapLoad = _gui->getGUI();

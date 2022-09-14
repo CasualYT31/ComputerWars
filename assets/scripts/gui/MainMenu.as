@@ -1,4 +1,5 @@
 void MainMenuSetUp() {
+	setGlobalFont("AW2");
 	setBackground("", 200, 200, 200, 0);
 	addWidget("ListBox", "FileSelect");
 	setWidgetSize("FileSelect", "50%", "50%");
