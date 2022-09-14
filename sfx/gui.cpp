@@ -161,6 +161,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"All menus have an <tt>Open()</tt> function which has the same "
 		"declaration and behaviour as this one, except it is called "
 		"MenuName<tt>Open()</tt>.");
+	document->DocumentExpectedFunction("void MainMenuClose(const string&in)",
+		"When switching from the \"MainMenu\", its \"Close()\" function will be "
+		"called, if it has been defined. The parameter holds the name of the menu "
+		"being opened next.\n\n"
+		"All menus have a <tt>Close()</tt> function which has the same "
+		"declaration and behaviour as this one, except it is called "
+		"MenuName<tt>Close()</tt>.");
 	document->DocumentExpectedFunction(
 		"void MainMenuHandleInput(const dictionary)",
 		"Regardless of how the game is modded, there will <b>always</b> be a menu "
@@ -324,7 +331,8 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"the specified container. Does not count recursively.");
 }
 
-void sfx::gui::setGUI(const std::string& newPanel, const bool callOpen) noexcept {
+void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
+	const bool callOpen) noexcept {
 	auto old = getGUI();
 	if (_gui.get(old)) {
 		_gui.get(old)->setVisible(false);
@@ -333,13 +341,19 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callOpen) noexcept
 		if (!_gui.get(newPanel)) throw tgui::Exception("GUI with name \"" +
 			newPanel + "\" does not exist.");
 		_gui.get(newPanel)->setVisible(true);
+		// Call CurrentPanelClose() script function, if it has been defined.
+		auto closeFuncName = _currentGUI + "Close",
+			newMenu = newPanel;
+		if (callClose && !_currentGUI.empty() &&
+			_scripts->functionExists(closeFuncName))
+			_scripts->callFunction(closeFuncName, &newMenu);
 		// Clear widget sprites.
 		_widgetSprites.clear();
 		_currentGUI = newPanel;
 		// Call NewPanelOpen() script function, if it has been defined.
-		auto funcName = newPanel + "Open";
-		if (callOpen && _scripts->functionExists(funcName))
-			_scripts->callFunction(funcName, &old);
+		auto openFuncName = newPanel + "Open";
+		if (callOpen && _scripts->functionExists(openFuncName))
+			_scripts->callFunction(openFuncName, &old);
 	} catch (tgui::Exception& e) {
 		_logger.error("{}", e.what());
 		if (_gui.get(old)) _gui.get(old)->setVisible(true);
@@ -636,7 +650,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 		tgui::Group::Ptr menu = tgui::Group::create();
 		menu->setVisible(false);
 		_gui.add(menu, "MainMenu");
-		setGUI("MainMenu", false);
+		setGUI("MainMenu", false, false);
 		if (_scripts) _scripts->callFunction("MainMenuSetUp");
 		// Create each menu.
 		for (auto& m : names) {
@@ -645,11 +659,11 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 			_gui.add(menu, m);
 			// Temporarily set the current GUI to this one to make _findWidget()
 			// work with relative widget names in SetUp() functions.
-			setGUI(m, false);
+			setGUI(m, false, false);
 			if (_scripts) _scripts->callFunction(m + "SetUp");
 		}
 		// Leave with the current menu being MainMenu.
-		setGUI("MainMenu", true);
+		setGUI("MainMenu", false, true);
 		return true;
 	} else {
 		return false;
@@ -848,7 +862,7 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 //////////////////////
 
 void sfx::gui::_setGUI(const std::string& name) noexcept {
-	setGUI(name, true);
+	setGUI(name, true, true);
 }
 
 void sfx::gui::_noBackground(std::string menu) noexcept {

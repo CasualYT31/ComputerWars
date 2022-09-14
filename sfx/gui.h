@@ -78,14 +78,16 @@ namespace sfx {
 		/**
 		 * Sets the GUI menu to display.
 		 * No widgets are actually destroyed: they are only made visible/invisible.
-		 * @param newPanel The name of the menu to display. If a menu with the
-		 *                 given name does not exist, an error will be logged and
-		 *                 no other changes will occur.
-		 * @param callOpen If @c TRUE, the new menu's respective @c Open() script
-		 *                 function will be called, if it exists.
+		 * @param newPanel  The name of the menu to display. If a menu with the
+		 *                  given name does not exist, an error will be logged and
+		 *                  no other changes will occur.
+		 * @param callClose If @c TRUE, the current menu's @c Close() script
+		 *                  function will be called, if it exists.
+		 * @param callOpen  If @c TRUE, the new menu's @c Open() script function
+		 *                  will be called, if it exists.
 		 */
-		void setGUI(const std::string& newPanel, const bool callOpen = true)
-			noexcept;
+		void setGUI(const std::string& newPanel, const bool callClose = true,
+			const bool callOpen = true) noexcept;
 
 		/**
 		 * Gets the name of the menu currently showing.
@@ -426,7 +428,7 @@ namespace sfx {
 		// SET GUI //
 
 		/**
-		 * Calls @c setGUI(), passing @c TRUE to @c callOpen.
+		 * Calls @c setGUI(), passing @c TRUE to both @c callClose and @c callOpen.
 		 * @sa @c sfx::gui::setGUI()
 		 */
 		void _setGUI(const std::string& name) noexcept;
