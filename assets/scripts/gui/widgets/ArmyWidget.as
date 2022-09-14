@@ -46,6 +46,9 @@ class ArmyWidget {
 
 		funds = panelName + ".funds";
 		addWidget("Label", funds);
+		setWidgetTextColour(funds, Colour(255,255,255,255));
+		setWidgetTextOutlineColour(funds, Colour(0,0,0,255));
+		setWidgetTextOutlineThickness(funds, 2.0);
 
 		setAlignment(ArmyWidgetAlignment::Left);
 	}

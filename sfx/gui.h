@@ -543,6 +543,36 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Sets a widget's text colour.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no caption will be changed.
+		 * @param name   The name of the widget to change.
+		 * @param colour The new text colour.
+		 */
+		void _setWidgetTextColour(const std::string& name, const sf::Color& colour)
+			noexcept;
+
+		/**
+		 * Sets a widget's text outline colour.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no caption will be changed.
+		 * @param name   The name of the widget to change.
+		 * @param colour The new text outline colour.
+		 */
+		void _setWidgetTextOutlineColour(const std::string& name,
+			const sf::Color& colour) noexcept;
+
+		/**
+		 * Sets a widget's text outline thickness.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no caption will be changed.
+		 * @param name      The name of the widget to change.
+		 * @param thickness The new text outline thickness.
+		 */
+		void _setWidgetTextOutlineThickness(const std::string& name,
+			const float thickness) noexcept;
+
+		/**
 		 * Updates a widget's sprite.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no sprite will be set.

@@ -284,6 +284,23 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Sets a widget's text. The name of the "
 		"widget is given, then its new text.");
 
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetTextColour(const string&in, const Colour&in)",
+		asMETHOD(sfx::gui, _setWidgetTextColour), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's text colour.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetTextOutlineColour(const string&in, const Colour&in)",
+		asMETHOD(sfx::gui, _setWidgetTextOutlineColour),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's text outline colour.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetTextOutlineThickness(const string&in, const float)",
+		asMETHOD(sfx::gui, _setWidgetTextOutlineThickness),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's text outline thickness.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetSprite(const string& in, "
 		"const string& in, const string& in)",
 		asMETHOD(sfx::gui, _setWidgetSprite), asCALL_THISCALL_ASGLOBAL, this);
@@ -1066,6 +1083,72 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 	}
 }
 
+void sfx::gui::_setWidgetTextColour(const std::string& name,
+	const sf::Color& colour) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "label") {
+			auto label = _findWidget<Label>(name);
+			label->getRenderer()->setTextColor(colour);
+		} else {
+			_logger.error("Attempted to set the text colour \"{}\" to widget "
+				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
+				"operation is not supported for this type of widget.", colour,
+				name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the text colour \"{}\" to a widget \"{}\" "
+			"within menu \"{}\". This widget does not exist.", colour, name,
+			fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetTextOutlineColour(const std::string& name,
+	const sf::Color& colour) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "label") {
+			auto label = _findWidget<Label>(name);
+			label->getRenderer()->setTextOutlineColor(colour);
+		} else {
+			_logger.error("Attempted to set the text outline colour \"{}\" to "
+				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "
+				"operation is not supported for this type of widget.", colour,
+				name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the text outline colour \"{}\" to a "
+			"widget \"{}\" within menu \"{}\". This widget does not exist.",
+			colour, name, fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetTextOutlineThickness(const std::string& name,
+	const float thickness) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "label") {
+			auto label = _findWidget<Label>(name);
+			label->getRenderer()->setTextOutlineThickness(thickness);
+		} else {
+			_logger.error("Attempted to set the text outline thickness {} to "
+				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "
+				"operation is not supported for this type of widget.", thickness,
+				name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the text outline thickness {} to a widget "
+			"\"{}\" within menu \"{}\". This widget does not exist.", thickness,
+			name, fullname[0]);
+	}
+}
+
 void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& sheet,
 	const std::string& key) noexcept {
 	std::vector<std::string> fullname;
@@ -1091,8 +1174,7 @@ void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& shee
 void sfx::gui::_setWidgetBgColour(const std::string& name, const sf::Color& colour)
 	noexcept {
 	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "panel") {

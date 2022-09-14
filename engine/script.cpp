@@ -24,6 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 #include "SFML/Graphics/Color.hpp"
 
+void AWEColourTypeConstructor(const int r, const int g, const int b,
+    const int a, void* memory) {
+    new(memory) sf::Color((sf::Uint8)r, (sf::Uint8)g, (sf::Uint8)b, (sf::Uint8)a);
+}
+
 void engine::RegisterColourType(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) noexcept {
     if (!engine->GetTypeInfoByName("Colour")) {
@@ -37,7 +42,9 @@ void engine::RegisterColourType(asIScriptEngine* engine,
             asOFFSET(sf::Color, b));
         engine->RegisterObjectProperty("Colour", "uint8 a",
             asOFFSET(sf::Color, a));
-        // engine->RegisterObjectBehaviour("Colour", asBEHAVE_CONSTRUCT, "", , );
+        engine->RegisterObjectBehaviour("Colour", asBEHAVE_CONSTRUCT,
+            "void Colour(const int, const int, const int, const int)",
+            asFUNCTION(AWEColourTypeConstructor), asCALL_CDECL_OBJLAST);
         document->DocumentObjectType(r, "Represents a colour value.");
     }
 }
