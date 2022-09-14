@@ -595,7 +595,9 @@ namespace awe {
 		 * The \c movecosts array stores a list of movement points associated with
 		 * each movement type. For example, the first value will store the number
 		 * of movement points it takes for the first type of movement to traverse
-		 * over it (in the default implementation, Infantry).\n
+		 * over it (in the default implementation, Infantry). A negative value
+		 * indicates that a unit of the specified movement type cannot traverse the
+		 * terrain.\n
 		 * 
 		 * The \c pictures array stores a list of animated sprite names associated
 		 * with each country. For example, the first value will store the name of
@@ -1334,6 +1336,10 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::bank<T>, _opIndexStr), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Access a game property by its script "
 		"name.");
+	r = engine->RegisterObjectMethod(bankTypeName.c_str(), "uint length() const",
+		asMETHOD(awe::bank<T>, size), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the number of game properties stored "
+		"in this bank.");
 	// 4. Register the global point of access to the _propertyName + "Bank" object.
 	engine->RegisterGlobalProperty(globalPropDecl.c_str(), this);
 	document->DocumentExpectedFunction(globalPropDecl, "The single point of "

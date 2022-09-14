@@ -296,6 +296,17 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Returns the number of armies currently in "
 		"play.");
 
+	r = engine->RegisterObjectMethod("GameInterface",
+		"const Tile getTileType(const Vector2&in)",
+		asMETHOD(awe::game, getTileType), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns properties on a given tile.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"const Terrain getTerrainOfTile(const Vector2&in)",
+		asMETHOD(awe::game, getTerrainOfTile), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns properties on a given tile's "
+		"terrain type.");
+
 	// Register game global property.
 	r = engine->RegisterGlobalProperty("GameInterface game", &_game);
 

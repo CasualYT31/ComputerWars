@@ -217,6 +217,23 @@ std::size_t awe::game::getArmyCount() const {
 		throw NO_MAP;
 }
 
+const awe::tile_type awe::game::getTileType(const sf::Vector2u& pos) const {
+	if (_map) {
+		auto type = _map->getTileType(pos);
+		if (type)
+			return *type;
+		else
+			throw std::runtime_error("Could not retrieve the property of a tile. "
+				"The tile coordinate given was out of range.");
+	} else {
+		throw NO_MAP;
+	}
+}
+
+const awe::terrain awe::game::getTerrainOfTile(const sf::Vector2u& pos) const {
+	return *getTileType(pos).getType();
+}
+
 //////////////////////////////
 // INTERFACE HELPER METHODS //
 //////////////////////////////

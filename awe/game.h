@@ -198,6 +198,20 @@ namespace awe {
 		 */
 		std::size_t getArmyCount() const;
 
+		/**
+		 * @throws std::runtime_error if no map is currently loaded, or if the tile
+		 *                            location given was out of range.
+		 * @sa     @c awe::map::getTileType().
+		 */
+		const awe::tile_type getTileType(const sf::Vector2u& pos) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded, or if the tile
+		 *                            location given was out of range.
+		 * @sa     @c awe::map::getTileType().
+		 */
+		const awe::terrain getTerrainOfTile(const sf::Vector2u& pos) const;
+
 		/////////////////////
 		//  END  INTERFACE //
 		/////////////////////

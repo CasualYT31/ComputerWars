@@ -37,7 +37,7 @@ void setUpTerrainPanel(string baseLayout) {
 
 	addWidget("Label", baseLayout + "description");
 
-	// Add in movement types.
+	addWidget("VerticalLayout", baseLayout + "moveCosts");
 }
 
 void setUpUnitPanel(string baseLayout) {
@@ -62,6 +62,8 @@ string previousMenu;
 // displays detailed information on them.
 void DetailedInfoMenuOpen(const string&in previous) {
 	previousMenu = previous;
+
+	// Setup army panel.
 	const uint armyCount = game.getArmyCount();
 	for (uint a = 0; a < armyCount; a++) {
 		armyWidgets.insertLast(ArmyWidget(
@@ -70,17 +72,49 @@ void DetailedInfoMenuOpen(const string&in previous) {
 		setWidgetPosition(armyWidgets[a].panel, "2%", "2% + " +
 			formatUInt((ARMYWIDGET_HEIGHT + 10) * a) + "px");
 	}
+	
+	// Setup tile panel.
+	const Terrain terrainType = game.getTerrainOfTile(game.getSelectedTile());
+	string base = "DetailedInfoMenu.baseLayout.terrainPanel.terrainLayout.";
+	setWidgetText(base + "detailsAndPicture.details.longName", terrainType.name);
+	setWidgetSprite(base + "detailsAndPicture.details.defence.icon", "icon",
+		"defstar");
+	setWidgetText(base + "detailsAndPicture.details.defence.label", "~" +
+		formatUInt(terrainType.defence));
+	setWidgetSprite(base + "detailsAndPicture.details.hp.icon", "icon", "hp");
+	setWidgetText(base + "detailsAndPicture.details.hp.label", "~" +
+		formatUInt(terrainType.maxHP));
+	setWidgetText(base + "description", terrainType.description);
+	base += "moveCosts.";
+	for (BankID moveID = 0; moveID < movement.length(); ++moveID) {
+		if (terrainType.moveCost[moveID] >= 0) {
+			const Movement movementType = movement[moveID];
+			const string costName = base + "move" + formatUInt(moveID);
+			addWidget("HorizontalLayout", costName);
+			addWidget("Picture", costName + ".icon");
+			setWidgetSprite(costName + ".icon", "icon", movementType.iconName);
+			addWidget("Label", costName + ".shortName");
+			setWidgetText(costName + ".shortName", movementType.shortName);
+			addWidget("Label", costName + ".cost");
+			setWidgetText(costName + ".cost", "~" + terrainType.moveCost[moveID]);
+		}
+	}
 }
 
 /**
- * Deletes all ArmyWidgets.
+ * Deletes all the dynamic widgets.
  */
 void DetailedInfoMenuClose() {
+	// Remove all army widgets.
 	const uint armyCount = game.getArmyCount();
 	for (uint a = 0; a < armyCount; a++) {
 		armyWidgets[a].remove();
 	}
 	armyWidgets.removeRange(0, armyWidgets.length());
+
+	// Remove all movement cost layouts.
+	removeWidgetsFromContainer(
+		"DetailedInfoMenu.baseLayout.terrainPanel.terrainLayout.moveCosts");
 }
 
 void DetailedInfoMenuHandleInput(const dictionary controls) {
