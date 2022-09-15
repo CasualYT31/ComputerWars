@@ -315,6 +315,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"the specified tile. <tt>NO_ARMY</tt> is returned if either the position "
 		"was out of range, or if no army owns the tile.");
 
+	r = engine->RegisterObjectMethod("GameInterface",
+		"HP getTileHP(const Vector2&in)",
+		asMETHOD(awe::game, getTileHP), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns a tile's current HP.");
+
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
 		&awe::army::NO_ARMY_SCRIPT);

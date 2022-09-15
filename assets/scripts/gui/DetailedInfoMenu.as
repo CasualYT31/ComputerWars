@@ -111,6 +111,7 @@ void DetailedInfoMenuOpen(const string&in previous) {
 	setWidgetText(base + "detailsAndPicture.details.defence.label", "~" +
 		formatUInt(terrainType.defence));
 	setWidgetText(base + "detailsAndPicture.details.hp.label", "~" +
+		formatInt(game.getTileHP(game.getSelectedTile())) + " / " +
 		formatUInt(terrainType.maxHP));
 	if (terrainType.maxHP == 0) {
 		setWidgetVisibility(base + "detailsAndPicture.details.hp", false);

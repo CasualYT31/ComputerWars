@@ -216,7 +216,13 @@ namespace awe {
 		 * @throws std::runtime_error if no map is currently loaded.
 		 * @sa     @c awe::map::getTileOwner().
 		 */
-		const awe::ArmyID getTileOwner(const sf::Vector2u& pos) const;
+		awe::ArmyID getTileOwner(const sf::Vector2u& pos) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getTileHP().
+		 */
+		awe::HP getTileHP(const sf::Vector2u& pos) const;
 
 		/////////////////////
 		//  END  INTERFACE //
