@@ -405,6 +405,20 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Creates a widget of a given type and returns it.
+		 * Logs an error if the given type isn't supported. In this case, no widget
+		 * will be created.
+		 * @param  wType The type of widget to create. Must be all lower case.
+		 * @param  name  The fullname of the widget, which will be assigned later.
+		 * @param  menu  The name of the menu which the widget will later be added
+		 *               to.
+		 * @return Pointer to the new widget, or \c nullptr if it couldn't be
+		 *         created.
+		 */
+		tgui::Widget::Ptr _createWidget(const std::string& wType,
+			const std::string& name, const std::string& menu) noexcept;
+
+		/**
 		 * Finds a widget in the root GUI object and returns it.
 		 * The name of the widget should be in the format
 		 * "[MenuName[.ContainerNames].]WidgetName". If MenuName is not given,
@@ -483,6 +497,24 @@ namespace sfx {
 		 * @param name       The name of the new widget.
 		 */
 		void _addWidget(const std::string& widgetType, const std::string& name)
+			noexcept;
+
+		/**
+		 * Creates a widget and adds it to a grid.
+		 * An error will be logged in the following circumstances:
+		 * <ul><li>If the @c type parameter was invalid.</li>
+		 *     <li>If the second to last short name in the full name of the new
+		 *         widget did not identify a grid.</li>
+		 *     <li>If there was already a widget within the specified cell.
+		 *     </li></ul>
+		 * If an error is logged, no widget will be created or added.
+		 * @param widgetType The type of widget to create.
+		 * @param name       The name of the new widget. Must include the grid.
+		 * @param row        The row to add the widget to.
+		 * @param col        The column to add the widget to.
+		 */
+		void _addWidgetToGrid(const std::string& widgetType,
+			const std::string& name, const std::size_t row, const std::size_t col)
 			noexcept;
 
 		/**
@@ -672,6 +704,18 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Sets a widget's size in relation to others in its layout.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no ratio will be set. An
+		 * error will also be logged if the given index was too high.
+		 * @param name  The name of the vertical or horizontal layout to change.
+		 * @param index The 0-based index of the widget to readjust.
+		 * @param ratio The ratio to apply.
+		 */
+		void _setWidgetRatioInLayout(const std::string& name,
+			const std::size_t index, const float ratio) noexcept;
+
+		/**
 		 * Adds an item to a widget.
 		 * E.g. appends an item to a listbox.\n
 		 * If no widget exists with the given name, or if it doesn't support the
@@ -727,6 +771,21 @@ namespace sfx {
 		 */
 		void _setGroupPadding(const std::string& name, const std::string& padding)
 			noexcept;
+
+		/**
+		 * Sets the alignment applied to a widget within a grid.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no alignment will be
+		 * changed. An error will also be logged if the \c row and \c col
+		 * parameters are out of range.
+		 * @param name      The name of the grid to edit.
+		 * @param row       The 0-based row ID of the widget to edit.
+		 * @param col       The 0-based column ID of the widget to edit.
+		 * @param alignment The alignment to set to the widget.
+		 */
+		void _setWidgetAlignmentInGrid(const std::string& name,
+			const std::size_t row, const std::size_t col,
+			const tgui::Grid::Alignment alignment) noexcept;
 
 		//////////
 		// DATA //

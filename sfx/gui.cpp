@@ -205,8 +205,30 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	// Register types.
 	engine::RegisterColourType(engine, document);
 
+	auto r = engine->RegisterEnum("WidgetAlignment");
+	document->DocumentObjectEnum(r, "Values representing widget alignments in a "
+		"grid.");
+	engine->RegisterEnumValue("WidgetAlignment", "Centre",
+		(int)Grid::Alignment::Center);
+	engine->RegisterEnumValue("WidgetAlignment", "UpperLeft",
+		(int)Grid::Alignment::UpperLeft);
+	engine->RegisterEnumValue("WidgetAlignment", "Up",
+		(int)Grid::Alignment::Up);
+	engine->RegisterEnumValue("WidgetAlignment", "UpperRight",
+		(int)Grid::Alignment::UpperRight);
+	engine->RegisterEnumValue("WidgetAlignment", "Right",
+		(int)Grid::Alignment::Right);
+	engine->RegisterEnumValue("WidgetAlignment", "BottomRight",
+		(int)Grid::Alignment::BottomRight);
+	engine->RegisterEnumValue("WidgetAlignment", "Bottom",
+		(int)Grid::Alignment::Bottom);
+	engine->RegisterEnumValue("WidgetAlignment", "BottomLeft",
+		(int)Grid::Alignment::BottomLeft);
+	engine->RegisterEnumValue("WidgetAlignment", "Left",
+		(int)Grid::Alignment::Left);
+
 	// Register non-widget global functions.
-	auto r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
+	r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
 		asMETHOD(sfx::gui, _setGUI), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Hides the current menu and shows the "
 		"menu given.");
@@ -241,6 +263,14 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"the name of the new widget is a full name, it will be added in the "
 		"specified container. If it is not a full name, it will be added to the "
 		"current menu.");
+
+	r = engine->RegisterGlobalFunction("void addWidgetToGrid(const string&in,"
+		"const string&in, const uint, const uint)",
+		asMETHOD(sfx::gui, _addWidgetToGrid), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Creates a new widget and adds it to a "
+		"grid. The type of widget is given, then the name of the new widget "
+		"(which must include the grid's name before the new widget's name!). The "
+		"widget's row and column index are then specified, in that order.");
 
 	r = engine->RegisterGlobalFunction("void removeWidget(const string&in)",
 		asMETHOD(sfx::gui, _removeWidget), asCALL_THISCALL_ASGLOBAL, this);
@@ -355,6 +385,15 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's rounded border radius.");
 
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetRatioInLayout(const string&in, const uint, const float)",
+		asMETHOD(sfx::gui, _setWidgetRatioInLayout),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Within a VerticalLayout or "
+		"HorizontalLayout; sets the ratio of a specified widget's size compared "
+		"to others in the layout. The unsigned integer is a 0-based index of the "
+		"widget in the layout to amend.");
+
 	r = engine->RegisterGlobalFunction("void addItem(const string& in, const "
 		"string& in)",
 		asMETHOD(sfx::gui, _addItem), asCALL_THISCALL_ASGLOBAL, this);
@@ -387,6 +426,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"const string&in, const string&in)",
 		asMETHOD(sfx::gui, _setGroupPadding), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a group's padding.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetAlignmentInGrid("
+		"const string&in, const uint, const uint, const WidgetAlignment)",
+		asMETHOD(sfx::gui, _setWidgetAlignmentInGrid),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's alignment within its "
+		"grid cell.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -947,6 +993,37 @@ std::string sfx::gui::_extractWidgetName(const tgui::String& fullname) noexcept 
 	}
 }
 
+Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
+	const std::string& name, const std::string& menu) noexcept {
+	tgui::String type = tgui::String(wType).trim().toLower();
+	if (type == "bitmapbutton") {
+		return tgui::BitmapButton::create();
+	} else if (type == "listbox") {
+		return tgui::ListBox::create();
+	} else if (type == "verticallayout") {
+		return tgui::VerticalLayout::create();
+	} else if (type == "horizontallayout") {
+		return tgui::HorizontalLayout::create();
+	} else if (type == "picture") {
+		return tgui::Picture::create();
+	} else if (type == "label") {
+		return tgui::Label::create();
+	} else if (type == "scrollablepanel") {
+		return tgui::ScrollablePanel::create();
+	} else if (type == "panel") {
+		return tgui::Panel::create();
+	} else if (type == "group") {
+		return tgui::Group::create();
+	} else if (type == "grid") {
+		return tgui::Grid::create();
+	} else {
+		_logger.error("Attempted to create a widget of type \"{}\" with name "
+			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
+			name, menu);
+		return nullptr;
+	}
+}
+
 //////////////////////
 // SCRIPT INTERFACE //
 //////////////////////
@@ -980,49 +1057,57 @@ void sfx::gui::_colourBackground(std::string menu, const unsigned int r,
 
 void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name)
 	noexcept {
-	std::string type = String(widgetType).toLower().toStdString();
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	if (_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
 		_logger.error("Attempted to create a new \"{}\" widget with name \"{}\": "
-			"a widget with that name already exists!", type, name);
+			"a widget with that name already exists!", widgetType, name);
 	} else {
-		tgui::Widget::Ptr widget;
-		if (type == "bitmapbutton") {
-			widget = tgui::BitmapButton::create();
-		} else if (type == "listbox") {
-			widget = tgui::ListBox::create();
-		} else if (type == "verticallayout") {
-			widget = tgui::VerticalLayout::create();
-		} else if (type == "horizontallayout") {
-			widget = tgui::HorizontalLayout::create();
-		} else if (type == "picture") {
-			widget = tgui::Picture::create();
-		} else if (type == "label") {
-			widget = tgui::Label::create();
-		} else if (type == "scrollablepanel") {
-			widget = tgui::ScrollablePanel::create();
-		} else if (type == "panel") {
-			widget = tgui::Panel::create();
-		} else if (type == "group") {
-			widget = tgui::Group::create();
-		} else {
-			_logger.error("Attempted to create a widget of type \"{}\" with name "
-				"\"{}\" for menu \"{}\": that widget type is not supported.", type,
-				name, fullname[0]);
-			return;
+		tgui::Widget::Ptr widget = _createWidget(widgetType, name, fullname[0]);
+		if (widget) {
+			const auto containerName =
+				fullnameAsString.substr(0, fullnameAsString.rfind('.'));
+			auto container = _findWidget<Container>(containerName);
+			if (!container) {
+				_logger.error("Attempted to add a \"{}\" widget called \"{}\" to "
+					"the container \"{}\". This container does not exist.",
+					widgetType, name, containerName);
+				return;
+			}
+			container->add(widget, fullnameAsString);
+			_connectSignals(widget);
 		}
-		const auto containerName =
-			fullnameAsString.substr(0, fullnameAsString.rfind('.'));
-		auto container = _findWidget<Container>(containerName);
-		if (!container) {
-			_logger.error("Attempted to add a \"{}\" widget called \"{}\" to the "
-				"container \"{}\". This container does not exist.", type, name,
-				containerName);
-			return;
+	}
+}
+
+void sfx::gui::_addWidgetToGrid(const std::string& widgetType,
+	const std::string& name, const std::size_t row, const std::size_t col)
+	noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	if (_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
+		_logger.error("Attempted to create a new \"{}\" widget with name \"{}\": "
+			"a widget with that name already exists!", widgetType, name);
+	} else {
+		tgui::Widget::Ptr widget = _createWidget(widgetType, name, fullname[0]);
+		if (widget) {
+			const auto gridName =
+				fullnameAsString.substr(0, fullnameAsString.rfind('.'));
+			auto grid = _findWidget<Grid>(gridName);
+			if (!grid) {
+				_logger.error("Attempted to add a \"{}\" widget called \"{}\" to "
+					"the grid \"{}\". This grid does not exist.",
+					widgetType, name, gridName);
+			} else if (grid->getWidgetType() != "Grid") {
+				_logger.error("Attempted to add a \"{}\" widget called \"{}\" to "
+					"the grid \"{}\". This widget is not a grid.",
+					widgetType, name, gridName);
+			} else {
+				widget->setWidgetName(fullnameAsString);
+				_connectSignals(widget);
+				grid->addWidget(widget, row, col);
+			}
 		}
-		container->add(widget, fullnameAsString);
-		_connectSignals(widget);
 	}
 }
 
@@ -1387,6 +1472,32 @@ void sfx::gui::_setWidgetBorderRadius(const std::string& name, const float radiu
 	}
 }
 
+void sfx::gui::_setWidgetRatioInLayout(const std::string& name,
+	const std::size_t index, const float ratio) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "verticallayout" || type == "horizontallayout") {
+			auto boxRatios = std::dynamic_pointer_cast<BoxLayoutRatios>(widget);
+			if (!boxRatios->setRatio(index, ratio)) {
+				_logger.error("Attempted to set the widget ratio {} to widget {} "
+					"in layout \"{}\", within menu \"{}\". The widget index was "
+					"too high.", ratio, index, name, fullname[0]);
+			}
+		} else {
+			_logger.error("Attempted to set the widget ratio {} to widget {} in "
+				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
+				"This operation is not supported for this type of widget.", ratio,
+				index, name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the widget ratio {} to widget {} in "
+			"widget \"{}\" within menu \"{}\". This widget does not exist.", ratio,
+			index, name, fullname[0]);
+	}
+}
+
 void sfx::gui::_addItem(const std::string& name, const std::string& text)
 	noexcept {
 	std::vector<std::string> fullname;
@@ -1532,5 +1643,42 @@ void sfx::gui::_setGroupPadding(const std::string& name,
 		_logger.error("Attempted to set a padding {} to a widget \"{}\" within "
 			"menu \"{}\". This widget does not exist.", padding, name,
 			fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
+	const std::size_t row, const std::size_t col,
+	const tgui::Grid::Alignment alignment) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "grid") {
+			auto grid = std::dynamic_pointer_cast<Grid>(widget);
+			auto table = grid->getGridWidgets();
+			if (row < table.size()) {
+				if (col < table[row].size()) {
+					grid->setWidgetAlignment(row, col, alignment);
+				} else {
+					_logger.error("Attempted to set an alignment {} to a grid "
+						"\"{}\" @ ({}, {}), within menu \"{}\". The column index "
+						"is out of range.", alignment, name, row, col,
+						fullname[0]);
+				}
+			} else {
+				_logger.error("Attempted to set an alignment {} to a grid \"{}\" "
+					"@ ({}, {}), within menu \"{}\". The row index is out of "
+					"range.", alignment, name, row, col, fullname[0]);
+			}
+		} else {
+			_logger.error("Attempted to set an alignment {} to a widget \"{}\" @ "
+				"({}, {}) which is of type \"{}\", within menu \"{}\". This "
+				"operation is not supported for this type of widget.", alignment,
+				name, row, col, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set an alignment {} to a widget \"{}\" @ ({}, "
+			"{}) within menu \"{}\". This widget does not exist.", alignment, name,
+			row, col, fullname[0]);
 	}
 }

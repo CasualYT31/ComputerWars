@@ -53,6 +53,84 @@ void setUpUnitPanel(string baseLayout) {
 	baseLayout += ".unitPanel";
 	addWidget("ScrollablePanel", baseLayout);
 	setWidgetSize(baseLayout, "33.333%", "100%");
+	setGroupPadding(baseLayout, "5%");
+	baseLayout += ".unitLayout";
+	addWidget("VerticalLayout", baseLayout);
+	string unitLayout = baseLayout + ".";
+	string details = unitLayout + "details";
+
+	addWidget("HorizontalLayout", details);
+	details += ".";
+	string stats = details + "stats";
+	addWidget("VerticalLayout", stats);
+	stats += ".";
+	addWidget("Label", stats + "name");
+	stats += "grid";
+	addWidget("Grid", stats);
+	stats += ".";
+	addWidgetToGrid("Label", stats + "priceLabel", 0, 0);
+	setWidgetText(stats + "priceLabel", "~G.");
+	addWidgetToGrid("Picture", stats + "fuelIcon", 1, 0);
+	setWidgetSprite(stats + "fuelIcon", "icon", "fuel");
+	addWidgetToGrid("Picture", stats + "ammoIcon", 2, 0);
+	setWidgetSprite(stats + "ammoIcon", "icon", "ammo");
+	addWidgetToGrid("Label", stats + "price", 0, 1);
+	addWidgetToGrid("Label", stats + "fuel", 1, 1);
+	addWidgetToGrid("Label", stats + "ammo", 2, 1);
+	addWidgetToGrid("Picture", stats + "moveIcon", 0, 2);
+	setWidgetSprite(stats + "moveIcon", "icon", "move");
+	addWidgetToGrid("Picture", stats + "typeIcon", 1, 2);
+	addWidgetToGrid("Picture", stats + "visionIcon", 2, 2);
+	setWidgetSprite(stats + "visionIcon", "icon", "vision");
+	addWidgetToGrid("Label", stats + "mp", 0, 3);
+	addWidgetToGrid("Label", stats + "movement", 1, 3);
+	addWidgetToGrid("Label", stats + "vision", 2, 3);
+	stats.erase(stats.length() - 1);
+	setWidgetAlignmentInGrid(stats, 0, 0, WidgetAlignment::Right);
+	setWidgetAlignmentInGrid(stats, 1, 0, WidgetAlignment::Right);
+	setWidgetAlignmentInGrid(stats, 2, 0, WidgetAlignment::Right);
+	setWidgetAlignmentInGrid(stats, 0, 1, WidgetAlignment::Left);
+	setWidgetAlignmentInGrid(stats, 1, 1, WidgetAlignment::Left);
+	setWidgetAlignmentInGrid(stats, 2, 1, WidgetAlignment::Left);
+	setWidgetAlignmentInGrid(stats, 0, 2, WidgetAlignment::Right);
+	setWidgetAlignmentInGrid(stats, 1, 2, WidgetAlignment::Right);
+	setWidgetAlignmentInGrid(stats, 2, 2, WidgetAlignment::Right);
+	setWidgetAlignmentInGrid(stats, 0, 3, WidgetAlignment::Left);
+	setWidgetAlignmentInGrid(stats, 1, 3, WidgetAlignment::Left);
+	setWidgetAlignmentInGrid(stats, 2, 3, WidgetAlignment::Left);
+	setWidgetRatioInLayout(details + "stats", 0, 1.0);
+	setWidgetRatioInLayout(details + "stats", 1, 9.0);
+
+	addWidget("VerticalLayout", details + "pictureAndRange");
+	addWidget("Panel", details + "pictureAndRange.panel");
+	addWidget("Picture", details + "pictureAndRange.panel.picture");
+	setWidgetOrigin(
+		details + "pictureAndRange.panel.picture", 1.0, 0.5);
+	setWidgetPosition(
+		details + "pictureAndRange.panel.picture", "100%", "50%");
+	addWidget("HorizontalLayout", details + "pictureAndRange.rangeLayout");
+	addWidget("Panel", details + "pictureAndRange.rangeLayout.panel");
+	addWidget("Label", details + "pictureAndRange.rangeLayout.panel.label");
+	setWidgetOrigin(
+		details + "pictureAndRange.rangeLayout.panel.label", 1.0, 0.5);
+	setWidgetPosition(
+		details + "pictureAndRange.rangeLayout.panel.label", "100%", "50%");
+	setWidgetText(details + "pictureAndRange.rangeLayout.panel.label", "range");
+	string ranges = details + "pictureAndRange.rangeLayout.ranges";
+	addWidget("Grid", ranges);
+	ranges += ".";
+	addWidgetToGrid("Label", ranges + "lower", 0, 0);
+	addWidgetToGrid("Picture", ranges + "icon", 0, 1);
+	setWidgetSprite(ranges + "icon", "icon", "range");
+	addWidgetToGrid("Label", ranges + "higher", 0, 2);
+	ranges.erase(ranges.length() - 1);
+	setWidgetAlignmentInGrid(ranges, 0, 0, WidgetAlignment::Centre);
+	setWidgetAlignmentInGrid(ranges, 0, 1, WidgetAlignment::Centre);
+	setWidgetAlignmentInGrid(ranges, 0, 2, WidgetAlignment::Centre);
+	setWidgetRatioInLayout(details + "pictureAndRange", 0, 9.0);
+	setWidgetRatioInLayout(details + "pictureAndRange", 1, 1.0);
+
+	addWidget("Label", unitLayout + "description");
 }
 
 void DetailedInfoMenuSetUp() {
