@@ -130,6 +130,10 @@ void setUpUnitPanel(string baseLayout) {
 	setWidgetRatioInLayout(details + "pictureAndRange", 0, 9.0);
 	setWidgetRatioInLayout(details + "pictureAndRange", 1, 1.0);
 
+	details.erase(details.length() - 1);
+	setWidgetRatioInLayout(details, 0, 1.5);
+	setWidgetRatioInLayout(details, 1, 1.0);
+
 	addWidget("Label", unitLayout + "description");
 }
 
@@ -212,6 +216,49 @@ void DetailedInfoMenuOpen(const string&in previous) {
 			addWidget("Label", costName + ".cost");
 			setWidgetText(costName + ".cost", "~" + terrainType.moveCost[moveID]);
 		}
+	}
+
+	// Setup unit panel.
+	const string unitPanel =
+		"DetailedInfoMenu.baseLayout.unitPanel.unitLayout.details";
+	const auto unitID = game.getUnitOnTile(game.getSelectedTile());
+	if (unitID > 0) {
+		const Unit unitType = game.getUnitType(unitID);
+		setWidgetText(unitPanel + ".stats.name", unitType.name);
+		setWidgetText(unitPanel + ".stats.grid.price", "~" +
+			formatUInt(unitType.cost));
+		setWidgetText(unitPanel + ".stats.grid.fuel", "~" +
+			formatInt(game.getUnitFuel(unitID)) + " / " +
+			formatInt(unitType.maxFuel));
+		setWidgetText(unitPanel + ".stats.grid.ammo", "~" +
+			formatInt(game.getUnitAmmo(unitID)) + " / " +
+			formatInt(unitType.maxAmmo));
+		setWidgetText(unitPanel + ".stats.grid.mp", "~" +
+			formatUInt(unitType.movementPoints));
+		setWidgetSprite(unitPanel + ".stats.grid.typeIcon", "icon",
+			movement[unitType.movementType].iconName);
+		setWidgetText(unitPanel + ".stats.grid.movement",
+			movement[unitType.movementType].shortName);
+		setWidgetText(unitPanel + ".stats.grid.vision", "~" +
+			formatUInt(unitType.vision));
+
+		setWidgetSprite(unitPanel + ".pictureAndRange.panel.picture",
+			"unitPicture", unitType.pictureSprite[
+			game.getArmyCountry(game.getArmyOfUnit(unitID)).ID]);
+		setWidgetText(unitPanel + ".pictureAndRange.rangeLayout.ranges.lower",
+			"~" + unitType.lowerRange);
+		setWidgetText(unitPanel + ".pictureAndRange.rangeLayout.ranges.higher",
+			"~" + unitType.higherRange);
+
+		setWidgetText(
+			"DetailedInfoMenu.baseLayout.unitPanel.unitLayout.description",
+			unitType.description);
+
+		setWidgetVisibility("DetailedInfoMenu.baseLayout.unitPanel.unitLayout",
+			true);
+	} else {
+		setWidgetVisibility("DetailedInfoMenu.baseLayout.unitPanel.unitLayout",
+			false);
 	}
 }
 

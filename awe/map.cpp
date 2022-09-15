@@ -308,27 +308,35 @@ void awe::map::deleteUnit(const awe::UnitID id) noexcept {
 			"with ID {} that didn't exist!", id);
 		return;
 	}
-	// firstly, remove the unit from the tile, if it was on a tile
-	// we don't need to check if the unit "is actually on the map or not"
-	// since the tile will always hold the index to the unit in either case:
-	// which is why we need the "actually" check to begin with
+	// Firstly, remove the unit from the tile, if it was on a tile.
+	// We don't need to check if the unit "is actually on the map or not," since
+	// the tile will always hold the index to the unit in either case: which is why
+	// we need the "actually" check to begin with
 	if (!_isOutOfBounds(_units.at(id).getPosition()))
 		_tiles[_units.at(id).getPosition().x]
 		      [_units.at(id).getPosition().y].setUnit(0);
-	// secondly, remove the unit from the army's list
+	// Secondly, remove the unit from the army's list.
 	if (_isArmyPresent(_units.at(id).getArmy())) {
 		_armys.at(_units.at(id).getArmy()).removeUnit(id);
 	} else {
 		_logger.warning("deleteUnit warning: unit with ID {} didn't have a valid "
 			"owning army ID, which was {}", id, _units.at(id).getArmy());
 	}
-	// thirdly, delete all units that are loaded onto this one
+	// Thirdly, delete all units that are loaded onto this one.
 	auto loaded = _units.at(id).loadedUnits();
 	for (awe::UnitID unit : loaded) {
 		deleteUnit(unit);
 	}
-	// finally, delete the unit from the main list
+	// Finally, delete the unit from the main list.
 	_units.erase(id);
+}
+
+std::shared_ptr<const awe::unit_type> awe::map::getUnitType(const awe::UnitID id)
+	const noexcept {
+	if (_isUnitPresent(id)) return _units.at(id).getType();
+	_logger.error("getUnitType operation failed: unit with ID {} doesn't exist!",
+		id);
+	return nullptr;
 }
 
 void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u pos)

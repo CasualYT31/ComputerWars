@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine.h"
 
 const std::runtime_error NO_MAP("No map is currently loaded");
+const std::runtime_error INVALID_UNIT_ID("The given unit ID was invalid");
 
 awe::game::game(const std::string& name) noexcept : _logger(name) {}
 
@@ -244,6 +245,45 @@ awe::ArmyID awe::game::getTileOwner(const sf::Vector2u& pos) const {
 awe::HP awe::game::getTileHP(const sf::Vector2u& pos) const {
 	if (_map)
 		return _map->getTileHP(pos);
+	else
+		throw NO_MAP;
+}
+
+const awe::unit_type awe::game::getUnitType(const awe::UnitID id) const {
+	if (_map) {
+		auto type = _map->getUnitType(id);
+		if (type)
+			return *type;
+		else
+			throw INVALID_UNIT_ID;
+	} else {
+		throw NO_MAP;
+	}
+}
+
+awe::ArmyID awe::game::getArmyOfUnit(const awe::UnitID id) const {
+	if (_map) {
+		auto army = _map->getArmyOfUnit(id);
+		if (army == awe::army::NO_ARMY) {
+			throw INVALID_UNIT_ID;
+		} else {
+			return army;
+		}
+	} else {
+		throw NO_MAP;
+	}
+}
+
+awe::Fuel awe::game::getUnitFuel(const awe::UnitID id) const {
+	if (_map)
+		return _map->getUnitFuel(id);
+	else
+		throw NO_MAP;
+}
+
+awe::Ammo awe::game::getUnitAmmo(const awe::UnitID id) const {
+	if (_map)
+		return _map->getUnitAmmo(id);
 	else
 		throw NO_MAP;
 }

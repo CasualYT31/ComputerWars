@@ -9,7 +9,7 @@
     "co": "sprites/co/spritesco.json",
     "unit": {
       "idle": "sprites/unit/idle/spritesunitidle.json",
-      "pictures": "sprites/unit_picture/spritesunit_picture.json"
+      "pictures": "sprites/unit_picture/unitpictures.json"
     },
     "tile": {
       "normal": "sprites/tile/normal/spritestilenormal.json",

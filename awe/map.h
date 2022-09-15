@@ -319,6 +319,15 @@ namespace awe {
 		void deleteUnit(const awe::UnitID id) noexcept;
 
 		/**
+		 * Gets a unit's type.
+		 * @param  id The 1-based ID of the unit to query.
+		 * @return Pointer to the unit's type properties. \c nullptr if the unit ID
+		 *         was invalid.
+		 */
+		std::shared_ptr<const awe::unit_type> getUnitType(const awe::UnitID id)
+			const noexcept;
+
+		/**
 		 * Sets a unit's position on the map.
 		 * The operation will be cancelled if the specified tile is already
 		 * occupied.

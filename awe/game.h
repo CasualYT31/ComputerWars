@@ -224,6 +224,32 @@ namespace awe {
 		 */
 		awe::HP getTileHP(const sf::Vector2u& pos) const;
 
+		/**
+		 * @throws std::runtime_error if no map is currently loaded, or if the unit
+		 *                            ID was invalid.
+		 * @sa     @c awe::map::getUnitType().
+		 */
+		const awe::unit_type getUnitType(const awe::UnitID id) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded, or if the unit
+		 *                            ID was invalid.
+		 * @sa     @c awe::map::getArmyOfUnit().
+		 */
+		awe::ArmyID getArmyOfUnit(const awe::UnitID id) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getUnitFuel().
+		 */
+		awe::Fuel getUnitFuel(const awe::UnitID id) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getUnitAmmo().
+		 */
+		awe::Ammo getUnitAmmo(const awe::UnitID id) const;
+
 		/////////////////////
 		//  END  INTERFACE //
 		/////////////////////

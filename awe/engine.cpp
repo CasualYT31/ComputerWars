@@ -320,6 +320,27 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game, getTileHP), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns a tile's current HP.");
 
+	r = engine->RegisterObjectMethod("GameInterface",
+		"const Unit getUnitType(const UnitID)",
+		asMETHOD(awe::game, getUnitType), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns details on a unit's type.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"ArmyID getArmyOfUnit(const UnitID)",
+		asMETHOD(awe::game, getArmyOfUnit), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the ID of the army who owns a "
+		"specified unit.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"Fuel getUnitFuel(const UnitID)",
+		asMETHOD(awe::game, getUnitFuel), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the fuel that a given unit has.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"Ammo getUnitAmmo(const UnitID)",
+		asMETHOD(awe::game, getUnitAmmo), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the ammo that a given unit has.");
+
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
 		&awe::army::NO_ARMY_SCRIPT);
@@ -550,8 +571,8 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 			{ "spritesheets", "unit", "idle" })
 		&& _loadObject(_sprites->tile->normal, j,
 			{ "spritesheets", "tile", "normal" })
-		// && _loadObject(_sprites->unitPicture, j,
-			// { "spritesheets", "unit", "pictures" })
+		&& _loadObject(_sprites->unitPicture, j,
+			{ "spritesheets", "unit", "pictures" })
 		&& _loadObject(_sprites->tilePicture->normal, j,
 			{ "spritesheets", "tile", "normalpictures" })
 		&& _loadObject(_sprites->icon, j, { "spritesheets", "icon" })
@@ -579,6 +600,7 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_gui->addSpritesheet("icon", _sprites->icon);
 	_gui->addSpritesheet("co", _sprites->CO);
 	_gui->addSpritesheet("tilePicture.normal", _sprites->tilePicture->normal);
+	_gui->addSpritesheet("unitPicture", _sprites->unitPicture);
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setFonts(_fonts);
 	_gui->setTarget(*_renderer);
