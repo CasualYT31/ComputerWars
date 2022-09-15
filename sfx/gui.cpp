@@ -255,8 +255,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"components of the colour, respectively.");
 
 	// Register widget global functions.
-	r = engine->RegisterGlobalFunction("void addWidget(const string& in, const "
-		"string& in)",
+	r = engine->RegisterGlobalFunction("bool widgetExists(const string&in)",
+		asMETHOD(sfx::gui, _widgetExists), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the named "
+		"widget exists, <tt>FALSE</tt> otherwise.");
+
+	r = engine->RegisterGlobalFunction("void addWidget(const string&in, const "
+		"string&in)",
 		asMETHOD(sfx::gui, _addWidget), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Creates a new widget and adds it to a "
 		"menu. The type of widget is given, then the name of the new widget. If "
@@ -310,8 +315,8 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"axis, and then along the Y axis. Each origin is a value between 0 and 1, "
 		"and represents a percentage, from left/top to right/bottom.");
 
-	r = engine->RegisterGlobalFunction("void setWidgetSize(const string& in, "
-		"const string& in, const string& in)",
+	r = engine->RegisterGlobalFunction("void setWidgetSize(const string&in, "
+		"const string&in, const string&in)",
 		asMETHOD(sfx::gui, _setWidgetSize), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's size. The name of the "
 		"widget is given, then the width, then the height.");
@@ -962,8 +967,12 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 		auto container = _findWidget<Container>(
 			widget->getWidgetName().toStdString());
 		auto widgetsInContainer = container->getWidgets();
-		for (auto& widgetInContainer : widgetsInContainer)
-			_removeWidgets(widgetInContainer, container, true);
+		for (auto& widgetInContainer : widgetsInContainer) {
+			if (widget->getWidgetType() == "Grid")
+				_removeWidgets(widgetInContainer, container, false);
+			else
+				_removeWidgets(widgetInContainer, container, true);
+		}
 		if (!removeIt) return;
 	}
 	// Remove widget.
@@ -978,7 +987,7 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 			_dontOverridePictureSizeWithSpriteSize.erase(name);
 		if (_originalStrings.find(name) != _originalStrings.end())
 			_originalStrings.erase(name);
-		container->remove(widget);
+		if (removeIt) container->remove(widget);
 	} else {
 		_logger.error("Attempted to remove a widget \"{}\", which did not have a "
 			"container!", name);
@@ -1053,6 +1062,10 @@ void sfx::gui::_colourBackground(std::string menu, const unsigned int r,
 	const unsigned int g, const unsigned int b, const unsigned int a) noexcept {
 	if (menu == "") menu = getGUI();
 	_guiBackground[menu].set(sf::Color(r, g, b, a));
+}
+
+bool sfx::gui::_widgetExists(const std::string& name) noexcept {
+	return _findWidget<Widget>(name).operator bool();
 }
 
 void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name)

@@ -49,6 +49,12 @@ namespace awe {
 		game(const std::string& name = "game") noexcept;
 
 		/**
+		 * Sets the script engine to use with this game.
+		 * @param scripts Pointer to the script engine.
+		 */
+		void setScripts(const std::shared_ptr<engine::scripts>& scripts) noexcept;
+
+		/**
 		 * Sets up a game based on what @c map requires.
 		 * @param file       Path to the binary file containing the map to play on.
 		 * @param countries  Information on the countries to search through when
@@ -240,6 +246,12 @@ namespace awe {
 
 		/**
 		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getUnitHP().
+		 */
+		awe::HP getUnitHP(const awe::UnitID id) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
 		 * @sa     @c awe::map::getUnitFuel().
 		 */
 		awe::Fuel getUnitFuel(const awe::UnitID id) const;
@@ -249,6 +261,12 @@ namespace awe {
 		 * @sa     @c awe::map::getUnitAmmo().
 		 */
 		awe::Ammo getUnitAmmo(const awe::UnitID id) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getLoadedUnits().
+		 */
+		CScriptArray* getLoadedUnits(const awe::UnitID id) const;
 
 		/////////////////////
 		//  END  INTERFACE //
@@ -276,6 +294,11 @@ namespace awe {
 		 * Internal logger object.
 		 */
 		mutable engine::logger _logger;
+
+		/**
+		 * Lets the \c game class create arrays to pass to the scripts.
+		 */
+		std::shared_ptr<engine::scripts> _scripts = nullptr;
 
 		/**
 		 * Stores the map.

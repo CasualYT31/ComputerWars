@@ -252,6 +252,14 @@ namespace engine {
 		 *         registered with this engine.
 		 */
 		CScriptDictionary* createDictionary() noexcept;
+
+		/**
+		 * Creates a @c CScriptArray object.
+		 * @param  type The name of the type to give as the array's type.
+		 * @return Pointer to a new AngelScript @c array object, or \c nullptr if
+		 *         it could not be created.
+		 */
+		CScriptArray* createArray(const std::string& type) const noexcept;
 	private:
 		/**
 		 * Allocates a new function context.

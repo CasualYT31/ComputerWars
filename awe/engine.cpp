@@ -24,8 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "game.h"
 #include "army.h"
 
-sf::Vector2i awe::game_engine::_INVALID_MOUSE = sfx::INVALID_MOUSE;
-
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
 int awe::game_engine::run() noexcept {
@@ -70,6 +68,18 @@ int awe::game_engine::run() noexcept {
 }
 
 // Script interface.
+
+sf::Vector2i awe::game_engine::_INVALID_MOUSE = sfx::INVALID_MOUSE;
+
+void AWEVector2TypeConstructor(const unsigned int x, const unsigned int y,
+	void* memory) {
+	new(memory) sf::Vector2u(x, y);
+}
+
+awe::HP getDisplayedHP(const awe::HP hp) noexcept {
+	auto ret = (awe::HP)ceil((double)hp / (double)awe::unit_type::HP_GRANULARITY);
+	return ret;
+}
 
 // Wrapper for Vector2u and Vector2i operator==s.
 // Using them directly doesn't work... No idea why.
@@ -116,6 +126,9 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asOFFSET(sf::Vector2u, x));
 	engine->RegisterObjectProperty("Vector2", "uint y",
 		asOFFSET(sf::Vector2u, y));
+	engine->RegisterObjectBehaviour("Vector2", asBEHAVE_CONSTRUCT,
+		"void Vector2(const uint, const uint)",
+		asFUNCTION(AWEVector2TypeConstructor), asCALL_CDECL_OBJLAST);
 	document->DocumentObjectType(r, "Represents a 2D vector.");
 
 	r = engine->RegisterObjectType("MousePosition", sizeof(sf::Vector2i),
@@ -332,6 +345,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"specified unit.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
+		"HP getUnitHP(const UnitID)",
+		asMETHOD(awe::game, getUnitHP), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the HP that a given unit has.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
 		"Fuel getUnitFuel(const UnitID)",
 		asMETHOD(awe::game, getUnitFuel), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the fuel that a given unit has.");
@@ -340,6 +358,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"Ammo getUnitAmmo(const UnitID)",
 		asMETHOD(awe::game, getUnitAmmo), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the ammo that a given unit has.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"array<UnitID>@ getLoadedUnits(const UnitID)",
+		asMETHOD(awe::game, getLoadedUnits), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the IDs of the units that are "
+		"loaded onto the one specified.");
 
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
@@ -532,6 +556,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, _renderer.get());
 	document->DocumentGlobalFunction(r, "Returns the render window's client "
 		"region's size, in pixels.");
+
+	r = engine->RegisterGlobalFunction("HP getDisplayedHP(const HP)",
+		asFUNCTION(getDisplayedHP), asCALL_CDECL);
+	document->DocumentGlobalFunction(r, "Receives an internal unit HP value and "
+		"returns the unit HP value that is displayed to the user.");
 }
 
 bool awe::game_engine::_load(engine::json& j) noexcept {
@@ -563,6 +592,7 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_renderer->openWindow();
 	// Allocate GUI and scripts objects, but don't initialise yet.
 	_scripts = std::make_shared<engine::scripts>();
+	_game.setScripts(_scripts);
 	_gui = std::make_shared<sfx::gui>(_scripts);
 	// Continue loading most of the objects.
 	ret =  _loadObject(_userinput, j, { "userinput" })
@@ -601,6 +631,8 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_gui->addSpritesheet("co", _sprites->CO);
 	_gui->addSpritesheet("tilePicture.normal", _sprites->tilePicture->normal);
 	_gui->addSpritesheet("unitPicture", _sprites->unitPicture);
+	_gui->addSpritesheet("tile.normal", _sprites->tile->normal);
+	_gui->addSpritesheet("unit", _sprites->unit->idle);
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setFonts(_fonts);
 	_gui->setTarget(*_renderer);

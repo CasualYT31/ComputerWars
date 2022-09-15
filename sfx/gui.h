@@ -384,14 +384,20 @@ namespace sfx {
 
 		/**
 		 * Removes widgets from \c _gui.
+		 * @warning A grid within a grid may cause the game to crash!
 		 * @param widget    Pointer to the widget to delete.
 		 * @param container Pointer to the container which holds the widget.
-		 * @param removeIt  This parameter is ignored if the given widget is not a
-		 *                  container. If \c FALSE, this will only remove all the
-		 *                  widgets within a container, but not the container
+		 * @param removeIt  For containers: if \c FALSE, this will only remove all
+		 *                  the widgets within a container, but not the container
 		 *                  itself. If \c TRUE, this will ensure that the container
 		 *                  itself is also deleted, as well as all of its child
-		 *                  widgets.
+		 *                  widgets.\n
+		 *                  For widgets: if \c FALSE, the widget's associated data
+		 *                  will be erased, but the widget itself won't be erased.
+		 *                  If \c TRUE, the widget and its data will be erased.
+		 *                  This is required for \c Grid widgets, who cause the
+		 *                  game to crash if it attempts to remove a grid whose
+		 *                  widgets have already been erased.
 		 */
 		void _removeWidgets(const tgui::Widget::Ptr& widget,
 			const tgui::Container::Ptr& container, const bool removeIt) noexcept;
@@ -485,6 +491,14 @@ namespace sfx {
 			noexcept;
 
 		// WIDGETS //
+
+		/**
+		 * Determines if a widget exists.
+		 * @param  name The name of the widget to search for.
+		 * @return \c TRUE if a widget with the given name exists, \c FALSE
+		 *         otherwise.
+		 */
+		bool _widgetExists(const std::string& name) noexcept;
 
 		/**
 		 * Creates a new widget and adds it to a container.

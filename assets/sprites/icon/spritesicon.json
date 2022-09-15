@@ -185,6 +185,14 @@
 		"slimemove": {
 			"frames": [ [ 32, 48, 32, 15 ] ],
 			"durations": [ 0 ]
+		},
+		"curveRightAlign": {
+			"frames": [ [ 113, 0, 13, 100 ] ],
+			"durations": [ 0 ]
+		},
+		"curveLeftAlign": {
+			"frames": [ [ 126, 0, 13, 100 ] ],
+			"durations": [ 0 ]
 		}
 	}
 }

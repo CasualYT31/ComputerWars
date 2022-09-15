@@ -503,6 +503,14 @@ awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {
 	return awe::army::NO_ARMY;
 }
 
+std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(const awe::UnitID id)
+	const noexcept {
+	if (_isUnitPresent(id)) return _units.at(id).loadedUnits();
+	_logger.error("getLoadedUnits operation failed: unit with ID {} doesn't "
+		"exist!", id);
+	return {};
+}
+
 bool awe::map::setTileType(const sf::Vector2u pos,
 	const std::shared_ptr<const awe::tile_type>& type) noexcept {
 	if (!type) _logger.warning("setTileType warning: assigning the tile at "

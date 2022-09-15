@@ -430,6 +430,15 @@ namespace awe {
 		 */
 		awe::ArmyID getArmyOfUnit(const awe::UnitID id) const noexcept;
 
+		/**
+		 * Retrieves the units that are loaded onto a specified one.
+		 * @param  id The ID of the unit to query.
+		 * @return The IDs of the loaded units. An empty set is returned if the
+		 *         given ID was invalid.
+		 */
+		std::unordered_set<awe::UnitID> getLoadedUnits(const awe::UnitID id) const
+			noexcept;
+
 		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////

@@ -24,9 +24,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine.h"
 
 const std::runtime_error NO_MAP("No map is currently loaded");
+const std::runtime_error NO_SCRIPTS(
+	"No scripts object was given to this game object");
 const std::runtime_error INVALID_UNIT_ID("The given unit ID was invalid");
 
 awe::game::game(const std::string& name) noexcept : _logger(name) {}
+
+void awe::game::setScripts(const std::shared_ptr<engine::scripts>& scripts)
+	noexcept {
+	_scripts = scripts;
+}
 
 bool awe::game::load(const std::string& file,
 	const std::shared_ptr<awe::bank<awe::country>>& countries,
@@ -274,6 +281,13 @@ awe::ArmyID awe::game::getArmyOfUnit(const awe::UnitID id) const {
 	}
 }
 
+awe::HP awe::game::getUnitHP(const awe::UnitID id) const {
+	if (_map)
+		return _map->getUnitHP(id);
+	else
+		throw NO_MAP;
+}
+
 awe::Fuel awe::game::getUnitFuel(const awe::UnitID id) const {
 	if (_map)
 		return _map->getUnitFuel(id);
@@ -286,6 +300,25 @@ awe::Ammo awe::game::getUnitAmmo(const awe::UnitID id) const {
 		return _map->getUnitAmmo(id);
 	else
 		throw NO_MAP;
+}
+
+CScriptArray* awe::game::getLoadedUnits(const awe::UnitID id) const {
+	if (_map) {
+		if (_scripts) {
+			auto set = _map->getLoadedUnits(id);
+			CScriptArray* ret = _scripts->createArray("UnitID");
+			if (ret) {
+				for (auto id : set) ret->InsertLast(&id);
+				return ret;
+			} else {
+				throw std::runtime_error("Could not create array");
+			}
+		} else {
+			throw NO_SCRIPTS;
+		}
+	} else {
+		throw NO_MAP;
+	}
 }
 
 //////////////////////////////

@@ -254,6 +254,14 @@ CScriptDictionary* engine::scripts::createDictionary() noexcept {
     return CScriptDictionary::Create(_engine);
 }
 
+CScriptArray* engine::scripts::createArray(const std::string& type) const
+    noexcept {
+    std::string decl = "array<" + type + ">";
+    auto typeInfo = _engine->GetTypeInfoByDecl(decl.c_str());
+    if (typeInfo) return CScriptArray::Create(typeInfo);
+    return nullptr;
+}
+
 int engine::scripts::_allocateContext() noexcept {
     asIScriptContext* context = _engine->CreateContext();
     if (context) {
