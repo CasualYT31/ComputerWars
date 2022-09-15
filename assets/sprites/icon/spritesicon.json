@@ -39,6 +39,18 @@
 			],
 			"durations": [ 0 ]
 		},
+		"move": {
+			"frames": [ [ 84, 31, 9, 9 ] ],
+			"durations": [ 0 ]
+		},
+		"vision": {
+			"frames": [ [ 98, 0, 15, 10 ] ],
+			"durations": [ 0 ]
+		},
+		"range": {
+			"frames": [ [ 70, 40, 25, 8 ] ],
+			"durations": [ 0 ]
+		},
 		"nohpicon": {
 			"frames": [
 				[ 0, 40, 7, 8 ]

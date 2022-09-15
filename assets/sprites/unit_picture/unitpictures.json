@@ -1,0 +1,21 @@
+{
+  "path": "sprites/unit_picture/unitpictures.png",
+  "sprites": {
+    "osinfantry": {
+      "frames": [ [ 0, 1, 24, 28 ] ],
+      "durations": [ 0 ]
+    },
+    "bminfantry": {
+      "frames": [ [ 24, 1, 25, 28 ] ],
+      "durations": [ 0 ]
+    },
+    "geinfantry": {
+      "frames": [ [ 49, 0, 25, 29 ] ],
+      "durations": [ 0 ]
+    },
+    "ycinfantry": {
+      "frames": [ [ 74, 2, 31, 27 ] ],
+      "durations": [ 0 ]
+    }
+  }
+}

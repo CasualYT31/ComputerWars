@@ -3,7 +3,7 @@
 		"shortname": "INFANTRY_shortname",
 		"icon": "",
 		"sprites": ["infos","infbm","infge","infyc","infbh","infrf","infgs","infbd","infab","infjs","infci","infpc","inftg","infpl","infar","infwn"],
-		"pictures": [""],
+		"pictures": ["osinfantry","bminfantry","geinfantry","ycinfantry"],
 		"description": "INFANTRY_description",
 		"price": 1000,
 		"hp": 10,
