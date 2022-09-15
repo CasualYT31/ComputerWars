@@ -14,6 +14,7 @@ void setUpTerrainPanel(string baseLayout) {
 	baseLayout += ".terrainPanel";
 	addWidget("ScrollablePanel", baseLayout);
 	setWidgetSize(baseLayout, "33.333%", "100%");
+	setGroupPadding(baseLayout, "5%");
 	baseLayout += ".terrainLayout";
 	addWidget("VerticalLayout", baseLayout);
 	baseLayout += ".";
@@ -21,19 +22,27 @@ void setUpTerrainPanel(string baseLayout) {
 	addWidget("HorizontalLayout", baseLayout + "detailsAndPicture");
 	addWidget("VerticalLayout", baseLayout + "detailsAndPicture.details");
 	addWidget("Label", baseLayout + "detailsAndPicture.details.longName");
-	addWidget("VerticalLayout",
+	addWidget("HorizontalLayout",
 		baseLayout + "detailsAndPicture.details.defence");
 	addWidget("Picture",
 		baseLayout + "detailsAndPicture.details.defence.icon");
+	setWidgetSprite(baseLayout + "detailsAndPicture.details.defence.icon", "icon",
+		"defstar");
 	addWidget("Label",
 		baseLayout + "detailsAndPicture.details.defence.label");
-	addWidget("VerticalLayout",
+	addWidget("HorizontalLayout",
 		baseLayout + "detailsAndPicture.details.hp");
 	addWidget("Picture",
 		baseLayout + "detailsAndPicture.details.hp.icon");
+	setWidgetSprite(baseLayout + "detailsAndPicture.details.hp.icon", "icon",
+		"hp");
 	addWidget("Label",
 		baseLayout + "detailsAndPicture.details.hp.label");
-	addWidget("Picture", baseLayout + "detailsAndPicture.picture");
+	addWidget("Group", baseLayout + "detailsAndPicture.group");
+	addWidget("Picture", baseLayout + "detailsAndPicture.group.picture");
+	setWidgetPosition(baseLayout + "detailsAndPicture.group.picture",
+		"100%", "50%");
+	setWidgetOrigin(baseLayout + "detailsAndPicture.group.picture", 1.0, 0.5);
 
 	addWidget("Label", baseLayout + "description");
 
@@ -99,15 +108,12 @@ void DetailedInfoMenuOpen(const string&in previous) {
 	const Terrain terrainType = game.getTerrainOfTile(game.getSelectedTile());
 	string base = "DetailedInfoMenu.baseLayout.terrainPanel.terrainLayout.";
 	setWidgetText(base + "detailsAndPicture.details.longName", terrainType.name);
-	setWidgetSprite(base + "detailsAndPicture.details.defence.icon", "icon",
-		"defstar");
 	setWidgetText(base + "detailsAndPicture.details.defence.label", "~" +
 		formatUInt(terrainType.defence));
-	setWidgetSprite(base + "detailsAndPicture.details.hp.icon", "icon", "hp");
 	setWidgetText(base + "detailsAndPicture.details.hp.label", "~" +
 		formatUInt(terrainType.maxHP));
-	setWidgetSprite(base + "detailsAndPicture.picture", "tilePicture.normal",
-		tilePicture(game.getSelectedTile()));
+	setWidgetSprite(base + "detailsAndPicture.group.picture",
+		"tilePicture.normal", tilePicture(game.getSelectedTile()));
 	setWidgetText(base + "description", terrainType.description);
 	base += "moveCosts.";
 	for (BankID moveID = 0; moveID < movement.length(); ++moveID) {

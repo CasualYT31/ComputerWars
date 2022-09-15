@@ -315,12 +315,21 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's text outline thickness.");
 
-	r = engine->RegisterGlobalFunction("void setWidgetSprite(const string& in, "
-		"const string& in, const string& in)",
+	r = engine->RegisterGlobalFunction("void setWidgetSprite(const string&in, "
+		"const string&in, const string&in)",
 		asMETHOD(sfx::gui, _setWidgetSprite), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's sprite. The name of "
 		"the widget is given, then the name of the sprite sheet, then the name of "
 		"the sprite.");
+
+	r = engine->RegisterGlobalFunction("void matchWidgetSizeToSprite("
+		"const string & in, const bool)",
+		asMETHOD(sfx::gui, _matchWidgetSizeToSprite),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "If <tt>TRUE</tt> is given for a widget, "
+		"it informs the engine that the widget should <b>always</b> match the "
+		"size of its sprite. Only supported by the Picture widget type. <b>TRUE "
+		"is the default behaviour for all picture widgets!</b>");
 
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetBackgroundColour(const string&in, const Colour&in)",
@@ -357,8 +366,8 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Removes all items from a given widget. "
 		"The name of the widget should be given.");
 
-	r = engine->RegisterGlobalFunction("string getSelectedItemText(const string& "
-		"in)",
+	r = engine->RegisterGlobalFunction("string getSelectedItemText("
+		"const string&in)",
 		asMETHOD(sfx::gui, _getSelectedItemText), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's selected item's text.");
 
@@ -373,6 +382,11 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's horizontal "
 		"scrollbar's scroll amount.");
+
+	r = engine->RegisterGlobalFunction("void setGroupPadding("
+		"const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setGroupPadding), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a group's padding.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -574,6 +588,12 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 				auto newRenderer = tgui::PictureRenderer();
 				newRenderer.setTexture(_widgetPictures[widgetName]);
 				w->setRenderer(newRenderer.getData());
+				if (_dontOverridePictureSizeWithSpriteSize.find(widgetName) ==
+					_dontOverridePictureSizeWithSpriteSize.end()) {
+					// Resize this widget to match with the sprite's size.
+					auto rect = _widgetPictures[widgetName].getImageSize();
+					w->setSize(rect.x, rect.y);
+				}
 			}
 		} else if (type == "MenuBar") {
 			// auto w = _findWidget<MenuBar>(widgetName);
@@ -703,6 +723,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 		_widgetPictures.clear();
 		_widgetSprites.clear();
 		_guiSpriteKeys.clear();
+		_dontOverridePictureSizeWithSpriteSize.clear();
 		_originalStrings.clear();
 		// Create the main menu that always exists.
 		tgui::Group::Ptr menu = tgui::Group::create();
@@ -906,6 +927,9 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 			_widgetSprites.erase(name);
 		if (_guiSpriteKeys.find(name) != _guiSpriteKeys.end())
 			_guiSpriteKeys.erase(name);
+		if (_dontOverridePictureSizeWithSpriteSize.find(name) !=
+			_dontOverridePictureSizeWithSpriteSize.end())
+			_dontOverridePictureSizeWithSpriteSize.erase(name);
 		if (_originalStrings.find(name) != _originalStrings.end())
 			_originalStrings.erase(name);
 		container->remove(widget);
@@ -980,6 +1004,8 @@ void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name
 			widget = tgui::ScrollablePanel::create();
 		} else if (type == "panel") {
 			widget = tgui::Panel::create();
+		} else if (type == "group") {
+			widget = tgui::Group::create();
 		} else {
 			_logger.error("Attempted to create a widget of type \"{}\" with name "
 				"\"{}\" for menu \"{}\": that widget type is not supported.", type,
@@ -1248,6 +1274,31 @@ void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& shee
 	}
 }
 
+void sfx::gui::_matchWidgetSizeToSprite(const std::string& name,
+	const bool overrideSetSize) noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type != "picture") {
+			_logger.error("Attempted to match widget \"{}\"'s size to its set "
+				"sprite. The widget is of type \"{}\", within menu \"{}\". This "
+				"operation is not supported for this type of widget.", name, type,
+				fullname[0]);
+			return;
+		}
+		if (overrideSetSize)
+			_dontOverridePictureSizeWithSpriteSize.erase(fullnameAsString);
+		else
+			_dontOverridePictureSizeWithSpriteSize.insert(fullnameAsString);
+	} else {
+		_logger.error("Attempted to match widget \"{}\"'s size to its set sprite. "
+			"The widget is within menu \"{}\". This widget does not exist.", name,
+			fullname[0]);
+	}
+}
+
 void sfx::gui::_setWidgetBgColour(const std::string& name, const sf::Color& colour)
 	noexcept {
 	std::vector<std::string> fullname;
@@ -1450,5 +1501,36 @@ void sfx::gui::_setHorizontalScrollbarAmount(const std::string& name,
 		_logger.error("Attempted to set the horizontal scrollbar amount {} to a "
 			"widget \"{}\" within menu \"{}\". This widget does not exist.",
 			amount, name, fullname[0]);
+	}
+}
+
+void sfx::gui::_setGroupPadding(const std::string& name,
+	const std::string& padding) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "scrollablepanel") {
+			std::dynamic_pointer_cast<ScrollablePanel>(widget)->
+				getRenderer()->setPadding(AbsoluteOrRelativeValue(padding));
+		} else if (type == "panel") {
+			std::dynamic_pointer_cast<Panel>(widget)->
+				getRenderer()->setPadding(AbsoluteOrRelativeValue(padding));
+		} else if (type == "verticallayout") {
+			std::dynamic_pointer_cast<VerticalLayout>(widget)->
+				getRenderer()->setPadding(AbsoluteOrRelativeValue(padding));
+		} else if (type == "horizontallayout") {
+			std::dynamic_pointer_cast<HorizontalLayout>(widget)->
+				getRenderer()->setPadding(AbsoluteOrRelativeValue(padding));
+		} else {
+			_logger.error("Attempted to set a padding {} to widget \"{}\" which "
+				"is of type \"{}\", within menu \"{}\". This operation is not "
+				"supported for this type of widget.", padding, name, type,
+				fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set a padding {} to a widget \"{}\" within "
+			"menu \"{}\". This widget does not exist.", padding, name,
+			fullname[0]);
 	}
 }

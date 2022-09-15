@@ -616,6 +616,21 @@ namespace sfx {
 			const std::string& key) noexcept;
 
 		/**
+		 * Configures a widget to always resize to match its sprite's size.
+		 * If you set this to \c FALSE for a widget who used to be set to \c TRUE,
+		 * then the size of the widget will be left at the last set sprite and will
+		 * no longer automatically update. If you set this to \c TRUE, and you
+		 * attempt to manually set the size to something else, that will be
+		 * overriden by the sprite's size.\n
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no change will be made.
+		 * @param name            The name of the widget to change.
+		 * @param overrideSetSize The new value.
+		 */
+		void _matchWidgetSizeToSprite(const std::string& name,
+			const bool overrideSetSize) noexcept;
+
+		/**
 		 * Sets a widget's background colour.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no colour will be set.
@@ -703,6 +718,16 @@ namespace sfx {
 		void _setHorizontalScrollbarAmount(const std::string& name,
 			const unsigned int amount) noexcept;
 
+		/**
+		 * Sets the padding applied to a group of widgets.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no padding will be changed.
+		 * @param name    The name of the widget to edit.
+		 * @param padding The padding to set.
+		 */
+		void _setGroupPadding(const std::string& name, const std::string& padding)
+			noexcept;
+
 		//////////
 		// DATA //
 		//////////
@@ -764,6 +789,12 @@ namespace sfx {
 		 */
 		std::unordered_map<std::string, std::pair<std::string, std::string>>
 			_guiSpriteKeys;
+
+		/**
+		 * The picture widgets whose size should NOT always match with their sprite
+		 * size.
+		 */
+		std::unordered_set<std::string> _dontOverridePictureSizeWithSpriteSize;
 
 		/**
 		 * Stores the original captions assigned to each widget.
