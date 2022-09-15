@@ -84,6 +84,7 @@
 	"PIPESEAM_longname": "Pipe Seam",
 	"PIPESEAM_shortname": "Seam",
 	"PIPESEAM_description": "A Black Hole pipeline. The armor is weaker here than on other sections of the pipe.",
+	"PIPESEAM_unitdescription": "This pipe seam has a maximum of 99 health and it can never be healed.",
 
 	"MISSILESILO_longname": "Missile Silo",
 	"MISSILESILO_shortname": "Silo",
@@ -121,55 +122,107 @@
 	"HQ_shortname": "HQ",
 	"HQ_description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",
 
+	"INFANTRY_longname": "Infantry",
 	"INFANTRY_shortname": "Inft",
+	"INFANTRY_description": "Infantry units have the lowest deployment cost. They can capture bases but have low firepower.",
 
+	"MECH_longname": "Mech",
 	"MECH_shortname": "Mech",
+	"MECH_description": "Mechs can capture bases, traverse most terrain types, and have superior firepower.",
 
+	"RECON_longname": "Recon",
 	"RECON_shortname": "Recn",
+	"RECON_description": "Recons have a high movement range and vision. Good against infantry.",
 
+	"TANK_longname": "Tank",
 	"TANK_shortname": "Tank",
+	"TANK_description": "Tank units have high movement ranges and are inexpensive, so they're easy to deploy.",
 
+	"MDTANK_longname": "MD Tank",
 	"MDTANK_shortname": "MTnk",
+	"MDTANK_description": "Both attack and defence are stronger in comparison with the Tank.",
 
+	"NEOTANK_longname": "Neotank",
 	"NEOTANK_shortname": "Neo",
+	"NEOTANK_description": "These are new weapons developed by Black Hole. They are more powerful than MD Tanks.",
 
+	"MEGATANK_longname": "Megatank",
 	"MEGATANK_shortname": "Mega",
+	"MEGATANK_description": "The strongest tank on Wars World, which Green Earth developed. Movement, ammo, and fuel is low.",
 
+	"APC_longname": "APC",
 	"APC_shortname": "APC",
+	"APC_description": "APC units transport infantry units and supply gas and ammo to deployed troops.",
 
+	"ANTIAIR_longname": "Anti-Air",
 	"ANTIAIR_shortname": "AAir",
+	"ANTIAIR_description": "Anti-air units work well against infantry and air units. They're weak against tanks.",
 
+	"ARTILLERY_longname": "Artillery",
 	"ARTILLERY_shortname": "Artl",
+	"ARTILLERY_description": "Artillery units are an inexpensive way to gain indirect offensive attack capabilities.",
 
+	"ROCKETS_longname": "Rockets",
 	"ROCKETS_shortname": "Rokt",
+	"ROCKETS_description": "Rockets units are valuable, because they can fire on both land and naval units.",
 
+	"MISSILES_longname": "Missiles",
 	"MISSILES_shortname": "Misl",
+	"MISSILES_description": "Missile units are essential in defending against air units. Their vision range is large.",
 
+	"PIPERUNNER_longname": "Piperunner",
 	"PIPERUNNER_shortname": "Runr",
+	"PIPERUNNER_description": "Indirect attack unit developed by Black Hole. Can only be moved on pipes and bases.",
 
+	"TCOPTER_longname": "T Copter",
 	"TCOPTER_shortname": "TCop",
+	"TCOPTER_description": "T copters can transport both infantry and mech units.",
 
+	"BCOPTER_longname": "B Copter",
 	"BCOPTER_shortname": "BCop",
+	"BCOPTER_description": "B copter units can fire on many unit types, so they're quite valuable.",
 
+	"FIGHTER_longname": "Fighter",
 	"FIGHTER_shortname": "Fitr",
+	"FIGHTER_description": "Fighter units are strong vs. other air units. They also have the highest movement.",
 
+	"BOMBER_longname": "Bomber",
 	"BOMBER_shortname": "Bmbr",
+	"BOMBER_description": "Bomber units can fire on ground and naval units with a high destructive force.",
 
+	"STEALTH_longname": "Stealth Fighter",
 	"STEALTH_shortname": "Stea",
+	"STEALTH_description": "When it hides, it can only be seen or attacked by adjacent units, fighters, and stealths.",
 
+	"BLACKBOMB_longname": "Black Bomb",
 	"BLACKBOMB_shortname": "Bomb",
+	"BLACKBOMB_description": "An unmanned weapon from Black Hole. When it explodes it does damage to all units within 3 tiles.",
 
+	"BLACKBOAT_longname": "Black Boat",
 	"BLACKBOAT_shortname": "Boat",
+	"BLACKBOAT_description": "It can load two soldier units. It recovers 1 HP and supplies to adjacent units.",
 
+	"LANDER_longname": "Lander",
 	"LANDER_shortname": "Lndr",
+	"LANDER_description": "Landers can transport two ground units. If the lander sinks, the units vanish.",
 
+	"CRUISER_longname": "Cruiser",
 	"CRUISER_shortname": "Crui",
+	"CRUISER_description": "It is strong against subs and air units. It can load and supply two copter units.",
 
+	"SUB_longname": "Sub",
 	"SUB_shortname": "Sub",
+	"SUB_description": "Submerged subs are difficult to find, and only cruisers and subs can fire on them.",
 
+	"BATTLESHIP_longname": "Battleship",
 	"BATTLESHIP_shortname": "Bshp",
+	"BATTLESHIP_description": "B ships have a larger attack range than even rocket units.",
 
+	"CARRIER_longname": "Carrier",
 	"CARRIER_shortname": "Cari",
+	"CARRIER_description": "It can load two air units and supply them. Its indirect attack has a wide range in the sky.",
 
-	"OOZIUM_shortname": "Oozi"
+	"OOZIUM_longname": "Oozium 238",
+	"OOZIUM_shortname": "Oozi",
+	"OOZIUM_description": "An odd giant mass of gelatinous goo that consumes everything it touches. Extremely resistant to damage, but very slow."
 }
