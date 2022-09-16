@@ -25,8 +25,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using namespace tgui;
 
-// This value is intended to be constant.
+// These values are intended to be constant.
 float NO_SPACE = -0.001f;
+sf::Color NO_COLOUR(0, 0, 0, 0);
 
 sfx::gui::gui_background::gui_background() noexcept {}
 
@@ -236,6 +237,9 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"represents \"no space between widgets in a vertical or horizontal "
 		"layout\". Due to rounding errors, however, this likely won't be "
 		"perfect, especially when scaling is applied.");
+	r = engine->RegisterGlobalProperty("const Colour NO_COLOUR", &NO_COLOUR);
+	document->DocumentExpectedFunction("const Colour NO_COLOUR", "Constant which "
+		"holds a colour value of (0, 0, 0, 0).");
 
 	// Register non-widget global functions.
 	r = engine->RegisterGlobalFunction("void setGUI(const string& in)",

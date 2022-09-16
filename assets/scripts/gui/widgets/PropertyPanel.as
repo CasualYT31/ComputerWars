@@ -36,12 +36,12 @@ class PropertyPanel {
 		layout = layoutName + ".layout";
 		addWidget("VerticalLayout", layout);
 		addWidget("Panel", layout + ".iconPanel");
-		setWidgetBackgroundColour(layout + ".iconPanel", Colour(0,0,0,0));
+		setWidgetBackgroundColour(layout + ".iconPanel", NO_COLOUR);
 		addWidget("Picture", layout + ".iconPanel.icon");
 		setWidgetOrigin(layout + ".iconPanel.icon", 0.5, 0.5);
 		setWidgetPosition(layout + ".iconPanel.icon", "50%", "50%");
 		addWidget("Panel", layout + ".namePanel");
-		setWidgetBackgroundColour(layout + ".namePanel", Colour(0,0,0,0));
+		setWidgetBackgroundColour(layout + ".namePanel", NO_COLOUR);
 		addWidget("Label", layout + ".namePanel.name");
 		setWidgetOrigin(layout + ".namePanel.name", 0.5, 0.5);
 		setWidgetPosition(layout + ".namePanel.name", "50%", "50%");

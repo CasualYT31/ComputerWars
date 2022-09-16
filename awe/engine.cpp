@@ -368,6 +368,8 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
 		&awe::army::NO_ARMY_SCRIPT);
+	document->DocumentExpectedFunction("const ArmyID NO_ARMY", "Represents \"no "
+		"army\". Used to signify \"no ownership.\"");
 	r = engine->RegisterGlobalProperty("GameInterface game", &_game);
 
 	// Register the global functions.
