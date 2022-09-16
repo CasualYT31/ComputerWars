@@ -43,12 +43,13 @@ class PropertyPanel {
 		addWidget("Panel", layout + ".namePanel");
 		setWidgetBackgroundColour(layout + ".namePanel", NO_COLOUR);
 		addWidget("Label", layout + ".namePanel.name");
+		_configureLabel(layout + ".namePanel.name", 16);
 		setWidgetOrigin(layout + ".namePanel.name", 0.5, 0.5);
 		setWidgetPosition(layout + ".namePanel.name", "50%", "50%");
 		addWidget("Grid", layout + ".properties");
-		setWidgetRatioInLayout(layout, 0, 82.5);
-		setWidgetRatioInLayout(layout, 1, 15.0);
-		setWidgetRatioInLayout(layout, 2, 92.5);
+		setWidgetRatioInLayout(layout, 0, 72.5);
+		setWidgetRatioInLayout(layout, 1, 30.0);
+		setWidgetRatioInLayout(layout, 2, 87.5);
 	}
 
 	/**
@@ -83,6 +84,7 @@ class PropertyPanel {
 			setWidgetAlignmentInGrid(layout + ".properties", index, 0,
 				WidgetAlignment::Right);
 			addWidgetToGrid("Label", layout + ".properties.label" + i, index, 1);
+			_configureLabel(layout + ".properties.label" + i, 12);
 			setWidgetAlignmentInGrid(layout + ".properties", index, 1,
 				WidgetAlignment::Left);
 		}
@@ -94,4 +96,14 @@ class PropertyPanel {
 	 * Name of the panel's base layout widget.
 	 */
 	string layout;
+
+	/**
+	 * Sets a label's properties.
+	 */
+	void _configureLabel(const string&in name, const uint size) {
+		setWidgetTextSize(name, size);
+		setWidgetTextColour(name, Colour(255,255,255,255));
+		setWidgetTextOutlineColour(name, Colour(0,0,0,255));
+		setWidgetTextOutlineThickness(name, 1.5);
+	}
 }

@@ -341,11 +341,17 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Sets a widget's visibility. The name of "
 		"the widget is given, then if it should be visible or not.");
 
-	r = engine->RegisterGlobalFunction("void setWidgetText(const string& in, "
-		"const string& in)",
+	r = engine->RegisterGlobalFunction("void setWidgetText(const string&in, "
+		"const string&in)",
 		asMETHOD(sfx::gui, _setWidgetText), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's text. The name of the "
 		"widget is given, then its new text.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetTextSize(const string&in, "
+		"const uint)",
+		asMETHOD(sfx::gui, _setWidgetTextSize), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's character size. The name "
+		"of the widget is given, then its new character size.");
 
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetTextColour(const string&in, const Colour&in)",
@@ -1301,6 +1307,28 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 	} else {
 		_logger.error("Attempted to set the caption \"{}\" to a widget \"{}\" "
 			"within menu \"{}\". This widget does not exist.", text, name,
+			fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetTextSize(const std::string& name, const unsigned int size)
+	noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "label") {
+			auto label = std::dynamic_pointer_cast<Label>(widget);
+			label->setTextSize(size);
+		} else {
+			_logger.error("Attempted to set the character size {} to widget "
+				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
+				"operation is not supported for this type of widget.", size,
+				name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the character size {} to a widget \"{}\" "
+			"within menu \"{}\". This widget does not exist.", size, name,
 			fullname[0]);
 	}
 }

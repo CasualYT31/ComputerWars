@@ -620,6 +620,16 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Sets a widget's character size.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no size will be changed.
+		 * @param name The name of the widget to change.
+		 * @param size The new character size.
+		 */
+		void _setWidgetTextSize(const std::string& name, const unsigned int size)
+			noexcept;
+
+		/**
 		 * Sets a widget's text colour.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no caption will be changed.
