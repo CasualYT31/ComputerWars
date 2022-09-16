@@ -35,7 +35,6 @@ class PropertyPanel {
 		setWidgetBorderSize(layoutName, 0.0);
 		layout = layoutName + ".layout";
 		addWidget("VerticalLayout", layout);
-		setWidgetSize(layout, PROPERTY_PANEL_WIDTH, PROPERTY_PANEL_HEIGHT);
 		addWidget("Panel", layout + ".iconPanel");
 		setWidgetBackgroundColour(layout + ".iconPanel", Colour(0,0,0,0));
 		addWidget("Picture", layout + ".iconPanel.icon");
@@ -47,8 +46,8 @@ class PropertyPanel {
 		setWidgetOrigin(layout + ".namePanel.name", 0.5, 0.5);
 		setWidgetPosition(layout + ".namePanel.name", "50%", "50%");
 		addWidget("Grid", layout + ".properties");
-		setWidgetRatioInLayout(layout, 0, 92.5);
-		setWidgetRatioInLayout(layout, 1, 5.0);
+		setWidgetRatioInLayout(layout, 0, 82.5);
+		setWidgetRatioInLayout(layout, 1, 15.0);
 		setWidgetRatioInLayout(layout, 2, 92.5);
 	}
 

@@ -25,6 +25,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using namespace tgui;
 
+// This value is intended to be constant.
+float NO_SPACE = -0.001f;
+
 sfx::gui::gui_background::gui_background() noexcept {}
 
 sfx::gui::gui_background::gui_background(
@@ -226,6 +229,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		(int)Grid::Alignment::BottomLeft);
 	engine->RegisterEnumValue("WidgetAlignment", "Left",
 		(int)Grid::Alignment::Left);
+
+	// Register global constants.
+	r = engine->RegisterGlobalProperty("const float NO_SPACE", &NO_SPACE);
+	document->DocumentExpectedFunction("const float NO_SPACE", "Constant which "
+		"represents \"no space between widgets in a vertical or horizontal "
+		"layout\". Due to rounding errors, however, this likely won't be "
+		"perfect, especially when scaling is applied.");
 
 	// Register non-widget global functions.
 	r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
@@ -438,6 +448,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's alignment within its "
 		"grid cell.");
+
+	r = engine->RegisterGlobalFunction("void setSpaceBetweenWidgets("
+		"const string&in, const float)",
+		asMETHOD(sfx::gui, _setSpaceBetweenWidgets),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the space between widgets in a "
+		"vertical or horizontal layout.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -1693,5 +1710,27 @@ void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
 		_logger.error("Attempted to set an alignment {} to a widget \"{}\" @ ({}, "
 			"{}) within menu \"{}\". This widget does not exist.", alignment, name,
 			row, col, fullname[0]);
+	}
+}
+
+void sfx::gui::_setSpaceBetweenWidgets(const std::string& name, const float space)
+	noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "verticallayout" || type == "horizontallayout") {
+			auto layout = std::dynamic_pointer_cast<BoxLayout>(widget);
+			layout->getRenderer()->setSpaceBetweenWidgets(space);
+		} else {
+			_logger.error("Attempted to set {} to a widget \"{}\"'s space between "
+				"widgets property. The widget is of type \"{}\", within menu "
+				"\"{}\". This operation is not supported for this type of widget.",
+				space, name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set {} to a widget \"{}\"'s space between "
+			"widgets property, within menu \"{}\". This widget does not exist.",
+			space, name, fullname[0]);
 	}
 }

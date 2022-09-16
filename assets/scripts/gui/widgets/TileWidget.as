@@ -30,6 +30,7 @@ class TileWidget {
 		explicit {
 		layout = layoutName;
 		addWidget("HorizontalLayout", layoutName);
+		setSpaceBetweenWidgets(layoutName, NO_SPACE);
 	}
 
 	/**

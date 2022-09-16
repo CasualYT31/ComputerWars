@@ -801,6 +801,16 @@ namespace sfx {
 			const std::size_t row, const std::size_t col,
 			const tgui::Grid::Alignment alignment) noexcept;
 
+		/**
+		 * Sets the space between widgets in Vertical and Horizontal Layouts.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no space will be applied.
+		 * @param name  The name of the layout to edit.
+		 * @param space The new distance to apply.
+		 */
+		void _setSpaceBetweenWidgets(const std::string& name, const float space)
+			noexcept;
+
 		//////////
 		// DATA //
 		//////////
