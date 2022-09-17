@@ -71,6 +71,10 @@ int awe::game_engine::run() noexcept {
 
 sf::Vector2i awe::game_engine::_INVALID_MOUSE = sfx::INVALID_MOUSE;
 
+void AWEVector2iTypeConstructor(const int x, const int y, void* memory) {
+	new(memory) sf::Vector2i(x, y);
+}
+
 void AWEVector2TypeConstructor(const unsigned int x, const unsigned int y,
 	void* memory) {
 	new(memory) sf::Vector2u(x, y);
@@ -90,21 +94,23 @@ awe::HP getDisplayedHP(const awe::HP hp) noexcept {
 }
 
 // Wrapper for Vector2u and Vector2i operator==s.
-// Using them directly doesn't work... No idea why.
 
-bool iEqI(const sf::Vector2i lhs, const sf::Vector2i rhs) noexcept {
-	return lhs.x == rhs.x && lhs.y == rhs.y;
+bool iEqI(void* pLhs, const sf::Vector2i& rhs) noexcept {
+	auto lhs = (const sf::Vector2i*)pLhs;
+	return lhs->x == rhs.x && lhs->y == rhs.y;
 }
 
-bool iEqU(const sf::Vector2i lhs, const sf::Vector2u rhs) noexcept {
-	return lhs.x == rhs.x && lhs.y == rhs.y;
+bool iEqU(void* pLhs, const sf::Vector2u& rhs) noexcept {
+	auto lhs = (const sf::Vector2i*)pLhs;
+	return lhs->x == rhs.x && lhs->y == rhs.y;
 }
 
-bool uEqI(const sf::Vector2u lhs, const sf::Vector2i rhs) noexcept {
-	return lhs.x == rhs.x && lhs.y == rhs.y;
+bool uEqI(void* pLhs, const sf::Vector2i& rhs) noexcept {
+	auto lhs = (const sf::Vector2u*)pLhs;
+	return lhs->x == rhs.x && lhs->y == rhs.y;
 }
 
-bool uEqU(void* pLhs, const sf::Vector2u rhs) noexcept {
+bool uEqU(void* pLhs, const sf::Vector2u& rhs) noexcept {
 	auto lhs = (const sf::Vector2u*)pLhs;
 	return lhs->x == rhs.x && lhs->y == rhs.y;
 }
@@ -151,22 +157,23 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asOFFSET(sf::Vector2i, x));
 	engine->RegisterObjectProperty("MousePosition", "int y",
 		asOFFSET(sf::Vector2i, y));
+	engine->RegisterObjectBehaviour("MousePosition", asBEHAVE_CONSTRUCT,
+		"void MousePosition(const int, const int)",
+		asFUNCTION(AWEVector2iTypeConstructor), asCALL_CDECL_OBJLAST);
 	r = engine->RegisterObjectMethod("MousePosition",
-		"bool opEquals(MousePosition) const",
-		asFUNCTIONPR(iEqI, (const sf::Vector2i, const sf::Vector2i), bool),
-		asCALL_CDECL_OBJFIRST);
+		"bool opEquals(const MousePosition&in) const",
+		asFUNCTION(iEqI), asCALL_CDECL_OBJFIRST);
 	r = engine->RegisterObjectMethod("MousePosition",
-		"bool opEquals(Vector2) const",
-		asFUNCTIONPR(iEqU, (const sf::Vector2i, const sf::Vector2u), bool),
-		asCALL_CDECL_OBJFIRST);
+		"bool opEquals(const Vector2&in) const",
+		asFUNCTION(iEqU), asCALL_CDECL_OBJFIRST);
 
 	// Vector 2 opEquals
-	r = engine->RegisterObjectMethod("Vector2", "bool opEquals(Vector2) const",
+	r = engine->RegisterObjectMethod("Vector2",
+		"bool opEquals(const Vector2&in) const",
 		asFUNCTION(uEqU), asCALL_CDECL_OBJFIRST);
 	r = engine->RegisterObjectMethod("Vector2",
-		"bool opEquals(MousePosition) const",
-		asFUNCTIONPR(uEqI, (const sf::Vector2u, const sf::Vector2i), bool),
-		asCALL_CDECL_OBJFIRST);
+		"bool opEquals(const MousePosition&in) const",
+		asFUNCTION(uEqI), asCALL_CDECL_OBJFIRST);
 
 	// Time class.
 	r = engine->RegisterObjectType("Time", sizeof(sf::Time),
