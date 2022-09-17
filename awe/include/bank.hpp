@@ -86,9 +86,11 @@ namespace awe {
 		 *                given but with \c "Bank" appended, and the single global
 		 *                property of this bank type will be called the given name,
 		 *                but in lowercase.
+		 * @param logName Name given for to this bank object in the log file.
+		 *                Defaults to "bank."
 		 */
 		bank(const std::shared_ptr<engine::scripts>& scripts,
-			const std::string& name) noexcept;
+			const std::string& name, const std::string& logName = "bank") noexcept;
 
 		/**
 		 * Allows the client to access the game properties of a bank member.
@@ -151,15 +153,23 @@ namespace awe {
 
 		/**
 		 * Script's integer index operator.
-		 * @sa @c awe::bank<T>::operator[](const awe::BankID)
+		 * @throws std::runtime_error if no game property with the given ID exists.
+		 * @sa     @c awe::bank<T>::operator[](const awe::BankID)
 		 */
-		const T _opIndexInt(const awe::BankID id) const noexcept;
+		const T _opIndexInt(const awe::BankID id) const;
 
 		/**
 		 * Script's string index operator.
-		 * @sa @c awe::bank<T>::operator[](const std::string&)
+		 * @throws std::runtime_error if no game property with the given name
+		 *                            exists.
+		 * @sa     @c awe::bank<T>::operator[](const std::string&)
 		 */
-		const T _opIndexStr(const std::string name) const noexcept;
+		const T _opIndexStr(const std::string name) const;
+
+		/**
+		 * Internal logger object.
+		 */
+		mutable engine::logger _logger;
 
 		/**
 		 * The internal vector of game properties.

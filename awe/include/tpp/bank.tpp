@@ -24,14 +24,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T>
 awe::bank<T>::bank(const std::shared_ptr<engine::scripts>& scripts,
-	const std::string& name) noexcept : _scripts(scripts), _propertyName(name) {
+	const std::string& name, const std::string& logName) noexcept :
+	_logger(logName), _scripts(scripts), _propertyName(name) {
 	if (scripts) _scripts->addRegistrant(this);
 }
 
 template<typename T>
 std::shared_ptr<const T> awe::bank<T>::operator[](const awe::BankID id) const
 	noexcept {
-	if (id >= size()) return nullptr;
+	if (id >= size()) {
+		_logger.error("Game property {} does not exist in this bank!", id);
+		return nullptr;
+	}
 	return _bank[id];
 }
 
@@ -39,6 +43,7 @@ template<typename T>
 std::shared_ptr<const T> awe::bank<T>::operator[](const std::string& sn) const
 	noexcept {
 	for (auto& prop : _bank) if (prop->getScriptName() == sn) return prop;
+	_logger.error("Game property \"{}\" does not exist in this bank!", sn);
 	return nullptr;
 }
 
@@ -103,13 +108,21 @@ bool awe::bank<T>::_save(nlohmann::ordered_json& j) noexcept {
 }
 
 template<typename T>
-const T awe::bank<T>::_opIndexInt(const awe::BankID id) const noexcept {
-	return *operator[](id);
+const T awe::bank<T>::_opIndexInt(const awe::BankID id) const {
+	auto ret = operator[](id);
+	if (ret)
+		return *ret;
+	else
+		throw std::runtime_error("Could not access game property");
 }
 
 template<typename T>
-const T awe::bank<T>::_opIndexStr(const std::string name) const noexcept {
-	return *operator[](name);
+const T awe::bank<T>::_opIndexStr(const std::string name) const {
+	auto ret = operator[](name);
+	if (ret)
+		return *ret;
+	else
+		throw std::runtime_error("Could not access game property");
 }
 
 template<typename T>

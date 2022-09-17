@@ -625,14 +625,22 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 			{ "spritesheets", "tile", "normalpictures" })
 		&& _loadObject(_sprites->icon, j, { "spritesheets", "icon" })
 		&& _loadObject(_sprites->GUI, j, { "spritesheets", "gui" })
-		&& _loadObject(_countries, j, { "countries" }, _scripts, "Country")
-		&& _loadObject(_weathers, j, { "weathers" }, _scripts, "Weather")
-	&& _loadObject(_environments, j, { "environments" }, _scripts, "Environment")
-		&& _loadObject(_movements, j, { "movements" }, _scripts, "Movement")
-		&& _loadObject(_terrains, j, { "terrains" }, _scripts, "Terrain")
-		&& _loadObject(_tiles, j, { "tiles" }, _scripts, "Tile")
-		&& _loadObject(_units, j, { "units" }, _scripts, "Unit")
-		&& _loadObject(_commanders, j, { "commanders" }, _scripts, "Commander");
+		&& _loadObject(_countries, j, { "countries" }, _scripts, "Country",
+			"country_bank")
+		&& _loadObject(_weathers, j, { "weathers" }, _scripts, "Weather",
+			"weather_bank")
+		&& _loadObject(_environments, j, { "environments" }, _scripts,
+			"Environment", "environment_bank")
+		&& _loadObject(_movements, j, { "movements" }, _scripts, "Movement",
+			"movement_bank")
+		&& _loadObject(_terrains, j, { "terrains" }, _scripts, "Terrain",
+			"terrain_bank")
+		&& _loadObject(_tiles, j, { "tiles" }, _scripts, "Tile",
+			"tile_bank")
+		&& _loadObject(_units, j, { "units" }, _scripts, "Unit",
+			"unit_bank")
+		&& _loadObject(_commanders, j, { "commanders" }, _scripts, "Commander",
+			"commander_bank");
 	if (!ret) return false;
 	// Ignore the state of these objects for now. Can't load them currently
 	// because I have no tile or unit pictures to configure with.
