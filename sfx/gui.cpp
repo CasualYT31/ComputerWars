@@ -1010,11 +1010,11 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 			widget->getWidgetName().toStdString());
 		auto& widgetsInContainer = container->getWidgets();
 		for (auto& widgetInContainer : widgetsInContainer) {
-			if (widget->getWidgetType() == "Grid")
-				_removeWidgets(widgetInContainer, container, false);
-			else
-				_removeWidgets(widgetInContainer, container, true);
+			// Remove each child widget's internal data entries only.
+			_removeWidgets(widgetInContainer, container, false);
 		}
+		// Now remove each child widget fr.
+		container->removeAllWidgets();
 		if (!removeIt) return;
 	}
 	// Remove widget.
