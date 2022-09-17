@@ -894,8 +894,6 @@ namespace awe {
 		 *     <li>\c "canload" = \c _canLoadThese, <tt>([unsigned 32-bit int{,
 		 *         unsigned 32-bit int, etc.}])</tt></li>
 		 *     <li>\c "loadlimit" = \c _loadLimit, <tt>(unsigned 32-bit int)</tt>
-		 *     </li>
-		 *     <li>\c "fuelperturn" = \c _fuelPerTurn, <tt>(signed 32-bit int)</tt>
 		 *     </li></ul>
 		 * 
 		 * Range values work by counting the number of tiles away from the unit's
@@ -1057,13 +1055,6 @@ namespace awe {
 		unsigned int loadLimit() const noexcept;
 
 		/**
-		 * Retrieves the amount of fuel consumed at the beginning of each day.
-		 * @return The amount of fuel this unit type consumes at the beginning of
-		 *         each day.
-		 */
-		signed int fuelPerTurn() const noexcept;
-
-		/**
 		 * Updates the stored unit type properties pointers for units that can be
 		 * loaded onto this one.
 		 * @param unitBank A reference to the unit type bank to pull the pointers
@@ -1193,12 +1184,6 @@ namespace awe {
 		 * The maximum number of units this unit type can load.
 		 */
 		unsigned int _loadLimit = 0;
-
-		/**
-		 * The amount of fuel this unit type consumes at the beginning of every
-		 * day.
-		 */
-		signed int _fuelPerTurn = 0;
 	};
 
 	/**

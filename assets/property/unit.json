@@ -15,8 +15,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"MECH": {"longname": "MECH_longname",
 		"shortname": "MECH_shortname",
@@ -34,8 +33,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"RECON": {"longname": "RECON_longname",
 		"shortname": "RECON_shortname",
@@ -53,8 +51,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"TANK": {"longname": "TANK_longname",
 		"shortname": "TANK_shortname",
@@ -72,8 +69,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"MDTANK": {"longname": "MDTANK_longname",
 		"shortname": "MDTANK_shortname",
@@ -91,8 +87,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"NEOTANK": {"longname": "NEOTANK_longname",
 		"shortname": "NEOTANK_shortname",
@@ -110,8 +105,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"MEGATANK": {"longname": "MEGATANK_longname",
 		"shortname": "MEGATANK_shortname",
@@ -129,8 +123,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"APC": {"longname": "APC_longname",
 		"shortname": "APC_shortname",
@@ -148,8 +141,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [0, 1],
-		"loadlimit": 1,
-		"fuelperturn": 0
+		"loadlimit": 1
 	},
 	"ANTIAIR": {"longname": "ANTIAIR_longname",
 		"shortname": "ANTIAIR_shortname",
@@ -167,8 +159,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"ARTILLERY": {"longname": "ARTILLERY_longname",
 		"shortname": "ARTILLERY_shortname",
@@ -186,8 +177,7 @@
 		"lowrange": 2,
 		"highrange": 3,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"ROCKETS": {"longname": "ROCKETS_longname",
 		"shortname": "ROCKETS_shortname",
@@ -205,8 +195,7 @@
 		"lowrange": 3,
 		"highrange": 5,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"MISSILES": {"longname": "MISSILES_longname",
 		"shortname": "MISSILES_shortname",
@@ -224,8 +213,7 @@
 		"lowrange": 3,
 		"highrange": 5,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"PIPERUNNER": {"longname": "PIPERUNNER_longname",
 		"shortname": "PIPERUNNER_shortname",
@@ -243,8 +231,7 @@
 		"lowrange": 2,
 		"highrange": 5,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"TCOPTER": {"longname": "TCOPTER_longname",
 		"shortname": "TCOPTER_shortname",
@@ -262,8 +249,7 @@
 		"lowrange": 0,
 		"highrange": 0,
 		"canload": [0, 1],
-		"loadlimit": 1,
-		"fuelperturn": 2
+		"loadlimit": 1
 	},
 	"BCOPTER": {"longname": "BCOPTER_longname",
 		"shortname": "BCOPTER_shortname",
@@ -281,8 +267,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 2
+		"loadlimit": 0
 	},
 	"FIGHTER": {"longname": "FIGHTER_longname",
 		"shortname": "FIGHTER_shortname",
@@ -300,8 +285,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 5
+		"loadlimit": 0
 	},
 	"BOMBER": {"longname": "BOMBER_longname",
 		"shortname": "BOMBER_shortname",
@@ -319,8 +303,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 5
+		"loadlimit": 0
 	},
 	"STEALTH": {"longname": "STEALTH_longname",
 		"shortname": "STEALTH_shortname",
@@ -338,8 +321,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 5
+		"loadlimit": 0
 	},
 	"BLACKBOMB": {"longname": "BLACKBOMB_longname",
 		"shortname": "BLACKBOMB_shortname",
@@ -357,8 +339,7 @@
 		"lowrange": 1,
 		"highrange": 3,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 5
+		"loadlimit": 0
 	},
 	"BLACKBOAT": {"longname": "BLACKBOAT_longname",
 		"shortname": "BLACKBOAT_shortname",
@@ -376,8 +357,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [0, 1],
-		"loadlimit": 2,
-		"fuelperturn": 1
+		"loadlimit": 2
 	},
 	"LANDER": {"longname": "LANDER_longname",
 		"shortname": "LANDER_shortname",
@@ -395,8 +375,7 @@
 		"lowrange": 0,
 		"highrange": 0,
 		"canload": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 26],
-		"loadlimit": 2,
-		"fuelperturn": 1
+		"loadlimit": 2
 	},
 	"CRUISER": {"longname": "CRUISER_longname",
 		"shortname": "CRUISER_shortname",
@@ -414,8 +393,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [13, 14],
-		"loadlimit": 2,
-		"fuelperturn": 1
+		"loadlimit": 2
 	},
 	"SUB": {"longname": "SUB_longname",
 		"shortname": "SUB_shortname",
@@ -433,8 +411,7 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 1
+		"loadlimit": 0
 	},
 	"BATTLESHIP": {"longname": "BATTLESHIP_longname",
 		"shortname": "BATTLESHIP_shortname",
@@ -452,8 +429,7 @@
 		"lowrange": 2,
 		"highrange": 6,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 1
+		"loadlimit": 0
 	},
 	"CARRIER": {"longname": "CARRIER_longname",
 		"shortname": "CARRIER_shortname",
@@ -471,8 +447,7 @@
 		"lowrange": 3,
 		"highrange": 8,
 		"canload": [13, 14, 15, 16, 17, 18],
-		"loadlimit": 2,
-		"fuelperturn": 1
+		"loadlimit": 2
 	},
 	"PIPESEAM": {"longname": "PIPESEAM_longname",
 		"shortname": "PIPESEAM_shortname",
@@ -490,8 +465,7 @@
 		"lowrange": 0,
 		"highrange": 0,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	},
 	"OOZIUM": {"longname": "OOZIUM_longname",
 		"shortname": "OOZIUM_shortname",
@@ -509,7 +483,6 @@
 		"lowrange": 0,
 		"highrange": 0,
 		"canload": [],
-		"loadlimit": 0,
-		"fuelperturn": 0
+		"loadlimit": 0
 	}
 }

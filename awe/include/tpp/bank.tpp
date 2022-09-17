@@ -307,11 +307,6 @@ void awe::unit_type::registerInterface(const std::string& type,
 		"uint get_loadLimit() const property",
 		asMETHOD(T, loadLimit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit's load limit.");
-	r = engine->RegisterObjectMethod(type.c_str(),
-		"int get_fuelPerTurn() const property",
-		asMETHOD(T, fuelPerTurn), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Gets the number of units of fuel that is "
-		"burned up at the beginning of this unit's turn.");
 }
 
 template<typename T>
