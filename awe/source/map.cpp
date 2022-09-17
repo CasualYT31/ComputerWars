@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.hpp"
 #include "fmtformatter.hpp"
+#include <cmath>
 
 awe::map::map(const std::string& name) noexcept : _logger(name) {}
 
@@ -674,8 +675,10 @@ void awe::map::setMapScalingFactor(const float factor) noexcept {
 }
 
 sf::Vector2u awe::map::getTileSize() const noexcept {
-	return sf::Vector2u(awe::tile::MIN_WIDTH * _scalingCache * _mapScalingFactor,
-		awe::tile::MIN_HEIGHT * _scalingCache * _mapScalingFactor);
+	return sf::Vector2u(awe::tile::MIN_WIDTH * (sf::Uint32)_scalingCache *
+		(sf::Uint32)_mapScalingFactor,
+		awe::tile::MIN_HEIGHT * (sf::Uint32)_scalingCache *
+		(sf::Uint32)_mapScalingFactor);
 }
 
 void awe::map::setTileSpritesheet(
@@ -746,10 +749,10 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 			// central to the screen.
 			auto cursorX = _sel.x * REAL_TILE_MIN_WIDTH + (_mapOffset.x),
 				cursorY = _sel.y * REAL_TILE_MIN_HEIGHT + (_mapOffset.y);
-			_mapOffset.x = (((float)target.getSize().x - REAL_TILE_MIN_WIDTH * 2) / 2.0f) -
-				((float)mapSize.x / 2.0f) - REAL_TILE_MIN_WIDTH / 2.0f;
-			_mapOffset.y = (((float)target.getSize().y - REAL_TILE_MIN_HEIGHT * 2) / 2.0f) -
-				((float)mapSize.y / 2.0f) - REAL_TILE_MIN_HEIGHT / 2.0f;
+			_mapOffset.x = (((float)target.getSize().x - REAL_TILE_MIN_WIDTH * 2)
+				/ 2.0f) - ((float)mapSize.x / 2.0f) - REAL_TILE_MIN_WIDTH / 2.0f;
+			_mapOffset.y = (((float)target.getSize().y - REAL_TILE_MIN_HEIGHT * 2)
+				/ 2.0f) - ((float)mapSize.y / 2.0f) - REAL_TILE_MIN_HEIGHT / 2.0f;
 			_mapOffset.x -= cursorX;
 			_mapOffset.y -= cursorY;
 			_changedScaleFactor = false;
@@ -789,8 +792,10 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 		(float)target.getSize().x / 2.0f - mapSize.x * REAL_TILE_MIN_WIDTH / 2.0f,
 		(float)target.getSize().y / 2.0f - mapSize.y * REAL_TILE_MIN_HEIGHT / 2.0f
 	);
-	mapCenterOffset /= _mapScalingFactor;
-	mapCenterOffset /= (float)scaling;
+	mapCenterOffset = sf::Vector2f(ceil(mapCenterOffset.x / _mapScalingFactor),
+		ceil(mapCenterOffset.y / _mapScalingFactor));
+	mapCenterOffset = sf::Vector2f(ceil(mapCenterOffset.x / (float)scaling),
+		ceil(mapCenterOffset.y / (float)scaling));
 	// Replace map centre offset values with _mapOffset if either of them are -ive.
 	if (mapCenterOffset.x < 0.0f)
 		mapCenterOffset.x = _mapOffset.x / _mapScalingFactor / (float)scaling;
@@ -799,9 +804,9 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	// Step 1. the tiles.
 	// Also update the position of the cursor here!
 	float tiley = 0.0;
-	for (sf::Uint32 y = 0, height = getMapSize().y; y < height; y++) {
+	for (sf::Uint32 y = 0, height = getMapSize().y; y < height; ++y) {
 		float tilex = 0.0;
-		for (sf::Uint32 x = 0, width = getMapSize().x; x < width; x++) {
+		for (sf::Uint32 x = 0, width = getMapSize().x; x < width; ++x) {
 			auto& tile = _tiles[x][y];
 			tile.animate(target, scaling);
 			sf::Vector2u tilePos = sf::Vector2u(x, y);
@@ -895,8 +900,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		_mapScalingFactor)).combine(states.transform);
 	// step 1. the tiles
 	auto mapSize = getMapSize();
-	for (sf::Uint32 y = 0; y < mapSize.y; y++) {
-		for (sf::Uint32 x = 0; x < mapSize.x; x++) {
+	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
+		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			target.draw(_tiles[x][y], mapStates);
 		}
 	}
@@ -905,8 +910,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// looping through all units
 	// unfortunately they have to be looped through separately to prevent tiles
 	// taller than the minimum height from drawing over units
-	for (sf::Uint32 y = 0; y < mapSize.y; y++) {
-		for (sf::Uint32 x = 0; x < mapSize.x; x++) {
+	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
+		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			if (_tiles[x][y].getUnit() && isUnitOnMap(_tiles[x][y].getUnit()))
 				target.draw(_units.at(_tiles[x][y].getUnit()), mapStates);
 		}
