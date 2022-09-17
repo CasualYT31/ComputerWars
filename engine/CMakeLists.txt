@@ -56,12 +56,22 @@ FetchContent_Declare(docgen
 )
 FetchContent_MakeAvailable(docgen)
 
+# Expose public includes to other projects through cache variable.
+set(${PROJECT_NAME}_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include"
+	${SystemProperties_INCLUDE_DIRS}
+	${Boxer_INCLUDE_DIRS}
+	${spdlog_INCLUDE_DIRS}
+	${nlohmann_json_INCLUDE_DIRS}
+	${sfml_INCLUDE_DIRS}
+	${angelscript_SOURCE_DIR}/angelscript/include
+	CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
+
 add_library(${PROJECT_NAME} STATIC
-	"logger.cpp"
-	"safejson.cpp"
-	"language.cpp"
-	"file.cpp"
-	"script.cpp"
+	"source/logger.cpp"
+	"source/safejson.cpp"
+	"source/language.cpp"
+	"source/file.cpp"
+	"source/script.cpp"
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring_utils.cpp
@@ -71,13 +81,8 @@ add_library(${PROJECT_NAME} STATIC
 	${angelscript_SOURCE_DIR}/add_on/scriptfile/scriptfilesystem.cpp
 	${angelscript_SOURCE_DIR}/add_on/scripthelper/scripthelper.cpp
 	${docgen_SOURCE_DIR}/source/docgen.cpp)
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}
-	${SystemProperties_INCLUDE_DIRS}
-	${Boxer_INCLUDE_DIRS}
-	${spdlog_INCLUDE_DIRS}
-	${nlohmann_json_INCLUDE_DIRS}
-	${sfml_INCLUDE_DIRS}
-	${angelscript_SOURCE_DIR}/angelscript/include
+target_include_directories(${PROJECT_NAME} PUBLIC
+	${ComputerWarsEngine_INCLUDE_DIRS}
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/
 	${angelscript_SOURCE_DIR}/add_on/scriptdictionary/
@@ -97,16 +102,6 @@ target_link_libraries(${PROJECT_NAME}
 	sfml-graphics
 	sfml-system
 	angelscript)
-
-# Expose public includes to other projects through cache variable.
-set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
-	${SystemProperties_INCLUDE_DIRS}
-	${Boxer_INCLUDE_DIRS}
-	${spdlog_INCLUDE_DIRS}
-	${nlohmann_json_INCLUDE_DIRS}
-	${sfml_INCLUDE_DIRS}
-	${angelscript_INCLUDE_DIRS}
-	CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 # Copy SFML's openal.dll file depending on build type.
 IF (WIN32)

@@ -1,24 +1,25 @@
 project("ComputerWarsAWE")
 
+set(${PROJECT_NAME}_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include"
+	${ComputerWarsTransitions_INCLUDE_DIRS}
+	CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
+
 add_library(${PROJECT_NAME} STATIC
-	"dialogue.cpp"
-	"bank.cpp"
-	"tile.cpp"
-	"unit.cpp"
-	"unit_pane.cpp"
-	"tile_pane.cpp"
-	"army.cpp"
-	"army_pane.cpp"
-	"map.cpp"
-	"spritesheets.cpp"
-	"engine.cpp"
-	"game.cpp"
-	"typedef.cpp")
-target_include_directories(${PROJECT_NAME} PUBLIC ${PUBLIC_SOURCE_DIR}
-	${ComputerWarsTransitions_INCLUDE_DIRS})
+	"source/dialogue.cpp"
+	"source/bank.cpp"
+	"source/tile.cpp"
+	"source/unit.cpp"
+	"source/unit_pane.cpp"
+	"source/tile_pane.cpp"
+	"source/army.cpp"
+	"source/army_pane.cpp"
+	"source/map.cpp"
+	"source/spritesheets.cpp"
+	"source/engine.cpp"
+	"source/game.cpp"
+	"source/typedef.cpp")
+target_include_directories(${PROJECT_NAME} PUBLIC
+	${ComputerWarsAWE_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_link_libraries(${PROJECT_NAME} ComputerWarsTransitions)
 
-set(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}
-	${ComputerWarsTransitions_INCLUDE_DIRS}
-	CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)

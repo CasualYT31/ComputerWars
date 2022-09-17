@@ -1285,4 +1285,4 @@ namespace awe {
 		const awe::bank<awe::movement_type>& movementBank) noexcept;
 }
 
-#include "bank.tpp"
+#include "tpp/bank.tpp"

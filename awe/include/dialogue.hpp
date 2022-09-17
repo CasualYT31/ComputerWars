@@ -788,7 +788,7 @@ namespace awe {
 	};
 }
 
-#include "dialogue.tpp"
+#include "tpp/dialogue.tpp"
 
 /*
 /*#include "audio.hpp"
