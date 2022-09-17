@@ -24,6 +24,16 @@ const string PROPERTY_PANEL_HEIGHT = formatUInt(PROPERTY_PANEL_SIZE.y) + "px";
  */
 class PropertyPanel {
 	/**
+	 * Name of the panel's base layout widget.
+	 */
+	string layout;
+	
+	/**
+	 * Doesn't create any widgets.
+	 */
+	PropertyPanel() {}
+
+	/**
 	 * Creates the widgets that represent a property panel.
 	 * @param panelName The full name of the panel which will contain all of the
 	 *                  other widgets.
@@ -53,13 +63,6 @@ class PropertyPanel {
 	}
 
 	/**
-	 * Removes the widgets from the menu.
-	 */
-	void remove() {
-		removeWidget(layout);
-	}
-
-	/**
 	 * Updates the panel's icon.
 	 */
 	void setIcon(const string&in sheet, const string&in sprite) {
@@ -74,28 +77,34 @@ class PropertyPanel {
 	}
 
 	/**
-	 * Updates a property.
+	 * Updates a property's icon.
 	 */
-	void setProperty(const uint index, const string&in text,
-		const string&in sheet, const string&in sprite) {
-		const string i = formatUInt(index);
-		if (!widgetExists(layout + ".properties.icon" + i)) {
-			addWidgetToGrid("Picture", layout + ".properties.icon" + i, index, 0);
-			setWidgetAlignmentInGrid(layout + ".properties", index, 0,
-				WidgetAlignment::Right);
-			addWidgetToGrid("Label", layout + ".properties.label" + i, index, 1);
-			_configureLabel(layout + ".properties.label" + i, 12);
-			setWidgetAlignmentInGrid(layout + ".properties", index, 1,
-				WidgetAlignment::Left);
-		}
-		setWidgetSprite(layout + ".properties.icon" + i, sheet, sprite);
-		setWidgetText(layout + ".properties.label" + i, text);
+	void setPropertyIcon(const uint index, const string&in sheet,
+		const string&in sprite) {
+		_ensurePropertyCreation(index);
+		setWidgetSprite(layout + ".properties.icon" + formatUInt(index),
+			sheet, sprite);
 	}
 
 	/**
-	 * Name of the panel's base layout widget.
+	 * Updates a property's text.
 	 */
-	string layout;
+	void setPropertyText(const uint index, const string&in text) {
+		const string i = formatUInt(index);
+		_ensurePropertyCreation(index);
+		setWidgetText(layout + ".properties.label" + formatUInt(index), text);
+	}
+
+	/**
+	 * Shows or hides a property.
+	 */
+	void setPropertyVisibility(const uint index, const bool visible) {
+		_ensurePropertyCreation(index);
+		setWidgetVisibility(
+			layout + ".properties.icon" + formatUInt(index), visible);
+		setWidgetVisibility(
+			layout + ".properties.label" + formatUInt(index), visible);
+	}
 
 	/**
 	 * Sets a label's properties.
@@ -105,5 +114,20 @@ class PropertyPanel {
 		setWidgetTextColour(name, Colour(255,255,255,255));
 		setWidgetTextOutlineColour(name, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness(name, 1.5);
+	}
+
+	void _ensurePropertyCreation(const uint index) {
+		const string i = formatUInt(index);
+		if (!widgetExists(layout + ".properties.icon" + i)) {
+			addWidgetToGrid("Picture", layout + ".properties.icon" + i, index, 0);
+			setWidgetAlignmentInGrid(layout + ".properties", index, 0,
+				WidgetAlignment::Right);
+		}
+		if (!widgetExists(layout + ".properties.label" + i)) {
+			addWidgetToGrid("Label", layout + ".properties.label" + i, index, 1);
+			_configureLabel(layout + ".properties.label" + i, 12);
+			setWidgetAlignmentInGrid(layout + ".properties", index, 1,
+				WidgetAlignment::Left);
+		}
 	}
 }

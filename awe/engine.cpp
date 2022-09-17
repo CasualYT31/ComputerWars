@@ -76,6 +76,14 @@ void AWEVector2TypeConstructor(const unsigned int x, const unsigned int y,
 	new(memory) sf::Vector2u(x, y);
 }
 
+std::string AWEVector2TypeToString(void* memory) {
+	if (memory) {
+		sf::Vector2u* v = (sf::Vector2u*)memory;
+		return "(" + std::to_string(v->x) + ", " + std::to_string(v->y) + ")";
+	}
+	return "";
+}
+
 awe::HP getDisplayedHP(const awe::HP hp) noexcept {
 	auto ret = (awe::HP)ceil((double)hp / (double)awe::unit_type::HP_GRANULARITY);
 	return ret;
@@ -96,8 +104,9 @@ bool uEqI(const sf::Vector2u lhs, const sf::Vector2i rhs) noexcept {
 	return lhs.x == rhs.x && lhs.y == rhs.y;
 }
 
-bool uEqU(const sf::Vector2u lhs, const sf::Vector2u rhs) noexcept {
-	return lhs.x == rhs.x && lhs.y == rhs.y;
+bool uEqU(void* pLhs, const sf::Vector2u rhs) noexcept {
+	auto lhs = (const sf::Vector2u*)pLhs;
+	return lhs->x == rhs.x && lhs->y == rhs.y;
 }
 
 void awe::game_engine::registerInterface(asIScriptEngine* engine,
@@ -129,6 +138,8 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	engine->RegisterObjectBehaviour("Vector2", asBEHAVE_CONSTRUCT,
 		"void Vector2(const uint, const uint)",
 		asFUNCTION(AWEVector2TypeConstructor), asCALL_CDECL_OBJLAST);
+	engine->RegisterObjectMethod("Vector2", "string toString() const",
+		asFUNCTION(AWEVector2TypeToString), asCALL_CDECL_OBJLAST);
 	document->DocumentObjectType(r, "Represents a 2D vector.");
 
 	r = engine->RegisterObjectType("MousePosition", sizeof(sf::Vector2i),
@@ -150,10 +161,8 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_CDECL_OBJFIRST);
 
 	// Vector 2 opEquals
-	r = engine->RegisterObjectMethod("Vector2",
-		"bool opEquals(Vector2) const",
-		asFUNCTIONPR(uEqU, (const sf::Vector2u, const sf::Vector2u), bool),
-		asCALL_CDECL_OBJFIRST);
+	r = engine->RegisterObjectMethod("Vector2", "bool opEquals(Vector2) const",
+		asFUNCTION(uEqU), asCALL_CDECL_OBJFIRST);
 	r = engine->RegisterObjectMethod("Vector2",
 		"bool opEquals(MousePosition) const",
 		asFUNCTIONPR(uEqI, (const sf::Vector2u, const sf::Vector2i), bool),

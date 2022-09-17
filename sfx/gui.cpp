@@ -411,6 +411,21 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Sets a widget's rounded border radius.");
 
 	r = engine->RegisterGlobalFunction(
+		"void setWidgetIndex(const string&in, const uint)",
+		asMETHOD(sfx::gui, _setWidgetIndex),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's index within a "
+		"container.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetIndexInContainer(const string&in, const uint, const uint)",
+		asMETHOD(sfx::gui, _setWidgetIndexInContainer),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's index within a given "
+		"container. The name of the container is given, then the index of the "
+		"widget to edit, with its new index given as the last parameter.");
+
+	r = engine->RegisterGlobalFunction(
 		"void setWidgetRatioInLayout(const string&in, const uint, const float)",
 		asMETHOD(sfx::gui, _setWidgetRatioInLayout),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -993,7 +1008,7 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	if (_isContainerWidget(widget->getWidgetType())) {
 		auto container = _findWidget<Container>(
 			widget->getWidgetName().toStdString());
-		auto widgetsInContainer = container->getWidgets();
+		auto& widgetsInContainer = container->getWidgets();
 		for (auto& widgetInContainer : widgetsInContainer) {
 			if (widget->getWidgetType() == "Grid")
 				_removeWidgets(widgetInContainer, container, false);
@@ -1413,7 +1428,12 @@ void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& shee
 				sheet, name, type, fullname[0]);
 			return;
 		}
-		_guiSpriteKeys[fullnameAsString] = std::make_pair(sheet, key);
+		// Prevent deleting sprite objects if there won't be any change.
+		if (_guiSpriteKeys[fullnameAsString].first != sheet ||
+			_guiSpriteKeys[fullnameAsString].second != key) {
+			_guiSpriteKeys[fullnameAsString] = std::make_pair(sheet, key);
+			_widgetSprites.erase(fullnameAsString);
+		}
 	} else {
 		_logger.error("Attempted to set the sprite \"{}\" from sheet \"{}\" to a "
 			"widget \"{}\" within menu \"{}\". This widget does not exist.", key,
@@ -1531,6 +1551,73 @@ void sfx::gui::_setWidgetBorderRadius(const std::string& name, const float radiu
 		_logger.error("Attempted to set the border radius {} to a widget "
 			"\"{}\" within menu \"{}\". This widget does not exist.", radius, name,
 			fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetIndex(const std::string& name, const std::size_t index)
+	noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		if (fullname.size() >= 2) {
+			std::string containerName =
+				fullnameAsString.substr(0, fullnameAsString.rfind('.'));
+			Container::Ptr container = _findWidget<Container>(containerName);
+			if (container) {
+				if (!container->setWidgetIndex(widget, index)) {
+					_logger.error("Could not set index {} to widget \"{}\" within "
+						"menu \"{}\". The index cannot be higher than {}.", index,
+						name, fullname[0], container->getWidgets().size() - 1);
+				}
+			} else {
+				_logger.error("Could not find container \"{}\" whilst setting "
+					"widget \"{}\"'s index to {}, within menu \"{}\".",
+					containerName, name, index, fullname[0]);
+			}
+		} else {
+			_logger.error("Attempted to set a menu \"{}\"'s widget index to {}. "
+				"This is unsupported for menu groups.", name, index);
+		}
+	} else {
+		_logger.error("Attempted to set the index {} to a widget \"{}\" within "
+			"menu \"{}\". This widget does not exist.", index, name, fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetIndexInContainer(const std::string& name,
+	const std::size_t oldIndex, const std::size_t newIndex) noexcept {
+	std::vector<std::string> fullname;
+	Container::Ptr container = _findWidget<Container>(name, &fullname);
+	if (container) {
+		if (_isContainerWidget(container->getWidgetType())) {
+			Widget::Ptr widget;
+			try {
+				widget = container->getWidgets().at(oldIndex);
+			} catch (const std::out_of_range&) {
+				_logger.error("Attempted to set container \"{}\"'s number {} "
+					"widget to an index of {}, within menu \"{}\". This container "
+					"does not have a widget with index {}.", name, oldIndex,
+					newIndex, fullname[0], oldIndex);
+				return;
+			}
+			if (!container->setWidgetIndex(widget, newIndex)) {
+				_logger.error("Attempted to set container \"{}\"'s number {} "
+					"widget to an index of {}, within menu \"{}\". The new index "
+					"cannot be higher than {}.", name, oldIndex, newIndex,
+					fullname[0], container->getWidgets().size() - 1);
+			}
+		} else {
+			_logger.error("Attempted to set widget \"{}\"'s number {} widget to "
+				"an index of {}, within menu \"{}\". The first widget is of type "
+				"\"{}\". This operation is not supported for this widget type.",
+				name, oldIndex, newIndex, fullname[0],
+				container->getWidgetType().toStdString());
+		}
+	} else {
+		_logger.error("Attempted to set widget \"{}\"'s number {} widget to an "
+			"index of {}, within menu \"{}\". The first widget does not exist.",
+			name, oldIndex, newIndex, fullname[0]);
 	}
 }
 
@@ -1717,7 +1804,7 @@ void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "grid") {
 			auto grid = std::dynamic_pointer_cast<Grid>(widget);
-			auto table = grid->getGridWidgets();
+			auto& table = grid->getGridWidgets();
 			if (row < table.size()) {
 				if (col < table[row].size()) {
 					grid->setWidgetAlignment(row, col, alignment);

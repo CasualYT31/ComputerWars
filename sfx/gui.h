@@ -728,6 +728,32 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Sets a widget's index within its container.
+		 * Used to reorder widgets within the container.\n
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no index will be set. An
+		 * error will also be logged if a given index is too high.
+		 * @param name  The name of the widget to change.
+		 * @param index The new index to set to the widget.
+		 */
+		void _setWidgetIndex(const std::string& name, const std::size_t index)
+			noexcept;
+
+		/**
+		 * Updates a widget's index within a given container.
+		 * Used to reorder widgets within the container.\n
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no index will be set. Errors
+		 * will also be logged if either index is invalid.
+		 * @param name     The name of the container containing the widget to
+		 *                 update.
+		 * @param oldIndex The index of the widget to update.
+		 * @param newIndex The new index of the widget.
+		 */
+		void _setWidgetIndexInContainer(const std::string& name,
+			const std::size_t oldIndex, const std::size_t newIndex) noexcept;
+
+		/**
 		 * Sets a widget's size in relation to others in its layout.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no ratio will be set. An

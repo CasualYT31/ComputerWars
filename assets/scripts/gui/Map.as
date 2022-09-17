@@ -2,11 +2,10 @@ TileWidget test;
 
 void MapSetUp() {
 	test = TileWidget("test");
+	test.setAlignment(TileWidgetAlignment::Right);
+	// test.setAlignment(TileWidgetAlignment::Left);
 	setWidgetOrigin(test.layout, 0.5, 0.5);
 	setWidgetPosition(test.layout, "50%", "50%");
-}
-
-void MapOpen() {
 }
 
 // Holds the previous mouse position.
@@ -14,7 +13,7 @@ MousePosition previousPosition;
 
 void MapHandleInput(const dictionary controls) {
 	// Test.
-	test.update(game.getSelectedTile(), TileWidgetAlignment::Left);
+	test.update(game.getSelectedTile());
 
 	// Handle mouse input.
 	MousePosition currentPosition = mousePosition();
