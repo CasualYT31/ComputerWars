@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file drawabletest.h
+/**@file drawabletest.hpp
  * Tests the \c sfx::animated_drawable class.
  */
 
-#include "sharedfunctions.h"
-#include "renderer.h"
+#include "sharedfunctions.hpp"
+#include "renderer.hpp"
 
 /**
  * Defines an implementation of \c animated_drawable for testing purposes.

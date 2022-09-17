@@ -20,9 +20,9 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "engine.h"
-#include "game.h"
-#include "army.h"
+#include "engine.hpp"
+#include "game.hpp"
+#include "army.hpp"
 
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 

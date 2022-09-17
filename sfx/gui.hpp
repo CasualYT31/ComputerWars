@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file gui.h
+/**@file gui.hpp
  * Defines code related to managing GUIs.
  * The backend used with this class is TGUI.
  */
@@ -28,11 +28,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "tgui/tgui.hpp"
-#include "texture.h"
-#include "script.h"
-#include "language.h"
-#include "userinput.h"
-#include "fonts.h"
+#include "texture.hpp"
+#include "script.hpp"
+#include "language.hpp"
+#include "userinput.hpp"
+#include "fonts.hpp"
 
 namespace sfx {
 	/**

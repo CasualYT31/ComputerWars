@@ -20,14 +20,14 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file game.h
+/**@file game.hpp
  * Declares the class which is used to manage a game of Computer Wars.
  */
 
-#include "renderer.h"
-#include "map.h"
-#include "userinput.h"
-#include "gui.h"
+#include "renderer.hpp"
+#include "map.hpp"
+#include "userinput.hpp"
+#include "gui.hpp"
 
 #pragma once
 

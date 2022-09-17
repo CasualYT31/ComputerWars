@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "unit.h"
+#include "unit.hpp"
 #include <cmath>
 
 awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type,

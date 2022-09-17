@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "texture.h"
+#include "texture.hpp"
 
 sfx::animated_spritesheet::animated_spritesheet(const std::string& name) noexcept :
 	_logger(name) {}

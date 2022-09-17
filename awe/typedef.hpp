@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**
- * @file typedef.h
+ * @file typedef.hpp
  * Defines a series of typedefs specific to Computer Wars. These were added so that
  * the sizes of these values could be easily amended after implementation.
  */

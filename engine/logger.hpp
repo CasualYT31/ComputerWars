@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file logger.h
+/**@file logger.hpp
  * Classes used for logging and debugging.
  * This file provides two classes: \c logger and \c sink. \c sink is a singleton
  * class which represents the log file which all instantiations of the \c logger

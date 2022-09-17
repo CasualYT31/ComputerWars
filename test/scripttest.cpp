@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file scripttest.h
+/**@file scripttest.hpp
  * Tests the \c engine::scripts class.
  */
 
-#include "sharedfunctions.h"
-#include "script.h"
+#include "sharedfunctions.hpp"
+#include "script.hpp"
 
 /**
  * Registers the interface.

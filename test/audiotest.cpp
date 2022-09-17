@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file audiotest.h
+/**@file audiotest.hpp
  * Tests the \c sfx::audio class.
  */
 
-#include "sharedfunctions.h"
-#include "audio.h"
+#include "sharedfunctions.hpp"
+#include "audio.hpp"
 
 /**
  * This test fixture is used to initialise an \c audio object for testing.

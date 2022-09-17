@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "fonts.h"
+#include "fonts.hpp"
 
 sfx::fonts::fonts(const std::string& name) noexcept : _logger(name) {}
 

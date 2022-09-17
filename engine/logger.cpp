@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "logger.h"
+#include "logger.hpp"
 #include <fstream>
 #include <ctime>
 #include "SystemProperties.hpp"

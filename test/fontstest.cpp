@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file fontstest.h
+/**@file fontstest.hpp
  * Tests the \c sfx::fonts class.
  */
 
-#include "sharedfunctions.h"
-#include "fonts.h"
+#include "sharedfunctions.hpp"
+#include "fonts.hpp"
 
 /**
  * This test fixture is used to initialise a \c fonts object for testing.

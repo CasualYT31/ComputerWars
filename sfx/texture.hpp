@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file texture.h
+/**@file texture.hpp
  * Defines classes dedicated to drawing animated sprites.
  * \c animated_spritesheet loads a series of images and dissects them into separate
  * sprites, each image representing a frame of that sprite. \c animated_sprite
@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "renderer.h"
+#include "renderer.hpp"
 
 namespace sfx {
 	/**

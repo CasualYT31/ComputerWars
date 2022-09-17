@@ -20,14 +20,14 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file sharedfunctions.h
+/**@file sharedfunctions.hpp
  * Contains helper functions and macros used by testing code.
  */
 
 #pragma once
 
 #include "nlohmann/json.hpp"
-#include "gtest/gtest.h"
+#include "gtest/gtest.hpp"
 #include <fstream>
 #include <functional>
 

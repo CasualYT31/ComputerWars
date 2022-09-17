@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file texturetest.h
+/**@file texturetest.hpp
  * Tests the \c sfx::animated_spritesheet class.
  */
 
-#include "sharedfunctions.h"
-#include "texture.h"
+#include "sharedfunctions.hpp"
+#include "texture.hpp"
 
 /**
  * This test fixture is used to initialise testing objects.

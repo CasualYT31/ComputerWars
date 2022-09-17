@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file languagetest.h
+/**@file languagetest.hpp
  * Tests the \c engine::language_dictionary class.
  */
 
-#include "sharedfunctions.h"
-#include "language.h"
+#include "sharedfunctions.hpp"
+#include "language.hpp"
 
 /**
  * This test fixture is used to initialise \c language_dictionary objects with a

@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "transitions.h"
+#include "transitions.hpp"
 
 transition::base::base(const bool isFadingIn, const sf::Time& duration) noexcept :
 	_isFadingIn(isFadingIn), _duration(duration) {}

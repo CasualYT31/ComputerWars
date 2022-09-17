@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file jsontest.h
+/**@file jsontest.hpp
  * Tests the \c engine::json and \c engine::json_state classes.
  */
 
-#include "sharedfunctions.h"
-#include "safejson.h"
+#include "sharedfunctions.hpp"
+#include "safejson.hpp"
 
 /**
  * This test fixture is used to initialise \c json objects with values before

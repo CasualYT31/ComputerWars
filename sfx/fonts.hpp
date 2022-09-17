@@ -20,13 +20,13 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file fonts.h
+/**@file fonts.hpp
  * Defines the \c fonts class.
  */
 
 #pragma once
 
-#include "safejson.h"
+#include "safejson.hpp"
 #include "SFML/Graphics/Font.hpp"
 
 namespace sfx {

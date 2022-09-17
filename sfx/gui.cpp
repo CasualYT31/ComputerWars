@@ -20,8 +20,8 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "gui.h"
-#include "fmtformatter.h"
+#include "gui.hpp"
+#include "fmtformatter.hpp"
 
 using namespace tgui;
 

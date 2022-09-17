@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file unit_pane.h
+/**@file unit_pane.hpp
  * Declares the class which allows the client to draw the units within a tile pane.
  */
 
-#include "unit.h"
-#include "language.h"
+#include "unit.hpp"
+#include "language.hpp"
 
 #pragma once
 

@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "tile.h"
+#include "tile.hpp"
 
 awe::tile::tile(const std::shared_ptr<const awe::tile_type>& type,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept :

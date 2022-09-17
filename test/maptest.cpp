@@ -20,10 +20,10 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file maptest.h
+/**@file maptest.hpp
  * Tests the \c awe::map class.
  */
 
-#include "sharedfunctions.h"
-#include "map.h"
+#include "sharedfunctions.hpp"
+#include "map.hpp"
 

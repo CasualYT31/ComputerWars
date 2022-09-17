@@ -20,16 +20,16 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file map.h
+/**@file map.hpp
  * Declares the class which is used to manage a map.
  * Unit, armies, and tiles are all stored and managed here.
  */
 
-#include "tile_pane.h"
-#include "army_pane.h"
-#include "script.h"
-#include "file.h"
-#include "language.h"
+#include "tile_pane.hpp"
+#include "army_pane.hpp"
+#include "script.hpp"
+#include "file.hpp"
+#include "language.hpp"
 
 #pragma once
 

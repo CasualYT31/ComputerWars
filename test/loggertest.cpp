@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file loggertest.h
+/**@file loggertest.hpp
  * Tests the \c engine::logger class.
  */
 
-#include "sharedfunctions.h"
-#include "logger.h"
+#include "sharedfunctions.hpp"
+#include "logger.hpp"
 
 /**
  * This function tests \c engine::logger::write(), with no variable insertion.

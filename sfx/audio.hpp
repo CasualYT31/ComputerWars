@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file audio.h
+/**@file audio.hpp
  * Declares classes which utilise the SFML's audio module. The \c audio class
  * unifies both streamable audio and short sounds under one interface. A JSON
  * script is used to load specific sound files and assign each of them names. The
@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "safejson.h"
+#include "safejson.hpp"
 #include "SFML/Audio.hpp"
 
 namespace sfx {

@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file script.h
+/**@file script.hpp
  * Defines code realted to executing scripts on disc.
  * This implementation uses AngelScript.
  */
@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "scriptarray.h"
 #include "scriptfilesystem.h"
 #include "scripthelper.h"
-#include "logger.h"
+#include "logger.hpp"
 #include <type_traits>
 #include "docgen.h"
 

@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**
- * @file fmtformatter.h
+ * @file fmtformatter.hpp
  * Defines the fmt formatter for SFML types.
  */
 

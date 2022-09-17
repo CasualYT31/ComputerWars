@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "safejson.h"
+#include "safejson.hpp"
 #include <fstream>
 
 bool engine::json_state::inGoodState() const noexcept {

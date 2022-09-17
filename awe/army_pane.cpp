@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "army_pane.h"
+#include "army_pane.hpp"
 
 const float awe::army_pane::_outlineThickness = 2.0f;
 

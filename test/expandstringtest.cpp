@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file expandstringtest.h
+/**@file expandstringtest.hpp
  * Tests the \c engine::expand_string class.
  */
 
-#include "language.h"
-#include "gtest/gtest.h"
+#include "language.hpp"
+#include "gtest/gtest.hpp"
 
 /**
  * Run a series of tests on \c engine::expand_string with a given var char.

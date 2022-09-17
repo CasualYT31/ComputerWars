@@ -21,13 +21,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**
- * @file spritesheets.h
+ * @file spritesheets.hpp
  * Declares the structure used to hold spritesheet pointers.
  */
 
 #pragma once
 
-#include "texture.h"
+#include "texture.hpp"
 
 namespace awe {
 	/**

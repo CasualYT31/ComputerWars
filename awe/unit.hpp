@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file unit.h
+/**@file unit.hpp
  * Declares the class which represents an in-game unit.
  */
 
-#include "bank.h"
-#include "army.h"
+#include "bank.hpp"
+#include "army.hpp"
 
 #pragma once
 

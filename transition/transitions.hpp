@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file transitions.h
+/**@file transitions.hpp
  * Classes used for drawing transitions to the screen.
  * Each class is designed to be single-use-then-discard. A transition is allocated
  * (either on the heap or the stack), then animated and drawn. Once \c animate()
@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "renderer.h"
+#include "renderer.hpp"
 
 namespace transition {
 	/**
@@ -106,7 +106,7 @@ namespace transition {
 		 * Performs all the calculations on the rectangle shapes.
 		 * @param  target The target to render the transition to.
 		 * @return \c TRUE if the transition has completed, \c FALSE otherwise.
-		 * @sa     transitions.h
+		 * @sa     transitions.hpp
 		 */
 		virtual bool animate(const sf::RenderTarget& target,
 			const double scaling = 1.0) noexcept;

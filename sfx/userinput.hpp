@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file userinput.h
+/**@file userinput.hpp
  * Classes used for user input handling.
  * These classes build on top of the SFML backend to manage keyboard, mouse, and
  * joystick inputs. Another layer of abstraction is added on top of these devices
@@ -31,7 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "safejson.h"
+#include "safejson.hpp"
 #include "SFML/Graphics.hpp"
 #include <memory>
 #include <unordered_set>

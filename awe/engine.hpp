@@ -21,22 +21,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**
- * @file engine.h
+ * @file engine.hpp
  * Declares the class which brings together all the others to maintain the engine
  * as it executes.
  */
 
 #pragma once
 
-#include "language.h"
-#include "fonts.h"
-#include "audio.h"
-#include "renderer.h"
-#include "userinput.h"
-#include "gui.h"
-#include "bank.h"
-#include "spritesheets.h"
-#include "game.h"
+#include "language.hpp"
+#include "fonts.hpp"
+#include "audio.hpp"
+#include "renderer.hpp"
+#include "userinput.hpp"
+#include "gui.hpp"
+#include "bank.hpp"
+#include "spritesheets.hpp"
+#include "game.hpp"
 #include <filesystem>
 
 namespace awe {

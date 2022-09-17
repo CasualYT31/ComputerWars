@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "userinput.h"
+#include "userinput.hpp"
 
 bool sfx::joystick::operator==(const sfx::joystick& rhs) const noexcept {
 	return this->axis == rhs.axis && this->direction == rhs.direction;

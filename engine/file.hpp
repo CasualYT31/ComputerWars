@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**
- * @file file.h
+ * @file file.hpp
  * Declares a class that can be used to read and write binary files.
  */
 

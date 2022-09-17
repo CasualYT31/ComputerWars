@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file transitiontest.h
+/**@file transitiontest.hpp
  * Tests the \c transition classes.
  */
 
-#include "sharedfunctions.h"
-#include "transitions.h"
+#include "sharedfunctions.hpp"
+#include "transitions.hpp"
 
 #ifdef COMPUTER_WARS_FULL_TRANSITION_TESTING
 

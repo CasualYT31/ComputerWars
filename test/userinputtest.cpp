@@ -20,14 +20,14 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file userinputtest.h
+/**@file userinputtest.hpp
  * Tests the \c sfx::user_input class.
  */
 
-#include "sharedfunctions.h"
-#include "userinput.h"
-#include "renderer.h"
-#include "fonts.h"
+#include "sharedfunctions.hpp"
+#include "userinput.hpp"
+#include "renderer.hpp"
+#include "fonts.hpp"
 
 /**
  * This test fixture is used to initialise the testing object.

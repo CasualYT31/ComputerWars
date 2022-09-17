@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file renderer.h
+/**@file renderer.hpp
  * Classes used for rendering.
  * These classes were intended to accompany, and not replace or encapsulate, the
  * SFML dependency. The \c renderer class is an \c sf::RenderWindow that reads and
@@ -33,7 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "safejson.h"
+#include "safejson.hpp"
 #include "SFML/Graphics.hpp"
 
 namespace sfx {

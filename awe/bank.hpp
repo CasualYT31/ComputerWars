@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file bank.h
+/**@file bank.hpp
  * This header file declares classes used to store static game information specific
  * to Computer Wars.
  * Static game information describes information that doesn't usually change during
@@ -35,9 +35,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "texture.h"
-#include "typedef.h"
-#include "script.h"
+#include "texture.hpp"
+#include "typedef.hpp"
+#include "script.hpp"
 #include "TGUI/String.hpp"
 
 namespace awe {

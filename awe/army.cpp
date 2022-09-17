@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "army.h"
+#include "army.hpp"
 #include <algorithm>
 
 awe::ArmyID awe::army::NO_ARMY_SCRIPT = ~((awe::ArmyID)0);

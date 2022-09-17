@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file safejson.h
+/**@file safejson.hpp
  * Classes which are used to interact with JSON in a "safer" way.
  * Classes in this file allow clients to interact with JSON in a safer way by
  * reporting errors in assumptions that are made, such as the existance of a key
@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "logger.h"
+#include "logger.hpp"
 #include "nlohmann/json.hpp"
 #include "SFML/Graphics/Color.hpp"
 

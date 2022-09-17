@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "tile_pane.h"
+#include "tile_pane.hpp"
 
 awe::tile_pane::tile_pane() noexcept {
 	_bg.setFillColor(sf::Color(250,250,250,128));

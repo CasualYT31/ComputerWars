@@ -20,15 +20,15 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file sinktest.h
+/**@file sinktest.hpp
  * Tests the \c engine::sink class.
  * Unfortunately, it is not very easy to perform date, time, and hardware
  * specification tests, especially tests that work across any machine. The simplest
  * thing to do is manually check these items yourself.
  */
 
-#include "sharedfunctions.h"
-#include "logger.h"
+#include "sharedfunctions.hpp"
+#include "logger.hpp"
 #include <filesystem>
 
 /**

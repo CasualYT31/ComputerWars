@@ -20,11 +20,11 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file army_pane.h
+/**@file army_pane.hpp
  * Declares the class which allows the client to draw the army pane of an army.
  */
 
-#include "army.h"
+#include "army.hpp"
 
 #pragma once
 

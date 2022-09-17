@@ -46,7 +46,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @brief     The \c transition namespace contains all the transition drawables.
  */
 
-#include "awe/engine.h"
+#include "awe/engine.hpp"
 #include <filesystem>
 
 /**

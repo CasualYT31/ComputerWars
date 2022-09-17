@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file filetest.h
+/**@file filetest.hpp
  * Tests the \c engine::binary_file class.
  */
 
-#include "sharedfunctions.h"
-#include "file.h"
+#include "sharedfunctions.hpp"
+#include "file.hpp"
 
 /**
  * Tests \c engine::binary_file::convertNumber().

@@ -20,16 +20,16 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file dialogue.h
+/**@file dialogue.hpp
  * Allows the client to produce in-game dialogue boxes.
  */
 
 #pragma once
 
-#include "texture.h"
-#include "audio.h"
-#include "language.h"
-#include "userinput.h"
+#include "texture.hpp"
+#include "audio.hpp"
+#include "language.hpp"
+#include "userinput.hpp"
 
 namespace awe {
 	/**
@@ -791,14 +791,14 @@ namespace awe {
 #include "dialogue.tpp"
 
 /*
-/*#include "audio.h"
-#include "fonts.h"
-#include "userinput.h"
-#include "texture.h"
-#include "language.h"
+/*#include "audio.hpp"
+#include "fonts.hpp"
+#include "userinput.hpp"
+#include "texture.hpp"
+#include "language.hpp"
 
-#include "language.h"
-#include "texture.h"
+#include "language.hpp"
+#include "texture.hpp"
 
 namespace awe {
 	// CONSTRUCTION ZONE

@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file banktest.h
+/**@file banktest.hpp
  * Tests the \c bank.h classes.
  */
 
-#include "sharedfunctions.h"
-#include "bank.h"
+#include "sharedfunctions.hpp"
+#include "bank.hpp"
 
 TEST(BankTest, OldTest) {
 	awe::bank<awe::movement_type> move;

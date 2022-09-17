@@ -20,13 +20,13 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file tile_pane.h
+/**@file tile_pane.hpp
  * Declares the class which allows the client to draw the tile pane of a tile.
  */
 
-#include "tile.h"
-#include "unit_pane.h"
-#include "language.h"
+#include "tile.hpp"
+#include "unit_pane.hpp"
+#include "language.hpp"
 
 #pragma once
 

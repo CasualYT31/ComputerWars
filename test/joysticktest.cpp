@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file joysticktest.h
+/**@file joysticktest.hpp
  * Tests the \c sfx::joystick structure.
  */
 
-#include "sharedfunctions.h"
-#include "userinput.h"
+#include "sharedfunctions.hpp"
+#include "userinput.hpp"
 
 /**
  * Tests \c sfx::joystick::operator==.

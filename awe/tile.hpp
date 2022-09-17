@@ -20,11 +20,11 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file tile.h
+/**@file tile.hpp
  * Declares the class which represents an in-game tile.
  */
 
-#include "army.h"
+#include "army.hpp"
 
 #pragma once
 

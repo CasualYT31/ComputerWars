@@ -20,12 +20,12 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file guitest.h
+/**@file guitest.hpp
  * Tests the \c sfx::gui class.
  */
 
-#include "sharedfunctions.h"
-#include "gui.h"
+#include "sharedfunctions.hpp"
+#include "gui.hpp"
 
 /**
  * This test fixture is used to initialise a \c gui object for testing.

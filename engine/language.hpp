@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file language.h
+/**@file language.hpp
  * Classes used for string translation and manipulation.
  * This file declares two classes, \c expand_string and \c language_dictionary.
  * \c language_dictionary stores a map of maps of string pairs which can be
@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "safejson.h"
+#include "safejson.hpp"
 #include <sstream>
 #include <memory>
 

@@ -20,11 +20,11 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file army.h
+/**@file army.hpp
  * Declares the class which represents an in-game army.
  */
 
-#include "bank.h"
+#include "bank.hpp"
 #include "sfml/System/Vector2.hpp"
 #include <unordered_set>
 

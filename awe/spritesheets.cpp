@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "spritesheets.h"
+#include "spritesheets.hpp"
 
 void awe::spritesheets::test(std::string& errstring) const noexcept {
 	if (!CO) errstring += "CO spritesheet\n";

@@ -20,7 +20,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "sharedfunctions.h"
+#include "sharedfunctions.hpp"
 #include "SFML/System/Clock.hpp"
 
 std::string getYear() noexcept {
