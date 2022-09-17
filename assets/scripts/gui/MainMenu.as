@@ -5,6 +5,9 @@ void MainMenuSetUp() {
 	setWidgetSize("FileSelect", "50%", "50%");
 	setWidgetPosition("FileSelect", "25%", "50%");
 	setWidgetOrigin("FileSelect", 0.25, 0.5);
+	addWidget("Button", "NewGame");
+	setWidgetPosition("NewGame", "10%", "10%");
+	setWidgetText("NewGame", "~New Game");
 }
 
 void MainMenuOpen() {
@@ -26,4 +29,8 @@ void MainMenuOpen() {
 void MainMenu_FileSelect_MouseReleased() {
 	string item = getSelectedItemText("FileSelect");
 	loadMap("map/" + item, "Map");
+}
+
+void MainMenu_NewGame_MouseReleased() {
+	setGUI("NewGameOptions");
 }

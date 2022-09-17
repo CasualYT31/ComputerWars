@@ -240,6 +240,11 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	r = engine->RegisterGlobalProperty("const Colour NO_COLOUR", &NO_COLOUR);
 	document->DocumentExpectedFunction("const Colour NO_COLOUR", "Constant which "
 		"holds a colour value of (0, 0, 0, 0).");
+	r = engine->RegisterGlobalProperty("const string PREVIOUS_MENU",
+		&_previousGUI);
+	document->DocumentExpectedFunction("const string PREVIOUS_MENU", "Holds the "
+		"name of the menu that was open before the current one. Scripts cannot "
+		"change this value, but the engine does update it when switching menus.");
 
 	// Register non-widget global functions.
 	r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
@@ -506,15 +511,13 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 		}
 		// Clear widget sprites.
 		_widgetSprites.clear();
+		_previousGUI = old;
 		_currentGUI = newPanel;
 		// Call NewPanelOpen() script function, if it has been defined.
 		auto openFuncName = newPanel + "Open",
-			openFuncEmptyDecl = "void " + _currentGUI + "Open()",
-			openFuncDecl = "void " + _currentGUI + "Open(const string&in)";
+			openFuncEmptyDecl = "void " + _currentGUI + "Open()";
 		if (callOpen) {
-			if (_scripts->functionDeclExists(openFuncDecl)) {
-				_scripts->callFunction(openFuncName, &old);
-			} else if (_scripts->functionDeclExists(openFuncEmptyDecl)) {
+			if (_scripts->functionDeclExists(openFuncEmptyDecl)) {
 				_scripts->callFunction(openFuncName);
 			}
 		}
@@ -835,6 +838,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 			if (_scripts) _scripts->callFunction(m + "SetUp");
 		}
 		// Leave with the current menu being MainMenu.
+		// _previousGUI will hold the name of the last menu in the JSON array.
 		setGUI("MainMenu", false, true);
 		return true;
 	} else {
@@ -1067,6 +1071,8 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::Group::create();
 	} else if (type == "grid") {
 		return tgui::Grid::create();
+	} else if (type == "button") {
+		return tgui::Button::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -1304,7 +1310,7 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type != "bitmapbutton" && type != "label") {
+		if (type != "bitmapbutton" && type != "label" && type != "button") {
 			_logger.error("Attempted to set the caption \"{}\" to widget \"{}\" "
 				"which is of type \"{}\", within menu \"{}\". This operation is "
 				"not supported for this type of widget.", text, name, type,

@@ -146,9 +146,6 @@ void DetailedInfoMenuSetUp() {
 	setUpUnitPanel(baseLayout);
 }
 
-// Remembers the previous menu so that it can go back to it.
-string previousMenu;
-
 /**
  * Determines which tile picture to present to the user.
  * @param  pos The location of the tile whose picture is to be shown.
@@ -173,9 +170,7 @@ const string tilePicture(const Vector2&in pos) {
  * Retrieves all the details on the current armies and the current tile and
  * displays detailed information on them.
  */
-void DetailedInfoMenuOpen(const string&in previous) {
-	previousMenu = previous;
-
+void DetailedInfoMenuOpen() {
 	// Setup army panel.
 	const uint armyCount = game.getArmyCount();
 	for (uint a = 0; a < armyCount; a++) {
@@ -281,6 +276,6 @@ void DetailedInfoMenuClose() {
 
 void DetailedInfoMenuHandleInput(const dictionary controls) {
 	if (bool(controls["info"]) || bool(controls["back"])) {
-		setGUI(previousMenu);
+		setGUI(PREVIOUS_MENU);
 	}
 }

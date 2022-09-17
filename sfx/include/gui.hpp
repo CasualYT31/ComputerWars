@@ -870,6 +870,11 @@ namespace sfx {
 		std::string _currentGUI;
 
 		/**
+		 * Stores the name of the GUI that was set before the current one.
+		 */
+		std::string _previousGUI;
+
+		/**
 		 * Stores the background information for each GUI menu.
 		 */
 		std::unordered_map<std::string, gui::gui_background> _guiBackground;

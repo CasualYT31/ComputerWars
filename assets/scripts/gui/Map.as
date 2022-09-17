@@ -1,3 +1,5 @@
+void MapSetUp() {}
+
 // Holds the previous mouse position.
 MousePosition previousPosition;
 
@@ -9,8 +11,8 @@ void MapHandleInput(const dictionary controls) {
 		// Ignore the mouse if it's outside of the window.
 		Vector2 windowSize = getWindowSize();
 		if (currentPosition.x >= 0 && currentPosition.y >= 0
-			&& currentPosition.x <= windowSize.x
-			&& currentPosition.y <= windowSize.y) {
+			&& currentPosition.x <= int(windowSize.x)
+			&& currentPosition.y <= int(windowSize.y)) {
 			// Only consider the mouse if it has moved.
 			if (currentPosition.x != previousPosition.x) {
 				game.setSelectedTileByPixel(currentPosition);
