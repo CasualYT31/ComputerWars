@@ -156,10 +156,15 @@ void sfx::user_input::setConfiguration(const std::string& name,
 sf::Vector2i sfx::user_input::mousePosition() const noexcept {
 	if (_window) {
 		if (_window->hasFocus()) {
-			return sf::Mouse::getPosition(*_window);
-		} else {
-			return sfx::INVALID_MOUSE;
+			// Also ignore button presses if the mouse is currently outside of the
+			// client area.
+			auto pos = sf::Mouse::getPosition(*_window);
+			if (pos.x >= 0 && pos.y >= 0 && pos.x <= (int)_window->getSize().x &&
+				pos.y <= (int)_window->getSize().y) {
+				return pos;
+			}
 		}
+		return sfx::INVALID_MOUSE;
 	} else {
 		return sf::Mouse::getPosition();
 	}
