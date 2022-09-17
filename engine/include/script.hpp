@@ -211,6 +211,27 @@ namespace engine {
 		bool functionDeclExists(const std::string& decl) const noexcept;
 
 		/**
+		 * Will write a message to the log, using the current context to retrieve
+		 * extra information.
+		 * @param message The message to log.
+		 */
+		void writeToLog(const std::string& message) const noexcept;
+
+		/**
+		 * Will write a warning to the log, using the current context to retrieve
+		 * extra information.
+		 * @param message The message to log.
+		 */
+		void warningToLog(const std::string& message) const noexcept;
+		
+		/**
+		 * Will write an error to the log, using the current context to retrieve
+		 * extra information.
+		 * @param message The message to log.
+		 */
+		void errorToLog(const std::string& message) const noexcept;
+
+		/**
 		 * Parameter pack method called when a script function requires parameters.
 		 * It is called recursively, so that each parameter is added, with the
 		 * first parameter being the first parameter passed to the function, etc.
@@ -280,6 +301,12 @@ namespace engine {
 		 * Call this method just before a call to \c callFunction() is over.
 		 */
 		void _resetCallFunctionVariables() noexcept;
+
+		/**
+		 * Constructs a log message from the most current context.
+		 * @param msg The message to log.
+		 */
+		std::string _constructMessage(const std::string& msg) const noexcept;
 
 		/**
 		 * The internal logger object.

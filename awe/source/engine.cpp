@@ -389,20 +389,20 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	r = engine->RegisterGlobalProperty("GameInterface game", &_game);
 
 	// Register the global functions.
-	r = engine->RegisterGlobalFunction("void info(const string& in)",
-		asMETHODPR(engine::logger, write, (const std::string&), void),
-		asCALL_THISCALL_ASGLOBAL, &_logger);
+	r = engine->RegisterGlobalFunction("void info(const string&in)",
+		asMETHOD(engine::scripts, writeToLog),
+		asCALL_THISCALL_ASGLOBAL, _scripts.get());
 	document->DocumentGlobalFunction(r, "Writes to the log using the info level.");
 
-	r = engine->RegisterGlobalFunction("void warn(const string& in)",
-		asMETHODPR(engine::logger, warning, (const std::string&), void),
-		asCALL_THISCALL_ASGLOBAL, &_logger);
+	r = engine->RegisterGlobalFunction("void warn(const string&in)",
+		asMETHOD(engine::scripts, warningToLog),
+		asCALL_THISCALL_ASGLOBAL, _scripts.get());
 	document->DocumentGlobalFunction(r, "Writes to the log using the warning "
 		"level.");
 
-	r = engine->RegisterGlobalFunction("void error(const string& in)",
-		asMETHODPR(engine::logger, error, (const std::string&), void),
-		asCALL_THISCALL_ASGLOBAL, &_logger);
+	r = engine->RegisterGlobalFunction("void error(const string&in)",
+		asMETHOD(engine::scripts, errorToLog),
+		asCALL_THISCALL_ASGLOBAL, _scripts.get());
 	document->DocumentGlobalFunction(r, "Writes to the log using the error "
 		"level.");
 

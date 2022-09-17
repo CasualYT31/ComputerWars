@@ -214,6 +214,18 @@ bool engine::scripts::functionDeclExists(const std::string& decl) const noexcept
     return _engine->GetModule("ComputerWars")->GetFunctionByDecl(decl.c_str());
 }
 
+void engine::scripts::writeToLog(const std::string& message) const noexcept {
+    _logger.write(_constructMessage(message));
+}
+
+void engine::scripts::warningToLog(const std::string& message) const noexcept {
+    _logger.warning(_constructMessage(message));
+}
+
+void engine::scripts::errorToLog(const std::string& message) const noexcept {
+    _logger.error(_constructMessage(message));
+}
+
 bool engine::scripts::callFunction(const std::string& name) noexcept {
     if (!_callFunction_TemplateCall) {
         // If this method is being called directly and not from the template
@@ -315,4 +327,15 @@ bool engine::scripts::_setupContext(const std::string& name) noexcept {
 void engine::scripts::_resetCallFunctionVariables() noexcept {
     _callFunction_TemplateCall = false;
     _argumentID = 0;
+}
+
+std::string engine::scripts::_constructMessage(const std::string& msg) const
+    noexcept {
+    asIScriptContext* context = _context.back();
+    const char* sectionName = nullptr;
+    asIScriptFunction* function = context->GetFunction(0);
+    const int lineNumber = context->GetLineNumber(0, nullptr, &sectionName);
+    return "In " + std::string(sectionName) + ", function " +
+        std::string(function->GetDeclaration()) + ", at line " +
+        std::to_string(lineNumber) + ": " + msg;
 }
