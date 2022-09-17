@@ -275,7 +275,8 @@ namespace awe {
 		template<typename T>
 		static void registerInterface(const std::string & type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>&document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>&document,
+			const std::string& extraIconDoc = "") noexcept;
 
 		/**
 		 * Retrieves the long name property.
