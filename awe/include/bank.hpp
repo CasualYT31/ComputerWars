@@ -894,7 +894,9 @@ namespace awe {
 		 *     <li>\c "canload" = \c _canLoadThese, <tt>([unsigned 32-bit int{,
 		 *         unsigned 32-bit int, etc.}])</tt></li>
 		 *     <li>\c "loadlimit" = \c _loadLimit, <tt>(unsigned 32-bit int)</tt>
-		 *     </li></ul>
+		 *     </li>
+		 *     <li>\c "turnstartpriority" = \c _turnStartPriority, <tt>(unsigned
+		 *         32-bit int)</tt></li></ul>
 		 * 
 		 * Range values work by counting the number of tiles away from the unit's
 		 * current tile. If the tile is within both the lower and higher ranges
@@ -904,7 +906,17 @@ namespace awe {
 		 * portrait of the type of unit.\n
 		 * 
 		 * Sprites is an array of sprite names corresponding to each country's map
-		 * representation of the type of unit.
+		 * representation of the type of unit.\n
+		 *
+		 * Upon the start of an army's turn, all of their units go through a script
+		 * function which will affect the unit depending on its type.
+		 * TurnStartPriority allows you to group units together into priority
+		 * levels, where units with a higher number are passed to this script
+		 * function first, before units with a lower number. This allows you to,
+		 * for example, ensure that APCs always resupply adjacent units at the
+		 * start of every turn before any planes crash or ships sink. There is no
+		 * guaranteed order defined for units that fall in the same priority level.
+		 * By default, units have the lowest priority level.
 		 * @param id         The ID of the bank entry.
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
@@ -1055,6 +1067,12 @@ namespace awe {
 		unsigned int loadLimit() const noexcept;
 
 		/**
+		 * Retrieves the turn start priority level for this unit type.
+		 * @return The priority level.
+		 */
+		unsigned int getTurnStartPriority() const noexcept;
+
+		/**
 		 * Updates the stored unit type properties pointers for units that can be
 		 * loaded onto this one.
 		 * @param unitBank A reference to the unit type bank to pull the pointers
@@ -1184,6 +1202,11 @@ namespace awe {
 		 * The maximum number of units this unit type can load.
 		 */
 		unsigned int _loadLimit = 0;
+
+		/**
+		 * The turn start priority.
+		 */
+		unsigned int _turnStartPriority = 0;
 	};
 
 	/**

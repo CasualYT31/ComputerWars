@@ -227,6 +227,7 @@ awe::unit_type::unit_type(const awe::BankID id, const std::string& scriptName,
 	j.resetState();
 	j.applyVector(_canLoadThese, { "canload" });
 	j.apply(_loadLimit, { "loadlimit" }, true);
+	j.apply(_turnStartPriority, { "turnstartpriority" }, true);
 }
 awe::BankID awe::unit_type::getMovementTypeIndex() const noexcept {
 	return _movementTypeID;
@@ -293,6 +294,9 @@ bool awe::unit_type::canLoad(const std::shared_ptr<const awe::unit_type>& type)
 }
 unsigned int awe::unit_type::loadLimit() const noexcept {
 	return _loadLimit;
+}
+unsigned int awe::unit_type::getTurnStartPriority() const noexcept {
+	return _turnStartPriority;
 }
 void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)
 	const noexcept {

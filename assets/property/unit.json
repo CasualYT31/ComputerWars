@@ -1,9 +1,10 @@
 ﻿{
-	"INFANTRY": {"longname": "INFANTRY_longname",
+	"INFANTRY": {
+		"longname": "INFANTRY_longname",
 		"shortname": "INFANTRY_shortname",
 		"icon": "",
-		"sprites": ["infos","infbm","infge","infyc","infbh","infrf","infgs","infbd","infab","infjs","infci","infpc","inftg","infpl","infar","infwn"],
-		"pictures": ["osinfantry","bminfantry","geinfantry","ycinfantry"],
+		"sprites": [ "infos", "infbm", "infge", "infyc", "infbh", "infrf", "infgs", "infbd", "infab", "infjs", "infci", "infpc", "inftg", "infpl", "infar", "infwn" ],
+		"pictures": [ "osinfantry", "bminfantry", "geinfantry", "ycinfantry" ],
 		"description": "INFANTRY_description",
 		"price": 1000,
 		"hp": 10,
@@ -15,13 +16,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"MECH": {"longname": "MECH_longname",
+	"MECH": {
+		"longname": "MECH_longname",
 		"shortname": "MECH_shortname",
 		"icon": "",
-		"sprites": ["mechos","mechbm","mechge","mechyc","mechbh","mechrf","mechgs","mechbd","mechab","mechjs","mechci","mechpc","mechtg","mechpl","mechar","mechwn"],
-		"pictures": [""],
+		"sprites": [ "mechos", "mechbm", "mechge", "mechyc", "mechbh", "mechrf", "mechgs", "mechbd", "mechab", "mechjs", "mechci", "mechpc", "mechtg", "mechpl", "mechar", "mechwn" ],
+		"pictures": [ "" ],
 		"description": "MECH_description",
 		"price": 3000,
 		"hp": 10,
@@ -33,13 +36,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"RECON": {"longname": "RECON_longname",
+	"RECON": {
+		"longname": "RECON_longname",
 		"shortname": "RECON_shortname",
 		"icon": "",
-		"sprites": ["reconos","reconbm","reconge","reconyc","reconbh","reconrf","recongs","reconbd","reconab","reconjs","reconci","reconpc","recontg","reconpl","reconar","reconwn"],
-		"pictures": [""],
+		"sprites": [ "reconos", "reconbm", "reconge", "reconyc", "reconbh", "reconrf", "recongs", "reconbd", "reconab", "reconjs", "reconci", "reconpc", "recontg", "reconpl", "reconar", "reconwn" ],
+		"pictures": [ "" ],
 		"description": "RECON_description",
 		"price": 4000,
 		"hp": 10,
@@ -51,13 +56,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"TANK": {"longname": "TANK_longname",
+	"TANK": {
+		"longname": "TANK_longname",
 		"shortname": "TANK_shortname",
 		"icon": "",
-		"sprites": ["tankos","tankbm","tankge","tankyc","tankbh","tankrf","tankgs","tankbd","tankab","tankjs","tankci","tankpc","tanktg","tankpl","tankar","tankwn"],
-		"pictures": [""],
+		"sprites": [ "tankos", "tankbm", "tankge", "tankyc", "tankbh", "tankrf", "tankgs", "tankbd", "tankab", "tankjs", "tankci", "tankpc", "tanktg", "tankpl", "tankar", "tankwn" ],
+		"pictures": [ "" ],
 		"description": "TANK_description",
 		"price": 7000,
 		"hp": 10,
@@ -69,13 +76,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"MDTANK": {"longname": "MDTANK_longname",
+	"MDTANK": {
+		"longname": "MDTANK_longname",
 		"shortname": "MDTANK_shortname",
 		"icon": "",
-		"sprites": ["mdos","mdbm","mdge","mdyc","mdbh","mdrf","mdgs","mdbd","mdab","mdjs","mdci","mdpc","mdtg","mdpl","mdar","mdwn"],
-		"pictures": [""],
+		"sprites": [ "mdos", "mdbm", "mdge", "mdyc", "mdbh", "mdrf", "mdgs", "mdbd", "mdab", "mdjs", "mdci", "mdpc", "mdtg", "mdpl", "mdar", "mdwn" ],
+		"pictures": [ "" ],
 		"description": "MDTANK_description",
 		"price": 16000,
 		"hp": 10,
@@ -87,13 +96,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"NEOTANK": {"longname": "NEOTANK_longname",
+	"NEOTANK": {
+		"longname": "NEOTANK_longname",
 		"shortname": "NEOTANK_shortname",
 		"icon": "",
-		"sprites": ["neoos","neobm","neoge","neoyc","neobh","neorf","neogs","neobd","neoab","neojs","neoci","neopc","neotg","neopl","neoar","neown"],
-		"pictures": [""],
+		"sprites": [ "neoos", "neobm", "neoge", "neoyc", "neobh", "neorf", "neogs", "neobd", "neoab", "neojs", "neoci", "neopc", "neotg", "neopl", "neoar", "neown" ],
+		"pictures": [ "" ],
 		"description": "NEOTANK_description",
 		"price": 22000,
 		"hp": 10,
@@ -105,13 +116,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"MEGATANK": {"longname": "MEGATANK_longname",
+	"MEGATANK": {
+		"longname": "MEGATANK_longname",
 		"shortname": "MEGATANK_shortname",
 		"icon": "",
-		"sprites": ["megaos","megabm","megage","megayc","megabh","megarf","megags","megabd","megaab","megajs","megaci","megapc","megatg","megapl","megaar","megawn"],
-		"pictures": [""],
+		"sprites": [ "megaos", "megabm", "megage", "megayc", "megabh", "megarf", "megags", "megabd", "megaab", "megajs", "megaci", "megapc", "megatg", "megapl", "megaar", "megawn" ],
+		"pictures": [ "" ],
 		"description": "MEGATANK_description",
 		"price": 28000,
 		"hp": 10,
@@ -123,13 +136,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"APC": {"longname": "APC_longname",
+	"APC": {
+		"longname": "APC_longname",
 		"shortname": "APC_shortname",
 		"icon": "",
-		"sprites": ["apcos","apcbm","apcge","apcyc","apcbh","apcrf","apcgs","apcbd","apcab","apcjs","apcci","apcpc","apctg","apcpl","apcar","apcwn"],
-		"pictures": [""],
+		"sprites": [ "apcos", "apcbm", "apcge", "apcyc", "apcbh", "apcrf", "apcgs", "apcbd", "apcab", "apcjs", "apcci", "apcpc", "apctg", "apcpl", "apcar", "apcwn" ],
+		"pictures": [ "" ],
 		"description": "APC_description",
 		"price": 5000,
 		"hp": 10,
@@ -140,14 +155,16 @@
 		"vision": 1,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": [0, 1],
-		"loadlimit": 1
+		"canload": [ 0, 1 ],
+		"loadlimit": 1,
+		"turnstartpriority": 1000
 	},
-	"ANTIAIR": {"longname": "ANTIAIR_longname",
+	"ANTIAIR": {
+		"longname": "ANTIAIR_longname",
 		"shortname": "ANTIAIR_shortname",
 		"icon": "",
-		"sprites": ["antios","antibm","antige","antiyc","antibh","antirf","antigs","antibd","antiab","antijs","antici","antipc","antitg","antipl","antiar","antiwn"],
-		"pictures": [""],
+		"sprites": [ "antios", "antibm", "antige", "antiyc", "antibh", "antirf", "antigs", "antibd", "antiab", "antijs", "antici", "antipc", "antitg", "antipl", "antiar", "antiwn" ],
+		"pictures": [ "" ],
 		"description": "ANTIAIR_description",
 		"price": 8000,
 		"hp": 10,
@@ -159,13 +176,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"ARTILLERY": {"longname": "ARTILLERY_longname",
+	"ARTILLERY": {
+		"longname": "ARTILLERY_longname",
 		"shortname": "ARTILLERY_shortname",
 		"icon": "",
-		"sprites": ["artos","artbm","artge","artyc","artbh","artrf","artgs","artbd","artab","artjs","artci","artpc","arttg","artpl","artar","artwn"],
-		"pictures": [""],
+		"sprites": [ "artos", "artbm", "artge", "artyc", "artbh", "artrf", "artgs", "artbd", "artab", "artjs", "artci", "artpc", "arttg", "artpl", "artar", "artwn" ],
+		"pictures": [ "" ],
 		"description": "ARTILLERY_description",
 		"price": 6000,
 		"hp": 10,
@@ -177,13 +196,15 @@
 		"lowrange": 2,
 		"highrange": 3,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"ROCKETS": {"longname": "ROCKETS_longname",
+	"ROCKETS": {
+		"longname": "ROCKETS_longname",
 		"shortname": "ROCKETS_shortname",
 		"icon": "",
-		"sprites": ["rocketos","rocketbm","rocketge","rocketyc","rocketbh","rocketrf","rocketgs","rocketbd","rocketab","rocketjs","rocketci","rocketpc","rockettg","rocketpl","rocketar","rocketwn"],
-		"pictures": [""],
+		"sprites": [ "rocketos", "rocketbm", "rocketge", "rocketyc", "rocketbh", "rocketrf", "rocketgs", "rocketbd", "rocketab", "rocketjs", "rocketci", "rocketpc", "rockettg", "rocketpl", "rocketar", "rocketwn" ],
+		"pictures": [ "" ],
 		"description": "ROCKETS_description",
 		"price": 15000,
 		"hp": 10,
@@ -195,13 +216,15 @@
 		"lowrange": 3,
 		"highrange": 5,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"MISSILES": {"longname": "MISSILES_longname",
+	"MISSILES": {
+		"longname": "MISSILES_longname",
 		"shortname": "MISSILES_shortname",
 		"icon": "",
-		"sprites": ["missos","missbm","missge","missyc","missbh","missrf","missgs","missbd","missab","missjs","missci","misspc","misstg","misspl","missar","misswn"],
-		"pictures": [""],
+		"sprites": [ "missos", "missbm", "missge", "missyc", "missbh", "missrf", "missgs", "missbd", "missab", "missjs", "missci", "misspc", "misstg", "misspl", "missar", "misswn" ],
+		"pictures": [ "" ],
 		"description": "MISSILES_description",
 		"price": 12000,
 		"hp": 10,
@@ -213,13 +236,15 @@
 		"lowrange": 3,
 		"highrange": 5,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"PIPERUNNER": {"longname": "PIPERUNNER_longname",
+	"PIPERUNNER": {
+		"longname": "PIPERUNNER_longname",
 		"shortname": "PIPERUNNER_shortname",
 		"icon": "",
-		"sprites": ["pipeos","pipebm","pipege","pipeyc","pipebh","piperf","pipegs","pipebd","pipeab","pipejs","pipeci","pipepc","pipetg","pipepl","pipear","pipewn"],
-		"pictures": [""],
+		"sprites": [ "pipeos", "pipebm", "pipege", "pipeyc", "pipebh", "piperf", "pipegs", "pipebd", "pipeab", "pipejs", "pipeci", "pipepc", "pipetg", "pipepl", "pipear", "pipewn" ],
+		"pictures": [ "" ],
 		"description": "PIPERUNNER_description",
 		"price": 20000,
 		"hp": 10,
@@ -231,13 +256,15 @@
 		"lowrange": 2,
 		"highrange": 5,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"TCOPTER": {"longname": "TCOPTER_longname",
+	"TCOPTER": {
+		"longname": "TCOPTER_longname",
 		"shortname": "TCOPTER_shortname",
 		"icon": "",
-		"sprites": ["tos","tbm","tge","tyc","tbh","trf","tgs","tbd","tab","tjs","tci","tpc","ttg","tpl","tar","twn"],
-		"pictures": [""],
+		"sprites": [ "tos", "tbm", "tge", "tyc", "tbh", "trf", "tgs", "tbd", "tab", "tjs", "tci", "tpc", "ttg", "tpl", "tar", "twn" ],
+		"pictures": [ "" ],
 		"description": "TCOPTER_description",
 		"price": 5000,
 		"hp": 10,
@@ -248,14 +275,16 @@
 		"vision": 2,
 		"lowrange": 0,
 		"highrange": 0,
-		"canload": [0, 1],
-		"loadlimit": 1
+		"canload": [ 0, 1 ],
+		"loadlimit": 1,
+		"turnstartpriority": 2
 	},
-	"BCOPTER": {"longname": "BCOPTER_longname",
+	"BCOPTER": {
+		"longname": "BCOPTER_longname",
 		"shortname": "BCOPTER_shortname",
 		"icon": "",
-		"sprites": ["bos","bbm","bge","byc","bbh","brf","bgs","bbd","bab","bjs","bci","bpc","btg","bpl","bar","bwn"],
-		"pictures": [""],
+		"sprites": [ "bos", "bbm", "bge", "byc", "bbh", "brf", "bgs", "bbd", "bab", "bjs", "bci", "bpc", "btg", "bpl", "bar", "bwn" ],
+		"pictures": [ "" ],
 		"description": "BCOPTER_description",
 		"price": 9000,
 		"hp": 10,
@@ -267,13 +296,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 2
 	},
-	"FIGHTER": {"longname": "FIGHTER_longname",
+	"FIGHTER": {
+		"longname": "FIGHTER_longname",
 		"shortname": "FIGHTER_shortname",
 		"icon": "",
-		"sprites": ["fighteros","fighterbm","fighterge","fighteryc","fighterbh","fighterrf","fightergs","fighterbd","fighterab","fighterjs","fighterci","fighterpc","fightertg","fighterpl","fighterar","fighterwn"],
-		"pictures": [""],
+		"sprites": [ "fighteros", "fighterbm", "fighterge", "fighteryc", "fighterbh", "fighterrf", "fightergs", "fighterbd", "fighterab", "fighterjs", "fighterci", "fighterpc", "fightertg", "fighterpl", "fighterar", "fighterwn" ],
+		"pictures": [ "" ],
 		"description": "FIGHTER_description",
 		"price": 20000,
 		"hp": 10,
@@ -285,13 +316,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 2
 	},
-	"BOMBER": {"longname": "BOMBER_longname",
+	"BOMBER": {
+		"longname": "BOMBER_longname",
 		"shortname": "BOMBER_shortname",
 		"icon": "",
-		"sprites": ["bomberos","bomberbm","bomberge","bomberyc","bomberbh","bomberrf","bombergs","bomberbd","bomberab","bomberjs","bomberci","bomberpc","bombertg","bomberpl","bomberar","bomberwn"],
-		"pictures": [""],
+		"sprites": [ "bomberos", "bomberbm", "bomberge", "bomberyc", "bomberbh", "bomberrf", "bombergs", "bomberbd", "bomberab", "bomberjs", "bomberci", "bomberpc", "bombertg", "bomberpl", "bomberar", "bomberwn" ],
+		"pictures": [ "" ],
 		"description": "BOMBER_description",
 		"price": 22000,
 		"hp": 10,
@@ -303,13 +336,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 2
 	},
-	"STEALTH": {"longname": "STEALTH_longname",
+	"STEALTH": {
+		"longname": "STEALTH_longname",
 		"shortname": "STEALTH_shortname",
 		"icon": "",
-		"sprites": ["stealthos","stealthbm","stealthge","stealthyc","stealthbh","stealthrf","stealthgs","stealthbd","stealthab","stealthjs","stealthci","stealthpc","stealthtg","stealthpl","stealthar","stealthwn"],
-		"pictures": [""],
+		"sprites": [ "stealthos", "stealthbm", "stealthge", "stealthyc", "stealthbh", "stealthrf", "stealthgs", "stealthbd", "stealthab", "stealthjs", "stealthci", "stealthpc", "stealthtg", "stealthpl", "stealthar", "stealthwn" ],
+		"pictures": [ "" ],
 		"description": "STEALTH_description",
 		"price": 24000,
 		"hp": 10,
@@ -321,13 +356,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 2
 	},
-	"BLACKBOMB": {"longname": "BLACKBOMB_longname",
+	"BLACKBOMB": {
+		"longname": "BLACKBOMB_longname",
 		"shortname": "BLACKBOMB_shortname",
 		"icon": "",
-		"sprites": ["bbombos","bbombbm","bbombge","bbombyc","bbombbh","bbombrf","bbombgs","bbombbd","bbombab","bbombjs","bbombci","bbombpc","bbombtg","bbombpl","bbombar","bbombwn"],
-		"pictures": [""],
+		"sprites": [ "bbombos", "bbombbm", "bbombge", "bbombyc", "bbombbh", "bbombrf", "bbombgs", "bbombbd", "bbombab", "bbombjs", "bbombci", "bbombpc", "bbombtg", "bbombpl", "bbombar", "bbombwn" ],
+		"pictures": [ "" ],
 		"description": "BLACKBOMB_description",
 		"price": 25000,
 		"hp": 10,
@@ -339,13 +376,15 @@
 		"lowrange": 1,
 		"highrange": 3,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 2
 	},
-	"BLACKBOAT": {"longname": "BLACKBOAT_longname",
+	"BLACKBOAT": {
+		"longname": "BLACKBOAT_longname",
 		"shortname": "BLACKBOAT_shortname",
 		"icon": "",
-		"sprites": ["bboatos","bboatbm","bboatge","bboatyc","bboatbh","bboatrf","bboatgs","bboatbd","bboatab","bboatjs","bboatci","bboatpc","bboattg","bboatpl","bboatar","bboatwn"],
-		"pictures": [""],
+		"sprites": [ "bboatos", "bboatbm", "bboatge", "bboatyc", "bboatbh", "bboatrf", "bboatgs", "bboatbd", "bboatab", "bboatjs", "bboatci", "bboatpc", "bboattg", "bboatpl", "bboatar", "bboatwn" ],
+		"pictures": [ "" ],
 		"description": "BLACKBOAT_description",
 		"price": 7500,
 		"hp": 10,
@@ -356,14 +395,16 @@
 		"vision": 1,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": [0, 1],
-		"loadlimit": 2
+		"canload": [ 0, 1 ],
+		"loadlimit": 2,
+		"turnstartpriority": 2
 	},
-	"LANDER": {"longname": "LANDER_longname",
+	"LANDER": {
+		"longname": "LANDER_longname",
 		"shortname": "LANDER_shortname",
 		"icon": "",
-		"sprites": ["landeros","landerbm","landerge","landeryc","landerbh","landerrf","landergs","landerbd","landerab","landerjs","landerci","landerpc","landertg","landerpl","landerar","landerwn"],
-		"pictures": [""],
+		"sprites": [ "landeros", "landerbm", "landerge", "landeryc", "landerbh", "landerrf", "landergs", "landerbd", "landerab", "landerjs", "landerci", "landerpc", "landertg", "landerpl", "landerar", "landerwn" ],
+		"pictures": [ "" ],
 		"description": "LANDER_description",
 		"price": 12000,
 		"hp": 10,
@@ -374,14 +415,16 @@
 		"vision": 1,
 		"lowrange": 0,
 		"highrange": 0,
-		"canload": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 26],
-		"loadlimit": 2
+		"canload": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 26 ],
+		"loadlimit": 2,
+		"turnstartpriority": 2
 	},
-	"CRUISER": {"longname": "CRUISER_longname",
+	"CRUISER": {
+		"longname": "CRUISER_longname",
 		"shortname": "CRUISER_shortname",
 		"icon": "",
-		"sprites": ["cruiseros","cruiserbm","cruiserge","cruiseryc","cruiserbh","cruiserrf","cruisergs","cruiserbd","cruiserab","cruiserjs","cruiserci","cruiserpc","cruisertg","cruiserpl","cruiserar","cruiserwn"],
-		"pictures": [""],
+		"sprites": [ "cruiseros", "cruiserbm", "cruiserge", "cruiseryc", "cruiserbh", "cruiserrf", "cruisergs", "cruiserbd", "cruiserab", "cruiserjs", "cruiserci", "cruiserpc", "cruisertg", "cruiserpl", "cruiserar", "cruiserwn" ],
+		"pictures": [ "" ],
 		"description": "CRUISER_description",
 		"price": 18000,
 		"hp": 10,
@@ -392,14 +435,16 @@
 		"vision": 3,
 		"lowrange": 1,
 		"highrange": 1,
-		"canload": [13, 14],
-		"loadlimit": 2
+		"canload": [ 13, 14 ],
+		"loadlimit": 2,
+		"turnstartpriority": 2
 	},
-	"SUB": {"longname": "SUB_longname",
+	"SUB": {
+		"longname": "SUB_longname",
 		"shortname": "SUB_shortname",
 		"icon": "",
-		"sprites": ["subos","subbm","subge","subyc","subbh","subrf","subgs","subbd","subab","subjs","subci","subpc","subtg","subpl","subar","subwn"],
-		"pictures": [""],
+		"sprites": [ "subos", "subbm", "subge", "subyc", "subbh", "subrf", "subgs", "subbd", "subab", "subjs", "subci", "subpc", "subtg", "subpl", "subar", "subwn" ],
+		"pictures": [ "" ],
 		"description": "SUB_description",
 		"price": 20000,
 		"hp": 10,
@@ -411,13 +456,15 @@
 		"lowrange": 1,
 		"highrange": 1,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 2
 	},
-	"BATTLESHIP": {"longname": "BATTLESHIP_longname",
+	"BATTLESHIP": {
+		"longname": "BATTLESHIP_longname",
 		"shortname": "BATTLESHIP_shortname",
 		"icon": "",
-		"sprites": ["battleos","battlebm","battlege","battleyc","battlebh","battlerf","battlegs","battlebd","battleab","battlejs","battleci","battlepc","battletg","battlepl","battlear","battlewn"],
-		"pictures": [""],
+		"sprites": [ "battleos", "battlebm", "battlege", "battleyc", "battlebh", "battlerf", "battlegs", "battlebd", "battleab", "battlejs", "battleci", "battlepc", "battletg", "battlepl", "battlear", "battlewn" ],
+		"pictures": [ "" ],
 		"description": "BATTLESHIP_description",
 		"price": 28000,
 		"hp": 10,
@@ -429,13 +476,15 @@
 		"lowrange": 2,
 		"highrange": 6,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 2
 	},
-	"CARRIER": {"longname": "CARRIER_longname",
+	"CARRIER": {
+		"longname": "CARRIER_longname",
 		"shortname": "CARRIER_shortname",
 		"icon": "",
-		"sprites": ["carrieros","carrierbm","carrierge","carrieryc","carrierbh","carrierrf","carriergs","carrierbd","carrierab","carrierjs","carrierci","carrierpc","carriertg","carrierpl","carrierar","carrierwn"],
-		"pictures": [""],
+		"sprites": [ "carrieros", "carrierbm", "carrierge", "carrieryc", "carrierbh", "carrierrf", "carriergs", "carrierbd", "carrierab", "carrierjs", "carrierci", "carrierpc", "carriertg", "carrierpl", "carrierar", "carrierwn" ],
+		"pictures": [ "" ],
 		"description": "CARRIER_description",
 		"price": 30000,
 		"hp": 10,
@@ -446,14 +495,16 @@
 		"vision": 4,
 		"lowrange": 3,
 		"highrange": 8,
-		"canload": [13, 14, 15, 16, 17, 18],
-		"loadlimit": 2
+		"canload": [ 13, 14, 15, 16, 17, 18 ],
+		"loadlimit": 2,
+		"turnstartpriority": 2
 	},
-	"PIPESEAM": {"longname": "PIPESEAM_longname",
+	"PIPESEAM": {
+		"longname": "PIPESEAM_longname",
 		"shortname": "PIPESEAM_shortname",
 		"icon": "",
-		"sprites": [""],
-		"pictures": [""],
+		"sprites": [ "" ],
+		"pictures": [ "" ],
 		"description": "PIPESEAM_unitdescription",
 		"price": 0,
 		"hp": 99,
@@ -465,13 +516,15 @@
 		"lowrange": 0,
 		"highrange": 0,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	},
-	"OOZIUM": {"longname": "OOZIUM_longname",
+	"OOZIUM": {
+		"longname": "OOZIUM_longname",
 		"shortname": "OOZIUM_shortname",
 		"icon": "",
-		"sprites": ["ooziumos","ooziumbm","ooziumge","ooziumyc","ooziumbh","ooziumrf","ooziumgs","ooziumbd","ooziumab","ooziumjs","ooziumci","ooziumpc","ooziumtg","ooziumpl","ooziumar","ooziumwn"],
-		"pictures": [""],
+		"sprites": [ "ooziumos", "ooziumbm", "ooziumge", "ooziumyc", "ooziumbh", "ooziumrf", "ooziumgs", "ooziumbd", "ooziumab", "ooziumjs", "ooziumci", "ooziumpc", "ooziumtg", "ooziumpl", "ooziumar", "ooziumwn" ],
+		"pictures": [ "" ],
 		"description": "OOZIUM_description",
 		"price": 0,
 		"hp": 99,
@@ -483,6 +536,7 @@
 		"lowrange": 0,
 		"highrange": 0,
 		"canload": [],
-		"loadlimit": 0
+		"loadlimit": 0,
+		"turnstartpriority": 1
 	}
 }

@@ -307,6 +307,11 @@ void awe::unit_type::registerInterface(const std::string& type,
 		"uint get_loadLimit() const property",
 		asMETHOD(T, loadLimit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit's load limit.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_turnStartPriority() const property",
+		asMETHOD(T, getTurnStartPriority), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets this unit type's turn start priority "
+		"level.");
 }
 
 template<typename T>
