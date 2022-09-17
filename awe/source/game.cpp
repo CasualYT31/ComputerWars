@@ -84,7 +84,13 @@ bool awe::game::animate(const sf::RenderTarget& target, const double scaling)
 }
 
 void awe::game::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	sf::View oldView = target.getView();
+	sf::View view;
+	view.reset(sf::FloatRect(0, 0, target.getSize().x, target.getSize().y));
+	view.setViewport(sf::FloatRect(0, 0, 1, 1));
+	target.setView(view);
 	if (_map) target.draw(*_map, states);
+	target.setView(oldView);
 }
 
 //////////////////////
