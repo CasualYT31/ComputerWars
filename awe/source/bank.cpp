@@ -192,6 +192,9 @@ const std::string& awe::tile_type::getNeutralTile() const noexcept {
 std::shared_ptr<const awe::terrain> awe::tile_type::getType() const noexcept {
 	return _terrain;
 }
+const awe::terrain awe::tile_type::getTypeObj() const noexcept {
+	return *_terrain;
+}
 void awe::tile_type::updateTerrain(const awe::bank<awe::terrain>& terrainBank)
 	const noexcept {
 	_terrain = terrainBank[_terrainType];
@@ -235,6 +238,9 @@ awe::BankID awe::unit_type::getMovementTypeIndex() const noexcept {
 std::shared_ptr<const awe::movement_type> awe::unit_type::getMovementType() const
 	noexcept {
 	return _movementType;
+}
+const awe::movement_type awe::unit_type::getMovementTypeObj() const noexcept {
+	return *_movementType;
 }
 void awe::unit_type::updateMovementType(const awe::bank<awe::movement_type>&
 	movementBank) const noexcept {

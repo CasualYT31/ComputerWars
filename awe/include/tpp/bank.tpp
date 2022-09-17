@@ -234,6 +234,11 @@ void awe::tile_type::registerInterface(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets the index of this tile's terrain "
 		"type.");
 	r = engine->RegisterObjectMethod(type.c_str(),
+		"const Terrain get_type() const property",
+		asMETHOD(T, getTypeObj), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns details on this tile's terrain "
+		"type.");
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_ownedTileSprite(const BankID) const property",
 		asMETHOD(T, getOwnedTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's owned "
@@ -252,9 +257,14 @@ void awe::unit_type::registerInterface(const std::string& type,
 	awe::common_properties::registerInterface<T>(type, engine, document,
 		"For unit types, this property is unused.");
 	auto r = engine->RegisterObjectMethod(type.c_str(),
-		"BankID get_movementType() const property",
+		"BankID get_movementTypeIndex() const property",
 		asMETHOD(T, getMovementTypeIndex), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit's movement type index.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const Movement get_movementType() const property",
+		asMETHOD(T, getMovementTypeObj), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns details on this unit's movement "
+		"type.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_pictureSprite(const BankID) const property",
 		asMETHOD(T, getPicture), asCALL_THISCALL);

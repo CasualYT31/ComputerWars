@@ -796,9 +796,18 @@ namespace awe {
 		 * Retrieves a pointer to the details of the type of terrain this tile
 		 * represents.
 		 * @return The pointer to the terrain type's properties.
-		 * @sa     updateTerrain()
+		 * @sa     @c updateTerrain()
 		 */
 		std::shared_ptr<const awe::terrain> getType() const noexcept;
+
+		/**
+		 * Copies the details of the type of terrain this tile represents.
+		 * Primarily used for the script interface; for C++ code, use \c getType()
+		 * instead.
+		 * @return The terrain type's properties.
+		 * @sa     @c getType()
+		 */
+		const awe::terrain getTypeObj() const noexcept;
 
 		/**
 		 * Updates the stored terrain type properties pointer.
@@ -954,9 +963,18 @@ namespace awe {
 		 * Retrieves a pointer to the details of the type of movement this unit
 		 * has.
 		 * @return The pointer to the movement type's properties.
-		 * @sa     updateMovementType()
+		 * @sa     @c updateMovementType()
 		 */
 		std::shared_ptr<const awe::movement_type> getMovementType() const noexcept;
+
+		/**
+		 * Copies the details of the type of movement this unit has.
+		 * Primarily used for the script interface; for C++ code, use
+		 * \c getMovementType() instead.
+		 * @return The movement type's properties.
+		 * @sa     @c getMovementType()
+		 */
+		const awe::movement_type getMovementTypeObj() const noexcept;
 
 		/**
 		 * Updates the stored movement type properties pointer.

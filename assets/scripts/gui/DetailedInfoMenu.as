@@ -224,6 +224,7 @@ void DetailedInfoMenuOpen(const string&in previous) {
 	const auto unitID = game.getUnitOnTile(game.getSelectedTile());
 	if (unitID > 0) {
 		const Unit unitType = game.getUnitType(unitID);
+		const Movement movementType = unitType.movementType;
 		setWidgetText(unitPanel + ".stats.name", unitType.name);
 		setWidgetText(unitPanel + ".stats.grid.price", "~" +
 			formatUInt(unitType.cost));
@@ -236,9 +237,9 @@ void DetailedInfoMenuOpen(const string&in previous) {
 		setWidgetText(unitPanel + ".stats.grid.mp", "~" +
 			formatUInt(unitType.movementPoints));
 		setWidgetSprite(unitPanel + ".stats.grid.typeIcon", "icon",
-			movement[unitType.movementType].iconName);
+			movementType.iconName);
 		setWidgetText(unitPanel + ".stats.grid.movement",
-			movement[unitType.movementType].shortName);
+			movementType.shortName);
 		setWidgetText(unitPanel + ".stats.grid.vision", "~" +
 			formatUInt(unitType.vision));
 
