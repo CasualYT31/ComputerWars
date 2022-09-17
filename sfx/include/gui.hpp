@@ -784,6 +784,17 @@ namespace sfx {
 		void _clearItems(const std::string& name) noexcept;
 
 		/**
+		 * Selects an item by index.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no item will be selected. An
+		 * error will also be reported if the given index was out of range.
+		 * @param name  The name of the widget which contains the item to select.
+		 * @param index The 0-based index of the item to select.
+		 */
+		void _setSelectedItem(const std::string& name, const std::size_t index)
+			noexcept;
+
+		/**
 		 * Retrieves the text of the currently selected item of a widget.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and a blank string will be

@@ -439,16 +439,23 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"to others in the layout. The unsigned integer is a 0-based index of the "
 		"widget in the layout to amend.");
 
-	r = engine->RegisterGlobalFunction("void addItem(const string& in, const "
-		"string& in)",
+	r = engine->RegisterGlobalFunction("void addItem(const string&in, const "
+		"string&in)",
 		asMETHOD(sfx::gui, _addItem), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Appends a new item to a widget. The name "
 		"of the widget is given, then the text of the new item.");
 
-	r = engine->RegisterGlobalFunction("void clearItems(const string& in)",
+	r = engine->RegisterGlobalFunction("void clearItems(const string&in)",
 		asMETHOD(sfx::gui, _clearItems), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Removes all items from a given widget. "
 		"The name of the widget should be given.");
+
+	r = engine->RegisterGlobalFunction("void setSelectedItem(const string&in, "
+		"const uint)", asMETHODPR(sfx::gui, _setSelectedItem,
+		(const std::string&, const std::size_t), void),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Selects an item from a widget. The name "
+		"of the widget is given, then the 0-based index of the item to select.");
 
 	r = engine->RegisterGlobalFunction("string getSelectedItemText("
 		"const string&in)",
@@ -1572,6 +1579,7 @@ void sfx::gui::_setWidgetIndex(const std::string& name, const std::size_t index)
 			Container::Ptr container = _findWidget<Container>(containerName);
 			if (container) {
 				if (!container->setWidgetIndex(widget, index)) {
+					// The size() should never be 0 here...
 					_logger.error("Could not set index {} to widget \"{}\" within "
 						"menu \"{}\". The index cannot be higher than {}.", index,
 						name, fullname[0], container->getWidgets().size() - 1);
@@ -1608,10 +1616,18 @@ void sfx::gui::_setWidgetIndexInContainer(const std::string& name,
 				return;
 			}
 			if (!container->setWidgetIndex(widget, newIndex)) {
-				_logger.error("Attempted to set container \"{}\"'s number {} "
-					"widget to an index of {}, within menu \"{}\". The new index "
-					"cannot be higher than {}.", name, oldIndex, newIndex,
-					fullname[0], container->getWidgets().size() - 1);
+				const auto count = container->getWidgets().size();
+				if (count) {
+					_logger.error("Attempted to set container \"{}\"'s number {} "
+						"widget to an index of {}, within menu \"{}\". The new "
+						"index cannot be higher than {}.", name, oldIndex,
+						newIndex, fullname[0], count - 1);
+				} else {
+					_logger.error("Attempted to set container \"{}\"'s number {} "
+						"widget to an index of {}, within menu \"{}\". There are "
+						"no widgets in this container.", name, oldIndex, newIndex,
+						fullname[0]);
+				}
 			}
 		} else {
 			_logger.error("Attempted to set widget \"{}\"'s number {} widget to "
@@ -1702,6 +1718,39 @@ void sfx::gui::_clearItems(const std::string& name) noexcept {
 	} else {
 		_logger.error("Attempted to clear all items from a widget \"{}\" within "
 			"menu \"{}\". This widget does not exist.", name, fullname[0]);
+	}
+}
+
+void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index)
+	noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		// Select the item differently depending on the type the widget is.
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "listbox") {
+			auto listbox = std::dynamic_pointer_cast<ListBox>(widget);
+			if (!listbox->setSelectedItemByIndex(index)) {
+				const auto count = listbox->getItemCount();
+				if (count) {
+					_logger.error("Attempted to select item {} from listbox "
+						"\"{}\", within menu \"{}\". The item index cannot be "
+						"higher than {}.", index, name, fullname[0], count - 1);
+				} else {
+					_logger.error("Attempted to select item {} from listbox "
+						"\"{}\", within menu \"{}\". There are no items in this "
+						"listbox.", index, name, fullname[0]);
+				}
+			}
+		} else {
+			_logger.error("Attempted to select item {} from widget \"{}\" which "
+				"is of type \"{}\", within menu \"{}\". This operation is not "
+				"supported for this type of widget.", index, name, type,
+				fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to select item {} from a widget \"{}\" within "
+			"menu \"{}\". This widget does not exist.", index, name, fullname[0]);
 	}
 }
 
