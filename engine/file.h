@@ -158,40 +158,4 @@ namespace engine {
 	};
 }
 
-template<typename T>
-T engine::binary_file::convertNumber(T number) noexcept {
-	T copy = number;
-	for (std::size_t i = 0; i < sizeof(T); i++) {
-		*((unsigned char*)&number + i) =
-			*((unsigned char*)&copy + sizeof(T) - i - 1);
-	}
-	return number;
-}
-
-template<typename T>
-T engine::binary_file::readNumber() {
-	try {
-		T ret;
-		_file.read(reinterpret_cast<char*>(&ret), sizeof(T));
-		_bytes += sizeof(T);
-		if (sizeof(T) > 1 && isBigEndian()) ret = convertNumber(ret);
-		return ret;
-	} catch (std::exception& e) {
-		std::string w = "Failed to read number at position " +
-			std::to_string(_bytes) + ": " + e.what();
-		throw std::exception(w.c_str());
-	}
-}
-
-template<typename T>
-void engine::binary_file::writeNumber(T number) {
-	try {
-		if (sizeof(T) > 1 && isBigEndian()) number = convertNumber(number);
-		_file.write(reinterpret_cast<char*>(&number), sizeof(T));
-		_bytes += sizeof(T);
-	} catch (std::exception& e) {
-		std::string w = "Failed to write number to position " +
-			std::to_string(_bytes) + ": " + e.what();
-		throw std::exception(w.c_str());
-	}
-}
+#include "file.tpp"

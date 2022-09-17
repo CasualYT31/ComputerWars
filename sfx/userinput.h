@@ -588,13 +588,4 @@ namespace sfx {
 	};
 }
 
-template<typename T>
-bool sfx::user_input::_isBeingTriggered(const T& configured, const T& list)
-	const noexcept {
-	for (auto c = configured.begin(), ec = configured.end(); c != ec; c++) {
-		for (auto l = list.begin(), el = list.end(); l != el; l++) {
-			if (*c == *l) return true;
-		}
-	}
-	return false;
-}
+#include "userinput.tpp"

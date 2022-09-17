@@ -375,12 +375,4 @@ namespace awe {
 	};
 }
 
-template<typename T, typename... Ts>
-bool awe::game_engine::_loadObject(std::shared_ptr<T>& ptr, engine::json& j,
-	const engine::json::KeySequence& keys, Ts... constructorParams) noexcept {
-	std::string path;
-	j.apply(path, keys);
-	ptr = std::make_shared<T>(constructorParams...);
-	ptr->load(path);
-	return j.inGoodState() && ptr->inGoodState();
-}
+#include "engine.tpp"

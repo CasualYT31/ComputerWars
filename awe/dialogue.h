@@ -788,44 +788,7 @@ namespace awe {
 	};
 }
 
-template<typename... Ts>
-void awe::dialogue_sequence::updateMainText(Ts... values) noexcept {
-	if (_langDic && _currentBox) _currentBox->setMainText((*_langDic)(
-		_boxes[_currentBoxID].mainText, values...)
-	);
-}
-
-template<typename... Ts>
-void awe::dialogue_sequence::updateNameText(Ts... values) noexcept {
-	if (_langDic && _currentBox) _currentBox->setNameText((*_langDic)(
-		_boxes[_currentBoxID].nameText, values...)
-	);
-}
-
-template<typename... Ts>
-void awe::dialogue_sequence::updateOption1Text(Ts... values) noexcept {
-	if (_langDic && _currentBox) _currentBox->setOptions((*_langDic)(
-		_boxes[_currentBoxID].options[0], values...),
-		_currentBox->getOption2Text(), _currentBox->getOption3Text()
-	);
-}
-
-template<typename... Ts>
-void awe::dialogue_sequence::updateOption2Text(Ts... values) noexcept {
-	if (_langDic && _currentBox) _currentBox->setOptions(
-		_currentBox->getOption1Text(),
-		(*_langDic)(_boxes[_currentBoxID].options[1], values...),
-		_currentBox->getOption3Text()
-	);
-}
-
-template<typename... Ts>
-void awe::dialogue_sequence::updateOption3Text(Ts... values) noexcept {
-	if (_langDic && _currentBox) _currentBox->setOptions(
-		_currentBox->getOption1Text(), _currentBox->getOption2Text(),
-		(*_langDic)(_boxes[_currentBoxID].options[2], values...)
-	);
-}
+#include "dialogue.tpp"
 
 /*
 /*#include "audio.h"
