@@ -66,7 +66,7 @@ namespace awe {
 		 * The latest version of the CWM format.
 		 * Can be used with calls to the constructor and the \c save() method.
 		 */
-		static const unsigned char LATEST_VERSION = 1;
+		static const unsigned char LATEST_VERSION = 2;
 
 		/**
 		 * Version number of the CWM format representing the latest version.
@@ -747,6 +747,14 @@ namespace awe {
 		 * @throws std::exception if the file couldn't be read or written.
 		 */
 		void _CWM_1(const bool isSave);
+
+		/**
+		 * Third version of the CWM format.
+		 * @param  isSave \c TRUE if the file is to be written to, \c FALSE if the
+		 *                file is to be read from.
+		 * @throws std::exception if the file couldn't be read or written.
+		 */
+		void _CWM_2(const bool isSave);
 
 		/**
 		 * File name of the binary file previously read from or written to.

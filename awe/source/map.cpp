@@ -973,6 +973,9 @@ void awe::map::_CWM_Header(const bool isSave, unsigned char version) {
 	case 1:
 		_CWM_1(isSave);
 		break;
+	case 2:
+		_CWM_2(isSave);
+		break;
 	default:
 		_logger.error("CWM version {} is unrecognised!", version);
 		throw std::exception("read above");
@@ -998,10 +1001,10 @@ void awe::map::_CWM_0(const bool isSave) {
 				if (tile.getUnit()) {
 					_CWM_0_Unit(isSave, tile.getUnit(), sf::Vector2u(x, y));
 				}
-				// covers the following cases:
-				// 1. tile is vacant
-				// 2. unit has no loaded units on it
-				// 3. unit has loaded units on it, but there are no more to load
+				// Covers the following cases:
+				// 1. Tile is vacant.
+				// 2. Unit has no loaded units on it.
+				// 3. Unit has loaded units on it, but there are no more to load.
 				_file.writeNumber(awe::army::NO_ARMY);
 			}
 		}
@@ -1038,7 +1041,6 @@ void awe::map::_CWM_0(const bool isSave) {
 	}
 }
 
-// do not forget to update _CWM_0_Unit() calls if needed!
 void awe::map::_CWM_1(const bool isSave) {
 	if (isSave) {
 		_file.writeString(getMapName());
@@ -1050,7 +1052,7 @@ void awe::map::_CWM_1(const bool isSave) {
 		for (auto& army : _armys) {
 			_file.writeNumber(army.second.getCountry()->getID());
 			_file.writeNumber(army.second.getFunds());
-			// there should always be a current CO...
+			// There should always be a current CO...
 			if (army.second.getCurrentCO()) {
 				_file.writeNumber(army.second.getCurrentCO()->getID());
 			} else {
@@ -1071,10 +1073,10 @@ void awe::map::_CWM_1(const bool isSave) {
 				if (tile.getUnit()) {
 					_CWM_0_Unit(isSave, tile.getUnit(), sf::Vector2u(x, y));
 				}
-				// covers the following cases:
-				// 1. tile is vacant
-				// 2. unit has no loaded units on it
-				// 3. unit has loaded units on it, but there are no more to load
+				// Covers the following cases:
+				// 1. Tile is vacant.
+				// 2. Unit has no loaded units on it.
+				// 3. Unit has loaded units on it, but there are no more to load.
 				_file.writeNumber(awe::army::NO_ARMY);
 			}
 		}
@@ -1107,6 +1109,98 @@ void awe::map::_CWM_1(const bool isSave) {
 				throw std::exception("read above");
 			}
 		}
+		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
+			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
+				auto pos = sf::Vector2u(x, y);
+				if (setTileType(pos,
+					(*_tileTypes)[_file.readNumber<awe::BankID>()])) {
+					awe::HP hp = _file.readNumber<awe::HP>();
+					setTileHP(pos, hp);
+					awe::ArmyID army = _file.readNumber<awe::ArmyID>();
+					setTileOwner(pos, army);
+					_CWM_0_Unit(isSave, 0, sf::Vector2u(x, y));
+				} else {
+					throw std::exception("read above");
+				}
+			}
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////
+// Do not forget to update _CWM_0_Unit() calls if needed! //
+////////////////////////////////////////////////////////////
+void awe::map::_CWM_2(const bool isSave) {
+	if (isSave) {
+		_file.writeString(getMapName());
+		_file.writeNumber((sf::Uint32)getMapSize().x);
+		_file.writeNumber((sf::Uint32)getMapSize().y);
+		_file.writeNumber((sf::Uint32)getSelectedTile().x);
+		_file.writeNumber((sf::Uint32)getSelectedTile().y);
+		_file.writeNumber((sf::Uint32)_armys.size());
+		for (auto& army : _armys) {
+			_file.writeNumber(army.second.getCountry()->getID());
+			_file.writeNumber(army.second.getFunds());
+			// There should always be a current CO...
+			if (army.second.getCurrentCO()) {
+				_file.writeNumber(army.second.getCurrentCO()->getID());
+			} else {
+				_file.writeNumber(awe::army::NO_ARMY);
+			}
+			if (army.second.getTagCO()) {
+				_file.writeNumber(army.second.getTagCO()->getID());
+			} else {
+				_file.writeNumber(awe::army::NO_ARMY);
+			}
+		}
+		_file.writeNumber(_currentArmy);
+		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
+			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
+				auto& tile = _tiles[x][y];
+				_file.writeNumber(tile.getTileType()->getID());
+				_file.writeNumber(tile.getTileHP());
+				_file.writeNumber(tile.getTileOwner());
+				if (tile.getUnit()) {
+					_CWM_0_Unit(isSave, tile.getUnit(), sf::Vector2u(x, y));
+				}
+				// Covers the following cases:
+				// 1. Tile is vacant.
+				// 2. Unit has no loaded units on it.
+				// 3. Unit has loaded units on it, but there are no more to load.
+				_file.writeNumber(awe::army::NO_ARMY);
+			}
+		}
+	} else {
+		setMapName(_file.readString());
+		sf::Uint32 width = _file.readNumber<sf::Uint32>();
+		sf::Uint32 height = _file.readNumber<sf::Uint32>();
+		setMapSize(sf::Vector2u(width, height));
+		sf::Uint32 sel_x = _file.readNumber<sf::Uint32>();
+		sf::Uint32 sel_y = _file.readNumber<sf::Uint32>();
+		setSelectedTile(sf::Vector2u(sel_x, sel_y));
+		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
+		for (sf::Uint64 army = 0; army < armyCount; army++) {
+			auto pCountry = (*_countries)[_file.readNumber<awe::BankID>()];
+			if (createArmy(pCountry)) {
+				awe::Funds funds = _file.readNumber<awe::Funds>();
+				setArmyFunds(pCountry->getID(), funds);
+				awe::BankID currentCO = _file.readNumber<awe::BankID>();
+				awe::BankID tagCO = _file.readNumber<awe::BankID>();
+				std::shared_ptr<const awe::commander> primaryCO = nullptr,
+					secondaryCO = nullptr;
+				if (currentCO != awe::army::NO_ARMY) {
+					primaryCO = (*_commanders)[currentCO];
+				}
+				if (tagCO != awe::army::NO_ARMY) {
+					secondaryCO = (*_commanders)[tagCO];
+				}
+				setArmyCOs(pCountry->getID(), primaryCO, secondaryCO);
+			} else {
+				throw std::exception("read above");
+			}
+		}
+		awe::ArmyID currentArmy = _file.readNumber<awe::ArmyID>();
+		selectArmy(currentArmy);
 		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
 			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
 				auto pos = sf::Vector2u(x, y);
