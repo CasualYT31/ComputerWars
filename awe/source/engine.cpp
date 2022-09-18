@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "engine.hpp"
 #include "game.hpp"
 #include "army.hpp"
+#include "options.hpp"
 
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
@@ -216,6 +217,9 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sf::Clock, restart), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Restarts the clock. Returns the time "
 		"elapsed.");
+
+	// GameOptions class.
+	awe::game_options::registerGameOptionsType(engine, document, _scripts);
 
 	// GameInterface.
 	awe::RegisterGameTypedefs(engine, document);
