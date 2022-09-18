@@ -84,6 +84,11 @@ namespace awe {
 	typedef awe::BankID ArmyID;
 
 	/**
+	 * Typedef representing a day number.
+	 */
+	typedef sf::Uint32 Day;
+
+	/**
 	 * Registers game-related typedefs with a given AngelScript engine, if any of
 	 * them haven't already been registered.
 	 */

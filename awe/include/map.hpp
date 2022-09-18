@@ -172,6 +172,18 @@ namespace awe {
 		 */
 		sf::Vector2u getMapSize() const noexcept;
 
+		/**
+		 * Sets the current day.
+		 * @param day The new day.
+		 */
+		void setDay(const awe::Day day) noexcept;
+
+		/**
+		 * Gets the current day.
+		 * @return The current day.
+		 */
+		awe::Day getDay() const noexcept;
+
 		/////////////////////
 		// ARMY OPERATIONS //
 		/////////////////////
@@ -585,12 +597,25 @@ namespace awe {
 
 		/**
 		 * Selects an army from the map.
-		 * Used only to let \c map know what army to draw information on. If the
-		 * given army didn't exist, the call will be cancelled and logged.
+		 * If the given army didn't exist, the call will be cancelled and logged.
 		 * @param army The ID of the army which should be having their turn at the
 		 *             time of the call.
 		 */
 		void selectArmy(const awe::ArmyID army) noexcept;
+
+		/**
+		 * Returns the ID of the currently selected army.
+		 * @return The current army.
+		 */
+		awe::ArmyID getSelectedArmy() const noexcept;
+
+		/**
+		 * Returns the ID of the army that should be selected next.
+		 * @return The ID of the army after the current one, or the ID of the first
+		 *         army if the current army is the last one in the list. Returns
+		 *         \c NO_ARMY if \c _currentArmy is \c NO_ARMY.
+		 */
+		awe::ArmyID getNextArmy() const noexcept;
 
 		/**
 		 * Sets the amount by which the map is scaled.
@@ -827,6 +852,11 @@ namespace awe {
 		 * Used to generate unit IDs once the initial unit has been created.
 		 */
 		awe::UnitID _lastUnitID;
+
+		/**
+		 * Stores which day it currently is.
+		 */
+		awe::Day _day = 0;
 
 		/////////////
 		// DRAWING //

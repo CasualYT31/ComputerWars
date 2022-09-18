@@ -50,6 +50,7 @@ bool awe::map::load(std::string file, const unsigned char version) noexcept {
 	_tiles.clear();
 	_mapName = "";
 	_mapOffset = sf::Vector2f(0.0f, 0.0f);
+	_day = 0;
 	// Load new state.
 	try {
 		_file.open(file, true);
@@ -139,6 +140,14 @@ sf::Vector2u awe::map::getMapSize() const noexcept {
 	sf::Vector2u ret((unsigned int)_tiles.size(), 0);
 	if (ret.x) ret.y = (unsigned int)_tiles.at(0).size();
 	return ret;
+}
+
+void awe::map::setDay(const awe::Day day) noexcept {
+	_day = day;
+}
+
+awe::Day awe::map::getDay() const noexcept {
+	return _day;
 }
 
 bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)
@@ -683,6 +692,17 @@ void awe::map::selectArmy(const awe::ArmyID army) noexcept {
 			"exist!", army);
 }
 
+awe::ArmyID awe::map::getSelectedArmy() const noexcept {
+	return _currentArmy;
+}
+
+awe::ArmyID awe::map::getNextArmy() const noexcept {
+	if (_currentArmy == awe::army::NO_ARMY) return awe::army::NO_ARMY;
+	auto itr = ++_armys.find(_currentArmy);
+	if (itr == _armys.end()) itr = _armys.begin();
+	return itr->first;
+}
+
 void awe::map::setMapScalingFactor(const float factor) noexcept {
 	_mapScalingFactor = factor;
 	_updateTilePane = true;
@@ -1153,7 +1173,8 @@ void awe::map::_CWM_2(const bool isSave) {
 		_file.writeNumber((sf::Uint32)getMapSize().y);
 		_file.writeNumber((sf::Uint32)getSelectedTile().x);
 		_file.writeNumber((sf::Uint32)getSelectedTile().y);
-		_file.writeNumber((sf::Uint32)_armys.size());
+		_file.writeNumber(getDay());
+		_file.writeNumber((sf::Uint32)getArmyCount());
 		for (auto& army : _armys) {
 			_file.writeNumber(army.second.getCountry()->getID());
 			_file.writeNumber(army.second.getFunds());
@@ -1194,6 +1215,8 @@ void awe::map::_CWM_2(const bool isSave) {
 		sf::Uint32 sel_x = _file.readNumber<sf::Uint32>();
 		sf::Uint32 sel_y = _file.readNumber<sf::Uint32>();
 		setSelectedTile(sf::Vector2u(sel_x, sel_y));
+		awe::Day day = _file.readNumber<awe::Day>();
+		setDay(day);
 		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
 		for (sf::Uint64 army = 0; army < armyCount; army++) {
 			auto pCountry = (*_countries)[_file.readNumber<awe::BankID>()];

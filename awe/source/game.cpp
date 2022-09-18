@@ -114,11 +114,51 @@ bool awe::game::animate(const sf::RenderTarget& target, const double scaling)
 void awe::game::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	sf::View oldView = target.getView();
 	sf::View view;
-	view.reset(sf::FloatRect(0, 0, target.getSize().x, target.getSize().y));
-	view.setViewport(sf::FloatRect(0, 0, 1, 1));
+	view.reset(sf::FloatRect(0.0f, 0.0f, (float)target.getSize().x,
+		(float)target.getSize().y));
+	view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 	target.setView(view);
 	if (_map) target.draw(*_map, states);
 	target.setView(oldView);
+}
+
+
+/////////////////////////////////////
+// SCRIPT INTERFACE UNIQUE TO GAME //
+/////////////////////////////////////
+
+void awe::game::zoomIn() {
+	if (_map) {
+		_mapScalingFactor += 1.0f;
+		if (_mapScalingFactor >= 3.9f) _mapScalingFactor = 3.0f;
+		_map->setMapScalingFactor(_mapScalingFactor);
+	} else {
+		throw NO_MAP;
+	}
+}
+
+void awe::game::zoomOut() {
+	if (_map) {
+		_mapScalingFactor -= 1.0f;
+		if (_mapScalingFactor < 0.9f) _mapScalingFactor = 1.0f;
+		_map->setMapScalingFactor(_mapScalingFactor);
+	} else {
+		throw NO_MAP;
+	}
+}
+
+void awe::game::endTurn() {
+	if (_map) {
+		const auto next = _map->getNextArmy();
+		if (_map->getSelectedArmy() >= next) {
+			// It can technically overflow, but I don't care! If they can play for
+			// over 11,767,033 in-game years then they deserve what they get.
+			_map->setDay(_map->getDay() + 1);
+		}
+		_map->selectArmy(next);
+	} else {
+		throw NO_MAP;
+	}
 }
 
 //////////////////////
@@ -165,26 +205,6 @@ awe::UnitID awe::game::getUnitOnTile(const sf::Vector2u tile) const {
 		return _map->getUnitOnTile(tile);
 	else
 		throw NO_MAP;
-}
-
-void awe::game::zoomIn() {
-	if (_map) {
-		_mapScalingFactor += 1.0f;
-		if (_mapScalingFactor >= 3.9f) _mapScalingFactor = 3.0f;
-		_map->setMapScalingFactor(_mapScalingFactor);
-	} else {
-		throw NO_MAP;
-	}
-}
-
-void awe::game::zoomOut() {
-	if (_map) {
-		_mapScalingFactor -= 1.0f;
-		if (_mapScalingFactor < 0.9f) _mapScalingFactor = 1.0f;
-		_map->setMapScalingFactor(_mapScalingFactor);
-	} else {
-		throw NO_MAP;
-	}
 }
 
 void awe::game::setSelectedTileByPixel(const sf::Vector2i pixel) {
@@ -353,6 +373,12 @@ CScriptArray* awe::game::getLoadedUnits(const awe::UnitID id) const {
 	} else {
 		throw NO_MAP;
 	}
+}
+
+awe::Day awe::game::getDay() const {
+	if (_map)
+		return _map->getDay();
+	throw NO_MAP;
 }
 
 //////////////////////////////

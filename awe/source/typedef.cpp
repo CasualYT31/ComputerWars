@@ -64,4 +64,9 @@ void awe::RegisterGameTypedefs(asIScriptEngine* engine,
 		document->DocumentExpectedFunction("typedef uint32 ArmyID",
 			"Index used to identify an army.");
 	}
+	if (!engine->GetTypeInfoByName("Day")) {
+		engine->RegisterTypedef("Day", "uint32");
+		document->DocumentExpectedFunction("typdef uint32 Day",
+			"Represents a day number.");
+	}
 }

@@ -112,6 +112,36 @@ namespace awe {
 		// BEGIN INTERFACE //
 		/////////////////////
 
+		////////////////////
+		// UNIQUE TO GAME //
+		////////////////////
+
+		/**
+		 * Increases the map scaling factor by @c 1.0.
+		 * The map scaling factor does not go above @c 3.0.
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::setMapScalingFactor().
+		 */
+		void zoomIn();
+
+		/**
+		 * Decreases the map scaling factor by @c 1.0.
+		 * The map scaling factor does not go below @c 1.0.
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::setMapScalingFactor().
+		 */
+		void zoomOut();
+
+		/**
+		 * Ends the current turn.
+		 * @throws std::runtime_error if no map is currently loaded.
+		 */
+		void endTurn();
+
+		////////////////////////
+		// NOT UNIQUE TO GAME //
+		////////////////////////
+
 		/**
 		 * @throws std::runtime_error if no map is currently loaded.
 		 * @sa     @c awe::map::moveSelectedTileUp().
@@ -147,22 +177,6 @@ namespace awe {
 		 * @sa     @c awe::map::getUnitOnTile().
 		 */
 		awe::UnitID getUnitOnTile(const sf::Vector2u tile) const;
-
-		/**
-		 * Increases the map scaling factor by @c 1.0.
-		 * The map scaling factor does not go above @c 3.0.
-		 * @throws std::runtime_error if no map is currently loaded.
-		 * @sa     @c awe::map::setMapScalingFactor().
-		 */
-		void zoomIn();
-
-		/**
-		 * Decreases the map scaling factor by @c 1.0.
-		 * The map scaling factor does not go below @c 1.0.
-		 * @throws std::runtime_error if no map is currently loaded.
-		 * @sa     @c awe::map::setMapScalingFactor().
-		 */
-		void zoomOut();
 
 		/**
 		 * @throws std::runtime_error if no map is currently loaded.
@@ -279,6 +293,12 @@ namespace awe {
 		 * @sa     @c awe::map::getLoadedUnits().
 		 */
 		CScriptArray* getLoadedUnits(const awe::UnitID id) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getDay().
+		 */
+		awe::Day getDay() const;
 
 		/////////////////////
 		//  END  INTERFACE //

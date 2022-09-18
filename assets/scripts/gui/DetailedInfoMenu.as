@@ -8,6 +8,13 @@ void setUpArmyPanel(string baseLayout) {
 	addWidget("ScrollablePanel", baseLayout);
 	setWidgetSize(baseLayout, "33.333%", "100%");
 	setHorizontalScrollbarAmount(baseLayout, 100);
+	baseLayout += ".day";
+	addWidget("Label", baseLayout);
+	setWidgetPosition(baseLayout, "2%", "2%");
+	setWidgetTextSize(baseLayout, 32);
+	setWidgetTextColour(baseLayout, Colour(255, 255, 255, 255));
+	setWidgetTextOutlineColour(baseLayout, Colour(0, 0, 0, 255));
+	setWidgetTextOutlineThickness(baseLayout, 3.0);
 }
 
 void setUpTerrainPanel(string baseLayout) {
@@ -172,13 +179,15 @@ const string tilePicture(const Vector2&in pos) {
  */
 void DetailedInfoMenuOpen() {
 	// Setup army panel.
+	setWidgetText("DetailedInfoMenu.baseLayout.armyPanel.day", "day",
+		{ any(game.getDay()) });
 	const uint armyCount = game.getArmyCount();
 	for (uint a = 0; a < armyCount; a++) {
 		armyWidgets.insertLast(ArmyWidget(
 			"DetailedInfoMenu.baseLayout.armyPanel.army" + formatUInt(a)));
 		armyWidgets[a].update(a);
 		setWidgetPosition(armyWidgets[a].panel, "2%", "2% + " +
-			formatUInt((ARMYWIDGET_HEIGHT + 10) * a) + "px");
+			formatUInt(55 + (ARMYWIDGET_HEIGHT + 10) * a) + "px");
 	}
 	
 	// Setup tile panel.

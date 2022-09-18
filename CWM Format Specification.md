@@ -95,5 +95,7 @@ first version, with the following additions:
 Here are the changes for the next iteration of the alpha release version of
 the map format:
 
+ - In between `Selected Tile Y` and `Army Count`, there is a new `Day` field
+   which stores the current day.
  - In between the `Army` loop and the `Tile` loop, there is a new `ArmyID` field,
    which stores the army whose turn it was when the map was saved.

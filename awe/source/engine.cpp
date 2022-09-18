@@ -385,6 +385,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Returns the IDs of the units that are "
 		"loaded onto the one specified.");
 
+	r = engine->RegisterObjectMethod("GameInterface", "Day getDay()",
+		asMETHOD(awe::game, getDay), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the current day.");
+
+	r = engine->RegisterObjectMethod("GameInterface", "void endTurn()",
+		asMETHOD(awe::game, endTurn), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Ends the current army's turn.");
+
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
 		&awe::army::NO_ARMY_SCRIPT);

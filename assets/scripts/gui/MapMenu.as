@@ -5,6 +5,10 @@ void MapMenuSetUp() {
 	setWidgetSprite("MapMenu.Menu.Save", "icon", "saveicon");
 	setWidgetText("MapMenu.Menu.Save", "save");
 
+	addWidget("BitmapButton", "MapMenu.Menu.EndTurn");
+	setWidgetSprite("MapMenu.Menu.EndTurn", "icon", "endturnicon");
+	setWidgetText("MapMenu.Menu.EndTurn", "endturn");
+
 	addWidget("BitmapButton", "MapMenu.Menu.Quit");
 	setWidgetSprite("MapMenu.Menu.Quit", "icon", "quiticon");
 	setWidgetText("MapMenu.Menu.Quit", "quit");
@@ -23,6 +27,11 @@ void MapMenuHandleInput(const dictionary controls) {
 
 void MapMenu_Save_Pressed() {
 	saveMap();
+	setGUI("Map");
+}
+
+void MapMenu_EndTurn_Pressed() {
+	game.endTurn();
 	setGUI("Map");
 }
 

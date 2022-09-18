@@ -1,5 +1,9 @@
 void MapSetUp() {}
 
+void MapOpen() {
+	info(formatUInt(game.getDay()));
+}
+
 // Holds the previous mouse position.
 MousePosition previousPosition;
 
