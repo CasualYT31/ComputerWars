@@ -37,9 +37,9 @@ void awe::game_options::registerGameOptionsType(asIScriptEngine* engine,
 		"void f()", asMETHOD(awe::game_options, addRef), asCALL_THISCALL);
 	r = engine->RegisterObjectBehaviour("GameOptions", asBEHAVE_RELEASE,
 		"void f()", asMETHOD(awe::game_options, releaseRef), asCALL_THISCALL);
-	r = engine->RegisterObjectProperty("GameOptions", "array<BankID>@ currentCOs",
+	r = engine->RegisterObjectProperty("GameOptions", "array<int>@ currentCOs",
 		asOFFSET(awe::game_options, currentCOs));
-	r = engine->RegisterObjectProperty("GameOptions", "array<BankID>@ tagCOs",
+	r = engine->RegisterObjectProperty("GameOptions", "array<int>@ tagCOs",
 		asOFFSET(awe::game_options, tagCOs));
 }
 
@@ -47,8 +47,8 @@ awe::game_options* awe::game_options::factory() noexcept {
 	// The reference counter is set to 1 for all new game_options objects.
 	auto obj = new awe::game_options();
 	if (_scripts) {
-		obj->currentCOs = _scripts->createArray("BankID");
-		obj->tagCOs = _scripts->createArray("BankID");
+		obj->currentCOs = _scripts->createArray("int");
+		obj->tagCOs = _scripts->createArray("int");
 	}
 	return obj;
 }

@@ -795,6 +795,16 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Gets the currently selected item's index.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and \c -1 will be returned. If
+		 * no item was selected, \c -1 will also be returned.
+		 * @param  name The name of the widget to query.
+		 * @return The index of the currently selected item.
+		 */
+		int _getSelectedItem(const std::string& name) noexcept;
+
+		/**
 		 * Retrieves the text of the currently selected item of a widget.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and a blank string will be

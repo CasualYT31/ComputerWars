@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "map.hpp"
 #include "userinput.hpp"
 #include "gui.hpp"
+#include "options.hpp"
 
 #pragma once
 
@@ -56,6 +57,11 @@ namespace awe {
 
 		/**
 		 * Sets up a game based on what @c map requires.
+		 * When calling \c load(), \c game will check if it has a pointer to game
+		 * options. If it does, it will use those options to replace values that
+		 * are stored in the map file. E.g., setting an army's CO/s for a new game,
+		 * and then not providing any options when loading the map again, as those
+		 * COs will have been saved to the map by then.
 		 * @param file       Path to the binary file containing the map to play on.
 		 * @param countries  Information on the countries to search through when
 		 *                   reading country IDs from the map file.
@@ -70,6 +76,11 @@ namespace awe {
 		 * @param icon_sheet Pointer to the animated spritesheet to use for icons.
 		 * @param co_sheet   Pointer to the animated spritesheet to use for COs.
 		 * @param font       Pointer to the font to use with this map.
+		 * @param dict       Pointer to the language dictionary to use with this
+		 *                   map.
+		 * @param options    Reference to a set of game options to apply to this
+		 *                   game. This method <b>will not</b> release this
+		 *                   reference! \c nullptr can be given.
 		 * @sa    @c awe::map::load()
 		 */
 		bool load(const std::string& file,
@@ -82,7 +93,8 @@ namespace awe {
 			const std::shared_ptr<sfx::animated_spritesheet>& icon_sheet,
 			const std::shared_ptr<sfx::animated_spritesheet>& co_sheet,
 			const std::shared_ptr<sf::Font>& font,
-			const std::shared_ptr<engine::language_dictionary>& dict) noexcept;
+			const std::shared_ptr<engine::language_dictionary>& dict,
+			awe::game_options* options) noexcept;
 
 		/**
 		 * Saves the state of the map to the previously given binary file.

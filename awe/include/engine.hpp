@@ -234,10 +234,13 @@ namespace awe {
 
 		/**
 		 * Loads a map.
-		 * @param file The map file to load.
-		 * @param menu The menu to switch to once loading finishes.
+		 * @param file    The map file to load.
+		 * @param menu    The menu to switch to once loading finishes.
+		 * @param options The set of options to apply to the map. Can be
+		 *                \c nullptr.
 		 */
-		void _script_loadMap(const std::string& file, const std::string& menu);
+		void _script_loadMap(const std::string& file, const std::string& menu,
+			awe::game_options* options);
 
 		/**
 		 * Saves the current map.

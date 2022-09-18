@@ -542,14 +542,17 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"joystick ID and axis threashold).");
 
 	r = engine->RegisterGlobalFunction(
-		"void loadMap(const string& in, const string& in)",
+		"void loadMap(const string&in, const string&in, GameOptions@ = null)",
 		asMETHOD(awe::game_engine, _script_loadMap),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Opens a map (its file path being the "
 		"first parameter), and then switches to the menu given in the second "
-		"parameter. The menu should be \"empty\" so as to display the map on the "
-		"screen. If there is already a map open at the time of the call, then an "
-		"error will be logged and no changes will occur.");
+		"parameter. An optional set of game options can also be applied after the "
+		"map has been loaded. They will override anything stored in the map, but "
+		"those overrides won't be saved to the map file until it is saved using a "
+		"save function. The menu should be \"empty\" so as to display the map on "
+		"the screen. If there is already a map open at the time of the call, then "
+		"an error will be logged and no changes will occur.");
 
 	r = engine->RegisterGlobalFunction("void saveMap()",
 		asMETHOD(awe::game_engine, _script_saveMap),
@@ -732,15 +735,17 @@ void awe::game_engine::_script_saveUIConfig() {
 }
 
 void awe::game_engine::_script_loadMap(const std::string& file,
-	const std::string& menu) {
+	const std::string& menu, awe::game_options* options) {
 	// Create the game.
 	_game.load(file, _countries, _tiles, _units, _commanders,
 		_sprites->tile->normal, _sprites->unit->idle, _sprites->icon, _sprites->CO,
-		(*_fonts)["AW2"], _dictionary);
+		(*_fonts)["AW2"], _dictionary, options);
 	// Remember what the last menu was so that we can easily go back to it when
 	// the user quits.
 	_menuBeforeMapLoad = _gui->getGUI();
 	_gui->setGUI(menu);
+	// Release our game options reference.
+	options->releaseRef();
 }
 
 void awe::game_engine::_script_saveMap() {

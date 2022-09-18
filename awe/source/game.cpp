@@ -45,7 +45,8 @@ bool awe::game::load(const std::string& file,
 	const std::shared_ptr<sfx::animated_spritesheet>& icon_sheet,
 	const std::shared_ptr<sfx::animated_spritesheet>& co_sheet,
 	const std::shared_ptr<sf::Font>& font,
-	const std::shared_ptr<engine::language_dictionary>& dict) noexcept {
+	const std::shared_ptr<engine::language_dictionary>& dict,
+	awe::game_options* options) noexcept {
 	try {
 		_map = std::make_unique<awe::map>(countries, tiles, units, commanders);
 	} catch (std::bad_alloc) {
@@ -60,6 +61,31 @@ bool awe::game::load(const std::string& file,
 		_map->setFont(font);
 		_map->setLanguageDictionary(dict);
 		auto r = _map->load(file);
+		// If we have any game options, apply them.
+		if (options) {
+			// Assign current and tag COs.
+			std::vector<std::shared_ptr<const awe::commander>> currentCOs, tagCOs;
+			if (options->currentCOs) {
+				for (asUINT i = 0; i < options->currentCOs->GetSize(); ++i) {
+					int commanderID = *(int*)options->currentCOs->At(i);
+					currentCOs.push_back((commanderID >= 0 ? commanders->operator[]
+						((awe::BankID)commanderID) : nullptr));
+				}
+			}
+			if (options->tagCOs) {
+				for (asUINT i = 0; i < options->tagCOs->GetSize(); ++i) {
+					int commanderID = *(int*)options->tagCOs->At(i);
+					tagCOs.push_back((commanderID >= 0 ? commanders->operator[]
+					((awe::BankID)commanderID) : nullptr));
+				}
+			}
+			const std::size_t cSize = currentCOs.size(), tSize = tagCOs.size();
+			const std::size_t largest = std::max(cSize, tSize);
+			for (std::size_t i = 0; i < largest; ++i) {
+				_map->setArmyCOs(i, (i < cSize ? currentCOs[i] : nullptr),
+					(i < tSize ? tagCOs[i] : nullptr));
+			}
+		}
 		_map->selectArmy(0);
 		return r;
 	}

@@ -37,8 +37,6 @@ namespace awe {
 		/**
 		 * Registers this struct with the script interface, if it hasn't been
 		 * already.
-		 * @warning The \c BankID typedef must already have been registered before
-		 *          using this class!
 		 */
 		static void registerGameOptionsType(asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document,
@@ -47,14 +45,16 @@ namespace awe {
 		/**
 		 * The array of current COs to assign to each army.
 		 * The \c ArmyID of an army will be used as an index. The values will be
-		 * \c commander <tt>BankID</tt>s.
+		 * \c commander <tt>BankID</tt>s. If a value is negative, it represents a
+		 * complete lack of CO.
 		 */
 		CScriptArray* currentCOs = nullptr;
 
 		/**
 		 * The array of tag COs to assign to each army.
 		 * The \c ArmyID of an army will be used as an index. The values will be
-		 * \c commander <tt>BankID</tt>s.
+		 * \c commander <tt>BankID</tt>s. If a value is negative, it represents a
+		 * complete lack of CO.
 		 */
 		CScriptArray* tagCOs = nullptr;
 

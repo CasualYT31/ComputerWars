@@ -457,6 +457,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Selects an item from a widget. The name "
 		"of the widget is given, then the 0-based index of the item to select.");
 
+	r = engine->RegisterGlobalFunction("int getSelectedItem(const string&in)",
+		asMETHOD(sfx::gui, _getSelectedItem), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's selected item's index.");
+
 	r = engine->RegisterGlobalFunction("string getSelectedItemText("
 		"const string&in)",
 		asMETHOD(sfx::gui, _getSelectedItemText), asCALL_THISCALL_ASGLOBAL, this);
@@ -1754,15 +1758,38 @@ void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index
 	}
 }
 
+int sfx::gui::_getSelectedItem(const std::string& name) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		// Get the item index differently depending on the type the widget is.
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "listbox") {
+			return std::dynamic_pointer_cast<ListBox>(widget)->
+				getSelectedItemIndex();
+		} else {
+			_logger.error("Attempted to get the index of the selected item of a "
+				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "
+				"operation is not supported for this type of widget.", name, type,
+				fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to get the index of the selected item of a "
+			"widget \"{}\" within menu \"{}\". This widget does not exist.", name,
+			fullname[0]);
+	}
+	return -1;
+}
+
 std::string sfx::gui::_getSelectedItemText(const std::string& name) noexcept {
 	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
 		// Get the item text differently depending on the type the widget is.
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "listbox") {
-			return _findWidget<ListBox>(name)->getSelectedItem().toStdString();
+			return std::dynamic_pointer_cast<ListBox>(widget)->
+				getSelectedItem().toStdString();
 		} else {
 			_logger.error("Attempted to get the text of the selected item of a "
 				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "

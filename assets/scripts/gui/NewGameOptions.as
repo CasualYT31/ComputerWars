@@ -75,22 +75,23 @@ void NewGameOptionsSetUp() {
 	addItem("COs.YCTagList", "~" + commander["JAKE"].name);
 
 	/*
+	Original map file has these COs:
 	OS: Jake, NOCO
 	BM: NOCO
 	GE: JAKE, JAKE
 	YC: NOCO, NOCO
 	*/
-	setSelectedItem("COs.OSCurrentList", 1);
-	setSelectedItem("COs.BMCurrentList", 0);
-	setSelectedItem("COs.GECurrentList", 1);
-	setSelectedItem("COs.YCCurrentList", 0);
-	setSelectedItem("COs.OSTagList", 0);
-	setSelectedItem("COs.GETagList", 1);
-	setSelectedItem("COs.YCTagList", 0);
+	// setSelectedItem("COs.OSCurrentList", 1);
+	// setSelectedItem("COs.BMCurrentList", 0);
+	// setSelectedItem("COs.GECurrentList", 1);
+	// setSelectedItem("COs.YCCurrentList", 0);
+	// setSelectedItem("COs.OSTagList", 0);
+	// setSelectedItem("COs.GETagList", 1);
+	// setSelectedItem("COs.YCTagList", 0);
 }
 
 void NewGameOptions_GoBack_MouseReleased() {
-	setGUI(PREVIOUS_MENU);
+	setGUI("MainMenu");
 }
 
 void NewGameOptions_DeletePlay_MouseReleased() {
@@ -105,6 +106,15 @@ void NewGameOptions_Play_MouseReleased() {
 	filesystem fs;
 	fs.changeCurrentPath("./map");
 	fs.copyFile("islandx.cwm", "islandxcopy.cwm");
-	// Create some form of "options" object to pass to the game engine.
-	loadMap("map/islandxcopy.cwm", "Map");
+	// Setup the game options, then load the map.
+	GameOptions opts;
+	opts.currentCOs.insertLast(getSelectedItem("COs.OSCurrentList"));
+	opts.currentCOs.insertLast(getSelectedItem("COs.BMCurrentList"));
+	opts.currentCOs.insertLast(getSelectedItem("COs.GECurrentList"));
+	opts.currentCOs.insertLast(getSelectedItem("COs.YCCurrentList"));
+	opts.tagCOs.insertLast(getSelectedItem("COs.OSTagList"));
+	opts.tagCOs.insertLast(getSelectedItem("COs.BMTagList"));
+	opts.tagCOs.insertLast(getSelectedItem("COs.GETagList"));
+	opts.tagCOs.insertLast(getSelectedItem("COs.YCTagList"));
+	loadMap("map/islandxcopy.cwm", "Map", opts);
 }
