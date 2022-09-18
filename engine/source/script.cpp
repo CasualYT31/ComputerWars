@@ -73,6 +73,7 @@ engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
                 "callback - this is likely a faulty engine build. Code {}.", r);
         }
         RegisterStdString(_engine);
+        RegisterScriptAny(_engine);
         RegisterScriptArray(_engine, false);
         RegisterScriptDictionary(_engine);
         RegisterScriptDateTime(_engine);

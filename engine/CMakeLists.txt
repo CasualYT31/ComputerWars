@@ -80,6 +80,7 @@ add_library(${PROJECT_NAME} STATIC
 	${angelscript_SOURCE_DIR}/add_on/datetime/datetime.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptfile/scriptfilesystem.cpp
 	${angelscript_SOURCE_DIR}/add_on/scripthelper/scripthelper.cpp
+	${angelscript_SOURCE_DIR}/add_on/scriptany/scriptany.cpp
 	${docgen_SOURCE_DIR}/source/docgen.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsEngine_INCLUDE_DIRS}
@@ -90,6 +91,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	${angelscript_SOURCE_DIR}/add_on/datetime/
 	${angelscript_SOURCE_DIR}/add_on/scriptfile/
 	${angelscript_SOURCE_DIR}/add_on/scripthelper/
+	${angelscript_SOURCE_DIR}/add_on/scriptany/
 	${docgen_SOURCE_DIR}/source/)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_link_libraries(${PROJECT_NAME}
