@@ -153,7 +153,24 @@ namespace awe {
 		 *                            \c scripts object was given, or if the array
 		 *                            couldn't be created.
 		 */
-		CScriptArray* getAdjacentUnits(const sf::Vector2u& position);
+		CScriptArray* getAdjacentUnits(const sf::Vector2u& position) const;
+
+		/**
+		 * Burns fuel from a unit.
+		 * @param  unit The ID of the unit to change.
+		 * @param  fuel The units of fuel to burn.
+		 * @throws std::runtime_error if no map is currently loaded.
+		 */
+		void burnFuel(const awe::UnitID unit, const awe::Fuel fuel);
+
+		/**
+		 * Deletes a unit.
+		 * @param  unit The ID of the unit to delete.
+		 * @throws std::runtime_error if no map is currently loaded, if an invalid
+		 *                            unit was given, or if a unit was given that
+		 *                            didn't belong to the current army.
+		 */
+		void deleteUnit(const awe::UnitID unit);
 
 		////////////////////////
 		// NOT UNIQUE TO GAME //

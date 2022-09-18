@@ -412,6 +412,17 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Gets a list of units that are adjacent to "
 		"a given tile.");
 
+	r = engine->RegisterObjectMethod("GameInterface",
+		"void burnFuel(const UnitID, const Fuel)",
+		asMETHOD(awe::game, burnFuel), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Burns fuel from a unit.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"void deleteUnit(const UnitID)",
+		asMETHOD(awe::game, deleteUnit), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Deletes a unit. Only a unit belonging to "
+		"the current army can be deleted.");
+
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
 		&awe::army::NO_ARMY_SCRIPT);

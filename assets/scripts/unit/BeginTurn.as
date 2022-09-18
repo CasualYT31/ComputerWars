@@ -1,0 +1,29 @@
+void BeginTurnForUnit(const UnitID unit, const Unit&in type,
+	const Vector2&in position) {
+	string typeName = type.scriptName;
+
+	if (typeName == "APC") {
+		array<UnitID> units = game.getAdjacentUnits(position);
+		auto apcArmy = game.getArmyOfUnit(unit);
+		for (uint i = 0; i < units.length(); ++i) {
+			if (apcArmy == game.getArmyOfUnit(units[i]))
+				game.replenishUnit(units[i]);
+		}
+
+	} else if (typeName == "TCOPTER" || typeName == "BCOPTER") {
+		game.burnFuel(unit, 2);
+		if (game.getUnitFuel(unit) <= 0) game.deleteUnit(unit);
+	
+	} else if (typeName == "FIGHTER" || typeName == "BOMBER" ||
+		typeName == "STEALTH" || typeName == "BLACKBOMB") {
+		game.burnFuel(unit, 5);
+		if (game.getUnitFuel(unit) <= 0) game.deleteUnit(unit);
+	
+	} else if (typeName == "BLACKBOAT" || typeName == "LANDER" ||
+		typeName == "CRUISER" || typeName == "SUB" ||
+		typeName == "BATTLESHIP" || typeName == "CARRIER") {
+		game.burnFuel(unit, 1);
+		if (game.getUnitFuel(unit) <= 0) game.deleteUnit(unit);
+
+	}
+}

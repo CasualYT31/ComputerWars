@@ -194,7 +194,7 @@ void awe::game::replenishUnit(const awe::UnitID unit) {
 	}
 }
 
-CScriptArray* awe::game::getAdjacentUnits(const sf::Vector2u& position) {
+CScriptArray* awe::game::getAdjacentUnits(const sf::Vector2u& position) const {
 	if (_map) {
 		if (_scripts) {
 			CScriptArray* ret = _scripts->createArray("UnitID");
@@ -224,6 +224,33 @@ CScriptArray* awe::game::getAdjacentUnits(const sf::Vector2u& position) {
 		throw NO_SCRIPTS;
 	}
 	throw NO_MAP;
+}
+
+void awe::game::burnFuel(const awe::UnitID unit, const awe::Fuel fuel) {
+	if (_map) {
+		auto currentFuel = _map->getUnitFuel(unit);
+		_map->setUnitFuel(unit, currentFuel - fuel);
+	} else {
+		throw NO_MAP;
+	}
+}
+
+void awe::game::deleteUnit(const awe::UnitID unit) {
+	if (_map) {
+		const auto army = _map->getArmyOfUnit(unit);
+		if (army != awe::army::NO_ARMY) {
+			if (army == _map->getSelectedArmy()) {
+				_map->deleteUnit(unit);
+			} else {
+				throw std::runtime_error("You cannot delete units of a different "
+					"army than the current army!");
+			}
+		} else {
+			throw INVALID_UNIT_ID;
+		}
+	} else {
+		throw NO_MAP;
+	}
 }
 
 //////////////////////
