@@ -329,6 +329,21 @@ namespace sfx {
 			CScriptAnyWrapper(CScriptAny* const obj) noexcept;
 
 			/**
+			 * Copies the pointer and increases its reference count.
+			 */
+			CScriptAnyWrapper(const CScriptAnyWrapper& obj) noexcept;
+
+			/**
+			 * Moves the pointer over and increases the reference count.
+			 * Even though it's a move, we are technically creating another
+			 * reference to the object, so increase the reference count anyway. If
+			 * you remove this, \c emplace_back() and other "move" calls will cause
+			 * the reference count to fall down by one, which will cause a nasty
+			 * crash later on at whatever point.
+			 */
+			CScriptAnyWrapper(CScriptAnyWrapper&& obj) noexcept;
+
+			/**
 			 * Releases the reference to the stored \c CScriptAny object.
 			 */
 			~CScriptAnyWrapper() noexcept;
@@ -440,6 +455,20 @@ namespace sfx {
 		 */
 		void _removeWidgets(const tgui::Widget::Ptr& widget,
 			const tgui::Container::Ptr& container, const bool removeIt) noexcept;
+
+		/**
+		 * Adds a translatable caption to a widget, or updates an existing one.
+		 * Note that if an out of range index is given, the internal lists will
+		 * grow in order to accomodate for the new entry.
+		 * @param text      The translation key of the string to use.
+		 * @param fullname  The full name of the widget to assign the caption to.
+		 * @param index     Which caption to set.
+		 * @param variables Optional list of variables to later insert into the
+		 *                  caption when translating.
+		 */
+		void _setTranslatedString(const std::string& text,
+			const std::string& fullname, const std::size_t index,
+			CScriptArray* variables) noexcept;
 
 		/**
 		 * Extracts a widget's short name from its full name.
@@ -652,11 +681,12 @@ namespace sfx {
 		 * Updates a widget's caption.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no caption will be changed.
-		 * @param name The name of the widget to change.
-		 * @param text The new caption.
+		 * @param name      The name of the widget to change.
+		 * @param text      The new caption.
+		 * @param variables Optional list of variables to insert into the caption.
 		 */
-		void _setWidgetText(const std::string& name, const std::string& text)
-			noexcept;
+		void _setWidgetText(const std::string& name, const std::string& text,
+			CScriptArray* variables) noexcept;
 
 		/**
 		 * Sets a widget's character size.
@@ -809,10 +839,13 @@ namespace sfx {
 		 * E.g. appends an item to a listbox.\n
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no item will be added.
-		 * @param name The name of the widget to add the item to.
-		 * @param text The text of the new item.
+		 * @param name      The name of the widget to add the item to.
+		 * @param text      The text of the new item.
+		 * @param variables Optional list of variables to insert into the item
+		 *                  text.
 		 */
-		void _addItem(const std::string& name, const std::string& text) noexcept;
+		void _addItem(const std::string& name, const std::string& text,
+			CScriptArray* variables) noexcept;
 
 		/**
 		 * Clears all items from a widget.

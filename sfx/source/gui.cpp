@@ -104,6 +104,16 @@ sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(CScriptAny* const obj) noexcept :
 	if (_any) _any->AddRef();
 }
 
+sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(
+	const sfx::gui::CScriptAnyWrapper& obj) noexcept : _any(obj.operator->()) {
+	if (_any) _any->AddRef();
+}
+
+sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(sfx::gui::CScriptAnyWrapper&& obj)
+	noexcept : _any(std::move(obj.operator->())) {
+	if (_any) _any->AddRef();
+}
+
 sfx::gui::CScriptAnyWrapper::~CScriptAnyWrapper() noexcept {
 	if (_any) _any->Release();
 }
@@ -372,10 +382,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"the widget is given, then if it should be visible or not.");
 
 	r = engine->RegisterGlobalFunction("void setWidgetText(const string&in, "
-		"const string&in)",
+		"const string&in, array<any>@ = null)",
 		asMETHOD(sfx::gui, _setWidgetText), asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Sets a widget's text. The name of the "
-		"widget is given, then its new text.");
+	document->DocumentGlobalFunction(r, std::string("Sets a widget's text. The "
+		"name of the widget is given, then its new text. An optional list of "
+		"variables can also be given. These variables will be inserted into the "
+		"text wherever a '" + std::to_string(engine::expand_string::getVarChar()) +
+		"' is found.").c_str());
 
 	r = engine->RegisterGlobalFunction("void setWidgetTextSize(const string&in, "
 		"const uint)",
@@ -465,10 +478,11 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"widget in the layout to amend.");
 
 	r = engine->RegisterGlobalFunction("void addItem(const string&in, const "
-		"string&in)",
+		"string&in, array<any>@ = null)",
 		asMETHOD(sfx::gui, _addItem), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Appends a new item to a widget. The name "
-		"of the widget is given, then the text of the new item.");
+		"of the widget is given, then the text of the new item. An optional list "
+		"variables can also be given: see setWidgetText() for more information.");
 
 	r = engine->RegisterGlobalFunction("void clearItems(const string&in)",
 		asMETHOD(sfx::gui, _clearItems), asCALL_THISCALL_ASGLOBAL, this);
@@ -835,7 +849,34 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) noexcept {
 
 std::string sfx::gui::_getTranslatedText(const std::string& name,
 	const std::size_t index) const noexcept {
-	return (*_langdict)(_originalStrings.at(name).at(index));
+	std::string ret = (*_langdict)(_originalStrings.at(name).at(index));
+	// If there are any variables, insert them manually.
+	if (_originalStringsVariables.find(name) != _originalStringsVariables.end()) {
+		// Code will crash if you don't set up _originalStrings and
+		// _originalStringsVariables entries together!
+		for (auto& var : _originalStringsVariables.at(name).at(index)) {
+			int type = var->GetTypeId();
+			if (type == _scripts->getTypeID("int64")) {
+				asINT64 val = 0;
+				var->Retrieve(val);
+				ret = engine::expand_string::insert(ret, val);
+			} else if (type == _scripts->getTypeID("double")) {
+				double val = 0.0;
+				var->Retrieve(val);
+				ret = engine::expand_string::insert(ret, val);
+			} else if (type == _scripts->getTypeID("string")) {
+				std::string val;
+				var->Retrieve(&val, type);
+				ret = engine::expand_string::insert(ret, val);
+			} else {
+				_logger.warning("Unsupported type \"{}\" given when translating "
+					"widget \"{}\"'s #{} string: inserting blank string instead.",
+					_scripts->getTypeName(type), name, index);
+				ret = engine::expand_string::insert(ret, "");
+			}
+		}
+	}
+	return ret;
 }
 
 void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -1079,6 +1120,26 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	} else {
 		_logger.error("Attempted to remove a widget \"{}\", which did not have a "
 			"container!", name);
+	}
+}
+
+void sfx::gui::_setTranslatedString(const std::string& text,
+	const std::string& fullname, const std::size_t index, CScriptArray* variables)
+	noexcept {
+	// Resize both containers to fit.
+	if (_originalStrings[fullname].size() <= index) {
+		_originalStrings[fullname].resize(index + 1);
+		_originalStringsVariables[fullname].resize(index + 1);
+	}
+	// Update _originalStrings.
+	_originalStrings[fullname][index] = text;
+	// Update _originalStringsVariables.
+	_originalStringsVariables[fullname][index].clear();
+	if (variables) {
+		for (asUINT i = 0; i < variables->GetSize(); ++i) {
+			_originalStringsVariables[fullname][index].emplace_back(
+				(CScriptAny*)variables->At(i));
+		}
 	}
 }
 
@@ -1345,8 +1406,8 @@ void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible)
 	}
 }
 
-void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
-	noexcept {
+void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
+	CScriptArray* variables) noexcept {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -1357,14 +1418,10 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 				"which is of type \"{}\", within menu \"{}\". This operation is "
 				"not supported for this type of widget.", text, name, type,
 				fullname[0]);
+			if (variables) variables->Release();
 			return;
 		}
-		// Store the item's text in the _originalStrings container.
-		if (_originalStrings[fullnameAsString].size() == 0) {
-			_originalStrings[fullnameAsString].push_back(text);
-		} else {
-			_originalStrings[fullnameAsString][0] = text;
-		}
+		_setTranslatedString(text, fullnameAsString, 0, variables);
 		// Set it by translating it.
 		_translateWidget(widget);
 	} else {
@@ -1372,6 +1429,7 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text)
 			"within menu \"{}\". This widget does not exist.", text, name,
 			fullname[0]);
 	}
+	if (variables) variables->Release();
 }
 
 void sfx::gui::_setWidgetTextSize(const std::string& name, const unsigned int size)
@@ -1704,8 +1762,8 @@ void sfx::gui::_setWidgetRatioInLayout(const std::string& name,
 	}
 }
 
-void sfx::gui::_addItem(const std::string& name, const std::string& text)
-	noexcept {
+void sfx::gui::_addItem(const std::string& name, const std::string& text,
+	CScriptArray* variables) noexcept {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -1719,10 +1777,11 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text)
 				"is of type \"{}\", within menu \"{}\". This operation is not "
 				"supported for this type of widget.", text, name, type,
 				fullname[0]);
+			if (variables) variables->Release();
 			return;
 		}
-		// Store the item's text in the _originalStrings container.
-		_originalStrings[fullnameAsString].push_back(text);
+		_setTranslatedString(text, fullnameAsString,
+			_originalStrings[fullnameAsString].size(), variables);
 		// Translate the new item.
 		// We still have to add the new item itself so keep the code above!
 		_translateWidget(widget);
@@ -1731,6 +1790,7 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text)
 			"within menu \"{}\". This widget does not exist.", text, name,
 			fullname[0]);
 	}
+	if (variables) variables->Release();
 }
 
 void sfx::gui::_clearItems(const std::string& name) noexcept {

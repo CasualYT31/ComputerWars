@@ -275,6 +275,80 @@ CScriptArray* engine::scripts::createArray(const std::string& type) const
     return nullptr;
 }
 
+CScriptAny* engine::scripts::createAny() const noexcept {
+    return new CScriptAny(_engine);
+}
+
+int engine::scripts::getTypeID(const std::string& type) const noexcept {
+    // Handle primitive types separately as they don't seem to work with TypeInfo.
+    if (type == "void") {
+        return 0;
+    } else if (type == "bool") {
+        return 1;
+    } else if (type == "int8") {
+        return 2;
+    } else if (type == "int16") {
+        return 3;
+    } else if (type == "int" || type == "int32") {
+        return 4;
+    } else if (type == "int64") {
+        return 5;
+    } else if (type == "uint8") {
+        return 6;
+    } else if (type == "uint16") {
+        return 7;
+    } else if (type == "uint" || type == "uint32") {
+        return 8;
+    } else if (type == "uint64") {
+        return 9;
+    } else if (type == "float") {
+        return 10;
+    } else if (type == "double") {
+        return 11;
+    }
+    // Handle other types.
+    auto typeInfo = _engine->GetTypeInfoByDecl(type.c_str());
+    if (typeInfo)
+        return typeInfo->GetTypeId();
+    else
+        return -1;
+}
+
+std::string engine::scripts::getTypeName(const int id) const noexcept {
+    // Handle primitive types separately as they don't seem to work with TypeInfo.
+    if (id == 0) {
+        return "void";
+    } else if (id == 1) {
+        return "bool";
+    } else if (id == 2) {
+        return "int8";
+    } else if (id == 3) {
+        return "int16";
+    } else if (id == 4) {
+        return "int";
+    } else if (id == 5) {
+        return "int64";
+    } else if (id == 6) {
+        return "uint8";
+    } else if (id == 7) {
+        return "uint16";
+    } else if (id == 8) {
+        return "uint";
+    } else if (id == 9) {
+        return "uint64";
+    } else if (id == 10) {
+        return "float";
+    } else if (id == 11) {
+        return "double";
+    }
+    // Handle other types.
+    auto typeInfo = _engine->GetTypeInfoById(id);
+    if (typeInfo)
+        return typeInfo->GetName();
+    else
+        return "";
+}
+
 int engine::scripts::_allocateContext() noexcept {
     asIScriptContext* context = _engine->CreateContext();
     if (context) {

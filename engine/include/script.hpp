@@ -282,6 +282,29 @@ namespace engine {
 		 *         it could not be created.
 		 */
 		CScriptArray* createArray(const std::string& type) const noexcept;
+
+		/**
+		 * Creates a @C CScriptAny object.
+		 * @warning You must remember to \c delete or \c Release() the returned
+		 *          pointer!
+		 * @return  Pointer to a new AngelScript @c any object that's been
+		 *          registered with this engine.
+		 */
+		CScriptAny* createAny() const noexcept;
+
+		/**
+		 * Returns the type ID of a given type.
+		 * @param  type The name of the type.
+		 * @return The type ID, or \c -1 if there was an error.
+		 */
+		int getTypeID(const std::string& type) const noexcept;
+
+		/**
+		 * Returns the name of a given type.
+		 * @param  id The type ID of the type to query.
+		 * @return The name of the type, or a blank string if there was an error.
+		 */
+		std::string getTypeName(const int id) const noexcept;
 	private:
 		/**
 		 * Allocates a new function context.
