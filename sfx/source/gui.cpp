@@ -755,45 +755,43 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) noexcept {
 	if (!_originalStrings[widgetName].empty()) {
 		if (type == "Button") {
 			auto w = _findWidget<Button>(widgetName);
-			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			w->setText(_getTranslatedText(widgetName, 0));
 		} else if (type == "BitmapButton") {
 			auto w = _findWidget<BitmapButton>(widgetName);
-			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			w->setText(_getTranslatedText(widgetName, 0));
 		} else if (type == "CheckBox") {
 			auto w = _findWidget<CheckBox>(widgetName);
-			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			w->setText(_getTranslatedText(widgetName, 0));
 		} else if (type == "ChildWindow") {
 			auto w = _findWidget<ChildWindow>(widgetName);
-			w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+			w->setTitle(_getTranslatedText(widgetName, 0));
 		} else if (type == "ColorPicker") {
 			auto w = _findWidget<ColorPicker>(widgetName);
-			w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+			w->setTitle(_getTranslatedText(widgetName, 0));
 		} else if (type == "ComboBox") {
 			auto w = _findWidget<ComboBox>(widgetName);
 			for (std::size_t i = 0; i < w->getItemCount(); i++) {
-				w->changeItemByIndex(i,
-					(*_langdict)(_originalStrings[widgetName][i]));
+				w->changeItemByIndex(i, _getTranslatedText(widgetName, i));
 			}
 		} else if (type == "FileDialog") {
 			auto w = _findWidget<FileDialog>(widgetName);
-			w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
+			w->setTitle(_getTranslatedText(widgetName, 0));
 		} else if (type == "Label") {
 			auto w = _findWidget<Label>(widgetName);
-			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			w->setText(_getTranslatedText(widgetName, 0));
 		} else if (type == "ListBox") {
 			auto w = _findWidget<ListBox>(widgetName);
 			for (std::size_t i = 0; i < w->getItemCount(); i++) {
-				w->changeItemByIndex(i,
-					(*_langdict)(_originalStrings[widgetName][i]));
+				w->changeItemByIndex(i, _getTranslatedText(widgetName, i));
 			}
 		} else if (type == "ListView") {
 			auto w = _findWidget<ListView>(widgetName);
 			std::size_t colCount = w->getColumnCount();
 			for (std::size_t i = 0; i < colCount; i++) {
-				w->setColumnText(i, (*_langdict)(_originalStrings[widgetName][i]));
+				w->setColumnText(i, _getTranslatedText(widgetName, i));
 				for (std::size_t j = 0; j <= w->getItemCount(); j++) {
-					w->changeSubItem(i, j, (*_langdict)
-						(_originalStrings[widgetName][colCount * (i + 1) + j])
+					w->changeSubItem(i, j,
+						_getTranslatedText(widgetName, colCount * (i + 1) + j)
 					);
 				}
 			}
@@ -804,28 +802,28 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) noexcept {
 			// menu hierarchies would have to be stored, though...
 		} else if (type == "MessageBox") {
 			auto w = _findWidget<MessageBox>(widgetName);
-			w->setTitle((*_langdict)(_originalStrings[widgetName][0]));
-			w->setText((*_langdict)(_originalStrings[widgetName][1]));
+			w->setTitle(_getTranslatedText(widgetName, 0));
+			w->setText(_getTranslatedText(widgetName, 1));
 			// Don't know how I'm going to translate buttons.
 		} else if (type == "ProgressBar") {
 			auto w = _findWidget<ProgressBar>(widgetName);
-			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			w->setText(_getTranslatedText(widgetName, 0));
 		} else if (type == "RadioButton") {
 			auto w = _findWidget<RadioButton>(widgetName);
-			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			w->setText(_getTranslatedText(widgetName, 0));
 		} else if (type == "TabContainer") {
 			auto w = _findWidget<TabContainer>(widgetName);
 			for (std::size_t i = 0; i < w->getTabs()->getTabsCount(); i++) {
-				w->changeTabText(i, (*_langdict)(_originalStrings[widgetName][i]));
+				w->changeTabText(i, _getTranslatedText(widgetName, i));
 			}
 		} else if (type == "Tabs") {
 			auto w = _findWidget<Tabs>(widgetName);
 			for (std::size_t i = 0; i < w->getTabsCount(); i++) {
-				w->changeText(i, (*_langdict)(_originalStrings[widgetName][i]));
+				w->changeText(i, _getTranslatedText(widgetName, i));
 			}
 		} else if (type == "ToggleButton") {
 			auto w = _findWidget<ToggleButton>(widgetName);
-			w->setText((*_langdict)(_originalStrings[widgetName][0]));
+			w->setText(_getTranslatedText(widgetName, 0));
 		}
 	}
 	if (_isContainerWidget(type)) {
@@ -833,6 +831,11 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) noexcept {
 		auto& widgetList = w->getWidgets();
 		for (auto& w : widgetList) _translateWidget(w);
 	}
+}
+
+std::string sfx::gui::_getTranslatedText(const std::string& name,
+	const std::size_t index) const noexcept {
+	return (*_langdict)(_originalStrings.at(name).at(index));
 }
 
 void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -857,6 +860,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 		_guiSpriteKeys.clear();
 		_dontOverridePictureSizeWithSpriteSize.clear();
 		_originalStrings.clear();
+		_originalStringsVariables.clear();
 		// Create the main menu that always exists.
 		tgui::Group::Ptr menu = tgui::Group::create();
 		menu->setVisible(false);
@@ -1069,6 +1073,8 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 			_dontOverridePictureSizeWithSpriteSize.erase(name);
 		if (_originalStrings.find(name) != _originalStrings.end())
 			_originalStrings.erase(name);
+		if (_originalStringsVariables.find(name) !=
+			_originalStringsVariables.end()) _originalStringsVariables.erase(name);
 		if (removeIt) container->remove(widget);
 	} else {
 		_logger.error("Attempted to remove a widget \"{}\", which did not have a "
@@ -1744,6 +1750,7 @@ void sfx::gui::_clearItems(const std::string& name) noexcept {
 		}
 		// Clear this widget's entry in the _originalStrings container.
 		_originalStrings[fullnameAsString].clear();
+		_originalStringsVariables[fullnameAsString].clear();
 	} else {
 		_logger.error("Attempted to clear all items from a widget \"{}\" within "
 			"menu \"{}\". This widget does not exist.", name, fullname[0]);

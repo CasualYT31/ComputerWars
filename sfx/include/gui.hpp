@@ -361,6 +361,16 @@ namespace sfx {
 		void _translateWidget(tgui::Widget::Ptr widget) noexcept;
 
 		/**
+		 * Calculates the translated widget text for a given widget.
+		 * @warning Assumes that a language dictionary has been set!
+		 * @param   name  The name of the widget whose text needs to be translated.
+		 * @param   index The text belonging to the widget which needs translating.
+		 * @return  The translated string with any variables inserted.
+		 */
+		std::string _getTranslatedText(const std::string& name,
+			const std::size_t index) const noexcept;
+
+		/**
 		 * Draws the current GUI menu.
 		 * @warning It is to be noted that this implementation of \c draw()
 		 *          \b ignores any given render states. This was done to remain
@@ -974,6 +984,13 @@ namespace sfx {
 		 * Stores the original captions assigned to each widget.
 		 */
 		std::unordered_map<std::string, std::vector<std::string>> _originalStrings;
+
+		/**
+		 * Stores variables that are to be provided to the translation method.
+		 */
+		std::unordered_map<std::string,
+			std::vector<std::vector<sfx::gui::CScriptAnyWrapper>>>
+			_originalStringsVariables;
 
 		/**
 		 * Pointer to the language dictionary used to translate all captions.
