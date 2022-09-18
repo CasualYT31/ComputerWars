@@ -171,6 +171,15 @@ void awe::game::endTurn() {
 				}
 			}
 		}
+		if (_scripts->functionDeclExists("void BeginTurnForTile(const Vector2&in, "
+			"const Terrain&in, const ArmyID)")) {
+			auto tiles = _map->getTilesOfArmy(next);
+			for (auto tile : tiles) {
+				auto type = _map->getTileType(tile)->getType();
+				_scripts->callFunction("BeginTurnForTile", &tile,
+					const_cast<awe::terrain*>(type.get()), next);
+			}
+		}
 	} else {
 		throw NO_MAP;
 	}
@@ -247,6 +256,19 @@ void awe::game::deleteUnit(const awe::UnitID unit) {
 			}
 		} else {
 			throw INVALID_UNIT_ID;
+		}
+	} else {
+		throw NO_MAP;
+	}
+}
+
+void awe::game::offsetFunds(const awe::ArmyID army, const awe::Funds funds) {
+	if (_map) {
+		const auto currentFunds = _map->getArmyFunds(army);
+		if (currentFunds >= 0) {
+			_map->setArmyFunds(army, currentFunds + funds);
+		} else {
+			throw std::runtime_error("The army does not exist!");
 		}
 	} else {
 		throw NO_MAP;

@@ -423,6 +423,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Deletes a unit. Only a unit belonging to "
 		"the current army can be deleted.");
 
+	r = engine->RegisterObjectMethod("GameInterface",
+		"void offsetFunds(const ArmyID, const Funds)",
+		asMETHOD(awe::game, offsetFunds), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Awards or takes away funds to/from an "
+		"army.");
+
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
 		&awe::army::NO_ARMY_SCRIPT);

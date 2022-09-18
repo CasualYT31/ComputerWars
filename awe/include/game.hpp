@@ -172,6 +172,15 @@ namespace awe {
 		 */
 		void deleteUnit(const awe::UnitID unit);
 
+		/**
+		 * Offsets funds for an army.
+		 * @param  army  The ID of the army to change.
+		 * @param  funds The fund amount to either award or take away.
+		 * @return std::runtime_error if no map is currently loaded, or if an
+		 *                            invalid army ID was given.
+		 */
+		void offsetFunds(const awe::ArmyID army, const awe::Funds funds);
+
 		////////////////////////
 		// NOT UNIQUE TO GAME //
 		////////////////////////
