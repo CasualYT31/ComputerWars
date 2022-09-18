@@ -365,6 +365,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"specified unit.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
+		"Vector2 getUnitPosition(const UnitID)",
+		asMETHOD(awe::game, getUnitPosition), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the tile position of the given "
+		"unit.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
 		"HP getUnitHP(const UnitID)",
 		asMETHOD(awe::game, getUnitHP), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the HP that a given unit has.");
@@ -392,6 +398,19 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	r = engine->RegisterObjectMethod("GameInterface", "void endTurn()",
 		asMETHOD(awe::game, endTurn), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Ends the current army's turn.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"void replenishUnit(const UnitID)",
+		asMETHOD(awe::game, replenishUnit), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Replenishes a given unit. Sets its fuel "
+		"ammo back up to max. If the unit has infinite fuel, that unit's fuel "
+		"won't be changed. Same for the ammo.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"array<UnitID>@ getAdjacentUnits(const Vector2&in)",
+		asMETHOD(awe::game, getAdjacentUnits), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets a list of units that are adjacent to "
+		"a given tile.");
 
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",

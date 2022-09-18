@@ -157,22 +157,73 @@ void awe::game::endTurn() {
 		}
 		_map->selectArmy(next);
 		// Begin next army's turn.
-		if (_scripts->functionDeclExists(
-			"void BeginTurnForUnit(const UnitID, const Unit&in)")) {
+		if (_scripts->functionDeclExists("void BeginTurnForUnit(const UnitID, "
+			"const Unit&in, const Vector2&in)")) {
 			auto units = _map->getUnitsOfArmyByPriority(next);
 			// Loop through backwards: see documentation on unit_type::unit_type().
 			for (auto itr = units.rbegin(), enditr = units.rend(); itr != enditr;
 				++itr) {
 				for (auto& unit : itr->second) {
 					auto type = _map->getUnitType(unit);
+					auto pos = _map->getUnitPosition(unit);
 					_scripts->callFunction("BeginTurnForUnit", unit,
-						const_cast<awe::unit_type*>(type.get()));
+						const_cast<awe::unit_type*>(type.get()), &pos);
 				}
 			}
 		}
 	} else {
 		throw NO_MAP;
 	}
+}
+
+void awe::game::replenishUnit(const awe::UnitID unit) {
+	if (_map) {
+		auto type = _map->getUnitType(unit);
+		if (type) {
+			if (!type->hasInfiniteFuel()) {
+				_map->setUnitFuel(unit, type->getMaxFuel());
+			}
+			if (!type->hasInfiniteAmmo()) {
+				_map->setUnitAmmo(unit, type->getMaxAmmo());
+			}
+		} else {
+			throw INVALID_UNIT_ID;
+		}
+	} else {
+		throw NO_MAP;
+	}
+}
+
+CScriptArray* awe::game::getAdjacentUnits(const sf::Vector2u& position) {
+	if (_map) {
+		if (_scripts) {
+			CScriptArray* ret = _scripts->createArray("UnitID");
+			if (ret) {
+				std::unordered_set<sf::Vector2u> positions;
+				// Up.
+				if (position.y > 0)
+					positions.insert(sf::Vector2u(position.x, position.y - 1));
+				// Down.
+				if (position.y < _map->getMapSize().y - 1)
+					positions.insert(sf::Vector2u(position.x, position.y + 1));
+				// Left.
+				if (position.x > 0)
+					positions.insert(sf::Vector2u(position.x - 1, position.y));
+				// Right.
+				if (position.x < _map->getMapSize().x - 1)
+					positions.insert(sf::Vector2u(position.x + 1, position.y));
+				for (auto& pos : positions) {
+					auto id = _map->getUnitOnTile(pos);
+					if (id) ret->InsertLast(&id);
+				}
+				return ret;
+			} else {
+				throw std::runtime_error("Could not create array");
+			}
+		}
+		throw NO_SCRIPTS;
+	}
+	throw NO_MAP;
 }
 
 //////////////////////
@@ -347,6 +398,12 @@ awe::ArmyID awe::game::getArmyOfUnit(const awe::UnitID id) const {
 	} else {
 		throw NO_MAP;
 	}
+}
+
+sf::Vector2u awe::game::getUnitPosition(const awe::UnitID id) const {
+	if (_map)
+		return _map->getUnitPosition(id);
+	throw NO_MAP;
 }
 
 awe::HP awe::game::getUnitHP(const awe::UnitID id) const {

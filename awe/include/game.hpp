@@ -138,6 +138,23 @@ namespace awe {
 		 */
 		void endTurn();
 
+		/**
+		 * Replenish a unit.
+		 * @param  unit The ID of the unit to replenish.
+		 * @throws std::runtime_error if no map is currently loaded.
+		 */
+		void replenishUnit(const awe::UnitID unit);
+
+		/**
+		 * Creates a list of units that are adjacent to a given tile.
+		 * @param  position The location of the tile to query.
+		 * @return A script array containing the unit IDs of any adjacent units.
+		 * @throws std::runtime_error if no map is currently loaded, if no
+		 *                            \c scripts object was given, or if the array
+		 *                            couldn't be created.
+		 */
+		CScriptArray* getAdjacentUnits(const sf::Vector2u& position);
+
 		////////////////////////
 		// NOT UNIQUE TO GAME //
 		////////////////////////
@@ -269,6 +286,12 @@ namespace awe {
 		 * @sa     @c awe::map::getArmyOfUnit().
 		 */
 		awe::ArmyID getArmyOfUnit(const awe::UnitID id) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getUnitPosition().
+		 */
+		sf::Vector2u getUnitPosition(const awe::UnitID id) const;
 
 		/**
 		 * @throws std::runtime_error if no map is currently loaded.
