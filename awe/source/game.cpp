@@ -64,26 +64,29 @@ bool awe::game::load(const std::string& file,
 		// If we have any game options, apply them.
 		if (options) {
 			// Assign current and tag COs.
-			std::vector<std::shared_ptr<const awe::commander>> currentCOs, tagCOs;
-			if (options->currentCOs) {
-				for (asUINT i = 0; i < options->currentCOs->GetSize(); ++i) {
-					int commanderID = *(int*)options->currentCOs->At(i);
-					currentCOs.push_back((commanderID >= 0 ? commanders->operator[]
-						((awe::BankID)commanderID) : nullptr));
+			auto IDs = _map->getArmyIDs();
+			for (auto& ID : IDs) {
+				try {
+					// Don't forget, weird behaviour will occur if nullptr is given
+					// here. It will move the old tag CO to the current CO.
+					_map->setArmyCurrentCO(ID,
+						options->getCurrentCO(ID, commanders));
+				} catch (const std::range_error& e) {
+					std::string msg(e.what());
+					if (!msg.empty()) {
+						_logger.error("Couldn't override current CO for army {}: "
+							"{}", ID, msg);
+					}
 				}
-			}
-			if (options->tagCOs) {
-				for (asUINT i = 0; i < options->tagCOs->GetSize(); ++i) {
-					int commanderID = *(int*)options->tagCOs->At(i);
-					tagCOs.push_back((commanderID >= 0 ? commanders->operator[]
-					((awe::BankID)commanderID) : nullptr));
+				try {
+					_map->setArmyTagCO(ID, options->getTagCO(ID, commanders));
+				} catch (const std::range_error& e) {
+					std::string msg(e.what());
+					if (!msg.empty()) {
+						_logger.error("Couldn't override tag CO for army {}: {}",
+							ID, msg);
+					}
 				}
-			}
-			const std::size_t cSize = currentCOs.size(), tSize = tagCOs.size();
-			const std::size_t largest = std::max(cSize, tSize);
-			for (std::size_t i = 0; i < largest; ++i) {
-				_map->setArmyCOs(i, (i < cSize ? currentCOs[i] : nullptr),
-					(i < tSize ? tagCOs[i] : nullptr));
 			}
 		}
 		return r;

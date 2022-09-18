@@ -182,6 +182,12 @@ std::size_t awe::map::getArmyCount() const noexcept {
 	return _armys.size();
 }
 
+std::set<awe::ArmyID> awe::map::getArmyIDs() const noexcept {
+	std::set<awe::ArmyID> ret;
+	for (auto& a : _armys) ret.insert(a.first);
+	return ret;
+}
+
 void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds)
 	noexcept {
 	if (_isArmyPresent(army)) {
@@ -226,6 +232,16 @@ void awe::map::setArmyCOs(const awe::ArmyID army,
 		_logger.error("setCOs operation failed: army with ID {} didn't exist at "
 			"the time of calling!", army);
 	}
+}
+
+void awe::map::setArmyCurrentCO(const awe::ArmyID army,
+	const std::shared_ptr<const awe::commander>& current) noexcept {
+	setArmyCOs(army, current, getArmyTagCO(army));
+}
+
+void awe::map::setArmyTagCO(const awe::ArmyID army,
+	const std::shared_ptr<const awe::commander>& tag) noexcept {
+	setArmyCOs(army, getArmyCurrentCO(army), tag);
 }
 
 void awe::map::tagArmyCOs(const awe::ArmyID army) noexcept {

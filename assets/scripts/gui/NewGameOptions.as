@@ -108,13 +108,37 @@ void NewGameOptions_Play_MouseReleased() {
 	fs.copyFile("islandx.cwm", "islandxcopy.cwm");
 	// Setup the game options, then load the map.
 	GameOptions opts;
-	opts.currentCOs.insertLast(getSelectedItem("COs.OSCurrentList"));
-	opts.currentCOs.insertLast(getSelectedItem("COs.BMCurrentList"));
-	opts.currentCOs.insertLast(getSelectedItem("COs.GECurrentList"));
-	opts.currentCOs.insertLast(getSelectedItem("COs.YCCurrentList"));
-	opts.tagCOs.insertLast(getSelectedItem("COs.OSTagList"));
-	opts.tagCOs.insertLast(getSelectedItem("COs.BMTagList"));
-	opts.tagCOs.insertLast(getSelectedItem("COs.GETagList"));
-	opts.tagCOs.insertLast(getSelectedItem("COs.YCTagList"));
+	auto osCurrent = getSelectedItem("COs.OSCurrentList");
+	auto bmCurrent = getSelectedItem("COs.BMCurrentList");
+	auto geCurrent = getSelectedItem("COs.GECurrentList");
+	auto ycCurrent = getSelectedItem("COs.YCCurrentList");
+	auto osTag = getSelectedItem("COs.OSTagList");
+	auto bmTag = getSelectedItem("COs.BMTagList");
+	auto geTag = getSelectedItem("COs.GETagList");
+	auto ycTag = getSelectedItem("COs.YCTagList");
+	if (osCurrent >= 0) opts.setCurrentCO(0, osCurrent);
+	if (bmCurrent >= 0) opts.setCurrentCO(1, bmCurrent);
+	if (geCurrent >= 0) opts.setCurrentCO(2, geCurrent);
+	if (ycCurrent >= 0) opts.setCurrentCO(3, ycCurrent);
+	if (osTag >= 0) {
+		opts.setTagCO(0, osTag);
+	} else {
+		opts.setNoTagCO(0, true);
+	}
+	if (bmTag >= 0) {
+		opts.setTagCO(1, bmTag);
+	} else {
+		opts.setNoTagCO(1, true);
+	}
+	if (geTag >= 0) {
+		opts.setTagCO(2, geTag);
+	} else {
+		opts.setNoTagCO(2, true);
+	}
+	if (ycTag >= 0) {
+		opts.setTagCO(3, ycTag);
+	} else {
+		opts.setNoTagCO(3, true);
+	}
 	loadMap("map/islandxcopy.cwm", "Map", opts);
 }

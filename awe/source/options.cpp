@@ -22,51 +22,107 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "options.hpp"
 
-std::shared_ptr<engine::scripts> awe::game_options::_scripts = nullptr;
-
 void awe::game_options::registerGameOptionsType(asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document,
-	const std::shared_ptr<engine::scripts>& scripts) noexcept {
-	awe::game_options::_scripts = scripts;
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::RegisterGameTypedefs(engine, document);
+
 	auto r = engine->RegisterObjectType("GameOptions", 0, asOBJ_REF);
 	document->DocumentObjectType(r, "Holds options that the game engine will "
 		"require when it creates a new game on a map.");
 	r = engine->RegisterObjectBehaviour("GameOptions", asBEHAVE_FACTORY,
-		"GameOptions@ f()", asFUNCTION(awe::game_options::factory), asCALL_CDECL);
+		"GameOptions@ f()", asFUNCTION(awe::game_options::Create), asCALL_CDECL);
 	r = engine->RegisterObjectBehaviour("GameOptions", asBEHAVE_ADDREF,
-		"void f()", asMETHOD(awe::game_options, addRef), asCALL_THISCALL);
+		"void f()", asMETHOD(awe::game_options, AddRef), asCALL_THISCALL);
 	r = engine->RegisterObjectBehaviour("GameOptions", asBEHAVE_RELEASE,
-		"void f()", asMETHOD(awe::game_options, releaseRef), asCALL_THISCALL);
-	r = engine->RegisterObjectProperty("GameOptions", "array<int>@ currentCOs",
-		asOFFSET(awe::game_options, currentCOs));
-	r = engine->RegisterObjectProperty("GameOptions", "array<int>@ tagCOs",
-		asOFFSET(awe::game_options, tagCOs));
+		"void f()", asMETHOD(awe::game_options, Release), asCALL_THISCALL);
+	r = engine->RegisterObjectMethod("GameOptions",
+		"void setCurrentCO(const ArmyID, const BankID)",
+		asMETHOD(awe::game_options, setCurrentCO), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Sets an override for an army's current "
+		"CO.");
+	r = engine->RegisterObjectMethod("GameOptions",
+		"void setTagCO(const ArmyID, const BankID)",
+		asMETHOD(awe::game_options, setTagCO), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Sets an override for an army's tag CO.");
+	r = engine->RegisterObjectMethod("GameOptions",
+		"void setNoTagCO(const ArmyID, const bool)",
+		asMETHOD(awe::game_options, setNoTagCO), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Sets whether or not an army's tag CO "
+		"should be overridden with a lack of a CO.");
 }
-
-awe::game_options* awe::game_options::factory() noexcept {
+awe::game_options* awe::game_options::Create() noexcept {
 	// The reference counter is set to 1 for all new game_options objects.
 	auto obj = new awe::game_options();
-	if (_scripts) {
-		obj->currentCOs = _scripts->createArray("int");
-		obj->tagCOs = _scripts->createArray("int");
-	}
 	return obj;
 }
-
-void awe::game_options::addRef() noexcept {
+void awe::game_options::AddRef() const noexcept {
 	++_refCount;
 }
-
-void awe::game_options::releaseRef() noexcept {
+void awe::game_options::Release() const noexcept {
 	if (--_refCount == 0) {
-		if (currentCOs) {
-			currentCOs->Release();
-			currentCOs = nullptr;
-		}
-		if (tagCOs) {
-			tagCOs->Release();
-			tagCOs = nullptr;
-		}
 		delete this;
 	}
+}
+
+void awe::game_options::setCurrentCO(const awe::ArmyID armyID,
+	const awe::BankID bankID) noexcept {
+	CommanderPair currentPair = _commanderOverrides[armyID];
+	currentPair.first = bankID;
+	_commanderOverrides[armyID] = currentPair;
+}
+
+void awe::game_options::setTagCO(const awe::ArmyID armyID,
+	const awe::BankID bankID) noexcept {
+	CommanderPair currentPair = _commanderOverrides[armyID];
+	currentPair.second = bankID;
+	_commanderOverrides[armyID] = currentPair;
+}
+
+void awe::game_options::setNoTagCO(const awe::ArmyID armyID, const bool tag)
+	noexcept {
+	_noTags[armyID] = tag;
+}
+
+std::shared_ptr<const awe::commander> awe::game_options::getCurrentCO(
+	const awe::ArmyID armyID,
+	const std::shared_ptr<awe::bank<awe::commander>>& coBank) const {
+	if (coBank) {
+		if (_commanderOverrides.find(armyID) != _commanderOverrides.end()) {
+			auto coID = _commanderOverrides.at(armyID).first;
+			if (coID) {
+				if (*coID < coBank->size()) {
+					return coBank->operator[](*coID);
+				} else {
+					throw std::range_error("commander index " +
+						std::to_string(*coID) + " is out of range!");
+				}
+			}
+		}
+		// No override configured, so not an actual error.
+		throw std::range_error("");
+	}
+	throw std::range_error("no commander bank given!");
+}
+
+std::shared_ptr<const awe::commander> awe::game_options::getTagCO(
+	const awe::ArmyID armyID,
+	const std::shared_ptr<awe::bank<awe::commander>>& coBank) const {
+	if (_noTags.find(armyID) != _noTags.end() && _noTags.at(armyID))
+		return nullptr;
+	if (coBank) {
+		if (_commanderOverrides.find(armyID) != _commanderOverrides.end()) {
+			auto coID = _commanderOverrides.at(armyID).second;
+			if (coID) {
+				if (*coID < coBank->size()) {
+					return coBank->operator[](*coID);
+				} else {
+					throw std::range_error("commander index " +
+						std::to_string(*coID) + " is out of range!");
+				}
+			}
+		}
+		// No override configured, so not an actual error.
+		throw std::range_error("");
+	}
+	throw std::range_error("no commander bank given!");
 }

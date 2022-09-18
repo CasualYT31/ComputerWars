@@ -200,6 +200,12 @@ namespace awe {
 		std::size_t getArmyCount() const noexcept;
 
 		/**
+		 * Creates a set of each army's \c ArmyID, in their turn order.
+		 * @return The set.
+		 */
+		std::set<awe::ArmyID> getArmyIDs() const noexcept;
+
+		/**
 		 * Sets the amount of funds a specified army obtains.
 		 * If \c 0 or less is given, \c 0 will be stored.
 		 * @param army  The ID of the army to amend.
@@ -239,6 +245,24 @@ namespace awe {
 		void setArmyCOs(const awe::ArmyID army,
 			const std::shared_ptr<const awe::commander>& current,
 			const std::shared_ptr<const awe::commander>& tag = nullptr) noexcept;
+
+		/**
+		 * Sets the current CO of a specified army.
+		 * @param army    The ID of the army to set the CO of.
+		 * @param current The primary CO of the specified army.
+		 * @sa    @c setArmyCOs()
+		 */
+		void setArmyCurrentCO(const awe::ArmyID army,
+			const std::shared_ptr<const awe::commander>& current) noexcept;
+
+		/**
+		 * Sets the tag CO of a specified army.
+		 * @param army The ID of the army to set the CO of.
+		 * @param tag  The tag CO of the specified army.
+		 * @sa    @c setArmyCOs()
+		 */
+		void setArmyTagCO(const awe::ArmyID army,
+			const std::shared_ptr<const awe::commander>& tag) noexcept;
 
 		/**
 		 * Performs a tag on a given army.

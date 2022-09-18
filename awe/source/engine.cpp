@@ -219,7 +219,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"elapsed.");
 
 	// GameOptions class.
-	awe::game_options::registerGameOptionsType(engine, document, _scripts);
+	awe::game_options::registerGameOptionsType(engine, document);
 
 	// GameInterface.
 	awe::RegisterGameTypedefs(engine, document);
@@ -745,7 +745,7 @@ void awe::game_engine::_script_loadMap(const std::string& file,
 	_menuBeforeMapLoad = _gui->getGUI();
 	_gui->setGUI(menu);
 	// Release our game options reference.
-	if (options) options->releaseRef();
+	if (options) options->Release();
 }
 
 void awe::game_engine::_script_saveMap() {
