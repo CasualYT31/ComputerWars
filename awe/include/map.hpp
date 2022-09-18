@@ -331,6 +331,19 @@ namespace awe {
 		std::unordered_set<awe::UnitID> getUnitsOfArmy(const awe::ArmyID army)
 			const noexcept;
 
+		/**
+		 * Retrieves a list of units that belong to a given army, ordered by
+		 * priority.
+		 * For each of an army's units, their turn start priority will be queried.
+		 * They will then be categorised into the resulting map based on this
+		 * priority.\n
+		 * If the specified army doesn't exist, an empty map will be returned.
+		 * @param  army The ID of the army to retrieve the units of.
+		 * @return Unit IDs, categorised by their turn start priority.
+		 */
+		std::map<unsigned int, std::unordered_set<awe::UnitID>>
+			getUnitsOfArmyByPriority(const awe::ArmyID army) const noexcept;
+
 		/////////////////////
 		// UNIT OPERATIONS //
 		/////////////////////

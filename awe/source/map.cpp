@@ -306,6 +306,20 @@ std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(const awe::ArmyID army)
 	return std::unordered_set<awe::UnitID>();
 }
 
+std::map<unsigned int, std::unordered_set<awe::UnitID>>
+	awe::map::getUnitsOfArmyByPriority(const awe::ArmyID army) const noexcept {
+	if (!_isArmyPresent(army)) {
+		_logger.error("getUnitsOfArmyByPriority operation failed: army with ID {} "
+			"didn't exist at the time of calling!", army);
+		return {};
+	}
+	std::map<unsigned int, std::unordered_set<awe::UnitID>> ret;
+	auto units = getUnitsOfArmy(army);
+	for (auto& unit : units)
+		ret[_units.at(unit).getType()->getTurnStartPriority()].insert(unit);
+	return ret;
+}
+
 awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& type,
 	const awe::ArmyID army) noexcept {
 	if (!type) _logger.warning("createUnit warning: creating a unit for army {} "
@@ -325,6 +339,7 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 		return 0;
 	}
 	_units.insert({ id, awe::unit(type, army, _sheet_unit, _sheet_icon) });
+	_armys.at(army).addUnit(id);
 	return id;
 }
 

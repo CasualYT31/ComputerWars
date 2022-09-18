@@ -156,6 +156,20 @@ void awe::game::endTurn() {
 			_map->setDay(_map->getDay() + 1);
 		}
 		_map->selectArmy(next);
+		// Begin next army's turn.
+		if (_scripts->functionDeclExists(
+			"void BeginTurnForUnit(const UnitID, const Unit&in)")) {
+			auto units = _map->getUnitsOfArmyByPriority(next);
+			// Loop through backwards: see documentation on unit_type::unit_type().
+			for (auto itr = units.rbegin(), enditr = units.rend(); itr != enditr;
+				++itr) {
+				for (auto& unit : itr->second) {
+					auto type = _map->getUnitType(unit);
+					_scripts->callFunction("BeginTurnForUnit", unit,
+						const_cast<awe::unit_type*>(type.get()));
+				}
+			}
+		}
 	} else {
 		throw NO_MAP;
 	}
