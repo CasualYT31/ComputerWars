@@ -745,7 +745,7 @@ void awe::game_engine::_script_loadMap(const std::string& file,
 	_menuBeforeMapLoad = _gui->getGUI();
 	_gui->setGUI(menu);
 	// Release our game options reference.
-	options->releaseRef();
+	if (options) options->releaseRef();
 }
 
 void awe::game_engine::_script_saveMap() {
