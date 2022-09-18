@@ -27,7 +27,7 @@ in the future as I create new iterations of the format.
 All Computer Wars Map files will have the extension `.cwm`. There is a
 possibility that I could have `.#cwm` extensions to refer to specific
 versions, but the header carries out this job anyway so... eh. I'll leave
-it here as an idea I might come back to later if I don't forget about it.
+it here as an idea I might come back to later.
 
 ## Header
 
@@ -89,3 +89,11 @@ first version, with the following additions:
    in that order. Both are `awe::BankID` fields, storing the IDs of the CO
    types. If there is no tag CO, the `awe::army::NO_ARMY` value should be
    stored in that field. This should *not* be the case for the current CO.
+
+## 2CWM
+
+Here are the changes for the next iteration of the alpha release version of
+the map format:
+
+ - In between the `Army` loop and the `Tile` loop, there is a new `ArmyID` field,
+   which stores the army whose turn it was when the map was saved.

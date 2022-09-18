@@ -86,7 +86,6 @@ bool awe::game::load(const std::string& file,
 					(i < tSize ? tagCOs[i] : nullptr));
 			}
 		}
-		_map->selectArmy(0);
 		return r;
 	}
 	return false;
