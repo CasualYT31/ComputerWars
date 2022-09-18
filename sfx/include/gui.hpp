@@ -317,6 +317,35 @@ namespace sfx {
 		};
 
 		/**
+		 * Class used to automatically handle reference counting of \c CScriptAny
+		 * objects.
+		 */
+		class CScriptAnyWrapper {
+		public:
+			/**
+			 * Initialises the wrapper object with an existing \c CScriptAny
+			 * object.
+			 */
+			CScriptAnyWrapper(CScriptAny* const obj) noexcept;
+
+			/**
+			 * Releases the reference to the stored \c CScriptAny object.
+			 */
+			~CScriptAnyWrapper() noexcept;
+
+			/**
+			 * Allows direct access to the stored \c CScriptAny object.
+			 * @return Pointer to the \c CScriptAny object.
+			 */
+			CScriptAny* operator->() const noexcept;
+		private:
+			/**
+			 * The \c CScriptAny object.
+			 */
+			CScriptAny* _any = nullptr;
+		};
+
+		/**
 		 * Performs animation calculations on a container of widgets.
 		 * @param target    The target which the GUI will be drawn to later.
 		 * @param scaling   Scaling factor which will be applied when drawing.

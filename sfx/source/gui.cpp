@@ -29,6 +29,10 @@ using namespace tgui;
 float NO_SPACE = -0.001f;
 sf::Color NO_COLOUR(0, 0, 0, 0);
 
+////////////////////
+// GUI_BACKGROUND //
+////////////////////
+
 sfx::gui::gui_background::gui_background() noexcept {}
 
 sfx::gui::gui_background::gui_background(
@@ -90,6 +94,27 @@ void sfx::gui::gui_background::draw(sf::RenderTarget& target,
 		break;
 	}
 }
+
+///////////////////////
+// CSCRIPTANYWRAPPER //
+///////////////////////
+
+sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(CScriptAny* const obj) noexcept :
+	_any(obj) {
+	if (_any) _any->AddRef();
+}
+
+sfx::gui::CScriptAnyWrapper::~CScriptAnyWrapper() noexcept {
+	if (_any) _any->Release();
+}
+
+CScriptAny* sfx::gui::CScriptAnyWrapper::operator->() const noexcept {
+	return _any;
+}
+
+/////////
+// GUI //
+/////////
 
 sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
 	const std::string& name) noexcept : _scripts(scripts), _logger(name) {
