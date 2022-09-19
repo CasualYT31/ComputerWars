@@ -44,7 +44,7 @@ void MapHandleInput(const dictionary controls) {
 			ArmyID currentArmy = game.getCurrentArmy();
 			string type = game.getTerrainOfTile(cursor).scriptName;
 			if (owner == currentArmy) {
-				if (type == "BASE") {
+				if (type == "BASE" || type == "AIRPORT" || type == "PORT") {
 					setGUI("BaseMenu");
 					return;
 				}

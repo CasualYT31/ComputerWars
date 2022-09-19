@@ -1,41 +1,66 @@
-/**
- * The height of each unit button.
- */
-const uint HEIGHT = 30;
+const array<string> GROUND_UNITS = {
+	"TREAD",
+	"TIRES",
+	"INFANTRY",
+	"MECH",
+	"PIPELINE"
+};
 
-void BaseMenuSetUp() {
-	addWidget("ScrollablePanel", "panel");
-	setWidgetSize("panel", "60%", "60%");
-	setWidgetOrigin("panel", 0.5, 0.5);
-	setWidgetPosition("panel", "50%", "50%");
-	setHorizontalScrollbarPolicy("panel", ScrollbarPolicy::Never);
+const array<string> AIR_UNITS = {
+	"AIR"
+};
+
+const array<string> SEA_UNITS = {
+	"SHIPS",
+	"TRANSPORT"
+};
+
+void PanelSetUp(const string&in panelName, const array<string>@ movementTypeNames,
+	const uint columnCount) {
+	const uint HEIGHT = 30;
+	addWidget("ScrollablePanel", panelName);
+	setWidgetVisibility(panelName, false);
+	setWidgetSize(panelName, "60%", "60%");
+	setWidgetOrigin(panelName, 0.5, 0.5);
+	setWidgetPosition(panelName, "50%", "50%");
+	setHorizontalScrollbarPolicy(panelName, ScrollbarPolicy::Never);
 	const uint unitTypeCount = unit.length();
+	uint firstUnitTypeID = 0;
+	bool firstIDSet = false;
 	for (uint i = 0; i < unitTypeCount; ++i) {
 		const Unit type = unit[i];
-		string movementType = type.movementType.scriptName;
-		if (movementType == "TREAD" || movementType == "TIRES" ||
-			movementType == "INFANTRY" || movementType == "MECH" ||
-			movementType == "PIPELINE") {
-			string widget = "panel." + type.scriptName;
+		if (movementTypeNames.find(type.movementType.scriptName) >= 0) {
+			if (!firstIDSet) {
+				firstIDSet = true;
+				firstUnitTypeID = i;
+			}
+			string widget = panelName + "." + type.scriptName;
 			addWidget("BitmapButton", widget, "BaseMenuHandleSignal");
 			setWidgetTextSize(widget, 16);
-			setWidgetSize(widget, "50%", formatUInt(HEIGHT) + "px");
-			const string y =
-				formatUInt(uint(i / 2) * HEIGHT) + "px";
-			if ((i + 1) % 2 == 0) {
-				setWidgetOrigin(widget, 1.0, 0.0);
-				setWidgetPosition(widget, "100%", y);
-			} else {
-				setWidgetPosition(widget, "0%", y);
-			}
+			// Rounding errors that will need addressing in the future.
+			setWidgetSize(widget, formatFloat(100.0 / double(columnCount)) + "%",
+				formatUInt(HEIGHT) + "px");
+			const string x = formatFloat(100 / double(columnCount) *
+				((i - firstUnitTypeID) % columnCount)) + "%";
+			const string y = formatUInt(uint((i - firstUnitTypeID) / columnCount)
+				* HEIGHT) + "px";
+				setWidgetPosition(widget, x, y);
 			setWidgetText(widget, "~" + translate(type.name) + " (G. " +
 				formatUInt(type.cost) + ")");
 		}
 	}
+}
+
+void BaseMenuSetUp() {
+	PanelSetUp("ground", GROUND_UNITS, 2);
+	PanelSetUp("air", AIR_UNITS, 1);
+	PanelSetUp("sea", SEA_UNITS, 1);
 	
 	addWidget("Panel", "calc");
 	setWidgetOrigin("calc", 0.5, 1.0);
-	setWidgetPosition("calc", "50%", "BaseMenu.panel.top");
+	// They're all taking up the same size, so it shouldn't matter which panel
+	// we're passing the position on.
+	setWidgetPosition("calc", "50%", "BaseMenu.ground.top");
 	setWidgetSize("calc", "60%", "30px");
 	addWidget("Label", "calc.label");
 	setWidgetSize("calc.label", "100%", "100%");
@@ -47,19 +72,37 @@ void BaseMenuSetUp() {
 		VerticalAlignment::Top);
 }
 
-void BaseMenuOpen() {
+void PanelOpen(const string&in panelName, const array<string>@ movementTypeNames)
+	{
 	const BankID country = game.getArmyCountry(game.getCurrentArmy()).ID;
 	const uint unitTypeCount = unit.length();
 	for (uint i = 0; i < unitTypeCount; ++i) {
 		const Unit type = unit[i];
-		string movementType = type.movementType.scriptName;
-		if (movementType == "TREAD" || movementType == "TIRES" ||
-			movementType == "INFANTRY" || movementType == "MECH" ||
-			movementType == "PIPELINE") {
-			setWidgetSprite("panel." + type.scriptName, "unit",
+		if (movementTypeNames.find(type.movementType.scriptName) >= 0) {
+			setWidgetSprite(panelName + "." + type.scriptName, "unit",
 				type.unitSprite[country]);
 		}
 	}
+	setWidgetVisibility(panelName, true);
+}
+
+void BaseMenuOpen() {
+	setWidgetVisibility("ground", false);
+	setWidgetVisibility("air", false);
+	setWidgetVisibility("sea", false);
+	const string terrain =
+		game.getTerrainOfTile(game.getSelectedTile()).scriptName;
+	if (terrain == "BASE") {
+		PanelOpen("ground", GROUND_UNITS);
+	} else if (terrain == "AIRPORT") {
+		PanelOpen("air", AIR_UNITS);
+	} else if (terrain == "PORT") {
+		PanelOpen("sea", SEA_UNITS);
+	}
+}
+
+void BaseMenuClose() {
+	setWidgetText("calc.label", "~");
 }
 
 void BaseMenuHandleInput(const dictionary controls) {
