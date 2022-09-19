@@ -740,6 +740,9 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 	// Animate each widget.
 	auto& widgetList = container->getWidgets();
 	for (auto& widget : widgetList) {
+		// Ignore the widget if it is hidden.
+		if (!widget->isVisible()) continue;
+		// Animate widget if it is shown.
 		std::string widgetName = widget->getWidgetName().toStdString();
 		String type = widget->getWidgetType();
 		// If the widget deals with animated sprites then handle them.
