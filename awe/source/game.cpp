@@ -205,24 +205,14 @@ void awe::game::replenishUnit(const awe::UnitID unit) {
 	}
 }
 
-CScriptArray* awe::game::getAdjacentUnits(const sf::Vector2u& position) const {
+CScriptArray* awe::game::getAdjacentUnits(const sf::Vector2u& position,
+	const unsigned int startFrom, const unsigned int endAt) const {
 	if (_map) {
 		if (_scripts) {
 			CScriptArray* ret = _scripts->createArray("UnitID");
 			if (ret) {
-				std::unordered_set<sf::Vector2u> positions;
-				// Up.
-				if (position.y > 0)
-					positions.insert(sf::Vector2u(position.x, position.y - 1));
-				// Down.
-				if (position.y < _map->getMapSize().y - 1)
-					positions.insert(sf::Vector2u(position.x, position.y + 1));
-				// Left.
-				if (position.x > 0)
-					positions.insert(sf::Vector2u(position.x - 1, position.y));
-				// Right.
-				if (position.x < _map->getMapSize().x - 1)
-					positions.insert(sf::Vector2u(position.x + 1, position.y));
+				std::unordered_set<sf::Vector2u> positions =
+					_map->getAvailableTiles(position, startFrom, endAt, false);
 				for (auto& pos : positions) {
 					auto id = _map->getUnitOnTile(pos);
 					if (id) ret->InsertLast(&id);

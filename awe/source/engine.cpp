@@ -406,11 +406,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"ammo back up to max. If the unit has infinite fuel, that unit's fuel "
 		"won't be changed. Same for the ammo.");
 
-	r = engine->RegisterObjectMethod("GameInterface",
-		"array<UnitID>@ getAdjacentUnits(const Vector2&in) const",
+	r = engine->RegisterObjectMethod("GameInterface", "array<UnitID>@ "
+		"getAdjacentUnits(const Vector2&in, const uint, const uint) const",
 		asMETHOD(awe::game, getAdjacentUnits), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets a list of units that are adjacent to "
-		"a given tile.");
+		"a given tile. The first integer represents the number of tiles away from "
+		"the given tile to start at. The second integer stores the upper limit of "
+		"the range from the given tile to consider. For example, passing in 1 and "
+		"1 will simply get the directly adjacent units.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
 		"void burnFuel(const UnitID, const Fuel)",

@@ -35,6 +35,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace awe {
 	/**
+	 * Calculates the manhattan distance between two tiles.
+	 * @param  lhs The source tile.
+	 * @param  rhs The destination tile.
+	 * @return The distance, in tiles.
+	 */
+	unsigned int inline distance(const sf::Vector2u& lhs, const sf::Vector2u& rhs)
+		noexcept;
+
+	/**
 	 * Class which represents a map, and the armies and units that play on it.
 	 * Only basic checks are carried out in this class; all game logic is separate.
 	 * If any of these basic checks fail, they will be logged.
@@ -488,6 +497,13 @@ namespace awe {
 		std::unordered_set<awe::UnitID> getLoadedUnits(const awe::UnitID id) const
 			noexcept;
 
+		/**
+		 * Sets a unit to be in move mode.
+		 * @param id The ID of the unit to put into move mode. \c 0 to cancel move
+		 *           mode.
+		 */
+		void moveMode(const awe::UnitID id) noexcept;
+
 		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////
@@ -557,6 +573,28 @@ namespace awe {
 		 *         vacant or out of bounds.
 		 */
 		awe::UnitID getUnitOnTile(const sf::Vector2u pos) const noexcept;
+
+		/**
+		 * Calculates the tiles available from a specified tile.
+		 * @param  tile         The tile to calculate from.
+		 * @param  startFrom    The number of tiles away from the given tile to
+		 *                      start counting from. If \c 0 is given, it will be
+		 *                      increased to \c 1.
+		 * @param  endAt        All tiles within the given distance will be
+		 *                      considered for addage to the result.
+		 * @param  considerUnit If \c TRUE, the method will take into account the
+		 *                      unit that is on the tile, if the tile has one
+		 *                      (according to \c getUnitOnTile()). Its movement
+		 *                      type will be factored in, but the unit's movement
+		 *                      points or attack range will have to be provided
+		 *                      manually via the integer parameters.
+		 * @return The set of tiles that are within range. An empty set will be
+		 *         returned if the given tile was out of bounds (an error will be
+		 *         logged), or if \c startFrom was larger than \c endAt.
+		 */
+		std::unordered_set<sf::Vector2u> getAvailableTiles(
+			const sf::Vector2u tile, unsigned int startFrom,
+			const unsigned int endAt, const bool considerUnit) noexcept;
 
 		////////////////////////
 		// DRAWING OPERATIONS //
@@ -870,6 +908,21 @@ namespace awe {
 		 * Stores which day it currently is.
 		 */
 		awe::Day _day = 0;
+
+		///////////////
+		// MOVE MODE //
+		///////////////
+
+		/**
+		 * Holds the unit ID of the unit that is in move mode.
+		 * \c 0 represents that no unit is in move mode.
+		 */
+		awe::UnitID _movingUnit = 0;
+
+		/**
+		 * The list of tiles within range of the moving unit.
+		 */
+		std::unordered_set<sf::Vector2u> _availableTiles;
 
 		/////////////
 		// DRAWING //

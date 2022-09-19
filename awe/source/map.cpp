@@ -24,6 +24,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "fmtformatter.hpp"
 #include <cmath>
 
+unsigned int inline awe::distance(const sf::Vector2u& lhs, const sf::Vector2u& rhs)
+	noexcept {
+	return (unsigned int)(abs((int64_t)lhs.x - (int64_t)rhs.x) +
+		abs((int64_t)lhs.y - (int64_t)rhs.y));
+}
+
 awe::map::map(const std::string& name) noexcept : _logger(name) {}
 
 awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
@@ -552,6 +558,19 @@ std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(const awe::UnitID id)
 	return {};
 }
 
+///////////////
+// MOVE MODE //
+///////////////
+
+void awe::map::moveMode(const awe::UnitID id) noexcept {
+	_movingUnit = id;
+	// Clear the move mode state.
+}
+
+///////////////////
+// END MOVE MODE //
+///////////////////
+
 bool awe::map::setTileType(const sf::Vector2u pos,
 	const std::shared_ptr<const awe::tile_type>& type) noexcept {
 	if (!type) _logger.warning("setTileType warning: assigning the tile at "
@@ -638,6 +657,61 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u pos) const noexcept {
 	auto u = _tiles[pos.x][pos.y].getUnit();
 	if (u != 0 && _units.at(u).isOnMap()) return u;
 	return 0;
+}
+
+std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(
+	const sf::Vector2u tile, unsigned int startFrom,
+	const unsigned int endAt, const bool considerUnit) noexcept {
+	// Checking.
+	const sf::Vector2u mapSize = getMapSize();
+	if (_isOutOfBounds(tile)) {
+		_logger.error("getAvailableTiles operation failed: tile at position {} is "
+			"out of bounds with the map's size of {}!", tile, mapSize);
+		return {};
+	}
+	if (startFrom == 0) startFrom = 1;
+	if (startFrom > endAt) return {};
+	std::shared_ptr<const awe::movement_type> moveType = nullptr;
+	if (considerUnit) {
+		const awe::UnitID unit = getUnitOnTile(tile);
+		if (unit > 0) moveType = _units.at(unit).getType()->getMovementType();
+	}
+
+	std::unordered_set<sf::Vector2u> tiles;
+	// Get highest tile in range and add it to the list for consideration.
+	unsigned int widthOfLine = 1;
+	sf::Vector2<int64_t> highest = {tile.x, tile.y - endAt};
+	if (highest.y < 0) {
+		widthOfLine += (unsigned int)(2 * abs(highest.y) + 1);
+		highest.y = 0;
+	}
+	tiles.insert({ (unsigned int)highest.x, (unsigned int)highest.y });
+	// Now go down the map and add tiles as appropriate, until we either hit the
+	// bottom of the map or the end of the given range.
+	while (true) {
+		++highest.y;
+		if (highest.y > tile.y + endAt || highest.y >= mapSize.y) break;
+		if (highest.y <= tile.y)
+			widthOfLine += 2;
+		else
+			widthOfLine -= 2;
+		int leftMostX = (int)tile.x - (int)(widthOfLine / 2),
+			rightMostX = (int)tile.x + (int)(widthOfLine / 2);
+		for (int64_t x = (leftMostX < 0 ? 0 : leftMostX);
+			x <= rightMostX && x < mapSize.x; ++x) {
+			sf::Vector2u newTile = { (unsigned int)x, (unsigned int)highest.y };
+			if (distance(newTile, tile) >= startFrom) tiles.insert(newTile);
+		}
+	}
+
+	// Now go over the tiles and factor in the unit's movement type, if configured
+	// to do so.
+	if (moveType) {
+		// We'll have to use pathfinding here.
+	}
+
+	// All the tiles!
+	return tiles;
 }
 
 void awe::map::setSelectedTile(const sf::Vector2u pos) noexcept {

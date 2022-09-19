@@ -147,13 +147,18 @@ namespace awe {
 
 		/**
 		 * Creates a list of units that are adjacent to a given tile.
-		 * @param  position The location of the tile to query.
+		 * @param  position  The location of the tile to query.
+		 * @param  startFrom The number of tiles away from the given tile to start
+		 *                   from.
+		 * @param  endAt     The number of tiles to stay within.
 		 * @return A script array containing the unit IDs of any adjacent units.
 		 * @throws std::runtime_error if no map is currently loaded, if no
 		 *                            \c scripts object was given, or if the array
 		 *                            couldn't be created.
+		 * @sa     @c awe::map::getAvailableTiles().
 		 */
-		CScriptArray* getAdjacentUnits(const sf::Vector2u& position) const;
+		CScriptArray* getAdjacentUnits(const sf::Vector2u& position,
+			const unsigned int startFrom, const unsigned int endAt) const;
 
 		/**
 		 * Burns fuel from a unit.

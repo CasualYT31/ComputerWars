@@ -3,7 +3,7 @@ void BeginTurnForUnit(const UnitID unit, const Unit&in type,
 	string typeName = type.scriptName;
 
 	if (typeName == "APC") {
-		array<UnitID> units = game.getAdjacentUnits(position);
+		array<UnitID> units = game.getAdjacentUnits(position, 1, 1);
 		auto apcArmy = game.getArmyOfUnit(unit);
 		for (uint i = 0; i < units.length(); ++i) {
 			if (apcArmy == game.getArmyOfUnit(units[i]))
