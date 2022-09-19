@@ -22,6 +22,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+inline awe::HP awe::unit_type::getDisplayedHP(const awe::HP hp) noexcept {
+	return (awe::HP)ceil((double)hp / (double)awe::unit_type::HP_GRANULARITY);
+}
+inline awe::HP awe::unit_type::getInternalHP(const awe::HP hp) noexcept {
+	return hp * awe::unit_type::HP_GRANULARITY;
+}
+
 template<typename T>
 awe::bank<T>::bank(const std::shared_ptr<engine::scripts>& scripts,
 	const std::string& name, const std::string& logName) noexcept :
@@ -300,6 +307,11 @@ void awe::unit_type::registerInterface(const std::string& type,
 		"int get_maxAmmo() const property",
 		asMETHOD(T, getMaxAmmo), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit's maximum ammo.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint get_maxHP() const property",
+		asMETHOD(T, getMaxHP), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets this unit's maximum HP in internal "
+		"format.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"uint get_movementPoints() const property",
 		asMETHOD(T, getMovementPoints), asCALL_THISCALL);

@@ -89,11 +89,6 @@ std::string AWEVector2TypeToString(void* memory) {
 	return "";
 }
 
-awe::HP getDisplayedHP(const awe::HP hp) noexcept {
-	auto ret = (awe::HP)ceil((double)hp / (double)awe::unit_type::HP_GRANULARITY);
-	return ret;
-}
-
 // Wrapper for Vector2u and Vector2i operator==s.
 
 bool iEqI(void* pLhs, const sf::Vector2i& rhs) noexcept {
@@ -400,6 +395,13 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Ends the current army's turn.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
+		"HP healUnit(const UnitID, HP)",
+		asMETHOD(awe::game, healUnit), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Adds HP to a given unit. Ensures that the "
+		"unit's HP does not go over its max. The given HP can't be at or below 0. "
+		"The given HP should be an internal HP value.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
 		"void replenishUnit(const UnitID)",
 		asMETHOD(awe::game, replenishUnit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Replenishes a given unit. Sets its fuel "
@@ -642,9 +644,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"region's size, in pixels.");
 
 	r = engine->RegisterGlobalFunction("HP getDisplayedHP(const HP)",
-		asFUNCTION(getDisplayedHP), asCALL_CDECL);
+		asFUNCTION(awe::unit_type::getDisplayedHP), asCALL_CDECL);
 	document->DocumentGlobalFunction(r, "Receives an internal unit HP value and "
 		"returns the unit HP value that is displayed to the user.");
+
+	r = engine->RegisterGlobalFunction("HP getInternalHP(const HP)",
+		asFUNCTION(awe::unit_type::getInternalHP), asCALL_CDECL);
+	document->DocumentGlobalFunction(r, "Receives a user-friendly unit HP value "
+		"and returns the equivalent internal HP value.");
 
 	r = engine->RegisterGlobalFunction("string translate(const string&in)",
 		asMETHOD(awe::game_engine, _script_translate),

@@ -139,6 +139,19 @@ namespace awe {
 		void endTurn();
 
 		/**
+		 * Adds HP to a unit.
+		 * Ensures that a unit's HP does not exceed its maximum.
+		 * @param  unit The ID of the unit to heal.
+		 * @param  hp   The internal HP amount to heal by.
+		 * @return The <b>user-friendly</b> (i.e. not internal) HP that was
+		 *         actually healed.
+		 * @throws std::runtime_error if no map is currently loaded, if the given
+		 *                            unit ID was invalid, or if the given HP value
+		 *                            was at or below \c 0.
+		 */
+		awe::HP healUnit(const awe::UnitID unit, awe::HP hp);
+
+		/**
 		 * Replenish a unit.
 		 * @param  unit The ID of the unit to replenish.
 		 * @throws std::runtime_error if no map is currently loaded.

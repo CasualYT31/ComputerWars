@@ -200,6 +200,30 @@ void awe::game::endTurn() {
 	}
 }
 
+awe::HP awe::game::healUnit(const awe::UnitID unit, awe::HP hp) {
+	if (_map) {
+		if (hp <= 0) {
+			throw std::runtime_error("HP value can't be below 0 for healUnit() "
+				"operation");
+		}
+		auto type = _map->getUnitType(unit);
+		if (type) {
+			const unsigned int maxHP = _map->getUnitType(unit)->getMaxHP();
+			awe::HP newHP = _map->getUnitHP(unit) + hp;
+			if ((unsigned int)newHP > maxHP) {
+				hp -= newHP - maxHP;
+				newHP = (awe::HP)maxHP;
+			}
+			_map->setUnitHP(unit, newHP);
+			return awe::unit_type::getDisplayedHP(hp);
+		} else {
+			throw INVALID_UNIT_ID;
+		}
+	} else {
+		throw NO_MAP;
+	}
+}
+
 void awe::game::replenishUnit(const awe::UnitID unit) {
 	if (_map) {
 		auto type = _map->getUnitType(unit);

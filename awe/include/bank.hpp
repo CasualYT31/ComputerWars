@@ -887,6 +887,20 @@ namespace awe {
 		static const unsigned int HP_GRANULARITY;
 
 		/**
+		 * Converts an internal HP value into a user-friendly one.
+		 * @param  hp The internal HP.
+		 * @return The user-friendly HP.
+		 */
+		static awe::HP getDisplayedHP(const awe::HP hp) noexcept;
+
+		/**
+		 * Converts a user-friendly HP value into an internal one.
+		 * @param  hp The user-friendly HP.
+		 * @return The internal HP.
+		 */
+		static awe::HP getInternalHP(const awe::HP hp) noexcept;
+
+		/**
 		 * Constructor which scans a JSON object for the unit type's properties.
 		 * It also passes on the JSON object to the \c common_properties
 		 * constructor. In addition to the keys defined in the superclass, the
