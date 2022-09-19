@@ -212,7 +212,7 @@ CScriptArray* awe::game::getAdjacentUnits(const sf::Vector2u& position,
 			CScriptArray* ret = _scripts->createArray("UnitID");
 			if (ret) {
 				std::unordered_set<sf::Vector2u> positions =
-					_map->getAvailableTiles(position, startFrom, endAt, false);
+					_map->getAvailableTiles(position, startFrom, endAt);
 				for (auto& pos : positions) {
 					auto id = _map->getUnitOnTile(pos);
 					if (id) ret->InsertLast(&id);
