@@ -17,7 +17,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"MECH": {
 		"longname": "MECH_longname",
@@ -37,7 +37,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"RECON": {
 		"longname": "RECON_longname",
@@ -57,7 +57,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"TANK": {
 		"longname": "TANK_longname",
@@ -77,7 +77,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"MDTANK": {
 		"longname": "MDTANK_longname",
@@ -97,7 +97,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"NEOTANK": {
 		"longname": "NEOTANK_longname",
@@ -117,7 +117,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"MEGATANK": {
 		"longname": "MEGATANK_longname",
@@ -137,7 +137,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"APC": {
 		"longname": "APC_longname",
@@ -157,7 +157,7 @@
 		"highrange": 1,
 		"canload": [ 0, 1 ],
 		"loadlimit": 1,
-		"turnstartpriority": 1000
+		"turnstartpriority": 500
 	},
 	"ANTIAIR": {
 		"longname": "ANTIAIR_longname",
@@ -177,7 +177,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"ARTILLERY": {
 		"longname": "ARTILLERY_longname",
@@ -197,7 +197,7 @@
 		"highrange": 3,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"ROCKETS": {
 		"longname": "ROCKETS_longname",
@@ -217,7 +217,7 @@
 		"highrange": 5,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"MISSILES": {
 		"longname": "MISSILES_longname",
@@ -237,7 +237,7 @@
 		"highrange": 5,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"PIPERUNNER": {
 		"longname": "PIPERUNNER_longname",
@@ -257,7 +257,7 @@
 		"highrange": 5,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	},
 	"TCOPTER": {
 		"longname": "TCOPTER_longname",
@@ -277,7 +277,7 @@
 		"highrange": 0,
 		"canload": [ 0, 1 ],
 		"loadlimit": 1,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"BCOPTER": {
 		"longname": "BCOPTER_longname",
@@ -297,7 +297,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"FIGHTER": {
 		"longname": "FIGHTER_longname",
@@ -317,7 +317,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"BOMBER": {
 		"longname": "BOMBER_longname",
@@ -337,7 +337,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"STEALTH": {
 		"longname": "STEALTH_longname",
@@ -357,7 +357,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"BLACKBOMB": {
 		"longname": "BLACKBOMB_longname",
@@ -377,7 +377,7 @@
 		"highrange": 3,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"BLACKBOAT": {
 		"longname": "BLACKBOAT_longname",
@@ -397,7 +397,7 @@
 		"highrange": 1,
 		"canload": [ 0, 1 ],
 		"loadlimit": 2,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"LANDER": {
 		"longname": "LANDER_longname",
@@ -417,7 +417,7 @@
 		"highrange": 0,
 		"canload": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 26 ],
 		"loadlimit": 2,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"CRUISER": {
 		"longname": "CRUISER_longname",
@@ -437,7 +437,7 @@
 		"highrange": 1,
 		"canload": [ 13, 14 ],
 		"loadlimit": 2,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"SUB": {
 		"longname": "SUB_longname",
@@ -457,7 +457,7 @@
 		"highrange": 1,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"BATTLESHIP": {
 		"longname": "BATTLESHIP_longname",
@@ -477,7 +477,7 @@
 		"highrange": 6,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"CARRIER": {
 		"longname": "CARRIER_longname",
@@ -497,7 +497,7 @@
 		"highrange": 8,
 		"canload": [ 13, 14, 15, 16, 17, 18 ],
 		"loadlimit": 2,
-		"turnstartpriority": 2
+		"turnstartpriority": 2000
 	},
 	"OOZIUM": {
 		"longname": "OOZIUM_longname",
@@ -517,6 +517,6 @@
 		"highrange": 0,
 		"canload": [],
 		"loadlimit": 0,
-		"turnstartpriority": 1
+		"turnstartpriority": 1000
 	}
 }

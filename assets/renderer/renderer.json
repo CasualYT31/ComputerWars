@@ -1,8 +1,8 @@
 {
 	"width": 1280,
 	"height": 720,
-	"x": 2235,
-	"y": -537,
+	"x": 235,
+	"y": 137,
 	"framerate": 0,
 	"caption": "Computer Wars",
 	"icon": "./renderer/icon.png",

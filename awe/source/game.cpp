@@ -27,6 +27,7 @@ const std::runtime_error NO_MAP("No map is currently loaded");
 const std::runtime_error NO_SCRIPTS(
 	"No scripts object was given to this game object");
 const std::runtime_error INVALID_UNIT_ID("The given unit ID was invalid");
+const std::runtime_error INVALID_ARRAY("Could not create arrays");
 
 awe::game::game(const std::string& name) noexcept : _logger(name) {}
 
@@ -172,15 +173,27 @@ void awe::game::endTurn() {
 				}
 			}
 		}
+		auto tiles = _map->getTilesOfArmy(next);
 		if (_scripts->functionDeclExists("void BeginTurnForTile(const Vector2&in, "
 			"const Terrain&in, const ArmyID)")) {
-			auto tiles = _map->getTilesOfArmy(next);
 			// Have to make tile copies here, otherwise callFunction won't work.
 			for (auto tile : tiles) {
 				auto type = _map->getTileType(tile)->getType();
 				_scripts->callFunction("BeginTurnForTile", &tile,
 					const_cast<awe::terrain*>(type.get()), next);
 			}
+		}
+		if (_scripts->functionDeclExists("void BeginTurnForArmy("
+			"const array<UnitID>@, const array<Vector2>@)")) {
+			auto units = _map->getUnitsOfArmy(next);
+			CScriptArray* tilesArray = _scripts->createArray("Vector2");
+			CScriptArray* unitsArray = _scripts->createArray("UnitID");
+			if (!tilesArray || !unitsArray) throw INVALID_ARRAY;
+			for (auto tile : tiles) tilesArray->InsertLast(&tile);
+			for (auto unit : units) unitsArray->InsertLast(&unit);
+			_scripts->callFunction("BeginTurnForArmy", unitsArray, tilesArray);
+			unitsArray->Release();
+			tilesArray->Release();
 		}
 	} else {
 		throw NO_MAP;
@@ -219,7 +232,7 @@ CScriptArray* awe::game::getAdjacentUnits(const sf::Vector2u& position,
 				}
 				return ret;
 			} else {
-				throw std::runtime_error("Could not create array");
+				throw INVALID_ARRAY;
 			}
 		}
 		throw NO_SCRIPTS;
@@ -498,7 +511,7 @@ CScriptArray* awe::game::getLoadedUnits(const awe::UnitID id) const {
 				for (auto id : set) ret->InsertLast(&id);
 				return ret;
 			} else {
-				throw std::runtime_error("Could not create array");
+				throw INVALID_ARRAY;
 			}
 		} else {
 			throw NO_SCRIPTS;
