@@ -54,6 +54,7 @@ bool awe::game::load(const std::string& file,
 		return false;
 	}
 	if (_map) {
+		_unitBank = units;
 		_map->setTileSpritesheet(tile_sheet);
 		_map->setUnitSpritesheet(unit_sheet);
 		_map->setIconSpritesheet(icon_sheet);
@@ -174,6 +175,7 @@ void awe::game::endTurn() {
 		if (_scripts->functionDeclExists("void BeginTurnForTile(const Vector2&in, "
 			"const Terrain&in, const ArmyID)")) {
 			auto tiles = _map->getTilesOfArmy(next);
+			// Have to make tile copies here, otherwise callFunction won't work.
 			for (auto tile : tiles) {
 				auto type = _map->getTileType(tile)->getType();
 				_scripts->callFunction("BeginTurnForTile", &tile,
@@ -273,6 +275,27 @@ void awe::game::offsetFunds(const awe::ArmyID army, const awe::Funds funds) {
 	} else {
 		throw NO_MAP;
 	}
+}
+
+bool awe::game::buyUnit(const awe::BankID type) {
+	if (_map) {
+		const auto army = _map->getSelectedArmy();
+		std::shared_ptr<const awe::unit_type> unitType = (*_unitBank)[type];
+		const awe::Funds newFunds = _map->getArmyFunds(army) - unitType->getCost();
+		if (newFunds < 0) return false;
+		auto id = _map->createUnit(unitType, army);
+		_map->setUnitPosition(id, _map->getSelectedTile());
+		_map->setArmyFunds(army, newFunds);
+		_map->setUnitHP(id, unitType->getMaxHP());
+		if (!unitType->hasInfiniteFuel())
+			_map->setUnitFuel(id, unitType->getMaxFuel());
+		if (!unitType->hasInfiniteAmmo())
+			_map->setUnitAmmo(id, unitType->getMaxAmmo());
+		return true;
+	} else {
+		throw NO_MAP;
+	}
+	return false;
 }
 
 //////////////////////
@@ -498,6 +521,12 @@ CScriptArray* awe::game::getLoadedUnits(const awe::UnitID id) const {
 awe::Day awe::game::getDay() const {
 	if (_map)
 		return _map->getDay();
+	throw NO_MAP;
+}
+
+awe::ArmyID awe::game::getCurrentArmy() const {
+	if (_map)
+		return _map->getSelectedArmy();
 	throw NO_MAP;
 }
 

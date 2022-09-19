@@ -426,8 +426,12 @@ namespace sfx {
 		 * Connects all signals of a widget to this class' \c signalHandler()
 		 * method.
 		 * @param widget The widget whose signals are to be connected.
+		 * @param customSignalHandler The name of the script function to call when
+		 *                            handling the signal. If a blank string is
+		 *                            given, the default handlers will be assumed.
 		 */
-		void _connectSignals(tgui::Widget::Ptr widget) noexcept;
+		void _connectSignals(tgui::Widget::Ptr widget,
+			const std::string& customSignalHandler) noexcept;
 
 		/**
 		 * Determines whether or not the given widget type is a container type.
@@ -475,7 +479,7 @@ namespace sfx {
 		 * @param  fullname The full name of the widget.
 		 * @return The short name of the widget.
 		 */
-		static inline std::string _extractWidgetName(const tgui::String& fullname)
+		static inline std::string _extractWidgetName(const std::string& fullname)
 			noexcept;
 
 		/**
@@ -575,11 +579,13 @@ namespace sfx {
 		 * If the @c type parameter was invalid, or if a widget with the specified
 		 * name already existed at the time of the call, then an error will be
 		 * logged and no widget will be created.
-		 * @param widgetType The type of widget to create.
-		 * @param name       The name of the new widget.
+		 * @param widgetType    The type of widget to create.
+		 * @param name          The name of the new widget.
+		 * @param signalHandler The name of the custom signal handler to assign to
+		 *                      this widget, if any.
 		 */
-		void _addWidget(const std::string& widgetType, const std::string& name)
-			noexcept;
+		void _addWidget(const std::string& widgetType, const std::string& name,
+			const std::string& signalHandler = "") noexcept;
 
 		/**
 		 * Creates a widget and adds it to a grid.
@@ -590,14 +596,16 @@ namespace sfx {
 		 *     <li>If there was already a widget within the specified cell.
 		 *     </li></ul>
 		 * If an error is logged, no widget will be created or added.
-		 * @param widgetType The type of widget to create.
-		 * @param name       The name of the new widget. Must include the grid.
-		 * @param row        The row to add the widget to.
-		 * @param col        The column to add the widget to.
+		 * @param widgetType    The type of widget to create.
+		 * @param name          The name of the new widget. Must include the grid.
+		 * @param row           The row to add the widget to.
+		 * @param col           The column to add the widget to.
+		 * @param signalHandler The name of the custom signal handler to assign to
+		 *                      this widget, if any.
 		 */
 		void _addWidgetToGrid(const std::string& widgetType,
-			const std::string& name, const std::size_t row, const std::size_t col)
-			noexcept;
+			const std::string& name, const std::size_t row, const std::size_t col,
+			const std::string& signalHandler = "") noexcept;
 
 		/**
 		 * Removes a specified widget, and all the widgets that are within it.
@@ -727,6 +735,19 @@ namespace sfx {
 		 */
 		void _setWidgetTextOutlineThickness(const std::string& name,
 			const float thickness) noexcept;
+
+		/**
+		 * Sets a widget's text alignment.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no alignment will be
+		 * changed.
+		 * @param name The name of the widget to change.
+		 * @param h    The new horizontal alignment.
+		 * @param v    The new vertical alignment.
+		 */
+		void _setWidgetTextAlignment(const std::string& name,
+			const tgui::Label::HorizontalAlignment h,
+			const tgui::Label::VerticalAlignment v) noexcept;
 
 		/**
 		 * Updates a widget's sprite.
@@ -896,6 +917,16 @@ namespace sfx {
 		std::size_t _getWidgetCount(const std::string& name) noexcept;
 
 		/**
+		 * Sets the scrollbar policy for a scrollable panel's horizontal scrollbar.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no policy will be changed.
+		 * @param name   The name of the widget to edit.
+		 * @param policy The amount the scrollbar should scroll by.
+		 */
+		void _setHorizontalScrollbarPolicy(const std::string& name,
+			const tgui::Scrollbar::Policy policy) noexcept;
+
+		/**
 		 * Sets the scroll amount for a scrollable panel's horizontal scrollbar.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no amount will be changed.
@@ -1024,6 +1055,11 @@ namespace sfx {
 		std::unordered_map<std::string,
 			std::vector<std::vector<sfx::gui::CScriptAnyWrapper>>>
 			_originalStringsVariables;
+
+		/**
+		 * Stores the custom signal handler names associated with some widgets.
+		 */
+		std::unordered_map<std::string, std::string> _customSignalHandlers;
 
 		/**
 		 * Pointer to the language dictionary used to translate all captions.

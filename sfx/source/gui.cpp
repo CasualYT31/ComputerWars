@@ -266,6 +266,33 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	engine->RegisterEnumValue("WidgetAlignment", "Left",
 		(int)Grid::Alignment::Left);
 
+	r = engine->RegisterEnum("ScrollbarPolicy");
+	document->DocumentObjectEnum(r, "Values representing scollbar policies.");
+	engine->RegisterEnumValue("ScrollbarPolicy", "Automatic",
+		(int)Scrollbar::Policy::Automatic);
+	engine->RegisterEnumValue("ScrollbarPolicy", "Always",
+		(int)Scrollbar::Policy::Always);
+	engine->RegisterEnumValue("ScrollbarPolicy", "Never",
+		(int)Scrollbar::Policy::Never);
+
+	r = engine->RegisterEnum("HorizontalAlignment");
+	document->DocumentObjectEnum(r, "Values representing horizontal alignment.");
+	engine->RegisterEnumValue("HorizontalAlignment", "Left",
+		(int)Label::HorizontalAlignment::Left);
+	engine->RegisterEnumValue("HorizontalAlignment", "Centre",
+		(int)Label::HorizontalAlignment::Center);
+	engine->RegisterEnumValue("HorizontalAlignment", "Right",
+		(int)Label::HorizontalAlignment::Right);
+
+	r = engine->RegisterEnum("VerticalAlignment");
+	document->DocumentObjectEnum(r, "Values representing vertical alignment.");
+	engine->RegisterEnumValue("VerticalAlignment", "Top",
+		(int)Label::VerticalAlignment::Top);
+	engine->RegisterEnumValue("VerticalAlignment", "Centre",
+		(int)Label::VerticalAlignment::Center);
+	engine->RegisterEnumValue("VerticalAlignment", "Bottom",
+		(int)Label::VerticalAlignment::Bottom);
+
 	// Register global constants.
 	r = engine->RegisterGlobalProperty("const float NO_SPACE", &NO_SPACE);
 	document->DocumentExpectedFunction("const float NO_SPACE", "Constant which "
@@ -315,21 +342,29 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"widget exists, <tt>FALSE</tt> otherwise.");
 
 	r = engine->RegisterGlobalFunction("void addWidget(const string&in, const "
-		"string&in)",
+		"string&in, const string&in = \"\")",
 		asMETHOD(sfx::gui, _addWidget), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Creates a new widget and adds it to a "
 		"menu. The type of widget is given, then the name of the new widget. If "
 		"the name of the new widget is a full name, it will be added in the "
 		"specified container. If it is not a full name, it will be added to the "
-		"current menu.");
+		"current menu.\n"
+		"The final parameter is the name of the script function to call when this "
+		"widget emits a signal. If a blank string is given, then the default "
+		"handlers will be assumed. The custom signal handler must have two "
+		"<tt>const string&in</tt> parameters. The first is the full name of the "
+		"widget that triggered the handler. The second is the name of the signal "
+		"that was emitted.");
 
 	r = engine->RegisterGlobalFunction("void addWidgetToGrid(const string&in,"
-		"const string&in, const uint, const uint)",
+		"const string&in, const uint, const uint, const string&in = \"\")",
 		asMETHOD(sfx::gui, _addWidgetToGrid), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Creates a new widget and adds it to a "
 		"grid. The type of widget is given, then the name of the new widget "
 		"(which must include the grid's name before the new widget's name!). The "
-		"widget's row and column index are then specified, in that order.");
+		"widget's row and column index are then specified, in that order.\n"
+		"See <tt>addWidget()</tt> for information on the final parameter to this "
+		"function.");
 
 	r = engine->RegisterGlobalFunction("void removeWidget(const string&in)",
 		asMETHOD(sfx::gui, _removeWidget), asCALL_THISCALL_ASGLOBAL, this);
@@ -412,6 +447,14 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _setWidgetTextOutlineThickness),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's text outline thickness.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetTextAlignment(const string&in, const HorizontalAlignment, "
+		"const VerticalAlignment)",
+		asMETHOD(sfx::gui, _setWidgetTextAlignment),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's text horizontal and "
+		"vertical alignment.");
 
 	r = engine->RegisterGlobalFunction("void setWidgetSprite(const string&in, "
 		"const string&in, const string&in)",
@@ -510,12 +553,19 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Gets the number of widgets that are in "
 		"the specified container. Does not count recursively.");
 
+	r = engine->RegisterGlobalFunction("void setHorizontalScrollbarPolicy("
+		"const string&in, const ScrollbarPolicy)",
+		asMETHOD(sfx::gui, _setHorizontalScrollbarPolicy),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's horizontal "
+		"scrollbar policy.");
+
 	r = engine->RegisterGlobalFunction("void setHorizontalScrollbarAmount("
 		"const string&in, const uint)",
 		asMETHOD(sfx::gui, _setHorizontalScrollbarAmount),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's horizontal "
-		"scrollbar's scroll amount.");
+		"scroll amount.");
 
 	r = engine->RegisterGlobalFunction("void setGroupPadding("
 		"const string&in, const string&in)",
@@ -619,10 +669,30 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept 
 
 void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const tgui::String& signalName) noexcept {
-	std::string functionName = getGUI() + "_" +
-		_extractWidgetName(widget->getWidgetName()) + "_" + signalName.toStdString();
-	if (_scripts && getGUI() != "" && _scripts->functionExists(functionName))
-		_scripts->callFunction(functionName);
+	if (_scripts && getGUI() != "") {
+		std::string fullname = widget->getWidgetName().toStdString();
+		std::string signalNameStd = signalName.toStdString();
+		auto customHandler = _customSignalHandlers.find(fullname);
+		if (customHandler != _customSignalHandlers.end()) {
+			std::string decl = "void " + customHandler->second +
+				"(const string&in, const string&in)";
+			if (_scripts->functionDeclExists(decl)) {
+				_scripts->callFunction(customHandler->second, &fullname,
+					&signalNameStd);
+				return;
+			} else {
+				_logger.warning("Widget \"{}\" was configured with a custom "
+					"signal handler \"{}\", but a function of declaration \"{}\" "
+					"does not exist. Falling back on the default signal handler.",
+					fullname, customHandler->second, decl);
+			}
+		}
+		std::string functionName = getGUI() + "_" + _extractWidgetName(fullname) +
+			"_" + signalNameStd;
+		if (_scripts->functionExists(functionName)) {
+			_scripts->callFunction(functionName);
+		}
+	}
 }
 
 void sfx::gui::setLanguageDictionary(
@@ -902,6 +972,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 		_dontOverridePictureSizeWithSpriteSize.clear();
 		_originalStrings.clear();
 		_originalStringsVariables.clear();
+		_customSignalHandlers.clear();
 		// Create the main menu that always exists.
 		tgui::Group::Ptr menu = tgui::Group::create();
 		menu->setVisible(false);
@@ -932,7 +1003,13 @@ bool sfx::gui::_save(nlohmann::ordered_json& j) noexcept {
 }
 
 // ALL SIGNALS NEED TO BE TESTED IDEALLY
-void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) noexcept {
+void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
+	const std::string& customSignalHandler) noexcept {
+	// Register the custom signal handler, if one is provided.
+	if (!customSignalHandler.empty()) {
+		_customSignalHandlers[widget->getWidgetName().toStdString()] =
+			customSignalHandler;
+	}
 	// Connect common widget signals.
 	widget->getSignal("PositionChanged").
 		connectEx(&sfx::gui::signalHandler, this);
@@ -1116,6 +1193,8 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 			_originalStrings.erase(name);
 		if (_originalStringsVariables.find(name) !=
 			_originalStringsVariables.end()) _originalStringsVariables.erase(name);
+		if (_customSignalHandlers.find(name) != _customSignalHandlers.end())
+			_customSignalHandlers.erase(name);
 		if (removeIt) container->remove(widget);
 	} else {
 		_logger.error("Attempted to remove a widget \"{}\", which did not have a "
@@ -1143,11 +1222,11 @@ void sfx::gui::_setTranslatedString(const std::string& text,
 	}
 }
 
-std::string sfx::gui::_extractWidgetName(const tgui::String& fullname) noexcept {
+std::string sfx::gui::_extractWidgetName(const std::string& fullname) noexcept {
 	if (fullname.rfind('.') == String::npos) {
-		return fullname.toStdString();
+		return fullname;
 	} else {
-		return fullname.substr(fullname.rfind('.') + 1).toStdString();
+		return fullname.substr(fullname.rfind('.') + 1);
 	}
 }
 
@@ -1219,8 +1298,8 @@ bool sfx::gui::_widgetExists(const std::string& name) noexcept {
 	return _findWidget<Widget>(name).operator bool();
 }
 
-void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name)
-	noexcept {
+void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name,
+	const std::string& signalHandler) noexcept {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	if (_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
@@ -1239,14 +1318,14 @@ void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name
 				return;
 			}
 			container->add(widget, fullnameAsString);
-			_connectSignals(widget);
+			_connectSignals(widget, signalHandler);
 		}
 	}
 }
 
 void sfx::gui::_addWidgetToGrid(const std::string& widgetType,
-	const std::string& name, const std::size_t row, const std::size_t col)
-	noexcept {
+	const std::string& name, const std::size_t row, const std::size_t col,
+	const std::string& signalHandler) noexcept {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	if (_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
@@ -1268,7 +1347,7 @@ void sfx::gui::_addWidgetToGrid(const std::string& widgetType,
 					widgetType, name, gridName);
 			} else {
 				widget->setWidgetName(fullnameAsString);
-				_connectSignals(widget);
+				_connectSignals(widget, signalHandler);
 				grid->addWidget(widget, row, col);
 			}
 		}
@@ -1441,6 +1520,12 @@ void sfx::gui::_setWidgetTextSize(const std::string& name, const unsigned int si
 		if (type == "label") {
 			auto label = std::dynamic_pointer_cast<Label>(widget);
 			label->setTextSize(size);
+		} else if (type == "bitmapbutton") {
+			auto button = std::dynamic_pointer_cast<BitmapButton>(widget);
+			button->setTextSize(size);
+		} else if (type == "button") {
+			auto button = std::dynamic_pointer_cast<Button>(widget);
+			button->setTextSize(size);
 		} else {
 			_logger.error("Attempted to set the character size {} to widget "
 				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
@@ -1505,7 +1590,7 @@ void sfx::gui::_setWidgetTextOutlineThickness(const std::string& name,
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "label") {
-			auto label = _findWidget<Label>(name);
+			auto label = std::dynamic_pointer_cast<Label>(widget);
 			label->getRenderer()->setTextOutlineThickness(thickness);
 		} else {
 			_logger.error("Attempted to set the text outline thickness {} to "
@@ -1517,6 +1602,30 @@ void sfx::gui::_setWidgetTextOutlineThickness(const std::string& name,
 		_logger.error("Attempted to set the text outline thickness {} to a widget "
 			"\"{}\" within menu \"{}\". This widget does not exist.", thickness,
 			name, fullname[0]);
+	}
+}
+
+void sfx::gui::_setWidgetTextAlignment(const std::string& name,
+	const tgui::Label::HorizontalAlignment h,
+	const tgui::Label::VerticalAlignment v) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "label") {
+			auto label = std::dynamic_pointer_cast<Label>(widget);
+			label->setHorizontalAlignment(h);
+			label->setVerticalAlignment(v);
+		} else {
+			_logger.error("Attempted to set the text horizontal alignment {} and "
+				"vertical alignment {} to widget \"{}\" which is of type \"{}\", "
+				"within menu \"{}\". This operation is not supported for this "
+				"type of widget.", h, v, name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the text horizontal alignment {} and "
+			"vertical alignment {} to a widget \"{}\" within menu \"{}\". This "
+			"widget does not exist.", h, v, name, fullname[0]);
 	}
 }
 
@@ -1914,6 +2023,28 @@ std::size_t sfx::gui::_getWidgetCount(const std::string& name) noexcept {
 			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
 	}
 	return 0;
+}
+
+void sfx::gui::_setHorizontalScrollbarPolicy(const std::string& name,
+	const tgui::Scrollbar::Policy policy) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "scrollablepanel") {
+			std::dynamic_pointer_cast<ScrollablePanel>(widget)->
+				setHorizontalScrollbarPolicy(policy);
+		} else {
+			_logger.error("Attempted to set the horizontal scrollbar policy {} to "
+				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
+				"This operation is not supported for this type of widget.", policy,
+				name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to set the horizontal scrollbar policy {} to a "
+			"widget \"{}\" within menu \"{}\". This widget does not exist.",
+			policy, name, fullname[0]);
+	}
 }
 
 void sfx::gui::_setHorizontalScrollbarAmount(const std::string& name,

@@ -181,6 +181,16 @@ namespace awe {
 		 */
 		void offsetFunds(const awe::ArmyID army, const awe::Funds funds);
 
+		/**
+		 * Buys a unit, gives it to the current army, and places it at the cursor
+		 * position.
+		 * @param  type The bank ID of the type of unit to create.
+		 * @return \c FALSE if the current army could not afford the unit, \c TRUE
+		 *         if it was created successfully.
+		 * @throws std::runtime_error if no map is currently loaded.
+		 */
+		bool buyUnit(const awe::BankID type);
+
 		////////////////////////
 		// NOT UNIQUE TO GAME //
 		////////////////////////
@@ -349,6 +359,12 @@ namespace awe {
 		 */
 		awe::Day getDay() const;
 
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getSelectedArmy().
+		 */
+		awe::ArmyID getCurrentArmy() const;
+
 		/////////////////////
 		//  END  INTERFACE //
 		/////////////////////
@@ -390,5 +406,10 @@ namespace awe {
 		 * Stores the current map scaling factor.
 		 */
 		float _mapScalingFactor = 2.0f;
+
+		/**
+		 * Caches the unit type bank.
+		 */
+		std::shared_ptr<awe::bank<awe::unit_type>> _unitBank = nullptr;
 	};
 }

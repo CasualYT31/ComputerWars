@@ -21,7 +21,7 @@ The project has now entered the alpha stage :smile:! [Here's a small demo](https
 ### Dependencies
 For information on the versions of libraries I have used for this project, please check the `FetchContent_Declare` statements in the referenced `CMakeLists.txt` files.
 - [SFML](https://github.com/SFML/SFML) (check `engine/CMakeLists.txt`)
-- [TGUI](https://github.com/texus/TGUI) (check `sfx/CMakeLists.txt`)
+- [TGUI](https://github.com/CasualYT31/TGUI) (check `sfx/CMakeLists.txt`)
 - [AngelScript](https://www.angelcode.com/angelscript/) (check `engine/CMakeLists.txt`)
 - [Boxer](https://github.com/aaronmjacobs/Boxer) (check `engine/CMakeLists.txt`)
 - [SPDLOG](https://github.com/gabime/spdlog) (check `engine/CMakeLists.txt`)

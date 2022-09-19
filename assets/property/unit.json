@@ -499,26 +499,6 @@
 		"loadlimit": 2,
 		"turnstartpriority": 2
 	},
-	"PIPESEAM": {
-		"longname": "PIPESEAM_longname",
-		"shortname": "PIPESEAM_shortname",
-		"icon": "",
-		"sprites": [ "" ],
-		"pictures": [ "" ],
-		"description": "PIPESEAM_unitdescription",
-		"price": 0,
-		"hp": 99,
-		"fuel": 0,
-		"ammo": 0,
-		"movetype": 0,
-		"mp": 0,
-		"vision": 0,
-		"lowrange": 0,
-		"highrange": 0,
-		"canload": [],
-		"loadlimit": 0,
-		"turnstartpriority": 1
-	},
 	"OOZIUM": {
 		"longname": "OOZIUM_longname",
 		"shortname": "OOZIUM_shortname",

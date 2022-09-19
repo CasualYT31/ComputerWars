@@ -253,6 +253,11 @@ namespace awe {
 		void _script_quitMap();
 
 		/**
+		 * Translates a string without variables.
+		 */
+		std::string _script_translate(const std::string& nativeString) const;
+
+		/**
 		 * Used to hold a copy of @c sfx::INVALID_MOUSE that can be used with the
 		 * script interface (it can't accept pointers to constants).
 		 */

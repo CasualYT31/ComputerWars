@@ -38,11 +38,23 @@ void MapHandleInput(const dictionary controls) {
 		game.zoomIn();
 	}
 	if (bool(controls["select"])) {
-		if (game.getUnitOnTile(game.getSelectedTile()) == 0) {
+		auto cursor = game.getSelectedTile();
+		if (game.getUnitOnTile(cursor) == 0) {
+			ArmyID owner = game.getTileOwner(cursor);
+			ArmyID currentArmy = game.getCurrentArmy();
+			string type = game.getTerrainOfTile(cursor).scriptName;
+			if (owner == currentArmy) {
+				if (type == "BASE") {
+					setGUI("BaseMenu");
+					return;
+				}
+			}
 			setGUI("MapMenu");
+			return;
 		}
 	}
 	if (bool(controls["info"])) {
 		setGUI("DetailedInfoMenu");
+		return;
 	}
 }

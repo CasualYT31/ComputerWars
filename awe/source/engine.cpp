@@ -386,12 +386,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Returns the ammo that a given unit has.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
-		"array<UnitID>@ getLoadedUnits(const UnitID)",
+		"array<UnitID>@ getLoadedUnits(const UnitID) const",
 		asMETHOD(awe::game, getLoadedUnits), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the IDs of the units that are "
 		"loaded onto the one specified.");
 
-	r = engine->RegisterObjectMethod("GameInterface", "Day getDay()",
+	r = engine->RegisterObjectMethod("GameInterface", "Day getDay() const",
 		asMETHOD(awe::game, getDay), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the current day.");
 
@@ -407,7 +407,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"won't be changed. Same for the ammo.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
-		"array<UnitID>@ getAdjacentUnits(const Vector2&in)",
+		"array<UnitID>@ getAdjacentUnits(const Vector2&in) const",
 		asMETHOD(awe::game, getAdjacentUnits), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets a list of units that are adjacent to "
 		"a given tile.");
@@ -428,6 +428,18 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game, offsetFunds), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Awards or takes away funds to/from an "
 		"army.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"ArmyID getCurrentArmy() const",
+		asMETHOD(awe::game, getCurrentArmy), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Retrieves the ID of the army who is having "
+		"their turn.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"bool buyUnit(const BankID) const",
+		asMETHOD(awe::game, buyUnit), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Buys a unit for the current army and "
+		"places it at the current cursor location.");
 
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
@@ -630,6 +642,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asFUNCTION(getDisplayedHP), asCALL_CDECL);
 	document->DocumentGlobalFunction(r, "Receives an internal unit HP value and "
 		"returns the unit HP value that is displayed to the user.");
+
+	r = engine->RegisterGlobalFunction("string translate(const string&in)",
+		asMETHOD(awe::game_engine, _script_translate),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Translates a string without inserting "
+		"any variables.");
 }
 
 bool awe::game_engine::_load(engine::json& j) noexcept {
@@ -693,13 +711,9 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 		&& _loadObject(_commanders, j, { "commanders" }, _scripts, "Commander",
 			"commander_bank");
 	if (!ret) return false;
-	// Ignore the state of these objects for now. Can't load them currently
-	// because I have no tile or unit pictures to configure with.
-	_loadObject(_sprites->unitPicture, j,
-		{ "spritesheets", "unit", "pictures" });
-	_loadObject(_sprites->tilePicture->normal, j,
-		{ "spritesheets", "tile", "normalpictures" });
-	j.resetState();
+	// Finish initialisation of banks.
+	awe::updateAllTerrains(*_tiles, *_terrains);
+	awe::updateAllMovementsAndLoadedUnits(*_units, *_movements);
 	// Initialise GUIs and the scripts.
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scriptsPath);
@@ -715,9 +729,6 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_gui->setTarget(*_renderer);
 	_gui->load(guiPath);
 	if (!_gui->inGoodState()) return false;
-	// Finish initialisation of banks.
-	awe::updateAllTerrains(*_tiles, *_terrains);
-	awe::updateAllMovementsAndLoadedUnits(*_units, *_movements);
 	// If one of the objects failed to initialise properly, return FALSE.
 	_userinput->tieWindow(_renderer);
 	return true;
@@ -800,6 +811,11 @@ void awe::game_engine::_script_saveMap() {
 void awe::game_engine::_script_quitMap() {
 	_game.quit();
 	_gui->setGUI(_menuBeforeMapLoad);
+}
+
+std::string awe::game_engine::_script_translate(const std::string& nativeString)
+	const {
+	return _dictionary->operator()(nativeString);
 }
 
 // initCheck()
