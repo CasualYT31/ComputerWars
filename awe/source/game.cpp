@@ -184,14 +184,15 @@ void awe::game::endTurn() {
 			}
 		}
 		if (_scripts->functionDeclExists("void BeginTurnForArmy("
-			"const array<UnitID>@, const array<Vector2>@)")) {
+			"const ArmyID, const array<UnitID>@, const array<Vector2>@)")) {
 			auto units = _map->getUnitsOfArmy(next);
 			CScriptArray* tilesArray = _scripts->createArray("Vector2");
 			CScriptArray* unitsArray = _scripts->createArray("UnitID");
 			if (!tilesArray || !unitsArray) throw INVALID_ARRAY;
 			for (auto tile : tiles) tilesArray->InsertLast(&tile);
 			for (auto unit : units) unitsArray->InsertLast(&unit);
-			_scripts->callFunction("BeginTurnForArmy", unitsArray, tilesArray);
+			_scripts->callFunction("BeginTurnForArmy", next, unitsArray,
+				tilesArray);
 			unitsArray->Release();
 			tilesArray->Release();
 		}
@@ -200,7 +201,7 @@ void awe::game::endTurn() {
 	}
 }
 
-awe::HP awe::game::healUnit(const awe::UnitID unit, awe::HP hp) {
+void awe::game::healUnit(const awe::UnitID unit, awe::HP hp) {
 	if (_map) {
 		if (hp <= 0) {
 			throw std::runtime_error("HP value can't be below 0 for healUnit() "
@@ -214,8 +215,33 @@ awe::HP awe::game::healUnit(const awe::UnitID unit, awe::HP hp) {
 				hp -= newHP - maxHP;
 				newHP = (awe::HP)maxHP;
 			}
-			_map->setUnitHP(unit, newHP);
-			return awe::unit_type::getDisplayedHP(hp);
+			// See if the army can afford the heal. If not, attempt to heal 1 less.
+			// If that doesn't work, keep going until we hit 0. At which point,
+			// simply heal the unit back to "full health" for that HP, i.e. set an
+			// intenal HP of 57 to 60 and don't charge anything.
+			const awe::ArmyID currentArmy = _map->getSelectedArmy();
+			const awe::Funds currentFunds = _map->getArmyFunds(currentArmy);
+			while (true) {
+				awe::Funds charge = type->getCost() /
+					awe::unit_type::getDisplayedHP(type->getMaxHP()) *
+					awe::unit_type::getDisplayedHP(hp);
+				if (hp <= 0) {
+					// Get internal HP. Then convert it to user HP. Finally,
+					// converting it back into internal HP should return the full
+					// HP amount.
+					_map->setUnitHP(unit, awe::unit_type::getInternalHP(
+						awe::unit_type::getDisplayedHP(
+							_map->getUnitHP(unit))));
+					break;
+				} else if (charge > currentFunds) {
+					hp -= awe::unit_type::getInternalHP(1);
+					newHP -= awe::unit_type::getInternalHP(1);
+				} else {
+					_map->setUnitHP(unit, newHP);
+					_map->setArmyFunds(currentArmy, currentFunds - charge);
+					break;
+				}
+			}
 		} else {
 			throw INVALID_UNIT_ID;
 		}

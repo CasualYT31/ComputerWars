@@ -395,7 +395,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Ends the current army's turn.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
-		"HP healUnit(const UnitID, HP)",
+		"void healUnit(const UnitID, HP)",
 		asMETHOD(awe::game, healUnit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Adds HP to a given unit. Ensures that the "
 		"unit's HP does not go over its max. The given HP can't be at or below 0. "

@@ -140,7 +140,8 @@ namespace awe {
 
 		/**
 		 * Adds HP to a unit.
-		 * Ensures that a unit's HP does not exceed its maximum.
+		 * Ensures that a unit's HP does not exceed its maximum. Also charges the
+		 * current army for the heal.
 		 * @param  unit The ID of the unit to heal.
 		 * @param  hp   The internal HP amount to heal by.
 		 * @return The <b>user-friendly</b> (i.e. not internal) HP that was
@@ -149,7 +150,7 @@ namespace awe {
 		 *                            unit ID was invalid, or if the given HP value
 		 *                            was at or below \c 0.
 		 */
-		awe::HP healUnit(const awe::UnitID unit, awe::HP hp);
+		void healUnit(const awe::UnitID unit, awe::HP hp);
 
 		/**
 		 * Replenish a unit.
