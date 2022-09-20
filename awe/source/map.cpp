@@ -98,43 +98,43 @@ std::string awe::map::getMapName() const noexcept {
 
 void awe::map::setMapSize(const sf::Vector2u dim,
 	const std::shared_ptr<const awe::tile_type>& tile) noexcept {
-	// first, resize the tiles vectors accordingly
+	// First, resize the tiles vectors accordingly.
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
 	_tiles.resize(dim.x);
 	for (std::size_t x = 0; x < dim.x; x++) {
 		_tiles[x].resize(dim.y, { tile, _sheet_tile });
 	}
 	if (mapHasShrunk) {
-		// then, go through all owned tiles in each army and delete those that are
-		// now out of bounds
+		// Then, go through all owned tiles in each army and delete those that are
+		// now out of bounds.
 		for (auto& army : _armys) {
 			auto tiles = army.second.getTiles();
 			for (auto& tile : tiles) {
 				if (_isOutOfBounds(tile)) army.second.removeTile(tile);
 			}
 		}
-		// then, go through all units and delete those that are out of bounds
+		// Then, go through all units and delete those that are out of bounds.
 		std::vector<awe::UnitID> unitsToDelete;
 		for (auto& itr : _units) {
 			if (_isOutOfBounds(itr.second.getPosition()))
 				unitsToDelete.push_back(itr.first);
 		}
 		// I decided to separate out identification and deletion because I wasn't
-		// (and still aren't) sure if deleting elements will invalidate iterators
+		// (and still aren't) sure if deleting elements will invalidate iterators.
 		for (auto& itr : unitsToDelete) {
 			deleteUnit(itr);
 		}
-		// finally, if the currently selected tile is now out of bounds, adjust it
+		// Finally, if the currently selected tile is now out of bounds, adjust it.
 		if (_isOutOfBounds(_sel)) {
 			if (dim.x == 0)
-				// will still be out of bounds: this should be checked for anyway
-				// in the drawing code
+				// Will still be out of bounds: this should be checked for anyway
+				// in the drawing code.
 				_sel.x = 0;
 			else if (_sel.x >= dim.x)
 				_sel.x = dim.x - 1;
 			if (dim.y == 0)
-				// will still be out of bounds: this should be checked for anyway
-				// in the drawing code
+				// Will still be out of bounds: this should be checked for anyway
+				// in the drawing code.
 				_sel.y = 0;
 			else if (_sel.y >= dim.y)
 				_sel.y = dim.y - 1;
@@ -407,15 +407,14 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u pos)
 			id, pos.x, pos.y, getUnitOnTile(pos));
 		return;
 	}
-	// make new tile occupied
+	// Make new tile occupied.
 	_tiles[pos.x][pos.y].setUnit(id);
-	// make old tile vacant
-	// don't make tile vacant if a loaded unit also occupies the same tile
-	// internally, just to be safe
+	// Make old tile vacant. Don't make tile vacant if a loaded unit also occupies
+	// the same tile internally, just to be safe.
 	if (_units.at(id).isOnMap())
 		_tiles[_units.at(id).getPosition().x]
 		      [_units.at(id).getPosition().y].setUnit(0);
-	// assign new location to unit
+	// Assign new location to unit.
 	_units.at(id).setPosition(pos);
 }
 
@@ -534,7 +533,7 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 		return;
 	}
 	if (_units.at(from).unloadUnit(unload)) {
-		// unload successful, continue with operation
+		// Unload successful, continue with operation.
 		_units.at(unload).loadOnto(0);
 		setUnitPosition(unload, onto);
 	} else {
@@ -558,19 +557,6 @@ std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(const awe::UnitID id)
 	return {};
 }
 
-///////////////
-// MOVE MODE //
-///////////////
-
-void awe::map::moveMode(const awe::UnitID id) noexcept {
-	_movingUnit = id;
-	// Clear the move mode state.
-}
-
-///////////////////
-// END MOVE MODE //
-///////////////////
-
 bool awe::map::setTileType(const sf::Vector2u pos,
 	const std::shared_ptr<const awe::tile_type>& type) noexcept {
 	if (!type) _logger.warning("setTileType warning: assigning the tile at "
@@ -584,7 +570,7 @@ bool awe::map::setTileType(const sf::Vector2u pos,
 		return false;
 	}
 	_tiles[pos.x][pos.y].setTileType(type);
-	// remove ownership of the tile from the army who owns it, if any army does
+	// Remove ownership of the tile from the army who owns it, if any army does.
 	setTileOwner(pos, awe::army::NO_ARMY);
 	return true;
 }
@@ -629,12 +615,12 @@ void awe::map::setTileOwner(const sf::Vector2u pos, awe::ArmyID army) noexcept {
 		return;
 	}
 	auto& tile = _tiles[pos.x][pos.y];
-	// first, remove the tile from the army who currently owns it
+	// First, remove the tile from the army who currently owns it.
 	if (_isArmyPresent(tile.getTileOwner()))
 		_armys.at(tile.getTileOwner()).removeTile(pos);
-	// now assign it to the real owner, if any
+	// Now assign it to the real owner, if any.
 	if (_isArmyPresent(army)) _armys.at(army).addTile(pos);
-	// update the actual tile now
+	// Update the actual tile now.
 	tile.setTileOwner(army);
 }
 
@@ -796,7 +782,7 @@ sf::Vector2u awe::map::getTileSize() const noexcept {
 void awe::map::setTileSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
 	_sheet_tile = sheet;
-	// go through all of the tiles and set the new spritesheet to each one
+	// Go through all of the tiles and set the new spritesheet to each one.
 	for (auto& column : _tiles) {
 		for (auto& tile : column) {
 			tile.setSpritesheet(sheet);
@@ -807,7 +793,7 @@ void awe::map::setTileSpritesheet(
 void awe::map::setUnitSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
 	_sheet_unit = sheet;
-	// go through all of the units and set the new icon spritesheet to each one
+	// Go through all of the units and set the new icon spritesheet to each one.
 	for (auto& unit : _units) unit.second.setSpritesheet(sheet);
 }
 
@@ -817,7 +803,7 @@ void awe::map::setIconSpritesheet(
 	_cursor.setSpritesheet(sheet);
 	_cursor.setSprite("cursor");
 	_tilePane.setSpritesheet(sheet);
-	// go through all of the units and set the new spritesheet to each one
+	// Go through all of the units and set the new spritesheet to each one.
 	for (auto& unit : _units) unit.second.setIconSpritesheet(sheet);
 }
 
@@ -1010,27 +996,27 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	sf::RenderStates mapStates = states;
 	mapStates.transform = sf::Transform().scale(sf::Vector2f(_mapScalingFactor,
 		_mapScalingFactor)).combine(states.transform);
-	// step 1. the tiles
+	// Step 1. the tiles.
 	auto mapSize = getMapSize();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			target.draw(_tiles[x][y], mapStates);
 		}
 	}
-	// step 2. the units
-	// loop through all visible tiles only, and retrieve their units, instead of
-	// looping through all units
-	// unfortunately they have to be looped through separately to prevent tiles
-	// taller than the minimum height from drawing over units
+	// Step 2. the units.
+	// Loop through all visible tiles only, and retrieve their units, instead of
+	// looping through all units. Unfortunately they have to be looped through
+	// separately to prevent tiles taller than the minimum height from drawing over
+	// units.
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			if (_tiles[x][y].getUnit() && isUnitOnMap(_tiles[x][y].getUnit()))
 				target.draw(_units.at(_tiles[x][y].getUnit()), mapStates);
 		}
 	}
-	// step 3. the cursor
-	// but only if it is within the visible portion!
-	// to tell the truth the cursor should never be not visible...
+	// Step 3. the cursor.
+	// But only if it is within the visible portion!
+	// To tell the truth the cursor should never be not visible...
 	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, mapStates);
 	// step 4. army pane
 	target.draw(_armyPane, states);
@@ -1056,7 +1042,7 @@ bool awe::map::_isUnitPresent(const awe::UnitID id) const noexcept {
 
 awe::UnitID awe::map::_findUnitID() {
 	if (_units.size() == 0) return _lastUnitID;
-	// minus 1 to account for the reserved value, 0
+	// Minus 1 to account for the reserved value, 0.
 	if (_units.size() == (~((awe::UnitID)0)) - 1) 
 		throw std::bad_alloc();
 	awe::UnitID temp = _lastUnitID + 1;

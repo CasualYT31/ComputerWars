@@ -497,13 +497,6 @@ namespace awe {
 		std::unordered_set<awe::UnitID> getLoadedUnits(const awe::UnitID id) const
 			noexcept;
 
-		/**
-		 * Sets a unit to be in move mode.
-		 * @param id The ID of the unit to put into move mode. \c 0 to cancel move
-		 *           mode.
-		 */
-		void moveMode(const awe::UnitID id) noexcept;
-
 		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////
@@ -902,21 +895,6 @@ namespace awe {
 		 * Stores which day it currently is.
 		 */
 		awe::Day _day = 0;
-
-		///////////////
-		// MOVE MODE //
-		///////////////
-
-		/**
-		 * Holds the unit ID of the unit that is in move mode.
-		 * \c 0 represents that no unit is in move mode.
-		 */
-		awe::UnitID _movingUnit = 0;
-
-		/**
-		 * The list of tiles within range of the moving unit.
-		 */
-		std::unordered_set<sf::Vector2u> _availableTiles;
 
 		/////////////
 		// DRAWING //
