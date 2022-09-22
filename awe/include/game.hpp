@@ -421,18 +421,19 @@ namespace awe {
 
 		/**
 		 * Finds the shortest path from the origin to the destination.
-		 * @param  origin   The origin tile.
-		 * @param  dest     The intended destination.
-		 * @param  moveType Pointer to the movement type used for traversal
-		 *                  calculations.
-		 * @param  fuel     The units of fuel that we have to work with.
+		 * @param  origin     The origin tile.
+		 * @param  dest       The intended destination.
+		 * @param  moveType   Pointer to the movement type used for traversal
+		 *                    calculations.
+		 * @param  movePoints The movement points available.
+		 * @param  fuel       The units of fuel that we have to work with.
 		 * @return The shortest path, if a path could be found. An empty vector if
 		 *         no path could be found.
 		 */
 		std::vector<awe::closed_list_node> _findPath(const sf::Vector2u& origin,
 			const sf::Vector2u& dest,
 			const std::shared_ptr<const awe::movement_type>& moveType,
-			const awe::Fuel fuel);
+			const unsigned int movePoints, const awe::Fuel fuel);
 
 		/**
 		 * Internal logger object.
@@ -458,5 +459,12 @@ namespace awe {
 		 * Caches the unit type bank.
 		 */
 		std::shared_ptr<awe::bank<awe::unit_type>> _unitBank = nullptr;
+
+		/**
+		 * Move mode data.
+		 * \c game holds the original copy of selected unit data. Any pointers of
+		 *  that are passed around should be stored as weak references.
+		 */
+		std::shared_ptr<awe::selected_unit_render_data> _unitRenderData = nullptr;
 	};
 }

@@ -57,4 +57,7 @@ void MapHandleInput(const dictionary controls) {
 		setGUI("DetailedInfoMenu");
 		return;
 	}
+
+	// Test move mode rendering.
+	game.enableMoveMode();
 }

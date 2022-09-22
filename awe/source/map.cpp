@@ -31,7 +31,9 @@ void awe::selected_unit_render_data::clearState() noexcept {
 	renderUnitAtDestination = false;
 }
 
-awe::map::map(const std::string& name) noexcept : _logger(name) {}
+awe::map::map(const std::string& name) noexcept : _logger(name) {
+	_initShaders();
+}
 
 awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
@@ -43,6 +45,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	_tileTypes = tiles;
 	_unitTypes = units;
 	_commanders = commanders;
+	_initShaders();
 }
 
 bool awe::map::load(std::string file, const unsigned char version) noexcept {
@@ -1001,7 +1004,28 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	auto mapSize = getMapSize();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
-			target.draw(_tiles[x][y], mapStates);
+			if (selectedUnitRenderData.selectedUnit > 0) {
+				sf::Vector2u currentTile(x, y);
+				sf::RenderStates tileStates = mapStates;
+				if (selectedUnitRenderData.availableTiles.find(currentTile) !=
+					selectedUnitRenderData.availableTiles.end()) {
+					// Apply configured shading.
+					switch (selectedUnitRenderData.availableTileShader) {
+					case awe::selected_unit_render_data::shader::Yellow:
+						tileStates.shader = &_availableTileShader;
+						break;
+					case awe::selected_unit_render_data::shader::Red:
+						break;
+					default:
+						break;
+					}
+				} else { // Not an available tile. Grey out.
+					tileStates.shader = &_unavailableTileShader;
+				}
+				target.draw(_tiles[x][y], tileStates);
+			} else {
+				target.draw(_tiles[x][y], mapStates);
+			}
 		}
 	}
 	// Step 2. the units.
@@ -1011,8 +1035,17 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// units.
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
-			if (_tiles[x][y].getUnit() && isUnitOnMap(_tiles[x][y].getUnit()))
-				target.draw(_units.at(_tiles[x][y].getUnit()), mapStates);
+			const awe::UnitID unit = _tiles[x][y].getUnit();
+			if (unit > 0 && isUnitOnMap(unit)) {
+				if (selectedUnitRenderData.selectedUnit > 0 &&
+					unit != selectedUnitRenderData.selectedUnit) {
+					sf::RenderStates unitStates = mapStates;
+					unitStates.shader = &_unavailableTileShader;
+					target.draw(_units.at(unit), unitStates);
+				} else {
+					target.draw(_units.at(unit), mapStates);
+				}
+			}
 		}
 	}
 	// Step 3. the cursor.
@@ -1364,4 +1397,15 @@ bool awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id,
 			return false;
 		}
 	}
+}
+
+void awe::map::_initShaders() noexcept {
+	_unavailableTileShader.loadFromMemory("uniform sampler2D texUnit;"
+		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
+		"pixel.xyz /= 2.0; gl_FragColor = pixel;}", sf::Shader::Fragment);
+	_unavailableTileShader.setUniform("texUnit", sf::Shader::CurrentTexture);
+	_availableTileShader.loadFromMemory("uniform sampler2D texUnit;"
+		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
+		"pixel.xy *= 1.1; gl_FragColor = pixel;}", sf::Shader::Fragment);
+	_availableTileShader.setUniform("texUnit", sf::Shader::CurrentTexture);
 }

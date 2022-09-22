@@ -1045,6 +1045,23 @@ namespace awe {
 		 */
 		sf::Vector2f _targetSizeCache;
 
+		// MOVE MODE DRAWING //
+
+		/**
+		 * Initialises the shaders used for selected unit rendering.
+		 */
+		void _initShaders() noexcept;
+
+		/**
+		 * Available tiles shader.
+		 */
+		sf::Shader _availableTileShader;
+
+		/**
+		 * Unavilable tiles shader.
+		 */
+		sf::Shader _unavailableTileShader;
+
 		//////////////////
 		// SPRITESHEETS //
 		//////////////////

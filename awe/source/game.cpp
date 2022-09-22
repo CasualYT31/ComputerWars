@@ -357,6 +357,11 @@ void awe::game::enableMoveMode() {
 		//if (_map->selectedUnitRenderData.selectedUnit == 0) {
 			_map->selectedUnitRenderData.selectedUnit =
 				_map->getUnitOnTile(_map->getSelectedTile());
+			if (_map->selectedUnitRenderData.selectedUnit == 0) {
+				// Tried to select a unit on a vacant tile. In the future, throw
+				// here.
+				return;
+			}
 			_map->selectedUnitRenderData.availableTileShader =
 				awe::selected_unit_render_data::shader::Yellow;
 			_map->selectedUnitRenderData.closedList.push_back(
@@ -368,9 +373,12 @@ void awe::game::enableMoveMode() {
 				_map->getUnitType(_map->selectedUnitRenderData.selectedUnit);
 			auto allTiles = _map->getAvailableTiles(_map->getSelectedTile(), 1,
 				unitType->getMovementPoints());
+			// DEBUG
+			_map->selectedUnitRenderData.availableTiles.clear();
 			for (auto& tile : allTiles) {
 				if (!_findPath(_map->selectedUnitRenderData.closedList.back().tile,
 					tile, unitType->getMovementType(),
+					unitType->getMovementPoints(),
 					_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)).
 					empty()) {
 					_map->selectedUnitRenderData.availableTiles.insert(tile);
@@ -649,7 +657,7 @@ open_list_node tileWithLowestFScore(
 std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& origin,
 	const sf::Vector2u& dest,
 	const std::shared_ptr<const awe::movement_type>& moveType,
-	const awe::Fuel fuel) {
+	const unsigned int movePoints, const awe::Fuel fuel) {
 	// openSet could be a min-heap or priority queue.
 	std::unordered_set<sf::Vector2u> openSet = { origin };
 	std::unordered_map<sf::Vector2u, sf::Vector2u> cameFrom;
@@ -681,15 +689,21 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 		openSet.erase(currentTile);
 		auto adjacentTiles = _map->getAvailableTiles(currentTile, 1, 1);
 		for (auto& adjacentTile : adjacentTiles) {
+			// Get the movement cost for this terrain.
 			auto moveCost =
 				_map->getTileType(adjacentTile)->getType()->
 				getMoveCost(moveType->getID());
+
+			// If this unit cannot traverse the terrain, do not add it to any set.
+			if (moveCost < 0) continue;
+
 			int tentativeGScore = gScore[currentTile] + moveCost;
 
-			// If the unit does not have enough fuel, or if its movement type
-			// cannot traverse the adjacent tile's terrain, then it cannot traverse
-			// the tile, so don't add it to the open set.
-			if (moveCost < 0 || tentativeGScore <= fuel) {
+			// If the unit does not have enough fuel, or has ran out of movement
+			// points, then it cannot traverse the tile, so don't add it to the
+			// open set.
+			if (tentativeGScore <= fuel &&
+				(unsigned int)tentativeGScore <= movePoints) {
 				if (gScore.find(adjacentTile) == gScore.end() ||
 					tentativeGScore < gScore[adjacentTile]) {
 					cameFrom[adjacentTile] = currentTile;
