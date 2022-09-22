@@ -1015,8 +1015,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 						tileStates.shader = &_availableTileShader;
 						break;
 					case awe::selected_unit_render_data::shader::Red:
-						break;
-					default:
+						tileStates.shader = &_attackableTileShader;
 						break;
 					}
 				} else { // Not an available tile. Grey out.
@@ -1408,4 +1407,9 @@ void awe::map::_initShaders() noexcept {
 		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
 		"pixel.xy *= 1.1; gl_FragColor = pixel;}", sf::Shader::Fragment);
 	_availableTileShader.setUniform("texUnit", sf::Shader::CurrentTexture);
+	_attackableTileShader.loadFromMemory("uniform sampler2D texUnit;"
+		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
+		"pixel.x += 0.85; pixel.yz += 0.05;"
+		"gl_FragColor = pixel;}", sf::Shader::Fragment);
+	_attackableTileShader.setUniform("texUnit", sf::Shader::CurrentTexture);
 }

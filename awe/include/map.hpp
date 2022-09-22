@@ -1053,9 +1053,14 @@ namespace awe {
 		void _initShaders() noexcept;
 
 		/**
-		 * Available tiles shader.
+		 * Yellow tiles shader.
 		 */
 		sf::Shader _availableTileShader;
+
+		/**
+		 * Red tiles shader.
+		 */
+		sf::Shader _attackableTileShader;
 
 		/**
 		 * Unavilable tiles shader.
