@@ -3,7 +3,10 @@ void MapSetUp() {}
 // Holds the previous mouse position.
 MousePosition previousPosition;
 
-void MapHandleInput(const dictionary controls) {
+/**
+ * Input handling code common to both Map and MoveUnitMenu.
+ */
+void HandleCommonGameInput(const dictionary@ controls) {
 	// Handle mouse input.
 	MousePosition currentPosition = mousePosition();
 	// Ignore the mouse if the game doesn't have focus.
@@ -37,6 +40,14 @@ void MapHandleInput(const dictionary controls) {
 	if (bool(controls["zoomin"])) {
 		game.zoomIn();
 	}
+	if (bool(controls["info"])) {
+		setGUI("DetailedInfoMenu");
+		return;
+	}
+}
+
+void MapHandleInput(const dictionary controls) {
+	HandleCommonGameInput(controls);
 	if (bool(controls["select"])) {
 		auto cursor = game.getSelectedTile();
 		if (game.getUnitOnTile(cursor) == 0) {
@@ -51,13 +62,10 @@ void MapHandleInput(const dictionary controls) {
 			}
 			setGUI("MapMenu");
 			return;
+		} else {
+			game.enableMoveMode();
+			setGUI("MoveUnitMenu");
+			return;
 		}
 	}
-	if (bool(controls["info"])) {
-		setGUI("DetailedInfoMenu");
-		return;
-	}
-
-	// Test move mode rendering.
-	game.enableMoveMode();
 }

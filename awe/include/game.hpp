@@ -212,8 +212,9 @@ namespace awe {
 
 		/**
 		 * Enables move mode for the unit underneath the currently selected tile.
-		 * @throws std::runtime_error if no map is currently loaded, or if a unit
-		 *                            is already in move mode.
+		 * @throws std::runtime_error if no map is currently loaded, if a unit is
+		 *                            already in move mode, or if the currently
+		 *                            selected tile is vacant.
 		 */
 		void enableMoveMode();
 
@@ -459,6 +460,11 @@ namespace awe {
 		 * Caches the unit type bank.
 		 */
 		std::shared_ptr<awe::bank<awe::unit_type>> _unitBank = nullptr;
+
+		/**
+		 * Caches the icon spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> _iconSheet = nullptr;
 
 		/**
 		 * Move mode data.

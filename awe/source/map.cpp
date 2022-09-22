@@ -956,14 +956,24 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 		}
 		tiley += (float)awe::tile::MIN_HEIGHT;
 	}
-	// Step 2. the units.
+	// Step 2. the selected unit closed list tile icons.
+	if (selectedUnitRenderData.selectedUnit > 0) {
+		for (auto& pathNode : selectedUnitRenderData.closedList) {
+			pathNode.sprite.animate(target, scaling);
+			auto pos = _tiles[pathNode.tile.x][pathNode.tile.y].getPixelPosition();
+			auto h = _tiles[pathNode.tile.x][pathNode.tile.y].getPixelSize().y;
+			if (h > awe::tile::MIN_HEIGHT) pos.y += h - awe::tile::MIN_HEIGHT;
+			pathNode.sprite.setPosition(pos);
+		}
+	}
+	// Step 3. the units.
 	// Note that unit positioning was carried out in step 1.
 	for (auto& unit : _units) {
 		unit.second.animate(target, scaling);
 	}
-	// Step 3. the cursor.
+	// Step 4. the cursor.
 	_cursor.animate(target, scaling);
-	// Step 3.5. set the general location of the panes.
+	// Step 5. set the general location of the panes.
 	if (_cursor.getPosition().x < target.getSize().x / _mapScalingFactor /
 		(float)scaling / 2.0f) {
 		_armyPane.setGeneralLocation(awe::army_pane::location::Right);
@@ -972,12 +982,12 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 		_armyPane.setGeneralLocation(awe::army_pane::location::Left);
 		_tilePane.setGeneralLocation(awe::tile_pane::location::Left);
 	}
-	// Step 4. the army pane.
+	// Step 6. the army pane.
 	if (_currentArmy != awe::army::NO_ARMY) {
 		_armyPane.setArmy(_armys.at(_currentArmy));
 		_armyPane.animate(target, scaling);
 	}
-	// Step 5. the tile pane.
+	// Step 7. the tile pane.
 	if (_updateTilePane) {
 		const awe::tile& tile = _tiles[_sel.x][_sel.y];
 		_tilePane.setTile(tile);
@@ -1027,7 +1037,13 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			}
 		}
 	}
-	// Step 2. the units.
+	// Step 2. the selected unit closed list tiles.
+	if (selectedUnitRenderData.selectedUnit > 0) {
+		for (auto& pathNode : selectedUnitRenderData.closedList) {
+			target.draw(pathNode.sprite, mapStates);
+		}
+	}
+	// Step 3. the units.
 	// Loop through all visible tiles only, and retrieve their units, instead of
 	// looping through all units. Unfortunately they have to be looped through
 	// separately to prevent tiles taller than the minimum height from drawing over
@@ -1047,13 +1063,13 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			}
 		}
 	}
-	// Step 3. the cursor.
+	// Step 4. the cursor.
 	// But only if it is within the visible portion!
 	// To tell the truth the cursor should never be not visible...
 	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, mapStates);
-	// step 4. army pane
+	// Step 5. army pane.
 	target.draw(_armyPane, states);
-	// step 5. tile pane
+	// Step 6. tile pane.
 	target.draw(_tilePane, states);
 }
 

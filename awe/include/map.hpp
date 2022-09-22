@@ -57,10 +57,9 @@ namespace awe {
 		sf::Vector2u tile;
 
 		/**
-		 * The sprite key of the icon to render in between the tile and unit layers
-		 * for this tile.
+		 * The animated sprite of the icon.
 		 */
-		std::string sprite;
+		sfx::animated_sprite sprite;
 	};
 
 	/**

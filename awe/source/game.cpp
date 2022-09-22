@@ -57,6 +57,7 @@ bool awe::game::load(const std::string& file,
 	}
 	if (_map) {
 		_unitBank = units;
+		_iconSheet = icon_sheet;
 		_map->setTileSpritesheet(tile_sheet);
 		_map->setUnitSpritesheet(unit_sheet);
 		_map->setIconSpritesheet(icon_sheet);
@@ -354,27 +355,24 @@ bool awe::game::buyUnit(const awe::BankID type) {
 
 void awe::game::enableMoveMode() {
 	if (_map) {
-		//if (_map->selectedUnitRenderData.selectedUnit == 0) {
+		if (_map->selectedUnitRenderData.selectedUnit == 0) {
 			_map->selectedUnitRenderData.selectedUnit =
 				_map->getUnitOnTile(_map->getSelectedTile());
 			if (_map->selectedUnitRenderData.selectedUnit == 0) {
-				// Tried to select a unit on a vacant tile. In the future, throw
-				// here.
-				return;
+				throw std::runtime_error("No unit is on the currently selected "
+					"tile!");
 			}
 			_map->selectedUnitRenderData.availableTileShader =
 				awe::selected_unit_render_data::shader::Yellow;
 			_map->selectedUnitRenderData.closedList.push_back(
-				{ _map->getSelectedTile(), "" });
+				{ _map->getSelectedTile(), { nullptr, ""}});
 			_map->selectedUnitRenderData.renderUnitAtDestination = false;
-			// Filter the available tiles down based on the unit's movement type
-			// and fuel.
+			// Filter the available tiles down based on the unit's movement type,
+			// movement points, and fuel.
 			const auto unitType =
 				_map->getUnitType(_map->selectedUnitRenderData.selectedUnit);
 			auto allTiles = _map->getAvailableTiles(_map->getSelectedTile(), 1,
 				unitType->getMovementPoints());
-			// DEBUG
-			_map->selectedUnitRenderData.availableTiles.clear();
 			for (auto& tile : allTiles) {
 				if (!_findPath(_map->selectedUnitRenderData.closedList.back().tile,
 					tile, unitType->getMovementType(),
@@ -386,9 +384,9 @@ void awe::game::enableMoveMode() {
 			}
 			_map->selectedUnitRenderData.availableTiles.insert(
 				_map->selectedUnitRenderData.closedList.back().tile);
-		//} else {
-		//	throw std::runtime_error("A unit is already in move mode!");
-		//}
+		} else {
+			throw std::runtime_error("A unit is already in move mode!");
+		}
 	} else {
 		throw NO_MAP;
 	}
@@ -448,10 +446,25 @@ awe::UnitID awe::game::getUnitOnTile(const sf::Vector2u tile) const {
 }
 
 void awe::game::setSelectedTileByPixel(const sf::Vector2i pixel) {
-	if (_map)
+	if (_map) {
 		_map->setSelectedTileByPixel(pixel);
-	else
+		if (_map->selectedUnitRenderData.selectedUnit > 0) {
+			auto unitType =
+				_map->getUnitType(_map->selectedUnitRenderData.selectedUnit);
+			auto newClosedList = _findPath(
+				_map->getUnitPosition(_map->selectedUnitRenderData.selectedUnit),
+				_map->getSelectedTile(),
+				unitType->getMovementType(),
+				unitType->getMovementPoints(),
+				_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)
+			);
+			if (!newClosedList.empty()) {
+				_map->selectedUnitRenderData.closedList = newClosedList;
+			}
+		}
+	} else {
 		throw NO_MAP;
+	}
 }
 
 sf::Vector2u awe::game::getTileSize() const {
@@ -677,11 +690,61 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 		}
 
 		if (currentTile == dest) {
-			// Path found - also figure out which arrow icons to draw here.
-			std::vector<awe::closed_list_node> ret = { { currentTile, "" } };
+			// Path found.
+			std::vector<awe::closed_list_node> ret =
+				{ { currentTile, { _iconSheet, "" }} };
 			while (cameFrom.find(currentTile) != cameFrom.end()) {
 				currentTile = cameFrom[currentTile];
-				ret.insert(ret.begin(), { currentTile, "" });
+				ret.insert(ret.begin(), { currentTile, { _iconSheet, "" }});
+			}
+			// Starting from the beginning; calculate the arrow sprites to draw for
+			// each tile.
+			for (std::size_t i = 0; i < ret.size(); ++i) {
+				if (i == 0) {
+					ret[i].sprite.setSpritesheet(nullptr);
+				} else if (i == ret.size() - 1) {
+					if (ret[i - 1].tile.x < ret[i].tile.x) {
+						ret[i].sprite.setSprite("unitArrowRight");
+					} else if (ret[i - 1].tile.x > ret[i].tile.x) {
+						ret[i].sprite.setSprite("unitArrowLeft");
+					} else if (ret[i - 1].tile.y < ret[i].tile.y) {
+						ret[i].sprite.setSprite("unitArrowDown");
+					} else if (ret[i - 1].tile.y > ret[i].tile.y) {
+						ret[i].sprite.setSprite("unitArrowUp");
+					}
+				} else {
+					if ((ret[i - 1].tile.x < ret[i].tile.x &&
+						ret[i].tile.x < ret[i + 1].tile.x) ||
+						(ret[i - 1].tile.x > ret[i].tile.x &&
+							ret[i].tile.x > ret[i + 1].tile.x)) {
+						ret[i].sprite.setSprite("unitArrowHori");
+					} else if ((ret[i - 1].tile.y < ret[i].tile.y &&
+						ret[i].tile.y < ret[i + 1].tile.y) ||
+						(ret[i - 1].tile.y > ret[i].tile.y &&
+							ret[i].tile.y > ret[i + 1].tile.y)) {
+						ret[i].sprite.setSprite("unitArrowVert");
+					} else if ((ret[i - 1].tile.y < ret[i].tile.y &&
+						ret[i].tile.x < ret[i + 1].tile.x) ||
+						(ret[i - 1].tile.x > ret[i].tile.x &&
+							ret[i].tile.y > ret[i + 1].tile.y)) {
+						ret[i].sprite.setSprite("unitArrowNE");
+					} else if ((ret[i - 1].tile.y > ret[i].tile.y &&
+						ret[i].tile.x < ret[i + 1].tile.x) ||
+						(ret[i - 1].tile.x > ret[i].tile.x &&
+							ret[i].tile.y < ret[i + 1].tile.y)) {
+						ret[i].sprite.setSprite("unitArrowSE");
+					} else if ((ret[i - 1].tile.x < ret[i].tile.x &&
+						ret[i].tile.y > ret[i + 1].tile.y) ||
+						(ret[i - 1].tile.y < ret[i].tile.y &&
+							ret[i].tile.x > ret[i + 1].tile.x)) {
+						ret[i].sprite.setSprite("unitArrowNW");
+					} else if ((ret[i - 1].tile.x < ret[i].tile.x &&
+						ret[i].tile.y < ret[i + 1].tile.y) ||
+						(ret[i - 1].tile.y > ret[i].tile.y &&
+							ret[i].tile.x > ret[i + 1].tile.x)) {
+						ret[i].sprite.setSprite("unitArrowSW");
+					}
+				}
 			}
 			return ret;
 		}

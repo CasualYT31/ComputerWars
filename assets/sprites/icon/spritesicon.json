@@ -197,6 +197,46 @@
 		"curveLeftAlign": {
 			"frames": [ [ 126, 0, 13, 100 ] ],
 			"durations": [ 0 ]
+		},
+		"unitArrowHori": {
+			"frames": [ [ 0, 116, 16, 16 ] ],
+			"durations": [ 0 ]
+		},
+		"unitArrowVert": {
+			"frames": [ [ 16, 116, 16, 16 ] ],
+			"durations": [ 0 ]
+		},
+		"unitArrowNE": {
+			"frames": [ [ 0, 100, 16, 16 ] ],
+			"durations": [ 0 ]
+		},
+		"unitArrowSE": {
+			"frames": [ [ 16, 100, 16, 16 ] ],
+			"durations": [ 0 ]
+		},
+		"unitArrowSW": {
+			"frames": [ [ 32, 100, 16, 16 ] ],
+			"durations": [ 0 ]
+		},
+		"unitArrowNW": {
+			"frames": [ [ 32, 116, 16, 16 ] ],
+			"durations": [ 0 ]
+		},
+		"unitArrowRight": {
+			"frames": [ [ 48, 100, 16, 16 ] ],
+			"durations": [ 0 ]
+		},
+		"unitArrowUp": {
+			"frames": [ [ 64, 100, 16, 16 ] ],
+			"durations": [ 0 ]
+		},
+		"unitArrowDown": {
+			"frames": [ [ 64, 116, 16, 16 ] ],
+			"durations": [ 0 ]
+		},
+		"unitArrowLeft": {
+			"frames": [ [ 48, 116, 16, 16 ] ],
+			"durations": [ 0 ]
 		}
 	}
 }
