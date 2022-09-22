@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "script.hpp"
 #include "file.hpp"
 #include "language.hpp"
+#include <cmath>
 
 #pragma once
 
@@ -41,7 +42,69 @@ namespace awe {
 	 * @return The distance, in tiles.
 	 */
 	unsigned int inline distance(const sf::Vector2u& lhs, const sf::Vector2u& rhs)
-		noexcept;
+		noexcept {
+		return (unsigned int)(abs((int64_t)lhs.x - (int64_t)rhs.x) +
+			abs((int64_t)lhs.y - (int64_t)rhs.y));
+	}
+
+	/**
+	 * A node along a closed list path.
+	 */
+	struct closed_list_node {
+		/**
+		 * The tile which this node represents.
+		 */
+		sf::Vector2u tile;
+
+		/**
+		 * The sprite key of the icon to render in between the tile and unit layers
+		 * for this tile.
+		 */
+		std::string sprite;
+	};
+
+	/**
+	 * Data \c map needs in order to render a selected unit.
+	 */
+	struct selected_unit_render_data {
+		/**
+		 * The ID of the unit that is selected.
+		 * \c 0 represents no selected unit and can be used to disable selected
+		 * unit rendering.
+		 */
+		awe::UnitID selectedUnit = 0;
+
+		/**
+		 * The set of available tiles.
+		 */
+		std::unordered_set<sf::Vector2u> availableTiles;
+
+		/**
+		 * The list of shaders that can be applied to the tiles that are available.
+		 */
+		enum shader {
+			None,
+			Yellow,
+			Red
+		} availableTileShader; ///< The shader to apply to all available tiles.
+
+		/**
+		 * The closed list, i.e. the currently selected path that a moving unit
+		 * is considering to go along.
+		 */
+		std::vector<awe::closed_list_node> closedList;
+
+		/**
+		 * Tells \c map to render the unit to the tile at the back of the closed
+		 * list instead of its actual location.
+		 */
+		bool renderUnitAtDestination = false;
+
+		/**
+		 * Clears the state of the object.
+		 */
+		void clearState() noexcept;
+	};
 
 	/**
 	 * Class which represents a map, and the armies and units that play on it.
@@ -632,6 +695,11 @@ namespace awe {
 		 * @return The X and Y location of the selected tile.
 		 */
 		sf::Vector2u getSelectedTile() const noexcept;
+
+		/**
+		 * Stores selected unit render data.
+		 */
+		selected_unit_render_data selectedUnitRenderData;
 
 		/**
 		 * Selects an army from the map.

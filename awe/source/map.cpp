@@ -22,12 +22,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.hpp"
 #include "fmtformatter.hpp"
-#include <cmath>
 
-unsigned int inline awe::distance(const sf::Vector2u& lhs, const sf::Vector2u& rhs)
-	noexcept {
-	return (unsigned int)(abs((int64_t)lhs.x - (int64_t)rhs.x) +
-		abs((int64_t)lhs.y - (int64_t)rhs.y));
+void awe::selected_unit_render_data::clearState() noexcept {
+	selectedUnit = 0;
+	availableTiles.clear();
+	availableTileShader = awe::selected_unit_render_data::shader::None;
+	closedList.clear();
+	renderUnitAtDestination = false;
 }
 
 awe::map::map(const std::string& name) noexcept : _logger(name) {}

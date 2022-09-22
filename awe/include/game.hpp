@@ -210,6 +210,19 @@ namespace awe {
 		 */
 		bool buyUnit(const awe::BankID type);
 
+		/**
+		 * Enables move mode for the unit underneath the currently selected tile.
+		 * @throws std::runtime_error if no map is currently loaded, or if a unit
+		 *                            is already in move mode.
+		 */
+		void enableMoveMode();
+
+		/**
+		 * Disables move mode, if there is a unit currently in move mode.
+		 * @throws std::runtime_error if no map is currently loaded.
+		 */
+		void disableMoveMode();
+
 		////////////////////////
 		// NOT UNIQUE TO GAME //
 		////////////////////////
@@ -405,6 +418,21 @@ namespace awe {
 		 * @sa @c awe::map::draw()
 		 */
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+		/**
+		 * Finds the shortest path from the origin to the destination.
+		 * @param  origin   The origin tile.
+		 * @param  dest     The intended destination.
+		 * @param  moveType Pointer to the movement type used for traversal
+		 *                  calculations.
+		 * @param  fuel     The units of fuel that we have to work with.
+		 * @return The shortest path, if a path could be found. An empty vector if
+		 *         no path could be found.
+		 */
+		std::vector<awe::closed_list_node> _findPath(const sf::Vector2u& origin,
+			const sf::Vector2u& dest,
+			const std::shared_ptr<const awe::movement_type>& moveType,
+			const awe::Fuel fuel);
 
 		/**
 		 * Internal logger object.

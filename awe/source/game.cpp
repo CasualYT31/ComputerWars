@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "game.hpp"
 #include "engine.hpp"
+#include <algorithm>
 
 const std::runtime_error NO_MAP("No map is currently loaded");
 const std::runtime_error NO_SCRIPTS(
@@ -351,6 +352,47 @@ bool awe::game::buyUnit(const awe::BankID type) {
 	return false;
 }
 
+void awe::game::enableMoveMode() {
+	if (_map) {
+		//if (_map->selectedUnitRenderData.selectedUnit == 0) {
+			_map->selectedUnitRenderData.selectedUnit =
+				_map->getUnitOnTile(_map->getSelectedTile());
+			_map->selectedUnitRenderData.availableTileShader =
+				awe::selected_unit_render_data::shader::Yellow;
+			_map->selectedUnitRenderData.closedList.push_back(
+				{ _map->getSelectedTile(), "" });
+			_map->selectedUnitRenderData.renderUnitAtDestination = false;
+			// Filter the available tiles down based on the unit's movement type
+			// and fuel.
+			const auto unitType =
+				_map->getUnitType(_map->selectedUnitRenderData.selectedUnit);
+			auto allTiles = _map->getAvailableTiles(_map->getSelectedTile(), 1,
+				unitType->getMovementPoints());
+			for (auto& tile : allTiles) {
+				if (!_findPath(_map->selectedUnitRenderData.closedList.back().tile,
+					tile, unitType->getMovementType(),
+					_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)).
+					empty()) {
+					_map->selectedUnitRenderData.availableTiles.insert(tile);
+				}
+			}
+			_map->selectedUnitRenderData.availableTiles.insert(
+				_map->selectedUnitRenderData.closedList.back().tile);
+		//} else {
+		//	throw std::runtime_error("A unit is already in move mode!");
+		//}
+	} else {
+		throw NO_MAP;
+	}
+}
+
+void awe::game::disableMoveMode() {
+	if (_map)
+		_map->selectedUnitRenderData.clearState();
+	else
+		throw NO_MAP;
+}
+
 //////////////////////
 // SCRIPT INTERFACE //
 //////////////////////
@@ -586,3 +628,81 @@ awe::ArmyID awe::game::getCurrentArmy() const {
 //////////////////////////////
 // INTERFACE HELPER METHODS //
 //////////////////////////////
+
+struct open_list_node {
+	std::shared_ptr<open_list_node> parent = nullptr;
+	sf::Vector2u tile;
+	int g = 0;
+	int h = 0;
+	inline int f() const noexcept { return g + h; }
+};
+
+open_list_node tileWithLowestFScore(
+	const std::unordered_set<open_list_node>& openList) {
+	open_list_node ret = *openList.begin();
+	for (auto& node : openList) {
+		if (ret.f() > node.f()) ret = node;
+	}
+	return ret;
+}
+
+std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& origin,
+	const sf::Vector2u& dest,
+	const std::shared_ptr<const awe::movement_type>& moveType,
+	const awe::Fuel fuel) {
+	// openSet could be a min-heap or priority queue.
+	std::unordered_set<sf::Vector2u> openSet = { origin };
+	std::unordered_map<sf::Vector2u, sf::Vector2u> cameFrom;
+	std::unordered_map<sf::Vector2u, int> gScore = { {origin, 0} };
+	std::unordered_map<sf::Vector2u, int> fScore = { {origin, 0} };
+
+	while (!openSet.empty()) {
+		bool firstElement = true;
+		sf::Vector2u currentTile;
+		for (auto& node : openSet) {
+			if (firstElement) {
+				firstElement = false;
+				currentTile = node;
+			} else if (fScore.at(node) < fScore.at(currentTile)) {
+				currentTile = node;
+			}
+		}
+
+		if (currentTile == dest) {
+			// Path found - also figure out which arrow icons to draw here.
+			std::vector<awe::closed_list_node> ret = { { currentTile, "" } };
+			while (cameFrom.find(currentTile) != cameFrom.end()) {
+				currentTile = cameFrom[currentTile];
+				ret.insert(ret.begin(), { currentTile, "" });
+			}
+			return ret;
+		}
+
+		openSet.erase(currentTile);
+		auto adjacentTiles = _map->getAvailableTiles(currentTile, 1, 1);
+		for (auto& adjacentTile : adjacentTiles) {
+			auto moveCost =
+				_map->getTileType(adjacentTile)->getType()->
+				getMoveCost(moveType->getID());
+			int tentativeGScore = gScore[currentTile] + moveCost;
+
+			// If the unit does not have enough fuel, or if its movement type
+			// cannot traverse the adjacent tile's terrain, then it cannot traverse
+			// the tile, so don't add it to the open set.
+			if (moveCost < 0 || tentativeGScore <= fuel) {
+				if (gScore.find(adjacentTile) == gScore.end() ||
+					tentativeGScore < gScore[adjacentTile]) {
+					cameFrom[adjacentTile] = currentTile;
+					gScore[adjacentTile] = tentativeGScore;
+					fScore[adjacentTile] =
+						tentativeGScore + awe::distance(adjacentTile, dest);
+					if (openSet.find(adjacentTile) == openSet.end()) {
+						openSet.insert(adjacentTile);
+					}
+				}
+			}
+		}
+	}
+
+	return {};
+}

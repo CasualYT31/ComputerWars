@@ -441,10 +441,22 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"their turn.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
-		"bool buyUnit(const BankID) const",
+		"bool buyUnit(const BankID)",
 		asMETHOD(awe::game, buyUnit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Buys a unit for the current army and "
 		"places it at the current cursor location.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"void enableMoveMode()",
+		asMETHOD(awe::game, enableMoveMode), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Enables move mode for the unit on the "
+		"currently selected tile.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"void disableMoveMode()",
+		asMETHOD(awe::game, disableMoveMode), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Disables move mode for the unit currently "
+		"in move mode.");
 
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
