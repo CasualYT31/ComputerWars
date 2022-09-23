@@ -404,64 +404,61 @@ void awe::game::disableMoveMode() {
 //////////////////////
 
 void awe::game::moveSelectedTileUp() {
-	if (_map)
+	if (_map) {
 		_map->moveSelectedTileUp();
-	else
+		_updateMoveModeClosedList();
+	} else {
 		throw NO_MAP;
+	}
 }
 
 void awe::game::moveSelectedTileDown() {
-	if (_map)
+	if (_map) {
 		_map->moveSelectedTileDown();
-	else
+		_updateMoveModeClosedList();
+	} else {
 		throw NO_MAP;
+	}
 }
 
 void awe::game::moveSelectedTileLeft() {
-	if (_map)
+	if (_map) {
 		_map->moveSelectedTileLeft();
-	else
+		_updateMoveModeClosedList();
+	} else {
 		throw NO_MAP;
+	}
 }
 
 void awe::game::moveSelectedTileRight() {
-	if (_map)
+	if (_map) {
 		_map->moveSelectedTileRight();
-	else
+		_updateMoveModeClosedList();
+	} else {
 		throw NO_MAP;
+	}
 }
 
 sf::Vector2u awe::game::getSelectedTile() const {
-	if (_map)
+	if (_map) {
 		return _map->getSelectedTile();
-	else
+	} else {
 		throw NO_MAP;
+	}
 }
 
 awe::UnitID awe::game::getUnitOnTile(const sf::Vector2u tile) const {
-	if (_map)
+	if (_map) {
 		return _map->getUnitOnTile(tile);
-	else
+	} else {
 		throw NO_MAP;
+	}
 }
 
 void awe::game::setSelectedTileByPixel(const sf::Vector2i pixel) {
 	if (_map) {
 		_map->setSelectedTileByPixel(pixel);
-		if (_map->selectedUnitRenderData.selectedUnit > 0) {
-			auto unitType =
-				_map->getUnitType(_map->selectedUnitRenderData.selectedUnit);
-			auto newClosedList = _findPath(
-				_map->getUnitPosition(_map->selectedUnitRenderData.selectedUnit),
-				_map->getSelectedTile(),
-				unitType->getMovementType(),
-				unitType->getMovementPoints(),
-				_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)
-			);
-			if (!newClosedList.empty()) {
-				_map->selectedUnitRenderData.closedList = newClosedList;
-			}
-		}
+		_updateMoveModeClosedList();
 	} else {
 		throw NO_MAP;
 	}
@@ -670,12 +667,38 @@ open_list_node tileWithLowestFScore(
 std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& origin,
 	const sf::Vector2u& dest,
 	const std::shared_ptr<const awe::movement_type>& moveType,
-	const unsigned int movePoints, const awe::Fuel fuel) {
+	const unsigned int movePoints, const awe::Fuel fuel,
+	const std::vector<awe::closed_list_node>& oldClosedList) {
 	// openSet could be a min-heap or priority queue.
-	std::unordered_set<sf::Vector2u> openSet = { origin };
+	std::unordered_set<sf::Vector2u> openSet;
 	std::unordered_map<sf::Vector2u, sf::Vector2u> cameFrom;
-	std::unordered_map<sf::Vector2u, int> gScore = { {origin, 0} };
-	std::unordered_map<sf::Vector2u, int> fScore = { {origin, 0} };
+	std::unordered_map<sf::Vector2u, int> gScore;
+	std::unordered_map<sf::Vector2u, int> fScore;
+
+	// Initialise the set and maps depending on the given closed list.
+	if (oldClosedList.empty()) {
+		openSet = { origin };
+		gScore = { {origin, 0} };
+		fScore = { {origin, 0} };
+	} else {
+		openSet = { oldClosedList.back().tile };
+		for (std::size_t i = 0; i < oldClosedList.size(); ++i) {
+			if (i > 0) {
+				cameFrom[oldClosedList.at(i).tile] = oldClosedList.at(i - 1).tile;
+				auto moveCost =
+					_map->getTileType(oldClosedList.at(i).tile)->getType()->
+					getMoveCost(moveType->getID());
+				gScore[oldClosedList.at(i).tile] =
+					gScore[oldClosedList.at(i - 1).tile] + moveCost;
+				fScore[oldClosedList.at(i).tile] =
+					gScore[oldClosedList.at(i).tile] +
+					awe::distance(oldClosedList.at(i).tile, dest);
+			} else {
+				gScore[oldClosedList.at(i).tile] = 0;
+				fScore[oldClosedList.at(i).tile] = 0;
+			}
+		}
+	}
 
 	while (!openSet.empty()) {
 		bool firstElement = true;
@@ -762,9 +785,13 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 
 			int tentativeGScore = gScore[currentTile] + moveCost;
 
-			// If the unit does not have enough fuel, or has ran out of movement
-			// points, then it cannot traverse the tile, so don't add it to the
-			// open set.
+			// If:
+			// 1. The unit does not have enough fuel.
+			// 2. The unit has ran out of movement points.
+			// 3. The tile has a unit belonging to an opposing team (not
+			//    implemented yet).
+			// then it cannot traverse the tile, so don't add it to the open set.
+			const auto unitOnAdjacentTile = _map->getUnitOnTile(adjacentTile);
 			if (tentativeGScore <= fuel &&
 				(unsigned int)tentativeGScore <= movePoints) {
 				if (gScore.find(adjacentTile) == gScore.end() ||
@@ -782,4 +809,33 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 	}
 
 	return {};
+}
+
+void awe::game::_updateMoveModeClosedList() noexcept {
+	if (_map->selectedUnitRenderData.selectedUnit > 0) {
+		auto unitType =
+			_map->getUnitType(_map->selectedUnitRenderData.selectedUnit);
+		auto newClosedList = _findPath(
+			_map->getUnitPosition(_map->selectedUnitRenderData.selectedUnit),
+			_map->getSelectedTile(),
+			unitType->getMovementType(),
+			unitType->getMovementPoints(),
+			_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit),
+			_map->selectedUnitRenderData.closedList
+		);
+		if (!newClosedList.empty()) {
+			_map->selectedUnitRenderData.closedList = newClosedList;
+		} else if (newClosedList.empty() && _map->selectedUnitRenderData.
+			availableTiles.find(_map->getSelectedTile()) !=
+			_map->selectedUnitRenderData.availableTiles.end()) {
+			// Calculate new shortest path and assign it to the closed list.
+			_map->selectedUnitRenderData.closedList = _findPath(
+				_map->getUnitPosition(_map->selectedUnitRenderData.selectedUnit),
+				_map->getSelectedTile(),
+				unitType->getMovementType(),
+				unitType->getMovementPoints(),
+				_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)
+			);
+		}
+	}
 }

@@ -422,19 +422,32 @@ namespace awe {
 
 		/**
 		 * Finds the shortest path from the origin to the destination.
-		 * @param  origin     The origin tile.
-		 * @param  dest       The intended destination.
-		 * @param  moveType   Pointer to the movement type used for traversal
-		 *                    calculations.
-		 * @param  movePoints The movement points available.
-		 * @param  fuel       The units of fuel that we have to work with.
+		 * @param  origin        The origin tile.
+		 * @param  dest          The intended destination.
+		 * @param  moveType      Pointer to the movement type used for traversal
+		 *                       calculations.
+		 * @param  movePoints    The movement points available.
+		 * @param  fuel          The units of fuel that we have to work with.
+		 * @param  oldClosedList If empty, the internal \c cameFrom map will be
+		 *                       empty at the start of the call. If not empty, the
+		 *                       internal \c cameFrom map will be constructed from
+		 *                       the given closed list, and the \c openSet will be
+		 *                       initialised with the tile at the back of the
+		 *                       closed list. This is used to give an existing path
+		 *                       to base the new path on.
 		 * @return The shortest path, if a path could be found. An empty vector if
 		 *         no path could be found.
 		 */
 		std::vector<awe::closed_list_node> _findPath(const sf::Vector2u& origin,
 			const sf::Vector2u& dest,
 			const std::shared_ptr<const awe::movement_type>& moveType,
-			const unsigned int movePoints, const awe::Fuel fuel);
+			const unsigned int movePoints, const awe::Fuel fuel,
+			const std::vector<awe::closed_list_node>& oldClosedList = {});
+
+		/**
+		 * Updates the closed list given to \c _map.
+		 */
+		void _updateMoveModeClosedList() noexcept;
 
 		/**
 		 * Internal logger object.
