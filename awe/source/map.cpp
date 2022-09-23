@@ -488,6 +488,22 @@ awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id) const noexcept {
 	return 0;
 }
 
+void awe::map::waitUnit(const awe::UnitID id, const bool waiting) noexcept {
+	if (_isUnitPresent(id)) {
+		_units.at(id).wait(waiting);
+	} else {
+		_logger.error("waitUnit operation cancelled: attempted to assign waiting "
+			"state {} to unit with ID {}, which doesn't exist!", waiting, id);
+	}
+}
+
+bool awe::map::isUnitWaiting(const awe::UnitID id) const noexcept {
+	if (_isUnitPresent(id)) return _units.at(id).isWaiting();
+	_logger.error("isUnitWaiting operation failed: unit with ID {} doesn't exist!",
+		id);
+	return 0;
+}
+
 void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) noexcept {
 	if (!_isUnitPresent(onto)) {
 		_logger.error("loadUnit operation cancelled: attempted to load a unit "
@@ -1052,13 +1068,17 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			const awe::UnitID unit = _tiles[x][y].getUnit();
 			if (unit > 0 && isUnitOnMap(unit)) {
+				sf::RenderStates unitStates = mapStates;
+				unitStates.shader = &_unavailableTileShader;
 				if (selectedUnitRenderData.selectedUnit > 0 &&
 					unit != selectedUnitRenderData.selectedUnit) {
-					sf::RenderStates unitStates = mapStates;
-					unitStates.shader = &_unavailableTileShader;
 					target.draw(_units.at(unit), unitStates);
 				} else {
-					target.draw(_units.at(unit), mapStates);
+					if (isUnitWaiting(unit)) {
+						target.draw(_units.at(unit), unitStates);
+					} else {
+						target.draw(_units.at(unit), mapStates);
+					}
 				}
 			}
 		}
@@ -1274,6 +1294,51 @@ void awe::map::_CWM_1(const bool isSave) {
 	}
 }
 
+bool awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id,
+	const sf::Vector2u& curtile, const awe::UnitID loadOnto) {
+	if (isSave) {
+		auto& unit = _units.at(id);
+		_file.writeNumber(unit.getArmy());
+		_file.writeNumber(unit.getType()->getID());
+		_file.writeNumber(unit.getHP());
+		_file.writeNumber(unit.getFuel());
+		_file.writeNumber(unit.getAmmo());
+		auto loaded = unit.loadedUnits();
+		if (loaded.size()) {
+			for (auto loadedUnitID : loaded) {
+				_CWM_0_Unit(isSave, loadedUnitID, curtile);
+			}
+			_file.writeNumber(awe::army::NO_ARMY);
+		}
+		return true;
+	} else {
+		auto ownerArmy = _file.readNumber<awe::ArmyID>();
+		if (ownerArmy != awe::army::NO_ARMY) {
+			auto unitID = createUnit(
+				(*_unitTypes)[_file.readNumber<awe::BankID>()], ownerArmy);
+			if (unitID) {
+				auto hp = _file.readNumber<awe::HP>();
+				setUnitHP(unitID, hp);
+				auto fuel = _file.readNumber<awe::Fuel>();
+				setUnitFuel(unitID, fuel);
+				auto ammo = _file.readNumber<awe::Ammo>();
+				setUnitAmmo(unitID, ammo);
+				if (loadOnto)
+					loadUnit(unitID, loadOnto);
+				else
+					setUnitPosition(unitID, curtile);
+				while (_CWM_0_Unit(isSave, id, curtile,
+					((loadOnto) ? (loadOnto) : (unitID))));
+			} else {
+				throw std::exception("read above");
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////
 // Do not forget to update _CWM_0_Unit() calls if needed! //
 ////////////////////////////////////////////////////////////
@@ -1309,7 +1374,7 @@ void awe::map::_CWM_2(const bool isSave) {
 				_file.writeNumber(tile.getTileHP());
 				_file.writeNumber(tile.getTileOwner());
 				if (tile.getUnit()) {
-					_CWM_0_Unit(isSave, tile.getUnit(), sf::Vector2u(x, y));
+					_CWM_2_Unit(isSave, tile.getUnit(), sf::Vector2u(x, y));
 				}
 				// Covers the following cases:
 				// 1. Tile is vacant.
@@ -1360,7 +1425,7 @@ void awe::map::_CWM_2(const bool isSave) {
 					setTileHP(pos, hp);
 					awe::ArmyID army = _file.readNumber<awe::ArmyID>();
 					setTileOwner(pos, army);
-					_CWM_0_Unit(isSave, 0, sf::Vector2u(x, y));
+					_CWM_2_Unit(isSave, 0, sf::Vector2u(x, y));
 				} else {
 					throw std::exception("read above");
 				}
@@ -1369,7 +1434,7 @@ void awe::map::_CWM_2(const bool isSave) {
 	}
 }
 
-bool awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id,
+bool awe::map::_CWM_2_Unit(const bool isSave, awe::UnitID id,
 	const sf::Vector2u& curtile, const awe::UnitID loadOnto) {
 	if (isSave) {
 		auto& unit = _units.at(id);
@@ -1378,10 +1443,11 @@ bool awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id,
 		_file.writeNumber(unit.getHP());
 		_file.writeNumber(unit.getFuel());
 		_file.writeNumber(unit.getAmmo());
+		_file.writeBool(unit.isWaiting());
 		auto loaded = unit.loadedUnits();
 		if (loaded.size()) {
 			for (auto loadedUnitID : loaded) {
-				_CWM_0_Unit(isSave, loadedUnitID, curtile);
+				_CWM_2_Unit(isSave, loadedUnitID, curtile);
 			}
 			_file.writeNumber(awe::army::NO_ARMY);
 		}
@@ -1398,11 +1464,13 @@ bool awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id,
 				setUnitFuel(unitID, fuel);
 				auto ammo = _file.readNumber<awe::Ammo>();
 				setUnitAmmo(unitID, ammo);
+				auto isWaiting = _file.readBool();
+				waitUnit(unitID, isWaiting);
 				if (loadOnto)
 					loadUnit(unitID, loadOnto);
 				else
 					setUnitPosition(unitID, curtile);
-				while (_CWM_0_Unit(isSave, id, curtile,
+				while (_CWM_2_Unit(isSave, id, curtile,
 					((loadOnto) ? (loadOnto) : (unitID))));
 			} else {
 				throw std::exception("read above");

@@ -136,6 +136,20 @@ namespace awe {
 		awe::Ammo getAmmo() const noexcept;
 
 		/**
+		 * Sets this unit's waiting/moved status.
+		 * By default, a unit is created with the waiting status turned on.
+		 * @param moved \c TRUE if the unit is in wait mode, \c FALSE if it can be
+		 *              moved.
+		 */
+		void wait(const bool moved) noexcept;
+
+		/**
+		 * Gets this unit's waiting/moved status.
+		 * @return \c TRUE if this unit is waiting, \c FALSE if not.
+		 */
+		bool isWaiting() const noexcept;
+
+		/**
 		 * Loads another unit onto this one.
 		 * @param id The ID of the unit to load onto this one.
 		 */
@@ -254,6 +268,11 @@ namespace awe {
 		 * The ammo of this unit.
 		 */
 		awe::Ammo _ammo = 0;
+
+		/**
+		 * The waiting/moved state of this unit.
+		 */
+		bool _waiting = true;
 
 		/**
 		 * The list of units loaded onto this one.

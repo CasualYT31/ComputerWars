@@ -520,6 +520,21 @@ namespace awe {
 		awe::Ammo getUnitAmmo(const awe::UnitID id) const noexcept;
 
 		/**
+		 * Sets a unit's waiting state.
+		 * @param id      The ID of the unit to amend.
+		 * @param waiting \c TRUE if the unit should wait, \c FALSE if not.
+		 */
+		void waitUnit(const awe::UnitID id, const bool waiting) noexcept;
+
+		/**
+		 * Gets a unit's waiting state.
+		 * @param  id The ID of the unit to query.
+		 * @return \c TRUE if the unit is waiting, \c FALSE if it is not. \c FALSE
+		 *         if a unit does not exist.
+		 */
+		bool isUnitWaiting(const awe::UnitID id) const noexcept;
+
+		/**
 		 * Loads one unit onto another.
 		 * If the unit to load is already loaded onto another unit, this call will
 		 * be ignored and a warning will be logged.
@@ -909,6 +924,22 @@ namespace awe {
 		 * @throws std::exception if the file couldn't be read or written.
 		 */
 		void _CWM_2(const bool isSave);
+
+		/**
+		 * Reads or writes information pertaining to a unit in 2CWM format.
+		 * @param  isSave   \c TRUE if the file is to be written to, \c FALSE if
+		 *                  the file is to be read from.
+		 * @param  id       The ID of the unit to write info on, if writing.
+		 * @param  curtile  The location of the tile to create the unit on, if
+		 *                  reading.
+		 * @param  loadOnto The ID of the unit to load the new unit onto. \c 0 if
+		 *                  the unit should not be loaded onto another one.
+		 * @throws std::exception if the unit info couldn't be read or written.
+		 * @return When loading, \c TRUE if there was a unit created, \c FALSE if
+		 *         no unit was created. When saving, always \c TRUE.
+		 */
+		bool _CWM_2_Unit(const bool isSave, awe::UnitID id,
+			const sf::Vector2u& curtile, const awe::UnitID loadOnto = 0);
 
 		/**
 		 * File name of the binary file previously read from or written to.

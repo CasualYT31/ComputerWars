@@ -99,3 +99,7 @@ the map format:
    which stores the current day.
  - In between the `Army` loop and the `Tile` loop, there is a new `ArmyID` field,
    which stores the army whose turn it was when the map was saved.
+ - In between a unit's ammo and first loaded unit's owner, there is a new `bool`
+   field (which is one byte in size) representing the waiting state of the unit. If
+   `TRUE`, the unit is waiting and cannot be moved for the rest of the turn. If
+   `FALSE`, the unit can be moved.

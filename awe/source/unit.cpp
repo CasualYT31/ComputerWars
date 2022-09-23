@@ -92,6 +92,14 @@ awe::Ammo awe::unit::getAmmo() const noexcept {
 	return _ammo;
 }
 
+void awe::unit::wait(const bool moved) noexcept {
+	_waiting = moved;
+}
+
+bool awe::unit::isWaiting() const noexcept {
+	return _waiting;
+}
+
 void awe::unit::loadUnit(const awe::UnitID id) noexcept {
 	_loaded.insert(id);
 }
