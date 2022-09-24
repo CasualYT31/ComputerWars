@@ -39,7 +39,8 @@ namespace awe {
 	 * Class which represents a map with game logic and user input.
 	 * @sa @c awe::map
 	 */
-	class game : sf::NonCopyable, public sfx::animated_drawable {
+	class game : sf::NonCopyable, public engine::script_registrant,
+		public sfx::animated_drawable {
 	public:
 		/**
 		 * Initialises the internal logger object.
@@ -48,6 +49,12 @@ namespace awe {
 		 * @sa    \c engine::logger
 		 */
 		game(const std::string& name = "game") noexcept;
+		
+		/**
+		 * Registers the \c GameInterface type and the \c game singleton object.
+		 */
+		void registerInterface(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 		/**
 		 * Sets the script engine to use with this game.

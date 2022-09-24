@@ -39,6 +39,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace sfx {
 	/**
 	 * Value representing an invalid mouse position.
+	 * @warning If you need to change this value, make sure to also update
+	 *          \c INVALID_MOUSE_SCRIPT in <tt>engine/source/script.cpp</tt>!
 	 * @sa user_input::mousePosition()
 	 */
 	const sf::Vector2i INVALID_MOUSE = sf::Vector2i(INT_MIN, INT_MIN);

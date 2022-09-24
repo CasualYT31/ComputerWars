@@ -262,12 +262,6 @@ namespace awe {
 		 */
 		sf::Vector2i _script_scaledMousePosition() const;
 
-		/**
-		 * Used to hold a copy of @c sfx::INVALID_MOUSE that can be used with the
-		 * script interface (it can't accept pointers to constants).
-		 */
-		static sf::Vector2i _INVALID_MOUSE;
-
 		//=============================
 		//==========GAME DATA==========
 		//=============================

@@ -48,6 +48,13 @@ namespace engine {
 		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 	/**
+	 * Registers and documents the \c Vector2 and \c MousePosition types, if they
+	 * haven't already been registered.
+	 */
+	void RegisterVectorTypes(asIScriptEngine* engine,
+		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+	/**
 	 * Interface which allows a subclass to register functions, object types, etc.
 	 * with a \c scripts object.
 	 */

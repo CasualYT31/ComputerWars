@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "script.hpp"
 #include <filesystem>
 #include "SFML/Graphics/Color.hpp"
+#include "SFML/System/Vector2.hpp"
 
 void AWEColourTypeConstructor(const int r, const int g, const int b,
     const int a, void* memory) {
@@ -46,6 +47,93 @@ void engine::RegisterColourType(asIScriptEngine* engine,
             "void Colour(const int, const int, const int, const int)",
             asFUNCTION(AWEColourTypeConstructor), asCALL_CDECL_OBJLAST);
         document->DocumentObjectType(r, "Represents a colour value.");
+    }
+}
+
+void AWEVector2iTypeConstructor(const int x, const int y, void* memory) {
+    new(memory) sf::Vector2i(x, y);
+}
+
+void AWEVector2TypeConstructor(const unsigned int x, const unsigned int y,
+    void* memory) {
+    new(memory) sf::Vector2u(x, y);
+}
+
+std::string AWEVector2TypeToString(void* memory) {
+    if (memory) {
+        sf::Vector2u* v = (sf::Vector2u*)memory;
+        return "(" + std::to_string(v->x) + ", " + std::to_string(v->y) + ")";
+    }
+    return "";
+}
+
+// Wrapper for Vector2u and Vector2i operator==s.
+
+bool iEqI(void* pLhs, const sf::Vector2i& rhs) noexcept {
+    auto lhs = (const sf::Vector2i*)pLhs;
+    return lhs->x == rhs.x && lhs->y == rhs.y;
+}
+
+bool iEqU(void* pLhs, const sf::Vector2u& rhs) noexcept {
+    auto lhs = (const sf::Vector2i*)pLhs;
+    return lhs->x == rhs.x && lhs->y == rhs.y;
+}
+
+bool uEqI(void* pLhs, const sf::Vector2i& rhs) noexcept {
+    auto lhs = (const sf::Vector2u*)pLhs;
+    return lhs->x == rhs.x && lhs->y == rhs.y;
+}
+
+bool uEqU(void* pLhs, const sf::Vector2u& rhs) noexcept {
+    auto lhs = (const sf::Vector2u*)pLhs;
+    return lhs->x == rhs.x && lhs->y == rhs.y;
+}
+
+// DON'T FORGET TO KEEP sfx::INVALID_MOUSE UP TO DATE!
+sf::Vector2i INVALID_MOUSE_SCRIPT = sf::Vector2i(INT_MIN, INT_MIN);
+
+void engine::RegisterVectorTypes(asIScriptEngine* engine,
+    const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+    if (!engine->GetTypeInfoByName("Vector2")) {
+        auto r = engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
+            asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());
+        engine->RegisterObjectProperty("Vector2", "uint x",
+            asOFFSET(sf::Vector2u, x));
+        engine->RegisterObjectProperty("Vector2", "uint y",
+            asOFFSET(sf::Vector2u, y));
+        engine->RegisterObjectBehaviour("Vector2", asBEHAVE_CONSTRUCT,
+            "void Vector2(const uint, const uint)",
+            asFUNCTION(AWEVector2TypeConstructor), asCALL_CDECL_OBJLAST);
+        engine->RegisterObjectMethod("Vector2", "string toString() const",
+            asFUNCTION(AWEVector2TypeToString), asCALL_CDECL_OBJLAST);
+        document->DocumentObjectType(r, "Represents a 2D vector.");
+
+        r = engine->RegisterObjectType("MousePosition", sizeof(sf::Vector2i),
+            asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2i>());
+        document->DocumentObjectType(r, "Represents a mouse position.");
+        r = engine->RegisterGlobalProperty("const MousePosition INVALID_MOUSE",
+            &INVALID_MOUSE_SCRIPT);
+        engine->RegisterObjectProperty("MousePosition", "int x",
+            asOFFSET(sf::Vector2i, x));
+        engine->RegisterObjectProperty("MousePosition", "int y",
+            asOFFSET(sf::Vector2i, y));
+        engine->RegisterObjectBehaviour("MousePosition", asBEHAVE_CONSTRUCT,
+            "void MousePosition(const int, const int)",
+            asFUNCTION(AWEVector2iTypeConstructor), asCALL_CDECL_OBJLAST);
+        r = engine->RegisterObjectMethod("MousePosition",
+            "bool opEquals(const MousePosition&in) const",
+            asFUNCTION(iEqI), asCALL_CDECL_OBJFIRST);
+        r = engine->RegisterObjectMethod("MousePosition",
+            "bool opEquals(const Vector2&in) const",
+            asFUNCTION(iEqU), asCALL_CDECL_OBJFIRST);
+
+        // Vector 2 opEquals
+        r = engine->RegisterObjectMethod("Vector2",
+            "bool opEquals(const Vector2&in) const",
+            asFUNCTION(uEqU), asCALL_CDECL_OBJFIRST);
+        r = engine->RegisterObjectMethod("Vector2",
+            "bool opEquals(const MousePosition&in) const",
+            asFUNCTION(uEqI), asCALL_CDECL_OBJFIRST);
     }
 }
 
