@@ -928,7 +928,7 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 			auto& tile = _tiles[x][y];
 			tile.animate(target, scaling);
 			sf::Vector2u tilePos = sf::Vector2u(x, y);
-			// position the tile and their unit if they are in the visible portion
+			// Position the tile and their unit if they are in the visible portion.
 			if (_tileIsVisible(tilePos)) {
 				sf::Uint32 tileWidth = 0, tileHeight = 0;
 				auto type = tile.getTileType();
@@ -955,12 +955,32 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
 				tile.setPixelPosition(tilex + mapCenterOffset.x, tiley -
 					(float)(tileHeight - tile.MIN_HEIGHT) + mapCenterOffset.y);
-				if (tile.getUnit()) {
-					_units.at(tile.getUnit()).setPixelPosition(
-						tilex + mapCenterOffset.x, tiley + mapCenterOffset.y
-					);
+				if (!selectedUnitRenderData.renderUnitAtDestination) {
+					if (tile.getUnit()) {
+						_units.at(tile.getUnit()).setPixelPosition(
+							tilex + mapCenterOffset.x, tiley + mapCenterOffset.y
+						);
+					}
+				} else if (selectedUnitRenderData.renderUnitAtDestination) {
+					if (tile.getUnit()) {
+						if (tile.getUnit() !=
+							selectedUnitRenderData.selectedUnit) {
+							_units.at(tile.getUnit()).setPixelPosition(
+								tilex + mapCenterOffset.x,
+								tiley + mapCenterOffset.y
+							);
+						}
+					}
+					if (sf::Vector2u(x, y) ==
+						selectedUnitRenderData.closedList.back().tile) {
+						_units.at(selectedUnitRenderData.selectedUnit).
+							setPixelPosition(
+							tilex + mapCenterOffset.x,
+							tiley + mapCenterOffset.y
+						);
+					}
 				}
-				// update cursor position
+				// Update cursor position.
 				if (getSelectedTile() == tilePos) {
 					_cursor.setPosition(
 						sf::Vector2f(tilex + mapCenterOffset.x,
@@ -1030,7 +1050,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	auto mapSize = getMapSize();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
-			if (selectedUnitRenderData.selectedUnit > 0) {
+			if (selectedUnitRenderData.selectedUnit > 0 &&
+				!selectedUnitRenderData.renderUnitAtDestination) {
 				sf::Vector2u currentTile(x, y);
 				sf::RenderStates tileStates = mapStates;
 				if (selectedUnitRenderData.availableTiles.find(currentTile) !=
@@ -1054,7 +1075,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		}
 	}
 	// Step 2. the selected unit closed list tiles.
-	if (selectedUnitRenderData.selectedUnit > 0) {
+	if (selectedUnitRenderData.selectedUnit > 0 &&
+		!selectedUnitRenderData.renderUnitAtDestination) {
 		for (auto& pathNode : selectedUnitRenderData.closedList) {
 			target.draw(pathNode.sprite, mapStates);
 		}
@@ -1071,6 +1093,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 				sf::RenderStates unitStates = mapStates;
 				unitStates.shader = &_unavailableTileShader;
 				if (selectedUnitRenderData.selectedUnit > 0 &&
+					!selectedUnitRenderData.renderUnitAtDestination &&
 					unit != selectedUnitRenderData.selectedUnit) {
 					target.draw(_units.at(unit), unitStates);
 				} else {

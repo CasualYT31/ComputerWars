@@ -14,7 +14,7 @@ void BeginTurnForArmy(const ArmyID currentArmy, const array<UnitID>@ units,
 					game.getTerrainOfTile(tiles[i]).scriptName;
 				if (terrainType == "CITY" || terrainType == "BASE" ||
 					terrainType == "HQ") {
-					if (unitType == "TREADS" || unitType == "TIRES" ||
+					if (unitType == "TREAD" || unitType == "TIRES" ||
 						unitType == "INFANTRY" || unitType == "MECH" ||
 						unitType == "PIPELINE") {
 						game.healUnit(unitOnTile, getInternalHP(2));

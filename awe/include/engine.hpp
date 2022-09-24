@@ -258,6 +258,11 @@ namespace awe {
 		std::string _script_translate(const std::string& nativeString) const;
 
 		/**
+		 * Returns the current mouse position, scaled down by \c _scaling.
+		 */
+		sf::Vector2i _script_scaledMousePosition() const;
+
+		/**
 		 * Used to hold a copy of @c sfx::INVALID_MOUSE that can be used with the
 		 * script interface (it can't accept pointers to constants).
 		 */
@@ -380,6 +385,11 @@ namespace awe {
 		 * The name of the menu that was showing before a map was loaded.
 		 */
 		std::string _menuBeforeMapLoad;
+
+		/**
+		 * The scaling applied to all drawing.
+		 */
+		float _scaling = 2.0f;
 	};
 }
 

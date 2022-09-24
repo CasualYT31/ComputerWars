@@ -224,6 +224,27 @@ namespace awe {
 		 */
 		void disableMoveMode();
 
+		/**
+		 * Temporarily moves the unit in move mode, at render time, to the
+		 * currently selected tile, if given \c TRUE.
+		 * The call will be ignored if the currently selected tile is not in the
+		 * selected unit's set of available tiles.
+		 * @param  preview If \c TRUE, the selected unit will be rendered at the
+		 *                 chosen destination. If \c FALSE, the selected unit will
+		 *                 be rendered at its true location on the map.
+		 * @throws std::runtime_error if no map is currently loaded, or if there
+		 *                            isn't currently a unit in move mode.
+		 */
+		void togglePreviewMoveMode(const bool preview);
+
+		/**
+		 * Moves the currently selected unit along the chosen path and disables
+		 * move mode.
+		 * @throws std::runtime_error if no map is currently loaded, or if there
+		 *                            isn't currently a unit in move mode.
+		 */
+		void moveUnit();
+
 		////////////////////////
 		// NOT UNIQUE TO GAME //
 		////////////////////////
@@ -397,6 +418,18 @@ namespace awe {
 		 * @sa     @c awe::map::getSelectedArmy().
 		 */
 		awe::ArmyID getCurrentArmy() const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::isUnitWaiting().
+		 */
+		bool isUnitWaiting(const awe::UnitID id) const;
+
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::selectedUnitRenderData.selectUnit.
+		 */
+		awe::UnitID getMovingUnit() const;
 
 		/////////////////////
 		//  END  INTERFACE //

@@ -60,6 +60,11 @@ namespace awe {
 		 * The animated sprite of the icon.
 		 */
 		sfx::animated_sprite sprite;
+
+		/**
+		 * The G score for this node.
+		 */
+		int g = 0;
 	};
 
 	/**

@@ -153,6 +153,14 @@ void awe::game::zoomOut() {
 
 void awe::game::endTurn() {
 	if (_map) {
+		// Before selecting the next army, ensure that each of the previous army's
+		// units are no longer in the waiting state.
+		const auto previousArmyUnits =
+			_map->getUnitsOfArmy(_map->getSelectedArmy());
+		for (auto unit : previousArmyUnits) {
+			_map->waitUnit(unit, false);
+		}
+		// Update the current army.
 		const auto next = _map->getNextArmy();
 		if (_map->getSelectedArmy() >= next) {
 			// It can technically overflow, but I don't care! If they can play for
@@ -393,10 +401,46 @@ void awe::game::enableMoveMode() {
 }
 
 void awe::game::disableMoveMode() {
-	if (_map)
+	if (_map) {
 		_map->selectedUnitRenderData.clearState();
-	else
+	} else {
 		throw NO_MAP;
+	}
+}
+
+void awe::game::togglePreviewMoveMode(const bool preview) {
+	if (_map) {
+		if (_map->selectedUnitRenderData.selectedUnit > 0) {
+			if (_map->selectedUnitRenderData.availableTiles.find(
+				_map->getSelectedTile()) !=
+				_map->selectedUnitRenderData.availableTiles.end()) {
+				_map->selectedUnitRenderData.renderUnitAtDestination = preview;
+			}
+		} else {
+			throw std::runtime_error("A unit is not in move mode!");
+		}
+	} else {
+		throw NO_MAP;
+	}
+}
+
+void awe::game::moveUnit() {
+	if (_map) {
+		if (_map->selectedUnitRenderData.selectedUnit > 0) {
+			// Burn the right amount of fuel, update the unit's position, and make
+			// it wait.
+			const auto id = _map->selectedUnitRenderData.selectedUnit;
+			const auto& node = _map->selectedUnitRenderData.closedList.back();
+			_map->setUnitFuel(id, _map->getUnitFuel(id) - node.g);
+			_map->setUnitPosition(id, node.tile);
+			_map->waitUnit(id, true);
+			_map->selectedUnitRenderData.clearState();
+		} else {
+			throw std::runtime_error("A unit is not in move mode!");
+		}
+	} else {
+		throw NO_MAP;
+	}
 }
 
 //////////////////////
@@ -643,6 +687,21 @@ awe::ArmyID awe::game::getCurrentArmy() const {
 	throw NO_MAP;
 }
 
+bool awe::game::isUnitWaiting(const awe::UnitID id) const {
+	if (_map) {
+		return _map->isUnitWaiting(id);
+	}
+	throw NO_MAP;
+}
+
+awe::UnitID awe::game::getMovingUnit() const {
+	if (_map) {
+		return _map->selectedUnitRenderData.selectedUnit;
+	} else {
+		throw NO_MAP;
+	}
+}
+
 //////////////////////////////
 // INTERFACE HELPER METHODS //
 //////////////////////////////
@@ -669,7 +728,7 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 	const std::shared_ptr<const awe::movement_type>& moveType,
 	const unsigned int movePoints, const awe::Fuel fuel,
 	const std::vector<awe::closed_list_node>& oldClosedList) {
-	// openSet could be a min-heap or priority queue.
+	// openSet could be a min-heap or priority queue for added efficiency.
 	std::unordered_set<sf::Vector2u> openSet;
 	std::unordered_map<sf::Vector2u, sf::Vector2u> cameFrom;
 	std::unordered_map<sf::Vector2u, int> gScore;
@@ -685,11 +744,8 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 		for (std::size_t i = 0; i < oldClosedList.size(); ++i) {
 			if (i > 0) {
 				cameFrom[oldClosedList.at(i).tile] = oldClosedList.at(i - 1).tile;
-				auto moveCost =
-					_map->getTileType(oldClosedList.at(i).tile)->getType()->
-					getMoveCost(moveType->getID());
 				gScore[oldClosedList.at(i).tile] =
-					gScore[oldClosedList.at(i - 1).tile] + moveCost;
+					gScore[oldClosedList.at(i - 1).tile] + oldClosedList.at(i).g;
 				fScore[oldClosedList.at(i).tile] =
 					gScore[oldClosedList.at(i).tile] +
 					awe::distance(oldClosedList.at(i).tile, dest);
@@ -715,10 +771,11 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 		if (currentTile == dest) {
 			// Path found.
 			std::vector<awe::closed_list_node> ret =
-				{ { currentTile, { _iconSheet, "" }} };
+				{ { currentTile, { _iconSheet, "" }, gScore[currentTile]} };
 			while (cameFrom.find(currentTile) != cameFrom.end()) {
 				currentTile = cameFrom[currentTile];
-				ret.insert(ret.begin(), { currentTile, { _iconSheet, "" }});
+				ret.insert(ret.begin(), { currentTile, { _iconSheet, "" },
+					gScore[currentTile] });
 			}
 			// Starting from the beginning; calculate the arrow sprites to draw for
 			// each tile.
@@ -812,7 +869,8 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 }
 
 void awe::game::_updateMoveModeClosedList() noexcept {
-	if (_map->selectedUnitRenderData.selectedUnit > 0) {
+	if (_map->selectedUnitRenderData.selectedUnit > 0 && _map->getSelectedTile()
+		!= _map->selectedUnitRenderData.closedList.back().tile) {
 		auto unitType =
 			_map->getUnitType(_map->selectedUnitRenderData.selectedUnit);
 		auto newClosedList = _findPath(

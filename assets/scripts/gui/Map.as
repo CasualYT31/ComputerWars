@@ -50,7 +50,8 @@ void MapHandleInput(const dictionary controls) {
 	HandleCommonGameInput(controls);
 	if (bool(controls["select"])) {
 		auto cursor = game.getSelectedTile();
-		if (game.getUnitOnTile(cursor) == 0) {
+		auto unitID = game.getUnitOnTile(cursor);
+		if (unitID == 0) {
 			ArmyID owner = game.getTileOwner(cursor);
 			ArmyID currentArmy = game.getCurrentArmy();
 			string type = game.getTerrainOfTile(cursor).scriptName;
@@ -62,7 +63,8 @@ void MapHandleInput(const dictionary controls) {
 			}
 			setGUI("MapMenu");
 			return;
-		} else {
+		} else if (game.getArmyOfUnit(unitID) == game.getCurrentArmy() &&
+			!game.isUnitWaiting(unitID)) {
 			game.enableMoveMode();
 			setGUI("MoveUnitMenu");
 			return;

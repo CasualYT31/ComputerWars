@@ -31,7 +31,6 @@ int awe::game_engine::run() noexcept {
 	auto r = _initCheck();
 	if (r) return r;
 
-	const float scaling = 2.0f;
 	try {
 		while (_renderer->isOpen()) {
 			// Handle menu user input first before handling the events.
@@ -53,12 +52,12 @@ int awe::game_engine::run() noexcept {
 			}
 
 			_renderer->clear();
-			_renderer->animate(*_gui, scaling);
-			_renderer->animate(_game, scaling);
+			_renderer->animate(*_gui, _scaling);
+			_renderer->animate(_game, _scaling);
 			_renderer->draw(_game,
-				sf::RenderStates().transform.scale(scaling, scaling));
+				sf::RenderStates().transform.scale(_scaling, _scaling));
 			_renderer->draw(*_gui,
-				sf::RenderStates().transform.scale(scaling, scaling));
+				sf::RenderStates().transform.scale(_scaling, _scaling));
 			_renderer->display();
 		}
 	} catch (std::exception& e) {
@@ -441,6 +440,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"their turn.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
+		"bool isUnitWaiting(const UnitID) const",
+		asMETHOD(awe::game, isUnitWaiting), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns <tt>TRUE</tt> if a unit is "
+		"waiting, <tt>FALSE</tt> otherwise.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
 		"bool buyUnit(const BankID)",
 		asMETHOD(awe::game, buyUnit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Buys a unit for the current army and "
@@ -457,6 +462,25 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game, disableMoveMode), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Disables move mode for the unit currently "
 		"in move mode.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"void togglePreviewMoveMode(const bool)",
+		asMETHOD(awe::game, togglePreviewMoveMode), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Temporarily moves the unit in move mode to "
+		"the currently selected tile (but does not actually update the unit's "
+		"position), if given <tt>TRUE</tt>.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"void moveUnit()",
+		asMETHOD(awe::game, moveUnit), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Moves the currently selected unit along "
+		"the chosen path and makes it wait.");
+
+	r = engine->RegisterObjectMethod("GameInterface",
+		"UnitID getMovingUnit()",
+		asMETHOD(awe::game, getMovingUnit), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the ID of the unit that is currently "
+		"in move mode. <tt>0</tt> if no unit is in move mode.");
 
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
@@ -649,6 +673,16 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"client area. Will return <tt>INVALID_MOUSE</tt> if the game's window "
 		"does not have focus.");
 
+	r = engine->RegisterGlobalFunction("MousePosition scaledMousePosition()",
+		asMETHOD(awe::game_engine, _script_scaledMousePosition),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Retrieves the current position of the "
+		"mouse, in pixels, relative to the game window's upper left corner of the "
+		"client area. Will return <tt>INVALID_MOUSE</tt> if the game's window "
+		"does not have focus. Also scales it down appropriately depending on the "
+		"scaling currently applied to all of the game's drawing. Useful for when "
+		"you need to position a widget relative to the mouse position.");
+
 	r = engine->RegisterGlobalFunction("Vector2 getWindowSize()",
 		asMETHOD(sfx::renderer, getSize),
 		asCALL_THISCALL_ASGLOBAL, _renderer.get());
@@ -838,6 +872,15 @@ void awe::game_engine::_script_quitMap() {
 std::string awe::game_engine::_script_translate(const std::string& nativeString)
 	const {
 	return _dictionary->operator()(nativeString);
+}
+
+sf::Vector2i awe::game_engine::_script_scaledMousePosition() const {
+	auto ret = _userinput->mousePosition();
+	if (ret != sfx::INVALID_MOUSE) {
+		return { (int)((float)ret.x / _scaling), (int)((float)ret.y / _scaling) };
+	} else {
+		return ret;
+	}
 }
 
 // initCheck()

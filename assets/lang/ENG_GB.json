@@ -5,6 +5,7 @@
 	"quit": "Quit",
 	"range": "Range",
 	"endturn": "End Turn",
+	"wait": "Wait",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",
