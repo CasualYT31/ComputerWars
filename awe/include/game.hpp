@@ -490,6 +490,13 @@ namespace awe {
 		void _updateMoveModeClosedList() noexcept;
 
 		/**
+		 * Updates a closed list's arrow icons.
+		 * @param ret Reference to the closed list to update.
+		 */
+		void _updateClosedListArrowIcons(std::vector<awe::closed_list_node>& ret)
+			const noexcept;
+
+		/**
 		 * Internal logger object.
 		 */
 		mutable engine::logger _logger;

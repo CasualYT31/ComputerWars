@@ -1060,55 +1060,7 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 				ret.insert(ret.begin(), { currentTile, { _iconSheet, "" },
 					gScore[currentTile] });
 			}
-			// Starting from the beginning; calculate the arrow sprites to draw for
-			// each tile.
-			for (std::size_t i = 0; i < ret.size(); ++i) {
-				if (i == 0) {
-					ret[i].sprite.setSpritesheet(nullptr);
-				} else if (i == ret.size() - 1) {
-					if (ret[i - 1].tile.x < ret[i].tile.x) {
-						ret[i].sprite.setSprite("unitArrowRight");
-					} else if (ret[i - 1].tile.x > ret[i].tile.x) {
-						ret[i].sprite.setSprite("unitArrowLeft");
-					} else if (ret[i - 1].tile.y < ret[i].tile.y) {
-						ret[i].sprite.setSprite("unitArrowDown");
-					} else if (ret[i - 1].tile.y > ret[i].tile.y) {
-						ret[i].sprite.setSprite("unitArrowUp");
-					}
-				} else {
-					if ((ret[i - 1].tile.x < ret[i].tile.x &&
-						ret[i].tile.x < ret[i + 1].tile.x) ||
-						(ret[i - 1].tile.x > ret[i].tile.x &&
-							ret[i].tile.x > ret[i + 1].tile.x)) {
-						ret[i].sprite.setSprite("unitArrowHori");
-					} else if ((ret[i - 1].tile.y < ret[i].tile.y &&
-						ret[i].tile.y < ret[i + 1].tile.y) ||
-						(ret[i - 1].tile.y > ret[i].tile.y &&
-							ret[i].tile.y > ret[i + 1].tile.y)) {
-						ret[i].sprite.setSprite("unitArrowVert");
-					} else if ((ret[i - 1].tile.y < ret[i].tile.y &&
-						ret[i].tile.x < ret[i + 1].tile.x) ||
-						(ret[i - 1].tile.x > ret[i].tile.x &&
-							ret[i].tile.y > ret[i + 1].tile.y)) {
-						ret[i].sprite.setSprite("unitArrowNE");
-					} else if ((ret[i - 1].tile.y > ret[i].tile.y &&
-						ret[i].tile.x < ret[i + 1].tile.x) ||
-						(ret[i - 1].tile.x > ret[i].tile.x &&
-							ret[i].tile.y < ret[i + 1].tile.y)) {
-						ret[i].sprite.setSprite("unitArrowSE");
-					} else if ((ret[i - 1].tile.x < ret[i].tile.x &&
-						ret[i].tile.y > ret[i + 1].tile.y) ||
-						(ret[i - 1].tile.y < ret[i].tile.y &&
-							ret[i].tile.x > ret[i + 1].tile.x)) {
-						ret[i].sprite.setSprite("unitArrowNW");
-					} else if ((ret[i - 1].tile.x < ret[i].tile.x &&
-						ret[i].tile.y < ret[i + 1].tile.y) ||
-						(ret[i - 1].tile.y > ret[i].tile.y &&
-							ret[i].tile.x > ret[i + 1].tile.x)) {
-						ret[i].sprite.setSprite("unitArrowSW");
-					}
-				}
-			}
+			_updateClosedListArrowIcons(ret);
 			return ret;
 		}
 
@@ -1116,7 +1068,7 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 		auto adjacentTiles = _map->getAvailableTiles(currentTile, 1, 1);
 		for (auto& adjacentTile : adjacentTiles) {
 			// Get the movement cost for this terrain.
-			auto moveCost =
+			const auto moveCost =
 				_map->getTileType(adjacentTile)->getType()->
 				getMoveCost(moveType->getID());
 
@@ -1152,31 +1104,160 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 }
 
 void awe::game::_updateMoveModeClosedList() noexcept {
-	if (_map->selectedUnitRenderData.selectedUnit > 0 && _map->getSelectedTile()
-		!= _map->selectedUnitRenderData.closedList.back().tile) {
-		auto unitType =
-			_map->getUnitType(_map->selectedUnitRenderData.selectedUnit);
-		auto newClosedList = _findPath(
-			_map->getUnitPosition(_map->selectedUnitRenderData.selectedUnit),
-			_map->getSelectedTile(),
-			unitType->getMovementType(),
-			unitType->getMovementPoints(),
-			_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit),
-			_map->selectedUnitRenderData.closedList
-		);
-		if (!newClosedList.empty()) {
-			_map->selectedUnitRenderData.closedList = newClosedList;
-		} else if (newClosedList.empty() && _map->selectedUnitRenderData.
-			availableTiles.find(_map->getSelectedTile()) !=
-			_map->selectedUnitRenderData.availableTiles.end()) {
-			// Calculate new shortest path and assign it to the closed list.
+	// If in move mode, and the selection has changed, and the selection is of an
+	// available tile, then attempt to append the currently selected tile to the
+	// closed list. If the path won't work, then deduce the shortest path and use
+	// that instead.
+	const auto tile = _map->getSelectedTile();
+	if (_map->selectedUnitRenderData.selectedUnit > 0 &&
+		_map->selectedUnitRenderData.availableTiles.find(tile) !=
+		_map->selectedUnitRenderData.availableTiles.end()) {
+		const auto unitID = _map->selectedUnitRenderData.selectedUnit;
+		const auto unitType = _map->getUnitType(unitID);
+
+		// If the closed list is empty, fallback on the _findPath() method.
+		if (_map->selectedUnitRenderData.closedList.empty()) {
 			_map->selectedUnitRenderData.closedList = _findPath(
-				_map->getUnitPosition(_map->selectedUnitRenderData.selectedUnit),
-				_map->getSelectedTile(),
+				_map->getUnitPosition(
+					_map->selectedUnitRenderData.selectedUnit),
+				tile,
 				unitType->getMovementType(),
 				unitType->getMovementPoints(),
 				_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)
 			);
+
+		} else if (tile != _map->selectedUnitRenderData.closedList.back().tile) {
+			// If any distance between any two adjacent tiles in the closed list is
+			// more than one, then we need to fix up the list. The easiest way to
+			// do this is to just find the shortest path. The closed list can get
+			// into this state if the mouse is moved very quickly, for example.
+			for (std::size_t i = 1;
+				i < _map->selectedUnitRenderData.closedList.size(); ++i) {
+				if (awe::distance(
+					_map->selectedUnitRenderData.closedList.at(i - 1).tile,
+					_map->selectedUnitRenderData.closedList.at(i).tile) > 1) {
+					_map->selectedUnitRenderData.closedList = _findPath(
+						_map->getUnitPosition(
+							_map->selectedUnitRenderData.selectedUnit),
+						tile,
+						unitType->getMovementType(),
+						unitType->getMovementPoints(),
+						_map->getUnitFuel(
+							_map->selectedUnitRenderData.selectedUnit)
+					);
+					return;
+				}
+			}
+
+			// If a tile has been selected that's already in the closed list, then
+			// simply remove all tiles from the closed list that come after it.
+			for (auto itr = _map->selectedUnitRenderData.closedList.begin(),
+				enditr = _map->selectedUnitRenderData.closedList.end();
+				itr != enditr; ++itr) {
+				if (itr->tile == tile) {
+					_map->selectedUnitRenderData.closedList.erase(itr + 1, enditr);
+					_updateClosedListArrowIcons(
+						_map->selectedUnitRenderData.closedList);
+					return;
+				}
+			}
+
+			const auto moveCost = _map->getTileType(tile)->getType()->
+				getMoveCost(unitType->getMovementType()->getID());
+			const auto tentativeGScore =
+				_map->selectedUnitRenderData.closedList.back().g + moveCost;
+
+			if (tentativeGScore <= _map->getUnitFuel(unitID) &&
+				(unsigned int)tentativeGScore <= unitType->getMovementPoints()) {
+				_map->selectedUnitRenderData.closedList.push_back({ tile,
+					{ _iconSheet, "" }, tentativeGScore });
+				_updateClosedListArrowIcons(
+					_map->selectedUnitRenderData.closedList);
+				// Because we've just appended a new node without checking it
+				// thoroughly, the user could have moved their cursor off the
+				// available tiles and joined back into the available tiles again
+				// to a form a completely disjointed path. So we need to carry out
+				// distance checking again!
+				for (std::size_t i = 1;
+					i < _map->selectedUnitRenderData.closedList.size(); ++i) {
+					if (awe::distance(
+						_map->selectedUnitRenderData.closedList.at(i - 1).tile,
+						_map->selectedUnitRenderData.closedList.at(i).tile) > 1) {
+						_map->selectedUnitRenderData.closedList = _findPath(
+							_map->getUnitPosition(
+								_map->selectedUnitRenderData.selectedUnit),
+							tile,
+							unitType->getMovementType(),
+							unitType->getMovementPoints(),
+							_map->getUnitFuel(
+								_map->selectedUnitRenderData.selectedUnit)
+						);
+						return;
+					}
+				}
+			} else {
+				_map->selectedUnitRenderData.closedList = _findPath(
+					_map->getUnitPosition(
+						_map->selectedUnitRenderData.selectedUnit),
+					tile,
+					unitType->getMovementType(),
+					unitType->getMovementPoints(),
+					_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)
+				);
+			}
+		}
+	}
+}
+
+void awe::game::_updateClosedListArrowIcons(
+	std::vector<awe::closed_list_node>& ret) const noexcept {
+	// Starting from the beginning; calculate the arrow sprites to draw for
+	// each tile.
+	for (std::size_t i = 0; i < ret.size(); ++i) {
+		if (i == 0) {
+			ret[i].sprite.setSpritesheet(nullptr);
+		} else if (i == ret.size() - 1) {
+			if (ret[i - 1].tile.x < ret[i].tile.x) {
+				ret[i].sprite.setSprite("unitArrowRight");
+			} else if (ret[i - 1].tile.x > ret[i].tile.x) {
+				ret[i].sprite.setSprite("unitArrowLeft");
+			} else if (ret[i - 1].tile.y < ret[i].tile.y) {
+				ret[i].sprite.setSprite("unitArrowDown");
+			} else if (ret[i - 1].tile.y > ret[i].tile.y) {
+				ret[i].sprite.setSprite("unitArrowUp");
+			}
+		} else {
+			if ((ret[i - 1].tile.x < ret[i].tile.x &&
+				ret[i].tile.x < ret[i + 1].tile.x) ||
+				(ret[i - 1].tile.x > ret[i].tile.x &&
+					ret[i].tile.x > ret[i + 1].tile.x)) {
+				ret[i].sprite.setSprite("unitArrowHori");
+			} else if ((ret[i - 1].tile.y < ret[i].tile.y &&
+				ret[i].tile.y < ret[i + 1].tile.y) ||
+				(ret[i - 1].tile.y > ret[i].tile.y &&
+					ret[i].tile.y > ret[i + 1].tile.y)) {
+				ret[i].sprite.setSprite("unitArrowVert");
+			} else if ((ret[i - 1].tile.y < ret[i].tile.y &&
+				ret[i].tile.x < ret[i + 1].tile.x) ||
+				(ret[i - 1].tile.x > ret[i].tile.x &&
+					ret[i].tile.y > ret[i + 1].tile.y)) {
+				ret[i].sprite.setSprite("unitArrowNE");
+			} else if ((ret[i - 1].tile.y > ret[i].tile.y &&
+				ret[i].tile.x < ret[i + 1].tile.x) ||
+				(ret[i - 1].tile.x > ret[i].tile.x &&
+					ret[i].tile.y < ret[i + 1].tile.y)) {
+				ret[i].sprite.setSprite("unitArrowSE");
+			} else if ((ret[i - 1].tile.x < ret[i].tile.x &&
+				ret[i].tile.y > ret[i + 1].tile.y) ||
+				(ret[i - 1].tile.y < ret[i].tile.y &&
+					ret[i].tile.x > ret[i + 1].tile.x)) {
+				ret[i].sprite.setSprite("unitArrowNW");
+			} else if ((ret[i - 1].tile.x < ret[i].tile.x &&
+				ret[i].tile.y < ret[i + 1].tile.y) ||
+				(ret[i - 1].tile.y > ret[i].tile.y &&
+					ret[i].tile.x > ret[i + 1].tile.x)) {
+				ret[i].sprite.setSprite("unitArrowSW");
+			}
 		}
 	}
 }
