@@ -483,16 +483,23 @@ namespace awe {
 		 * Sets a unit's HP.
 		 * If < 0 is given, 0 will be stored.
 		 * @param id The ID of the unit to amend.
-		 * @param hp The new HP of the unit.
+		 * @param hp The new HP of the unit. In internal format.
 		 */
 		void setUnitHP(const awe::UnitID id, const awe::HP hp) noexcept;
 
 		/**
 		 * Gets a unit's HP.
 		 * @param  id The ID of the unit to inspect.
-		 * @return The HP of the unit. \c 0 if unit doesn't exist.
+		 * @return The internal HP of the unit. \c 0 if unit doesn't exist.
 		 */
 		awe::HP getUnitHP(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Gets a unit's HP in a user-friendly format.
+		 * @param  id The ID of the unit to inspect.
+		 * @return The user-friendly HP of the unit. \c 0 if unit doesn't exist.
+		 */
+		awe::HP getUnitDisplayedHP(const awe::UnitID id) const noexcept;
 
 		/**
 		 * Sets a unit's fuel.

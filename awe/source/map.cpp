@@ -456,6 +456,13 @@ awe::HP awe::map::getUnitHP(const awe::UnitID id) const noexcept {
 	return 0;
 }
 
+awe::HP awe::map::getUnitDisplayedHP(const awe::UnitID id) const noexcept {
+	if (_isUnitPresent(id)) return _units.at(id).getDisplayedHP();
+	_logger.error("getUnitDisplayedHP operation failed: unit with ID {} doesn't "
+		"exist!", id);
+	return 0;
+}
+
 void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept {
 	if (_isUnitPresent(id)) {
 		_units.at(id).setFuel(fuel);

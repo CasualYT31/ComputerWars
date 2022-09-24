@@ -888,17 +888,26 @@ namespace awe {
 
 		/**
 		 * Converts an internal HP value into a user-friendly one.
+		 * Note that if one wishes to add this function to the script interface,
+		 * they will have to remove \c inline in order to do so.
 		 * @param  hp The internal HP.
 		 * @return The user-friendly HP.
 		 */
-		static awe::HP getDisplayedHP(const awe::HP hp) noexcept;
+		static inline awe::HP getDisplayedHP(const awe::HP hp) noexcept {
+			return (awe::HP)ceil((double)hp /
+				(double)awe::unit_type::HP_GRANULARITY);
+		}
 
 		/**
 		 * Converts a user-friendly HP value into an internal one.
+		 * Note that if one wishes to add this function to the script interface,
+		 * they will have to remove \c inline in order to do so.
 		 * @param  hp The user-friendly HP.
 		 * @return The internal HP.
 		 */
-		static awe::HP getInternalHP(const awe::HP hp) noexcept;
+		static inline awe::HP getInternalHP(const awe::HP hp) noexcept {
+			return hp * awe::unit_type::HP_GRANULARITY;
+		}
 
 		/**
 		 * Constructor which scans a JSON object for the unit type's properties.

@@ -22,13 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-inline awe::HP awe::unit_type::getDisplayedHP(const awe::HP hp) noexcept {
-	return (awe::HP)ceil((double)hp / (double)awe::unit_type::HP_GRANULARITY);
-}
-inline awe::HP awe::unit_type::getInternalHP(const awe::HP hp) noexcept {
-	return hp * awe::unit_type::HP_GRANULARITY;
-}
-
 template<typename T>
 awe::bank<T>::bank(const std::shared_ptr<engine::scripts>& scripts,
 	const std::string& name, const std::string& logName) noexcept :

@@ -220,9 +220,10 @@ void awe::game::healUnit(const awe::UnitID unit, awe::HP hp) {
 		auto type = _map->getUnitType(unit);
 		if (type) {
 			const unsigned int maxHP = _map->getUnitType(unit)->getMaxHP();
-			awe::HP newHP = _map->getUnitHP(unit) + hp;
+			awe::HP newHP = _map->getUnitHP(unit) +
+				awe::unit_type::getInternalHP(hp);
 			if ((unsigned int)newHP > maxHP) {
-				hp -= newHP - maxHP;
+				hp -= awe::unit_type::getDisplayedHP(newHP - maxHP);
 				newHP = (awe::HP)maxHP;
 			}
 			// See if the army can afford the heal. If not, attempt to heal 1 less.
@@ -233,8 +234,7 @@ void awe::game::healUnit(const awe::UnitID unit, awe::HP hp) {
 			const awe::Funds currentFunds = _map->getArmyFunds(currentArmy);
 			while (true) {
 				awe::Funds charge = type->getCost() /
-					awe::unit_type::getDisplayedHP(type->getMaxHP()) *
-					awe::unit_type::getDisplayedHP(hp);
+					awe::unit_type::getDisplayedHP(type->getMaxHP()) * hp;
 				if (hp <= 0) {
 					// Get internal HP. Then convert it to user HP. Finally,
 					// converting it back into internal HP should return the full
@@ -244,7 +244,7 @@ void awe::game::healUnit(const awe::UnitID unit, awe::HP hp) {
 							_map->getUnitHP(unit))));
 					break;
 				} else if (charge > currentFunds) {
-					hp -= awe::unit_type::getInternalHP(1);
+					hp -= 1;
 					newHP -= awe::unit_type::getInternalHP(1);
 				} else {
 					_map->setUnitHP(unit, newHP);
@@ -630,30 +630,34 @@ awe::ArmyID awe::game::getArmyOfUnit(const awe::UnitID id) const {
 }
 
 sf::Vector2u awe::game::getUnitPosition(const awe::UnitID id) const {
-	if (_map)
+	if (_map) {
 		return _map->getUnitPosition(id);
+	}
 	throw NO_MAP;
 }
 
-awe::HP awe::game::getUnitHP(const awe::UnitID id) const {
-	if (_map)
-		return _map->getUnitHP(id);
-	else
+awe::HP awe::game::getUnitDisplayedHP(const awe::UnitID id) const {
+	if (_map) {
+		return _map->getUnitDisplayedHP(id);
+	} else {
 		throw NO_MAP;
+	}
 }
 
 awe::Fuel awe::game::getUnitFuel(const awe::UnitID id) const {
-	if (_map)
+	if (_map) {
 		return _map->getUnitFuel(id);
-	else
+	} else {
 		throw NO_MAP;
+	}
 }
 
 awe::Ammo awe::game::getUnitAmmo(const awe::UnitID id) const {
-	if (_map)
+	if (_map) {
 		return _map->getUnitAmmo(id);
-	else
+	} else {
 		throw NO_MAP;
+	}
 }
 
 CScriptArray* awe::game::getLoadedUnits(const awe::UnitID id) const {

@@ -366,8 +366,9 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 
 	r = engine->RegisterObjectMethod("GameInterface",
 		"HP getUnitHP(const UnitID)",
-		asMETHOD(awe::game, getUnitHP), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Returns the HP that a given unit has.");
+		asMETHOD(awe::game, getUnitDisplayedHP), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the user-friendly HP that a given "
+		"unit has.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
 		"Fuel getUnitFuel(const UnitID)",
@@ -398,7 +399,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game, healUnit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Adds HP to a given unit. Ensures that the "
 		"unit's HP does not go over its max. The given HP can't be at or below 0. "
-		"The given HP should be an internal HP value.");
+		"The given HP should be a user-friendly HP value.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
 		"void replenishUnit(const UnitID)",
@@ -688,16 +689,6 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, _renderer.get());
 	document->DocumentGlobalFunction(r, "Returns the render window's client "
 		"region's size, in pixels.");
-
-	r = engine->RegisterGlobalFunction("HP getDisplayedHP(const HP)",
-		asFUNCTION(awe::unit_type::getDisplayedHP), asCALL_CDECL);
-	document->DocumentGlobalFunction(r, "Receives an internal unit HP value and "
-		"returns the unit HP value that is displayed to the user.");
-
-	r = engine->RegisterGlobalFunction("HP getInternalHP(const HP)",
-		asFUNCTION(awe::unit_type::getInternalHP), asCALL_CDECL);
-	document->DocumentGlobalFunction(r, "Receives a user-friendly unit HP value "
-		"and returns the equivalent internal HP value.");
 
 	r = engine->RegisterGlobalFunction("string translate(const string&in)",
 		asMETHOD(awe::game_engine, _script_translate),

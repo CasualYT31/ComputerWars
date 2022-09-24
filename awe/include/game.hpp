@@ -143,9 +143,8 @@ namespace awe {
 		 * Ensures that a unit's HP does not exceed its maximum. Also charges the
 		 * current army for the heal.
 		 * @param  unit The ID of the unit to heal.
-		 * @param  hp   The internal HP amount to heal by.
-		 * @return The <b>user-friendly</b> (i.e. not internal) HP that was
-		 *         actually healed.
+		 * @param  hp   The user-friendly HP amount to heal by.
+		 * @return The user-friendly HP that was actually healed.
 		 * @throws std::runtime_error if no map is currently loaded, if the given
 		 *                            unit ID was invalid, or if the given HP value
 		 *                            was at or below \c 0.
@@ -384,10 +383,11 @@ namespace awe {
 		sf::Vector2u getUnitPosition(const awe::UnitID id) const;
 
 		/**
-		 * @throws std::runtime_error if no map is currently loaded.
-		 * @sa     @c awe::map::getUnitHP().
+		 * Gets the user-friendly HP of a unit.
+		 * @throws  std::runtime_error if no map is currently loaded.
+		 * @sa      @c awe::map::getUnitDisplayedHP().
 		 */
-		awe::HP getUnitHP(const awe::UnitID id) const;
+		awe::HP getUnitDisplayedHP(const awe::UnitID id) const;
 
 		/**
 		 * @throws std::runtime_error if no map is currently loaded.

@@ -183,7 +183,7 @@ class TileWidget {
 			]);
 			_panels[i].setName(unitType.shortName);
 			_panels[i].setPropertyText(0, "~" +
-				formatInt(getDisplayedHP(game.getUnitHP(unitID))));
+				formatInt(game.getUnitHP(unitID)));
 			_panels[i].setPropertyText(1, "~" +
 				formatInt(game.getUnitFuel(unitID)));
 			_panels[i].setPropertyText(2, "~" +
@@ -319,7 +319,7 @@ class TileWidget {
 		_unitPanels[panel].setName(unitType.shortName);
 		uint index = 0;
 		_unitPanels[panel].setProperty(index++, "~" +
-			formatInt(getDisplayedHP(game.getUnitHP(unitID))), "icon", "hp");
+			formatInt(game.getUnitHP(unitID)), "icon", "hp");
 		_unitPanels[panel].setProperty(index++, "~" +
 			formatInt(game.getUnitFuel(unitID)), "icon", "fuel");
 		_unitPanels[panel].setProperty(index++, "~" +

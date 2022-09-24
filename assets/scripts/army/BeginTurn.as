@@ -17,17 +17,17 @@ void BeginTurnForArmy(const ArmyID currentArmy, const array<UnitID>@ units,
 					if (unitType == "TREAD" || unitType == "TIRES" ||
 						unitType == "INFANTRY" || unitType == "MECH" ||
 						unitType == "PIPELINE") {
-						game.healUnit(unitOnTile, getInternalHP(2));
+						game.healUnit(unitOnTile, 2);
 						game.replenishUnit(unitOnTile);
 					}
 				} else if (terrainType == "AIRPORT") {
 					if (unitType == "AIR") {
-						game.healUnit(unitOnTile, getInternalHP(2));
+						game.healUnit(unitOnTile, 2);
 						game.replenishUnit(unitOnTile);
 					}
 				} else if (terrainType == "PORT") {
 					if (unitType == "SHIPS" || unitType == "TRANSPORT") {
-						game.healUnit(unitOnTile, getInternalHP(2));
+						game.healUnit(unitOnTile, 2);
 						game.replenishUnit(unitOnTile);
 					}
 				}
