@@ -17,6 +17,19 @@ void NewGameOptionsSetUp() {
 	setWidgetPosition("DeletePlay", "5%", "95%");
 	setWidgetOrigin("DeletePlay", 0.0, 1.0);
 
+	addWidget("VerticalLayout", "Teams");
+	setWidgetOrigin("Teams", 1.0, 0.5);
+	setWidgetPosition("Teams", "100%", "50%");
+	setWidgetSize("Teams", "10%", "200px");
+	addWidget("EditBox", "Teams.OS");
+	setWidgetDefaultText("Teams.OS", "~OS's Team");
+	addWidget("EditBox", "Teams.BM");
+	setWidgetDefaultText("Teams.BM", "~BM's Team");
+	addWidget("EditBox", "Teams.GE");
+	setWidgetDefaultText("Teams.GE", "~GE's Team");
+	addWidget("EditBox", "Teams.YC");
+	setWidgetDefaultText("Teams.YC", "~YC's Team");
+
 	addWidget("Grid", "COs");
 	setWidgetOrigin("COs", 0.5, 0.5);
 	setWidgetPosition("COs", "50%", "50%");
@@ -116,6 +129,10 @@ void NewGameOptions_Play_MouseReleased() {
 	auto bmTag = getSelectedItem("COs.BMTagList");
 	auto geTag = getSelectedItem("COs.GETagList");
 	auto ycTag = getSelectedItem("COs.YCTagList");
+	auto osTeam = getWidgetText("Teams.OS");
+	auto bmTeam = getWidgetText("Teams.BM");
+	auto geTeam = getWidgetText("Teams.GE");
+	auto ycTeam = getWidgetText("Teams.YC");
 	if (osCurrent >= 0) opts.setCurrentCO(0, osCurrent);
 	if (bmCurrent >= 0) opts.setCurrentCO(1, bmCurrent);
 	if (geCurrent >= 0) opts.setCurrentCO(2, geCurrent);
@@ -139,6 +156,18 @@ void NewGameOptions_Play_MouseReleased() {
 		opts.setTagCO(3, ycTag);
 	} else {
 		opts.setNoTagCO(3, true);
+	}
+	if (osTeam.length() > 0) {
+		opts.setTeam(0, parseUInt(osTeam));
+	}
+	if (bmTeam.length() > 0) {
+		opts.setTeam(1, parseUInt(bmTeam));
+	}
+	if (geTeam.length() > 0) {
+		opts.setTeam(2, parseUInt(geTeam));
+	}
+	if (ycTeam.length() > 0) {
+		opts.setTeam(3, parseUInt(ycTeam));
 	}
 	loadMap("map/islandxcopy.cwm", "Map", opts);
 }

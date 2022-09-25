@@ -438,6 +438,12 @@ namespace awe {
 		 */
 		awe::UnitID getMovingUnit() const;
 
+		/**
+		 * @throws std::runtime_error if no map is currently loaded.
+		 * @sa     @c awe::map::getArmyTeam()
+		 */
+		awe::TeamID getArmyTeam(const awe::ArmyID id) const;
+
 		/////////////////////
 		//  END  INTERFACE //
 		/////////////////////
@@ -462,19 +468,13 @@ namespace awe {
 
 		/**
 		 * Finds the shortest path from the origin to the destination.
-		 * @param  origin        The origin tile.
-		 * @param  dest          The intended destination.
-		 * @param  moveType      Pointer to the movement type used for traversal
-		 *                       calculations.
-		 * @param  movePoints    The movement points available.
-		 * @param  fuel          The units of fuel that we have to work with.
-		 * @param  oldClosedList If empty, the internal \c cameFrom map will be
-		 *                       empty at the start of the call. If not empty, the
-		 *                       internal \c cameFrom map will be constructed from
-		 *                       the given closed list, and the \c openSet will be
-		 *                       initialised with the tile at the back of the
-		 *                       closed list. This is used to give an existing path
-		 *                       to base the new path on.
+		 * @param  origin     The origin tile.
+		 * @param  dest       The intended destination.
+		 * @param  moveType   Pointer to the movement type used for traversal
+		 *                    calculations.
+		 * @param  movePoints The movement points available.
+		 * @param  fuel       The units of fuel that we have to work with.
+		 * @param  team       The team the moving unit is on.
 		 * @return The shortest path, if a path could be found. An empty vector if
 		 *         no path could be found.
 		 */
@@ -482,7 +482,7 @@ namespace awe {
 			const sf::Vector2u& dest,
 			const std::shared_ptr<const awe::movement_type>& moveType,
 			const unsigned int movePoints, const awe::Fuel fuel,
-			const std::vector<awe::closed_list_node>& oldClosedList = {});
+			const awe::TeamID team);
 
 		/**
 		 * Updates the closed list given to \c _map.

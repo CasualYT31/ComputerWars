@@ -80,6 +80,18 @@ namespace awe {
 		army(const std::shared_ptr<const awe::country>& country) noexcept;
 
 		/**
+		 * Sets the team that this army belongs to.
+		 * @param teamID The new team to assign to this army.
+		 */
+		void setTeam(const awe::TeamID teamID) noexcept;
+
+		/**
+		 * Gets the team that this army belongs to.
+		 * @return The ID of the team this army belongs to.
+		 */
+		awe::TeamID getTeam() const noexcept;
+
+		/**
 		 * Gets the army's country information.
 		 * @return The army's country information.
 		 */
@@ -166,6 +178,11 @@ namespace awe {
 		 */
 		std::unordered_set<sf::Vector2u> getTiles() const noexcept;
 	private:
+		/**
+		 * The team that this army belongs to.
+		 */
+		awe::TeamID _team;
+
 		/**
 		 * The country of the army.
 		 */

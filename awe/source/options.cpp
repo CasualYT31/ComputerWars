@@ -29,26 +29,35 @@ void awe::game_options::registerGameOptionsType(asIScriptEngine* engine,
 	auto r = engine->RegisterObjectType("GameOptions", 0, asOBJ_REF);
 	document->DocumentObjectType(r, "Holds options that the game engine will "
 		"require when it creates a new game on a map.");
+
 	r = engine->RegisterObjectBehaviour("GameOptions", asBEHAVE_FACTORY,
 		"GameOptions@ f()", asFUNCTION(awe::game_options::Create), asCALL_CDECL);
 	r = engine->RegisterObjectBehaviour("GameOptions", asBEHAVE_ADDREF,
 		"void f()", asMETHOD(awe::game_options, AddRef), asCALL_THISCALL);
 	r = engine->RegisterObjectBehaviour("GameOptions", asBEHAVE_RELEASE,
 		"void f()", asMETHOD(awe::game_options, Release), asCALL_THISCALL);
+
 	r = engine->RegisterObjectMethod("GameOptions",
 		"void setCurrentCO(const ArmyID, const BankID)",
 		asMETHOD(awe::game_options, setCurrentCO), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Sets an override for an army's current "
 		"CO.");
+
 	r = engine->RegisterObjectMethod("GameOptions",
 		"void setTagCO(const ArmyID, const BankID)",
 		asMETHOD(awe::game_options, setTagCO), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Sets an override for an army's tag CO.");
+
 	r = engine->RegisterObjectMethod("GameOptions",
 		"void setNoTagCO(const ArmyID, const bool)",
 		asMETHOD(awe::game_options, setNoTagCO), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Sets whether or not an army's tag CO "
 		"should be overridden with a lack of a CO.");
+
+	r = engine->RegisterObjectMethod("GameOptions",
+		"void setTeam(const ArmyID, const TeamID)",
+		asMETHOD(awe::game_options, setTeam), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Sets an override for an army's team.");
 }
 awe::game_options* awe::game_options::Create() noexcept {
 	// The reference counter is set to 1 for all new game_options objects.
@@ -81,6 +90,11 @@ void awe::game_options::setTagCO(const awe::ArmyID armyID,
 void awe::game_options::setNoTagCO(const awe::ArmyID armyID, const bool tag)
 	noexcept {
 	_noTags[armyID] = tag;
+}
+
+void awe::game_options::setTeam(const awe::ArmyID armyID, const awe::TeamID teamID)
+	noexcept {
+	_teamOverrides[armyID] = teamID;
 }
 
 std::shared_ptr<const awe::commander> awe::game_options::getCurrentCO(
@@ -125,4 +139,12 @@ std::shared_ptr<const awe::commander> awe::game_options::getTagCO(
 		throw std::range_error("");
 	}
 	throw std::range_error("no commander bank given!");
+}
+
+awe::TeamID awe::game_options::getTeam(const awe::ArmyID armyID) const {
+	if (_teamOverrides.find(armyID) != _teamOverrides.end()) {
+		return _teamOverrides.at(armyID);
+	}
+	// No override configured, so not an actual error.
+	throw std::range_error("");
 }

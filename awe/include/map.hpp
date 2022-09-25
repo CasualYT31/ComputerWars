@@ -267,6 +267,9 @@ namespace awe {
 		 * Allocates a new army.
 		 * If the army with the given country already exists, or \c nullptr is
 		 * given, the call will be logged.
+		 * @warning By default, a newly created army will be on its own team.
+		 *          However, a simple counter is used to achieve this, so if the
+		 *          client reassigns team IDs, this behaviour can't be guaranteed.
 		 * @param  country The country of the army.
 		 * @return \c TRUE if the army was created, \c FALSE otherwise.
 		 */
@@ -292,6 +295,21 @@ namespace awe {
 		 * @return The set.
 		 */
 		std::set<awe::ArmyID> getArmyIDs() const noexcept;
+
+		/**
+		 * Sets the team that a given army belongs to.
+		 * @param army The ID of the army to change.
+		 * @param team The ID of the team to assign this army to.
+		 */
+		void setArmyTeam(const awe::ArmyID army, const awe::TeamID team) noexcept;
+
+		/**
+		 * Gets the team that a given army belongs to.
+		 * @param  army The ID of the army to query.
+		 * @return The ID of the team that the given army belongs to. \c 0 if the
+		 *         given army doesn't exist.
+		 */
+		awe::TeamID getArmyTeam(const awe::ArmyID army) const noexcept;
 
 		/**
 		 * Sets the amount of funds a specified army obtains.
@@ -576,6 +594,14 @@ namespace awe {
 		 * @return The ID of the army that owns this unit.
 		 */
 		awe::ArmyID getArmyOfUnit(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Retrieves the ID of the team a specified unit belongs to.
+		 * <tt>0</tt> will be returned if the unit doesn't exist.
+		 * @param  id The ID of the unit to inspect.
+		 * @return The ID of the team of the army that owns this unit.
+		 */
+		awe::TeamID getTeamOfUnit(const awe::UnitID id) const noexcept;
 
 		/**
 		 * Retrieves the units that are loaded onto a specified one.
@@ -994,6 +1020,11 @@ namespace awe {
 		 *          isn't created!
 		 */
 		std::map<awe::ArmyID, awe::army> _armys;
+
+		/**
+		 * The \c TeamID counter used to ensure each army is on their own team.
+		 */
+		awe::TeamID _teamIDCounter = 0;
 
 		/**
 		 * The ID of the last unit created.

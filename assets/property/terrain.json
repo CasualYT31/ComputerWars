@@ -72,7 +72,7 @@
 		"description": "RIVER_description",
 		"hp": 0,
 		"defence": 0,
-		"movecosts": [ 1, 1, -1, -1, 1, -1, -1, -1, 1 ],
+		"movecosts": [ 2, 1, -1, -1, 1, -1, -1, -1, 1 ],
 		"pictures": [ "" ],
 		"capturable": false
 	},

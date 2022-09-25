@@ -103,3 +103,5 @@ the map format:
    field (which is one byte in size) representing the waiting state of the unit. If
    `TRUE`, the unit is waiting and cannot be moved for the rest of the turn. If
    `FALSE`, the unit can be moved.
+ - In between each army's Country ID and Funds, there is a new `TeamID` field,
+   which stores the team that the army belongs to.

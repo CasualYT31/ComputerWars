@@ -173,7 +173,12 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)
 			country->getName());
 		return false;
 	}
+	// Create the army.
 	_armys.insert(std::pair<awe::BankID, awe::army>(country->getID(), country));
+	static const awe::TeamID maxIDCounter = ~((awe::TeamID)0);
+	// This will miss out the maximum value for a team ID, but I don't care.
+	if (_teamIDCounter == maxIDCounter) _teamIDCounter = 0;
+	_armys.at(country->getID()).setTeam(_teamIDCounter++);
 	return true;
 }
 
@@ -205,6 +210,23 @@ std::set<awe::ArmyID> awe::map::getArmyIDs() const noexcept {
 	std::set<awe::ArmyID> ret;
 	for (auto& a : _armys) ret.insert(a.first);
 	return ret;
+}
+
+void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team)
+	noexcept {
+	if (_isArmyPresent(army)) {
+		_armys.at(army).setTeam(team);
+	} else {
+		_logger.error("setArmyTeam operation cancelled: attempted to set an army "
+			"{}'s team to {}, but that army didn't exist!", army, team);
+	}
+}
+
+awe::TeamID awe::map::getArmyTeam(const awe::ArmyID army) const noexcept {
+	if (_isArmyPresent(army)) return _armys.at(army).getTeam();
+	_logger.error("getArmyTeam operation failed: army with ID {} didn't exist at "
+		"the time of calling!", army);
+	return 0;
 }
 
 void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds)
@@ -574,6 +596,13 @@ awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {
 	_logger.error("getArmyOfUnit operation failed: unit with ID {} doesn't exist!",
 		id);
 	return awe::army::NO_ARMY;
+}
+
+awe::TeamID awe::map::getTeamOfUnit(const awe::UnitID id) const noexcept {
+	if (_isUnitPresent(id)) return _armys.at(_units.at(id).getArmy()).getTeam();
+	_logger.error("getTeamOfUnit operation failed: unit with ID {} doesn't exist!",
+		id);
+	return 0;
 }
 
 std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(const awe::UnitID id)
@@ -1369,9 +1398,6 @@ bool awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id,
 	}
 }
 
-////////////////////////////////////////////////////////////
-// Do not forget to update _CWM_0_Unit() calls if needed! //
-////////////////////////////////////////////////////////////
 void awe::map::_CWM_2(const bool isSave) {
 	if (isSave) {
 		_file.writeString(getMapName());
@@ -1383,6 +1409,7 @@ void awe::map::_CWM_2(const bool isSave) {
 		_file.writeNumber((sf::Uint32)getArmyCount());
 		for (auto& army : _armys) {
 			_file.writeNumber(army.second.getCountry()->getID());
+			_file.writeNumber(army.second.getTeam());
 			_file.writeNumber(army.second.getFunds());
 			// There should always be a current CO...
 			if (army.second.getCurrentCO()) {
@@ -1427,6 +1454,8 @@ void awe::map::_CWM_2(const bool isSave) {
 		for (sf::Uint64 army = 0; army < armyCount; army++) {
 			auto pCountry = (*_countries)[_file.readNumber<awe::BankID>()];
 			if (createArmy(pCountry)) {
+				awe::TeamID team = _file.readNumber<awe::TeamID>();
+				setArmyTeam(pCountry->getID(), team);
 				awe::Funds funds = _file.readNumber<awe::Funds>();
 				setArmyFunds(pCountry->getID(), funds);
 				awe::BankID currentCO = _file.readNumber<awe::BankID>();

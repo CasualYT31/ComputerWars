@@ -697,6 +697,19 @@ namespace sfx {
 			CScriptArray* variables) noexcept;
 
 		/**
+		 * Gets the widget's caption.
+		 * For most widget types, this will return the translated caption. For
+		 * \c EditBox widgets, this will return the text that the user has typed
+		 * in.\n
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and a blank string will be
+		 * returned.
+		 * @param  name The name of the widget to query.
+		 * @return The caption/text assigned to the widget.
+		 */
+		std::string _getWidgetText(const std::string& name) noexcept;
+
+		/**
 		 * Sets a widget's character size.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no size will be changed.
@@ -854,6 +867,19 @@ namespace sfx {
 		 */
 		void _setWidgetRatioInLayout(const std::string& name,
 			const std::size_t index, const float ratio) noexcept;
+		
+		/**
+		 * Updates a widget's default text.
+		 * E.g. the editbox will display the default text when it has no
+		 * text/caption.\n
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no text will be changed.
+		 * @param name      The name of the widget to change.
+		 * @param text      The new default text.
+		 * @param variables Optional list of variables to insert into the text.
+		 */
+		void _setWidgetDefaultText(const std::string& name,
+			const std::string& text, CScriptArray* variables) noexcept;
 
 		/**
 		 * Adds an item to a widget.

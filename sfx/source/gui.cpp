@@ -425,6 +425,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"text wherever a '" + std::to_string(engine::expand_string::getVarChar()) +
 		"' is found.").c_str());
 
+	r = engine->RegisterGlobalFunction("string getWidgetText(const string&in)",
+		asMETHOD(sfx::gui, _getWidgetText), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's caption/text.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetTextSize(const string&in, "
 		"const uint)",
 		asMETHOD(sfx::gui, _setWidgetTextSize), asCALL_THISCALL_ASGLOBAL, this);
@@ -519,6 +523,17 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"HorizontalLayout; sets the ratio of a specified widget's size compared "
 		"to others in the layout. The unsigned integer is a 0-based index of the "
 		"widget in the layout to amend.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetDefaultText(const string&in, const string&in, "
+		"array<any>@ = null)",
+		asMETHOD(sfx::gui, _setWidgetDefaultText), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, std::string("Sets a widget's default "
+		"text. The name of the widget is given, then its new default text. An "
+		"optional list of variables can also be given. These variables will be "
+		"inserted into the text wherever a '" +
+		std::to_string(engine::expand_string::getVarChar()) + "' is "
+		"found.").c_str());
 
 	r = engine->RegisterGlobalFunction("void addItem(const string&in, const "
 		"string&in, array<any>@ = null)",
@@ -860,6 +875,9 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) noexcept {
 			for (std::size_t i = 0; i < w->getItemCount(); i++) {
 				w->changeItemByIndex(i, _getTranslatedText(widgetName, i));
 			}
+		} else if (type == "EditBox") {
+			auto w = _findWidget<EditBox>(widgetName);
+			w->setDefaultText(_getTranslatedText(widgetName, 0));
 		} else if (type == "FileDialog") {
 			auto w = _findWidget<FileDialog>(widgetName);
 			w->setTitle(_getTranslatedText(widgetName, 0));
@@ -955,7 +973,7 @@ std::string sfx::gui::_getTranslatedText(const std::string& name,
 void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// Draw background.
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
-		// this GUI has a background to animate
+		// This GUI has a background to animate.
 		target.draw(_guiBackground.at(getGUI()), states);
 	}
 	// Draw foreground.
@@ -1028,7 +1046,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		connectEx(&sfx::gui::signalHandler, this);
 	widget->getSignal("AnimationFinished").
 		connectEx(&sfx::gui::signalHandler, this);
-	// connect clickable widget signals
+	// Connect clickable widget signals.
 	tgui::String type = widget->getWidgetType().toLower();
 	if (type == "button" || type == "editbox" || type == "label" ||
 		type == "picture" || type == "progressbar" || type == "radiobutton" ||
@@ -1046,7 +1064,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		widget->getSignal("RightClicked").
 			connectEx(&sfx::gui::signalHandler, this);
 	}
-	// connect bespoke signals
+	// Connect bespoke signals.
 	if (type == "button" || type == "bitmapbutton") {
 		widget->getSignal("Pressed").connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "childwindow") {
@@ -1080,9 +1098,9 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "knob" || type == "scrollbar" || type == "slider" ||
 		type == "spinbutton") { // || type == "spincontrol") {
-		// okay... so... when I try to set ValueChanged on a SpinControl here, the
+		// Okay... So... When I try to set ValueChanged on a SpinControl here, the
 		// program crashes without reporting any errors whatsoever, not even in
-		// debug mode... but the TGUI documentation says that it should have this
+		// debug mode... But the TGUI documentation says that it should have this
 		// signal...
 		widget->getSignal("ValueChanged").
 			connectEx(&sfx::gui::signalHandler, this);
@@ -1258,6 +1276,8 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::Grid::create();
 	} else if (type == "button") {
 		return tgui::Button::create();
+	} else if (type == "editbox") {
+		return tgui::EditBox::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -1495,6 +1515,13 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
+		// For EditBoxes, don't translate the text, as this is text that the user
+		// can edit.
+		if (type == "editbox") {
+			std::dynamic_pointer_cast<EditBox>(widget)->setText(text);
+			if (variables) variables->Release();
+			return;
+		}
 		if (type != "bitmapbutton" && type != "label" && type != "button") {
 			_logger.error("Attempted to set the caption \"{}\" to widget \"{}\" "
 				"which is of type \"{}\", within menu \"{}\". This operation is "
@@ -1514,6 +1541,27 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
 	if (variables) variables->Release();
 }
 
+std::string sfx::gui::_getWidgetText(const std::string& name) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		// Get the text differently depending on the type the widget is.
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type == "editbox") {
+			return std::dynamic_pointer_cast<EditBox>(widget)->
+				getText().toStdString();
+		} else {
+			_logger.error("Attempted to get the text of a widget \"{}\" which is "
+				"of type \"{}\", within menu \"{}\". This operation is not "
+				"supported for this type of widget.", name, type, fullname[0]);
+		}
+	} else {
+		_logger.error("Attempted to get the text of a widget \"{}\" within menu "
+			"\"{}\". This widget does not exist.", name, fullname[0]);
+	}
+	return "";
+}
+
 void sfx::gui::_setWidgetTextSize(const std::string& name, const unsigned int size)
 	noexcept {
 	std::vector<std::string> fullname;
@@ -1521,14 +1569,13 @@ void sfx::gui::_setWidgetTextSize(const std::string& name, const unsigned int si
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "label") {
-			auto label = std::dynamic_pointer_cast<Label>(widget);
-			label->setTextSize(size);
+			std::dynamic_pointer_cast<Label>(widget)->setTextSize(size);
 		} else if (type == "bitmapbutton") {
-			auto button = std::dynamic_pointer_cast<BitmapButton>(widget);
-			button->setTextSize(size);
+			std::dynamic_pointer_cast<BitmapButton>(widget)->setTextSize(size);
 		} else if (type == "button") {
-			auto button = std::dynamic_pointer_cast<Button>(widget);
-			button->setTextSize(size);
+			std::dynamic_pointer_cast<Button>(widget)->setTextSize(size);
+		} else if (type == "editbox") {
+			std::dynamic_pointer_cast<EditBox>(widget)->setTextSize(size);
 		} else {
 			_logger.error("Attempted to set the character size {} to widget "
 				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
@@ -1549,8 +1596,11 @@ void sfx::gui::_setWidgetTextColour(const std::string& name,
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "label") {
-			auto label = _findWidget<Label>(name);
-			label->getRenderer()->setTextColor(colour);
+			std::dynamic_pointer_cast<Label>(widget)->
+				getRenderer()->setTextColor(colour);
+		} else if (type == "editbox") {
+			std::dynamic_pointer_cast<EditBox>(widget)->
+				getRenderer()->setTextColor(colour);
 		} else {
 			_logger.error("Attempted to set the text colour \"{}\" to widget "
 				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
@@ -1571,8 +1621,8 @@ void sfx::gui::_setWidgetTextOutlineColour(const std::string& name,
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "label") {
-			auto label = _findWidget<Label>(name);
-			label->getRenderer()->setTextOutlineColor(colour);
+			std::dynamic_pointer_cast<Label>(widget)->
+				getRenderer()->setTextOutlineColor(colour);
 		} else {
 			_logger.error("Attempted to set the text outline colour \"{}\" to "
 				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "
@@ -1872,6 +1922,32 @@ void sfx::gui::_setWidgetRatioInLayout(const std::string& name,
 			"widget \"{}\" within menu \"{}\". This widget does not exist.", ratio,
 			index, name, fullname[0]);
 	}
+}
+
+void sfx::gui::_setWidgetDefaultText(const std::string& name,
+	const std::string& text, CScriptArray* variables) noexcept {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		const std::string type = widget->getWidgetType().toLower().toStdString();
+		if (type != "editbox") {
+			_logger.error("Attempted to set the default text \"{}\" to widget "
+				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
+				"operation is not supported for this type of widget.", text, name,
+				type, fullname[0]);
+			if (variables) variables->Release();
+			return;
+		}
+		_setTranslatedString(text, fullnameAsString, 0, variables);
+		// Set it by translating it.
+		_translateWidget(widget);
+	} else {
+		_logger.error("Attempted to set the default text \"{}\" to a widget "
+			"\"{}\" within menu \"{}\". This widget does not exist.", text, name,
+			fullname[0]);
+	}
+	if (variables) variables->Release();
 }
 
 void sfx::gui::_addItem(const std::string& name, const std::string& text,

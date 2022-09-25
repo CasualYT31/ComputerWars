@@ -303,6 +303,12 @@ void awe::game::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Gets the ID of the unit that is currently "
 		"in move mode. <tt>0</tt> if no unit is in move mode.");
 
+	r = engine->RegisterObjectMethod("GameInterface",
+		"TeamID getArmyTeam(const ArmyID)",
+		asMETHOD(awe::game, getArmyTeam), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the team that the given army belongs "
+		"to.");
+
 	// Register game global property and related constants.
 	r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
 		&awe::army::NO_ARMY_SCRIPT);
@@ -346,7 +352,7 @@ bool awe::game::load(const std::string& file,
 		auto r = _map->load(file);
 		// If we have any game options, apply them.
 		if (options) {
-			// Assign current and tag COs.
+			// Apply overrides to armies.
 			auto IDs = _map->getArmyIDs();
 			for (auto& ID : IDs) {
 				try {
@@ -367,6 +373,15 @@ bool awe::game::load(const std::string& file,
 					std::string msg(e.what());
 					if (!msg.empty()) {
 						_logger.error("Couldn't override tag CO for army {}: {}",
+							ID, msg);
+					}
+				}
+				try {
+					_map->setArmyTeam(ID, options->getTeam(ID));
+				} catch (const std::range_error& e) {
+					std::string msg(e.what());
+					if (!msg.empty()) {
+						_logger.error("Couldn't override team for army {}: {}",
 							ID, msg);
 					}
 				}
@@ -664,8 +679,9 @@ void awe::game::enableMoveMode() {
 				if (!_findPath(_map->selectedUnitRenderData.closedList.back().tile,
 					tile, unitType->getMovementType(),
 					unitType->getMovementPoints(),
-					_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)).
-					empty()) {
+					_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit),
+					_map->getTeamOfUnit(_map->selectedUnitRenderData.selectedUnit))
+					.empty()) {
 					_map->selectedUnitRenderData.availableTiles.insert(tile);
 				}
 			}
@@ -985,6 +1001,14 @@ awe::UnitID awe::game::getMovingUnit() const {
 	}
 }
 
+awe::TeamID awe::game::getArmyTeam(const awe::ArmyID id) const {
+	if (_map) {
+		return _map->getArmyTeam(id);
+	} else {
+		throw NO_MAP;
+	}
+}
+
 //////////////////////////////
 // INTERFACE HELPER METHODS //
 //////////////////////////////
@@ -1009,35 +1033,12 @@ open_list_node tileWithLowestFScore(
 std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& origin,
 	const sf::Vector2u& dest,
 	const std::shared_ptr<const awe::movement_type>& moveType,
-	const unsigned int movePoints, const awe::Fuel fuel,
-	const std::vector<awe::closed_list_node>& oldClosedList) {
+	const unsigned int movePoints, const awe::Fuel fuel, const awe::TeamID team) {
 	// openSet could be a min-heap or priority queue for added efficiency.
-	std::unordered_set<sf::Vector2u> openSet;
+	std::unordered_set<sf::Vector2u> openSet = { origin };
 	std::unordered_map<sf::Vector2u, sf::Vector2u> cameFrom;
-	std::unordered_map<sf::Vector2u, int> gScore;
-	std::unordered_map<sf::Vector2u, int> fScore;
-
-	// Initialise the set and maps depending on the given closed list.
-	if (oldClosedList.empty()) {
-		openSet = { origin };
-		gScore = { {origin, 0} };
-		fScore = { {origin, 0} };
-	} else {
-		openSet = { oldClosedList.back().tile };
-		for (std::size_t i = 0; i < oldClosedList.size(); ++i) {
-			if (i > 0) {
-				cameFrom[oldClosedList.at(i).tile] = oldClosedList.at(i - 1).tile;
-				gScore[oldClosedList.at(i).tile] =
-					gScore[oldClosedList.at(i - 1).tile] + oldClosedList.at(i).g;
-				fScore[oldClosedList.at(i).tile] =
-					gScore[oldClosedList.at(i).tile] +
-					awe::distance(oldClosedList.at(i).tile, dest);
-			} else {
-				gScore[oldClosedList.at(i).tile] = 0;
-				fScore[oldClosedList.at(i).tile] = 0;
-			}
-		}
-	}
+	std::unordered_map<sf::Vector2u, int> gScore = { {origin, 0} };
+	std::unordered_map<sf::Vector2u, int> fScore = { {origin, 0} };
 
 	while (!openSet.empty()) {
 		bool firstElement = true;
@@ -1080,12 +1081,13 @@ std::vector<awe::closed_list_node> awe::game::_findPath(const sf::Vector2u& orig
 			// If:
 			// 1. The unit does not have enough fuel.
 			// 2. The unit has ran out of movement points.
-			// 3. The tile has a unit belonging to an opposing team (not
-			//    implemented yet).
+			// 3. The tile has a unit belonging to an opposing team.
 			// then it cannot traverse the tile, so don't add it to the open set.
 			const auto unitOnAdjacentTile = _map->getUnitOnTile(adjacentTile);
 			if (tentativeGScore <= fuel &&
-				(unsigned int)tentativeGScore <= movePoints) {
+				(unsigned int)tentativeGScore <= movePoints &&
+				(unitOnAdjacentTile == 0 || ( unitOnAdjacentTile != 0 &&
+					_map->getTeamOfUnit(unitOnAdjacentTile) == team))) {
 				if (gScore.find(adjacentTile) == gScore.end() ||
 					tentativeGScore < gScore[adjacentTile]) {
 					cameFrom[adjacentTile] = currentTile;
@@ -1123,7 +1125,8 @@ void awe::game::_updateMoveModeClosedList() noexcept {
 				tile,
 				unitType->getMovementType(),
 				unitType->getMovementPoints(),
-				_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)
+				_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit),
+				_map->getTeamOfUnit(_map->selectedUnitRenderData.selectedUnit)
 			);
 
 		} else if (tile != _map->selectedUnitRenderData.closedList.back().tile) {
@@ -1143,6 +1146,8 @@ void awe::game::_updateMoveModeClosedList() noexcept {
 						unitType->getMovementType(),
 						unitType->getMovementPoints(),
 						_map->getUnitFuel(
+							_map->selectedUnitRenderData.selectedUnit),
+						_map->getTeamOfUnit(
 							_map->selectedUnitRenderData.selectedUnit)
 					);
 					return;
@@ -1190,6 +1195,8 @@ void awe::game::_updateMoveModeClosedList() noexcept {
 							unitType->getMovementType(),
 							unitType->getMovementPoints(),
 							_map->getUnitFuel(
+								_map->selectedUnitRenderData.selectedUnit),
+							_map->getTeamOfUnit(
 								_map->selectedUnitRenderData.selectedUnit)
 						);
 						return;
@@ -1202,7 +1209,8 @@ void awe::game::_updateMoveModeClosedList() noexcept {
 					tile,
 					unitType->getMovementType(),
 					unitType->getMovementPoints(),
-					_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit)
+					_map->getUnitFuel(_map->selectedUnitRenderData.selectedUnit),
+					_map->getTeamOfUnit(_map->selectedUnitRenderData.selectedUnit)
 				);
 			}
 		}

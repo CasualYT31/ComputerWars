@@ -36,6 +36,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace awe {
 	/**
 	 * Typedef representing a team ID.
+	 * @warning Do \b not make this a signed type!
+	 * @sa      @c awe::map::createArmy
 	 */
 	typedef sf::Uint8 TeamID;
 
@@ -79,7 +81,7 @@ namespace awe {
 	 * Typedef representing an army ID.
 	 * \c UINT32_MAX should be reserved, even if it isn't officially in bank.h...
 	 * @warning Do \b not make this a signed type!
-	 * @sa      awe::army::NO_ARMY
+	 * @sa      @c awe::army::NO_ARMY
 	 */
 	typedef awe::BankID ArmyID;
 

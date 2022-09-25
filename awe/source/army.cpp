@@ -28,6 +28,14 @@ awe::ArmyID awe::army::NO_ARMY_SCRIPT = ~((awe::ArmyID)0);
 awe::army::army(const std::shared_ptr<const awe::country>& country) noexcept :
 	_country(country) {}
 
+void awe::army::setTeam(const awe::TeamID teamID) noexcept {
+	_team = teamID;
+}
+
+awe::TeamID awe::army::getTeam() const noexcept {
+	return _team;
+}
+
 std::shared_ptr<const awe::country> awe::army::getCountry() const noexcept {
 	return _country;
 }

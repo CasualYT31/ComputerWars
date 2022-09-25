@@ -87,6 +87,13 @@ namespace awe {
 		void setNoTagCO(const awe::ArmyID armyID, const bool tag) noexcept;
 
 		/**
+		 * Sets the team override for a given army.
+		 * @param armyID The ID of the army whose team will be overridden.
+		 * @param teamID The team ID to override with.
+		 */
+		void setTeam(const awe::ArmyID armyID, const awe::TeamID teamID) noexcept;
+
+		/**
 		 * Returns an override \c commander, if it has been configured.
 		 * This method will throw if a bank isn't given, if the specified army
 		 * wasn't configured with an override, or if the configured commander index
@@ -122,6 +129,18 @@ namespace awe {
 		 */
 		std::shared_ptr<const awe::commander> getTagCO(const awe::ArmyID armyID,
 			const std::shared_ptr<awe::bank<awe::commander>>& coBank) const;
+
+		/**
+		 * Returns an override \c TeamID, if it has been configured.
+		 * This method will throw if the specified army wasn't configured with an
+		 * override.
+		 * @param  armyID The ID of the army whose team override is being queried.
+		 * @return The team ID override, if there is an override.
+		 * @throws range_error if no override should be applied. If there was an
+		 *                     actual error, \c what() will return a non-empty
+		 *                     string.
+		 */
+		awe::TeamID getTeam(const awe::ArmyID armyID) const;
 	private:
 		/**
 		 * Reference counter.
@@ -137,5 +156,10 @@ namespace awe {
 		 * Stores "no tag" configurations.
 		 */
 		std::unordered_map<awe::ArmyID, bool> _noTags;
+
+		/**
+		 * Stores team configurations.
+		 */
+		std::unordered_map<awe::ArmyID, awe::TeamID> _teamOverrides;
 	};
 }

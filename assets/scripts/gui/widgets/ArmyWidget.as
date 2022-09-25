@@ -48,6 +48,13 @@ class ArmyWidget {
 		setWidgetBorderRadius(panel, ARMYWIDGET_RADIUS);
 		setWidgetBorderColour(panel, Colour(0,0,0,alpha));
 
+		team = panelName + ".team";
+		addWidget("Label", team);
+		setWidgetTextSize(team, 32);
+		setWidgetTextColour(team, Colour(255,255,255,255));
+		setWidgetTextOutlineColour(team, Colour(0,0,0,255));
+		setWidgetTextOutlineThickness(team, 2.0);
+
 		currentCO = panelName + ".currentCO";
 		addWidget("Picture", currentCO);
 
@@ -80,6 +87,9 @@ class ArmyWidget {
 		colour.a = alpha;
 		setWidgetBackgroundColour(panel, colour);
 
+		TeamID teamID = game.getArmyTeam(armyID);
+		setWidgetText(team, "~" + formatUInt(teamID));
+
 		Commander currentCommander = game.getArmyCurrentCO(armyID);
 		setWidgetSprite(currentCO, "co", currentCommander.iconName);
 
@@ -106,6 +116,7 @@ class ArmyWidget {
 		switch (alignment) {
 		case ArmyWidgetAlignment::Left:
 			setWidgetPosition(panel, "0px", "0px");
+			setWidgetPosition(team, "9px", "6px");
 			setWidgetPosition(currentCO, formatFloat(coX) + "px", "5px");
 			setWidgetPosition(tagCO, formatFloat(coX) + "px", "30px");
 			setWidgetPosition(funds, "140px", "5px");
@@ -122,6 +133,11 @@ class ArmyWidget {
 	 * Holds the name of the panel widget.
 	 */
 	string panel;
+
+	/**
+	 * Holds the name of the team ID label widget.
+	 */
+	string team;
 
 	/**
 	 * Holds the name of the current CO's picture widget.
