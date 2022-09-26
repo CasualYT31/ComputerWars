@@ -6,17 +6,21 @@ void PreviewMoveUnitMenuSetUp() {
 }
 
 void PreviewMoveUnitMenuOpen() {
-	int offset = 10;
+	int xOffset = 10;
 	if (mousePosition().x >= int(getWindowSize().x / 2)) {
-		offset -= 120;
+		xOffset -= 120;
+	}
+	int yOffset = 10;
+	if (mousePosition().y >= int(getWindowSize().y / 2)) {
+		yOffset -= 50;
 	}
 	auto mouse = scaledMousePosition();
 	if (mouse == INVALID_MOUSE) {
 		mouse.x = 0;
 		mouse.y = 0;
 	}
-	setWidgetPosition("Wait", formatInt(mouse.x + offset) + "px",
-		formatInt(mouse.y + 10) + "px");
+	setWidgetPosition("Wait", formatInt(mouse.x + xOffset) + "px",
+		formatInt(mouse.y + yOffset) + "px");
 }
 
 void PreviewMoveUnitMenuHandleInput(const dictionary controls) {
