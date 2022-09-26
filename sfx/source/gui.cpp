@@ -726,8 +726,6 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 		_guiBackground.at(getGUI()).animate(target, scaling);
 	}
 
-	_widgetPictures.clear();
-
 	if (getGUI() != "") {
 		if (_langdict && _langdict->getLanguage() != _lastlang) {
 			_lastlang = _langdict->getLanguage();
@@ -752,101 +750,108 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 
 void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 	tgui::Container::Ptr container) noexcept {
+	static auto allocImage = [&](const tgui::String& type, Widget::Ptr widget,
+		const std::string& widgetName, const unsigned int w, const unsigned int h)
+		-> void {
+		// Create an empty texture
+		sf::Uint8* pixels = (sf::Uint8*)calloc(w * h, 4);
+		sf::Texture blank;
+		blank.create(w, h);
+		blank.update(pixels);
+		free(pixels);
+
+		// Assign the empty texture
+		if (type == "BitmapButton") {
+			std::dynamic_pointer_cast<BitmapButton>(widget)->
+				setImage(blank);
+		} else if (type == "Picture") {
+			auto picture = std::dynamic_pointer_cast<Picture>(widget);
+			picture->getRenderer()->setTexture(blank);
+			if (_dontOverridePictureSizeWithSpriteSize.find(widgetName)
+				== _dontOverridePictureSizeWithSpriteSize.end()) {
+				// Resize the Picture to match with the sprite's size.
+				picture->setSize(w, h);
+			}
+		}
+	};
+
 	// Animate each widget.
 	auto& widgetList = container->getWidgets();
 	for (auto& widget : widgetList) {
 		// Ignore the widget if it is hidden.
 		if (!widget->isVisible()) continue;
-		// Animate widget if it is shown.
+
 		std::string widgetName = widget->getWidgetName().toStdString();
 		String type = widget->getWidgetType();
-		// If the widget deals with animated sprites then handle them.
-		bool updateTexture = true;
+
+		// Only BitmapButtons and Pictures can have animated sprites.
 		if (type == "BitmapButton" || type == "Picture") {
-			if (_guiSpriteKeys.find(widgetName) == _guiSpriteKeys.end() ||
-				_sheet.find(_guiSpriteKeys.at(widgetName).first) == _sheet.end()) {
-				updateTexture = false;
-			} else {
+			// If the widget doesn't have a sprite, or if it doesn't have a valid
+			// spritesheet, then don't animate the widget's sprite.
+			if (_guiSpriteKeys.find(widgetName) != _guiSpriteKeys.end() &&
+				_sheet.find(_guiSpriteKeys.at(widgetName).first) != _sheet.end()) {
 				std::shared_ptr<sfx::animated_spritesheet> sheet =
 					_sheet[_guiSpriteKeys[widgetName].first];
+				const std::string& sprite = _guiSpriteKeys[widgetName].second;
+
 				if (_widgetSprites.find(widgetName) == _widgetSprites.end()) {
 					// Animated sprite for this widget doesn't exist yet, so
 					// allocate it.
-					_widgetSprites.insert({ widgetName, sfx::animated_sprite(sheet,
-						_guiSpriteKeys[widgetName].second) });
+					_widgetSprites.insert({ widgetName, sfx::animated_sprite() });
 				}
-				_widgetSprites[widgetName].animate(target, scaling);
-				try {
-					auto iRect = sheet->getFrameRect(
-						_widgetSprites[widgetName].getSprite(),
-						_widgetSprites[widgetName].getCurrentFrame()
-					);
-					tgui::UIntRect rect;
-					rect.left = iRect.left;
-					rect.top = iRect.top;
-					rect.width = iRect.width;
-					rect.height = iRect.height;
-					_widgetPictures[widgetName].load(sheet->getTexture(), rect);
-				} catch (std::out_of_range&) {
-					updateTexture = false;
-					// Remove widget's sprite if its picture couldn't be allocated.
-					_widgetSprites.erase(widgetName);
+				auto& animatedSprite = _widgetSprites.at(widgetName);
+
+				if (sprite == "" && animatedSprite.getSprite() != "") {
+					// If the sprite has been removed, then we also need to remove
+					// the image from the widget, see else if case at the bottom.
+					allocImage(type, widget, widgetName, 0, 0);
+					continue;
 				}
+
+				if (animatedSprite.getSpritesheet() != sheet ||
+					animatedSprite.getSprite() != sprite) {
+					// If the widget's animated sprite hasn't been given its sprite
+					// yet, or if it has changed, then we need to update the
+					// widget's texture so that all the positioning and sizing
+					// matches up.
+					animatedSprite.setSpritesheet(sheet);
+					animatedSprite.setSprite(sprite);
+					animatedSprite.animate(target, scaling);
+					sf::Vector2f spriteSizeF = animatedSprite.getSize();
+					sf::Vector2u spriteSize((unsigned int)spriteSizeF.x,
+						(unsigned int)spriteSizeF.y);
+					allocImage(type, widget, widgetName, spriteSize.x,
+						spriteSize.y);
+				} else {
+					// If the widget's sprite hasn't changed, then simply animate
+					// it.
+					animatedSprite.animate(target, scaling);
+				}
+
+				// Now reposition the animated sprites based on the locations and
+				// sizes of the widget's image.
+				sf::Vector2f newPosition;
+				if (type == "BitmapButton") {
+					newPosition = std::dynamic_pointer_cast<BitmapButton>(widget)->
+						getAbsolutePositionOfImage();
+				} else if (type == "Picture") {
+					newPosition = std::dynamic_pointer_cast<Picture>(widget)->
+						getAbsolutePosition();
+				}
+				animatedSprite.setPosition(newPosition);
+			} else if (_guiSpriteKeys.find(widgetName) != _guiSpriteKeys.end() &&
+				_widgetSprites.at(widgetName).getSpritesheet() != nullptr &&
+				_sheet.find(_guiSpriteKeys.at(widgetName).first) == _sheet.end()) {
+				// Else if the widget DID have a valid spritesheet, then we're
+				// going to have to remove the image from the widget to ensure that
+				// sizing works out.
+				allocImage(type, widget, widgetName, 0, 0);
 			}
 		}
-		// Widget-specific code.
-		if (type == "Button") {
-			// auto w = _findWidget<Button>(widgetName);
-		} else if (type == "BitmapButton") {
-			auto w = _findWidget<BitmapButton>(widgetName);
-			if (updateTexture) w->setImage(_widgetPictures[widgetName]);
-		} else if (type == "CheckBox") {
-			// auto w = _findWidget<CheckBox>(widgetName);
-		} else if (type == "ChildWindow") {
-			// auto w = _findWidget<ChildWindow>(widgetName);
-		} else if (type == "ColorPicker") {
-			// auto w = _findWidget<ColorPicker>(widgetName);
-		} else if (type == "ComboBox") {
-			// auto w = _findWidget<ComboBox>(widgetName);
-		} else if (type == "FileDialog") {
-			// auto w = _findWidget<FileDialog>(widgetName);
-		} else if (type == "Label") {
-			// auto w = _findWidget<Label>(widgetName);
-		} else if (type == "ListBox") {
-			// auto w = _findWidget<ListBox>(widgetName);
-		} else if (type == "ListView") {
-			// auto w = _findWidget<ListView>(widgetName);
-		} else if (type == "Picture") {
-			auto w = _findWidget<Picture>(widgetName);
-			if (updateTexture) {
-				auto newRenderer = tgui::PictureRenderer();
-				newRenderer.setTexture(_widgetPictures[widgetName]);
-				w->setRenderer(newRenderer.getData());
-				if (_dontOverridePictureSizeWithSpriteSize.find(widgetName) ==
-					_dontOverridePictureSizeWithSpriteSize.end()) {
-					// Resize this widget to match with the sprite's size.
-					auto rect = _widgetPictures[widgetName].getImageSize();
-					w->setSize(rect.x, rect.y);
-				}
-			}
-		} else if (type == "MenuBar") {
-			// auto w = _findWidget<MenuBar>(widgetName);
-		} else if (type == "MessageBox") {
-			// auto w = _findWidget<MessageBox>(widgetName);
-		} else if (type == "ProgressBar") {
-			// auto w = _findWidget<ProgressBar>(widgetName);
-		} else if (type == "RadioButton") {
-			// auto w = _findWidget<RadioButton>(widgetName);
-		} else if (type == "TabContainer") {
-			// auto w = _findWidget<TabContainer>(widgetName);
-		} else if (type == "Tabs") {
-			// auto w = _findWidget<Tabs>(widgetName);
-		} else if (type == "ToggleButton") {
-			// auto w = _findWidget<ToggleButton>(widgetName);
-		}
+
 		if (_isContainerWidget(type)) {
-			auto w = _findWidget<Container>(widgetName);
-			_animate(target, scaling, w);
+			_animate(target, scaling,
+				std::dynamic_pointer_cast<Container>(widget));
 		}
 	}
 }
@@ -978,6 +983,18 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	}
 	// Draw foreground.
 	_gui.draw();
+	// Draw each widget's sprite if the widget isn't hidden.
+	sf::View oldView = target.getView();
+	target.setView(_gui.calculateGUIView());
+	for (auto& sprite : _widgetSprites) {
+		Widget::Ptr widget = _findWidget<Widget>(sprite.first);
+		if (widget && widget->isVisible()) {
+			// Pictures that don't match with their sprite's size will stretch the
+			// sprite. This should be emulated here in the future using scaling.
+			target.draw(sprite.second, states);
+		}
+	}
+	target.setView(oldView);
 }
 
 bool sfx::gui::_load(engine::json& j) noexcept {
@@ -987,7 +1004,6 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 		// Clear state.
 		_gui.removeAllWidgets();
 		_guiBackground.clear();
-		_widgetPictures.clear();
 		_widgetSprites.clear();
 		_guiSpriteKeys.clear();
 		_dontOverridePictureSizeWithSpriteSize.clear();

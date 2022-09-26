@@ -1042,12 +1042,6 @@ namespace sfx {
 			_sheet;
 
 		/**
-		 * Stores a list of TGUI textures to draw with the animated widgets.
-		 * Cleared and refilled upon every call to \c animate().
-		 */
-		std::unordered_map<std::string, tgui::Texture> _widgetPictures;
-
-		/**
 		 * Stores a list of animated sprites associated with each animated widget.
 		 * Cleared upon a call to \c setGUI(). Refilled once upon the first call to
 		 * \c animate() since \c setGUI() was last called.

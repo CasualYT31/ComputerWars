@@ -3,7 +3,7 @@ project("ComputerWarsSFX")
 # TGUI
 FetchContent_Declare(tgui
 	GIT_REPOSITORY https://github.com/CasualYT31/TGUI.git
-	GIT_TAG e893ff7d4d6225adb49995da4d78c61060b626bd
+	GIT_TAG 0.9
 )
 FetchContent_MakeAvailable(tgui)
 
