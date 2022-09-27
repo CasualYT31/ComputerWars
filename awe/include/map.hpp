@@ -1013,13 +1013,13 @@ namespace awe {
 		std::unordered_map<awe::UnitID, awe::unit> _units;
 
 		/**
-		 * The armys on this map.
+		 * The armies on this map.
 		 * To retain turn order, which is defined by countries, an ordered map was
 		 * chosen.
 		 * @warning Please ensure that an army with the ID \c awe::army::NO_ARMY
 		 *          isn't created!
 		 */
-		std::map<awe::ArmyID, awe::army> _armys;
+		std::map<awe::ArmyID, awe::army> _armies;
 
 		/**
 		 * The \c TeamID counter used to ensure each army is on their own team.

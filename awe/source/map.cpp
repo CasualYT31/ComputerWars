@@ -55,7 +55,7 @@ bool awe::map::load(std::string file, const unsigned char version) noexcept {
 	_currentArmy = awe::army::NO_ARMY;
 	_updateTilePane = false;
 	_lastUnitID = 1;
-	_armys.clear();
+	_armies.clear();
 	_units.clear();
 	_tiles.clear();
 	_mapName = "";
@@ -111,7 +111,7 @@ void awe::map::setMapSize(const sf::Vector2u dim,
 	if (mapHasShrunk) {
 		// Then, go through all owned tiles in each army and delete those that are
 		// now out of bounds.
-		for (auto& army : _armys) {
+		for (auto& army : _armies) {
 			auto tiles = army.second.getTiles();
 			for (auto& tile : tiles) {
 				if (_isOutOfBounds(tile)) army.second.removeTile(tile);
@@ -174,11 +174,11 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)
 		return false;
 	}
 	// Create the army.
-	_armys.insert(std::pair<awe::BankID, awe::army>(country->getID(), country));
+	_armies.insert(std::pair<awe::BankID, awe::army>(country->getID(), country));
 	static const awe::TeamID maxIDCounter = ~((awe::TeamID)0);
 	// This will miss out the maximum value for a team ID, but I don't care.
 	if (_teamIDCounter == maxIDCounter) _teamIDCounter = 0;
-	_armys.at(country->getID()).setTeam(_teamIDCounter++);
+	_armies.at(country->getID()).setTeam(_teamIDCounter++);
 	return true;
 }
 
@@ -189,33 +189,33 @@ void awe::map::deleteArmy(const awe::ArmyID army) noexcept {
 		return;
 	}
 	// Firstly, delete all units belonging to the army.
-	auto units = _armys.at(army).getUnits();
+	auto units = _armies.at(army).getUnits();
 	for (auto unit : units) {
 		deleteUnit(unit);
 	}
 	// Then, disown all tiles.
-	auto tiles = _armys.at(army).getTiles();
+	auto tiles = _armies.at(army).getTiles();
 	for (auto& tile : tiles) {
 		_tiles[tile.x][tile.y].setTileOwner(awe::army::NO_ARMY);
 	}
 	// Finally, delete the army from the army list.
-	_armys.erase(army);
+	_armies.erase(army);
 }
 
 std::size_t awe::map::getArmyCount() const noexcept {
-	return _armys.size();
+	return _armies.size();
 }
 
 std::set<awe::ArmyID> awe::map::getArmyIDs() const noexcept {
 	std::set<awe::ArmyID> ret;
-	for (auto& a : _armys) ret.insert(a.first);
+	for (auto& a : _armies) ret.insert(a.first);
 	return ret;
 }
 
 void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team)
 	noexcept {
 	if (_isArmyPresent(army)) {
-		_armys.at(army).setTeam(team);
+		_armies.at(army).setTeam(team);
 	} else {
 		_logger.error("setArmyTeam operation cancelled: attempted to set an army "
 			"{}'s team to {}, but that army didn't exist!", army, team);
@@ -223,7 +223,7 @@ void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team)
 }
 
 awe::TeamID awe::map::getArmyTeam(const awe::ArmyID army) const noexcept {
-	if (_isArmyPresent(army)) return _armys.at(army).getTeam();
+	if (_isArmyPresent(army)) return _armies.at(army).getTeam();
 	_logger.error("getArmyTeam operation failed: army with ID {} didn't exist at "
 		"the time of calling!", army);
 	return 0;
@@ -232,7 +232,7 @@ awe::TeamID awe::map::getArmyTeam(const awe::ArmyID army) const noexcept {
 void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds)
 	noexcept {
 	if (_isArmyPresent(army)) {
-		_armys.at(army).setFunds(funds);
+		_armies.at(army).setFunds(funds);
 	} else {
 		_logger.error("setArmyFunds operation cancelled: attempted to set {} "
 			"funds to an army, {}, that didn't exist!", funds, army);
@@ -240,7 +240,7 @@ void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds)
 }
 
 awe::Funds awe::map::getArmyFunds(const awe::ArmyID army) const noexcept {
-	if (_isArmyPresent(army)) return _armys.at(army).getFunds();
+	if (_isArmyPresent(army)) return _armies.at(army).getFunds();
 	_logger.error("getArmyFunds operation failed: army with ID {} didn't exist at "
 		"the time of calling!", army);
 	return -1;
@@ -248,7 +248,7 @@ awe::Funds awe::map::getArmyFunds(const awe::ArmyID army) const noexcept {
 
 std::shared_ptr<const awe::country>
 	awe::map::getArmyCountry(const awe::ArmyID army) const noexcept {
-	if (_isArmyPresent(army)) return _armys.at(army).getCountry();
+	if (_isArmyPresent(army)) return _armies.at(army).getCountry();
 	_logger.error("getArmyCountry operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
 	return nullptr;
@@ -267,7 +267,7 @@ void awe::map::setArmyCOs(const awe::ArmyID army,
 					"tag CO but not current CO! The army will instead be assigned "
 					"a current CO and it will not be assigned a tag CO.", army);
 			}
-			_armys.at(army).setCOs(current, tag);
+			_armies.at(army).setCOs(current, tag);
 		}
 	} else {
 		_logger.error("setCOs operation failed: army with ID {} didn't exist at "
@@ -290,8 +290,8 @@ void awe::map::tagArmyCOs(const awe::ArmyID army) noexcept {
 		_logger.error("tagCOs operation failed: army with ID {} didn't exist at "
 			"the time of calling!", army);
 	} else {
-		if (_armys.at(army).getTagCO()) {
-			_armys.at(army).tagCOs();
+		if (_armies.at(army).getTagCO()) {
+			_armies.at(army).tagCOs();
 		} else {
 			_logger.error("tagCOs operation failed: army with ID {} didn't have a "
 				"secondary CO at the time of calling!", army);
@@ -301,7 +301,7 @@ void awe::map::tagArmyCOs(const awe::ArmyID army) noexcept {
 
 std::shared_ptr<const awe::commander> awe::map::getArmyCurrentCO(
 	const awe::ArmyID army) const noexcept {
-	if (_isArmyPresent(army)) return _armys.at(army).getCurrentCO();
+	if (_isArmyPresent(army)) return _armies.at(army).getCurrentCO();
 	_logger.error("getCurrentCO operation failed: army with ID {} didn't exist at "
 		"the time of calling!", army);
 	return nullptr;
@@ -309,14 +309,14 @@ std::shared_ptr<const awe::commander> awe::map::getArmyCurrentCO(
 
 std::shared_ptr<const awe::commander> awe::map::getArmyTagCO(
 	const awe::ArmyID army) const noexcept {
-	if (_isArmyPresent(army)) return _armys.at(army).getTagCO();
+	if (_isArmyPresent(army)) return _armies.at(army).getTagCO();
 	_logger.error("getTagCO operation failed: army with ID {} didn't exist at the "
 		"time of calling!", army);
 	return nullptr;
 }
 
 bool awe::map::tagCOIsPresent(const awe::ArmyID army) const noexcept {
-	if (_isArmyPresent(army)) return _armys.at(army).getTagCO().operator bool();
+	if (_isArmyPresent(army)) return _armies.at(army).getTagCO().operator bool();
 	_logger.error("tagCOIsPresent operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
 	return false;
@@ -324,7 +324,7 @@ bool awe::map::tagCOIsPresent(const awe::ArmyID army) const noexcept {
 
 std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army)
 	const noexcept {
-	if (_isArmyPresent(army)) return _armys.at(army).getTiles();
+	if (_isArmyPresent(army)) return _armies.at(army).getTiles();
 	_logger.error("getTilesOfArmy operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
 	return std::unordered_set<sf::Vector2u>();
@@ -332,7 +332,7 @@ std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army
 
 std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(const awe::ArmyID army)
 	const noexcept {
-	if (_isArmyPresent(army)) return _armys.at(army).getUnits();
+	if (_isArmyPresent(army)) return _armies.at(army).getUnits();
 	_logger.error("getUnitsOfArmy operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
 	return std::unordered_set<awe::UnitID>();
@@ -371,7 +371,7 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 		return 0;
 	}
 	_units.insert({ id, awe::unit(type, army, _sheet_unit, _sheet_icon) });
-	_armys.at(army).addUnit(id);
+	_armies.at(army).addUnit(id);
 	return id;
 }
 
@@ -390,7 +390,7 @@ void awe::map::deleteUnit(const awe::UnitID id) noexcept {
 		      [_units.at(id).getPosition().y].setUnit(0);
 	// Secondly, remove the unit from the army's list.
 	if (_isArmyPresent(_units.at(id).getArmy())) {
-		_armys.at(_units.at(id).getArmy()).removeUnit(id);
+		_armies.at(_units.at(id).getArmy()).removeUnit(id);
 	} else {
 		_logger.warning("deleteUnit warning: unit with ID {} didn't have a valid "
 			"owning army ID, which was {}", id, _units.at(id).getArmy());
@@ -599,7 +599,7 @@ awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {
 }
 
 awe::TeamID awe::map::getTeamOfUnit(const awe::UnitID id) const noexcept {
-	if (_isUnitPresent(id)) return _armys.at(_units.at(id).getArmy()).getTeam();
+	if (_isUnitPresent(id)) return _armies.at(_units.at(id).getArmy()).getTeam();
 	_logger.error("getTeamOfUnit operation failed: unit with ID {} doesn't exist!",
 		id);
 	return 0;
@@ -673,9 +673,9 @@ void awe::map::setTileOwner(const sf::Vector2u pos, awe::ArmyID army) noexcept {
 	auto& tile = _tiles[pos.x][pos.y];
 	// First, remove the tile from the army who currently owns it.
 	if (_isArmyPresent(tile.getTileOwner()))
-		_armys.at(tile.getTileOwner()).removeTile(pos);
+		_armies.at(tile.getTileOwner()).removeTile(pos);
 	// Now assign it to the real owner, if any.
-	if (_isArmyPresent(army)) _armys.at(army).addTile(pos);
+	if (_isArmyPresent(army)) _armies.at(army).addTile(pos);
 	// Update the actual tile now.
 	tile.setTileOwner(army);
 }
@@ -816,8 +816,8 @@ awe::ArmyID awe::map::getSelectedArmy() const noexcept {
 
 awe::ArmyID awe::map::getNextArmy() const noexcept {
 	if (_currentArmy == awe::army::NO_ARMY) return awe::army::NO_ARMY;
-	auto itr = ++_armys.find(_currentArmy);
-	if (itr == _armys.end()) itr = _armys.begin();
+	auto itr = ++_armies.find(_currentArmy);
+	if (itr == _armies.end()) itr = _armies.begin();
 	return itr->first;
 }
 
@@ -1056,7 +1056,7 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	}
 	// Step 6. the army pane.
 	if (_currentArmy != awe::army::NO_ARMY) {
-		_armyPane.setArmy(_armys.at(_currentArmy));
+		_armyPane.setArmy(_armies.at(_currentArmy));
 		_armyPane.animate(target, scaling);
 	}
 	// Step 7. the tile pane.
@@ -1161,7 +1161,7 @@ bool awe::map::_tileIsVisible(const sf::Vector2u pos) const noexcept {
 }
 
 bool awe::map::_isArmyPresent(const awe::ArmyID id) const noexcept {
-	return _armys.find(id) != _armys.end();
+	return _armies.find(id) != _armies.end();
 }
 
 bool awe::map::_isUnitPresent(const awe::UnitID id) const noexcept {
@@ -1213,8 +1213,8 @@ void awe::map::_CWM_0(const bool isSave) {
 		_file.writeString(getMapName());
 		_file.writeNumber((sf::Uint32)getMapSize().x);
 		_file.writeNumber((sf::Uint32)getMapSize().y);
-		_file.writeNumber((sf::Uint32)_armys.size());
-		for (auto& army : _armys) {
+		_file.writeNumber((sf::Uint32)_armies.size());
+		for (auto& army : _armies) {
 			_file.writeNumber(army.second.getCountry()->getID());
 			_file.writeNumber(army.second.getFunds());
 		}
@@ -1274,8 +1274,8 @@ void awe::map::_CWM_1(const bool isSave) {
 		_file.writeNumber((sf::Uint32)getMapSize().y);
 		_file.writeNumber((sf::Uint32)getSelectedTile().x);
 		_file.writeNumber((sf::Uint32)getSelectedTile().y);
-		_file.writeNumber((sf::Uint32)_armys.size());
-		for (auto& army : _armys) {
+		_file.writeNumber((sf::Uint32)_armies.size());
+		for (auto& army : _armies) {
 			_file.writeNumber(army.second.getCountry()->getID());
 			_file.writeNumber(army.second.getFunds());
 			// There should always be a current CO...
@@ -1407,7 +1407,7 @@ void awe::map::_CWM_2(const bool isSave) {
 		_file.writeNumber((sf::Uint32)getSelectedTile().y);
 		_file.writeNumber(getDay());
 		_file.writeNumber((sf::Uint32)getArmyCount());
-		for (auto& army : _armys) {
+		for (auto& army : _armies) {
 			_file.writeNumber(army.second.getCountry()->getID());
 			_file.writeNumber(army.second.getTeam());
 			_file.writeNumber(army.second.getFunds());
