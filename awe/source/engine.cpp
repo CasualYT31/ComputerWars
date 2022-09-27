@@ -72,12 +72,12 @@ int awe::game_engine::run() noexcept {
 void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	// Register the object types.
-	int r = engine->RegisterObjectType("joystick_axis", sizeof(sfx::joystick),
+	int r = engine->RegisterObjectType("JoystickAxis", sizeof(sfx::joystick),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sfx::joystick>() |
 		asOBJ_APP_CLASS_ALLINTS);
-	engine->RegisterObjectProperty("joystick_axis", "uint axis",
+	engine->RegisterObjectProperty("JoystickAxis", "uint axis",
 		asOFFSET(sfx::joystick, axis));
-	engine->RegisterObjectProperty("joystick_axis", "int direction",
+	engine->RegisterObjectProperty("JoystickAxis", "int direction",
 		asOFFSET(sfx::joystick, direction));
 	document->DocumentObjectType(r, "Represents a joystick axis input. This class "
 		"stores the ID of the axis being input, and which direction the axis is "
