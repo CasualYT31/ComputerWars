@@ -1,4 +1,4 @@
-void BeginTurnForUnit(const UnitID unit, const Unit&in type,
+void BeginTurnForUnit(const UnitID unit, const UnitType&in type,
 	const Vector2&in position) {
 	string typeName = type.scriptName;
 

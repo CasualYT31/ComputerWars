@@ -24,11 +24,11 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 	setWidgetOrigin(panelName, 0.5, 0.5);
 	setWidgetPosition(panelName, "50%", "50%");
 	setHorizontalScrollbarPolicy(panelName, ScrollbarPolicy::Never);
-	const uint unitTypeCount = unit.length();
+	const uint unitTypeCount = unittype.length();
 	uint firstUnitTypeID = 0;
 	bool firstIDSet = false;
 	for (uint i = 0; i < unitTypeCount; ++i) {
-		const Unit type = unit[i];
+		const UnitType type = unittype[i];
 		if (movementTypeNames.find(type.movementType.scriptName) >= 0) {
 			if (!firstIDSet) {
 				firstIDSet = true;
@@ -75,9 +75,9 @@ void BaseMenuSetUp() {
 void PanelOpen(const string&in panelName, const array<string>@ movementTypeNames)
 	{
 	const BankID country = game.getArmyCountry(game.getCurrentArmy()).ID;
-	const uint unitTypeCount = unit.length();
+	const uint unitTypeCount = unittype.length();
 	for (uint i = 0; i < unitTypeCount; ++i) {
-		const Unit type = unit[i];
+		const UnitType type = unittype[i];
 		if (movementTypeNames.find(type.movementType.scriptName) >= 0) {
 			setWidgetSprite(panelName + "." + type.scriptName, "unit",
 				type.unitSprite[country]);
@@ -112,7 +112,8 @@ void BaseMenuHandleInput(const dictionary controls) {
 }
 
 void BaseMenuHandleSignal(const string&in widgetName, const string&in signal) {
-	const Unit type = unit[widgetName.substr(widgetName.findLast(".") + 1)];
+	const UnitType type =
+		unittype[widgetName.substr(widgetName.findLast(".") + 1)];
 	if (signal == "Clicked") {
 		if (game.buyUnit(type.ID)) setGUI("Map");
 	} else if (signal == "MouseEntered") {

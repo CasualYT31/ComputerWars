@@ -337,9 +337,9 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 			"movement_bank")
 		&& _loadObject(_terrains, j, { "terrains" }, _scripts, "Terrain",
 			"terrain_bank")
-		&& _loadObject(_tiles, j, { "tiles" }, _scripts, "Tile",
+		&& _loadObject(_tiles, j, { "tiles" }, _scripts, "TileType",
 			"tile_bank")
-		&& _loadObject(_units, j, { "units" }, _scripts, "Unit",
+		&& _loadObject(_units, j, { "units" }, _scripts, "UnitType",
 			"unit_bank")
 		&& _loadObject(_commanders, j, { "commanders" }, _scripts, "Commander",
 			"commander_bank");

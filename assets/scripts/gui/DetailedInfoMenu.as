@@ -227,7 +227,7 @@ void DetailedInfoMenuOpen() {
 		"DetailedInfoMenu.baseLayout.unitPanel.unitLayout.details";
 	const auto unitID = game.getUnitOnTile(game.getSelectedTile());
 	if (unitID > 0) {
-		const Unit unitType = game.getUnitType(unitID);
+		const UnitType unitType = game.getUnitType(unitID);
 		const Movement movementType = unitType.movementType;
 		setWidgetText(unitPanel + ".stats.name", unitType.name);
 		setWidgetText(unitPanel + ".stats.grid.price", "~" +

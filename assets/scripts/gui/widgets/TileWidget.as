@@ -97,12 +97,12 @@ class TileWidget {
 	 */
 	void update(const Vector2&in tilePos) {
 		// Gather information.
-		const Tile tileType = game.getTileType(tilePos);
+		const TileType tileType = game.getTileType(tilePos);
 		const Terrain terrainType = game.getTerrainOfTile(tilePos);
 		const ArmyID tileOwner = game.getTileOwner(tilePos);
 		const UnitID unitID = game.getUnitOnTile(tilePos);
 		array<UnitID> unitIDs;
-		array<Unit> unitTypes;
+		array<UnitType> unitTypes;
 		if (unitID > 0) {
 			unitIDs = game.getLoadedUnits(unitID);
 			unitIDs.insertAt(0, unitID);
@@ -153,8 +153,9 @@ class TileWidget {
 	/**
 	 * Updates the tile property panel with tile information.
 	 */
-	private void _updateTilePanel(const Vector2&in tilePos, const Tile&in tileType,
-		const Terrain&in terrainType, const ArmyID tileOwner) {
+	private void _updateTilePanel(const Vector2&in tilePos,
+		const TileType&in tileType, const Terrain&in terrainType,
+		const ArmyID tileOwner) {
 		if (tileOwner == NO_ARMY) {
 			_panels[0].setIcon("tile.normal",
 				tileType.neutralTileSprite);
@@ -172,12 +173,12 @@ class TileWidget {
 	 * Updates the unit property panels with information on each unit.
 	 */
 	private void _updateUnitPanels(const array<UnitID>@ unitIDs,
-		const array<Unit>@ unitTypes) {
+		const array<UnitType>@ unitTypes) {
 		_panelsThatAreShowing = 1;
 		for (uint i = 1; i < unitIDs.length() + 1; ++i) {
 			++_panelsThatAreShowing;
 			const UnitID unitID = unitIDs[i - 1];
-			const Unit unitType = unitTypes[i - 1];
+			const UnitType unitType = unitTypes[i - 1];
 			_panels[i].setIcon("unit", unitType.unitSprite[
 				game.getArmyCountry(game.getArmyOfUnit(unitID)).ID
 			]);

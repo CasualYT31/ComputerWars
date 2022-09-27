@@ -145,7 +145,7 @@ void awe::game::registerInterface(asIScriptEngine* engine,
 		"play.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
-		"const Tile getTileType(const Vector2&in)",
+		"const TileType getTileType(const Vector2&in)",
 		asMETHOD(awe::game, getTileType), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns properties on a given tile.");
 
@@ -168,7 +168,7 @@ void awe::game::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectMethod(r, "Returns a tile's current HP.");
 
 	r = engine->RegisterObjectMethod("GameInterface",
-		"const Unit getUnitType(const UnitID)",
+		"const UnitType getUnitType(const UnitID)",
 		asMETHOD(awe::game, getUnitType), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns details on a unit's type.");
 
@@ -464,7 +464,7 @@ void awe::game::endTurn() {
 		_map->selectArmy(next);
 		// Begin next army's turn.
 		if (_scripts->functionDeclExists("void BeginTurnForUnit(const UnitID, "
-			"const Unit&in, const Vector2&in)")) {
+			"const UnitType&in, const Vector2&in)")) {
 			auto units = _map->getUnitsOfArmyByPriority(next);
 			// Loop through backwards: see documentation on unit_type::unit_type().
 			for (auto itr = units.rbegin(), enditr = units.rend(); itr != enditr;

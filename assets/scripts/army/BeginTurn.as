@@ -39,7 +39,7 @@ void BeginTurnForArmy(const ArmyID currentArmy, const array<UnitID>@ units,
 	const uint unitsSize = units.length();
 	for (uint i = 0; i < unitsSize; ++i) {
 		// If unit has infinite fuel, skip fuel checks.
-		const Unit unit = game.getUnitType(units[i]);
+		const UnitType unit = game.getUnitType(units[i]);
 		if (unit.hasInfiniteFuel) continue;
 
 		string type = unit.movementType.scriptName;
