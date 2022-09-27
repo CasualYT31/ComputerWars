@@ -73,54 +73,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	sfx::joystick::Register(engine, document);
 	engine::RegisterVectorTypes(engine, document);
-
-	// Time class.
-	auto r = engine->RegisterObjectType("Time", sizeof(sf::Time),
-		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Time>());
-	document->DocumentObjectType(r, "Represents a time value.");
-	r = engine->RegisterObjectMethod("Time", "float asSeconds()",
-		asMETHOD(sf::Time, asSeconds), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Return the time value as a number of "
-		"seconds.");
-	r = engine->RegisterObjectMethod("Time", "int32 asMilliseconds()",
-		asMETHOD(sf::Time, asMilliseconds), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Return the time value as a number of "
-		"milliseconds.");
-	r = engine->RegisterObjectMethod("Time", "int64 asMicroseconds()",
-		asMETHOD(sf::Time, asMicroseconds), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Return the time value as a number of "
-		"microseconds.");
-	// Time class factory functions.
-	r = engine->RegisterGlobalFunction("Time seconds(const float)",
-		asFUNCTION(sf::seconds), asCALL_CDECL);
-	document->DocumentGlobalFunction(r, "Constructs a Time object using seconds.");
-	r = engine->RegisterGlobalFunction("Time milliseconds(const int32)",
-		asFUNCTION(sf::milliseconds), asCALL_CDECL);
-	document->DocumentGlobalFunction(r, "Constructs a Time object using "
-		"milliseconds.");
-	r = engine->RegisterGlobalFunction("Time microseconds(const int64)",
-		asFUNCTION(sf::microseconds), asCALL_CDECL);
-	document->DocumentGlobalFunction(r, "Constructs a Time object using "
-		"microseconds.");
-
-	// Clock class.
-	r = engine->RegisterObjectType("Clock", sizeof(sf::Clock),
-		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Clock>());
-	document->DocumentObjectType(r, "Used to calculate elapsed time.");
-	r = engine->RegisterObjectMethod("Clock", "Time getElapsedTime()",
-		asMETHOD(sf::Clock, getElapsedTime), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Calculates the elapsed time since the "
-		"clock was constructed or since <tt>restart()</tt> was called.");
-	r = engine->RegisterObjectMethod("Clock", "Time restart()",
-		asMETHOD(sf::Clock, restart), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Restarts the clock. Returns the time "
-		"elapsed.");
-
-	// GameOptions class.
-	awe::game_options::registerGameOptionsType(engine, document);
+	engine::RegisterTimeTypes(engine, document);
+	awe::game_options::Register(engine, document);
 
 	// Register the global functions.
-	r = engine->RegisterGlobalFunction("void info(const string&in)",
+	auto r = engine->RegisterGlobalFunction("void info(const string&in)",
 		asMETHOD(engine::scripts, writeToLog),
 		asCALL_THISCALL_ASGLOBAL, _scripts.get());
 	document->DocumentGlobalFunction(r, "Writes to the log using the info level.");

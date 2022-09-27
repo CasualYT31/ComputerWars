@@ -55,6 +55,13 @@ namespace engine {
 		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 	/**
+	 * Registers and documents the \c Time and \c Clock types, if they haven't
+	 * already been registered.
+	 */
+	void RegisterTimeTypes(asIScriptEngine* engine,
+		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+	/**
 	 * Interface which allows a subclass to register functions, object types, etc.
 	 * with a \c scripts object.
 	 */

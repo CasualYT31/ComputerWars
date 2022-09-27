@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "options.hpp"
 
-void awe::game_options::registerGameOptionsType(asIScriptEngine* engine,
+void awe::game_options::Register(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	awe::RegisterGameTypedefs(engine, document);
 

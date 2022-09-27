@@ -45,7 +45,7 @@ namespace awe {
 		 * Registers this struct with the script interface, if it hasn't been
 		 * already.
 		 */
-		static void registerGameOptionsType(asIScriptEngine* engine,
+		static void Register(asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 		/**
 		 * Factory function for this reference type.

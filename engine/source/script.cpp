@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 #include "SFML/Graphics/Color.hpp"
 #include "SFML/System/Vector2.hpp"
+#include "SFML/System/Clock.hpp"
 
 void AWEColourTypeConstructor(const int r, const int g, const int b,
     const int a, void* memory) {
@@ -134,6 +135,54 @@ void engine::RegisterVectorTypes(asIScriptEngine* engine,
         r = engine->RegisterObjectMethod("Vector2",
             "bool opEquals(const MousePosition&in) const",
             asFUNCTION(uEqI), asCALL_CDECL_OBJFIRST);
+    }
+}
+
+void engine::RegisterTimeTypes(asIScriptEngine* engine,
+    const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+    if (!engine->GetTypeInfoByName("Time")) {
+        // Time class.
+        auto r = engine->RegisterObjectType("Time", sizeof(sf::Time),
+            asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Time>());
+        document->DocumentObjectType(r, "Represents a time value.");
+        r = engine->RegisterObjectMethod("Time", "float asSeconds()",
+            asMETHOD(sf::Time, asSeconds), asCALL_THISCALL);
+        document->DocumentObjectMethod(r, "Return the time value as a number of "
+            "seconds.");
+        r = engine->RegisterObjectMethod("Time", "int32 asMilliseconds()",
+            asMETHOD(sf::Time, asMilliseconds), asCALL_THISCALL);
+        document->DocumentObjectMethod(r, "Return the time value as a number of "
+            "milliseconds.");
+        r = engine->RegisterObjectMethod("Time", "int64 asMicroseconds()",
+            asMETHOD(sf::Time, asMicroseconds), asCALL_THISCALL);
+        document->DocumentObjectMethod(r, "Return the time value as a number of "
+            "microseconds.");
+        // Time class factory functions.
+        r = engine->RegisterGlobalFunction("Time seconds(const float)",
+            asFUNCTION(sf::seconds), asCALL_CDECL);
+        document->DocumentGlobalFunction(r, "Constructs a Time object using "
+            "seconds.");
+        r = engine->RegisterGlobalFunction("Time milliseconds(const int32)",
+            asFUNCTION(sf::milliseconds), asCALL_CDECL);
+        document->DocumentGlobalFunction(r, "Constructs a Time object using "
+            "milliseconds.");
+        r = engine->RegisterGlobalFunction("Time microseconds(const int64)",
+            asFUNCTION(sf::microseconds), asCALL_CDECL);
+        document->DocumentGlobalFunction(r, "Constructs a Time object using "
+            "microseconds.");
+
+        // Clock class.
+        r = engine->RegisterObjectType("Clock", sizeof(sf::Clock),
+            asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Clock>());
+        document->DocumentObjectType(r, "Used to calculate elapsed time.");
+        r = engine->RegisterObjectMethod("Clock", "Time getElapsedTime()",
+            asMETHOD(sf::Clock, getElapsedTime), asCALL_THISCALL);
+        document->DocumentObjectMethod(r, "Calculates the elapsed time since the "
+            "clock was constructed or since <tt>restart()</tt> was called.");
+        r = engine->RegisterObjectMethod("Clock", "Time restart()",
+            asMETHOD(sf::Clock, restart), asCALL_THISCALL);
+        document->DocumentObjectMethod(r, "Restarts the clock. Returns the time "
+            "elapsed.");
     }
 }
 

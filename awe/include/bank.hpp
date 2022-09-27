@@ -66,8 +66,8 @@ namespace awe {
 	 *     <li>Your class needs to inherit from @c awe::bank_id. This is so that
 	 *         the string version of \c operator[] can be supported.</li>
 	 *     <li>In addition, your class needs to define a static method:
-	 *         <tt>template<typename T> void registerInterface(const std::string&
-	 *         type, asIScriptEngine* engine, const
+	 *         <tt>template<typename T> void Register(const std::string& type,
+	 *         asIScriptEngine* engine, const
 	 *         std::shared_ptr<DocumentationGenerator>& document) noexcept</tt>.
 	 *         This method should register your T reference type with the given
 	 *         script engine so that the scripts can call the get methods.</ol>
@@ -210,7 +210,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string& type,
+		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
@@ -283,7 +283,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string & type,
+		static void Register(const std::string & type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>&document,
 			const std::string& extraIconDoc = "") noexcept;
@@ -396,7 +396,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string& type,
+		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
@@ -457,7 +457,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string& type,
+		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
@@ -510,7 +510,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string& type,
+		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
@@ -561,7 +561,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string& type,
+		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
@@ -635,7 +635,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string& type,
+		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
@@ -775,7 +775,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string& type,
+		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
@@ -982,7 +982,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string& type,
+		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
@@ -1294,7 +1294,7 @@ namespace awe {
 		 *                  register script interface documentation with.
 		 */
 		template<typename T>
-		static void registerInterface(const std::string& type,
+		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
