@@ -71,28 +71,11 @@ int awe::game_engine::run() noexcept {
 
 void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
-	// Register the object types.
-	int r = engine->RegisterObjectType("JoystickAxis", sizeof(sfx::joystick),
-		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sfx::joystick>() |
-		asOBJ_APP_CLASS_ALLINTS);
-	engine->RegisterObjectProperty("JoystickAxis", "uint axis",
-		asOFFSET(sfx::joystick, axis));
-	engine->RegisterObjectProperty("JoystickAxis", "int direction",
-		asOFFSET(sfx::joystick, direction));
-	document->DocumentObjectType(r, "Represents a joystick axis input. This class "
-		"stores the ID of the axis being input, and which direction the axis is "
-		"currently being pressed.\n"
-		"<tt>axis</tt> is an <tt>sf::Joystick::Axis</tt> value. If too large of "
-		"an ID is given, via this object, into a function, it will be lowered "
-		"down to the maximum possible value and a warning will be logged.\n"
-		"A positive <tt>direction</tt> value represents the positive direction "
-		"(including <tt>0</tt>), and a negative value represents the negative "
-		"direction.");
-
+	sfx::joystick::Register(engine, document);
 	engine::RegisterVectorTypes(engine, document);
 
 	// Time class.
-	r = engine->RegisterObjectType("Time", sizeof(sf::Time),
+	auto r = engine->RegisterObjectType("Time", sizeof(sf::Time),
 		asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Time>());
 	document->DocumentObjectType(r, "Represents a time value.");
 	r = engine->RegisterObjectMethod("Time", "float asSeconds()",

@@ -126,7 +126,14 @@ namespace engine {
 		 * objects to invoke the methods of.\n
 		 * After the call to @c loadScripts(), the internal list of registrants
 		 * will be cleared. This is because once the interface has been registered,
-		 * it does not need to be registered again.
+		 * it does not need to be registered again.\n
+		 * For classes that need to register themselves with the script interface,
+		 * but that aren't instantiated at the time of calling this method, define
+		 * a function with the same signature as
+		 * \c script_registrant::registerInterface() that registers the class with
+		 * the interface, e.g. as an object type, and call this function when
+		 * necessary in \c registerInterface() methods. Your functions should check
+		 * if the type has already been added before attempting to add the type!
 		 * @warning You must ensure that the registrants you give remain alive for
 		 *          the lifetime of the @c scripts instance, if you have registered
 		 *          a class' methods with the interface.

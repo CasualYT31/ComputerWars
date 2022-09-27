@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "safejson.hpp"
+#include "script.hpp"
 #include "SFML/Graphics.hpp"
 #include <memory>
 #include <unordered_set>
@@ -81,6 +82,12 @@ namespace sfx {
 	 * @sa sfx::axis_direction
 	 */
 	struct joystick {
+		/**
+		 * Registers the joystick type with the script interface.
+		 */
+		static void Register(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
 		/**
 		 * Tests if a given \c sfx::joystick object is equivalent to this one.
 		 * Two \c sfx::joystick objects are equivalent if both \c axis and
