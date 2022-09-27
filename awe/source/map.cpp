@@ -31,6 +31,140 @@ void awe::selected_unit_render_data::clearState() noexcept {
 	renderUnitAtDestination = false;
 }
 
+static const std::runtime_error NO_SCRIPTS("No scripts object was given to this "
+	"map object!");
+
+void awe::map::Register(asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	if (!engine->GetTypeInfoByName("Map")) {
+		engine::RegisterVectorTypes(engine, document);
+		awe::RegisterGameTypedefs(engine, document);
+		auto r = engine->RegisterObjectType("Map", 0, asOBJ_REF | asOBJ_NOCOUNT);
+		document->DocumentObjectType(r, "Class representing a map.");
+
+		////////////////////
+		// MAP OPERATIONS //
+		////////////////////
+		r = engine->RegisterObjectMethod("Map",
+			"void setMapName(const string&in)",
+			asMETHOD(awe::map, setMapName), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"string getMapName() const",
+			asMETHOD(awe::map, getMapName), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setMapSize(const Vector2&in, const BankID = 0)",
+			asMETHODPR(awe::map, setMapSize, (const sf::Vector2u&,
+				const awe::BankID), void), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setMapSize(const Vector2&in, const string&in)",
+			asMETHODPR(awe::map, setMapSize, (const sf::Vector2u&,
+				const std::string&), void), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"Vector2 getMapSize() const",
+			asMETHOD(awe::map, getMapSize), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setDay(const Day)",
+			asMETHOD(awe::map, setDay), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"Day getDay() const",
+			asMETHOD(awe::map, getDay), asCALL_THISCALL);
+
+		/////////////////////
+		// ARMY OPERATIONS //
+		/////////////////////
+		r = engine->RegisterObjectMethod("Map",
+			"bool createArmy(const BankID)",
+			asMETHODPR(awe::map, createArmy, (const awe::BankID), bool),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool createArmy(const string&in)",
+			asMETHODPR(awe::map, createArmy, (const std::string&), bool),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void deleteArmy(const ArmyID)",
+			asMETHOD(awe::map, deleteArmy), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"uint getArmyCount() const",
+			asMETHOD(awe::map, getArmyCount), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"array<ArmyID>@ getArmyIDs() const",
+			asMETHOD(awe::map, getArmyIDsAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setArmyTeam(const ArmyID, const TeamID)",
+			asMETHOD(awe::map, setArmyTeam), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"TeamID getArmyTeam(const ArmyID) const",
+			asMETHOD(awe::map, getArmyTeam), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setArmyFunds(const ArmyID, const Funds)",
+			asMETHOD(awe::map, setArmyFunds), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"Funds getArmyFunds(const ArmyID) const",
+			asMETHOD(awe::map, getArmyFunds), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"const Country getArmyCountry(const ArmyID) const",
+			asMETHOD(awe::map, getArmyCountryObject), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "void setArmyCOs(const ArmyID, "
+			"const string&in, const string&in = \"\")",
+			asMETHODPR(awe::map, setArmyCOs, (const awe::ArmyID,
+				const std::string&, const std::string&), void), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setArmyCurrentCO(const ArmyID, const string&in)",
+			asMETHODPR(awe::map, setArmyCurrentCO, (const awe::ArmyID,
+				const std::string&), void), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setArmyTagCO(const ArmyID, const string&in)",
+			asMETHODPR(awe::map, setArmyTagCO, (const awe::ArmyID,
+				const std::string&), void), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void tagArmyCOs(const ArmyID)",
+			asMETHOD(awe::map, tagArmyCOs), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"string getArmyCurrentCO(const ArmyID) const",
+			asMETHOD(awe::map, getArmyCurrentCOScriptName), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"string getArmyTagCO(const ArmyID) const",
+			asMETHOD(awe::map, getArmyTagCOScriptName), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool tagCOIsPresent(const ArmyID) const",
+			asMETHOD(awe::map, tagCOIsPresent), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"array<Vector2>@ getTilesOfArmy(const ArmyID) const",
+			asMETHOD(awe::map, getTilesOfArmyAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"array<UnitID>@ getUnitsOfArmy(const ArmyID) const",
+			asMETHOD(awe::map, getUnitsOfArmyAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "array<array<UnitID>@>@ "
+			"getUnitsOfArmyByPriorityAsArray(const ArmyID) const",
+			asMETHOD(awe::map, getUnitsOfArmyByPriorityAsArray), asCALL_THISCALL);
+	}
+}
+
 awe::map::map(const std::string& name) noexcept : _logger(name) {
 	_initShaders();
 }
@@ -92,6 +226,11 @@ bool awe::map::save(std::string file, const unsigned char version) noexcept {
 	return true;
 }
 
+void awe::map::setScripts(const std::shared_ptr<engine::scripts>& scripts)
+	noexcept {
+	_scripts = scripts;
+}
+
 void awe::map::setMapName(const std::string& name) noexcept {
 	_mapName = name;
 }
@@ -100,7 +239,7 @@ std::string awe::map::getMapName() const noexcept {
 	return _mapName;
 }
 
-void awe::map::setMapSize(const sf::Vector2u dim,
+void awe::map::setMapSize(const sf::Vector2u& dim,
 	const std::shared_ptr<const awe::tile_type>& tile) noexcept {
 	// First, resize the tiles vectors accordingly.
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
@@ -146,6 +285,16 @@ void awe::map::setMapSize(const sf::Vector2u dim,
 	}
 }
 
+void awe::map::setMapSize(const sf::Vector2u& dim, const awe::BankID tile)
+	noexcept {
+	setMapSize(dim, _tileTypes->operator[](tile));
+}
+
+void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile)
+	noexcept {
+	setMapSize(dim, _tileTypes->operator[](tile));
+}
+
 sf::Vector2u awe::map::getMapSize() const noexcept {
 	sf::Vector2u ret((unsigned int)_tiles.size(), 0);
 	if (ret.x) ret.y = (unsigned int)_tiles.at(0).size();
@@ -182,6 +331,14 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)
 	return true;
 }
 
+bool awe::map::createArmy(const awe::BankID country) noexcept {
+	return createArmy(_countries->operator[](country));
+}
+
+bool awe::map::createArmy(const std::string& country) noexcept {
+	return createArmy(_countries->operator[](country));
+}
+
 void awe::map::deleteArmy(const awe::ArmyID army) noexcept {
 	if (!_isArmyPresent(army)) {
 		_logger.error("deleteArmy operation cancelled: attempted to delete an "
@@ -210,6 +367,19 @@ std::set<awe::ArmyID> awe::map::getArmyIDs() const noexcept {
 	std::set<awe::ArmyID> ret;
 	for (auto& a : _armies) ret.insert(a.first);
 	return ret;
+}
+
+CScriptArray* awe::map::getArmyIDsAsArray() const {
+	if (_scripts) {
+		auto set = getArmyIDs();
+		CScriptArray* ret = _scripts->createArray("ArmyID");
+		for (auto element : set) {
+			ret->InsertLast(&element);
+		}
+		return ret;
+	} else {
+		throw NO_SCRIPTS;
+	}
 }
 
 void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team)
@@ -254,6 +424,15 @@ std::shared_ptr<const awe::country>
 	return nullptr;
 }
 
+const awe::country awe::map::getArmyCountryObject(const awe::ArmyID army) const {
+	auto ret = getArmyCountry(army);
+	if (ret) {
+		return *ret;
+	} else {
+		throw std::out_of_range("This army does not exist!");
+	}
+}
+
 void awe::map::setArmyCOs(const awe::ArmyID army,
 	const std::shared_ptr<const awe::commander>& current,
 	const std::shared_ptr<const awe::commander>& tag) noexcept {
@@ -275,14 +454,38 @@ void awe::map::setArmyCOs(const awe::ArmyID army,
 	}
 }
 
+void awe::map::setArmyCOs(const awe::ArmyID army, const std::string& current,
+	const std::string& tag = "") noexcept {
+	if (tag.empty()) {
+		setArmyCOs(army, _commanders->operator[](current), nullptr);
+	} else {
+		setArmyCOs(army, _commanders->operator[](current),
+			_commanders->operator[](tag));
+	}
+}
+
 void awe::map::setArmyCurrentCO(const awe::ArmyID army,
 	const std::shared_ptr<const awe::commander>& current) noexcept {
 	setArmyCOs(army, current, getArmyTagCO(army));
 }
 
+void awe::map::setArmyCurrentCO(const awe::ArmyID army, const std::string& current)
+	noexcept {
+	setArmyCOs(army, _commanders->operator[](current), getArmyTagCO(army));
+}
+
 void awe::map::setArmyTagCO(const awe::ArmyID army,
 	const std::shared_ptr<const awe::commander>& tag) noexcept {
 	setArmyCOs(army, getArmyCurrentCO(army), tag);
+}
+
+void awe::map::setArmyTagCO(const awe::ArmyID army, const std::string& tag)
+	noexcept {
+	if (tag.empty()) {
+		setArmyCOs(army, getArmyCurrentCO(army), nullptr);
+	} else {
+		setArmyCOs(army, getArmyCurrentCO(army), _commanders->operator[](tag));
+	}
 }
 
 void awe::map::tagArmyCOs(const awe::ArmyID army) noexcept {
@@ -307,12 +510,32 @@ std::shared_ptr<const awe::commander> awe::map::getArmyCurrentCO(
 	return nullptr;
 }
 
+std::string awe::map::getArmyCurrentCOScriptName(const awe::ArmyID army) const
+	noexcept {
+	auto co = getArmyCurrentCO(army);
+	if (co) {
+		return co->getScriptName();
+	} else {
+		return "";
+	}
+}
+
 std::shared_ptr<const awe::commander> awe::map::getArmyTagCO(
 	const awe::ArmyID army) const noexcept {
 	if (_isArmyPresent(army)) return _armies.at(army).getTagCO();
 	_logger.error("getTagCO operation failed: army with ID {} didn't exist at the "
 		"time of calling!", army);
 	return nullptr;
+}
+
+std::string awe::map::getArmyTagCOScriptName(const awe::ArmyID army) const noexcept
+	{
+	auto co = getArmyTagCO(army);
+	if (co) {
+		return co->getScriptName();
+	} else {
+		return "";
+	}
 }
 
 bool awe::map::tagCOIsPresent(const awe::ArmyID army) const noexcept {
@@ -330,12 +553,38 @@ std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army
 	return std::unordered_set<sf::Vector2u>();
 }
 
+CScriptArray* awe::map::getTilesOfArmyAsArray(const awe::ArmyID army) const {
+	if (_scripts) {
+		auto set = getTilesOfArmy(army);
+		CScriptArray* ret = _scripts->createArray("Vector2");
+		for (auto tile : set) {
+			ret->InsertLast(&tile);
+		}
+		return ret;
+	} else {
+		throw NO_SCRIPTS;
+	}
+}
+
 std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(const awe::ArmyID army)
 	const noexcept {
 	if (_isArmyPresent(army)) return _armies.at(army).getUnits();
 	_logger.error("getUnitsOfArmy operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
 	return std::unordered_set<awe::UnitID>();
+}
+
+CScriptArray* awe::map::getUnitsOfArmyAsArray(const awe::ArmyID army) const {
+	if (_scripts) {
+		auto set = getUnitsOfArmy(army);
+		CScriptArray* ret = _scripts->createArray("UnitID");
+		for (auto unit : set) {
+			ret->InsertLast(&unit);
+		}
+		return ret;
+	} else {
+		throw NO_SCRIPTS;
+	}
 }
 
 std::map<unsigned int, std::unordered_set<awe::UnitID>>
@@ -350,6 +599,25 @@ std::map<unsigned int, std::unordered_set<awe::UnitID>>
 	for (auto& unit : units)
 		ret[_units.at(unit).getType()->getTurnStartPriority()].insert(unit);
 	return ret;
+}
+
+CScriptArray* awe::map::getUnitsOfArmyByPriorityAsArray(const awe::ArmyID army)
+	const {
+	if (_scripts) {
+		auto set = getUnitsOfArmyByPriority(army);
+		CScriptArray* ret = _scripts->createArray("array<UnitID>@");
+		// Loop through backwards: see documentation on unit_type::unit_type().
+		for (auto itr = set.rbegin(), enditr = set.rend(); itr != enditr; ++itr) {
+			CScriptArray* list = _scripts->createArray("UnitID");
+			for (auto unit : itr->second) {
+				list->InsertLast(&unit);
+			}
+			ret->InsertLast(list);
+		}
+		return ret;
+	} else {
+		throw NO_SCRIPTS;
+	}
 }
 
 awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& type,
@@ -1238,7 +1506,7 @@ void awe::map::_CWM_0(const bool isSave) {
 		setMapName(_file.readString());
 		sf::Uint32 width = _file.readNumber<sf::Uint32>();
 		sf::Uint32 height = _file.readNumber<sf::Uint32>();
-		setMapSize(sf::Vector2u(width, height));
+		setMapSize(sf::Vector2u(width, height), 0);
 		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
 		for (sf::Uint64 army = 0; army < armyCount; army++) {
 			auto pCountry = (*_countries)[_file.readNumber<awe::BankID>()];
@@ -1310,7 +1578,7 @@ void awe::map::_CWM_1(const bool isSave) {
 		setMapName(_file.readString());
 		sf::Uint32 width = _file.readNumber<sf::Uint32>();
 		sf::Uint32 height = _file.readNumber<sf::Uint32>();
-		setMapSize(sf::Vector2u(width, height));
+		setMapSize(sf::Vector2u(width, height), 0);
 		sf::Uint32 sel_x = _file.readNumber<sf::Uint32>();
 		sf::Uint32 sel_y = _file.readNumber<sf::Uint32>();
 		setSelectedTile(sf::Vector2u(sel_x, sel_y));
@@ -1444,7 +1712,7 @@ void awe::map::_CWM_2(const bool isSave) {
 		setMapName(_file.readString());
 		sf::Uint32 width = _file.readNumber<sf::Uint32>();
 		sf::Uint32 height = _file.readNumber<sf::Uint32>();
-		setMapSize(sf::Vector2u(width, height));
+		setMapSize(sf::Vector2u(width, height), 0);
 		sf::Uint32 sel_x = _file.readNumber<sf::Uint32>();
 		sf::Uint32 sel_y = _file.readNumber<sf::Uint32>();
 		setSelectedTile(sf::Vector2u(sel_x, sel_y));

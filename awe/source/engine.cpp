@@ -75,6 +75,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	engine::RegisterVectorTypes(engine, document);
 	engine::RegisterTimeTypes(engine, document);
 	awe::game_options::Register(engine, document);
+	awe::map::Register(engine, document);
 
 	// Register the global functions.
 	auto r = engine->RegisterGlobalFunction("void info(const string&in)",

@@ -118,6 +118,16 @@ namespace awe {
 	 */
 	class map : sf::NonCopyable, public sfx::animated_drawable {
 	public:
+		//////////////////////////////////////////
+		// SCRIPT INTERFACE AND FILE OPERATIONS //
+		//////////////////////////////////////////
+		/**
+		 * Registers the \c Map script object type, if it hasn't already been
+		 * registered.
+		 */
+		static void Register(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
 		/**
 		 * Initialises the internal logger object.
 		 * @param name The name to give this particular instantiation within the
@@ -126,9 +136,6 @@ namespace awe {
 		 */
 		map(const std::string& name = "map") noexcept;
 
-		/////////////////////
-		// FILE OPERATIONS //
-		/////////////////////
 		/**
 		 * Version number of the CWM format representing the very first version.
 		 * \c 1297564416 is the 32-bit integer value representing "[NUL]", "C",
@@ -204,6 +211,13 @@ namespace awe {
 		bool save(std::string file, const unsigned char version = LATEST_VERSION)
 			noexcept;
 
+		/**
+		 * The \c scripts object which will allow this \c map object to create
+		 * arrays for the scripts.
+		 * @param scripts Pointer to the \c scripts object.
+		 */
+		void setScripts(const std::shared_ptr<engine::scripts>& scripts) noexcept;
+
 		////////////////////
 		// MAP OPERATIONS //
 		////////////////////
@@ -239,8 +253,23 @@ namespace awe {
 		 * @param  dim  The width (x) and height (y) to make the map.
 		 * @param  tile The type of tile to assign to new tiles.
 		 */
-		void setMapSize(const sf::Vector2u dim,
+		void setMapSize(const sf::Vector2u& dim,
 			const std::shared_ptr<const awe::tile_type>& tile = nullptr) noexcept;
+
+		/**
+		 * Overload of \c setMapSize() which accepts a tile type bank index.
+		 * @param dim  The new size of the map.
+		 * @param tile The bank index of the tile type to assign to new tiles.
+		 */
+		void setMapSize(const sf::Vector2u& dim, const awe::BankID tile = 0)
+			noexcept;
+
+		/**
+		 * Overload of \c setMapSize() which accepts a tile type script name.
+		 * @param dim  The new size of the map.
+		 * @param tile The script name of the tile type to assign to new tiles.
+		 */
+		void setMapSize(const sf::Vector2u& dim, const std::string& tile) noexcept;
 
 		/**
 		 * Retrieves the size of the map, in tiles.
@@ -277,6 +306,18 @@ namespace awe {
 			noexcept;
 
 		/**
+		 * Overload of \c createArmy() which accepts a country bank index.
+		 * @param country The bank index of the country of the army.
+		 */
+		bool createArmy(const awe::BankID country) noexcept;
+
+		/**
+		 * Overload of \c createArmy() which accepts a country script name.
+		 * @param country The script name of the country of the army.
+		 */
+		bool createArmy(const std::string& country) noexcept;
+
+		/**
 		 * Deletes an army entirely from the map.
 		 * Deleting an army removes the army from the army list, deletes all the
 		 * units belonging to the army, and disowns all owned tiles.
@@ -295,6 +336,13 @@ namespace awe {
 		 * @return The set.
 		 */
 		std::set<awe::ArmyID> getArmyIDs() const noexcept;
+
+		/**
+		 * Calls \c getArmyIDs() and converts the result into a \c CScriptArray.
+		 * @return The array listing each army's \c ArmyID in turn order.
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 */
+		CScriptArray* getArmyIDsAsArray() const;
 
 		/**
 		 * Sets the team that a given army belongs to.
@@ -338,6 +386,14 @@ namespace awe {
 			const noexcept;
 
 		/**
+		 * Retrieves an army's country, dereferenced for use with the scripts.
+		 * @param  army The ID of the army whose country is to be reteieved.
+		 * @return Information on the given army's country.
+		 * @throws @c std::out_of_range if an army with the given ID didn't exist.
+		 */
+		const awe::country getArmyCountryObject(const awe::ArmyID army) const;
+
+		/**
 		 * Sets the COs that are in charge of a specified army.
 		 * If \c current was \c nullptr, but \c tag was not, the current CO will be
 		 * assigned \c tag and a warning will be logged. If both pointer parameters
@@ -353,6 +409,16 @@ namespace awe {
 			const std::shared_ptr<const awe::commander>& tag = nullptr) noexcept;
 
 		/**
+		 * Overload of \c setArmyCOs() which accepts script names.
+		 * @param army    The ID of the army to set the COs of.
+		 * @param current The primary CO of the specified army.
+		 * @param tag     The tag CO of the specified army. Should be an empty
+		 *                string if there will not be one.
+		 */
+		void setArmyCOs(const awe::ArmyID army, const std::string& current,
+			 const std::string& tag = "") noexcept;
+
+		/**
 		 * Sets the current CO of a specified army.
 		 * @param army    The ID of the army to set the CO of.
 		 * @param current The primary CO of the specified army.
@@ -362,6 +428,14 @@ namespace awe {
 			const std::shared_ptr<const awe::commander>& current) noexcept;
 
 		/**
+		 * Overload of \c setArmyCurrentCO() which accepts a script name.
+		 * @param army    The ID of the army to set the CO of.
+		 * @param current The primary CO of the specified army.
+		 */
+		void setArmyCurrentCO(const awe::ArmyID army, const std::string& current)
+			noexcept;
+
+		/**
 		 * Sets the tag CO of a specified army.
 		 * @param army The ID of the army to set the CO of.
 		 * @param tag  The tag CO of the specified army.
@@ -369,6 +443,14 @@ namespace awe {
 		 */
 		void setArmyTagCO(const awe::ArmyID army,
 			const std::shared_ptr<const awe::commander>& tag) noexcept;
+
+		/**
+		 * Overload of \c setArmyTagCO() which accepts a script name.
+		 * @param army The ID of the army to set the CO of.
+		 * @param tag  The tag CO of the specified army. Can be an empty string to
+		 *             mean a lack of a tag CO.
+		 */
+		void setArmyTagCO(const awe::ArmyID army, const std::string& tag) noexcept;
 
 		/**
 		 * Performs a tag on a given army.
@@ -389,6 +471,15 @@ namespace awe {
 			const awe::ArmyID army) const noexcept;
 
 		/**
+		 * Gets the army's primary CO's script name.
+		 * @param  army The ID of the army to retrieve the current CO of.
+		 * @return The script name of the primary CO assigned to this army, or an
+		 *         empty string if one is not assigned.
+		 */
+		std::string getArmyCurrentCOScriptName(const awe::ArmyID army) const
+			noexcept;
+
+		/**
 		 * Retrieves an army's secondary/tag CO.
 		 * @param  army The ID of the army to retrieve the tag CO of.
 		 * @return Pointer to the information on the given army's tag CO.
@@ -397,6 +488,14 @@ namespace awe {
 		 */
 		std::shared_ptr<const awe::commander> getArmyTagCO(const awe::ArmyID army)
 			const noexcept;
+
+		/**
+		 * Gets the army's secondary CO's script name.
+		 * @param  army The ID of the army to retrieve the current CO of.
+		 * @return The script name of the secondary CO assigned to this army, or an
+		 *         empty string if one is not assigned.
+		 */
+		std::string getArmyTagCOScriptName(const awe::ArmyID army) const noexcept;
 
 		/**
 		 * Finds out if an army has a tag CO.
@@ -417,6 +516,14 @@ namespace awe {
 			const noexcept;
 
 		/**
+		 * Converts the result of a \c getTilesOfArmy() call into a
+		 * \c CScriptArray.
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c getTilesOfArmy().
+		 */
+		CScriptArray* getTilesOfArmyAsArray(const awe::ArmyID army) const;
+
+		/**
 		 * Retrieves a list of units that belong to a specified army.
 		 * If the specified army doesn't exist, an empty set will be returned.
 		 * @param  army The ID of the army to retrieve the units of.
@@ -424,6 +531,14 @@ namespace awe {
 		 */
 		std::unordered_set<awe::UnitID> getUnitsOfArmy(const awe::ArmyID army)
 			const noexcept;
+
+		/**
+		 * Converts the result of a \c getUnitsOfArmy() call into a
+		 * \c CScriptArray.
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c getUnitsOfArmy().
+		 */
+		CScriptArray* getUnitsOfArmyAsArray(const awe::ArmyID army) const;
 
 		/**
 		 * Retrieves a list of units that belong to a given army, ordered by
@@ -437,6 +552,15 @@ namespace awe {
 		 */
 		std::map<unsigned int, std::unordered_set<awe::UnitID>>
 			getUnitsOfArmyByPriority(const awe::ArmyID army) const noexcept;
+
+		/**
+		 * Converts the result of a \c getUnitsOfArmyByPriority() call into a
+		 * \c CScriptArray.
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c getUnitsOfArmyByPriority().
+		 */
+		CScriptArray* getUnitsOfArmyByPriorityAsArray(const awe::ArmyID army)
+			const;
 
 		/////////////////////
 		// UNIT OPERATIONS //
@@ -988,6 +1112,11 @@ namespace awe {
 		 * Binary file object used to read files.
 		 */
 		engine::binary_file _file;
+
+		/**
+		 * Pointer to a \c scripts object.
+		 */
+		std::shared_ptr<engine::scripts> _scripts = nullptr;
 
 		//////////
 		// DATA //
