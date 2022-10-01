@@ -97,17 +97,17 @@ class TileWidget {
 	 */
 	void update(const Vector2&in tilePos) {
 		// Gather information.
-		const TileType tileType = game.getTileType(tilePos);
-		const Terrain terrainType = game.getTerrainOfTile(tilePos);
-		const ArmyID tileOwner = game.getTileOwner(tilePos);
-		const UnitID unitID = game.getUnitOnTile(tilePos);
+		const TileType tileType = game.map.getTileType(tilePos);
+		const Terrain terrainType = game.map.getTileType(tilePos).type;
+		const ArmyID tileOwner = game.map.getTileOwner(tilePos);
+		const UnitID unitID = game.map.getUnitOnTile(tilePos);
 		array<UnitID> unitIDs;
 		array<UnitType> unitTypes;
 		if (unitID > 0) {
-			unitIDs = game.getLoadedUnits(unitID);
+			unitIDs = game.map.getLoadedUnits(unitID);
 			unitIDs.insertAt(0, unitID);
 			for (uint i = 0; i < unitIDs.length(); ++i) {
-				unitTypes.insertLast(game.getUnitType(unitIDs[i]));
+				unitTypes.insertLast(game.map.getUnitType(unitIDs[i]));
 			}
 		}
 
@@ -161,11 +161,13 @@ class TileWidget {
 				tileType.neutralTileSprite);
 		} else {
 			_panels[0].setIcon("tile.normal",
-				tileType.ownedTileSprite[game.getArmyCountry(tileOwner).ID]);
+				tileType.ownedTileSprite[game.map.getArmyCountry(tileOwner).ID]);
 		}
 		_panels[0].setName(terrainType.shortName);
-		_panels[0].setPropertyText(0, "~" + formatInt(game.getTileHP(tilePos)));
-		_panels[0].setPropertyText(1, "~" + formatUInt(terrainType.defence));
+		_panels[0].setPropertyText(0,
+			"~" + formatInt(game.map.getTileHP(tilePos)));
+		_panels[0].setPropertyText(1,
+			"~" + formatUInt(terrainType.defence));
 		_panels[0].setPropertyVisibility(0, terrainType.maxHP > 0);
 	}
 
@@ -180,15 +182,15 @@ class TileWidget {
 			const UnitID unitID = unitIDs[i - 1];
 			const UnitType unitType = unitTypes[i - 1];
 			_panels[i].setIcon("unit", unitType.unitSprite[
-				game.getArmyCountry(game.getArmyOfUnit(unitID)).ID
+				game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).ID
 			]);
 			_panels[i].setName(unitType.shortName);
 			_panels[i].setPropertyText(0, "~" +
-				formatInt(game.getUnitHP(unitID)));
+				formatInt(game.map.getUnitDisplayedHP(unitID)));
 			_panels[i].setPropertyText(1, "~" +
-				formatInt(game.getUnitFuel(unitID)));
+				formatInt(game.map.getUnitFuel(unitID)));
 			_panels[i].setPropertyText(2, "~" +
-				formatInt(game.getUnitAmmo(unitID)));
+				formatInt(game.map.getUnitAmmo(unitID)));
 			setWidgetVisibility(_panels[i].layout, true);
 			switch (_alignment) {
 			case TileWidgetAlignment::Left:
@@ -250,213 +252,4 @@ class TileWidget {
 	 * The ratio that the curve picture widget should have.
 	 */
 	private float _CURVE_RATIO = 0.2167;
-
-
-
-
-
-
-	// \/ REWRITE \/ //
-
-
-	/**
-	 * Configures a tile widget to display information on a given tile.
-	 * @param tilePos The location of the tile on the current map to display
-	 *                information on.
-	 * @param align   The alignment to set the tile widget to. Falls back on left
-	 *                alignment in cases where an invalid alignment was given.
-	 *
-	void update(const Vector2&in tilePos, const TileWidgetAlignment align) {
-		if (_firstUpdateCall) {
-			_firstUpdateCall = false;
-			// Add all the widgets for the first time.
-			_addWidgets(tilePos, align);
-		} else if (_prevTilePos != tilePos || _prevAlign != align) {
-			// Add all the widgets if the tile or alignment has changed.
-			_removePanels();
-			_addWidgets(tilePos, align);
-		}
-
-		// Update tracker variables.
-		_prevTilePos = tilePos;
-		_prevAlign = align;
-
-		// Generate an appropriately ordered list of unit IDs.
-		array<UnitID> unitIDs;
-		const UnitID unitOnTile = game.getUnitOnTile(tilePos);
-		if (unitOnTile > 0) {
-			unitIDs.insertLast(unitOnTile);
-			array<UnitID> loaded = game.getLoadedUnits(unitOnTile);
-			for (uint i = 0; i < loaded.length(); ++i) {
-				unitIDs.insertLast(loaded[i]);
-			}
-			if (align == TileWidgetAlignment::Right) {
-				unitIDs.reverse();
-			}
-		}
-		
-		// Set panel properties.
-		_setTilePanel(tilePos);
-		// for (uint i = 0; i < unitIDs.length(); ++i) {
-		// 	_setUnitPanel(i, unitIDs[i]);
-		// }
-
-		// Fix the size of the tile widget.
-		// 13 here is the unscaled width of the curve picture.
-		setWidgetSize(layout, "13+" + formatUInt(1 + _unitPanels.length()) +
-			"*" + PROPERTY_PANEL_WIDTH, PROPERTY_PANEL_HEIGHT);
-	}
-
-	/**
-	 * Updates a unit panel's properties.
-	 * @param panel  The 0-based index identifying the unit panel to update.
-	 * @param unitID The ID of the unit to display information on.
-	 *
-	private void _setUnitPanel(const uint panel, const UnitID unitID) {
-		const Unit unitType = game.getUnitType(unitID);
-		_unitPanels[panel].setIcon("unit", unitType.unitSprite[
-			game.getArmyCountry(game.getArmyOfUnit(unitID)).ID
-		]);
-		_unitPanels[panel].setName(unitType.shortName);
-		uint index = 0;
-		_unitPanels[panel].setProperty(index++, "~" +
-			formatInt(game.getUnitHP(unitID)), "icon", "hp");
-		_unitPanels[panel].setProperty(index++, "~" +
-			formatInt(game.getUnitFuel(unitID)), "icon", "fuel");
-		_unitPanels[panel].setProperty(index++, "~" +
-			formatInt(game.getUnitAmmo(unitID)), "icon", "ammo");
-	}
-
-	/**
-	 * Updates the tile panel's properties.
-	 * @param tilePos Location of the tile to display information on.
-	 *
-	private void _setTilePanel(const Vector2&in tilePos) {
-		const Tile tileType = game.getTileType(tilePos);
-		const Terrain terrainType = game.getTerrainOfTile(tilePos);
-		const ArmyID tileOwner = game.getTileOwner(tilePos);
-		if (tileOwner == NO_ARMY) {
-			_tilePanel.setIcon("tile.normal", tileType.neutralTileSprite);
-		} else {
-			_tilePanel.setIcon("tile.normal",
-				tileType.ownedTileSprite[game.getArmyCountry(tileOwner).ID]);
-		}
-		_tilePanel.setName(terrainType.shortName);
-		uint index = 0;
-		if (terrainType.maxHP > 0) {
-			_tilePanel.setProperty(index++, "~" +
-				formatInt(game.getTileHP(tilePos)), "icon", "hp");
-		}
-		_tilePanel.setProperty(index++, "~" + formatUInt(terrainType.defence),
-			"icon", "defstar");
-	}
-
-	/**
-	 * Adds all the widgets necessary to display information on a given tile.
-	 * Also sets static properties, such as the picture that the curve panel
-	 * displays.
-	 *
-	private void _addWidgets(const Vector2&in tilePos,
-		const TileWidgetAlignment align) {
-		const UnitID unitID = game.getUnitOnTile(tilePos);
-		// Add widgets in a different order depending on the alignment.
-		if (align == TileWidgetAlignment::Right) {
-			_addCurve(align);
-			_addLoadedUnitPropertyPanels(unitID, align);
-			_addUnitPropertyPanel(unitID);
-			_addTilePropertyPanel();
-		} else {
-			_addTilePropertyPanel();
-			_addTilePropertyPanel(".2");
-			_addTilePropertyPanel(".3");
-			// _addUnitPropertyPanel(unitID);
-			// _addLoadedUnitPropertyPanels(unitID, align);
-			_addCurve(align);
-		}
-	}
-
-	/**
-	 * Adds the tile property panel.
-	 *
-	private void _addTilePropertyPanel(const string&in name = ".tile") {
-		_tilePanel = PropertyPanel(layout + name);
-	}
-	
-	/**
-	 * Adds the unit property panel.
-	 * @param unitID The ID of the unit to display.
-	 *
-	private void _addUnitPropertyPanel(const UnitID unitID) {
-		if (unitID > 0) {
-			_unitPanels.insertLast(PropertyPanel(layout + ".unit" +
-				formatUInt(unitID)));
-		}
-	}
-
-	/**
-	 * Adds the loaded unit property panels.
-	 * @param unitID The ID of the unit who has the loaded units on it.
-	 * @param align  The alignment of the tile widget.
-	 *
-	private void _addLoadedUnitPropertyPanels(const UnitID unitID,
-		const TileWidgetAlignment align) {
-		if (unitID > 0) {
-			const array<UnitID> loadedIDs = game.getLoadedUnits(unitID);
-			for (int64 i = (align == TileWidgetAlignment::Right ?
-				loadedIDs.length() - 1 : 0);
-				(align == TileWidgetAlignment::Right ?
-								i >= 0 : i < loadedIDs.length());
-				(align == TileWidgetAlignment::Right ?
-								--i : ++i)) {
-				_unitPanels.insertLast(PropertyPanel(layout + ".unit" +
-					formatUInt(loadedIDs[i])));
-			}
-		}
-	}
-	
-	/**
-	 * Adds the curve picture panel.
-	 *
-	private void _addCurve(const TileWidgetAlignment align) {
-		addWidget("Picture", layout + ".curve");
-		if (align == TileWidgetAlignment::Right) {
-			setWidgetSprite(layout + ".curve", "icon", "curveRightAlign");
-		} else {
-			setWidgetSprite(layout + ".curve", "icon", "curveLeftAlign");
-		}
-		matchWidgetSizeToSprite(layout + ".curve", true);
-	}
-	
-	/**
-	 * Removes all of the widgets within the layout.
-	 *
-	private void _removePanels() {
-		_unitPanels.removeRange(0, _unitPanels.length());
-		removeWidgetsFromContainer(layout);
-	}
-
-	/**
-	 * Used to force widget creation upon a first call to update().
-	 *
-	private bool _firstUpdateCall = true;
-
-	/**
-	 * The tile previously given to update().
-	 *
-	private Vector2 _prevTilePos;
-
-	/**
-	 * The alignment previously given to update().
-	 *
-	private TileWidgetAlignment _prevAlign;
-
-	/**
-	 * Holds the property panel displaying the tile.
-	 *
-	private PropertyPanel _tilePanel;
-
-	/**
-	 * Holds the property panels displaying each unit.
-	 *
-	private array<PropertyPanel> _unitPanels;*/
 }

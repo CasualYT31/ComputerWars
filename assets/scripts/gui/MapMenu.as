@@ -1,3 +1,6 @@
+/**
+ * Sets up the menu that is displayed when a user selects a vacant tile.
+ */
 void MapMenuSetUp() {
 	addWidget("VerticalLayout", "Menu");
 
@@ -19,22 +22,36 @@ void MapMenuSetUp() {
 	setWidgetOrigin("MapMenu.Menu", 0.5, 0.0);
 }
 
+/**
+ * Used to allow the user to shut down the menu.
+ * @param controls Control map given by the engine.
+ */
 void MapMenuHandleInput(const dictionary controls) {
 	if (bool(controls["back"])) {
 		setGUI("Map");
 	}
 }
 
+/**
+ * Allows the user to save the map in its current state.
+ */
 void MapMenu_Save_Pressed() {
-	saveMap();
+	game.map.save();
 	setGUI("Map");
 }
 
+/**
+ * Allows the current army to end their turn.
+ */
 void MapMenu_EndTurn_Pressed() {
 	game.endTurn();
 	setGUI("Map");
 }
 
+/**
+ * Quits the map without saving and goes back to the menu the user was on before
+ * loading the map.
+ */
 void MapMenu_Quit_Pressed() {
 	quitMap();
 }

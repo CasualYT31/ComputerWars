@@ -21,9 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "engine.hpp"
-#include "game.hpp"
 #include "army.hpp"
-#include "options.hpp"
 
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
@@ -53,9 +51,18 @@ int awe::game_engine::run() noexcept {
 
 			_renderer->clear();
 			_renderer->animate(*_gui, _scaling);
-			_renderer->animate(_game, _scaling);
-			_renderer->draw(_game,
-				sf::RenderStates().transform.scale(_scaling, _scaling));
+			if (_map) {
+				_renderer->animate(*_map, _scaling);
+				sf::View oldView = _renderer->getView();
+				sf::View view;
+				view.reset(sf::FloatRect(0.0f, 0.0f, (float)_renderer->getSize().x,
+					(float)_renderer->getSize().y));
+				view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+				_renderer->setView(view);
+				_renderer->draw(*_map,
+					sf::RenderStates().transform.scale(_scaling, _scaling));
+				_renderer->setView(oldView);
+			}
 			_renderer->draw(*_gui,
 				sf::RenderStates().transform.scale(_scaling, _scaling));
 			_renderer->display();
@@ -74,7 +81,6 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	sfx::joystick::Register(engine, document);
 	engine::RegisterVectorTypes(engine, document);
 	engine::RegisterTimeTypes(engine, document);
-	awe::game_options::Register(engine, document);
 	awe::map::Register(engine, document);
 
 	// Register the global functions.
@@ -226,24 +232,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Saves the UI configuration (i.e. the "
 		"joystick ID and axis threashold).");
 
-	r = engine->RegisterGlobalFunction(
-		"void loadMap(const string&in, const string&in, GameOptions@ = null)",
+	r = engine->RegisterGlobalFunction("Map@ loadMap(const string&in)",
 		asMETHOD(awe::game_engine, _script_loadMap),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Opens a map (its file path being the "
-		"first parameter), and then switches to the menu given in the second "
-		"parameter. An optional set of game options can also be applied after the "
-		"map has been loaded. They will override anything stored in the map, but "
-		"those overrides won't be saved to the map file until it is saved using a "
-		"save function. The menu should be \"empty\" so as to display the map on "
-		"the screen. If there is already a map open at the time of the call, then "
-		"an error will be logged and no changes will occur.");
-
-	r = engine->RegisterGlobalFunction("void saveMap()",
-		asMETHOD(awe::game_engine, _script_saveMap),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Saves the currently open map. If there "
-		"is no open map, then a warning will be logged.");
+		"first parameter), and returns a handle to it if it could be loaded. If "
+		"there is already a map open at the time of the call, then an error will "
+		"be logged and no changes will occur. A null handle will be returned if "
+		"the map couldn't be loaded!");
 
 	r = engine->RegisterGlobalFunction("void quitMap()",
 		asMETHOD(awe::game_engine, _script_quitMap),
@@ -313,7 +309,6 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_renderer->openWindow();
 	// Allocate GUI and scripts objects, but don't initialise yet.
 	_scripts = std::make_shared<engine::scripts>();
-	_game.setScripts(_scripts);
 	_gui = std::make_shared<sfx::gui>(_scripts);
 	// Continue loading most of the objects.
 	ret =  _loadObject(_userinput, j, { "userinput" })
@@ -350,7 +345,6 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	awe::updateAllMovementsAndLoadedUnits(*_units, *_movements);
 	// Initialise GUIs and the scripts.
 	_scripts->addRegistrant(this);
-	_scripts->addRegistrant(&_game);
 	_scripts->loadScripts(scriptsPath);
 	_scripts->generateDocumentation();
 	_gui->addSpritesheet("icon", _sprites->icon);
@@ -424,27 +418,41 @@ void awe::game_engine::_script_saveUIConfig() {
 	_userinput->save();
 }
 
-void awe::game_engine::_script_loadMap(const std::string& file,
-	const std::string& menu, awe::game_options* options) {
+awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 	// Create the game.
-	_game.load(file, _countries, _tiles, _units, _commanders,
-		_sprites->tile->normal, _sprites->unit->idle, _sprites->icon, _sprites->CO,
-		(*_fonts)["AW2"], _dictionary, options);
-	// Remember what the last menu was so that we can easily go back to it when
-	// the user quits.
-	_menuBeforeMapLoad = _gui->getGUI();
-	_gui->setGUI(menu);
-	// Release our game options reference.
-	if (options) options->Release();
-}
-
-void awe::game_engine::_script_saveMap() {
-	if (!_game.save())
-		_logger.error("Call to \"saveMap()\" couldn't save the current map.");
+	if (_map) {
+		_logger.error("Attempted to load map file \"{}\" whilst map \"{}\" was "
+			"still loaded!", file, _map->getMapName());
+		return nullptr;
+	} else {
+		try {
+			_map = std::make_unique<awe::map>(
+				_countries, _tiles, _units, _commanders);
+		} catch (const std::bad_alloc& e) {
+			_logger.error("Couldn't allocate the map object: {}", e.what());
+			return nullptr;
+		}
+		_map->setTileSpritesheet(_sprites->tile->normal);
+		_map->setUnitSpritesheet(_sprites->unit->idle);
+		_map->setIconSpritesheet(_sprites->icon);
+		_map->setCOSpritesheet(_sprites->CO);
+		_map->setFont((*_fonts)["AW2"]);
+		_map->setLanguageDictionary(_dictionary);
+		_map->setScripts(_scripts);
+		auto r = _map->load(file);
+		if (r) {
+			_menuBeforeMapLoad = _gui->getGUI();
+			return _map.get();
+		} else {
+			_map = nullptr;
+			_logger.error("Couldn't load map file \"{}\".", file);
+			return nullptr;
+		}
+	}
 }
 
 void awe::game_engine::_script_quitMap() {
-	_game.quit();
+	_map = nullptr;
 	_gui->setGUI(_menuBeforeMapLoad);
 }
 

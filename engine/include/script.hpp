@@ -62,6 +62,56 @@ namespace engine {
 		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 	/**
+	 * Base class for AngelScript reference types.
+	 * @tparam T A subclass should pass their class name in to this parameter.
+	 */
+	template<typename T>
+	class script_reference_type {
+	public:
+		/**
+		 * Polymorphic base classes must have virtual destructors.
+		 */
+		~script_reference_type() noexcept = default;
+
+		/**
+		 * Creates the reference type.
+		 * @return Pointer to the reference type.
+		 */
+		static T* Create() noexcept;
+
+		/**
+		 * Copies a reference to the object.
+		 */
+		void AddRef() const noexcept;
+
+		/**
+		 * Releases a reference to the object.
+		 * When the reference counter hits \c 0, the object will be deleted.
+		 */
+		void Release() const noexcept;
+	protected:
+		/**
+		 * One cannot instantiate this class by itself.
+		 */
+		script_reference_type() noexcept = default;
+
+		/**
+		 * Registers the reference type with a given script engine and registers
+		 * the factory and reference counting behaviours.
+		 * @param  engine Pointer to the script engine to register with.
+		 * @param  type   The name of the type to register.
+		 * @return The result of the \c RegisterObjectType() method.
+		 */
+		static int RegisterType(asIScriptEngine* engine, const std::string& type)
+			noexcept;
+	private:
+		/**
+		 * The reference counter.
+		 */
+		mutable asUINT _refCount = 1;
+	};
+
+	/**
 	 * Interface which allows a subclass to register functions, object types, etc.
 	 * with a \c scripts object.
 	 */

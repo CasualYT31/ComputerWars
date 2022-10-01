@@ -1,3 +1,6 @@
+/**
+ * Holds a list of ground unit movement types.
+ */
 const array<string> GROUND_UNITS = {
 	"TREAD",
 	"TIRES",
@@ -6,15 +9,29 @@ const array<string> GROUND_UNITS = {
 	"PIPELINE"
 };
 
+/**
+ * Holds a list of air unit movement types.
+ */
 const array<string> AIR_UNITS = {
 	"AIR"
 };
 
+/**
+ * Holds a list of naval unit movement types.
+ */
 const array<string> SEA_UNITS = {
 	"SHIPS",
 	"TRANSPORT"
 };
 
+/**
+ * Sets up the panel shown for a particular type of production tile.
+ * @param panelName         The name to give to the root panel widget.
+ * @param movementTypeNames An array of movement types. If a unit has a movement
+ *                          type from this list, then it can be built using this
+ *                          panel.
+ * @param columnCount       The number of columns in this panel.
+ */
 void PanelSetUp(const string&in panelName, const array<string>@ movementTypeNames,
 	const uint columnCount) {
 	const uint HEIGHT = 30;
@@ -51,6 +68,9 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 	}
 }
 
+/**
+ * Sets up the menu which allows users to produce units.
+ */
 void BaseMenuSetUp() {
 	PanelSetUp("ground", GROUND_UNITS, 2);
 	PanelSetUp("air", AIR_UNITS, 1);
@@ -72,9 +92,17 @@ void BaseMenuSetUp() {
 		VerticalAlignment::Top);
 }
 
+/**
+ * When this menu is opened, one of the panels has to be shown. This function
+ * shows one of the panels.
+ * @param panelName         The name of the panel to show.
+ * @param movementTypeNames An array of movement types. If a unit has a movement
+ *                          type from this list, then it can be built using this
+ *                          panel.
+ */
 void PanelOpen(const string&in panelName, const array<string>@ movementTypeNames)
 	{
-	const BankID country = game.getArmyCountry(game.getCurrentArmy()).ID;
+	const BankID country = game.map.getArmyCountry(game.map.getSelectedArmy()).ID;
 	const uint unitTypeCount = unittype.length();
 	for (uint i = 0; i < unitTypeCount; ++i) {
 		const UnitType type = unittype[i];
@@ -86,12 +114,15 @@ void PanelOpen(const string&in panelName, const array<string>@ movementTypeNames
 	setWidgetVisibility(panelName, true);
 }
 
+/**
+ * When an appropriate base, airport, or port is selected, this menu is opened.
+ */
 void BaseMenuOpen() {
 	setWidgetVisibility("ground", false);
 	setWidgetVisibility("air", false);
 	setWidgetVisibility("sea", false);
 	const string terrain =
-		game.getTerrainOfTile(game.getSelectedTile()).scriptName;
+		game.map.getTileType(game.map.getSelectedTile()).type.scriptName;
 	if (terrain == "BASE") {
 		PanelOpen("ground", GROUND_UNITS);
 	} else if (terrain == "AIRPORT") {
@@ -101,24 +132,41 @@ void BaseMenuOpen() {
 	}
 }
 
+/**
+ * When the menu is closed, the calculation label is cleared.
+ */
 void BaseMenuClose() {
 	setWidgetText("calc.label", "~");
 }
 
+/**
+ * Allows the user to leave the menu without building anything.
+ * @param controls Control map given by the engine.
+ */
 void BaseMenuHandleInput(const dictionary controls) {
 	if (bool(controls["back"])) {
 		setGUI("Map");
 	}
 }
 
+/**
+ * Handles all signals emitted by button widgets in this menu.
+ * Handles clicking of a button, and when the mouse enters a button.
+ * @param widgetName The name of the button that emitted the signal.
+ * @param signal     The signal emitted. Use this to determine if a button was
+ *                   clicked or if the mouse entered a button.
+ */
 void BaseMenuHandleSignal(const string&in widgetName, const string&in signal) {
 	const UnitType type =
 		unittype[widgetName.substr(widgetName.findLast(".") + 1)];
 	if (signal == "Clicked") {
-		if (game.buyUnit(type.ID)) setGUI("Map");
+		const ArmyID army = game.map.getSelectedArmy();
+		if (game.buyUnit(type, army, game.map.getSelectedTile())) {
+			setGUI("Map");
+		}
 	} else if (signal == "MouseEntered") {
-		const ArmyID army = game.getCurrentArmy();
-		const Funds current = game.getArmyFunds(army);
+		const ArmyID army = game.map.getSelectedArmy();
+		const Funds current = game.map.getArmyFunds(army);
 		const Funds cost = type.cost;
 		const Funds result = current - cost;
 		setWidgetText("calc.label", "~G. " + formatInt(current) + " - G. " +

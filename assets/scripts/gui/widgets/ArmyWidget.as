@@ -83,25 +83,31 @@ class ArmyWidget {
 	 *               on.
 	 */
 	void update(const ArmyID armyID) {
-		Colour colour = game.getArmyCountry(armyID).colour;
+		Colour colour = game.map.getArmyCountry(armyID).colour;
 		colour.a = alpha;
 		setWidgetBackgroundColour(panel, colour);
 
-		TeamID teamID = game.getArmyTeam(armyID);
+		TeamID teamID = game.map.getArmyTeam(armyID);
 		setWidgetText(team, "~" + formatUInt(teamID));
 
-		Commander currentCommander = game.getArmyCurrentCO(armyID);
-		setWidgetSprite(currentCO, "co", currentCommander.iconName);
+		string currentCommanderStr = game.map.getArmyCurrentCO(armyID);
+		if (currentCommanderStr.isEmpty()) {
+			setWidgetVisibility(currentCO, false);
+		} else {
+			Commander currentCommander = commander[currentCommanderStr];
+			setWidgetSprite(currentCO, "co", currentCommander.iconName);
+			setWidgetVisibility(currentCO, true);
+		}
 
-		if (game.tagCOIsPresent(armyID)) {
-			Commander tagCommander = game.getArmyTagCO(armyID);
+		if (game.map.tagCOIsPresent(armyID)) {
+			Commander tagCommander = commander[game.map.getArmyTagCO(armyID)];
 			setWidgetSprite(tagCO, "co", tagCommander.iconName);
 			setWidgetVisibility(tagCO, true);
 		} else {
 			setWidgetVisibility(tagCO, false);
 		}
 
-		setWidgetText(funds, "~G. " + formatInt(game.getArmyFunds(armyID)));
+		setWidgetText(funds, "~G. " + formatInt(game.map.getArmyFunds(armyID)));
 	}
 
 	/**

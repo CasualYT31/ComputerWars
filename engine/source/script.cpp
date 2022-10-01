@@ -60,6 +60,14 @@ void AWEVector2TypeConstructor(const unsigned int x, const unsigned int y,
     new(memory) sf::Vector2u(x, y);
 }
 
+void AWEVector2TypeConstructFromString(const std::string& s, void* memory) {
+    const unsigned int x =
+        (unsigned int)std::stoll(s.substr(1, s.find(',')));
+    const unsigned int y =
+        (unsigned int)std::stoll(s.substr(s.find(',') + 1, s.find(')')));
+    AWEVector2TypeConstructor(x, y, memory);
+}
+
 std::string AWEVector2TypeToString(void* memory) {
     if (memory) {
         sf::Vector2u* v = (sf::Vector2u*)memory;
@@ -105,6 +113,9 @@ void engine::RegisterVectorTypes(asIScriptEngine* engine,
         engine->RegisterObjectBehaviour("Vector2", asBEHAVE_CONSTRUCT,
             "void Vector2(const uint, const uint)",
             asFUNCTION(AWEVector2TypeConstructor), asCALL_CDECL_OBJLAST);
+        engine->RegisterObjectBehaviour("Vector2", asBEHAVE_CONSTRUCT,
+            "void Vector2(const string&in)",
+            asFUNCTION(AWEVector2TypeConstructFromString), asCALL_CDECL_OBJLAST);
         engine->RegisterObjectMethod("Vector2", "string toString() const",
             asFUNCTION(AWEVector2TypeToString), asCALL_CDECL_OBJLAST);
         document->DocumentObjectType(r, "Represents a 2D vector.");

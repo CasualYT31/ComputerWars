@@ -50,64 +50,46 @@ namespace awe {
 	/**
 	 * A node along a closed list path.
 	 */
-	struct closed_list_node {
+	struct closed_list_node :
+		public engine::script_reference_type<awe::closed_list_node> {
+		/**
+		 * Registers this struct with the script interface, if it hasn't been
+		 * already.
+		 */
+		static void Register(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+		/**
+		 * Constructs a closed list node.
+		 * @param tileIn The tile to construct the node with.
+		 * @param gIn    The G score to construct the node with.
+		 */
+		closed_list_node(const sf::Vector2u& tileIn = {}, const int gIn = 0)
+			noexcept;
+
 		/**
 		 * The tile which this node represents.
 		 */
 		sf::Vector2u tile;
 
 		/**
-		 * The animated sprite of the icon.
-		 */
-		sfx::animated_sprite sprite;
-
-		/**
 		 * The G score for this node.
 		 */
 		int g = 0;
+
+		/**
+		 * The animated sprite of the icon.
+		 */
+		sfx::animated_sprite sprite;
 	};
 
 	/**
-	 * Data \c map needs in order to render a selected unit.
+	 * The list of shaders that can be applied to the tiles that are available.
 	 */
-	struct selected_unit_render_data {
-		/**
-		 * The ID of the unit that is selected.
-		 * \c 0 represents no selected unit and can be used to disable selected
-		 * unit rendering.
-		 */
-		awe::UnitID selectedUnit = 0;
-
-		/**
-		 * The set of available tiles.
-		 */
-		std::unordered_set<sf::Vector2u> availableTiles;
-
-		/**
-		 * The list of shaders that can be applied to the tiles that are available.
-		 */
-		enum shader {
-			None,
-			Yellow,
-			Red
-		} availableTileShader; ///< The shader to apply to all available tiles.
-
-		/**
-		 * The closed list, i.e. the currently selected path that a moving unit
-		 * is considering to go along.
-		 */
-		std::vector<awe::closed_list_node> closedList;
-
-		/**
-		 * Tells \c map to render the unit to the tile at the back of the closed
-		 * list instead of its actual location.
-		 */
-		bool renderUnitAtDestination = false;
-
-		/**
-		 * Clears the state of the object.
-		 */
-		void clearState() noexcept;
+	enum class available_tile_shader {
+		None,
+		Yellow,
+		Red
 	};
 
 	/**
@@ -212,9 +194,19 @@ namespace awe {
 			noexcept;
 
 		/**
+		 * Gives access to the scripts to save the map.
+		 * @return \c TRUE if the save was successful, \c FALSE if the file
+		 *         couldn't be saved (reason will be logged).
+		 */
+		bool save() noexcept;
+
+		/**
 		 * The \c scripts object which will allow this \c map object to create
 		 * arrays for the scripts.
+		 * If the given pointer was not \c nullptr, then the closed list will be
+		 * allocated here.
 		 * @param scripts Pointer to the \c scripts object.
+		 * @sa    @c getClosedList().
 		 */
 		void setScripts(const std::shared_ptr<engine::scripts>& scripts) noexcept;
 
@@ -366,6 +358,16 @@ namespace awe {
 		 * @param funds The new fund amount to assign to the army.
 		 */
 		void setArmyFunds(const awe::ArmyID army, const awe::Funds funds) noexcept;
+
+		/**
+		 * Offsets the amount of funds a specified army obtains.
+		 * If the result of the operation would result in a fund amount of \c 0 or
+		 * less, \c 0 will be stored.
+		 * @param army  The ID of the army to amend.
+		 * @param funds The number of funds to award to the army.
+		 */
+		void offsetArmyFunds(const awe::ArmyID army, const awe::Funds funds)
+			noexcept;
 
 		/**
 		 * Retrieves an army's fund count.
@@ -577,6 +579,26 @@ namespace awe {
 			const awe::ArmyID army) noexcept;
 
 		/**
+		 * Overload of \c createUnit() which accepts a unit type bank index.
+		 * @param  type The bank index of the type of unit to create.
+		 * @param  army The ID of the army who will own this unit.
+		 * @return The 1-based ID of the unit created. Will be \c 0 if the unit
+		 *         couldn't be created.
+		 */
+		awe::UnitID createUnit(const awe::BankID type, const awe::ArmyID army)
+			noexcept;
+
+		/**
+		 * Overload of \c createUnit() which accepts a unit type script name.
+		 * @param  type The script name of the type of unit to create.
+		 * @param  army The ID of the army who will own this unit.
+		 * @return The 1-based ID of the unit created. Will be \c 0 if the unit
+		 *         couldn't be created.
+		 */
+		awe::UnitID createUnit(const std::string& type, const awe::ArmyID army)
+			noexcept;
+
+		/**
 		 * Deletes a unit.
 		 * A deleted unit will be removed from the map's and owning army's list, as
 		 * well as the tile it was on.
@@ -595,13 +617,21 @@ namespace awe {
 			const noexcept;
 
 		/**
+		 * Version of \c getUnitType() which dereferences the returned pointer.
+		 * For use with the script interface.
+		 * @throws @c std::out_of_range when the given ID did not identify a unit.
+		 * @sa     @c getUnitType().
+		 */
+		const awe::unit_type getUnitTypeObject(const awe::UnitID id) const;
+
+		/**
 		 * Sets a unit's position on the map.
 		 * The operation will be cancelled if the specified tile is already
 		 * occupied.
 		 * @param id  The ID of the unit to move.
 		 * @param pos The X and Y coordinate of the tile to move the unit to.
 		 */
-		void setUnitPosition(const awe::UnitID id, const sf::Vector2u pos)
+		void setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos)
 			noexcept;
 
 		/**
@@ -650,6 +680,15 @@ namespace awe {
 		 * @param fuel The new fuel of the unit.
 		 */
 		void setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept;
+
+		/**
+		 * Offsets a unit's fuel.
+		 * If the result of the operation would set the unit's fuel to < 0, then 0
+		 * will be stored.
+		 * @param id   The ID of the unit whose fuel is being burned.
+		 * @param fuel The fuel units that are being removed from the unit.
+		 */
+		void burnUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept;
 
 		/**
 		 * Gets a unit's fuel.
@@ -709,7 +748,7 @@ namespace awe {
 		 * @param onto   The X and Y location to move the unloaded unit to.
 		 */
 		void unloadUnit(const awe::UnitID unload, const awe::UnitID from,
-			const sf::Vector2u onto) noexcept;
+			const sf::Vector2u& onto) noexcept;
 
 		/**
 		 * Retrieves the ID of the army a specified unit belongs to.
@@ -736,6 +775,13 @@ namespace awe {
 		std::unordered_set<awe::UnitID> getLoadedUnits(const awe::UnitID id) const
 			noexcept;
 
+		/**
+		 * Version of \c getLoadedUnits() that converts the returned set into a
+		 * \c CScriptArray.
+		 * @sa @c getLoadedUnits().
+		 */
+		CScriptArray* getLoadedUnitsAsArray(const awe::UnitID id) const noexcept;
+
 		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////
@@ -750,8 +796,19 @@ namespace awe {
 		 * @return \c TRUE if setting the tile's type was successful, \c FALSE
 		 *         otherwise.
 		 */
-		bool setTileType(const sf::Vector2u pos,
+		bool setTileType(const sf::Vector2u& pos,
 			const std::shared_ptr<const awe::tile_type>& type) noexcept;
+
+		/**
+		 * Version of \c setTileType() which accepts a tile type bank index.
+		 */
+		bool setTileType(const sf::Vector2u& pos, const awe::BankID type) noexcept;
+
+		/**
+		 * Version of \c setTileType() which accepts a tile type script name.
+		 */
+		bool setTileType(const sf::Vector2u& pos, const std::string& type)
+			noexcept;
 
 		/**
 		 * Retrieves the specified tile's type.
@@ -759,8 +816,15 @@ namespace awe {
 		 * @param  pos The X and Y coordinate of the tile to change.
 		 * @return The type of the tile and its information.
 		 */
-		std::shared_ptr<const awe::tile_type> getTileType(const sf::Vector2u pos)
+		std::shared_ptr<const awe::tile_type> getTileType(const sf::Vector2u& pos)
 			const noexcept;
+
+		/**
+		 * Version of \c getTileType() which dereferences the returned pointer.
+		 * @throws @c std::out_of_range if the given tile was out of bounds.
+		 * @sa     @c getTileType().
+		 */
+		const awe::tile_type getTileTypeObject(const sf::Vector2u& pos) const;
 
 		/**
 		 * Sets a tile's HP.
@@ -768,7 +832,7 @@ namespace awe {
 		 * @param pos The X and Y coordinate of the tile to change.
 		 * @param hp  The HP to assign to the tile.
 		 */
-		void setTileHP(const sf::Vector2u pos, const awe::HP hp) noexcept;
+		void setTileHP(const sf::Vector2u& pos, const awe::HP hp) noexcept;
 
 		/**
 		 * Retrieves a tile's HP.
@@ -776,7 +840,7 @@ namespace awe {
 		 * @return The HP of the tile, or \c 0 if the given coordinate was out of
 		 *         bounds.
 		 */
-		awe::HP getTileHP(const sf::Vector2u pos) const noexcept;
+		awe::HP getTileHP(const sf::Vector2u& pos) const noexcept;
 
 		/**
 		 * Sets a tile's owner.
@@ -785,7 +849,7 @@ namespace awe {
 		 *             \c awe::army::NO_ARMY can be given to signal that the tile
 		 *             should not have an owner.
 		 */
-		void setTileOwner(const sf::Vector2u pos, awe::ArmyID army) noexcept;
+		void setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) noexcept;
 
 		/**
 		 * Gets a tile's owner.
@@ -794,7 +858,7 @@ namespace awe {
 		 * @return The ID of the army who owns this tile, or \c awe::army::NO_ARMY
 		 *         if no army owns it.
 		 */
-		awe::ArmyID getTileOwner(const sf::Vector2u pos) const noexcept;
+		awe::ArmyID getTileOwner(const sf::Vector2u& pos) const noexcept;
 
 		/**
 		 * Retrieves the unit currently occupying a specified tile.
@@ -804,7 +868,7 @@ namespace awe {
 		 * @return The ID of the unit occupying this tile. \c 0 if the tile is
 		 *         vacant or out of bounds.
 		 */
-		awe::UnitID getUnitOnTile(const sf::Vector2u pos) const noexcept;
+		awe::UnitID getUnitOnTile(const sf::Vector2u& pos) const noexcept;
 
 		/**
 		 * Calculates the tiles available from a specified tile.
@@ -819,8 +883,120 @@ namespace awe {
 		 *         logged), or if \c startFrom was larger than \c endAt.
 		 */
 		std::unordered_set<sf::Vector2u> getAvailableTiles(
-			const sf::Vector2u tile, unsigned int startFrom,
-			const unsigned int endAt) noexcept;
+			const sf::Vector2u& tile, unsigned int startFrom,
+			const unsigned int endAt) const noexcept;
+
+		/**
+		 * Version of \c getAvailableTiles() which converts the result into a
+		 * \c CScriptArray.
+		 * @sa @c getAvailableTiles().
+		 */
+		CScriptArray* getAvailableTilesAsArray(
+			const sf::Vector2u& tile, unsigned int startFrom,
+			const unsigned int endAt) const noexcept;
+
+		/**
+		 * Finds the shortest path from the origin to the destination.
+		 * @param  origin     The origin tile.
+		 * @param  dest       The intended destination.
+		 * @param  moveType   The movement type used for traversal calculations.
+		 * @param  movePoints The movement points available.
+		 * @param  fuel       The units of fuel that we have to work with.
+		 * @param  team       The team the moving unit is on.
+		 * @return The shortest path, if a path could be found. An empty vector if
+		 *         no path could be found.
+		 */
+		std::vector<awe::closed_list_node> findPath(const sf::Vector2u& origin,
+			const sf::Vector2u& dest, const awe::movement_type& moveType,
+			const unsigned int movePoints, const awe::Fuel fuel,
+			const awe::TeamID team) const noexcept;
+
+		/**
+		 * Version of \c findPath() which converts the result into a
+		 * \c CScriptArray.
+		 * @sa @c findPath().
+		 */
+		CScriptArray* findPathAsArray(const sf::Vector2u& origin,
+			const sf::Vector2u& dest, const awe::movement_type& moveType,
+			const unsigned int movePoints, const awe::Fuel fuel,
+			const awe::TeamID team) const noexcept;
+
+		//////////////////////////////////////
+		// SELECTED UNIT DRAWING OPERATIONS //
+		//////////////////////////////////////
+		/**
+		 * Selects a unit on the map.
+		 * If an invalid unit ID is given, the call won't have any effect, and it
+		 * will be logged.\n
+		 * Note that no rendering effects for available tiles or a selected unit,
+		 * etc., will be employed if the currently selected unit is \c 0.
+		 * @param unit The ID of the unit to select. If \c 0 is given, all of the
+		 *             selected unit rendering data will be cleared.
+		 */
+		void setSelectedUnit(const awe::UnitID unit) noexcept;
+
+		/**
+		 * Gets the currently selected unit.
+		 * @return The ID of the currently selected unit. \c 0 if no unit is
+		 *         selected.
+		 */
+		awe::UnitID getSelectedUnit() const noexcept;
+
+		/**
+		 * Adds a tile to the available tile set.
+		 * If the given tile was out of bounds, the call will be logged and the
+		 * tile won't be added.
+		 * @param tile The tile to add. If a tile is given that was already in the
+		 *             set, the tile won't be added again.
+		 */
+		void addAvailableTile(const sf::Vector2u& tile) noexcept;
+
+		/**
+		 * Finds out if a given tile was previously added to the available tiles
+		 * set.
+		 * If the given tile was out of bounds, the call will be logged and
+		 * \c FALSE will be returned.
+		 * @param  tile The tile to search for.
+		 * @return \c TRUE if \c tile was added as an available tile, \c FALSE
+		 *         otherwise.
+		 */
+		bool isAvailableTile(const sf::Vector2u& tile) const noexcept;
+
+		/**
+		 * Sets the shader to use for available tiles.
+		 * @param shader The shader to use.
+		 */
+		void setAvailableTileShader(const awe::available_tile_shader shader)
+			noexcept;
+
+		/**
+		 * Gets the shader currently used for available tiles.
+		 * @return The shader in use.
+		 */
+		awe::available_tile_shader getAvailableTileShader() const noexcept;
+
+		/**
+		 * Sets whether the selected unit should be rendered at the final tile in
+		 * the closed list or not.
+		 * @param flag \c TRUE if the unit should be rendered at the final tile in
+		 *             the closed list, \c FALSE if it should be rendered at its
+		 *             real location.
+		 */
+		void renderUnitAtDestination(const bool flag) noexcept;
+
+		/**
+		 * Returns a pointer to the closed list.
+		 * The returned array has elements of type \c awe::closed_list_node.
+		 * @return Pointer to the \c CScriptArray holding the closed list.
+		 * @sa     @c setScripts().
+		 */
+		CScriptArray* getClosedList() noexcept;
+
+		/**
+		 * Iterates through the closed list in its current state and updates each
+		 * node's animated sprite based on the stored path.
+		 */
+		void regenerateClosedListSprites() noexcept;
 
 		////////////////////////
 		// DRAWING OPERATIONS //
@@ -832,7 +1008,7 @@ namespace awe {
 		 * call will be ignored.
 		 * @param pos The X and Y location of the tile which is selected.
 		 */
-		void setSelectedTile(const sf::Vector2u pos) noexcept;
+		void setSelectedTile(const sf::Vector2u& pos) noexcept;
 
 		/**
 		 * Moves the cursor up one tile, if possible.
@@ -864,7 +1040,7 @@ namespace awe {
 		 * @param pixel The pixel relative to the render target to use to identify
 		 *              a tile to select.
 		 */
-		void setSelectedTileByPixel(const sf::Vector2i pixel) noexcept;
+		void setSelectedTileByPixel(const sf::Vector2i& pixel) noexcept;
 
 		/**
 		 * Gets the position of the currently selected tile.
@@ -873,17 +1049,12 @@ namespace awe {
 		sf::Vector2u getSelectedTile() const noexcept;
 
 		/**
-		 * Stores selected unit render data.
-		 */
-		selected_unit_render_data selectedUnitRenderData;
-
-		/**
 		 * Selects an army from the map.
 		 * If the given army didn't exist, the call will be cancelled and logged.
 		 * @param army The ID of the army which should be having their turn at the
 		 *             time of the call.
 		 */
-		void selectArmy(const awe::ArmyID army) noexcept;
+		void setSelectedArmy(const awe::ArmyID army) noexcept;
 
 		/**
 		 * Returns the ID of the currently selected army.
@@ -995,7 +1166,9 @@ namespace awe {
 		 * @param  pos The position to test.
 		 * @return \c TRUE if the position is out of bounds, \c FALSE if not.
 		 */
-		bool _isOutOfBounds(const sf::Vector2u pos) const noexcept;
+		inline bool _isOutOfBounds(const sf::Vector2u& pos) const noexcept {
+			return pos.x >= getMapSize().x || pos.y >= getMapSize().y;
+		}
 
 		/**
 		 * Checks if a given X and Y coordinate are within the visible portion of
@@ -1004,21 +1177,27 @@ namespace awe {
 		 * @return \c TRUE if the position is within the visible portion, \c FALSE
 		 *         if not.
 		 */
-		bool _tileIsVisible(const sf::Vector2u pos) const noexcept;
+		inline bool _tileIsVisible(const sf::Vector2u& pos) const noexcept {
+			return true;
+		}
 
 		/**
 		 * Checks if a given army ID is present on the map.
 		 * @param  id The ID of the army to check.
 		 * @return \c TRUE if the army is on the map, \c FALSE if they are not.
 		 */
-		bool _isArmyPresent(const awe::ArmyID id) const noexcept;
+		inline bool _isArmyPresent(const awe::ArmyID id) const noexcept {
+			return _armies.find(id) != _armies.end();
+		}
 
 		/**
 		 * Checks if a unit is present in the game.
 		 * @param  id The ID of the unit to check.
 		 * @return \c TRUE if the unit is on the map, \c FALSE if they are not.
 		 */
-		bool _isUnitPresent(const awe::UnitID id) const noexcept;
+		inline bool _isUnitPresent(const awe::UnitID id) const noexcept {
+			return _units.find(id) != _units.end();
+		}
 
 		/**
 		 * Determines the ID the next unit should have.
@@ -1169,6 +1348,54 @@ namespace awe {
 		/////////////
 		// DRAWING //
 		/////////////
+		/**
+		 * Data \c map needs in order to render a selected unit.
+		 */
+		struct selected_unit_render_data {
+			/**
+			 * Releases the reference to the closed list \c CScriptArray, if it has
+			 * been allocated.
+			 * @warning May need to implement proper copy and move constructors
+			 *          that increment the reference counter in the future!
+			 */
+			~selected_unit_render_data() noexcept;
+
+			/**
+			 * The ID of the unit that is selected.
+			 * \c 0 represents no selected unit and can be used to disable selected
+			 * unit rendering.
+			 */
+			awe::UnitID selectedUnit = 0;
+
+			/**
+			 * The set of available tiles.
+			 */
+			std::unordered_set<sf::Vector2u> availableTiles;
+
+			/**
+			 * The shader to apply to all available tiles.
+			 */
+			awe::available_tile_shader availableTileShader;
+
+			/**
+			 * The closed list, i.e. the currently selected path that a moving unit
+			 * is considering to go along.
+			 * The type stored in the array should be \c closed_list_node.
+			 */
+			CScriptArray* closedList = nullptr;
+
+			/**
+			 * Tells \c map to render the unit to the tile at the back of the
+			 * closed list instead of its actual location.
+			 */
+			bool renderUnitAtDestination = false;
+
+			/**
+			 * Clears the state of the object.
+			 */
+			void clearState() noexcept;
+		} _selectedUnitRenderData; ///< Stores selected unit render data.
+
 		/**
 		 * The currently selected tile.
 		 */

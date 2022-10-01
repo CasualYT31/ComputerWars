@@ -36,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui.hpp"
 #include "bank.hpp"
 #include "spritesheets.hpp"
-#include "game.hpp"
+#include "map.hpp"
 #include <filesystem>
 
 namespace awe {
@@ -234,21 +234,18 @@ namespace awe {
 
 		/**
 		 * Loads a map.
-		 * @param file    The map file to load.
-		 * @param menu    The menu to switch to once loading finishes.
-		 * @param options The set of options to apply to the map. Can be
-		 *                \c nullptr.
+		 * If a map was already loaded, then an error will be logged, that map
+		 * won't be unloaded, and no new map will be loaded.
+		 * @param  file The map file to load.
+		 * @return Pointer to the \c map object to give to the scripts. Returns
+		 *         \c nullptr if the map couldn't be loaded.
 		 */
-		void _script_loadMap(const std::string& file, const std::string& menu,
-			awe::game_options* options);
+		awe::map* _script_loadMap(const std::string& file);
 
 		/**
-		 * Saves the current map.
-		 */
-		void _script_saveMap();
-
-		/**
-		 * Quits the current map and goes back to the previous menu.
+		 * Quits the current map and goes back to the menu that was open when
+		 * \c _script_loadMap() was called.
+		 * @warning This operation will invalidate the \c map pointer!
 		 */
 		void _script_quitMap();
 
@@ -309,7 +306,7 @@ namespace awe {
 		/**
 		 * Stores a game's data, including its map and the armies.
 		 */
-		awe::game _game;
+		std::unique_ptr<awe::map> _map = nullptr;
 
 		//================================
 		//==========BACKEND DATA==========

@@ -888,8 +888,6 @@ namespace awe {
 
 		/**
 		 * Converts an internal HP value into a user-friendly one.
-		 * Note that if one wishes to add this function to the script interface,
-		 * they will have to remove \c inline in order to do so.
 		 * @param  hp The internal HP.
 		 * @return The user-friendly HP.
 		 */
@@ -900,8 +898,6 @@ namespace awe {
 
 		/**
 		 * Converts a user-friendly HP value into an internal one.
-		 * Note that if one wishes to add this function to the script interface,
-		 * they will have to remove \c inline in order to do so.
 		 * @param  hp The user-friendly HP.
 		 * @return The internal HP.
 		 */

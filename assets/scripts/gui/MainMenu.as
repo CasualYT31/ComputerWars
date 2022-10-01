@@ -1,3 +1,9 @@
+/**
+ * This version of the main menu simply lists the map files currently
+ * stored in the assets folder.
+ * It also allows the user to supply game options (but only when playing
+ * on Island X), via the \c NewGameOptions menu.
+ */
 void MainMenuSetUp() {
 	setGlobalFont("AW2");
 	setBackground("", 200, 200, 200, 0);
@@ -10,6 +16,10 @@ void MainMenuSetUp() {
 	setWidgetText("NewGame", "~New Game");
 }
 
+/**
+ * Every time the main menu is opened, the map file list will be
+ * updated.
+ */
 void MainMenuOpen() {
 	// Collect a list of available map files and add them to the listbox.
 	clearItems("FileSelect");
@@ -26,11 +36,42 @@ void MainMenuOpen() {
 	}
 }
 
-void MainMenu_FileSelect_MouseReleased() {
-	string item = getSelectedItemText("FileSelect");
-	loadMap("map/" + item, "Map");
+/**
+ * Global point of access to the map in-play.
+ */
+PlayableMap game;
+
+/**
+ * Loads a map for play.
+ * The map was loaded successfully, the \c Map menu will be opened.
+ * @param  file The path of the map file to load.
+ * @return The name of the menu to set, if the load was successful. If the load
+ *         was unsuccessful, an empty string will be returned.
+ */
+string PlayMap(const string&in file) {
+	game = PlayableMap(loadMap(file));
+	if (game.map is null) {
+		error("Failed to load map, will not switch menus.");
+		return "";
+	} else {
+		return "Map";
+	}
 }
 
+/**
+ * When a file is selected from the list, the map file will be loaded.
+ * If the map could be loaded successfully, then switch to the \c Map
+ * menu.
+ */
+void MainMenu_FileSelect_MouseReleased() {
+	const string menu = PlayMap("map/" + getSelectedItemText("FileSelect"));
+	if (!menu.isEmpty()) setGUI(menu);
+}
+
+/**
+ * Go to the \c NewGameOptions menu when the user clicks the right
+ * button.
+ */
 void MainMenu_NewGame_MouseReleased() {
 	setGUI("NewGameOptions");
 }

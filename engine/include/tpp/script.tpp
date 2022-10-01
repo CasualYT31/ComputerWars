@@ -22,6 +22,40 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+template<typename T>
+T* engine::script_reference_type<T>::Create() noexcept {
+	// The reference counter is automatically set to 1 for all new objects.
+	return new T();
+}
+
+template<typename T>
+void engine::script_reference_type<T>::AddRef() const noexcept {
+	++_refCount;
+}
+
+template<typename T>
+void engine::script_reference_type<T>::Release() const noexcept {
+	if (--_refCount == 0) {
+		delete static_cast<const T*>(this);
+	}
+}
+
+template<typename T>
+int engine::script_reference_type<T>::RegisterType(asIScriptEngine* engine,
+	const std::string& type) noexcept {
+	int r = engine->RegisterObjectType(type.c_str(), 0, asOBJ_REF);
+	engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
+		std::string(type + "@ f()").c_str(),
+		asFUNCTION(engine::script_reference_type<T>::Create), asCALL_CDECL);
+	engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_ADDREF,
+		"void f()", asMETHOD(engine::script_reference_type<T>, AddRef),
+		asCALL_THISCALL);
+	engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_RELEASE,
+		"void f()", asMETHOD(engine::script_reference_type<T>, Release),
+		asCALL_THISCALL);
+	return r;
+}
+
 template<typename T, typename... Ts>
 bool engine::scripts::callFunction(const std::string& name, T value, Ts... values)
 noexcept {

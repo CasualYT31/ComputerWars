@@ -1,10 +1,16 @@
+/**
+ * The menu used when a game is in play is completely empty.
+ */
 void MapSetUp() {}
 
-// Holds the previous mouse position.
+/**
+ * Holds the previous mouse position.
+ */
 MousePosition previousPosition;
 
 /**
  * Input handling code common to both Map and MoveUnitMenu.
+ * @param controls The control map given by the engine.
  */
 void HandleCommonGameInput(const dictionary@ controls) {
 	// Handle mouse input.
@@ -46,15 +52,19 @@ void HandleCommonGameInput(const dictionary@ controls) {
 	}
 }
 
+/**
+ * Handles input specific to the \c Map menu.
+ * @param controls The control map given by the engine.
+ */
 void MapHandleInput(const dictionary controls) {
 	HandleCommonGameInput(controls);
 	if (bool(controls["select"])) {
-		auto cursor = game.getSelectedTile();
-		auto unitID = game.getUnitOnTile(cursor);
+		auto cursor = game.map.getSelectedTile();
+		auto unitID = game.map.getUnitOnTile(cursor);
 		if (unitID == 0) {
-			ArmyID owner = game.getTileOwner(cursor);
-			ArmyID currentArmy = game.getCurrentArmy();
-			string type = game.getTerrainOfTile(cursor).scriptName;
+			ArmyID owner = game.map.getTileOwner(cursor);
+			ArmyID currentArmy = game.map.getSelectedArmy();
+			string type = game.map.getTileType(cursor).type.scriptName;
 			if (owner == currentArmy) {
 				if (type == "BASE" || type == "AIRPORT" || type == "PORT") {
 					setGUI("BaseMenu");
@@ -63,9 +73,9 @@ void MapHandleInput(const dictionary controls) {
 			}
 			setGUI("MapMenu");
 			return;
-		} else if (game.getArmyOfUnit(unitID) == game.getCurrentArmy() &&
-			!game.isUnitWaiting(unitID)) {
-			game.enableMoveMode();
+		} else if (game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy() &&
+			!game.map.isUnitWaiting(unitID)) {
+			game.selectUnit(unitID);
 			setGUI("MoveUnitMenu");
 			return;
 		}

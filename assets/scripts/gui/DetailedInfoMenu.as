@@ -3,6 +3,10 @@
  */
 array<ArmyWidget> armyWidgets;
 
+/**
+ * Sets up the army panel of the detailed info menu,
+ * @param baseLayout The name of the widget in which the army panel will be added.
+ */
 void setUpArmyPanel(string baseLayout) {
 	baseLayout += ".armyPanel";
 	addWidget("ScrollablePanel", baseLayout);
@@ -17,6 +21,11 @@ void setUpArmyPanel(string baseLayout) {
 	setWidgetTextOutlineThickness(baseLayout, 3.0);
 }
 
+/**
+ * Sets up the terrain panel of the detailed info menu,
+ * @param baseLayout The name of the widget in which the terrain panel will be
+ *                   added.
+ */
 void setUpTerrainPanel(string baseLayout) {
 	baseLayout += ".terrainPanel";
 	addWidget("ScrollablePanel", baseLayout);
@@ -56,6 +65,10 @@ void setUpTerrainPanel(string baseLayout) {
 	addWidget("VerticalLayout", baseLayout + "moveCosts");
 }
 
+/**
+ * Sets up the unit panel of the detailed info menu,
+ * @param baseLayout The name of the widget in which the unit panel will be added.
+ */
 void setUpUnitPanel(string baseLayout) {
 	baseLayout += ".unitPanel";
 	addWidget("ScrollablePanel", baseLayout);
@@ -144,6 +157,9 @@ void setUpUnitPanel(string baseLayout) {
 	addWidget("Label", unitLayout + "description");
 }
 
+/**
+ * Sets up the entire detailed info menu.
+ */
 void DetailedInfoMenuSetUp() {
 	string baseLayout = "DetailedInfoMenu.baseLayout";
 	addWidget("HorizontalLayout", baseLayout);
@@ -159,11 +175,11 @@ void DetailedInfoMenuSetUp() {
  * @return The \c tilePicture.normal sprite to show.
  */
 const string tilePicture(const Vector2&in pos) {
-	const Terrain t = game.getTerrainOfTile(pos);
+	const Terrain t = game.map.getTileType(pos).type;
 	// If the tile is owned, attempt to retrieve the owned terrain picture.
-	const auto ownerID = game.getTileOwner(pos);
+	const auto ownerID = game.map.getTileOwner(pos);
 	if (ownerID != NO_ARMY) {
-		const auto owned = t.picture[game.getArmyCountry(ownerID).ID];
+		const auto owned = t.picture[game.map.getArmyCountry(ownerID).ID];
 		if (!owned.isEmpty()) {
 			return owned;
 		}
@@ -180,8 +196,8 @@ const string tilePicture(const Vector2&in pos) {
 void DetailedInfoMenuOpen() {
 	// Setup army panel.
 	setWidgetText("DetailedInfoMenu.baseLayout.armyPanel.day", "day",
-		{ any(game.getDay()) });
-	const uint armyCount = game.getArmyCount();
+		{ any(game.map.getDay()) });
+	const uint armyCount = game.map.getArmyCount();
 	for (uint a = 0; a < armyCount; a++) {
 		armyWidgets.insertLast(ArmyWidget(
 			"DetailedInfoMenu.baseLayout.armyPanel.army" + formatUInt(a)));
@@ -191,13 +207,14 @@ void DetailedInfoMenuOpen() {
 	}
 	
 	// Setup tile panel.
-	const Terrain terrainType = game.getTerrainOfTile(game.getSelectedTile());
+	const Terrain terrainType =
+		game.map.getTileType(game.map.getSelectedTile()).type;
 	string base = "DetailedInfoMenu.baseLayout.terrainPanel.terrainLayout.";
 	setWidgetText(base + "detailsAndPicture.details.longName", terrainType.name);
 	setWidgetText(base + "detailsAndPicture.details.defence.label", "~" +
 		formatUInt(terrainType.defence));
 	setWidgetText(base + "detailsAndPicture.details.hp.label", "~" +
-		formatInt(game.getTileHP(game.getSelectedTile())) + " / " +
+		formatInt(game.map.getTileHP(game.map.getSelectedTile())) + " / " +
 		formatUInt(terrainType.maxHP));
 	if (terrainType.maxHP == 0) {
 		setWidgetVisibility(base + "detailsAndPicture.details.hp", false);
@@ -205,7 +222,7 @@ void DetailedInfoMenuOpen() {
 		setWidgetVisibility(base + "detailsAndPicture.details.hp", true);
 	}
 	setWidgetSprite(base + "detailsAndPicture.group.picture",
-		"tilePicture.normal", tilePicture(game.getSelectedTile()));
+		"tilePicture.normal", tilePicture(game.map.getSelectedTile()));
 	setWidgetText(base + "description", terrainType.description);
 	base += "moveCosts.";
 	for (BankID moveID = 0; moveID < movement.length(); ++moveID) {
@@ -225,18 +242,18 @@ void DetailedInfoMenuOpen() {
 	// Setup unit panel.
 	const string unitPanel =
 		"DetailedInfoMenu.baseLayout.unitPanel.unitLayout.details";
-	const auto unitID = game.getUnitOnTile(game.getSelectedTile());
+	const auto unitID = game.map.getUnitOnTile(game.map.getSelectedTile());
 	if (unitID > 0) {
-		const UnitType unitType = game.getUnitType(unitID);
+		const UnitType unitType = game.map.getUnitType(unitID);
 		const Movement movementType = unitType.movementType;
 		setWidgetText(unitPanel + ".stats.name", unitType.name);
 		setWidgetText(unitPanel + ".stats.grid.price", "~" +
 			formatUInt(unitType.cost));
 		setWidgetText(unitPanel + ".stats.grid.fuel", "~" +
-			formatInt(game.getUnitFuel(unitID)) + " / " +
+			formatInt(game.map.getUnitFuel(unitID)) + " / " +
 			formatInt(unitType.maxFuel));
 		setWidgetText(unitPanel + ".stats.grid.ammo", "~" +
-			formatInt(game.getUnitAmmo(unitID)) + " / " +
+			formatInt(game.map.getUnitAmmo(unitID)) + " / " +
 			formatInt(unitType.maxAmmo));
 		setWidgetText(unitPanel + ".stats.grid.mp", "~" +
 			formatUInt(unitType.movementPoints));
@@ -249,7 +266,7 @@ void DetailedInfoMenuOpen() {
 
 		setWidgetSprite(unitPanel + ".pictureAndRange.panel.picture",
 			"unitPicture", unitType.pictureSprite[
-			game.getArmyCountry(game.getArmyOfUnit(unitID)).ID]);
+			game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).ID]);
 		setWidgetText(unitPanel + ".pictureAndRange.rangeLayout.ranges.lower",
 			"~" + unitType.lowerRange);
 		setWidgetText(unitPanel + ".pictureAndRange.rangeLayout.ranges.higher",
@@ -268,11 +285,11 @@ void DetailedInfoMenuOpen() {
 }
 
 /**
- * Deletes all the dynamic widgets.
+ * Removes all the dynamic widgets.
  */
 void DetailedInfoMenuClose() {
 	// Remove all army widgets.
-	const uint armyCount = game.getArmyCount();
+	const uint armyCount = game.map.getArmyCount();
 	for (uint a = 0; a < armyCount; a++) {
 		armyWidgets[a].remove();
 	}
@@ -283,6 +300,10 @@ void DetailedInfoMenuClose() {
 		"DetailedInfoMenu.baseLayout.terrainPanel.terrainLayout.moveCosts");
 }
 
+/**
+ * Goes back to the previous menu if the user inputs the necessary control.
+ * @param controls The control map given by the engine.
+ */
 void DetailedInfoMenuHandleInput(const dictionary controls) {
 	if (bool(controls["info"]) || bool(controls["back"])) {
 		setGUI(PREVIOUS_MENU);

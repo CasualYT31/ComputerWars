@@ -119,55 +119,69 @@ void NewGameOptions_Play_MouseReleased() {
 	filesystem fs;
 	fs.changeCurrentPath("./map");
 	fs.copyFile("islandx.cwm", "islandxcopy.cwm");
-	// Setup the game options, then load the map.
-	GameOptions opts;
-	auto osCurrent = getSelectedItem("COs.OSCurrentList");
-	auto bmCurrent = getSelectedItem("COs.BMCurrentList");
-	auto geCurrent = getSelectedItem("COs.GECurrentList");
-	auto ycCurrent = getSelectedItem("COs.YCCurrentList");
-	auto osTag = getSelectedItem("COs.OSTagList");
-	auto bmTag = getSelectedItem("COs.BMTagList");
-	auto geTag = getSelectedItem("COs.GETagList");
-	auto ycTag = getSelectedItem("COs.YCTagList");
-	auto osTeam = getWidgetText("Teams.OS");
-	auto bmTeam = getWidgetText("Teams.BM");
-	auto geTeam = getWidgetText("Teams.GE");
-	auto ycTeam = getWidgetText("Teams.YC");
-	if (osCurrent >= 0) opts.setCurrentCO(0, osCurrent);
-	if (bmCurrent >= 0) opts.setCurrentCO(1, bmCurrent);
-	if (geCurrent >= 0) opts.setCurrentCO(2, geCurrent);
-	if (ycCurrent >= 0) opts.setCurrentCO(3, ycCurrent);
-	if (osTag >= 0) {
-		opts.setTagCO(0, osTag);
-	} else {
-		opts.setNoTagCO(0, true);
+	const string menu = PlayMap("map/islandxcopy.cwm");
+	if (!menu.isEmpty()) {
+		GameOptions opts;
+		auto osCurrent = getSelectedItem("COs.OSCurrentList");
+		auto bmCurrent = getSelectedItem("COs.BMCurrentList");
+		auto geCurrent = getSelectedItem("COs.GECurrentList");
+		auto ycCurrent = getSelectedItem("COs.YCCurrentList");
+		auto osTag = getSelectedItem("COs.OSTagList");
+		auto bmTag = getSelectedItem("COs.BMTagList");
+		auto geTag = getSelectedItem("COs.GETagList");
+		auto ycTag = getSelectedItem("COs.YCTagList");
+		auto osTeam = getWidgetText("Teams.OS");
+		auto bmTeam = getWidgetText("Teams.BM");
+		auto geTeam = getWidgetText("Teams.GE");
+		auto ycTeam = getWidgetText("Teams.YC");
+
+		if (osCurrent >= 0) {
+			opts.currentCOs.set("0", commander[osCurrent].scriptName);
+		}
+		if (bmCurrent >= 0) {
+			opts.currentCOs.set("1", commander[bmCurrent].scriptName);
+		}
+		if (geCurrent >= 0) {
+			opts.currentCOs.set("2", commander[geCurrent].scriptName);
+		}
+		if (ycCurrent >= 0) {
+			opts.currentCOs.set("3", commander[ycCurrent].scriptName);
+		}
+
+		if (osTag >= 0) {
+			opts.tagCOs.set("0", commander[osTag].scriptName);
+		} else {
+			opts.tagCOs.set("0", "");
+		}
+		if (bmTag >= 0) {
+			opts.tagCOs.set("1", commander[bmTag].scriptName);
+		} else {
+			opts.tagCOs.set("1", "");
+		}
+		if (geTag >= 0) {
+			opts.tagCOs.set("2", commander[geTag].scriptName);
+		} else {
+			opts.tagCOs.set("2", "");
+		}
+		if (ycTag >= 0) {
+			opts.tagCOs.set("3", commander[ycTag].scriptName);
+		} else {
+			opts.tagCOs.set("3", "");
+		}
+
+		if (osTeam.length() > 0) {
+			opts.teams.set("0", parseUInt(osTeam));
+		}
+		if (bmTeam.length() > 0) {
+			opts.teams.set("1", parseUInt(bmTeam));
+		}
+		if (geTeam.length() > 0) {
+			opts.teams.set("2", parseUInt(geTeam));
+		}
+		if (ycTeam.length() > 0) {
+			opts.teams.set("3", parseUInt(ycTeam));
+		}
+		game.overrideWithOptions(opts);
+		setGUI(menu);
 	}
-	if (bmTag >= 0) {
-		opts.setTagCO(1, bmTag);
-	} else {
-		opts.setNoTagCO(1, true);
-	}
-	if (geTag >= 0) {
-		opts.setTagCO(2, geTag);
-	} else {
-		opts.setNoTagCO(2, true);
-	}
-	if (ycTag >= 0) {
-		opts.setTagCO(3, ycTag);
-	} else {
-		opts.setNoTagCO(3, true);
-	}
-	if (osTeam.length() > 0) {
-		opts.setTeam(0, parseUInt(osTeam));
-	}
-	if (bmTeam.length() > 0) {
-		opts.setTeam(1, parseUInt(bmTeam));
-	}
-	if (geTeam.length() > 0) {
-		opts.setTeam(2, parseUInt(geTeam));
-	}
-	if (ycTeam.length() > 0) {
-		opts.setTeam(3, parseUInt(ycTeam));
-	}
-	loadMap("map/islandxcopy.cwm", "Map", opts);
 }
