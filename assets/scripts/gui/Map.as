@@ -73,6 +73,9 @@ void MapHandleInput(const dictionary controls) {
 			}
 			setGUI("MapMenu");
 			return;
+		} else if (game.map.isUnitWaiting(unitID)) {
+			setGUI("MapMenu");
+			return;
 		} else if (game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy() &&
 			!game.map.isUnitWaiting(unitID)) {
 			game.selectUnit(unitID);
