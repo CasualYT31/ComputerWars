@@ -1728,7 +1728,6 @@ void awe::map::setIconSpritesheet(
 	_sheet_icon = sheet;
 	_cursor.setSpritesheet(sheet);
 	_cursor.setSprite("cursor");
-	_tilePane.setSpritesheet(sheet);
 	// Go through all of the units and set the new spritesheet to each one.
 	for (auto& unit : _units) unit.second.setIconSpritesheet(sheet);
 }
@@ -1736,7 +1735,6 @@ void awe::map::setIconSpritesheet(
 void awe::map::setCOSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
 	_sheet_co = sheet;
-	_armyPane.setSpritesheet(sheet);
 }
 
 void awe::map::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
@@ -1744,8 +1742,6 @@ void awe::map::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
 		_logger.error("setFont operation failed: nullptr was given!");
 		return;
 	}
-	_armyPane.setFont(font);
-	_tilePane.setFont(font);
 }
 
 void awe::map::setLanguageDictionary(
@@ -1755,7 +1751,6 @@ void awe::map::setLanguageDictionary(
 			"given!");
 		return;
 	}
-	_tilePane.setLanguageDictionary(dict);
 }
 
 bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
@@ -1922,34 +1917,6 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	}
 	// Step 4. the cursor.
 	_cursor.animate(target, scaling);
-	// Step 5. set the general location of the panes.
-	if (_cursor.getPosition().x < target.getSize().x / _mapScalingFactor /
-		(float)scaling / 2.0f) {
-		_armyPane.setGeneralLocation(awe::army_pane::location::Right);
-		_tilePane.setGeneralLocation(awe::tile_pane::location::Right);
-	} else {
-		_armyPane.setGeneralLocation(awe::army_pane::location::Left);
-		_tilePane.setGeneralLocation(awe::tile_pane::location::Left);
-	}
-	// Step 6. the army pane.
-	if (_currentArmy != awe::army::NO_ARMY) {
-		_armyPane.setArmy(_armies.at(_currentArmy));
-		_armyPane.animate(target, scaling);
-	}
-	// Step 7. the tile pane.
-	if (_updateTilePane) {
-		const awe::tile& tile = _tiles[_sel.x][_sel.y];
-		_tilePane.setTile(tile);
-		_tilePane.clearUnits();
-		if (tile.getUnit()) {
-			const awe::unit& unit = _units.at(tile.getUnit());
-			_tilePane.addUnit(unit);
-			std::unordered_set<awe::UnitID> loaded = unit.loadedUnits();
-			for (auto& u : loaded) _tilePane.addUnit(_units.at(u));
-		}
-		_updateTilePane = false;
-	}
-	_tilePane.animate(target, scaling);
 	// End.
 	return false;
 }
@@ -2025,10 +1992,6 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// But only if it is within the visible portion!
 	// To tell the truth the cursor should never be not visible...
 	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, mapStates);
-	// Step 5. army pane.
-	// target.draw(_armyPane, states);
-	// Step 6. tile pane.
-	// target.draw(_tilePane, states);
 }
 
 awe::UnitID awe::map::_findUnitID() {

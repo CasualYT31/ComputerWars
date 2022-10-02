@@ -25,8 +25,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Unit, armies, and tiles are all stored and managed here.
  */
 
-#include "tile_pane.hpp"
-#include "army_pane.hpp"
+#include "tile.hpp"
+#include "unit.hpp"
+#include "army.hpp"
 #include "script.hpp"
 #include "file.hpp"
 #include "language.hpp"
@@ -1435,17 +1436,8 @@ namespace awe {
 		sfx::animated_sprite _cursor;
 
 		/**
-		 * The pane representing the current army.
-		 */
-		awe::army_pane _armyPane;
-
-		/**
-		 * The pane displaying information on the selected tile.
-		 */
-		awe::tile_pane _tilePane;
-
-		/**
-		 * Flag used to update \c _tilePane.
+		 * Flag used to update the old \c _tilePane.
+		 * Now just used for the map offset code.\n
 		 * When the selected tile is changed, this will be set to \c TRUE.
 		 */
 		bool _updateTilePane = false;
