@@ -172,6 +172,10 @@
 			"frames": [ [ 98, 53, 13, 13 ] ],
 			"durations": [ 0 ]
 		},
+		"joinicon": {
+			"frames": [ [ 98, 66, 14, 13 ] ],
+			"durations": [ 0 ]
+		},
 		"endturnicon": {
 			"frames": [ [ 98, 10, 15, 14 ] ],
 			"durations": [ 0 ]

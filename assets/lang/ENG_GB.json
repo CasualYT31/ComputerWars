@@ -8,6 +8,7 @@
 	"wait": "Wait",
 	"tag": "Change",
 	"delete": "Delete",
+	"join": "Join",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

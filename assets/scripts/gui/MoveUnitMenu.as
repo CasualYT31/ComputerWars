@@ -15,9 +15,9 @@ void MoveUnitMenuHandleInput(const dictionary controls) {
 		setGUI("Map");
 		return;
 	} else if (bool(controls["select"])) {
-		if (game.map.getUnitOnTile(game.map.getSelectedTile()) == 0 ||
-			game.map.getUnitOnTile(game.map.getSelectedTile()) ==
-			game.map.getSelectedUnit()) {
+		const auto otherUnit = game.map.getUnitOnTile(game.map.getSelectedTile());
+		if (otherUnit == 0 || otherUnit == game.map.getSelectedUnit() ||
+			game.canJoin(otherUnit, game.map.getSelectedUnit())) {
 			game.map.renderUnitAtDestination(true);
 			setGUI("PreviewMoveUnitMenu");
 			return;

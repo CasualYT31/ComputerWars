@@ -21,7 +21,12 @@ void PreviewMoveUnitMenuSetUp() {
  */
 void PreviewMoveUnitMenuOpen() {
 	// Add commands here.
-	PreviewCommands.addCommand("Wait", "wait", "waiticon");
+	if (game.canJoin(game.map.getUnitOnTile(game.map.getSelectedTile()),
+		game.map.getSelectedUnit())) {
+		PreviewCommands.addCommand("Join", "join", "joinicon");
+	} else {
+		PreviewCommands.addCommand("Wait", "wait", "waiticon");
+	}
 
 	// Position the command menu differently depending on the quadrant of the
 	// screen that the mouse is in.
@@ -67,5 +72,19 @@ void PreviewMoveUnitMenuHandleInput(const dictionary controls) {
  */
 void PreviewMoveUnitMenu_Wait_Pressed() {
 	game.moveUnit();
+	setGUI("Map");
+}
+
+/**
+ * Joins two units together.
+ */
+void PreviewMoveUnitMenu_Join_Pressed() {
+	game.joinUnits(
+		game.map.getUnitOnTile(game.map.getSelectedTile()),
+		game.map.getSelectedUnit(),
+		game.map.closedList[game.map.closedList.length() - 1].g
+	);
+	// Deselect the unit or else the game will crash!
+	game.selectUnit(0);
 	setGUI("Map");
 }

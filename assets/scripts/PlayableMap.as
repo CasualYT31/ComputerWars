@@ -397,6 +397,88 @@ class PlayableMap {
 			throw("Cannot move a unit as no unit is currently selected!");
 		}
 	}
+
+	/**
+	 * Checks if two units can join.
+	 * @param  stationary The ID of the stationary unit.
+	 * @param  moving     The ID of the unit that is being moved onto the
+	 *                    stationary one.
+	 * @return \c TRUE if the moving unit can join with the stationary one,
+	 *         \c FALSE otherwise.
+	 */
+	bool canJoin(const UnitID stationary, const UnitID moving) {
+		/* Conditions:
+		1. Both units must be of the same type.
+		2. Both units must belong to the same army.
+		3. Both units cannot have any units loaded onto them.
+		4. The user-friendly HP of the stationary unit must be below its maximum
+		   user-friendly HP.
+		5. The IDs of both the stationary unit and the moving unit cannot be 0.
+		6. A unit cannot join with itself.
+		*/
+		return stationary > 0 && moving > 0 && stationary != moving &&
+			map.getUnitType(stationary).ID == map.getUnitType(moving).ID &&
+			map.getArmyOfUnit(stationary) == map.getArmyOfUnit(moving) &&
+			map.getLoadedUnits(stationary).length() == 0 &&
+			map.getLoadedUnits(moving).length() == 0 &&
+			map.getUnitDisplayedHP(stationary) <
+				GetDisplayedHP(map.getUnitType(stationary).maxHP);
+	}
+
+	/**
+	 * Joins two units, if they can be joined.
+	 * If the two units could not be joined, a detailed error will be logged.
+	 * @param stationary The ID of the stationary unit.
+	 * @param moving     The ID of the unit that is being moved onto the
+	 *                   stationary one.
+	 * @param burn       The units of fuel to burn from the moving unit before
+	 *                   performing the join.
+	 */
+	void joinUnits(const UnitID stationary, const UnitID moving, const Fuel burn)
+		{
+		if (canJoin(stationary, moving)) {
+			// First, burn the moving unit's fuel.
+			map.burnUnitFuel(moving, burn);
+			// Perform join.
+			HP newHP = map.getUnitHP(stationary) + map.getUnitHP(moving);
+			Fuel newFuel = map.getUnitFuel(stationary) + map.getUnitFuel(moving);
+			Ammo newAmmo = map.getUnitAmmo(stationary) + map.getUnitAmmo(moving);
+			const auto type = map.getUnitType(stationary);
+			if (GetDisplayedHP(newHP) > GetDisplayedHP(type.maxHP)) {
+				map.offsetArmyFunds(map.getArmyOfUnit(stationary),
+					type.cost / GetDisplayedHP(type.maxHP) *
+					(GetDisplayedHP(newHP) - GetDisplayedHP(type.maxHP)));
+				newHP = type.maxHP;
+			}
+			if (!type.hasInfiniteFuel && newFuel > type.maxFuel) {
+				newFuel = type.maxFuel;
+			}
+			if (!type.hasInfiniteAmmo && newAmmo > type.maxAmmo) {
+				newAmmo = type.maxAmmo;
+			}
+			map.setUnitHP(stationary, newHP);
+			if (!type.hasInfiniteFuel) map.setUnitFuel(stationary, newFuel);
+			if (!type.hasInfiniteAmmo) map.setUnitAmmo(stationary, newAmmo);
+			map.waitUnit(stationary, true);
+			map.deleteUnit(moving);
+		} else {
+			error("Attempted to join moving unit " + formatUInt(moving) +
+				" with stationary unit " + formatUInt(stationary) + ". Details:\n"
+				"~~~Stationary unit~~~\nType: " +
+				map.getUnitType(stationary).scriptName + "\nOwner: " +
+				formatUInt(map.getArmyOfUnit(stationary)) + "\n# of Loaded "
+				"Units: " + formatUInt(map.getLoadedUnits(stationary).length()) +
+				"\nUser-friendly HP: " +
+				formatInt(map.getUnitDisplayedHP(stationary)) + "\n"
+				"~~~Moving unit~~~\nType: " +
+				map.getUnitType(moving).scriptName + "\nOwner: " +
+				formatUInt(map.getArmyOfUnit(moving)) + "\n# of Loaded "
+				"Units: " + formatUInt(map.getLoadedUnits(moving).length()) +
+				"\nUser-friendly HP: " +
+				formatInt(map.getUnitDisplayedHP(moving)));
+			
+		}
+	}
 	
 	/////////
 	// MAP //
