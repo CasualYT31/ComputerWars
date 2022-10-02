@@ -1,10 +1,20 @@
+/**
+ * The army widget.
+ */
+ArmyWidget armyWidget;
+
+/**
+ * The tile widget.
+ */
 TileWidget tileWidget;
 
 /**
- * The menu used when a game is in play is completely empty.
+ * The menu used when a game is in play only has the army widget and the tile
+ * widget.
  */
 void MapSetUp() {
-	tileWidget = TileWidget("Map.Test");
+	armyWidget = ArmyWidget("Map.ArmyWidget", 128);
+	tileWidget = TileWidget("Map.TileWidget");
 }
 
 /**
@@ -33,7 +43,6 @@ void HandleCommonGameInput(const dictionary@ controls) {
 		}
 	}
 	previousPosition = currentPosition;
-	tileWidget.update(game.map.getSelectedTile());
 
 	// Handle controls.
 	if (bool(controls["up"])) {
@@ -54,6 +63,37 @@ void HandleCommonGameInput(const dictionary@ controls) {
 	if (bool(controls["info"])) {
 		setGUI("DetailedInfoMenu");
 		return;
+	}
+
+	// Update army widget.
+	armyWidget.update(game.map.getSelectedArmy());
+	if (!game.map.isCursorOnLeftSide()) {
+		armyWidget.setAlignment(ArmyWidgetAlignment::Left);
+		setWidgetOrigin(armyWidget.panel, 0.0, 0.0);
+		setWidgetPosition(armyWidget.panel, "0%-" +
+			formatFloat(ARMYWIDGET_RADIUS) +
+			"px-" + formatFloat(ARMYWIDGET_BORDER_SIZE) + "px",
+			"0%-" + formatFloat(ARMYWIDGET_BORDER_SIZE) + "px");
+	} else {
+		armyWidget.setAlignment(ArmyWidgetAlignment::Right);
+		setWidgetOrigin(armyWidget.panel, 1.0, 0.0);
+		setWidgetPosition(armyWidget.panel, "100%", "0%");
+		setWidgetPosition(armyWidget.panel, "100%+" +
+			formatFloat(ARMYWIDGET_RADIUS) +
+			"px+" + formatFloat(ARMYWIDGET_BORDER_SIZE) + "px",
+			"0%-" + formatFloat(ARMYWIDGET_BORDER_SIZE) + "px");
+	}
+
+	// Update tile widget.
+	tileWidget.update(game.map.getSelectedTile());
+	if (!game.map.isCursorOnLeftSide()) {
+		tileWidget.setAlignment(TileWidgetAlignment::Left);
+		setWidgetOrigin(tileWidget.layout, 0.0, 1.0);
+		setWidgetPosition(tileWidget.layout, "0%", "100%");
+	} else {
+		tileWidget.setAlignment(TileWidgetAlignment::Right);
+		setWidgetOrigin(tileWidget.layout, 1.0, 1.0);
+		setWidgetPosition(tileWidget.layout, "100%", "100%");
 	}
 }
 

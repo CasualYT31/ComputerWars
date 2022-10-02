@@ -27,6 +27,11 @@ const uint ARMYWIDGET_HEIGHT = 60;
 const float ARMYWIDGET_RADIUS = ARMYWIDGET_HEIGHT / 2.0;
 
 /**
+ * Stores the size of an ArmyWidget's border.
+ */
+const float ARMYWIDGET_BORDER_SIZE = 2.0;
+
+/**
  * Used to create the widgets that represent an army panel in-game.
  */
 class ArmyWidget {
@@ -50,7 +55,7 @@ class ArmyWidget {
 		addWidget("Panel", panel);
 		setWidgetSize(panel, formatUInt(ARMYWIDGET_WIDTH) + "px",
 			formatUInt(ARMYWIDGET_HEIGHT) + "px");
-		setWidgetBorderSize(panel, 2.0);
+		setWidgetBorderSize(panel, ARMYWIDGET_BORDER_SIZE);
 		setWidgetBorderRadius(panel, ARMYWIDGET_RADIUS);
 		setWidgetBorderColour(panel, Colour(0,0,0,alpha));
 
@@ -69,6 +74,7 @@ class ArmyWidget {
 
 		funds = panelName + ".funds";
 		addWidget("Label", funds);
+		setWidgetTextSize(funds, 20);
 		setWidgetTextColour(funds, Colour(255,255,255,255));
 		setWidgetTextOutlineColour(funds, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness(funds, 2.0);
@@ -134,7 +140,7 @@ class ArmyWidget {
 			setWidgetOrigin(tagCO, 0.0, 0.0);
 			setWidgetPosition(tagCO, formatFloat(coX) + "px", "30px");
 			setWidgetOrigin(funds, 0.0, 0.0);
-			setWidgetPosition(funds, "140px", "5px");
+			setWidgetPosition(funds, "140px", "0px");
 			break;
 		case ArmyWidgetAlignment::Right:
 			setWidgetOrigin(team, 1.0, 0.0);
@@ -144,7 +150,7 @@ class ArmyWidget {
 			setWidgetOrigin(tagCO, 1.0, 0.0);
 			setWidgetPosition(tagCO, "100%-" + formatFloat(coX) + "px", "30px");
 			setWidgetOrigin(funds, 1.0, 0.0);
-			setWidgetPosition(funds, "100%-140px", "5px");
+			setWidgetPosition(funds, "100%-140px", "0px");
 			break;
 		default:
 			error("Attempted to set the ArmyWidget \"" + panel + "\"'s alignment "

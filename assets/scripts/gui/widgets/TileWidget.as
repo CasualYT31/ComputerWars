@@ -42,9 +42,8 @@ class TileWidget {
 		_panels[0].setPropertyIcon(1, "icon", "defstar");
 		addWidget("Picture", layout + ".curve");
 		// Default to left alignment.
-		_dontReorder = true;
+		_alignment = TileWidgetAlignment::Left;
 		setAlignment(TileWidgetAlignment::Left);
-		_dontReorder = false;
 		_fixTileWidgetSize();
 	}
 
@@ -54,6 +53,7 @@ class TileWidget {
 	 * @param align Which alignment to use.
 	 */
 	void setAlignment(const TileWidgetAlignment align) {
+		bool dontReorder = align == _alignment;
 		_alignment = align;
 		// Check alignment and fix.
 		switch (align) {
@@ -69,7 +69,7 @@ class TileWidget {
 		}
 		// Reverse panel order.
 		// N.B.: there will be # of panels + 1 (curve) to deal with.
-		if (!_dontReorder) {
+		if (!dontReorder) {
 			for (uint i = 0; i < uint((_panels.length() + 1) / 2); ++i) {
 				setWidgetIndexInContainer(layout, i, _panels.length() - i);
 				setWidgetIndexInContainer(layout, _panels.length() - 1 - i, i);
@@ -240,12 +240,6 @@ class TileWidget {
 	 * Tracks the number of panels that are showing to the user.
 	 */
 	private uint _panelsThatAreShowing = 1;
-
-	/**
-	 * Internal flag used by the constructor to prevent setAlignment() from
-	 * reordering the panels.
-	 */
-	private bool _dontReorder = true;
 
 	/**
 	 * The ratio that the curve picture widget should have.

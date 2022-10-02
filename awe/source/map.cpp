@@ -413,6 +413,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"void setMapScalingFactor(const float) const",
 			asMETHOD(awe::map, setMapScalingFactor), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"bool isCursorOnLeftSide() const",
+			asMETHOD(awe::map, isCursorOnLeftSide), asCALL_THISCALL);
+
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
 		//////////////////////////////////////
@@ -1689,6 +1693,11 @@ void awe::map::setMapScalingFactor(const float factor) noexcept {
 	_mapOffset = sf::Vector2f(0.0f, 0.0f);
 }
 
+bool awe::map::isCursorOnLeftSide() const noexcept {
+	return _cursor.getPosition().x < _targetSizeCache.x / _mapScalingFactor /
+		_scalingCache / 2.0f;
+}
+
 sf::Vector2u awe::map::getTileSize() const noexcept {
 	return sf::Vector2u(awe::tile::MIN_WIDTH * (sf::Uint32)_scalingCache *
 		(sf::Uint32)_mapScalingFactor,
@@ -2017,9 +2026,9 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// To tell the truth the cursor should never be not visible...
 	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, mapStates);
 	// Step 5. army pane.
-	target.draw(_armyPane, states);
+	// target.draw(_armyPane, states);
 	// Step 6. tile pane.
-	target.draw(_tilePane, states);
+	// target.draw(_tilePane, states);
 }
 
 awe::UnitID awe::map::_findUnitID() {

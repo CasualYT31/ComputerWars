@@ -1080,6 +1080,13 @@ namespace awe {
 		void setMapScalingFactor(const float factor) noexcept;
 
 		/**
+		 * Determines if the cursor is on the left or right side of the target.
+		 * @return \c TRUE if the UL of the cursor graphic is on the left half of
+		 *         the target, \c FALSE if it is on the right half of the target.
+		 */
+		bool isCursorOnLeftSide() const noexcept;
+
+		/**
 		 * Calculates the minimum pixel size of a tile as seen by the user.
 		 * @return The minimum size of a tile, after scaling has been applied.
 		 */
