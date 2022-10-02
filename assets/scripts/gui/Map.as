@@ -64,7 +64,15 @@ void HandleCommonGameInput(const dictionary@ controls) {
 		setGUI("DetailedInfoMenu");
 		return;
 	}
+}
 
+/**
+ * Handles input specific to the \c Map menu.
+ * @param controls The control map given by the engine.
+ */
+void MapHandleInput(const dictionary controls) {
+	HandleCommonGameInput(controls);
+	
 	// Update army widget.
 	armyWidget.update(game.map.getSelectedArmy());
 	if (!game.map.isCursorOnLeftSide()) {
@@ -95,14 +103,7 @@ void HandleCommonGameInput(const dictionary@ controls) {
 		setWidgetOrigin(tileWidget.layout, 1.0, 1.0);
 		setWidgetPosition(tileWidget.layout, "100%", "100%");
 	}
-}
 
-/**
- * Handles input specific to the \c Map menu.
- * @param controls The control map given by the engine.
- */
-void MapHandleInput(const dictionary controls) {
-	HandleCommonGameInput(controls);
 	if (bool(controls["select"])) {
 		auto cursor = game.map.getSelectedTile();
 		auto unitID = game.map.getUnitOnTile(cursor);

@@ -417,6 +417,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"bool isCursorOnLeftSide() const",
 			asMETHOD(awe::map, isCursorOnLeftSide), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"void setCursorSprite(const string&in)",
+			asMETHOD(awe::map, setCursorSprite), asCALL_THISCALL);
+
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
 		//////////////////////////////////////
@@ -1698,6 +1702,10 @@ bool awe::map::isCursorOnLeftSide() const noexcept {
 		_scalingCache / 2.0f;
 }
 
+void awe::map::setCursorSprite(const std::string& sprite) noexcept {
+	_cursor.setSprite(sprite);
+}
+
 sf::Vector2u awe::map::getTileSize() const noexcept {
 	return sf::Vector2u(awe::tile::MIN_WIDTH * (sf::Uint32)_scalingCache *
 		(sf::Uint32)_mapScalingFactor,
@@ -1727,7 +1735,6 @@ void awe::map::setIconSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
 	_sheet_icon = sheet;
 	_cursor.setSpritesheet(sheet);
-	_cursor.setSprite("cursor");
 	// Go through all of the units and set the new spritesheet to each one.
 	for (auto& unit : _units) unit.second.setIconSpritesheet(sheet);
 }
@@ -1991,7 +1998,9 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// Step 4. the cursor.
 	// But only if it is within the visible portion!
 	// To tell the truth the cursor should never be not visible...
-	if (_tileIsVisible(getSelectedTile())) target.draw(_cursor, mapStates);
+	if (_tileIsVisible(getSelectedTile()) && !_cursor.getSprite().empty()) {
+		target.draw(_cursor, mapStates);
+	}
 }
 
 awe::UnitID awe::map::_findUnitID() {

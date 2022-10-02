@@ -1,3 +1,12 @@
 {
-	"menus": ["Map", "MapMenu", "BaseMenu", "DetailedInfoMenu", "NewGameOptions", "MoveUnitMenu", "PreviewMoveUnitMenu"]
+	"menus": [
+		"Map",
+		"MapMenu",
+		"BaseMenu",
+		"DetailedInfoMenu",
+		"NewGameOptions",
+		"MoveUnitMenu",
+		"PreviewMoveUnitMenu",
+		"DeleteUnitMenu"
+	]
 }

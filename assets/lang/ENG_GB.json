@@ -7,6 +7,7 @@
 	"endturn": "End Turn",
 	"wait": "Wait",
 	"tag": "Change",
+	"delete": "Delete",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

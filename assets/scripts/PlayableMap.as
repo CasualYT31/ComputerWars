@@ -54,8 +54,10 @@ class PlayableMap {
 		if (mapToPlayOn is null) {
 			error("An invalid Map handle was given to the constructor of "
 				"PlayableMap; the game will crash soon!");
+		} else {
+			@map = mapToPlayOn;
+			setNormalCursorSprite();
 		}
-		@map = mapToPlayOn;
 	}
 
 	/**
@@ -118,6 +120,13 @@ class PlayableMap {
 		_mapScalingFactor -= 1.0;
 		if (_mapScalingFactor < 1.0) _mapScalingFactor = 1.0;
 		map.setMapScalingFactor(_mapScalingFactor);
+	}
+
+	/**
+	 * Reverts the cursor back to the normal sprite.
+	 */
+	void setNormalCursorSprite() {
+		map.setCursorSprite("cursor");
 	}
 
 	///////////////////////////////

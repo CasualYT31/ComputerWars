@@ -9,6 +9,10 @@ void MapMenuOpen() {
 	addWidget("BitmapButton", "MapMenu.Menu.Save");
 	setWidgetSprite("MapMenu.Menu.Save", "icon", "saveicon");
 	setWidgetText("MapMenu.Menu.Save", "save");
+	
+	addWidget("BitmapButton", "MapMenu.Menu.Delete");
+	setWidgetSprite("MapMenu.Menu.Delete", "icon", "deleteicon");
+	setWidgetText("MapMenu.Menu.Delete", "delete");
 
 	if (game.map.tagCOIsPresent(game.map.getSelectedArmy())) {
 		addWidget("BitmapButton", "MapMenu.Menu.Tag");
@@ -53,7 +57,14 @@ void MapMenu_Save_Pressed() {
 }
 
 /**
- *
+ * Allows the user to delete units that belong to them.
+ */
+void MapMenu_Delete_Pressed() {
+	setGUI("DeleteUnitMenu");
+}
+
+/**
+ * Allows the current army to tag their COs and end their turn.
  */
 void MapMenu_Tag_Pressed() {
 	game.tagCOs();

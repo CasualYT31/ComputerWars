@@ -1088,6 +1088,13 @@ namespace awe {
 		bool isCursorOnLeftSide() const noexcept;
 
 		/**
+		 * Sets which sprite from the icon spritesheet to use as the cursor.
+		 * @warning Must be called, or else the cursor will not show up!
+		 * @param   sprite The animated sprite to use as the cursor.
+		 */
+		void setCursorSprite(const std::string& sprite) noexcept;
+
+		/**
 		 * Calculates the minimum pixel size of a tile as seen by the user.
 		 * @return The minimum size of a tile, after scaling has been applied.
 		 */
