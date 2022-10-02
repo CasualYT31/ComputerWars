@@ -675,6 +675,16 @@ namespace sfx {
 			const std::string& h) noexcept;
 
 		/**
+		 * Gets the full size of a widget.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and a blank vector will be
+		 * returned.
+		 * @param  name The name of the widget to query.
+		 * @return The full size of the widget, which includes any borders, etc.
+		 */
+		sf::Vector2f _getWidgetFullSize(const std::string& name) noexcept;
+
+		/**
 		 * Updates a widget's visibility property.
 		 * If no widget exists with the given name, then an error will be logged
 		 * and no widget will be changed.

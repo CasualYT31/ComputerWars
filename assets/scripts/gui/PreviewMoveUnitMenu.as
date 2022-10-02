@@ -1,32 +1,53 @@
 /**
+ * @file PreviewMoveUnitMenu.as
+ * Code that's run when the user is previewing a unit move operation.
+ */
+
+/**
+ * Stores the commands available for the moving unit.
+ */
+CommandWidget PreviewCommands;
+
+/**
  * Sets up the menu that is shown whilst previewing a unit move operation.
  */
 void PreviewMoveUnitMenuSetUp() {
-	addWidget("BitmapButton", "Wait");
-	setWidgetText("Wait", "wait");
-	setWidgetSize("Wait", "100px", "30px");
-	setWidgetSprite("Wait", "icon", "waiticon");
+	PreviewCommands = CommandWidget("Menu", "100px");
 }
 
 /**
  * Positions the command menu relative to the current mouse position.
+ * Also adds all the buttons to the command menu.
  */
 void PreviewMoveUnitMenuOpen() {
+	// Add commands here.
+	PreviewCommands.addCommand("Wait", "wait", "waiticon");
+
+	// Position the command menu differently depending on the quadrant of the
+	// screen that the mouse is in.
+	const Vector2f commandMenuSize = getWidgetFullSize(PreviewCommands.layout);
 	int xOffset = 10;
 	if (mousePosition().x >= int(getWindowSize().x / 2)) {
-		xOffset -= 120;
+		xOffset = xOffset - int(commandMenuSize.x) - 20;
 	}
 	int yOffset = 10;
 	if (mousePosition().y >= int(getWindowSize().y / 2)) {
-		yOffset -= 50;
+		yOffset = yOffset - int(commandMenuSize.y) - 20;
 	}
 	auto mouse = scaledMousePosition();
 	if (mouse == INVALID_MOUSE) {
 		mouse.x = 0;
 		mouse.y = 0;
 	}
-	setWidgetPosition("Wait", formatInt(mouse.x + xOffset) + "px",
+	setWidgetPosition(PreviewCommands.layout, formatInt(mouse.x + xOffset) + "px",
 		formatInt(mouse.y + yOffset) + "px");
+}
+
+/**
+ * Removes all buttons from the command menu.
+ */
+void PreviewMoveUnitMenuClose() {
+	PreviewCommands.removeAllCommands();
 }
 
 /**

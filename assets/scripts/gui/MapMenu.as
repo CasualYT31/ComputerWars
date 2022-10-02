@@ -1,41 +1,42 @@
 /**
+ * @file MapMenu.as
+ * Code that's run when the map's main command menu is shown.
+ */
+
+/**
+ * The command menu widget.
+ */
+CommandWidget MapMenuCommands;
+
+/**
  * Sets up the menu that is displayed when a user selects a vacant tile.
  */
 void MapMenuSetUp() {
-	addWidget("VerticalLayout", "Menu");
+	MapMenuCommands = CommandWidget("Menu");
 }
 
+/**
+ * Fills in the commands that are available based on the current state of the
+ * game.
+ */
 void MapMenuOpen() {
-	addWidget("BitmapButton", "MapMenu.Menu.Save");
-	setWidgetSprite("MapMenu.Menu.Save", "icon", "saveicon");
-	setWidgetText("MapMenu.Menu.Save", "save");
-	
-	addWidget("BitmapButton", "MapMenu.Menu.Delete");
-	setWidgetSprite("MapMenu.Menu.Delete", "icon", "deleteicon");
-	setWidgetText("MapMenu.Menu.Delete", "delete");
-
+	MapMenuCommands.addCommand("Save", "save", "saveicon");
+	MapMenuCommands.addCommand("Delete", "delete", "deleteicon");
 	if (game.map.tagCOIsPresent(game.map.getSelectedArmy())) {
-		addWidget("BitmapButton", "MapMenu.Menu.Tag");
-		setWidgetSprite("MapMenu.Menu.Tag", "icon", "tagicon");
-		setWidgetText("MapMenu.Menu.Tag", "tag");
+		MapMenuCommands.addCommand("Tag", "tag", "tagicon");
 	}
-
-	addWidget("BitmapButton", "MapMenu.Menu.EndTurn");
-	setWidgetSprite("MapMenu.Menu.EndTurn", "icon", "endturnicon");
-	setWidgetText("MapMenu.Menu.EndTurn", "endturn");
-
-	addWidget("BitmapButton", "MapMenu.Menu.Quit");
-	setWidgetSprite("MapMenu.Menu.Quit", "icon", "quiticon");
-	setWidgetText("MapMenu.Menu.Quit", "quit");
+	MapMenuCommands.addCommand("EndTurn", "endturn", "endturnicon");
+	MapMenuCommands.addCommand("Quit", "quit", "quiticon");
 	
-	string height = formatUInt(getWidgetCount("MapMenu.Menu") * 25) + "px";
-	setWidgetSize("MapMenu.Menu", "25%", height);
-	setWidgetPosition("MapMenu.Menu", "50%", "10px");
-	setWidgetOrigin("MapMenu.Menu", 0.5, 0.0);
+	setWidgetPosition(MapMenuCommands.layout, "50%", "10px");
+	setWidgetOrigin(MapMenuCommands.layout, 0.5, 0.0);
 }
 
+/**
+ * Removes all commands from the menu.
+ */
 void MapMenuClose() {
-	removeWidgetsFromContainer("MapMenu.Menu");
+	MapMenuCommands.removeAllCommands();
 }
 
 /**

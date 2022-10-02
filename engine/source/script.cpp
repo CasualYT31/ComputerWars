@@ -55,6 +55,10 @@ void AWEVector2iTypeConstructor(const int x, const int y, void* memory) {
     new(memory) sf::Vector2i(x, y);
 }
 
+void AWEVector2fTypeConstructor(const float x, const float y, void* memory) {
+    new(memory) sf::Vector2f(x, y);
+}
+
 void AWEVector2TypeConstructor(const unsigned int x, const unsigned int y,
     void* memory) {
     new(memory) sf::Vector2u(x, y);
@@ -76,7 +80,15 @@ std::string AWEVector2TypeToString(void* memory) {
     return "";
 }
 
-// Wrapper for Vector2u and Vector2i operator==s.
+std::string AWEVector2fTypeToString(void* memory) {
+    if (memory) {
+        sf::Vector2f* v = (sf::Vector2f*)memory;
+        return "(" + std::to_string(v->x) + ", " + std::to_string(v->y) + ")";
+    }
+    return "";
+}
+
+// Wrapper for sf::Vector2<> operator==s.
 
 bool iEqI(void* pLhs, const sf::Vector2i& rhs) noexcept {
     auto lhs = (const sf::Vector2i*)pLhs;
@@ -139,13 +151,25 @@ void engine::RegisterVectorTypes(asIScriptEngine* engine,
             "bool opEquals(const Vector2&in) const",
             asFUNCTION(iEqU), asCALL_CDECL_OBJFIRST);
 
-        // Vector 2 opEquals
+        // Vector2 opEquals
         r = engine->RegisterObjectMethod("Vector2",
             "bool opEquals(const Vector2&in) const",
             asFUNCTION(uEqU), asCALL_CDECL_OBJFIRST);
         r = engine->RegisterObjectMethod("Vector2",
             "bool opEquals(const MousePosition&in) const",
             asFUNCTION(uEqI), asCALL_CDECL_OBJFIRST);
+
+        r = engine->RegisterObjectType("Vector2f", sizeof(sf::Vector2f),
+            asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2f>());
+        engine->RegisterObjectProperty("Vector2f", "float x",
+            asOFFSET(sf::Vector2f, x));
+        engine->RegisterObjectProperty("Vector2f", "float y",
+            asOFFSET(sf::Vector2f, y));
+        engine->RegisterObjectBehaviour("Vector2f", asBEHAVE_CONSTRUCT,
+            "void Vector2f(const float, const float)",
+            asFUNCTION(AWEVector2fTypeConstructor), asCALL_CDECL_OBJLAST);
+        engine->RegisterObjectMethod("Vector2f", "string toString() const",
+            asFUNCTION(AWEVector2fTypeToString), asCALL_CDECL_OBJLAST);
     }
 }
 

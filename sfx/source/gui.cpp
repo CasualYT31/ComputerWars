@@ -243,6 +243,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 
 	// Register types.
 	engine::RegisterColourType(engine, document);
+	engine::RegisterVectorTypes(engine, document);
 
 	auto r = engine->RegisterEnum("WidgetAlignment");
 	document->DocumentObjectEnum(r, "Values representing widget alignments in a "
@@ -409,6 +410,12 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _setWidgetSize), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's size. The name of the "
 		"widget is given, then the width, then the height.");
+
+	r = engine->RegisterGlobalFunction(
+		"Vector2f getWidgetFullSize(const string&in)",
+		asMETHOD(sfx::gui, _getWidgetFullSize), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's full size, which "
+		"includes any borders it may have, etc.");
 
 	r = engine->RegisterGlobalFunction("void setWidgetVisibility(const string&in, "
 		"const bool)",
@@ -1522,6 +1529,18 @@ void sfx::gui::_setWidgetSize(const std::string& name, const std::string& w,
 			"\"{}\" within menu \"{}\". This widget does not exist.", w, h, name,
 			fullname[0]);
 	}
+}
+
+sf::Vector2f sfx::gui::_getWidgetFullSize(const std::string& name) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		return widget->getFullSize();
+	} else {
+		_logger.error("Attempted to get the full size of a widget \"{}\" within "
+			"menu \"{}\". This widget does not exist.", name, fullname[0]);
+	}
+	return {};
 }
 
 void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible)
