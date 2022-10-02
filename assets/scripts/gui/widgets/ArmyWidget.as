@@ -12,6 +12,11 @@ enum ArmyWidgetAlignment {
 }
 
 /**
+ * Stores the width of an ArmyWidget.
+ */
+const uint ARMYWIDGET_WIDTH = 250;
+
+/**
  * Stores the height of an ArmyWidget.
  */
 const uint ARMYWIDGET_HEIGHT = 60;
@@ -43,7 +48,8 @@ class ArmyWidget {
 
 		panel = panelName;
 		addWidget("Panel", panel);
-		setWidgetSize(panel, "250px", formatUInt(ARMYWIDGET_HEIGHT) + "px");
+		setWidgetSize(panel, formatUInt(ARMYWIDGET_WIDTH) + "px",
+			formatUInt(ARMYWIDGET_HEIGHT) + "px");
 		setWidgetBorderSize(panel, 2.0);
 		setWidgetBorderRadius(panel, ARMYWIDGET_RADIUS);
 		setWidgetBorderColour(panel, Colour(0,0,0,alpha));
@@ -112,8 +118,8 @@ class ArmyWidget {
 
 	/**
 	 * Configures an army widget to be either left-aligned or right-aligned.
-	 * This method will reposition the panel, as well as everything inside the
-	 * panel, but the panel itself can be repositioned safely after the call.
+	 * This method will reposition everything inside the panel, but the panel itself
+	 * will not be repositioned.
 	 * @param alignment The alignment. If an invalid value is given, an error will
 	 *                  be logged and the widget will not be changed.
 	 */
@@ -121,13 +127,24 @@ class ArmyWidget {
 		const float coX = ARMYWIDGET_RADIUS + 5;
 		switch (alignment) {
 		case ArmyWidgetAlignment::Left:
-			setWidgetPosition(panel, "0px", "0px");
+			setWidgetOrigin(team, 0.0, 0.0);
 			setWidgetPosition(team, "9px", "6px");
+			setWidgetOrigin(currentCO, 0.0, 0.0);
 			setWidgetPosition(currentCO, formatFloat(coX) + "px", "5px");
+			setWidgetOrigin(tagCO, 0.0, 0.0);
 			setWidgetPosition(tagCO, formatFloat(coX) + "px", "30px");
+			setWidgetOrigin(funds, 0.0, 0.0);
 			setWidgetPosition(funds, "140px", "5px");
 			break;
 		case ArmyWidgetAlignment::Right:
+			setWidgetOrigin(team, 1.0, 0.0);
+			setWidgetPosition(team, "100%-9px", "6px");
+			setWidgetOrigin(currentCO, 1.0, 0.0);
+			setWidgetPosition(currentCO, "100%-" + formatFloat(coX) + "px", "5px");
+			setWidgetOrigin(tagCO, 1.0, 0.0);
+			setWidgetPosition(tagCO, "100%-" + formatFloat(coX) + "px", "30px");
+			setWidgetOrigin(funds, 1.0, 0.0);
+			setWidgetPosition(funds, "100%-140px", "5px");
 			break;
 		default:
 			error("Attempted to set the ArmyWidget \"" + panel + "\"'s alignment "
