@@ -79,7 +79,7 @@ void BaseMenuSetUp() {
 	addWidget("Panel", "calc");
 	setWidgetOrigin("calc", 0.5, 1.0);
 	// They're all taking up the same size, so it shouldn't matter which panel
-	// we're passing the position on.
+	// we're basing the position on.
 	setWidgetPosition("calc", "50%", "BaseMenu.ground.top");
 	setWidgetSize("calc", "60%", "30px");
 	addWidget("Label", "calc.label");
