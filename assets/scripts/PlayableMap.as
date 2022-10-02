@@ -222,6 +222,14 @@ class PlayableMap {
 		_beginTurnForArmy(currentArmy, finalUnits, finalTiles);
 	}
 
+	/**
+	 * Tags the current army's COs before ending the turn.
+	 */
+	void tagCOs() {
+		map.tagArmyCOs(map.getSelectedArmy());
+		endTurn();
+	}
+
 	////////////////////////////////
 	// UNIT MANAGEMENT OPERATIONS //
 	////////////////////////////////

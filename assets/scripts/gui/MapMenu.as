@@ -3,10 +3,18 @@
  */
 void MapMenuSetUp() {
 	addWidget("VerticalLayout", "Menu");
+}
 
+void MapMenuOpen() {
 	addWidget("BitmapButton", "MapMenu.Menu.Save");
 	setWidgetSprite("MapMenu.Menu.Save", "icon", "saveicon");
 	setWidgetText("MapMenu.Menu.Save", "save");
+
+	if (game.map.tagCOIsPresent(game.map.getSelectedArmy())) {
+		addWidget("BitmapButton", "MapMenu.Menu.Tag");
+		setWidgetSprite("MapMenu.Menu.Tag", "icon", "tagicon");
+		setWidgetText("MapMenu.Menu.Tag", "tag");
+	}
 
 	addWidget("BitmapButton", "MapMenu.Menu.EndTurn");
 	setWidgetSprite("MapMenu.Menu.EndTurn", "icon", "endturnicon");
@@ -20,6 +28,10 @@ void MapMenuSetUp() {
 	setWidgetSize("MapMenu.Menu", "25%", height);
 	setWidgetPosition("MapMenu.Menu", "50%", "10px");
 	setWidgetOrigin("MapMenu.Menu", 0.5, 0.0);
+}
+
+void MapMenuClose() {
+	removeWidgetsFromContainer("MapMenu.Menu");
 }
 
 /**
@@ -37,6 +49,14 @@ void MapMenuHandleInput(const dictionary controls) {
  */
 void MapMenu_Save_Pressed() {
 	game.map.save();
+	setGUI("Map");
+}
+
+/**
+ *
+ */
+void MapMenu_Tag_Pressed() {
+	game.tagCOs();
 	setGUI("Map");
 }
 

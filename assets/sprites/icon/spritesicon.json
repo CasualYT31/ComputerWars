@@ -150,6 +150,10 @@
 			"frames": [ [ 84, 15, 14, 15 ] ],
 			"durations": [ 0 ]
 		},
+		"tagicon": {
+			"frames": [ [ 98, 37, 15, 16 ] ],
+			"durations": [ 0 ]
+		},
 		"endturnicon": {
 			"frames": [ [ 98, 10, 15, 14 ] ],
 			"durations": [ 0 ]
