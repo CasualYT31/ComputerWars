@@ -35,11 +35,10 @@ class PropertyPanel {
 
 	/**
 	 * Creates the widgets that represent a property panel.
-	 * @param panelName The full name of the panel which will contain all of the
-	 *                  other widgets.
+	 * @param layoutName The full name of the panel which will contain all of the
+	 *                   other widgets.
 	 */
-	PropertyPanel(const string&in layoutName)
-		explicit {
+	PropertyPanel(const string&in layoutName) explicit {
 		addWidget("Panel", layoutName);
 		setWidgetBackgroundColour(layoutName, Colour(255,255,255,128));
 		setWidgetBorderSize(layoutName, 0.0);

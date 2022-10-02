@@ -1,7 +1,11 @@
+TileWidget tileWidget;
+
 /**
  * The menu used when a game is in play is completely empty.
  */
-void MapSetUp() {}
+void MapSetUp() {
+	tileWidget = TileWidget("Map.Test");
+}
 
 /**
  * Holds the previous mouse position.
@@ -29,6 +33,7 @@ void HandleCommonGameInput(const dictionary@ controls) {
 		}
 	}
 	previousPosition = currentPosition;
+	tileWidget.update(game.map.getSelectedTile());
 
 	// Handle controls.
 	if (bool(controls["up"])) {

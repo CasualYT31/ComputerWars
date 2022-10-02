@@ -41,7 +41,6 @@ class TileWidget {
 		_panels[0].setPropertyVisibility(0, false);
 		_panels[0].setPropertyIcon(1, "icon", "defstar");
 		addWidget("Picture", layout + ".curve");
-		matchWidgetSizeToSprite(layout + ".curve", true);
 		// Default to left alignment.
 		_dontReorder = true;
 		setAlignment(TileWidgetAlignment::Left);

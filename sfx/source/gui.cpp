@@ -988,7 +988,19 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.setView(_gui.calculateGUIView());
 	for (auto& sprite : _widgetSprites) {
 		Widget::Ptr widget = _findWidget<Widget>(sprite.first);
-		if (widget && widget->isVisible()) {
+		static const std::function<bool(const Widget* const)> isWidgetVisible =
+			[](const Widget* const widget) -> bool {
+			if (widget->isVisible()) {
+				const auto parent = widget->getParent();
+				if (parent) {
+					return isWidgetVisible(parent);
+				} else {
+					return true;
+				}
+			}
+			return false;
+		};
+		if (widget && isWidgetVisible(widget.get())) {
 			// Pictures that don't match with their sprite's size will stretch the
 			// sprite. This should be emulated here in the future using scaling.
 			target.draw(sprite.second, states);
