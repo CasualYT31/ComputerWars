@@ -228,12 +228,6 @@ void awe::terrain::Register(const std::string& type,
 		asMETHOD(T, getPicture), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this terrain type's "
 		"picture, given a country index.");
-	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool get_isCapturable() const property",
-		asMETHOD(T, isCapturable), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Returns TRUE if this terrain type is "
-		"capturable, in which case the max HP refers to the number of capture "
-		"points.");
 }
 
 template<typename T>
@@ -345,6 +339,12 @@ void awe::unit_type::Register(const std::string& type,
 		asMETHOD(T, getTurnStartPriority), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit type's turn start priority "
 		"level.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_canCapture(const BankID) const property",
+		asMETHODPR(T, canCapture, (const awe::BankID) const, bool),
+		asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns TRUE if this unit can capture a "
+		"type of terrain, whose index is given.");
 }
 
 template<typename T>

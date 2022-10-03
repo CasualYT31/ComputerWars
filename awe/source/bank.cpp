@@ -23,18 +23,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "bank.hpp"
 #include <algorithm>
 
-void awe::updateAllTerrains(awe::bank<awe::tile_type>& tileBank,
+void awe::updateTileTypeBank(awe::bank<awe::tile_type>& tileBank,
 	const awe::bank<awe::terrain>& terrainBank) noexcept {
 	for (awe::BankID i = 0; i < tileBank.size(); i++) {
 		tileBank[i]->updateTerrain(terrainBank);
 	}
 }
 
-void awe::updateAllMovementsAndLoadedUnits(awe::bank<awe::unit_type>& unitBank,
-	const awe::bank<awe::movement_type>& movementBank) noexcept {
+void awe::updateUnitTypeBank(awe::bank<awe::unit_type>& unitBank,
+	const awe::bank<awe::movement_type>& movementBank,
+	const awe::bank<awe::terrain>& terrainBank) noexcept {
 	for (awe::BankID i = 0; i < unitBank.size(); i++) {
 		unitBank[i]->updateMovementType(movementBank);
 		unitBank[i]->updateUnitTypes(unitBank);
+		unitBank[i]->updateTerrainTypes(terrainBank);
 	}
 }
 
@@ -133,7 +135,6 @@ awe::terrain::terrain(const awe::BankID id, const std::string& scriptName,
 	j.apply(_maxHP, { "hp" }, true);
 	if (_maxHP > INT_MAX) _maxHP = INT_MAX;
 	j.apply(_defence, { "defence" }, true);
-	j.apply(_isCapturable, { "capturable" }, true);
 	j.applyVector(_movecosts, { "movecosts" });
 	j.resetState();
 	j.applyVector(_pictures, { "pictures" });
@@ -152,9 +153,6 @@ const std::string& awe::terrain::getPicture(const awe::BankID countryID) const
 	noexcept {
 	if (countryID >= _pictures.size()) return emptyString;
 	return _pictures[countryID];
-}
-bool awe::terrain::isCapturable() const noexcept {
-	return _isCapturable;
 }
 std::vector<int> awe::terrain::copyMoveCosts() const noexcept {
 	return _movecosts;
@@ -229,8 +227,11 @@ awe::unit_type::unit_type(const awe::BankID id, const std::string& scriptName,
 	j.applyVector(_units, { "sprites" });
 	j.resetState();
 	j.applyVector(_canLoadThese, { "canload" });
+	j.resetState();
 	j.apply(_loadLimit, { "loadlimit" }, true);
 	j.apply(_turnStartPriority, { "turnstartpriority" }, true);
+	j.applyVector(_canCaptureThese, { "cancapture" });
+	j.resetState();
 }
 awe::BankID awe::unit_type::getMovementTypeIndex() const noexcept {
 	return _movementTypeID;
@@ -316,6 +317,30 @@ void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)
 		}
 	}
 }
+bool awe::unit_type::canCapture(const awe::BankID typeID) const noexcept {
+	return std::find(_canCaptureThese.begin(), _canCaptureThese.end(), typeID) !=
+		_canCaptureThese.end();
+}
+bool awe::unit_type::canCapture(const std::shared_ptr<const awe::terrain>& type)
+	const noexcept {
+	if (!type) return false;
+	for (auto& u : _canCaptureTheseTerrainTypes) {
+		if (u && *u == *type) return true;
+	}
+	return false;
+}
+void awe::unit_type::updateTerrainTypes(const awe::bank<awe::terrain>& terrainBank)
+	const noexcept {
+	_canCaptureTheseTerrainTypes.clear();
+	for (awe::BankID i = 0; i < terrainBank.size(); i++) {
+		for (auto& u : _canCaptureThese) {
+			if (i == u) {
+				_canCaptureTheseTerrainTypes.push_back(terrainBank[i]);
+				break;
+			}
+		}
+	}
+}
 std::vector<std::string> awe::unit_type::copyPictures() const noexcept {
 	return _pictures;
 }
@@ -328,6 +353,14 @@ std::vector<awe::BankID> awe::unit_type::copyLoadableUnitIDs() const noexcept {
 std::vector<std::shared_ptr<const awe::unit_type>>
 	awe::unit_type::copyLoadableUnits() const noexcept {
 	return _canLoadTheseUnitTypes;
+}
+std::vector<awe::BankID> awe::unit_type::copyCapturableTerrainIDs() const noexcept
+	{
+	return _canCaptureThese;
+}
+std::vector<std::shared_ptr<const awe::terrain>>
+	awe::unit_type::copyCapturableTerrains() const noexcept {
+	return _canCaptureTheseTerrainTypes;
 }
 bool awe::unit_type::operator==(const awe::unit_type& rhs) const noexcept {
 	return getID() == rhs.getID();

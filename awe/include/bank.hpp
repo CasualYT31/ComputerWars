@@ -597,7 +597,6 @@ namespace awe {
 		 * <ul><li>\c "hp" = \c _maxHP, <tt>(unsigned 32-bit int - capped off at
 		 *         signed 32-bit int's maximum value)</tt></li>
 		 *     <li>\c "defence" = \c _defenece, <tt>(unsigned 32-bit int)</tt></li>
-		 *     <li>\c "capturable" = \c _isCapturable, <tt>(bool)</tt></li>
 		 *     <li>\c "movecosts" = \c _movecosts, <tt>([signed 32-bit int{,
 		 *         signed 32-bit int, etc.}])</tt></li>
 		 *     <li>\c "pictures" = \c _pictures, <tt>([string{, string, etc.}])
@@ -671,12 +670,6 @@ namespace awe {
 		const std::string& getPicture(const awe::BankID countryID) const noexcept;
 
 		/**
-		 * Determines if this property is capturable.
-		 * @return \c TRUE if capturable, \c FALSE if not.
-		 */
-		bool isCapturable() const noexcept;
-
-		/**
 		 * Copies the internal list of movement costs and returns it.
 		 * @return All the move costs assigned to this terrain.
 		 */
@@ -722,11 +715,6 @@ namespace awe {
 		 * Picture properties.
 		 */
 		std::vector<std::string> _pictures;
-
-		/**
-		 * Capturable property.
-		 */
-		bool _isCapturable = false;
 	};
 
 	/**
@@ -920,12 +908,12 @@ namespace awe {
 		 *         signed 32-bit int's maximum value divided by the HP granularity
 		 *         value)</tt></li>
 		 *     <li>\c "mp" = \c _movementPoints, <tt>(unsigned 32-bit int)</tt>
-		 *     </li>
+		 *         </li>
 		 *     <li>\c "vision" = \c _vision, <tt>(unsigned 32-bit int)</tt></li>
 		 *     <li>\c "lowrange" = \c _lowerRange, <tt>(unsigned 32-bit int)</tt>
-		 *     </li>
+		 *         </li>
 		 *     <li>\c "highrange" = \c _higherRange, <tt>(unsigned 32-bit int)</tt>
-		 *     </li>
+		 *         </li>
 		 *     <li>\c "pictures" = \c _pictures, <tt>([string{, string, etc.}])
 		 *         </tt></li>
 		 *     <li>\c "sprites" = \c _units, <tt>([string{, string, etc.}])
@@ -933,9 +921,12 @@ namespace awe {
 		 *     <li>\c "canload" = \c _canLoadThese, <tt>([unsigned 32-bit int{,
 		 *         unsigned 32-bit int, etc.}])</tt></li>
 		 *     <li>\c "loadlimit" = \c _loadLimit, <tt>(unsigned 32-bit int)</tt>
-		 *     </li>
+		 *         </li>
 		 *     <li>\c "turnstartpriority" = \c _turnStartPriority, <tt>(unsigned
-		 *         32-bit int)</tt></li></ul>
+		 *         32-bit int)</tt></li>
+		 *     <li>\c "cancapture" = \c _canCaptureThese,
+		 *         <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt>
+		 *         </li></ul>
 		 * 
 		 * Range values work by counting the number of tiles away from the unit's
 		 * current tile. If the tile is within both the lower and higher ranges
@@ -1129,6 +1120,32 @@ namespace awe {
 		void updateUnitTypes(const bank<unit_type>& unitBank) const noexcept;
 
 		/**
+		 * Finds out if this type of unit can capture a given terrain type.
+		 * @param  typeID The ID of the type of terrain to test.
+		 * @return \c TRUE if yes, \c FALSE otherwise.
+		 */
+		bool canCapture(const awe::BankID typeID) const noexcept;
+
+		/**
+		 * Overloaded version of \c canCapture() that checks using a given terrain
+		 * type.
+		 * @param  type The terrain type to check for. Returns \c FALSE if
+		 *              \c nullptr.
+		 * @return \c TRUE if the given terrain type can be captured by units of
+		 *         this type, \c FALSE if not.
+		 */
+		bool canCapture(const std::shared_ptr<const awe::terrain>& type) const
+			noexcept;
+
+		/**
+		 * Updates the stored terrain type properties pointers for terrains that
+		 * can be captured by this type of unit.
+		 * @param terrainBank A reference to the terrain type bank to pull the
+		 *                    pointers from.
+		 */
+		void updateTerrainTypes(const bank<terrain>& terrainBank) const noexcept;
+
+		/**
 		 * Copies the internal list of picture sprite names and returns it.
 		 * @return All the pictures assigned to this unit.
 		 */
@@ -1154,6 +1171,22 @@ namespace awe {
 		 * @return All the types of units that can be loaded onto this unit.
 		 */
 		std::vector<std::shared_ptr<const awe::unit_type>> copyLoadableUnits()
+			const noexcept;
+
+		/**
+		 * Copies the internal list of IDs of terrain types this unit can capture
+		 * and returns it.
+		 * @return All the IDs of the types of terrain that can be captured by this
+		 *         unit.
+		 */
+		std::vector<awe::BankID> copyCapturableTerrainIDs() const noexcept;
+
+		/**
+		 * Copies the internal list of terrains that can be captured by this unit
+		 * type and returns it.
+		 * @return All the types of terrain that can be captured by this unit.
+		 */
+		std::vector<std::shared_ptr<const awe::terrain>> copyCapturableTerrains()
 			const noexcept;
 
 		/**
@@ -1255,6 +1288,19 @@ namespace awe {
 		 * The turn start priority.
 		 */
 		unsigned int _turnStartPriority = 0;
+
+		/**
+		 * List of terrain type IDs that this unit type can capture.
+		 */
+		std::vector<awe::BankID> _canCaptureThese;
+
+		/**
+		 * List of terrain types that this unit type can capture.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateTerrainTypes().
+		 */
+		mutable std::vector<std::shared_ptr<const awe::terrain>>
+			_canCaptureTheseTerrainTypes;
 	};
 
 	/**
@@ -1327,18 +1373,21 @@ namespace awe {
 	 * @param tileBank    The \c tile_type bank to update.
 	 * @param terrainBank The \c terrian bank to pull the pointers from.
 	 */
-	void updateAllTerrains(bank<tile_type>& tileBank,
+	void updateTileTypeBank(bank<tile_type>& tileBank,
 		const awe::bank<awe::terrain>& terrainBank) noexcept;
 
 	/**
-	 * Calls \c unit_type::updateMovementType() and \c unit_type::updateUnitTypes
-	 * on an entire bank of \c unit_type objects.
+	 * Calls \c unit_type::updateMovementType(), \c unit_type::updateUnitTypes(),
+	 * and \c unit_type::updateTerrainTypes() on an entire bank of \c unit_type
+	 * objects.
 	 * @param unitBank     The \c unit_type bank to update. Also the \c unit_type
 	 *                     bank that is used to update itself.
 	 * @param movementBank The \c movement_type bank to pull the pointers from.
+	 * @param terrainBank  The \c terrain bank to pull the pointers from.
 	 */
-	void updateAllMovementsAndLoadedUnits(bank<unit_type>& unitBank,
-		const awe::bank<awe::movement_type>& movementBank) noexcept;
+	void updateUnitTypeBank(bank<unit_type>& unitBank,
+		const awe::bank<awe::movement_type>& movementBank,
+		const awe::bank<awe::terrain>& terrainBank) noexcept;
 }
 
 #include "tpp/bank.tpp"

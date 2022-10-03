@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.hpp"
 #include "army.hpp"
+#include <iostream>
 
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
@@ -341,8 +342,8 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 			"commander_bank");
 	if (!ret) return false;
 	// Finish initialisation of banks.
-	awe::updateAllTerrains(*_tiles, *_terrains);
-	awe::updateAllMovementsAndLoadedUnits(*_units, *_movements);
+	awe::updateTileTypeBank(*_tiles, *_terrains);
+	awe::updateUnitTypeBank(*_units, *_movements, *_terrains);
 	// Initialise GUIs and the scripts.
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scriptsPath);
