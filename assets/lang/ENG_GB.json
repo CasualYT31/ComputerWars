@@ -9,6 +9,7 @@
 	"tag": "Change",
 	"delete": "Delete",
 	"join": "Join",
+	"capture": "Capture",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

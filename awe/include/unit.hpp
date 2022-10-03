@@ -150,6 +150,20 @@ namespace awe {
 		bool isWaiting() const noexcept;
 
 		/**
+		 * Sets this unit's capturing status.
+		 * By default, a unit is created with the capturing status turned off.
+		 * @param capturing \c TRUE if the unit is in capture mode, \c FALSE if
+		 *                  not.
+		 */
+		void capturing(const bool capturing) noexcept;
+
+		/**
+		 * Gets this unit's capturing status.
+		 * @return \c TRUE if this unit is capturing, \c FALSE if not.
+		 */
+		bool isCapturing() const noexcept;
+
+		/**
 		 * Loads another unit onto this one.
 		 * @param id The ID of the unit to load onto this one.
 		 */
@@ -275,6 +289,11 @@ namespace awe {
 		bool _waiting = true;
 
 		/**
+		 * The capturing state of this unit.
+		 */
+		bool _capturing = false;
+
+		/**
 		 * The list of units loaded onto this one.
 		 */
 		std::unordered_set<awe::UnitID> _loaded;
@@ -303,5 +322,10 @@ namespace awe {
 		 * The unit's loaded icon sprite object.
 		 */
 		sfx::animated_sprite _loadedIcon;
+
+		/**
+		 * The unit's capturing icon sprite object.
+		 */
+		sfx::animated_sprite _capturingIcon;
 	};
 }

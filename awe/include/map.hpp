@@ -724,9 +724,24 @@ namespace awe {
 		 * Gets a unit's waiting state.
 		 * @param  id The ID of the unit to query.
 		 * @return \c TRUE if the unit is waiting, \c FALSE if it is not. \c FALSE
-		 *         if a unit does not exist.
+		 *         if the unit does not exist.
 		 */
 		bool isUnitWaiting(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Sets a unit's capturing state.
+		 * @param id      The ID of the unit to amend.
+		 * @param capturing \c TRUE if the unit should capture, \c FALSE if not.
+		 */
+		void unitCapturing(const awe::UnitID id, const bool capturing) noexcept;
+
+		/**
+		 * Gets a unit's capturing state.
+		 * @param  id The ID of the unit to query.
+		 * @return \c TRUE if the unit is capturing, \c FALSE if it is not.
+		 *         \c FALSE if the unit does not exist.
+		 */
+		bool isUnitCapturing(const awe::UnitID id) const noexcept;
 
 		/**
 		 * Loads one unit onto another.

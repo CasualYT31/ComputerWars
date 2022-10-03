@@ -296,6 +296,14 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, isUnitWaiting), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void unitCapturing(const UnitID, const bool)",
+			asMETHOD(awe::map, unitCapturing), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isUnitCapturing(const UnitID) const",
+			asMETHOD(awe::map, isUnitCapturing), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void loadUnit(const UnitID, const UnitID)",
 			asMETHOD(awe::map, loadUnit), asCALL_THISCALL);
 		document->DocumentObjectMethod(r, "Loads the first unit onto the second "
@@ -1156,7 +1164,24 @@ bool awe::map::isUnitWaiting(const awe::UnitID id) const noexcept {
 	if (_isUnitPresent(id)) return _units.at(id).isWaiting();
 	_logger.error("isUnitWaiting operation failed: unit with ID {} doesn't exist!",
 		id);
-	return 0;
+	return false;
+}
+
+void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) noexcept {
+	if (_isUnitPresent(id)) {
+		_units.at(id).capturing(capturing);
+	} else {
+		_logger.error("unitCapturing operation cancelled: attempted to assign "
+			"capturing state {} to unit with ID {}, which doesn't exist!",
+			capturing, id);
+	}
+}
+
+bool awe::map::isUnitCapturing(const awe::UnitID id) const noexcept {
+	if (_isUnitPresent(id)) return _units.at(id).isCapturing();
+	_logger.error("isUnitCapturing operation failed: unit with ID {} doesn't "
+		"exist!", id);
+	return false;
 }
 
 void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) noexcept {
@@ -2338,6 +2363,7 @@ bool awe::map::_CWM_2_Unit(const bool isSave, awe::UnitID id,
 		_file.writeNumber(unit.getFuel());
 		_file.writeNumber(unit.getAmmo());
 		_file.writeBool(unit.isWaiting());
+		_file.writeBool(unit.isCapturing());
 		auto loaded = unit.loadedUnits();
 		if (loaded.size()) {
 			for (auto loadedUnitID : loaded) {
@@ -2360,6 +2386,8 @@ bool awe::map::_CWM_2_Unit(const bool isSave, awe::UnitID id,
 				setUnitAmmo(unitID, ammo);
 				auto isWaiting = _file.readBool();
 				waitUnit(unitID, isWaiting);
+				auto isCapturing = _file.readBool();
+				unitCapturing(unitID, isCapturing);
 				if (loadOnto)
 					loadUnit(unitID, loadOnto);
 				else

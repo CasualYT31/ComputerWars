@@ -105,3 +105,6 @@ the map format:
    `FALSE`, the unit can be moved.
  - In between each army's Country ID and Funds, there is a new `TeamID` field,
    which stores the team that the army belongs to.
+ - Immediately after the waiting state of the unit, another `bool` field is stored,
+   representing the capturing state of the unit. If `TRUE`, the unit is capturing
+   something. If `FALSE`, the unit is not capturing anything.

@@ -131,6 +131,12 @@
 			],
 			"durations": [ 0 ]
 		},
+		"capturing": {
+			"frames": [
+				[ 44, 32, 8, 8 ]
+			],
+			"durations": [ 0 ]
+		},
 		"fuellow": {
 			"frames": [
 				[ 68, 32, 8, 8 ],
@@ -174,6 +180,10 @@
 		},
 		"joinicon": {
 			"frames": [ [ 98, 66, 14, 13 ] ],
+			"durations": [ 0 ]
+		},
+		"captureicon": {
+			"frames": [ [ 98, 79, 13, 14 ] ],
 			"durations": [ 0 ]
 		},
 		"endturnicon": {
