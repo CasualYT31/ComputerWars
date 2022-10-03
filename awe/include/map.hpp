@@ -313,10 +313,18 @@ namespace awe {
 		/**
 		 * Deletes an army entirely from the map.
 		 * Deleting an army removes the army from the army list, deletes all the
-		 * units belonging to the army, and disowns all owned tiles.
-		 * @param army The ID of the army to delete.
+		 * units belonging to the army, and disowns all owned tiles.\n
+		 * If at least one of the army IDs given was invalid, the operation will be
+		 * cancelled and logged (\c NO_ARMY cannot be given as the first
+		 * parameter).
+		 * @param army              The ID of the army to delete.
+		 * @param transferOwnership The ID of the army who will assume ownership of
+		 *                          all the deleted army's tiles. By default,
+		 *                          ownership is set to \c NO_ARMY, i.e. back to
+		 *                          neutral.
 		 */
-		void deleteArmy(const awe::ArmyID army) noexcept;
+		void deleteArmy(const awe::ArmyID army,
+			const awe::ArmyID transferOwnership = awe::army::NO_ARMY) noexcept;
 
 		/**
 		 * Retrieves the number of armies currently on the map.

@@ -142,7 +142,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void deleteArmy(const ArmyID)",
+			"void deleteArmy(const ArmyID, const ArmyID = NO_ARMY)",
 			asMETHOD(awe::map, deleteArmy), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
@@ -662,10 +662,18 @@ bool awe::map::createArmy(const std::string& country) noexcept {
 	return createArmy(_countries->operator[](country));
 }
 
-void awe::map::deleteArmy(const awe::ArmyID army) noexcept {
+void awe::map::deleteArmy(const awe::ArmyID army,
+	const awe::ArmyID transferOwnership) noexcept {
 	if (!_isArmyPresent(army)) {
 		_logger.error("deleteArmy operation cancelled: attempted to delete an "
 			"army, {}, that didn't exist on the map!", army);
+		return;
+	}
+	if (!_isArmyPresent(transferOwnership) &&
+		transferOwnership != awe::army::NO_ARMY) {
+		_logger.error("deleteArmy operation cancelled: attempted to transfer "
+			"ownership of army {}'s tiles to an army of ID {}, which doesn't "
+			"exist on the map!", army, transferOwnership);
 		return;
 	}
 	// Firstly, delete all units belonging to the army.
@@ -676,7 +684,7 @@ void awe::map::deleteArmy(const awe::ArmyID army) noexcept {
 	// Then, disown all tiles.
 	auto tiles = _armies.at(army).getTiles();
 	for (auto& tile : tiles) {
-		_tiles[tile.x][tile.y].setTileOwner(awe::army::NO_ARMY);
+		_tiles[tile.x][tile.y].setTileOwner(transferOwnership);
 	}
 	// Finally, delete the army from the army list.
 	_armies.erase(army);
