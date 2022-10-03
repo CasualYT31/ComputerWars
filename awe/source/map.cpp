@@ -684,7 +684,7 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 	// Then, disown all tiles.
 	auto tiles = _armies.at(army).getTiles();
 	for (auto& tile : tiles) {
-		_tiles[tile.x][tile.y].setTileOwner(transferOwnership);
+		setTileOwner(tile, transferOwnership);
 	}
 	// Finally, delete the army from the army list.
 	_armies.erase(army);
@@ -717,6 +717,12 @@ void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team)
 	noexcept {
 	if (_isArmyPresent(army)) {
 		_armies.at(army).setTeam(team);
+		// First, stop all of the army's units from capturing.
+		const auto units = getUnitsOfArmy(army);
+		for (auto& unit : units) _updateCapturingUnit(unit);
+		// Then, stop all of the units capturing that are on this army's tiles.
+		const auto tiles = getTilesOfArmy(army);
+		for (auto& tile : tiles) _updateCapturingUnit(getUnitOnTile(tile));
 	} else {
 		_logger.error("setArmyTeam operation cancelled: attempted to set an army "
 			"{}'s team to {}, but that army didn't exist!", army, team);
@@ -1001,6 +1007,7 @@ void awe::map::deleteUnit(const awe::UnitID id) noexcept {
 			"with ID {} that didn't exist!", id);
 		return;
 	}
+	_updateCapturingUnit(id);
 	// Firstly, remove the unit from the tile, if it was on a tile.
 	// We don't need to check if the unit "is actually on the map or not," since
 	// the tile will always hold the index to the unit in either case: which is why
@@ -1066,6 +1073,7 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos)
 			"unit with ID {}!", id, pos.x, pos.y, idOfUnitOnTile);
 		return;
 	}
+	_updateCapturingUnit(id);
 	// Make new tile occupied.
 	_tiles[pos.x][pos.y].setUnit(id);
 	// Make old tile vacant. Don't make tile vacant if a loaded unit also occupies
@@ -1209,6 +1217,7 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) noexcept
 			"onto unit with ID {}", load, onto);
 		return;
 	}
+	_updateCapturingUnit(load);
 	_units.at(onto).loadUnit(load);
 	_units.at(load).loadOnto(onto);
 }
@@ -1295,6 +1304,7 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 			pos.x, pos.y, getMapSize().x, getMapSize().y);
 		return false;
 	}
+	_updateCapturingUnit(getUnitOnTile(pos));
 	_tiles[pos.x][pos.y].setTileType(type);
 	// Remove ownership of the tile from the army who owns it, if any army does.
 	setTileOwner(pos, awe::army::NO_ARMY);
@@ -1359,6 +1369,7 @@ void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) noexcept 
 			army, pos.x, pos.y, getMapSize().x, getMapSize().y);
 		return;
 	}
+	_updateCapturingUnit(getUnitOnTile(pos));
 	auto& tile = _tiles[pos.x][pos.y];
 	// First, remove the tile from the army who currently owns it.
 	if (_isArmyPresent(tile.getTileOwner()))

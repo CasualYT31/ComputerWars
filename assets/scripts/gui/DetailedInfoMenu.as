@@ -197,11 +197,11 @@ void DetailedInfoMenuOpen() {
 	// Setup army panel.
 	setWidgetText("DetailedInfoMenu.baseLayout.armyPanel.day", "day",
 		{ any(game.map.getDay()) });
-	const uint armyCount = game.map.getArmyCount();
-	for (uint a = 0; a < armyCount; a++) {
+	const auto armies = game.map.getArmyIDs();
+	for (uint a = 0, armyCount = armies.length(); a < armyCount; a++) {
 		armyWidgets.insertLast(ArmyWidget(
 			"DetailedInfoMenu.baseLayout.armyPanel.army" + formatUInt(a)));
-		armyWidgets[a].update(a);
+		armyWidgets[a].update(armies[a]);
 		setWidgetPosition(armyWidgets[a].panel, "2%", "2% + " +
 			formatUInt(55 + (ARMYWIDGET_HEIGHT + 10) * a) + "px");
 	}

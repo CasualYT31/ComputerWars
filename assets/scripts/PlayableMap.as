@@ -480,6 +480,62 @@ class PlayableMap {
 		}
 	}
 	
+	/**
+	 * Checks if a unit can capture the given tile.
+	 * @param  unit The ID of the capturing unit.
+	 * @param  tile The tile which the unit is capturing.
+	 * @return \c TRUE if the unit can capture the tile, \c FALSE otherwise.
+	 */
+	bool canCapture(const UnitID unit, const Vector2 tile) {
+		/* Conditions:
+		1. The unit must be able to capture the terrain type that the tile is.
+		2. The tile must be either owned by no one, or owned by an army on a
+		   team that is against the unit.
+		3. The tile must be vacant, unless the given unit is already occupying it.
+		*/
+		return map.getUnitType(unit).canCapture[map.getTileType(tile).type.ID] &&
+			(map.getTileOwner(tile) == NO_ARMY ||
+			map.getTeamOfUnit(unit) != map.getArmyTeam(map.getTileOwner(tile))) &&
+			(map.getUnitOnTile(tile) == 0 || map.getUnitOnTile(tile) == unit);
+	}
+
+	/**
+	 * Performs \c moveUnit() on the currently selected unit, then captures the
+	 * destination tile using the selected unit.
+	 * Note that the game engine handles all cases where a capture is completely
+	 * interrupted, and in such cases, the tile's HP will be set back to maximum
+	 * and the unit will no longer be in capturing mode.
+	 * @throws If a unit hasn't been selected, or if the unit cannot capture the
+	 *         destination tile.
+	 */
+	void moveUnitAndCapture() {
+		const auto unit = map.getSelectedUnit();
+		const auto tile = map.closedList[map.closedList.length() - 1].tile;
+		if (canCapture(unit, tile)) {
+			moveUnit();
+			const auto newHP = map.getTileHP(tile) - map.getUnitDisplayedHP(unit);
+			if (newHP <= 0) {
+				if (map.getTileType(tile).type.scriptName == "HQ") {
+					const auto armyToDelete = map.getTileOwner(tile);
+					const auto conqueringArmy = map.getArmyOfUnit(unit);
+					map.setTileType(tile, "064city");
+					map.setTileOwner(tile, conqueringArmy);
+					map.deleteArmy(armyToDelete, conqueringArmy);
+				} else {
+					map.setTileOwner(tile, map.getArmyOfUnit(unit));
+				}
+			} else {
+				map.unitCapturing(unit, true);
+				map.setTileHP(tile, newHP);
+			}
+		} else {
+			throw("Unit with ID " + formatInt(unit) + " (\"" +
+				map.getUnitType(unit).scriptName + "\") cannot capture tile " +
+				tile.toString() + " (\"" + map.getTileType(tile).type.scriptName +
+				" \").");
+		}
+	}
+
 	/////////
 	// MAP //
 	/////////

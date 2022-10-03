@@ -20,11 +20,17 @@ void PreviewMoveUnitMenuSetUp() {
  * Also adds all the buttons to the command menu.
  */
 void PreviewMoveUnitMenuOpen() {
+	// Gather data.
+	const auto unit = game.map.getSelectedUnit();
+	const auto tile = game.map.getSelectedTile();
+
 	// Add commands here.
-	if (game.canJoin(game.map.getUnitOnTile(game.map.getSelectedTile()),
-		game.map.getSelectedUnit())) {
+	if (game.canJoin(game.map.getUnitOnTile(tile), unit)) {
 		PreviewCommands.addCommand("Join", "join", "joinicon");
 	} else {
+		if (game.canCapture(unit, tile)) {
+			PreviewCommands.addCommand("Capture", "capture", "captureicon");
+		}
 		PreviewCommands.addCommand("Wait", "wait", "waiticon");
 	}
 
@@ -84,7 +90,15 @@ void PreviewMoveUnitMenu_Join_Pressed() {
 		game.map.getSelectedUnit(),
 		game.map.closedList[game.map.closedList.length() - 1].g
 	);
-	// Deselect the unit or else the game will crash!
+	// Deselect the unit or else the game will crash, since we just deleted it!
 	game.selectUnit(0);
+	setGUI("Map");
+}
+
+/**
+ * Moves a unit and make it capture a property.
+ */
+void PreviewMoveUnitMenu_Capture_Pressed() {
+	game.moveUnitAndCapture();
 	setGUI("Map");
 }

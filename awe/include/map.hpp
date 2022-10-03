@@ -1238,6 +1238,32 @@ namespace awe {
 		}
 
 		/**
+		 * Checks if a unit was put into a state where it can no longer capture.
+		 * There are many circumstances where a capturing process needs to be
+		 * stopped (the capturing unit = "a unit"):
+		 * <ol><li>When a unit moves off a tile.</li>
+		 *     <li>When a unit is loaded onto another unit.</li>
+		 *     <li>When a unit is deleted.</li>
+		 *     <li>When an army changes teams (all of its units must stop
+		 *         capturing, and all of the units that were capturing its tiles
+		 *         must also stop capturing).</li>
+		 *     <li>When the tile the unit is capturing changes type <b>(regardless
+		 *         of whether or not the type ends up being the same)</b>.</li>
+		 *     <li>When the tile changes owner <b>(regardless of whether or not the
+		 *         owner ends up being the same)</b>.</li></ol>
+		 * This method will restore the tile and unit back to a pre-capturing
+		 * state, if the given unit was capturing a tile.
+		 * @param id The ID of the unit to check
+		 */
+		inline void _updateCapturingUnit(const awe::UnitID id) noexcept {
+			if (id > 0 && isUnitCapturing(id)) {
+				const auto t = getUnitPosition(id);
+				setTileHP(t, (awe::HP)getTileType(t)->getType()->getMaxHP());
+				unitCapturing(id, false);
+			}
+		}
+
+		/**
 		 * Determines the ID the next unit should have.
 		 * A unit ID cannot be \c 0. Automatically assigns the returned value to
 		 * \c _lastUnitID.
