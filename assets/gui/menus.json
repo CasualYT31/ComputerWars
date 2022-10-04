@@ -7,6 +7,7 @@
 		"NewGameOptions",
 		"MoveUnitMenu",
 		"PreviewMoveUnitMenu",
-		"DeleteUnitMenu"
+		"DeleteUnitMenu",
+		"DevCommandMenu"
 	]
 }

@@ -457,6 +457,8 @@ std::string engine::scripts::executeCode(std::string code) noexcept {
         code = "void EXECUTE_CODE_" + std::to_string(counter++) + "() {" + code +
             "}";
         _fillCachedMsg = true;
+        _cachedMsg = "";
+        _cachedCol = "";
         auto r = m->CompileFunction("EXECUTE_CODE_SECTION", code.c_str(),
             0, 0, &func);
         _fillCachedMsg = false;

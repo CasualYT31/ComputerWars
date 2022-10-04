@@ -67,10 +67,27 @@ void HandleCommonGameInput(const dictionary@ controls) {
 }
 
 /**
+ * Used to make sure that the enter key doesn't trigger the dev command menu to
+ * reappear immediately after sending a command.
+ */
+bool CANCEL_DEV_INPUT = false;
+
+/**
  * Handles input specific to the \c Map menu.
  * @param controls The control map given by the engine.
  */
 void MapHandleInput(const dictionary controls) {
+	// If the dev key was hit, open the debug menu.
+	if (bool(controls["dev"])) {
+		if (CANCEL_DEV_INPUT) {
+			CANCEL_DEV_INPUT = false;
+		} else {
+			CANCEL_DEV_INPUT = true;
+			setGUI("DevCommandMenu");
+			return;
+		}
+	}
+
 	HandleCommonGameInput(controls);
 	
 	// Update army widget.

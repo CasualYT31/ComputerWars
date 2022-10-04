@@ -624,6 +624,14 @@ namespace sfx {
 		void _removeWidgetsFromContainer(const std::string& name) noexcept;
 
 		/**
+		 * Updates the setfocus to point to a given widget.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and the setfocus will not be changed.
+		 * @param name The name fo the widget who will have the setfocus.
+		 */
+		void _setWidgetFocus(const std::string& name) noexcept;
+
+		/**
 		 * Sets a widget's font.
 		 * If no widget or font exists with the given name, then an error will be
 		 * logged and no font will be changed.

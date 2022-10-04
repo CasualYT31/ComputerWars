@@ -379,6 +379,11 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Removes all the widgets from a given "
 		"container/menu, but does not remove the container/menu itself.");
 
+	r = engine->RegisterGlobalFunction("void setWidgetFocus(const string&in)",
+		asMETHOD(sfx::gui, _setWidgetFocus), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Updates the setfocus to point to a given "
+		"widget.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetFont(const string&in, "
 		"const string&in)",
 		asMETHOD(sfx::gui, _setWidgetFont), asCALL_THISCALL_ASGLOBAL, this);
@@ -1457,6 +1462,17 @@ void sfx::gui::_removeWidgetsFromContainer(const std::string& name) noexcept {
 			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
 	}
 
+}
+
+void sfx::gui::_setWidgetFocus(const std::string& name) noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		widget->setFocused(true);
+	} else {
+		_logger.error("Attempted to set the focus to a widget \"{}\" within menu "
+			"\"{}\". This widget does not exist.", name, fullname[0]);
+	}
 }
 
 void sfx::gui::_setWidgetFont(const std::string& name, const std::string& fontName)
