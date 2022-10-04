@@ -340,6 +340,17 @@ namespace engine {
 		bool callFunction(const std::string& name) noexcept;
 
 		/**
+		 * Compiles and executes the given code, which can call any code that is in
+		 * the \c ComputerWars module.
+		 * @param  code The code to execute. It is automatically put into a
+		 *              function so you don't have to do this maually in the code.
+		 * @return If execution was successful, an empty string is returned. If
+		 *         not, an error string will be returned. The error string will
+		 *         also be logged. These include build errors and exception errors.
+		 */
+		std::string executeCode(std::string code) noexcept;
+
+		/**
 		 * Creates a @c CScriptDictionary object.
 		 * @return Pointer to a new AngelScript @c dictionary object that's been
 		 *         registered with this engine.
@@ -450,6 +461,26 @@ namespace engine {
 		 * Used to generate documentation on the script interface.
 		 */
 		std::shared_ptr<DocumentationGenerator> _document;
+
+		/**
+		 * Flag used to tell the message callback to fill \c _cachedMsg.
+		 */
+		bool _fillCachedMsg = false;
+
+		/**
+		 * Caches messages given to the \c scriptMessageCallback().
+		 */
+		std::string _cachedMsg;
+
+		/**
+		 * Caches the last given column number to the \c scriptMessageCallback().
+		 */
+		std::string _cachedCol;
+
+		/**
+		 * The context used with \c executeCode().
+		 */
+		asIScriptContext* _executeCodeContext = nullptr;
 	};
 }
 

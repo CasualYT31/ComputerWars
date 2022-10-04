@@ -22,7 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.hpp"
 #include "army.hpp"
-#include <iostream>
 
 awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
 
@@ -279,6 +278,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Translates a string without inserting "
 		"any variables.");
+
+	r = engine->RegisterGlobalFunction("string execute(string)",
+		asMETHOD(engine::scripts, executeCode),
+		asCALL_THISCALL_ASGLOBAL, _scripts.get());
+	document->DocumentGlobalFunction(r, "Executes code within the ComputerWars "
+		"module.");
 }
 
 bool awe::game_engine::_load(engine::json& j) noexcept {

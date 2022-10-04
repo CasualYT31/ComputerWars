@@ -259,6 +259,7 @@ engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
 }
 
 engine::scripts::~scripts() noexcept {
+    if (_executeCodeContext) _executeCodeContext->Release();
     for (auto context : _context) context->Release();
     if (_engine) _engine->ShutDownAndRelease();
 }
@@ -273,6 +274,14 @@ void engine::scripts::addRegistrant(engine::script_registrant* const r) noexcept
 
 void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg, void* param)
     noexcept {
+    if (_fillCachedMsg) {
+        _cachedMsg += msg->message;
+        _cachedMsg += ", ";
+        _cachedCol = "Col " + std::to_string(msg->col) + ".";
+    } else {
+        _cachedMsg = "";
+        _cachedCol = "";
+    }
     if (msg->type == asMSGTYPE_INFORMATION) {
         _logger.write("INFO: (@{}:{},{}): {}.",
             msg->section, msg->row, msg->col, msg->message);
@@ -433,6 +442,87 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
         return false;
     }
     return true;
+}
+
+std::string engine::scripts::executeCode(std::string code) noexcept {
+    // If only I had known about ExecuteString() before writing all of this...
+    // Bruh...
+    static const auto Log = [&](const std::string& m) -> std::string {
+        _logger.error(m); return m;
+    };
+    auto m = _engine->GetModule("ComputerWars");
+    if (m) {
+        static std::size_t counter = 0;
+        asIScriptFunction* func = nullptr;
+        code = "void EXECUTE_CODE_" + std::to_string(counter++) + "() {" + code +
+            "}";
+        _fillCachedMsg = true;
+        auto r = m->CompileFunction("EXECUTE_CODE_SECTION", code.c_str(),
+            0, 0, &func);
+        _fillCachedMsg = false;
+        if (r >= 0 && func) {
+            if (!_executeCodeContext) {
+                _executeCodeContext = _engine->CreateContext();
+                if (!_executeCodeContext) {
+                    return Log("Could not create context for executeCode()!");
+                }
+            }
+            _executeCodeContext->Prepare(func);
+            r = _executeCodeContext->Execute();
+            func->Release();
+            std::string ret = "asEXECUTION_EXCEPTION: ";
+            switch (r) {
+            case asCONTEXT_NOT_PREPARED:
+                return Log("asCONTEXT_NOT_PREPARED: The context is not prepared "
+                    "or it is not in suspended state.");
+                break;
+            case asEXECUTION_ABORTED:
+                return Log("asEXECUTON_ABORTED: The execution was aborted with a "
+                    "call to Abort.");
+                break;
+            case asEXECUTION_SUSPENDED:
+                return Log("asEXECUTION_SUSPENDED: The execution was suspended "
+                    "with a call to Suspend.");
+                break;
+            case asEXECUTION_FINISHED:
+                return "";
+                break;
+            case asEXECUTION_EXCEPTION:
+                ret += _executeCodeContext->GetExceptionString();
+                return Log(ret);
+                break;
+            default:
+                return Log("An unknown error occurred during runtime: code " +
+                    std::to_string(r) + ".");
+            }
+        } else {
+            switch (r) {
+            case asINVALID_ARG:
+                return Log("asINVALID_ARG: One or more arguments have invalid "
+                    "values.");
+                break;
+            case asINVALID_CONFIGURATION:
+                return Log("asINVALID_CONFIGURATION: The engine configuration is "
+                    "invalid.");
+                break;
+            case asBUILD_IN_PROGRESS:
+                return Log("asBUILD_IN_PROGRESS: Another build is in progress.");
+                break;
+            case asERROR:
+                return Log("asERROR: " + _cachedMsg + _cachedCol);
+                break;
+            case asNOT_SUPPORTED:
+                return Log("asNOT_SUPPORTED: Compiler support is disabled in the "
+                    "engine.");
+                break;
+            default:
+                return Log("An unknown error occurred during compilation: code " +
+                    std::to_string(r) + ".");
+            }
+        }
+    } else {
+        return Log("The ComputerWars module does not exist!");
+    }
 }
 
 CScriptDictionary* engine::scripts::createDictionary() noexcept {
