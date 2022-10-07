@@ -11,6 +11,7 @@
 	"join": "Join",
 	"capture": "Capture",
 	"back": "Back",
+	"supply": "Supply",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

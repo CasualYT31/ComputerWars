@@ -406,7 +406,7 @@ class PlayableMap {
 	 * @return \c TRUE if the moving unit can join with the stationary one,
 	 *         \c FALSE otherwise.
 	 */
-	bool canJoin(const UnitID stationary, const UnitID moving) {
+	bool canJoin(const UnitID stationary, const UnitID moving) const {
 		/* Conditions:
 		1. Both units must be of the same type.
 		2. Both units must belong to the same army.
@@ -486,7 +486,7 @@ class PlayableMap {
 	 * @param  tile The tile which the unit is capturing.
 	 * @return \c TRUE if the unit can capture the tile, \c FALSE otherwise.
 	 */
-	bool canCapture(const UnitID unit, const Vector2 tile) {
+	bool canCapture(const UnitID unit, const Vector2 tile) const {
 		/* Conditions:
 		1. The unit must be able to capture the terrain type that the tile is.
 		2. The tile must be either owned by no one, or owned by an army on a
@@ -536,6 +536,46 @@ class PlayableMap {
 		}
 	}
 
+	/**
+	 * Checks if there are units adjacent to a given tile that belong to the same
+	 * army as the one given, and that have lost some fuel and/or ammo.
+	 * @param  tile The tile to search from.
+	 * @param  army The ID of the army to search with.
+	 * @return \c TRUE if there is at least one unit that belongs to the given
+	 *         army, on a tile directly adjacent to the tile given, that has lost
+	 *         some fuel and/or ammo. \c FALSE otherwise.
+	 */
+	bool areThereDepletedArmyUnitsAdjacentTo(const Vector2&in tile,
+		const ArmyID army) const {
+		const auto units = _findUnits(tile, 1, 1);
+		for (uint i = 0, length = units.length(); i < length; ++i) {
+			if (map.getArmyOfUnit(units[i]) == army) {
+				const auto unitType = map.getUnitType(units[i]);
+				if ((!unitType.hasInfiniteFuel &&
+					uint(map.getUnitFuel(units[i])) < unitType.maxFuel) ||
+					(!unitType.hasInfiniteAmmo &&
+					uint(map.getUnitAmmo(units[i])) < unitType.maxAmmo)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * APC replenish code.
+	 * @param unit The ID of the APC unit who is replenishing adjacent units, if
+	 *             they belong to the same army as the APC unit.
+	 */
+	void APCReplenishUnits(const UnitID unit) {
+		array<UnitID> units = _findUnits(map.getUnitPosition(unit), 1, 1);
+		auto apcArmy = map.getArmyOfUnit(unit);
+		for (uint i = 0; i < units.length(); ++i) {
+			if (apcArmy == map.getArmyOfUnit(units[i]))
+				replenishUnit(units[i]);
+		}
+	}
+
 	/////////
 	// MAP //
 	/////////
@@ -564,12 +604,7 @@ class PlayableMap {
 		string typeName = type.scriptName;
 
 		if (typeName == "APC") {
-			array<UnitID> units = _findUnits(position, 1, 1);
-			auto apcArmy = map.getArmyOfUnit(unit);
-			for (uint i = 0; i < units.length(); ++i) {
-				if (apcArmy == map.getArmyOfUnit(units[i]))
-					replenishUnit(units[i]);
-			}
+			APCReplenishUnits(unit);
 
 		} else if (typeName == "TCOPTER" || typeName == "BCOPTER") {
 			map.burnUnitFuel(unit, 2);

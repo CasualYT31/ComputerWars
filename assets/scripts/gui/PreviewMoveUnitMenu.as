@@ -31,6 +31,11 @@ void PreviewMoveUnitMenuOpen() {
 		if (game.canCapture(unit, tile)) {
 			PreviewCommands.addCommand("Capture", "capture", "captureicon");
 		}
+		if (game.map.getUnitType(unit).scriptName == "APC" &&
+			game.areThereDepletedArmyUnitsAdjacentTo(tile,
+				game.map.getArmyOfUnit(unit))) {
+			PreviewCommands.addCommand("Supply", "supply", "replenishicon");
+		}
 		PreviewCommands.addCommand("Wait", "wait", "waiticon");
 	}
 
@@ -100,5 +105,16 @@ void PreviewMoveUnitMenu_Join_Pressed() {
  */
 void PreviewMoveUnitMenu_Capture_Pressed() {
 	game.moveUnitAndCapture();
+	setGUI("Map");
+}
+
+/**
+ * Resupplies adjacent units and makes the selected unit wait.
+ */
+void PreviewMoveUnitMenu_Supply_Pressed() {
+	// Cache selected unit, as moveUnit() unselects it.
+	const auto selectedUnit = game.map.getSelectedUnit();
+	game.moveUnit();
+	game.APCReplenishUnits(selectedUnit);
 	setGUI("Map");
 }
