@@ -41,7 +41,7 @@ int awe::game_engine::run() noexcept {
 			// the click and so safely ignores it for that iteration.
 			_userinput->update();
 			_gui->handleInput(_userinput);
-			_userinput->update();
+
 			// Now handle the events.
 			sf::Event event;
 			while (_renderer->pollEvent(event)) {
