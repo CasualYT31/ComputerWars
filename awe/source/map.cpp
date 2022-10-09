@@ -438,8 +438,16 @@ void awe::map::Register(asIScriptEngine* engine,
 		// SELECTED UNIT DRAWING OPERATIONS //
 		//////////////////////////////////////
 		r = engine->RegisterObjectMethod("Map",
-			"void setSelectedUnit(const UnitID)",
+			"bool setSelectedUnit(const UnitID)",
 			asMETHOD(awe::map, setSelectedUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool pushSelectedUnit(const UnitID)",
+			asMETHOD(awe::map, pushSelectedUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void popSelectedUnit(const UnitID)",
+			asMETHOD(awe::map, popSelectedUnit), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"UnitID getSelectedUnit() const",
@@ -544,18 +552,9 @@ void awe::map::setScripts(const std::shared_ptr<engine::scripts>& scripts)
 	noexcept {
 	_scripts = scripts;
 	if (_scripts) {
-		// We need to make sure to allocate the closed list as soon as possible!
-		// Technically, I think there would be issues with keeping a reference to
-		// the old closed list alive (the one allocated with the old engine), so
-		// we'll have to reallocate it if it's already been allocated. If all the
-		// references haven't been released yet, then there's not much we can do at
-		// this point in the code. We should never have to set the scripts object
-		// more than once anyway, to be fair.
-		if (_selectedUnitRenderData.closedList) {
-			_selectedUnitRenderData.closedList->Release();
+		if (_selectedUnitRenderData.empty()) {
+			_selectedUnitRenderData.emplace(*_scripts);
 		}
-		_selectedUnitRenderData.closedList =
-			_scripts->createArray("ClosedListNode");
 	}
 }
 
@@ -1561,15 +1560,16 @@ CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 	return ret;
 }
 
-void awe::map::setSelectedUnit(const awe::UnitID unit) noexcept {
+bool awe::map::setSelectedUnit(const awe::UnitID unit) noexcept {
 	if (unit == 0) {
-		_selectedUnitRenderData.selectedUnit = 0;
-		_selectedUnitRenderData.clearState();
-		return;
+		_selectedUnitRenderData.top().selectedUnit = 0;
+		_selectedUnitRenderData.top().clearState();
+		return true;
 	}
 	if (_isUnitPresent(unit)) {
 		if (_units.at(unit).isOnMap()) {
-			_selectedUnitRenderData.selectedUnit = unit;
+			_selectedUnitRenderData.top().selectedUnit = unit;
+			return true;
 		} else {
 			_logger.error("setSelectedUnit operation failed: cannot select unit "
 				"with ID {} as it is not on the map.", unit);
@@ -1578,10 +1578,30 @@ void awe::map::setSelectedUnit(const awe::UnitID unit) noexcept {
 		_logger.error("setSelectedUnit operation failed: unit with ID {} doesn't "
 			"exist!", unit);
 	}
+	return false;
+}
+
+bool awe::map::pushSelectedUnit(const awe::UnitID unit) noexcept {
+	_selectedUnitRenderData.emplace(*_scripts);
+	const auto ret = setSelectedUnit(unit);
+	if (!ret) {
+		_selectedUnitRenderData.pop();
+		_logger.error("pushSelectedUnit operation failed: see above.");
+	}
+	return ret;
+}
+
+void awe::map::popSelectedUnit() noexcept {
+	if (_selectedUnitRenderData.size() > 1) {
+		_selectedUnitRenderData.pop();
+	} else {
+		_logger.error("popSelectUnit operation failed: the size of the stack was "
+			"{}, which is too low!", _selectedUnitRenderData.size());
+	}
 }
 
 awe::UnitID awe::map::getSelectedUnit() const noexcept {
-	return _selectedUnitRenderData.selectedUnit;
+	return _selectedUnitRenderData.top().selectedUnit;
 }
 
 void awe::map::addAvailableTile(const sf::Vector2u& tile) noexcept {
@@ -1589,9 +1609,9 @@ void awe::map::addAvailableTile(const sf::Vector2u& tile) noexcept {
 		_logger.error("addAvailableTile operation failed: tile {} is out of "
 			"bounds!", tile);
 	} else {
-		if (_selectedUnitRenderData.availableTiles.find(tile) ==
-			_selectedUnitRenderData.availableTiles.end()) {
-			_selectedUnitRenderData.availableTiles.insert(tile);
+		if (_selectedUnitRenderData.top().availableTiles.find(tile) ==
+			_selectedUnitRenderData.top().availableTiles.end()) {
+			_selectedUnitRenderData.top().availableTiles.insert(tile);
 		}
 	}
 }
@@ -1602,32 +1622,32 @@ bool awe::map::isAvailableTile(const sf::Vector2u& tile) const noexcept {
 			"bounds!", tile);
 		return false;
 	} else {
-		return _selectedUnitRenderData.availableTiles.find(tile) !=
-			_selectedUnitRenderData.availableTiles.end();
+		return _selectedUnitRenderData.top().availableTiles.find(tile) !=
+			_selectedUnitRenderData.top().availableTiles.end();
 	}
 }
 
 void awe::map::setAvailableTileShader(const awe::available_tile_shader shader)
 	noexcept {
-	_selectedUnitRenderData.availableTileShader = shader;
+	_selectedUnitRenderData.top().availableTileShader = shader;
 }
 
 awe::available_tile_shader awe::map::getAvailableTileShader() const noexcept {
-	return _selectedUnitRenderData.availableTileShader;
+	return _selectedUnitRenderData.top().availableTileShader;
 }
 
 void awe::map::renderUnitAtDestination(const bool flag) noexcept {
-	_selectedUnitRenderData.renderUnitAtDestination = flag;
+	_selectedUnitRenderData.top().renderUnitAtDestination = flag;
 }
 
 CScriptArray* awe::map::getClosedList() noexcept {
-	return _selectedUnitRenderData.closedList;
+	return _selectedUnitRenderData.top().closedList;
 }
 
 void awe::map::regenerateClosedListSprites() noexcept {
 	// Starting from the beginning; calculate the arrow sprites to draw for
 	// each tile.
-	CScriptArray* list = _selectedUnitRenderData.closedList;
+	CScriptArray* list = _selectedUnitRenderData.top().closedList;
 	for (asUINT i = 0, length = list->GetSize(); i < length; ++i) {
 		awe::closed_list_node* const current =
 			(awe::closed_list_node* const)list->At(i);
@@ -1937,16 +1957,16 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
 				tile.setPixelPosition(tilex + mapCenterOffset.x, tiley -
 					(float)(tileHeight - tile.MIN_HEIGHT) + mapCenterOffset.y);
-				if (!_selectedUnitRenderData.renderUnitAtDestination) {
+				if (!_selectedUnitRenderData.top().renderUnitAtDestination) {
 					if (tile.getUnit()) {
 						_units.at(tile.getUnit()).setPixelPosition(
 							tilex + mapCenterOffset.x, tiley + mapCenterOffset.y
 						);
 					}
-				} else if (_selectedUnitRenderData.renderUnitAtDestination) {
+				} else if (_selectedUnitRenderData.top().renderUnitAtDestination) {
 					if (tile.getUnit()) {
 						if (tile.getUnit() !=
-							_selectedUnitRenderData.selectedUnit) {
+							_selectedUnitRenderData.top().selectedUnit) {
 							_units.at(tile.getUnit()).setPixelPosition(
 								tilex + mapCenterOffset.x,
 								tiley + mapCenterOffset.y
@@ -1954,10 +1974,10 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 						}
 					}
 					if (sf::Vector2u(x, y) == ((awe::closed_list_node*)
-						_selectedUnitRenderData.closedList->At(
-							_selectedUnitRenderData.closedList->GetSize() - 1))->
-						tile) {
-						_units.at(_selectedUnitRenderData.selectedUnit).
+						_selectedUnitRenderData.top().closedList->At(
+							_selectedUnitRenderData.top().closedList->GetSize()-1))
+							->tile) {
+						_units.at(_selectedUnitRenderData.top().selectedUnit).
 							setPixelPosition(
 							tilex + mapCenterOffset.x,
 							tiley + mapCenterOffset.y
@@ -1977,11 +1997,11 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 		tiley += (float)awe::tile::MIN_HEIGHT;
 	}
 	// Step 2. the selected unit closed list tile icons.
-	if (_selectedUnitRenderData.selectedUnit > 0) {
-		for (asUINT i = 0, size = _selectedUnitRenderData.closedList->GetSize();
-			i < size; ++i) {
+	if (_selectedUnitRenderData.top().selectedUnit > 0) {
+		for (asUINT i = 0, size = _selectedUnitRenderData.top().closedList->
+			GetSize(); i < size; ++i) {
 			awe::closed_list_node* pathNode = (awe::closed_list_node*)
-				_selectedUnitRenderData.closedList->At(i);
+				_selectedUnitRenderData.top().closedList->At(i);
 			pathNode->sprite.animate(target, scaling);
 			auto pos =
 				_tiles[pathNode->tile.x][pathNode->tile.y].getPixelPosition();
@@ -2011,14 +2031,14 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	auto mapSize = getMapSize();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
-			if (_selectedUnitRenderData.selectedUnit > 0 &&
-				!_selectedUnitRenderData.renderUnitAtDestination) {
+			if (_selectedUnitRenderData.top().selectedUnit > 0 &&
+				!_selectedUnitRenderData.top().renderUnitAtDestination) {
 				sf::Vector2u currentTile(x, y);
 				sf::RenderStates tileStates = mapStates;
-				if (_selectedUnitRenderData.availableTiles.find(currentTile) !=
-					_selectedUnitRenderData.availableTiles.end()) {
+				if (_selectedUnitRenderData.top().availableTiles.find(currentTile)
+					!= _selectedUnitRenderData.top().availableTiles.end()) {
 					// Apply configured shading.
-					switch (_selectedUnitRenderData.availableTileShader) {
+					switch (_selectedUnitRenderData.top().availableTileShader) {
 					case awe::available_tile_shader::Yellow:
 						tileStates.shader = &_availableTileShader;
 						break;
@@ -2036,12 +2056,13 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		}
 	}
 	// Step 2. the selected unit closed list tiles.
-	if (_selectedUnitRenderData.selectedUnit > 0 &&
-		!_selectedUnitRenderData.renderUnitAtDestination) {
-		for (asUINT i = 0, size = _selectedUnitRenderData.closedList->GetSize();
-			i < size; ++i) {
+	if (_selectedUnitRenderData.top().selectedUnit > 0 &&
+		!_selectedUnitRenderData.top().renderUnitAtDestination) {
+		for (asUINT i = 0, size = _selectedUnitRenderData.top().closedList->
+			GetSize(); i < size; ++i) {
 			target.draw(((awe::closed_list_node*)
-				_selectedUnitRenderData.closedList->At(i))->sprite, mapStates);
+				_selectedUnitRenderData.top().closedList->At(i))->sprite,
+					mapStates);
 		}
 	}
 	// Step 3. the units.
@@ -2055,9 +2076,9 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			if (unit > 0 && isUnitOnMap(unit)) {
 				sf::RenderStates unitStates = mapStates;
 				unitStates.shader = &_unavailableTileShader;
-				if (_selectedUnitRenderData.selectedUnit > 0 &&
-					!_selectedUnitRenderData.renderUnitAtDestination &&
-					unit != _selectedUnitRenderData.selectedUnit) {
+				if (_selectedUnitRenderData.top().selectedUnit > 0 &&
+					!_selectedUnitRenderData.top().renderUnitAtDestination &&
+					unit != _selectedUnitRenderData.top().selectedUnit) {
 					target.draw(_units.at(unit), unitStates);
 				} else {
 					if (isUnitWaiting(unit)) {
@@ -2453,8 +2474,40 @@ bool awe::map::_CWM_2_Unit(const bool isSave, awe::UnitID id,
 	}
 }
 
+awe::map::selected_unit_render_data::selected_unit_render_data(
+	const engine::scripts& scripts) noexcept {
+	closedList = scripts.createArray("ClosedListNode");
+}
+
+awe::map::selected_unit_render_data::selected_unit_render_data(
+	const awe::map::selected_unit_render_data& o) noexcept {
+	*this = o;
+}
+
+awe::map::selected_unit_render_data::selected_unit_render_data(
+	awe::map::selected_unit_render_data&& o) noexcept {
+	selectedUnit = std::move(o.selectedUnit);
+	availableTiles = std::move(o.availableTiles);
+	availableTileShader = std::move(o.availableTileShader);
+	closedList = std::move(o.closedList);
+	if (closedList) closedList->AddRef();
+	renderUnitAtDestination = std::move(o.renderUnitAtDestination);
+}
+
 awe::map::selected_unit_render_data::~selected_unit_render_data() noexcept {
 	if (closedList) closedList->Release();
+}
+
+awe::map::selected_unit_render_data&
+	awe::map::selected_unit_render_data::operator=(
+	const awe::map::selected_unit_render_data& o) noexcept {
+	selectedUnit = o.selectedUnit;
+	availableTiles = o.availableTiles;
+	availableTileShader = o.availableTileShader;
+	closedList = o.closedList;
+	if (closedList) closedList->AddRef();
+	renderUnitAtDestination = o.renderUnitAtDestination;
+	return *this;
 }
 
 void awe::map::selected_unit_render_data::clearState() noexcept {

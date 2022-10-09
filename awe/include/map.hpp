@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "file.hpp"
 #include "language.hpp"
 #include <cmath>
+#include <stack>
 
 #pragma once
 
@@ -206,8 +207,10 @@ namespace awe {
 		 * arrays for the scripts.
 		 * If the given pointer was not \c nullptr, then the closed list will be
 		 * allocated here.
-		 * @param scripts Pointer to the \c scripts object.
-		 * @sa    @c getClosedList().
+		 * @warning Undefined behaviour will occur if you call this method more
+		 *          than once!
+		 * @param   scripts Pointer to the \c scripts object.
+		 * @sa      @c getClosedList().
 		 */
 		void setScripts(const std::shared_ptr<engine::scripts>& scripts) noexcept;
 
@@ -962,10 +965,31 @@ namespace awe {
 		 * will be logged.\n
 		 * Note that no rendering effects for available tiles or a selected unit,
 		 * etc., will be employed if the currently selected unit is \c 0.
-		 * @param unit The ID of the unit to select. If \c 0 is given, all of the
-		 *             selected unit rendering data will be cleared.
+		 * @param  unit The ID of the unit to select. If \c 0 is given, all of the
+		 *              selected unit rendering data will be cleared.
+		 * @return \c TRUE if the unit was successfully selected, \c FALSE if not.
 		 */
-		void setSelectedUnit(const awe::UnitID unit) noexcept;
+		bool setSelectedUnit(const awe::UnitID unit) noexcept;
+
+		/**
+		 * Selects a new unit on the map and remembers the previously selected
+		 * unit/s.
+		 * If \c FALSE is returned, the stack's new element will be removed.
+		 * @param  unit The ID of the unit to select.
+		 * @return \c TRUE if the unit was selected successfully, \c FALSE if not.
+		 * @sa     @c setSelectedUnit().
+		 */
+		bool pushSelectedUnit(const awe::UnitID unit) noexcept;
+
+		/**
+		 * Pops the currently selected unit from the stack and reselects the
+		 * unit that was selected before the popped one.
+		 * A call to this method will fail if there is only one element in the
+		 * stack.
+		 * @warning This is \em not used to deselect the current unit! To do that,
+		 *          call <tt>setSelectedUnit(0)</tt>.
+		 */
+		void popSelectedUnit() noexcept;
 
 		/**
 		 * Gets the currently selected unit.
@@ -1425,12 +1449,39 @@ namespace awe {
 		 */
 		struct selected_unit_render_data {
 			/**
+			 * Default constructor.
+			 * @param scripts The scripts engine to allocate the array with.
+			 */
+			selected_unit_render_data(const engine::scripts& scripts) noexcept;
+
+			/**
+			 * Copy constructor.
+			 * @param o The object to copy.
+			 */
+			selected_unit_render_data(const awe::map::selected_unit_render_data& o)
+				noexcept;
+
+			/**
+			 * Move constructor.
+			 * @param o The object to move.
+			 */
+			selected_unit_render_data(awe::map::selected_unit_render_data&& o)
+				noexcept;
+
+			/**
 			 * Releases the reference to the closed list \c CScriptArray, if it has
 			 * been allocated.
 			 * @warning May need to implement proper copy and move constructors
 			 *          that increment the reference counter in the future!
 			 */
 			~selected_unit_render_data() noexcept;
+
+			/**
+			 * Copy assignment operator.
+			 * @param o The object to copy.
+			 */
+			selected_unit_render_data& operator=(
+				const awe::map::selected_unit_render_data& o) noexcept;
 
 			/**
 			 * The ID of the unit that is selected.
@@ -1447,7 +1498,8 @@ namespace awe {
 			/**
 			 * The shader to apply to all available tiles.
 			 */
-			awe::available_tile_shader availableTileShader;
+			awe::available_tile_shader availableTileShader =
+				awe::available_tile_shader::None;
 
 			/**
 			 * The closed list, i.e. the currently selected path that a moving unit
@@ -1466,7 +1518,12 @@ namespace awe {
 			 * Clears the state of the object.
 			 */
 			void clearState() noexcept;
-		} _selectedUnitRenderData; ///< Stores selected unit render data.
+		};
+		
+		/**
+		 * Stores selected unit render data.
+		 */
+		std::stack<awe::map::selected_unit_render_data> _selectedUnitRenderData;
 
 		/**
 		 * The currently selected tile.
