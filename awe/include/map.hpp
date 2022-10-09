@@ -237,14 +237,20 @@ namespace awe {
 		 * The currently selected tile will be adjusted in case it should become
 		 * out of bounds after the resize. Only the out of bounds axes will be
 		 * adjusted if this is the case.
-		 * @remark Since this operation shouldn't be a bottleneck, I've not
-		 *         concerned myself much with efficiency in its implementation. The
-		 *         main way to improve efficiency would be to loop through each
-		 *         relevant tile and remove their unit before the resize, rather
-		 *         than looping through \em all units and removing out of bounds
-		 *         ones, after the resize.
-		 * @param  dim  The width (x) and height (y) to make the map.
-		 * @param  tile The type of tile to assign to new tiles.
+		 * @warning Maps cannot be the maximum size of an unsigned int in either
+		 *          dimension, they must be smaller than this! This is because the
+		 *          engine relies on the fact that \c awe::unit::NO_POSITION is the
+		 *          maximum size of the vector type in use, and \c _isOutOfBounds()
+		 *          is sometimes given a unit's position directly—this position may
+		 *          be \c NO_POSITION!
+		 * @remark  Since this operation shouldn't be a bottleneck, I've not
+		 *          concerned myself much with efficiency in its implementation.
+		 *          The main way to improve efficiency would be to loop through
+		 *          each relevant tile and remove their unit before the resize,
+		 *          rather than looping through \em all units and removing out of
+		 *          bounds ones, after the resize.
+		 * @param   dim  The width (x) and height (y) to make the map.
+		 * @param   tile The type of tile to assign to new tiles.
 		 */
 		void setMapSize(const sf::Vector2u& dim,
 			const std::shared_ptr<const awe::tile_type>& tile = nullptr) noexcept;
@@ -647,7 +653,8 @@ namespace awe {
 		 * Retrieves a unit's position, indicating the tile it is occupying.
 		 * This method does not take into account if the unit is \em actually on a
 		 * tile: please use this method in conjunction with \c isUnitOnMap().\n
-		 * If the unit doesn't exist, <tt>(0, 0)</tt> will be returned.
+		 * If the unit doesn't exist, <tt>awe::unit::NO_POSITION</tt> will be
+		 * returned.
 		 * @param  id The ID of the unit.
 		 * @return The X and Y location of the unit on the map.
 		 */
@@ -754,7 +761,8 @@ namespace awe {
 		/**
 		 * Loads one unit onto another.
 		 * If the unit to load is already loaded onto another unit, this call will
-		 * be ignored and a warning will be logged.
+		 * be ignored and a warning will be logged. If both unit IDs given are the
+		 * same, then an error will be logged and the call will be cancelled.
 		 * @warning This method does not consider any load limits imposed by any
 		 *          unit type.
 		 * @param   load The ID of the unit to load onto another.
@@ -1402,7 +1410,7 @@ namespace awe {
 		 * The ID of the last unit created.
 		 * Used to generate unit IDs once the initial unit has been created.
 		 */
-		awe::UnitID _lastUnitID;
+		awe::UnitID _lastUnitID = 1;
 
 		/**
 		 * Stores which day it currently is.
@@ -1482,7 +1490,7 @@ namespace awe {
 		 *          by the client. However, the drawing code must still check for
 		 *          it and act accordingly!
 		 */
-		awe::ArmyID _currentArmy;
+		awe::ArmyID _currentArmy = awe::army::NO_ARMY;
 
 		/**
 		 * The animated sprite representing the cursor.

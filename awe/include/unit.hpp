@@ -26,6 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "bank.hpp"
 #include "army.hpp"
+#include <limits>
 
 #pragma once
 
@@ -38,6 +39,17 @@ namespace awe {
 	 */
 	class unit : public sfx::animated_drawable {
 	public:
+		/**
+		 * Reserved value representing no position on the map.
+		 * Assigned the maximum value of \c sf::Vector2u.
+		 */
+		static const sf::Vector2u NO_POSITION;
+
+		/**
+		 * \c NO_POSITION that can be assigned to a script's interface.
+		 */
+		static sf::Vector2u NO_POSITION_SCRIPT;
+
 		/**
 		 * Creates a new unit.
 		 * @warning \c army \b must hold a valid country ID: checks must be carried
@@ -266,7 +278,7 @@ namespace awe {
 		/**
 		 * The tile this unit occupies.
 		 */
-		sf::Vector2u _location;
+		sf::Vector2u _location = awe::unit::NO_POSITION;
 
 		/**
 		 * The HP of this unit.

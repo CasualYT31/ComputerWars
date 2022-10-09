@@ -23,6 +23,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "unit.hpp"
 #include <cmath>
 
+const sf::Vector2u awe::unit::NO_POSITION(std::numeric_limits<unsigned int>::max(),
+	std::numeric_limits<unsigned int>::max());
+
+sf::Vector2u awe::unit::NO_POSITION_SCRIPT = awe::unit::NO_POSITION;
+
 awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type,
 	const awe::ArmyID army,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet,
@@ -50,7 +55,7 @@ sf::Vector2u awe::unit::getPosition() const noexcept {
 }
 
 bool awe::unit::isOnMap() const noexcept {
-	return loadedOnto() == 0;
+	return _location != awe::unit::NO_POSITION;
 }
 
 void awe::unit::setHP(const awe::HP hp) noexcept {

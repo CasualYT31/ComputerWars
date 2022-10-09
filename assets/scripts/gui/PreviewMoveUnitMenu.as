@@ -23,13 +23,17 @@ void PreviewMoveUnitMenuOpen() {
 	// Gather data.
 	const auto unit = game.map.getSelectedUnit();
 	const auto tile = game.map.getSelectedTile();
+	const auto unitOnTile = game.map.getUnitOnTile(tile);
 
 	// Add commands here.
-	if (game.canJoin(game.map.getUnitOnTile(tile), unit)) {
+	if (game.canJoin(unitOnTile, unit)) {
 		PreviewCommands.addCommand("Join", "join", "joinicon");
 	} else {
 		if (game.canCapture(unit, tile)) {
 			PreviewCommands.addCommand("Capture", "capture", "captureicon");
+		}
+		if (game.canLoad(unit, unitOnTile)) {
+			PreviewCommands.addCommand("Load", "load", "loadicon");
 		}
 		if (game.map.getUnitType(unit).scriptName == "APC" &&
 			game.areThereDepletedArmyUnitsAdjacentTo(tile,
@@ -116,5 +120,19 @@ void PreviewMoveUnitMenu_Supply_Pressed() {
 	const auto selectedUnit = game.map.getSelectedUnit();
 	game.moveUnit();
 	game.APCReplenishUnits(selectedUnit);
+	setGUI("Map");
+}
+
+/**
+ * Loads the moving unit onto the stationary one.
+ */
+void PreviewMoveUnitMenu_Load_Pressed() {
+	game.loadUnit(
+		game.map.getSelectedUnit(),
+		game.map.getUnitOnTile(game.map.getSelectedTile()),
+		game.map.closedList[game.map.closedList.length() - 1].g
+	);
+	// Deselect the unit!
+	game.selectUnit(0);
 	setGUI("Map");
 }

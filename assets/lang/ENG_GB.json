@@ -12,6 +12,7 @@
 	"capture": "Capture",
 	"back": "Back",
 	"supply": "Supply",
+	"load": "Load",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

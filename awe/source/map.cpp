@@ -84,6 +84,11 @@ void awe::map::Register(asIScriptEngine* engine,
 			&awe::army::NO_ARMY_SCRIPT);
 		document->DocumentExpectedFunction("const ArmyID NO_ARMY", "Represents "
 			"\"no army\". Used to signify \"no ownership.\"");
+		r = engine->RegisterGlobalProperty("const Vector2 NO_POSITION",
+			&awe::unit::NO_POSITION_SCRIPT);
+		document->DocumentExpectedFunction("const Vector2 NO_POSITION",
+			"Represents \"no position/location\". Used to signify that a unit is "
+			"not located on the map.");
 
 		//////////////
 		// MAP TYPE //
@@ -981,7 +986,7 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 	awe::UnitID id;
 	try {
 		id = _findUnitID();
-	} catch (std::bad_alloc&) {
+	} catch (const std::bad_alloc&) {
 		_logger.error("createUnit fatal error: could not generate a unique ID for "
 			"a new unit. There are too many units allocated!");
 		return 0;
@@ -1055,14 +1060,15 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos)
 			"doesn't exist!", id);
 		return;
 	}
-	if (_isOutOfBounds(pos)) {
+	if (_isOutOfBounds(pos) && pos != awe::unit::NO_POSITION) {
 		_logger.error("setUnitPosition operation cancelled: attempted to move "
 			"unit with ID {} to position ({},{}), which is out of bounds with the "
 			"map's size ({},{})!",
 			id, pos.x, pos.y, getMapSize().x, getMapSize().y);
 		return;
 	}
-	const auto idOfUnitOnTile = getUnitOnTile(pos);
+	const auto idOfUnitOnTile = ((pos == awe::unit::NO_POSITION) ? (0) :
+		(getUnitOnTile(pos)));
 	if (idOfUnitOnTile == id) {
 		// If the tile's position is being set to the tile it is on, then drop the
 		// call.
@@ -1075,12 +1081,14 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos)
 	}
 	_updateCapturingUnit(id);
 	// Make new tile occupied.
-	_tiles[pos.x][pos.y].setUnit(id);
-	// Make old tile vacant. Don't make tile vacant if a loaded unit also occupies
-	// the same tile internally, just to be safe.
-	if (_units.at(id).isOnMap())
-		_tiles[_units.at(id).getPosition().x]
-		      [_units.at(id).getPosition().y].setUnit(0);
+	if (pos != awe::unit::NO_POSITION) {
+		_tiles[pos.x][pos.y].setUnit(id);
+	}
+	// Make old tile vacant.
+	if (_units.at(id).isOnMap()) {
+		const auto oldLocation = _units.at(id).getPosition();
+		_tiles[oldLocation.x][oldLocation.y].setUnit(0);
+	}
 	// Assign new location to unit.
 	_units.at(id).setPosition(pos);
 }
@@ -1089,7 +1097,7 @@ sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const noexcept {
 	if (!_isUnitPresent(id)) {
 		_logger.error("getUnitPosition operation failed: unit with ID {} doesn't "
 			"exist!", id);
-		return sf::Vector2u(0, 0);
+		return awe::unit::NO_POSITION;
 	}
 	return _units.at(id).getPosition();
 }
@@ -1212,12 +1220,25 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) noexcept
 			load);
 		return;
 	}
+	if (load == onto) {
+		_logger.error("loadUnit operation cancelled: attempted to load unit with "
+			"ID {} onto itself.", load);
+		return;
+	}
 	if (_units.at(load).loadedOnto()) {
 		_logger.warning("loadUnit warning: unit with ID {} was already loaded "
 			"onto unit with ID {}", load, onto);
 		return;
 	}
 	_updateCapturingUnit(load);
+	// Make the tile that `load` was on vacant, and remove the unit ID from the
+	// tile.
+	if (_units.at(load).isOnMap()) {
+		const auto location = _units.at(load).getPosition();
+		_tiles[location.x][location.y].setUnit(0);
+	}
+	_units.at(load).setPosition(awe::unit::NO_POSITION);
+	// Perform loads.
 	_units.at(onto).loadUnit(load);
 	_units.at(load).loadOnto(onto);
 }
@@ -1547,7 +1568,12 @@ void awe::map::setSelectedUnit(const awe::UnitID unit) noexcept {
 		return;
 	}
 	if (_isUnitPresent(unit)) {
-		_selectedUnitRenderData.selectedUnit = unit;
+		if (_units.at(unit).isOnMap()) {
+			_selectedUnitRenderData.selectedUnit = unit;
+		} else {
+			_logger.error("setSelectedUnit operation failed: cannot select unit "
+				"with ID {} as it is not on the map.", unit);
+		}
 	} else {
 		_logger.error("setSelectedUnit operation failed: unit with ID {} doesn't "
 			"exist!", unit);
@@ -1603,12 +1629,14 @@ void awe::map::regenerateClosedListSprites() noexcept {
 	// each tile.
 	CScriptArray* list = _selectedUnitRenderData.closedList;
 	for (asUINT i = 0, length = list->GetSize(); i < length; ++i) {
-		awe::closed_list_node* current = (awe::closed_list_node*)list->At(i);
+		awe::closed_list_node* const current =
+			(awe::closed_list_node* const)list->At(i);
 		current->sprite.setSpritesheet(_sheet_icon);
 		if (i == 0) {
 			current->sprite.setSpritesheet(nullptr);
 		} else if (i == length - 1) {
-			awe::closed_list_node* prev = (awe::closed_list_node*)list->At(i - 1);
+			awe::closed_list_node* const prev =
+				(awe::closed_list_node* const)list->At(i - 1);
 			if (prev->tile.x < current->tile.x) {
 				current->sprite.setSprite("unitArrowRight");
 			} else if (prev->tile.x > current->tile.x) {
@@ -1619,8 +1647,10 @@ void awe::map::regenerateClosedListSprites() noexcept {
 				current->sprite.setSprite("unitArrowUp");
 			}
 		} else {
-			awe::closed_list_node* prev = (awe::closed_list_node*)list->At(i - 1);
-			awe::closed_list_node* next = (awe::closed_list_node*)list->At(i + 1);
+			awe::closed_list_node* const prev =
+				(awe::closed_list_node* const)list->At(i - 1);
+			awe::closed_list_node* const next =
+				(awe::closed_list_node* const)list->At(i + 1);
 			if ((prev->tile.x < current->tile.x &&
 				current->tile.x < next->tile.x) ||
 				(prev->tile.x > current->tile.x &&

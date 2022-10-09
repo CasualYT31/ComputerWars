@@ -493,7 +493,8 @@ class PlayableMap {
 		   team that is against the unit.
 		3. The tile must be vacant, unless the given unit is already occupying it.
 		*/
-		return map.getUnitType(unit).canCapture[map.getTileType(tile).type.ID] &&
+		return unit > 0 &&
+			map.getUnitType(unit).canCapture[map.getTileType(tile).type.ID] &&
 			(map.getTileOwner(tile) == NO_ARMY ||
 			map.getTeamOfUnit(unit) != map.getArmyTeam(map.getTileOwner(tile))) &&
 			(map.getUnitOnTile(tile) == 0 || map.getUnitOnTile(tile) == unit);
@@ -552,9 +553,9 @@ class PlayableMap {
 			if (map.getArmyOfUnit(units[i]) == army) {
 				const auto unitType = map.getUnitType(units[i]);
 				if ((!unitType.hasInfiniteFuel &&
-					uint(map.getUnitFuel(units[i])) < unitType.maxFuel) ||
+					map.getUnitFuel(units[i]) < unitType.maxFuel) ||
 					(!unitType.hasInfiniteAmmo &&
-					uint(map.getUnitAmmo(units[i])) < unitType.maxAmmo)) {
+					map.getUnitAmmo(units[i]) < unitType.maxAmmo)) {
 					return true;
 				}
 			}
@@ -573,6 +574,52 @@ class PlayableMap {
 		for (uint i = 0; i < units.length(); ++i) {
 			if (apcArmy == map.getArmyOfUnit(units[i]))
 				replenishUnit(units[i]);
+		}
+	}
+
+	/**
+	 * Checks if the first unit can load onto the second.
+	 * @param  load ID of the unit to load onto another.
+	 * @param  onto ID of the unit which is accepting the \c load unit.
+	 * @return \c TRUE if the load can be carried out, \c FALSE otherwise.
+	 */
+	bool canLoad(const UnitID load, const UnitID onto) const {
+		/* Conditions:
+		1. The two units must belong to the same army.
+		2. `onto` must be able to load units of `load`'s type.
+		3. `onto` must have space for `load`.
+		4. There are other conditions that are already covered by map.loadUnit().
+		5. The IDs of both the stationary unit and the moving unit cannot be 0.
+		*/
+		if (load == 0 || onto == 0) return false;
+		const auto ontoType = map.getUnitType(onto);
+		return map.getArmyOfUnit(load) == map.getArmyOfUnit(onto) &&
+			ontoType.canLoad[map.getUnitType(load).ID] &&
+			map.getLoadedUnits(onto).length() < ontoType.loadLimit;
+	}
+
+	/**
+	 * Loads the \c load unit onto the \c onto unit, if it can be carried out.
+	 * If the first unit could not be loaded onto the second, a detailed error
+	 * will be logged.
+	 * @param load ID of the unit being loaded onto \c onto.
+	 * @param onto ID of the unit accepting \c load.
+	 * @param fuel The fuel to burn from \c load.
+	 */
+	void loadUnit(const UnitID load, const UnitID onto, const Fuel burn) {
+		if (canLoad(load, onto)) {
+			// canLoad() will automatically deal with any load limits imposed by
+			// the type of the `onto` unit.
+			map.burnUnitFuel(load, burn);
+			map.loadUnit(load, onto);
+		} else {
+			const auto ontoType = map.getUnitType(onto);
+			error("Attempted to load unit " + formatUInt(load) + " onto unit " +
+				formatUInt(onto) + ". Details: \n" + "Unit " + formatUInt(load) +
+				":\nType: " + map.getUnitType(load).scriptName + "\nUnit " +
+				formatUInt(onto) + ":\nType: " + ontoType.scriptName + "\nLoad "
+				"Limit: " + formatUInt(ontoType.loadLimit) + "\nUnits Currently "
+				"Loaded: " + formatUInt(map.getLoadedUnits(onto).length()));
 		}
 	}
 
