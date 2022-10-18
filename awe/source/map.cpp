@@ -470,16 +470,33 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getAvailableTileShader), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void renderUnitAtDestination(const bool)",
-			asMETHOD(awe::map, renderUnitAtDestination), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
 			"array<ClosedListNode>& get_closedList() property",
 			asMETHOD(awe::map, getClosedList), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void disableSelectedUnitRenderingEffects(const bool)",
+			asMETHOD(awe::map, disableSelectedUnitRenderingEffects),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void regenerateClosedListSprites()",
 			asMETHOD(awe::map, regenerateClosedListSprites), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void addPreviewUnit(const UnitID, const Vector2&in)",
+			asMETHOD(awe::map, addPreviewUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void removePreviewUnit(const UnitID)",
+			asMETHOD(awe::map, removePreviewUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void removeAllPreviewUnits()",
+			asMETHOD(awe::map, removeAllPreviewUnits), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isPreviewUnit(const UnitID) const",
+			asMETHOD(awe::map, isPreviewUnit), asCALL_THISCALL);
 	}
 }
 
@@ -1636,12 +1653,12 @@ awe::available_tile_shader awe::map::getAvailableTileShader() const noexcept {
 	return _selectedUnitRenderData.top().availableTileShader;
 }
 
-void awe::map::renderUnitAtDestination(const bool flag) noexcept {
-	_selectedUnitRenderData.top().renderUnitAtDestination = flag;
-}
-
 CScriptArray* awe::map::getClosedList() noexcept {
 	return _selectedUnitRenderData.top().closedList;
+}
+
+void awe::map::disableSelectedUnitRenderingEffects(const bool val) noexcept {
+	_selectedUnitRenderData.top().disableRenderingEffects = val;
 }
 
 void awe::map::regenerateClosedListSprites() noexcept {
@@ -1704,6 +1721,34 @@ void awe::map::regenerateClosedListSprites() noexcept {
 			}
 		}
 	}
+}
+
+void awe::map::addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos)
+	noexcept {
+	if (!_isUnitPresent(unit)) {
+		_logger.error("addPreviewUnit operation failed: unit with ID {} does not "
+			"exist.", unit);
+		return;
+	}
+	if (_isOutOfBounds(pos)) {
+		_logger.error("addPreviewUnit operation failed: tile {} is out of bounds.",
+			pos);
+		return;
+	}
+	_unitLocationOverrides[unit] = pos;
+}
+
+void awe::map::removePreviewUnit(const awe::UnitID unit) noexcept {
+	if (_unitLocationOverrides.find(unit) == _unitLocationOverrides.end()) {
+		_logger.error("removePreviewUnit operation failed: unit with ID {} did "
+			"not have a position override at the time of calling.", unit);
+	} else {
+		_unitLocationOverrides.erase(unit);
+	}
+}
+
+void awe::map::removeAllPreviewUnits() noexcept {
+	_unitLocationOverrides.clear();
 }
 
 void awe::map::setSelectedTile(const sf::Vector2u& pos) noexcept {
@@ -1921,6 +1966,12 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 		mapCenterOffset.x = _mapOffset.x / _mapScalingFactor / (float)scaling;
 	if (mapCenterOffset.y < 0.0f)
 		mapCenterOffset.y = _mapOffset.y / _mapScalingFactor / (float)scaling;
+
+	// Create map of tiles -> units from _unitLocationOverrides.
+	std::unordered_map<sf::Vector2u, awe::UnitID> unitLocationOverrides;
+	for (auto pair : _unitLocationOverrides) {
+		unitLocationOverrides[pair.second] = pair.first;
+	}
 	// Step 1. the tiles.
 	// Also update the position of the cursor here!
 	float tiley = 0.0;
@@ -1957,33 +2008,25 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
 				tile.setPixelPosition(tilex + mapCenterOffset.x, tiley -
 					(float)(tileHeight - tile.MIN_HEIGHT) + mapCenterOffset.y);
-				if (!_selectedUnitRenderData.top().renderUnitAtDestination) {
-					if (tile.getUnit()) {
-						_units.at(tile.getUnit()).setPixelPosition(
-							tilex + mapCenterOffset.x, tiley + mapCenterOffset.y
-						);
-					}
-				} else if (_selectedUnitRenderData.top().renderUnitAtDestination) {
-					if (tile.getUnit()) {
-						if (tile.getUnit() !=
-							_selectedUnitRenderData.top().selectedUnit) {
-							_units.at(tile.getUnit()).setPixelPosition(
-								tilex + mapCenterOffset.x,
-								tiley + mapCenterOffset.y
-							);
-						}
-					}
-					if (sf::Vector2u(x, y) == ((awe::closed_list_node*)
-						_selectedUnitRenderData.top().closedList->At(
-							_selectedUnitRenderData.top().closedList->GetSize()-1))
-							->tile) {
-						_units.at(_selectedUnitRenderData.top().selectedUnit).
-							setPixelPosition(
-							tilex + mapCenterOffset.x,
-							tiley + mapCenterOffset.y
-						);
-					}
+
+				// Update the tile's unit's pixel position accordingly, if it
+				// doesn't have an override.
+				const auto tilesUnit = tile.getUnit();
+				if (tilesUnit && _unitLocationOverrides.find(tilesUnit) ==
+					_unitLocationOverrides.end()) {
+					_units.at(tilesUnit).setPixelPosition(
+						tilex + mapCenterOffset.x, tiley + mapCenterOffset.y
+					);
 				}
+
+				// Check if this tile has a unit's location overridded onto it.
+				if (unitLocationOverrides.find(tilePos) !=
+					unitLocationOverrides.end()) {
+					_units.at(unitLocationOverrides[tilePos]).setPixelPosition(
+						tilex + mapCenterOffset.x, tiley + mapCenterOffset.y
+					);
+				}
+
 				// Update cursor position.
 				if (getSelectedTile() == tilePos) {
 					_cursor.setPosition(
@@ -2032,7 +2075,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			if (_selectedUnitRenderData.top().selectedUnit > 0 &&
-				!_selectedUnitRenderData.top().renderUnitAtDestination) {
+				!_selectedUnitRenderData.top().disableRenderingEffects) {
 				sf::Vector2u currentTile(x, y);
 				sf::RenderStates tileStates = mapStates;
 				if (_selectedUnitRenderData.top().availableTiles.find(currentTile)
@@ -2057,7 +2100,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	}
 	// Step 2. the selected unit closed list tiles.
 	if (_selectedUnitRenderData.top().selectedUnit > 0 &&
-		!_selectedUnitRenderData.top().renderUnitAtDestination) {
+		!_selectedUnitRenderData.top().disableRenderingEffects) {
 		for (asUINT i = 0, size = _selectedUnitRenderData.top().closedList->
 			GetSize(); i < size; ++i) {
 			target.draw(((awe::closed_list_node*)
@@ -2077,7 +2120,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 				sf::RenderStates unitStates = mapStates;
 				unitStates.shader = &_unavailableTileShader;
 				if (_selectedUnitRenderData.top().selectedUnit > 0 &&
-					!_selectedUnitRenderData.top().renderUnitAtDestination &&
+					!_selectedUnitRenderData.top().disableRenderingEffects &&
 					unit != _selectedUnitRenderData.top().selectedUnit) {
 					target.draw(_units.at(unit), unitStates);
 				} else {
@@ -2491,7 +2534,7 @@ awe::map::selected_unit_render_data::selected_unit_render_data(
 	availableTileShader = std::move(o.availableTileShader);
 	closedList = std::move(o.closedList);
 	if (closedList) closedList->AddRef();
-	renderUnitAtDestination = std::move(o.renderUnitAtDestination);
+	disableRenderingEffects = std::move(o.disableRenderingEffects);
 }
 
 awe::map::selected_unit_render_data::~selected_unit_render_data() noexcept {
@@ -2506,7 +2549,7 @@ awe::map::selected_unit_render_data&
 	availableTileShader = o.availableTileShader;
 	closedList = o.closedList;
 	if (closedList) closedList->AddRef();
-	renderUnitAtDestination = o.renderUnitAtDestination;
+	disableRenderingEffects = o.disableRenderingEffects;
 	return *this;
 }
 
@@ -2515,7 +2558,7 @@ void awe::map::selected_unit_render_data::clearState() noexcept {
 	availableTiles.clear();
 	availableTileShader = awe::available_tile_shader::None;
 	closedList->RemoveRange(0, closedList->GetSize());
-	renderUnitAtDestination = false;
+	disableRenderingEffects = false;
 }
 
 void awe::map::_initShaders() noexcept {

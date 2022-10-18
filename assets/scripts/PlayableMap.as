@@ -352,6 +352,7 @@ class PlayableMap {
 
 	/**
 	 * Selects a unit for movement mode.
+	 * Also clears every unit location override.
 	 * @param unit The ID of the unit to put into move mode. \c 0 should be given
 	 *             if the currently selected unit is to be deselected.
 	 */
@@ -360,7 +361,8 @@ class PlayableMap {
 		if (unit > 0) {
 			map.setAvailableTileShader(AvailableTileShader::Yellow);
 			_newClosedListNode(map.closedList, -1, map.getUnitPosition(unit), 0);
-			map.renderUnitAtDestination(false);
+			map.disableSelectedUnitRenderingEffects(false);
+			map.removeAllPreviewUnits();
 
 			// Filter the available tiles down based on the unit's movement type,
 			// movement points, and fuel.

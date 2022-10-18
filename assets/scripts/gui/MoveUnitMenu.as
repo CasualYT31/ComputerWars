@@ -19,7 +19,9 @@ void MoveUnitMenuHandleInput(const dictionary controls) {
 		if (otherUnit == 0 || otherUnit == game.map.getSelectedUnit() ||
 			game.canJoin(otherUnit, game.map.getSelectedUnit()) ||
 			game.canLoad(game.map.getSelectedUnit(), otherUnit)) {
-			game.map.renderUnitAtDestination(true);
+			game.map.disableSelectedUnitRenderingEffects(true);
+			game.map.addPreviewUnit(game.map.getSelectedUnit(),
+				game.map.getSelectedTile());
 			setGUI("PreviewMoveUnitMenu");
 			return;
 		}

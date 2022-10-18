@@ -76,7 +76,8 @@ void PreviewMoveUnitMenuClose() {
  */
 void PreviewMoveUnitMenuHandleInput(const dictionary controls) {
 	if (bool(controls["back"])) {
-		game.map.renderUnitAtDestination(false);
+		game.map.disableSelectedUnitRenderingEffects(false);
+		game.map.removePreviewUnit(game.map.getSelectedUnit());
 		setGUI("MoveUnitMenu");
 		return;
 	}

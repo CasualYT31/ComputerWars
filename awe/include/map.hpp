@@ -1032,15 +1032,6 @@ namespace awe {
 		awe::available_tile_shader getAvailableTileShader() const noexcept;
 
 		/**
-		 * Sets whether the selected unit should be rendered at the final tile in
-		 * the closed list or not.
-		 * @param flag \c TRUE if the unit should be rendered at the final tile in
-		 *             the closed list, \c FALSE if it should be rendered at its
-		 *             real location.
-		 */
-		void renderUnitAtDestination(const bool flag) noexcept;
-
-		/**
 		 * Returns a pointer to the closed list.
 		 * The returned array has elements of type \c awe::closed_list_node.
 		 * @return Pointer to the \c CScriptArray holding the closed list.
@@ -1049,10 +1040,58 @@ namespace awe {
 		CScriptArray* getClosedList() noexcept;
 
 		/**
+		 * Disables rendering effects for a selected unit without deselecting the
+		 * unit.
+		 * Note that this does not include unit location overrides!
+		 * @param val \c TRUE if the rendering effects for selected units are to be
+		 *            disabled, \c FALSE if they are to be enabled.
+		 */
+		void disableSelectedUnitRenderingEffects(const bool val) noexcept;
+
+		/**
 		 * Iterates through the closed list in its current state and updates each
 		 * node's animated sprite based on the stored path.
 		 */
 		void regenerateClosedListSprites() noexcept;
+
+		/**
+		 * Add a unit location override.
+		 * When the given unit is rendered, it will be rendered at the tile \c pos
+		 * instead of its real location.\n
+		 * If the location is out of range, an error will be logged and the mapping
+		 * won't be added. If the unit ID is out of range, the same thing will
+		 * occur.\n
+		 * If there is already an override for the given unit, the previous
+		 * override will be replaced only if the new override is valid.
+		 * @param unit The ID of the unit to provide an override for.
+		 * @param pos  The tile to render the unit at.
+		 */
+		void addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos)
+			noexcept;
+
+		/**
+		 * Removes a unit location override.
+		 * If a mapping for the given unit does not exist, an error will be logged
+		 * and the state of the map will not change.
+		 * @param unit ID of the unit to remove the location override for.
+		 */
+		void removePreviewUnit(const awe::UnitID unit) noexcept;
+
+		/**
+		 * Removes all unit location overrides.
+		 */
+		void removeAllPreviewUnits() noexcept;
+
+		/**
+		 * Finds out if a unit has a location override.
+		 * @param  unit ID of the unit to query.
+		 * @return \c TRUE if a unit has a mapping that was previously given,
+		 *         \c FALSE otherwise.
+		 */
+		inline bool isPreviewUnit(const awe::UnitID unit) const noexcept {
+			return _unitLocationOverrides.find(unit) !=
+				_unitLocationOverrides.end();
+		}
 
 		////////////////////////
 		// DRAWING OPERATIONS //
@@ -1509,10 +1548,10 @@ namespace awe {
 			CScriptArray* closedList = nullptr;
 
 			/**
-			 * Tells \c map to render the unit to the tile at the back of the
-			 * closed list instead of its actual location.
+			 * Used to temporarily disable rendering effects without deselecting
+			 * the unit.
 			 */
-			bool renderUnitAtDestination = false;
+			bool disableRenderingEffects = false;
 
 			/**
 			 * Clears the state of the object.
@@ -1524,6 +1563,12 @@ namespace awe {
 		 * Stores selected unit render data.
 		 */
 		std::stack<awe::map::selected_unit_render_data> _selectedUnitRenderData;
+
+		/**
+		 * Tells \c map to render given units at a different location than
+		 * their real location.
+		 */
+		std::unordered_map<awe::UnitID, sf::Vector2u> _unitLocationOverrides;
 
 		/**
 		 * The currently selected tile.
