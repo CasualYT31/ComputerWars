@@ -40,6 +40,9 @@ void PreviewMoveUnitMenuOpen() {
 				game.map.getArmyOfUnit(unit))) {
 			PreviewCommands.addCommand("Supply", "supply", "replenishicon");
 		}
+		if (game.canUnload(unit, tile)) {
+			PreviewCommands.addCommand("Unload", "unload", "unloadicon");
+		}
 		PreviewCommands.addCommand("Wait", "wait", "waiticon");
 	}
 

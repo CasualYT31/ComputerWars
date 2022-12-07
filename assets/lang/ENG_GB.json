@@ -13,6 +13,7 @@
 	"back": "Back",
 	"supply": "Supply",
 	"load": "Load",
+	"unload": "Unload",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

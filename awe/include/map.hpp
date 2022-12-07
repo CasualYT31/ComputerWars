@@ -932,19 +932,28 @@ namespace awe {
 
 		/**
 		 * Finds the shortest path from the origin to the destination.
-		 * @param  origin     The origin tile.
-		 * @param  dest       The intended destination.
-		 * @param  moveType   The movement type used for traversal calculations.
-		 * @param  movePoints The movement points available.
-		 * @param  fuel       The units of fuel that we have to work with.
-		 * @param  team       The team the moving unit is on.
+		 * If \c nullptr is given for a pointer parameter, their respective check
+		 * will be ignored. For example, if \c fuel is \c nullptr, it can be
+		 * assumed that there are an infinite number of units of fuel available. Or
+		 * if \c team is \c nullptr, then any occupied tile will be considered
+		 * impassable, even if the tile is occupied by a unit on the same team.
+		 * @param  origin       The origin tile.
+		 * @param  dest         The intended destination.
+		 * @param  moveType     The movement type used for traversal calculations.
+		 * @param  movePoints   Pointer to the movement points available.
+		 * @param  fuel         Pointer to the units of fuel that we have to work
+		 *                      with.
+		 * @param  team         Pointer to the team the moving unit is on.
+		 * @param  ignoredUnits A set of units that can be moved through,
+		 *                      regardless of team.
 		 * @return The shortest path, if a path could be found. An empty vector if
 		 *         no path could be found.
 		 */
 		std::vector<awe::closed_list_node> findPath(const sf::Vector2u& origin,
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
-			const unsigned int movePoints, const awe::Fuel fuel,
-			const awe::TeamID team) const noexcept;
+			const unsigned int* const movePoints, const awe::Fuel* const fuel,
+			const awe::TeamID* const team,
+			const std::unordered_set<awe::UnitID>& ignoredUnits) const noexcept;
 
 		/**
 		 * Version of \c findPath() which converts the result into a
@@ -954,7 +963,16 @@ namespace awe {
 		CScriptArray* findPathAsArray(const sf::Vector2u& origin,
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
 			const unsigned int movePoints, const awe::Fuel fuel,
-			const awe::TeamID team) const noexcept;
+			const awe::TeamID team, CScriptArray* ignoredUnits) const noexcept;
+
+		/**
+		 * Version of \c findPath() which passes in \c nullptr where possible, and
+		 * converts the result into a \c CScriptArray.
+		 * @sa @c findPath().
+		 */
+		CScriptArray* findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
+			const sf::Vector2u& dest, const awe::movement_type& moveType,
+			CScriptArray* ignoredUnits) const noexcept;
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //

@@ -202,6 +202,10 @@
 			"frames": [ [ 98, 107, 13, 14 ] ],
 			"durations": [ 0 ]
 		},
+		"unloadicon": {
+			"frames": [ [ 98, 121, 13, 14 ] ],
+			"durations": [ 0 ]
+		},
 		"infmove": {
 			"frames": [ [ 0, 48, 32, 15 ] ],
 			"durations": [ 0 ]

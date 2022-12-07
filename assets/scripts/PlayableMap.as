@@ -625,6 +625,43 @@ class PlayableMap {
 		}
 	}
 
+	/**
+	 * Checks if a given unit can unload any of its units from a given tile.
+	 * @param  unit ID of the unit who will unload.
+	 * @param  from The tile from which the given unit will unload.
+	 * @return \c TRUE if at least one unload can be carried out, \c FALSE
+	 *         otherwise.
+	 */
+	bool canUnload(const UnitID unit, const Vector2&in from) const {
+		/* Conditions:
+		1. The unit ID must not be 0.
+		2. The unit must have at least one unit loaded onto it.
+		3. `from` must be vacant, unless the unit occupying the tile is the same
+		   as `unit`.
+		4. At least one of the loaded units must be able to move to at least one
+		   of the tiles adjacent to `from`.
+		*/
+		if (unit == 0) return false;
+		const auto loadedUnits = map.getLoadedUnits(unit);
+		const auto loadedUnitsLength = loadedUnits.length();
+		if (loadedUnitsLength == 0 ||
+			(map.getUnitOnTile(from) != unit && map.getUnitOnTile(from) != 0))
+			return false;
+		const auto adjacentTiles = map.getAvailableTiles(from, 1, 1);
+		for (uint i = 0; i < loadedUnitsLength; ++i) {
+			const auto unitID = loadedUnits[i];
+			const auto movementType = map.getUnitType(unitID).movementType;
+			const auto unitTeam = map.getTeamOfUnit(unitID);
+			for (uint j = 0, len = adjacentTiles.length(); j < len; ++j) {
+				if (map.findPathForUnloadUnit(from, adjacentTiles[j],
+					movementType, { unit }).length() > 0) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	/////////
 	// MAP //
 	/////////

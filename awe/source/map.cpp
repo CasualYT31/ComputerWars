@@ -376,8 +376,14 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPath(const Vector2&in origin, const Vector2&in dest, "
 			"const Movement&in moveType, const uint movePoints, const Fuel fuel, "
-			"const TeamID team) const",
+			"const TeamID team, array<UnitID>@ = null) const",
 			asMETHOD(awe::map, findPathAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
+			"findPathForUnloadUnit(const Vector2&in origin, "
+			"const Vector2&in dest, const Movement&in moveType, "
+			"array<UnitID>@ = null) const",
+			asMETHOD(awe::map, findPathAsArrayUnloadUnit), asCALL_THISCALL);
 
 		////////////////////////
 		// DRAWING OPERATIONS //
@@ -1493,8 +1499,9 @@ CScriptArray* awe::map::getAvailableTilesAsArray(
 
 std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
-	const unsigned int movePoints, const awe::Fuel fuel, const awe::TeamID team)
-	const noexcept {
+	const unsigned int* const movePoints, const awe::Fuel* const fuel,
+	const awe::TeamID* const team,
+	const std::unordered_set<awe::UnitID>& ignoredUnits) const noexcept {
 	// openSet could be a min-heap or priority queue for added efficiency.
 	std::unordered_set<sf::Vector2u> openSet = { origin };
 	std::unordered_map<sf::Vector2u, sf::Vector2u> cameFrom;
@@ -1539,13 +1546,17 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 			// If:
 			// 1. The unit does not have enough fuel.
 			// 2. The unit has ran out of movement points.
-			// 3. The tile has a unit belonging to an opposing team.
+			// 3. The tile has a unit belonging to an opposing team that isn't
+			//    ignored.
 			// then it cannot traverse the tile, so don't add it to the open set.
 			const auto unitOnAdjacentTile = getUnitOnTile(adjacentTile);
-			if (tentativeGScore <= fuel &&
-				(unsigned int)tentativeGScore <= movePoints &&
+			if ((fuel == nullptr || tentativeGScore <= *fuel) &&
+				(movePoints == nullptr ||
+					(unsigned int)tentativeGScore <= *movePoints) &&
 				(unitOnAdjacentTile == 0 || (unitOnAdjacentTile != 0 &&
-					getTeamOfUnit(unitOnAdjacentTile) == team))) {
+					ignoredUnits.find(unitOnAdjacentTile) != ignoredUnits.end()) ||
+					(unitOnAdjacentTile != 0 && team != nullptr &&
+					getTeamOfUnit(unitOnAdjacentTile) == *team))) {
 				if (gScore.find(adjacentTile) == gScore.end() ||
 					tentativeGScore < gScore[adjacentTile]) {
 					cameFrom[adjacentTile] = currentTile;
@@ -1563,11 +1574,44 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 	return {};
 }
 
+/**
+ * Converts a \c CScriptArray into an unordered set of unit IDs.
+ * @warning This function will release the array if the pointer is not \c nullptr!
+ * @param   ignoredUnits Pointer to the array.
+ * @return  The set. Empty if \c ignoredUnits is \c nullptr.
+ */
+static std::unordered_set<awe::UnitID> convertCScriptArrayIntoSet(
+	CScriptArray* ignoredUnits) noexcept {
+	std::unordered_set<awe::UnitID> ret;
+	if (ignoredUnits) {
+		for (asUINT i = 0; i < ignoredUnits->GetSize(); ++i) {
+			ret.insert(*(awe::UnitID*)ignoredUnits->At(i));
+		}
+		ignoredUnits->Release();
+	}
+	return ret;
+}
+
 CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const unsigned int movePoints, const awe::Fuel fuel,
-	const awe::TeamID team) const noexcept {
-	const auto vec = findPath(origin, dest, moveType, movePoints, fuel, team);
+	const awe::TeamID team, CScriptArray* ignoredUnits) const noexcept {
+	const auto vec = findPath(origin, dest, moveType, &movePoints, &fuel, &team,
+		convertCScriptArrayIntoSet(ignoredUnits));
+	CScriptArray* ret = _scripts->createArray("ClosedListNode");
+	for (auto& node : vec) {
+		ret->InsertLast(&awe::closed_list_node());
+		((awe::closed_list_node*)ret->At(ret->GetSize() - 1))->tile = node.tile;
+		((awe::closed_list_node*)ret->At(ret->GetSize() - 1))->g = node.g;
+	}
+	return ret;
+}
+
+CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
+	const sf::Vector2u& dest, const awe::movement_type& moveType,
+	CScriptArray* ignoredUnits) const noexcept {
+	const auto vec = findPath(origin, dest, moveType, nullptr, nullptr, nullptr,
+		convertCScriptArrayIntoSet(ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
 	for (auto& node : vec) {
 		ret->InsertLast(&awe::closed_list_node());
