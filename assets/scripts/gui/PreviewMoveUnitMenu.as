@@ -103,8 +103,6 @@ void PreviewMoveUnitMenu_Join_Pressed() {
 		game.map.getSelectedUnit(),
 		game.map.closedList[game.map.closedList.length() - 1].g
 	);
-	// Deselect the unit or else the game will crash, since we just deleted it!
-	game.selectUnit(0);
 	setGUI("Map");
 }
 
@@ -136,8 +134,6 @@ void PreviewMoveUnitMenu_Load_Pressed() {
 		game.map.getUnitOnTile(game.map.getSelectedTile()),
 		game.map.closedList[game.map.closedList.length() - 1].g
 	);
-	// Deselect the unit!
-	game.selectUnit(0);
 	setGUI("Map");
 }
 

@@ -625,7 +625,7 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 				unitsToDelete.push_back(itr.first);
 		}
 		// I decided to separate out identification and deletion because I wasn't
-		// (and still aren't) sure if deleting elements will invalidate iterators.
+		// (and still am not) sure if deleting elements will invalidate iterators.
 		for (auto& itr : unitsToDelete) {
 			deleteUnit(itr);
 		}
@@ -1050,7 +1050,7 @@ void awe::map::deleteUnit(const awe::UnitID id) noexcept {
 	// Firstly, remove the unit from the tile, if it was on a tile.
 	// We don't need to check if the unit "is actually on the map or not," since
 	// the tile will always hold the index to the unit in either case: which is why
-	// we need the "actually" check to begin with
+	// we need the "actually" check to begin with.
 	if (!_isOutOfBounds(_units.at(id).getPosition()))
 		_tiles[_units.at(id).getPosition().x]
 		      [_units.at(id).getPosition().y].setUnit(0);
@@ -1066,6 +1066,12 @@ void awe::map::deleteUnit(const awe::UnitID id) noexcept {
 	for (awe::UnitID unit : loaded) {
 		deleteUnit(unit);
 	}
+	// Fourthly, if this unit was selected, deselect it if it's on top of the
+	// stack. If it is further down the stack, then it will have to be removed
+	// later: see popSelectedUnit().
+	if (getSelectedUnit() == id) setSelectedUnit(0);
+	// Fifthly, if this unit has a location override, remove it from the map.
+	if (isPreviewUnit(id)) removePreviewUnit(id);
 	// Finally, delete the unit from the main list.
 	_units.erase(id);
 }
@@ -1693,6 +1699,15 @@ bool awe::map::pushSelectedUnit(const awe::UnitID unit) noexcept {
 void awe::map::popSelectedUnit() noexcept {
 	if (_selectedUnitRenderData.size() > 1) {
 		_selectedUnitRenderData.pop();
+		// At some point, the previously selected unit might have been deleted, and
+		// if this is the case, we need to deselect it.
+		if (!_isUnitPresent(_selectedUnitRenderData.top().selectedUnit)) {
+			_logger.warning("popSelectUnit operation: newly selected unit with ID "
+				"{} is now no longer present: the selected unit render data state "
+				"will now be cleared!",
+				_selectedUnitRenderData.top().selectedUnit);
+			setSelectedUnit(0);
+		}
 	} else {
 		_logger.error("popSelectUnit operation failed: the size of the stack was "
 			"{}, which is too low!", _selectedUnitRenderData.size());

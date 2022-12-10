@@ -619,8 +619,11 @@ namespace awe {
 		/**
 		 * Deletes a unit.
 		 * A deleted unit will be removed from the map's and owning army's list, as
-		 * well as the tile it was on.
-		 * @warning Any loaded units will \b also be deleted.
+		 * well as the tile it was on. Any location override associated with the
+		 * unit will also be deleted.
+		 * @warning Any loaded units will \b also be deleted. Additionally, if the
+		 *          deleted unit was selected, then \c setSelectedUnit(0) will be
+		 *          called!
 		 * @param   id The ID of the unit to delete.
 		 */
 		void deleteUnit(const awe::UnitID id) noexcept;
@@ -1026,6 +1029,9 @@ namespace awe {
 		 * stack.
 		 * @warning This is \em not used to deselect the current unit! To do that,
 		 *          call <tt>setSelectedUnit(0)</tt>.
+		 * @warning If the newly selected unit is no longer present after the pop,
+		 *          then \c setSelectedUnit(0) will be called and a warning will be
+		 *          logged.
 		 */
 		void popSelectedUnit() noexcept;
 
