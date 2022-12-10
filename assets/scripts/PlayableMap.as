@@ -640,8 +640,10 @@ class PlayableMap {
 		   as `unit`.
 		4. At least one of the loaded units must be able to move to at least one
 		   of the tiles adjacent to `from`.
+		5. `unit` cannot itself be loaded onto another unit.
 		*/
 		if (unit == 0) return false;
+		if (map.getUnitWhichContainsUnit(unit) != 0) return false;
 		const auto loadedUnits = map.getLoadedUnits(unit);
 		const auto loadedUnitsLength = loadedUnits.length();
 		if (loadedUnitsLength == 0 ||
@@ -658,6 +660,50 @@ class PlayableMap {
 					return true;
 				}
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if a given unit, that is loaded on another unit, can be unloaded
+	 * onto at least one of the given tiles.
+	 * @param  fromUnit      ID of the unit who will unload.
+	 * @param  fromTile      The tile from which the given unit will unload.
+	 * @param  unloadingUnit ID of the unit that is being unloaded.
+	 * @param  toTile        The tiles to attempt to unload the unit to (no unload
+	 *                       will actually be attempted).
+	 * @return \c TRUE if the unload operation can be carried out, \c FALSE
+	 *         otherwise. If \c toTile is \c NULL, then this method will return
+	 *         \c TRUE if \c unloadingUnit can unload to any of the tiles
+	 *         adjacent to \c fromTile.
+	 */
+	bool canUnload(const UnitID fromUnit, const Vector2&in fromTile,
+		const UnitID unloadingUnit, const array<Vector2>&in toTiles) const {
+		// NEEDS TO BE ABLE TO COUNT UNLOADS IN PROGRESS AS OCCUPIED TILES!
+		/* Conditions:
+		1. The unit IDs must not be 0.
+		2. `unloadingUnit` must be loaded onto `fromUnit`.
+		3. None of `toTiles` can be equal to `fromTile`.
+		4. `fromTile` and `toTiles` must all be vacant, unless any tile is
+		   occupied by `fromUnit`.
+		5. `unloadingUnit` must be able to move to a `toTile` from `fromTile`
+		   (remembering to ignore `fromUnit`).
+		6. `fromUnit` cannot itself be loaded onto another unit.
+		7. `toTiles` cannot be empty.
+		*/
+		if (fromUnit == 0 || unloadingUnit == 0) return false;
+		if (toTiles.length() == 0) return false;
+		if (map.getUnitWhichContainsUnit(fromUnit) != 0) return false;
+		if (!map.isUnitLoadedOntoUnit(unloadingUnit, fromUnit)) return false;
+		const auto unitOnFromTile = map.getUnitOnTile(fromTile);
+		if (unitOnFromTile != 0 && unitOnFromTile != fromUnit) return false;
+		const auto unloadingUnitMoveType =
+			map.getUnitType(unloadingUnit).movementType;
+		const auto toTilesLength = toTiles.length();
+		for (uint i = 0; i < toTilesLength; ++i) {
+			const auto tile = toTiles[i];
+			if (tile != fromTile && map.findPathForUnloadUnit(fromTile, tile,
+				unloadingUnitMoveType, { fromUnit }).length() > 0) return true;
 		}
 		return false;
 	}

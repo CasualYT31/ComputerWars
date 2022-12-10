@@ -8,6 +8,7 @@
 		"MoveUnitMenu",
 		"PreviewMoveUnitMenu",
 		"DeleteUnitMenu",
-		"DevCommandMenu"
+		"DevCommandMenu",
+		"UnloadUnitsMenu"
 	]
 }

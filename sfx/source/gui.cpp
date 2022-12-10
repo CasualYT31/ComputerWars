@@ -1806,6 +1806,9 @@ void sfx::gui::_setWidgetBgColour(const std::string& name, const sf::Color& colo
 		if (type == "panel") {
 			auto panel = _findWidget<Panel>(name);
 			panel->getRenderer()->setBackgroundColor(colour);
+		} else if (type == "scrollablepanel") {
+			auto panel = _findWidget<ScrollablePanel>(name);
+			panel->getRenderer()->setBackgroundColor(colour);
 		} else {
 			_logger.error("Attempted to set the background colour \"{}\" to "
 				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "

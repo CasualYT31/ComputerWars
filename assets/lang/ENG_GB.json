@@ -14,6 +14,8 @@
 	"supply": "Supply",
 	"load": "Load",
 	"unload": "Unload",
+	"proceedwithunload": "Proceed with Unload",
+	"cancelunload": "Cancel Unload",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

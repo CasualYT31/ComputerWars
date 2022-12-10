@@ -321,6 +321,18 @@ void awe::map::Register(asIScriptEngine* engine,
 			"one.");
 
 		r = engine->RegisterObjectMethod("Map",
+			"UnitID getUnitWhichContainsUnit(const UnitID)",
+			asMETHOD(awe::map, getUnitWhichContainsUnit), asCALL_THISCALL);
+		document->DocumentObjectMethod(r, "Finds out the unit that a given unit "
+			"is loaded on, if any. Returns 0 otherwise.");
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isUnitLoadedOntoUnit(const UnitID, const UnitID)",
+			asMETHOD(awe::map, isUnitLoadedOntoUnit), asCALL_THISCALL);
+		document->DocumentObjectMethod(r, "Returns TRUE if the first unit is "
+			"loaded onto the second unit, FALSE otherwise.");
+
+		r = engine->RegisterObjectMethod("Map",
 			"ArmyID getArmyOfUnit(const UnitID) const",
 			asMETHOD(awe::map, getArmyOfUnit), asCALL_THISCALL);
 
@@ -1300,6 +1312,32 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 		_logger.error("unloadUnit operation failed: unit with ID {} was not "
 			"loaded onto unit with ID {}", unload, from);
 	}
+}
+
+awe::UnitID awe::map::getUnitWhichContainsUnit(const awe::UnitID unit) const
+	noexcept {
+	if (!_isUnitPresent(unit)) {
+		_logger.error("getUnitWhichContainsUnit operation failed: unit with ID {} "
+			"does not exist!", unit);
+		return 0;
+	}
+	return _units.at(unit).loadedOnto();
+}
+
+bool awe::map::isUnitLoadedOntoUnit(const awe::UnitID unit, const awe::UnitID on)
+	const noexcept {
+	if (!_isUnitPresent(unit)) {
+		_logger.error("isUnitLoadedOntoUnit operation failed: unit with ID {} "
+			"does not exist!", unit);
+		return 0;
+	}
+	if (!_isUnitPresent(on)) {
+		_logger.error("isUnitLoadedOntoUnit operation failed: unit with ID {} "
+			"does not exist!", on);
+		return 0;
+	}
+	const auto units = _units.at(on).loadedUnits();
+	return units.find(unit) != units.end();
 }
 
 awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {

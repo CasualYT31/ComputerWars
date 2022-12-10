@@ -140,3 +140,10 @@ void PreviewMoveUnitMenu_Load_Pressed() {
 	game.selectUnit(0);
 	setGUI("Map");
 }
+
+/**
+ * Allows the user to select units to unload.
+ */
+void PreviewMoveUnitMenu_Unload_Pressed() {
+	setGUI("UnloadUnitsMenu");
+}

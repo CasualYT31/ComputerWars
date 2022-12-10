@@ -786,6 +786,26 @@ namespace awe {
 			const sf::Vector2u& onto) noexcept;
 
 		/**
+		 * Gets the ID of the unit that a given unit is loaded on, if any.
+		 * If the given unit doesn't exist, then an error will be logged and \c 0
+		 * will be returned.
+		 * @param  unit The ID of the unit which should be loaded onto another.
+		 * @return If \c unit is loaded onto another unit, then the latter's ID
+		 *         will be returned. Otherwise, \c 0 will be returned.
+		 */
+		awe::UnitID getUnitWhichContainsUnit(const awe::UnitID unit) const
+			noexcept;
+
+		/**
+		 * Finds out if a unit is loaded onto another.
+		 * @param  unit The ID of the unit to test for.
+		 * @param  on   The ID of the unit which should have \c unit on it.
+		 * @return \c TRUE if \c unit is loaded onto \c on, \c FALSE otherwise.
+		 */
+		bool isUnitLoadedOntoUnit(const awe::UnitID unit, const awe::UnitID on)
+			const noexcept;
+
+		/**
 		 * Retrieves the ID of the army a specified unit belongs to.
 		 * <tt>awe::army::NO_ARMY</tt> will be returned if the unit doesn't exist.
 		 * @param  id The ID of the unit to inspect.
