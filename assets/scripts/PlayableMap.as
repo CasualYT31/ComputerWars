@@ -748,6 +748,14 @@ class PlayableMap {
 			typeName == "BATTLESHIP" || typeName == "CARRIER") {
 			map.burnUnitFuel(unit, 1);
 
+			if (typeName == "CARRIER" || typeName == "CRUISER") {
+				// Replenish the units that are loaded onto this one.
+				const auto loadedUnits = map.getLoadedUnits(unit);
+				const auto loadedUnitsLength = loadedUnits.length();
+				for (uint i = 0; i < loadedUnitsLength; ++i) {
+					replenishUnit(loadedUnits[i]);
+				}
+			}
 		}
 	}
 

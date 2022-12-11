@@ -458,7 +458,7 @@
 		"highrange": 1,
 		"canload": [ 13, 14 ],
 		"loadlimit": 2,
-		"turnstartpriority": 2000,
+		"turnstartpriority": 1500,
 		"cancapture": []
 	},
 	"SUB": {
@@ -521,7 +521,7 @@
 		"highrange": 8,
 		"canload": [ 13, 14, 15, 16, 17, 18 ],
 		"loadlimit": 2,
-		"turnstartpriority": 2000,
+		"turnstartpriority": 1500,
 		"cancapture": []
 	},
 	"OOZIUM": {
