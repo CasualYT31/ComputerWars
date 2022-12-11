@@ -29,21 +29,22 @@ void PreviewMoveUnitMenuOpen() {
 	if (game.canJoin(unitOnTile, unit)) {
 		PreviewCommands.addCommand("Join", "join", "joinicon");
 	} else {
-		if (game.canCapture(unit, tile)) {
-			PreviewCommands.addCommand("Capture", "capture", "captureicon");
-		}
 		if (game.canLoad(unit, unitOnTile)) {
 			PreviewCommands.addCommand("Load", "load", "loadicon");
+		} else {
+			if (game.canCapture(unit, tile)) {
+				PreviewCommands.addCommand("Capture", "capture", "captureicon");
+			}
+			if (game.map.getUnitType(unit).scriptName == "APC" &&
+				game.areThereDepletedArmyUnitsAdjacentTo(tile,
+					game.map.getArmyOfUnit(unit))) {
+				PreviewCommands.addCommand("Supply", "supply", "replenishicon");
+			}
+			if (game.canUnload(unit, tile)) {
+				PreviewCommands.addCommand("Unload", "unload", "unloadicon");
+			}
+			PreviewCommands.addCommand("Wait", "wait", "waiticon");
 		}
-		if (game.map.getUnitType(unit).scriptName == "APC" &&
-			game.areThereDepletedArmyUnitsAdjacentTo(tile,
-				game.map.getArmyOfUnit(unit))) {
-			PreviewCommands.addCommand("Supply", "supply", "replenishicon");
-		}
-		if (game.canUnload(unit, tile)) {
-			PreviewCommands.addCommand("Unload", "unload", "unloadicon");
-		}
-		PreviewCommands.addCommand("Wait", "wait", "waiticon");
 	}
 
 	// Position the command menu differently depending on the quadrant of the
@@ -134,6 +135,9 @@ void PreviewMoveUnitMenu_Load_Pressed() {
 		game.map.getUnitOnTile(game.map.getSelectedTile()),
 		game.map.closedList[game.map.closedList.length() - 1].g
 	);
+	// Deselect unit and remove unit previews!
+	game.selectUnit(0);
+	game.map.removeAllPreviewUnits();
 	setGUI("Map");
 }
 

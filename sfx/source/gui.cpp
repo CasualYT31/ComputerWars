@@ -428,6 +428,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Sets a widget's visibility. The name of "
 		"the widget is given, then if it should be visible or not.");
 
+	r = engine->RegisterGlobalFunction("bool getWidgetVisibility(const string&in)",
+		asMETHOD(sfx::gui, _getWidgetVisibility), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's visibility.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetText(const string&in, "
 		"const string&in, array<any>@ = null)",
 		asMETHOD(sfx::gui, _setWidgetText), asCALL_THISCALL_ASGLOBAL, this);
@@ -1569,6 +1573,19 @@ void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible)
 		_logger.error("Attempted to update widget \"{}\"'s visibility, within "
 			"menu \"{}\". This widget does not exist.", name, fullname[0]);
 	}
+}
+
+bool sfx::gui::_getWidgetVisibility(const std::string& name) const noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		return widget->isVisible();
+	} else {
+		_logger.error("Attempted to get the visibility property of a widget "
+			"\"{}\" within menu \"{}\". This widget does not exist.", name,
+			fullname[0]);
+	}
+	return false;
 }
 
 void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,

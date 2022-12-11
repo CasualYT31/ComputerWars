@@ -1063,6 +1063,13 @@ namespace awe {
 		bool isAvailableTile(const sf::Vector2u& tile) const noexcept;
 
 		/**
+		 * Removes all available tiles.
+		 */
+		inline void clearAvailableTiles() noexcept {
+			_selectedUnitRenderData.top().availableTiles.clear();
+		}
+
+		/**
 		 * Sets the shader to use for available tiles.
 		 * @param shader The shader to use.
 		 */
@@ -1107,8 +1114,11 @@ namespace awe {
 		 * occur.\n
 		 * If there is already an override for the given unit, the previous
 		 * override will be replaced only if the new override is valid.
-		 * @param unit The ID of the unit to provide an override for.
-		 * @param pos  The tile to render the unit at.
+		 * @warning If a unit is given a location override, it will be rendered
+		 *          even if the unit would otherwise not be, such as if it is
+		 *          loaded or hidden!
+		 * @param   unit The ID of the unit to provide an override for.
+		 * @param   pos  The tile to render the unit at.
 		 */
 		void addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos)
 			noexcept;
@@ -1124,7 +1134,9 @@ namespace awe {
 		/**
 		 * Removes all unit location overrides.
 		 */
-		void removeAllPreviewUnits() noexcept;
+		inline void removeAllPreviewUnits() noexcept {
+			_unitLocationOverrides.clear();
+		}
 
 		/**
 		 * Finds out if a unit has a location override.
@@ -1135,6 +1147,30 @@ namespace awe {
 		inline bool isPreviewUnit(const awe::UnitID unit) const noexcept {
 			return _unitLocationOverrides.find(unit) !=
 				_unitLocationOverrides.end();
+		}
+
+		/**
+		 * Finds out if a tile has a given unit on it via a location override.
+		 * @param  tile The tile to query.
+		 * @param  unit The ID of the unit that the given tile should be tested
+		 *              for.
+		 * @return \c TRUE if \c unit maps to \c tile, \c FALSE otherwise.
+		 */
+		inline bool tileHasPreviewUnit(const sf::Vector2u& tile,
+			const awe::UnitID unit) const noexcept {
+			return isPreviewUnit(unit) && _unitLocationOverrides.at(unit) == tile;
+		}
+
+		/**
+		 * Retrieves the location override assigned to a unit.
+		 * @param  unit The ID of the unit to search for.
+		 * @return The assigned location override, or the unit's real location if
+		 *         it has no location override.
+		 */
+		inline sf::Vector2u getUnitPreviewPosition(const awe::UnitID unit) const
+			noexcept {
+			return (isPreviewUnit(unit)) ? (_unitLocationOverrides.at(unit)) :
+				(getUnitPosition(unit));
 		}
 
 		////////////////////////
@@ -1554,8 +1590,6 @@ namespace awe {
 			/**
 			 * Releases the reference to the closed list \c CScriptArray, if it has
 			 * been allocated.
-			 * @warning May need to implement proper copy and move constructors
-			 *          that increment the reference counter in the future!
 			 */
 			~selected_unit_render_data() noexcept;
 

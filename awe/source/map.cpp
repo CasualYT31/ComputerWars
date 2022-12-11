@@ -464,7 +464,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, pushSelectedUnit), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void popSelectedUnit(const UnitID)",
+			"void popSelectedUnit()",
 			asMETHOD(awe::map, popSelectedUnit), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
@@ -478,6 +478,10 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"bool isAvailableTile(const Vector2&in) const",
 			asMETHOD(awe::map, isAvailableTile), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void clearAvailableTiles()",
+			asMETHOD(awe::map, clearAvailableTiles), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"void setAvailableTileShader(const AvailableTileShader)",
@@ -515,6 +519,14 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"bool isPreviewUnit(const UnitID) const",
 			asMETHOD(awe::map, isPreviewUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool tileHasPreviewUnit(const Vector2&in, const UnitID) const",
+			asMETHOD(awe::map, tileHasPreviewUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"Vector2 getUnitPreviewPosition(const UnitID) const",
+			asMETHOD(awe::map, getUnitPreviewPosition), asCALL_THISCALL);
 	}
 }
 
@@ -1672,13 +1684,13 @@ bool awe::map::setSelectedUnit(const awe::UnitID unit) noexcept {
 		return true;
 	}
 	if (_isUnitPresent(unit)) {
-		if (_units.at(unit).isOnMap()) {
+		// if (_units.at(unit).isOnMap()) {
 			_selectedUnitRenderData.top().selectedUnit = unit;
 			return true;
-		} else {
-			_logger.error("setSelectedUnit operation failed: cannot select unit "
-				"with ID {} as it is not on the map.", unit);
-		}
+		// } else {
+		//	_logger.error("setSelectedUnit operation failed: cannot select unit "
+		//		"with ID {} as it is not on the map.", unit);
+		// }
 	} else {
 		_logger.error("setSelectedUnit operation failed: unit with ID {} doesn't "
 			"exist!", unit);
@@ -1842,10 +1854,6 @@ void awe::map::removePreviewUnit(const awe::UnitID unit) noexcept {
 	} else {
 		_unitLocationOverrides.erase(unit);
 	}
-}
-
-void awe::map::removeAllPreviewUnits() noexcept {
-	_unitLocationOverrides.clear();
 }
 
 void awe::map::setSelectedTile(const sf::Vector2u& pos) noexcept {
@@ -2206,26 +2214,25 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		}
 	}
 	// Step 3. the units.
-	// Loop through all visible tiles only, and retrieve their units, instead of
-	// looping through all units. Unfortunately they have to be looped through
-	// separately to prevent tiles taller than the minimum height from drawing over
-	// units.
-	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
-		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
-			const awe::UnitID unit = _tiles[x][y].getUnit();
-			if (unit > 0 && isUnitOnMap(unit)) {
-				sf::RenderStates unitStates = mapStates;
-				unitStates.shader = &_unavailableTileShader;
-				if (_selectedUnitRenderData.top().selectedUnit > 0 &&
-					!_selectedUnitRenderData.top().disableRenderingEffects &&
-					unit != _selectedUnitRenderData.top().selectedUnit) {
-					target.draw(_units.at(unit), unitStates);
+	// Unfortunately units have to be looped through separately to prevent tiles
+	// taller than the minimum height from drawing over units. If a unit has a
+	// location override, then render it, even if it isn't on the map according to
+	// `isUnitOnMap()`.
+	for (const auto unitsPair : _units) {
+		const awe::UnitID unitID = unitsPair.first;
+		if (unitID > 0 && (isUnitOnMap(unitID) ||
+			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end())) {
+			sf::RenderStates unitStates = mapStates;
+			unitStates.shader = &_unavailableTileShader;
+			if (_selectedUnitRenderData.top().selectedUnit > 0 &&
+				!_selectedUnitRenderData.top().disableRenderingEffects &&
+				unitID != _selectedUnitRenderData.top().selectedUnit) {
+				target.draw(_units.at(unitID), unitStates);
+			} else {
+				if (isUnitWaiting(unitID)) {
+					target.draw(_units.at(unitID), unitStates);
 				} else {
-					if (isUnitWaiting(unit)) {
-						target.draw(_units.at(unit), unitStates);
-					} else {
-						target.draw(_units.at(unit), mapStates);
-					}
+					target.draw(_units.at(unitID), mapStates);
 				}
 			}
 		}

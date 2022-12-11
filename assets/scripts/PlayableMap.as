@@ -352,7 +352,6 @@ class PlayableMap {
 
 	/**
 	 * Selects a unit for movement mode.
-	 * Also clears every unit location override.
 	 * @param unit The ID of the unit to put into move mode. \c 0 should be given
 	 *             if the currently selected unit is to be deselected.
 	 */
@@ -360,9 +359,8 @@ class PlayableMap {
 		map.setSelectedUnit(unit);
 		if (unit > 0) {
 			map.setAvailableTileShader(AvailableTileShader::Yellow);
-			_newClosedListNode(map.closedList, -1, map.getUnitPosition(unit), 0);
+			newClosedListNode(map.closedList, -1, map.getUnitPosition(unit), 0);
 			map.disableSelectedUnitRenderingEffects(false);
-			map.removeAllPreviewUnits();
 
 			// Filter the available tiles down based on the unit's movement type,
 			// movement points, and fuel.
@@ -667,19 +665,19 @@ class PlayableMap {
 	/**
 	 * Checks if a given unit, that is loaded on another unit, can be unloaded
 	 * onto at least one of the given tiles.
-	 * @param  fromUnit      ID of the unit who will unload.
-	 * @param  fromTile      The tile from which the given unit will unload.
-	 * @param  unloadingUnit ID of the unit that is being unloaded.
-	 * @param  toTile        The tiles to attempt to unload the unit to (no unload
-	 *                       will actually be attempted).
-	 * @return \c TRUE if the unload operation can be carried out, \c FALSE
-	 *         otherwise. If \c toTile is \c NULL, then this method will return
-	 *         \c TRUE if \c unloadingUnit can unload to any of the tiles
-	 *         adjacent to \c fromTile.
+	 * @warning Does not count "unloads in progress" as occupied!
+	 * @param   fromUnit      ID of the unit who will unload.
+	 * @param   fromTile      The tile from which the given unit will unload.
+	 * @param   unloadingUnit ID of the unit that is being unloaded.
+	 * @param   toTile        The tiles to attempt to unload the unit to (no
+	 *                        unload will actually be attempted).
+	 * @return  \c TRUE if the unload operation can be carried out, \c FALSE
+	 *          otherwise. If \c toTile is \c NULL, then this method will return
+	 *          \c TRUE if \c unloadingUnit can unload to any of the tiles
+	 *          adjacent to \c fromTile.
 	 */
 	bool canUnload(const UnitID fromUnit, const Vector2&in fromTile,
 		const UnitID unloadingUnit, const array<Vector2>&in toTiles) const {
-		// NEEDS TO BE ABLE TO COUNT UNLOADS IN PROGRESS AS OCCUPIED TILES!
 		/* Conditions:
 		1. The unit IDs must not be 0.
 		2. `unloadingUnit` must be loaded onto `fromUnit`.
@@ -866,8 +864,17 @@ class PlayableMap {
 		// Declare the function used to revert back to the shortest path.
 		DEF@ replaceWithShortestPath = function(pThis, tile, unitID, unitType){
 			pThis.map.closedList.removeRange(0, pThis.map.closedList.length());
+			Vector2 src = pThis.map.getUnitPreviewPosition(unitID);
+			if (src == NO_POSITION) {
+				// If the unloading unit doesn't have a location override yet,
+				// then use the location override of the unit that it's loaded
+				// onto.
+				src = pThis.map.getUnitPreviewPosition(
+					pThis.map.getUnitWhichContainsUnit(unitID)
+				);
+			}
 			const auto arr = pThis.map.findPath(
-				pThis.map.getUnitPosition(unitID),
+				src,
 				tile,
 				unitType.movementType,
 				unitType.movementPoints,
@@ -875,7 +882,7 @@ class PlayableMap {
 				pThis.map.getTeamOfUnit(unitID)
 			);
 			for (uint i = 0, length = arr.length(); i < length; ++i) {
-				pThis._newClosedListNode(pThis.map.closedList, -1, arr[i].tile,
+				pThis.newClosedListNode(pThis.map.closedList, -1, arr[i].tile,
 					arr[i].g);
 			}
 			pThis.map.regenerateClosedListSprites();
@@ -932,7 +939,7 @@ class PlayableMap {
 						unitType.movementTypeIndex];
 				if (tentativeGScore <= map.getUnitFuel(unitID) &&
 					uint(tentativeGScore) <= unitType.movementPoints) {
-					_newClosedListNode(map.closedList, -1, tile, tentativeGScore);
+					newClosedListNode(map.closedList, -1, tile, tentativeGScore);
 
 					// Because we've just appended a new node without checking it
 					// thoroughly, the user could have moved their cursor off the
@@ -959,7 +966,7 @@ class PlayableMap {
 	 * @param tile  The tile to give to the new node.
 	 * @param g     The G score to give to the new node.
 	 */
-	void _newClosedListNode(array<ClosedListNode>& arr, int64 index,
+	void newClosedListNode(array<ClosedListNode>& arr, int64 index,
 		const Vector2&in tile, const int g) {
 		if (index < 0) {
 			arr.insertLast(ClosedListNode());

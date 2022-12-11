@@ -704,6 +704,15 @@ namespace sfx {
 			noexcept;
 
 		/**
+		 * Retrieves the visibility property of a widget.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and \c FALSE will be returned.
+		 * @param  name The name of the widget to query.
+		 * @return \c TRUE if the widget is visible, \c FALSE otherwise.
+		 */
+		bool _getWidgetVisibility(const std::string& name) const noexcept;
+
+		/**
 		 * Updates a widget's caption.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no caption will be changed.

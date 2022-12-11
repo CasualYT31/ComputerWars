@@ -142,6 +142,7 @@ void MapHandleInput(const dictionary controls) {
 		} else if (game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy() &&
 			!game.map.isUnitWaiting(unitID)) {
 			game.selectUnit(unitID);
+			game.map.removeAllPreviewUnits();
 			setGUI("MoveUnitMenu");
 			return;
 		}
