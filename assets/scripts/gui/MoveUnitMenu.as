@@ -15,25 +15,34 @@ void MoveUnitMenuHandleInput(const dictionary controls) {
 		setGUI("Map");
 		return;
 	} else if (bool(controls["select"])) {
-		const auto unitID = game.map.getSelectedUnit();
-		const auto otherUnit = game.map.getUnitOnTile(game.map.getSelectedTile());
-		if (otherUnit == 0 || otherUnit == unitID ||
-			game.canJoin(otherUnit, unitID) || game.canLoad(unitID, otherUnit) ||
-			!game.map.isUnitVisible(otherUnit, game.map.getArmyOfUnit(unitID))) {
-			const auto obstructionIndex =
-				game.map.scanPath(game.map.closedList, unitID);
-			if (obstructionIndex >= 0) {
-				// Trim closed list and move unit.
-				game.map.closedList.removeRange(obstructionIndex,
-					game.map.closedList.length() - obstructionIndex);
-				game.moveUnit();
-				setGUI("Map");
-			} else {
-				game.map.disableSelectedUnitRenderingEffects(true);
-				game.map.addPreviewUnit(unitID, game.map.getSelectedTile());
-				setGUI("PreviewMoveUnitMenu");
+		// Only allow selection if an available tile was selected.
+		const auto selectedTile = game.map.getSelectedTile();
+		const auto closedListLength = game.map.closedList.length();
+		for (uint i = 0; i < closedListLength; ++i) {
+			if (game.map.closedList[i].tile == selectedTile) {
+				const auto unitID = game.map.getSelectedUnit();
+				const auto otherUnit = game.map.getUnitOnTile(selectedTile);
+				if (otherUnit == 0 || otherUnit == unitID ||
+					game.canJoin(otherUnit, unitID) ||
+					game.canLoad(unitID, otherUnit) ||
+					!game.map.isUnitVisible(otherUnit,
+						game.map.getArmyOfUnit(unitID))) {
+					const auto obstructionIndex =
+						game.map.scanPath(game.map.closedList, unitID);
+					if (obstructionIndex >= 0) {
+						// Trim closed list and move unit.
+						game.map.closedList.removeRange(obstructionIndex,
+							game.map.closedList.length() - obstructionIndex);
+						game.moveUnit();
+						setGUI("Map");
+					} else {
+						game.map.disableSelectedUnitRenderingEffects(true);
+						game.map.addPreviewUnit(unitID, selectedTile);
+						setGUI("PreviewMoveUnitMenu");
+					}
+					return;
+				}
 			}
-			return;
 		}
 	}
 }
