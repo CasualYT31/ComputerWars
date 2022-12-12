@@ -176,6 +176,19 @@ namespace awe {
 		bool isCapturing() const noexcept;
 
 		/**
+		 * Sets this unit's hiding status.
+		 * By default, a unit is created with the hiding status turned off.
+		 * @param hiding \c TRUE if the unit is hiding, \c FALSE if not.
+		 */
+		void hiding(const bool hiding) noexcept;
+
+		/**
+		 * Gets this unit's hiding status.
+		 * @return \c TRUE if this unit is hiding, \c FALSE if not.
+		 */
+		bool isHiding() const noexcept;
+
+		/**
 		 * Loads another unit onto this one.
 		 * @param id The ID of the unit to load onto this one.
 		 */
@@ -306,6 +319,11 @@ namespace awe {
 		bool _capturing = false;
 
 		/**
+		 * The hiding state of this unit.
+		 */
+		bool _hiding = false;
+
+		/**
 		 * The list of units loaded onto this one.
 		 */
 		std::unordered_set<awe::UnitID> _loaded;
@@ -336,8 +354,8 @@ namespace awe {
 		sfx::animated_sprite _loadedIcon;
 
 		/**
-		 * The unit's capturing icon sprite object.
+		 * The unit's capturing and hiding icon sprite object.
 		 */
-		sfx::animated_sprite _capturingIcon;
+		sfx::animated_sprite _capturingHidingIcon;
 	};
 }

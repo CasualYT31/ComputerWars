@@ -137,6 +137,19 @@
 			],
 			"durations": [ 0 ]
 		},
+		"hiding": {
+			"frames": [
+				[ 52, 32, 8, 8 ]
+			],
+			"durations": [ 0 ]
+		},
+		"capturinghiding": {
+			"frames": [
+				[ 44, 32, 8, 8 ],
+				[ 52, 32, 8, 8 ]
+			],
+			"durations": [ 750, 750 ]
+		},
 		"fuellow": {
 			"frames": [
 				[ 68, 32, 8, 8 ],
@@ -204,6 +217,14 @@
 		},
 		"unloadicon": {
 			"frames": [ [ 98, 121, 13, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"hideicon": {
+			"frames": [ [ 98, 135, 10, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"unhideicon": {
+			"frames": [ [ 98, 149, 10, 14 ] ],
 			"durations": [ 0 ]
 		},
 		"infmove": {

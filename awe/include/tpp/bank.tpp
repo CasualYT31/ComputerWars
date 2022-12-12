@@ -345,6 +345,11 @@ void awe::unit_type::Register(const std::string& type,
 		asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit can capture a "
 		"type of terrain, whose index is given.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_canHide() const property",
+		asMETHOD(T, canHide), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns TRUE if this type of unit can "
+		"hide, FALSE otherwise.");
 }
 
 template<typename T>

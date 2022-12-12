@@ -232,6 +232,7 @@ awe::unit_type::unit_type(const awe::BankID id, const std::string& scriptName,
 	j.apply(_turnStartPriority, { "turnstartpriority" }, true);
 	j.applyVector(_canCaptureThese, { "cancapture" });
 	j.resetState();
+	j.apply(_canHide, { "canhide" }, true);
 }
 awe::BankID awe::unit_type::getMovementTypeIndex() const noexcept {
 	return _movementTypeID;
@@ -328,6 +329,9 @@ bool awe::unit_type::canCapture(const std::shared_ptr<const awe::terrain>& type)
 		if (u && *u == *type) return true;
 	}
 	return false;
+}
+bool awe::unit_type::canHide() const noexcept {
+	return _canHide;
 }
 void awe::unit_type::updateTerrainTypes(const awe::bank<awe::terrain>& terrainBank)
 	const noexcept {

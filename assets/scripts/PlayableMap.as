@@ -372,7 +372,8 @@ class PlayableMap {
 			for (uint i = 0, length = allTiles.length(); i < length; ++i) {
 				if (map.findPath(tile, allTiles[i], unitType.movementType,
 					unitType.movementPoints, map.getUnitFuel(unit),
-					map.getTeamOfUnit(unit)).length() > 0) {
+					map.getTeamOfUnit(unit),
+					map.getArmyOfUnit(unit)).length() > 0) {
 					map.addAvailableTile(allTiles[i]);
 				}
 			}
@@ -393,9 +394,23 @@ class PlayableMap {
 			map.setUnitPosition(id, node.tile);
 			map.waitUnit(id, true);
 			selectUnit(0);
+			map.removePreviewUnit(id);
 		} else {
 			throw("Cannot move a unit as no unit is currently selected!");
 		}
+	}
+
+	/**
+	 * Moves the currently selected unit along the chosen path, deselects the
+	 * unit, and ensures it's either hidden or shown.
+	 * @param  hide \c TRUE to hide the unit, \c FALSE to show it.
+	 * @throws If a unit hasn't been selected. Note that no unit will be hidden or
+	 *         shown if this is the case.
+	 */
+	void moveUnitHide(const bool hide) {
+		const auto id = map.getSelectedUnit();
+		moveUnit();
+		map.unitHiding(id, hide);
 	}
 
 	/**
@@ -654,7 +669,8 @@ class PlayableMap {
 			const auto unitTeam = map.getTeamOfUnit(unitID);
 			for (uint j = 0, len = adjacentTiles.length(); j < len; ++j) {
 				if (map.findPathForUnloadUnit(from, adjacentTiles[j],
-					movementType, { unit }).length() > 0) {
+					movementType, map.getArmyOfUnit(unit), { unit }).length() > 0)
+					{
 					return true;
 				}
 			}
@@ -701,7 +717,8 @@ class PlayableMap {
 		for (uint i = 0; i < toTilesLength; ++i) {
 			const auto tile = toTiles[i];
 			if (tile != fromTile && map.findPathForUnloadUnit(fromTile, tile,
-				unloadingUnitMoveType, { fromUnit }).length() > 0) return true;
+				unloadingUnitMoveType, map.getArmyOfUnit(fromUnit),
+				{ fromUnit }).length() > 0) return true;
 		}
 		return false;
 	}
@@ -741,12 +758,20 @@ class PlayableMap {
 		
 		} else if (typeName == "FIGHTER" || typeName == "BOMBER" ||
 			typeName == "STEALTH" || typeName == "BLACKBOMB") {
-			map.burnUnitFuel(unit, 5);
+			if (typeName == "STEALTH" && map.isUnitHiding(unit)) {
+				map.burnUnitFuel(unit, 8);
+			} else {
+				map.burnUnitFuel(unit, 5);
+			}
 		
 		} else if (typeName == "BLACKBOAT" || typeName == "LANDER" ||
 			typeName == "CRUISER" || typeName == "SUB" ||
 			typeName == "BATTLESHIP" || typeName == "CARRIER") {
-			map.burnUnitFuel(unit, 1);
+			if (typeName == "SUB" && map.isUnitHiding(unit)) {
+				map.burnUnitFuel(unit, 5);
+			} else {
+				map.burnUnitFuel(unit, 1);
+			}
 
 			if (typeName == "CARRIER" || typeName == "CRUISER") {
 				// Replenish the units that are loaded onto this one.
@@ -887,7 +912,8 @@ class PlayableMap {
 				unitType.movementType,
 				unitType.movementPoints,
 				pThis.map.getUnitFuel(unitID),
-				pThis.map.getTeamOfUnit(unitID)
+				pThis.map.getTeamOfUnit(unitID),
+				pThis.map.getArmyOfUnit(unitID)
 			);
 			for (uint i = 0, length = arr.length(); i < length; ++i) {
 				pThis.newClosedListNode(pThis.map.closedList, -1, arr[i].tile,

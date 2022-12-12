@@ -124,9 +124,9 @@ void MapHandleInput(const dictionary controls) {
 	if (bool(controls["select"])) {
 		auto cursor = game.map.getSelectedTile();
 		auto unitID = game.map.getUnitOnTile(cursor);
+		const auto currentArmy = game.map.getSelectedArmy();
 		if (unitID == 0) {
 			ArmyID owner = game.map.getTileOwner(cursor);
-			ArmyID currentArmy = game.map.getSelectedArmy();
 			string type = game.map.getTileType(cursor).type.scriptName;
 			if (owner == currentArmy) {
 				if (type == "BASE" || type == "AIRPORT" || type == "PORT") {
@@ -136,7 +136,8 @@ void MapHandleInput(const dictionary controls) {
 			}
 			setGUI("MapMenu");
 			return;
-		} else if (game.map.isUnitWaiting(unitID)) {
+		} else if (game.map.isUnitWaiting(unitID) ||
+			!game.map.isUnitVisible(unitID, currentArmy)) {
 			setGUI("MapMenu");
 			return;
 		} else if (game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy() &&

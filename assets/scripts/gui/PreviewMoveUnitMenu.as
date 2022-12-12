@@ -22,6 +22,7 @@ void PreviewMoveUnitMenuSetUp() {
 void PreviewMoveUnitMenuOpen() {
 	// Gather data.
 	const auto unit = game.map.getSelectedUnit();
+	const auto unitType = game.map.getUnitType(unit);
 	const auto tile = game.map.getSelectedTile();
 	const auto unitOnTile = game.map.getUnitOnTile(tile);
 
@@ -35,13 +36,30 @@ void PreviewMoveUnitMenuOpen() {
 			if (game.canCapture(unit, tile)) {
 				PreviewCommands.addCommand("Capture", "capture", "captureicon");
 			}
-			if (game.map.getUnitType(unit).scriptName == "APC" &&
+			if (unitType.scriptName == "APC" &&
 				game.areThereDepletedArmyUnitsAdjacentTo(tile,
 					game.map.getArmyOfUnit(unit))) {
 				PreviewCommands.addCommand("Supply", "supply", "replenishicon");
 			}
 			if (game.canUnload(unit, tile)) {
 				PreviewCommands.addCommand("Unload", "unload", "unloadicon");
+			}
+			if (unitType.canHide) {
+				if (game.map.isUnitHiding(unit)) {
+					if (unitType.scriptName == "SUB") {
+						PreviewCommands.addCommand("Show", "surface",
+							"unhideicon");
+					} else {
+						PreviewCommands.addCommand("Show", "unhide",
+							"unhideicon");
+					}
+				} else {
+					if (unitType.scriptName == "SUB") {
+						PreviewCommands.addCommand("Hide", "dive", "hideicon");
+					} else {
+						PreviewCommands.addCommand("Hide", "hide", "hideicon");
+					}
+				}
 			}
 			PreviewCommands.addCommand("Wait", "wait", "waiticon");
 		}
@@ -146,4 +164,20 @@ void PreviewMoveUnitMenu_Load_Pressed() {
  */
 void PreviewMoveUnitMenu_Unload_Pressed() {
 	setGUI("UnloadUnitsMenu");
+}
+
+/**
+ * Move a unit and unhide it.
+ */
+void PreviewMoveUnitMenu_Show_Pressed() {
+	game.moveUnitHide(false);
+	setGUI("Map");
+}
+
+/**
+ * Move a unit and hide it.
+ */
+void PreviewMoveUnitMenu_Hide_Pressed() {
+	game.moveUnitHide(true);
+	setGUI("Map");
 }

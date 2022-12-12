@@ -16,6 +16,11 @@
 	"unload": "Unload",
 	"proceedwithunload": "Proceed with Unload",
 	"cancelunload": "Cancel Unload",
+	"dive": "Dive",
+	"surface": "Surface",
+	"hide": "Hide",
+	"unhide": "Unhide",
+	"hidden": "Hidden",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

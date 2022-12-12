@@ -108,3 +108,6 @@ the map format:
  - Immediately after the waiting state of the unit, another `bool` field is stored,
    representing the capturing state of the unit. If `TRUE`, the unit is capturing
    something. If `FALSE`, the unit is not capturing anything.
+ - And immediately after the capturing state of the unit, another `bool` field is
+   stored, representing the hiding state of the unit. If `TRUE`, the unit is
+   hiding. If `FALSE`, the unit is not hiding.

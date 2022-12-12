@@ -309,6 +309,18 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, isUnitCapturing), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void unitHiding(const UnitID, const bool)",
+			asMETHOD(awe::map, unitHiding), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isUnitHiding(const UnitID) const",
+			asMETHOD(awe::map, isUnitHiding), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isUnitVisible(const UnitID, const ArmyID) const",
+			asMETHOD(awe::map, isUnitVisible), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void loadUnit(const UnitID, const UnitID)",
 			asMETHOD(awe::map, loadUnit), asCALL_THISCALL);
 		document->DocumentObjectMethod(r, "Loads the first unit onto the second "
@@ -388,14 +400,18 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPath(const Vector2&in origin, const Vector2&in dest, "
 			"const Movement&in moveType, const uint movePoints, const Fuel fuel, "
-			"const TeamID team, array<UnitID>@ = null) const",
+			"const TeamID team, const ArmyID army, array<UnitID>@ = null) const",
 			asMETHOD(awe::map, findPathAsArray), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPathForUnloadUnit(const Vector2&in origin, "
-			"const Vector2&in dest, const Movement&in moveType, "
+			"const Vector2&in dest, const Movement&in moveType, const ArmyID, "
 			"array<UnitID>@ = null) const",
 			asMETHOD(awe::map, findPathAsArrayUnloadUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"int scanPath(const array<ClosedListNode>@, const UnitID) const",
+			asMETHOD(awe::map, scanPath), asCALL_THISCALL);
 
 		////////////////////////
 		// DRAWING OPERATIONS //
@@ -1122,7 +1138,7 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos)
 	const auto idOfUnitOnTile = ((pos == awe::unit::NO_POSITION) ? (0) :
 		(getUnitOnTile(pos)));
 	if (idOfUnitOnTile == id) {
-		// If the tile's position is being set to the tile it is on, then drop the
+		// If the unit's position is being set to the tile it is on, then drop the
 		// call.
 		return;
 	} else if (idOfUnitOnTile > 0) {
@@ -1257,6 +1273,59 @@ bool awe::map::isUnitCapturing(const awe::UnitID id) const noexcept {
 	if (_isUnitPresent(id)) return _units.at(id).isCapturing();
 	_logger.error("isUnitCapturing operation failed: unit with ID {} doesn't "
 		"exist!", id);
+	return false;
+}
+
+void awe::map::unitHiding(const awe::UnitID id, const bool hiding) noexcept {
+	if (_isUnitPresent(id)) {
+		_units.at(id).hiding(hiding);
+	} else {
+		_logger.error("unitHiding operation cancelled: attempted to assign hiding "
+			"state {} to unit with ID {}, which doesn't exist!", hiding, id);
+	}
+}
+
+bool awe::map::isUnitHiding(const awe::UnitID id) const noexcept {
+	if (_isUnitPresent(id)) return _units.at(id).isHiding();
+	_logger.error("isUnitHiding operation failed: unit with ID {} doesn't exist!",
+		id);
+	return false;
+}
+
+bool awe::map::isUnitVisible(const awe::UnitID unit, const awe::ArmyID army) const
+	noexcept {
+	if (!_isUnitPresent(unit)) {
+		_logger.error("isUnitVisible operation failed: unit with ID {} doesn't "
+			"exist!", unit);
+		return false;
+	}
+	if (!_isArmyPresent(army)) {
+		_logger.error("isUnitVisible operation failed: army with ID {} doesn't "
+			"exist!", army);
+		return false;
+	}
+	// A unit is visible if...
+	// 0. It is on the map.
+	if (!isUnitOnMap(unit)) return false;
+	// 1. It isn't hiding.
+	if (!isUnitHiding(unit)) return true;
+	// 2. It is hiding, but it belongs to the same team as the given army.
+	const auto armyTeam = getArmyTeam(army);
+	if (getTeamOfUnit(unit) == armyTeam) return true;
+	// 3. It is hiding, but it is located on a tile that belongs to `army`'s team.
+	const auto unitPos = getUnitPosition(unit);
+	const auto tileOwner = getTileOwner(unitPos);
+	if (tileOwner != awe::army::NO_ARMY && getArmyTeam(tileOwner) == armyTeam)
+		return true;
+	// 4. It is hiding, but it is adjacent to a unit that belongs to the same team
+	//    as `army`.
+	const auto adjacentTiles = getAvailableTiles(unitPos, 1, 1);
+	for (const auto tile : adjacentTiles) {
+		const auto tilesUnit = getUnitOnTile(tile);
+		if (_isUnitPresent(tilesUnit) && getTeamOfUnit(tilesUnit) == armyTeam)
+			return true;
+	}
+	// Otherwise, it is not visible.
 	return false;
 }
 
@@ -1556,7 +1625,7 @@ CScriptArray* awe::map::getAvailableTilesAsArray(
 std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const unsigned int* const movePoints, const awe::Fuel* const fuel,
-	const awe::TeamID* const team,
+	const awe::TeamID* const team, const awe::ArmyID* const army,
 	const std::unordered_set<awe::UnitID>& ignoredUnits) const noexcept {
 	// openSet could be a min-heap or priority queue for added efficiency.
 	std::unordered_set<sf::Vector2u> openSet = { origin };
@@ -1603,16 +1672,17 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 			// 1. The unit does not have enough fuel.
 			// 2. The unit has ran out of movement points.
 			// 3. The tile has a unit belonging to an opposing team that isn't
-			//    ignored.
+			//    ignored or invisible/hidden.
 			// then it cannot traverse the tile, so don't add it to the open set.
 			const auto unitOnAdjacentTile = getUnitOnTile(adjacentTile);
-			if ((fuel == nullptr || tentativeGScore <= *fuel) &&
-				(movePoints == nullptr ||
-					(unsigned int)tentativeGScore <= *movePoints) &&
-				(unitOnAdjacentTile == 0 || (unitOnAdjacentTile != 0 &&
-					ignoredUnits.find(unitOnAdjacentTile) != ignoredUnits.end()) ||
-					(unitOnAdjacentTile != 0 && team != nullptr &&
-					getTeamOfUnit(unitOnAdjacentTile) == *team))) {
+			const auto fuelCheck = fuel == nullptr || tentativeGScore <= *fuel;
+			const auto mpCheck = movePoints == nullptr ||
+				static_cast<unsigned int>(tentativeGScore) <= *movePoints;
+			const auto unitCheck = !_isUnitPresent(unitOnAdjacentTile) ||
+				(ignoredUnits.find(unitOnAdjacentTile) != ignoredUnits.end()) ||
+				(army == nullptr || !isUnitVisible(unitOnAdjacentTile, *army)) ||
+				(team != nullptr && getTeamOfUnit(unitOnAdjacentTile) == *team);
+			if (fuelCheck && mpCheck && unitCheck) {
 				if (gScore.find(adjacentTile) == gScore.end() ||
 					tentativeGScore < gScore[adjacentTile]) {
 					cameFrom[adjacentTile] = currentTile;
@@ -1651,9 +1721,10 @@ static std::unordered_set<awe::UnitID> convertCScriptArrayIntoSet(
 CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const unsigned int movePoints, const awe::Fuel fuel,
-	const awe::TeamID team, CScriptArray* ignoredUnits) const noexcept {
+	const awe::TeamID team, const awe::ArmyID army, CScriptArray* ignoredUnits)
+	const noexcept {
 	const auto vec = findPath(origin, dest, moveType, &movePoints, &fuel, &team,
-		convertCScriptArrayIntoSet(ignoredUnits));
+		&army, convertCScriptArrayIntoSet(ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
 	for (auto& node : vec) {
 		ret->InsertLast(&awe::closed_list_node());
@@ -1665,9 +1736,9 @@ CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 
 CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
-	CScriptArray* ignoredUnits) const noexcept {
+	const awe::ArmyID army, CScriptArray* ignoredUnits) const noexcept {
 	const auto vec = findPath(origin, dest, moveType, nullptr, nullptr, nullptr,
-		convertCScriptArrayIntoSet(ignoredUnits));
+		&army, convertCScriptArrayIntoSet(ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
 	for (auto& node : vec) {
 		ret->InsertLast(&awe::closed_list_node());
@@ -1675,6 +1746,29 @@ CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 		((awe::closed_list_node*)ret->At(ret->GetSize() - 1))->g = node.g;
 	}
 	return ret;
+}
+
+int awe::map::scanPath(CScriptArray* path, const awe::UnitID unit) const noexcept {
+	if (path && _isUnitPresent(unit)) {
+		asUINT len = path->GetSize();
+		const auto armyID = getArmyOfUnit(unit);
+		for (asUINT i = 0; i < len; ++i) {
+			const auto unitID =
+				getUnitOnTile(((awe::closed_list_node*)path->At(i))->tile);
+			if (_isUnitPresent(unitID)) {
+				if (!isUnitVisible(unitID, armyID)) {
+					if (path) path->Release();
+					return static_cast<int>(i);
+				}
+			}
+		}
+	} else {
+		_logger.error("scanPath operation failed: unit with ID {} exist{}",
+			((_isUnitPresent(unit)) ? ("does") : ("does not")),
+			((path) ? (", path is not NULL.") : (", path is NULL.")));
+	}
+	if (path) path->Release();
+	return -1;
 }
 
 bool awe::map::setSelectedUnit(const awe::UnitID unit) noexcept {
@@ -2218,9 +2312,11 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// taller than the minimum height from drawing over units. If a unit has a
 	// location override, then render it, even if it isn't on the map according to
 	// `isUnitOnMap()`.
+	const auto currentArmy = getSelectedArmy();
 	for (const auto unitsPair : _units) {
 		const awe::UnitID unitID = unitsPair.first;
-		if (unitID > 0 && (isUnitOnMap(unitID) ||
+		if (_isUnitPresent(unitID) && ((isUnitOnMap(unitID) &&
+			isUnitVisible(unitID, currentArmy)) ||
 			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end())) {
 			sf::RenderStates unitStates = mapStates;
 			unitStates.shader = &_unavailableTileShader;
@@ -2453,16 +2549,16 @@ bool awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id,
 			auto unitID = createUnit(
 				(*_unitTypes)[_file.readNumber<awe::BankID>()], ownerArmy);
 			if (unitID) {
+				if (loadOnto)
+					loadUnit(unitID, loadOnto);
+				else
+					setUnitPosition(unitID, curtile);
 				auto hp = _file.readNumber<awe::HP>();
 				setUnitHP(unitID, hp);
 				auto fuel = _file.readNumber<awe::Fuel>();
 				setUnitFuel(unitID, fuel);
 				auto ammo = _file.readNumber<awe::Ammo>();
 				setUnitAmmo(unitID, ammo);
-				if (loadOnto)
-					loadUnit(unitID, loadOnto);
-				else
-					setUnitPosition(unitID, curtile);
 				while (_CWM_0_Unit(isSave, id, curtile,
 					((loadOnto) ? (loadOnto) : (unitID))));
 			} else {
@@ -2581,6 +2677,7 @@ bool awe::map::_CWM_2_Unit(const bool isSave, awe::UnitID id,
 		_file.writeNumber(unit.getAmmo());
 		_file.writeBool(unit.isWaiting());
 		_file.writeBool(unit.isCapturing());
+		_file.writeBool(unit.isHiding());
 		auto loaded = unit.loadedUnits();
 		if (loaded.size()) {
 			for (auto loadedUnitID : loaded) {
@@ -2595,6 +2692,15 @@ bool awe::map::_CWM_2_Unit(const bool isSave, awe::UnitID id,
 			auto unitID = createUnit(
 				(*_unitTypes)[_file.readNumber<awe::BankID>()], ownerArmy);
 			if (unitID) {
+				// Setting the unit's position needs to come before, at least,
+				// reading the capturing property. This is because, if a unit is
+				// capturing something, setting its position will try to set the
+				// unit's old tile's HP to its max. But the unit doesn't have a
+				// previous position, causing a read access violation.
+				if (loadOnto)
+					loadUnit(unitID, loadOnto);
+				else
+					setUnitPosition(unitID, curtile);
 				auto hp = _file.readNumber<awe::HP>();
 				setUnitHP(unitID, hp);
 				auto fuel = _file.readNumber<awe::Fuel>();
@@ -2605,10 +2711,8 @@ bool awe::map::_CWM_2_Unit(const bool isSave, awe::UnitID id,
 				waitUnit(unitID, isWaiting);
 				auto isCapturing = _file.readBool();
 				unitCapturing(unitID, isCapturing);
-				if (loadOnto)
-					loadUnit(unitID, loadOnto);
-				else
-					setUnitPosition(unitID, curtile);
+				auto isHiding = _file.readBool();
+				unitHiding(unitID, isHiding);
 				while (_CWM_2_Unit(isSave, id, curtile,
 					((loadOnto) ? (loadOnto) : (unitID))));
 			} else {

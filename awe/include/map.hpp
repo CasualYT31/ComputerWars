@@ -765,6 +765,32 @@ namespace awe {
 		bool isUnitCapturing(const awe::UnitID id) const noexcept;
 
 		/**
+		 * Sets a unit's hiding state.
+		 * @param id     The ID of the unit to amend.
+		 * @param hiding \c TRUE if the unit should hide, \c FALSE if not.
+		 */
+		void unitHiding(const awe::UnitID id, const bool hiding) noexcept;
+
+		/**
+		 * Gets a unit's hiding state.
+		 * @param  id The ID of the unit to query.
+		 * @return \c TRUE if the unit is hiding, \c FALSE if it is not. \c FALSE
+		 *         if the unit does not exist.
+		 */
+		bool isUnitHiding(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Figures out if a given unit is visible on the map from the perspective
+		 * of the given army.
+		 * @param  unit The ID of the unit to check.
+		 * @param  army The ID of the army who is trying to see the unit.
+		 * @return \c TRUE if \c army can see \c unit on the map,
+		 *         \c FALSE otherwise.
+		 */
+		bool isUnitVisible(const awe::UnitID unit, const awe::ArmyID army) const
+			noexcept;
+
+		/**
 		 * Loads one unit onto another.
 		 * If the unit to load is already loaded onto another unit, this call will
 		 * be ignored and a warning will be logged. If both unit IDs given are the
@@ -967,6 +993,7 @@ namespace awe {
 		 * @param  fuel         Pointer to the units of fuel that we have to work
 		 *                      with.
 		 * @param  team         Pointer to the team the moving unit is on.
+		 * @param  army         Pointer to the army the moving unit is on.
 		 * @param  ignoredUnits A set of units that can be moved through,
 		 *                      regardless of team.
 		 * @return The shortest path, if a path could be found. An empty vector if
@@ -975,7 +1002,7 @@ namespace awe {
 		std::vector<awe::closed_list_node> findPath(const sf::Vector2u& origin,
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
 			const unsigned int* const movePoints, const awe::Fuel* const fuel,
-			const awe::TeamID* const team,
+			const awe::TeamID* const team, const awe::ArmyID* const army,
 			const std::unordered_set<awe::UnitID>& ignoredUnits) const noexcept;
 
 		/**
@@ -986,7 +1013,8 @@ namespace awe {
 		CScriptArray* findPathAsArray(const sf::Vector2u& origin,
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
 			const unsigned int movePoints, const awe::Fuel fuel,
-			const awe::TeamID team, CScriptArray* ignoredUnits) const noexcept;
+			const awe::TeamID team, const awe::ArmyID army,
+			CScriptArray* ignoredUnits) const noexcept;
 
 		/**
 		 * Version of \c findPath() which passes in \c nullptr where possible, and
@@ -995,7 +1023,22 @@ namespace awe {
 		 */
 		CScriptArray* findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
-			CScriptArray* ignoredUnits) const noexcept;
+			const awe::ArmyID army, CScriptArray* ignoredUnits) const noexcept;
+
+		/**
+		 * Finds out if there is an obstruction in a given path.
+		 * As of right now, an obstruction in the context of this method is defined
+		 * \em only as an invisible unit that does not belong to the same team as
+		 * the moving unit. Any other type of obstruction must be handled in the
+		 * \c findPath() method.\n
+		 * The path is scanned, from the first tile to the last tile. If an
+		 * obstruction is found along the path, then its index will be returned. If
+		 * one could not be found, then \c <0 will be returned.
+		 * @param  path The path to scan.
+		 * @param  unit The unit that is moving along the path.
+		 * @return The index to the obstruction, if any.
+		 */
+		int scanPath(CScriptArray* path, const awe::UnitID unit) const noexcept;
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //

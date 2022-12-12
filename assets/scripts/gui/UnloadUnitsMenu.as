@@ -11,7 +11,7 @@ void UnloadUnitsMenuSetUp() {
 	setWidgetBackgroundColour("panel", Colour(0,0,0,128));
 	setWidgetOrigin("panel", 0.5, 0.5);
 	setWidgetPosition("panel", "50%", "50%");
-	setWidgetSize("panel", "33%", "33%");
+	setWidgetSize("panel", "38%", "38%");
 	addWidget("Grid", "panel.grid");
 }
 
@@ -85,6 +85,15 @@ void UnloadUnitsMenuOpen() {
 		setWidgetTextColour("panel.grid.ammo" + name, Colour(255, 255, 255, 255));
 		setWidgetTextOutlineColour("panel.grid.ammo" + name, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness("panel.grid.ammo" + name, 2.0);
+		if (game.map.isUnitHiding(unitID)) {
+			addWidgetToGrid("Label", "panel.grid.ishiddenmsg" + name, i + 1, 5);
+			setWidgetText("panel.grid.ishiddenmsg" + name, "hidden");
+			setWidgetTextColour("panel.grid.ishiddenmsg" + name,
+				Colour(255, 255, 255, 255));
+			setWidgetTextOutlineColour("panel.grid.ishiddenmsg" + name,
+				Colour(0,0,0,255));
+			setWidgetTextOutlineThickness("panel.grid.ishiddenmsg" + name, 2.0);
+		}
 	}
 }
 
@@ -116,8 +125,17 @@ void UnloadUnitsMenuHandleInput(const dictionary controls) {
 				// only if it is an available tile.
 				const auto selectedTile = game.map.getSelectedTile();
 				if (game.map.isAvailableTile(selectedTile)) {
-					game.map.addPreviewUnit(UnloadUnitsMenuCurrentlyUnloadingUnit,
-						selectedTile);
+					// However! If the selected tile has a hidden unit on it, then
+					// prevent the unload of that unit, but force any unloads in
+					// progress to go ahead, and make the base unit wait.
+					if (game.map.getUnitOnTile(selectedTile) > 0) {
+						game.map.popSelectedUnit();
+						UnloadUnitsMenu_proceed_Pressed();
+						return;
+					} else {
+						game.map.addPreviewUnit(
+							UnloadUnitsMenuCurrentlyUnloadingUnit, selectedTile);
+					}
 				} else {
 					// Don't cancel the unload operation if it's unavailable!
 					return;
@@ -172,7 +190,10 @@ void UnloadUnitsMenu_proceed_Pressed() {
 			game.map.removePreviewUnit(unitID);
 		}
 	}
-	// Go back to the map.
+	// Go back to the map, and always ensure the base panel is visible before
+	// leaving (if we don't, then when a unit is unloaded onto a hidden unit, the
+	// unload menu will be bugged out in the future).
+	setWidgetVisibility("panel", true);
 	setGUI("Map");
 }
 
@@ -229,6 +250,7 @@ void UnloadUnitsMenu_UnloadUnit(const string&in widget, const string&in signal) 
 				// Remove tiles that the unit cannot be unloaded onto.
 				if (game.map.findPathForUnloadUnit(UnloadUnitsMenuBaseUnloadTile,
 					adjacentTile, unitMoveType,
+					game.map.getArmyOfUnit(UnloadUnitsMenuBaseUnloadUnit),
 					{ UnloadUnitsMenuBaseUnloadUnit }).length() == 0) {
 					continue;
 				}

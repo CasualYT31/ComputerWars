@@ -36,7 +36,7 @@ awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type,
 	_sprite(sheet, ((type) ? (type->getUnit(army)) : (""))),
 	_hpIcon(icons, "nohpicon"), _fuelAmmoIcon(icons, "nostatusicon"),
 	_loadedIcon(icons, "nostatusicon"),
-	_capturingIcon(icons, "nostatusicon") {}
+	_capturingHidingIcon(icons, "nostatusicon") {}
 
 std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept {
 	return _type;
@@ -114,6 +114,14 @@ bool awe::unit::isCapturing() const noexcept {
 	return _capturing;
 }
 
+void awe::unit::hiding(const bool hiding) noexcept {
+	_hiding = hiding;
+}
+
+bool awe::unit::isHiding() const noexcept {
+	return _hiding;
+}
+
 void awe::unit::loadUnit(const awe::UnitID id) noexcept {
 	_loaded.insert(id);
 }
@@ -144,7 +152,7 @@ void awe::unit::setIconSpritesheet(
 	_hpIcon.setSpritesheet(sheet);
 	_fuelAmmoIcon.setSpritesheet(sheet);
 	_loadedIcon.setSpritesheet(sheet);
-	_capturingIcon.setSpritesheet(sheet);
+	_capturingHidingIcon.setSpritesheet(sheet);
 }
 
 std::shared_ptr<const sfx::animated_spritesheet> awe::unit::getSpritesheet() const
@@ -173,10 +181,14 @@ bool awe::unit::animate(const sf::RenderTarget& target, const double scaling)
 	} else {
 		_loadedIcon.setSprite("nostatusicon");
 	}
-	if (_capturing) {
-		_capturingIcon.setSprite("capturing");
+	if (isCapturing() && isHiding()) {
+		_capturingHidingIcon.setSprite("capturinghiding");
+	} else if (isCapturing()) {
+		_capturingHidingIcon.setSprite("capturing");
+	} else if (isHiding()) {
+		_capturingHidingIcon.setSprite("hiding");
 	} else {
-		_capturingIcon.setSprite("nostatusicon");
+		_capturingHidingIcon.setSprite("nostatusicon");
 	}
 	const bool lowFuel =
 		(!_type->hasInfiniteFuel() && getFuel() <= _type->getMaxFuel() / 2);
@@ -196,7 +208,7 @@ bool awe::unit::animate(const sf::RenderTarget& target, const double scaling)
 	_hpIcon.animate(target, scaling);
 	_fuelAmmoIcon.animate(target, scaling);
 	_loadedIcon.animate(target, scaling);
-	_capturingIcon.animate(target, scaling);
+	_capturingHidingIcon.animate(target, scaling);
 	bool ret = _sprite.animate(target, scaling);
 	// Calculate icon positions.
 	sf::Vector2f pos = _sprite.getPosition();
@@ -206,8 +218,8 @@ bool awe::unit::animate(const sf::RenderTarget& target, const double scaling)
 	_fuelAmmoIcon.setPosition(sf::Vector2f(pos.x, pos.y + size.y -
 		_fuelAmmoIcon.getSize().y));
 	_loadedIcon.setPosition(pos);
-	_capturingIcon.setPosition(sf::Vector2f(
-		pos.x + size.x - _capturingIcon.getSize().x, pos.y));
+	_capturingHidingIcon.setPosition(sf::Vector2f(
+		pos.x + size.x - _capturingHidingIcon.getSize().x, pos.y));
 	// Return main unit graphic animation result.
 	return ret;
 }
@@ -215,7 +227,7 @@ bool awe::unit::animate(const sf::RenderTarget& target, const double scaling)
 void awe::unit::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_sprite, states);
 	target.draw(_loadedIcon, states);
-	target.draw(_capturingIcon, states);
+	target.draw(_capturingHidingIcon, states);
 	target.draw(_fuelAmmoIcon, states);
 	target.draw(_hpIcon, states);
 }

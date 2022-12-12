@@ -926,7 +926,8 @@ namespace awe {
 		 *         32-bit int)</tt></li>
 		 *     <li>\c "cancapture" = \c _canCaptureThese,
 		 *         <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt>
-		 *         </li></ul>
+		 *         </li>
+		 *     <li>\c "canhide" = \c _canHide, <tt>(bool)</tt></li></ul>
 		 * 
 		 * Range values work by counting the number of tiles away from the unit's
 		 * current tile. If the tile is within both the lower and higher ranges
@@ -1138,6 +1139,12 @@ namespace awe {
 			noexcept;
 
 		/**
+		 * Finds out if this type of unit can hide.
+		 * @return \c TRUE if yes, \c FALSE otherwise.
+		 */
+		bool canHide() const noexcept;
+
+		/**
 		 * Updates the stored terrain type properties pointers for terrains that
 		 * can be captured by this type of unit.
 		 * @param terrainBank A reference to the terrain type bank to pull the
@@ -1301,6 +1308,11 @@ namespace awe {
 		 */
 		mutable std::vector<std::shared_ptr<const awe::terrain>>
 			_canCaptureTheseTerrainTypes;
+
+		/**
+		 * Can this unit hide?
+		 */
+		bool _canHide = false;
 	};
 
 	/**
