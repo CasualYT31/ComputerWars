@@ -233,6 +233,8 @@ awe::unit_type::unit_type(const awe::BankID id, const std::string& scriptName,
 	j.applyVector(_canCaptureThese, { "cancapture" });
 	j.resetState();
 	j.apply(_canHide, { "canhide" }, true);
+	j.applyVector(_canUnloadFromThese, { "canunloadfrom" });
+	j.resetState();
 }
 awe::BankID awe::unit_type::getMovementTypeIndex() const noexcept {
 	return _movementTypeID;
@@ -330,16 +332,36 @@ bool awe::unit_type::canCapture(const std::shared_ptr<const awe::terrain>& type)
 	}
 	return false;
 }
+bool awe::unit_type::canUnloadFrom(const awe::BankID typeID) const noexcept {
+	return _canUnloadFromThese.empty() || std::find(_canUnloadFromThese.begin(),
+		_canUnloadFromThese.end(), typeID) != _canUnloadFromThese.end();
+}
+bool awe::unit_type::canUnloadFrom(const std::shared_ptr<const awe::terrain>& type)
+	const noexcept {
+	if (_canUnloadFromThese.empty()) return true;
+	if (!type) return false;
+	for (auto& u : _canUnloadFromTheseTerrainTypes) {
+		if (u && *u == *type) return true;
+	}
+	return false;
+}
 bool awe::unit_type::canHide() const noexcept {
 	return _canHide;
 }
 void awe::unit_type::updateTerrainTypes(const awe::bank<awe::terrain>& terrainBank)
 	const noexcept {
 	_canCaptureTheseTerrainTypes.clear();
+	_canUnloadFromTheseTerrainTypes.clear();
 	for (awe::BankID i = 0; i < terrainBank.size(); i++) {
 		for (auto& u : _canCaptureThese) {
 			if (i == u) {
 				_canCaptureTheseTerrainTypes.push_back(terrainBank[i]);
+				break;
+			}
+		}
+		for (auto& u : _canUnloadFromThese) {
+			if (i == u) {
+				_canUnloadFromTheseTerrainTypes.push_back(terrainBank[i]);
 				break;
 			}
 		}
@@ -365,6 +387,14 @@ std::vector<awe::BankID> awe::unit_type::copyCapturableTerrainIDs() const noexce
 std::vector<std::shared_ptr<const awe::terrain>>
 	awe::unit_type::copyCapturableTerrains() const noexcept {
 	return _canCaptureTheseTerrainTypes;
+}
+std::vector<awe::BankID> awe::unit_type::copyUnloadableTerrainIDs() const noexcept
+	{
+	return _canUnloadFromThese;
+}
+std::vector<std::shared_ptr<const awe::terrain>>
+awe::unit_type::copyUnloadableTerrains() const noexcept {
+	return _canUnloadFromTheseTerrainTypes;
 }
 bool awe::unit_type::operator==(const awe::unit_type& rhs) const noexcept {
 	return getID() == rhs.getID();

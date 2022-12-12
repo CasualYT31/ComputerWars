@@ -654,9 +654,12 @@ class PlayableMap {
 		4. At least one of the loaded units must be able to move to at least one
 		   of the tiles adjacent to `from`.
 		5. `unit` cannot itself be loaded onto another unit.
+		6. `from` is a tile which `unit` can unload from.
 		*/
 		if (unit == 0) return false;
 		if (map.getUnitWhichContainsUnit(unit) != 0) return false;
+		if (!map.getUnitType(unit).canUnloadFrom[map.getTileType(from).type.ID])
+			return false;
 		const auto loadedUnits = map.getLoadedUnits(unit);
 		const auto loadedUnitsLength = loadedUnits.length();
 		if (loadedUnitsLength == 0 ||
@@ -708,6 +711,8 @@ class PlayableMap {
 		if (fromUnit == 0 || unloadingUnit == 0) return false;
 		if (toTiles.length() == 0) return false;
 		if (map.getUnitWhichContainsUnit(fromUnit) != 0) return false;
+		if (!map.getUnitType(fromUnit).
+			canUnloadFrom[map.getTileType(fromTile).type.ID]) return false;
 		if (!map.isUnitLoadedOntoUnit(unloadingUnit, fromUnit)) return false;
 		const auto unitOnFromTile = map.getUnitOnTile(fromTile);
 		if (unitOnFromTile != 0 && unitOnFromTile != fromUnit) return false;

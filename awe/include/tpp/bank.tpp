@@ -346,6 +346,12 @@ void awe::unit_type::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit can capture a "
 		"type of terrain, whose index is given.");
 	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_canUnloadFrom(const BankID) const property",
+		asMETHODPR(T, canUnloadFrom, (const awe::BankID) const, bool),
+		asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns TRUE if this unit can unload units "
+		"from a type of terrain, whose index is given.");
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"bool get_canHide() const property",
 		asMETHOD(T, canHide), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this type of unit can "

@@ -927,7 +927,10 @@ namespace awe {
 		 *     <li>\c "cancapture" = \c _canCaptureThese,
 		 *         <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt>
 		 *         </li>
-		 *     <li>\c "canhide" = \c _canHide, <tt>(bool)</tt></li></ul>
+		 *     <li>\c "canhide" = \c _canHide, <tt>(bool)</tt></li>
+		 *     <li>\c "canonlyunloadfrom" = \c _canUnloadFromThese,
+		 *         <tt>([unsigned 32-bit int{, unsigned 32-bit int, etc.}])</tt>
+		 *         </li></ul>
 		 * 
 		 * Range values work by counting the number of tiles away from the unit's
 		 * current tile. If the tile is within both the lower and higher ranges
@@ -947,7 +950,12 @@ namespace awe {
 		 * for example, ensure that APCs always resupply adjacent units at the
 		 * start of every turn before any planes crash or ships sink. There is no
 		 * guaranteed order defined for units that fall in the same priority level.
-		 * By default, units have the lowest priority level.
+		 * By default, units have the lowest priority level.\n
+		 *
+		 * Cancapture and canonlyunloadfrom are arrays of terrain type bank IDs. If
+		 * no terrain type IDs are given for canonlyunloadfrom, then it is assumed
+		 * that the unit can unload from any tile. If cancapture is empty, however,
+		 * the unit won't be able to capture anything.
 		 * @param id         The ID of the bank entry.
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
@@ -1139,14 +1147,32 @@ namespace awe {
 			noexcept;
 
 		/**
+		 * Finds out if this type of unit can unload from a given terrain type.
+		 * @param  typeID The ID of the type of terrain to test.
+		 * @return \c TRUE if yes, \c FALSE otherwise.
+		 */
+		bool canUnloadFrom(const awe::BankID typeID) const noexcept;
+
+		/**
+		 * Overloaded version of \c canUnloadFrom() that checks using a given
+		 * terrain type.
+		 * @param  type The terrain type to check for. Returns \c FALSE if
+		 *              \c nullptr.
+		 * @return \c TRUE if the given terrain type allows units of this type to
+		 *         unload units from it, \c FALSE if not.
+		 */
+		bool canUnloadFrom(const std::shared_ptr<const awe::terrain>& type) const
+			noexcept;
+
+		/**
 		 * Finds out if this type of unit can hide.
 		 * @return \c TRUE if yes, \c FALSE otherwise.
 		 */
 		bool canHide() const noexcept;
 
 		/**
-		 * Updates the stored terrain type properties pointers for terrains that
-		 * can be captured by this type of unit.
+		 * Updates the stored terrain type properties pointers stored in this unit
+		 * type.
 		 * @param terrainBank A reference to the terrain type bank to pull the
 		 *                    pointers from.
 		 */
@@ -1194,6 +1220,21 @@ namespace awe {
 		 * @return All the types of terrain that can be captured by this unit.
 		 */
 		std::vector<std::shared_ptr<const awe::terrain>> copyCapturableTerrains()
+			const noexcept;
+
+		/**
+		 * Copies the internal list of IDs of terrain types this unit can unload
+		 * from and returns it.
+		 * @return All the IDs of the types of terrain.
+		 */
+		std::vector<awe::BankID> copyUnloadableTerrainIDs() const noexcept;
+
+		/**
+		 * Copies the internal list of terrains that allow this unit type to unload
+		 * units from it, and returns it.
+		 * @return All the types of terrain.
+		 */
+		std::vector<std::shared_ptr<const awe::terrain>> copyUnloadableTerrains()
 			const noexcept;
 
 		/**
@@ -1308,6 +1349,19 @@ namespace awe {
 		 */
 		mutable std::vector<std::shared_ptr<const awe::terrain>>
 			_canCaptureTheseTerrainTypes;
+
+		/**
+		 * List of terrain type IDs that this unit type can unload from.
+		 */
+		std::vector<awe::BankID> _canUnloadFromThese;
+
+		/**
+		 * List of terrain types that this unit type can unload from.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateTerrainTypes().
+		 */
+		mutable std::vector<std::shared_ptr<const awe::terrain>>
+			_canUnloadFromTheseTerrainTypes;
 
 		/**
 		 * Can this unit hide?
