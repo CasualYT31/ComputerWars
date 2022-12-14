@@ -53,21 +53,23 @@ namespace sfx {
 
 		/**
 		 * Retrieves the frame count of a given sprite.
-		 * @param  sprite The sprite to retrieve the frame count of.
-		 * @return The number of frames the sprite has. \c 0 if the given sprite
-		 *         does not exist (an error will also be logged in this case).
+		 * @warning Logging has been disabled in this method.
+		 * @param   sprite The sprite to retrieve the frame count of.
+		 * @return  The number of frames the sprite has. \c 0 if the given sprite
+		 *          does not exist (an error will also be logged in this case).
 		 */
 		std::size_t getFrameCount(const std::string& sprite) const noexcept;
 
 		/**
 		 * Retrieves one of a sprite's frame's bounding rectangles.
-		 * @param  sprite The sprite whose frame is to be queried.
-		 * @param  frame  The 0-based ID of the frame to retrieve the bounding box
-		 *                of.
-		 * @return The width, height, and upper-left location of the given sprite's
-		 *         frame in the spritesheet texture. A blank rect will be returned
-		 *         if either the sprite or the frame of the sprite did not exist
-		 *         (an error will also be logged in this case).
+		 * @warning Logging has been disabled in this method.
+		 * @param   sprite The sprite whose frame is to be queried.
+		 * @param   frame  The 0-based ID of the frame to retrieve the bounding box
+		 *                 of.
+		 * @return  The width, height, and upper-left location of the given
+		 *          sprite's frame in the spritesheet texture. A blank rect will be
+		 *          returned if either the sprite or the frame of the sprite did
+		 *          not exist (an error will also be logged in this case).
 		 */
 		sf::IntRect getFrameRect(const std::string& sprite,
 			const std::size_t frame) const noexcept;
@@ -75,14 +77,26 @@ namespace sfx {
 		/**
 		 * Retrieves the intended duration that a given frame of a given sprite is
 		 * to remain visible for.
-		 * @param  sprite The sprite whose frame is to be queried.
-		 * @param  frame  The 0-based ID of the frame to retrieve the duration of.
-		 * @return The duration of the frame. A duration of \c 0 will be returned
-		 *         if either the sprite or the frame of the sprite did not exist
-		 *         (an error will also be logged in this case).
+		 * @warning Logging has been disabled in this method.
+		 * @param   sprite The sprite whose frame is to be queried.
+		 * @param   frame  The 0-based ID of the frame to retrieve the duration of.
+		 * @return  The duration of the frame. A duration of \c 0 will be returned
+		 *          if either the sprite or the frame of the sprite did not exist
+		 *          (an error will also be logged in this case).
 		 */
 		sf::Time getFrameDuration(const std::string& sprite,
 			const std::size_t frame) const noexcept;
+
+		/**
+		 * Retrieves the offset intended to be applied to a sprite as it is being
+		 * drawn.
+		 * @warning Logging has been disabled in this method.
+		 * @param   sprite The sprite whose offset is to be queried.
+		 * @return  The offset to apply to the sprite. <tt>(0, 0)</tt> will be
+		 *          returned if the given sprite did not exist (an error will also
+		 *          be logged in this case).
+		 */
+		sf::Vector2f getSpriteOffset(const std::string& sprite) const noexcept;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -99,7 +113,11 @@ namespace sfx {
 		 *         [X,Y,W,H].</li>
 		 *     <li>\c durations - An array of integers. Each integer represents the
 		 *         duration of time which the corresponding frame should last for
-		 *         on screen, in milliseconds.</li></ul>
+		 *         on screen, in milliseconds.</li>
+		 *     <li>\c offset - An array that must contain two floats, [X, Y]. This
+		 *         will store offsets along the X and Y axes that the sprite will
+		 *         always be drawn with. If this array isn't provided, then an
+		 *         offset of [0, 0] is assumed.</li></ul>
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return If the spritesheet graphic could not be loaded, \c FALSE is
@@ -137,6 +155,11 @@ namespace sfx {
 		 * The durations of each frame of all of the sprites.
 		 */
 		std::unordered_map<std::string, std::vector<sf::Time>> _durations;
+
+		/**
+		 * The offsets that are to be applied to each sprite.
+		 */
+		std::unordered_map<std::string, sf::Vector2f> _offsets;
 	};
 
 	/**

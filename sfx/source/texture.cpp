@@ -33,7 +33,7 @@ std::size_t sfx::animated_spritesheet::getFrameCount(
 	const std::string& sprite) const noexcept {
 	try {
 		return _frames.at(sprite).size();
-	} catch (std::out_of_range&) {
+	} catch (const std::out_of_range&) {
 		/*
 		_logger.error("Error whilst attempting to retrieve the frame count of the "
 			"sprite \"{}\": it does not exist!", sprite); */
@@ -47,13 +47,13 @@ sf::IntRect sfx::animated_spritesheet::getFrameRect(const std::string& sprite,
 		const std::vector<sf::IntRect>& frames = _frames.at(sprite);
 		try {
 			return frames.at(frame);
-		} catch (std::out_of_range&) {
+		} catch (const std::out_of_range&) {
 			/*
 			_logger.error("Error whilst attempting to retrieve the rect of frame "
 				"{} of the sprite \"{}\": the frame does not exist!", frame,
 				sprite); */
 		}
-	} catch (std::out_of_range&) {
+	} catch (const std::out_of_range&) {
 		/*
 		_logger.error("Error whilst attempting to retrieve the rect of frame {} "
 			"of the sprite \"{}\": the sprite does not exist!", frame, sprite); */
@@ -67,19 +67,31 @@ sf::Time sfx::animated_spritesheet::getFrameDuration(const std::string& sprite,
 		const std::vector<sf::Time>& frames = _durations.at(sprite);
 		try {
 			return frames.at(frame);
-		} catch (std::out_of_range&) {
+		} catch (const std::out_of_range&) {
 			/*
 			_logger.error("Error whilst attempting to retrieve the duration of "
 				"frame {} of the sprite \"{}\": the frame does not exist!", frame,
 				sprite); */
 		}
-	} catch (std::out_of_range&) {
+	} catch (const std::out_of_range&) {
 		/*
 		_logger.error("Error whilst attempting to retrieve the duration of frame "
 			"{} of the sprite \"{}\": the sprite does not exist!", frame, sprite);
 			*/
 	}
 	return sf::Time();
+}
+
+sf::Vector2f sfx::animated_spritesheet::getSpriteOffset(const std::string& sprite)
+	const noexcept {
+	try {
+		return _offsets.at(sprite);
+	} catch (const std::out_of_range&) {
+		/*
+		_logger.error("Error whilst attempting to retrieve the offset of sprite "
+			"\"{}\": the sprite does not exist!", sprite); */
+	}
+	return {};
 }
 
 bool sfx::animated_spritesheet::_load(engine::json& j) noexcept {
@@ -126,9 +138,17 @@ bool sfx::animated_spritesheet::_load(engine::json& j) noexcept {
 						"{} and the number of durations was {}.", i.key(),
 						_frames[i.key()].size(), _durations[i.key()].size());
 				}
+				// Read the sprite's offset, if one was given.
+				_offsets[i.key()] = sf::Vector2f();
+				if (i.value().contains("offset")) {
+					std::array<float, 2> offset;
+					j.applyArray(offset, { "sprites", i.key(), "offset" });
+					j.resetState();
+					_offsets[i.key()] = sf::Vector2f(offset.at(0), offset.at(1));
+				}
 			}
 		}
-	} catch (nlohmann::json::exception& e) {
+	} catch (const nlohmann::json::exception& e) {
 		_logger.error("There was an error whilst attempting to read sprite info: "
 			"{}.", e.what());
 	}
@@ -192,7 +212,7 @@ bool sfx::animated_sprite::animate(const sf::RenderTarget& target,
 		_sprite.setTexture(_sheet->getTexture());
 		_sprite.setTextureRect(_sheet->getFrameRect(_spriteID,_currentFrame));
 		return getCurrentFrame() == _sheet->getFrameCount(_spriteID) - 1;
-	} catch (std::out_of_range& e) {
+	} catch (const std::out_of_range& e) {
 		if (!_errored) {
 			_logger.error("Attempted to access non-existent frame {} of sprite {}"
 				": {}", _currentFrame, _spriteID, e.what());
@@ -249,10 +269,17 @@ void sfx::animated_sprite::setPosition(const sf::Vector2f& newPosition) noexcept
 }
 
 sf::Vector2f sfx::animated_sprite::getPosition() const noexcept {
-	return _sprite.getPosition();
+	return _sprite.getPosition() + ((_sheet) ?
+		(_sheet->getSpriteOffset(_spriteID)) : ( sf::Vector2f() ));
 }
 
 void sfx::animated_sprite::draw(sf::RenderTarget& target, sf::RenderStates states)
-const {
+	const {
+	if (_sheet) {
+		// Always apply offset before any other transformation.
+		const auto transformations = states.transform;
+		states.transform = sf::Transform().
+			translate(_sheet->getSpriteOffset(_spriteID)).combine(transformations);
+	}
 	target.draw(_sprite, states);
 }
