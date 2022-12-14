@@ -306,6 +306,11 @@ namespace sfx {
 			 * whilst in set focus.
 			 */
 			bool mouseGrabbed = false;
+
+			/**
+			 * Stores whether or not the window should be maximised.
+			 */
+			bool maximised = false;
 		}
 		/**
 		 * This stores all the style flags associated with this
@@ -314,6 +319,36 @@ namespace sfx {
 		style;
 #pragma pack(pop)
 	};
+
+	/**
+	 * Either enables or disables the maximised state of a given window.
+	 * On unsupported platforms, this function is guaranteed not to amend the
+	 * window in any way. Currently, this function is only supported on Windows.
+	 * @param  window   The native handle of the window to update.
+	 * @param  maximise \c TRUE if the window is to be maximised, \C FALSE if the
+	 *                  window is to be set to normal/not maximised.
+	 * @param  logger   Pointer to a logger object to write any errors to if
+	 *                  \c FALSE is returned. If \c nullptr is given, then no log
+	 *                  messages will be written.
+	 * @return \c TRUE if this function was called on a supported platform, and the
+	 *         operation was successful. \c FALSE in all other cases.
+	 */
+	bool maximiseWindow(const sf::WindowHandle window, const bool maximise,
+		engine::logger* const logger = nullptr) noexcept;
+
+	/**
+	 * Determines if a window is in maximised state or not.
+	 * Currently, this function is only supported on Windows.
+	 * @param  window The native handle of the window to update.
+	 * @param  logger Pointer to a logger object to write any errors to if the call
+	 *                failed in any way. If \c nullptr is given, then no log
+	 *                messages will be written.
+	 * @return \c TRUE if the window is in the maximised state, \c FALSE otherwise,
+	 *         or if the function is called on an unsupported platform or otherwise
+	 *         failed.
+	 */
+	bool isWindowMaximised(const sf::WindowHandle window,
+		engine::logger* const logger = nullptr) noexcept;
 
 	/**
 	 * This class is a 'dynamically' configurable render window.
@@ -337,9 +372,9 @@ namespace sfx {
 		/**
 		 * Opens the render window using configurations.
 		 * Since this class is an \c sf::RenderWindow, the \c create() method can
-		 * be used. However, only the size and position of the window can be
-		 * updated in the internal configurations if this is done: any change in
-		 * any other property won't be saved.\n
+		 * be used. However, only the maximised state, size and position of the
+		 * window can be updated in the internal configurations if this is done:
+		 * any change in any other property won't be saved.\n
 		 * In addition to this, if the client uses \c create() to switch from
 		 * windowed to fullscreen or vice versa, positional data may not be saved
 		 * correctly.\n
@@ -459,7 +494,12 @@ namespace sfx {
 		 *        <tr><td>grabbedmouse</td>
 		 *        <td>bool</td>
 		 *        <td>\c TRUE if the render window keeps the mouse cursor within
-		 *            the window if in set focus.</td></tr></table>
+		 *            the window if in set focus.</td>
+		 * 
+		 *        <tr><td>maximised</td>
+		 *        <td>bool</td>
+		 *        <td>\c TRUE if the render window is to be maximised, \c FALSE if
+		 *            not.</td></tr></table>
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return Always returns \c TRUE.
