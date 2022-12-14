@@ -259,27 +259,8 @@ std::size_t sfx::animated_sprite::operator--(int) noexcept {
 	return old;
 }
 
-sf::Vector2f sfx::animated_sprite::getSize() const noexcept {
-	return sf::Vector2f((float)_sprite.getTextureRect().width,
-		(float)_sprite.getTextureRect().height);
-}
-
-void sfx::animated_sprite::setPosition(const sf::Vector2f& newPosition) noexcept {
-	_sprite.setPosition(newPosition);
-}
-
-sf::Vector2f sfx::animated_sprite::getPosition() const noexcept {
-	return _sprite.getPosition() + ((_sheet) ?
-		(_sheet->getSpriteOffset(_spriteID)) : ( sf::Vector2f() ));
-}
-
 void sfx::animated_sprite::draw(sf::RenderTarget& target, sf::RenderStates states)
 	const {
-	if (_sheet) {
-		// Always apply offset before any other transformation.
-		const auto transformations = states.transform;
-		states.transform = sf::Transform().
-			translate(_sheet->getSpriteOffset(_spriteID)).combine(transformations);
-	}
+	if (_sheet) states.transform.translate(_sheet->getSpriteOffset(_spriteID));
 	target.draw(_sprite, states);
 }

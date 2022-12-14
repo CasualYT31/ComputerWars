@@ -46,6 +46,15 @@ namespace sfx {
 		animated_spritesheet(const std::string& name = "spritesheet") noexcept;
 
 		/**
+		 * Determines whether or not a sprite with a given ID exists in this sheet.
+		 * @param  sprite The ID of the sprite to search for.
+		 * @return \c TRUE if a sprite exists with this ID, \c FALSE otherwise.
+		 */
+		inline bool doesSpriteExist(const std::string& sprite) const noexcept {
+			return _frames.find(sprite) != _frames.end();
+		}
+
+		/**
 		 * Retrieves the entire spritesheet graphic.
 		 * @return A reference to the texture object storing the spritesheet.
 		 */
@@ -293,19 +302,36 @@ namespace sfx {
 		 * @return The size of the internal sprite, specifically, the texture rect
 		 *         width and height, at the time of calling.
 		 */
-		sf::Vector2f getSize() const noexcept;
+		inline sf::Vector2f getSize() const noexcept {
+			return sf::Vector2f(static_cast<float>(_sprite.getTextureRect().width),
+				static_cast<float>(_sprite.getTextureRect().height));
+		}
 
 		/**
 		 * Sets the position of the internal sprite.
 		 * @param newPosition The new position, in pixels, of the sprite.
 		 */
-		void setPosition(const sf::Vector2f& newPosition) noexcept;
+		inline void setPosition(const sf::Vector2f& newPosition) noexcept {
+			_sprite.setPosition(newPosition);
+		}
 
 		/**
 		 * Gets the position of the internal sprite.
 		 * @return The position of the sprite, in pixels.
 		 */
-		sf::Vector2f getPosition() const noexcept;
+		inline sf::Vector2f getPosition() const noexcept {
+			return getPositionWithoutOffset() + ((_sheet) ?
+				(_sheet->getSpriteOffset(_spriteID)) : (sf::Vector2f()));
+		}
+
+		/**
+		 * Gets the position of the internal sprite without the offset stored in
+		 * the spritesheet.
+		 * @return The position of the sprite, in pixels.
+		 */
+		inline sf::Vector2f getPositionWithoutOffset() const noexcept {
+			return _sprite.getPosition();
+		}
 
 		/**
 		 * This drawable's \c animate() method.

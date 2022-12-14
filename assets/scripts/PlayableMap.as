@@ -56,7 +56,7 @@ class PlayableMap {
 				"PlayableMap; the game will crash soon!");
 		} else {
 			@map = mapToPlayOn;
-			setNormalCursorSprite();
+			setNormalCursorSprites();
 		}
 	}
 
@@ -123,10 +123,23 @@ class PlayableMap {
 	}
 
 	/**
-	 * Reverts the cursor back to the normal sprite.
+	 * Reverts the cursor back to the normal sprites.
 	 */
-	void setNormalCursorSprite() {
-		map.setCursorSprite("cursor");
+	void setNormalCursorSprites() {
+		map.setULCursorSprite("ulcursor");
+		map.setURCursorSprite("urcursor");
+		map.setLLCursorSprite("llcursor");
+		map.setLRCursorSprite("lrcursor");
+	}
+
+	/**
+	 * Sets the cursor to have the delete cursor sprites.
+	 */
+	void setDeleteCursorSprites() {
+		map.setULCursorSprite("deletecursor");
+		map.setURCursorSprite("deletecursor");
+		map.setLLCursorSprite("deletecursor");
+		map.setLRCursorSprite("deletecursor");
 	}
 
 	///////////////////////////////

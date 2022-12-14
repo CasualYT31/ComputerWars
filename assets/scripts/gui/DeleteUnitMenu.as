@@ -7,14 +7,14 @@ void DeleteUnitMenuSetUp() {}
  * When the menu is opened, the cursor graphic will change.
  */
 void DeleteUnitMenuOpen() {
-	game.map.setCursorSprite("deletecursor");
+	game.setDeleteCursorSprites();
 }
 
 /**
  * When the menu is closed, the cursor graphic will revert back to normal.
  */
 void DeleteUnitMenuClose() {
-	game.setNormalCursorSprite();
+	game.setNormalCursorSprites();
 }
 
 /**

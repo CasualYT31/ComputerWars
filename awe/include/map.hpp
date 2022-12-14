@@ -95,6 +95,16 @@ namespace awe {
 	};
 
 	/**
+	 * Represents quadrants of a rectangle such as a render target.
+	 */
+	enum class quadrant {
+		UpperLeft,
+		UpperRight,
+		LowerLeft,
+		LowerRight
+	};
+
+	/**
 	 * Class which represents a map, and the armies and units that play on it.
 	 * Only basic checks are carried out in this class; all game logic is separate.
 	 * If any of these basic checks fail, they will be logged.
@@ -1302,14 +1312,74 @@ namespace awe {
 		 * @return \c TRUE if the UL of the cursor graphic is on the left half of
 		 *         the target, \c FALSE if it is on the right half of the target.
 		 */
-		bool isCursorOnLeftSide() const noexcept;
+		inline bool isCursorOnLeftSide() const noexcept {
+			return _cursor.getPositionWithoutOffset().x < _targetSizeCache.x /
+				_mapScalingFactor / _scalingCache / 2.0f;
+		}
 
 		/**
-		 * Sets which sprite from the icon spritesheet to use as the cursor.
-		 * @warning Must be called, or else the cursor will not show up!
-		 * @param   sprite The animated sprite to use as the cursor.
+		 * Determines if the cursor is on the top or bottom side of the target.
+		 * @return \c TRUE if the UL of the cursor graphic is on the top half of
+		 *         the target, \c FALSE if it is on the bottom half of the target.
 		 */
-		void setCursorSprite(const std::string& sprite) noexcept;
+		inline bool isCursorOnTopSide() const noexcept {
+			return _cursor.getPositionWithoutOffset().y < _targetSizeCache.y /
+				_mapScalingFactor / _scalingCache / 2.0f;
+		}
+
+		/**
+		 * Determines which quadrant of the render target the cursor is in.
+		 * @return Where the UL of the cursor sprite is determined to be.
+		 */
+		awe::quadrant getCursorQuadrant() const noexcept;
+
+		/**
+		 * Sets which sprite from the icon spritesheet to use as the cursor when
+		 * the cursor is in the upper left quadrant of the screen.
+		 * If \c _sheet_icon isn't \c nullptr, and the given sprite doesn't exist
+		 * in that sheet, then a warning will be logged, but the assignment will
+		 * still go ahead.
+		 * @warning Must be called, or else the cursor will not show up if it is in
+		 *          this quadrant!
+		 * @param   sprite The animated sprite to use as the UL cursor.
+		 */
+		void setULCursorSprite(const std::string& sprite) noexcept;
+
+		/**
+		 * Sets which sprite from the icon spritesheet to use as the cursor when
+		 * the cursor is in the upper right quadrant of the screen.
+		 * If \c _sheet_icon isn't \c nullptr, and the given sprite doesn't exist
+		 * in that sheet, then a warning will be logged, but the assignment will
+		 * still go ahead.
+		 * @warning Must be called, or else the cursor will not show up if it is in
+		 *          this quadrant!
+		 * @param   sprite The animated sprite to use as the UR cursor.
+		 */
+		void setURCursorSprite(const std::string& sprite) noexcept;
+
+		/**
+		 * Sets which sprite from the icon spritesheet to use as the cursor when
+		 * the cursor is in the lower left quadrant of the screen.
+		 * If \c _sheet_icon isn't \c nullptr, and the given sprite doesn't exist
+		 * in that sheet, then a warning will be logged, but the assignment will
+		 * still go ahead.
+		 * @warning Must be called, or else the cursor will not show up if it is in
+		 *          this quadrant!
+		 * @param   sprite The animated sprite to use as the LL cursor.
+		 */
+		void setLLCursorSprite(const std::string& sprite) noexcept;
+
+		/**
+		 * Sets which sprite from the icon spritesheet to use as the cursor when
+		 * the cursor is in the lower right quadrant of the screen.
+		 * If \c _sheet_icon isn't \c nullptr, and the given sprite doesn't exist
+		 * in that sheet, then a warning will be logged, but the assignment will
+		 * still go ahead.
+		 * @warning Must be called, or else the cursor will not show up if it is in
+		 *          this quadrant!
+		 * @param   sprite The animated sprite to use as the LR cursor.
+		 */
+		void setLRCursorSprite(const std::string& sprite) noexcept;
 
 		/**
 		 * Calculates the minimum pixel size of a tile as seen by the user.
@@ -1717,10 +1787,32 @@ namespace awe {
 
 		/**
 		 * The animated sprite representing the cursor.
-		 * The cursor sprite is currently hard-coded to always be the first sprite
-		 * of the icon spritesheet provided later.
 		 */
 		sfx::animated_sprite _cursor;
+
+		/**
+		 * The ID of the sprite to use for the cursor when it is in the UL corner
+		 * of the screen.
+		 */
+		std::string _ulCursorSprite;
+
+		/**
+		 * The ID of the sprite to use for the cursor when it is in the UR corner
+		 * of the screen.
+		 */
+		std::string _urCursorSprite;
+
+		/**
+		 * The ID of the sprite to use for the cursor when it is in the LL corner
+		 * of the screen.
+		 */
+		std::string _llCursorSprite;
+
+		/**
+		 * The ID of the sprite to use for the cursor when it is in the LR corner
+		 * of the screen.
+		 */
+		std::string _lrCursorSprite;
 
 		/**
 		 * Flag used to update the old \c _tilePane.

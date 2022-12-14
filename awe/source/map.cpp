@@ -65,6 +65,21 @@ void awe::map::Register(asIScriptEngine* engine,
 		document->DocumentObjectEnum(r, "The list of shaders that can be applied "
 			"to the tiles that are available.");
 
+		///////////////////
+		// QUADRANT ENUM //
+		///////////////////
+		r = engine->RegisterEnum("Quadrant");
+		engine->RegisterEnumValue("Quadrant", "UpperLeft",
+			static_cast<int>(awe::quadrant::UpperLeft));
+		engine->RegisterEnumValue("Quadrant", "UpperRight",
+			static_cast<int>(awe::quadrant::UpperRight));
+		engine->RegisterEnumValue("Quadrant", "LowerLeft",
+			static_cast<int>(awe::quadrant::LowerLeft));
+		engine->RegisterEnumValue("Quadrant", "LowerRight",
+			static_cast<int>(awe::quadrant::LowerRight));
+		document->DocumentObjectEnum(r, "The different quadrants of a rectangle, "
+			"such as a render target.");
+
 		//////////////////////
 		// GLOBAL FUNCTIONS //
 		//////////////////////
@@ -465,8 +480,28 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, isCursorOnLeftSide), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void setCursorSprite(const string&in)",
-			asMETHOD(awe::map, setCursorSprite), asCALL_THISCALL);
+			"bool isCursorOnTopSide() const",
+			asMETHOD(awe::map, isCursorOnTopSide), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"Quadrant getCursorQuadrant() const",
+			asMETHOD(awe::map, getCursorQuadrant), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setULCursorSprite(const string&in)",
+			asMETHOD(awe::map, setULCursorSprite), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setURCursorSprite(const string&in)",
+			asMETHOD(awe::map, setURCursorSprite), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setLLCursorSprite(const string&in)",
+			asMETHOD(awe::map, setLLCursorSprite), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setLRCursorSprite(const string&in)",
+			asMETHOD(awe::map, setLRCursorSprite), asCALL_THISCALL);
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
@@ -2035,13 +2070,53 @@ void awe::map::setMapScalingFactor(const float factor) noexcept {
 	_mapOffset = sf::Vector2f(0.0f, 0.0f);
 }
 
-bool awe::map::isCursorOnLeftSide() const noexcept {
-	return _cursor.getPosition().x < _targetSizeCache.x / _mapScalingFactor /
-		_scalingCache / 2.0f;
+awe::quadrant awe::map::getCursorQuadrant() const noexcept {
+	const bool isTop = isCursorOnTopSide();
+	if (isCursorOnLeftSide()) {
+		if (isTop) {
+			return awe::quadrant::UpperLeft;
+		} else {
+			return awe::quadrant::LowerLeft;
+		}
+	} else {
+		if (isTop) {
+			return awe::quadrant::UpperRight;
+		} else {
+			return awe::quadrant::LowerRight;
+		}
+	}
 }
 
-void awe::map::setCursorSprite(const std::string& sprite) noexcept {
-	_cursor.setSprite(sprite);
+void awe::map::setULCursorSprite(const std::string& sprite) noexcept {
+	_ulCursorSprite = sprite;
+	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
+		_logger.warning("setULCursorSprite was just given sprite with ID \"{}\", "
+			"which doesn't exist in the spritesheet!", sprite);
+	}
+}
+
+void awe::map::setURCursorSprite(const std::string& sprite) noexcept {
+	_urCursorSprite = sprite;
+	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
+		_logger.warning("setURCursorSprite was just given sprite with ID \"{}\", "
+			"which doesn't exist in the spritesheet!", sprite);
+	}
+}
+
+void awe::map::setLLCursorSprite(const std::string& sprite) noexcept {
+	_llCursorSprite = sprite;
+	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
+		_logger.warning("setLLCursorSprite was just given sprite with ID \"{}\", "
+			"which doesn't exist in the spritesheet!", sprite);
+	}
+}
+
+void awe::map::setLRCursorSprite(const std::string& sprite) noexcept {
+	_lrCursorSprite = sprite;
+	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
+		_logger.warning("setLRCursorSprite was just given sprite with ID \"{}\", "
+			"which doesn't exist in the spritesheet!", sprite);
+	}
 }
 
 sf::Vector2u awe::map::getTileSize() const noexcept {
@@ -2259,6 +2334,20 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 		unit.second.animate(target, scaling);
 	}
 	// Step 4. the cursor.
+	const auto quadrant = getCursorQuadrant();
+	switch (quadrant) {
+	case awe::quadrant::LowerLeft:
+		_cursor.setSprite(_llCursorSprite);
+		break;
+	case awe::quadrant::LowerRight:
+		_cursor.setSprite(_lrCursorSprite);
+		break;
+	case awe::quadrant::UpperRight:
+		_cursor.setSprite(_urCursorSprite);
+		break;
+	default: // Let awe::quadrant::UpperLeft be the default.
+		_cursor.setSprite(_ulCursorSprite);
+	}
 	_cursor.animate(target, scaling);
 	// End.
 	return false;
