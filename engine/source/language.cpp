@@ -35,7 +35,7 @@ void engine::expand_string::setVarChar(const char varchar) noexcept {
 	_varchar = varchar;
 }
 
-// there is likely a cleaner way of implementing this for future reference
+// There is likely a cleaner way of implementing this for future reference.
 // I'm not sure why I didn't just grab the string contents directly using str()...
 std::string engine::expand_string::insert(const std::string& original) noexcept {
 	_sstream << original;
@@ -120,7 +120,7 @@ std::string engine::language_dictionary::getLanguage() const noexcept {
 
 bool engine::language_dictionary::_load(engine::json& j) noexcept {
 	std::string buffer = "";
-	// firstly, load language scripts
+	// Firstly, load language scripts.
 	_languageFiles.clear();
 	_currentLanguage = "";
 	nlohmann::ordered_json jj = j.nlohmannJSON();
@@ -134,7 +134,7 @@ bool engine::language_dictionary::_load(engine::json& j) noexcept {
 			}
 		}
 	}
-	// lastly, load current language
+	// Lastly, load current language.
 	j.apply(buffer, { "lang" }, &_currentLanguage);
 	if (!j.inGoodState()) {
 		return false;

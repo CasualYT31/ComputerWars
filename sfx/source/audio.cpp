@@ -45,13 +45,12 @@ void sfx::audio::play(std::string name) noexcept {
 	if (name == "") name = getCurrentMusic();
 	if (name == "") return;
 	if (_sound.find(name) != _sound.end()) {
-		// play the sound /*if not already playing*/
+		// Play the sound /*if not already playing*/.
 		/*if (_sound[name].sound.getStatus() != sf::Sound::Playing)*/
 			_sound[name].sound.play();
 	} else if (_music.find(name) != _music.end()) {
-		// play the music if not already playing
-		// also stop the currently playing music if there is one
-		// if paused, resume
+		// Play the music if not already playing. Also stop the currently playing
+		// music if there is one. If paused, resume.
 		if (_music[name].music.getStatus() == sf::Music::Paused) {
 			_music[name].music.play();
 		} else if (_music[name].music.getStatus() == sf::Music::Stopped) {

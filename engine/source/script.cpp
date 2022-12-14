@@ -414,10 +414,10 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
         // version then we must set up the context.
         if (!_setupContext(name)) return false;
     }
-    // first check that all parameters have been accounted for
-    // passing too few arguments is dangerous when object pointer paramters haven't
-    // been given as this will cause the program to crash
-    // _setupContext() ensures that the function exists
+    // First check that all parameters have been accounted for. Passing too few
+    // arguments is dangerous when object pointer paramters haven't been given as
+    // this will cause the program to crash. _setupContext() ensures that the
+    // function exists.
     auto expected = _engine->GetModule("ComputerWars")->
         GetFunctionByName(name.c_str())->GetParamCount();
     if (expected != _argumentID) {

@@ -83,7 +83,7 @@ sf::Time sfx::animated_spritesheet::getFrameDuration(const std::string& sprite,
 }
 
 bool sfx::animated_spritesheet::_load(engine::json& j) noexcept {
-	// firstly, load the spritesheet
+	// Firstly, load the spritesheet.
 	std::string imgpath;
 	j.apply(imgpath, { "path" });
 	if (!j.inGoodState()) {
@@ -96,15 +96,15 @@ bool sfx::animated_spritesheet::_load(engine::json& j) noexcept {
 			imgpath);
 		return false;
 	}
-	// secondly, go through all the sprites and store the info
+	// Secondly, go through all the sprites and store the info.
 	_frames.clear();
 	_durations.clear();
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	try {
 		for (auto& i : jj["sprites"].items()) {
-			// ignore any key-value pairs where the value is not an object
+			// Ignore any key-value pairs where the value is not an object.
 			if (i.value().is_object()) {
-				// go through the frames
+				// Go through the frames.
 				for (std::size_t f = 0; f < i.value()["frames"].size(); f++) {
 					sf::IntRect rect;
 					rect.left = i.value()["frames"][f][0];
@@ -113,14 +113,14 @@ bool sfx::animated_spritesheet::_load(engine::json& j) noexcept {
 					rect.height = i.value()["frames"][f][3];
 					_frames[i.key()].push_back(rect);
 				}
-				// go through the durations
+				// Go through the durations.
 				for (std::size_t f = 0; f < i.value()["durations"].size(); f++) {
 					sf::Time time;
 					time = sf::milliseconds(i.value()["durations"][f]);
 					_durations[i.key()].push_back(time);
 				}
-				// report a warning if the frame count did not match the duration
-				// count
+				// Report a warning if the frame count did not match the duration
+				// count.
 				if (_frames[i.key()].size() != _durations[i.key()].size()) {
 					_logger.warning("The number of frames for sprite \"{}\" was "
 						"{} and the number of durations was {}.", i.key(),

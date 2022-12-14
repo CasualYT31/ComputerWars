@@ -1,35 +1,42 @@
 {
-	"CLEAR": {"longname": "Clear",
+	"CLEAR": {
+		"longname": "Clear",
 		"shortname": "Clr",
 		"icon": "",
 		"description": "Clear weather."
 	},
-	"RAIN": {"longname": "Rain",
+	"RAIN": {
+		"longname": "Rain",
 		"shortname": "Rain",
 		"icon": "",
 		"description": "<Rain effect?>."
 	},
-	"SANDSTORM": {"longname": "Sandstorm",
+	"SANDSTORM": {
+		"longname": "Sandstorm",
 		"shortname": "Sand",
 		"icon": "",
 		"description": "Indirect units suffer a -1 range penalty."
 	},
-	"SNOW": {"longname": "Snow",
+	"SNOW": {
+		"longname": "Snow",
 		"shortname": "Snow",
 		"icon": "",
 		"description": "Units use up more fuel to move."
 	},
-	"FOG": {"longname": "Fog-of-War",
+	"FOG": {
+		"longname": "Fog-of-War",
 		"shortname": "Fog",
 		"icon": "",
 		"description": "Not all of the map is visible in FoW."
 	},
-	"FOGRAIN": {"longname": "Fog-and-Rain",
+	"FOGRAIN": {
+		"longname": "Fog-and-Rain",
 		"shortname": "F&R",
 		"icon": "",
 		"description": "<-1 Vision?>."
 	},
-	"FOGSNOW": {"longname": "Fog-and-Snow",
+	"FOGSNOW": {
+		"longname": "Fog-and-Snow",
 		"shortname": "F&S",
 		"icon": "",
 		"description": "Fog and snow."

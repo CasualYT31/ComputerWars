@@ -42,7 +42,7 @@ void sfx::renderer::openWindow() noexcept {
 		(_settings.style.resize ? sf::Style::Resize : 0) |
 		(_settings.style.titlebar ? sf::Style::Titlebar : 0),
 		_settings.contextSettings);
-	// a funny effect with SFML happens when moving the window in full screen mode
+	// A funny effect with SFML happens when moving the window in full screen mode
 	// you can see it with multiple monitors: it's like a part of the window pops
 	// up on the other screen...
 	if (!_settings.style.fullscreen)
@@ -51,7 +51,7 @@ void sfx::renderer::openWindow() noexcept {
 	setVerticalSyncEnabled(_settings.style.vsync);
 	setMouseCursorVisible(_settings.style.mouseVisible);
 	setMouseCursorGrabbed(_settings.style.mouseGrabbed);
-	// apply icon
+	// Apply icon.
 	if (_settings.iconPath != "") {
 		sf::Image icon;
 		if (icon.loadFromFile(_settings.iconPath)) {

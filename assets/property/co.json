@@ -1,11 +1,13 @@
 {
-	"NOCO": {"longname": "NoCO",
+	"NOCO": {
+		"longname": "NoCO",
 		"shortname": "NoCO",
 		"icon": "noco",
 		"description": "",
 		"portrait": ""
 	},
-	"JAKE": {"longname": "Jake",
+	"JAKE": {
+		"longname": "Jake",
 		"shortname": "Jake",
 		"icon": "jakeface",
 		"description": "",

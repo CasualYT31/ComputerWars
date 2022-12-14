@@ -48,17 +48,17 @@ engine::json::json(const nlohmann::ordered_json& jobj, const std::string& name)
 bool engine::json::equalType(nlohmann::ordered_json& dest,
 	nlohmann::ordered_json& src) noexcept {
 	if (dest.type() == src.type()) return true;
-	// special case 1: unsigned onto signed
-	// when this JSON library parses a positive integer, it interrprets that as an
-	// unsigned integer
-	// however, so long as that positive integer is within the data limtis of int
-	// it could technically be used with signed integers as well
+	// Special case 1: unsigned onto signed.
+	// When this JSON library parses a positive integer, it interprets that as an
+	// unsigned integer. However, so long as that positive integer is within the
+	// data limtis of a signed int, it could technically be used with signed
+	// integers as well.
 	if (dest.is_number_integer() && src.is_number_unsigned() && src <= INT_MAX)
 		return true;
-	// special case 2: integer or unsigned onto float
+	// Special case 2: integer or unsigned onto float.
 	if (dest.is_number_float() &&
 		(src.is_number_integer() || src.is_number_unsigned())) return true;
-	// special case 3: float with a fraction of 0 onto integer or unsigned
+	// Special case 3: float with a fraction of 0 onto integer or unsigned.
 	double temp;
 	if ((dest.is_number_integer() || dest.is_number_unsigned()) &&
 		src.is_number_float() && modf(src, &temp) == 0.0) return true;

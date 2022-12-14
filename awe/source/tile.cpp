@@ -103,7 +103,7 @@ void awe::tile::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 }
 
 void awe::tile::_updateSpriteID() noexcept {
-	// if this tile has no type, leave the sprite ID alone
+	// If this tile has no type, leave the sprite ID alone.
 	if (_type) {
 		if (_owner == awe::army::NO_ARMY) {
 			_sprite.setSprite(_type->getNeutralTile());

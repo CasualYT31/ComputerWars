@@ -60,9 +60,9 @@ std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 				_fileCopy << "Gamepads" << std::endl;
 				// I have avoided assuming that the SFML doesn't leave out IDs:
 				// i.e. joystick 0 is connected, 1 is not connected, but 2 IS
-				// connected
+				// connected.
 				// I don't have 100% certainty regarding how the SFML deals with
-				// IDs, so I'd prefer to be safe even if it's not 100% efficient
+				// IDs, so I'd prefer to be safe even if it's not 100% efficient.
 				sf::Joystick::update();
 				for (unsigned int i = 0; i < sf::Joystick::Count; i++) {
 					_fileCopy << "Gamepad #" << i << " is " <<
@@ -126,11 +126,11 @@ engine::logger::logger(const std::string& name) noexcept {
 	try {
 		_name = name + "_" + std::to_string(_objectCount);
 		_logger = std::make_shared<spdlog::logger>(_name, engine::sink::Get());
-		// don't increment in to_string() so that if it throws, the object count
-		// isn't incremented
+		// Don't increment in to_string() so that if it throws, the object count
+		// isn't incremented.
 		_objectCount++;
-	} catch (std::exception& e) { // also catches spdlog errors, which might not be
-		                          // the case if another backend is used!
+	} catch (std::exception& e) { // Also catches spdlog errors, which might not be
+		                          // the case if another logging backend is used!
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
 }

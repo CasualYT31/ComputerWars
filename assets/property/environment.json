@@ -1,20 +1,24 @@
 {
-	"NORMAL": {"longname": "Normal",
+	"NORMAL": {
+		"longname": "Normal",
 		"shortname": "Nrml",
 		"icon": "",
 		"description": "Normal environment."
 	},
-	"WASTELAND": {"longname": "Wasteland",
+	"WASTELAND": {
+		"longname": "Wasteland",
 		"shortname": "Wstl",
 		"icon": "",
 		"description": "Wasteland environment."
 	},
-	"SNOWY": {"longname": "Snowy",
+	"SNOWY": {
+		"longname": "Snowy",
 		"shortname": "Snow",
 		"icon": "",
 		"description": "Snowy environment."
 	},
-	"SANDY": {"longname": "Sandy",
+	"SANDY": {
+		"longname": "Sandy",
 		"shortname": "Sand",
 		"icon": "",
 		"description": "Desert environment."
