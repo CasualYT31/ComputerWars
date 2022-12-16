@@ -14,7 +14,7 @@ add_library(${PROJECT_NAME} STATIC
 	"source/spritesheets.cpp"
 	"source/engine.cpp"
 	"source/typedef.cpp"
-)
+	"source/damage_sprite.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsAWE_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

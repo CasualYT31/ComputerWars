@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "language.hpp"
 #include <cmath>
 #include <stack>
+#include "damage_sprite.hpp"
 
 #pragma once
 
@@ -1873,6 +1874,13 @@ namespace awe {
 		 * Unavilable tiles shader.
 		 */
 		sf::Shader _unavailableTileShader;
+
+		// BASE DAMAGE SPRITE //
+
+		/**
+		 * The [temporary] damage tooltip.
+		 */
+		awe::damage_tooltip _damageTooltip;
 
 		//////////////////
 		// SPRITESHEETS //

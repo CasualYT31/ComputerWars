@@ -61,6 +61,16 @@
 			],
 			"offset": [ -9, -12 ]
 		},
+		"ulattackcursor": {
+			"frames": [ [ 139, 93, 59, 49 ] ],
+			"durations": [ 0 ],
+			"offset": [ -5, -5 ]
+		},
+		"damagetooltip": {
+			"frames": [ [ 169, 93, 32, 23 ] ],
+			"durations": [ 0 ],
+			"offset": [ 0, 0 ]
+		},
 		"deletecursor": {
 			"frames": [
 				[ 0, 132, 28, 31 ],
@@ -271,6 +281,10 @@
 		},
 		"unhideicon": {
 			"frames": [ [ 98, 149, 10, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"attackicon": {
+			"frames": [ [ 111, 100, 14, 13 ] ],
 			"durations": [ 0 ]
 		},
 		"infmove": {

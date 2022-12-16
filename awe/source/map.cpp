@@ -578,6 +578,16 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"Vector2 getUnitPreviewPosition(const UnitID) const",
 			asMETHOD(awe::map, getUnitPreviewPosition), asCALL_THISCALL);
+
+		// Temporary mappings.
+		r = engine->RegisterObjectMethod("Map",
+			"void TOOLTIP_setDamage(const uint)",
+			asMETHOD(awe::damage_tooltip, setDamage), asCALL_THISCALL, 0,
+			asOFFSET(awe::map, _damageTooltip), false);
+		r = engine->RegisterObjectMethod("Map",
+			"void TOOLTIP_visible(const bool)",
+			asMETHOD(awe::damage_tooltip, visible), asCALL_THISCALL, 0,
+			asOFFSET(awe::map, _damageTooltip), false);
 	}
 }
 
@@ -2148,6 +2158,7 @@ void awe::map::setIconSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
 	_sheet_icon = sheet;
 	_cursor.setSpritesheet(sheet);
+	_damageTooltip.setSpritesheet(sheet);
 	// Go through all of the units and set the new spritesheet to each one.
 	for (auto& unit : _units) unit.second.setIconSpritesheet(sheet);
 }
@@ -2350,6 +2361,8 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	}
 	_cursor.animate(target, scaling);
 	// End.
+	_damageTooltip.setPosition(_cursor.getPosition());
+	_damageTooltip.animate(target, scaling);
 	return false;
 }
 
@@ -2428,6 +2441,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	if (_tileIsVisible(getSelectedTile()) && !_cursor.getSprite().empty()) {
 		target.draw(_cursor, mapStates);
 	}
+	target.draw(_damageTooltip, mapStates);
 }
 
 awe::UnitID awe::map::_findUnitID() {

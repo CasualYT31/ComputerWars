@@ -133,6 +133,16 @@ class PlayableMap {
 	}
 
 	/**
+	 * Sets the cursor to have the attack cursor sprites.
+	 */
+	void setAttackCursorSprites() {
+		map.setULCursorSprite("ulattackcursor");
+		map.setURCursorSprite("ulattackcursor");
+		map.setLLCursorSprite("ulattackcursor");
+		map.setLRCursorSprite("ulattackcursor");
+	}
+
+	/**
 	 * Sets the cursor to have the delete cursor sprites.
 	 */
 	void setDeleteCursorSprites() {
