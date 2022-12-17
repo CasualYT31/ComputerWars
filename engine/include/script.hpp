@@ -62,6 +62,13 @@ namespace engine {
 		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
 
 	/**
+	 * Registers and documents the \c BinaryFile type, if it hasn't already been
+	 * registered.
+	 */
+	void RegisterFileType(asIScriptEngine* engine,
+		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+	/**
 	 * Base class for AngelScript reference types.
 	 * @tparam T A subclass should pass their class name in to this parameter.
 	 */

@@ -49,6 +49,7 @@ void awe::map::Register(asIScriptEngine* engine,
 		// DEPENDENCIES //
 		//////////////////
 		engine::RegisterVectorTypes(engine, document);
+		engine::RegisterFileType(engine, document);
 		awe::RegisterGameTypedefs(engine, document);
 		awe::closed_list_node::Register(engine, document);
 
