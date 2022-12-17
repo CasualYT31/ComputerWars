@@ -193,6 +193,7 @@ namespace engine {
 		 *                text.
 		 * @sa     logger.error()
 		 * @sa     logger.warning()
+		 * @sa     logger.critical()
 		 */
 		template<typename... Ts>
 		void write(const std::string& line, Ts... values) noexcept;
@@ -207,6 +208,7 @@ namespace engine {
 		 *                text.
 		 * @sa     logger.write()
 		 * @sa     logger.warning()
+		 * @sa     logger.critical()
 		 */
 		template<typename... Ts>
 		void error(const std::string& line, Ts... values) noexcept;
@@ -222,9 +224,28 @@ namespace engine {
 		 *                text.
 		 * @sa     logger.write()
 		 * @sa     logger.error()
+		 * @sa     logger.critical()
 		 */
 		template<typename... Ts>
 		void warning(const std::string& line, Ts... values) noexcept;
+
+		/**
+		 * Outputs text to the log file as a critical error, and throws up a dialog
+		 * window.
+		 * A single line, which records a non-recoverable error, is output to the
+		 * log file via a call to this method. Please see \c logger.write() for
+		 * more information. Additionally, the line written to the log will be
+		 * shown to the user via a dialog box.
+		 * @tparam Ts     The types in the parameter pack.
+		 * @param  line   The line of text.
+		 * @param  values A parameter pack containing the values to insert into the
+		 *                text.
+		 * @sa     logger.write()
+		 * @sa     logger.error()
+		 * @sa     logger.warning()
+		 */
+		template<typename... Ts>
+		void critical(const std::string& line, Ts... values) noexcept;
 
 		/**
 		 * Retrieves the number of logger objects created thus far.

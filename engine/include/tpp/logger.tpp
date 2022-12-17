@@ -26,7 +26,7 @@ template<typename... Ts>
 void engine::logger::write(const std::string& line, Ts... values) noexcept {
 	try {
 		_logger->info(line, values...);
-	} catch (std::exception& e) {
+	} catch (const std::exception& e) {
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
 }
@@ -35,7 +35,7 @@ template<typename... Ts>
 void engine::logger::error(const std::string& line, Ts... values) noexcept {
 	try {
 		_logger->error(line, values...);
-	} catch (std::exception& e) {
+	} catch (const std::exception& e) {
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
 }
@@ -44,7 +44,20 @@ template<typename... Ts>
 void engine::logger::warning(const std::string& line, Ts... values) noexcept {
 	try {
 		_logger->warn(line, values...);
-	} catch (std::exception& e) {
+	} catch (const std::exception& e) {
+		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
+	}
+}
+
+template<typename... Ts>
+void engine::logger::critical(const std::string& line, Ts... values) noexcept {
+	try {
+		_logger->critical(line, values...);
+		// Produce dialog window.
+		std::string result;
+		fmt::format_to(std::back_inserter(result), line, values...);
+		boxer::show(result.c_str(), "Critical Error!", boxer::Style::Error);
+	} catch (const std::exception& e) {
 		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
 	}
 }

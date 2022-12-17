@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
         // with it.
         std::string configPath = assetsFolder + "/config.json";
         if (!std::filesystem::exists(configPath)) {
-            rootLogger.error("config.json script not found in assets folder "
+            rootLogger.critical("config.json script not found in assets folder "
                 "\"{}\", aborting.", assetsFolder);
             return 2;
         } else {
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
     if (engine.inGoodState()) {
         return engine.run();
     } else {
-        rootLogger.error("Game engine in bad state after loading, aborting.");
+        rootLogger.critical("Game engine in bad state after loading, aborting.");
         return 3;
     }
 }
