@@ -65,7 +65,6 @@ string PlayMap(const string&in file) {
  */
 void MainMenu_FileSelect_MouseReleased() {
 	const string menu = PlayMap("map/" + getSelectedItemText("FileSelect"));
-	// game.map.setUnitHP();
 	if (!menu.isEmpty()) setGUI(menu);
 }
 

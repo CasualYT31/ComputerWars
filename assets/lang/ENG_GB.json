@@ -142,14 +142,22 @@
 	"INFANTRY_longname": "Infantry",
 	"INFANTRY_shortname": "Inft",
 	"INFANTRY_description": "Infantry units have the lowest deployment cost. They can capture bases but have low firepower.",
+	"INFANTRY_SECONDARY_WEAPON_longname": "Machine Gun",
+	"INFANTRY_SECONDARY_WEAPON_shortname": "MchnGn",
+	"INFANTRY_SECONDARY_WEAPON_description": "The secondary weapons of the infantry are machine guns.",
 
 	"MECH_longname": "Mech",
 	"MECH_shortname": "Mech",
 	"MECH_description": "Mechs can capture bases, traverse most terrain types, and have superior firepower.",
+	"MECH_PRIMARY_WEAPON_longname": "Bazooka",
+	"MECH_PRIMARY_WEAPON_shortname": "Bazooka",
+	"MECH_PRIMARY_WEAPON_description": "Bazookas are the primary weapons of mech units.",
+	"MECH_SECONDARY_WEAPON_description": "The secondary weapon is the machine gun.",
 
 	"RECON_longname": "Recon",
 	"RECON_shortname": "Recn",
 	"RECON_description": "Recons have a high movement range and vision. Good against infantry.",
+	"RECON_SECONDARY_WEAPON_description": "The secondary weapons of recon units are machine guns. They're only good against infantry.",
 
 	"TANK_longname": "Tank",
 	"TANK_shortname": "Tank",

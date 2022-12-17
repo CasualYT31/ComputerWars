@@ -24,6 +24,7 @@
   "movements": "property/movement.json",
   "terrains": "property/terrain.json",
   "tiles": "property/tile.json",
+  "weapons": "property/weapon.json",
   "units": "property/unit.json",
   "commanders": "property/co.json",
   "gui": "gui/menus.json",

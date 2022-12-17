@@ -204,6 +204,13 @@ bool awe::tile_type::operator!=(const awe::tile_type& rhs) const noexcept {
 	return !(*this == rhs);
 }
 
+//********
+//*WEAPON*
+//********
+awe::weapon::weapon(const awe::BankID id, const std::string& scriptName,
+	engine::json& j) noexcept : common_properties(id, scriptName, j) {
+}
+
 //******
 //*UNIT*
 //******

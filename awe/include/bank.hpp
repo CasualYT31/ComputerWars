@@ -853,6 +853,197 @@ namespace awe {
 		std::string _neutralTile = "";
 	};
 
+	class unit_type;
+
+	/**
+	 * A game property class which stores the information associated with a weapon
+	 * belonging to a type of unit.
+	 */
+	class weapon : public common_properties {
+	public:
+		/**
+		 * 
+		 */
+		weapon(const awe::BankID id, const std::string& scriptName,
+			engine::json& j) noexcept;
+
+		/**
+		 * Registers \c weapon with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c weapon in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 */
+		template<typename T>
+		static void Register(const std::string& type, asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+
+		/**
+		 * Retrieves the maximum amount of ammo that can be stored in this weapon.
+		 * @return The max ammo property of this weapon.
+		 */
+		inline auto getMaxAmmo() const noexcept {
+			return _maxAmmo;
+		}
+
+		/**
+		 * Retrieves the range of this weapon.
+		 * @return The lower range (\c x), followed by the higher range (\c y).
+		 */
+		inline const auto& getRange() const noexcept {
+			return _range;
+		}
+
+		/**
+		 * Finds out if this weapon can attack after the weapon's owner has moved.
+		 * @return \c TRUE if a unit with this weapon can attack on any tile,
+		 *         \c FALSE if the unit can only attack from the tile it began its
+		 *         turn on.
+		 */
+		inline auto canAttackAfterMoving() const noexcept {
+			return _canAttackAfterMoving;
+		}
+
+		/**
+		 * Finds out if this weapon can counterattack directly.
+		 * I.e. within a one tile range.
+		 * @return \c TRUE if the unit can counterattack with a direct attack,
+		 *         \c FALSE otherwise.
+		 */
+		inline auto canCounterattackDirectly() const noexcept {
+			return _canCounterattackDirectly;
+		}
+
+		/**
+		 * Finds out if this weapon can counterattack indirectly.
+		 * I.e. outside of a one tile range.
+		 * @return \c TRUE if the unit can counterattack with an indirect attack,
+		 *         \c FALSE otherwise.
+		 */
+		inline auto canCounterattackIndirectly() const noexcept {
+			return _canCounterattackIndirectly;
+		}
+
+		/**
+		 * Finds out if this weapon can attack the given type of unit.
+		 * @param  unit   The bank ID of the type of unit to search for.
+		 * @param  hidden If \c TRUE, this will query the hidden units damage
+		 *                table instead of the visible units damage table.
+		 * @return \c TRUE if the given unit has a base damage stored, \c FALSE
+		 *         if not.
+		 */
+		inline auto canAttackUnit(const awe::BankID unit,
+			const bool hidden = false) const noexcept {
+			return ((hidden) ? ( _canAttackTheseHiddenUnits.find(unit) !=
+				_canAttackTheseHiddenUnits.end()) :
+				(_canAttackTheseUnits.find(unit) != _canAttackTheseUnits.end()));
+		}
+
+		/**
+		 * Finds out the base damage that this weapon deals to a unit.
+		 * @param  unit   The bank ID of the type of unit to query.
+		 * @param  hidden If \c TRUE, this will query the hidden units damage
+		 *                table instead of the visible units damage table.
+		 * @return The base damage, if this unit can be attacked. \c 0 otherwise.
+		 */
+		inline auto getBaseDamageUnit(const awe::BankID unit,
+			const bool hidden = false) const noexcept {
+			return ((canAttackUnit(unit, hidden)) ?
+				((hidden) ? (_canAttackTheseHiddenUnits.at(unit)) :
+				(_canAttackTheseUnits.at(unit))) : (0));
+		}
+
+		/**
+		 * Finds out if this weapon can attack the given type of terrain.
+		 * @param  terrain The bank ID of the type of terrain to search for.
+		 * @return \c TRUE if the given terrain has a base damage stored, \c FALSE
+		 *         if not.
+		 */
+		inline auto canAttackTerrain(const awe::BankID terrain) const noexcept {
+			return _canAttackTheseTerrains.find(terrain) !=
+				_canAttackTheseTerrains.end();
+		}
+
+		/**
+		 * Finds out the base damage that this weapon deals to a terrain.
+		 * @param  terrain The bank ID of the type of terrain to query.
+		 * @return The base damage, if this terrain can be attacked. \c 0
+		 *         otherwise.
+		 */
+		inline auto getBaseDamageTerrain(const awe::BankID terrain) const noexcept
+			{
+			return ((canAttackTerrain(terrain)) ?
+				(_canAttackTheseTerrains.at(terrain)) : (0));
+		}
+
+		/**
+		 * Comparison operator.
+		 * @param  rhs The \c weapon object to test against.
+		 * @return \c TRUE if both object's UUIDs are the same, \c FALSE if not.
+		 */
+		inline bool operator==(const awe::weapon& rhs) const noexcept {
+			return getID() == rhs.getID();
+		}
+
+		/**
+		 * Inverse comparison operator.
+		 * @param  rhs The \c weapon object to test against.
+		 * @return \c TRUE if both object's UUIDs are not the same, \c FALSE if
+		 *         they are.
+		 */
+		inline bool operator!=(const awe::weapon& rhs) const noexcept {
+			return !(*this == rhs);
+		}
+	private:
+		/**
+		 * The max ammo that can be stored in this weapon.
+		 */
+		int _maxAmmo = 0;
+
+		/**
+		 * The range of this weapon.
+		 */
+		sf::Vector2u _range = sf::Vector2u(1, 1);
+
+		/**
+		 * Can a unit with this weapon attack after moving?
+		 */
+		bool _canAttackAfterMoving = true;
+
+		/**
+		 * Can a unit with this weapon counterattack if their assailant is on a
+		 * tile directly next to theirs?
+		 */
+		bool _canCounterattackDirectly = true;
+
+		/**
+		 * Can a unit with this weapon counterattack if their assailant is on a
+		 * tile other than one directly next to theirs?
+		 */
+		bool _canCounterattackIndirectly = false;
+
+		/**
+		 * List of unit types that can be attacked by this weapon, along with their
+		 * base damages.
+		 */
+		std::unordered_map<awe::BankID, int> _canAttackTheseUnits;
+
+		/**
+		 * List of unit types that can be attacked by this weapon when the unit is
+		 * hidden, along with their base damages.
+		 */
+		std::unordered_map<awe::BankID, int> _canAttackTheseHiddenUnits;
+
+		/**
+		 * List of terrain types that can be attacked by this weapon, along with
+		 * their base damages.
+		 */
+		std::unordered_map<awe::BankID, int> _canAttackTheseTerrains;
+	};
+
 	/**
 	 * A game property class which stores the information associated with types of
 	 * units.

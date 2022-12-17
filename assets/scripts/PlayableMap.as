@@ -143,6 +143,26 @@ class PlayableMap {
 	}
 
 	/**
+	 * Calculates where the base damage label should be drawn on an attack cursor,
+	 * along the X axis.
+	 * @return The X coorindate of the base damage label.
+	 */
+	string getBaseDamageLabelX() const {
+		const auto quadrant = map.getCursorQuadrant();
+		switch (quadrant) {
+		case Quadrant::LowerLeft:
+			break;
+		case Quadrant::LowerRight:
+			break;
+		case Quadrant::UpperRight:
+			break;
+		default:
+			return "px";
+		}
+		return "placeholder function";
+	}
+
+	/**
 	 * Sets the cursor to have the delete cursor sprites.
 	 */
 	void setDeleteCursorSprites() {

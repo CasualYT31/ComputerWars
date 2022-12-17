@@ -258,6 +258,64 @@ void awe::tile_type::Register(const std::string& type,
 }
 
 template<typename T>
+void awe::weapon::Register(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	awe::common_properties::Register<T>(type, engine, document,
+		"For weapon types, this property holds the sprite ID of the small ammo "
+		"icon that is used with this weapon.");
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"int get_maxAmmo() const property",
+		asMETHOD(T, getMaxAmmo), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets this weapon's max ammo.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const Vector2& get_range() const property",
+		asMETHOD(T, getRange), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets this weapon's range. x stores the "
+		"lower range, and y stores the higher range.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_canAttackAfterMoving() const property",
+		asMETHOD(T, canAttackAfterMoving), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "TRUE if this weapon can attack after the "
+		"unit who's using it moves at least one tile.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_canCounterattackDirectly() const property",
+		asMETHOD(T, canCounterattackDirectly), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "TRUE if this weapon can counterattack  "
+		"using a direct attack.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_canCounterattackIndirectly() const property",
+		asMETHOD(T, canCounterattackIndirectly), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "TRUE if this weapon can counterattack  "
+		"using an indirect attack.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool canAttackUnit(const BankID, const bool = false) const",
+		asMETHOD(T, canAttackUnit), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns TRUE if this weapon can attack the "
+		"given type of unit. If the bool parameter is TRUE, this will find out if "
+		"this weapon can attack the given type of unit if it is hidden.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"int getBaseDamageUnit(const BankID, const bool = false) const",
+		asMETHOD(T, getBaseDamageUnit), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the base damage that this weapon "
+		"deals to the given type of unit. If the bool parameter is TRUE, this "
+		"will find out the base damage this weapon inflicts upon the given type "
+		"of unit if it is hidden. If this weapon cannot attack the given unit "
+		"type, whether hidden and/or visible, 0 will be returned.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool canAttackTerrain(const BankID) const",
+		asMETHOD(T, canAttackTerrain), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns TRUE if this weapon can attack the "
+		"given type of terrain.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"int getBaseDamageTerrain(const BankID) const",
+		asMETHOD(T, getBaseDamageTerrain), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the base damage that this weapon "
+		"deals to the given type of terrain. If this weapon cannot attack the "
+		"given terrain type, 0 will be returned.");
+}
+
+template<typename T>
 void awe::unit_type::Register(const std::string& type,
 	asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {

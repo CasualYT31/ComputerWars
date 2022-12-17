@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "damage_sprite.hpp"
 
-awe::damage_tooltip::damage_tooltip() {
+awe::damage_tooltip::damage_tooltip() noexcept {
 	_damage.setOutlineColor(sf::Color::Black);
 	_damage.setFillColor(sf::Color::White);
 	_damage.setOutlineThickness(2.0f);
@@ -38,8 +38,8 @@ void awe::damage_tooltip::setPosition(const sf::Vector2f& pos) noexcept {
 }
 
 bool awe::damage_tooltip::animate(const sf::RenderTarget& target,
-	const double scaling = 1.0) noexcept {
-	_sprite.animate(target, scaling);
+	const double scaling) noexcept {
+	return _sprite.animate(target, scaling);
 }
 
 void awe::damage_tooltip::draw(sf::RenderTarget& target, sf::RenderStates states)

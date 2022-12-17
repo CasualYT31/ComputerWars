@@ -294,6 +294,11 @@ namespace awe {
 		std::shared_ptr<awe::bank<awe::tile_type>> _tiles;
 
 		/**
+		 * Pointer to the static information on all the weapons available.
+		 */
+		std::shared_ptr<awe::bank<awe::weapon>> _weapons;
+
+		/**
 		 * Pointer to the static information on all the types of units available.
 		 */
 		std::shared_ptr<awe::bank<awe::unit_type>> _units;

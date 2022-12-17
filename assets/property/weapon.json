@@ -1,0 +1,94 @@
+{
+  "INFANTRY_SECONDARY": {
+    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "INFANTRY_SECONDARY_WEAPON_description",
+    "ammo": -1,
+    "units": {
+      "0": 55,
+      "1": 45,
+      "2": 12,
+      "3": 5,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 14,
+      "8": 5,
+      "9": 15,
+      "10": 25,
+      "11": 25,
+      "12": 5,
+      "13": 30,
+      "14": 7,
+      "25": 20
+    },
+    "terrains": {
+      "10": 1
+    }
+  },
+  "MECH_PRIMARY": {
+    "longname": "MECH_PRIMARY_WEAPON_longname",
+    "shortname": "MECH_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MECH_PRIMARY_WEAPON_description",
+    "ammo": 3,
+    "units": {
+      "2": 85,
+      "3": 55,
+      "4": 15,
+      "5": 15,
+      "6": 5,
+      "7": 75,
+      "8": 65,
+      "9": 70,
+      "10": 85,
+      "11": 85,
+      "12": 55,
+      "25": 30
+    },
+    "terrains": {
+      "10": 15
+    }
+  },
+  "MECH_SECONDARY": {
+    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MECH_SECONDARY_WEAPON_description",
+    "ammo": -1,
+    "units": {
+      "0": 65,
+      "1": 55,
+      "2": 18,
+      "3": 6,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 20,
+      "8": 6,
+      "9": 32,
+      "10": 35,
+      "11": 35,
+      "12": 6,
+      "13": 35,
+      "14": 9,
+      "25": 20
+    },
+    "terrains": {
+      "10": 1
+    }
+  },
+  "RECON_SECONDARY": {
+    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "RECON_SECONDARY_WEAPON_description",
+    "ammo": -1,
+    "units": {
+    },
+    "terrains": {
+      "10": 1
+    }
+  }
+}
