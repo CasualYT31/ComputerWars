@@ -106,13 +106,13 @@ class ArmyWidget {
 		if (currentCommanderStr.isEmpty()) {
 			setWidgetVisibility(currentCO, false);
 		} else {
-			Commander currentCommander = commander[currentCommanderStr];
+			const auto currentCommander = commander[currentCommanderStr];
 			setWidgetSprite(currentCO, "co", currentCommander.iconName);
 			setWidgetVisibility(currentCO, true);
 		}
 
 		if (game.map.tagCOIsPresent(armyID)) {
-			Commander tagCommander = commander[game.map.getArmyTagCO(armyID)];
+			const auto tagCommander = commander[game.map.getArmyTagCO(armyID)];
 			setWidgetSprite(tagCO, "co", tagCommander.iconName);
 			setWidgetVisibility(tagCO, true);
 		} else {

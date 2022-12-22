@@ -378,12 +378,12 @@ namespace awe {
 			const noexcept;
 
 		/**
-		 * Retrieves an army's country, dereferenced for use with the scripts.
+		 * Retrieves an army's country, for use with the scripts.
 		 * @param  army The ID of the army whose country is to be reteieved.
 		 * @return Information on the given army's country.
 		 * @throws @c std::out_of_range if an army with the given ID didn't exist.
 		 */
-		const awe::country getArmyCountryObject(const awe::ArmyID army) const;
+		const awe::country* getArmyCountryObject(const awe::ArmyID army) const;
 
 		/**
 		 * Sets the COs that are in charge of a specified army.
@@ -600,12 +600,11 @@ namespace awe {
 			const noexcept;
 
 		/**
-		 * Version of \c getUnitType() which dereferences the returned pointer.
-		 * For use with the script interface.
+		 * Script version of \c getUnitType().
 		 * @throws @c std::out_of_range when the given ID did not identify a unit.
 		 * @sa     @c getUnitType().
 		 */
-		const awe::unit_type getUnitTypeObject(const awe::UnitID id) const;
+		const awe::unit_type* getUnitTypeObject(const awe::UnitID id) const;
 
 		/**
 		 * Sets a unit's position on the map.
@@ -866,11 +865,11 @@ namespace awe {
 			const noexcept;
 
 		/**
-		 * Version of \c getTileType() which dereferences the returned pointer.
+		 * Script version of \c getTileType().
 		 * @throws @c std::out_of_range if the given tile was out of bounds.
 		 * @sa     @c getTileType().
 		 */
-		const awe::tile_type getTileTypeObject(const sf::Vector2u& pos) const;
+		const awe::tile_type* getTileTypeObject(const sf::Vector2u& pos) const;
 
 		/**
 		 * Sets a tile's HP.

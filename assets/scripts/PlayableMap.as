@@ -297,7 +297,7 @@ class PlayableMap {
 	 * @throws If the unit could not be created. This will either be because the
 	 *         army ID wasn't valid, or the given position was occupied.
 	 */
-	bool buyUnit(const UnitType&in type, const ArmyID army,
+	bool buyUnit(const UnitType@ type, const ArmyID army,
 		const Vector2&in position) {
 		if (map.getUnitOnTile(position) > 0) {
 			throw("Could not buy unit of type \"" + type.scriptName + "\" for "
@@ -821,7 +821,7 @@ class PlayableMap {
 	 * @param type     The type of unit that is identified by \c unit.
 	 * @param position The position of the unit.
 	 */
-	private void _beginTurnForUnit(const UnitID unit, const UnitType&in type,
+	private void _beginTurnForUnit(const UnitID unit, const UnitType@ type,
 		const Vector2&in position) {
 		string typeName = type.scriptName;
 
@@ -866,7 +866,7 @@ class PlayableMap {
 	 * @param currentArmy The ID of the army who owns the tile.
 	 */
 	private void _beginTurnForTile(const Vector2&in tile,
-		const Terrain&in terrain, const ArmyID currentArmy) {
+		const Terrain@ terrain, const ArmyID currentArmy) {
 		string terrainName = terrain.scriptName;
 
 		if (terrainName == "CITY" || terrainName == "BASE" ||
@@ -924,7 +924,7 @@ class PlayableMap {
 		const uint unitsSize = units.length();
 		for (uint i = 0; i < unitsSize; ++i) {
 			// If unit has infinite fuel, skip fuel checks.
-			const UnitType unit = map.getUnitType(units[i]);
+			const auto unit = map.getUnitType(units[i]);
 			if (unit.hasInfiniteFuel) continue;
 
 			string type = unit.movementType.scriptName;
@@ -966,7 +966,7 @@ class PlayableMap {
 	 * that instead.
 	 */
 	funcdef void DEF(PlayableMap@, const Vector2&in, const UnitID,
-		const UnitType&in);
+		const UnitType@);
 	funcdef bool DEF2(Map@);
 	private void _updateMoveModeClosedList() {
 		// Declare the function used to revert back to the shortest path.

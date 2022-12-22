@@ -175,7 +175,7 @@ void DetailedInfoMenuSetUp() {
  * @return The \c tilePicture.normal sprite to show.
  */
 const string tilePicture(const Vector2&in pos) {
-	const Terrain t = game.map.getTileType(pos).type;
+	const auto t = game.map.getTileType(pos).type;
 	// If the tile is owned, attempt to retrieve the owned terrain picture.
 	const auto ownerID = game.map.getTileOwner(pos);
 	if (ownerID != NO_ARMY) {
@@ -207,7 +207,7 @@ void DetailedInfoMenuOpen() {
 	}
 	
 	// Setup tile panel.
-	const Terrain terrainType =
+	const auto terrainType =
 		game.map.getTileType(game.map.getSelectedTile()).type;
 	string base = "DetailedInfoMenu.baseLayout.terrainPanel.terrainLayout.";
 	setWidgetText(base + "detailsAndPicture.details.longName", terrainType.name);
@@ -229,7 +229,7 @@ void DetailedInfoMenuOpen() {
 	const auto movementTypeCount = movement.length();
 	for (uint64 moveID = 0; moveID < movementTypeCount; ++moveID) {
 		if (terrainType.moveCost[movementTypeNames[moveID]] >= 0) {
-			const Movement movementType = movement[movementTypeNames[moveID]];
+			const auto movementType = movement[movementTypeNames[moveID]];
 			const string costName = base + "move" + formatUInt(moveID);
 			addWidget("HorizontalLayout", costName);
 			addWidget("Picture", costName + ".icon");
@@ -248,8 +248,8 @@ void DetailedInfoMenuOpen() {
 	const auto unitID = game.map.getUnitOnTile(game.map.getSelectedTile());
 	if (unitID > 0 &&
 		game.map.isUnitVisible(unitID, game.map.getSelectedArmy())) {
-		const UnitType unitType = game.map.getUnitType(unitID);
-		const Movement movementType = unitType.movementType;
+		const auto unitType = game.map.getUnitType(unitID);
+		const auto movementType = unitType.movementType;
 		setWidgetText(unitPanel + ".stats.name", unitType.name);
 		setWidgetText(unitPanel + ".stats.grid.price", "~" +
 			formatUInt(unitType.cost));

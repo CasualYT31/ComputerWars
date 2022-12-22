@@ -198,9 +198,9 @@ namespace awe {
 		 *                            exists.
 		 * @sa     @c awe::bank<T>::operator[](const std::string&)
 		 */
-		const T& _opIndexStr(const std::string& name) const {
+		const T* _opIndexStr(const std::string& name) const {
 			auto ret = operator[](name);
-			if (ret) return *ret;
+			if (ret) return ret.get();
 			throw std::runtime_error("Could not access game property");
 		}
 
@@ -871,12 +871,12 @@ namespace awe {
 			noexcept;
 	private:
 		/**
-		 * Copies the details of the type of terrain this tile represents.
+		 * Script interface version of \c getType().
 		 * @return The terrain type's properties.
 		 * @sa     @c getType()
 		 */
-		inline const awe::terrain _getTypeObj() const noexcept {
-			return *getType();
+		inline const awe::terrain* _getTypeObj() const noexcept {
+			return getType().get();
 		}
 
 		/**
@@ -1578,30 +1578,30 @@ namespace awe {
 			noexcept;
 	private:
 		/**
-		 * Copies the details of the type of movement this unit has.
+		 * Script interface version of \c getMovementType().
 		 * @return The movement type's properties.
 		 * @sa     @c getMovementType()
 		 */
-		inline const awe::movement_type _getMovementTypeObj() const noexcept {
-			return *_movementType;
+		inline const awe::movement_type* _getMovementTypeObj() const noexcept {
+			return getMovementType().get();
 		}
 
 		/**
 		 * Script version of \c getWeapon().
 		 */
-		inline const awe::weapon _getWeapon(const std::string& name) const
+		inline const awe::weapon* _getWeapon(const std::string& name) const
 			noexcept {
 			// Will cause segfault if name doesn't exist...
-			return *getWeapon(name);
+			return getWeapon(name).get();
 		}
 
 		/**
 		 * Script version of \c getWeaponByIndex().
 		 */
-		inline const awe::weapon _getWeaponByIndex(const std::size_t index) const
+		inline const awe::weapon* _getWeaponByIndex(const std::size_t index) const
 			noexcept {
 			// Will cause segfault if index doesn't exist...
-			return *getWeaponByIndex(index);
+			return getWeaponByIndex(index).get();
 		}
 
 		/**

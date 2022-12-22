@@ -45,13 +45,13 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 	const uint unitTypeCount = unitTypeScriptNames.length();
 	array<string> unitsMatchingMovement;
 	for (uint i = 0; i < unitTypeCount; ++i) {
-		const UnitType type = unittype[unitTypeScriptNames[i]];
+		const auto type = unittype[unitTypeScriptNames[i]];
 		if (movementTypeNames.find(type.movementType.scriptName) >= 0) {
 			unitsMatchingMovement.insertLast(unitTypeScriptNames[i]);
 		}
 	}
 	for (uint i = 0, len = unitsMatchingMovement.length(); i < len; ++i) {
-		const UnitType type = unittype[unitsMatchingMovement[i]];
+		const auto type = unittype[unitsMatchingMovement[i]];
 		string widget = panelName + "." + type.scriptName;
 		addWidget("BitmapButton", widget, "BaseMenuHandleSignal");
 		setWidgetTextSize(widget, 16);
@@ -104,10 +104,10 @@ void PanelOpen(const string&in panelName, const array<string>@ movementTypeNames
 	{
 	const auto country =
 		game.map.getArmyCountry(game.map.getSelectedArmy()).scriptName;
-	const auto@ unitTypeNames = unittype.scriptNames;
+	const auto unitTypeNames = unittype.scriptNames;
 	const uint unitTypeCount = unittype.length();
 	for (uint i = 0; i < unitTypeCount; ++i) {
-		const UnitType type = unittype[unitTypeNames[i]];
+		const auto type = unittype[unitTypeNames[i]];
 		if (movementTypeNames.find(type.movementType.scriptName) >= 0) {
 			setWidgetSprite(panelName + "." + type.scriptName, "unit",
 				type.unitSprite(country));
@@ -159,8 +159,7 @@ void BaseMenuHandleInput(const dictionary controls) {
  *                   clicked or if the mouse entered a button.
  */
 void BaseMenuHandleSignal(const string&in widgetName, const string&in signal) {
-	const UnitType type =
-		unittype[widgetName.substr(widgetName.findLast(".") + 1)];
+	const auto type = unittype[widgetName.substr(widgetName.findLast(".") + 1)];
 	if (signal == "Clicked") {
 		const ArmyID army = game.map.getSelectedArmy();
 		if (game.buyUnit(type, army, game.map.getSelectedTile())) {

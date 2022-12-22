@@ -191,7 +191,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getArmyFunds), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"const Country getArmyCountry(const ArmyID) const",
+			"const Country@ getArmyCountry(const ArmyID) const",
 			asMETHOD(awe::map, getArmyCountryObject), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "void setArmyCOs(const ArmyID, "
@@ -251,7 +251,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, deleteUnit), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"const UnitType getUnitType(const UnitID) const",
+			"const UnitType@ getUnitType(const UnitID) const",
 			asMETHOD(awe::map, getUnitTypeObject), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
@@ -371,7 +371,7 @@ void awe::map::Register(asIScriptEngine* engine,
 				const std::string&), bool), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"const TileType getTileType(const Vector2&in) const",
+			"const TileType@ getTileType(const Vector2&in) const",
 			asMETHOD(awe::map, getTileTypeObject), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
@@ -876,10 +876,10 @@ std::shared_ptr<const awe::country>
 	return nullptr;
 }
 
-const awe::country awe::map::getArmyCountryObject(const awe::ArmyID army) const {
+const awe::country* awe::map::getArmyCountryObject(const awe::ArmyID army) const {
 	auto ret = getArmyCountry(army);
 	if (ret) {
-		return *ret;
+		return ret.get();
 	} else {
 		throw std::out_of_range("This army does not exist!");
 	}
@@ -1145,10 +1145,10 @@ std::shared_ptr<const awe::unit_type> awe::map::getUnitType(const awe::UnitID id
 	return nullptr;
 }
 
-const awe::unit_type awe::map::getUnitTypeObject(const awe::UnitID id) const {
+const awe::unit_type* awe::map::getUnitTypeObject(const awe::UnitID id) const {
 	auto ret = getUnitType(id);
 	if (ret) {
-		return *ret;
+		return ret.get();
 	} else {
 		throw std::out_of_range("This unit does not exist!");
 	}
@@ -1531,10 +1531,10 @@ std::shared_ptr<const awe::tile_type> awe::map::getTileType(
 	return _tiles[pos.x][pos.y].getTileType();
 }
 
-const awe::tile_type awe::map::getTileTypeObject(const sf::Vector2u& pos) const {
+const awe::tile_type* awe::map::getTileTypeObject(const sf::Vector2u& pos) const {
 	auto ret = getTileType(pos);
 	if (ret) {
-		return *ret;
+		return ret.get();
 	} else {
 		throw std::out_of_range("This tile does not exist!");
 	}

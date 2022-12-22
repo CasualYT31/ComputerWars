@@ -98,7 +98,7 @@ class TileWidget {
 		// Gather information.
 		const UnitID unitID = game.map.getUnitOnTile(tilePos);
 		array<UnitID> unitIDs;
-		array<UnitType> unitTypes;
+		array<const UnitType@> unitTypes;
 		if (unitID > 0 &&
 			game.map.isUnitVisible(unitID, game.map.getSelectedArmy())) {
 			// Right now, information on a tile's unit/s are not displayed if
@@ -111,7 +111,9 @@ class TileWidget {
 			unitIDs = game.map.getLoadedUnits(unitID);
 			unitIDs.insertAt(0, unitID);
 			for (uint i = 0; i < unitIDs.length(); ++i) {
-				unitTypes.insertLast(game.map.getUnitType(unitIDs[i]));
+				unitTypes.resize(unitTypes.length() + 1);
+				@unitTypes[unitTypes.length() - 1] =
+					game.map.getUnitType(unitIDs[i]);
 			}
 		}
 
@@ -158,8 +160,8 @@ class TileWidget {
 	 * Updates the tile property panel with tile information.
 	 */
 	private void _updateTilePanel(const Vector2&in tilePos) {
-		const TileType tileType = game.map.getTileType(tilePos);
-		const Terrain terrainType = tileType.type;
+		const auto tileType = game.map.getTileType(tilePos);
+		const auto terrainType = tileType.type;
 		const ArmyID tileOwner = game.map.getTileOwner(tilePos);
 		if (tileOwner == NO_ARMY) {
 			_panels[0].setIcon("tile.normal",
@@ -181,12 +183,12 @@ class TileWidget {
 	 * Updates the unit property panels with information on each unit.
 	 */
 	private void _updateUnitPanels(const array<UnitID>@ unitIDs,
-		const array<UnitType>@ unitTypes) {
+		const array<const UnitType@>@ unitTypes) {
 		_panelsThatAreShowing = 1;
 		for (uint i = 1; i < unitIDs.length() + 1; ++i) {
 			++_panelsThatAreShowing;
 			const UnitID unitID = unitIDs[i - 1];
-			const UnitType unitType = unitTypes[i - 1];
+			const UnitType@ unitType = unitTypes[i - 1];
 			_panels[i].setIcon("unit", unitType.unitSprite(
 				game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).turnOrder
 			));
