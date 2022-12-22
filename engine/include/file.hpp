@@ -100,6 +100,21 @@ namespace engine {
 		T readNumber();
 
 		/**
+		 * Version of \c readNumber() that updates a given variable with the read
+		 * value.
+		 * These versions of the read methods were added to prevent explicit
+		 * references to types. This is particularly useful for typedefs.\n
+		 * If an exception was thrown, this method guarantees that the given
+		 * variable isn't updated.
+		 * @param  number If the number was retrieved from the binary file
+		 *                successfully, then it will replace the value stored at
+		 *                \c number.
+		 * @throws std::exception if the number could not be read.
+		 */
+		template<typename T>
+		void readNumber(T& number);
+
+		/**
 		 * Reads a bool value from the binary file.
 		 * This class reads and writes bool values as single bytes. \c FALSE is
 		 * represented by a value of \c 0, whereas \c TRUE is a value of \c !0,
@@ -111,6 +126,18 @@ namespace engine {
 		bool readBool();
 
 		/**
+		 * Version of \c readBool() that updates a given variable with the read
+		 * value.
+		 * If an exception was thrown, this method guarantees that the given
+		 * variable isn't updated.
+		 * @param  boolean If the bool was retrieved from the binary file
+		 *                 successfully, then it will replace the value stored at
+		 *                 \c boolean.
+		 * @throws std::exception if the boolean could not be read.
+		 */
+		void readBool(bool& boolean);
+
+		/**
 		 * Reads a string from the binary file.
 		 * This class reads and writes strings as a list of bytes prepended by the
 		 * length of the string, which is stored as an unsigned 32-bit integer.
@@ -118,6 +145,18 @@ namespace engine {
 		 * @throws std::exception if the string could not be read.
 		 */
 		std::string readString();
+
+		/**
+		 * Version of \c readString() that updates a given variable with the read
+		 * value.
+		 * If an exception was thrown, this method guarantees that the given
+		 * variable isn't updated.
+		 * @param  str If the string was retrieved from the binary file
+		 *             successfully, then it will replace the value stored at
+		 *             \c str.
+		 * @throws std::exception if the string could not be read.
+		 */
+		void readString(std::string& str);
 
 		/**
 		 * Writes a number value to the binary file.

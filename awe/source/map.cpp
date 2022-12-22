@@ -23,6 +23,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "map.hpp"
 #include "fmtformatter.hpp"
 
+/* \c NO_ARMY that can be assigned to a script's interface. Due to limitations of
+AngelScript, I unfortunately cannot register a constant with the script interface,
+despite it being a constant as far as the scripts are concerned. So I had to make
+this an evil global non-const. */
+awe::ArmyID NO_ARMY_SCRIPT = awe::NO_ARMY;
+
 static const std::runtime_error NO_SCRIPTS("No scripts object was given to this "
 	"map object!");
 
@@ -97,7 +103,7 @@ void awe::map::Register(asIScriptEngine* engine,
 		// GLOBAL CONSTANTS //
 		//////////////////////
 		r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
-			&awe::army::NO_ARMY_SCRIPT);
+			&NO_ARMY_SCRIPT);
 		document->DocumentExpectedFunction("const ArmyID NO_ARMY", "Represents "
 			"\"no army\". Used to signify \"no ownership.\"");
 		r = engine->RegisterGlobalProperty("const Vector2 NO_POSITION",
@@ -128,11 +134,6 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getMapName), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void setMapSize(const Vector2&in, const BankID = 0)",
-			asMETHODPR(awe::map, setMapSize, (const sf::Vector2u&,
-				const awe::BankID), void), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
 			"void setMapSize(const Vector2&in, const string&in)",
 			asMETHODPR(awe::map, setMapSize, (const sf::Vector2u&,
 				const std::string&), void), asCALL_THISCALL);
@@ -152,11 +153,6 @@ void awe::map::Register(asIScriptEngine* engine,
 		/////////////////////
 		// ARMY OPERATIONS //
 		/////////////////////
-		r = engine->RegisterObjectMethod("Map",
-			"bool createArmy(const BankID)",
-			asMETHODPR(awe::map, createArmy, (const awe::BankID), bool),
-			asCALL_THISCALL);
-
 		r = engine->RegisterObjectMethod("Map",
 			"bool createArmy(const string&in)",
 			asMETHODPR(awe::map, createArmy, (const std::string&), bool),
@@ -245,12 +241,6 @@ void awe::map::Register(asIScriptEngine* engine,
 		// UNIT OPERATIONS //
 		/////////////////////
 		r = engine->RegisterObjectMethod("Map",
-			"UnitID createUnit(const BankID, const ArmyID)",
-			asMETHODPR(awe::map, createUnit, (const awe::BankID,
-				const awe::ArmyID), awe::UnitID),
-			asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
 			"UnitID createUnit(const string&in, const ArmyID)",
 			asMETHODPR(awe::map, createUnit, (const std::string&,
 				const awe::ArmyID), awe::UnitID),
@@ -301,11 +291,11 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getUnitFuel), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void setUnitAmmo(const UnitID, const Ammo)",
+			"void setUnitAmmo(const UnitID, const string&in, const Ammo)",
 			asMETHOD(awe::map, setUnitAmmo), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"Ammo getUnitAmmo(const UnitID) const",
+			"Ammo getUnitAmmo(const UnitID, const string&in) const",
 			asMETHOD(awe::map, getUnitAmmo), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
@@ -375,11 +365,6 @@ void awe::map::Register(asIScriptEngine* engine,
 		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////
-		r = engine->RegisterObjectMethod("Map",
-			"bool setTileType(const Vector2&in, const BankID)",
-			asMETHODPR(awe::map, setTileType, (const sf::Vector2u&,
-				const awe::BankID), bool), asCALL_THISCALL);
-
 		r = engine->RegisterObjectMethod("Map",
 			"bool setTileType(const Vector2&in, const string&in)",
 			asMETHODPR(awe::map, setTileType, (const sf::Vector2u&,
@@ -613,7 +598,7 @@ bool awe::map::load(std::string file, const unsigned char version) noexcept {
 	if (file == "") file = _filename;
 	// Clear state.
 	_sel = sf::Vector2u(0, 0);
-	_currentArmy = awe::army::NO_ARMY;
+	_currentArmy = awe::NO_ARMY;
 	_updateTilePane = false;
 	_lastUnitID = 1;
 	_armies.clear();
@@ -626,11 +611,18 @@ bool awe::map::load(std::string file, const unsigned char version) noexcept {
 	try {
 		_file.open(file, true);
 		_filename = file;
-		_CWM_Header(false, version);
+		if (!_scripts) {
+			throw std::runtime_error("no scripts object!");
+		} else if (!_scripts->functionDeclExists(
+			"void LoadMap(BinaryFile@, Map@, uint8)")) {
+			throw std::runtime_error("void LoadMap(BinaryFile@, Map@, uint8) not "
+				"found in the scripts!");
+		}
+		_scripts->callFunction("LoadMap", &_file, this, version);
 		_file.close();
 	} catch (std::exception& e) {
-		_logger.error("Map loading operation: couldn't load map file \"{}\": {}",
-			file, e.what());
+		_logger.critical("Map loading operation: couldn't load map file \"{}\": "
+			"{}", file, e.what());
 		_file.close();
 		return false;
 	}
@@ -642,10 +634,17 @@ bool awe::map::save(std::string file, const unsigned char version) noexcept {
 	try {
 		_file.open(file, false);
 		_filename = file;
-		_CWM_Header(true, version);
+		if (!_scripts) {
+			throw std::runtime_error("no scripts object!");
+		} else if (!_scripts->functionDeclExists(
+			"void SaveMap(BinaryFile@, Map@, uint8)")) {
+			throw std::runtime_error("void SaveMap(BinaryFile@, Map@, uint8) not "
+				"found in the scripts!");
+		}
+		_scripts->callFunction("SaveMap", &_file, this, version);
 		_file.close();
 	} catch (std::exception& e) {
-		_logger.error("Map saving operation: couldn't save map file \"{}\": {}",
+		_logger.critical("Map saving operation: couldn't save map file \"{}\": {}",
 			file, e.what());
 		_file.close();
 		return false;
@@ -721,11 +720,6 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 	}
 }
 
-void awe::map::setMapSize(const sf::Vector2u& dim, const awe::BankID tile)
-	noexcept {
-	setMapSize(dim, _tileTypes->operator[](tile));
-}
-
 void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile)
 	noexcept {
 	setMapSize(dim, _tileTypes->operator[](tile));
@@ -752,23 +746,21 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)
 			"army with no country!");
 		return false;
 	}
-	if (_isArmyPresent(country->getID())) {
+	if (_isArmyPresent(country->getTurnOrder())) {
 		_logger.error("createArmy operation cancelled: attempted to create an "
 			"army with a country, \"{}\", that already existed on the map!",
 			country->getName());
 		return false;
 	}
 	// Create the army.
-	_armies.insert(std::pair<awe::BankID, awe::army>(country->getID(), country));
+	_armies.insert(
+		std::pair<awe::ArmyID, awe::army>(country->getTurnOrder(), country)
+	);
 	static const awe::TeamID maxIDCounter = ~((awe::TeamID)0);
 	// This will miss out the maximum value for a team ID, but I don't care.
 	if (_teamIDCounter == maxIDCounter) _teamIDCounter = 0;
-	_armies.at(country->getID()).setTeam(_teamIDCounter++);
+	_armies.at(country->getTurnOrder()).setTeam(_teamIDCounter++);
 	return true;
-}
-
-bool awe::map::createArmy(const awe::BankID country) noexcept {
-	return createArmy(_countries->operator[](country));
 }
 
 bool awe::map::createArmy(const std::string& country) noexcept {
@@ -783,7 +775,7 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 		return;
 	}
 	if (!_isArmyPresent(transferOwnership) &&
-		transferOwnership != awe::army::NO_ARMY) {
+		transferOwnership != awe::NO_ARMY) {
 		_logger.error("deleteArmy operation cancelled: attempted to transfer "
 			"ownership of army {}'s tiles to an army of ID {}, which doesn't "
 			"exist on the map!", army, transferOwnership);
@@ -1104,11 +1096,6 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 	return id;
 }
 
-awe::UnitID awe::map::createUnit(const awe::BankID type, const awe::ArmyID army)
-	noexcept {
-	return createUnit(_unitTypes->operator[](type), army);
-}
-
 awe::UnitID awe::map::createUnit(const std::string& type, const awe::ArmyID army)
 	noexcept {
 	return createUnit(_unitTypes->operator[](type), army);
@@ -1273,19 +1260,22 @@ awe::Fuel awe::map::getUnitFuel(const awe::UnitID id) const noexcept {
 	return 0;
 }
 
-void awe::map::setUnitAmmo(const awe::UnitID id, const awe::Ammo ammo) noexcept {
+void awe::map::setUnitAmmo(const awe::UnitID id, const std::string& weapon,
+		const awe::Ammo ammo) noexcept {
 	if (_isUnitPresent(id)) {
-		_units.at(id).setAmmo(ammo);
+		_units.at(id).setAmmo(weapon, ammo);
 	} else {
 		_logger.error("setUnitAmmo operation cancelled: attempted to assign ammo "
-			"{} to unit with ID {}, which doesn't exist!", ammo, id);
+			"{} to unit with ID {}'s weapon \"{}\". This unit doesn't exist!",
+			ammo, id, weapon);
 	}
 }
 
-awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id) const noexcept {
-	if (_isUnitPresent(id)) return _units.at(id).getAmmo();
-	_logger.error("getUnitAmmo operation failed: unit with ID {} doesn't exist!",
-		id);
+awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id, const std::string& weapon)
+	const noexcept {
+	if (_isUnitPresent(id)) return _units.at(id).getAmmo(weapon);
+	_logger.error("getUnitAmmo operation with weapon \"{}\" failed: unit with ID "
+		"{} doesn't exist!", weapon, id);
 	return 0;
 }
 
@@ -1361,7 +1351,7 @@ bool awe::map::isUnitVisible(const awe::UnitID unit, const awe::ArmyID army) con
 	// 3. It is hiding, but it is located on a tile that belongs to `army`'s team.
 	const auto unitPos = getUnitPosition(unit);
 	const auto tileOwner = getTileOwner(unitPos);
-	if (tileOwner != awe::army::NO_ARMY && getArmyTeam(tileOwner) == armyTeam)
+	if (tileOwner != awe::NO_ARMY && getArmyTeam(tileOwner) == armyTeam)
 		return true;
 	// 4. It is hiding, but it is adjacent to a unit that belongs to the same team
 	//    as `army`.
@@ -1477,7 +1467,7 @@ awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {
 	if (_isUnitPresent(id)) return _units.at(id).getArmy();
 	_logger.error("getArmyOfUnit operation failed: unit with ID {} doesn't exist!",
 		id);
-	return awe::army::NO_ARMY;
+	return awe::NO_ARMY;
 }
 
 awe::TeamID awe::map::getTeamOfUnit(const awe::UnitID id) const noexcept {
@@ -1521,13 +1511,8 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 	_updateCapturingUnit(getUnitOnTile(pos));
 	_tiles[pos.x][pos.y].setTileType(type);
 	// Remove ownership of the tile from the army who owns it, if any army does.
-	setTileOwner(pos, awe::army::NO_ARMY);
+	setTileOwner(pos, awe::NO_ARMY);
 	return true;
-}
-
-bool awe::map::setTileType(const sf::Vector2u& pos, const awe::BankID type)
-	noexcept {
-	return setTileType(pos, _tileTypes->operator[](type));
 }
 
 bool awe::map::setTileType(const sf::Vector2u& pos, const std::string& type)
@@ -1599,7 +1584,7 @@ awe::ArmyID awe::map::getTileOwner(const sf::Vector2u& pos) const noexcept {
 		_logger.error("getTileOwner operation failed: tile at position ({},{}) is "
 			"out of bounds with the map's size of ({},{})!",
 			pos.x, pos.y, getMapSize().x, getMapSize().y);
-		return awe::army::NO_ARMY;
+		return awe::NO_ARMY;
 	}
 	return _tiles[pos.x][pos.y].getTileOwner();
 }
@@ -1707,7 +1692,7 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 		for (auto& adjacentTile : adjacentTiles) {
 			// Get the movement cost for this terrain.
 			const auto moveCost = getTileType(adjacentTile)->getType()->
-				getMoveCost(moveType.getID());
+				getMoveCost(moveType.getScriptName());
 
 			// If this unit cannot traverse the terrain, do not add it to any set.
 			if (moveCost < 0) continue;
@@ -2068,7 +2053,7 @@ awe::ArmyID awe::map::getSelectedArmy() const noexcept {
 }
 
 awe::ArmyID awe::map::getNextArmy() const noexcept {
-	if (_currentArmy == awe::army::NO_ARMY) return awe::army::NO_ARMY;
+	if (_currentArmy == awe::NO_ARMY) return awe::NO_ARMY;
 	auto itr = ++_armies.find(_currentArmy);
 	if (itr == _armies.end()) itr = _armies.begin();
 	return itr->first;
@@ -2274,7 +2259,7 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 				if (type) {
 					tileWidth = (sf::Uint32)tile.getPixelSize().x;
 					tileHeight = (sf::Uint32)tile.getPixelSize().y;
-					/*if (tile.getTileOwner() == awe::army::NO_ARMY) {
+					/*if (tile.getTileOwner() == awe::NO_ARMY) {
 						tileWidth = (sf::Uint32)_sheet_tile->getFrameRect(
 							type->getNeutralTile()
 						).width;
@@ -2459,374 +2444,6 @@ awe::UnitID awe::map::_findUnitID() {
 	}
 	_lastUnitID = temp;
 	return temp;
-}
-
-void awe::map::_CWM_Header(const bool isSave, unsigned char version) {
-	sf::Uint32 finalVersion = FIRST_FILE_VERSION + version;
-	if (isSave) {
-		_file.writeNumber(finalVersion);
-	} else {
-		finalVersion = _file.readNumber<sf::Uint32>();
-		version = finalVersion - FIRST_FILE_VERSION;
-	}
-	switch (version) {
-	case 0:
-		_CWM_0(isSave);
-		break;
-	case 1:
-		_CWM_1(isSave);
-		break;
-	case 2:
-		_CWM_2(isSave);
-		break;
-	default:
-		_logger.error("CWM version {} is unrecognised!", version);
-		throw std::exception("read above");
-	}
-}
-
-void awe::map::_CWM_0(const bool isSave) {
-	if (isSave) {
-		_file.writeString(getMapName());
-		_file.writeNumber((sf::Uint32)getMapSize().x);
-		_file.writeNumber((sf::Uint32)getMapSize().y);
-		_file.writeNumber((sf::Uint32)_armies.size());
-		for (auto& army : _armies) {
-			_file.writeNumber(army.second.getCountry()->getID());
-			_file.writeNumber(army.second.getFunds());
-		}
-		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
-			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
-				auto& tile = _tiles[x][y];
-				_file.writeNumber(tile.getTileType()->getID());
-				_file.writeNumber(tile.getTileHP());
-				_file.writeNumber(tile.getTileOwner());
-				if (tile.getUnit()) {
-					_CWM_0_Unit(isSave, tile.getUnit(), sf::Vector2u(x, y));
-				}
-				// Covers the following cases:
-				// 1. Tile is vacant.
-				// 2. Unit has no loaded units on it.
-				// 3. Unit has loaded units on it, but there are no more to load.
-				_file.writeNumber(awe::army::NO_ARMY);
-			}
-		}
-	} else {
-		setMapName(_file.readString());
-		sf::Uint32 width = _file.readNumber<sf::Uint32>();
-		sf::Uint32 height = _file.readNumber<sf::Uint32>();
-		setMapSize(sf::Vector2u(width, height), 0);
-		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
-		for (sf::Uint64 army = 0; army < armyCount; army++) {
-			auto pCountry = (*_countries)[_file.readNumber<awe::BankID>()];
-			if (createArmy(pCountry)) {
-				awe::Funds funds = _file.readNumber<awe::Funds>();
-				setArmyFunds(pCountry->getID(), funds);
-			} else {
-				throw std::exception("read above");
-			}
-		}
-		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
-			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
-				auto pos = sf::Vector2u(x, y);
-				if (setTileType(pos,
-					(*_tileTypes)[_file.readNumber<awe::BankID>()])) {
-					awe::HP hp = _file.readNumber<awe::HP>();
-					setTileHP(pos, hp);
-					awe::ArmyID army = _file.readNumber<awe::ArmyID>();
-					setTileOwner(pos, army);
-					_CWM_0_Unit(isSave, 0, sf::Vector2u(x, y));
-				} else {
-					throw std::exception("read above");
-				}
-			}
-		}
-	}
-}
-
-void awe::map::_CWM_1(const bool isSave) {
-	if (isSave) {
-		_file.writeString(getMapName());
-		_file.writeNumber((sf::Uint32)getMapSize().x);
-		_file.writeNumber((sf::Uint32)getMapSize().y);
-		_file.writeNumber((sf::Uint32)getSelectedTile().x);
-		_file.writeNumber((sf::Uint32)getSelectedTile().y);
-		_file.writeNumber((sf::Uint32)_armies.size());
-		for (auto& army : _armies) {
-			_file.writeNumber(army.second.getCountry()->getID());
-			_file.writeNumber(army.second.getFunds());
-			// There should always be a current CO...
-			if (army.second.getCurrentCO()) {
-				_file.writeNumber(army.second.getCurrentCO()->getID());
-			} else {
-				_file.writeNumber(awe::army::NO_ARMY);
-			}
-			if (army.second.getTagCO()) {
-				_file.writeNumber(army.second.getTagCO()->getID());
-			} else {
-				_file.writeNumber(awe::army::NO_ARMY);
-			}
-		}
-		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
-			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
-				auto& tile = _tiles[x][y];
-				_file.writeNumber(tile.getTileType()->getID());
-				_file.writeNumber(tile.getTileHP());
-				_file.writeNumber(tile.getTileOwner());
-				if (tile.getUnit()) {
-					_CWM_0_Unit(isSave, tile.getUnit(), sf::Vector2u(x, y));
-				}
-				// Covers the following cases:
-				// 1. Tile is vacant.
-				// 2. Unit has no loaded units on it.
-				// 3. Unit has loaded units on it, but there are no more to load.
-				_file.writeNumber(awe::army::NO_ARMY);
-			}
-		}
-	} else {
-		setMapName(_file.readString());
-		sf::Uint32 width = _file.readNumber<sf::Uint32>();
-		sf::Uint32 height = _file.readNumber<sf::Uint32>();
-		setMapSize(sf::Vector2u(width, height), 0);
-		sf::Uint32 sel_x = _file.readNumber<sf::Uint32>();
-		sf::Uint32 sel_y = _file.readNumber<sf::Uint32>();
-		setSelectedTile(sf::Vector2u(sel_x, sel_y));
-		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
-		for (sf::Uint64 army = 0; army < armyCount; army++) {
-			auto pCountry = (*_countries)[_file.readNumber<awe::BankID>()];
-			if (createArmy(pCountry)) {
-				awe::Funds funds = _file.readNumber<awe::Funds>();
-				setArmyFunds(pCountry->getID(), funds);
-				awe::BankID currentCO = _file.readNumber<awe::BankID>();
-				awe::BankID tagCO = _file.readNumber<awe::BankID>();
-				std::shared_ptr<const awe::commander> primaryCO = nullptr,
-					secondaryCO = nullptr;
-				if (currentCO != awe::army::NO_ARMY) {
-					primaryCO = (*_commanders)[currentCO];
-				}
-				if (tagCO != awe::army::NO_ARMY) {
-					secondaryCO = (*_commanders)[tagCO];
-				}
-				setArmyCOs(pCountry->getID(), primaryCO, secondaryCO);
-			} else {
-				throw std::exception("read above");
-			}
-		}
-		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
-			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
-				auto pos = sf::Vector2u(x, y);
-				if (setTileType(pos,
-					(*_tileTypes)[_file.readNumber<awe::BankID>()])) {
-					awe::HP hp = _file.readNumber<awe::HP>();
-					setTileHP(pos, hp);
-					awe::ArmyID army = _file.readNumber<awe::ArmyID>();
-					setTileOwner(pos, army);
-					_CWM_0_Unit(isSave, 0, sf::Vector2u(x, y));
-				} else {
-					throw std::exception("read above");
-				}
-			}
-		}
-	}
-}
-
-bool awe::map::_CWM_0_Unit(const bool isSave, awe::UnitID id,
-	const sf::Vector2u& curtile, const awe::UnitID loadOnto) {
-	if (isSave) {
-		auto& unit = _units.at(id);
-		_file.writeNumber(unit.getArmy());
-		_file.writeNumber(unit.getType()->getID());
-		_file.writeNumber(unit.getHP());
-		_file.writeNumber(unit.getFuel());
-		_file.writeNumber(unit.getAmmo());
-		auto loaded = unit.loadedUnits();
-		if (loaded.size()) {
-			for (auto loadedUnitID : loaded) {
-				_CWM_0_Unit(isSave, loadedUnitID, curtile);
-			}
-			_file.writeNumber(awe::army::NO_ARMY);
-		}
-		return true;
-	} else {
-		auto ownerArmy = _file.readNumber<awe::ArmyID>();
-		if (ownerArmy != awe::army::NO_ARMY) {
-			auto unitID = createUnit(
-				(*_unitTypes)[_file.readNumber<awe::BankID>()], ownerArmy);
-			if (unitID) {
-				if (loadOnto)
-					loadUnit(unitID, loadOnto);
-				else
-					setUnitPosition(unitID, curtile);
-				auto hp = _file.readNumber<awe::HP>();
-				setUnitHP(unitID, hp);
-				auto fuel = _file.readNumber<awe::Fuel>();
-				setUnitFuel(unitID, fuel);
-				auto ammo = _file.readNumber<awe::Ammo>();
-				setUnitAmmo(unitID, ammo);
-				while (_CWM_0_Unit(isSave, id, curtile,
-					((loadOnto) ? (loadOnto) : (unitID))));
-			} else {
-				throw std::exception("read above");
-			}
-			return true;
-		} else {
-			return false;
-		}
-	}
-}
-
-void awe::map::_CWM_2(const bool isSave) {
-	if (isSave) {
-		_file.writeString(getMapName());
-		_file.writeNumber((sf::Uint32)getMapSize().x);
-		_file.writeNumber((sf::Uint32)getMapSize().y);
-		_file.writeNumber((sf::Uint32)getSelectedTile().x);
-		_file.writeNumber((sf::Uint32)getSelectedTile().y);
-		_file.writeNumber(getDay());
-		_file.writeNumber((sf::Uint32)getArmyCount());
-		for (auto& army : _armies) {
-			_file.writeNumber(army.second.getCountry()->getID());
-			_file.writeNumber(army.second.getTeam());
-			_file.writeNumber(army.second.getFunds());
-			// There should always be a current CO...
-			if (army.second.getCurrentCO()) {
-				_file.writeNumber(army.second.getCurrentCO()->getID());
-			} else {
-				_file.writeNumber(awe::army::NO_ARMY);
-			}
-			if (army.second.getTagCO()) {
-				_file.writeNumber(army.second.getTagCO()->getID());
-			} else {
-				_file.writeNumber(awe::army::NO_ARMY);
-			}
-		}
-		_file.writeNumber(_currentArmy);
-		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
-			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
-				auto& tile = _tiles[x][y];
-				_file.writeNumber(tile.getTileType()->getID());
-				_file.writeNumber(tile.getTileHP());
-				_file.writeNumber(tile.getTileOwner());
-				if (tile.getUnit()) {
-					_CWM_2_Unit(isSave, tile.getUnit(), sf::Vector2u(x, y));
-				}
-				// Covers the following cases:
-				// 1. Tile is vacant.
-				// 2. Unit has no loaded units on it.
-				// 3. Unit has loaded units on it, but there are no more to load.
-				_file.writeNumber(awe::army::NO_ARMY);
-			}
-		}
-	} else {
-		setMapName(_file.readString());
-		sf::Uint32 width = _file.readNumber<sf::Uint32>();
-		sf::Uint32 height = _file.readNumber<sf::Uint32>();
-		setMapSize(sf::Vector2u(width, height), 0);
-		sf::Uint32 sel_x = _file.readNumber<sf::Uint32>();
-		sf::Uint32 sel_y = _file.readNumber<sf::Uint32>();
-		setSelectedTile(sf::Vector2u(sel_x, sel_y));
-		awe::Day day = _file.readNumber<awe::Day>();
-		setDay(day);
-		sf::Uint32 armyCount = _file.readNumber<sf::Uint32>();
-		for (sf::Uint64 army = 0; army < armyCount; army++) {
-			auto pCountry = (*_countries)[_file.readNumber<awe::BankID>()];
-			if (createArmy(pCountry)) {
-				awe::TeamID team = _file.readNumber<awe::TeamID>();
-				setArmyTeam(pCountry->getID(), team);
-				awe::Funds funds = _file.readNumber<awe::Funds>();
-				setArmyFunds(pCountry->getID(), funds);
-				awe::BankID currentCO = _file.readNumber<awe::BankID>();
-				awe::BankID tagCO = _file.readNumber<awe::BankID>();
-				std::shared_ptr<const awe::commander> primaryCO = nullptr,
-					secondaryCO = nullptr;
-				if (currentCO != awe::army::NO_ARMY) {
-					primaryCO = (*_commanders)[currentCO];
-				}
-				if (tagCO != awe::army::NO_ARMY) {
-					secondaryCO = (*_commanders)[tagCO];
-				}
-				setArmyCOs(pCountry->getID(), primaryCO, secondaryCO);
-			} else {
-				throw std::exception("read above");
-			}
-		}
-		awe::ArmyID currentArmy = _file.readNumber<awe::ArmyID>();
-		setSelectedArmy(currentArmy);
-		for (sf::Uint32 y = 0; y < getMapSize().y; y++) {
-			for (sf::Uint32 x = 0; x < getMapSize().x; x++) {
-				auto pos = sf::Vector2u(x, y);
-				if (setTileType(pos,
-					(*_tileTypes)[_file.readNumber<awe::BankID>()])) {
-					awe::HP hp = _file.readNumber<awe::HP>();
-					setTileHP(pos, hp);
-					awe::ArmyID army = _file.readNumber<awe::ArmyID>();
-					setTileOwner(pos, army);
-					_CWM_2_Unit(isSave, 0, sf::Vector2u(x, y));
-				} else {
-					throw std::exception("read above");
-				}
-			}
-		}
-	}
-}
-
-bool awe::map::_CWM_2_Unit(const bool isSave, awe::UnitID id,
-	const sf::Vector2u& curtile, const awe::UnitID loadOnto) {
-	if (isSave) {
-		auto& unit = _units.at(id);
-		_file.writeNumber(unit.getArmy());
-		_file.writeNumber(unit.getType()->getID());
-		_file.writeNumber(unit.getHP());
-		_file.writeNumber(unit.getFuel());
-		_file.writeNumber(unit.getAmmo());
-		_file.writeBool(unit.isWaiting());
-		_file.writeBool(unit.isCapturing());
-		_file.writeBool(unit.isHiding());
-		auto loaded = unit.loadedUnits();
-		if (loaded.size()) {
-			for (auto loadedUnitID : loaded) {
-				_CWM_2_Unit(isSave, loadedUnitID, curtile);
-			}
-			_file.writeNumber(awe::army::NO_ARMY);
-		}
-		return true;
-	} else {
-		auto ownerArmy = _file.readNumber<awe::ArmyID>();
-		if (ownerArmy != awe::army::NO_ARMY) {
-			auto unitID = createUnit(
-				(*_unitTypes)[_file.readNumber<awe::BankID>()], ownerArmy);
-			if (unitID) {
-				// Setting the unit's position needs to come before, at least,
-				// reading the capturing property. This is because, if a unit is
-				// capturing something, setting its position will try to set the
-				// unit's old tile's HP to its max. But the unit doesn't have a
-				// previous position, causing a read access violation.
-				if (loadOnto)
-					loadUnit(unitID, loadOnto);
-				else
-					setUnitPosition(unitID, curtile);
-				auto hp = _file.readNumber<awe::HP>();
-				setUnitHP(unitID, hp);
-				auto fuel = _file.readNumber<awe::Fuel>();
-				setUnitFuel(unitID, fuel);
-				auto ammo = _file.readNumber<awe::Ammo>();
-				setUnitAmmo(unitID, ammo);
-				auto isWaiting = _file.readBool();
-				waitUnit(unitID, isWaiting);
-				auto isCapturing = _file.readBool();
-				unitCapturing(unitID, isCapturing);
-				auto isHiding = _file.readBool();
-				unitHiding(unitID, isHiding);
-				while (_CWM_2_Unit(isSave, id, curtile,
-					((loadOnto) ? (loadOnto) : (unitID))));
-			} else {
-				throw std::exception("read above");
-			}
-			return true;
-		} else {
-			return false;
-		}
-	}
 }
 
 awe::map::selected_unit_render_data::selected_unit_render_data(

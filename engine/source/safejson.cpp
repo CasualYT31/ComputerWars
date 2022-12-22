@@ -25,26 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "safejson.hpp"
 #include <fstream>
 
-bool engine::json_state::inGoodState() const noexcept {
-	return _bits == engine::json_state::SUCCESS;
-}
-engine::json_state::FailBits engine::json_state::whatFailed() const noexcept {
-	return _bits;
-}
-void engine::json_state::resetState() noexcept {
-	_bits = engine::json_state::SUCCESS;
-}
-void engine::json_state::_toggleState(engine::json_state::FailBits state) noexcept {
-	_bits |= state;
-}
-
-engine::json::json(const std::string& name) noexcept : _logger(name) {}
-
-engine::json::json(const nlohmann::ordered_json& jobj, const std::string& name)
-	noexcept : _logger(name) {
-	*this = jobj;
-}
-
 bool engine::json::equalType(nlohmann::ordered_json& dest,
 	nlohmann::ordered_json& src) noexcept {
 	if (dest.type() == src.type()) return true;
@@ -112,10 +92,6 @@ engine::json& engine::json::operator=(const nlohmann::ordered_json& jobj)
 	return *this;
 }
 
-nlohmann::ordered_json engine::json::nlohmannJSON() const noexcept {
-	return _j;
-}
-
 void engine::json::applyColour(sf::Color& dest, engine::json::KeySequence keys,
 	const bool suppressErrors) noexcept {
 	std::array<unsigned int, 4> colour = { 0, 0, 0, 255 };
@@ -128,11 +104,6 @@ void engine::json::applyColour(sf::Color& dest, engine::json::KeySequence keys,
 		dest = sf::Color(colour[0], colour[1], colour[2], colour[3]);
 	}
 	if (suppressErrors) resetState();
-}
-
-std::string engine::json::_getTypeName(nlohmann::ordered_json& j) noexcept {
-	if (j.is_number_float()) return "float";
-	return j.type_name();
 }
 
 bool engine::json::_performInitialChecks(engine::json::KeySequence& keys,
@@ -160,14 +131,6 @@ bool engine::json::_performInitialChecks(engine::json::KeySequence& keys,
 		}
 	}
 	return false;
-}
-
-std::string engine::json_script::getScriptPath() const noexcept {
-	return _script;
-}
-
-std::string engine::json_script::jsonwhat() const noexcept {
-	return _what;
 }
 
 void engine::json_script::load(const std::string script) noexcept {

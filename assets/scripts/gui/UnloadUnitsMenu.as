@@ -57,11 +57,12 @@ void UnloadUnitsMenuOpen() {
 	for (uint i = 0; i < loadedUnitsLength; ++i) {
 		const auto unitID = loadedUnits[i];
 		const string name = formatUInt(unitID);
+		const auto type = game.map.getUnitType(unitID);
 		addWidgetToGrid("Picture", "panel.grid.icon" + name, i + 1, 0);
 		setWidgetSprite("panel.grid.icon" + name, "unit",
-			game.map.getUnitType(unitID).unitSprite[
-				game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).ID
-			]);
+			type.unitSprite(
+				game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).turnOrder
+		));
 		// Update UnloadUnitsMenuHandleInput() if you change the name of this
 		// widget!
 		addWidgetToGrid("Button", "panel.grid.button" + name, i + 1, 1,
@@ -80,8 +81,15 @@ void UnloadUnitsMenuOpen() {
 		setWidgetTextOutlineColour("panel.grid.fuel" + name, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness("panel.grid.fuel" + name, 2.0);
 		addWidgetToGrid("Label", "panel.grid.ammo" + name, i + 1, 4);
-		setWidgetText("panel.grid.ammo" + name,
-			"~" + formatInt(game.map.getUnitAmmo(unitID)));
+		// TODO-1 {
+		if (type.weaponCount > 0 && !type.weapon(0).hasInfiniteAmmo) {
+			setWidgetText("panel.grid.ammo" + name,
+				"~" + formatInt(game.map.getUnitAmmo(unitID,
+					type.weapon(0).scriptName)));
+		} else {
+			setWidgetText("panel.grid.ammo" + name, "~");
+		}
+		// }
 		setWidgetTextColour("panel.grid.ammo" + name, Colour(255, 255, 255, 255));
 		setWidgetTextOutlineColour("panel.grid.ammo" + name, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness("panel.grid.ammo" + name, 2.0);

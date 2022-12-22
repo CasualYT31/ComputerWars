@@ -52,8 +52,8 @@ namespace awe {
 
 		/**
 		 * Creates a new unit.
-		 * @warning \c army \b must hold a valid country ID: checks must be carried
-		 *          out outside of this class!
+		 * @warning \c army \b must hold a valid turn order ID: checks must be
+		 *          carried out outside of this class!
 		 * @param   type  The type of the unit, which can't be changed.
 		 * @param   army  The army the unit belongs to, which can't be changed.
 		 * @param   sheet Pointer to the spritesheet to use with this unit.
@@ -69,32 +69,42 @@ namespace awe {
 		 * Gets the unit's type.
 		 * @return The information on the unit's type.
 		 */
-		std::shared_ptr<const awe::unit_type> getType() const noexcept;
+		inline std::shared_ptr<const awe::unit_type> getType() const noexcept {
+			return _type;
+		}
 
 		/**
 		 * Gets the unit's army affiliation.
 		 * @return The ID of the army which owns this unit.
 		 */
-		awe::ArmyID getArmy() const noexcept;
+		inline awe::ArmyID getArmy() const noexcept {
+			return _army;
+		}
 
 		/**
 		 * Sets this unit's X and Y location.
 		 * @param pos The X and Y location of the tile this unit occupies.
 		 */
-		void setPosition(const sf::Vector2u pos) noexcept;
+		inline void setPosition(const sf::Vector2u pos) noexcept {
+			_location = pos;
+		}
 
 		/**
 		 * Gets this unit's location.
 		 * @return The X and Y location of the tile this unit occupies.
 		 */
-		sf::Vector2u getPosition() const noexcept;
+		inline sf::Vector2u getPosition() const noexcept {
+			return _location;
+		}
 
 		/**
 		 * Used to determine if this unit is on a tile in the map.
 		 * Useful for loaded units, which are in the game but not on the map.
 		 * @return \c TRUE if the unit occupies a tile on the map, \c FALSE if not.
 		 */
-		bool isOnMap() const noexcept;
+		inline bool isOnMap() const noexcept {
+			return _location != awe::unit::NO_POSITION;
+		}
 
 		/**
 		 * Sets this unit's HP.
@@ -103,13 +113,17 @@ namespace awe {
 		 * the user would see (see \c getDisplayedHP()).
 		 * @param hp The new HP of this unit.
 		 */
-		void setHP(const awe::HP hp) noexcept;
+		inline void setHP(const awe::HP hp) noexcept {
+			_hp = ((hp < 0) ? (0) : (hp));
+		}
 
 		/**
 		 * Gets this unit's HP.
 		 * @return The current HP of this unit.
 		 */
-		awe::HP getHP() const noexcept;
+		inline awe::HP getHP() const noexcept {
+			return _hp;
+		}
 
 		/**
 		 * Gets this unit's HP as displayed to the user.
@@ -119,33 +133,47 @@ namespace awe {
 		 * @return The current HP of this unit in a user-friendly format.
 		 * @sa     awe::unit_type::HP_GRANULARITY
 		 */
-		awe::HP getDisplayedHP() const noexcept;
+		inline awe::HP getDisplayedHP() const noexcept {
+			return awe::unit_type::getDisplayedHP(_hp);
+		}
 
 		/**
 		 * Sets this unit's fuel.
 		 * If <tt>< 0</tt> is given, \c 0 will be stored.
 		 * @param fuel The new fuel of this unit.
 		 */
-		void setFuel(const awe::Fuel fuel) noexcept;
+		inline void setFuel(const awe::Fuel fuel) noexcept {
+			_fuel = ((fuel < 0) ? (0) : (fuel));
+		}
 
 		/**
 		 * Gets this unit's fuel.
 		 * @return The current fuel of this unit.
 		 */
-		awe::Fuel getFuel() const noexcept;
+		inline awe::Fuel getFuel() const noexcept {
+			return _fuel;
+		}
 
 		/**
 		 * Sets this unit's ammo.
 		 * If <tt>< 0</tt> is given, \c 0 will be stored.
-		 * @param ammo The new ammo of this unit.
+		 * @param weapon The script name of the weapon to amend.
+		 * @param ammo   The new ammo of this unit.
 		 */
-		void setAmmo(const awe::Ammo ammo) noexcept;
+		inline void setAmmo(const std::string& weapon, const awe::Ammo ammo)
+			noexcept {
+			_ammos[weapon] = ((ammo < 0) ? (0) : (ammo));
+		}
 
 		/**
 		 * Gets this unit's ammo.
+		 * @param  weapon The script name of the weapon to query.
 		 * @return The current ammo of this unit.
 		 */
-		awe::Ammo getAmmo() const noexcept;
+		inline awe::Ammo getAmmo(const std::string& weapon) const noexcept {
+			return ((_ammos.find(weapon) == _ammos.end()) ? (0) :
+				(_ammos.at(weapon)));
+		}
 
 		/**
 		 * Sets this unit's waiting/moved status.
@@ -153,13 +181,17 @@ namespace awe {
 		 * @param moved \c TRUE if the unit is in wait mode, \c FALSE if it can be
 		 *              moved.
 		 */
-		void wait(const bool moved) noexcept;
+		inline void wait(const bool moved) noexcept {
+			_waiting = moved;
+		}
 
 		/**
 		 * Gets this unit's waiting/moved status.
 		 * @return \c TRUE if this unit is waiting, \c FALSE if not.
 		 */
-		bool isWaiting() const noexcept;
+		inline bool isWaiting() const noexcept {
+			return _waiting;
+		}
 
 		/**
 		 * Sets this unit's capturing status.
@@ -167,32 +199,42 @@ namespace awe {
 		 * @param capturing \c TRUE if the unit is in capture mode, \c FALSE if
 		 *                  not.
 		 */
-		void capturing(const bool capturing) noexcept;
+		inline void capturing(const bool capturing) noexcept {
+			_capturing = capturing;
+		}
 
 		/**
 		 * Gets this unit's capturing status.
 		 * @return \c TRUE if this unit is capturing, \c FALSE if not.
 		 */
-		bool isCapturing() const noexcept;
+		inline bool isCapturing() const noexcept {
+			return _capturing;
+		}
 
 		/**
 		 * Sets this unit's hiding status.
 		 * By default, a unit is created with the hiding status turned off.
 		 * @param hiding \c TRUE if the unit is hiding, \c FALSE if not.
 		 */
-		void hiding(const bool hiding) noexcept;
+		inline void hiding(const bool hiding) noexcept {
+			_hiding = hiding;
+		}
 
 		/**
 		 * Gets this unit's hiding status.
 		 * @return \c TRUE if this unit is hiding, \c FALSE if not.
 		 */
-		bool isHiding() const noexcept;
+		inline bool isHiding() const noexcept {
+			return _hiding;
+		}
 
 		/**
 		 * Loads another unit onto this one.
 		 * @param id The ID of the unit to load onto this one.
 		 */
-		void loadUnit(const awe::UnitID id) noexcept;
+		inline void loadUnit(const awe::UnitID id) noexcept {
+			_loaded.insert(id);
+		}
 
 		/**
 		 * Unloads a unit from this one, if it exists.
@@ -200,13 +242,17 @@ namespace awe {
 		 * @return \c TRUE if the unit was unloaded successfully, \c FALSE if the
 		 *         unit wasn't loaded.
 		 */
-		bool unloadUnit(const awe::UnitID id) noexcept;
+		inline bool unloadUnit(const awe::UnitID id) noexcept {
+			return _loaded.erase(id);
+		}
 
 		/**
 		 * Copies the internal list of loaded units and returns it.
 		 * @return The IDs of the all the units that are loaded onto this one.
 		 */
-		std::unordered_set<awe::UnitID> loadedUnits() const noexcept;
+		inline std::unordered_set<awe::UnitID> loadedUnits() const noexcept {
+			return _loaded;
+		}
 
 		/**
 		 * Loads this unit onto another.
@@ -214,20 +260,26 @@ namespace awe {
 		 * unit.
 		 * @param id The ID of the unit this one is loaded onto.
 		 */
-		void loadOnto(const awe::UnitID id) noexcept;
+		inline void loadOnto(const awe::UnitID id) noexcept {
+			_loadedOnto = id;
+		}
 
 		/**
 		 * Identifies which unit this unit is loaded onto.
 		 * @return The ID of the unit this unit is loaded onto. 0 if none.
 		 */
-		awe::UnitID loadedOnto() const noexcept;
+		inline awe::UnitID loadedOnto() const noexcept {
+			return _loadedOnto;
+		}
 
 		/**
 		 * Sets the spritesheet to use with this unit.
 		 * @param sheet Pointer to the spritesheet to use with this unit.
 		 */
-		void setSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+		inline void setSpritesheet(
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+			_sprite.setSpritesheet(sheet);
+		}
 
 		/**
 		 * Sets the icon spritesheet to use with this unit.
@@ -240,21 +292,27 @@ namespace awe {
 		 * Gets the spritesheet used with this unit.
 		 * @return Pointer to the spritesheet used with this unit.
 		 */
-		std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet() const
-			noexcept;
+		inline std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet()
+			const noexcept {
+			return _sprite.getSpritesheet();
+		}
 
 		/**
 		 * Finds out the sprite name used with this unit's internal sprite.
 		 * @return The name of the sprite from the spritesheet used with this unit.
 		 */
-		std::string getSprite() const noexcept;
+		inline std::string getSprite() const noexcept {
+			return _sprite.getSprite();
+		}
 
 		/**
 		 * Sets the unit's pixel position to the internal sprite.
 		 * @param x The X position of the tile.
 		 * @param y The Y position of the tile.
 		 */
-		void setPixelPosition(float x, float y) noexcept;
+		inline void setPixelPosition(float x, float y) noexcept {
+			_sprite.setPosition(sf::Vector2f(x, y));
+		}
 
 		/**
 		 * This drawable's \c animate() method.
@@ -279,6 +337,13 @@ namespace awe {
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
+		 * Finds out if this unit's first finite ammo weapon is low on ammo.
+		 * @return \c TRUE if this unit has at least one weapon with finite ammo
+		 *         that has at most half of its ammo left. \c FALSE otherwise.
+		 */
+		bool _isLowOnAmmo() const noexcept;
+
+		/**
 		 * The type of the unit.
 		 */
 		std::shared_ptr<const awe::unit_type> _type;
@@ -286,7 +351,7 @@ namespace awe {
 		/**
 		 * The ID of the army the unit belongs to.
 		 */
-		awe::ArmyID _army = awe::army::NO_ARMY;
+		awe::ArmyID _army = awe::NO_ARMY;
 
 		/**
 		 * The tile this unit occupies.
@@ -304,9 +369,9 @@ namespace awe {
 		awe::Fuel _fuel = 0;
 
 		/**
-		 * The ammo of this unit.
+		 * The ammo belonging to each of the unit's weapons.
 		 */
-		awe::Ammo _ammo = 0;
+		std::unordered_map<std::string, awe::Ammo> _ammos;
 
 		/**
 		 * The waiting/moved state of this unit.

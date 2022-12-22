@@ -30,26 +30,11 @@ awe::bank<T>::bank(const std::shared_ptr<engine::scripts>& scripts,
 }
 
 template<typename T>
-std::shared_ptr<const T> awe::bank<T>::operator[](const awe::BankID id) const
-	noexcept {
-	if (id >= size()) {
-		_logger.error("Game property {} does not exist in this bank!", id);
-		return nullptr;
-	}
-	return _bank[id];
-}
-
-template<typename T>
-std::shared_ptr<const T> awe::bank<T>::operator[](const std::string& sn) const
-	noexcept {
-	for (auto& prop : _bank) if (prop->getScriptName() == sn) return prop;
-	_logger.error("Game property \"{}\" does not exist in this bank!", sn);
-	return nullptr;
-}
-
-template<typename T>
-std::size_t awe::bank<T>::size() const noexcept {
-	return _bank.size();
+std::unordered_set<std::string> awe::bank<T>::getScriptNames() const noexcept {
+	std::unordered_set<std::string> ret;
+	std::transform(_bank.begin(), _bank.end(),
+		std::inserter(ret, ret.end()), [](auto pair) {return pair.first; });
+	return ret;
 }
 
 template<typename T>
@@ -63,17 +48,13 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 	T::Register<T>(_propertyName, engine, document);
 	// 3. Register a single reference type, called _propertyName + "Bank".
 	const std::string bankTypeName(_propertyName + "Bank"),
-		indexOpIntDecl("const " + _propertyName + " opIndex(BankID)"),
-		indexOpStrDecl("const " + _propertyName + " opIndex(string)"),
+		indexOpStrDecl("const " + _propertyName + "& opIndex(const string&in)"),
 		globalPropDecl(bankTypeName + " " +
 			tgui::String(_propertyName).toLower().toStdString());
 	r = engine->RegisterObjectType(bankTypeName.c_str(), 0,
 		asOBJ_REF | asOBJ_NOHANDLE);
 	document->DocumentObjectType(r, "Holds a collection of related game "
 		"properties.");
-	r = engine->RegisterObjectMethod(bankTypeName.c_str(), indexOpIntDecl.c_str(),
-		asMETHOD(awe::bank<T>, _opIndexInt), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Access a game property by its index.");
 	r = engine->RegisterObjectMethod(bankTypeName.c_str(), indexOpStrDecl.c_str(),
 		asMETHOD(awe::bank<T>, _opIndexStr), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Access a game property by its script "
@@ -82,6 +63,16 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::bank<T>, size), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the number of game properties stored "
 		"in this bank.");
+	r = engine->RegisterObjectMethod(bankTypeName.c_str(),
+		"bool contains(const string&in) const",
+		asMETHOD(awe::bank<T>, contains), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns true if an entry with the given "
+		"script name exists within the bank, false otherwise.");
+	r = engine->RegisterObjectMethod(bankTypeName.c_str(),
+		"array<string>@ get_scriptNames() const property",
+		asMETHOD(awe::bank<T>, _getScriptNamesArray), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the script name of each game "
+		"property stored in this bank. No order is guaranteed.");
 	// 4. Register the global point of access to the _propertyName + "Bank" object.
 	engine->RegisterGlobalProperty(globalPropDecl.c_str(), this);
 	document->DocumentExpectedFunction(globalPropDecl, "The single point of "
@@ -92,37 +83,21 @@ template<typename T>
 bool awe::bank<T>::_load(engine::json& j) noexcept {
 	_bank.clear();
 	nlohmann::ordered_json jj = j.nlohmannJSON();
-	awe::BankID id = 0;
 	for (auto& i : jj.items()) {
 		// Loop through each object, allowing the template type T to construct its
 		// values based on each object.
 		engine::json input(i.value());
-		_bank.push_back(std::make_shared<const T>(id++, i.key(), input));
+		_bank[i.key()] = std::make_shared<const T>(i.key(), input);
 	}
 	return true;
 }
 
 template<typename T>
-bool awe::bank<T>::_save(nlohmann::ordered_json& j) noexcept {
-	return false;
-}
-
-template<typename T>
-const T awe::bank<T>::_opIndexInt(const awe::BankID id) const {
-	auto ret = operator[](id);
-	if (ret)
-		return *ret;
-	else
-		throw std::runtime_error("Could not access game property");
-}
-
-template<typename T>
-const T awe::bank<T>::_opIndexStr(const std::string name) const {
-	auto ret = operator[](name);
-	if (ret)
-		return *ret;
-	else
-		throw std::runtime_error("Could not access game property");
+CScriptArray* awe::bank<T>::_getScriptNamesArray() const noexcept {
+	const auto names = getScriptNames();
+	CScriptArray* ret = _scripts->createArray("string");
+	for (auto name : names) ret->InsertLast(&name);
+	return ret;
 }
 
 template<typename T>
@@ -130,10 +105,6 @@ void awe::bank_id::Register(const std::string& type,
 	asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	auto r = engine->RegisterObjectMethod(type.c_str(),
-		"BankID get_ID() const property",
-		asMETHOD(T, getID), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Gets the index of this game property.");
-	r = engine->RegisterObjectMethod(type.c_str(),
 		"string get_scriptName() const property",
 		asMETHOD(T, getScriptName), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the script name of this game "
@@ -179,6 +150,10 @@ void awe::country::Register(const std::string& type,
 		"const Colour& get_colour() const property",
 		asMETHOD(T, getColour), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the colour of the country.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"ArmyID get_turnOrder() const property",
+		asMETHOD(T, getTurnOrder), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the turn order of this country.");
 }
 
 template<typename T>
@@ -219,15 +194,22 @@ void awe::terrain::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets the number of defence stars that this "
 		"terrain type has.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"int get_moveCost(const BankID) const property",
+		"int get_moveCost(const string&in) const property",
 		asMETHOD(T, getMoveCost), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the movement cost of this terrain "
-		"type, given a movement type index.");
+		"type, given a movement type script name.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_picture(const BankID) const property",
-		asMETHOD(T, getPicture), asCALL_THISCALL);
+		"const string& picture(const string&in) const",
+		asMETHODPR(T, getPicture, (const std::string&) const, const std::string&),
+		asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this terrain type's "
-		"picture, given a country index.");
+		"picture, given a country script name.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& picture(const ArmyID) const",
+		asMETHODPR(T, getPicture, (const awe::ArmyID) const, const std::string&),
+		asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this terrain type's "
+		"picture, given a country turn order ID.");
 }
 
 template<typename T>
@@ -236,20 +218,27 @@ void awe::tile_type::Register(const std::string& type,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	awe::bank_id::Register<T>(type, engine, document);
 	auto r = engine->RegisterObjectMethod(type.c_str(),
-		"BankID get_typeIndex() const property",
-		asMETHOD(T, getTypeIndex), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Gets the index of this tile's terrain "
-		"type.");
+		"const string& get_typeScriptName() const property",
+		asMETHOD(T, getTypeScriptName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the script name of this tile's "
+		"terrain type.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"const Terrain get_type() const property",
-		asMETHOD(T, getTypeObj), asCALL_THISCALL);
+		asMETHOD(T, _getTypeObj), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns details on this tile's terrain "
 		"type.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_ownedTileSprite(const BankID) const property",
-		asMETHOD(T, getOwnedTile), asCALL_THISCALL);
+		"const string& ownedTileSprite(const string&in) const",
+		asMETHODPR(T, getOwnedTile, (const std::string&) const,
+			const std::string&), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's owned "
-		"tile that is displayed on the map, given a country index.");
+		"tile that is displayed on the map, given a country script name.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& ownedTileSprite(const ArmyID) const",
+		asMETHODPR(T, getOwnedTile, (const awe::ArmyID) const, const std::string&),
+		asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's owned "
+		"tile that is displayed on the map, given a country turn order ID.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_neutralTileSprite() const property",
 		asMETHOD(T, getNeutralTile), asCALL_THISCALL);
@@ -268,6 +257,11 @@ void awe::weapon::Register(const std::string& type,
 		"int get_maxAmmo() const property",
 		asMETHOD(T, getMaxAmmo), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this weapon's max ammo.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasInfiniteAmmo() const property",
+		asMETHOD(T, hasInfiniteAmmo), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns true if this weapon has infinite "
+		"ammo, false if maxAmmo returns >= 0.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"const Vector2& get_range() const property",
 		asMETHOD(T, getRange), asCALL_THISCALL);
@@ -289,13 +283,13 @@ void awe::weapon::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "TRUE if this weapon can counterattack  "
 		"using an indirect attack.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool canAttackUnit(const BankID, const bool = false) const",
+		"bool canAttackUnit(const string&in, const bool = false) const",
 		asMETHOD(T, canAttackUnit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this weapon can attack the "
 		"given type of unit. If the bool parameter is TRUE, this will find out if "
 		"this weapon can attack the given type of unit if it is hidden.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"int getBaseDamageUnit(const BankID, const bool = false) const",
+		"int getBaseDamageUnit(const string&in, const bool = false) const",
 		asMETHOD(T, getBaseDamageUnit), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the base damage that this weapon "
 		"deals to the given type of unit. If the bool parameter is TRUE, this "
@@ -303,12 +297,12 @@ void awe::weapon::Register(const std::string& type,
 		"of unit if it is hidden. If this weapon cannot attack the given unit "
 		"type, whether hidden and/or visible, 0 will be returned.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool canAttackTerrain(const BankID) const",
+		"bool canAttackTerrain(const string&in) const",
 		asMETHOD(T, canAttackTerrain), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this weapon can attack the "
 		"given type of terrain.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"int getBaseDamageTerrain(const BankID) const",
+		"int getBaseDamageTerrain(const string&in) const",
 		asMETHOD(T, getBaseDamageTerrain), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the base damage that this weapon "
 		"deals to the given type of terrain. If this weapon cannot attack the "
@@ -322,24 +316,39 @@ void awe::unit_type::Register(const std::string& type,
 	awe::common_properties::Register<T>(type, engine, document,
 		"For unit types, this property is unused.");
 	auto r = engine->RegisterObjectMethod(type.c_str(),
-		"BankID get_movementTypeIndex() const property",
-		asMETHOD(T, getMovementTypeIndex), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Gets this unit's movement type index.");
+		"const string& get_movementTypeScriptName() const property",
+		asMETHOD(T, getMovementTypeScriptName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets this unit's movement type script "
+		"name.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"const Movement get_movementType() const property",
-		asMETHOD(T, getMovementTypeObj), asCALL_THISCALL);
+		asMETHOD(T, _getMovementTypeObj), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns details on this unit's movement "
 		"type.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_pictureSprite(const BankID) const property",
-		asMETHOD(T, getPicture), asCALL_THISCALL);
+		"const string& pictureSprite(const string&in) const",
+		asMETHODPR(T, getPicture, (const std::string&) const, const std::string&),
+		asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's "
-		"picture, given a country index.");
+		"picture, given a country script name.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_unitSprite(const BankID) const property",
-		asMETHOD(T, getUnit), asCALL_THISCALL);
+		"const string& pictureSprite(const ArmyID) const",
+		asMETHODPR(T, getPicture, (const awe::ArmyID) const, const std::string&),
+		asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's "
+		"picture, given a country turn order ID.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& unitSprite(const string&in) const",
+		asMETHODPR(T, getUnit, (const std::string&) const, const std::string&),
+		asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's tile "
-		"graphic that is displayed on the map, given a country index.");
+		"graphic that is displayed on the map, given a country script name.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& unitSprite(const ArmyID) const",
+		asMETHODPR(T, getUnit, (const awe::ArmyID) const, const std::string&),
+		asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's tile "
+		"graphic that is displayed on the map, given a country turn order ID.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"uint get_cost() const property",
 		asMETHOD(T, getCost), asCALL_THISCALL);
@@ -348,10 +357,6 @@ void awe::unit_type::Register(const std::string& type,
 		"int get_maxFuel() const property",
 		asMETHOD(T, getMaxFuel), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit's maximum fuel.");
-	r = engine->RegisterObjectMethod(type.c_str(),
-		"int get_maxAmmo() const property",
-		asMETHOD(T, getMaxAmmo), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Gets this unit's maximum ammo.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"uint get_maxHP() const property",
 		asMETHOD(T, getMaxHP), asCALL_THISCALL);
@@ -366,28 +371,15 @@ void awe::unit_type::Register(const std::string& type,
 		asMETHOD(T, getVision), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit's vision range.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"uint get_lowerRange() const property",
-		asMETHOD(T, getLowerRange), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Gets this unit's lowest attack range.");
-	r = engine->RegisterObjectMethod(type.c_str(),
-		"uint get_higherRange() const property",
-		asMETHOD(T, getHigherRange), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Gets this unit's highest attack range.");
-	r = engine->RegisterObjectMethod(type.c_str(),
 		"bool get_hasInfiniteFuel() const property",
 		asMETHOD(T, hasInfiniteFuel), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit's maximum fuel "
 		"is less than 0.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool get_hasInfiniteAmmo() const property",
-		asMETHOD(T, hasInfiniteAmmo), asCALL_THISCALL);
-	document->DocumentObjectMethod(r, "Returns TRUE if this unit's maximum ammo "
-		"is less than 0.");
-	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool get_canLoad(const BankID) const property",
-		asMETHODPR(T, canLoad, (const awe::BankID) const, bool), asCALL_THISCALL);
+		"bool get_canLoad(const string&in) const property",
+		asMETHODPR(T, canLoad, (const std::string&) const, bool), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit can load another "
-		"type of unit, whose index is given.");
+		"type of unit, whose script name is given.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"uint get_loadLimit() const property",
 		asMETHOD(T, loadLimit), asCALL_THISCALL);
@@ -398,22 +390,37 @@ void awe::unit_type::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets this unit type's turn start priority "
 		"level.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool get_canCapture(const BankID) const property",
-		asMETHODPR(T, canCapture, (const awe::BankID) const, bool),
+		"bool get_canCapture(const string&in) const property",
+		asMETHODPR(T, canCapture, (const std::string&) const, bool),
 		asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit can capture a "
-		"type of terrain, whose index is given.");
+		"type of terrain, whose script name is given.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool get_canUnloadFrom(const BankID) const property",
-		asMETHODPR(T, canUnloadFrom, (const awe::BankID) const, bool),
+		"bool get_canUnloadFrom(const string&in) const property",
+		asMETHODPR(T, canUnloadFrom, (const std::string&) const, bool),
 		asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit can unload units "
-		"from a type of terrain, whose index is given.");
+		"from a type of terrain, whose script name is given.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"bool get_canHide() const property",
 		asMETHOD(T, canHide), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns TRUE if this type of unit can "
 		"hide, FALSE otherwise.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const Weapon weapon(const string&in) const",
+		asMETHOD(T, _getWeapon), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Retrieves a unit's weapon, given its "
+		"script name.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const Weapon weapon(const uint64) const",
+		asMETHOD(T, _getWeaponByIndex), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Retrieves a unit's weapon, given its index "
+		"in the list. Used to filter weapons based on their precedence.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint64 get_weaponCount() const property",
+		asMETHOD(T, getWeaponCount), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Retrieves the number of weapons a unit "
+		"possesses.");
 }
 
 template<typename T>

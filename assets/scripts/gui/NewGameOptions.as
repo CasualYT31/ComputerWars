@@ -135,36 +135,37 @@ void NewGameOptions_Play_MouseReleased() {
 		auto geTeam = getWidgetText("Teams.GE");
 		auto ycTeam = getWidgetText("Teams.YC");
 
+		const auto@ coNames = commander.scriptNames;
 		if (osCurrent >= 0) {
-			opts.currentCOs.set("0", commander[osCurrent].scriptName);
+			opts.currentCOs.set("0", commander[coNames[osCurrent]].scriptName);
 		}
 		if (bmCurrent >= 0) {
-			opts.currentCOs.set("1", commander[bmCurrent].scriptName);
+			opts.currentCOs.set("1", commander[coNames[bmCurrent]].scriptName);
 		}
 		if (geCurrent >= 0) {
-			opts.currentCOs.set("2", commander[geCurrent].scriptName);
+			opts.currentCOs.set("2", commander[coNames[geCurrent]].scriptName);
 		}
 		if (ycCurrent >= 0) {
-			opts.currentCOs.set("3", commander[ycCurrent].scriptName);
+			opts.currentCOs.set("3", commander[coNames[ycCurrent]].scriptName);
 		}
 
 		if (osTag >= 0) {
-			opts.tagCOs.set("0", commander[osTag].scriptName);
+			opts.tagCOs.set("0", commander[coNames[osTag]].scriptName);
 		} else {
 			opts.tagCOs.set("0", "");
 		}
 		if (bmTag >= 0) {
-			opts.tagCOs.set("1", commander[bmTag].scriptName);
+			opts.tagCOs.set("1", commander[coNames[bmTag]].scriptName);
 		} else {
 			opts.tagCOs.set("1", "");
 		}
 		if (geTag >= 0) {
-			opts.tagCOs.set("2", commander[geTag].scriptName);
+			opts.tagCOs.set("2", commander[coNames[geTag]].scriptName);
 		} else {
 			opts.tagCOs.set("2", "");
 		}
 		if (ycTag >= 0) {
-			opts.tagCOs.set("3", commander[ycTag].scriptName);
+			opts.tagCOs.set("3", commander[coNames[ycTag]].scriptName);
 		} else {
 			opts.tagCOs.set("3", "");
 		}

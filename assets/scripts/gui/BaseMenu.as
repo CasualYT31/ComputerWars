@@ -41,30 +41,30 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 	setWidgetOrigin(panelName, 0.5, 0.5);
 	setWidgetPosition(panelName, "50%", "50%");
 	setHorizontalScrollbarPolicy(panelName, ScrollbarPolicy::Never);
-	const uint unitTypeCount = unittype.length();
-	uint firstUnitTypeID = 0;
-	bool firstIDSet = false;
+	const auto unitTypeScriptNames = unittype.scriptNames;
+	const uint unitTypeCount = unitTypeScriptNames.length();
+	array<string> unitsMatchingMovement;
 	for (uint i = 0; i < unitTypeCount; ++i) {
-		const UnitType type = unittype[i];
+		const UnitType type = unittype[unitTypeScriptNames[i]];
 		if (movementTypeNames.find(type.movementType.scriptName) >= 0) {
-			if (!firstIDSet) {
-				firstIDSet = true;
-				firstUnitTypeID = i;
-			}
-			string widget = panelName + "." + type.scriptName;
-			addWidget("BitmapButton", widget, "BaseMenuHandleSignal");
-			setWidgetTextSize(widget, 16);
-			// Rounding errors that will need addressing in the future.
-			setWidgetSize(widget, formatFloat(100.0 / double(columnCount)) + "%",
-				formatUInt(HEIGHT) + "px");
-			const string x = formatFloat(100 / double(columnCount) *
-				((i - firstUnitTypeID) % columnCount)) + "%";
-			const string y = formatUInt(uint((i - firstUnitTypeID) / columnCount)
-				* HEIGHT) + "px";
-				setWidgetPosition(widget, x, y);
-			setWidgetText(widget, "~" + translate(type.name) + " (G. " +
-				formatUInt(type.cost) + ")");
+			unitsMatchingMovement.insertLast(unitTypeScriptNames[i]);
 		}
+	}
+	for (uint i = 0, len = unitsMatchingMovement.length(); i < len; ++i) {
+		const UnitType type = unittype[unitsMatchingMovement[i]];
+		string widget = panelName + "." + type.scriptName;
+		addWidget("BitmapButton", widget, "BaseMenuHandleSignal");
+		setWidgetTextSize(widget, 16);
+		// Rounding errors that will need addressing in the future.
+		setWidgetSize(widget, formatFloat(100.0 / double(columnCount)) + "%",
+			formatUInt(HEIGHT) + "px");
+		const string x = formatFloat(100 / double(columnCount) *
+			(i % columnCount)) + "%";
+		const string y = formatUInt(uint(i / columnCount)
+			* HEIGHT) + "px";
+			setWidgetPosition(widget, x, y);
+		setWidgetText(widget, "~" + translate(type.name) + " (G. " +
+			formatUInt(type.cost) + ")");
 	}
 }
 
@@ -102,13 +102,15 @@ void BaseMenuSetUp() {
  */
 void PanelOpen(const string&in panelName, const array<string>@ movementTypeNames)
 	{
-	const BankID country = game.map.getArmyCountry(game.map.getSelectedArmy()).ID;
+	const auto country =
+		game.map.getArmyCountry(game.map.getSelectedArmy()).scriptName;
+	const auto@ unitTypeNames = unittype.scriptNames;
 	const uint unitTypeCount = unittype.length();
 	for (uint i = 0; i < unitTypeCount; ++i) {
-		const UnitType type = unittype[i];
+		const UnitType type = unittype[unitTypeNames[i]];
 		if (movementTypeNames.find(type.movementType.scriptName) >= 0) {
 			setWidgetSprite(panelName + "." + type.scriptName, "unit",
-				type.unitSprite[country]);
+				type.unitSprite(country));
 		}
 	}
 	setWidgetVisibility(panelName, true);

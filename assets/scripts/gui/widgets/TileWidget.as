@@ -96,9 +96,6 @@ class TileWidget {
 	 */
 	void update(const Vector2&in tilePos) {
 		// Gather information.
-		const TileType tileType = game.map.getTileType(tilePos);
-		const Terrain terrainType = game.map.getTileType(tilePos).type;
-		const ArmyID tileOwner = game.map.getTileOwner(tilePos);
 		const UnitID unitID = game.map.getUnitOnTile(tilePos);
 		array<UnitID> unitIDs;
 		array<UnitType> unitTypes;
@@ -153,22 +150,24 @@ class TileWidget {
 			}
 		}
 
-		_updateTilePanel(tilePos, tileType, terrainType, tileOwner);
+		_updateTilePanel(tilePos);
 		_updateUnitPanels(unitIDs, unitTypes);
 	}
 
 	/**
 	 * Updates the tile property panel with tile information.
 	 */
-	private void _updateTilePanel(const Vector2&in tilePos,
-		const TileType&in tileType, const Terrain&in terrainType,
-		const ArmyID tileOwner) {
+	private void _updateTilePanel(const Vector2&in tilePos) {
+		const TileType tileType = game.map.getTileType(tilePos);
+		const Terrain terrainType = tileType.type;
+		const ArmyID tileOwner = game.map.getTileOwner(tilePos);
 		if (tileOwner == NO_ARMY) {
 			_panels[0].setIcon("tile.normal",
 				tileType.neutralTileSprite);
 		} else {
 			_panels[0].setIcon("tile.normal",
-				tileType.ownedTileSprite[game.map.getArmyCountry(tileOwner).ID]);
+				tileType.ownedTileSprite(
+					game.map.getArmyCountry(tileOwner).turnOrder));
 		}
 		_panels[0].setName(terrainType.shortName);
 		_panels[0].setPropertyText(0,
@@ -188,16 +187,23 @@ class TileWidget {
 			++_panelsThatAreShowing;
 			const UnitID unitID = unitIDs[i - 1];
 			const UnitType unitType = unitTypes[i - 1];
-			_panels[i].setIcon("unit", unitType.unitSprite[
-				game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).ID
-			]);
+			_panels[i].setIcon("unit", unitType.unitSprite(
+				game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).turnOrder
+			));
 			_panels[i].setName(unitType.shortName);
 			_panels[i].setPropertyText(0, "~" +
 				formatInt(game.map.getUnitDisplayedHP(unitID)));
 			_panels[i].setPropertyText(1, "~" +
 				formatInt(game.map.getUnitFuel(unitID)));
-			_panels[i].setPropertyText(2, "~" +
-				formatInt(game.map.getUnitAmmo(unitID)));
+			// TODO-1 {
+			if (unitType.weaponCount > 0 && !unitType.weapon(0).hasInfiniteAmmo) {
+				_panels[i].setPropertyText(2, "~" +
+					formatInt(game.map.getUnitAmmo(unitID,
+						unitType.weapon(0).scriptName)));
+			} else {
+				_panels[i].setPropertyText(2, "~0");
+			}
+			// }
 			setWidgetVisibility(_panels[i].layout, true);
 			switch (_alignment) {
 			case TileWidgetAlignment::Left:

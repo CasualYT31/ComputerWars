@@ -42,11 +42,6 @@ namespace awe {
 	typedef sf::Uint8 TeamID;
 
 	/**
-	 * Typedef representing a generic bank ID.
-	 */
-	typedef sf::Uint32 BankID;
-
-	/**
 	 * Typedef representing funds.
 	 * I decided to make this signed because fund calculations will result in
 	 * negative values more often than not, and they should be handled properly.
@@ -79,11 +74,16 @@ namespace awe {
 
 	/**
 	 * Typedef representing an army ID.
-	 * \c UINT32_MAX should be reserved, even if it isn't officially in bank.h...
 	 * @warning Do \b not make this a signed type!
 	 * @sa      @c awe::army::NO_ARMY
 	 */
-	typedef awe::BankID ArmyID;
+	typedef sf::Uint32 ArmyID;
+
+	/**
+	 * Reserved value representing no army.
+	 * Assigned the maximum value of the unsigned type of \c awe::ArmyID.
+	 */
+	const awe::ArmyID NO_ARMY = ~((awe::ArmyID)0);
 
 	/**
 	 * Typedef representing a day number.

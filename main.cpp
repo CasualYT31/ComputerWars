@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
     if (engine.inGoodState()) {
         return engine.run();
     } else {
-        rootLogger.critical("Game engine in bad state after loading, aborting.");
+        rootLogger.error("Game engine in bad state after loading, aborting...");
         return 3;
     }
 }

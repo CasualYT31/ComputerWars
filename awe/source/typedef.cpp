@@ -29,11 +29,6 @@ void awe::RegisterGameTypedefs(asIScriptEngine* engine,
 		document->DocumentExpectedFunction("typedef uint8 TeamID",
 			"Index used to identify a team.");
 	}
-	if (!engine->GetTypeInfoByName("BankID")) {
-		engine->RegisterTypedef("BankID", "uint32");
-		document->DocumentExpectedFunction("typedef uint32 BankID",
-			"Index used to identify a bank entry/game property.");
-	}
 	if (!engine->GetTypeInfoByName("Funds")) {
 		engine->RegisterTypedef("Funds", "int32");
 		document->DocumentExpectedFunction("typedef int32 Funds",

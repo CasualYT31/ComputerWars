@@ -132,29 +132,6 @@ namespace awe {
 		map(const std::string& name = "map") noexcept;
 
 		/**
-		 * Version number of the CWM format representing the very first version.
-		 * \c 1297564416 is the 32-bit integer value representing "[NUL]", "C",
-		 * "W", and "M". Adding a number of up to 255 to this value will increase
-		 * the first byte (little endian is used), so that different versions of
-		 * the CWM format can be checked for easily.
-		 */
-		static const sf::Uint32 FIRST_FILE_VERSION = 1297564416;
-
-		/**
-		 * The latest version of the CWM format.
-		 * Can be used with calls to the constructor and the \c save() method.
-		 */
-		static const unsigned char LATEST_VERSION = 2;
-
-		/**
-		 * Version number of the CWM format representing the latest version.
-		 * @sa \c awe::map::FIRST_FILE_VERSION
-		 * @sa \c awe::map::LATEST_VERSION
-		 */
-		static const sf::Uint32 LATEST_FILE_VERSION =
-			FIRST_FILE_VERSION + LATEST_VERSION;
-
-		/**
 		 * Initialises this object with \c bank pointers.
 		 * Also initialises the internal logger object.\n
 		 * @param countries  Information on the countries to search through when
@@ -190,8 +167,7 @@ namespace awe {
 		 * @return \c TRUE if the load was successful, \c FALSE if the file
 		 *         couldn't be loaded (reason will be logged).
 		 */
-		bool load(std::string file, const unsigned char version = LATEST_VERSION)
-			noexcept;
+		bool load(std::string file, const unsigned char version = 0) noexcept;
 
 		/**
 		 * Saves this \c map object's state to a given binary file.
@@ -203,8 +179,7 @@ namespace awe {
 		 * @return \c TRUE if the save was successful, \c FALSE if the file
 		 *         couldn't be saved (reason will be logged).
 		 */
-		bool save(std::string file, const unsigned char version = LATEST_VERSION)
-			noexcept;
+		bool save(std::string file, const unsigned char version = 0) noexcept;
 
 		/**
 		 * Gives access to the scripts to save the map.
@@ -270,14 +245,6 @@ namespace awe {
 			const std::shared_ptr<const awe::tile_type>& tile = nullptr) noexcept;
 
 		/**
-		 * Overload of \c setMapSize() which accepts a tile type bank index.
-		 * @param dim  The new size of the map.
-		 * @param tile The bank index of the tile type to assign to new tiles.
-		 */
-		void setMapSize(const sf::Vector2u& dim, const awe::BankID tile = 0)
-			noexcept;
-
-		/**
 		 * Overload of \c setMapSize() which accepts a tile type script name.
 		 * @param dim  The new size of the map.
 		 * @param tile The script name of the tile type to assign to new tiles.
@@ -319,12 +286,6 @@ namespace awe {
 			noexcept;
 
 		/**
-		 * Overload of \c createArmy() which accepts a country bank index.
-		 * @param country The bank index of the country of the army.
-		 */
-		bool createArmy(const awe::BankID country) noexcept;
-
-		/**
 		 * Overload of \c createArmy() which accepts a country script name.
 		 * @param country The script name of the country of the army.
 		 */
@@ -344,7 +305,7 @@ namespace awe {
 		 *                          neutral.
 		 */
 		void deleteArmy(const awe::ArmyID army,
-			const awe::ArmyID transferOwnership = awe::army::NO_ARMY) noexcept;
+			const awe::ArmyID transferOwnership = awe::NO_ARMY) noexcept;
 
 		/**
 		 * Retrieves the number of armies currently on the map.
@@ -608,16 +569,6 @@ namespace awe {
 			const awe::ArmyID army) noexcept;
 
 		/**
-		 * Overload of \c createUnit() which accepts a unit type bank index.
-		 * @param  type The bank index of the type of unit to create.
-		 * @param  army The ID of the army who will own this unit.
-		 * @return The 1-based ID of the unit created. Will be \c 0 if the unit
-		 *         couldn't be created.
-		 */
-		awe::UnitID createUnit(const awe::BankID type, const awe::ArmyID army)
-			noexcept;
-
-		/**
 		 * Overload of \c createUnit() which accepts a unit type script name.
 		 * @param  type The script name of the type of unit to create.
 		 * @param  army The ID of the army who will own this unit.
@@ -733,17 +684,22 @@ namespace awe {
 		/**
 		 * Sets a unit's ammo.
 		 * If < 0 is given, 0 will be stored.
-		 * @param id   The ID of the unit to amend.
-		 * @param ammo The new ammo of the unit.
+		 * @param id     The ID of the unit to amend.
+		 * @param weapon The script name of the weapon to update.
+		 * @param ammo   The new ammo of the unit's weapon.
 		 */
-		void setUnitAmmo(const awe::UnitID id, const awe::Ammo ammo) noexcept;
+		void setUnitAmmo(const awe::UnitID id, const std::string& weapon,
+			const awe::Ammo ammo) noexcept;
 
 		/**
 		 * Gets a unit's ammo.
-		 * @param  id The ID of the unit to inspect.
-		 * @return The ammo of the unit. \c 0 if unit doesn't exist.
+		 * @param  id     The ID of the unit to inspect.
+		 * @param  weapon The script name of the weapon to query.
+		 * @return The ammo of the unit's weapon. \c 0 if unit or weapon doesn't
+		 *         exist.
 		 */
-		awe::Ammo getUnitAmmo(const awe::UnitID id) const noexcept;
+		awe::Ammo getUnitAmmo(const awe::UnitID id, const std::string& weapon)
+			const noexcept;
 
 		/**
 		 * Sets a unit's waiting state.
@@ -893,11 +849,6 @@ namespace awe {
 		 */
 		bool setTileType(const sf::Vector2u& pos,
 			const std::shared_ptr<const awe::tile_type>& type) noexcept;
-
-		/**
-		 * Version of \c setTileType() which accepts a tile type bank index.
-		 */
-		bool setTileType(const sf::Vector2u& pos, const awe::BankID type) noexcept;
 
 		/**
 		 * Version of \c setTileType() which accepts a tile type script name.
@@ -1546,72 +1497,6 @@ namespace awe {
 		// FILE //
 		//////////
 		/**
-		 * Either reads from or writes to a binary file.
-		 * Also deduces the format which this file is to have or has.
-		 * @param  isSave  \c TRUE if the file is to be written to, \c FALSE if the
-		 *                 file is to be read from.
-		 * @param  version If writing, the version should be given here.
-		 * @throws std::exception if the header couldn't be read or written.
-		 */
-		void _CWM_Header(const bool isSave, unsigned char version);
-
-		/**
-		 * First version of the CWM format.
-		 * @param  isSave \c TRUE if the file is to be written to, \c FALSE if the
-		 *                file is to be read from.
-		 * @throws std::exception if the file couldn't be read or written.
-		 */
-		void _CWM_0(const bool isSave);
-
-		/**
-		 * Reads or writes information pertaining to a unit in 0CWM format.
-		 * @param  isSave   \c TRUE if the file is to be written to, \c FALSE if
-		 *                  the file is to be read from.
-		 * @param  id       The ID of the unit to write info on, if writing.
-		 * @param  curtile  The location of the tile to create the unit on, if
-		 *                  reading.
-		 * @param  loadOnto The ID of the unit to load the new unit onto. \c 0 if
-		 *                  the unit should not be loaded onto another one.
-		 * @throws std::exception if the unit info couldn't be read or written.
-		 * @return When loading, \c TRUE if there was a unit created, \c FALSE if
-		 *         no unit was created. When saving, always \c TRUE.
-		 */
-		bool _CWM_0_Unit(const bool isSave, awe::UnitID id,
-			const sf::Vector2u& curtile, const awe::UnitID loadOnto = 0);
-
-		/**
-		 * Second version of the CWM format.
-		 * @param  isSave \c TRUE if the file is to be written to, \c FALSE if the
-		 *                file is to be read from.
-		 * @throws std::exception if the file couldn't be read or written.
-		 */
-		void _CWM_1(const bool isSave);
-
-		/**
-		 * Third version of the CWM format.
-		 * @param  isSave \c TRUE if the file is to be written to, \c FALSE if the
-		 *                file is to be read from.
-		 * @throws std::exception if the file couldn't be read or written.
-		 */
-		void _CWM_2(const bool isSave);
-
-		/**
-		 * Reads or writes information pertaining to a unit in 2CWM format.
-		 * @param  isSave   \c TRUE if the file is to be written to, \c FALSE if
-		 *                  the file is to be read from.
-		 * @param  id       The ID of the unit to write info on, if writing.
-		 * @param  curtile  The location of the tile to create the unit on, if
-		 *                  reading.
-		 * @param  loadOnto The ID of the unit to load the new unit onto. \c 0 if
-		 *                  the unit should not be loaded onto another one.
-		 * @throws std::exception if the unit info couldn't be read or written.
-		 * @return When loading, \c TRUE if there was a unit created, \c FALSE if
-		 *         no unit was created. When saving, always \c TRUE.
-		 */
-		bool _CWM_2_Unit(const bool isSave, awe::UnitID id,
-			const sf::Vector2u& curtile, const awe::UnitID loadOnto = 0);
-
-		/**
 		 * File name of the binary file previously read from or written to.
 		 */
 		std::string _filename = "";
@@ -1784,7 +1669,7 @@ namespace awe {
 		 *          by the client. However, the drawing code must still check for
 		 *          it and act accordingly!
 		 */
-		awe::ArmyID _currentArmy = awe::army::NO_ARMY;
+		awe::ArmyID _currentArmy = awe::NO_ARMY;
 
 		/**
 		 * The animated sprite representing the cursor.

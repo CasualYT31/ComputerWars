@@ -81,6 +81,11 @@ bool engine::binary_file::readBool() {
 	}
 }
 
+void engine::binary_file::readBool(bool& boolean) {
+	const auto booleanRead = readBool();
+	boolean = booleanRead;
+}
+
 void engine::binary_file::writeBool(const bool val) {
 	try {
 		unsigned char out = val ? 0xFF : 0x00;
@@ -111,6 +116,11 @@ std::string engine::binary_file::readString() {
 			std::to_string(_bytes) + ": " + e.what();
 		throw std::exception(w.c_str());
 	}
+}
+
+void engine::binary_file::readString(std::string& str) {
+	const auto stringRead = readString();
+	str = stringRead;
 }
 
 void engine::binary_file::writeString(const std::string& str) {

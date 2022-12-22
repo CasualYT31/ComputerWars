@@ -93,3 +93,28 @@ void engine::json::applyVector(std::vector<T>& dest,
 		}
 	}
 }
+
+template<typename T>
+void engine::json::applyMap(std::unordered_map<std::string, T>& dest,
+	KeySequence keys, const bool continueReadingOnTypeError) {
+	nlohmann::ordered_json test;
+	if (_performInitialChecks(keys, test, dest, "map")) {
+		nlohmann::ordered_json testDataType = T();
+		for (const auto& item : test.items()) {
+			if (equalType(testDataType, item.value())) {
+				dest[item.key()] = item.value();
+			} else {
+				_toggleState(MISMATCHING_ELEMENT_TYPE);
+				_logger.error("The specified JSON object was not homogeneous, "
+					"found a value of data type \"{}\" with key \"{}\" when "
+					"attempting to assign to a map with values of data type "
+					"\"{}\", in the key sequence {}.{}", _getTypeName(item.value()),
+					item.key(), _getTypeName(testDataType),
+					synthesiseKeySequence(keys), ((continueReadingOnTypeError) ?
+						("") : (" Will now stop reading key-value pairs from this "
+							"object.")));
+				if (!continueReadingOnTypeError) break;
+			}
+		}
+	}
+}

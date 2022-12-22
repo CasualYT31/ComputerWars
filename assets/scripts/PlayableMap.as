@@ -306,7 +306,7 @@ class PlayableMap {
 		}
 		Funds newFunds = map.getArmyFunds(army) - type.cost;
 		if (newFunds < 0) return false;
-		const auto unitID = map.createUnit(type.ID, army);
+		const auto unitID = map.createUnit(type.scriptName, army);
 		if (unitID == 0) {
 			throw("Could not buy unit of type \"" + type.scriptName + "\" for "
 				"army " + formatUInt(army) + " on tile " + position.toString() +
@@ -315,12 +315,7 @@ class PlayableMap {
 		map.setUnitPosition(unitID, position);
 		map.setArmyFunds(army, newFunds);
 		map.setUnitHP(unitID, type.maxHP);
-		if (!type.hasInfiniteFuel) {
-			map.setUnitFuel(unitID, type.maxFuel);
-		}
-		if (!type.hasInfiniteAmmo) {
-			map.setUnitAmmo(unitID, type.maxAmmo);
-		}
+		replenishUnit(unitID);
 		return true;
 	}
 
@@ -388,8 +383,12 @@ class PlayableMap {
 		if (!type.hasInfiniteFuel) {
 			map.setUnitFuel(unit, type.maxFuel);
 		}
-		if (!type.hasInfiniteAmmo) {
-			map.setUnitAmmo(unit, type.maxAmmo);
+		const auto weaponCount = type.weaponCount;
+		for (uint64 i = 0; i < weaponCount; ++i) {
+			const auto weaponType = type.weapon(i);
+			if (!weaponType.hasInfiniteAmmo) {
+				map.setUnitAmmo(unit, weaponType.scriptName, weaponType.maxAmmo);
+			}
 		}
 	}
 
@@ -475,7 +474,8 @@ class PlayableMap {
 		6. A unit cannot join with itself.
 		*/
 		return stationary > 0 && moving > 0 && stationary != moving &&
-			map.getUnitType(stationary).ID == map.getUnitType(moving).ID &&
+			map.getUnitType(stationary).scriptName ==
+				map.getUnitType(moving).scriptName &&
 			map.getArmyOfUnit(stationary) == map.getArmyOfUnit(moving) &&
 			map.getLoadedUnits(stationary).length() == 0 &&
 			map.getLoadedUnits(moving).length() == 0 &&
@@ -500,8 +500,19 @@ class PlayableMap {
 			// Perform join.
 			HP newHP = map.getUnitHP(stationary) + map.getUnitHP(moving);
 			Fuel newFuel = map.getUnitFuel(stationary) + map.getUnitFuel(moving);
-			Ammo newAmmo = map.getUnitAmmo(stationary) + map.getUnitAmmo(moving);
 			const auto type = map.getUnitType(stationary);
+			dictionary newAmmos;
+			const auto weaponCount = type.weaponCount;
+			for (uint64 w = 0; w < weaponCount; ++w) {
+				const auto weaponType = type.weapon(w);
+				newAmmos[weaponType.scriptName] =
+					map.getUnitAmmo(stationary, weaponType.scriptName) +
+					map.getUnitAmmo(moving, weaponType.scriptName);
+				if (!weaponType.hasInfiniteAmmo &&
+					int(newAmmos[weaponType.scriptName]) > weaponType.maxAmmo) {
+					newAmmos[weaponType.scriptName] = weaponType.maxAmmo;
+				}
+			}
 			if (GetDisplayedHP(newHP) > GetDisplayedHP(type.maxHP)) {
 				map.offsetArmyFunds(map.getArmyOfUnit(stationary),
 					type.cost / GetDisplayedHP(type.maxHP) *
@@ -511,12 +522,16 @@ class PlayableMap {
 			if (!type.hasInfiniteFuel && newFuel > type.maxFuel) {
 				newFuel = type.maxFuel;
 			}
-			if (!type.hasInfiniteAmmo && newAmmo > type.maxAmmo) {
-				newAmmo = type.maxAmmo;
-			}
 			map.setUnitHP(stationary, newHP);
 			if (!type.hasInfiniteFuel) map.setUnitFuel(stationary, newFuel);
-			if (!type.hasInfiniteAmmo) map.setUnitAmmo(stationary, newAmmo);
+			const auto@ weaponNames = newAmmos.getKeys();
+			for (uint64 w = 0, len = weaponNames.length(); w < len; ++w) {
+				const auto weaponName = weaponNames[w];
+				if (!weapon[weaponName].hasInfiniteAmmo) {
+					map.setUnitAmmo(stationary, weaponName,
+						int(newAmmos[weaponName]));
+				}
+			}
 			map.waitUnit(stationary, true);
 			map.deleteUnit(moving);
 		} else {
@@ -551,8 +566,8 @@ class PlayableMap {
 		   team that is against the unit.
 		3. The tile must be vacant, unless the given unit is already occupying it.
 		*/
-		return unit > 0 &&
-			map.getUnitType(unit).canCapture[map.getTileType(tile).type.ID] &&
+		return unit > 0 && map.getUnitType(unit).canCapture[
+				map.getTileType(tile).type.scriptName] &&
 			(map.getTileOwner(tile) == NO_ARMY ||
 			map.getTeamOfUnit(unit) != map.getArmyTeam(map.getTileOwner(tile))) &&
 			(map.getUnitOnTile(tile) == 0 || map.getUnitOnTile(tile) == unit);
@@ -611,10 +626,18 @@ class PlayableMap {
 			if (map.getArmyOfUnit(units[i]) == army) {
 				const auto unitType = map.getUnitType(units[i]);
 				if ((!unitType.hasInfiniteFuel &&
-					map.getUnitFuel(units[i]) < unitType.maxFuel) ||
-					(!unitType.hasInfiniteAmmo &&
-					map.getUnitAmmo(units[i]) < unitType.maxAmmo)) {
+					map.getUnitFuel(units[i]) < unitType.maxFuel)) {
 					return true;
+				}
+				// Loop through every weapon.
+				const auto weaponCount = unitType.weaponCount;
+				for (uint64 w = 0; w < weaponCount; ++w) {
+					const auto weaponType = unitType.weapon(w);
+					if (!weaponType.hasInfiniteAmmo &&
+						map.getUnitAmmo(units[i], weaponType.scriptName) <
+							weaponType.maxAmmo) {
+						return true;
+					}
 				}
 			}
 		}
@@ -652,7 +675,7 @@ class PlayableMap {
 		if (load == 0 || onto == 0) return false;
 		const auto ontoType = map.getUnitType(onto);
 		return map.getArmyOfUnit(load) == map.getArmyOfUnit(onto) &&
-			ontoType.canLoad[map.getUnitType(load).ID] &&
+			ontoType.canLoad[map.getUnitType(load).scriptName] &&
 			map.getLoadedUnits(onto).length() < ontoType.loadLimit;
 	}
 
@@ -701,8 +724,10 @@ class PlayableMap {
 		*/
 		if (unit == 0) return false;
 		if (map.getUnitWhichContainsUnit(unit) != 0) return false;
-		if (!map.getUnitType(unit).canUnloadFrom[map.getTileType(from).type.ID])
+		if (!map.getUnitType(unit).canUnloadFrom[
+			map.getTileType(from).type.scriptName]) {
 			return false;
+		}
 		const auto loadedUnits = map.getLoadedUnits(unit);
 		const auto loadedUnitsLength = loadedUnits.length();
 		if (loadedUnitsLength == 0 ||
@@ -755,7 +780,9 @@ class PlayableMap {
 		if (toTiles.length() == 0) return false;
 		if (map.getUnitWhichContainsUnit(fromUnit) != 0) return false;
 		if (!map.getUnitType(fromUnit).
-			canUnloadFrom[map.getTileType(fromTile).type.ID]) return false;
+			canUnloadFrom[map.getTileType(fromTile).type.scriptName]) {
+			return false;
+		}
 		if (!map.isUnitLoadedOntoUnit(unloadingUnit, fromUnit)) return false;
 		const auto unitOnFromTile = map.getUnitOnTile(fromTile);
 		if (unitOnFromTile != 0 && unitOnFromTile != fromUnit) return false;
@@ -1018,7 +1045,7 @@ class PlayableMap {
 				const int tentativeGScore =
 					map.closedList[map.closedList.length() - 1].g +
 					map.getTileType(tile).type.moveCost[
-						unitType.movementTypeIndex];
+						unitType.movementTypeScriptName];
 				if (tentativeGScore <= map.getUnitFuel(unitID) &&
 					uint(tentativeGScore) <= unitType.movementPoints) {
 					newClosedListNode(map.closedList, -1, tile, tentativeGScore);

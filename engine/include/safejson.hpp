@@ -127,7 +127,9 @@ namespace engine {
 		 * this should be addressed by the client and reset using \c resetState().
 		 * @return \c TRUE if the object is in a good state, \c FALSE if not.
 		 */
-		bool inGoodState() const noexcept;
+		inline bool inGoodState() const noexcept {
+			return _bits == engine::json_state::SUCCESS;
+		}
 
 		/**
 		 * Returns the internal bit sequence which can be tested against.
@@ -137,14 +139,18 @@ namespace engine {
 		 * due to a wrongly formatted JSON script.
 		 * @return The bit sequence to test against using the bitwise-AND operator.
 		 */
-		FailBits whatFailed() const noexcept;
+		inline FailBits whatFailed() const noexcept {
+			return _bits;
+		}
 
 		/**
 		 * Resets the state of the object.
 		 * The internal bit sequence representing the state of the object
 		 * is set to \c SUCCESS.
 		 */
-		void resetState() noexcept;
+		inline void resetState() noexcept {
+			_bits = engine::json_state::SUCCESS;
+		}
 	protected:
 		/**
 		 * This class cannot be instantiated by the client.
@@ -158,7 +164,9 @@ namespace engine {
 		 * fail bit is assigned via a bitwise-OR operation.
 		 * @param state The fail bit to set to the internal bit sequence.
 		 */
-		void _toggleState(FailBits state) noexcept;
+		inline void _toggleState(FailBits state) noexcept {
+			_bits |= state;
+		}
 	private:
 		/**
 		 * The internal bit sequence.
@@ -195,7 +203,7 @@ namespace engine {
 		 * @param name The string name of the internal logger object which helps
 		 *             identify this object if it causes an error.
 		 */
-		json(const std::string& name = "json") noexcept;
+		inline json(const std::string& name = "json") noexcept : _logger(name) {}
 
 		/**
 		 * Constructs a JSON object from a \c nlohmann one.
@@ -206,8 +214,56 @@ namespace engine {
 		 *             identify this object if it causes an error.
 		 * @sa    operator=()
 		 */
-		json(const nlohmann::ordered_json& jobj, const std::string& name = "json")
-			noexcept;
+		inline json(const nlohmann::ordered_json& jobj,
+			const std::string& name = "json") noexcept : _logger(name) {
+			*this = jobj;
+		}
+
+		/**
+		 * Copy constructor.
+		 * Copies the JSON itself, but sets up a new logger with a new name.
+		 * @param obj  The object to copy.
+		 * @param name The string name of the internal logger object which helps
+		 *             identify this object if it causes an error.
+		 */
+		inline json(const engine::json& obj, const std::string& name = "json")
+			noexcept : _logger(name) {
+			*this = obj;
+		}
+
+		/**
+		 * Move constructor.
+		 * Moves the JSON itself, and sets up a new logger with a new name.
+		 * @param obj  The object to move.
+		 * @param name The string name of the internal logger object which helps
+		 *             identify this object if it causes an error.
+		 */
+		inline json(engine::json&& obj, const std::string& name = "json")
+			noexcept : _logger(name) {
+			*this = std::move(obj);
+		}
+
+		/**
+		 * Copy assignment operator.
+		 * Copies the internal JSON object.
+		 * @param  obj The object to copy over.
+		 * @return Reference to \c this.
+		 */
+		inline engine::json& operator=(const engine::json& obj) noexcept {
+			_j = obj._j;
+			return *this;
+		}
+
+		/**
+		 * Move assignment operator.
+		 * Moves the internal JSON object.
+		 * @param  obj The object to move over.
+		 * @return Reference to \c this.
+		 */
+		inline engine::json& operator=(engine::json&& obj) noexcept {
+			_j = std::move(obj._j);
+			return *this;
+		}
 
 		/**
 		 * Assignment operator which accepts a \c nlohmann::ordered_json object.
@@ -285,7 +341,9 @@ namespace engine {
 		 * @return The root JSON object stored in this object.
 		 * @sa     apply()
 		 */
-		nlohmann::ordered_json nlohmannJSON() const noexcept;
+		inline nlohmann::ordered_json nlohmannJSON() const noexcept {
+			return _j;
+		}
 
 		/**
 		 * Applies a value found within the JSON object to a given C++ object.
@@ -321,9 +379,10 @@ namespace engine {
 		 *                         value to apply to the C++ object.
 		 * @param   suppressErrors If \c TRUE, the error state of this object will
 		 *                         be reset at the end of the call.
-		 * @sa      applyArray()
-		 * @sa      applyColour()
-		 * @sa      applyVector()
+		 * @sa      \c applyArray()
+		 * @sa      \c applyColour()
+		 * @sa      \c applyVector()
+		 * @sa      \c applyMap()
 		 */
 		template<typename T>
 		void apply(T& dest, KeySequence keys, const bool suppressErrors = false)
@@ -359,9 +418,10 @@ namespace engine {
 		 * @param   dest The destination array object.
 		 * @param   keys The key sequence uniquely identifying the JSON array value
 		 *               to apply to the C++ array object.
-		 * @sa      apply()
-		 * @sa      applyColour()
-		 * @sa      applyVector()
+		 * @sa      \c apply()
+		 * @sa      \c applyColour()
+		 * @sa      \c applyVector()
+		 * @sa      \c applyMap()
 		 */
 		template<typename T, std::size_t N>
 		void applyArray(std::array<T, N>& dest, KeySequence keys) noexcept;
@@ -382,9 +442,10 @@ namespace engine {
 		 *                         array to apply to the \c Color object.
 		 * @param   suppressErrors Resets the error state of this object when the
 		 *                         call is finished.
-		 * @sa      apply()
-		 * @sa      applyArray()
-		 * @sa      applyVector()
+		 * @sa      \c apply()
+		 * @sa      \c applyArray()
+		 * @sa      \c applyVector()
+		 * @sa      \c applyMap()
 		 */
 		void applyColour(sf::Color& dest, KeySequence keys,
 			const bool suppressErrors = false) noexcept;
@@ -405,12 +466,43 @@ namespace engine {
 		 * @param   dest The destination vector object.
 		 * @param   keys The key sequence uniquely identifying the JSON array to
 		 *               apply.
-		 * @sa      apply()
-		 * @sa      applyArray()
-		 * @sa      applyColour()
+		 * @sa      \c apply()
+		 * @sa      \c applyArray()
+		 * @sa      \c applyColour()
+		 * @sa      \c applyMap()
 		 */
 		template<typename T>
 		void applyVector(std::vector<T>& dest, KeySequence keys);
+
+		/**
+		 * Applies a JSON object to a given \c std::unordered_map object.
+		 * This method reads a JSON object located at \c keys, iterates through all
+		 * of its key-value pairs, and assigns them to the destination map. All the
+		 * values in the pairs must be of the same data type, and must match \c T.
+		 * \c dest is not cleared by this method. If a key-value fails to be
+		 * assigned (if the value didn't match the data type), then the key won't
+		 * be added/updated in the destination map, and the appropriate error bit
+		 * will be set.
+		 * @warning Please see the \c applyVector() method for information on the
+		 *          error bits that might be set for this method.
+		 * @tparam  T    The type of objects stored in the map. Inferred from
+		 *               \c dest.
+		 * @param   dest The destination map object.
+		 * @param   keys The key sequence uniquely identifying the JSON object to
+		 *               apply.
+		 * @param   continueReadingOnTypeError If \c TRUE and a key-value pair
+		 *                                     couldn't be assigned, then key-value
+		 *                                     pairs will still be read. If
+		 *                                     \c FALSE, no further key-value pairs
+		 *                                     will be read in this case. \c TRUE
+		 *                                     is the default.
+		 * @sa      \c apply()
+		 * @sa      \c applyArray()
+		 * @sa      \c applyColour()
+		 */
+		template<typename T>
+		void applyMap(std::unordered_map<std::string, T>& dest, KeySequence keys,
+			const bool continueReadingOnTypeError = true);
 	private:
 		/**
 		 * Returns the data type of the value stored in a given
@@ -425,7 +517,11 @@ namespace engine {
 		 *         \c nlohmann::ordered_json class (unless where specified in the
 		 *         detailed section).
 		 */
-		static std::string _getTypeName(nlohmann::ordered_json& j) noexcept;
+		static inline std::string _getTypeName(nlohmann::ordered_json& j) noexcept
+			{
+			if (j.is_number_float()) return "float";
+			return j.type_name();
+		}
 
 		/**
 		 * Performs preliminary checks before continuing with the \c apply() call.
@@ -477,7 +573,9 @@ namespace engine {
 		 * @return The path last set via \c load() or \c save(). It will store it
 		 *         exactly as it was given.
 		 */
-		std::string getScriptPath() const noexcept;
+		inline std::string getScriptPath() const noexcept {
+			return _script;
+		}
 		
 		/**
 		 * Retrieves the last error text caught upon a failure to read or write a
@@ -487,7 +585,9 @@ namespace engine {
 		 * could not be opened.
 		 * @return A copy of the error text. Blank if no error has occurred yet.
 		 */
-		std::string jsonwhat() const noexcept;
+		inline std::string jsonwhat() const noexcept {
+			return _what;
+		}
 
 		/**
 		 * Loads a JSON script.

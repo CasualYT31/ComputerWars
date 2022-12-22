@@ -6,8 +6,14 @@
 		"description": "PLAINS_description",
 		"hp": 0,
 		"defence": 1,
-		"movecosts": [ 1, 1, 2, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 2,
+			"TREAD": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"SEA": {
 		"longname": "SEA_longname",
@@ -16,8 +22,11 @@
 		"description": "SEA_description",
 		"hp": 0,
 		"defence": 0,
-		"movecosts": [ -1, -1, -1, -1, 1, -1, 1, 1, -1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"AIR": 1,
+			"SHIPS": 1,
+			"TRANSPORT": 1
+		}
 	},
 	"ROAD": {
 		"longname": "ROAD_longname",
@@ -26,8 +35,14 @@
 		"description": "ROAD_description",
 		"hp": 0,
 		"defence": 0,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"BRIDGE": {
 		"longname": "BRIDGE_longname",
@@ -36,8 +51,14 @@
 		"description": "BRIDGE_description",
 		"hp": 0,
 		"defence": 0,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"MOUNTAIN": {
 		"longname": "MOUNTAIN_longname",
@@ -46,8 +67,12 @@
 		"description": "MOUNTAIN_description",
 		"hp": 0,
 		"defence": 4,
-		"movecosts": [ 2, 1, -1, -1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 2,
+			"MECH": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"WOODS": {
 		"longname": "WOODS_longname",
@@ -56,8 +81,14 @@
 		"description": "WOODS_description",
 		"hp": 0,
 		"defence": 2,
-		"movecosts": [ 1, 1, 3, 2, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 3,
+			"TREAD": 2,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"RIVER": {
 		"longname": "RIVER_longname",
@@ -66,8 +97,12 @@
 		"description": "RIVER_description",
 		"hp": 0,
 		"defence": 0,
-		"movecosts": [ 2, 1, -1, -1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 2,
+			"MECH": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"REEF": {
 		"longname": "REEF_longname",
@@ -76,8 +111,11 @@
 		"description": "REEF_description",
 		"hp": 0,
 		"defence": 1,
-		"movecosts": [ -1, -1, -1, -1, 1, -1, 2, 2, -1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"AIR": 1,
+			"SHIPS": 2,
+			"TRANSPORT": 2
+		}
 	},
 	"SHOAL": {
 		"longname": "SHOAL_longname",
@@ -86,8 +124,15 @@
 		"description": "SHOAL_description",
 		"hp": 0,
 		"defence": 0,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, 1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"TRANSPORT": 1,
+			"SLIME": 1
+		}
 	},
 	"PIPE": {
 		"longname": "PIPE_longname",
@@ -96,8 +141,9 @@
 		"description": "PIPE_description",
 		"hp": 0,
 		"defence": 0,
-		"movecosts": [ -1, -1, -1, -1, -1, 1, -1, -1, -1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"PIPELINE": 1
+		}
 	},
 	"PIPESEAM": {
 		"longname": "PIPESEAM_longname",
@@ -106,8 +152,9 @@
 		"description": "PIPESEAM_description",
 		"hp": 99,
 		"defence": 0,
-		"movecosts": [ -1, -1, -1, -1, -1, 1, -1, -1, -1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"PIPELINE": 1
+		}
 	},
 	"MISSILESILO": {
 		"longname": "MISSILESILO_longname",
@@ -116,8 +163,14 @@
 		"description": "MISSILESILO_description",
 		"hp": 0,
 		"defence": 3,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"CITY": {
 		"longname": "CITY_longname",
@@ -126,8 +179,14 @@
 		"description": "CITY_description",
 		"hp": 20,
 		"defence": 3,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"BASE": {
 		"longname": "BASE_longname",
@@ -136,8 +195,15 @@
 		"description": "BASE_description",
 		"hp": 20,
 		"defence": 3,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"PIPELINE": 1,
+			"SLIME": 1
+		}
 	},
 	"AIRPORT": {
 		"longname": "AIRPORT_longname",
@@ -146,8 +212,14 @@
 		"description": "AIRPORT_description",
 		"hp": 20,
 		"defence": 3,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"PORT": {
 		"longname": "PORT_longname",
@@ -156,8 +228,16 @@
 		"description": "PORT_description",
 		"hp": 20,
 		"defence": 3,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, 1, 1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"SHIPS": 1,
+			"TRANSPORT": 1,
+			"SLIME": 1
+		}
 	},
 	"COMTOWER": {
 		"longname": "COMTOWER_longname",
@@ -166,8 +246,14 @@
 		"description": "COMTOWER_description",
 		"hp": 20,
 		"defence": 3,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"LAB": {
 		"longname": "LAB_longname",
@@ -176,8 +262,14 @@
 		"description": "LAB_description",
 		"hp": 20,
 		"defence": 3,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"SLIME": 1
+		}
 	},
 	"VOLCANO": {
 		"longname": "VOLCANO_longname",
@@ -185,9 +277,7 @@
 		"icon": "noentry",
 		"description": "VOLCANO_description",
 		"hp": 0,
-		"defence": 0,
-		"movecosts": [ -1, -1, -1, -1, -1, -1, -1, -1, -1 ],
-		"pictures": [ "" ]
+		"defence": 0
 	},
 	"HQ": {
 		"longname": "HQ_longname",
@@ -196,7 +286,16 @@
 		"description": "HQ_description",
 		"hp": 20,
 		"defence": 4,
-		"movecosts": [ 1, 1, 1, 1, 1, -1, -1, -1, 1 ],
-		"pictures": [ "oshq" ]
+		"movecosts": {
+			"INFANTRY": 1,
+			"MECH": 1,
+			"TIRES": 1,
+			"TREAD": 1,
+			"AIR": 1,
+			"SLIME": 1
+		},
+		"pictures": {
+			"ORANGE": "oshq"
+		}
 	}
 }

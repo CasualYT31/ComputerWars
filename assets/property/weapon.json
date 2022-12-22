@@ -6,25 +6,25 @@
     "description": "INFANTRY_SECONDARY_WEAPON_description",
     "ammo": -1,
     "units": {
-      "0": 55,
-      "1": 45,
-      "2": 12,
-      "3": 5,
-      "4": 1,
-      "5": 1,
-      "6": 1,
-      "7": 14,
-      "8": 5,
-      "9": 15,
-      "10": 25,
-      "11": 25,
-      "12": 5,
-      "13": 30,
-      "14": 7,
-      "25": 20
+      "INFANTRY": 55,
+      "MECH": 45,
+      "RECON": 12,
+      "TANK": 5,
+      "MDTANK": 1,
+      "NEOTANK": 1,
+      "MEGATANK": 1,
+      "APC": 14,
+      "ANTIAIR": 5,
+      "ARTILLERY": 15,
+      "ROCKETS": 25,
+      "MISSILES": 25,
+      "PIPERUNNER": 5,
+      "TCOPTER": 30,
+      "BCOPTER": 7,
+      "OOZIUM": 20
     },
     "terrains": {
-      "10": 1
+      "PIPESEAM": 1
     }
   },
   "MECH_PRIMARY": {
@@ -34,21 +34,21 @@
     "description": "MECH_PRIMARY_WEAPON_description",
     "ammo": 3,
     "units": {
-      "2": 85,
-      "3": 55,
-      "4": 15,
-      "5": 15,
-      "6": 5,
-      "7": 75,
-      "8": 65,
-      "9": 70,
-      "10": 85,
-      "11": 85,
-      "12": 55,
-      "25": 30
+      "RECON": 85,
+      "TANK": 55,
+      "MDTANK": 15,
+      "NEOTANK": 15,
+      "MEGATANK": 5,
+      "APC": 75,
+      "ANTIAIR": 65,
+      "ARTILLERY": 70,
+      "ROCKETS": 85,
+      "MISSILES": 85,
+      "PIPERUNNER": 55,
+      "OOZIUM": 30
     },
     "terrains": {
-      "10": 15
+      "PIPESEAM": 15
     }
   },
   "MECH_SECONDARY": {
@@ -58,25 +58,25 @@
     "description": "MECH_SECONDARY_WEAPON_description",
     "ammo": -1,
     "units": {
-      "0": 65,
-      "1": 55,
-      "2": 18,
-      "3": 6,
-      "4": 1,
-      "5": 1,
-      "6": 1,
-      "7": 20,
-      "8": 6,
-      "9": 32,
-      "10": 35,
-      "11": 35,
-      "12": 6,
-      "13": 35,
-      "14": 9,
-      "25": 20
+      "INFANTRY": 65,
+      "MECH": 55,
+      "RECON": 18,
+      "TANK": 6,
+      "MDTANK": 1,
+      "NEOTANK": 1,
+      "MEGATANK": 1,
+      "APC": 20,
+      "ANTIAIR": 6,
+      "ARTILLERY": 32,
+      "ROCKETS": 35,
+      "MISSILES": 35,
+      "PIPERUNNER": 6,
+      "TCOPTER": 35,
+      "BCOPTER": 9,
+      "OOZIUM": 20
     },
     "terrains": {
-      "10": 1
+      "PIPESEAM": 1
     }
   },
   "RECON_SECONDARY": {
@@ -86,9 +86,584 @@
     "description": "RECON_SECONDARY_WEAPON_description",
     "ammo": -1,
     "units": {
+      "INFANTRY": 70,
+      "MECH": 65,
+      "RECON": 35,
+      "TANK": 6,
+      "MDTANK": 1,
+      "NEOTANK": 1,
+      "MEGATANK": 1,
+      "APC": 45,
+      "ANTIAIR": 4,
+      "ARTILLERY": 45,
+      "ROCKETS": 55,
+      "MISSILES": 28,
+      "PIPERUNNER": 6,
+      "TCOPTER": 35,
+      "BCOPTER": 10,
+      "OOZIUM": 20
     },
     "terrains": {
-      "10": 1
+      "PIPESEAM": 1
+    }
+  },
+  "TANK_PRIMARY": {
+    "longname": "TANK_PRIMARY_WEAPON_longname",
+    "shortname": "TANK_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "TANK_PRIMARY_WEAPON_description",
+    "ammo": 9,
+    "units": {
+      "RECON": 85,
+      "TANK": 55,
+      "MDTANK": 15,
+      "NEOTANK": 15,
+      "MEGATANK": 10,
+      "ANTIAIR": 65,
+      "ARTILLERY": 70,
+      "ROCKETS": 85,
+      "PIPERUNNER": 55,
+      "MISSILES": 85,
+      "APC": 75,
+      "OOZIUM": 20,
+      "CRUISER": 5,
+      "SUB": 1,
+      "BATTLESHIP": 1,
+      "CARRIER": 1,
+      "LANDER": 10,
+      "BLACKBOAT": 10
+    },
+    "terrains": {
+      "PIPESEAM": 15
+    }
+  },
+  "TANK_SECONDARY": {
+    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MECH_SECONDARY_WEAPON_description",
+    "ammo": -1,
+    "units": {
+      "INFANTRY": 75,
+      "MECH": 70,
+      "RECON": 40,
+      "TANK": 6,
+      "MDTANK": 1,
+      "NEOTANK": 1,
+      "MEGATANK": 1,
+      "ANTIAIR": 6,
+      "ARTILLERY": 45,
+      "ROCKETS": 55,
+      "PIPERUNNER": 6,
+      "MISSILES": 30,
+      "APC": 45,
+      "OOZIUM": 20,
+      "TCOPTER": 40,
+      "BCOPTER": 10
+    },
+    "terrains": {
+      "PIPESEAM": 1
+    }
+  },
+  "MDTANK_PRIMARY": {
+    "longname": "TANK_PRIMARY_WEAPON_longname",
+    "shortname": "TANK_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MDTANK_PRIMARY_WEAPON_description",
+    "ammo": 8,
+    "units": {
+      "RECON": 105,
+      "TANK": 85,
+      "MDTANK": 55,
+      "NEOTANK": 45,
+      "MEGATANK": 25,
+      "ANTIAIR": 105,
+      "ARTILLERY": 105,
+      "ROCKETS": 105,
+      "PIPERUNNER": 85,
+      "MISSILES": 105,
+      "APC": 105,
+      "OOZIUM": 30,
+      "CRUISER": 30,
+      "SUB": 10,
+      "BATTLESHIP": 10,
+      "CARRIER": 10,
+      "LANDER": 35,
+      "BLACKBOAT": 35
+    },
+    "terrains": {
+      "PIPESEAM": 55
+    }
+  },
+  "MDTANK_SECONDARY": {
+    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MECH_SECONDARY_WEAPON_description",
+    "ammo": -1,
+    "units": {
+      "INFANTRY": 105,
+      "MECH": 95,
+      "RECON": 45,
+      "TANK": 8,
+      "MDTANK": 1,
+      "NEOTANK": 1,
+      "MEGATANK": 1,
+      "ANTIAIR": 7,
+      "ARTILLERY": 45,
+      "ROCKETS": 55,
+      "PIPERUNNER": 8,
+      "MISSILES": 35,
+      "APC": 45,
+      "OOZIUM": 20,
+      "BCOPTER": 12,
+      "TCOPTER": 45
+    },
+    "terrains": {
+      "PIPESEAM": 1
+    }
+  },
+  "NEOTANK_PRIMARY": {
+    "longname": "NEOTANK_PRIMARY_WEAPON_longname",
+    "shortname": "NEOTANK_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "NEOTANK_PRIMARY_WEAPON_description",
+    "ammo": 9,
+    "units": {
+      "RECON": 125,
+      "TANK": 105,
+      "MDTANK": 75,
+      "NEOTANK": 55,
+      "MEGATANK": 35,
+      "ANTIAIR": 115,
+      "ARTILLERY": 115,
+      "ROCKETS": 125,
+      "PIPERUNNER": 105,
+      "MISSILES": 125,
+      "APC": 125,
+      "OOZIUM": 35,
+      "CRUISER": 30,
+      "SUB": 15,
+      "BATTLESHIP": 15,
+      "CARRIER": 15,
+      "LANDER": 40,
+      "BLACKBOAT": 40
+    },
+    "terrains": {
+      "PIPESEAM": 75
+    }
+  },
+  "NEOTANK_SECONDARY": {
+    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MECH_SECONDARY_WEAPON_description",
+    "ammo": -1,
+    "units": {
+      "INFANTRY": 125,
+      "MECH": 115,
+      "RECON": 65,
+      "TANK": 10,
+      "MDTANK": 1,
+      "NEOTANK": 1,
+      "MEGATANK": 1,
+      "ANTIAIR": 17,
+      "ARTILLERY": 65,
+      "ROCKETS": 75,
+      "PIPERUNNER": 10,
+      "MISSILES": 55,
+      "APC": 65,
+      "OOZIUM": 20,
+      "BCOPTER": 22,
+      "TCOPTER": 55
+    },
+    "terrains": {
+      "PIPESEAM": 1
+    }
+  },
+  "MEGATANK_PRIMARY": {
+    "longname": "MEGATANK_PRIMARY_WEAPON_longname",
+    "shortname": "MEGATANK_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MEGATANK_PRIMARY_WEAPON_description",
+    "ammo": 3,
+    "units": {
+      "RECON": 195,
+      "TANK": 180,
+      "MDTANK": 125,
+      "NEOTANK": 115,
+      "MEGATANK": 65,
+      "ANTIAIR": 195,
+      "ARTILLERY": 195,
+      "ROCKETS": 195,
+      "PIPERUNNER": 180,
+      "MISSILES": 195,
+      "APC": 195,
+      "OOZIUM": 45,
+      "CRUISER": 65,
+      "SUB": 45,
+      "BATTLESHIP": 45,
+      "CARRIER": 45,
+      "LANDER": 75,
+      "BLACKBOAT": 105
+    },
+    "terrains": {
+      "PIPESEAM": 125
+    }
+  },
+  "MEGATANK_SECONDARY": {
+    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MECH_SECONDARY_WEAPON_description",
+    "ammo": -1,
+    "units": {
+      "INFANTRY": 135,
+      "MECH": 125,
+      "RECON": 65,
+      "TANK": 10,
+      "MDTANK": 1,
+      "NEOTANK": 1,
+      "MEGATANK": 1,
+      "ANTIAIR": 17,
+      "ARTILLERY": 65,
+      "ROCKETS": 75,
+      "PIPERUNNER": 10,
+      "MISSILES": 55,
+      "APC": 65,
+      "OOZIUM": 30,
+      "BCOPTER": 22,
+      "TCOPTER": 55
+    },
+    "terrains": {
+      "PIPESEAM": 1
+    }
+  },
+  "ANTIAIR_PRIMARY": {
+    "longname": "ANTIAIR_PRIMARY_WEAPON_longname",
+    "shortname": "ANTIAIR_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "ANTIAIR_PRIMARY_WEAPON_description",
+    "ammo": 9,
+    "units": {
+      "INFANTRY": 105,
+      "MECH": 105,
+      "RECON": 60,
+      "TANK": 25,
+      "MDTANK": 10,
+      "NEOTANK": 5,
+      "MEGATANK": 1,
+      "ANTIAIR": 45,
+      "ARTILLERY": 50,
+      "ROCKETS": 55,
+      "PIPERUNNER": 25,
+      "MISSILES": 55,
+      "APC": 50,
+      "OOZIUM": 30,
+      "FIGHTER": 65,
+      "BOMBER": 75,
+      "STEALTH": 75,
+      "BCOPTER": 105,
+      "TCOPTER": 105,
+      "BLACKBOMB": 120
+    },
+    "terrains": {
+      "PIPESEAM": 10
+    }
+  },
+  "ARTILLERY_PRIMARY": {
+    "longname": "TANK_PRIMARY_WEAPON_longname",
+    "shortname": "TANK_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "ARTILLERY_PRIMARY_WEAPON_description",
+    "ammo": 9,
+    "lowrange": 2,
+    "highrange": 3,
+    "canattackaftermoving": false,
+    "units": {
+      "INFANTRY": 90,
+      "MECH": 85,
+      "RECON": 80,
+      "TANK": 70,
+      "MDTANK": 45,
+      "NEOTANK": 40,
+      "MEGATANK": 15,
+      "ANTIAIR": 75,
+      "ARTILLERY": 75,
+      "ROCKETS": 80,
+      "PIPERUNNER": 70,
+      "MISSILES": 80,
+      "APC": 70,
+      "OOZIUM": 5,
+      "CRUISER": 50,
+      "SUB": 60,
+      "BATTLESHIP": 40,
+      "CARRIER": 45,
+      "LANDER": 55,
+      "BLACKBOAT": 55
+    },
+    "terrains": {
+      "PIPESEAM": 45
+    }
+  },
+  "ROCKETS_PRIMARY": {
+    "longname": "ROCKETS_PRIMARY_WEAPON_longname",
+    "shortname": "ROCKETS_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "ROCKETS_PRIMARY_WEAPON_description",
+    "ammo": 6,
+    "lowrange": 3,
+    "highrange": 5,
+    "canattackaftermoving": false,
+    "units": {
+      "INFANTRY": 95,
+      "MECH": 90,
+      "RECON": 90,
+      "TANK": 80,
+      "MDTANK": 55,
+      "NEOTANK": 50,
+      "MEGATANK": 25,
+      "ANTIAIR": 85,
+      "ARTILLERY": 80,
+      "ROCKETS": 85,
+      "PIPERUNNER": 80,
+      "MISSILES": 90,
+      "APC": 80,
+      "OOZIUM": 15,
+      "CRUISER": 60,
+      "SUB": 85,
+      "BATTLESHIP": 55,
+      "CARRIER": 60,
+      "LANDER": 60,
+      "BLACKBOAT": 60
+    },
+    "terrains": {
+      "PIPESEAM": 55
+    },
+    "these units override this weapon (just documentation)": [
+      "PIPERUNNER",
+      "BATTLESHIP"
+    ]
+  },
+  "MISSILES_PRIMARY": {
+    "longname": "MISSILES_PRIMARY_WEAPON_longname",
+    "shortname": "MISSILES_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MISSILES_PRIMARY_WEAPON_description",
+    "ammo": 6,
+    "lowrange": 3,
+    "highrange": 5,
+    "canattackaftermoving": false,
+    "units": {
+      "FIGHTER": 100,
+      "BOMBER": 100,
+      "STEALTH": 100,
+      "BCOPTER": 115,
+      "TCOPTER": 115,
+      "BLACKBOMB": 120
+    },
+    "these units override this weapon (just documentation)": [
+      "CARRIER"
+    ]
+  },
+  "FIGHTER_PRIMARY": {
+    "longname": "MISSILES_PRIMARY_WEAPON_longname",
+    "shortname": "MISSILES_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MISSILES_PRIMARY_WEAPON_description",
+    "ammo": 9,
+    "units": {
+      "FIGHTER": 55,
+      "BOMBER": 100,
+      "STEALTH": 85,
+      "BCOPTER": 120,
+      "TCOPTER": 120,
+      "BLACKBOMB": 120
+    },
+    "hiddenunits": {
+      "STEALTH": true
+    }
+  },
+  "BOMBER_PRIMARY": {
+    "longname": "BOMBER_PRIMARY_WEAPON_longname",
+    "shortname": "BOMBER_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "BOMBER_PRIMARY_WEAPON_description",
+    "ammo": 9,
+    "units": {
+      "INFANTRY": 110,
+      "MECH": 110,
+      "RECON": 105,
+      "TANK": 105,
+      "MDTANK": 95,
+      "NEOTANK": 90,
+      "MEGATANK": 35,
+      "ANTIAIR": 95,
+      "ARTILLERY": 105,
+      "ROCKETS": 105,
+      "PIPERUNNER": 105,
+      "MISSILES": 105,
+      "APC": 105,
+      "OOZIUM": 35,
+      "CRUISER": 50,
+      "SUB": 95,
+      "BATTLESHIP": 75,
+      "CARRIER": 105,
+      "LANDER": 95,
+      "BLACKBOAT": 75
+    },
+    "terrains": {
+      "PIPESEAM": 95
+    }
+  },
+  "STEALTH_PRIMARY": {
+    "longname": "STEALTH_PRIMARY_WEAPON_longname",
+    "shortname": "STEALTH_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "STEALTH_PRIMARY_WEAPON_description",
+    "ammo": 6,
+    "units": {
+      "INFANTRY": 90,
+      "MECH": 90,
+      "RECON": 85,
+      "TANK": 75,
+      "MDTANK": 70,
+      "NEOTANK": 60,
+      "MEGATANK": 15,
+      "ANTIAIR": 50,
+      "ARTILLERY": 75,
+      "ROCKETS": 85,
+      "PIPERUNNER": 80,
+      "MISSILES": 85,
+      "APC": 85,
+      "OOZIUM": 30,
+      "FIGHTER": 45,
+      "BOMBER": 70,
+      "STEALTH": 55,
+      "BCOPTER": 85,
+      "TCOPTER": 95,
+      "BLACKBOMB": 120,
+      "CRUISER": 35,
+      "SUB": 55,
+      "BATTLESHIP": 45,
+      "CARRIER": 45,
+      "LANDER": 65,
+      "BLACKBOAT": 65
+    },
+    "terrains": {
+      "PIPESEAM": 70
+    },
+    "hiddenunits": {
+      "STEALTH": true
+    }
+  },
+  "BCOPTER_PRIMARY": {
+    "longname": "MISSILES_PRIMARY_WEAPON_longname",
+    "shortname": "MISSILES_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MISSILES_PRIMARY_WEAPON_description",
+    "ammo": 6,
+    "units": {
+      "RECON": 55,
+      "TANK": 55,
+      "MDTANK": 25,
+      "NEOTANK": 20,
+      "MEGATANK": 10,
+      "ANTIAIR": 25,
+      "ARTILLERY": 65,
+      "ROCKETS": 65,
+      "PIPERUNNER": 55,
+      "MISSILES": 65,
+      "APC": 60,
+      "OOZIUM": 25,
+      "CRUISER": 25,
+      "SUB": 25,
+      "BATTLESHIP": 25,
+      "CARRIER": 25,
+      "LANDER": 25,
+      "BLACKBOAT": 25
+    },
+    "terrains": {
+      "PIPESEAM": 25
+    }
+  },
+  "BCOPTER_SECONDARY": {
+    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "BCOPTER_SECONDARY_WEAPON_description",
+    "ammo": -1,
+    "units": {
+      "INFANTRY": 75,
+      "MECH": 75,
+      "RECON": 30,
+      "TANK": 6,
+      "MDTANK": 1,
+      "NEOTANK": 1,
+      "MEGATANK": 1,
+      "APC": 20,
+      "ANTIAIR": 6,
+      "ARTILLERY": 25,
+      "ROCKETS": 35,
+      "MISSILES": 35,
+      "PIPERUNNER": 6,
+      "TCOPTER": 95,
+      "BCOPTER": 65,
+      "OOZIUM": 20
+    },
+    "terrains": {
+      "PIPESEAM": 1
+    }
+  },
+  "CRUISER_PRIMARY": {
+    "longname": "MISSILES_PRIMARY_WEAPON_longname",
+    "shortname": "MISSILES_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "MISSILES_PRIMARY_WEAPON_description",
+    "ammo": 9,
+    "units": {
+      "CRUISER": 25,
+      "SUB": 90,
+      "BATTLESHIP": 5,
+      "CARRIER": 5,
+      "LANDER": 25,
+      "BLACKBOAT": 25
+    },
+    "hiddenunits": {
+      "SUB": true
+    }
+  },
+  "CRUISER_SECONDARY": {
+    "longname": "CRUISER_SECONDARY_WEAPON_longname",
+    "shortname": "CRUISER_SECONDARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "CRUISER_SECONDARY_WEAPON_description",
+    "ammo": -1,
+    "units": {
+      "FIGHTER": 85,
+      "BOMBER": 100,
+      "STEALTH": 100,
+      "BCOPTER": 105,
+      "TCOPTER": 105,
+      "BLACKBOMB": 120
+    }
+  },
+  "SUB_PRIMARY": {
+    "longname": "SUB_PRIMARY_WEAPON_longname",
+    "shortname": "SUB_PRIMARY_WEAPON_shortname",
+    "icon": "ammo",
+    "description": "SUB_PRIMARY_WEAPON_description",
+    "ammo": 6,
+    "units": {
+      "CRUISER": 25,
+      "SUB": 55,
+      "BATTLESHIP": 65,
+      "CARRIER": 75,
+      "LANDER": 95,
+      "BLACKBOAT": 95
+    },
+    "hiddenunits": {
+      "SUB": true
     }
   }
 }

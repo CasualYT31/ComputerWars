@@ -349,8 +349,19 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 			"commander_bank");
 	if (!ret) return false;
 	// Finish initialisation of banks.
-	awe::updateTileTypeBank(*_tiles, *_terrains);
-	awe::updateUnitTypeBank(*_units, *_movements, *_terrains);
+	if (!awe::checkCountryTurnOrderIDs(*_countries)) {
+		_logger.critical("The turn order IDs assigned to each configured country "
+			"are not valid. See the log for more information.");
+		for (const auto& pCountry : *_countries) {
+			_logger.error("Turn order ID for country {} = {}",
+				pCountry.first, pCountry.second->getTurnOrder());
+		}
+		return false;
+	}
+	awe::updateTerrainBank(*_terrains, *_countries);
+	awe::updateTileTypeBank(*_tiles, *_terrains, *_countries);
+	awe::updateUnitTypeBank(*_units, *_movements, *_terrains, *_weapons,
+		*_countries);
 	// Initialise GUIs and the scripts.
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scriptsPath);

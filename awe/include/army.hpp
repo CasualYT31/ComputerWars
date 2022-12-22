@@ -63,17 +63,6 @@ namespace awe {
 	class army {
 	public:
 		/**
-		 * Reserved value representing no army.
-		 * Assigned the maximum value of the unsigned type of \c awe::ArmyID.
-		 */
-		static const awe::ArmyID NO_ARMY = ~((awe::ArmyID)0);
-
-		/**
-		 * \c NO_ARMY that can be assigned to a script's interface.
-		 */
-		static awe::ArmyID NO_ARMY_SCRIPT;
-
-		/**
 		 * Constructs a new army.
 		 * @param country The country the army belongs to, which can't be changed.
 		 */

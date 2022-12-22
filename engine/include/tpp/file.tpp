@@ -48,6 +48,12 @@ T engine::binary_file::readNumber() {
 }
 
 template<typename T>
+void engine::binary_file::readNumber(T& number) {
+	const auto numberRead = readNumber<T>();
+	number = numberRead;
+}
+
+template<typename T>
 void engine::binary_file::writeNumber(T number) {
 	try {
 		if (sizeof(T) > 1 && isBigEndian()) number = convertNumber(number);

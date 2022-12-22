@@ -179,7 +179,7 @@ const string tilePicture(const Vector2&in pos) {
 	// If the tile is owned, attempt to retrieve the owned terrain picture.
 	const auto ownerID = game.map.getTileOwner(pos);
 	if (ownerID != NO_ARMY) {
-		const auto owned = t.picture[game.map.getArmyCountry(ownerID).ID];
+		const auto owned = t.picture(game.map.getArmyCountry(ownerID).scriptName);
 		if (!owned.isEmpty()) {
 			return owned;
 		}
@@ -225,9 +225,11 @@ void DetailedInfoMenuOpen() {
 		"tilePicture.normal", tilePicture(game.map.getSelectedTile()));
 	setWidgetText(base + "description", terrainType.description);
 	base += "moveCosts.";
-	for (BankID moveID = 0; moveID < movement.length(); ++moveID) {
-		if (terrainType.moveCost[moveID] >= 0) {
-			const Movement movementType = movement[moveID];
+	const auto@ movementTypeNames = movement.scriptNames;
+	const auto movementTypeCount = movement.length();
+	for (uint64 moveID = 0; moveID < movementTypeCount; ++moveID) {
+		if (terrainType.moveCost[movementTypeNames[moveID]] >= 0) {
+			const Movement movementType = movement[movementTypeNames[moveID]];
 			const string costName = base + "move" + formatUInt(moveID);
 			addWidget("HorizontalLayout", costName);
 			addWidget("Picture", costName + ".icon");
@@ -235,7 +237,8 @@ void DetailedInfoMenuOpen() {
 			addWidget("Label", costName + ".shortName");
 			setWidgetText(costName + ".shortName", movementType.shortName);
 			addWidget("Label", costName + ".cost");
-			setWidgetText(costName + ".cost", "~" + terrainType.moveCost[moveID]);
+			setWidgetText(costName + ".cost", "~" +
+				terrainType.moveCost[movementTypeNames[moveID]]);
 		}
 	}
 
@@ -253,9 +256,17 @@ void DetailedInfoMenuOpen() {
 		setWidgetText(unitPanel + ".stats.grid.fuel", "~" +
 			formatInt(game.map.getUnitFuel(unitID)) + " / " +
 			formatInt(unitType.maxFuel));
-		setWidgetText(unitPanel + ".stats.grid.ammo", "~" +
-			formatInt(game.map.getUnitAmmo(unitID)) + " / " +
-			formatInt(unitType.maxAmmo));
+		// TODO-1 {
+		if (unitType.weaponCount > 0 &&
+			!unitType.weapon(0).hasInfiniteAmmo) {
+			setWidgetText(unitPanel + ".stats.grid.ammo", "~" +
+				formatInt(game.map.getUnitAmmo(unitID,
+					unitType.weapon(0).scriptName)) + " / " +
+				formatInt(unitType.weapon(0).maxAmmo));
+		} else {
+			setWidgetText(unitPanel + ".stats.grid.ammo", "~");
+		}
+		// }
 		setWidgetText(unitPanel + ".stats.grid.mp", "~" +
 			formatUInt(unitType.movementPoints));
 		setWidgetSprite(unitPanel + ".stats.grid.typeIcon", "icon",
@@ -266,12 +277,16 @@ void DetailedInfoMenuOpen() {
 			formatUInt(unitType.vision));
 
 		setWidgetSprite(unitPanel + ".pictureAndRange.panel.picture",
-			"unitPicture", unitType.pictureSprite[
-			game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).ID]);
-		setWidgetText(unitPanel + ".pictureAndRange.rangeLayout.ranges.lower",
-			"~" + unitType.lowerRange);
-		setWidgetText(unitPanel + ".pictureAndRange.rangeLayout.ranges.higher",
-			"~" + unitType.higherRange);
+			"unitPicture", unitType.pictureSprite(
+			game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).turnOrder));
+		if (unitType.weaponCount > 0) {
+			setWidgetText(unitPanel +
+				".pictureAndRange.rangeLayout.ranges.lower",
+				"~" + unitType.weapon(0).range.x);
+			setWidgetText(unitPanel +
+				".pictureAndRange.rangeLayout.ranges.higher",
+				"~" + unitType.weapon(0).range.y);
+		}
 
 		setWidgetText(
 			"DetailedInfoMenu.baseLayout.unitPanel.unitLayout.description",

@@ -185,7 +185,7 @@ namespace awe {
 		/**
 		 * The army ID of the owner of the tile.
 		 */
-		awe::ArmyID _owner = awe::army::NO_ARMY;
+		awe::ArmyID _owner = awe::NO_ARMY;
 
 		/**
 		 * The tile's HP.

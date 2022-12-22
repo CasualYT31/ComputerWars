@@ -36,115 +36,13 @@ awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type,
 	_sprite(sheet, ((type) ? (type->getUnit(army)) : (""))),
 	_hpIcon(icons, "nohpicon"), _fuelAmmoIcon(icons, "nostatusicon"),
 	_loadedIcon(icons, "nostatusicon"),
-	_capturingHidingIcon(icons, "nostatusicon") {}
-
-std::shared_ptr<const awe::unit_type> awe::unit::getType() const noexcept {
-	return _type;
-}
-
-awe::ArmyID awe::unit::getArmy() const noexcept {
-	return _army;
-}
-
-void awe::unit::setPosition(const sf::Vector2u pos) noexcept {
-	_location = pos;
-}
-
-sf::Vector2u awe::unit::getPosition() const noexcept {
-	return _location;
-}
-
-bool awe::unit::isOnMap() const noexcept {
-	return _location != awe::unit::NO_POSITION;
-}
-
-void awe::unit::setHP(const awe::HP hp) noexcept {
-	if (hp < 0) {
-		_hp = 0;
-	} else {
-		_hp = hp;
+	_capturingHidingIcon(icons, "nostatusicon") {
+	// Initialise all ammos.
+	for (std::size_t i = 0, weaponCount = type->getWeaponCount();
+		i < weaponCount; ++i) {
+		const auto weapon = type->getWeaponByIndex(i);
+		_ammos[weapon->getScriptName()] = 0;
 	}
-}
-
-awe::HP awe::unit::getHP() const noexcept {
-	return _hp;
-}
-
-awe::HP awe::unit::getDisplayedHP() const noexcept {
-	return awe::unit_type::getDisplayedHP(_hp);
-}
-
-void awe::unit::setFuel(const awe::Fuel fuel) noexcept {
-	if (fuel < 0) {
-		_fuel = 0;
-	} else {
-		_fuel = fuel;
-	}
-}
-
-awe::Fuel awe::unit::getFuel() const noexcept {
-	return _fuel;
-}
-
-void awe::unit::setAmmo(const awe::Ammo ammo) noexcept {
-	if (ammo < 0) {
-		_ammo = 0;
-	} else {
-		_ammo = ammo;
-	}
-}
-
-awe::Ammo awe::unit::getAmmo() const noexcept {
-	return _ammo;
-}
-
-void awe::unit::wait(const bool moved) noexcept {
-	_waiting = moved;
-}
-
-bool awe::unit::isWaiting() const noexcept {
-	return _waiting;
-}
-
-void awe::unit::capturing(const bool capturing) noexcept {
-	_capturing = capturing;
-}
-
-bool awe::unit::isCapturing() const noexcept {
-	return _capturing;
-}
-
-void awe::unit::hiding(const bool hiding) noexcept {
-	_hiding = hiding;
-}
-
-bool awe::unit::isHiding() const noexcept {
-	return _hiding;
-}
-
-void awe::unit::loadUnit(const awe::UnitID id) noexcept {
-	_loaded.insert(id);
-}
-
-bool awe::unit::unloadUnit(const awe::UnitID id) noexcept {
-	return _loaded.erase(id);
-}
-
-std::unordered_set<awe::UnitID> awe::unit::loadedUnits() const noexcept {
-	return _loaded;
-}
-
-void awe::unit::loadOnto(const awe::UnitID id) noexcept {
-	_loadedOnto = id;
-}
-
-awe::UnitID awe::unit::loadedOnto() const noexcept {
-	return _loadedOnto;
-}
-
-void awe::unit::setSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
-	_sprite.setSpritesheet(sheet);
 }
 
 void awe::unit::setIconSpritesheet(
@@ -155,17 +53,12 @@ void awe::unit::setIconSpritesheet(
 	_capturingHidingIcon.setSpritesheet(sheet);
 }
 
-std::shared_ptr<const sfx::animated_spritesheet> awe::unit::getSpritesheet() const
-	noexcept {
-	return _sprite.getSpritesheet();
-}
-
-std::string awe::unit::getSprite() const noexcept {
-	return _sprite.getSprite();
-}
-
-void awe::unit::setPixelPosition(float x, float y) noexcept {
-	_sprite.setPosition(sf::Vector2f(x, y));
+bool awe::unit::_isLowOnAmmo() const noexcept {
+	// TODO-1: determine when we should show the low ammo icon. What we have now
+	// might be fine.
+	const auto weapon = _type->getFirstWeaponWithFiniteAmmo();
+	if (!weapon) return false;
+	return getAmmo(weapon->getScriptName()) <= weapon->getMaxAmmo() / 2;
 }
 
 bool awe::unit::animate(const sf::RenderTarget& target, const double scaling)
@@ -192,9 +85,7 @@ bool awe::unit::animate(const sf::RenderTarget& target, const double scaling)
 	}
 	const bool lowFuel =
 		(!_type->hasInfiniteFuel() && getFuel() <= _type->getMaxFuel() / 2);
-	const bool lowAmmo =
-		(!_type->hasInfiniteAmmo() && _type->getMaxAmmo() &&
-			getAmmo() <= _type->getMaxAmmo() / 2);
+	const bool lowAmmo = _isLowOnAmmo();
 	if (lowFuel && lowAmmo) {
 		_fuelAmmoIcon.setSprite("fuelammolow");
 	} else if (lowFuel) {
