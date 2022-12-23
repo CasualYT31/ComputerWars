@@ -798,6 +798,61 @@ class PlayableMap {
 		return false;
 	}
 
+	/**
+	 * Checks if a unit can attack from a given tile.
+	 * @param attackingUnit The ID of the unit who's attacking
+	 * @param fromTile      Attacking from this tile.
+	 */
+	bool canAttack(const UnitID attackingUnit, const Vector2&in fromTile) const {
+		// The unit ID must not be 0.
+		if (attackingUnit == 0) return false;
+		// If `fromTile` isn't vacant and the unit on that tile isn't the
+		// attacking unit, then the unit can't attack.
+		if (map.getUnitOnTile(fromTile) != 0 &&
+			map.getUnitOnTile(fromTile) != attackingUnit) return false;
+		const bool isMoving = map.getUnitPosition(attackingUnit) != fromTile;
+		const auto unitType = map.getUnitType(attackingUnit);
+		for (uint64 weaponID = 0, weaponCount = unitType.weaponCount;
+			weaponID < weaponCount; ++weaponID) {
+			const auto weaponType = unitType.weapon(weaponID);
+			// If the unit is moving as part of the attack, check if this weapon
+			// can be used, and if not, check the next weapon.
+			if (isMoving && !weaponType.canAttackAfterMoving) continue;
+			// If this weapon hasn't got infinite ammo, and the ammo has run out,
+			// this weapon can't be used, try the next one.
+			if (!weaponType.hasInfiniteAmmo &&
+				map.getUnitAmmo(attackingUnit, weaponType.scriptName) <= 0) {
+				continue;
+			}
+			// Now, go through all available tiles, within the range configured
+			// for the weapon, and see if the weapon can attack any units or tiles
+			// within that range.
+			const auto availableTiles = map.getAvailableTiles(fromTile,
+				weaponType.range.x, weaponType.range.y);
+			for (uint64 t = 0, tileCount = availableTiles.length();
+				t < tileCount; ++t) {
+				const auto tile = availableTiles[t];
+				// Can this weapon attack this type of terrain? If so, true.
+				if (weaponType.canAttackTerrain(
+					map.getTileType(tile).type.scriptName)) return true;
+				// Otherwise, go through all of the unit checks. The unit can't be
+				// attacked if it isn't visible to the attacking unit, or if it is
+				// on the same team as the attacking unit.
+				const auto defendingUnit = map.getUnitOnTile(tile);
+				if (defendingUnit == 0) continue;
+				if (map.getTeamOfUnit(attackingUnit) ==
+					map.getTeamOfUnit(defendingUnit)) continue;
+				if (!map.isUnitVisible(defendingUnit,
+					map.getArmyOfUnit(attackingUnit))) continue;
+				// Can the weapon attack the unit? If so, true.
+				if (weaponType.canAttackUnit(
+					map.getUnitType(defendingUnit).scriptName,
+					map.isUnitHiding(defendingUnit))) return true;
+			}
+		}
+		return false;
+	}
+
 	/////////
 	// MAP //
 	/////////

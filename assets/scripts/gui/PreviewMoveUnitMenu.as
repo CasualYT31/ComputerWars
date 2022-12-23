@@ -33,6 +33,9 @@ void PreviewMoveUnitMenuOpen() {
 		if (game.canLoad(unit, unitOnTile)) {
 			PreviewCommands.addCommand("Load", "load", "loadicon");
 		} else {
+			if (game.canAttack(unit, tile)) {
+				PreviewCommands.addCommand("Fire", "fire", "attackicon");
+			}
 			if (game.canCapture(unit, tile)) {
 				PreviewCommands.addCommand("Capture", "capture", "captureicon");
 			}
