@@ -22,19 +22,48 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "damage_sprite.hpp"
 
-awe::damage_tooltip::damage_tooltip() noexcept {
+void awe::damage_tooltip::setSpritesheet(
+	const std::shared_ptr<sfx::animated_spritesheet>& spritesheet) noexcept {
+	_sprite.setSpritesheet(spritesheet);
+	_sprite.setSprite("damagetooltip");
+}
+
+void awe::damage_tooltip::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
+	_damage.setFont(*font);
+	_damage.setCharacterSize(12);
 	_damage.setOutlineColor(sf::Color::Black);
 	_damage.setFillColor(sf::Color::White);
 	_damage.setOutlineThickness(2.0f);
 }
 
 void awe::damage_tooltip::setDamage(const unsigned int dmg) noexcept {
-	_damage.setString(std::to_string(dmg) + "%");
+	_damage.setString(std::to_string(dmg));
 }
 
-void awe::damage_tooltip::setPosition(const sf::Vector2f& pos) noexcept {
-	_sprite.setPosition(pos + sf::Vector2f(28.0f, 27.0f));
-	_damage.setPosition(pos + sf::Vector2f(28.0f, 37.0f));
+void awe::damage_tooltip::setPosition(const sf::Vector2f& pos, const int quadrant)
+	noexcept {
+	switch (quadrant) {
+	case 0:
+		_sprite.setPosition(pos + sf::Vector2f(28.0f, 27.0f));
+		_damage.setPosition(pos + sf::Vector2f(34.0f, 34.0f));
+		break;
+	case 1:
+		_sprite.setPosition(pos + sf::Vector2f(-29.0f, 26.0f));
+		_damage.setPosition(pos + sf::Vector2f(-23.0f, 33.0f));
+		break;
+	case 2:
+		_sprite.setPosition(pos + sf::Vector2f(27.0f, -20.0f));
+		_damage.setPosition(pos + sf::Vector2f(33.0f, -13.0f));
+		break;
+	case 3:
+		_sprite.setPosition(pos + sf::Vector2f(-30.0f, -21.0f));
+		_damage.setPosition(pos + sf::Vector2f(-24.0f, -14.0f));
+		break;
+	}
+}
+
+void awe::damage_tooltip::visible(const bool v) noexcept {
+	_visible = v;
 }
 
 bool awe::damage_tooltip::animate(const sf::RenderTarget& target,

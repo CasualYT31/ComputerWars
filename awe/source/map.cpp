@@ -538,6 +538,11 @@ void awe::map::Register(asIScriptEngine* engine,
 			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void disableShaderForAvailableUnits(const bool)",
+			asMETHOD(awe::map, disableShaderForAvailableUnits),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void regenerateClosedListSprites()",
 			asMETHOD(awe::map, regenerateClosedListSprites), asCALL_THISCALL);
 
@@ -1895,6 +1900,10 @@ void awe::map::disableSelectedUnitRenderingEffects(const bool val) noexcept {
 	_selectedUnitRenderData.top().disableRenderingEffects = val;
 }
 
+void awe::map::disableShaderForAvailableUnits(const bool val) {
+	_selectedUnitRenderData.top().disableShaderForAvailableUnits = val;
+}
+
 void awe::map::regenerateClosedListSprites() noexcept {
 	// Starting from the beginning; calculate the arrow sprites to draw for
 	// each tile.
@@ -2159,6 +2168,7 @@ void awe::map::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
 		_logger.error("setFont operation failed: nullptr was given!");
 		return;
 	}
+	_damageTooltip.setFont(font);
 }
 
 void awe::map::setLanguageDictionary(
@@ -2347,7 +2357,7 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
 	}
 	_cursor.animate(target, scaling);
 	// End.
-	_damageTooltip.setPosition(_cursor.getPosition());
+	_damageTooltip.setPosition(_cursor.getPosition(), static_cast<int>(quadrant));
 	_damageTooltip.animate(target, scaling);
 	return false;
 }
@@ -2410,7 +2420,11 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			unitStates.shader = &_unavailableTileShader;
 			if (_selectedUnitRenderData.top().selectedUnit > 0 &&
 				!_selectedUnitRenderData.top().disableRenderingEffects &&
-				unitID != _selectedUnitRenderData.top().selectedUnit) {
+				unitID != _selectedUnitRenderData.top().selectedUnit &&
+				(!_selectedUnitRenderData.top().disableShaderForAvailableUnits ||
+				_selectedUnitRenderData.top().availableTiles.find(
+					getUnitPosition(unitID)) ==
+					_selectedUnitRenderData.top().availableTiles.end())) {
 				target.draw(_units.at(unitID), unitStates);
 			} else {
 				if (isUnitWaiting(unitID)) {
@@ -2464,6 +2478,7 @@ awe::map::selected_unit_render_data::selected_unit_render_data(
 	closedList = std::move(o.closedList);
 	if (closedList) closedList->AddRef();
 	disableRenderingEffects = std::move(o.disableRenderingEffects);
+	disableShaderForAvailableUnits = std::move(o.disableShaderForAvailableUnits);
 }
 
 awe::map::selected_unit_render_data::~selected_unit_render_data() noexcept {
@@ -2479,6 +2494,7 @@ awe::map::selected_unit_render_data&
 	closedList = o.closedList;
 	if (closedList) closedList->AddRef();
 	disableRenderingEffects = o.disableRenderingEffects;
+	disableShaderForAvailableUnits = o.disableShaderForAvailableUnits;
 	return *this;
 }
 
@@ -2488,6 +2504,7 @@ void awe::map::selected_unit_render_data::clearState() noexcept {
 	availableTileShader = awe::available_tile_shader::None;
 	closedList->RemoveRange(0, closedList->GetSize());
 	disableRenderingEffects = false;
+	disableShaderForAvailableUnits = false;
 }
 
 void awe::map::_initShaders() noexcept {
@@ -2501,7 +2518,7 @@ void awe::map::_initShaders() noexcept {
 	_availableTileShader.setUniform("texUnit", sf::Shader::CurrentTexture);
 	_attackableTileShader.loadFromMemory("uniform sampler2D texUnit;"
 		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
-		"pixel.x += 0.85; pixel.yz += 0.05;"
+		"pixel.x = 1.0; pixel.yz -= 0.25;"
 		"gl_FragColor = pixel;}", sf::Shader::Fragment);
 	_attackableTileShader.setUniform("texUnit", sf::Shader::CurrentTexture);
 }

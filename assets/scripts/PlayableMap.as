@@ -137,9 +137,9 @@ class PlayableMap {
 	 */
 	void setAttackCursorSprites() {
 		map.setULCursorSprite("ulattackcursor");
-		map.setURCursorSprite("ulattackcursor");
-		map.setLLCursorSprite("ulattackcursor");
-		map.setLRCursorSprite("ulattackcursor");
+		map.setURCursorSprite("urattackcursor");
+		map.setLLCursorSprite("llattackcursor");
+		map.setLRCursorSprite("lrattackcursor");
 	}
 
 	/**
@@ -181,7 +181,7 @@ class PlayableMap {
 	 */
 	void moveSelectedTileUp() {
 		map.moveSelectedTileUp();
-		_updateMoveModeClosedList();
+		if (_closedListEnabled) _updateMoveModeClosedList();
 	}
 	
 	/**
@@ -190,7 +190,7 @@ class PlayableMap {
 	 */
 	void moveSelectedTileDown() {
 		map.moveSelectedTileDown();
-		_updateMoveModeClosedList();
+		if (_closedListEnabled) _updateMoveModeClosedList();
 	}
 	
 	/**
@@ -199,7 +199,7 @@ class PlayableMap {
 	 */
 	void moveSelectedTileLeft() {
 		map.moveSelectedTileLeft();
-		_updateMoveModeClosedList();
+		if (_closedListEnabled) _updateMoveModeClosedList();
 	}
 	
 	/**
@@ -208,7 +208,18 @@ class PlayableMap {
 	 */
 	void moveSelectedTileRight() {
 		map.moveSelectedTileRight();
-		_updateMoveModeClosedList();
+		if (_closedListEnabled) _updateMoveModeClosedList();
+	}
+
+	/**
+	 * Disable closed list updates when selecting tiles.
+	 * @param flag \c TRUE if the closed list should be updated when moving the
+	 *             selection using \c moveSelectedTileXYZ() or
+	 *             \c setSelectedTileByPixel(), \c FALSE if not. Defaults to
+	 *             \c TRUE
+	 */
+	void enableClosedList(const bool flag) {
+		_closedListEnabled = flag;
 	}
 	
 	/**
@@ -218,7 +229,7 @@ class PlayableMap {
 	 */
 	void setSelectedTileByPixel(const MousePosition pixel) {
 		map.setSelectedTileByPixel(pixel);
-		_updateMoveModeClosedList();
+		if (_closedListEnabled) _updateMoveModeClosedList();
 	}
 
 	////////////////////////////////
@@ -1238,4 +1249,10 @@ class PlayableMap {
 	 * The map scaling factor.
 	 */
 	private float _mapScalingFactor = 2.0;
+
+	/**
+	 * Flag which determines if the \c _updateMoveModeClosedList() method should
+	 * be called.
+	 */
+	private bool _closedListEnabled = true;
 }

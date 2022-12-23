@@ -62,9 +62,24 @@
 			"offset": [ -9, -12 ]
 		},
 		"ulattackcursor": {
-			"frames": [ [ 139, 93, 59, 49 ] ],
+			"frames": [ [ 139, 93, 30, 29 ] ],
 			"durations": [ 0 ],
 			"offset": [ -5, -5 ]
+		},
+		"urattackcursor": {
+			"frames": [ [ 139, 122, 30, 29 ] ],
+			"durations": [ 0 ],
+			"offset": [ -10, -5 ]
+		},
+		"llattackcursor": {
+			"frames": [ [ 169, 122, 30, 29 ] ],
+			"durations": [ 0 ],
+			"offset": [ -5, -9 ]
+		},
+		"lrattackcursor": {
+			"frames": [ [ 199, 122, 30, 29 ] ],
+			"durations": [ 0 ],
+			"offset": [ -10, -9 ]
 		},
 		"damagetooltip": {
 			"frames": [ [ 169, 93, 32, 23 ] ],

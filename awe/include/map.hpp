@@ -1104,6 +1104,12 @@ namespace awe {
 		void disableSelectedUnitRenderingEffects(const bool val) noexcept;
 
 		/**
+		 * Disables greyed out unit shading for units that are on an available
+		 * tile.
+		 */
+		void disableShaderForAvailableUnits(const bool val);
+
+		/**
 		 * Iterates through the closed list in its current state and updates each
 		 * node's animated sprite based on the stored path.
 		 */
@@ -1628,6 +1634,12 @@ namespace awe {
 			 * the unit.
 			 */
 			bool disableRenderingEffects = false;
+
+			/**
+			 * Used to disable greyed out shading on units if they are on an
+			 * available tile.
+			 */
+			bool disableShaderForAvailableUnits = false;
 
 			/**
 			 * Clears the state of the object.
