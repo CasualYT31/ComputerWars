@@ -799,19 +799,30 @@ class PlayableMap {
 	}
 
 	/**
-	 * Checks if a unit can attack from a given tile.
-	 * @param attackingUnit The ID of the unit who's attacking
-	 * @param fromTile      Attacking from this tile.
+	 * Fills a dictionary with all the tiles which contain possible targets for
+	 * the given unit, attacking from the given tile.
+	 * The keys will be string forms of the positions of tiles containing targets
+	 * (whether it be tile, unit, or both), and the value will be the script name
+	 * of the weapon best suited to attack the given target with.\n
+	 * If a tile contains both a unit and tile target, then the unit target will/
+	 * must be chosen.
+	 * @warning This method will \em not clear the given dictionary before
+	 *          processing.
+	 * @param   result        Handle to the dictionary to write the results to.
+	 * @param   attackingUnit The ID of the unit who's attacking.
+	 * @param   fromTile      The tile from which the unit will attack.
 	 */
-	bool canAttack(const UnitID attackingUnit, const Vector2&in fromTile) const {
-		// The unit ID must not be 0.
-		if (attackingUnit == 0) return false;
+	void findTilesWithTargets(dictionary@ result, const UnitID attackingUnit,
+		const Vector2&in fromTile) const {
+		// No tiles can contain targets if there isn't a unit who is attacking.
+		if (attackingUnit == 0) return;
 		// If `fromTile` isn't vacant and the unit on that tile isn't the
 		// attacking unit, then the unit can't attack.
 		if (map.getUnitOnTile(fromTile) != 0 &&
-			map.getUnitOnTile(fromTile) != attackingUnit) return false;
+			map.getUnitOnTile(fromTile) != attackingUnit) return;
 		const bool isMoving = map.getUnitPosition(attackingUnit) != fromTile;
 		const auto unitType = map.getUnitType(attackingUnit);
+		// Cycle through every weapon that the attacking unit possesses.
 		for (uint64 weaponID = 0, weaponCount = unitType.weaponCount;
 			weaponID < weaponCount; ++weaponID) {
 			const auto weaponType = unitType.weapon(weaponID);
@@ -832,25 +843,103 @@ class PlayableMap {
 			for (uint64 t = 0, tileCount = availableTiles.length();
 				t < tileCount; ++t) {
 				const auto tile = availableTiles[t];
-				// Can this weapon attack this type of terrain? If so, true.
-				if (weaponType.canAttackTerrain(
-					map.getTileType(tile).type.scriptName)) return true;
-				// Otherwise, go through all of the unit checks. The unit can't be
-				// attacked if it isn't visible to the attacking unit, or if it is
-				// on the same team as the attacking unit.
+				const auto tileStr = tile.toString();
+				// Prioritise units over tiles. Units can't be attacked if they
+				// aren't visible to the attacking unit, or if they are on the
+				// same team as the attacking unit.
 				const auto defendingUnit = map.getUnitOnTile(tile);
-				if (defendingUnit == 0) continue;
-				if (map.getTeamOfUnit(attackingUnit) ==
-					map.getTeamOfUnit(defendingUnit)) continue;
-				if (!map.isUnitVisible(defendingUnit,
-					map.getArmyOfUnit(attackingUnit))) continue;
-				// Can the weapon attack the unit? If so, true.
-				if (weaponType.canAttackUnit(
-					map.getUnitType(defendingUnit).scriptName,
-					map.isUnitHiding(defendingUnit))) return true;
+				if (defendingUnit > 0 && map.getTeamOfUnit(attackingUnit) !=
+					map.getTeamOfUnit(defendingUnit) &&
+					map.isUnitVisible(defendingUnit,
+					map.getArmyOfUnit(attackingUnit))) {
+					// There is a unit that could be a target. Check if this
+					// weapon can attack this type of unit.
+					if (weaponType.canAttackUnit(
+						map.getUnitType(defendingUnit).scriptName,
+						map.isUnitHiding(defendingUnit))) {
+						// Add this tile as a target, but only if it wasn't added
+						// previously.
+						// If it was added previously, then it can only override
+						// the selected weapon if it deals more damage, or if it
+						// deals the same damage, but has infinite ammo, and the
+						// stored weapon has finite ammo.
+						if (result.exists(tileStr)) {
+							const auto defendingUnitTypeName =
+								map.getUnitType(defendingUnit).scriptName;
+							string storedWeaponName;
+							result.get(tileStr, storedWeaponName);
+							const auto storedWeapon =
+								unitType.weapon(storedWeaponName);
+							const auto baseDamageThisWeapon =
+								weaponType.getBaseDamageUnit(
+									defendingUnitTypeName);
+							const auto baseDamageStoredWeapon =
+								storedWeapon.getBaseDamageUnit(
+									defendingUnitTypeName);
+							if (baseDamageThisWeapon == baseDamageStoredWeapon) {
+								if (weaponType.hasInfiniteAmmo &&
+									!storedWeapon.hasInfiniteAmmo) {
+									result.set(tileStr, weaponType.scriptName);
+								}
+							} else if (baseDamageThisWeapon >
+								baseDamageStoredWeapon) {
+								result.set(tileStr, weaponType.scriptName);
+							}
+						} else {
+							result.set(tileStr, weaponType.scriptName);
+						}
+					}
+				}
+				// If there isn't a unit on this tile, or if the unit couldn't be
+				// attacked, see if this weapon can attack this tile.
+				if (weaponType.canAttackTerrain(
+					map.getTileType(tile).type.scriptName)) {
+					// Add this tile as a target, but only if it wasn't added
+					// previously, and if it is vacant.
+					// If it was added previously, then it can only override the
+					// selected weapon if it deals more damage, or if it deals the
+					// same damage, but has infinite ammo, and the stored weapon
+					// has finite ammo.
+					if (defendingUnit == 0) {
+						if (result.exists(tileStr)) {
+							const auto terrainTypeName =
+								map.getTileType(tile).type.scriptName;
+							string storedWeaponName;
+							result.get(tileStr, storedWeaponName);
+							const auto storedWeapon =
+								unitType.weapon(storedWeaponName);
+							const auto baseDamageThisWeapon =
+								weaponType.getBaseDamageTerrain(terrainTypeName);
+							const auto baseDamageStoredWeapon =
+								storedWeapon.getBaseDamageTerrain(
+									terrainTypeName);
+							if (baseDamageThisWeapon == baseDamageStoredWeapon) {
+								if (weaponType.hasInfiniteAmmo &&
+									!storedWeapon.hasInfiniteAmmo) {
+									result.set(tileStr, weaponType.scriptName);
+								}
+							} else if (baseDamageThisWeapon >
+								baseDamageStoredWeapon) {
+								result.set(tileStr, weaponType.scriptName);
+							}
+						} else {
+							result.set(tileStr, weaponType.scriptName);
+						}
+					}
+				}
 			}
 		}
-		return false;
+	}
+
+	/**
+	 * Checks if a unit can attack from a given tile.
+	 * @param attackingUnit The ID of the unit who's attacking
+	 * @param fromTile      Attacking from this tile.
+	 */
+	bool canAttack(const UnitID attackingUnit, const Vector2&in fromTile) const {
+		dictionary t;
+		findTilesWithTargets(t, attackingUnit, fromTile);
+		return t.getSize() > 0;
 	}
 
 	/////////

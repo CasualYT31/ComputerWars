@@ -184,3 +184,10 @@ void PreviewMoveUnitMenu_Hide_Pressed() {
 	game.moveUnitHide(true);
 	setGUI("Map");
 }
+
+/**
+ * Allows the user to select a target for an attack.
+ */
+void PreviewMoveUnitMenu_Fire_Pressed() {
+	setGUI("SelectTargetMenu");
+}
