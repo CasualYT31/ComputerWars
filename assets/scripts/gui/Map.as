@@ -37,7 +37,7 @@ void HandleCommonGameInput(const dictionary@ controls) {
 			&& currentPosition.x <= int(windowSize.x)
 			&& currentPosition.y <= int(windowSize.y)) {
 			// Only consider the mouse if it has moved.
-			if (currentPosition.x != previousPosition.x) {
+			if (currentPosition != previousPosition) {
 				game.setSelectedTileByPixel(currentPosition);
 			}
 		}
@@ -121,7 +121,11 @@ void MapHandleInput(const dictionary controls) {
 		setWidgetPosition(tileWidget.layout, "100%", "100%");
 	}
 
-	if (bool(controls["select"])) {
+	// If the user is holding the correct control, calculate the attack range of
+	// the unit on the currently selected tile and display it.
+	if (bool(controls["range"])) {
+		
+	} else if (bool(controls["select"])) {
 		auto cursor = game.map.getSelectedTile();
 		auto unitID = game.map.getUnitOnTile(cursor);
 		const auto currentArmy = game.map.getSelectedArmy();
