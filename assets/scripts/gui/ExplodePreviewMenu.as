@@ -32,6 +32,11 @@ funcdef void EXPLODE_PREVIEW_MENU_EXPLOSION_CALLBACK();
 EXPLODE_PREVIEW_MENU_EXPLOSION_CALLBACK@ EXPLODE_PREVIEW_MENU_CALLBACK = null;
 
 /**
+ * Cache of the tile that was selected when the menu was opened.
+ */
+Vector2 EXPLODE_PREVIEW_MENU_SELECTED_TILE;
+
+/**
  * This menu has no widgets.
  */
 void ExplodePreviewMenuSetUp() {}
@@ -41,6 +46,7 @@ void ExplodePreviewMenuSetUp() {}
  * in the configured range to the available list, and disable the closed list.
  */
 void ExplodePreviewMenuOpen() {
+	EXPLODE_PREVIEW_MENU_SELECTED_TILE = game.map.getSelectedTile();
 	game.enableClosedList(false);
 	game.setAttackCursorSprites();
 	game.map.pushSelectedUnit(game.map.getSelectedUnit());
@@ -53,7 +59,7 @@ void ExplodePreviewMenuOpen() {
 	}
 	// Find all tiles within the range and add them to the available tile list.
 	const auto availableTiles = game.map.getAvailableTiles(
-		game.map.getSelectedTile(), EXPLODE_PREVIEW_MENU_RANGE.x,
+		EXPLODE_PREVIEW_MENU_SELECTED_TILE, EXPLODE_PREVIEW_MENU_RANGE.x,
 		EXPLODE_PREVIEW_MENU_RANGE.y);
 	for (uint i = 0, len = availableTiles.length(); i < len; ++i) {
 		game.map.addAvailableTile(availableTiles[i]);
@@ -89,6 +95,11 @@ void ExplodePreviewMenuHandleInput(const dictionary controls) {
 		HandleCommonGameInput(controls);
 	}
 	if (bool(controls["back"])) {
+		// Force the selection to go back to the originally selected unit (as the
+		// currently selected tile could be moved whilst in this menu, and this
+		// menu relies on the selected tile being on the original unit as the menu
+		// opens).
+		game.map.setSelectedTile(EXPLODE_PREVIEW_MENU_SELECTED_TILE);
 		setGUI(PREVIOUS_MENU);
 	} else if (bool(controls["select"])) {
 		// Perform explosion.

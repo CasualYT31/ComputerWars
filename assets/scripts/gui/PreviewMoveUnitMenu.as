@@ -46,6 +46,10 @@ void PreviewMoveUnitMenuOpen() {
 				game.areThereDepletedArmyUnitsAdjacentTo(tile,
 					game.map.getArmyOfUnit(unit), { unit })) {
 				PreviewCommands.addCommand("Supply", "supply", "replenishicon");
+			} else if (unitType.scriptName == "BLACKBOAT" &&
+				game.areThereDamagedOrDepletedArmyUnitsAdjacentTo(tile,
+					game.map.getArmyOfUnit(unit), { unit })) {
+				PreviewCommands.addCommand("Repair", "repair", "repairicon");
 			}
 			if (game.canUnload(unit, tile)) {
 				PreviewCommands.addCommand("Unload", "unload", "unloadicon");
@@ -212,4 +216,11 @@ void PreviewMoveUnitMenu_Explode_Pressed() {
 		game.map.deleteUnit(game.map.getSelectedUnit());
 	};
 	setGUI("ExplodePreviewMenu");
+}
+
+/**
+ * Allows the user to select a unit to repair.
+ */
+void PreviewMoveUnitMenu_Repair_Pressed() {
+	setGUI("RepairMenu");
 }

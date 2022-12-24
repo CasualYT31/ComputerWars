@@ -659,6 +659,67 @@ class PlayableMap {
 	}
 
 	/**
+	 * Finds the units adjacent to a given tile that belong to the same army as
+	 * the one given, and that have lost some \em displayed HP, and/or have lost
+	 * some fuel and/or ammo.
+	 * @param  tile        The tile to search from.
+	 * @param  army        The ID of the army to search with.
+	 * @param  ignoreUnits An array of units to ignore in the search.
+	 * @return A list of unit IDs that match the given criteria.
+	 */
+	array<UnitID>@ findDamagedOrDepletedArmyUnitsAdjacentTo(const Vector2&in tile,
+		const ArmyID army, const array<UnitID>@ ignoreUnits) const {
+		const auto units = _findUnits(tile, 1, 1);
+		array<UnitID> res;
+		for (uint i = 0, length = units.length(); i < length; ++i) {
+			const auto unitID = units[i];
+			if (ignoreUnits.find(unitID) >= 0) continue;
+			if (map.getArmyOfUnit(unitID) == army) {
+				const auto unitType = map.getUnitType(unitID);
+				if (map.getUnitDisplayedHP(unitID) <
+					GetDisplayedHP(int(unitType.maxHP))) {
+					res.insertLast(unitID);
+					continue;
+				}
+				if ((!unitType.hasInfiniteFuel &&
+					map.getUnitFuel(unitID) < unitType.maxFuel)) {
+					res.insertLast(unitID);
+					continue;
+				}
+				// Loop through every weapon.
+				const auto weaponCount = unitType.weaponCount;
+				for (uint64 w = 0; w < weaponCount; ++w) {
+					const auto weaponType = unitType.weapon(w);
+					if (!weaponType.hasInfiniteAmmo &&
+						map.getUnitAmmo(unitID, weaponType.scriptName) <
+							weaponType.maxAmmo) {
+						res.insertLast(unitID);
+						break;
+					}
+				}
+			}
+		}
+		return res;
+	}
+
+	/**
+	 * Checks if there are units adjacent to a given tile that belong to the same
+	 * army as the one given, and that have lost some \em displayed HP, and/or
+	 * have lost some fuel and/or ammo.
+	 * @param  tile        The tile to search from.
+	 * @param  army        The ID of the army to search with.
+	 * @param  ignoreUnits An array of units to ignore in the search.
+	 * @return \c TRUE if there is at least one unit that belongs to the given
+	 *         army, on a tile directly adjacent to the tile given, that has lost
+	 *         some displayed HP. \c FALSE otherwise.
+	 */
+	bool areThereDamagedOrDepletedArmyUnitsAdjacentTo(const Vector2&in tile,
+		const ArmyID army, const array<UnitID>@ ignoreUnits) const {
+		return findDamagedOrDepletedArmyUnitsAdjacentTo(tile, army, ignoreUnits).
+			length() > 0;
+	}
+
+	/**
 	 * APC replenish code.
 	 * @param unit The ID of the APC unit who is replenishing adjacent units, if
 	 *             they belong to the same army as the APC unit.
