@@ -624,20 +624,23 @@ class PlayableMap {
 	/**
 	 * Checks if there are units adjacent to a given tile that belong to the same
 	 * army as the one given, and that have lost some fuel and/or ammo.
-	 * @param  tile The tile to search from.
-	 * @param  army The ID of the army to search with.
+	 * @param  tile        The tile to search from.
+	 * @param  army        The ID of the army to search with.
+	 * @param  ignoreUnits An array of units to ignore in the search.
 	 * @return \c TRUE if there is at least one unit that belongs to the given
 	 *         army, on a tile directly adjacent to the tile given, that has lost
 	 *         some fuel and/or ammo. \c FALSE otherwise.
 	 */
 	bool areThereDepletedArmyUnitsAdjacentTo(const Vector2&in tile,
-		const ArmyID army) const {
+		const ArmyID army, const array<UnitID>@ ignoreUnits) const {
 		const auto units = _findUnits(tile, 1, 1);
 		for (uint i = 0, length = units.length(); i < length; ++i) {
-			if (map.getArmyOfUnit(units[i]) == army) {
-				const auto unitType = map.getUnitType(units[i]);
+			const auto unitID = units[i];
+			if (ignoreUnits.find(unitID) >= 0) continue;
+			if (map.getArmyOfUnit(unitID) == army) {
+				const auto unitType = map.getUnitType(unitID);
 				if ((!unitType.hasInfiniteFuel &&
-					map.getUnitFuel(units[i]) < unitType.maxFuel)) {
+					map.getUnitFuel(unitID) < unitType.maxFuel)) {
 					return true;
 				}
 				// Loop through every weapon.
@@ -645,7 +648,7 @@ class PlayableMap {
 				for (uint64 w = 0; w < weaponCount; ++w) {
 					const auto weaponType = unitType.weapon(w);
 					if (!weaponType.hasInfiniteAmmo &&
-						map.getUnitAmmo(units[i], weaponType.scriptName) <
+						map.getUnitAmmo(unitID, weaponType.scriptName) <
 							weaponType.maxAmmo) {
 						return true;
 					}

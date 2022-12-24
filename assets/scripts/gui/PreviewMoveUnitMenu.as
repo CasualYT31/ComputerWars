@@ -39,9 +39,12 @@ void PreviewMoveUnitMenuOpen() {
 			if (game.canCapture(unit, tile)) {
 				PreviewCommands.addCommand("Capture", "capture", "captureicon");
 			}
+			// Remember to ignore the APC itself when searching for adjacent
+			// units: it hasn't moved yet, so the engine still thinks it's at its
+			// original position.
 			if (unitType.scriptName == "APC" &&
 				game.areThereDepletedArmyUnitsAdjacentTo(tile,
-					game.map.getArmyOfUnit(unit))) {
+					game.map.getArmyOfUnit(unit), { unit })) {
 				PreviewCommands.addCommand("Supply", "supply", "replenishicon");
 			}
 			if (game.canUnload(unit, tile)) {
