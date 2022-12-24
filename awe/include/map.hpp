@@ -1033,11 +1033,16 @@ namespace awe {
 		 * The path is scanned, from the first tile to the last tile. If an
 		 * obstruction is found along the path, then its index will be returned. If
 		 * one could not be found, then \c <0 will be returned.
-		 * @param  path The path to scan.
-		 * @param  unit The unit that is moving along the path.
+		 * @param  path    The path to scan.
+		 * @param  unit    The unit that is moving along the path.
+		 * @param  ignores This stores the number of obstructions that will be
+		 *                 ignored when performing the search. This effectively
+		 *                 acts as an index, where if \c ignores is \c 1, the
+		 *                 second obstruction will be returned, if any. Etc.
 		 * @return The index to the obstruction, if any.
 		 */
-		int scanPath(CScriptArray* path, const awe::UnitID unit) const noexcept;
+		int scanPath(CScriptArray* path, const awe::UnitID unit,
+			std::size_t ignores = 0) const noexcept;
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //

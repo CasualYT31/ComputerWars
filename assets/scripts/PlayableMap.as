@@ -492,6 +492,120 @@ class PlayableMap {
 	}
 
 	/**
+	 * Selects a unit so that its attack range can be calculated and shown.
+	 * In the future, this method should list the attack range of every weapon the
+	 * unit possesses, not just the first eligible one found.
+	 * @warning The client must ensure the closed list is disabled whilst the unit
+	 *          is still selected by this method!
+	 * @param   unitID The ID of the unit to show the attack range of. \c 0 to
+	 *                 show no attack range.
+	 */
+	void showAttackRangeOfUnit(const UnitID unitID) {
+		map.setSelectedUnit(unitID);
+		if (unitID > 0) {
+			map.setAvailableTileShader(AvailableTileShader::Red);
+			map.disableSelectedUnitRenderingEffects(false);
+
+			// Filter the available tiles down based on the unit's movement type,
+			// movement points, fuel, and first available weapon (the first weapon
+			// with enough ammo, or the first weapon with infinite ammo). If there
+			// is not an available weapon, then there will be no available tiles.
+			map.clearAvailableTiles();
+			const Weapon@ weaponType = null;
+			const auto unitType = map.getUnitType(unitID);
+			for (uint i = 0, len = unitType.weaponCount; i < len; ++i) {
+				const auto weaponTypeTemp = unitType.weapon(i);
+				if (weaponTypeTemp.hasInfiniteAmmo) {
+					@weaponType = weaponTypeTemp;
+					break;
+				}
+				if (map.getUnitAmmo(unitID, weaponTypeTemp.scriptName) > 0) {
+					@weaponType = weaponTypeTemp;
+					break;
+				}
+			}
+			if (weaponType is null) return;
+
+			const auto tile = map.getUnitPosition(unitID);
+			array<Vector2> allTiles;
+			// If the weapon can attack after moving, then first find all
+			// available tiles separately. Then, feed each tile into an algorithm
+			// that determines how many tiles the given weapon can attack from
+			// that tile.
+			// If the given weapon can't attack after moving, then we can simply
+			// assign each tile as available that is within the weapon's range.
+			if (weaponType.canAttackAfterMoving) {
+				const auto moveableTiles = map.getAvailableTiles(tile, 1,
+					unitType.movementPoints);
+				moveableTiles.insertLast(tile);
+				const auto unitsArmy = map.getArmyOfUnit(unitID);
+				array<Vector2> availableTiles;
+				for (uint i = 0, len = moveableTiles.length(); i < len; ++i) {
+					// If there is a path to the available tile, AND it isn't
+					// occupied in any way EXCEPT if the unit occupying the tile
+					// is the unit itself, OR the occupying unit is not visible to
+					// the selected army, then it is considered in range.
+					const auto path = map.findPath(tile, moveableTiles[i],
+						unitType.movementType, unitType.movementPoints,
+						map.getUnitFuel(unitID), map.getTeamOfUnit(unitID),
+						map.getSelectedArmy());
+					// Army ID checks refer only to visible unit checks, so make
+					// sure to give in the CURRENT army to findPath(), and not the
+					// army who owns the unit.
+					if (path.length() > 0 &&
+						(map.getUnitOnTile(moveableTiles[i]) == 0 ||
+						map.getUnitOnTile(moveableTiles[i]) == unitID ||
+						!map.isUnitVisible(map.getUnitOnTile(moveableTiles[i]),
+							map.getSelectedArmy()))) {
+						availableTiles.insertLast(moveableTiles[i]);
+					}
+				}
+				// Now go through each available tile and see if the weapon can
+				// attack tiles that go out from it.
+				for (uint i = 0, len = availableTiles.length(); i < len; ++i) {
+					const auto availableTilesUnit =
+						map.getUnitOnTile(availableTiles[i]);
+					bool availableTileIsOccupied = availableTilesUnit != 0;
+					// If the unit occupying the tile is the unit being queried,
+					// then consider it unoccupied.
+					if (availableTilesUnit == unitID) {
+						availableTileIsOccupied = false;
+					}
+					// If the unit is not visible to the selected army, then act
+					// as if it is not occupied.
+					if (availableTileIsOccupied &&
+						!map.isUnitVisible(availableTilesUnit,
+							map.getSelectedArmy())) {
+						availableTileIsOccupied = false;
+					}
+					// We can add the tiles in range, but only if the unit could
+					// theoretically move to the available tile first.
+					if (!availableTileIsOccupied) {
+						const auto tilesInRange = map.getAvailableTiles(
+							availableTiles[i], weaponType.range.x,
+							weaponType.range.y);
+						for (uint j = 0, len2 = tilesInRange.length(); j < len2;
+							++j) {
+							allTiles.insertLast(tilesInRange[j]);
+						}
+					}
+				}
+			} else {
+				allTiles = map.getAvailableTiles(tile, weaponType.range.x,
+					weaponType.range.y);
+			}
+
+			// Add each available tile. Don't add the available tile if the given
+			// unit is occupying it.
+			for (uint i = 0, length = allTiles.length(); i < length; ++i) {
+				if (allTiles[i] != tile) {
+					map.addAvailableTile(allTiles[i]);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Moves the currently selected unit along the chosen path and deselects the
 	 * unit.
 	 * @throws If a unit hasn't been selected.

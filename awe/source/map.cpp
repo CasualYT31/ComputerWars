@@ -423,7 +423,8 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, findPathAsArrayUnloadUnit), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"int scanPath(const array<ClosedListNode>@, const UnitID) const",
+			"int scanPath(const array<ClosedListNode>@, const UnitID, uint = 0) "
+			"const",
 			asMETHOD(awe::map, scanPath), asCALL_THISCALL);
 
 		////////////////////////
@@ -1846,7 +1847,8 @@ CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 	return ret;
 }
 
-int awe::map::scanPath(CScriptArray* path, const awe::UnitID unit) const noexcept {
+int awe::map::scanPath(CScriptArray* path, const awe::UnitID unit,
+	std::size_t ignores) const noexcept {
 	if (path && _isUnitPresent(unit)) {
 		asUINT len = path->GetSize();
 		const auto armyID = getArmyOfUnit(unit);
@@ -1855,8 +1857,12 @@ int awe::map::scanPath(CScriptArray* path, const awe::UnitID unit) const noexcep
 				getUnitOnTile(((awe::closed_list_node*)path->At(i))->tile);
 			if (_isUnitPresent(unitID)) {
 				if (!isUnitVisible(unitID, armyID)) {
-					if (path) path->Release();
-					return static_cast<int>(i);
+					if (ignores == 0) {
+						if (path) path->Release();
+						return static_cast<int>(i);
+					} else {
+						--ignores;
+					}
 				}
 			}
 		}
