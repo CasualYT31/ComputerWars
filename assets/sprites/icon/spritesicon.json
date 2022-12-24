@@ -302,6 +302,10 @@
 			"frames": [ [ 111, 100, 14, 13 ] ],
 			"durations": [ 0 ]
 		},
+		"repairicon": {
+			"frames": [ [ 111, 113, 13, 13 ] ],
+			"durations": [ 0 ]
+		},
 		"infmove": {
 			"frames": [ [ 0, 48, 32, 15 ] ],
 			"durations": [ 0 ]
