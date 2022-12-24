@@ -1217,6 +1217,12 @@ namespace awe {
 				(getUnitPosition(unit));
 		}
 
+		/**
+		 * Retrieves the number of unit location overrides currently configured.
+		 * @return The number of unit location overrides currently configured.
+		 */
+		std::size_t getUnitPreviewsCount() const noexcept;
+
 		////////////////////////
 		// DRAWING OPERATIONS //
 		////////////////////////

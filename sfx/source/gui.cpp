@@ -422,6 +422,16 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Gets a widget's full size, which "
 		"includes any borders it may have, etc.");
 
+	r = engine->RegisterGlobalFunction("void setWidgetEnabled(const string&in, "
+		"const bool)",
+		asMETHOD(sfx::gui, _setWidgetEnabled), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's enabled state. The name "
+		"of the widget is given, then if it should be enabled or not.");
+
+	r = engine->RegisterGlobalFunction("bool getWidgetEnabled(const string&in)",
+		asMETHOD(sfx::gui, _getWidgetEnabled), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's enabled state.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetVisibility(const string&in, "
 		"const bool)",
 		asMETHOD(sfx::gui, _setWidgetVisibility), asCALL_THISCALL_ASGLOBAL, this);
@@ -1552,6 +1562,30 @@ sf::Vector2f sfx::gui::_getWidgetFullSize(const std::string& name) noexcept {
 			"menu \"{}\". This widget does not exist.", name, fullname[0]);
 	}
 	return {};
+}
+
+void sfx::gui::_setWidgetEnabled(const std::string& name, const bool enable)
+	noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		widget->setEnabled(enable);
+	} else {
+		_logger.error("Attempted to update widget \"{}\"'s enabled state, within "
+			"menu \"{}\". This widget does not exist.", name, fullname[0]);
+	}
+}
+
+bool sfx::gui::_getWidgetEnabled(const std::string& name) const noexcept {
+	std::vector<std::string> fullname;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
+	if (widget) {
+		return widget->isEnabled();
+	} else {
+		_logger.error("Attempted to get the enabled property of a widget \"{}\" "
+			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
+	}
+	return false;
 }
 
 void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible)

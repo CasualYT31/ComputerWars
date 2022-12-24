@@ -700,6 +700,26 @@ namespace sfx {
 		sf::Vector2f _getWidgetFullSize(const std::string& name) noexcept;
 
 		/**
+		 * Updates a widget's enabled property.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be changed.
+		 * @param name    The name of the widget to enable/disable.
+		 * @param visible \c TRUE if the widget should be enabled, \c FALSE if it
+		 *                should be disabled.
+		 */
+		void _setWidgetEnabled(const std::string& name, const bool enable)
+			noexcept;
+
+		/**
+		 * Retrieves the enabled property of a widget.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and \c FALSE will be returned.
+		 * @param  name The name of the widget to query.
+		 * @return \c TRUE if the widget is enabled, \c FALSE otherwise.
+		 */
+		bool _getWidgetEnabled(const std::string& name) const noexcept;
+
+		/**
 		 * Updates a widget's visibility property.
 		 * If no widget exists with the given name, then an error will be logged
 		 * and no widget will be changed.

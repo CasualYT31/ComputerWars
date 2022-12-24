@@ -117,6 +117,14 @@ void UnloadUnitsMenuClose() {
  * @param controls The control map given by the engine.
  */
 void UnloadUnitsMenuHandleInput(const dictionary controls) {
+	// Prevent user from accidentally proceeding with unload if they haven't
+	// selected any units to unload yet.
+	if (game.map.getUnitPreviewsCount() == 1) {
+		setWidgetEnabled("panel.grid.proceed", false);
+	} else {
+		setWidgetEnabled("panel.grid.proceed", true);
+	}
+
 	if (getWidgetVisibility("panel")) {
 		if (bool(controls["back"])) {
 			// Cancel whole unloading operation.

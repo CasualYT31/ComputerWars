@@ -582,6 +582,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"Vector2 getUnitPreviewPosition(const UnitID) const",
 			asMETHOD(awe::map, getUnitPreviewPosition), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"uint64 getUnitPreviewsCount() const",
+			asMETHOD(awe::map, getUnitPreviewsCount), asCALL_THISCALL);
+
 		// Temporary mappings.
 		r = engine->RegisterObjectMethod("Map",
 			"void TOOLTIP_setDamage(const int)",
@@ -2055,6 +2059,10 @@ void awe::map::removePreviewUnit(const awe::UnitID unit) noexcept {
 
 void awe::map::removeAllPreviewUnits() noexcept {
 	_unitLocationOverrides.clear();
+}
+
+std::size_t awe::map::getUnitPreviewsCount() const noexcept {
+	return _unitLocationOverrides.size();
 }
 
 void awe::map::setSelectedTile(const sf::Vector2u& pos) noexcept {
