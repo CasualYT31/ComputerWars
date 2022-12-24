@@ -559,7 +559,8 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"ignoresdefence": true
 	},
 	"BCOPTER": {
 		"longname": "BCOPTER_longname",
@@ -599,7 +600,8 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"ignoresdefence": true
 	},
 	"FIGHTER": {
 		"longname": "FIGHTER_longname",
@@ -638,7 +640,8 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"ignoresdefence": true
 	},
 	"BOMBER": {
 		"longname": "BOMBER_longname",
@@ -677,7 +680,8 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"ignoresdefence": true
 	},
 	"STEALTH": {
 		"longname": "STEALTH_longname",
@@ -716,7 +720,8 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": true,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"ignoresdefence": true
 	},
 	"BLACKBOMB": {
 		"longname": "BLACKBOMB_longname",
@@ -752,7 +757,8 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"ignoresdefence": true
 	},
 	"BLACKBOAT": {
 		"longname": "BLACKBOAT_longname",

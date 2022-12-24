@@ -258,6 +258,9 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) noexce
 			_baseWeapons.push_back({weapon.key(), jj});
 		}
 	}
+	if (j.keysExist({ "ignoresdefence" })) {
+		j.apply(_ignoreDefence, { "ignoresdefence" }, true);
+	}
 }
 //bool awe::unit_type::canLoad(const std::shared_ptr<const awe::unit_type>& type)
 //	const noexcept {

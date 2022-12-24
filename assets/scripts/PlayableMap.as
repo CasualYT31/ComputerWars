@@ -819,12 +819,16 @@ class PlayableMap {
 	 * must be chosen.
 	 * @warning This method will \em not clear the given dictionary before
 	 *          processing.
-	 * @param   result        Handle to the dictionary to write the results to.
-	 * @param   attackingUnit The ID of the unit who's attacking.
-	 * @param   fromTile      The tile from which the unit will attack.
+	 * @param   result             Handle to the dictionary to write the results
+	 *                             to.
+	 * @param   attackingUnit      The ID of the unit who's attacking.
+	 * @param   fromTile           The tile from which the unit will attack.
+	 * @param   isCounterattacking If \c TRUE, \c attackingUnit is performing a
+	 *                             counterattack, and some extra checks need to be
+	 *                             carried out.
 	 */
 	void findTilesWithTargets(dictionary@ result, const UnitID attackingUnit,
-		const Vector2&in fromTile) const {
+		const Vector2&in fromTile, const bool isCounterattacking = false) const {
 		// No tiles can contain targets if there isn't a unit who is attacking.
 		if (attackingUnit == 0) return;
 		// If `fromTile` isn't vacant and the unit on that tile isn't the
@@ -855,6 +859,22 @@ class PlayableMap {
 				t < tileCount; ++t) {
 				const auto tile = availableTiles[t];
 				const auto tileStr = tile.toString();
+				// If the attacker is counterattacking, then we need to perform
+				// some more checks here, namely:
+				// 1. If the target is directly next to the attacker, and this
+				//    weapon cannot counterattack directly, then we must ignore
+				//    this target.
+				// 2. If the target is not directly next to the attacker, and this
+				//    weapon cannot counterattack indirectly, then we must ignore
+				//    this target.
+				if (isCounterattacking) {
+					const auto distanceBetweenAttackerAndTarget =
+						Distance(fromTile, tile);
+					if (distanceBetweenAttackerAndTarget == 1 &&
+						!weaponType.canCounterattackDirectly) continue;
+					if (distanceBetweenAttackerAndTarget > 1 &&
+						!weaponType.canCounterattackIndirectly) continue;
+				}
 				// Prioritise units over tiles. Units can't be attacked if they
 				// aren't visible to the attacking unit, or if they are on the
 				// same team as the attacking unit.
@@ -951,6 +971,196 @@ class PlayableMap {
 		dictionary t;
 		findTilesWithTargets(t, attackingUnit, fromTile);
 		return t.getSize() > 0;
+	}
+
+	/**
+	 * Calculates the base damage that one weapon deals to another tile on the
+	 * map.
+	 * This method takes into account defensive terrain, COM tower count, and the
+	 * HP of both the attacker and the defender, if the defender is a unit.
+	 * @param attacker   The ID of the unit who's attacking.
+	 * @param weaponName The name of the weapon the attacker is using.
+	 * @param defender   The tile who's defending. If the tile is being occupied
+	 *                   by a unit, then the unit will be the defender.
+	 * @param baseOnly   If \c TRUE is given, no luck modifiers will be applied.
+	 */
+	int calculateDamage(const UnitID attacker, const string&in weaponName,
+		const Vector2&in defender, bool baseOnly) {
+		// Credit: https://awbw.fandom.com/wiki/Damage_Formula.
+		const auto comTowerCount = map.countTilesBelongingToArmy(
+			map.getArmyOfUnit(attacker), "COMTOWER");
+		const auto defenderUnit = map.getUnitOnTile(defender);
+		// Find base damage.
+		int baseDamage = 0;
+		const auto attackerWeapon = map.getUnitType(attacker).weapon(weaponName);
+		const auto defenderTerrainType = map.getTileType(defender).type;
+		int displayedHPOfDefender = 0;
+		uint defenderDefenceRating = 0;
+		if (defenderUnit > 0) {
+			// Unit is the defender.
+			baseDamage = attackerWeapon.getBaseDamageUnit(
+				map.getUnitType(defenderUnit).scriptName,
+				map.isUnitHiding(defenderUnit));
+			displayedHPOfDefender = map.getUnitDisplayedHP(defenderUnit);
+			defenderDefenceRating = map.getUnitDefence(defenderUnit);
+		} else {
+			// Tile is the defender.
+			baseDamage = attackerWeapon.getBaseDamageTerrain(
+				defenderTerrainType.scriptName);
+			displayedHPOfDefender = GetDisplayedHP(map.getTileHP(defender));
+			defenderDefenceRating = defenderTerrainType.defence;
+		}
+		// Apply CO attack percentage here:
+		// baseDamage = baseDamage * 100 / 100
+		// Roll for luck.
+		const int luck = ((baseOnly) ? (0) : (rand(9)));
+		// Calculate attacker HP multiplier.
+		double attackerDisplayedHPMultiplier =
+			double(map.getUnitDisplayedHP(attacker)) / 10;
+		// Calculate defender HP multiplier, apply CO defence percentage here:
+		double defenderDisplayedHPMultiplier = double(200 - (100 +
+			defenderDefenceRating * displayedHPOfDefender)) / 100;
+		// Calculate total damage%.
+		double totalDamage = (baseDamage + luck) * attackerDisplayedHPMultiplier *
+			defenderDisplayedHPMultiplier;
+		// Apply COM tower buffs.
+		totalDamage += double(comTowerCount) * 10.0;
+		// Round up to the nearest 0.05 interval.
+		const double mod = totalDamage % 0.05;
+		if (mod < 0.025) {
+			totalDamage -= mod;
+		} else {
+			totalDamage += 0.05 - mod;
+		}
+		// Round down, i.e. floor(), i.e. cast to int.
+		return int(totalDamage);
+	}
+
+	/**
+	 * Carries out an attack between two combatants.
+	 * A lot of attacking checks are assumed to be carried out first using
+	 * \c findTilesWithTargets() (such as ammo checks).\n
+	 * The attacker must have already been moved onto the tile it is attacking
+	 * from before making a call to this method!
+	 * @param targets  A dictionary of targets generated previously using
+	 *                 \c findTilesWithTargets().
+	 * @param attacker The ID of the unit who is performing the attack.
+	 * @param defender The tile defending itself. If there is a unit on this tile,
+	 *                 it will be selected as the defender instead of the tile.
+	 */
+	void attack(const dictionary@ targets, const UnitID attacker,
+		const Vector2&in defender) {
+		// Find the weapon that should be used against the target. If it can't be
+		// found, then we know the attack can't be carried out. Also, if the found
+		// weapon can't attack the given target, then we must cancel the attack.
+		const auto defenderStr = defender.toString();
+		if (!targets.exists(defenderStr)) {
+			error("Unit with ID " + formatUInt(attacker) + " cannot attack "
+				"defender [on] tile " + defenderStr + " as it was not in the "
+				"available list of targets!");
+			return;
+		}
+		string weaponName;
+		targets.get(defenderStr, weaponName);
+		const auto attackerType = map.getUnitType(attacker);
+		if (attackerType is null) {
+			error("Could not retrieve type of unit with ID " +
+				formatUInt(attacker) + ", cancelling the attack against defender "
+				"[on] tile " + defenderStr + ".");
+			return;
+		}
+		// Find out if the defender is a tile or a unit.
+		const auto defenderTerrainTypeName =
+			map.getTileType(defender).type.scriptName;
+		const auto defenderUnit = map.getUnitOnTile(defender);
+		const auto attackerWeapon = attackerType.weapon(weaponName);
+		bool attackerIsAlive = true;
+		if (defenderUnit > 0) {
+			// Defender is a unit.
+			const auto defenderUnitIsHidden = map.isUnitHiding(defenderUnit);
+			const auto defenderUnitType = map.getUnitType(defenderUnit);
+			if (!attackerWeapon.canAttackUnit(defenderUnitType.scriptName,
+				defenderUnitIsHidden)) {
+				error("Unit with ID " + formatUInt(attacker) + " attempted to "
+					"attack unit with ID " + formatUInt(defenderUnit) + " using "
+					"weapon \"" + weaponName + "\", which cannot attack units of "
+					"type \"" + defenderTerrainTypeName + "\". The defending "
+					"unit was " + ((defenderUnitIsHidden) ? ("") : ("not ")) +
+					"hidden at the time of the call.");
+				return;
+			}
+			// Carry out attack!
+			const auto damage = calculateDamage(attacker, weaponName, defender,
+				false);
+			const auto newUnitHP = map.getUnitHP(defenderUnit) - damage;
+			map.setUnitHP(defenderUnit, newUnitHP);
+			// If unit HP has reached 0, do not counterattack and delete unit.
+			// Otherwise, perform counterattack, if possible.
+			if (newUnitHP <= 0) {
+				map.deleteUnit(defenderUnit);
+			} else {
+				// First, see if the attacker is a potential target for the
+				// defender.
+				dictionary defenderTargets;
+				findTilesWithTargets(defenderTargets, defenderUnit, defender,
+					true);
+				const auto keys = defenderTargets.getKeys();
+				const auto attackerPosition = map.getUnitPosition(attacker);
+				for (uint i = 0, len = keys.length(); i < len; ++i) {
+					const auto tile = Vector2(keys[i]);
+					if (tile == attackerPosition) {
+						// Counterattack!
+						string defenderWeaponName;
+						defenderTargets.get(keys[i], defenderWeaponName);
+						const auto defendersDamage = calculateDamage(
+							defenderUnit, defenderWeaponName,
+							attackerPosition, false);
+						const auto newUnitHP2 = map.getUnitHP(attacker) -
+							defendersDamage;
+						map.setUnitHP(attacker, newUnitHP2);
+						// If the defending unit somehow killed its attacker, then
+						// delete it.
+						if (newUnitHP2 <= 0) {
+							map.deleteUnit(attacker);
+							attackerIsAlive = false;
+						}
+						// If the defending unit's weapon has finite ammo, remove
+						// 1.
+						if (!map.getUnitType(defenderUnit).
+							weapon(defenderWeaponName).hasInfiniteAmmo) {
+							map.setUnitAmmo(defenderUnit, defenderWeaponName,
+								map.getUnitAmmo(defenderUnit,
+								defenderWeaponName) - 1);
+						}
+					}
+				}
+			}
+		} else {
+			// Defender is a tile.
+			if (!attackerWeapon.canAttackTerrain(defenderTerrainTypeName)) {
+				error("Unit with ID " + formatUInt(attacker) + " attempted to "
+					"attack tile " + defenderStr + " using weapon \"" +
+					weaponName + "\", which cannot attack tiles of type \"" +
+					defenderTerrainTypeName + "\".");
+				return;
+			}
+			// Carry out attack! Tiles never counterattack, nor do they have luck
+			// rolls.
+			const auto damage = calculateDamage(attacker, weaponName, defender,
+				true);
+			const auto newTileHP = map.getTileHP(defender) - damage;
+			map.setTileHP(defender, newTileHP);
+			// If the tile's HP has reached zero, invoke the helper method.
+			if (newTileHP <= 0) {
+				_tileHasBeenDestroyed(defender, map.getTileType(defender));
+			}
+		}
+		// If the weapon used has finite ammo, and it is still alive, then remove
+		// one from its ammo count.
+		if (attackerIsAlive && !attackerWeapon.hasInfiniteAmmo) {
+			map.setUnitAmmo(attacker, weaponName,
+				map.getUnitAmmo(attacker, weaponName) - 1);
+		}
 	}
 
 	/////////
@@ -1240,6 +1450,25 @@ class PlayableMap {
 		}
 		arr[uint(index)].tile = tile;
 		arr[uint(index)].g = g;
+	}
+
+	//////////////////////////
+	// MISC. HELPER METHODS //
+	//////////////////////////
+	/**
+	 * When a tile's HP reaches 0 after it has been attacked, this method will be
+	 * invoked.
+	 * @param tile The position of the tile that has ran out of HP.
+	 * @param type The tile type of the tile.
+	 */
+	private void _tileHasBeenDestroyed(const Vector2&in tile,
+		const TileType@ type) {
+		// Pipe seams need to transform into plains.
+		if (type.scriptName == "05Epipeseamhori") {
+			map.setTileType(tile, "060plainseamhori");
+		} else if (type.scriptName == "05Fpipeseamvert") {
+			map.setTileType(tile, "061plainseamvert");
+		}
 	}
 
 	//////////

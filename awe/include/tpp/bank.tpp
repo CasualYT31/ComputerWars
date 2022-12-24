@@ -105,7 +105,7 @@ void awe::bank_id::Register(const std::string& type,
 	asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
 	auto r = engine->RegisterObjectMethod(type.c_str(),
-		"string get_scriptName() const property",
+		"const string& get_scriptName() const property",
 		asMETHOD(T, getScriptName), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the script name of this game "
 		"property.");
@@ -421,6 +421,12 @@ void awe::unit_type::Register(const std::string& type,
 		asMETHOD(T, getWeaponCount), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Retrieves the number of weapons a unit "
 		"possesses.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_ignoresDefence() const property",
+		asMETHOD(T, ignoresDefence), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns TRUE if this unit always has 0 "
+		"defence, FALSE if this unit's defence is based on the terrain it is "
+		"positioned on.");
 }
 
 template<typename T>

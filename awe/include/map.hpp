@@ -554,6 +554,16 @@ namespace awe {
 		CScriptArray* getUnitsOfArmyByPriorityAsArray(const awe::ArmyID army)
 			const;
 
+		/**
+		 * Counts how many tiles of a specific terrain type the given army owns.
+		 * @param  army        The ID of the army to query.
+		 * @param  terrainType The terrain to search for.
+		 * @return The number of tiles belonging to the army that have the given
+		 *         terrain type.
+		 */
+		std::size_t countTilesBelongingToArmy(const awe::ArmyID army,
+			const std::string& terrainType) const noexcept;
+
 		/////////////////////
 		// UNIT OPERATIONS //
 		/////////////////////
@@ -831,6 +841,16 @@ namespace awe {
 		 * @sa @c getLoadedUnits().
 		 */
 		CScriptArray* getLoadedUnitsAsArray(const awe::UnitID id) const noexcept;
+
+		/**
+		 * Finds out the number of defence stars this unit has based on its type
+		 * and current position.
+		 * Loaded units will always give a defence rating of \c 0, as they are not
+		 * internally positioned on any tile.
+		 * @param  id The ID of the unit to getthe defence of.
+		 * @return The defence rating that this unit currently obtains.
+		 */
+		unsigned int getUnitDefence(const awe::UnitID id) const noexcept;
 
 		/////////////////////
 		// TILE OPERATIONS //

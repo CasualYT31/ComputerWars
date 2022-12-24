@@ -36,7 +36,7 @@ void awe::damage_tooltip::setFont(const std::shared_ptr<sf::Font>& font) noexcep
 	_damage.setOutlineThickness(2.0f);
 }
 
-void awe::damage_tooltip::setDamage(const unsigned int dmg) noexcept {
+void awe::damage_tooltip::setDamage(const int dmg) noexcept {
 	_damage.setString(std::to_string(dmg));
 }
 

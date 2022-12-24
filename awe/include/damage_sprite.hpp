@@ -46,7 +46,7 @@ namespace awe {
 			const std::shared_ptr<sfx::animated_spritesheet>& spritesheet)
 			noexcept;
 		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
-		void setDamage(const unsigned int dmg) noexcept;
+		void setDamage(const int dmg) noexcept;
 		/// Should be the position of the attack cursor with offset applied!
 		void setPosition(const sf::Vector2f& pos, const int quadrant) noexcept;
 		void visible(const bool v) noexcept;

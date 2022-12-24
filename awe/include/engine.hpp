@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "spritesheets.hpp"
 #include "map.hpp"
 #include <filesystem>
+#include <random>
 
 namespace awe {
 	/**
@@ -48,6 +49,7 @@ namespace awe {
 	public:
 		/**
 		 * Initialises the internal logger object.
+		 * Also seeds the psuedo random number sequence generator.
 		 * @param name The name to give this particular instantiation within the
 		 *             log file. Defaults to "engine."
 		 * @sa    \c engine::logger
@@ -259,6 +261,13 @@ namespace awe {
 		 */
 		sf::Vector2i _script_scaledMousePosition() const;
 
+		/**
+		 * Returns a randomly generated number between \c 0 and \c max.
+		 * @param  max The maximum value the result can be.
+		 * @return The random number.
+		 */
+		unsigned int _script_rand(const unsigned int max) noexcept;
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================
@@ -386,6 +395,11 @@ namespace awe {
 		 * The scaling applied to all drawing.
 		 */
 		float _scaling = 2.0f;
+
+		/**
+		 * The pseudo-random number sequence generator.
+		 */
+		std::unique_ptr<std::mt19937> _prng;
 	};
 }
 

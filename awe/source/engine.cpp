@@ -22,8 +22,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.hpp"
 #include "army.hpp"
+#include <chrono>
 
-awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {}
+awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {
+	// Credit: https://stackoverflow.com/a/13446015/6928376.
+	std::random_device randomDevice;
+	std::mt19937::result_type seed = randomDevice() ^ (
+		(std::mt19937::result_type)
+		std::chrono::duration_cast<std::chrono::seconds>(
+			std::chrono::system_clock::now().time_since_epoch()
+			).count() +
+		(std::mt19937::result_type)
+		std::chrono::duration_cast<std::chrono::microseconds>(
+			std::chrono::high_resolution_clock::now().time_since_epoch()
+			).count()
+	);
+	_prng = std::make_unique<std::mt19937>(seed);
+}
 
 int awe::game_engine::run() noexcept {
 	auto r = _initCheck();
@@ -284,6 +299,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, _scripts.get());
 	document->DocumentGlobalFunction(r, "Executes code within the ComputerWars "
 		"module.");
+
+	r = engine->RegisterGlobalFunction("uint rand(const uint)",
+		asMETHOD(awe::game_engine, _script_rand),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Generates a random number between 0 and "
+		"the given value (inclusive).");
 }
 
 bool awe::game_engine::_load(engine::json& j) noexcept {
@@ -487,6 +508,12 @@ sf::Vector2i awe::game_engine::_script_scaledMousePosition() const {
 	} else {
 		return ret;
 	}
+}
+
+unsigned int awe::game_engine::_script_rand(const unsigned int max) noexcept {
+	// Credit: https://stackoverflow.com/a/13446015/6928376.
+	std::uniform_int_distribution<unsigned> distribution(0, max);
+	return distribution(*_prng);
 }
 
 // initCheck()

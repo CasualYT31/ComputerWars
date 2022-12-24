@@ -4,7 +4,7 @@
  */
 
 /**
- * Sets up the damage tooltip which will display base damage against targets.
+ * In the future, the damage tooltip will be widgets created here.
  */
 void SelectTargetMenuSetUp() {
 }
@@ -51,12 +51,7 @@ void SelectTargetMenuOpen() {
 void SelectTargetMenuClose() {
 	// Always ensure the damage tooltip is hidden before leaving the menu.
 	game.map.TOOLTIP_visible(false);
-	game.map.popSelectedUnit();
 	game.enableClosedList(true);
-	// Force the selection to go back to the originally selected unit (as the
-	// currently selected tile could be moved whilst in this menu, and this menu
-	// relies on the selected tile being on the original unit as the menu opens).
-	game.map.setSelectedTile(SELECT_TARGET_MENU_SELECTED_TILE);
 	game.setNormalCursorSprites();
 }
 
@@ -74,19 +69,8 @@ void SelectTargetMenuHandleInput(const dictionary controls) {
 	if (game.map.isAvailableTile(selectedTile)) {
 		string weaponName;
 		TILES_WITH_TARGETS.get(selectedTile.toString(), weaponName);
-		// Is the tile occupied? In which case, target the unit. Otherwise, the
-		// tile itself.
-		uint baseDamage = 0;
-		const auto unitID = game.map.getUnitOnTile(selectedTile);
-		if (unitID > 0) {
-			baseDamage = ATTACKING_UNIT_TYPE.weapon(weaponName).getBaseDamageUnit(
-				game.map.getUnitType(unitID).scriptName,
-				game.map.isUnitHiding(unitID));
-		} else {
-			baseDamage = ATTACKING_UNIT_TYPE.weapon(weaponName).
-				getBaseDamageTerrain(
-					game.map.getTileType(selectedTile).type.scriptName);
-		}
+		int baseDamage = game.calculateDamage(game.map.getSelectedUnit(),
+			weaponName, selectedTile, true);
 		game.map.TOOLTIP_setDamage(baseDamage);
 		game.map.TOOLTIP_visible(true);
 	} else {
@@ -94,6 +78,23 @@ void SelectTargetMenuHandleInput(const dictionary controls) {
 	}
 
 	if (bool(controls["back"])) {
+		game.map.popSelectedUnit();
+		// Force the selection to go back to the originally selected unit (as the
+		// currently selected tile could be moved whilst in this menu, and this
+		// menu relies on the selected tile being on the original unit as the menu
+		// opens).
+		game.map.setSelectedTile(SELECT_TARGET_MENU_SELECTED_TILE);
 		setGUI("PreviewMoveUnitMenu");
+	} else if (bool(controls["select"])) {
+		// Ignore the selection if a non-available tile was selected.
+		if (game.map.isAvailableTile(selectedTile)) {
+			game.map.popSelectedUnit();
+			// Perform move operation.
+			const auto attackingUnit = game.map.getSelectedUnit();
+			game.moveUnit();
+			// Perform attack.
+			game.attack(TILES_WITH_TARGETS, attackingUnit, selectedTile);
+			setGUI("Map");
+		}
 	}
 }

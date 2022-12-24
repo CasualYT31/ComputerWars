@@ -264,7 +264,7 @@ namespace awe {
 		 * script it is loaded with.
 		 * @return The string identifier.
 		 */
-		inline std::string getScriptName() const noexcept {
+		inline const std::string& getScriptName() const noexcept {
 			return _scriptName;
 		}
 
@@ -1213,7 +1213,9 @@ namespace awe {
 		 *     <li>\c "canunloadfrom" = \c _canUnloadFromThese,
 		 *         <tt>([TERRAIN_TYPE_SCRIPT_NAME{, etc.}])</tt></li>
 		 *     <li>\c "weapons" = \c _weapons, <tt>({WEAPON_SCRIPT_NAME: {insert
-		 *         optional overrides here}[, etc.]})</tt></li></ul>
+		 *         optional overrides here}[, etc.]})</tt></li>
+		 *     <li>\c "ignoredefence" = \c _ignoreDefence, <tt>(bool, default =
+		 *         false)</tt></li></ul>
 		 *
 		 * Pictures is an array of sprite names corresponding to each country's
 		 * portrait of the type of unit.\n
@@ -1576,6 +1578,15 @@ namespace awe {
 		 */
 		void updateSpriteMaps(const awe::bank<awe::country>& countries) const
 			noexcept;
+
+		/**
+		 * Does this type of unit ignore terrain defence?
+		 * @return \c TRUE if this unit always has 0 defence, regardless of what
+		 *         terrain it is on.
+		 */
+		inline bool ignoresDefence() const noexcept {
+			return _ignoreDefence;
+		}
 	private:
 		/**
 		 * Script interface version of \c getMovementType().
@@ -1727,6 +1738,12 @@ namespace awe {
 		 */
 		mutable std::unordered_map<std::string, std::shared_ptr<const awe::weapon>>
 			_weapons;
+
+		/**
+		 * If \c TRUE, this type of unit should ignore terrain defence in damage
+		 * calculations.
+		 */
+		bool _ignoreDefence = false;
 	};
 
 	/**

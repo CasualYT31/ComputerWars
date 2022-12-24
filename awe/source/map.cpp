@@ -237,6 +237,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"getUnitsOfArmyByPriority(const ArmyID) const",
 			asMETHOD(awe::map, getUnitsOfArmyByPriorityAsArray), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map", "uint64 "
+			"countTilesBelongingToArmy(const ArmyID, const string&in) const",
+			asMETHOD(awe::map, countTilesBelongingToArmy), asCALL_THISCALL);
+
 		/////////////////////
 		// UNIT OPERATIONS //
 		/////////////////////
@@ -361,6 +365,10 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"array<UnitID>@ getLoadedUnits(const UnitID) const",
 			asMETHOD(awe::map, getLoadedUnitsAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"uint getUnitDefence(const UnitID) const",
+			asMETHOD(awe::map, getUnitDefence), asCALL_THISCALL);
 
 		/////////////////////
 		// TILE OPERATIONS //
@@ -572,7 +580,7 @@ void awe::map::Register(asIScriptEngine* engine,
 
 		// Temporary mappings.
 		r = engine->RegisterObjectMethod("Map",
-			"void TOOLTIP_setDamage(const uint)",
+			"void TOOLTIP_setDamage(const int)",
 			asMETHOD(awe::damage_tooltip, setDamage), asCALL_THISCALL, 0,
 			asOFFSET(awe::map, _damageTooltip), false);
 		r = engine->RegisterObjectMethod("Map",
@@ -1078,6 +1086,25 @@ CScriptArray* awe::map::getUnitsOfArmyByPriorityAsArray(const awe::ArmyID army)
 	}
 }
 
+std::size_t awe::map::countTilesBelongingToArmy(const awe::ArmyID army,
+	const std::string& terrainType) const noexcept {
+	if (!_isArmyPresent(army)) {
+		_logger.error("countTilesBelongingToArmy operation failed: army with ID "
+			"{} didn't exist at the time of calling!", army);
+		return 0;
+	}
+	std::size_t counter = 0;
+	const auto tiles = getTilesOfArmy(army);
+	for (const auto& tile : tiles) {
+		const auto type = getTileType(tile);
+		if (type) {
+			const auto terrain = type->getType();
+			if (terrain && terrain->getScriptName() == terrainType) ++counter;
+		}
+	}
+	return counter;
+}
+
 awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& type,
 	const awe::ArmyID army) noexcept {
 	if (!type) _logger.warning("createUnit warning: creating a unit for army {} "
@@ -1499,6 +1526,25 @@ CScriptArray* awe::map::getLoadedUnitsAsArray(const awe::UnitID id) const noexce
 		ret->InsertLast(&unit);
 	}
 	return ret;
+}
+
+unsigned int awe::map::getUnitDefence(const awe::UnitID id) const noexcept {
+	if (!_isUnitPresent(id)) {
+		_logger.error("getUnitDefence operation failed: unit with ID {} doesn't "
+			"exist!", id);
+		return 0;
+	}
+	const auto type = getUnitType(id);
+	if (!type) {
+		_logger.error("getUnitDefence operation failed: couldn't deduce unit {}'s "
+			"type.", id);
+		return 0;
+	}
+	if (type->ignoresDefence() || !isUnitOnMap(id)) {
+		return 0;
+	} else {
+		return getTileType(getUnitPosition(id))->getType()->getDefence();
+	}
 }
 
 bool awe::map::setTileType(const sf::Vector2u& pos,
