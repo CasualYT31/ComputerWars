@@ -26,30 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 awe::army::army(const std::shared_ptr<const awe::country>& country) noexcept :
 	_country(country) {}
 
-void awe::army::setTeam(const awe::TeamID teamID) noexcept {
-	_team = teamID;
-}
-
-awe::TeamID awe::army::getTeam() const noexcept {
-	return _team;
-}
-
-std::shared_ptr<const awe::country> awe::army::getCountry() const noexcept {
-	return _country;
-}
-
-void awe::army::setFunds(const awe::Funds funds) noexcept {
-	if (funds <= 0) {
-		_funds = 0;
-	} else {
-		_funds = funds;
-	}
-}
-
-awe::Funds awe::army::getFunds() const noexcept {
-	return _funds;
-}
-
 void awe::army::setCOs(const std::shared_ptr<const awe::commander>& current,
 	const std::shared_ptr<const awe::commander>& tag) noexcept {
 	if (!current && tag) {
@@ -63,14 +39,6 @@ void awe::army::setCOs(const std::shared_ptr<const awe::commander>& current,
 
 void awe::army::tagCOs() noexcept {
 	if (_co_2) std::swap(_co_1, _co_2);
-}
-
-std::shared_ptr<const awe::commander> awe::army::getCurrentCO() const noexcept {
-	return _co_1;
-}
-
-std::shared_ptr<const awe::commander> awe::army::getTagCO() const noexcept {
-	return _co_2;
 }
 
 void awe::army::addUnit(const awe::UnitID unit) noexcept {

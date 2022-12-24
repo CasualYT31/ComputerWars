@@ -200,6 +200,13 @@ namespace awe {
 		 */
 		void setScripts(const std::shared_ptr<engine::scripts>& scripts) noexcept;
 
+		/**
+		 * Carry out periodic tasks, such as checking for win conditions.
+		 * @return If \c TRUE is returned, it signifies that the map's win
+		 *         condition has been met, and the map object should be deleted.
+		 */
+		bool periodic() noexcept;
+
 		////////////////////
 		// MAP OPERATIONS //
 		////////////////////
@@ -268,6 +275,15 @@ namespace awe {
 		 * @return The current day.
 		 */
 		awe::Day getDay() const noexcept;
+
+		/**
+		 * The default win condition of a map.
+		 * If there is only one team remaining on the map, then the win condition
+		 * has been met. If there is no team remaining, then \c TRUE will be
+		 * returned.
+		 * @return \c TRUE if the win condition has been met, \c FALSE otherwise.
+		 */
+		bool defaultWinCondition() const noexcept;
 
 		/////////////////////
 		// ARMY OPERATIONS //

@@ -213,7 +213,7 @@ void PreviewMoveUnitMenu_Explode_Pressed() {
 	@EXPLODE_PREVIEW_MENU_CALLBACK = function(){
 		// If the explosion went ahead, then we need to delete the Black Bomb
 		// unit.
-		game.map.deleteUnit(game.map.getSelectedUnit());
+		game.deleteUnit(game.map.getSelectedUnit());
 	};
 	setGUI("ExplodePreviewMenu");
 }

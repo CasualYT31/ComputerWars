@@ -150,6 +150,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"Day getDay() const",
 			asMETHOD(awe::map, getDay), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"bool defaultWinCondition() const",
+			asMETHOD(awe::map, defaultWinCondition), asCALL_THISCALL);
+
 		/////////////////////
 		// ARMY OPERATIONS //
 		/////////////////////
@@ -679,6 +683,10 @@ void awe::map::setScripts(const std::shared_ptr<engine::scripts>& scripts)
 	}
 }
 
+bool awe::map::periodic() noexcept {
+	return defaultWinCondition();
+}
+
 void awe::map::setMapName(const std::string& name) noexcept {
 	_mapName = name;
 }
@@ -750,6 +758,15 @@ void awe::map::setDay(const awe::Day day) noexcept {
 
 awe::Day awe::map::getDay() const noexcept {
 	return _day;
+}
+
+bool awe::map::defaultWinCondition() const noexcept {
+	if (_armies.size() == 0) return true;
+	const auto firstArmysTeam = _armies.begin()->second.getTeam();
+	for (const auto& army : _armies) {
+		if (army.second.getTeam() != firstArmysTeam) return false;
+	}
+	return true;
 }
 
 bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)

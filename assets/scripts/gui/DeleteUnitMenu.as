@@ -26,7 +26,9 @@ void DeleteUnitMenuHandleInput(const dictionary controls) {
 	auto unitID = game.map.getUnitOnTile(game.map.getSelectedTile());
 	if (bool(controls["select"]) && unitID > 0 &&
 		game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy()) {
-		game.map.deleteUnit(unitID);
+		if (game.deleteUnit(unitID)) {
+			setGUI("Map");
+		}
 	} else if (bool(controls["back"])) {
 		setGUI("Map");
 	}

@@ -237,8 +237,12 @@ class PlayableMap {
 	////////////////////////////////
 	/**
 	 * Ends the current turn.
+	 * @param deleteOldArmy If \c TRUE, this will delete the army who's ending
+	 *                      their turn, after the next army has been selected.
+	 *                      Their properties will not be transfered to any other
+	 *                      army.
 	 */
-	void endTurn() {
+	void endTurn(const bool deleteOldArmy = false) {
 		// 1. Ensure that each of the current army's units are no longer waiting.
 		auto currentArmy = map.getSelectedArmy();
 		const auto previousArmyUnits = map.getUnitsOfArmy(currentArmy);
@@ -253,9 +257,14 @@ class PlayableMap {
 			map.setDay(map.getDay() + 1);
 		}
 		map.setSelectedArmy(nextArmy);
+
+		// 3. If configured to, delete the army ending their turn.
+		if (deleteOldArmy) {
+			map.deleteArmy(currentArmy);
+		}
 		currentArmy = nextArmy;
 
-		// 3. Go through each of the current army's units and perform start of
+		// 4. Go through each of the current army's units and perform start of
 		//    turn operations. Order each unit by their priority.
 		const auto armyUnitsByPriority =
 			map.getUnitsOfArmyByPriority(currentArmy);
@@ -269,14 +278,14 @@ class PlayableMap {
 			}
 		}
 
-		// 4. Then, go through each of the current army's owned tiles.
+		// 5. Then, go through each of the current army's owned tiles.
 		const auto armyTiles = map.getTilesOfArmy(currentArmy);
 		for (uint i = 0, tileCount = armyTiles.length(); i < tileCount; ++i) {
 			const Vector2 tile = armyTiles[i];
 			_beginTurnForTile(tile, map.getTileType(tile).type, currentArmy);
 		}
 
-		// 5. Finally, perform extra operations on the army's units and tiles that
+		// 6. Finally, perform extra operations on the army's units and tiles that
 		//    need to be executed after the others. We shall get the lists again.
 		//    This allows steps 3 and 4 to add or remove units or tiles if it so
 		//    chooses.
@@ -291,6 +300,35 @@ class PlayableMap {
 	void tagCOs() {
 		map.tagArmyCOs(map.getSelectedArmy());
 		endTurn();
+	}
+
+	/**
+	 * Delete an army.
+	 * This method has additional checking which ends the turn if the army was
+	 * having their turn at the time.
+	 * @param armyID            The ID of the army being deleted.
+	 * @param transferOwnership The ID of the army who will assume ownership of
+	 *                          all the deleted army's tiles. By default,
+	 *                          ownership is set to \c NO_ARMY, i.e. back to
+	 *                          neutral.
+	 */
+	void deleteArmy(const ArmyID armyID, const ArmyID transferOwnership = NO_ARMY)
+		{
+		// Find all HQs belonging to the army and convert them to cities. Transfer
+		// ownership of them, too.
+		const auto tiles = map.getTilesOfArmy(armyID);
+		for (uint i = 0, len = tiles.length(); i < len; ++i) {
+			const auto tile = tiles[i];
+			if (map.getTileType(tile).type.scriptName == "HQ") {
+				map.setTileType(tile, "064city");
+				map.setTileOwner(tile, transferOwnership);
+			}
+		}
+		if (map.getSelectedArmy() == armyID) {
+			endTurn(true);
+		} else {
+			map.deleteArmy(armyID, transferOwnership);
+		}
 	}
 
 	////////////////////////////////
@@ -328,6 +366,22 @@ class PlayableMap {
 		map.setUnitHP(unitID, type.maxHP);
 		replenishUnit(unitID);
 		return true;
+	}
+
+	/**
+	 * Deletes a unit, and deletes its army if it has no units left.
+	 * @param  unitID ID of the unit to delete.
+	 * @return \c TRUE if the unit's army was deleted, \c FALSE otherwise.
+	 */
+	bool deleteUnit(const UnitID unitID) {
+		const auto unitsArmy = map.getArmyOfUnit(unitID);
+		map.deleteUnit(unitID);
+		const auto unitCount = map.getUnitsOfArmy(unitsArmy).length();
+		if (unitCount == 0) {
+			deleteArmy(unitsArmy);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -544,6 +598,8 @@ class PlayableMap {
 				}
 			}
 			map.waitUnit(stationary, true);
+			// For "efficiency," don't perform extra PlayableMap checking that
+			// comes with deleteUnit() and just delete it directly.
 			map.deleteUnit(moving);
 		} else {
 			error("Attempted to join moving unit " + formatUInt(moving) +
@@ -601,11 +657,7 @@ class PlayableMap {
 			const auto newHP = map.getTileHP(tile) - map.getUnitDisplayedHP(unit);
 			if (newHP <= 0) {
 				if (map.getTileType(tile).type.scriptName == "HQ") {
-					const auto armyToDelete = map.getTileOwner(tile);
-					const auto conqueringArmy = map.getArmyOfUnit(unit);
-					map.setTileType(tile, "064city");
-					map.setTileOwner(tile, conqueringArmy);
-					map.deleteArmy(armyToDelete, conqueringArmy);
+					deleteArmy(map.getTileOwner(tile), map.getArmyOfUnit(unit));
 				} else {
 					map.setTileOwner(tile, map.getArmyOfUnit(unit));
 				}
@@ -1161,7 +1213,7 @@ class PlayableMap {
 			// If unit HP has reached 0, do not counterattack and delete unit.
 			// Otherwise, perform counterattack, if possible.
 			if (newUnitHP <= 0) {
-				map.deleteUnit(defenderUnit);
+				deleteUnit(defenderUnit);
 			} else {
 				// First, see if the attacker is a potential target for the
 				// defender.
@@ -1185,7 +1237,7 @@ class PlayableMap {
 						// If the defending unit somehow killed its attacker, then
 						// delete it.
 						if (newUnitHP2 <= 0) {
-							map.deleteUnit(attacker);
+							deleteUnit(attacker);
 							attackerIsAlive = false;
 						}
 						// If the defending unit's weapon has finite ammo, remove
@@ -1386,7 +1438,7 @@ class PlayableMap {
 
 			string type = unit.movementType.scriptName;
 			if (type == "AIR" || type == "SHIPS" || type == "TRANSPORT") {
-				if (map.getUnitFuel(units[i]) <= 0) map.deleteUnit(units[i]);
+				if (map.getUnitFuel(units[i]) <= 0) deleteUnit(units[i]);
 			}
 		}
 	}

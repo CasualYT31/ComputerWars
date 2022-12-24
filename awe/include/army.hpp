@@ -72,33 +72,43 @@ namespace awe {
 		 * Sets the team that this army belongs to.
 		 * @param teamID The new team to assign to this army.
 		 */
-		void setTeam(const awe::TeamID teamID) noexcept;
+		inline void setTeam(const awe::TeamID teamID) noexcept {
+			_team = teamID;
+		}
 
 		/**
 		 * Gets the team that this army belongs to.
 		 * @return The ID of the team this army belongs to.
 		 */
-		awe::TeamID getTeam() const noexcept;
+		inline awe::TeamID getTeam() const noexcept {
+			return _team;
+		}
 
 		/**
 		 * Gets the army's country information.
 		 * @return The army's country information.
 		 */
-		std::shared_ptr<const awe::country> getCountry() const noexcept;
+		inline std::shared_ptr<const awe::country> getCountry() const noexcept {
+			return _country;
+		}
 
 		/**
 		 * Updates the army's fund count.
 		 * If a value below \c 0 is given, \c 0 will be stored.
 		 * @param funds The fund count to replace this army's old fund count with.
 		 */
-		void setFunds(const awe::Funds funds) noexcept;
+		inline void setFunds(const awe::Funds funds) noexcept {
+			_funds = ((funds <= 0) ? (0) : (funds));
+		}
 
 		/**
 		 * Retrieves the army's fund count.
 		 * By default, it is \c 0.
 		 * @return The funds this army obtains.
 		 */
-		awe::Funds getFunds() const noexcept;
+		inline awe::Funds getFunds() const noexcept {
+			return _funds;
+		}
 
 		/**
 		 * Sets the COs that are in charge of this army.
@@ -123,13 +133,18 @@ namespace awe {
 		 * this army.
 		 * @return Information on the current CO, or \c nullptr if there is none.
 		 */
-		std::shared_ptr<const awe::commander> getCurrentCO() const noexcept;
+		inline std::shared_ptr<const awe::commander> getCurrentCO() const noexcept
+			{
+			return _co_1;
+		}
 
 		/**
 		 * Retrieves a pointer to the information on the tag CO of this army.
 		 * @return Information on the tag CO, or \c nullptr if there is none.
 		 */
-		std::shared_ptr<const awe::commander> getTagCO() const noexcept;
+		inline std::shared_ptr<const awe::commander> getTagCO() const noexcept {
+			return _co_2;
+		}
 
 		/**
 		 * Adds a unit to this army's unit list.
