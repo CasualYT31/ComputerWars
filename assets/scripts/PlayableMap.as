@@ -265,16 +265,19 @@ class PlayableMap {
 		currentArmy = nextArmy;
 
 		// 4. Go through each of the current army's units and perform start of
-		//    turn operations. Order each unit by their priority.
-		const auto armyUnitsByPriority =
-			map.getUnitsOfArmyByPriority(currentArmy);
-		for (uint i = 0, priorityGroups = armyUnitsByPriority.length();
-			i < priorityGroups; ++i) {
-			for (uint j = 0, unitCount = armyUnitsByPriority[i].length();
-			j < unitCount; ++j) {
-				const auto unit = armyUnitsByPriority[i][j];
-				_beginTurnForUnit(unit, map.getUnitType(unit),
-					map.getUnitPosition(unit));
+		//    turn operations. Order each unit by their priority. Only do this if
+		//    it's not the first day.
+		if (map.getDay() > 1) {
+			const auto armyUnitsByPriority =
+				map.getUnitsOfArmyByPriority(currentArmy);
+			for (uint i = 0, priorityGroups = armyUnitsByPriority.length();
+				i < priorityGroups; ++i) {
+				for (uint j = 0, unitCount = armyUnitsByPriority[i].length();
+				j < unitCount; ++j) {
+					const auto unit = armyUnitsByPriority[i][j];
+					_beginTurnForUnit(unit, map.getUnitType(unit),
+						map.getUnitPosition(unit));
+				}
 			}
 		}
 
