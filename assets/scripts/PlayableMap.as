@@ -1166,6 +1166,34 @@ class PlayableMap {
 		}
 	}
 
+	/**
+	 * Damage all units within a given range by a given amount, but don't delete
+	 * them if they reach 0HP.
+	 * @param fromTile          The tile from which to measure the range.
+	 * @param lowRange          The number of tiles away from \c fromTile the
+	 *                          range begins.
+	 * @param highRange         The number of tiles the range goes on for.
+	 * @param displayedHP       The HP to remove from all units found in the
+	 *                          range, in \em displayed HP format.
+	 * @param unitTypesToIgnore An array of unit type script names. If a unit is
+	 *                          of this type, then it won't be damaged by this
+	 *                          method.
+	 */
+	void damageUnitsInRange(const Vector2&in fromTile, const uint lowRange,
+		const uint highRange, const HP displayedHP,
+		const array<string>@ unitTypesToIgnore) {
+		const auto units = _findUnits(fromTile, lowRange, highRange);
+		for (uint i = 0, len = units.length(); i < len; ++i) {
+			const auto unitID = units[i];
+			if (unitTypesToIgnore.find(map.getUnitType(unitID).scriptName) >= 0) {
+				continue;
+			}
+			auto newHP = map.getUnitHP(unitID) - GetInternalHP(displayedHP);
+			if (newHP <= 0) newHP = 1;
+			map.setUnitHP(unitID, newHP);
+		}
+	}
+
 	/////////
 	// MAP //
 	/////////
@@ -1307,7 +1335,7 @@ class PlayableMap {
 	//////////////////////////////////
 	/**
 	 * Creates a list of units that are within the specified range of a given
-	 * tile.
+	 * tile, regardless of whether or not they are visible to any given army.
 	 * @param  position  The tile to begin the search from.
 	 * @param  startFrom The number of tiles away from the given tile to start on
 	 *                   will always be at least \c 1.

@@ -1049,7 +1049,7 @@
 		},
 		"description": "OOZIUM_description",
 		"price": 0,
-		"hp": 99,
+		"hp": 10,
 		"fuel": -1,
 		"movetype": "SLIME",
 		"mp": 1,

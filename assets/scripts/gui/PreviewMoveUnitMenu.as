@@ -67,6 +67,9 @@ void PreviewMoveUnitMenuOpen() {
 					}
 				}
 			}
+			if (unitType.scriptName == "BLACKBOMB") {
+				PreviewCommands.addCommand("Explode", "explode", "attackicon");
+			}
 			PreviewCommands.addCommand("Wait", "wait", "waiticon");
 		}
 	}
@@ -193,4 +196,20 @@ void PreviewMoveUnitMenu_Hide_Pressed() {
  */
 void PreviewMoveUnitMenu_Fire_Pressed() {
 	setGUI("SelectTargetMenu");
+}
+
+/**
+ * Allows the user to preview a Black Bomb explosion.
+ */
+void PreviewMoveUnitMenu_Explode_Pressed() {
+	EXPLODE_PREVIEW_MENU_DISPLAYED_HP_TO_DEAL = 5;
+	EXPLODE_PREVIEW_MENU_RANGE.x = 1;
+	EXPLODE_PREVIEW_MENU_RANGE.y = 3;
+	EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE = false;
+	@EXPLODE_PREVIEW_MENU_CALLBACK = function(){
+		// If the explosion went ahead, then we need to delete the Black Bomb
+		// unit.
+		game.map.deleteUnit(game.map.getSelectedUnit());
+	};
+	setGUI("ExplodePreviewMenu");
 }

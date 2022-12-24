@@ -1889,7 +1889,8 @@ void awe::map::popSelectedUnit() noexcept {
 		_selectedUnitRenderData.pop();
 		// At some point, the previously selected unit might have been deleted, and
 		// if this is the case, we need to deselect it.
-		if (!_isUnitPresent(_selectedUnitRenderData.top().selectedUnit)) {
+		if (!_isUnitPresent(_selectedUnitRenderData.top().selectedUnit) &&
+			_selectedUnitRenderData.top().selectedUnit != 0) {
 			_logger.warning("popSelectUnit operation: newly selected unit with ID "
 				"{} is now no longer present: the selected unit render data state "
 				"will now be cleared!",
