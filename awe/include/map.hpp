@@ -262,7 +262,9 @@ namespace awe {
 		 * Retrieves the size of the map, in tiles.
 		 * @return The map's size. X = width, Y = height.
 		 */
-		sf::Vector2u getMapSize() const noexcept;
+		inline sf::Vector2u getMapSize() const noexcept {
+			return _mapSizeCache;
+		}
 
 		/**
 		 * Sets the current day.
@@ -1105,9 +1107,7 @@ namespace awe {
 		/**
 		 * Removes all available tiles.
 		 */
-		inline void clearAvailableTiles() noexcept {
-			_selectedUnitRenderData.top().availableTiles.clear();
-		}
+		void clearAvailableTiles() noexcept;
 
 		/**
 		 * Sets the shader to use for available tiles.
@@ -1180,9 +1180,7 @@ namespace awe {
 		/**
 		 * Removes all unit location overrides.
 		 */
-		inline void removeAllPreviewUnits() noexcept {
-			_unitLocationOverrides.clear();
-		}
+		void removeAllPreviewUnits() noexcept;
 
 		/**
 		 * Finds out if a unit has a location override.
@@ -1267,7 +1265,9 @@ namespace awe {
 		 * Gets the position of the currently selected tile.
 		 * @return The X and Y location of the selected tile.
 		 */
-		sf::Vector2u getSelectedTile() const noexcept;
+		inline sf::Vector2u getSelectedTile() const noexcept {
+			return _sel;
+		}
 
 		/**
 		 * Selects an army from the map.
@@ -1512,13 +1512,7 @@ namespace awe {
 		 * state, if the given unit was capturing a tile.
 		 * @param id The ID of the unit to check
 		 */
-		inline void _updateCapturingUnit(const awe::UnitID id) noexcept {
-			if (id > 0 && isUnitCapturing(id)) {
-				const auto t = getUnitPosition(id);
-				setTileHP(t, (awe::HP)getTileType(t)->getType()->getMaxHP());
-				unitCapturing(id, false);
-			}
-		}
+		void _updateCapturingUnit(const awe::UnitID id) noexcept;
 
 		/**
 		 * Determines the ID the next unit should have.
@@ -1569,6 +1563,11 @@ namespace awe {
 		 * bottom. Counting starts from the top left corner of the map.
 		 */
 		std::vector<std::vector<awe::tile>> _tiles;
+
+		/**
+		 * Cache of the map's size as configured via \c setMapSize().
+		 */
+		sf::Vector2u _mapSizeCache;
 
 		/**
 		 * The units on this map.

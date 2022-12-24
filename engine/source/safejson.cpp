@@ -25,6 +25,76 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "safejson.hpp"
 #include <fstream>
 
+engine::json::json(const std::string& name) noexcept : _logger(name) {}
+
+engine::json::json(const nlohmann::ordered_json& jobj, const std::string& name)
+	noexcept : _logger(name) {
+	*this = jobj;
+}
+
+engine::json::json(nlohmann::ordered_json&& jobj, const std::string& name) noexcept
+	: _logger(name) {
+	*this = std::move(jobj);
+}
+
+engine::json::json(const engine::json& obj, const std::string& name) noexcept :
+	_logger(name) {
+	*this = obj;
+}
+
+engine::json::json(engine::json&& obj, const std::string& name) noexcept :
+	_logger(name) {
+	*this = std::move(obj);
+}
+
+engine::json& engine::json::operator=(const engine::json& obj) noexcept {
+	return *this = obj._j;
+}
+
+engine::json& engine::json::operator=(engine::json&& obj) noexcept {
+	return *this = std::move(obj._j);
+}
+
+engine::json& engine::json::operator=(const nlohmann::ordered_json& jobj)
+noexcept {
+	if (jobj.is_object()) {
+		_j = jobj;
+	} else {
+		_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
+		_logger.error("Attempted to assign a nlohmann::ordered_json object which "
+			"had no root object.");
+	}
+	return *this;
+}
+
+engine::json& engine::json::operator=(nlohmann::ordered_json&& jobj) noexcept {
+	if (jobj.is_object()) {
+		_j = std::move(jobj);
+	} else {
+		_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
+		_logger.error("Attempted to assign a nlohmann::ordered_json object which "
+			"had no root object.");
+	}
+	return *this;
+}
+
+bool engine::json::keysExist(engine::json::KeySequence keys,
+	nlohmann::ordered_json* ret) const noexcept {
+	if (!keys.empty()) {
+		nlohmann::ordered_json jCopy = _j;
+		for (auto itr = keys.begin(), enditr = keys.end(); itr != enditr; itr++) {
+			if (jCopy.contains(*itr)) {
+				jCopy = jCopy[*itr];
+			} else {
+				return false;
+			}
+		}
+		if (ret) *ret = jCopy;
+		return true;
+	}
+	return false;
+}
+
 bool engine::json::equalType(nlohmann::ordered_json& dest,
 	nlohmann::ordered_json& src) noexcept {
 	if (dest.type() == src.type()) return true;
@@ -45,23 +115,6 @@ bool engine::json::equalType(nlohmann::ordered_json& dest,
 	return false;
 }
 
-bool engine::json::keysExist(engine::json::KeySequence keys,
-	nlohmann::ordered_json* ret) const noexcept {
-	if (!keys.empty()) {
-		nlohmann::ordered_json jCopy = _j;
-		for (auto itr = keys.begin(), enditr = keys.end(); itr != enditr; itr++) {
-			if (jCopy.contains(*itr)) {
-				jCopy = jCopy[*itr];
-			} else {
-				return false;
-			}
-		}
-		if (ret) *ret = jCopy;
-		return true;
-	}
-	return false;
-}
-
 std::string engine::json::synthesiseKeySequence(engine::json::KeySequence& keys)
 	noexcept {
 	if (keys.empty()) {
@@ -78,18 +131,6 @@ std::string engine::json::synthesiseKeySequence(engine::json::KeySequence& keys)
 		}
 		return ret + "}";
 	}
-}
-
-engine::json& engine::json::operator=(const nlohmann::ordered_json& jobj)
-	noexcept {
-	if (jobj.is_object()) {
-		_j = jobj;
-	} else {
-		_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
-		_logger.error("Attempted to assign a nlohmann::ordered_json object which "
-			"had no root object.");
-	}
-	return *this;
 }
 
 void engine::json::applyColour(sf::Color& dest, engine::json::KeySequence keys,

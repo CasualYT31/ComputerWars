@@ -739,17 +739,12 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 				_sel.y = dim.y - 1;
 		}
 	}
+	_mapSizeCache = dim;
 }
 
 void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile)
 	noexcept {
 	setMapSize(dim, _tileTypes->operator[](tile));
-}
-
-sf::Vector2u awe::map::getMapSize() const noexcept {
-	sf::Vector2u ret((unsigned int)_tiles.size(), 0);
-	if (ret.x) ret.y = (unsigned int)_tiles.at(0).size();
-	return ret;
 }
 
 void awe::map::setDay(const awe::Day day) noexcept {
@@ -1947,6 +1942,10 @@ bool awe::map::isAvailableTile(const sf::Vector2u& tile) const noexcept {
 	}
 }
 
+void awe::map::clearAvailableTiles() noexcept {
+	_selectedUnitRenderData.top().availableTiles.clear();
+}
+
 void awe::map::setAvailableTileShader(const awe::available_tile_shader shader)
 	noexcept {
 	_selectedUnitRenderData.top().availableTileShader = shader;
@@ -2054,6 +2053,10 @@ void awe::map::removePreviewUnit(const awe::UnitID unit) noexcept {
 	}
 }
 
+void awe::map::removeAllPreviewUnits() noexcept {
+	_unitLocationOverrides.clear();
+}
+
 void awe::map::setSelectedTile(const sf::Vector2u& pos) noexcept {
 	if (!_isOutOfBounds(pos)) {
 		_sel_old = _sel;
@@ -2078,10 +2081,6 @@ void awe::map::moveSelectedTileLeft() noexcept {
 
 void awe::map::moveSelectedTileRight() noexcept {
 	setSelectedTile(sf::Vector2u(getSelectedTile().x + 1, getSelectedTile().y));
-}
-
-sf::Vector2u awe::map::getSelectedTile() const noexcept {
-	return _sel;
 }
 
 void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) noexcept {
@@ -2506,6 +2505,14 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		target.draw(_cursor, mapStates);
 	}
 	target.draw(_damageTooltip, mapStates);
+}
+
+void awe::map::_updateCapturingUnit(const awe::UnitID id) noexcept {
+	if (id > 0 && isUnitCapturing(id)) {
+		const auto t = getUnitPosition(id);
+		setTileHP(t, (awe::HP)getTileType(t)->getType()->getMaxHP());
+		unitCapturing(id, false);
+	}
 }
 
 awe::UnitID awe::map::_findUnitID() {

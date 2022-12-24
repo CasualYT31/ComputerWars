@@ -1221,15 +1221,6 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 	}
 }
 
-bool sfx::gui::_isContainerWidget(tgui::String type) noexcept {
-	type = type.trim().toLower();
-	// Not all of them are here for future reference!
-	return type == "childwindow" || type == "grid" || type == "group" ||
-		type == "radiobuttongroup" || type == "verticallayout" ||
-		type == "horizontallayout" || type == "panel" ||
-		type == "scrollablepanel";
-}
-
 void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	const tgui::Container::Ptr& container, const bool removeIt) noexcept {
 	if (_isContainerWidget(widget->getWidgetType())) {

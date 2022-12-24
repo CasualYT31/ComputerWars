@@ -438,7 +438,14 @@ namespace sfx {
 		 * @param  type The TGUI widget type.
 		 * @return \c TRUE if the widget type is a container, \c FALSE otherwise.
 		 */
-		static inline bool _isContainerWidget(tgui::String type) noexcept;
+		static inline bool _isContainerWidget(tgui::String type) noexcept {
+			type = type.trim().toLower();
+			// Not all of them are here for future reference!
+			return type == "childwindow" || type == "grid" || type == "group" ||
+				type == "radiobuttongroup" || type == "verticallayout" ||
+				type == "horizontallayout" || type == "panel" ||
+				type == "scrollablepanel";
+		}
 
 		/**
 		 * Removes widgets from \c _gui.
@@ -479,7 +486,7 @@ namespace sfx {
 		 * @param  fullname The full name of the widget.
 		 * @return The short name of the widget.
 		 */
-		static inline std::string _extractWidgetName(const std::string& fullname)
+		static std::string _extractWidgetName(const std::string& fullname)
 			noexcept;
 
 		/**

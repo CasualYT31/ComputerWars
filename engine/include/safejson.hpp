@@ -203,7 +203,7 @@ namespace engine {
 		 * @param name The string name of the internal logger object which helps
 		 *             identify this object if it causes an error.
 		 */
-		inline json(const std::string& name = "json") noexcept : _logger(name) {}
+		json(const std::string& name = "json") noexcept;
 
 		/**
 		 * Constructs a JSON object from a \c nlohmann one.
@@ -214,10 +214,20 @@ namespace engine {
 		 *             identify this object if it causes an error.
 		 * @sa    operator=()
 		 */
-		inline json(const nlohmann::ordered_json& jobj,
-			const std::string& name = "json") noexcept : _logger(name) {
-			*this = jobj;
-		}
+		json(const nlohmann::ordered_json& jobj, const std::string& name = "json")
+			noexcept;
+
+		/**
+		 * Constructs a JSON object from a \c nlohmann one.
+		 * The assignment operator is called in order to achieve this.
+		 * @param jobj The \c nlohmann::ordered_json object to store within this
+		 *             object - this is referred to as the JSON object.
+		 * @param name The string name of the internal logger object which helps
+		 *             identify this object if it causes an error.
+		 * @sa    operator=()
+		 */
+		json(nlohmann::ordered_json&& jobj, const std::string& name = "json")
+			noexcept;
 
 		/**
 		 * Copy constructor.
@@ -226,10 +236,7 @@ namespace engine {
 		 * @param name The string name of the internal logger object which helps
 		 *             identify this object if it causes an error.
 		 */
-		inline json(const engine::json& obj, const std::string& name = "json")
-			noexcept : _logger(name) {
-			*this = obj;
-		}
+		json(const engine::json& obj, const std::string& name = "json") noexcept;
 
 		/**
 		 * Move constructor.
@@ -238,10 +245,7 @@ namespace engine {
 		 * @param name The string name of the internal logger object which helps
 		 *             identify this object if it causes an error.
 		 */
-		inline json(engine::json&& obj, const std::string& name = "json")
-			noexcept : _logger(name) {
-			*this = std::move(obj);
-		}
+		json(engine::json&& obj, const std::string& name = "json") noexcept;
 
 		/**
 		 * Copy assignment operator.
@@ -249,10 +253,7 @@ namespace engine {
 		 * @param  obj The object to copy over.
 		 * @return Reference to \c this.
 		 */
-		inline engine::json& operator=(const engine::json& obj) noexcept {
-			_j = obj._j;
-			return *this;
-		}
+		engine::json& operator=(const engine::json& obj) noexcept;
 
 		/**
 		 * Move assignment operator.
@@ -260,10 +261,7 @@ namespace engine {
 		 * @param  obj The object to move over.
 		 * @return Reference to \c this.
 		 */
-		inline engine::json& operator=(engine::json&& obj) noexcept {
-			_j = std::move(obj._j);
-			return *this;
-		}
+		engine::json& operator=(engine::json&& obj) noexcept;
 
 		/**
 		 * Assignment operator which accepts a \c nlohmann::ordered_json object.
@@ -277,6 +275,19 @@ namespace engine {
 		 * @return  A reference to this object.
 		 */
 		engine::json& operator=(const nlohmann::ordered_json& jobj) noexcept;
+
+		/**
+		 * Assignment operator which moves a \c nlohmann::ordered_json object.
+		 * This operator replaces the JSON object stored within this object if it
+		 * is called. All JSON objects given must have a root object: they cannot
+		 * just contain a number, or a string, or an array, etc.
+		 * @warning If the given JSON object did not have a root object, the
+		 *          \c JSON_WAS_NOT_OBJECT bit will be set.
+		 * @param   jobj The \c nlohmann::ordered_json object to store within this
+		 *               object - this is referred to as the JSON object.
+		 * @return  A reference to this object.
+		 */
+		engine::json& operator=(nlohmann::ordered_json&& jobj) noexcept;
 
 		/**
 		 * Determines if a specified value within the JSON object exists.

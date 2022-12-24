@@ -415,6 +415,38 @@ bool awe::game_engine::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }
 
+int awe::game_engine::_initCheck() const noexcept {
+	std::string errstring = "";
+	if (!_countries) errstring += "countries\n";
+	if (!_weathers) errstring += "weathers\n";
+	if (!_environments) errstring += "environments\n";
+	if (!_movements) errstring += "movements\n";
+	if (!_terrains) errstring += "terrains\n";
+	if (!_tiles) errstring += "tiles\n";
+	if (!_units) errstring += "units\n";
+	if (!_commanders) errstring += "commanders\n";
+	if (!_dictionary) errstring += "dictionary\n";
+	if (!_fonts) errstring += "fonts\n";
+	if (!_sounds) errstring += "sounds\n";
+	if (!_music) errstring += "music\n";
+	if (!_renderer) errstring += "renderer\n";
+	if (!_userinput) errstring += "userinput\n";
+	if (!_sprites) {
+		errstring += "spritesheet collection\n";
+	} else {
+		_sprites->test(errstring);
+	}
+	if (!_scripts) errstring += "scripts\n";
+	if (!_gui) errstring += "gui\n";
+	if (errstring.length()) {
+		_logger.error("Fatal error: could not run the game engine due to the "
+			"following objects not being allocated correctly:\n{}Game will now "
+			"shut down.", errstring);
+		return 1;
+	}
+	return 0;
+}
+
 void awe::game_engine::_script_setFullscreen(const bool in) {
 	_tempRendererSettings.style.fullscreen = in;
 }
@@ -522,38 +554,4 @@ unsigned int awe::game_engine::_script_rand(const unsigned int max) noexcept {
 	// Credit: https://stackoverflow.com/a/13446015/6928376.
 	std::uniform_int_distribution<unsigned> distribution(0, max);
 	return distribution(*_prng);
-}
-
-// initCheck()
-
-int awe::game_engine::_initCheck() const noexcept {
-	std::string errstring = "";
-	if (!_countries) errstring += "countries\n";
-	if (!_weathers) errstring += "weathers\n";
-	if (!_environments) errstring += "environments\n";
-	if (!_movements) errstring += "movements\n";
-	if (!_terrains) errstring += "terrains\n";
-	if (!_tiles) errstring += "tiles\n";
-	if (!_units) errstring += "units\n";
-	if (!_commanders) errstring += "commanders\n";
-	if (!_dictionary) errstring += "dictionary\n";
-	if (!_fonts) errstring += "fonts\n";
-	if (!_sounds) errstring += "sounds\n";
-	if (!_music) errstring += "music\n";
-	if (!_renderer) errstring += "renderer\n";
-	if (!_userinput) errstring += "userinput\n";
-	if (!_sprites) {
-		errstring += "spritesheet collection\n";
-	} else {
-		_sprites->test(errstring);
-	}
-	if (!_scripts) errstring += "scripts\n";
-	if (!_gui) errstring += "gui\n";
-	if (errstring.length()) {
-		_logger.error("Fatal error: could not run the game engine due to the "
-			"following objects not being allocated correctly:\n{}Game will now "
-			"shut down.", errstring);
-		return 1;
-	}
-	return 0;
 }
