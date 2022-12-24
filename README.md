@@ -4,7 +4,8 @@ If you've somehow stumbled across this project, then please stick around. This i
 
 ### Planned Features
 - Customisable Advance Wars engine: countries, graphics, units, terrains, COs, etc. will all be customisable, as well as a lot more.
-- The ability to not only modify the game using scripts, but also the ability to modify the engine itself.
+- The ability to not only modify the game using scripts, but also the ability to modify the engine itself if you so wish.
+- Map maker.
 - Internet play.
 - Campaign engine.
 - Cross-platform: Windows, macOS, and Linux.
@@ -38,7 +39,7 @@ For information on the versions of libraries I have used for this project, pleas
 Despite its incomplete state, you are free to work with some or all of my code for your own projects, so long as you follow the MIT licence attached to this repository.
 
 ### Gitmoji
-I like the idea of Gitmoji, but I find that there are a lot of emoji for the same thing, and some that are missing, in my opinion. So I decided to use my own emoji:
+I like the idea of Gitmoji, but I find that there are a lot of emoji for the same thing, and some that are missing. So I decided to use my own emoji:
 
 | Coding | Emoji | Name | Meaning |
 | --- | ---: | :---: | :--- |
