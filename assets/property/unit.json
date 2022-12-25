@@ -559,7 +559,23 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": [],
+		"canunloadfrom": [
+			"PLAINS",
+			"ROAD",
+			"BRIDGE",
+			"MOUNTAIN",
+			"WOODS",
+			"RIVER",
+			"SHOAL",
+			"MISSILESILO",
+			"CITY",
+			"BASE",
+			"AIRPORT",
+			"PORT",
+			"COMTOWER",
+			"LAB",
+			"HQ"
+		],
 		"ignoresdefence": true
 	},
 	"BCOPTER": {
