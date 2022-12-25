@@ -13,10 +13,13 @@ If you've somehow stumbled across this project, then please stick around. This i
 - Ability to easily add in Artificial Intelligence after-the-fact (actually implementing the AI is not a main goal, but it will be invaluable for the campaign side of the engine).
 - In-depth documentation, along with tutorials and examples once the project is ready for release.
 
-### July 7th 2021
+### December 25th 2022 ~ Version 0.0.3
+The basics of the game have now been written up! You can currently play full games on three maps: Island X, Moon Isle, and Keyhole Cove. There are a few minor bugs, but otherwise the engine is in a good playable state! Notable features I haven't coded yet include: weather, FoW, CO powers, and day-to-day abilities. My next goals are to complete a map maker for version 0.0.4, before including the aforementioned features—and more—in 0.0.5. It's best to operate the game with the mouse only for now: full keyboard and gamepad support hasn't been implemented yet w.r.t. navigating GUIs.
+
+### July 7th 2021 ~ Version 0.0.2
 Okay, I've officially converted the project to use CMake. This should theoretically make it possible to build this game on more systems besides Windows, **however**, I have only tested on Windows up to this point, and there are one or two areas where Windows-only code or project settings have been written, so I'm more or less convinced that the code won't work for other platforms yet. At least you should now be able to use other IDEs besides Visual Studio 2019 :smile:.
 
-### June 5th 2021
+### June 5th 2021 ~ Version 0.0.1
 The project has now entered the alpha stage :smile:! [Here's a small demo](https://youtu.be/p96ly3l8YBo) of the project so far. Not much, true, but development should be fairly rapid once I find more time to dedicate to the project in the near future. The engine can load basic maps and display/animate them, but not much else yet. It's far from a complete product, so if you really want an Advance Wars engine **now**, then you can check out [Robosturm's project](https://github.com/Robosturm/Commander_Wars): it might be one of the only AW engine out there of this flavour that's still being actively developed, so go check it out. [This project by ThislsAUsername](https://github.com/ThislsAUsername/DefendPeace) is also worth mentioning. [Custom Wars Tactics](https://github.com/ctomni231/cwtactics) is a web-based Advance Wars engine that you should check out, too :smile:!
 
 ### Dependencies
