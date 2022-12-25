@@ -151,6 +151,9 @@ void UnloadUnitsMenuHandleInput(const dictionary controls) {
 					} else {
 						game.map.addPreviewUnit(
 							UnloadUnitsMenuCurrentlyUnloadingUnit, selectedTile);
+						setWidgetText("panel.grid.button" +
+							formatUInt(UnloadUnitsMenuCurrentlyUnloadingUnit),
+							"load");
 					}
 				} else {
 					// Don't cancel the unload operation if it's unavailable!
@@ -158,8 +161,6 @@ void UnloadUnitsMenuHandleInput(const dictionary controls) {
 				}
 			}
 			game.map.popSelectedUnit();
-			setWidgetText("panel.grid.button" +
-				formatUInt(UnloadUnitsMenuCurrentlyUnloadingUnit), "load");
 			setWidgetVisibility("panel", true);
 			return;
 		}
