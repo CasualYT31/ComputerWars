@@ -14,6 +14,10 @@ void MainMenuSetUp() {
 	addWidget("Button", "NewGame");
 	setWidgetPosition("NewGame", "10%", "10%");
 	setWidgetText("NewGame", "~New Game");
+	addWidget("Button", "MapMaker");
+	setWidgetPosition("MapMaker", "90%", "10%");
+	setWidgetOrigin("MapMaker", 1.0, 0.0);
+	setWidgetText("MapMaker", "~Map Maker");
 }
 
 /**
@@ -74,4 +78,11 @@ void MainMenu_FileSelect_MouseReleased() {
  */
 void MainMenu_NewGame_MouseReleased() {
 	setGUI("NewGameOptions");
+}
+
+/**
+ * Opens the map maker.
+ */
+void MainMenu_MapMaker_Pressed() {
+	setGUI("MapMakerMenu");
 }

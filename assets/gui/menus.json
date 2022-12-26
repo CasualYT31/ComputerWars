@@ -12,6 +12,7 @@
 		"UnloadUnitsMenu",
 		"SelectTargetMenu",
 		"ExplodePreviewMenu",
-		"RepairMenu"
+		"RepairMenu",
+		"MapMakerMenu"
 	]
 }
