@@ -239,7 +239,7 @@ namespace cwm {
 		for (uint i = 0; i < loadedUnitCount; ++i) {
 			SaveMapUnit(file, map, loadedUnits[i]);
 		}
-		if (loadedUnitCount > 0) file.write(NO_ARMY);
+		file.write(NO_ARMY);
 	}
 
 	/**
@@ -284,12 +284,9 @@ namespace cwm {
 				const auto unitID = map.getUnitOnTile(tilePos);
 				if (unitID > 0) {
 					SaveMapUnit(file, map, unitID);
+				} else {
+					file.write(NO_ARMY);
 				}
-				// Covers the following cases:
-				// 1. Tile is vacant.
-				// 2. Unit has no loaded units on it.
-				// 3. Unit has loaded units on it, but there are no more to load.
-				file.write(NO_ARMY);
 			}
 		}
 	}
