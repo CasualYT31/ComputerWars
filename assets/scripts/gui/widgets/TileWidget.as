@@ -120,7 +120,8 @@ class TileWidget {
 		// If there are more units than there are allocated unit panels, then
 		// allocate more.
 		if (unitIDs.length() > _panels.length() - 1) {
-			for (uint i = 0; i < unitIDs.length() - (_panels.length() - 1); ++i) {
+			for (uint i = 0, until = unitIDs.length() - (_panels.length() - 1);
+				i < until; ++i) {
 				// Set current curve widget's ratio back to 1.
 				switch (_alignment) {
 				case TileWidgetAlignment::Left:
