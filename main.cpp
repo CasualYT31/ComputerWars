@@ -73,10 +73,7 @@ int main(int argc, char* argv[]) {
     engine::sink::Get("Computer Wars", "CasualYouTuber31", ".");
 #endif
     engine::logger rootLogger("main");
-    // Allocate the game engine.
     awe::game_engine engine;
-    // Load the game engine within a scope in order to get rid of temporary objects
-    // before running the engine.
     {
         // Find assets folder path from command-line arguments.
         std::string assetsFolder = "./assets";
@@ -87,7 +84,6 @@ int main(int argc, char* argv[]) {
             rootLogger.write("Assets folder not provided in command-line "
                 "arguments, assuming \"{}\".", assetsFolder);
         }
-
         // Find config.json within the assets folder, then load the game engine
         // with it.
         std::string configPath = assetsFolder + "/config.json";
@@ -99,7 +95,6 @@ int main(int argc, char* argv[]) {
             engine.load(configPath);
         }
     }
-    // Run the game, but only if the engine is in a good state.
     if (engine.inGoodState()) {
         return engine.run();
     } else {
