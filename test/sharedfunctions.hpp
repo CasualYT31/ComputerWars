@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "nlohmann/json.hpp"
-#include "gtest/gtest.hpp"
+#include "gtest/gtest.h"
 #include <fstream>
 #include <functional>
 

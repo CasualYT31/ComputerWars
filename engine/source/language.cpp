@@ -22,10 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "language.hpp"
 
-std::stringstream engine::expand_string::_sstream = std::stringstream();
+std::unique_ptr<std::stringstream> engine::expand_string::_sstream = nullptr;
 char engine::expand_string::_varchar = '#';
-
-engine::expand_string::expand_string() noexcept {}
 
 char engine::expand_string::getVarChar() noexcept {
 	return _varchar;
@@ -35,15 +33,16 @@ void engine::expand_string::setVarChar(const char varchar) noexcept {
 	_varchar = varchar;
 }
 
-// There is likely a cleaner way of implementing this for future reference.
-// I'm not sure why I didn't just grab the string contents directly using str()...
-std::string engine::expand_string::insert(const std::string& original) noexcept {
-	_sstream << original;
-	std::string finalString;
-	std::getline(_sstream, finalString, '\0');
-	_sstream.str(std::string());
-	_sstream.clear();
-	return finalString;
+std::string engine::expand_string::insert(const std::string& original) {
+	if (_sstream) {
+		*_sstream << original;
+		std::string finalString = _sstream->str();
+		_sstream = nullptr;
+		return finalString;
+	} else {
+		// No variables were inserted, so just return the original string.
+		return original;
+	}
 }
 
 engine::language_dictionary::language_dictionary(const std::string& name) noexcept :

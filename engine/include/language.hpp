@@ -72,12 +72,14 @@ namespace engine {
 		 * @param  value    The variable to insert in this call.
 		 * @param  values   Subsequent variables in the queue.
 		 * @return The final string, with variables inserted.
+		 * @safety Strong guarantee: if an exception is thrown, internal state will
+		 *         be reset and future calls won't be affected.
 		 * @sa     insert()
 		 * @sa     setVarChar()
 		 */
 		template<typename T, typename... Ts>
 		static std::string insert(const std::string& original, T value,
-			Ts... values) noexcept;
+			Ts... values);
 
 		/**
 		 * Dumps the given string to the internal stream and returns the final
@@ -93,9 +95,11 @@ namespace engine {
 		 * @param  original The string to dump to the internal stream: usually the
 		 *                  tail end of a larger string.
 		 * @return The final string as stored by the stream.
+		 * @safety Strong guarantee: if an exception is thrown, internal state will
+		 *         be reset and future calls won't be affected.
 		 * @sa     insert<T,Ts>()
 		 */
-		static std::string insert(const std::string& original) noexcept;
+		static std::string insert(const std::string& original);
 
 		/**
 		 * Retrieves the var char.
@@ -114,13 +118,13 @@ namespace engine {
 		/**
 		 * This class cannot be instantiated by the client.
 		 */
-		expand_string() noexcept;
+		expand_string() noexcept = default;
 	private:
 		/**
 		 * The string stream which is used to piece together the final string.
 		 * @sa insert<T,Ts>()
 		 */
-		static std::stringstream _sstream;
+		static std::unique_ptr<std::stringstream> _sstream;
 
 		/**
 		 * Stores the var char.

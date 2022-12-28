@@ -24,26 +24,36 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T, typename... Ts>
 std::string engine::expand_string::insert(const std::string& original, T value,
-	Ts... values) noexcept {
-	for (std::size_t c = 0; c < original.length(); c++) {
-		if (original[c] == _varchar) {
-			if (c < original.length() - 1 && original[c + 1] == _varchar) {
-				// If two varchars appear in succession,
-				// then one is printed, and the next one is ignored.
-				_sstream << _varchar; // Print...
-				++c; // Ignore...
-			} else {
-				_sstream << value;
-				return insert(original.substr(c + 1), values...);
-			}
-		} else {
-			_sstream << original[c];
-		}
+	Ts... values) {
+	// If this is the first call to insert(), attempt to setup the string stream.
+	if (!_sstream) {
+		_sstream = std::make_unique<std::stringstream>();
 	}
-	// Execution enters this point if more variables were given than varchars. In
-	// which case, we've reached the end of the original string, so retrieve the
-	// results and return them.
-	return insert("");
+	try {
+		for (std::size_t c = 0; c < original.length(); c++) {
+			if (original[c] == _varchar) {
+				if (c < original.length() - 1 && original[c + 1] == _varchar) {
+					// If two varchars appear in succession,
+					// then one is printed, and the next one is ignored.
+					*_sstream << _varchar; // Print...
+					++c; // Ignore...
+				} else {
+					*_sstream << value;
+					return insert(original.substr(c + 1), values...);
+				}
+			} else {
+				*_sstream << original[c];
+			}
+		}
+		// Execution enters this point if more variables were given than varchars.
+		// In which case, we've reached the end of the original string, so retrieve
+		// the results and return them.
+		return insert("");
+	} catch (const std::exception& e) {
+		// Before rethrowing the exception, make sure to destroy the string stream.
+		_sstream = nullptr;
+		throw e;
+	}
 }
 
 template<typename... Ts>
