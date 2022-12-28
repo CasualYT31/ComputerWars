@@ -93,40 +93,56 @@ namespace engine {
 		 * Retrieves a copy of the event log produced thus far.
 		 * @return The event log produced thus far, including additional
 		 *         information at the start of the log file.
+		 * @safety Basic guarantee: all internal state is guaranteed to be
+		 *         unaffected. However, the output string stream used to copy the
+		 *         event log is only guaranteed to be left in a valid state should
+		 *         its \c str() method throw.
 		 */
-		static std::string GetLog() noexcept;
+		static std::string GetLog();
 
 		/**
 		 * Retrieves the application name as defined in the first call to
 		 * \c sink.Get().
 		 * @return The application name.
+		 * @safety Strong guarantee: see <a href=
+		 *         "https://cplusplus.com/reference/string/string/string/"
+		 *         target="_blank">string constructor documentation.</a>
 		 */
-		static std::string ApplicationName() noexcept;
+		static std::string ApplicationName();
 		
 		/**
 		 * Retrieves the name of the application developer as defined in the first
 		 * call to \c sink.Get().
 		 * @return The name of the application developer.
+		 * @safety Strong guarantee: see <a href=
+		 *         "https://cplusplus.com/reference/string/string/string/"
+		 *         target="_blank">string constructor documentation.</a>
 		 */
-		static std::string DeveloperName() noexcept;
+		static std::string DeveloperName();
 		
 		/**
 		 * Retrieves the current year in string form.
 		 * Used when writing the first line of the log file.
 		 * @return The year in the format "yyyy".
+		 * @safety Strong guarantee: see <a href=
+		 *         "https://cplusplus.com/reference/string/string/string/"
+		 *         target="_blank">string constructor documentation.</a>
 		 */
-		static std::string GetYear() noexcept;
+		static std::string GetYear();
 		
 		/**
 		 * Retrieves the current date and time in the format "d-m-yyyy h-m-s".
 		 * @return The date and time in string form.
+		 * @safety Strong guarantee: see <a href=
+		 *         "https://cplusplus.com/reference/string/string/string/"
+		 *         target="_blank">string constructor documentation.</a>
 		 */
-		static std::string GetDateTime() noexcept;
+		static std::string GetDateTime();
 	protected:
 		/**
 		 * This class cannot be instantiated by the client.
 		 */
-		sink() noexcept;
+		sink() noexcept = default;
 	private:
 		/**
 		 * The non-thread safe distribution sink which outputs to a file and an

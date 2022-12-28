@@ -26,12 +26,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "SystemProperties.hpp"
 #include "SFML/Window/Joystick.hpp"
 
-std::shared_ptr<spdlog::sinks::dup_filter_sink_st> engine::sink::_sharedSink = nullptr;
+std::shared_ptr<spdlog::sinks::dup_filter_sink_st> engine::sink::_sharedSink =
+	nullptr;
 std::ostringstream engine::sink::_fileCopy = std::ostringstream();
 std::string engine::sink::_appName = "";
 std::string engine::sink::_devName = "";
-
-engine::sink::sink() noexcept {}
 
 std::shared_ptr<spdlog::sinks::dup_filter_sink_st> engine::sink::Get(
 	const std::string& name, const std::string& dev, const std::string& folder,
@@ -92,18 +91,26 @@ std::shared_ptr<spdlog::sinks::dup_filter_sink_st> engine::sink::Get(
 	return _sharedSink;
 }
 
-std::string engine::sink::GetLog() noexcept {
+std::string engine::sink::GetLog() {
 	return _fileCopy.str();
 }
 
-std::string engine::sink::GetYear() noexcept {
+std::string engine::sink::ApplicationName() {
+	return _appName;
+}
+
+std::string engine::sink::DeveloperName() {
+	return _devName;
+}
+
+std::string engine::sink::GetYear() {
 	time_t curtime = time(NULL);
 	tm ltime;
 	localtime_s(&ltime, &curtime);
 	return std::to_string(ltime.tm_year + 1900);
 }
 
-std::string engine::sink::GetDateTime() noexcept {
+std::string engine::sink::GetDateTime() {
 	time_t curtime = time(NULL);
 	tm ltime;
 	localtime_s(&ltime, &curtime);
@@ -111,14 +118,6 @@ std::string engine::sink::GetDateTime() noexcept {
 		"-" + std::to_string(ltime.tm_year + 1900) + " " +
 		std::to_string(ltime.tm_hour) + "-" + std::to_string(ltime.tm_min) + "-" +
 		std::to_string(ltime.tm_sec);
-}
-
-std::string engine::sink::ApplicationName() noexcept {
-	return _appName;
-}
-
-std::string engine::sink::DeveloperName() noexcept {
-	return _devName;
 }
 
 std::size_t engine::logger::_objectCount = 0;
