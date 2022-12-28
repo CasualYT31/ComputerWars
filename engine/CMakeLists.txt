@@ -5,6 +5,11 @@ cmake_minimum_required(VERSION 3.14)
 project("ComputerWarsEngine")
 include(FetchContent)
 
+# Builder must specify location of their Boost 1.65.0 or later.
+# https://stackoverflow.com/questions/54581717/adding-boost-to-cmake-project for
+# help with Boost.
+set(BOOST_ROOT "C:/Boost/boost-1.81.0" CACHE STRING "The folder which contains Boost. You must install at least version 1.65.0 for stacktrace support.")
+
 # SystemProperties.
 FetchContent_Declare(systemproperties
 	GIT_REPOSITORY https://github.com/CasualYT31/SystemProperties.git
@@ -56,6 +61,12 @@ FetchContent_Declare(docgen
 )
 FetchContent_MakeAvailable(docgen)
 
+# Boost.
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED OFF)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.65.0 REQUIRED) # boost_stacktrace_windbg
+
 # Expose public includes to other projects through cache variable.
 set(${PROJECT_NAME}_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include"
 	${SystemProperties_INCLUDE_DIRS}
@@ -64,6 +75,7 @@ set(${PROJECT_NAME}_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include"
 	${nlohmann_json_INCLUDE_DIRS}
 	${sfml_INCLUDE_DIRS}
 	${angelscript_SOURCE_DIR}/angelscript/include
+	${Boost_INCLUDE_DIRS}
 	CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 add_library(${PROJECT_NAME} STATIC
@@ -103,7 +115,8 @@ target_link_libraries(${PROJECT_NAME}
 	sfml-window
 	sfml-graphics
 	sfml-system
-	angelscript)
+	angelscript
+	${Boost_LIBRARIES})
 
 # Copy SFML's openal.dll file depending on build type.
 IF (WIN32)
