@@ -26,7 +26,8 @@ FetchContent_MakeAvailable(boxer)
 
 # SPDLOG.
 FetchContent_Declare(spdlog
-	URL https://github.com/gabime/spdlog/archive/refs/tags/v1.8.5.zip
+	GIT_REPOSITORY https://github.com/gabime/spdlog.git
+	GIT_TAG v1.11.0
 )
 FetchContent_MakeAvailable(spdlog)
 
