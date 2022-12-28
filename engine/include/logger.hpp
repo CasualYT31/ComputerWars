@@ -33,7 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/ostream_sink.h"
-#include "spdlog/sinks/dist_sink.h"
+#include "spdlog/sinks/dup_filter_sink.h"
 #include "boxer/boxer.h"
 #include <sstream>
 
@@ -81,7 +81,7 @@ namespace engine {
 		 * @return  A pointer to the sink representing the log file. If sink
 		 *          creation failed, \c nullptr is returned.
 		 */
-		static std::shared_ptr<spdlog::sinks::dist_sink_st> Get(
+		static std::shared_ptr<spdlog::sinks::dup_filter_sink_st> Get(
 			const std::string& name = "Application",
 			const std::string& dev = "Developer",
 			const std::string& folder = ".",
@@ -132,7 +132,7 @@ namespace engine {
 		 * The non-thread safe distribution sink which outputs to a file and an
 		 * \c ostringstream.
 		 */
-		static std::shared_ptr<spdlog::sinks::dist_sink_st> _sharedSink;
+		static std::shared_ptr<spdlog::sinks::dup_filter_sink_st> _sharedSink;
 
 		/**
 		 * The \c ostringstream used to store a copy of the event log of the log

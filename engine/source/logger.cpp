@@ -26,14 +26,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "SystemProperties.hpp"
 #include "SFML/Window/Joystick.hpp"
 
-std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::_sharedSink = nullptr;
+std::shared_ptr<spdlog::sinks::dup_filter_sink_st> engine::sink::_sharedSink = nullptr;
 std::ostringstream engine::sink::_fileCopy = std::ostringstream();
 std::string engine::sink::_appName = "";
 std::string engine::sink::_devName = "";
 
 engine::sink::sink() noexcept {}
 
-std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
+std::shared_ptr<spdlog::sinks::dup_filter_sink_st> engine::sink::Get(
 	const std::string& name, const std::string& dev, const std::string& folder,
 	const bool date, const bool hardwareDetails) noexcept {
 	if (!_sharedSink) {
@@ -77,7 +77,8 @@ std::shared_ptr<spdlog::sinks::dist_sink_st> engine::sink::Get(
 			logfile << _fileCopy.str();
 			logfile.close();
 
-			_sharedSink = std::make_shared<spdlog::sinks::dist_sink_st>();
+			_sharedSink = std::make_shared<spdlog::sinks::dup_filter_sink_st>(
+				std::chrono::seconds(5));
 			_sharedSink->add_sink(
 				std::make_shared<spdlog::sinks::basic_file_sink_st>(filename)
 			);
