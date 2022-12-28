@@ -57,6 +57,7 @@ I like the idea of Gitmoji, but I find that there are a lot of emoji for the sam
 | | :fire: | fire | Remove code, tests, or files. |
 | | :warning: | warning | Fix code causing compiler warnings. |
 | | :no_entry: | no_entry | Fix code causing compiler errors. |
+| | :stethoscope: | stethoscope | Improve and/or document exception safety. |
 
 | Testing | Emoji | Name | Meaning |
 | --- | ---: | :---: | :--- |
