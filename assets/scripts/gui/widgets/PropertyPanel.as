@@ -115,6 +115,10 @@ class PropertyPanel {
 		setWidgetTextOutlineThickness(name, 1.5);
 	}
 
+	/**
+	 * Ensures that a property panel's widgets exist.
+	 * @param index The index of the panel to update.
+	 */
 	void _ensurePropertyCreation(const uint index) {
 		const string i = formatUInt(index);
 		if (!widgetExists(layout + ".properties.icon" + i)) {

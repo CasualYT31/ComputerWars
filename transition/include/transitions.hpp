@@ -104,7 +104,8 @@ namespace transition {
 		/**
 		 * This drawable's \c animate() method.
 		 * Performs all the calculations on the rectangle shapes.
-		 * @param  target The target to render the transition to.
+		 * @param  target  The target to render the transition to.
+		 * @param  scaling Scaling applied to the transition.
 		 * @return \c TRUE if the transition has completed, \c FALSE otherwise.
 		 * @sa     transitions.hpp
 		 */

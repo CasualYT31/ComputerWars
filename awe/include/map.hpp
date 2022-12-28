@@ -340,7 +340,7 @@ namespace awe {
 		/**
 		 * Calls \c getArmyIDs() and converts the result into a \c CScriptArray.
 		 * @return The array listing each army's \c ArmyID in turn order.
-		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @throws std::runtime_error if \c _scripts was \c nullptr.
 		 */
 		CScriptArray* getArmyIDsAsArray() const;
 
@@ -399,7 +399,7 @@ namespace awe {
 		 * Retrieves an army's country, for use with the scripts.
 		 * @param  army The ID of the army whose country is to be reteieved.
 		 * @return Information on the given army's country.
-		 * @throws @c std::out_of_range if an army with the given ID didn't exist.
+		 * @throws std::out_of_range if an army with the given ID didn't exist.
 		 */
 		const awe::country* getArmyCountryObject(const awe::ArmyID army) const;
 
@@ -528,7 +528,7 @@ namespace awe {
 		/**
 		 * Converts the result of a \c getTilesOfArmy() call into a
 		 * \c CScriptArray.
-		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @throws std::runtime_error if \c _scripts was \c nullptr.
 		 * @sa     @c getTilesOfArmy().
 		 */
 		CScriptArray* getTilesOfArmyAsArray(const awe::ArmyID army) const;
@@ -545,7 +545,7 @@ namespace awe {
 		/**
 		 * Converts the result of a \c getUnitsOfArmy() call into a
 		 * \c CScriptArray.
-		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @throws std::runtime_error if \c _scripts was \c nullptr.
 		 * @sa     @c getUnitsOfArmy().
 		 */
 		CScriptArray* getUnitsOfArmyAsArray(const awe::ArmyID army) const;
@@ -566,7 +566,7 @@ namespace awe {
 		/**
 		 * Converts the result of a \c getUnitsOfArmyByPriority() call into a
 		 * \c CScriptArray.
-		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @throws std::runtime_error if \c _scripts was \c nullptr.
 		 * @sa     @c getUnitsOfArmyByPriority().
 		 */
 		CScriptArray* getUnitsOfArmyByPriorityAsArray(const awe::ArmyID army)
@@ -629,7 +629,7 @@ namespace awe {
 
 		/**
 		 * Script version of \c getUnitType().
-		 * @throws @c std::out_of_range when the given ID did not identify a unit.
+		 * @throws std::out_of_range when the given ID did not identify a unit.
 		 * @sa     @c getUnitType().
 		 */
 		const awe::unit_type* getUnitTypeObject(const awe::UnitID id) const;
@@ -904,7 +904,7 @@ namespace awe {
 
 		/**
 		 * Script version of \c getTileType().
-		 * @throws @c std::out_of_range if the given tile was out of bounds.
+		 * @throws std::out_of_range if the given tile was out of bounds.
 		 * @sa     @c getTileType().
 		 */
 		const awe::tile_type* getTileTypeObject(const sf::Vector2u& pos) const;
@@ -1436,7 +1436,9 @@ namespace awe {
 
 		/**
 		 * This drawable's \c animate() method.
-		 * @param  target The target to render the map to.
+		 * @param  target  The target to render the map to.
+		 * @param  scaling An additional scaling factor applied to the entire map
+		 *                 graphic.
 		 * @return \c FALSE, for now.
 		 */
 		virtual bool animate(const sf::RenderTarget& target,
@@ -1778,7 +1780,7 @@ namespace awe {
 
 		/**
 		 * Cache of the @c sf::Transform previously used with @c draw().
-		 * Used in `setSelectedTileByPixel()` calculations. Can only be
+		 * Used in \c setSelectedTileByPixel() calculations. Can only be
 		 * conveniently cached in @c draw() so it needs to be mutable. The scaling
 		 * value given to @c animate() must be the same as the one given with
 		 * @c draw().
@@ -1786,7 +1788,7 @@ namespace awe {
 		mutable sf::Transform _transformCache;
 
 		/**
-		 * Cache of the @scaling parameter last given to @animate().
+		 * Cache of the \c scaling parameter last given to \c animate().
 		 */
 		float _scalingCache;
 

@@ -284,7 +284,7 @@ namespace engine {
 		/**
 		 * Tests to see if a function with the given declaration exists in any of
 		 * the loaded scripts.
-		 * @param  name The declaration of the function.
+		 * @param  decl The declaration of the function.
 		 * @return \c TRUE if the function exists, \c FALSE otherwise.
 		 */
 		bool functionDeclExists(const std::string& decl) const noexcept;
@@ -373,7 +373,7 @@ namespace engine {
 		CScriptArray* createArray(const std::string& type) const noexcept;
 
 		/**
-		 * Creates a @C CScriptAny object.
+		 * Creates a @c CScriptAny object.
 		 * @warning You must remember to \c delete or \c Release() the returned
 		 *          pointer!
 		 * @return  Pointer to a new AngelScript @c any object that's been

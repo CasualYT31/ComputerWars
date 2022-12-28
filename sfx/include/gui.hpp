@@ -371,7 +371,7 @@ namespace sfx {
 
 		/**
 		 * Reapplies all the translations to a widget recursively.
-		 * @param container Pointer to the widget to translate.
+		 * @param widget Pointer to the widget to translate.
 		 */
 		void _translateWidget(tgui::Widget::Ptr widget) noexcept;
 
@@ -703,9 +703,9 @@ namespace sfx {
 		 * Updates a widget's enabled property.
 		 * If no widget exists with the given name, then an error will be logged
 		 * and no widget will be changed.
-		 * @param name    The name of the widget to enable/disable.
-		 * @param visible \c TRUE if the widget should be enabled, \c FALSE if it
-		 *                should be disabled.
+		 * @param name   The name of the widget to enable/disable.
+		 * @param enable \c TRUE if the widget should be enabled, \c FALSE if it
+		 *               should be disabled.
 		 */
 		void _setWidgetEnabled(const std::string& name, const bool enable)
 			noexcept;

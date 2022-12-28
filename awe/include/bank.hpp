@@ -328,13 +328,15 @@ namespace awe {
 
 		/**
 		 * Registers \c common_properties with a given type.
-		 * @tparam T        The type that is being registered, that inherits from
-		 *                  \c common_properties in some way.
-		 * @param  type     Name of the type to add the properties to.
-		 * @param  engine   Pointer to the AngelScript script engine to register
-		 *                  with.
-		 * @param  document Pointer to the AngelScript documentation generator to
-		 *                  register script interface documentation with.
+		 * @tparam T            The type that is being registered, that inherits
+		 *                      from \c common_properties in some way.
+		 * @param  type         Name of the type to add the properties to.
+		 * @param  engine       Pointer to the AngelScript script engine to
+		 *                      register with.
+		 * @param  document     Pointer to the AngelScript documentation generator
+		 *                      to register script interface documentation with.
+		 * @param  extraIconDoc Used by subclasses to provide extra documentation
+		 *                      on how their \c icon property should be used.
 		 */
 		template<typename T>
 		static void Register(const std::string & type,
@@ -1422,15 +1424,6 @@ namespace awe {
 		}
 
 		/**
-		 * Overloaded version of \c canLoad() that checks using a given unit type.
-		 * @param  type The unit type to check for. Returns \c FALSE if \c nullptr.
-		 * @return \c TRUE if the given unit type can be loaded onto units of this
-		 *         type, \c FALSE if not.
-		 */
-		/*bool canLoad(const std::shared_ptr<const awe::unit_type>& type) const
-			noexcept;*/
-
-		/**
 		 * Retrieves the load limit of this unit type.
 		 * @return The maximum number of units this unit can hold at any given
 		 *         time.
@@ -1466,17 +1459,6 @@ namespace awe {
 		}
 
 		/**
-		 * Overloaded version of \c canCapture() that checks using a given terrain
-		 * type.
-		 * @param  type The terrain type to check for. Returns \c FALSE if
-		 *              \c nullptr.
-		 * @return \c TRUE if the given terrain type can be captured by units of
-		 *         this type, \c FALSE if not.
-		 */
-		/*bool canCapture(const std::shared_ptr<const awe::terrain>& type) const
-			noexcept;*/
-
-		/**
 		 * Finds out if this type of unit can unload from a given terrain type.
 		 * @param  typeScriptName The script name of the type of terrain to test.
 		 * @return \c TRUE if yes, \c FALSE otherwise.
@@ -1487,17 +1469,6 @@ namespace awe {
 				_canUnloadFromThese.begin(), _canUnloadFromThese.end(),
 				typeScriptName) != _canUnloadFromThese.end();
 		}
-
-		/**
-		 * Overloaded version of \c canUnloadFrom() that checks using a given
-		 * terrain type.
-		 * @param  type The terrain type to check for. Returns \c FALSE if
-		 *              \c nullptr.
-		 * @return \c TRUE if the given terrain type allows units of this type to
-		 *         unload units from it, \c FALSE if not.
-		 */
-		/*bool canUnloadFrom(const std::shared_ptr<const awe::terrain>& type) const
-			noexcept;*/
 
 		/**
 		 * Finds out if this type of unit can hide.
@@ -1802,7 +1773,7 @@ namespace awe {
 	 * Calls \c terrain::updatePictureMap() on an entire bank of \c terrain
 	 * objects.
 	 * @param terrainBank The \c terrain bank to update.
-	 * @param coutnryBank The \c country bank to pull turn order IDs from.
+	 * @param countryBank The \c country bank to pull turn order IDs from.
 	 */
 	void updateTerrainBank(awe::bank<awe::terrain>& terrainBank,
 		const awe::bank<awe::country>& countryBank) noexcept;
@@ -1826,6 +1797,7 @@ namespace awe {
 	 *                     bank that is used to update itself.
 	 * @param movementBank The \c movement_type bank to pull the pointers from.
 	 * @param terrainBank  The \c terrain bank to pull the pointers from.
+	 * @param weaponBank   The \c weapon bank to pull the pointers from.
 	 * @param countryBank  The \c country bank to pull turn order IDs from.
 	 */
 	void updateUnitTypeBank(awe::bank<awe::unit_type>& unitBank,

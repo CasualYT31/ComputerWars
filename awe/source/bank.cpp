@@ -262,14 +262,6 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) noexce
 		j.apply(_ignoreDefence, { "ignoresdefence" }, true);
 	}
 }
-//bool awe::unit_type::canLoad(const std::shared_ptr<const awe::unit_type>& type)
-//	const noexcept {
-//	if (!type) return false;
-//	for (auto& u : _canLoadTheseUnitTypes) {
-//		if (u && *u == *type) return true;
-//	}
-//	return false;
-//}
 void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)
 	const noexcept {
 	_canLoadTheseUnitTypes.clear();
@@ -282,23 +274,6 @@ void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)
 		}
 	}
 }
-//bool awe::unit_type::canCapture(const std::shared_ptr<const awe::terrain>& type)
-//	const noexcept {
-//	if (!type) return false;
-//	for (auto& u : _canCaptureTheseTerrainTypes) {
-//		if (u && *u == *type) return true;
-//	}
-//	return false;
-//}
-//bool awe::unit_type::canUnloadFrom(const std::shared_ptr<const awe::terrain>& type)
-//	const noexcept {
-//	if (_canUnloadFromThese.empty()) return true;
-//	if (!type) return false;
-//	for (auto& u : _canUnloadFromTheseTerrainTypes) {
-//		if (u && *u == *type) return true;
-//	}
-//	return false;
-//}
 void awe::unit_type::updateTerrainTypes(const awe::bank<awe::terrain>& terrainBank)
 	const noexcept {
 	_canCaptureTheseTerrainTypes.clear();

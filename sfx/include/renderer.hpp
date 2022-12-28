@@ -325,7 +325,7 @@ namespace sfx {
 	 * On unsupported platforms, this function is guaranteed not to amend the
 	 * window in any way. Currently, this function is only supported on Windows.
 	 * @param  window   The native handle of the window to update.
-	 * @param  maximise \c TRUE if the window is to be maximised, \C FALSE if the
+	 * @param  maximise \c TRUE if the window is to be maximised, \c FALSE if the
 	 *                  window is to be set to normal/not maximised.
 	 * @param  logger   Pointer to a logger object to write any errors to if
 	 *                  \c FALSE is returned. If \c nullptr is given, then no log

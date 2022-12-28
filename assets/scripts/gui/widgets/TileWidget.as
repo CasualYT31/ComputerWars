@@ -27,8 +27,8 @@ class TileWidget {
 
 	/**
 	 * Creates the layout that the property panels will be added to.
-	 * @param panelName The full name of the layout which will contain all of the
-	 *                  other widgets.
+	 * @param layoutName The full name of the layout which will contain all of the
+	 *                   other widgets.
 	 */
 	TileWidget(const string&in layoutName) explicit {
 		layout = layoutName;

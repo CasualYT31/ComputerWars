@@ -39,6 +39,9 @@ namespace std {
 	 * (https://en.sfml-dev.org/forums/index.php?topic=24275.0).
 	 */
 	template<typename T> struct hash<sf::Vector2<T>> {
+		/**
+		 * Custom specialisation of \c std::hash for \c sf::Vector2.
+		 */
 		std::size_t operator()(sf::Vector2<T> const& s) const noexcept {
 			// I don't actually think they need to be separate...
 			// Only did it this way in order to preserve Elias' intended execution
