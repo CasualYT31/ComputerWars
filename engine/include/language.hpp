@@ -146,11 +146,10 @@ namespace engine {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the
-		 *             log file. Defaults to "dictionary."
+		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		language_dictionary(const std::string& name = "dictionary") noexcept;
+		language_dictionary(const engine::logger::data& data) noexcept;
 
 		/**
 		 * Adds a path to a language's string map script.
@@ -278,11 +277,10 @@ namespace engine {
 
 			/**
 			 * Initialises the internal logger object.
-			 * @param name The name to give this particular instantiation
-			 *             within the log file. Defaults to "language."
+			 * @param data The data to initialise the logger object with.
 			 * @sa    \c engine::logger
 			 */
-			language(const std::string& name = "language") noexcept;
+			language(const engine::logger::data& data) noexcept;
 
 			/**
 			 * Accesses a string stored within the string map.

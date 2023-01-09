@@ -24,8 +24,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T>
 awe::bank<T>::bank(const std::shared_ptr<engine::scripts>& scripts,
-	const std::string& name, const std::string& logName) noexcept :
-	_logger(logName), _scripts(scripts), _propertyName(name) {
+	const std::string& name, const engine::logger::data& data) noexcept :
+	engine::json_script({ data.sink, "json_script" }), _logger(data),
+	_scripts(scripts), _propertyName(name) {
 	if (scripts) _scripts->addRegistrant(this);
 }
 
@@ -86,7 +87,7 @@ bool awe::bank<T>::_load(engine::json& j) noexcept {
 	for (auto& i : jj.items()) {
 		// Loop through each object, allowing the template type T to construct its
 		// values based on each object.
-		engine::json input(i.value());
+		engine::json input(i.value(), {_logger.getData().sink, "json"});
 		_bank[i.key()] = std::make_shared<const T>(i.key(), input);
 	}
 	return true;

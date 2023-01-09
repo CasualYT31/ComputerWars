@@ -28,15 +28,19 @@ const sf::Vector2u awe::unit::NO_POSITION(std::numeric_limits<unsigned int>::max
 
 sf::Vector2u awe::unit::NO_POSITION_SCRIPT = awe::unit::NO_POSITION;
 
-awe::unit::unit(const std::shared_ptr<const awe::unit_type>& type,
-	const awe::ArmyID army,
+awe::unit::unit(const engine::logger::data& data,
+	const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet,
 	const std::shared_ptr<sfx::animated_spritesheet>& icons) noexcept :
 	_type(type), _army(army),
-	_sprite(sheet, ((type) ? (type->getUnit(army)) : (""))),
-	_hpIcon(icons, "nohpicon"), _fuelAmmoIcon(icons, "nostatusicon"),
-	_loadedIcon(icons, "nostatusicon"),
-	_capturingHidingIcon(icons, "nostatusicon") {
+	_sprite(sheet, ((type) ? (type->getUnit(army)) : ("")),
+		{data.sink, data.name + "_animated_sprite"}),
+	_hpIcon(icons, "nohpicon", { data.sink, data.name + "_hp_icon" }),
+	_fuelAmmoIcon(icons, "nostatusicon",
+		{ data.sink, data.name + "_fuel_ammo_icon" }),
+	_loadedIcon(icons, "nostatusicon", { data.sink, data.name + "_loaded_icon" }),
+	_capturingHidingIcon(icons, "nostatusicon",
+		{ data.sink, data.name + "_status_icon" }) {
 	// Initialise all ammos.
 	for (std::size_t i = 0, weaponCount = type->getWeaponCount();
 		i < weaponCount; ++i) {

@@ -363,11 +363,10 @@ namespace sfx {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the
-		 *             log file. Defaults to "renderer."
+		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		renderer(const std::string& name = "renderer") noexcept;
+		renderer(const engine::logger::data& data) noexcept;
 
 		/**
 		 * Opens the render window using configurations.

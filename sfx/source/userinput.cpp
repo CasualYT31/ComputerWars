@@ -107,7 +107,8 @@ sfx::control_signal sfx::convert::tosignaltype(unsigned int s,
 	return static_cast<sfx::control_signal>(s);
 }
 
-sfx::user_input::user_input(const std::string& name) noexcept : _logger(name) {}
+sfx::user_input::user_input(const engine::logger::data& data) noexcept :
+	json_script({data.sink, "json_script"}), _logger(data) {}
 
 std::unordered_set<std::string> sfx::user_input::getControls() const noexcept {
 	std::unordered_set<std::string> ret;

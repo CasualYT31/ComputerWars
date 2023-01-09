@@ -599,7 +599,8 @@ void awe::map::Register(asIScriptEngine* engine,
 	}
 }
 
-awe::map::map(const std::string& name) noexcept : _logger(name) {
+awe::map::map(const engine::logger::data& data) noexcept : _logger(data),
+	_cursor({ data.sink, data.name + "_cursor_sprite" }) {
 	_initShaders();
 }
 
@@ -607,8 +608,8 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-	const std::string& name) noexcept :
-	_logger(name) {
+	const engine::logger::data& data) noexcept : _logger(data),
+	_cursor({data.sink, data.name + "_cursor_sprite"}) {
 	_countries = countries;
 	_tileTypes = tiles;
 	_unitTypes = units;
@@ -706,7 +707,8 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
 	_tiles.resize(dim.x);
 	for (std::size_t x = 0; x < dim.x; x++) {
-		_tiles[x].resize(dim.y, { tile, _sheet_tile });
+		_tiles[x].resize(dim.y, { { _logger.getData().sink, "tile" }, tile,
+			_sheet_tile });
 	}
 	if (mapHasShrunk) {
 		// Then, go through all owned tiles in each army and delete those that are
@@ -1140,7 +1142,8 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 			"a new unit. There are too many units allocated!");
 		return 0;
 	}
-	_units.insert({ id, awe::unit(type, army, _sheet_unit, _sheet_icon) });
+	_units.insert({ id, awe::unit({_logger.getData().sink, "unit"}, type, army,
+		_sheet_unit, _sheet_icon) });
 	_armies.at(army).addUnit(id);
 	return id;
 }

@@ -44,12 +44,13 @@ void awe::updateUnitTypeBank(awe::bank<awe::unit_type>& unitBank,
 	const awe::bank<awe::movement_type>& movementBank,
 	const awe::bank<awe::terrain>& terrainBank,
 	const awe::bank<awe::weapon>& weaponBank,
-	const awe::bank<awe::country>& countryBank) noexcept {
+	const awe::bank<awe::country>& countryBank,
+	const std::shared_ptr<engine::sink>& sink) noexcept {
 	for (const auto& unit : unitBank) {
 		unit.second->updateMovementType(movementBank);
 		unit.second->updateUnitTypes(unitBank);
 		unit.second->updateTerrainTypes(terrainBank);
-		unit.second->updateWeapons(weaponBank);
+		unit.second->updateWeapons(weaponBank, sink);
 		unit.second->updateSpriteMaps(countryBank);
 	}
 }
@@ -321,8 +322,8 @@ void updateJJNew(nlohmann::ordered_json& jjNew,
 		}
 	}
 }
-void awe::unit_type::updateWeapons(const awe::bank<awe::weapon>& weaponBank) const
-noexcept {
+void awe::unit_type::updateWeapons(const awe::bank<awe::weapon>& weaponBank,
+	const std::shared_ptr<engine::sink>& sink) const noexcept {
 	_weapons.clear();
 	for (const auto weapon : _baseWeapons) {
 		if (weaponBank.contains(weapon.first)) {
@@ -346,7 +347,7 @@ noexcept {
 			// For hiddenunits, the override will completely replace the base
 			// object, if an override is given. update() does this for us.
 			const auto newWeapon = std::make_shared<const awe::weapon>(
-				weapon.first, engine::json(jjNew));
+				weapon.first, engine::json(jjNew, {sink, "json"}));
 			_weapons.emplace(weapon.first, newWeapon);
 		}
 	}

@@ -76,7 +76,8 @@ bool sfx::isWindowMaximised(const sf::WindowHandle window,
 #endif
 }
 
-sfx::renderer::renderer(const std::string& name) noexcept : _logger(name) {}
+sfx::renderer::renderer(const engine::logger::data& data) noexcept :
+	json_script({ data.sink, "json_script" }), _logger(data) {}
 
 void sfx::renderer::openWindow() noexcept {
 	sf::VideoMode mode(_settings.width, _settings.height);

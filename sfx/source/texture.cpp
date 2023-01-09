@@ -22,8 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "texture.hpp"
 
-sfx::animated_spritesheet::animated_spritesheet(const std::string& name) noexcept :
-	_logger(name) {}
+sfx::animated_spritesheet::animated_spritesheet(const engine::logger::data& data)
+	noexcept : json_script({ data.sink, "json_script" }), _logger(data) {}
 
 const sf::Texture& sfx::animated_spritesheet::getTexture() const noexcept {
 	return _texture;
@@ -159,12 +159,13 @@ bool sfx::animated_spritesheet::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }
 
-sfx::animated_sprite::animated_sprite(const std::string& name) noexcept :
-	_logger(name) {}
+sfx::animated_sprite::animated_sprite(const engine::logger::data& data) noexcept :
+	_logger(data) {}
 
 sfx::animated_sprite::animated_sprite(
 	std::shared_ptr<const sfx::animated_spritesheet> sheet,
-	const std::string& sprite, const std::string& name) noexcept : _logger(name) {
+	const std::string& sprite, const engine::logger::data& data) noexcept :
+	_logger(data) {
 	setSpritesheet(sheet);
 	setSprite(sprite);
 }

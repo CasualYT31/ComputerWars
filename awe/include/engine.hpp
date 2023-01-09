@@ -50,11 +50,10 @@ namespace awe {
 		/**
 		 * Initialises the internal logger object.
 		 * Also seeds the psuedo random number sequence generator.
-		 * @param name The name to give this particular instantiation within the
-		 *             log file. Defaults to "engine."
+		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		game_engine(const std::string& name = "engine") noexcept;
+		game_engine(const engine::logger::data& data) noexcept;
 
 		/**
 		 * Executes the game based on given game data.

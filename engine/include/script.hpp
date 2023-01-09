@@ -167,15 +167,14 @@ namespace engine {
 		 * \c registerInterface() method. In addition, loading and building scripts
 		 * relies on the interface being established, so it is carried out
 		 * afterwards using the \c loadScripts() method.
-		 * @param name The name to give this particular instantiation within the
-		 *             log file. Defaults to "scripts."
+		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 * @sa    \c engine::scripts::registerInterface()
 		 */
-		scripts(const std::string& name = "scripts") noexcept;
+		scripts(const engine::logger::data& data) noexcept;
 
 		/**
-		 * Releases the sole function context and shuts down the engine.
+		 * Releases all the function contexts and shuts down the engine.
 		 */
 		~scripts() noexcept;
 

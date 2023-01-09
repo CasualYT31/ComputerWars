@@ -23,6 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui.hpp"
 #include "fmtformatter.hpp"
 
+#undef MessageBox
+
 using namespace tgui;
 
 // These values are intended to be constant.
@@ -33,15 +35,13 @@ sf::Color NO_COLOUR(0, 0, 0, 0);
 // GUI_BACKGROUND //
 ////////////////////
 
-sfx::gui::gui_background::gui_background() noexcept {}
-
 sfx::gui::gui_background::gui_background(
 	const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
 	const std::string& key) noexcept {
 	set(sheet, key);
 }
 
-sfx::gui::gui_background::gui_background(sf::Color colour) noexcept {
+sfx::gui::gui_background::gui_background(const sf::Color& colour) noexcept {
 	set(colour);
 }
 
@@ -53,7 +53,7 @@ void sfx::gui::gui_background::set(
 	_bgSprite.setSprite(key);
 }
 
-void sfx::gui::gui_background::set(sf::Color colour) noexcept {
+void sfx::gui::gui_background::set(const sf::Color& colour) noexcept {
 	_flag = sfx::gui::gui_background::type::Colour;
 	_bgColour.setFillColor(colour);
 }
@@ -127,7 +127,8 @@ CScriptAny* sfx::gui::CScriptAnyWrapper::operator->() const noexcept {
 /////////
 
 sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
-	const std::string& name) noexcept : _scripts(scripts), _logger(name) {
+	const engine::logger::data& data) noexcept :
+	json_script({data.sink, "json_script"}), _scripts(scripts), _logger(data) {
 	if (!scripts) {
 		_logger.error("No scripts object has been provided to this GUI object: no "
 			"menus will be loaded.");
@@ -791,7 +792,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 			std::dynamic_pointer_cast<BitmapButton>(widget)->
 				setImage(blank);
 		} else if (type == "Picture") {
-			auto picture = std::dynamic_pointer_cast<Picture>(widget);
+			auto picture = std::dynamic_pointer_cast<tgui::Picture>(widget);
 			picture->getRenderer()->setTexture(blank);
 			if (_dontOverridePictureSizeWithSpriteSize.find(widgetName)
 				== _dontOverridePictureSizeWithSpriteSize.end()) {
@@ -861,8 +862,8 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 					newPosition = std::dynamic_pointer_cast<BitmapButton>(widget)->
 						getAbsolutePositionOfImage();
 				} else if (type == "Picture") {
-					newPosition = std::dynamic_pointer_cast<Picture>(widget)->
-						getAbsolutePosition();
+					newPosition = std::dynamic_pointer_cast<tgui::Picture>(widget)
+						->getAbsolutePosition();
 				}
 				animatedSprite.setPosition(newPosition);
 			} else if (_guiSpriteKeys.find(widgetName) != _guiSpriteKeys.end() &&
@@ -937,7 +938,7 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) noexcept {
 			// separately to keep this as simple as possible. Potentially multiple
 			// menu hierarchies would have to be stored, though...
 		} else if (type == "MessageBox") {
-			auto w = _findWidget<MessageBox>(widgetName);
+			auto w = _findWidget<tgui::MessageBox>(widgetName);
 			w->setTitle(_getTranslatedText(widgetName, 0));
 			w->setText(_getTranslatedText(widgetName, 1));
 			// Don't know how I'm going to translate buttons.

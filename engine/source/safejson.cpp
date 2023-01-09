@@ -25,25 +25,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "safejson.hpp"
 #include <fstream>
 
-engine::json::json(const std::string& name) noexcept : _logger(name) {}
+engine::json::json(const engine::logger::data& data) noexcept : _logger(data) {}
 
-engine::json::json(const nlohmann::ordered_json& jobj, const std::string& name)
-	noexcept : _logger(name) {
+engine::json::json(const nlohmann::ordered_json& jobj,
+	const engine::logger::data& data) noexcept : _logger(data) {
 	*this = jobj;
 }
 
-engine::json::json(nlohmann::ordered_json&& jobj, const std::string& name) noexcept
-	: _logger(name) {
+engine::json::json(nlohmann::ordered_json&& jobj, const engine::logger::data& data)
+	noexcept : _logger(data) {
 	*this = std::move(jobj);
 }
 
-engine::json::json(const engine::json& obj, const std::string& name) noexcept :
-	_logger(name) {
+engine::json::json(const engine::json& obj, const engine::logger::data& data)
+	noexcept : _logger(data) {
 	*this = obj;
 }
 
-engine::json::json(engine::json&& obj, const std::string& name) noexcept :
-	_logger(name) {
+engine::json::json(engine::json&& obj, const engine::logger::data& data) noexcept :
+	_logger(data) {
+	*this = std::move(obj);
+}
+
+engine::json::json(const engine::json& obj) noexcept : _logger(obj._logger) {
+	*this = obj;
+}
+
+engine::json::json(engine::json&& obj) noexcept : _logger(obj._logger) {
 	*this = std::move(obj);
 }
 
@@ -174,12 +182,15 @@ bool engine::json::_performInitialChecks(engine::json::KeySequence& keys,
 	return false;
 }
 
+engine::json_script::json_script(const engine::logger::data& data) : _logger(data)
+	{}
+
 void engine::json_script::load(const std::string script) noexcept {
 	if (script != "") _script = script;
 	_logger.write("Loading JSON script {}...", getScriptPath());
 	nlohmann::ordered_json nlohmannJSON;
 	if (_loadFromScript(nlohmannJSON)) {
-		engine::json safeJSON = nlohmannJSON;
+		engine::json safeJSON(nlohmannJSON, {_logger.getData().sink, "json"});
 		if (safeJSON.whatFailed() & engine::json_state::JSON_WAS_NOT_OBJECT) {
 			_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
 			_logger.error("Failed to load JSON script {}: the JSON saved in the "

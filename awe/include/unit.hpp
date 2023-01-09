@@ -54,12 +54,15 @@ namespace awe {
 		 * Creates a new unit.
 		 * @warning \c army \b must hold a valid turn order ID: checks must be
 		 *          carried out outside of this class!
+		 * @param   data  The data used to initialise the animated sprite's logger
+		 *                object.
 		 * @param   type  The type of the unit, which can't be changed.
 		 * @param   army  The army the unit belongs to, which can't be changed.
 		 * @param   sheet Pointer to the spritesheet to use with this unit.
 		 * @param   icons Pointer to the icon spritesheet to use with this unit.
 		 */
-		unit(const std::shared_ptr<const awe::unit_type>& type,
+		unit(const engine::logger::data& data,
+			const std::shared_ptr<const awe::unit_type>& type,
 			const awe::ArmyID army = 0,
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr,
 			const std::shared_ptr<sfx::animated_spritesheet>& icons = nullptr)

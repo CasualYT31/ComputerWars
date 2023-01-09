@@ -22,9 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tile.hpp"
 
-awe::tile::tile(const std::shared_ptr<const awe::tile_type>& type,
+awe::tile::tile(const engine::logger::data& data,
+	const std::shared_ptr<const awe::tile_type>& type,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept :
-	_sprite(sheet, "") {
+	_sprite(sheet, "", {data.sink, data.name + "_sprite"}) {
 	setTileType(type);
 }
 

@@ -87,11 +87,10 @@ namespace awe {
 		 *                given but with \c "Bank" appended, and the single global
 		 *                property of this bank type will be called the given name,
 		 *                but in lowercase.
-		 * @param logName Name given for to this bank object in the log file.
-		 *                Defaults to "bank."
+		 * @param data    The data to initialise the logger object with.
 		 */
 		bank(const std::shared_ptr<engine::scripts>& scripts,
-			const std::string& name, const std::string& logName = "bank") noexcept;
+			const std::string& name, const engine::logger::data& data) noexcept;
 
 		/**
 		 * The type of container used to store bank values internally.
@@ -1536,9 +1535,11 @@ namespace awe {
 		 *          with a unit's weapons.
 		 * @param   weaponBank A reference to the weapons bank to pull information
 		 *                     from.
+		 * @param   sink       Pointer to the sink which JSON objects created in
+		 *                     this method will output to.
 		 */
-		void updateWeapons(const awe::bank<awe::weapon>& weaponBank) const
-			noexcept;
+		void updateWeapons(const awe::bank<awe::weapon>& weaponBank,
+			const std::shared_ptr<engine::sink>& sink) const noexcept;
 
 		/**
 		 * Updates \c _picturesTurnOrder and \c _unitsTurnOrder by copying over the
@@ -1799,12 +1800,15 @@ namespace awe {
 	 * @param terrainBank  The \c terrain bank to pull the pointers from.
 	 * @param weaponBank   The \c weapon bank to pull the pointers from.
 	 * @param countryBank  The \c country bank to pull turn order IDs from.
+	 * @param sink         Pointer to the sink which JSON objects created in this
+	 *                     function will output to.
 	 */
 	void updateUnitTypeBank(awe::bank<awe::unit_type>& unitBank,
 		const awe::bank<awe::movement_type>& movementBank,
 		const awe::bank<awe::terrain>& terrainBank,
 		const awe::bank<awe::weapon>& weaponBank,
-		const awe::bank<awe::country>& countryBank) noexcept;
+		const awe::bank<awe::country>& countryBank,
+		const std::shared_ptr<engine::sink>& sink) noexcept;
 
 	/**
 	 * Checks an entire bank of countries to ensure each country's turn order ID is

@@ -296,14 +296,15 @@ void engine::RegisterFileType(asIScriptEngine* engine,
     }
 }
 
-engine::scripts::scripts(const std::string& name) noexcept : _logger(name) {
+engine::scripts::scripts(const engine::logger::data& data) noexcept : _logger(data)
+    {
     _engine = asCreateScriptEngine();
     if (_engine) {
         // Allocate the documentation generator.
         ScriptDocumentationOptions options;
         options.htmlSafe = false;
         options.projectName = "Computer Wars";
-        std::string filename = name + " Script Interface Documentation.html";
+        std::string filename = data.name + " Script Interface Documentation.html";
         options.outputFile = filename;
         _document = std::make_shared<DocumentationGenerator>(_engine, options);
         // Allocate the script engine.

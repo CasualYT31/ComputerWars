@@ -37,11 +37,10 @@ namespace sfx {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the
-		 *             log file. Defaults to "fonts."
+		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		fonts(const std::string& name = "fonts") noexcept;
+		fonts(const engine::logger::data& data) noexcept;
 
 		/**
 		 * Accesses a previously loaded \c sf::Font object.

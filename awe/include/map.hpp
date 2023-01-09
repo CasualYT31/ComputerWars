@@ -125,11 +125,10 @@ namespace awe {
 
 		/**
 		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the
-		 *             log file. Defaults to "map."
+		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		map(const std::string& name = "map") noexcept;
+		map(const engine::logger::data& data) noexcept;
 
 		/**
 		 * Initialises this object with \c bank pointers.
@@ -142,16 +141,14 @@ namespace awe {
 		 *                   reading unit type IDs from map files.
 		 * @param commanders Information on the commanders to search through when
 		 *                   reading CO IDs from map files.
-		 * @param name       The name to give this particular instantiation within
-		 *                   the log file. Defaults to "map."
+		 * @param data       The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
 		map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-			const std::string& name = "map")
-			noexcept;
+			const engine::logger::data& data) noexcept;
 
 		/**
 		 * Replaces the state of this object with that given in the binary file.
