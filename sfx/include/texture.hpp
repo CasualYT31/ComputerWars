@@ -39,11 +39,10 @@ namespace sfx {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the
-		 *             log file. Defaults to "spritesheet."
+		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		animated_spritesheet(const std::string& name = "spritesheet") noexcept;
+		animated_spritesheet(const engine::logger::data& data) noexcept;
 
 		/**
 		 * Determines whether or not a sprite with a given ID exists in this sheet.
@@ -185,26 +184,27 @@ namespace sfx {
 		 * Initialises the internal logger object.
 		 * \c _sheet will be initialised with \c nullptr, so it should be set later
 		 * on with \c setSpritesheet() if this constructor is used.
-		 * @param  name The name to give this particular instantiation within the
-		 *              log file. Defaults to "sprite."
-		 * @sa     \c engine::logger
+		 * @param data The data to initialise the logger object with. Defaults to
+		 *             the data that represents "no logger."
+		 * @sa    \c engine::logger
 		 */
-		animated_sprite(const std::string& name = "sprite") noexcept;
+		animated_sprite(const engine::logger::data& data = { nullptr, "" })
+			noexcept;
 
 		/**
 		 * Constructs an animated sprite and initialises the internal logger
 		 * object.
-		 * @param  sheet  A pointer to an \c animated_spritesheet object containing
-		 *                the sprite to animate.
-		 * @param  sprite The name of the sprite from the given sheet which is to
-		 *                be animated/drawn.
-		 * @param  name   The name to give this particular instantiation within the
-		 *                log file. Defaults to "sprite."
-		 * @sa     \c engine::logger
+		 * @param sheet  A pointer to an \c animated_spritesheet object containing
+		 *               the sprite to animate.
+		 * @param sprite The name of the sprite from the given sheet which is to be
+		 *               animated/drawn.
+		 * @param data   The data to initialise the logger object with. Defaults to
+		 *               the data that represents "no logger."
+		 * @sa    \c engine::logger
 		 */
 		animated_sprite(std::shared_ptr<const sfx::animated_spritesheet> sheet,
-			const std::string& sprite, const std::string& name = "sprite")
-			noexcept;
+			const std::string& sprite, const engine::logger::data& data =
+			{ nullptr, "" }) noexcept;
 
 		/**
 		 * Sets a new \c animated_spritesheet to this animated sprite.

@@ -200,21 +200,19 @@ namespace engine {
 
 		/**
 		 * Constructs an empty JSON object.
-		 * @param name The string name of the internal logger object which helps
-		 *             identify this object if it causes an error.
+		 * @param data The data to initialise the logger object with.
 		 */
-		json(const std::string& name = "json") noexcept;
+		json(const engine::logger::data& data) noexcept;
 
 		/**
 		 * Constructs a JSON object from a \c nlohmann one.
 		 * The assignment operator is called in order to achieve this.
 		 * @param jobj The \c nlohmann::ordered_json object to store within this
 		 *             object - this is referred to as the JSON object.
-		 * @param name The string name of the internal logger object which helps
-		 *             identify this object if it causes an error.
+		 * @param data The data to initialise the logger object with.
 		 * @sa    operator=()
 		 */
-		json(const nlohmann::ordered_json& jobj, const std::string& name = "json")
+		json(const nlohmann::ordered_json& jobj, const engine::logger::data& data)
 			noexcept;
 
 		/**
@@ -222,34 +220,45 @@ namespace engine {
 		 * The assignment operator is called in order to achieve this.
 		 * @param jobj The \c nlohmann::ordered_json object to store within this
 		 *             object - this is referred to as the JSON object.
-		 * @param name The string name of the internal logger object which helps
-		 *             identify this object if it causes an error.
+		 * @param data The data to initialise the logger object with.
 		 * @sa    operator=()
 		 */
-		json(nlohmann::ordered_json&& jobj, const std::string& name = "json")
+		json(nlohmann::ordered_json&& jobj, const engine::logger::data& data)
 			noexcept;
 
 		/**
 		 * Copy constructor.
-		 * Copies the JSON itself, but sets up a new logger with a new name.
+		 * Copies the JSON itself, but creates a new logger object.
 		 * @param obj  The object to copy.
-		 * @param name The string name of the internal logger object which helps
-		 *             identify this object if it causes an error.
+		 * @param data The data to initialise the logger object with.
 		 */
-		json(const engine::json& obj, const std::string& name = "json") noexcept;
+		json(const engine::json& obj, const engine::logger::data& data) noexcept;
 
 		/**
 		 * Move constructor.
-		 * Moves the JSON itself, and sets up a new logger with a new name.
+		 * Moves the JSON itself, but creates a new logger object.
 		 * @param obj  The object to move.
-		 * @param name The string name of the internal logger object which helps
-		 *             identify this object if it causes an error.
+		 * @param data The data to initialise the logger object with.
 		 */
-		json(engine::json&& obj, const std::string& name = "json") noexcept;
+		json(engine::json&& obj, const engine::logger::data& data) noexcept;
+
+		/**
+		 * Copy constructor.
+		 * Copies the JSON itself, and the logger object.
+		 * @param obj The object to copy.
+		 */
+		json(const engine::json& obj) noexcept;
+
+		/**
+		 * Move constructor.
+		 * Moves the JSON itself, but copies the logger object.
+		 * @param obj The object to move.
+		 */
+		json(engine::json&& obj) noexcept;
 
 		/**
 		 * Copy assignment operator.
-		 * Copies the internal JSON object.
+		 * Copies the internal JSON object, but does not copy the logger object.
 		 * @param  obj The object to copy over.
 		 * @return Reference to \c this.
 		 */
@@ -257,7 +266,8 @@ namespace engine {
 
 		/**
 		 * Move assignment operator.
-		 * Moves the internal JSON object.
+		 * Moves the internal JSON object, but does not copy or move the logger
+		 * object.
 		 * @param  obj The object to move over.
 		 * @return Reference to \c this.
 		 */
@@ -573,6 +583,12 @@ namespace engine {
 	class json_script : public json_state {
 	public:
 		/**
+		 * Initialises the internal logger object.
+		 * @param data The data to initialise the logger object with.
+		 */
+		json_script(const engine::logger::data& data);
+		
+		/**
 		 * Polymorphic base classes should have virtual destructors.
 		 */
 		virtual ~json_script() noexcept = default;
@@ -710,7 +726,7 @@ namespace engine {
 		/**
 		 * The internal logger object.
 		 */
-		mutable engine::logger _logger = engine::logger("json_script");
+		mutable engine::logger _logger;
 	};
 }
 

@@ -108,8 +108,8 @@ void engine::json::applyMap(std::unordered_map<std::string, T>& dest,
 				_logger.error("The specified JSON object was not homogeneous, "
 					"found a value of data type \"{}\" with key \"{}\" when "
 					"attempting to assign to a map with values of data type "
-					"\"{}\", in the key sequence {}.{}", _getTypeName(item.value()),
-					item.key(), _getTypeName(testDataType),
+					"\"{}\", in the key sequence {}.{}", _getTypeName(
+					item.value()), item.key(), _getTypeName(testDataType),
 					synthesiseKeySequence(keys), ((continueReadingOnTypeError) ?
 						("") : (" Will now stop reading key-value pairs from this "
 							"object.")));

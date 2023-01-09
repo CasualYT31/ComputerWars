@@ -61,12 +61,11 @@ namespace sfx {
 		 *                <em>one</em> instance of \c scripts for every instance of
 		 *                \c gui,</b> as the different \c gui functions belonging
 		 *                to the different instances will conflict with each other.
-		 * @param name    The name to give this particular instantiation within the
-		 *                log file. Defaults to "gui."
+		 * @param data    The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
 		gui(const std::shared_ptr<engine::scripts>& scripts,
-			const std::string& name = "gui") noexcept;
+			const engine::logger::data& data) noexcept;
 
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
@@ -223,7 +222,7 @@ namespace sfx {
 			 * Default constructor.
 			 * By default, a GUI background is a solid colour of black.
 			 */
-			gui_background() noexcept;
+			gui_background() noexcept = default;
 
 			/**
 			 * Initialises the GUI background with a sprite.
@@ -238,7 +237,7 @@ namespace sfx {
 			 * Initialises the GUI background with a solid colour.
 			 * @param colour The colour to set.
 			 */
-			gui_background(sf::Color colour) noexcept;
+			gui_background(const sf::Color& colour) noexcept;
 
 			/**
 			 * Sets this GUI background to be a sprite.
@@ -257,7 +256,7 @@ namespace sfx {
 			 * The stored sprite ID is then ignored.
 			 * @param colour The colour to set.
 			 */
-			void set(sf::Color colour) noexcept;
+			void set(const sf::Color& colour) noexcept;
 
 			/**
 			 * Retrieves the type of this GUI background.

@@ -22,7 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "fonts.hpp"
 
-sfx::fonts::fonts(const std::string& name) noexcept : _logger(name) {}
+sfx::fonts::fonts(const engine::logger::data& data) noexcept :
+	json_script({data.sink, "json_script"}), _logger(data) {}
 
 std::shared_ptr<sf::Font> sfx::fonts::operator[](const std::string& key) const
 	noexcept {

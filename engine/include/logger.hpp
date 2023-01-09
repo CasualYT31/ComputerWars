@@ -22,9 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**@file logger.hpp
  * Classes used for logging and debugging.
- * This file provides two classes: \c logger and \c sink. \c sink is a singleton
- * class which represents the log file which all instantiations of the \c logger
- * class output to. These classes act as simple wrappers for the \c spdlog backend.
+ * This file provides two classes: \c logger and \c sink. A \c sink represents a
+ * single log file, which multiple \c logger objects can write to.
  */
 
 #pragma once
@@ -35,59 +34,58 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "spdlog/sinks/ostream_sink.h"
 #include "spdlog/sinks/dup_filter_sink.h"
 #include "boxer/boxer.h"
+#include "SFML/System/NonCopyable.hpp"
+#include "SystemProperties.hpp"
 #include <sstream>
 
 namespace engine {
 	/**
-	 * This class represents the log file which all loggers output to.
-	 * This class uses the singleton design pattern. As such, no instantiation of
-	 * this class can be made. Instead, the client must access the log file via
-	 * \c sink.Get().\n
-	 * <b>It is important to emphasise that the client should call \c Get() once at
-	 * the start of the program to open and initalise the log file before any
-	 * \c logger objects use it!</b>
+	 * Retrieves the current year in string form.
+	 * @return The year in the format "yyyy".
+	 * @safety Strong guarantee: see <a href=
+	 *         "https://cplusplus.com/reference/string/string/string/"
+	 *         target="_blank">string constructor documentation.</a>
 	 */
-	class sink {
+	std::string GetYear();
+
+	/**
+	 * Retrieves the current date and time in the format "d-m-yyyy h-m-s".
+	 * @return The date and time in string form.
+	 * @safety Strong guarantee: see <a href=
+	 *         "https://cplusplus.com/reference/string/string/string/"
+	 *         target="_blank">string constructor documentation.</a>
+	 */
+	std::string GetDateTime();
+
+	/**
+	 * This class represents a log file which loggers can output to.
+	 */
+	class sink : sf::NonCopyable {
 	public:
 		/**
-		 * Retrieves the file sink.
-		 * If called for the first time, the .log file is opened, and cleared of
-		 * all contents if it already exists. A pointer to the file sink
-		 * representing this log file is then returned.\n
-		 * Subsequent calls are used to retrieve this pointer only: it will only
-		 * attempt to create the necessary sinks if creating it in the first call
-		 * failed. Subsequent calls will ignore all parameters given if sink
-		 * creation was succesful.\n
-		 * If creating the sink failed, the \c boxer library is used to produce an
-		 * OS error dialog containing the error text.\n
+		 * Opens a log file.
 		 * The log file has the following name: <tt>Log[ d-m-yyyy h-m-s].log</tt>.
 		 * The components within brackets are optional and can be toggled off, see
-		 * \c date below.
-		 * @warning Passing in a blank string to the \c folder parameter will
-		 *          attempt to write the log file to the root of the drive the
-		 *          program is executing on (at least on Windows, I think this will
-		 *          occur on Unix-based systems, too)!
-		 * @param   name            The name of the application to write in the
-		 *                          first line of the log file.
-		 * @param   dev             The name of the application developer/s to
-		 *                          write in the first line of the log file.
-		 * @param   folder          The directory, relative or absolute, to write
-		 *                          the log file in.
-		 * @param   date            If \c TRUE, a short form of the date and time
-		 *                          will be included in the file name.
-		 * @param   hardwareDetails If \c TRUE, hardware details of the machine
-		 *                          running this game will be printed at the
-		 *                          beginning of the log.
-		 * @return  A pointer to the sink representing the log file. If sink
-		 *          creation failed, \c nullptr is returned.
+		 * \c date below. If a file with the same path already exists, then it will
+		 * be cleared of all its contents before it is opened.
+		 * @param  name            The name of the application to write in the
+		 *                         first line of the log file.
+		 * @param  dev             The name of the application developer/s to
+		 *                         write in the first line of the log file.
+		 * @param  folder          The directory, relative or absolute, to write
+		 *                         the log file in.
+		 * @param  date            If \c TRUE, a short form of the date and time
+		 *                         will be included in the file name.
+		 * @param  hardwareDetails If given, the hardware details of the machine
+		 *                         running this game will be printed at the
+		 *                         beginning of the log.
+		 * @safety If an exception is thrown, the created object should \b not be
+		 *         used.
 		 */
-		static std::shared_ptr<spdlog::sinks::dup_filter_sink_st> Get(
-			const std::string& name = "Application",
-			const std::string& dev = "Developer",
-			const std::string& folder = ".",
+		sink(const std::string& name = "Application",
+			const std::string& dev = "Developer", std::string folder = "",
 			const bool date = true,
-			const bool hardwareDetails = true
-		) noexcept;
+			const std::shared_ptr<System::Properties>& hardwareDetails = nullptr);
 		
 		/**
 		 * Retrieves a copy of the event log produced thus far.
@@ -98,102 +96,102 @@ namespace engine {
 		 *         event log is only guaranteed to be left in a valid state should
 		 *         its \c str() method throw.
 		 */
-		static std::string GetLog();
-
-		/**
-		 * Retrieves the application name as defined in the first call to
-		 * \c sink.Get().
-		 * @return The application name.
-		 * @safety Strong guarantee: see <a href=
-		 *         "https://cplusplus.com/reference/string/string/string/"
-		 *         target="_blank">string constructor documentation.</a>
-		 */
-		static std::string ApplicationName();
-		
-		/**
-		 * Retrieves the name of the application developer as defined in the first
-		 * call to \c sink.Get().
-		 * @return The name of the application developer.
-		 * @safety Strong guarantee: see <a href=
-		 *         "https://cplusplus.com/reference/string/string/string/"
-		 *         target="_blank">string constructor documentation.</a>
-		 */
-		static std::string DeveloperName();
-		
-		/**
-		 * Retrieves the current year in string form.
-		 * Used when writing the first line of the log file.
-		 * @return The year in the format "yyyy".
-		 * @safety Strong guarantee: see <a href=
-		 *         "https://cplusplus.com/reference/string/string/string/"
-		 *         target="_blank">string constructor documentation.</a>
-		 */
-		static std::string GetYear();
-		
-		/**
-		 * Retrieves the current date and time in the format "d-m-yyyy h-m-s".
-		 * @return The date and time in string form.
-		 * @safety Strong guarantee: see <a href=
-		 *         "https://cplusplus.com/reference/string/string/string/"
-		 *         target="_blank">string constructor documentation.</a>
-		 */
-		static std::string GetDateTime();
-	protected:
-		/**
-		 * This class cannot be instantiated by the client.
-		 */
-		sink() noexcept = default;
+		std::string getLog();
 	private:
 		/**
 		 * The non-thread safe distribution sink which outputs to a file and an
 		 * \c ostringstream.
 		 */
-		static std::shared_ptr<spdlog::sinks::dup_filter_sink_st> _sharedSink;
+		std::shared_ptr<spdlog::sinks::dup_filter_sink_st> _sharedSink;
 
 		/**
 		 * The \c ostringstream used to store a copy of the event log of the log
 		 * file.
 		 */
-		static std::ostringstream _fileCopy;
-		
+		std::ostringstream _fileCopy;
+
 		/**
-		 * Stores the name of the application.
+		 * \c logger was made a friend of \c sink so that it can access the
+		 * internal sink object.
 		 */
-		static std::string _appName;
-		
-		/**
-		 * Stores the name of the application developer.
-		 */
-		static std::string _devName;
+		friend class logger;
 	};
 
 	/**
-	 * This class represents a single C++ object's interface with the log file.
-	 * The multiple logger-single sink architecture was created to allow for
-	 * different C++ objects to have their own logger object which could output to
-	 * the same file. It also decouples C++ classes from the "global" file sink and
-	 * makes implementing a multiple logger-multiple sink architecture easier.
+	 * This class can write information to a \c sink object.
 	 */
 	class logger {
 	public:
 		/**
-		 * Creates a new logger object and adds it to the file sink.
+		 * Logger initialisation data.
+		 */
+		struct data {
+			/**
+			 * A pointer to the sink the logger will write to.
+			 */
+			std::shared_ptr<engine::sink> sink = nullptr;
+
+			/**
+			 * The name used to identify the logger object in the sink's file.
+			 */
+			std::string name = "logger";
+		};
+
+		/**
+		 * Creates a new logger object and adds it to the given sink.
 		 * An internal object counter is used to keep track of the number of logger
 		 * objects throughout the execution of the program: this is used only to
 		 * ensure that all logger object names are unique as this is important to
 		 * maintain for the logging backend. This counter is only incremented if
-		 * object creation is successful. If the operation failed, the \c boxer
-		 * library is used to report an error string to the user via a message box.
-		 * @param name The name to give to the logger object.
+		 * object creation is successful.\n
+		 * If \c nullptr is given as the sink, then the logger object will not
+		 * write anything to a sink, and the object counter will not increment. If
+		 * a critical log is written, it still won't be written to any file,
+		 * however, the dialog will still pop up. In this state, the internal
+		 * logger object won't be constructed, and this logger object will have a
+		 * blank name.
+		 * @warning Do not give a \c sink that couldn't be constructed! Doing this
+		 *          will crash the game with an assertion.
+		 * @param   data Data to initialise the logger with.
+		 * @safety  Basic guarantee: if an exception was thrown, then the logger
+		 *          object will be left in a defined state. However, if an attempt
+		 *          to write with this faulty logger object is made, the attempt
+		 *          will have no effect.
 		 */
-		logger(const std::string& name) noexcept;
+		logger(const engine::logger::data& loggerData);
+
+		/**
+		 * Creates a new logger object based on the data of another logger object.
+		 * The new, copied logger object will write to the same sink as the one
+		 * given. It will also have the same name, but with a different number due
+		 * to the workings of the internal object counter.\n
+		 * If the given \c logger object isn't properly constructed, the newly
+		 * constructed object won't be properly constructed either.\n
+		 * If the given \c logger object wasn't given a sink on construction, then
+		 * this logger object won't be assigned a sink, either.
+		 * @param  logger Reference to the logger object to copy from.
+		 * @safety Basic guarantee.
+		 * @sa     logger(const engine::logger::data&).
+		 */
+		logger(const engine::logger& logger);
 
 		/**
 		 * Drops the logger object from <tt>spdlog</tt>'s logger pool.
 		 * If the call to \c spdlog::drop() failed, the \c boxer library is used to
-		 * report an error string to the user via a message box.
+		 * report an error string to the user via a message box. This will never
+		 * happen if construction failed.
 		 */
 		~logger() noexcept;
+
+		/**
+		 * Retrieves a reference to the data used to initialise this logger object.
+		 * @return The data given during construction.
+		 * @safety Note that if the constructor throws during the storing of the
+		 *         data, the data returned will be in an undefined state.
+		 */
+		inline const engine::logger::data& getData() const noexcept {
+			return _data;
+		}
 
 		/**
 		 * Outputs text to the log file.
@@ -207,6 +205,8 @@ namespace engine {
 		 * @param  line   The line of text.
 		 * @param  values A parameter pack containing the values to insert into the
 		 *                text.
+		 * @safety <a href="https://github.com/gabime/spdlog/wiki/Error-handling"
+		 *         target="_blank">Spdlog will not throw whilst logging.</a>
 		 * @sa     logger.error()
 		 * @sa     logger.warning()
 		 * @sa     logger.critical()
@@ -222,6 +222,8 @@ namespace engine {
 		 * @param  line   The line of text.
 		 * @param  values A parameter pack containing the values to insert into the
 		 *                text.
+		 * @safety <a href="https://github.com/gabime/spdlog/wiki/Error-handling"
+		 *         target="_blank">Spdlog will not throw whilst logging.</a>
 		 * @sa     logger.write()
 		 * @sa     logger.warning()
 		 * @sa     logger.critical()
@@ -238,6 +240,8 @@ namespace engine {
 		 * @param  line   The line of text.
 		 * @param  values A parameter pack containing the values to insert into the
 		 *                text.
+		 * @safety <a href="https://github.com/gabime/spdlog/wiki/Error-handling"
+		 *         target="_blank">Spdlog will not throw whilst logging.</a>
 		 * @sa     logger.write()
 		 * @sa     logger.error()
 		 * @sa     logger.critical()
@@ -256,6 +260,10 @@ namespace engine {
 		 * @param  line   The line of text.
 		 * @param  values A parameter pack containing the values to insert into the
 		 *                text.
+		 * @safety <a href="https://github.com/gabime/spdlog/wiki/Error-handling"
+		 *         target="_blank">Spdlog will not throw whilst logging.</a> If the
+		 *         dialog box couldn't be created, then the reason why will be
+		 *         logged at the critical level.
 		 * @sa     logger.write()
 		 * @sa     logger.error()
 		 * @sa     logger.warning()
@@ -287,6 +295,11 @@ namespace engine {
 		 * for the internal logger object later.
 		 */
 		std::string _name;
+
+		/**
+		 * Cache of the data used to initialise this logger object.
+		 */
+		engine::logger::data _data;
 	};
 }
 

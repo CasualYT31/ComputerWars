@@ -24,7 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "army.hpp"
 #include <chrono>
 
-awe::game_engine::game_engine(const std::string& name) noexcept : _logger(name) {
+awe::game_engine::game_engine(const engine::logger::data& data) noexcept :
+	engine::json_script({ data.sink, "json_script" }), _logger(data) {
 	// Credit: https://stackoverflow.com/a/13446015/6928376.
 	std::random_device randomDevice;
 	std::mt19937::result_type seed = randomDevice() ^ (
@@ -332,50 +333,66 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	_sprites->tile = std::make_shared<awe::spritesheets::tiles>();
 	_sprites->tilePicture = std::make_shared<awe::spritesheets::tile_pictures>();
 	// Load most of the objects.
-	bool ret = _loadObject(_dictionary, j, { "languages" })
-		&& _loadObject(_fonts, j, { "fonts" })
-		&& _loadObject(_sounds, j, { "sounds" })
-		&& _loadObject(_music, j, { "music" })
-		&& _loadObject(_renderer, j, { "renderer" });
+	bool ret = _loadObject(_dictionary, j, { "languages" },
+			engine::logger::data{ _logger.getData().sink, "language_dictionary" })
+		&& _loadObject(_fonts, j, { "fonts" },
+			engine::logger::data{ _logger.getData().sink, "fonts" })
+		&& _loadObject(_sounds, j, { "sounds" },
+			engine::logger::data{ _logger.getData().sink, "sounds" })
+		&& _loadObject(_music, j, { "music" },
+			engine::logger::data{ _logger.getData().sink, "music" })
+		&& _loadObject(_renderer, j, { "renderer" },
+			engine::logger::data{ _logger.getData().sink, "renderer" });
 	if (!ret) return false;
 	// Opening the renderer now will prevent glFlush() SFML errors from plaguing
 	// standard output when I load images in the animated_spritesheet objects
 	// below.
 	_renderer->openWindow();
 	// Allocate GUI and scripts objects, but don't initialise yet.
-	_scripts = std::make_shared<engine::scripts>();
-	_gui = std::make_shared<sfx::gui>(_scripts);
+	_scripts = std::make_shared<engine::scripts>(
+		engine::logger::data{ _logger.getData().sink, "scripts" });
+	_gui = std::make_shared<sfx::gui>(_scripts,
+		engine::logger::data{_logger.getData().sink, "gui"});
 	// Continue loading most of the objects.
-	ret =  _loadObject(_userinput, j, { "userinput" })
-		&& _loadObject(_sprites->CO, j, { "spritesheets", "co" })
+	ret =  _loadObject(_userinput, j, { "userinput" },
+			engine::logger::data{ _logger.getData().sink, "user_input" })
+		&& _loadObject(_sprites->CO, j, { "spritesheets", "co" },
+			engine::logger::data{ _logger.getData().sink, "spritesheet" })
 		&& _loadObject(_sprites->unit->idle, j,
-			{ "spritesheets", "unit", "idle" })
+			{ "spritesheets", "unit", "idle" },
+			engine::logger::data{ _logger.getData().sink, "spritesheet" })
 		&& _loadObject(_sprites->tile->normal, j,
-			{ "spritesheets", "tile", "normal" })
+			{ "spritesheets", "tile", "normal" },
+			engine::logger::data{ _logger.getData().sink, "spritesheet" })
 		&& _loadObject(_sprites->unitPicture, j,
-			{ "spritesheets", "unit", "pictures" })
+			{ "spritesheets", "unit", "pictures" },
+			engine::logger::data{ _logger.getData().sink, "spritesheet" })
 		&& _loadObject(_sprites->tilePicture->normal, j,
-			{ "spritesheets", "tile", "normalpictures" })
-		&& _loadObject(_sprites->icon, j, { "spritesheets", "icon" })
-		&& _loadObject(_sprites->GUI, j, { "spritesheets", "gui" })
+			{ "spritesheets", "tile", "normalpictures" },
+			engine::logger::data{ _logger.getData().sink, "spritesheet" })
+		&& _loadObject(_sprites->icon, j, { "spritesheets", "icon" },
+			engine::logger::data{ _logger.getData().sink, "spritesheet" })
+		&& _loadObject(_sprites->GUI, j, { "spritesheets", "gui" },
+			engine::logger::data{ _logger.getData().sink, "spritesheet" })
 		&& _loadObject(_countries, j, { "countries" }, _scripts, "Country",
-			"country_bank")
+			engine::logger::data{ _logger.getData().sink, "country_bank" })
 		&& _loadObject(_weathers, j, { "weathers" }, _scripts, "Weather",
-			"weather_bank")
+			engine::logger::data{ _logger.getData().sink, "weather_bank" })
 		&& _loadObject(_environments, j, { "environments" }, _scripts,
-			"Environment", "environment_bank")
+			"Environment",
+			engine::logger::data{ _logger.getData().sink, "environment_bank" })
 		&& _loadObject(_movements, j, { "movements" }, _scripts, "Movement",
-			"movement_bank")
+			engine::logger::data{ _logger.getData().sink, "movement_bank" })
 		&& _loadObject(_terrains, j, { "terrains" }, _scripts, "Terrain",
-			"terrain_bank")
+			engine::logger::data{ _logger.getData().sink, "terrain_bank" })
 		&& _loadObject(_tiles, j, { "tiles" }, _scripts, "TileType",
-			"tile_bank")
+			engine::logger::data{ _logger.getData().sink, "tile_bank" })
 		&& _loadObject(_weapons, j, { "weapons" }, _scripts, "Weapon",
-			"weapon_bank")
+			engine::logger::data{ _logger.getData().sink, "weapon_bank" })
 		&& _loadObject(_units, j, { "units" }, _scripts, "UnitType",
-			"unit_bank")
+			engine::logger::data{ _logger.getData().sink, "unit_bank" })
 		&& _loadObject(_commanders, j, { "commanders" }, _scripts, "Commander",
-			"commander_bank");
+			engine::logger::data{ _logger.getData().sink, "commander_bank" });
 	if (!ret) return false;
 	// Finish initialisation of banks.
 	if (!awe::checkCountryTurnOrderIDs(*_countries)) {
@@ -390,7 +407,7 @@ bool awe::game_engine::_load(engine::json& j) noexcept {
 	awe::updateTerrainBank(*_terrains, *_countries);
 	awe::updateTileTypeBank(*_tiles, *_terrains, *_countries);
 	awe::updateUnitTypeBank(*_units, *_movements, *_terrains, *_weapons,
-		*_countries);
+		*_countries, _logger.getData().sink);
 	// Initialise GUIs and the scripts.
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scriptsPath);
@@ -506,8 +523,8 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 		return nullptr;
 	} else {
 		try {
-			_map = std::make_unique<awe::map>(
-				_countries, _tiles, _units, _commanders);
+			_map = std::make_unique<awe::map>( _countries, _tiles, _units,
+				_commanders, engine::logger::data{_logger.getData().sink, "map"});
 		} catch (const std::bad_alloc& e) {
 			_logger.error("Couldn't allocate the map object: {}", e.what());
 			return nullptr;

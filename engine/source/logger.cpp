@@ -26,91 +26,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "SystemProperties.hpp"
 #include "SFML/Window/Joystick.hpp"
 
-std::shared_ptr<spdlog::sinks::dup_filter_sink_st> engine::sink::_sharedSink =
-	nullptr;
-std::ostringstream engine::sink::_fileCopy = std::ostringstream();
-std::string engine::sink::_appName = "";
-std::string engine::sink::_devName = "";
-
-std::shared_ptr<spdlog::sinks::dup_filter_sink_st> engine::sink::Get(
-	const std::string& name, const std::string& dev, const std::string& folder,
-	const bool date, const bool hardwareDetails) noexcept {
-	if (!_sharedSink) {
-		try {
-			_appName = name;
-			_devName = dev;
-			std::string filename = folder + "/Log" +
-				(date ? " " + GetDateTime() : "") + ".log";
-
-			_fileCopy << ApplicationName() << " © " << GetYear() << " " <<
-				DeveloperName() << std::endl;
-			_fileCopy << "---------------" << std::endl;
-			if (hardwareDetails) {
-				System::Properties sys;
-				_fileCopy << "Hardware Specification:\n";
-				_fileCopy << "CPU       " << sys.CPUModel() << std::endl;
-				_fileCopy << "Memory    " << sys.RAMTotal() << std::endl;
-				_fileCopy << "GPU       " << sys.GPUName() << std::endl;
-				_fileCopy << "Storage   " << sys.StorageFree(System::Unit::MB) <<
-					" out of " << sys.StorageTotal() << " is free" << std::endl;
-				_fileCopy << "Platform  " << sys.OSName() << " ~ " <<
-					sys.OSVersion() << std::endl;
-				_fileCopy << "---------------" << std::endl;
-				_fileCopy << "Gamepads" << std::endl;
-				// I have avoided assuming that the SFML doesn't leave out IDs:
-				// i.e. joystick 0 is connected, 1 is not connected, but 2 IS
-				// connected.
-				// I don't have 100% certainty regarding how the SFML deals with
-				// IDs, so I'd prefer to be safe even if it's not 100% efficient.
-				sf::Joystick::update();
-				for (unsigned int i = 0; i < sf::Joystick::Count; i++) {
-					_fileCopy << "Gamepad #" << i << " is " <<
-						((sf::Joystick::isConnected(i)) ? ("") : ("not ")) <<
-						"connected" << std::endl;
-				}
-				_fileCopy << "---------------" << std::endl;
-			}
-			_fileCopy << "Event Log:" << std::endl;
-
-			std::ofstream logfile(filename);
-			logfile << _fileCopy.str();
-			logfile.close();
-
-			_sharedSink = std::make_shared<spdlog::sinks::dup_filter_sink_st>(
-				std::chrono::seconds(5));
-			_sharedSink->add_sink(
-				std::make_shared<spdlog::sinks::basic_file_sink_st>(filename)
-			);
-			_sharedSink->add_sink(
-				std::make_shared<spdlog::sinks::ostream_sink_st>(_fileCopy)
-			);
-		} catch (std::exception& e) {
-			boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
-		}
-	}
-	return _sharedSink;
-}
-
-std::string engine::sink::GetLog() {
-	return _fileCopy.str();
-}
-
-std::string engine::sink::ApplicationName() {
-	return _appName;
-}
-
-std::string engine::sink::DeveloperName() {
-	return _devName;
-}
-
-std::string engine::sink::GetYear() {
+std::string engine::GetYear() {
 	time_t curtime = time(NULL);
 	tm ltime;
 	localtime_s(&ltime, &curtime);
 	return std::to_string(ltime.tm_year + 1900);
 }
 
-std::string engine::sink::GetDateTime() {
+std::string engine::GetDateTime() {
 	time_t curtime = time(NULL);
 	tm ltime;
 	localtime_s(&ltime, &curtime);
@@ -120,26 +43,121 @@ std::string engine::sink::GetDateTime() {
 		std::to_string(ltime.tm_sec);
 }
 
+engine::sink::sink(const std::string& name, const std::string& dev,
+	std::string folder, const bool date,
+	const std::shared_ptr<System::Properties>& hardwareDetails) {
+	try {
+		// First, attempt to write preliminary information to the log file.
+		if (!folder.empty() && (folder.back() != '/' || folder.back() != '\\'))
+			folder.push_back('/');
+		std::string filename = folder + "Log" +
+			((date) ? (" " + GetDateTime()) : ("")) + ".log";
+		{
+			std::ofstream logfile(filename);
+			_fileCopy << name << " © " << GetYear() << " " << dev <<
+				"\n---------------\n";
+			if (hardwareDetails) {
+				try {
+					_fileCopy << "Hardware Specification:\n     CPU\t\t";
+					_fileCopy << hardwareDetails->CPUModel() << "\n  Memory\t\t";
+					_fileCopy << hardwareDetails->RAMTotal() << "\n     GPU\t\t";
+					_fileCopy << hardwareDetails->GPUName() << "\n Storage\t\t";
+					_fileCopy << hardwareDetails->StorageFree(System::Unit::MB) <<
+						" out of " << hardwareDetails->StorageTotal() <<
+						" is free\n";
+					_fileCopy << "Platform\t\t" << hardwareDetails->OSName() <<
+						" ~ " << hardwareDetails->OSVersion();
+				} catch (const std::system_error& e) {
+					// Exceptions thrown [likely] due to a System::Properties
+					// failure should be reported in the log file (or, at least, an
+					// attempt should be made to - don't try to deal with stream
+					// exceptions).
+					_fileCopy << "\nA failure occurred whilst trying to retrieve "
+						"system properties: code " <<
+						std::to_string(e.code().value()) << ", category: " <<
+						e.code().category().name() << ", message: " <<
+						e.code().message();
+				}
+				_fileCopy << "\n---------------\nGamepads\n";
+				// I have avoided assuming that the SFML doesn't leave out IDs:
+				// i.e. joystick 0 is connected, 1 is not connected, but 2 IS
+				// connected.
+				// I don't have 100% certainty regarding how the SFML deals with
+				// IDs, so I'd prefer to be safe even if it's not 100% efficient.
+				sf::Joystick::update();
+				for (unsigned int i = 0; i < sf::Joystick::Count; ++i) {
+					_fileCopy << "Gamepad #" << i << " is " <<
+						((sf::Joystick::isConnected(i)) ? ("") : ("not ")) <<
+						"connected\n";
+				}
+				_fileCopy << "---------------\n";
+			}
+			_fileCopy << "Event Log:\n";
+			logfile << _fileCopy.str();
+		}
+		// Then, attempt to create the spdlog sinks.
+		_sharedSink = std::make_shared<spdlog::sinks::dup_filter_sink_st>(
+			std::chrono::seconds(5)
+			);
+		_sharedSink->add_sink(
+			std::make_shared<spdlog::sinks::basic_file_sink_st>(filename)
+		);
+		_sharedSink->add_sink(
+			std::make_shared<spdlog::sinks::ostream_sink_st>(_fileCopy)
+		);
+	} catch (const std::exception& e) {
+		// If the above code throws an exception, we must guarantee that the
+		// internal sink object is kept uninitialised to denote that it should not
+		// be used.
+		_sharedSink = nullptr;
+		throw e;
+	}
+}
+
+std::string engine::sink::getLog() {
+	return _fileCopy.str();
+}
+
 std::size_t engine::logger::_objectCount = 0;
 
-engine::logger::logger(const std::string& name) noexcept {
-	try {
-		_name = name + "_" + std::to_string(_objectCount);
-		_logger = std::make_shared<spdlog::logger>(_name, engine::sink::Get());
-		// Don't increment in to_string() so that if it throws, the object count
-		// isn't incremented.
-		_objectCount++;
-	} catch (std::exception& e) { // Also catches spdlog errors, which might not be
-		                          // the case if another logging backend is used!
-		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
+engine::logger::logger(const engine::logger::data& loggerData) : _data(loggerData)
+	{
+	if (loggerData.sink) {
+		assert(("The sink given to a logger must be constructed properly!",
+			loggerData.sink->_sharedSink));
+		_name = loggerData.name + "_" + std::to_string(_objectCount);
+		_logger = std::make_shared<spdlog::logger>(_name,
+			loggerData.sink->_sharedSink);
+		// Don't increment in to_string() so that if this code throws, the object
+		// count isn't incremented.
+		++_objectCount;
+	}
+}
+
+engine::logger::logger(const engine::logger& logger) : _data{ logger._data } {
+	if (logger._logger) {
+		if (logger._name.rfind('_') == std::string::npos) {
+			_name = logger._name + "_" + std::to_string(_objectCount);
+		} else {
+			_name = logger._name.substr(0, logger._name.rfind('_') + 1) +
+				std::to_string(_objectCount);
+		}
+		const auto& sinks = logger._logger->sinks();
+		_logger = std::make_shared<spdlog::logger>(_name, begin(sinks),
+			end(sinks));
+		++_objectCount;
 	}
 }
 
 engine::logger::~logger() noexcept {
-	try {
-		spdlog::drop(_name);
-	} catch (std::exception& e) {
-		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
+	// If we know the logger couldn't be created properly, then there's no point
+	// trying to drop it.
+	if (_logger) {
+		try {
+			spdlog::drop(_name);
+		} catch (std::exception& e) {
+			boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
+		}
 	}
 }
 

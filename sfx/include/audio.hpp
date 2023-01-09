@@ -112,11 +112,10 @@ namespace sfx {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the
-		 *             log file. Defaults to "audio."
+		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		audio(const std::string& name = "audio") noexcept;
+		audio(const engine::logger::data& data) noexcept;
 
 		/**
 		 * Retrieves the base volume of all audio objects.

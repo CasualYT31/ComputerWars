@@ -310,11 +310,10 @@ namespace sfx {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param name The name to give this particular instantiation within the
-		 *             log file. Defaults to "user_input."
+		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		user_input(const std::string& name = "user_input") noexcept;
+		user_input(const engine::logger::data& data) noexcept;
 
 		/**
 		 * Returns a set of controls that have been registered with this object.

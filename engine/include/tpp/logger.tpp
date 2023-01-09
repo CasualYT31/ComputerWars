@@ -24,40 +24,31 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename... Ts>
 void engine::logger::write(const std::string& line, Ts... values) noexcept {
-	try {
-		_logger->info(line, values...);
-	} catch (const std::exception& e) {
-		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
-	}
+	if (_logger) _logger->info(line, values...);
 }
 
 template<typename... Ts>
 void engine::logger::error(const std::string& line, Ts... values) noexcept {
-	try {
-		_logger->error(line, values...);
-	} catch (const std::exception& e) {
-		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
-	}
+	if (_logger) _logger->error(line, values...);
 }
 
 template<typename... Ts>
 void engine::logger::warning(const std::string& line, Ts... values) noexcept {
-	try {
-		_logger->warn(line, values...);
-	} catch (const std::exception& e) {
-		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
-	}
+	if (_logger) _logger->warn(line, values...);
 }
 
 template<typename... Ts>
 void engine::logger::critical(const std::string& line, Ts... values) noexcept {
+	if (_logger) _logger->critical(line, values...);
 	try {
-		_logger->critical(line, values...);
 		// Produce dialog window.
 		std::string result;
 		fmt::format_to(std::back_inserter(result), line, values...);
 		boxer::show(result.c_str(), "Critical Error!", boxer::Style::Error);
 	} catch (const std::exception& e) {
-		boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
+		if (_logger) {
+			_logger->critical("Can't produce dialog box for above log: {}",
+				e.what());
+		}
 	}
 }

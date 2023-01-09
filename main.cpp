@@ -68,12 +68,15 @@ int main(int argc, char* argv[]) {
     );
     // Initialise the sink all loggers output to.
 #ifdef COMPUTER_WARS_DEBUG
-    engine::sink::Get("Computer Wars", "CasualYouTuber31", ".", false, false);
+    std::shared_ptr<engine::sink> sink = std::make_shared<engine::sink>(
+        "Computer Wars", "CasualYouTuber31", "", false, nullptr);
 #else
-    engine::sink::Get("Computer Wars", "CasualYouTuber31", ".");
+    std::shared_ptr<engine::sink> sink = std::make_shared<engine::sink>(
+        "Computer Wars", "CasualYouTuber31", "", true,
+        std::make_shared<System::Properties>());
 #endif
-    engine::logger rootLogger("main");
-    awe::game_engine engine;
+    engine::logger rootLogger({ sink, "main" });
+    awe::game_engine engine({ sink, "engine" });
     {
         // Find assets folder path from command-line arguments.
         std::string assetsFolder = "./assets";

@@ -45,8 +45,8 @@ std::string engine::expand_string::insert(const std::string& original) {
 	}
 }
 
-engine::language_dictionary::language_dictionary(const std::string& name) noexcept :
-	_logger(name) {}
+engine::language_dictionary::language_dictionary(const engine::logger::data& data)
+	noexcept : engine::json_script({data.sink, "json_script"}), _logger(data) {}
 
 bool engine::language_dictionary::addLanguage(const std::string& id,
 	const std::string& path) noexcept {
@@ -93,7 +93,7 @@ bool engine::language_dictionary::setLanguage(const std::string& id) noexcept {
 		std::unique_ptr<engine::language_dictionary::language> newMap = nullptr;
 		try {
 			newMap = std::make_unique<engine::language_dictionary::language>(
-				"language_" + id
+				engine::logger::data{ _logger.getData().sink, "language_" + id }
 			);
 		} catch (std::bad_alloc& e) {
 			_logger.error("Failed to allocate memory for the string map of "
@@ -150,8 +150,8 @@ bool engine::language_dictionary::_save(nlohmann::ordered_json& j) noexcept {
 	return true;
 }
 
-engine::language_dictionary::language::language(const std::string& name) noexcept :
-	_logger(name) {}
+engine::language_dictionary::language::language(const engine::logger::data& data)
+	noexcept : engine::json_script({ data.sink, "json_script" }), _logger(data) {}
 
 bool engine::language_dictionary::language::_load(engine::json& j) noexcept {
 	_strings.clear();

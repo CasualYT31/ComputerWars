@@ -24,7 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 const float sfx::audio::_granularity = 100.0f;
 
-sfx::audio::audio(const std::string& name) noexcept : _logger(name) {}
+sfx::audio::audio(const engine::logger::data& data) noexcept :
+	json_script({data.sink, "json_script"}), _logger(data) {}
 
 float sfx::audio::getVolume() const noexcept {
 	return _volume;
