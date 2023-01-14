@@ -600,6 +600,7 @@ void awe::map::Register(asIScriptEngine* engine,
 }
 
 awe::map::map(const engine::logger::data& data) noexcept : _logger(data),
+	_file({ data.sink, data.name + "_binary_file" }),
 	_cursor({ data.sink, data.name + "_cursor_sprite" }) {
 	_initShaders();
 }
@@ -609,6 +610,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const engine::logger::data& data) noexcept : _logger(data),
+	_file({ data.sink, data.name + "_binary_file" }),
 	_cursor({data.sink, data.name + "_cursor_sprite"}) {
 	_countries = countries;
 	_tileTypes = tiles;

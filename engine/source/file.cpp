@@ -22,9 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "file.hpp"
 
-engine::binary_file::binary_file() noexcept {
+engine::binary_file::binary_file(const engine::logger::data& data) {
 	_file.exceptions(std::fstream::failbit |
 		std::fstream::badbit | std::fstream::eofbit);
+	_logger.setData(data);
 }
 
 bool engine::binary_file::isBigEndian() noexcept {
@@ -51,16 +52,24 @@ void engine::binary_file::open(const std::string& filepath, const bool forInput)
 				std::ios::trunc);
 		}
 		_bytes = 0;
-	} catch (std::exception&) {
-		throw std::exception("Could not open file.");
+		_logger.write("Successfully opened file \"{}\" for {}.", filepath,
+			((forInput) ? ("input") : ("output")));
+	} catch (const std::exception& e) {
+		_logger.error("Could not open file \"{}\" for {}: {}", filepath,
+			((forInput) ? ("input") : ("output")), e.what());
+		throw e;
 	}
 }
 
 void engine::binary_file::close() {
 	try {
-		if (_file.is_open()) _file.close();
-	} catch (std::exception&) {
-		throw std::exception("Could not close file.");
+		if (_file.is_open()) {
+			_file.close();
+			_logger.write("Successfully closed file.");
+		}
+	} catch (const std::exception& e) {
+		_logger.error("Could not close file.");
+		throw e;
 	}
 }
 
@@ -69,15 +78,15 @@ sf::Uint64 engine::binary_file::position() const noexcept {
 }
 
 bool engine::binary_file::readBool() {
+	unsigned char inp = 0;
 	try {
-		unsigned char inp;
 		_file.read(reinterpret_cast<char*>(&inp), sizeof(inp));
 		_bytes += sizeof(inp);
 		return inp;
-	} catch (std::exception& e) {
-		std::string w = "Failed to read bool at position " +
-			std::to_string(_bytes) + ": " + e.what();
-		throw std::exception(w.c_str());
+	} catch (const std::exception& e) {
+		_logger.error("Failed to read bool of size {} at position {}: {}",
+			sizeof(inp), _bytes, e.what());
+		throw e;
 	}
 }
 
@@ -87,34 +96,41 @@ void engine::binary_file::readBool(bool& boolean) {
 }
 
 void engine::binary_file::writeBool(const bool val) {
+	unsigned char out = val ? 0xFF : 0x00;
 	try {
-		unsigned char out = val ? 0xFF : 0x00;
 		_file.write(reinterpret_cast<char*>(&out), sizeof(out));
 		_bytes += sizeof(out);
-	} catch (std::exception& e) {
-		std::string w = "Failed to write bool to position " +
-			std::to_string(_bytes) + ": " + e.what();
-		throw std::exception(w.c_str());
+	} catch (const std::exception& e) {
+		_logger.error("Failed to write bool {} of size {} to position {}: {}", out,
+			sizeof(out), _bytes, e.what());
+		throw e;
 	}
 }
 
 std::string engine::binary_file::readString() {
+	sf::Uint32 len = 0;
 	try {
-		sf::Uint32 len = 0;
 		_file.read(reinterpret_cast<char*>(&len), sizeof(len));
 		_bytes += sizeof(len);
+	} catch (const std::exception& e) {
+		_logger.error("Failed to read string length of size {} at position {}: {}",
+			sizeof(len), _bytes, e.what());
+		throw e;
+	}
+	sf::Uint32 i = 0;
+	try {
 		std::string ret;
-		for (sf::Uint32 i = 0; i < len; i++) {
+		for (; i < len; ++i) {
 			char inp;
 			_file.read(&inp, sizeof(inp));
 			_bytes += sizeof(inp);
 			ret += inp;
 		}
 		return ret;
-	} catch (std::exception& e) {
-		std::string w = "Failed to read string at position " +
-			std::to_string(_bytes) + ": " + e.what();
-		throw std::exception(w.c_str());
+	} catch (const std::exception& e) {
+		_logger.error("Failed to read character {} at position {} for string of "
+			"length {}: {}", i, _bytes, len, e.what());
+		throw e;
 	}
 }
 
@@ -124,17 +140,25 @@ void engine::binary_file::readString(std::string& str) {
 }
 
 void engine::binary_file::writeString(const std::string& str) {
+	sf::Uint32 len = (sf::Uint32)str.length();
 	try {
-		sf::Uint32 len = (sf::Uint32)str.length();
 		_file.write(reinterpret_cast<char*>(&len), sizeof(len));
 		_bytes += sizeof(len);
-		for (sf::Uint32 i = 0; i < len; i++) {
+	} catch (const std::exception& e) {
+		_logger.error("Failed to write string \"{}\"'s size {} to position {}: "
+			"{}", str, len, _bytes, e.what());
+		throw e;
+	}
+	sf::Uint32 i = 0;
+	try {
+		for (; i < len; ++i) {
 			_file.write(&str.at(i), 1);
 			_bytes += 1;
 		}
-	} catch (std::exception& e) {
-		std::string w = "Failed to write string to position " +
-			std::to_string(_bytes) + ": " + e.what();
-		throw std::exception(w.c_str());
+	} catch (const std::exception& e) {
+		_logger.error("Failed to write character {} ('{}') of string \"{}\" "
+			"(size {}) to position {}: {}", i, str.at(i), str, len, _bytes,
+			e.what());
+		throw e;
 	}
 }

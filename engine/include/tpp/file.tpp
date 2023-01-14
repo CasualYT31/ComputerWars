@@ -24,6 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T>
 T engine::binary_file::convertNumber(T number) noexcept {
+	static_assert(std::is_arithmetic<T>::value,
+		"Value must be an arithmetic type!");
 	T copy = number;
 	for (std::size_t i = 0; i < sizeof(T); i++) {
 		*((unsigned char*)&number + i) =
@@ -34,16 +36,18 @@ T engine::binary_file::convertNumber(T number) noexcept {
 
 template<typename T>
 T engine::binary_file::readNumber() {
+	static_assert(std::is_arithmetic<T>::value,
+		"The return must be an arithmetic type!");
 	try {
 		T ret;
 		_file.read(reinterpret_cast<char*>(&ret), sizeof(T));
 		_bytes += sizeof(T);
 		if (sizeof(T) > 1 && isBigEndian()) ret = convertNumber(ret);
 		return ret;
-	} catch (std::exception& e) {
-		std::string w = "Failed to read number at position " +
-			std::to_string(_bytes) + ": " + e.what();
-		throw std::exception(w.c_str());
+	} catch (const std::exception& e) {
+		_logger.error("Failed to read number of size {} at position {}: {}",
+			sizeof(T), _bytes, e.what());
+		throw e;
 	}
 }
 
@@ -55,13 +59,15 @@ void engine::binary_file::readNumber(T& number) {
 
 template<typename T>
 void engine::binary_file::writeNumber(T number) {
+	static_assert(std::is_arithmetic<T>::value,
+		"Value must be an arithmetic type!");
 	try {
 		if (sizeof(T) > 1 && isBigEndian()) number = convertNumber(number);
 		_file.write(reinterpret_cast<char*>(&number), sizeof(T));
 		_bytes += sizeof(T);
-	} catch (std::exception& e) {
-		std::string w = "Failed to write number to position " +
-			std::to_string(_bytes) + ": " + e.what();
-		throw std::exception(w.c_str());
+	} catch (const std::exception& e) {
+		_logger.error("Failed to write number {} of size {} to position {}: {}",
+			number, sizeof(T), _bytes, e.what());
+		throw e;
 	}
 }

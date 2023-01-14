@@ -29,7 +29,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <string>
 #include <fstream>
+#include <type_traits>
 #include "sfml/System/NonCopyable.hpp"
+#include "logger.hpp"
 
 namespace engine {
 	/**
@@ -42,10 +44,19 @@ namespace engine {
 	public:
 		/**
 		 * Initialises the internal file stream.
-		 * The internal file stream will throw an exception when any of its fail,
-		 * bad, and eof bits are set.
+		 * In the constructor, the internal file stream is configured to throw an
+		 * exception when any of its fail, bad, and eof bits are set.
+		 * @param  data The data to initialise the logger object with.
+		 * @safety The \c exceptions() method used to perform the configuration has
+		 *         the basic guarantee.\n
+		 *         If the construction of the logger object failed, and
+		 *         \c exceptions() doesn't throw, then the rest of the object is
+		 *         guaranteed to be properly constructed.\n
+		 *         If \c bad_alloc is thrown, then the object is \em not left in a
+		 *         good state, and should not be used.
+		 * @sa     \c engine::logger
 		 */
-		binary_file() noexcept;
+		binary_file(const engine::logger::data& data);
 
 		/**
 		 * Determines if the system is running on big endian byte ordering.
@@ -55,9 +66,10 @@ namespace engine {
 
 		/**
 		 * Converts a number between little and big endian encoding.
-		 * @tparam T      The type of integer or floating point value to convert.
-		 * @param  number The number to convert.
-		 * @return The converted number.
+		 * @warning The given value must be an arithmetic value!
+		 * @tparam  T      The type of integer or floating point value to convert.
+		 * @param   number The number to convert.
+		 * @return  The converted number.
 		 */
 		template<typename T>
 		static T convertNumber(T number) noexcept;
@@ -69,13 +81,18 @@ namespace engine {
 		 * @param  filepath The path of the file to open.
 		 * @param  forInput \c TRUE if the file is to be open for input, \c FALSE
 		 *                  if for output.
-		 * @throws std::exception if the file couldn't be opened.
+		 * @throws If the file couldn't be opened, or if the old file couldn't be
+		 *         closed. See \c fstream::close() and \c fstream::open().
+		 * @safety The internal file stream is left in a valid state if an
+		 *         exception is thrown.
 		 */
 		void open(const std::string& filepath, const bool forInput);
 
 		/**
 		 * Closes the currently open file, if any is open.
-		 * @throws std::exception if the file couldn't be closed.
+		 * @throws If the file couldn't be closed. See \c fstream::close().
+		 * @safety The internal file stream is left in a valid state if an
+		 *         exception is thrown.
 		 */
 		void close();
 
@@ -94,7 +111,9 @@ namespace engine {
 		 * @tparam The type of arithmetic value to read.
 		 * @return The number retrieved from the binary file, in the correct
 		 *         format.
-		 * @throws std::exception if the number could not be read.
+		 * @throws If the number could not be read.
+		 * @safety If the read operation failed, \c _bytes is not incremented, and
+		 *         the stream is left in a valid state.
 		 */
 		template<typename T>
 		T readNumber();
@@ -103,13 +122,13 @@ namespace engine {
 		 * Version of \c readNumber() that updates a given variable with the read
 		 * value.
 		 * These versions of the read methods were added to prevent explicit
-		 * references to types. This is particularly useful for typedefs.\n
-		 * If an exception was thrown, this method guarantees that the given
-		 * variable isn't updated.
+		 * references to types. This is particularly useful for typedefs.
 		 * @param  number If the number was retrieved from the binary file
 		 *                successfully, then it will replace the value stored at
 		 *                \c number.
-		 * @throws std::exception if the number could not be read.
+		 * @safety If an exception was thrown, this method guarantees that the
+		 *         given variable isn't updated.
+		 * @sa     \c readNumber()
 		 */
 		template<typename T>
 		void readNumber(T& number);
@@ -121,19 +140,21 @@ namespace engine {
 		 * with \c 0xFF being the value that is written by the \c writeBool()
 		 * method.
 		 * @return The boolean value retrieved from the binary file.
-		 * @throws std::exception if the bool could not be read.
+		 * @throws If the bool could not be read.
+		 * @safety If the read operation failed, \c _bytes is not incremented, and
+		 *         the stream is left in a valid state.
 		 */
 		bool readBool();
 
 		/**
 		 * Version of \c readBool() that updates a given variable with the read
 		 * value.
-		 * If an exception was thrown, this method guarantees that the given
-		 * variable isn't updated.
 		 * @param  boolean If the bool was retrieved from the binary file
 		 *                 successfully, then it will replace the value stored at
 		 *                 \c boolean.
-		 * @throws std::exception if the boolean could not be read.
+		 * @safety If an exception was thrown, this method guarantees that the
+		 *         given variable isn't updated.
+		 * @sa     \c readBool()
 		 */
 		void readBool(bool& boolean);
 
@@ -142,7 +163,11 @@ namespace engine {
 		 * This class reads and writes strings as a list of bytes prepended by the
 		 * length of the string, which is stored as an unsigned 32-bit integer.
 		 * @return The string retrieved from the binary file.
-		 * @throws std::exception if the string could not be read.
+		 * @throws If the string could not be read.
+		 * @safety If the read operation failed, the stream is left in a valid
+		 *         state. \c _bytes will have been incremented by the number of
+		 *         bytes that were successfully read (which will not have been all
+		 *         of them).
 		 */
 		std::string readString();
 
@@ -154,7 +179,10 @@ namespace engine {
 		 * @param  str If the string was retrieved from the binary file
 		 *             successfully, then it will replace the value stored at
 		 *             \c str.
-		 * @throws std::exception if the string could not be read.
+		 * @throws If the string could not be read.
+		 * @safety If an exception was thrown, this method guarantees that the
+		 *         given variable isn't updated.
+		 * @sa     \c readString()
 		 */
 		void readString(std::string& str);
 
@@ -163,7 +191,9 @@ namespace engine {
 		 * @tparam The type of arithmetic value to write.
 		 * @param  number The arithmetic value to write, converted to little endian
 		 *                if required.
-		 * @throws std::exception if the number could not be written.
+		 * @throws If the number could not be written.
+		 * @safety If the write operation failed, \c _bytes is not incremented, and
+		 *         the stream is left in a valid state.
 		 */
 		template<typename T>
 		void writeNumber(T number);
@@ -171,19 +201,30 @@ namespace engine {
 		/**
 		 * Writes a bool value to the binary file.
 		 * @param  val The bool value to write.
-		 * @throws std::exception if the bool could not be written.
-		 * @sa     readBool()
+		 * @throws If the bool could not be written.
+		 * @safety If the write operation failed, \c _bytes is not incremented, and
+		 *         the stream is left in a valid state.
+		 * @sa     \c readBool()
 		 */
 		void writeBool(const bool val);
 
 		/**
 		 * Writes a string to the binary file.
 		 * @param  str The string to write.
-		 * @throws std::exception if the string could not be written.
-		 * @sa     readString()
+		 * @throws If the string could not be written.
+		 * @safety If the write operation failed, the stream is left in a valid
+		 *         state. \c _bytes will have been incremented by the number of
+		 *         bytes that were successfully written (which will not have been
+		 *         all of them).
+		 * @sa     \c readString()
 		 */
 		void writeString(const std::string& str);
 	private:
+		/**
+		 * The internal logger object.
+		 */
+		mutable engine::logger _logger;
+
 		/**
 		 * The internal file stream.
 		 */

@@ -120,38 +120,61 @@ std::string engine::sink::getLog() {
 
 std::size_t engine::logger::_objectCount = 0;
 
-engine::logger::logger(const engine::logger::data& loggerData) : _data(loggerData)
-	{
-	if (loggerData.sink) {
-		assert(("The sink given to a logger must be constructed properly!",
-			loggerData.sink->_sharedSink));
-		_name = loggerData.name + "_" + std::to_string(_objectCount);
-		_logger = std::make_shared<spdlog::logger>(_name,
-			loggerData.sink->_sharedSink);
-		// Don't increment in to_string() so that if this code throws, the object
-		// count isn't incremented.
-		++_objectCount;
-	}
+engine::logger::logger(const engine::logger::data& loggerData) {
+	setData(loggerData);
 }
 
-engine::logger::logger(const engine::logger& logger) : _data{ logger._data } {
-	if (logger._logger) {
-		if (logger._name.rfind('_') == std::string::npos) {
-			_name = logger._name + "_" + std::to_string(_objectCount);
-		} else {
-			_name = logger._name.substr(0, logger._name.rfind('_') + 1) +
-				std::to_string(_objectCount);
-		}
-		const auto& sinks = logger._logger->sinks();
-		_logger = std::make_shared<spdlog::logger>(_name, begin(sinks),
-			end(sinks));
-		++_objectCount;
-	}
+engine::logger::logger(const engine::logger& logger) {
+	setData(logger);
 }
 
 engine::logger::~logger() noexcept {
-	// If we know the logger couldn't be created properly, then there's no point
-	// trying to drop it.
+	_dropLogger();
+}
+
+void engine::logger::setData(const engine::logger::data& loggerData) {
+	if (loggerData.sink) {
+		assert(("The sink given to a logger must be constructed properly!",
+			loggerData.sink->_sharedSink));
+		_initialiseLogger(loggerData.name + "_" + std::to_string(_objectCount),
+			{ loggerData.sink->_sharedSink }, loggerData);
+	} else {
+		_uninitialiseLogger(loggerData);
+	}
+}
+
+void engine::logger::setData(const engine::logger& logger) {
+	if (logger._logger) {
+		if (logger._name.rfind('_') == std::string::npos) {
+			_initialiseLogger(logger._name + "_" + std::to_string(_objectCount),
+				logger._logger->sinks(), logger._data);
+		} else {
+			_initialiseLogger(logger._name.substr(0, logger._name.rfind('_') + 1) +
+				std::to_string(_objectCount),
+				logger._logger->sinks(), logger._data);
+		}
+	} else {
+		_uninitialiseLogger(logger._data);
+	}
+}
+
+std::size_t engine::logger::countCreated() noexcept {
+	return _objectCount;
+}
+
+void engine::logger::_initialiseLogger(const std::string& name,
+	const std::vector<spdlog::sink_ptr>& sinks,
+	const engine::logger::data& data) {
+	_logger = std::make_shared<spdlog::logger>(name, begin(sinks), end(sinks));
+	// _logger has changed, but _name hasn't yet. So we can call _dropLogger() to
+	// drop the old logger.
+	_dropLogger();
+	_name = name;
+	_data = data;
+	++_objectCount;
+}
+
+void engine::logger::_dropLogger() noexcept {
 	if (_logger) {
 		try {
 			spdlog::drop(_name);
@@ -161,6 +184,11 @@ engine::logger::~logger() noexcept {
 	}
 }
 
-std::size_t engine::logger::countCreated() noexcept {
-	return _objectCount;
+void engine::logger::_uninitialiseLogger(const engine::logger::data& loggerData) {
+	if (_logger) {
+		_dropLogger();
+		_name = "";
+		_data = loggerData;
+		_logger = nullptr;
+	}
 }

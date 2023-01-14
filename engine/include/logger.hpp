@@ -129,13 +129,19 @@ namespace engine {
 			/**
 			 * A pointer to the sink the logger will write to.
 			 */
-			std::shared_ptr<engine::sink> sink = nullptr;
+			std::shared_ptr<engine::sink> sink;
 
 			/**
 			 * The name used to identify the logger object in the sink's file.
 			 */
-			std::string name = "logger";
+			std::string name;
 		};
+
+		/**
+		 * Creates a blank logger object that can be later initialised with
+		 * \c setData() later.
+		 */
+		logger() noexcept = default;
 
 		/**
 		 * Creates a new logger object and adds it to the given sink.
@@ -157,6 +163,7 @@ namespace engine {
 		 *          object will be left in a defined state. However, if an attempt
 		 *          to write with this faulty logger object is made, the attempt
 		 *          will have no effect.
+		 * @sa      \c setData(const engine::logger::data&)
 		 */
 		logger(const engine::logger::data& loggerData);
 
@@ -171,7 +178,8 @@ namespace engine {
 		 * this logger object won't be assigned a sink, either.
 		 * @param  logger Reference to the logger object to copy from.
 		 * @safety Basic guarantee.
-		 * @sa     logger(const engine::logger::data&).
+		 * @sa     \c logger(const engine::logger::data&)
+		 * @sa     \c setData(const engine::logger&)
 		 */
 		logger(const engine::logger& logger);
 
@@ -182,6 +190,30 @@ namespace engine {
 		 * happen if construction failed.
 		 */
 		~logger() noexcept;
+
+		/**
+		 * Initialises the internal logger object.
+		 * This method will destroy any logger object that was previously
+		 * allocated. If the \c sink field in the given data is \c nullptr, then
+		 * any allocated logger object will be uninitialised and no new object will
+		 * be constructed.
+		 * @warning This method asserts that the internal sink in the given sink
+		 *          object, if given, is not \c nullptr.
+		 * @param   loggerData The data to construct the new logger object with.
+		 * @safety  Basic guarantee.
+		 */
+		void setData(const engine::logger::data& loggerData);
+
+		/**
+		 * Constructs a new logger object using data found in another one.
+		 * This method will destroy any logger object that was previously
+		 * allocated. If the internal logger object in the given logger is
+		 * \c nullptr, then any allocated logger object will be uninitialised and
+		 * no new object will be constructed.
+		 * @param  logger The logger to extract data from.
+		 * @safety Basic guarantee.
+		 */
+		void setData(const engine::logger& logger);
 
 		/**
 		 * Retrieves a reference to the data used to initialise this logger object.
@@ -277,6 +309,38 @@ namespace engine {
 		 */
 		static std::size_t countCreated() noexcept;
 	private:
+		/**
+		 * Replaces the stored logger with a new one.
+		 * @param  name  The name to give the logger object.
+		 * @param  sinks The sinks to assign to the logger object.
+		 * @param  data  The data that the caller used to construct the \c name and
+		 *               \c sinks parameters.
+		 * @safety Strong guarantee: if the new logger object could not be
+		 *         constructed, then all of the old logger's information will be
+		 *         kept.
+		 */
+		void _initialiseLogger(const std::string& name,
+			const std::vector<spdlog::sink_ptr>& sinks,
+			const engine::logger::data& data);
+
+		/**
+		 * Drops the logger object.
+		 * This method has no effect if \c _logger is \c nullptr.
+		 * @safety If the drop operation throws an exception, this method will
+		 *         catch it and produce a message box containing details of what
+		 *         occurred.
+		 */
+		void _dropLogger() noexcept;
+
+		/**
+		 * Drops the logger object and uninitialises the data stored in this
+		 * object.
+		 * This method has no effect if \c _logger is \c nullptr.
+		 * @safety Basic guarantee: if this method throws, the object is left in a
+		 *         valid state, but it might not have been fully uninitialised.
+		 */
+		void _uninitialiseLogger(const engine::logger::data& loggerData = {});
+
 		/**
 		 * A pointer to the logger object.
 		 */
