@@ -190,9 +190,8 @@ namespace engine {
 		 * A key sequence is a list of strings, each containing a key which should
 		 * exist in the JSON object. The first key in the list should exist in the
 		 * root object. The second key should exist within the object referenced by
-		 * the first key, and so. This means the following: the last key can point
-		 * to any type of value, but all the keys before it must point to object
-		 * values.\n
+		 * the first key, and so. This means that the last key can point to any
+		 * type of value, but all the keys before it must point to object values.\n
 		 * Since this typedef uses the \c vector STL container, initialiser lists
 		 * can be used for parameters of type \c KeySequence.
 		 */
@@ -200,61 +199,84 @@ namespace engine {
 
 		/**
 		 * Constructs an empty JSON object.
-		 * @param data The data to initialise the logger object with.
+		 * @param  data The data to initialise the logger object with.
+		 * @safety If the initialisation of the logger object throws an exception,
+		 *         this object will not be able to log anything, but the rest of
+		 *         the object is guaranteed to be in a valid state.
 		 */
-		json(const engine::logger::data& data) noexcept;
+		json(const engine::logger::data& data);
 
 		/**
 		 * Constructs a JSON object from a \c nlohmann one.
 		 * The assignment operator is called in order to achieve this.
-		 * @param jobj The \c nlohmann::ordered_json object to store within this
-		 *             object - this is referred to as the JSON object.
-		 * @param data The data to initialise the logger object with.
-		 * @sa    operator=()
+		 * @param  jobj The \c nlohmann::ordered_json object to store within this
+		 *              object - this is referred to as the JSON object.
+		 * @param  data The data to initialise the logger object with.
+		 * @safety If the initialisation of the logger object throws an exception,
+		 *         this object will not be able to log anything, but the rest of
+		 *         the object is guaranteed to be in a valid state. \c jobj is
+		 *         guaranteed to be stored.
+		 * @sa     \c operator=()
 		 */
-		json(const nlohmann::ordered_json& jobj, const engine::logger::data& data)
-			noexcept;
+		json(const nlohmann::ordered_json& jobj, const engine::logger::data& data);
 
 		/**
 		 * Constructs a JSON object from a \c nlohmann one.
 		 * The assignment operator is called in order to achieve this.
-		 * @param jobj The \c nlohmann::ordered_json object to store within this
-		 *             object - this is referred to as the JSON object.
-		 * @param data The data to initialise the logger object with.
-		 * @sa    operator=()
+		 * @param  jobj The \c nlohmann::ordered_json object to store within this
+		 *              object - this is referred to as the JSON object.
+		 * @param  data The data to initialise the logger object with.
+		 * @safety If the initialisation of the logger object throws an exception,
+		 *         this object will not be able to log anything, but the rest of
+		 *         the object is guaranteed to be in a valid state. \c jobj is
+		 *         guaranteed to be stored.
+		 * @sa     \c operator=()
 		 */
-		json(nlohmann::ordered_json&& jobj, const engine::logger::data& data)
-			noexcept;
+		json(nlohmann::ordered_json&& jobj, const engine::logger::data& data);
 
 		/**
 		 * Copy constructor.
 		 * Copies the JSON itself, but creates a new logger object.
-		 * @param obj  The object to copy.
-		 * @param data The data to initialise the logger object with.
+		 * @param  obj  The object to copy.
+		 * @param  data The data to initialise the logger object with.
+		 * @safety If the initialisation of the logger object throws an exception,
+		 *         this object will not be able to log anything, but the rest of
+		 *         the object is guaranteed to be in a valid state. \c obj is
+		 *         guaranteed to be copied.
 		 */
-		json(const engine::json& obj, const engine::logger::data& data) noexcept;
+		json(const engine::json& obj, const engine::logger::data& data);
 
 		/**
 		 * Move constructor.
 		 * Moves the JSON itself, but creates a new logger object.
-		 * @param obj  The object to move.
-		 * @param data The data to initialise the logger object with.
+		 * @param  obj  The object to move.
+		 * @param  data The data to initialise the logger object with.
+		 * @safety If the initialisation of the logger object throws an exception,
+		 *         this object will not be able to log anything, but the rest of
+		 *         the object is guaranteed to be in a valid state. \c obj is
+		 *         guaranteed to be moved.
 		 */
-		json(engine::json&& obj, const engine::logger::data& data) noexcept;
+		json(engine::json&& obj, const engine::logger::data& data);
 
 		/**
 		 * Copy constructor.
 		 * Copies the JSON itself, and the logger object.
-		 * @param obj The object to copy.
+		 * @param  obj The object to copy.
+		 * @safety If the initialisation of the logger object throws an exception,
+		 *         this object will not be able to log anything, but the JSON
+		 *         object itself is guaranteed to be copied.
 		 */
-		json(const engine::json& obj) noexcept;
+		json(const engine::json& obj);
 
 		/**
 		 * Move constructor.
 		 * Moves the JSON itself, but copies the logger object.
-		 * @param obj The object to move.
+		 * @param  obj The object to move.
+		 * @safety If the initialisation of the logger object throws an exception,
+		 *         this object will not be able to log anything, but the JSON
+		 *         object itself is guaranteed to be moved.
 		 */
-		json(engine::json&& obj) noexcept;
+		json(engine::json&& obj);
 
 		/**
 		 * Copy assignment operator.
@@ -319,8 +341,8 @@ namespace engine {
 		 * the same or compatible data types.
 		 * The test is performed on a source-destination basis: if the source could
 		 * be safely assigned to the destination, then they are of compatible
-		 * types. It is to be emphasised that \b no actual value transfer occurs between
-		 * source and destination objects.\n
+		 * types. It is to be emphasised that \b no actual value transfer occurs
+		 * between source and destination objects.\n
 		 * Here are the cases which cause this method to return \c TRUE:
 		 * <ol><li>If \c type() returns the same for both \c nlohmann::ordered_json
 		 *         objects.</li>
@@ -351,7 +373,7 @@ namespace engine {
 		 * @param  keys The key sequence to convert.
 		 * @return The string containing all the keys in the sequence.
 		 */
-		static std::string synthesiseKeySequence(KeySequence& keys) noexcept;
+		static std::string synthesiseKeySequence(const KeySequence& keys);
 
 		/**
 		 * Returns the \c nlohmann::ordered_json object stored in this object.
@@ -360,9 +382,11 @@ namespace engine {
 		 * with the use of this method. The \c apply() methods should be used
 		 * whenever possible.
 		 * @return The root JSON object stored in this object.
+		 * @safety Strong guarantee: if the JSON object couldn't be copied, it
+		 *         won't be changed.
 		 * @sa     apply()
 		 */
-		inline nlohmann::ordered_json nlohmannJSON() const noexcept {
+		inline nlohmann::ordered_json nlohmannJSON() const {
 			return _j;
 		}
 
@@ -400,14 +424,17 @@ namespace engine {
 		 *                         value to apply to the C++ object.
 		 * @param   suppressErrors If \c TRUE, the error state of this object will
 		 *                         be reset at the end of the call.
+		 * @safety  If an exception is thrown, \c dest is guaranteed not to be
+		 *          amended. Additionally, if \c suppressErrors is \c TRUE, the
+		 *          error state will always be reset even if an exception is
+		 *          thrown by \c synthesiseKeySequence() when reporting an error.
 		 * @sa      \c applyArray()
 		 * @sa      \c applyColour()
 		 * @sa      \c applyVector()
 		 * @sa      \c applyMap()
 		 */
 		template<typename T>
-		void apply(T& dest, KeySequence keys, const bool suppressErrors = false)
-			noexcept;
+		void apply(T& dest, KeySequence keys, const bool suppressErrors = false);
 
 		/**
 		 * Applies a JSON array of homogenous values to a given
@@ -439,13 +466,17 @@ namespace engine {
 		 * @param   dest The destination array object.
 		 * @param   keys The key sequence uniquely identifying the JSON array value
 		 *               to apply to the C++ array object.
+		 * @safety  If an exception is thrown, this method will not set any error
+		 *          bit. If an exception is thrown whilst updating \c dest, then it
+		 *          will be left in a valid state but not necessarily in its
+		 *          original state.
 		 * @sa      \c apply()
 		 * @sa      \c applyColour()
 		 * @sa      \c applyVector()
 		 * @sa      \c applyMap()
 		 */
 		template<typename T, std::size_t N>
-		void applyArray(std::array<T, N>& dest, KeySequence keys) noexcept;
+		void applyArray(std::array<T, N>& dest, KeySequence keys);
 		
 		/**
 		 * Applies a JSON array of a specific format to an \c sf::Color object.
@@ -463,13 +494,17 @@ namespace engine {
 		 *                         array to apply to the \c Color object.
 		 * @param   suppressErrors Resets the error state of this object when the
 		 *                         call is finished.
+		 * @safety  If an exception is thrown, \c dest is guaranteed not to be
+		 *          amended. Additionally, if \c suppressErrors is \c TRUE, the
+		 *          error state will always be reset even if an exception is
+		 *          thrown by \c synthesiseKeySequence() when reporting an error.
 		 * @sa      \c apply()
 		 * @sa      \c applyArray()
 		 * @sa      \c applyVector()
 		 * @sa      \c applyMap()
 		 */
 		void applyColour(sf::Color& dest, KeySequence keys,
-			const bool suppressErrors = false) noexcept;
+			const bool suppressErrors = false);
 		
 		/**
 		 * Applies a JSON array of a variable size to a given \c std::vector
@@ -487,6 +522,9 @@ namespace engine {
 		 * @param   dest The destination vector object.
 		 * @param   keys The key sequence uniquely identifying the JSON array to
 		 *               apply.
+		 * @safety  If an exception is thrown, this method will not set any error
+		 *          bit. If an exception is thrown whilst updating \c dest, then it
+		 *          will be left in a valid state but not in its original state.
 		 * @sa      \c apply()
 		 * @sa      \c applyArray()
 		 * @sa      \c applyColour()
@@ -517,6 +555,9 @@ namespace engine {
 		 *                                     \c FALSE, no further key-value pairs
 		 *                                     will be read in this case. \c TRUE
 		 *                                     is the default.
+		 * @safety  Basic guarantee: this object and \c dest will be left in a
+		 *          valid state, but \c dest is not guaranteed to keep its original
+		 *          state.
 		 * @sa      \c apply()
 		 * @sa      \c applyArray()
 		 * @sa      \c applyColour()
@@ -538,10 +579,8 @@ namespace engine {
 		 *         \c nlohmann::ordered_json class (unless where specified in the
 		 *         detailed section).
 		 */
-		static inline std::string _getTypeName(nlohmann::ordered_json& j) noexcept
-			{
-			if (j.is_number_float()) return "float";
-			return j.type_name();
+		static inline std::string _getTypeName(const nlohmann::ordered_json& j) {
+			return (j.is_number_float()) ? ("float") : (j.type_name());
 		}
 
 		/**
@@ -557,10 +596,12 @@ namespace engine {
 		 * @param  type The name of the data type of the destination object. If
 		 *              blank, \c _getTypeName(dest) will be called.
 		 * @return \c TRUE if all checks passed, \c FALSE if at least one failed.
+		 * @safety Strong guarantee: if an exception is thrown, no error bit will
+		 *         be set, even if an error condition was detected.
 		 */
 		bool _performInitialChecks(engine::json::KeySequence& keys,
-			nlohmann::ordered_json& test,
-			nlohmann::ordered_json dest, std::string type = "") noexcept;
+			nlohmann::ordered_json& test, nlohmann::ordered_json dest,
+			std::string type = "");
 
 		/**
 		 * The \c nlohmann::ordered_json object stored internally.
@@ -576,15 +617,17 @@ namespace engine {
 	/**
 	 * This abstract class is used to read from and write to JSON script files.
 	 * This class allows derived classes to be "configured" using a JSON script, by
-	 * reading values from the script via the \c engine::json class and applying them
-	 * to member fields. In addition to this, derived classes can also save these
-	 * values to a JSON script.
+	 * reading values from the script via the \c engine::json class and applying
+	 * them to member fields. In addition to this, derived classes can also save
+	 * these values to a JSON script.
 	 */
 	class json_script : public json_state {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param data The data to initialise the logger object with.
+		 * @param  data The data to initialise the logger object with.
+		 * @safety If this constructor throws, the logger object will not be able
+		 *         to log anything.
 		 */
 		json_script(const engine::logger::data& data);
 		
@@ -599,8 +642,9 @@ namespace engine {
 		 * \c load() and \c save() methods.
 		 * @return The path last set via \c load() or \c save(). It will store it
 		 *         exactly as it was given.
+		 * @safety Strong guarantee.
 		 */
-		inline std::string getScriptPath() const noexcept {
+		inline std::string getScriptPath() const {
 			return _script;
 		}
 		
@@ -611,10 +655,9 @@ namespace engine {
 		 * stream operators failed: no error string will be stored in case the file
 		 * could not be opened.
 		 * @return A copy of the error text. Blank if no error has occurred yet.
+		 * @safety Strong guarantee.
 		 */
-		inline std::string jsonwhat() const noexcept {
-			return _what;
-		}
+		std::string jsonwhat() const;
 
 		/**
 		 * Loads a JSON script.
@@ -630,8 +673,9 @@ namespace engine {
 		 * @warning Please see \c _loadFromScript() for more error bits.
 		 * @param   script The path of the script file to load. If a blank string,
 		 *                 the last opened script will be loaded.
+		 * @safety  Basic guarantee.
 		 */
-		void load(const std::string script = "") noexcept;
+		void load(const std::string script = "");
 		
 		/**
 		 * Saves a JSON script.
@@ -646,8 +690,9 @@ namespace engine {
 		 * @warning Please see \c _saveToScript() for more error bits.
 		 * @param   script The path of the script file to load. If a blank string,
 		 *                 the last opened script will be written to.
+		 * @safety  Basic guarantee.
 		 */
-		void save(const std::string script = "") noexcept;
+		void save(const std::string script = "");
 	private:
 		/**
 		 * The method which derived classes use to configure themselves.
@@ -665,9 +710,11 @@ namespace engine {
 		 * possible: it should not trust that the required values are stored in the
 		 * JSON script.
 		 * @return \c TRUE if the method succeeded with minimal errors, or \c FALSE
-		 (         if a fatal error occurred.
+		 *         if a fatal error occurred.
+		 * @safety Derived classes must at least provide the basic guarantee for
+		 *         their implementation of this method.
 		 */
-		virtual bool _load(engine::json&) noexcept = 0;
+		virtual bool _load(engine::json&) = 0;
 		
 		/**
 		 * The method which derived classes use to store their configurations.
@@ -681,8 +728,10 @@ namespace engine {
 		 * \c FALSE ever be returned.
 		 * @return \c TRUE if the method succeeded, or \c FALSE if a
 		 *         serious/unrecoverable error occurred.
+		 * @safety Derived classes must at least provide the basic guarantee for
+		 *         their implementation of this method.
 		 */
-		virtual bool _save(nlohmann::ordered_json&) noexcept = 0;
+		virtual bool _save(nlohmann::ordered_json&) = 0;
 
 		/**
 		 * This method loads a JSON script file and stores it in the given JSON
@@ -696,8 +745,9 @@ namespace engine {
 		 * @param   jobj The \c nlohmann::ordered_json object to load the script
 		 *               into.
 		 * @return  \c TRUE if loading was successful, \c FALSE if not.
+		 * @safety  Basic guarantee.
 		 */
-		bool _loadFromScript(nlohmann::ordered_json& jobj) noexcept;
+		bool _loadFromScript(nlohmann::ordered_json& jobj);
 		
 		/**
 		 * This method saves a given JSON object to a JSON script file.
@@ -708,8 +758,9 @@ namespace engine {
 		 * @param   jobj The \c nlohmann::ordered_json object to save to the
 		 *               script.
 		 * @return  \c TRUE if saving was successful, \c FALSE if not.
+		 * @safety  Basic guarantee.
 		 */
-		bool _saveToScript(nlohmann::ordered_json& jobj) noexcept;
+		bool _saveToScript(nlohmann::ordered_json& jobj);
 
 		/**
 		 * A string storing the path of the last written to or read from script

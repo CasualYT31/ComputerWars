@@ -179,7 +179,11 @@ void engine::logger::_dropLogger() noexcept {
 		try {
 			spdlog::drop(_name);
 		} catch (std::exception& e) {
-			boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
+			try {
+				boxer::show(e.what(), "Fatal Error!", boxer::Style::Error);
+			} catch (const std::exception&) {
+				// Swallow it. Can't let the destructor throw an exception.
+			}
 		}
 	}
 }

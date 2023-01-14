@@ -24,20 +24,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T>
 void engine::json::apply(T& dest, engine::json::KeySequence keys,
-	const bool suppressErrors) noexcept {
+	const bool suppressErrors) {
 	nlohmann::ordered_json test;
 	if (_performInitialChecks(keys, test, dest)) {
 		dest = test.get<T>();
 	} else {
+		if (suppressErrors) resetState();
 		_logger.write("{} property faulty: left to the default of {}.",
 			synthesiseKeySequence(keys), dest);
-		if (suppressErrors) resetState();
 	}
 }
 
 template<typename T, std::size_t N>
 void engine::json::applyArray(std::array<T, N>& dest,
-	engine::json::KeySequence keys) noexcept {
+	engine::json::KeySequence keys) {
 	if (!N) return;
 	nlohmann::ordered_json test;
 	if (_performInitialChecks(keys, test, dest, "array")) {
@@ -45,26 +45,26 @@ void engine::json::applyArray(std::array<T, N>& dest,
 			nlohmann::ordered_json testDataType = dest[0];
 			// Loop through each element in the JSON array to see if it matches
 			// completely in data type.
-			for (std::size_t i = 0; i < N; i++) {
+			for (std::size_t i = 0; i < N; ++i) {
 				// If the JSON array is homogeneous, assign it to the destination
 				// array.
 				if (i == N - 1 && equalType(testDataType, test[i])) {
-					for (std::size_t j = 0; j < N; j++) dest[j] = test[j].get<T>();
+					for (std::size_t j = 0; j < N; ++j) dest[j] = test[j].get<T>();
 				} else if (!equalType(testDataType, test[i])) {
-					_toggleState(MISMATCHING_ELEMENT_TYPE);
 					_logger.error("The specified JSON array was not homogeneous, "
 						"found an element of data type \"{}\" when attempting to "
 						"assign to an array of data type \"{}\", in the key "
 						"sequence {}.", _getTypeName(test[i]),
 						_getTypeName(testDataType), synthesiseKeySequence(keys));
+					_toggleState(MISMATCHING_ELEMENT_TYPE);
 					break;
 				}
 			}
 		} else {
-			_toggleState(MISMATCHING_SIZE);
 			_logger.error("The size of the JSON array specified ({}) does not "
 				"match with the size of the provided array ({}), in the key "
 				"sequence {}.", test.size(), N, synthesiseKeySequence(keys));
+			_toggleState(MISMATCHING_SIZE);
 		}
 	}
 }
@@ -75,19 +75,19 @@ void engine::json::applyVector(std::vector<T>& dest,
 	nlohmann::ordered_json test;
 	if (_performInitialChecks(keys, test, dest, "vector")) {
 		nlohmann::ordered_json testDataType = T();
-		for (std::size_t i = 0; i < test.size(); i++) {
+		for (std::size_t i = 0; i < test.size(); ++i) {
 			if (i == test.size() - 1 && equalType(testDataType, test[i])) {
 				dest.clear();
 				for (std::size_t j = 0; j < test.size(); j++) {
 					dest.push_back(test[j].get<T>());
 				}
 			} else if (!equalType(testDataType, test[i])) {
-				_toggleState(MISMATCHING_ELEMENT_TYPE);
 				_logger.error("The specified JSON array was not homogeneous, "
 					"found an element of data type \"{}\" when attempting to "
 					"assign to a vector of data type \"{}\", in the key sequence "
 					"{}.", _getTypeName(test[i]), _getTypeName(testDataType),
 					synthesiseKeySequence(keys));
+				_toggleState(MISMATCHING_ELEMENT_TYPE);
 				break;
 			}
 		}
@@ -104,7 +104,6 @@ void engine::json::applyMap(std::unordered_map<std::string, T>& dest,
 			if (equalType(testDataType, item.value())) {
 				dest[item.key()] = item.value();
 			} else {
-				_toggleState(MISMATCHING_ELEMENT_TYPE);
 				_logger.error("The specified JSON object was not homogeneous, "
 					"found a value of data type \"{}\" with key \"{}\" when "
 					"attempting to assign to a map with values of data type "
@@ -113,6 +112,7 @@ void engine::json::applyMap(std::unordered_map<std::string, T>& dest,
 					synthesiseKeySequence(keys), ((continueReadingOnTypeError) ?
 						("") : (" Will now stop reading key-value pairs from this "
 							"object.")));
+				_toggleState(MISMATCHING_ELEMENT_TYPE);
 				if (!continueReadingOnTypeError) break;
 			}
 		}

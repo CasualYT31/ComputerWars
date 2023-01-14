@@ -140,8 +140,9 @@ namespace engine {
 		/**
 		 * Creates a blank logger object that can be later initialised with
 		 * \c setData() later.
+		 * @safety Strong guarantee.
 		 */
-		logger() noexcept = default;
+		logger() = default;
 
 		/**
 		 * Creates a new logger object and adds it to the given sink.

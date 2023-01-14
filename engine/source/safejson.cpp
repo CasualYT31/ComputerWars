@@ -25,35 +25,56 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "safejson.hpp"
 #include <fstream>
 
-engine::json::json(const engine::logger::data& data) noexcept : _logger(data) {}
+engine::json::json(const engine::logger::data& data) {
+	_logger.setData(data);
+}
 
 engine::json::json(const nlohmann::ordered_json& jobj,
-	const engine::logger::data& data) noexcept : _logger(data) {
-	*this = jobj;
+	const engine::logger::data& data) {
+	try {
+		_logger.setData(data);
+		*this = jobj;
+	} catch (const std::exception& e) {
+		*this = jobj;
+		throw e;
+	}
 }
 
 engine::json::json(nlohmann::ordered_json&& jobj, const engine::logger::data& data)
-	noexcept : _logger(data) {
-	*this = std::move(jobj);
+	{
+	try {
+		_logger.setData(data);
+		*this = std::move(jobj);
+	} catch (const std::exception& e) {
+		*this = std::move(jobj);
+		throw e;
+	}
 }
 
-engine::json::json(const engine::json& obj, const engine::logger::data& data)
-	noexcept : _logger(data) {
-	*this = obj;
+engine::json::json(const engine::json& obj, const engine::logger::data& data) {
+	try {
+		_logger.setData(data);
+		*this = obj;
+	} catch (const std::exception& e) {
+		*this = obj;
+		throw e;
+	}
 }
 
-engine::json::json(engine::json&& obj, const engine::logger::data& data) noexcept :
-	_logger(data) {
-	*this = std::move(obj);
+engine::json::json(engine::json&& obj, const engine::logger::data& data) {
+	try {
+		_logger.setData(data);
+		*this = std::move(obj);
+	} catch (const std::exception& e) {
+		*this = std::move(obj);
+		throw e;
+	}
 }
 
-engine::json::json(const engine::json& obj) noexcept : _logger(obj._logger) {
-	*this = obj;
-}
+engine::json::json(const engine::json& obj) : _j(obj._j), _logger(obj._logger) {}
 
-engine::json::json(engine::json&& obj) noexcept : _logger(obj._logger) {
-	*this = std::move(obj);
-}
+engine::json::json(engine::json&& obj) : _j(std::move(obj._j)),
+	_logger(obj._logger) {}
 
 engine::json& engine::json::operator=(const engine::json& obj) noexcept {
 	return *this = obj._j;
@@ -64,7 +85,7 @@ engine::json& engine::json::operator=(engine::json&& obj) noexcept {
 }
 
 engine::json& engine::json::operator=(const nlohmann::ordered_json& jobj)
-noexcept {
+	noexcept {
 	if (jobj.is_object()) {
 		_j = jobj;
 	} else {
@@ -90,9 +111,11 @@ bool engine::json::keysExist(engine::json::KeySequence keys,
 	nlohmann::ordered_json* ret) const noexcept {
 	if (!keys.empty()) {
 		nlohmann::ordered_json jCopy = _j;
-		for (auto itr = keys.begin(), enditr = keys.end(); itr != enditr; itr++) {
-			if (jCopy.contains(*itr)) {
-				jCopy = jCopy[*itr];
+		for (const auto& key : keys) {
+			if (jCopy.contains(key)) {
+				// This statement should never throw, as we first tested that jCopy
+				// is an object—and that the key exists—using contains().
+				jCopy = jCopy[key];
 			} else {
 				return false;
 			}
@@ -123,8 +146,8 @@ bool engine::json::equalType(nlohmann::ordered_json& dest,
 	return false;
 }
 
-std::string engine::json::synthesiseKeySequence(engine::json::KeySequence& keys)
-	noexcept {
+std::string engine::json::synthesiseKeySequence(
+	const engine::json::KeySequence& keys) {
 	if (keys.empty()) {
 		return "";
 	} else {
@@ -142,41 +165,40 @@ std::string engine::json::synthesiseKeySequence(engine::json::KeySequence& keys)
 }
 
 void engine::json::applyColour(sf::Color& dest, engine::json::KeySequence keys,
-	const bool suppressErrors) noexcept {
+	const bool suppressErrors) {
 	std::array<unsigned int, 4> colour = { 0, 0, 0, 255 };
 	applyArray(colour, keys);
 	if (!inGoodState()) {
+		if (suppressErrors) resetState();
 		_logger.write("{} colour property faulty: left to the default of "
 			"[{},{},{},{}].", synthesiseKeySequence(keys),
 			dest.r, dest.g, dest.b, dest.a);
 	} else {
 		dest = sf::Color(colour[0], colour[1], colour[2], colour[3]);
 	}
-	if (suppressErrors) resetState();
 }
 
 bool engine::json::_performInitialChecks(engine::json::KeySequence& keys,
-	nlohmann::ordered_json& test, nlohmann::ordered_json dest,
-	std::string type) noexcept {
+	nlohmann::ordered_json& test, nlohmann::ordered_json dest, std::string type) {
 	if (type == "") type = _getTypeName(dest);
 	if (keys.empty()) {
-		_toggleState(NO_KEYS_GIVEN);
 		_logger.error("Attempted to assign a value to a destination of type "
 			"\"{}\" without specifying a key sequence.", type);
+		_toggleState(NO_KEYS_GIVEN);
 	} else {
 		if (keysExist(keys, &test)) {
 			if (equalType(dest, test)) {
 				return true;
 			} else {
-				_toggleState(MISMATCHING_TYPE);
 				_logger.error("Attempted to assign a value of data type \"{}\" to "
 					"a destination of type \"{}\", in the key sequence {}.",
 					_getTypeName(test), type, synthesiseKeySequence(keys));
+				_toggleState(MISMATCHING_TYPE);
 			}
 		} else {
-			_toggleState(KEYS_DID_NOT_EXIST);
 			_logger.error("The key sequence {} does not exist in the JSON object.",
 				synthesiseKeySequence(keys));
+			_toggleState(KEYS_DID_NOT_EXIST);
 		}
 	}
 	return false;
@@ -185,20 +207,32 @@ bool engine::json::_performInitialChecks(engine::json::KeySequence& keys,
 engine::json_script::json_script(const engine::logger::data& data) : _logger(data)
 	{}
 
-void engine::json_script::load(const std::string script) noexcept {
+std::string engine::json_script::jsonwhat() const {
+	return _what;
+}
+
+void engine::json_script::load(const std::string script) {
 	if (script != "") _script = script;
 	_logger.write("Loading JSON script {}...", getScriptPath());
 	nlohmann::ordered_json nlohmannJSON;
 	if (_loadFromScript(nlohmannJSON)) {
 		engine::json safeJSON(nlohmannJSON, {_logger.getData().sink, "json"});
 		if (safeJSON.whatFailed() & engine::json_state::JSON_WAS_NOT_OBJECT) {
-			_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
 			_logger.error("Failed to load JSON script {}: the JSON saved in the "
 				"script didn't contain a root object.", getScriptPath());
+			_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
 		} else {
-			if (!_load(safeJSON)) {
-				_toggleState(engine::json_state::FAILED_LOAD_METHOD);
+			bool ret = false;
+			try {
+				ret = _load(safeJSON);
+			} catch (...) {
 				_logger.write("Failed to load JSON script {}.", getScriptPath());
+				_toggleState(engine::json_state::FAILED_LOAD_METHOD);
+				throw;
+			}
+			if (!ret) {
+				_logger.write("Failed to load JSON script {}.", getScriptPath());
+				_toggleState(engine::json_state::FAILED_LOAD_METHOD);
 			} else {
 				_logger.write("Finished loading JSON script {}.", getScriptPath());
 			}
@@ -206,18 +240,26 @@ void engine::json_script::load(const std::string script) noexcept {
 	}
 }
 
-void engine::json_script::save(const std::string script) noexcept {
+void engine::json_script::save(const std::string script) {
 	std::string scriptPath = _script; if (script != "") scriptPath = script;
 	_logger.write("Saving JSON script {}...", scriptPath);
 	nlohmann::ordered_json nlohmannJSON;
-	if (!_save(nlohmannJSON)) {
-		_toggleState(engine::json_state::FAILED_SAVE_METHOD);
+	bool ret = false;
+	try {
+		ret = _save(nlohmannJSON);
+	} catch (...) {
 		_logger.write("Failed to save JSON script {}.", scriptPath);
+		_toggleState(engine::json_state::FAILED_SAVE_METHOD);
+		throw;
+	}
+	if (!ret) {
+		_logger.write("Failed to save JSON script {}.", scriptPath);
+		_toggleState(engine::json_state::FAILED_SAVE_METHOD);
 	} else {
 		if (!nlohmannJSON.is_object()) {
-			_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
 			_logger.error("Failed to save JSON script {}: given JSON object did "
 				"not contain a root object.", scriptPath);
+			_toggleState(engine::json_state::JSON_WAS_NOT_OBJECT);
 		} else {
 			_script = scriptPath;
 			if (_saveToScript(nlohmannJSON)) {
@@ -229,44 +271,44 @@ void engine::json_script::save(const std::string script) noexcept {
 	}
 }
 
-bool engine::json_script::_loadFromScript(nlohmann::ordered_json& jobj) noexcept {
+bool engine::json_script::_loadFromScript(nlohmann::ordered_json& jobj) {
 	std::ifstream jscript(_script);
 	if (jscript.good()) {
 		try {
 			jscript >> jobj;
-		} catch (std::exception & e) {
+			jscript.close();
+		} catch (const std::exception& e) {
+			jscript.close();
 			_what = e.what();
-			_toggleState(engine::json_state::UNPARSABLE);
-			_logger.error("Provided JSON script \"{}\" has incorrect syntax: {}.",
+			_logger.error("Provided JSON script \"{}\" has incorrect syntax: {}",
 				getScriptPath(), jsonwhat());
+			_toggleState(engine::json_state::UNPARSABLE);
 		}
-		jscript.close();
 	} else {
-		_toggleState(engine::json_state::FAILED_SCRIPT_LOAD);
 		_logger.error("Failed to open JSON script \"{}\" for reading.",
 			getScriptPath());
+		_toggleState(engine::json_state::FAILED_SCRIPT_LOAD);
 	}
-	if (inGoodState()) return true;
-	return false;
+	return inGoodState();
 }
 
-bool engine::json_script::_saveToScript(nlohmann::ordered_json& jobj) noexcept {
+bool engine::json_script::_saveToScript(nlohmann::ordered_json& jobj) {
 	std::ofstream jscript(_script);
 	if (jscript.good()) {
 		try {
 			jscript << jobj;
+			jscript.close();
 		} catch (std::exception& e) {
+			jscript.close();
 			_what = e.what();
-			_toggleState(engine::json_state::FAILED_SCRIPT_SAVE);
-			_logger.error("Could not write JSON object to JSON script \"{}\": {}.",
+			_logger.error("Could not write JSON object to JSON script \"{}\": {}",
 				getScriptPath(), jsonwhat());
+			_toggleState(engine::json_state::FAILED_SCRIPT_SAVE);
 		}
-		jscript.close();
 	} else {
-		_toggleState(engine::json_state::FAILED_SCRIPT_SAVE);
 		_logger.error("Failed to open JSON script \"{}\" for writing.",
 			getScriptPath());
+		_toggleState(engine::json_state::FAILED_SCRIPT_SAVE);
 	}
-	if (inGoodState()) return true;
-	return false;
+	return inGoodState();
 }
