@@ -277,7 +277,7 @@ namespace engine {
 			 * @param data The data to initialise the logger object with.
 			 * @sa    \c engine::logger
 			 */
-			language(const engine::logger::data& data) noexcept;
+			language(const engine::logger::data& data);
 
 			/**
 			 * Accesses a string stored within the string map.
@@ -300,9 +300,10 @@ namespace engine {
 			 * @param  values       The variables to insert into the language
 			 *                      string.
 			 * @return The final language string.
+			 * @safety Strong guarantee.
 			 */
 			template<typename... Ts>
-			std::string get(const std::string& nativeString, Ts... values) noexcept;
+			std::string get(const std::string& nativeString, Ts... values);
 		private:
 			/**
 			 * The JSON load method for this class.
@@ -315,12 +316,12 @@ namespace engine {
 			 * script should contain the same list of keys, but they should have
 			 * different values, depending on the language the script is supposed
 			 * to store.
-			 * @warning Before loading the string map is \b cleared.
-			 * @param   j The \c engine::json object representing the contents of
-			 *            the loaded script which this method reads.
-			 * @return  Always returns \c TRUE.
+			 * @param  j The \c engine::json object representing the contents of
+			 *           the loaded script which this method reads.
+			 * @return Always returns \c TRUE.
+			 * @safety Strong guarantee.
 			 */
-			bool _load(engine::json& j) noexcept;
+			bool _load(engine::json& j);
 
 			/**
 			 * The JSON save method for this class.
@@ -329,8 +330,9 @@ namespace engine {
 			 * @param  j The \c nlohmann::ordered_json object representing the JSON
 			 *           script which this method writes to.
 			 * @return Always returns \c TRUE.
-			*/
-			bool _save(nlohmann::ordered_json& j) noexcept;
+			 * @safety Strong guarantee.
+			 */
+			bool _save(nlohmann::ordered_json& j);
 
 			/**
 			 * The string map.

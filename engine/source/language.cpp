@@ -150,27 +150,25 @@ bool engine::language_dictionary::_save(nlohmann::ordered_json& j) noexcept {
 	return true;
 }
 
-engine::language_dictionary::language::language(const engine::logger::data& data)
-	noexcept : engine::json_script({ data.sink, "json_script" }), _logger(data) {}
+engine::language_dictionary::language::language(const engine::logger::data& data) :
+	engine::json_script({ data.sink, "json_script" }), _logger(data) {}
 
-bool engine::language_dictionary::language::_load(engine::json& j) noexcept {
-	_strings.clear();
+bool engine::language_dictionary::language::_load(engine::json& j) {
+	std::unordered_map<std::string, std::string> strings;
 	nlohmann::ordered_json jj = j.nlohmannJSON();
-	for (auto& i : jj.items()) {
-		j.apply(_strings[i.key()], { i.key() });
+	for (const auto& i : jj.items()) {
+		j.apply(strings[i.key()], { i.key() });
 		if (!j.inGoodState()) {
-			_strings.erase(i.key());
+			strings.erase(i.key());
 			j.resetState();
 		}
 	}
+	_strings = std::move(strings);
 	return true;
 }
 
-bool engine::language_dictionary::language::_save(nlohmann::ordered_json& j)
-	noexcept {
-	for (auto& itr : _strings) {
-		j[itr.first] = itr.second;
-	}
+bool engine::language_dictionary::language::_save(nlohmann::ordered_json& j) {
+	for (const auto& itr : _strings) j[itr.first] = itr.second;
 	return true;
 }
 

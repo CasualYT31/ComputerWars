@@ -57,8 +57,21 @@ std::string engine::expand_string::insert(const std::string& original, T value,
 }
 
 template<typename... Ts>
-std::string engine::language_dictionary::language::get(
+std::string engine::language_dictionary::operator()(
 	const std::string& nativeString, Ts... values) noexcept {
+	if (_currentLanguage == "") return engine::expand_string::insert(nativeString,
+		values...);
+	if (_languageMap) {
+		return _languageMap->get(nativeString, values...);
+	} else {
+		_logger.error("Fatal - _languageMap was NULL.");
+		return "<fatal>";
+	}
+}
+
+template<typename... Ts>
+std::string engine::language_dictionary::language::get(
+	const std::string& nativeString, Ts... values) {
 	if (_strings.find(nativeString) == _strings.end()) {
 		if (nativeString.size() > 0 && nativeString[0] == TRANSLATION_OVERRIDE) {
 			return nativeString.substr(1);
@@ -69,18 +82,5 @@ std::string engine::language_dictionary::language::get(
 		}
 	} else {
 		return engine::expand_string::insert(_strings.at(nativeString), values...);
-	}
-}
-
-template<typename... Ts>
-std::string engine::language_dictionary::operator()(
-	const std::string& nativeString, Ts... values) noexcept {
-	if (_currentLanguage == "") return engine::expand_string::insert(nativeString,
-		values...);
-	if (_languageMap) {
-		return _languageMap->get(nativeString, values...);
-	} else {
-		_logger.error("Fatal - _languageMap was NULL.");
-		return "<fatal>";
 	}
 }

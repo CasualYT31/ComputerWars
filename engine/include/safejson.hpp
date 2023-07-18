@@ -641,7 +641,7 @@ namespace engine {
 		 * \c engine::json object. It outputs to the logger when loading commenses
 		 * and ends.
 		 * @warning The \c FAILED_LOAD_METHOD bit will be set if the derived
-		 *          \c _load() method returned \c FALSE.
+		 *          \c _load() method returned \c FALSE, or threw.
 		 * @warning The \c JSON_WAS_NOT_OBJECT bit will be set if the JSON in the
 		 *          given script did not contain a root object.
 		 * @warning Please see \c _loadFromScript() for more error bits.
@@ -658,7 +658,7 @@ namespace engine {
 		 * \c _save() method. It outputs to the logger when saving commenses and
 		 * ends. Files will be \b overwritten if they exist.
 		 * @warning The \c FAILED_SAVE_METHOD bit will be set if the derived
-		 *          \c _save() method returned \c FALSE.
+		 *          \c _save() method returned \c FALSE, or threw.
 		 * @warning The \c JSON_WAS_NOT_OBJECT bit will be set if the JSON given by
 		 *          the derived \c save() method did not contain a root object.
 		 * @warning Please see \c _saveToScript() for more error bits.
