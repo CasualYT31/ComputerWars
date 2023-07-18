@@ -46,15 +46,8 @@ namespace engine {
 		 * Initialises the internal file stream.
 		 * In the constructor, the internal file stream is configured to throw an
 		 * exception when any of its fail, bad, and eof bits are set.
-		 * @param  data The data to initialise the logger object with.
-		 * @safety The \c exceptions() method used to perform the configuration has
-		 *         the basic guarantee.\n
-		 *         If the construction of the logger object failed, and
-		 *         \c exceptions() doesn't throw, then the rest of the object is
-		 *         guaranteed to be properly constructed.\n
-		 *         If \c bad_alloc is thrown, then the object is \em not left in a
-		 *         good state, and should not be used.
-		 * @sa     \c engine::logger
+		 * @param data The data to initialise the logger object with.
+		 * @sa    \c engine::logger
 		 */
 		binary_file(const engine::logger::data& data);
 

@@ -22,10 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "file.hpp"
 
-engine::binary_file::binary_file(const engine::logger::data& data) {
+engine::binary_file::binary_file(const engine::logger::data& data) : _logger(data)
+	{
 	_file.exceptions(std::fstream::failbit |
 		std::fstream::badbit | std::fstream::eofbit);
-	_logger.setData(data);
 }
 
 bool engine::binary_file::isBigEndian() noexcept {

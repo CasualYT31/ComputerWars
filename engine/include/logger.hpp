@@ -68,19 +68,17 @@ namespace engine {
 		 * The components within brackets are optional and can be toggled off, see
 		 * \c date below. If a file with the same path already exists, then it will
 		 * be cleared of all its contents before it is opened.
-		 * @param  name            The name of the application to write in the
-		 *                         first line of the log file.
-		 * @param  dev             The name of the application developer/s to
-		 *                         write in the first line of the log file.
-		 * @param  folder          The directory, relative or absolute, to write
-		 *                         the log file in.
-		 * @param  date            If \c TRUE, a short form of the date and time
-		 *                         will be included in the file name.
-		 * @param  hardwareDetails If given, the hardware details of the machine
-		 *                         running this game will be printed at the
-		 *                         beginning of the log.
-		 * @safety If an exception is thrown, the created object should \b not be
-		 *         used.
+		 * @param name            The name of the application to write in the first
+		 *                        line of the log file.
+		 * @param dev             The name of the application developer/s to write
+		 *                        in the first line of the log file.
+		 * @param folder          The directory, relative or absolute, to write the
+		 *                        log file in.
+		 * @param date            If \c TRUE, a short form of the date and time
+		 *                        will be included in the file name.
+		 * @param hardwareDetails If given, the hardware details of the machine
+		 *                        running this game will be written to the
+		 *                        beginning of the log.
 		 */
 		sink(const std::string& name = "Application",
 			const std::string& dev = "Developer", std::string folder = "",
@@ -140,7 +138,6 @@ namespace engine {
 		/**
 		 * Creates a blank logger object that can be later initialised with
 		 * \c setData() later.
-		 * @safety Strong guarantee.
 		 */
 		logger() = default;
 
@@ -160,10 +157,6 @@ namespace engine {
 		 * @warning Do not give a \c sink that couldn't be constructed! Doing this
 		 *          will crash the game with an assertion.
 		 * @param   data Data to initialise the logger with.
-		 * @safety  Basic guarantee: if an exception was thrown, then the logger
-		 *          object will be left in a defined state. However, if an attempt
-		 *          to write with this faulty logger object is made, the attempt
-		 *          will have no effect.
 		 * @sa      \c setData(const engine::logger::data&)
 		 */
 		logger(const engine::logger::data& loggerData);
@@ -177,12 +170,23 @@ namespace engine {
 		 * constructed object won't be properly constructed either.\n
 		 * If the given \c logger object wasn't given a sink on construction, then
 		 * this logger object won't be assigned a sink, either.
-		 * @param  logger Reference to the logger object to copy from.
-		 * @safety Basic guarantee.
-		 * @sa     \c logger(const engine::logger::data&)
-		 * @sa     \c setData(const engine::logger&)
+		 * @param logger Reference to the logger object to copy from.
+		 * @sa    \c logger(const engine::logger::data&)
+		 * @sa    \c setData(const engine::logger&)
 		 */
 		logger(const engine::logger& logger);
+
+		/**
+		 * Moves the given logger object.
+		 * The new, moved logger object will write to the same sink as the one
+		 * given. It will also have the same name, and same number.\n
+		 * If the given \c logger object isn't properly constructed, the newly
+		 * constructed object won't be properly constructed either.\n
+		 * If the given \c logger object wasn't given a sink on construction, then
+		 * this logger object won't be assigned a sink, either.
+		 * @param logger Reference to the logger object to move.
+		 */
+		logger(engine::logger&& logger) noexcept;
 
 		/**
 		 * Drops the logger object from <tt>spdlog</tt>'s logger pool.
@@ -318,7 +322,7 @@ namespace engine {
 		 *               \c sinks parameters.
 		 * @safety Strong guarantee: if the new logger object could not be
 		 *         constructed, then all of the old logger's information will be
-		 *         kept.
+		 *         retained.
 		 */
 		void _initialiseLogger(const std::string& name,
 			const std::vector<spdlog::sink_ptr>& sinks,

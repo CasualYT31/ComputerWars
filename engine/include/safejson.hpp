@@ -155,7 +155,7 @@ namespace engine {
 		/**
 		 * This class cannot be instantiated by the client.
 		 */
-		json_state() noexcept = default;
+		json_state() = default;
 
 		/**
 		 * Sets the error state of the object.
@@ -199,84 +199,59 @@ namespace engine {
 
 		/**
 		 * Constructs an empty JSON object.
-		 * @param  data The data to initialise the logger object with.
-		 * @safety If the initialisation of the logger object throws an exception,
-		 *         this object will not be able to log anything, but the rest of
-		 *         the object is guaranteed to be in a valid state.
+		 * @param data The data to initialise the logger object with.
 		 */
 		json(const engine::logger::data& data);
 
 		/**
 		 * Constructs a JSON object from a \c nlohmann one.
 		 * The assignment operator is called in order to achieve this.
-		 * @param  jobj The \c nlohmann::ordered_json object to store within this
-		 *              object - this is referred to as the JSON object.
-		 * @param  data The data to initialise the logger object with.
-		 * @safety If the initialisation of the logger object throws an exception,
-		 *         this object will not be able to log anything, but the rest of
-		 *         the object is guaranteed to be in a valid state. \c jobj is
-		 *         guaranteed to be stored.
-		 * @sa     \c operator=()
+		 * @param jobj The \c nlohmann::ordered_json object to store within this
+		 *             object - this is referred to as the JSON object.
+		 * @param data The data to initialise the logger object with.
+		 * @sa    \c operator=()
 		 */
 		json(const nlohmann::ordered_json& jobj, const engine::logger::data& data);
 
 		/**
 		 * Constructs a JSON object from a \c nlohmann one.
 		 * The assignment operator is called in order to achieve this.
-		 * @param  jobj The \c nlohmann::ordered_json object to store within this
-		 *              object - this is referred to as the JSON object.
-		 * @param  data The data to initialise the logger object with.
-		 * @safety If the initialisation of the logger object throws an exception,
-		 *         this object will not be able to log anything, but the rest of
-		 *         the object is guaranteed to be in a valid state. \c jobj is
-		 *         guaranteed to be stored.
-		 * @sa     \c operator=()
+		 * @param jobj The \c nlohmann::ordered_json object to store within this
+		 *             object - this is referred to as the JSON object.
+		 * @param data The data to initialise the logger object with.
+		 * @sa    \c operator=()
 		 */
 		json(nlohmann::ordered_json&& jobj, const engine::logger::data& data);
 
 		/**
 		 * Copy constructor.
 		 * Copies the JSON itself, but creates a new logger object.
-		 * @param  obj  The object to copy.
-		 * @param  data The data to initialise the logger object with.
-		 * @safety If the initialisation of the logger object throws an exception,
-		 *         this object will not be able to log anything, but the rest of
-		 *         the object is guaranteed to be in a valid state. \c obj is
-		 *         guaranteed to be copied.
+		 * @param obj  The object to copy.
+		 * @param data The data to initialise the logger object with.
 		 */
 		json(const engine::json& obj, const engine::logger::data& data);
 
 		/**
 		 * Move constructor.
 		 * Moves the JSON itself, but creates a new logger object.
-		 * @param  obj  The object to move.
-		 * @param  data The data to initialise the logger object with.
-		 * @safety If the initialisation of the logger object throws an exception,
-		 *         this object will not be able to log anything, but the rest of
-		 *         the object is guaranteed to be in a valid state. \c obj is
-		 *         guaranteed to be moved.
+		 * @param obj  The object to move.
+		 * @param data The data to initialise the logger object with.
 		 */
 		json(engine::json&& obj, const engine::logger::data& data);
 
 		/**
 		 * Copy constructor.
 		 * Copies the JSON itself, and the logger object.
-		 * @param  obj The object to copy.
-		 * @safety If the initialisation of the logger object throws an exception,
-		 *         this object will not be able to log anything, but the JSON
-		 *         object itself is guaranteed to be copied.
+		 * @param obj The object to copy.
 		 */
 		json(const engine::json& obj);
 
 		/**
 		 * Move constructor.
-		 * Moves the JSON itself, but copies the logger object.
-		 * @param  obj The object to move.
-		 * @safety If the initialisation of the logger object throws an exception,
-		 *         this object will not be able to log anything, but the JSON
-		 *         object itself is guaranteed to be moved.
+		 * Moves the JSON itself, and the logger object.
+		 * @param obj The object to move.
 		 */
-		json(engine::json&& obj);
+		json(engine::json&& obj) noexcept;
 
 		/**
 		 * Copy assignment operator.
@@ -372,6 +347,7 @@ namespace engine {
 		 * "keyEtc"}</tt>. This is helpful for debugging/logging purposes.
 		 * @param  keys The key sequence to convert.
 		 * @return The string containing all the keys in the sequence.
+		 * @throws If building the string failed in some way.
 		 */
 		static std::string synthesiseKeySequence(const KeySequence& keys);
 
@@ -625,9 +601,7 @@ namespace engine {
 	public:
 		/**
 		 * Initialises the internal logger object.
-		 * @param  data The data to initialise the logger object with.
-		 * @safety If this constructor throws, the logger object will not be able
-		 *         to log anything.
+		 * @param data The data to initialise the logger object with.
 		 */
 		json_script(const engine::logger::data& data);
 		

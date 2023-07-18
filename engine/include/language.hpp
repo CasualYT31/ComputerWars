@@ -228,22 +228,19 @@ namespace engine {
 	private:
 		/**
 		 * The JSON load method for this class.
-		 * Before loading, the language map is \b cleared,
-		 * even if the method returns \c FALSE.\n
-		 * The JSON script loaded by this class must have
-		 * the following format:\n
-		 * <ul><li>There should only be string values, no
-		 * objects or any other types are permitted. If they
-		 * exist a warning will be reported and the value
-		 * will be ignored.</li>
-		 * <li>There is a special key, "lang", which is paired
-		 * with the current language ID as it was when last saved.</li>
-		 * <li>All other keys are language IDs, and <em>their</em>
-		 * values should be paths to JSON scripts detailing that
-		 * language's string map.</li>
+		 * Before loading, the language map is \b cleared, even if the method
+		 * returns \c FALSE.\n
+		 * The JSON script loaded by this class must have the following format:\n
+		 * <ul><li>There should only be string values, no objects or any other
+		 * types are permitted. If they exist a warning will be reported and the
+		 * value will be ignored.</li>
+		 * <li>There is a special key, "lang", which is paired with the current
+		 * language ID as it was when last saved.</li>
+		 * <li>All other keys are language IDs, and <em>their</em> values should be
+		 * paths to JSON scripts detailing that language's string map.</li>
 		 * <li>A blank key and its value will be completely ignored.</li></ul>\n
-		 * Please see \c engine::language_dictionary::language::_load()
-		 * for more details on the format of these string map JSON scripts.
+		 * Please see \c engine::language_dictionary::language::_load() for more
+		 * details on the format of these string map JSON scripts.
 		 * @param  j The \c engine::json object representing the contents
 		 *           of the loaded script which this method reads.
 		 * @return \c TRUE if the current language as dictated by the
@@ -298,8 +295,10 @@ namespace engine {
 			 * @tparam Ts           The types of the variables to insert into
 			 *                      the language string, if any are given.
 			 * @param  nativeString The key uniquely identifying the language
-			 *                      string to extract. Also called the "native string."
-			 * @param  values       The variables to insert into the language string.
+			 *                      string to extract. Also called the "native
+			 *                      string."
+			 * @param  values       The variables to insert into the language
+			 *                      string.
 			 * @return The final language string.
 			 */
 			template<typename... Ts>
@@ -317,8 +316,8 @@ namespace engine {
 			 * different values, depending on the language the script is supposed
 			 * to store.
 			 * @warning Before loading the string map is \b cleared.
-			 * @param   j The \c engine::json object representing the contents of the
-			 *            loaded script which this method reads.
+			 * @param   j The \c engine::json object representing the contents of
+			 *            the loaded script which this method reads.
 			 * @return  Always returns \c TRUE.
 			 */
 			bool _load(engine::json& j) noexcept;

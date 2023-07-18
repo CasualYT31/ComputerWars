@@ -128,6 +128,10 @@ engine::logger::logger(const engine::logger& logger) {
 	setData(logger);
 }
 
+engine::logger::logger(engine::logger&& logger) noexcept :
+	_logger(std::move(logger._logger)), _name(std::move(logger._name)),
+	_data(std::move(logger._data)) {}
+
 engine::logger::~logger() noexcept {
 	_dropLogger();
 }

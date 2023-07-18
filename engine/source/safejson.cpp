@@ -73,8 +73,8 @@ engine::json::json(engine::json&& obj, const engine::logger::data& data) {
 
 engine::json::json(const engine::json& obj) : _j(obj._j), _logger(obj._logger) {}
 
-engine::json::json(engine::json&& obj) : _j(std::move(obj._j)),
-	_logger(obj._logger) {}
+engine::json::json(engine::json&& obj) noexcept : _j(std::move(obj._j)),
+	_logger(std::move(obj._logger)) {}
 
 engine::json& engine::json::operator=(const engine::json& obj) noexcept {
 	return *this = obj._j;
