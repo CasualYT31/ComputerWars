@@ -40,7 +40,7 @@ namespace sfx {
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		fonts(const engine::logger::data& data) noexcept;
+		fonts(const engine::logger::data& data);
 
 		/**
 		 * Accesses a previously loaded \c sf::Font object.
@@ -51,9 +51,9 @@ namespace sfx {
 		 *             script.
 		 * @return The pointer to the \c sf::Font object, or \c nullptr if the font
 		 *         didn't exist.
+		 * @safety Strong guarantee.
 		 */
-		std::shared_ptr<sf::Font> operator[](const std::string& key)
-			const noexcept;
+		std::shared_ptr<sf::Font> operator[](const std::string& key) const;
 
 		/**
 		 * Accesses a previously loaded font file path.
@@ -62,6 +62,7 @@ namespace sfx {
 		 *             script.
 		 * @return The file path of the font, or an empty string if the font didn't
 		 *         exist.
+		 * @safety Strong guarantee.
 		 */
 		std::string getFontPath(const std::string& key) const noexcept;
 	private:
@@ -69,15 +70,15 @@ namespace sfx {
 		 * The JSON load method for this class.
 		 * The root object is to contain a list of key-string value pairs only.
 		 * The key defines the name of the font object, and the value defines the
-		 * absolute or relative path of the font file to load.
-		 * @warning When called, the internal collection of font objects and their
-		 *          paths are cleared, even if the method returns \c FALSE.
-		 * @param   j The \c engine::json object representing the contents of the
-		 *            loaded script which this method reads.
-		 * @return  \c TRUE if all font files could be loaded, \c FALSE if at least
-		 *          one could not be loaded.
+		 * absolute or relative path of the font file to load. If a font file could
+		 * not be loaded, it won't be included in the internal fonts map.
+		 * @param  j The \c engine::json object representing the contents of the
+		 *           loaded script which this method reads.
+		 * @return \c TRUE if all font files could be loaded, \c FALSE if at least
+		 *         one could not be loaded.
+		 * @safety Strong guarantee.
 		 */
-		bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j);
 
 		/**
 		 * The JSON save method for this class.
@@ -86,8 +87,9 @@ namespace sfx {
 		 * @param  j The \c nlohmann::ordered_json object representing the JSON
 		 *           script which this method writes to.
 		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee.
 		 */
-		bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j);
 
 		/**
 		 * The collection of font objects.

@@ -22,11 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "fonts.hpp"
 
-sfx::fonts::fonts(const engine::logger::data& data) noexcept :
+sfx::fonts::fonts(const engine::logger::data& data) :
 	json_script({data.sink, "json_script"}), _logger(data) {}
 
-std::shared_ptr<sf::Font> sfx::fonts::operator[](const std::string& key) const
-	noexcept {
+std::shared_ptr<sf::Font> sfx::fonts::operator[](const std::string& key) const {
  	if (_font.find(key) == _font.end()) {
 		_logger.error("Attempting to access font with key \"{}\" which does not "
 			"exist.", key);
@@ -35,7 +34,7 @@ std::shared_ptr<sf::Font> sfx::fonts::operator[](const std::string& key) const
 	return _font.at(key);
 }
 
-std::string sfx::fonts::getFontPath(const std::string& key) const noexcept {
+std::string sfx::fonts::getFontPath(const std::string& key) const {
 	if (_fontpath.find(key) == _fontpath.end()) {
 		_logger.error("Attempting to access font file path with key \"{}\" which "
 			"does not exist.", key);
@@ -44,28 +43,27 @@ std::string sfx::fonts::getFontPath(const std::string& key) const noexcept {
 	return _fontpath.at(key);
 }
 
-bool sfx::fonts::_load(engine::json& j) noexcept {
-	_font.clear();
-	_fontpath.clear();
+bool sfx::fonts::_load(engine::json& j) {
+	std::unordered_map<std::string, std::shared_ptr<sf::Font>> fonts;
+	std::unordered_map<std::string, std::string> fontpaths;
 	bool ret = true;
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		std::string path = i.value();
-		_font[i.key()] = std::make_shared<sf::Font>();
-		if (!_font[i.key()]->loadFromFile(path)) {
-			_logger.error("Attempting to load font file \"{}\" which does not "
-				"exist.", path);
-			_font.erase(i.key());
+		fonts[i.key()] = std::make_shared<sf::Font>();
+		if (!fonts[i.key()]->loadFromFile(path)) {
+			_logger.error("Could not load font file \"{}\".", path);
+			fonts.erase(i.key());
 			ret = false;
 		}
-		_fontpath[i.key()] = path;
+		fontpaths[i.key()] = path;
 	}
+	_font = std::move(fonts);
+	_fontpath = std::move(fontpaths);
 	return ret;
 }
 
-bool sfx::fonts::_save(nlohmann::ordered_json& j) noexcept {
-	for (auto& path : _fontpath) {
-		j[path.first] = path.second;
-	}
+bool sfx::fonts::_save(nlohmann::ordered_json& j) {
+	for (const auto& path : _fontpath) j[path.first] = path.second;
 	return true;
 }
