@@ -65,7 +65,7 @@ namespace sfx {
 		 * @sa    \c engine::logger
 		 */
 		gui(const std::shared_ptr<engine::scripts>& scripts,
-			const engine::logger::data& data) noexcept;
+			const engine::logger::data& data);
 
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
@@ -73,27 +73,28 @@ namespace sfx {
 		 * @sa \c engine::scripts::registerInterface()
 		 */
 		void registerInterface(asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Sets the GUI menu to display.
 		 * No widgets are actually destroyed: they are only made visible/invisible.
-		 * @param newPanel  The name of the menu to display. If a menu with the
-		 *                  given name does not exist, an error will be logged and
-		 *                  no other changes will occur.
-		 * @param callClose If @c TRUE, the current menu's @c Close() script
-		 *                  function will be called, if it exists.
-		 * @param callOpen  If @c TRUE, the new menu's @c Open() script function
-		 *                  will be called, if it exists.
+		 * @param  newPanel  The name of the menu to display. If a menu with the
+		 *                   given name does not exist, an error will be logged and
+		 *                   no other changes will occur.
+		 * @param  callClose If @c TRUE, the current menu's @c Close() script
+		 *                   function will be called, if it exists.
+		 * @param  callOpen  If @c TRUE, the new menu's @c Open() script function
+		 *                   will be called, if it exists.
+		 * @safety Basic guarantee.
 		 */
 		void setGUI(const std::string& newPanel, const bool callClose = true,
-			const bool callOpen = true) noexcept;
+			const bool callOpen = true);
 
 		/**
 		 * Gets the name of the menu currently showing.
 		 * @return The menu currently being drawn.
 		 */
-		std::string getGUI() const noexcept;
+		std::string getGUI() const;
 
 		/**
 		 * Adds a spritesheet which can be uses with the GUI menus.
@@ -104,7 +105,7 @@ namespace sfx {
 		 *              GUI menus.
 		 */
 		void addSpritesheet(const std::string& name,
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
 
 		/**
 		 * Sets the target to draw the GUI menus to.
@@ -113,8 +114,9 @@ namespace sfx {
 		 *         all possible in the future. Please see \c engine::gui::draw()
 		 *         for more details.
 		 * @param  newTarget Reference to the new target to set.
+		 * @safety No guarantee.
 		 */
-		void setTarget(sf::RenderTarget& newTarget) noexcept;
+		void setTarget(sf::RenderTarget& newTarget);
 
 		/**
 		 * Allows the TGUI to handle SFML window events.
@@ -123,8 +125,9 @@ namespace sfx {
 		 *           eventually.
 		 * @return \c FALSE if all widgets ignored the given event, \c TRUE
 		 *         otherwise.
+		 * @safety No guarantee.
 		 */
-		bool handleEvent(sf::Event e) noexcept;
+		bool handleEvent(sf::Event e);
 
 		/**
 		 * Allows the current menu to handle input via AngelScript.
@@ -137,11 +140,12 @@ namespace sfx {
 		 * triggered, so you don't have to worry about tracking the state of a
 		 * particular control, e.g. to ensure that it is only triggered "once."
 		 * You can just check for it directly and perform code whenever it happens.
-		 * @param ui Pointer to the @c user_input instance to send information on.
-		 *           Note that the @c user_input::update() method should already
-		 *           have been called before a call to @c handleInput().
+		 * @param  ui Pointer to the @c user_input instance to send information on.
+		 *            Note that the @c user_input::update() method should already
+		 *            have been called before a call to @c handleInput().
+		 * @safety No guarantee.
 		 */
-		void handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept;
+		void handleInput(const std::shared_ptr<sfx::user_input>& ui);
 
 		/**
 		 * Handles all widget signals by attempting to invoke the necessary script
@@ -160,22 +164,24 @@ namespace sfx {
 		 * was not defined, the signal will simply be ignored.\n
 		 * For a list of available signals, you can view the definition of
 		 * \c _connectSignals() in \c gui.cpp.
-		 * @param widget     The widget sending the signal.
-		 * @param signalName The name of the signal being sent.
+		 * @param  widget     The widget sending the signal.
+		 * @param  signalName The name of the signal being sent.
+		 * @safety No guarantee.
 		 */
 		void signalHandler(tgui::Widget::Ptr widget,
-			const tgui::String& signalName) noexcept;
+			const tgui::String& signalName);
 
 		/**
 		 * Sets the \c language_dictionary object to use with these GUI menus.
 		 * If a language dictionary is given, all GUI captions will be fed into it
 		 * for translation purposes, during the call to \c animate(). If one is not
 		 * given, which is the default, GUI text will not be translated or amended.
-		 * @param lang Pointer to the \c language_dictionary to use. \c nullptr can
-		 *             be given to disable translation.
+		 * @param  lang Pointer to the \c language_dictionary to use. \c nullptr
+		 *              can be given to disable translation.
+		 * @safety Strong guarantee.
 		 */
 		void setLanguageDictionary(
-			const std::shared_ptr<engine::language_dictionary>& lang) noexcept;
+			const std::shared_ptr<engine::language_dictionary>& lang);
 
 		/**
 		 * Sets the \c fonts object to use with these GUI menus.
@@ -195,10 +201,11 @@ namespace sfx {
 		 * resized to match the size of the target. In addition, if a langauge
 		 * dictionary has been given, all captions will be translated.
 		 * @return Always returns \c FALSE.
+		 * @safety No guarantee.
 		 * @sa     sfx::gui::setLanguageDictionary()
 		 */
 		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0) noexcept;
+			const double scaling = 1.0);
 	private:
 		/**
 		 * Represents a GUI background.
@@ -222,7 +229,7 @@ namespace sfx {
 			 * Default constructor.
 			 * By default, a GUI background is a solid colour of black.
 			 */
-			gui_background() noexcept = default;
+			gui_background() = default;
 
 			/**
 			 * Initialises the GUI background with a sprite.
@@ -231,13 +238,13 @@ namespace sfx {
 			 */
 			gui_background(
 				const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
-				const std::string& key) noexcept;
+				const std::string& key);
 
 			/**
 			 * Initialises the GUI background with a solid colour.
 			 * @param colour The colour to set.
 			 */
-			gui_background(const sf::Color& colour) noexcept;
+			gui_background(const sf::Color& colour);
 
 			/**
 			 * Sets this GUI background to be a sprite.
@@ -249,14 +256,14 @@ namespace sfx {
 			 * @param key   The sprite name to set.
 			 */
 			void set(const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
-				const std::string& key) noexcept;
+				const std::string& key);
 
 			/**
 			 * Sets this GUI background to be a solid colour.
 			 * The stored sprite ID is then ignored.
 			 * @param colour The colour to set.
 			 */
-			void set(const sf::Color& colour) noexcept;
+			void set(const sf::Color& colour);
 
 			/**
 			 * Retrieves the type of this GUI background.
@@ -271,7 +278,7 @@ namespace sfx {
 			 * background is actually meant to represent a sprite background.
 			 * @return The sprite name that was last assigned.
 			 */
-			std::string getSprite() const noexcept;
+			std::string getSprite() const;
 
 			/**
 			 * Retrieves the assigned colour value.
@@ -280,7 +287,7 @@ namespace sfx {
 			 * background is actually meant to represent a solid colour background.
 			 * @return The colour that was last assigned.
 			 */
-			sf::Color getColour() const noexcept;
+			sf::Color getColour() const;
 
 			/**
 			 * Animates this background.
@@ -291,7 +298,7 @@ namespace sfx {
 			 *         sprite background.
 			 */
 			virtual bool animate(const sf::RenderTarget& target,
-				const double scaling = 1.0) noexcept;
+				const double scaling = 1.0);
 		private:
 			/**
 			 * Draws the GUI background.
@@ -325,12 +332,12 @@ namespace sfx {
 			 * Initialises the wrapper object with an existing \c CScriptAny
 			 * object.
 			 */
-			CScriptAnyWrapper(CScriptAny* const obj) noexcept;
+			CScriptAnyWrapper(CScriptAny* const obj);
 
 			/**
 			 * Copies the pointer and increases its reference count.
 			 */
-			CScriptAnyWrapper(const CScriptAnyWrapper& obj) noexcept;
+			CScriptAnyWrapper(const CScriptAnyWrapper& obj);
 
 			/**
 			 * Moves the pointer over and increases the reference count.
@@ -361,18 +368,20 @@ namespace sfx {
 
 		/**
 		 * Performs animation calculations on a container of widgets.
-		 * @param target    The target which the GUI will be drawn to later.
-		 * @param scaling   Scaling factor which will be applied when drawing.
-		 * @param container Pointer to the container widget.
+		 * @param  target    The target which the GUI will be drawn to later.
+		 * @param  scaling   Scaling factor which will be applied when drawing.
+		 * @param  container Pointer to the container widget.
+		 * @safety No guarantee.
 		 */
 		void _animate(const sf::RenderTarget& target, const double scaling,
-			tgui::Container::Ptr container) noexcept;
+			tgui::Container::Ptr container);
 
 		/**
 		 * Reapplies all the translations to a widget recursively.
-		 * @param widget Pointer to the widget to translate.
+		 * @param  widget Pointer to the widget to translate.
+		 * @safety No guarantee.
 		 */
-		void _translateWidget(tgui::Widget::Ptr widget) noexcept;
+		void _translateWidget(tgui::Widget::Ptr widget);
 
 		/**
 		 * Calculates the translated widget text for a given widget.
@@ -380,9 +389,10 @@ namespace sfx {
 		 * @param   name  The name of the widget whose text needs to be translated.
 		 * @param   index The text belonging to the widget which needs translating.
 		 * @return  The translated string with any variables inserted.
+		 * @safety  No guarantee.
 		 */
 		std::string _getTranslatedText(const std::string& name,
-			const std::size_t index) const noexcept;
+			const std::size_t index) const;
 
 		/**
 		 * Draws the current GUI menu.
@@ -409,8 +419,9 @@ namespace sfx {
 		 *           loaded script which this method reads.
 		 * @return \c TRUE if all existing menus before the call were deleted, \c
 		 *         FALSE if not.
+		 * @safety No guarantee.
 		 */
-		bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j);
 
 		/**
 		 * The JSON save method for this class.
@@ -424,20 +435,21 @@ namespace sfx {
 		/**
 		 * Connects all signals of a widget to this class' \c signalHandler()
 		 * method.
-		 * @param widget The widget whose signals are to be connected.
-		 * @param customSignalHandler The name of the script function to call when
-		 *                            handling the signal. If a blank string is
-		 *                            given, the default handlers will be assumed.
+		 * @param  widget The widget whose signals are to be connected.
+		 * @param  customSignalHandler The name of the script function to call when
+		 *                             handling the signal. If a blank string is
+		 *                             given, the default handlers will be assumed.
+		 * @safety No guarantee.
 		 */
 		void _connectSignals(tgui::Widget::Ptr widget,
-			const std::string& customSignalHandler) noexcept;
+			const std::string& customSignalHandler);
 
 		/**
 		 * Determines whether or not the given widget type is a container type.
 		 * @param  type The TGUI widget type.
 		 * @return \c TRUE if the widget type is a container, \c FALSE otherwise.
 		 */
-		static inline bool _isContainerWidget(tgui::String type) noexcept {
+		static inline bool _isContainerWidget(tgui::String type) {
 			type = type.trim().toLower();
 			// Not all of them are here for future reference!
 			return type == "childwindow" || type == "grid" || type == "group" ||
@@ -449,44 +461,45 @@ namespace sfx {
 		/**
 		 * Removes widgets from \c _gui.
 		 * @warning A grid within a grid may cause the game to crash!
-		 * @param widget    Pointer to the widget to delete.
-		 * @param container Pointer to the container which holds the widget.
-		 * @param removeIt  For containers: if \c FALSE, this will only remove all
-		 *                  the widgets within a container, but not the container
-		 *                  itself. If \c TRUE, this will ensure that the container
-		 *                  itself is also deleted, as well as all of its child
-		 *                  widgets.\n
-		 *                  For widgets: if \c FALSE, the widget's associated data
-		 *                  will be erased, but the widget itself won't be erased.
-		 *                  If \c TRUE, the widget and its data will be erased.
-		 *                  This is required for \c Grid widgets, who cause the
-		 *                  game to crash if it attempts to remove a grid whose
-		 *                  widgets have already been erased.
+		 * @param   widget    Pointer to the widget to delete.
+		 * @param   container Pointer to the container which holds the widget.
+		 * @param   removeIt  For containers: if \c FALSE, this will only remove
+		 *                    all the widgets within a container, but not the
+		 *                    container itself. If \c TRUE, this will ensure that
+		 *                    the container itself is also deleted, as well as all
+		 *                    of its child widgets.\n
+		 *                    For widgets: if \c FALSE, the widget's associated
+		 *                    data will be erased, but the widget itself won't be
+		 *                    erased. If \c TRUE, the widget and its data will be
+		 *                    erased. This is required for \c Grid widgets, who
+		 *                    cause the game to crash if it attempts to remove a
+		 *                    grid whose widgets have already been erased.
+		 * @safety  No guarantee.
 		 */
 		void _removeWidgets(const tgui::Widget::Ptr& widget,
-			const tgui::Container::Ptr& container, const bool removeIt) noexcept;
+			const tgui::Container::Ptr& container, const bool removeIt);
 
 		/**
 		 * Adds a translatable caption to a widget, or updates an existing one.
 		 * Note that if an out of range index is given, the internal lists will
 		 * grow in order to accomodate for the new entry.
-		 * @param text      The translation key of the string to use.
-		 * @param fullname  The full name of the widget to assign the caption to.
-		 * @param index     Which caption to set.
-		 * @param variables Optional list of variables to later insert into the
-		 *                  caption when translating.
+		 * @param  text      The translation key of the string to use.
+		 * @param  fullname  The full name of the widget to assign the caption to.
+		 * @param  index     Which caption to set.
+		 * @param  variables Optional list of variables to later insert into the
+		 *                   caption when translating.
+		 * @safety No guarantee.
 		 */
 		void _setTranslatedString(const std::string& text,
 			const std::string& fullname, const std::size_t index,
-			CScriptArray* variables) noexcept;
+			CScriptArray* variables);
 
 		/**
 		 * Extracts a widget's short name from its full name.
 		 * @param  fullname The full name of the widget.
 		 * @return The short name of the widget.
 		 */
-		static std::string _extractWidgetName(const std::string& fullname)
-			noexcept;
+		static std::string _extractWidgetName(const std::string& fullname);
 
 		/**
 		 * Creates a widget of a given type and returns it.
@@ -500,7 +513,7 @@ namespace sfx {
 		 *         created.
 		 */
 		tgui::Widget::Ptr _createWidget(const std::string& wType,
-			const std::string& name, const std::string& menu) noexcept;
+			const std::string& name, const std::string& menu) const;
 
 		/**
 		 * Finds a widget in the root GUI object and returns it.
@@ -520,7 +533,7 @@ namespace sfx {
 		template<typename T>
 		typename T::Ptr _findWidget(std::string name,
 			std::vector<std::string>* namesList = nullptr,
-			std::string* fullname = nullptr) const noexcept;
+			std::string* fullname = nullptr) const;
 
 		//////////////////////
 		// SCRIPT INTERFACE //
@@ -532,7 +545,7 @@ namespace sfx {
 		 * Calls @c setGUI(), passing @c TRUE to both @c callClose and @c callOpen.
 		 * @sa @c sfx::gui::setGUI()
 		 */
-		void _setGUI(const std::string& name) noexcept;
+		void _setGUI(const std::string& name);
 
 		// BACKGROUND //
 
@@ -541,7 +554,7 @@ namespace sfx {
 		 * @param menu The name of the menu whose background is to be removed. If a
 		 *             blank string is given, the current menu is chosen.
 		 */
-		void _noBackground(std::string menu) noexcept;
+		void _noBackground(std::string menu);
 
 		/**
 		 * Makes a menu have an animated sprite for a background.
@@ -553,7 +566,7 @@ namespace sfx {
 		 * @param sprite The name of the sprite to draw.
 		 */
 		void _spriteBackground(std::string menu, const std::string& sheet,
-			const std::string& sprite) noexcept;
+			const std::string& sprite);
 
 		/**
 		 * Makes a menu have a solid colour background.
@@ -565,8 +578,7 @@ namespace sfx {
 		 * @param a    The alpha attribute.
 		 */
 		void _colourBackground(std::string menu, const unsigned int r,
-			const unsigned int g, const unsigned int b, const unsigned int a)
-			noexcept;
+			const unsigned int g, const unsigned int b, const unsigned int a);
 
 		// WIDGETS //
 
@@ -576,7 +588,7 @@ namespace sfx {
 		 * @return \c TRUE if a widget with the given name exists, \c FALSE
 		 *         otherwise.
 		 */
-		bool _widgetExists(const std::string& name) noexcept;
+		bool _widgetExists(const std::string& name);
 
 		/**
 		 * Creates a new widget and adds it to a container.
@@ -591,7 +603,7 @@ namespace sfx {
 		 *                      this widget, if any.
 		 */
 		void _addWidget(const std::string& widgetType, const std::string& name,
-			const std::string& signalHandler = "") noexcept;
+			const std::string& signalHandler = "");
 
 		/**
 		 * Creates a widget and adds it to a grid.
@@ -611,7 +623,7 @@ namespace sfx {
 		 */
 		void _addWidgetToGrid(const std::string& widgetType,
 			const std::string& name, const std::size_t row, const std::size_t col,
-			const std::string& signalHandler = "") noexcept;
+			const std::string& signalHandler = "");
 
 		/**
 		 * Removes a specified widget, and all the widgets that are within it.
@@ -619,7 +631,7 @@ namespace sfx {
 		 * and no widget will be removed.
 		 * @param name The name of the widget to remove.
 		 */
-		void _removeWidget(const std::string& name) noexcept;
+		void _removeWidget(const std::string& name);
 
 		/**
 		 * Removes all the widgets from a given container.
@@ -627,7 +639,7 @@ namespace sfx {
 		 * container, then an error will be logged and no widget will be removed.
 		 * @param name The name of the container whose widgets are to be removed.
 		 */
-		void _removeWidgetsFromContainer(const std::string& name) noexcept;
+		void _removeWidgetsFromContainer(const std::string& name);
 
 		/**
 		 * Updates the setfocus to point to a given widget.
@@ -635,7 +647,7 @@ namespace sfx {
 		 * and the setfocus will not be changed.
 		 * @param name The name fo the widget who will have the setfocus.
 		 */
-		void _setWidgetFocus(const std::string& name) noexcept;
+		void _setWidgetFocus(const std::string& name);
 
 		/**
 		 * Sets a widget's font.
@@ -644,8 +656,7 @@ namespace sfx {
 		 * @param name     The name of the widget to change.
 		 * @param fontName The name of the font to assign to the widget.
 		 */
-		void _setWidgetFont(const std::string& name, const std::string& fontName)
-			noexcept;
+		void _setWidgetFont(const std::string& name, const std::string& fontName);
 
 		/**
 		 * Sets the global UI font.
@@ -653,7 +664,7 @@ namespace sfx {
 		 * no font will be changed.
 		 * @param fontName The name of the font to assign.
 		 */
-		void _setGlobalFont(const std::string& fontName) noexcept;
+		void _setGlobalFont(const std::string& fontName);
 
 		/**
 		 * Updates a widget's location.
@@ -664,7 +675,7 @@ namespace sfx {
 		 * @param y    The expression to assign to the widget's Y coordinate.
 		 */
 		void _setWidgetPosition(const std::string& name, const std::string& x,
-			const std::string& y) noexcept;
+			const std::string& y);
 
 		/**
 		 * Updates a widget's origin.
@@ -675,7 +686,7 @@ namespace sfx {
 		 * @param y    The new origin to set along the widget's Y axis (0.0-1.0).
 		 */
 		void _setWidgetOrigin(const std::string& name, const float x,
-			const float y) noexcept;
+			const float y);
 
 		/**
 		 * Updates a widget's size.
@@ -686,7 +697,7 @@ namespace sfx {
 		 * @param h    The expression to assign to the widget's height.
 		 */
 		void _setWidgetSize(const std::string& name, const std::string& w,
-			const std::string& h) noexcept;
+			const std::string& h);
 
 		/**
 		 * Gets the full size of a widget.
@@ -696,7 +707,7 @@ namespace sfx {
 		 * @param  name The name of the widget to query.
 		 * @return The full size of the widget, which includes any borders, etc.
 		 */
-		sf::Vector2f _getWidgetFullSize(const std::string& name) noexcept;
+		sf::Vector2f _getWidgetFullSize(const std::string& name);
 
 		/**
 		 * Updates a widget's enabled property.
@@ -706,8 +717,7 @@ namespace sfx {
 		 * @param enable \c TRUE if the widget should be enabled, \c FALSE if it
 		 *               should be disabled.
 		 */
-		void _setWidgetEnabled(const std::string& name, const bool enable)
-			noexcept;
+		void _setWidgetEnabled(const std::string& name, const bool enable);
 
 		/**
 		 * Retrieves the enabled property of a widget.
@@ -716,7 +726,7 @@ namespace sfx {
 		 * @param  name The name of the widget to query.
 		 * @return \c TRUE if the widget is enabled, \c FALSE otherwise.
 		 */
-		bool _getWidgetEnabled(const std::string& name) const noexcept;
+		bool _getWidgetEnabled(const std::string& name) const;
 
 		/**
 		 * Updates a widget's visibility property.
@@ -726,8 +736,7 @@ namespace sfx {
 		 * @param visible \c TRUE if the widget should be shown, \c FALSE if it
 		 *                should be hidden.
 		 */
-		void _setWidgetVisibility(const std::string& name, const bool visible)
-			noexcept;
+		void _setWidgetVisibility(const std::string& name, const bool visible);
 
 		/**
 		 * Retrieves the visibility property of a widget.
@@ -736,7 +745,7 @@ namespace sfx {
 		 * @param  name The name of the widget to query.
 		 * @return \c TRUE if the widget is visible, \c FALSE otherwise.
 		 */
-		bool _getWidgetVisibility(const std::string& name) const noexcept;
+		bool _getWidgetVisibility(const std::string& name) const;
 
 		/**
 		 * Updates a widget's caption.
@@ -747,7 +756,7 @@ namespace sfx {
 		 * @param variables Optional list of variables to insert into the caption.
 		 */
 		void _setWidgetText(const std::string& name, const std::string& text,
-			CScriptArray* variables) noexcept;
+			CScriptArray* variables);
 
 		/**
 		 * Gets the widget's caption.
@@ -760,7 +769,7 @@ namespace sfx {
 		 * @param  name The name of the widget to query.
 		 * @return The caption/text assigned to the widget.
 		 */
-		std::string _getWidgetText(const std::string& name) noexcept;
+		std::string _getWidgetText(const std::string& name);
 
 		/**
 		 * Sets a widget's character size.
@@ -769,8 +778,7 @@ namespace sfx {
 		 * @param name The name of the widget to change.
 		 * @param size The new character size.
 		 */
-		void _setWidgetTextSize(const std::string& name, const unsigned int size)
-			noexcept;
+		void _setWidgetTextSize(const std::string& name, const unsigned int size);
 
 		/**
 		 * Sets a widget's text colour.
@@ -779,8 +787,8 @@ namespace sfx {
 		 * @param name   The name of the widget to change.
 		 * @param colour The new text colour.
 		 */
-		void _setWidgetTextColour(const std::string& name, const sf::Color& colour)
-			noexcept;
+		void _setWidgetTextColour(const std::string& name,
+			const sf::Color& colour);
 
 		/**
 		 * Sets a widget's text outline colour.
@@ -790,7 +798,7 @@ namespace sfx {
 		 * @param colour The new text outline colour.
 		 */
 		void _setWidgetTextOutlineColour(const std::string& name,
-			const sf::Color& colour) noexcept;
+			const sf::Color& colour);
 
 		/**
 		 * Sets a widget's text outline thickness.
@@ -800,7 +808,7 @@ namespace sfx {
 		 * @param thickness The new text outline thickness.
 		 */
 		void _setWidgetTextOutlineThickness(const std::string& name,
-			const float thickness) noexcept;
+			const float thickness);
 
 		/**
 		 * Sets a widget's text alignment.
@@ -813,7 +821,7 @@ namespace sfx {
 		 */
 		void _setWidgetTextAlignment(const std::string& name,
 			const tgui::Label::HorizontalAlignment h,
-			const tgui::Label::VerticalAlignment v) noexcept;
+			const tgui::Label::VerticalAlignment v);
 
 		/**
 		 * Updates a widget's sprite.
@@ -825,7 +833,7 @@ namespace sfx {
 		 * @param key   The name of the sprite to set.
 		 */
 		void _setWidgetSprite(const std::string& name, const std::string& sheet,
-			const std::string& key) noexcept;
+			const std::string& key);
 
 		/**
 		 * Configures a widget to always resize to match its sprite's size.
@@ -840,7 +848,7 @@ namespace sfx {
 		 * @param overrideSetSize The new value.
 		 */
 		void _matchWidgetSizeToSprite(const std::string& name,
-			const bool overrideSetSize) noexcept;
+			const bool overrideSetSize);
 
 		/**
 		 * Sets a widget's background colour.
@@ -849,8 +857,7 @@ namespace sfx {
 		 * @param name   The name of the widget to change.
 		 * @param colour The colour to set to the background of the widget.
 		 */
-		void _setWidgetBgColour(const std::string& name, const sf::Color& colour)
-			noexcept;
+		void _setWidgetBgColour(const std::string& name, const sf::Color& colour);
 
 		/**
 		 * Sets a widget's border size.
@@ -860,8 +867,7 @@ namespace sfx {
 		 * @param name The name of the widget to change.
 		 * @param size The size to set to the widget's border.
 		 */
-		void _setWidgetBorderSize(const std::string& name, const float size)
-			noexcept;
+		void _setWidgetBorderSize(const std::string& name, const float size);
 
 		/**
 		 * Sets a widget's border colour.
@@ -871,7 +877,7 @@ namespace sfx {
 		 * @param colour The colour to set to the widget's border.
 		 */
 		void _setWidgetBorderColour(const std::string& name,
-			const sf::Color& colour) noexcept;
+			const sf::Color& colour);
 
 		/**
 		 * Sets a widget's rounded border radius.
@@ -880,8 +886,7 @@ namespace sfx {
 		 * @param name   The name of the widget to change.
 		 * @param radius The radius to set to the widget's rounded border.
 		 */
-		void _setWidgetBorderRadius(const std::string& name, const float radius)
-			noexcept;
+		void _setWidgetBorderRadius(const std::string& name, const float radius);
 
 		/**
 		 * Sets a widget's index within its container.
@@ -892,8 +897,7 @@ namespace sfx {
 		 * @param name  The name of the widget to change.
 		 * @param index The new index to set to the widget.
 		 */
-		void _setWidgetIndex(const std::string& name, const std::size_t index)
-			noexcept;
+		void _setWidgetIndex(const std::string& name, const std::size_t index);
 
 		/**
 		 * Updates a widget's index within a given container.
@@ -907,7 +911,7 @@ namespace sfx {
 		 * @param newIndex The new index of the widget.
 		 */
 		void _setWidgetIndexInContainer(const std::string& name,
-			const std::size_t oldIndex, const std::size_t newIndex) noexcept;
+			const std::size_t oldIndex, const std::size_t newIndex);
 
 		/**
 		 * Sets a widget's size in relation to others in its layout.
@@ -919,7 +923,7 @@ namespace sfx {
 		 * @param ratio The ratio to apply.
 		 */
 		void _setWidgetRatioInLayout(const std::string& name,
-			const std::size_t index, const float ratio) noexcept;
+			const std::size_t index, const float ratio);
 		
 		/**
 		 * Updates a widget's default text.
@@ -932,7 +936,7 @@ namespace sfx {
 		 * @param variables Optional list of variables to insert into the text.
 		 */
 		void _setWidgetDefaultText(const std::string& name,
-			const std::string& text, CScriptArray* variables) noexcept;
+			const std::string& text, CScriptArray* variables);
 
 		/**
 		 * Adds an item to a widget.
@@ -945,7 +949,7 @@ namespace sfx {
 		 *                  text.
 		 */
 		void _addItem(const std::string& name, const std::string& text,
-			CScriptArray* variables) noexcept;
+			CScriptArray* variables);
 
 		/**
 		 * Clears all items from a widget.
@@ -953,7 +957,7 @@ namespace sfx {
 		 * operation, then an error will be logged and no item will be removed.
 		 * @param name The name of the widget to add the item to.
 		 */
-		void _clearItems(const std::string& name) noexcept;
+		void _clearItems(const std::string& name);
 
 		/**
 		 * Selects an item by index.
@@ -963,8 +967,7 @@ namespace sfx {
 		 * @param name  The name of the widget which contains the item to select.
 		 * @param index The 0-based index of the item to select.
 		 */
-		void _setSelectedItem(const std::string& name, const std::size_t index)
-			noexcept;
+		void _setSelectedItem(const std::string& name, const std::size_t index);
 
 		/**
 		 * Gets the currently selected item's index.
@@ -974,7 +977,7 @@ namespace sfx {
 		 * @param  name The name of the widget to query.
 		 * @return The index of the currently selected item.
 		 */
-		int _getSelectedItem(const std::string& name) noexcept;
+		int _getSelectedItem(const std::string& name);
 
 		/**
 		 * Retrieves the text of the currently selected item of a widget.
@@ -984,7 +987,7 @@ namespace sfx {
 		 * @param  name The name of the widget to query.
 		 * @return The translated text of the item.
 		 */
-		std::string _getSelectedItemText(const std::string& name) noexcept;
+		std::string _getSelectedItemText(const std::string& name);
 
 		/**
 		 * Returns the number of widgets within a container.
@@ -993,7 +996,7 @@ namespace sfx {
 		 * @param  name The name of the container to query.
 		 * @return The number of widgets within the container.
 		 */
-		std::size_t _getWidgetCount(const std::string& name) noexcept;
+		std::size_t _getWidgetCount(const std::string& name);
 
 		/**
 		 * Sets the scrollbar policy for a scrollable panel's horizontal scrollbar.
@@ -1003,7 +1006,7 @@ namespace sfx {
 		 * @param policy The amount the scrollbar should scroll by.
 		 */
 		void _setHorizontalScrollbarPolicy(const std::string& name,
-			const tgui::Scrollbar::Policy policy) noexcept;
+			const tgui::Scrollbar::Policy policy);
 
 		/**
 		 * Sets the scroll amount for a scrollable panel's horizontal scrollbar.
@@ -1013,7 +1016,7 @@ namespace sfx {
 		 * @param amount The amount the scrollbar should scroll by.
 		 */
 		void _setHorizontalScrollbarAmount(const std::string& name,
-			const unsigned int amount) noexcept;
+			const unsigned int amount);
 
 		/**
 		 * Sets the padding applied to a group of widgets.
@@ -1022,8 +1025,7 @@ namespace sfx {
 		 * @param name    The name of the widget to edit.
 		 * @param padding The padding to set.
 		 */
-		void _setGroupPadding(const std::string& name, const std::string& padding)
-			noexcept;
+		void _setGroupPadding(const std::string& name, const std::string& padding);
 
 		/**
 		 * Sets the alignment applied to a widget within a grid.
@@ -1038,7 +1040,7 @@ namespace sfx {
 		 */
 		void _setWidgetAlignmentInGrid(const std::string& name,
 			const std::size_t row, const std::size_t col,
-			const tgui::Grid::Alignment alignment) noexcept;
+			const tgui::Grid::Alignment alignment);
 
 		/**
 		 * Sets the space between widgets in Vertical and Horizontal Layouts.
@@ -1047,8 +1049,7 @@ namespace sfx {
 		 * @param name  The name of the layout to edit.
 		 * @param space The new distance to apply.
 		 */
-		void _setSpaceBetweenWidgets(const std::string& name, const float space)
-			noexcept;
+		void _setSpaceBetweenWidgets(const std::string& name, const float space);
 
 		//////////
 		// DATA //

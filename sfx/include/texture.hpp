@@ -234,7 +234,7 @@ namespace sfx {
 		 * @param  sprite The name of the sprite to animate and draw.
 		 * @safety Strong guarantee.
 		 */
-		void setSprite(const std::string& sprite) noexcept;
+		void setSprite(const std::string& sprite);
 
 		/**
 		 * Retrieves the name of the sprite assigned to this object.

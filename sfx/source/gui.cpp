@@ -37,23 +37,23 @@ sf::Color NO_COLOUR(0, 0, 0, 0);
 
 sfx::gui::gui_background::gui_background(
 	const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
-	const std::string& key) noexcept {
+	const std::string& key) {
 	set(sheet, key);
 }
 
-sfx::gui::gui_background::gui_background(const sf::Color& colour) noexcept {
+sfx::gui::gui_background::gui_background(const sf::Color& colour) {
 	set(colour);
 }
 
 void sfx::gui::gui_background::set(
 	const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
-	const std::string& key) noexcept {
+	const std::string& key) {
 	_flag = sfx::gui::gui_background::type::Sprite;
 	if (sheet) _bgSprite.setSpritesheet(sheet);
 	_bgSprite.setSprite(key);
 }
 
-void sfx::gui::gui_background::set(const sf::Color& colour) noexcept {
+void sfx::gui::gui_background::set(const sf::Color& colour) {
 	_flag = sfx::gui::gui_background::type::Colour;
 	_bgColour.setFillColor(colour);
 }
@@ -62,16 +62,16 @@ sfx::gui::gui_background::type sfx::gui::gui_background::getType() const noexcep
 	return _flag;
 }
 
-std::string sfx::gui::gui_background::getSprite() const noexcept {
+std::string sfx::gui::gui_background::getSprite() const {
 	return _bgSprite.getSprite();
 }
 
-sf::Color sfx::gui::gui_background::getColour() const noexcept {
+sf::Color sfx::gui::gui_background::getColour() const {
 	return _bgColour.getFillColor();
 }
 
 bool sfx::gui::gui_background::animate(const sf::RenderTarget& target,
-	const double scaling) noexcept {
+	const double scaling) {
 	if (_flag == sfx::gui::gui_background::type::Sprite) {
 		return _bgSprite.animate(target, scaling);
 	} else if (_flag == sfx::gui::gui_background::type::Colour) {
@@ -99,13 +99,12 @@ void sfx::gui::gui_background::draw(sf::RenderTarget& target,
 // CSCRIPTANYWRAPPER //
 ///////////////////////
 
-sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(CScriptAny* const obj) noexcept :
-	_any(obj) {
+sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(CScriptAny* const obj) : _any(obj) {
 	if (_any) _any->AddRef();
 }
 
 sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(
-	const sfx::gui::CScriptAnyWrapper& obj) noexcept : _any(obj.operator->()) {
+	const sfx::gui::CScriptAnyWrapper& obj) : _any(obj.operator->()) {
 	if (_any) _any->AddRef();
 }
 
@@ -127,18 +126,18 @@ CScriptAny* sfx::gui::CScriptAnyWrapper::operator->() const noexcept {
 /////////
 
 sfx::gui::gui(const std::shared_ptr<engine::scripts>& scripts,
-	const engine::logger::data& data) noexcept :
-	json_script({data.sink, "json_script"}), _scripts(scripts), _logger(data) {
+	const engine::logger::data& data) : json_script({data.sink, "json_script"}),
+	_scripts(scripts), _logger(data) {
 	if (!scripts) {
-		_logger.error("No scripts object has been provided to this GUI object: no "
-			"menus will be loaded.");
+		_logger.critical("No scripts object has been provided to this GUI object: "
+			"no menus will be loaded.");
 	} else {
 		_scripts->addRegistrant(this);
 	}
 }
 
 void sfx::gui::registerInterface(asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	// Document GUI behaviours.
 	document->DocumentExpectedFunction("WidgetNames",
 		"Widgets have both a short name and a long name. The long name describes "
@@ -630,7 +629,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
-	const bool callOpen) noexcept {
+	const bool callOpen) {
 	auto old = getGUI();
 	if (_gui.get(old)) {
 		_gui.get(old)->setVisible(false);
@@ -669,27 +668,27 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 	}
 }
 
-std::string sfx::gui::getGUI() const noexcept {
+std::string sfx::gui::getGUI() const {
 	return _currentGUI;
 }
 
 void sfx::gui::addSpritesheet(const std::string& name,
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	if (_sheet.find(name) != _sheet.end()) {
 		_logger.warning("Updated the spritesheet named {}!", name);
 	}
 	_sheet[name] = sheet;
 }
 
-void sfx::gui::setTarget(sf::RenderTarget& newTarget) noexcept {
+void sfx::gui::setTarget(sf::RenderTarget& newTarget) {
 	_gui.setTarget(newTarget);
 }
 
-bool sfx::gui::handleEvent(sf::Event e) noexcept {
+bool sfx::gui::handleEvent(sf::Event e) {
 	return _gui.handleEvent(e);
 }
 
-void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept {
+void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	if (ui) {
 		if (_scripts->functionExists(getGUI() + "HandleInput")) {
 			_handleInputErrorLogged = false;
@@ -710,7 +709,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) noexcept 
 }
 
 void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
-	const tgui::String& signalName) noexcept {
+	const tgui::String& signalName) {
 	if (_scripts && getGUI() != "") {
 		std::string fullname = widget->getWidgetName().toStdString();
 		std::string signalNameStd = signalName.toStdString();
@@ -738,17 +737,16 @@ void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 }
 
 void sfx::gui::setLanguageDictionary(
-	const std::shared_ptr<engine::language_dictionary>& lang) noexcept {
-	_langdict = lang;
+	const std::shared_ptr<engine::language_dictionary>& lang) {
 	_lastlang = "";
+	_langdict = lang;
 }
 
 void sfx::gui::setFonts(const std::shared_ptr<sfx::fonts>& fonts) noexcept {
 	_fonts = fonts;
 }
 
-bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
-	noexcept {
+bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		_guiBackground.at(getGUI()).animate(target, scaling);
 	}
@@ -776,7 +774,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling)
 }
 
 void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
-	tgui::Container::Ptr container) noexcept {
+	tgui::Container::Ptr container) {
 	static auto allocImage = [&](const tgui::String& type, Widget::Ptr widget,
 		const std::string& widgetName, const unsigned int w, const unsigned int h)
 		-> void {
@@ -883,7 +881,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 	}
 }
 
-void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) noexcept {
+void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 	std::string widgetName = widget->getWidgetName().toStdString();
 	String type = widget->getWidgetType();
 	if (!_originalStrings[widgetName].empty()) {
@@ -971,7 +969,7 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) noexcept {
 }
 
 std::string sfx::gui::_getTranslatedText(const std::string& name,
-	const std::size_t index) const noexcept {
+	const std::size_t index) const {
 	std::string ret = (*_langdict)(_originalStrings.at(name).at(index));
 	// If there are any variables, insert them manually.
 	if (_originalStringsVariables.find(name) != _originalStringsVariables.end()) {
@@ -1036,7 +1034,7 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.setView(oldView);
 }
 
-bool sfx::gui::_load(engine::json& j) noexcept {
+bool sfx::gui::_load(engine::json& j) {
 	std::vector<std::string> names;
 	j.applyVector(names, { "menus" });
 	if (j.inGoodState()) {
@@ -1056,7 +1054,7 @@ bool sfx::gui::_load(engine::json& j) noexcept {
 		setGUI("MainMenu", false, false);
 		if (_scripts) _scripts->callFunction("MainMenuSetUp");
 		// Create each menu.
-		for (auto& m : names) {
+		for (const auto& m : names) {
 			menu = tgui::Group::create();
 			menu->setVisible(false);
 			_gui.add(menu, m);
@@ -1080,7 +1078,7 @@ bool sfx::gui::_save(nlohmann::ordered_json& j) noexcept {
 
 // ALL SIGNALS NEED TO BE TESTED IDEALLY
 void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
-	const std::string& customSignalHandler) noexcept {
+	const std::string& customSignalHandler) {
 	// Register the custom signal handler, if one is provided.
 	if (!customSignalHandler.empty()) {
 		_customSignalHandlers[widget->getWidgetName().toStdString()] =
@@ -1233,7 +1231,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 }
 
 void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
-	const tgui::Container::Ptr& container, const bool removeIt) noexcept {
+	const tgui::Container::Ptr& container, const bool removeIt) {
 	if (_isContainerWidget(widget->getWidgetType())) {
 		auto container = _findWidget<Container>(
 			widget->getWidgetName().toStdString());
@@ -1270,8 +1268,8 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 }
 
 void sfx::gui::_setTranslatedString(const std::string& text,
-	const std::string& fullname, const std::size_t index, CScriptArray* variables)
-	noexcept {
+	const std::string& fullname, const std::size_t index,
+	CScriptArray* variables) {
 	// Resize both containers to fit.
 	if (_originalStrings[fullname].size() <= index) {
 		_originalStrings[fullname].resize(index + 1);
@@ -1289,7 +1287,7 @@ void sfx::gui::_setTranslatedString(const std::string& text,
 	}
 }
 
-std::string sfx::gui::_extractWidgetName(const std::string& fullname) noexcept {
+std::string sfx::gui::_extractWidgetName(const std::string& fullname) {
 	if (fullname.rfind('.') == String::npos) {
 		return fullname;
 	} else {
@@ -1298,7 +1296,7 @@ std::string sfx::gui::_extractWidgetName(const std::string& fullname) noexcept {
 }
 
 Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
-	const std::string& name, const std::string& menu) noexcept {
+	const std::string& name, const std::string& menu) const {
 	tgui::String type = tgui::String(wType).trim().toLower();
 	if (type == "bitmapbutton") {
 		return tgui::BitmapButton::create();
@@ -1336,17 +1334,17 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 // SCRIPT INTERFACE //
 //////////////////////
 
-void sfx::gui::_setGUI(const std::string& name) noexcept {
+void sfx::gui::_setGUI(const std::string& name) {
 	setGUI(name, true, true);
 }
 
-void sfx::gui::_noBackground(std::string menu) noexcept {
+void sfx::gui::_noBackground(std::string menu) {
 	if (menu == "") menu = getGUI();
 	_guiBackground.erase(menu);
 }
 
 void sfx::gui::_spriteBackground(std::string menu, const std::string& sheet,
-	const std::string& sprite) noexcept {
+	const std::string& sprite) {
 	if (menu == "") menu = getGUI();
 	try {
 		_guiBackground[menu].set(_sheet.at(sheet), sprite);
@@ -1358,17 +1356,17 @@ void sfx::gui::_spriteBackground(std::string menu, const std::string& sheet,
 }
 
 void sfx::gui::_colourBackground(std::string menu, const unsigned int r,
-	const unsigned int g, const unsigned int b, const unsigned int a) noexcept {
+	const unsigned int g, const unsigned int b, const unsigned int a) {
 	if (menu == "") menu = getGUI();
 	_guiBackground[menu].set(sf::Color(r, g, b, a));
 }
 
-bool sfx::gui::_widgetExists(const std::string& name) noexcept {
+bool sfx::gui::_widgetExists(const std::string& name) {
 	return _findWidget<Widget>(name).operator bool();
 }
 
 void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name,
-	const std::string& signalHandler) noexcept {
+	const std::string& signalHandler) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	if (_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
@@ -1394,7 +1392,7 @@ void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name
 
 void sfx::gui::_addWidgetToGrid(const std::string& widgetType,
 	const std::string& name, const std::size_t row, const std::size_t col,
-	const std::string& signalHandler) noexcept {
+	const std::string& signalHandler) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	if (_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
@@ -1423,7 +1421,7 @@ void sfx::gui::_addWidgetToGrid(const std::string& widgetType,
 	}
 }
 
-void sfx::gui::_removeWidget(const std::string& name) noexcept {
+void sfx::gui::_removeWidget(const std::string& name) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -1442,7 +1440,7 @@ void sfx::gui::_removeWidget(const std::string& name) noexcept {
 	}
 }
 
-void sfx::gui::_removeWidgetsFromContainer(const std::string& name) noexcept {
+void sfx::gui::_removeWidgetsFromContainer(const std::string& name) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -1470,7 +1468,7 @@ void sfx::gui::_removeWidgetsFromContainer(const std::string& name) noexcept {
 
 }
 
-void sfx::gui::_setWidgetFocus(const std::string& name) noexcept {
+void sfx::gui::_setWidgetFocus(const std::string& name) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1481,8 +1479,8 @@ void sfx::gui::_setWidgetFocus(const std::string& name) noexcept {
 	}
 }
 
-void sfx::gui::_setWidgetFont(const std::string& name, const std::string& fontName)
-	noexcept {
+void sfx::gui::_setWidgetFont(const std::string& name,
+	const std::string& fontName) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1503,7 +1501,7 @@ void sfx::gui::_setWidgetFont(const std::string& name, const std::string& fontNa
 	}
 }
 
-void sfx::gui::_setGlobalFont(const std::string& fontName) noexcept {
+void sfx::gui::_setGlobalFont(const std::string& fontName) {
 	if (_fonts) {
 		auto fontPath = _fonts->getFontPath(fontName);
 		// Invalid font name will be logged by fonts class.
@@ -1515,7 +1513,7 @@ void sfx::gui::_setGlobalFont(const std::string& fontName) noexcept {
 }
 
 void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,
-	const std::string& y) noexcept {
+	const std::string& y) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1528,7 +1526,7 @@ void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,
 }
 
 void sfx::gui::_setWidgetOrigin(const std::string& name, const float x,
-	const float y) noexcept {
+	const float y) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1541,7 +1539,7 @@ void sfx::gui::_setWidgetOrigin(const std::string& name, const float x,
 }
 
 void sfx::gui::_setWidgetSize(const std::string& name, const std::string& w,
-	const std::string& h) noexcept {
+	const std::string& h) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1553,7 +1551,7 @@ void sfx::gui::_setWidgetSize(const std::string& name, const std::string& w,
 	}
 }
 
-sf::Vector2f sfx::gui::_getWidgetFullSize(const std::string& name) noexcept {
+sf::Vector2f sfx::gui::_getWidgetFullSize(const std::string& name) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1565,8 +1563,7 @@ sf::Vector2f sfx::gui::_getWidgetFullSize(const std::string& name) noexcept {
 	return {};
 }
 
-void sfx::gui::_setWidgetEnabled(const std::string& name, const bool enable)
-	noexcept {
+void sfx::gui::_setWidgetEnabled(const std::string& name, const bool enable) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1577,7 +1574,7 @@ void sfx::gui::_setWidgetEnabled(const std::string& name, const bool enable)
 	}
 }
 
-bool sfx::gui::_getWidgetEnabled(const std::string& name) const noexcept {
+bool sfx::gui::_getWidgetEnabled(const std::string& name) const {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1589,8 +1586,7 @@ bool sfx::gui::_getWidgetEnabled(const std::string& name) const noexcept {
 	return false;
 }
 
-void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible)
-	noexcept {
+void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1601,7 +1597,7 @@ void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible)
 	}
 }
 
-bool sfx::gui::_getWidgetVisibility(const std::string& name) const noexcept {
+bool sfx::gui::_getWidgetVisibility(const std::string& name) const {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1615,7 +1611,7 @@ bool sfx::gui::_getWidgetVisibility(const std::string& name) const noexcept {
 }
 
 void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
-	CScriptArray* variables) noexcept {
+	CScriptArray* variables) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -1647,7 +1643,7 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
 	if (variables) variables->Release();
 }
 
-std::string sfx::gui::_getWidgetText(const std::string& name) noexcept {
+std::string sfx::gui::_getWidgetText(const std::string& name) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1668,8 +1664,8 @@ std::string sfx::gui::_getWidgetText(const std::string& name) noexcept {
 	return "";
 }
 
-void sfx::gui::_setWidgetTextSize(const std::string& name, const unsigned int size)
-	noexcept {
+void sfx::gui::_setWidgetTextSize(const std::string& name,
+	const unsigned int size) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1696,7 +1692,7 @@ void sfx::gui::_setWidgetTextSize(const std::string& name, const unsigned int si
 }
 
 void sfx::gui::_setWidgetTextColour(const std::string& name,
-	const sf::Color& colour) noexcept {
+	const sf::Color& colour) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1721,7 +1717,7 @@ void sfx::gui::_setWidgetTextColour(const std::string& name,
 }
 
 void sfx::gui::_setWidgetTextOutlineColour(const std::string& name,
-	const sf::Color& colour) noexcept {
+	const sf::Color& colour) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1743,7 +1739,7 @@ void sfx::gui::_setWidgetTextOutlineColour(const std::string& name,
 }
 
 void sfx::gui::_setWidgetTextOutlineThickness(const std::string& name,
-	const float thickness) noexcept {
+	const float thickness) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1766,7 +1762,7 @@ void sfx::gui::_setWidgetTextOutlineThickness(const std::string& name,
 
 void sfx::gui::_setWidgetTextAlignment(const std::string& name,
 	const tgui::Label::HorizontalAlignment h,
-	const tgui::Label::VerticalAlignment v) noexcept {
+	const tgui::Label::VerticalAlignment v) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1789,7 +1785,7 @@ void sfx::gui::_setWidgetTextAlignment(const std::string& name,
 }
 
 void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& sheet,
-	const std::string& key) noexcept {
+	const std::string& key) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -1816,7 +1812,7 @@ void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& shee
 }
 
 void sfx::gui::_matchWidgetSizeToSprite(const std::string& name,
-	const bool overrideSetSize) noexcept {
+	const bool overrideSetSize) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -1840,8 +1836,8 @@ void sfx::gui::_matchWidgetSizeToSprite(const std::string& name,
 	}
 }
 
-void sfx::gui::_setWidgetBgColour(const std::string& name, const sf::Color& colour)
-	noexcept {
+void sfx::gui::_setWidgetBgColour(const std::string& name,
+	const sf::Color& colour) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1865,8 +1861,7 @@ void sfx::gui::_setWidgetBgColour(const std::string& name, const sf::Color& colo
 	}
 }
 
-void sfx::gui::_setWidgetBorderSize(const std::string& name, const float size)
-	noexcept {
+void sfx::gui::_setWidgetBorderSize(const std::string& name, const float size) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1888,7 +1883,7 @@ void sfx::gui::_setWidgetBorderSize(const std::string& name, const float size)
 }
 
 void sfx::gui::_setWidgetBorderColour(const std::string& name,
-	const sf::Color& colour) noexcept {
+	const sf::Color& colour) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1909,8 +1904,8 @@ void sfx::gui::_setWidgetBorderColour(const std::string& name,
 	}
 }
 
-void sfx::gui::_setWidgetBorderRadius(const std::string& name, const float radius)
-	noexcept {
+void sfx::gui::_setWidgetBorderRadius(const std::string& name,
+	const float radius) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -1931,8 +1926,7 @@ void sfx::gui::_setWidgetBorderRadius(const std::string& name, const float radiu
 	}
 }
 
-void sfx::gui::_setWidgetIndex(const std::string& name, const std::size_t index)
-	noexcept {
+void sfx::gui::_setWidgetIndex(const std::string& name, const std::size_t index) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -1964,7 +1958,7 @@ void sfx::gui::_setWidgetIndex(const std::string& name, const std::size_t index)
 }
 
 void sfx::gui::_setWidgetIndexInContainer(const std::string& name,
-	const std::size_t oldIndex, const std::size_t newIndex) noexcept {
+	const std::size_t oldIndex, const std::size_t newIndex) {
 	std::vector<std::string> fullname;
 	Container::Ptr container = _findWidget<Container>(name, &fullname);
 	if (container) {
@@ -2008,7 +2002,7 @@ void sfx::gui::_setWidgetIndexInContainer(const std::string& name,
 }
 
 void sfx::gui::_setWidgetRatioInLayout(const std::string& name,
-	const std::size_t index, const float ratio) noexcept {
+	const std::size_t index, const float ratio) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -2034,7 +2028,7 @@ void sfx::gui::_setWidgetRatioInLayout(const std::string& name,
 }
 
 void sfx::gui::_setWidgetDefaultText(const std::string& name,
-	const std::string& text, CScriptArray* variables) noexcept {
+	const std::string& text, CScriptArray* variables) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -2060,7 +2054,7 @@ void sfx::gui::_setWidgetDefaultText(const std::string& name,
 }
 
 void sfx::gui::_addItem(const std::string& name, const std::string& text,
-	CScriptArray* variables) noexcept {
+	CScriptArray* variables) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -2090,7 +2084,7 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text,
 	if (variables) variables->Release();
 }
 
-void sfx::gui::_clearItems(const std::string& name) noexcept {
+void sfx::gui::_clearItems(const std::string& name) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -2114,8 +2108,7 @@ void sfx::gui::_clearItems(const std::string& name) noexcept {
 	}
 }
 
-void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index)
-	noexcept {
+void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -2147,7 +2140,7 @@ void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index
 	}
 }
 
-int sfx::gui::_getSelectedItem(const std::string& name) noexcept {
+int sfx::gui::_getSelectedItem(const std::string& name) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -2170,7 +2163,7 @@ int sfx::gui::_getSelectedItem(const std::string& name) noexcept {
 	return -1;
 }
 
-std::string sfx::gui::_getSelectedItemText(const std::string& name) noexcept {
+std::string sfx::gui::_getSelectedItemText(const std::string& name) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -2193,7 +2186,7 @@ std::string sfx::gui::_getSelectedItemText(const std::string& name) noexcept {
 	return "";
 }
 
-std::size_t sfx::gui::_getWidgetCount(const std::string& name) noexcept {
+std::size_t sfx::gui::_getWidgetCount(const std::string& name) {
 	std::vector<std::string> fullname;
 	std::string fullnameAsString;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
@@ -2214,7 +2207,7 @@ std::size_t sfx::gui::_getWidgetCount(const std::string& name) noexcept {
 }
 
 void sfx::gui::_setHorizontalScrollbarPolicy(const std::string& name,
-	const tgui::Scrollbar::Policy policy) noexcept {
+	const tgui::Scrollbar::Policy policy) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -2236,7 +2229,7 @@ void sfx::gui::_setHorizontalScrollbarPolicy(const std::string& name,
 }
 
 void sfx::gui::_setHorizontalScrollbarAmount(const std::string& name,
-	const unsigned int amount) noexcept {
+	const unsigned int amount) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -2258,7 +2251,7 @@ void sfx::gui::_setHorizontalScrollbarAmount(const std::string& name,
 }
 
 void sfx::gui::_setGroupPadding(const std::string& name,
-	const std::string& padding) noexcept {
+	const std::string& padding) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -2290,7 +2283,7 @@ void sfx::gui::_setGroupPadding(const std::string& name,
 
 void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
 	const std::size_t row, const std::size_t col,
-	const tgui::Grid::Alignment alignment) noexcept {
+	const tgui::Grid::Alignment alignment) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {
@@ -2325,8 +2318,8 @@ void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
 	}
 }
 
-void sfx::gui::_setSpaceBetweenWidgets(const std::string& name, const float space)
-	noexcept {
+void sfx::gui::_setSpaceBetweenWidgets(const std::string& name,
+	const float space) {
 	std::vector<std::string> fullname;
 	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
 	if (widget) {

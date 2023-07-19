@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T>
 typename T::Ptr sfx::gui::_findWidget(std::string name,
-	std::vector<std::string>* namesList, std::string* fullname) const noexcept {
+	std::vector<std::string>* namesList, std::string* fullname) const {
 	// Split string.
 	std::vector<std::string> names;
 	std::size_t pos = 0;
