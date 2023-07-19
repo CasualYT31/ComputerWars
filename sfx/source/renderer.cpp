@@ -25,11 +25,45 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Windows.h>
 #endif
 
+float sfx::animated_drawable::calculateDelta(const sf::Time& timeout) {
+	_firsttime = false;
+	// If the delta timer has timed out, restart the delta timer twice to
+	// achieved the desired effect.
+	if (_deltaTimer.getElapsedTime() >= timeout) _deltaTimer.restart();
+	return _deltaTimer.restart().asSeconds();
+}
+
+float sfx::animated_drawable::accumulatedDelta(const sf::Time& timeout) {
+	_delta += calculateDelta(timeout);
+	return _delta;
+}
+
+void sfx::animated_drawable::resetDeltaAccumulation(const float to) noexcept {
+	_delta = to;
+}
+
+void sfx::animated_drawable::finish() noexcept {
+	_finished = true;
+}
+
+bool sfx::animated_drawable::isFinished() const noexcept {
+	return _finished;
+}
+
+bool sfx::animated_drawable::firstTimeAnimated() const noexcept {
+	return _firsttime;
+}
+
+void sfx::animated_drawable::resetAnimation() noexcept {
+	_finished = false;
+	_firsttime = true;
+}
+
 bool sfx::maximiseWindow(const sf::WindowHandle window, const bool maximise,
 	engine::logger* const logger) noexcept {
 #ifdef _WIN32
 	// https://learn.microsoft.com/en-us/windows/win32/menurc/wm-syscommand.
-	LRESULT result;
+	LRESULT result = 0;
 	if (maximise) {
 		// Likely not needed for our use case, but still useful to employ for a
 		// generic function nonetheless: https://stackoverflow.com/a/4687861.
@@ -76,17 +110,15 @@ bool sfx::isWindowMaximised(const sf::WindowHandle window,
 #endif
 }
 
-sfx::renderer::renderer(const engine::logger::data& data) noexcept :
+sfx::renderer::renderer(const engine::logger::data& data) :
 	json_script({ data.sink, "json_script" }), _logger(data) {}
 
-void sfx::renderer::openWindow() noexcept {
+void sfx::renderer::openWindow() {
 	sf::VideoMode mode(_settings.width, _settings.height);
 	if (_settings.style.fullscreen && !mode.isValid()) {
-		_logger.warning("Invalid video mode for fullscreen ({}x{})! Reverting to "
-			"windowed mode...", mode.width, mode.height);
-		boxer::show("The renderer's configurations contained an invalid width and "
-			"height for fullscreen mode. The program has reverted to windowed "
-			"mode.", "Error!");
+		_logger.critical("The renderer's configurations contained an invalid "
+			"width ({}) and height ({}) for fullscreen mode. The program has "
+			"reverted to windowed mode.", mode.width, mode.height);
 		_settings.style.fullscreen = false;
 	}
 	create(mode, _settings.caption,
@@ -126,39 +158,40 @@ const sfx::renderer_settings& sfx::renderer::getSettings() const noexcept {
 	return _settings;
 }
 
-void sfx::renderer::setSettings(const sfx::renderer_settings& newSettings)
-	noexcept {
+void sfx::renderer::setSettings(const sfx::renderer_settings& newSettings) {
 	_settings = newSettings;
 	openWindow();
 }
 
 bool sfx::renderer::animate(sfx::animated_drawable& drawable, const double scaling)
-	const noexcept {
+	const {
 	return drawable.animate(*this, scaling);
 }
 
-bool sfx::renderer::_load(engine::json& j) noexcept {
-	j.apply(_settings.width, { "width" }, true);
-	j.apply(_settings.height, { "height" }, true);
-	j.apply(_settings.x, { "x" }, true);
-	j.apply(_settings.y, { "y" }, true);
-	j.apply(_settings.framerate, { "framerate" }, true);
-	j.apply(_settings.caption, { "caption" }, true);
-	j.apply(_settings.iconPath, { "icon" }, true);
-	j.apply(_settings.style.close, { "close" }, true);
-	j.apply(_settings.style.def, { "def" }, true);
-	j.apply(_settings.style.fullscreen, { "fullscreen" }, true);
-	j.apply(_settings.style.none, { "none" }, true);
-	j.apply(_settings.style.resize, { "resize" }, true);
-	j.apply(_settings.style.titlebar, { "titlebar" }, true);
-	j.apply(_settings.style.vsync, { "vsync" }, true);
-	j.apply(_settings.style.mouseVisible, { "cursor" }, true);
-	j.apply(_settings.style.mouseGrabbed, { "grabbedmouse" }, true);
-	j.apply(_settings.style.maximised, { "maximised" }, true);
+bool sfx::renderer::_load(engine::json& j) {
+	sfx::renderer_settings settings;
+	j.apply(settings.width, { "width" }, true);
+	j.apply(settings.height, { "height" }, true);
+	j.apply(settings.x, { "x" }, true);
+	j.apply(settings.y, { "y" }, true);
+	j.apply(settings.framerate, { "framerate" }, true);
+	j.apply(settings.caption, { "caption" }, true);
+	j.apply(settings.iconPath, { "icon" }, true);
+	j.apply(settings.style.close, { "close" }, true);
+	j.apply(settings.style.def, { "def" }, true);
+	j.apply(settings.style.fullscreen, { "fullscreen" }, true);
+	j.apply(settings.style.none, { "none" }, true);
+	j.apply(settings.style.resize, { "resize" }, true);
+	j.apply(settings.style.titlebar, { "titlebar" }, true);
+	j.apply(settings.style.vsync, { "vsync" }, true);
+	j.apply(settings.style.mouseVisible, { "cursor" }, true);
+	j.apply(settings.style.mouseGrabbed, { "grabbedmouse" }, true);
+	j.apply(settings.style.maximised, { "maximised" }, true);
+	_settings = std::move(settings);
 	return true;
 }
 
-bool sfx::renderer::_save(nlohmann::ordered_json& j) noexcept {
+bool sfx::renderer::_save(nlohmann::ordered_json& j) {
 	_settings.style.maximised = isWindowMaximised(getSystemHandle(), &_logger);
 	if (!_settings.style.maximised) {
 		// With the current code, this won't necessarily remember the exactly size
@@ -189,38 +222,4 @@ bool sfx::renderer::_save(nlohmann::ordered_json& j) noexcept {
 	j["grabbedmouse"] = _settings.style.mouseGrabbed;
 	j["maximised"] = _settings.style.maximised;
 	return true;
-}
-
-float sfx::animated_drawable::calculateDelta(const sf::Time& timeout) noexcept {
-	_firsttime = false;
-	// If the delta timer has timed out, restart the delta timer twice to
-	// achieved the desired effect.
-	if (_deltaTimer.getElapsedTime() >= timeout) _deltaTimer.restart();
-	return _deltaTimer.restart().asSeconds();
-}
-
-float sfx::animated_drawable::accumulatedDelta(const sf::Time& timeout) noexcept {
-	_delta += calculateDelta(timeout);
-	return _delta;
-}
-
-void sfx::animated_drawable::resetDeltaAccumulation(const float to) noexcept {
-	_delta = to;
-}
-
-void sfx::animated_drawable::finish() noexcept {
-	_finished = true;
-}
-
-bool sfx::animated_drawable::isFinished() const noexcept {
-	return _finished;
-}
-
-bool sfx::animated_drawable::firstTimeAnimated() const noexcept {
-	return _firsttime;
-}
-
-void sfx::animated_drawable::resetAnimation() noexcept {
-	_finished = false;
-	_firsttime = true;
 }

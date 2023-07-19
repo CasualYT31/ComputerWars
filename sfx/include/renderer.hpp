@@ -84,7 +84,7 @@ namespace sfx {
 		 *         unimportant to them.
 		 */
 		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0) noexcept = 0;
+			const double scaling = 1.0) = 0;
 	protected:
 		/**
 		 * Calculates the time elapsed from the last call to this method.
@@ -114,9 +114,10 @@ namespace sfx {
 		 *                  you can provide a different duration here.
 		 * @return  The time elapsed since the last call to \c calculateDelta(), in
 		 *          seconds.
+		 * @safety  No guarantee.
 		 * @sa      sfx::animated_drawable::_timeout
 		 */
-		float calculateDelta(const sf::Time& timeout = sf::seconds(1.0f)) noexcept;
+		float calculateDelta(const sf::Time& timeout = sf::seconds(1.0f));
 
 		/**
 		 * Retrieves the delta accumulated overtime.
@@ -130,11 +131,11 @@ namespace sfx {
 		 * @param   timeout See \c calculateDelta().
 		 * @return  The delta accumulated since the object's construction, or since
 		 *          the last call to \c resetDeltaAccumulation().
+		 * @safety  No guarantee.
 		 * @sa      \c calculateDelta()
 		 * @sa      \c resetDeltaAccumulation()
 		 */
-		float accumulatedDelta(const sf::Time& timeout = sf::seconds(1.0f))
-			noexcept;
+		float accumulatedDelta(const sf::Time& timeout = sf::seconds(1.0f));
 
 		/**
 		 * Resets delta accumulation.
@@ -366,7 +367,7 @@ namespace sfx {
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		renderer(const engine::logger::data& data) noexcept;
+		renderer(const engine::logger::data& data);
 
 		/**
 		 * Opens the render window using configurations.
@@ -378,8 +379,9 @@ namespace sfx {
 		 * windowed to fullscreen or vice versa, positional data may not be saved
 		 * correctly.\n
 		 * For these reasons it is discouraged to use \c create() with this class.
+		 * @safety No guarantee.
 		 */
-		void openWindow() noexcept;
+		void openWindow();
 
 		/**
 		 * Used to acquire the current renderer settings.
@@ -398,10 +400,11 @@ namespace sfx {
 		 *         \c setSettings() methods to provide their own overrides to
 		 *         certain settings if they so desired.
 		 * @param  newSettings The new settings to apply.
+		 * @safety No guarantee. 
 		 * @sa     getSettings()
 		 * @sa     openWindow()
 		 */
-		void setSettings(const sfx::renderer_settings& newSettings) noexcept;
+		void setSettings(const sfx::renderer_settings& newSettings);
 
 		/**
 		 * Animate an \c sfx::animated_drawable object.
@@ -414,8 +417,8 @@ namespace sfx {
 		 *                 animating
 		 * @sa    sfx::animated_drawable::animate()
 		 */
-		bool animate(sfx::animated_drawable& drawable,
-			const double scaling = 1.0) const noexcept;
+		bool animate(sfx::animated_drawable& drawable, const double scaling = 1.0)
+			const;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -502,8 +505,9 @@ namespace sfx {
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee.
 		 */
-		bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j);
 
 		/**
 		 * The JSON save method for this class.
@@ -514,8 +518,10 @@ namespace sfx {
 		 * @param  j The \c nlohmann::ordered_json object representing the JSON
 		 *           script which this method writes to.
 		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee. A quick look at the SFML calls doesn't seem to
+		 *         suggest they should throw anything extraordinary.
 		 */
-		bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j);
 
 		/**
 		 * The internal logger object.
