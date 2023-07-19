@@ -149,15 +149,15 @@ namespace engine {
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		language_dictionary(const engine::logger::data& data) noexcept;
+		language_dictionary(const engine::logger::data& data);
 
 		/**
 		 * Adds a path to a language's string map script.
 		 * The language is only added if the given ID was non-blank and was not the
 		 * ID of the current language. If the ID of an existing language was given,
 		 * the old path is replaced with the new path.\n
-		 * Please see \c engine::language_dictionary::language::_load() for a rundown
-		 * of the format this JSON script is to have.\n
+		 * Please see \c engine::language_dictionary::language::_load() for a
+		 * rundown on the format this JSON script is to have.
 		 * @remark It is advised to instead load all language script paths at once
 		 *         using the \c load() function inherited from
 		 *         \c engine::json_script.
@@ -167,8 +167,9 @@ namespace engine {
 		 * @return \c TRUE if adding the language went successfully,
 		 *         \c FALSE otherwise (if \c id was blank, for example). If
 		 *         \c FALSE is returned, a warning will be logged.
+		 * @safety Strong guarantee.
 		 */
-		bool addLanguage(const std::string& id, const std::string& path) noexcept;
+		bool addLanguage(const std::string& id, const std::string& path);
 
 		/**
 		 * Removes a language path from the internal collection.
@@ -177,8 +178,9 @@ namespace engine {
 		 * will fail and warnings will be logged.
 		 * @param  id The ID of the language to remove.
 		 * @return \c TRUE if removal was successful, \c FALSE otherwise.
+		 * @safety Strong guarantee.
 		 */
-		bool removeLanguage(const std::string& id) noexcept;
+		bool removeLanguage(const std::string& id);
 
 		/**
 		 * Updates the current language.
@@ -192,17 +194,19 @@ namespace engine {
 		 * @return \c TRUE if switching was successful, \c FALSE if the given ID
 		 *         could not identify a loaded language, or if loading the script
 		 *         failed.
+		 * @safety Strong guarantee.
 		 * @sa     operator()
 		 * @sa     getLanguage()
 		 */
-		bool setLanguage(const std::string& id) noexcept;
+		bool setLanguage(const std::string& id);
 
 		/**
 		 * Retrieves the ID of the current language.
 		 * @return The ID of the current language.
+		 * @safety Strong guarantee.
 		 * @sa     setLanguage()
 		 */
-		std::string getLanguage() const noexcept;
+		std::string getLanguage() const;
 
 		/**
 		 * Retrieves a string from the current language's string map.
@@ -221,10 +225,10 @@ namespace engine {
 		 *                      the current language's string map.
 		 * @param  values       The variables to insert into the language string.
 		 * @return The translated string.
+		 * @safety Strong guarantee.
 		 */
 		template<typename... Ts>
-		std::string operator()(const std::string& nativeString, Ts... values)
-			noexcept;
+		std::string operator()(const std::string& nativeString, Ts... values);
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -246,8 +250,9 @@ namespace engine {
 		 * @return \c TRUE if the current language as dictated by the
 		 *         \c lang key could be loaded, \c FALSE if not, or
 		 *         if the current language ID could not identify a language.
+		 * @safety Basic guarantee.
 		 */
-		bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j);
 
 		/**
 		 * The JSON save method for this class.
@@ -256,8 +261,9 @@ namespace engine {
 		 * @param  j The \c nlohmann::ordered_json object representing
 		 *           the JSON script which this method writes to.
 		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee.
 		 */
-		bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j);
 
 		/**
 		 * This class represents the string map of a single language.

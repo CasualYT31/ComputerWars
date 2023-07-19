@@ -197,6 +197,15 @@ namespace engine {
 		~logger() noexcept;
 
 		/**
+		 * Copy assignment operator.
+		 * Creates a new logger object based on the data of another logger object.
+		 * @param  logger The logger object to copy.
+		 * @safety Basic guarantee.
+		 * @sa     engine::logger::logger(const engine::logger&)
+		 */
+		engine::logger& operator=(const engine::logger& logger);
+
+		/**
 		 * Initialises the internal logger object.
 		 * This method will destroy any logger object that was previously
 		 * allocated. If the \c sink field in the given data is \c nullptr, then

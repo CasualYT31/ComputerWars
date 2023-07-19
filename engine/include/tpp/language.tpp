@@ -58,7 +58,7 @@ std::string engine::expand_string::insert(const std::string& original, T value,
 
 template<typename... Ts>
 std::string engine::language_dictionary::operator()(
-	const std::string& nativeString, Ts... values) noexcept {
+	const std::string& nativeString, Ts... values) {
 	if (_currentLanguage == "") return engine::expand_string::insert(nativeString,
 		values...);
 	if (_languageMap) {

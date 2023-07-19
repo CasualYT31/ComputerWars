@@ -45,11 +45,12 @@ std::string engine::expand_string::insert(const std::string& original) {
 	}
 }
 
-engine::language_dictionary::language_dictionary(const engine::logger::data& data)
-	noexcept : engine::json_script({data.sink, "json_script"}), _logger(data) {}
+engine::language_dictionary::language_dictionary(
+	const engine::logger::data& data) :
+	engine::json_script({data.sink, "json_script"}), _logger(data) {}
 
 bool engine::language_dictionary::addLanguage(const std::string& id,
-	const std::string& path) noexcept {
+	const std::string& path) {
 	if (id == _currentLanguage) {
 		_logger.warning("Attempted to replace the script path of the current "
 			"language \"{}\".", id);
@@ -64,7 +65,7 @@ bool engine::language_dictionary::addLanguage(const std::string& id,
 	}
 }
 
-bool engine::language_dictionary::removeLanguage(const std::string& id) noexcept {
+bool engine::language_dictionary::removeLanguage(const std::string& id) {
 	if (_languageFiles.find(id) == _languageFiles.end()) {
 		_logger.warning("Attempted to remove non-existent language script path "
 			"\"{}\".", id);
@@ -79,31 +80,25 @@ bool engine::language_dictionary::removeLanguage(const std::string& id) noexcept
 	}
 }
 
-bool engine::language_dictionary::setLanguage(const std::string& id) noexcept {
+bool engine::language_dictionary::setLanguage(const std::string& id) {
 	if (id != "" && _languageFiles.find(id) == _languageFiles.end()) {
 		_logger.warning("Attempted to switch to non-existent string map \"{}\".",
 			id);
 		return false;
 	} else {
 		if (id == "") {
-			_languageMap = nullptr;
 			_currentLanguage = "";
+			_languageMap = nullptr;
 			return true;
 		}
-		std::unique_ptr<engine::language_dictionary::language> newMap = nullptr;
-		try {
-			newMap = std::make_unique<engine::language_dictionary::language>(
+		std::unique_ptr<engine::language_dictionary::language> newMap =
+			std::make_unique<engine::language_dictionary::language>(
 				engine::logger::data{ _logger.getData().sink, "language_" + id }
 			);
-		} catch (std::bad_alloc& e) {
-			_logger.error("Failed to allocate memory for the string map of "
-				"langauage \"{}\": {}", id, e.what());
-			return false;
-		}
 		newMap->load(_languageFiles[id]);
 		if (newMap->inGoodState()) {
-			_languageMap.swap(newMap);
 			_currentLanguage = id;
+			_languageMap.swap(newMap);
 			return true;
 		} else {
 			_logger.error("Failed to load string map script for language \"{}\".",
@@ -113,11 +108,11 @@ bool engine::language_dictionary::setLanguage(const std::string& id) noexcept {
 	}
 }
 
-std::string engine::language_dictionary::getLanguage() const noexcept {
+std::string engine::language_dictionary::getLanguage() const {
 	return _currentLanguage;
 }
 
-bool engine::language_dictionary::_load(engine::json& j) noexcept {
+bool engine::language_dictionary::_load(engine::json& j) {
 	std::string buffer = "";
 	// Firstly, load language scripts.
 	_languageFiles.clear();
@@ -142,11 +137,9 @@ bool engine::language_dictionary::_load(engine::json& j) noexcept {
 	}
 }
 
-bool engine::language_dictionary::_save(nlohmann::ordered_json& j) noexcept {
+bool engine::language_dictionary::_save(nlohmann::ordered_json& j) {
 	j["lang"] = _currentLanguage;
-	for (auto& itr : _languageFiles) {
-		j[itr.first] = itr.second;
-	}
+	for (auto& itr : _languageFiles) j[itr.first] = itr.second;
 	return true;
 }
 

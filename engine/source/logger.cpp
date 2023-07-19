@@ -125,7 +125,7 @@ engine::logger::logger(const engine::logger::data& loggerData) {
 }
 
 engine::logger::logger(const engine::logger& logger) {
-	setData(logger);
+	*this = logger;
 }
 
 engine::logger::logger(engine::logger&& logger) noexcept :
@@ -134,6 +134,11 @@ engine::logger::logger(engine::logger&& logger) noexcept :
 
 engine::logger::~logger() noexcept {
 	_dropLogger();
+}
+
+engine::logger& engine::logger::operator=(const engine::logger& logger) {
+	setData(logger);
+	return *this;
 }
 
 void engine::logger::setData(const engine::logger::data& loggerData) {
