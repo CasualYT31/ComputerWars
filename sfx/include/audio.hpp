@@ -115,7 +115,7 @@ namespace sfx {
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		audio(const engine::logger::data& data) noexcept;
+		audio(const engine::logger::data& data);
 
 		/**
 		 * Retrieves the base volume of all audio objects.
@@ -125,10 +125,12 @@ namespace sfx {
 
 		/**
 		 * Updates the base volume of all audio objects.
-		 * @param newvolume The new volume, a value between \c 0.0 and \c 100.0.
-		 * @sa    _validateVolume()
+		 * @param  newvolume The new volume, a value between \c 0.0 and \c 100.0.
+		 * @safety No guarantee. The new volume is always guaranteed to be assigned
+		 *         to \c _volume.
+		 * @sa     _validateVolume()
 		 */
-		void setVolume(float newvolume) noexcept;
+		void setVolume(float newvolume);
 
 		/**
 		 * Plays a specified audio object.
@@ -140,26 +142,30 @@ namespace sfx {
 		 * playing at the time of calling, as well as with the background music if
 		 * it is being played. If an unregistered name was given, an error will be
 		 * logged.
-		 * @param name The name of the audio object to play. If a blank string, the
-		 *             previously accessed \c music object will be substituted.
+		 * @param  name The name of the audio object to play. If a blank string,
+		 *              the previously accessed \c music object will be
+		 *              substituted.
+		 * @safety No guarantee.
 		 */
-		void play(std::string name = "") noexcept;
+		void play(std::string name = "");
 
 		/**
 		 * Stops a specified audio object.
 		 * If a blank or invalid sound object name is given, the current music will
 		 * stop.
-		 * @param name The name of the sound object to stop.
+		 * @param  name The name of the sound object to stop.
+		 * @safety No guarantee.
 		 */
-		void stop(const std::string& name = "") noexcept;
+		void stop(const std::string& name = "");
 
 		/**
 		 * Pauses a specified audio object.
 		 * If a blank or invalid sound object name is given, the current music will
 		 * pause.
-		 * @param name The name of the sound object to pause.
+		 * @param  name The name of the sound object to pause.
+		 * @safety No guarantee.
 		 */
-		void pause(const std::string& name = "") noexcept;
+		void pause(const std::string& name = "");
 
 		/**
 		 * Fades out the currently playing music until it is stopped.
@@ -171,8 +177,9 @@ namespace sfx {
 		 * @param   length The amount of time that passes between music volume to
 		 *                 zero volume.
 		 * @return  \c TRUE if the fadeout is complete, \c FALSE if not.
+		 * @safety  No guarantee.
 		 */
-		bool fadeout(sf::Time length = sf::seconds(1.0)) noexcept;
+		bool fadeout(sf::Time length = sf::seconds(1.0));
 
 		/**
 		 * Gets the name of the current music, whether playing or paused.
@@ -180,8 +187,9 @@ namespace sfx {
 		 * that this method does not return names of any sounds that may be
 		 * playing.
 		 * @return The name of the current music.
+		 * @safety Strong guarantee.
 		 */
-		std::string getCurrentMusic() const noexcept;
+		std::string getCurrentMusic() const;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -212,9 +220,10 @@ namespace sfx {
 		 *            loaded script which this method reads.
 		 * @return  \c TRUE if all audio files could be loaded successfully,
 		 *          \c FALSE if at least one couldn't be loaded.
+		 * @safety  No guarantee.
 		 * @sa      setVolume()
 		 */
-		bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j);
 
 		/**
 		 * The JSON save method for this class.
@@ -223,8 +232,9 @@ namespace sfx {
 		 * @param  j The \c nlohmann::ordered_json object representing the JSON
 		 *           script which this method writes to.
 		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee.
 		 */
-		bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j);
 
 		/**
 		 * Helper method called in \c _load() which reads all paths for each audio
@@ -234,8 +244,9 @@ namespace sfx {
 		 * not be loaded will be logged.
 		 * @return \c TRUE if all audio objects could be loaded, \c FALSE if at
 		 *         least one could not.
+		 * @safety No guarantee.
 		 */
-		bool _loadAudio() noexcept;
+		bool _loadAudio();
 
 		/**
 		 * Validates a given volume value.
@@ -255,7 +266,7 @@ namespace sfx {
 		 * @return The volume of the audio object after its offset has been
 		 *         applied.
 		 */
-		float _volumeAfterOffset(const std::string& name) const noexcept;
+		float _volumeAfterOffset(const std::string& name) const;
 
 		/**
 		 * The internal logger object.

@@ -24,25 +24,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 const float sfx::audio::_granularity = 100.0f;
 
-sfx::audio::audio(const engine::logger::data& data) noexcept :
+sfx::audio::audio(const engine::logger::data& data) :
 	json_script({data.sink, "json_script"}), _logger(data) {}
 
 float sfx::audio::getVolume() const noexcept {
 	return _volume;
 }
 
-void sfx::audio::setVolume(float newvolume) noexcept {
+void sfx::audio::setVolume(float newvolume) {
 	_validateVolume(newvolume);
 	_volume = newvolume;
-	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; itr++) {
+	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; ++itr) {
 		itr->second.sound.setVolume(_volumeAfterOffset(itr->first));
 	}
-	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; itr++) {
+	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; ++itr) {
 		itr->second.music.setVolume(_volumeAfterOffset(itr->first));
 	}
 }
 
-void sfx::audio::play(std::string name) noexcept {
+void sfx::audio::play(std::string name) {
 	if (name == "") name = getCurrentMusic();
 	if (name == "") return;
 	if (_sound.find(name) != _sound.end()) {
@@ -64,7 +64,7 @@ void sfx::audio::play(std::string name) noexcept {
 	}
 }
 
-void sfx::audio::stop(const std::string& name) noexcept {
+void sfx::audio::stop(const std::string& name) {
 	if (_sound.find(name) != _sound.end()) {
 		_sound[name].sound.stop();
 	} else {
@@ -75,7 +75,7 @@ void sfx::audio::stop(const std::string& name) noexcept {
 	}
 }
 
-void sfx::audio::pause(const std::string& name) noexcept {
+void sfx::audio::pause(const std::string& name) {
 	if (_sound.find(name) != _sound.end()) {
 		_sound[name].sound.pause();
 	} else {
@@ -83,7 +83,7 @@ void sfx::audio::pause(const std::string& name) noexcept {
 	}
 }
 
-bool sfx::audio::fadeout(sf::Time length) noexcept {
+bool sfx::audio::fadeout(sf::Time length) {
 	if (getCurrentMusic() == "") return true;
 	if (!_fadingOut) {
 		_clock.restart();
@@ -107,39 +107,11 @@ bool sfx::audio::fadeout(sf::Time length) noexcept {
 	return !_fadingOut;
 }
 
-std::string sfx::audio::getCurrentMusic() const noexcept {
+std::string sfx::audio::getCurrentMusic() const {
 	return _currentMusic;
 }
 
-void sfx::audio::_validateVolume(float& v) noexcept {
-	if (v > 100.0) {
-		_logger.write("Volume value {} is too high: set to 100.0", v);
-		v = 100.0;
-	}
-	if (v < 0.0) {
-		_logger.write("Volume value {} is too low: set to 0.0", v);
-		v = 0.0;
-	}
-}
-
-float sfx::audio::_volumeAfterOffset(const std::string& name) const noexcept {
-	if (_sound.find(name) != _sound.end()) {
-		if (getVolume() < 1.0) return 0.0;
-		float vol = getVolume() + _sound.at(name).volumeOffset;
-		if (vol < 1.0) vol = 1.0;
-		if (vol > 100.0) vol = 100.0;
-		return vol;
-	} else if (_music.find(name) != _music.end()) {
-		if (getVolume() < 1.0) return 0.0;
-		float vol = getVolume() + _music.at(name).volumeOffset;
-		if (vol < 1.0) vol = 1.0;
-		if (vol > 100.0) vol = 100.0;
-		return vol;
-	}
-	return 0.0;
-}
-
-bool sfx::audio::_load(engine::json& j) noexcept {
+bool sfx::audio::_load(engine::json& j) {
 	j.apply(_volume, { "volume" }, true);
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	_sound.clear();
@@ -182,14 +154,14 @@ bool sfx::audio::_load(engine::json& j) noexcept {
 	return _loadAudio();
 }
 
-bool sfx::audio::_save(nlohmann::ordered_json& j) noexcept {
+bool sfx::audio::_save(nlohmann::ordered_json& j) {
 	j["volume"] = _volume;
-	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; itr++) {
+	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; ++itr) {
 		j[itr->first]["type"] = "sound";
 		j[itr->first]["path"] = itr->second.path;
 		j[itr->first]["offset"] = itr->second.volumeOffset;
 	}
-	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; itr++) {
+	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; ++itr) {
 		j[itr->first]["type"] = "music";
 		j[itr->first]["path"] = itr->second.path;
 		j[itr->first]["offset"] = itr->second.volumeOffset;
@@ -199,9 +171,9 @@ bool sfx::audio::_save(nlohmann::ordered_json& j) noexcept {
 	return true;
 }
 
-bool sfx::audio::_loadAudio() noexcept {
+bool sfx::audio::_loadAudio() {
 	bool ret = true;
-	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; itr++) {
+	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; ++itr) {
 		if (!itr->second.buffer.loadFromFile(itr->second.path)) {
 			_logger.error("Audio file \"{}\" for sound object \"{}\" could not be "
 				"loaded!", itr->second.path, itr->first);
@@ -210,7 +182,7 @@ bool sfx::audio::_loadAudio() noexcept {
 			itr->second.sound.setBuffer(itr->second.buffer);
 		}
 	}
-	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; itr++) {
+	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; ++itr) {
 		if (!itr->second.music.openFromFile(itr->second.path)) {
 			_logger.error("Audio file \"{}\" for music object \"{}\" could not be "
 				"loaded!", itr->second.path, itr->first);
@@ -235,4 +207,32 @@ bool sfx::audio::_loadAudio() noexcept {
 	}
 	setVolume(getVolume());
 	return ret;
+}
+
+void sfx::audio::_validateVolume(float& v) noexcept {
+	if (v > 100.0) {
+		_logger.write("Volume value {} is too high: set to 100.0", v);
+		v = 100.0;
+	}
+	if (v < 0.0) {
+		_logger.write("Volume value {} is too low: set to 0.0", v);
+		v = 0.0;
+	}
+}
+
+float sfx::audio::_volumeAfterOffset(const std::string& name) const {
+	if (_sound.find(name) != _sound.end()) {
+		if (getVolume() < 1.0) return 0.0;
+		float vol = getVolume() + _sound.at(name).volumeOffset;
+		if (vol < 1.0) vol = 1.0;
+		if (vol > 100.0) vol = 100.0;
+		return vol;
+	} else if (_music.find(name) != _music.end()) {
+		if (getVolume() < 1.0) return 0.0;
+		float vol = getVolume() + _music.at(name).volumeOffset;
+		if (vol < 1.0) vol = 1.0;
+		if (vol > 100.0) vol = 100.0;
+		return vol;
+	}
+	return 0.0;
 }
