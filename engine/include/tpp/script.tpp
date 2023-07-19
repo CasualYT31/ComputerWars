@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 template<typename T>
-T* engine::script_reference_type<T>::Create() noexcept {
+T* engine::script_reference_type<T>::Create() {
 	// The reference counter is automatically set to 1 for all new objects.
 	return new T();
 }
@@ -34,7 +34,7 @@ void engine::script_reference_type<T>::AddRef() const noexcept {
 }
 
 template<typename T>
-void engine::script_reference_type<T>::Release() const noexcept {
+void engine::script_reference_type<T>::Release() const {
 	if (--_refCount == 0) {
 		delete static_cast<const T*>(this);
 	}
@@ -42,7 +42,7 @@ void engine::script_reference_type<T>::Release() const noexcept {
 
 template<typename T>
 int engine::script_reference_type<T>::RegisterType(asIScriptEngine* engine,
-	const std::string& type) noexcept {
+	const std::string& type) {
 	int r = engine->RegisterObjectType(type.c_str(), 0, asOBJ_REF);
 	engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
 		std::string(type + "@ f()").c_str(),
@@ -57,8 +57,8 @@ int engine::script_reference_type<T>::RegisterType(asIScriptEngine* engine,
 }
 
 template<typename T, typename... Ts>
-bool engine::scripts::callFunction(const std::string& name, T value, Ts... values)
-noexcept {
+bool engine::scripts::callFunction(const std::string& name, T value,
+	Ts... values) {
 	if (!_callFunction_TemplateCall) {
 		// First call to the template version, so setup the context.
 		if (!_setupContext(name)) return false;

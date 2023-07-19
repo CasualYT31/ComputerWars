@@ -33,7 +33,7 @@ void AWEColourTypeConstructor(const int r, const int g, const int b,
 }
 
 void engine::RegisterColourType(asIScriptEngine* engine,
-    const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+    const std::shared_ptr<DocumentationGenerator>& document) {
     if (!engine->GetTypeInfoByName("Colour")) {
         auto r = engine->RegisterObjectType("Colour", sizeof(sf::Color),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Color>());
@@ -91,22 +91,22 @@ std::string AWEVector2fTypeToString(void* memory) {
 
 // Wrapper for sf::Vector2<> operator==s.
 
-bool iEqI(void* pLhs, const sf::Vector2i& rhs) noexcept {
+bool iEqI(void* pLhs, const sf::Vector2i& rhs) {
     auto lhs = (const sf::Vector2i*)pLhs;
     return lhs->x == rhs.x && lhs->y == rhs.y;
 }
 
-bool iEqU(void* pLhs, const sf::Vector2u& rhs) noexcept {
+bool iEqU(void* pLhs, const sf::Vector2u& rhs) {
     auto lhs = (const sf::Vector2i*)pLhs;
     return lhs->x == rhs.x && lhs->y == rhs.y;
 }
 
-bool uEqI(void* pLhs, const sf::Vector2i& rhs) noexcept {
+bool uEqI(void* pLhs, const sf::Vector2i& rhs) {
     auto lhs = (const sf::Vector2u*)pLhs;
     return lhs->x == rhs.x && lhs->y == rhs.y;
 }
 
-bool uEqU(void* pLhs, const sf::Vector2u& rhs) noexcept {
+bool uEqU(void* pLhs, const sf::Vector2u& rhs) {
     auto lhs = (const sf::Vector2u*)pLhs;
     return lhs->x == rhs.x && lhs->y == rhs.y;
 }
@@ -115,7 +115,7 @@ bool uEqU(void* pLhs, const sf::Vector2u& rhs) noexcept {
 sf::Vector2i INVALID_MOUSE_SCRIPT = sf::Vector2i(INT_MIN, INT_MIN);
 
 void engine::RegisterVectorTypes(asIScriptEngine* engine,
-    const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+    const std::shared_ptr<DocumentationGenerator>& document) {
     if (!engine->GetTypeInfoByName("Vector2")) {
         auto r = engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());
@@ -175,7 +175,7 @@ void engine::RegisterVectorTypes(asIScriptEngine* engine,
 }
 
 void engine::RegisterTimeTypes(asIScriptEngine* engine,
-    const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+    const std::shared_ptr<DocumentationGenerator>& document) {
     if (!engine->GetTypeInfoByName("Time")) {
         // Time class.
         auto r = engine->RegisterObjectType("Time", sizeof(sf::Time),
@@ -223,7 +223,7 @@ void engine::RegisterTimeTypes(asIScriptEngine* engine,
 }
 
 void engine::RegisterFileType(asIScriptEngine* engine,
-    const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+    const std::shared_ptr<DocumentationGenerator>& document) {
     if (!engine->GetTypeInfoByName("BinaryFile")) {
         auto r = engine->RegisterObjectType("BinaryFile", 0,
             asOBJ_REF | asOBJ_NOCOUNT);
@@ -296,8 +296,7 @@ void engine::RegisterFileType(asIScriptEngine* engine,
     }
 }
 
-engine::scripts::scripts(const engine::logger::data& data) noexcept : _logger(data)
-    {
+engine::scripts::scripts(const engine::logger::data& data) : _logger(data) {
     _engine = asCreateScriptEngine();
     if (_engine) {
         // Allocate the documentation generator.
@@ -340,7 +339,7 @@ engine::scripts::~scripts() noexcept {
     if (_engine) _engine->ShutDownAndRelease();
 }
 
-void engine::scripts::addRegistrant(engine::script_registrant* const r) noexcept {
+void engine::scripts::addRegistrant(engine::script_registrant* const r) {
     if (r) {
         _registrants.push_back(r);
     } else {
@@ -348,8 +347,8 @@ void engine::scripts::addRegistrant(engine::script_registrant* const r) noexcept
     }
 }
 
-void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg, void* param)
-    noexcept {
+void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg,
+    void* param) {
     if (_fillCachedMsg) {
         _cachedMsg += msg->message;
         _cachedMsg += ", ";
@@ -370,8 +369,7 @@ void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg, void* par
     }
 }
 
-void engine::scripts::contextExceptionCallback(asIScriptContext* context)
-    noexcept {
+void engine::scripts::contextExceptionCallback(asIScriptContext* context) {
     if (!context) return;
     _logger.error("RUNTIME ERROR: (@{}:{}:{}): {}.",
         context->GetExceptionFunction()->GetScriptSectionName(),
@@ -390,7 +388,7 @@ void engine::scripts::translateExceptionCallback(asIScriptContext* context, void
     } catch (...) {}
 }
 
-bool engine::scripts::loadScripts(std::string folder) noexcept {
+bool engine::scripts::loadScripts(std::string folder) {
     // First check if the interface has been registered, and if not, register it.
     if (_registrants.size() > 0) {
         _logger.write("Registering the script interface...");
@@ -445,7 +443,7 @@ bool engine::scripts::loadScripts(std::string folder) noexcept {
     return true;
 }
 
-int engine::scripts::generateDocumentation() noexcept {
+int engine::scripts::generateDocumentation() {
 #if AS_GENERATE_DOCUMENTATION == 1
     if (_document) {
         _logger.write("Generating the script interface documentation...");
@@ -464,27 +462,27 @@ const std::string& engine::scripts::getScriptsFolder() const noexcept {
     return _scriptsFolder;
 }
 
-bool engine::scripts::functionExists(const std::string& name) const noexcept {
+bool engine::scripts::functionExists(const std::string& name) const {
     return _engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
 }
 
-bool engine::scripts::functionDeclExists(const std::string& decl) const noexcept {
+bool engine::scripts::functionDeclExists(const std::string& decl) const {
     return _engine->GetModule("ComputerWars")->GetFunctionByDecl(decl.c_str());
 }
 
-void engine::scripts::writeToLog(const std::string& message) const noexcept {
+void engine::scripts::writeToLog(const std::string& message) const {
     _logger.write(_constructMessage(message));
 }
 
-void engine::scripts::warningToLog(const std::string& message) const noexcept {
+void engine::scripts::warningToLog(const std::string& message) const {
     _logger.warning(_constructMessage(message));
 }
 
-void engine::scripts::errorToLog(const std::string& message) const noexcept {
+void engine::scripts::errorToLog(const std::string& message) const {
     _logger.error(_constructMessage(message));
 }
 
-bool engine::scripts::callFunction(const std::string& name) noexcept {
+bool engine::scripts::callFunction(const std::string& name) {
     if (!_callFunction_TemplateCall) {
         // If this method is being called directly and not from the template
         // version then we must set up the context.
@@ -508,11 +506,11 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
     _resetCallFunctionVariables();
     // Increment the context ID now so that future calls will recognise that this
     // context is in use now.
-    _contextId++;
+    ++_contextId;
     // Execute the function and return if it worked or not.
     int r = _context[_contextId - 1]->Execute();
     // This context is free now.
-    _contextId--;
+    --_contextId;
     if (r != asEXECUTION_FINISHED) {
         _logger.error("Failed to execute function \"{}\": code {}.", name, r);
         return false;
@@ -520,7 +518,7 @@ bool engine::scripts::callFunction(const std::string& name) noexcept {
     return true;
 }
 
-std::string engine::scripts::executeCode(std::string code) noexcept {
+std::string engine::scripts::executeCode(std::string code) {
     // If only I had known about ExecuteString() before writing all of this...
     // Bruh...
     static const auto Log = [&](const std::string& m) -> std::string {
@@ -603,23 +601,22 @@ std::string engine::scripts::executeCode(std::string code) noexcept {
     }
 }
 
-CScriptDictionary* engine::scripts::createDictionary() noexcept {
+CScriptDictionary* engine::scripts::createDictionary() {
     return CScriptDictionary::Create(_engine);
 }
 
-CScriptArray* engine::scripts::createArray(const std::string& type) const
-    noexcept {
+CScriptArray* engine::scripts::createArray(const std::string& type) const {
     std::string decl = "array<" + type + ">";
     auto typeInfo = _engine->GetTypeInfoByDecl(decl.c_str());
     if (typeInfo) return CScriptArray::Create(typeInfo);
     return nullptr;
 }
 
-CScriptAny* engine::scripts::createAny() const noexcept {
+CScriptAny* engine::scripts::createAny() const {
     return new CScriptAny(_engine);
 }
 
-int engine::scripts::getTypeID(const std::string& type) const noexcept {
+int engine::scripts::getTypeID(const std::string& type) const {
     // Handle primitive types separately as they don't seem to work with TypeInfo.
     if (type == "void") {
         return 0;
@@ -654,7 +651,7 @@ int engine::scripts::getTypeID(const std::string& type) const noexcept {
         return -1;
 }
 
-std::string engine::scripts::getTypeName(const int id) const noexcept {
+std::string engine::scripts::getTypeName(const int id) const {
     // Handle primitive types separately as they don't seem to work with TypeInfo.
     if (id == 0) {
         return "void";
@@ -689,7 +686,7 @@ std::string engine::scripts::getTypeName(const int id) const noexcept {
         return "";
 }
 
-int engine::scripts::_allocateContext() noexcept {
+int engine::scripts::_allocateContext() {
     asIScriptContext* context = _engine->CreateContext();
     if (context) {
         int r = context->SetExceptionCallback(asMETHOD(engine::scripts,
@@ -709,7 +706,7 @@ int engine::scripts::_allocateContext() noexcept {
     }
 }
 
-bool engine::scripts::_setupContext(const std::string& name) noexcept {
+bool engine::scripts::_setupContext(const std::string& name) {
     if (!_engine) return false;
     asIScriptFunction* func =
         _engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
@@ -744,8 +741,7 @@ void engine::scripts::_resetCallFunctionVariables() noexcept {
     _argumentID = 0;
 }
 
-std::string engine::scripts::_constructMessage(const std::string& msg) const
-    noexcept {
+std::string engine::scripts::_constructMessage(const std::string& msg) const {
     asIScriptContext* context = _context.back();
     const char* sectionName = nullptr;
     asIScriptFunction* function = context->GetFunction(0);

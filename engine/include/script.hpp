@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**@file script.hpp
- * Defines code realted to executing scripts on disc.
+ * Defines code related to executing scripts on disc.
  * This implementation uses AngelScript.
  */
 
@@ -43,30 +43,34 @@ namespace engine {
 	/**
 	 * Registers and documents the \c Colour script type, if it hasn't already been
 	 * registered.
+	 * @safety No guarantee.
 	 */
 	void RegisterColourType(asIScriptEngine* engine,
-		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+		const std::shared_ptr<DocumentationGenerator>& document);
 
 	/**
 	 * Registers and documents the \c Vector2 and \c MousePosition types, if they
 	 * haven't already been registered.
+	 * @safety No guarantee.
 	 */
 	void RegisterVectorTypes(asIScriptEngine* engine,
-		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+		const std::shared_ptr<DocumentationGenerator>& document);
 
 	/**
 	 * Registers and documents the \c Time and \c Clock types, if they haven't
 	 * already been registered.
+	 * @safety No guarantee.
 	 */
 	void RegisterTimeTypes(asIScriptEngine* engine,
-		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+		const std::shared_ptr<DocumentationGenerator>& document);
 
 	/**
 	 * Registers and documents the \c BinaryFile type, if it hasn't already been
 	 * registered.
+	 * @safety No guarantee.
 	 */
 	void RegisterFileType(asIScriptEngine* engine,
-		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+		const std::shared_ptr<DocumentationGenerator>& document);
 
 	/**
 	 * Base class for AngelScript reference types.
@@ -78,13 +82,13 @@ namespace engine {
 		/**
 		 * Polymorphic base classes must have virtual destructors.
 		 */
-		~script_reference_type() noexcept = default;
+		virtual ~script_reference_type() noexcept = default;
 
 		/**
 		 * Creates the reference type.
 		 * @return Pointer to the reference type.
 		 */
-		static T* Create() noexcept;
+		static T* Create();
 
 		/**
 		 * Copies a reference to the object.
@@ -95,12 +99,12 @@ namespace engine {
 		 * Releases a reference to the object.
 		 * When the reference counter hits \c 0, the object will be deleted.
 		 */
-		void Release() const noexcept;
+		void Release() const;
 	protected:
 		/**
 		 * One cannot instantiate this class by itself.
 		 */
-		script_reference_type() noexcept = default;
+		script_reference_type() = default;
 
 		/**
 		 * Registers the reference type with a given script engine and registers
@@ -108,9 +112,9 @@ namespace engine {
 		 * @param  engine Pointer to the script engine to register with.
 		 * @param  type   The name of the type to register.
 		 * @return The result of the \c RegisterObjectType() method.
+	     * @safety No guarantee.
 		 */
-		static int RegisterType(asIScriptEngine* engine, const std::string& type)
-			noexcept;
+		static int RegisterType(asIScriptEngine* engine, const std::string& type);
 	private:
 		/**
 		 * The reference counter.
@@ -141,7 +145,7 @@ namespace engine {
 		 *                 register script interface documentation with.
 		 */
 		virtual void registerInterface(asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept = 0;
+			const std::shared_ptr<DocumentationGenerator>& document) = 0;
 	};
 
 	/**
@@ -171,7 +175,7 @@ namespace engine {
 		 * @sa    \c engine::logger
 		 * @sa    \c engine::scripts::registerInterface()
 		 */
-		scripts(const engine::logger::data& data) noexcept;
+		scripts(const engine::logger::data& data);
 
 		/**
 		 * Releases all the function contexts and shuts down the engine.
@@ -202,25 +206,28 @@ namespace engine {
 		 *          a class' methods with the interface.
 		 * @param   r Pointer to the script registrant to add. If @c nullptr is
 		 *            provided, it won't be added and an error will be logged.
+		 * @safety  Strong guarantee.
 		 */
-		void addRegistrant(engine::script_registrant* const r)
-			noexcept;
+		void addRegistrant(engine::script_registrant* const r);
 
 		/**
 		 * The message callback assigned to the script engine.
 		 * This callback mirrors messages to the log file.
-		 * @param msg   The object containing the message information to output.
-		 * @param param Ignored.
+		 * @param  msg   The object containing the message information to output.
+		 * @param  param Ignored.
+		 * @safety Basic guarantee.
 		 */
-		void scriptMessageCallback(const asSMessageInfo* msg, void* param)
-			noexcept;
+		void scriptMessageCallback(const asSMessageInfo* msg, void* param);
 
 		/**
 		 * The runtime error callback assigned to the function context.
-		 * @param context The pointer to the function context which has encountered
-		 *                an error during runtime.
+		 * @param  context The pointer to the function context which has
+		 *                 encountered an error during runtime.
+		 * @safety No guarantee. Unsure if \c asIScriptContext methods can throw or
+		 *         not, and if they can, what those methods guarantee. Cba finding
+		 *         out.
 		 */
-		void contextExceptionCallback(asIScriptContext* context) noexcept;
+		void contextExceptionCallback(asIScriptContext* context);
 
 		/**
 		 * Used to translate application exceptions into AngelScript exceptions.
@@ -249,9 +256,10 @@ namespace engine {
 		 * @return  \c TRUE if successful, \c FALSE if not. Note that this method
 		 *          returns \c TRUE even if the given folder did not exist or could
 		 *          not be read.
+		 * @safety  No guarantee.
 		 * @sa      engine::scripts::addRegistrant()
 		 */
-		bool loadScripts(std::string folder = "") noexcept;
+		bool loadScripts(std::string folder = "");
 
 		/**
 		 * Generate the documentation for this @c scripts instance.
@@ -260,13 +268,13 @@ namespace engine {
 		 * @return The result of the generation operation. @c INT_MIN if the
 		 *         document generator object couldn't be initialised in the
 		 *         constructor (this is also logged).
+		 * @safety No guarantee.
 		 */
-		int generateDocumentation() noexcept;
+		int generateDocumentation();
 
 		/**
 		 * Retrieves the last path used with \c loadScripts().
-		 * Even if the path did not exist, it will be internally assigned and
-		 * returned here.
+		 * Even if the path did not exist, it will be internally assigned.
 		 * @return The path containing all the loaded scripts.
 		 */
 		const std::string& getScriptsFolder() const noexcept;
@@ -277,37 +285,42 @@ namespace engine {
 		 * @param  name The name of the function.
 		 * @return \c TRUE if the function exists, \c FALSE if not, or if there
 		 *         were multiple matches.
+		 * @safety No guarantee.
 		 */
-		bool functionExists(const std::string& name) const noexcept;
+		bool functionExists(const std::string& name) const;
 
 		/**
 		 * Tests to see if a function with the given declaration exists in any of
 		 * the loaded scripts.
 		 * @param  decl The declaration of the function.
 		 * @return \c TRUE if the function exists, \c FALSE otherwise.
+		 * @safety No guarantee.
 		 */
-		bool functionDeclExists(const std::string& decl) const noexcept;
+		bool functionDeclExists(const std::string& decl) const;
 
 		/**
 		 * Will write a message to the log, using the current context to retrieve
 		 * extra information.
-		 * @param message The message to log.
+		 * @param  message The message to log.
+		 * @safety No guarantee.
 		 */
-		void writeToLog(const std::string& message) const noexcept;
+		void writeToLog(const std::string& message) const;
 
 		/**
 		 * Will write a warning to the log, using the current context to retrieve
 		 * extra information.
-		 * @param message The message to log.
+		 * @param  message The message to log.
+		 * @safety No guarantee.
 		 */
-		void warningToLog(const std::string& message) const noexcept;
+		void warningToLog(const std::string& message) const;
 		
 		/**
 		 * Will write an error to the log, using the current context to retrieve
 		 * extra information.
-		 * @param message The message to log.
+		 * @param  message The message to log.
+		 * @safety No guarantee.
 		 */
-		void errorToLog(const std::string& message) const noexcept;
+		void errorToLog(const std::string& message) const;
 
 		/**
 		 * Parameter pack method called when a script function requires parameters.
@@ -333,17 +346,19 @@ namespace engine {
 		 *         call, or if the function context couldn't be setup, or if the
 		 *         function couldn't be called. \c TRUE if the call to the function
 		 *         was successful.
+		 * @safety No guarantee.
 		 */
 		template<typename T, typename... Ts>
-		bool callFunction(const std::string& name, T value, Ts... values) noexcept;
+		bool callFunction(const std::string& name, T value, Ts... values);
 
 		/**
 		 * Calls a script function when no more parameters have to be added to the
 		 * function call.
 		 * @param  name The name of the script function to call.
 		 * @return See the template version of \c callFunction().
+		 * @safety No guarantee.
 		 */
-		bool callFunction(const std::string& name) noexcept;
+		bool callFunction(const std::string& name);
 
 		/**
 		 * Compiles and executes the given code, which can call any code that is in
@@ -353,23 +368,26 @@ namespace engine {
 		 * @return If execution was successful, an empty string is returned. If
 		 *         not, an error string will be returned. The error string will
 		 *         also be logged. These include build errors and exception errors.
+		 * @safety No guarantee.
 		 */
-		std::string executeCode(std::string code) noexcept;
+		std::string executeCode(std::string code);
 
 		/**
 		 * Creates a @c CScriptDictionary object.
 		 * @return Pointer to a new AngelScript @c dictionary object that's been
 		 *         registered with this engine.
+		 * @safety No guarantee.
 		 */
-		CScriptDictionary* createDictionary() noexcept;
+		CScriptDictionary* createDictionary();
 
 		/**
 		 * Creates a @c CScriptArray object.
 		 * @param  type The name of the type to give as the array's type.
 		 * @return Pointer to a new AngelScript @c array object, or \c nullptr if
 		 *         it could not be created.
+		 * @safety No guarantee.
 		 */
-		CScriptArray* createArray(const std::string& type) const noexcept;
+		CScriptArray* createArray(const std::string& type) const;
 
 		/**
 		 * Creates a @c CScriptAny object.
@@ -377,36 +395,41 @@ namespace engine {
 		 *          pointer!
 		 * @return  Pointer to a new AngelScript @c any object that's been
 		 *          registered with this engine.
+		 * @safety No guarantee.
 		 */
-		CScriptAny* createAny() const noexcept;
+		CScriptAny* createAny() const;
 
 		/**
 		 * Returns the type ID of a given type.
 		 * @param  type The name of the type.
 		 * @return The type ID, or \c -1 if there was an error.
+		 * @safety No guarantee.
 		 */
-		int getTypeID(const std::string& type) const noexcept;
+		int getTypeID(const std::string& type) const;
 
 		/**
 		 * Returns the name of a given type.
 		 * @param  id The type ID of the type to query.
 		 * @return The name of the type, or a blank string if there was an error.
+		 * @safety No guarantee.
 		 */
-		std::string getTypeName(const int id) const noexcept;
+		std::string getTypeName(const int id) const;
 	private:
 		/**
 		 * Allocates a new function context.
 		 * @return The error code.
+		 * @safety No guarantee.
 		 */
-		int _allocateContext() noexcept;
+		int _allocateContext();
 
 		/**
 		 * Prepares the function context when making a call to \c callFunction().
 		 * @param  name The name of the function to call.
 		 * @return \c TRUE if the context was setup successfully, \c FALSE
 		 *         otherwise.
+		 * @safety No guarantee.
 		 */
-		bool _setupContext(const std::string& name) noexcept;
+		bool _setupContext(const std::string& name);
 
 		/**
 		 * Resets \c callFunction() variables.
@@ -417,8 +440,9 @@ namespace engine {
 		/**
 		 * Constructs a log message from the most current context.
 		 * @param msg The message to log.
+		 * @safety No guarantee.
 		 */
-		std::string _constructMessage(const std::string& msg) const noexcept;
+		std::string _constructMessage(const std::string& msg) const;
 
 		/**
 		 * The internal logger object.
