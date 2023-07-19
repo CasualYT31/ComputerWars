@@ -84,9 +84,10 @@ namespace sfx {
 	struct joystick {
 		/**
 		 * Registers the joystick type with the script interface.
+		 * @safety No guarantee.
 		 */
 		static void Register(asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Tests if a given \c sfx::joystick object is equivalent to this one.
@@ -300,7 +301,7 @@ namespace sfx {
 		/**
 		 * This class cannot be instantiated by the client.
 		 */
-		convert() noexcept;
+		convert() = default;
 	};
 
 	/**
@@ -313,12 +314,14 @@ namespace sfx {
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		user_input(const engine::logger::data& data) noexcept;
+		user_input(const engine::logger::data& data);
 
 		/**
 		 * Returns a set of controls that have been registered with this object.
+		 * @return The set of controls that have been registered with this object.
+		 * @safety Strong guarantee.
 		 */
-		std::unordered_set<std::string> getControls() const noexcept;
+		std::unordered_set<std::string> getControls() const;
 
 		/**
 		 * Sets the window that this \c user_input object is tied to.
@@ -351,10 +354,11 @@ namespace sfx {
 		 * old joystick ID. This will also happen if a joystick ID with an ID
 		 * greater than \c sf::Joystick::Count is given, as undefined behaviour
 		 * occurs if those larger values are processed within the SFML.
-		 * @param newid The new ID of the joystick to associate with this
-		 *              user/object.
+		 * @param  newid The new ID of the joystick to associate with this
+		 *               user/object.
+		 * @safety Strong guarantee.
 		 */
-		void setJoystickID(unsigned int newid) noexcept;
+		void setJoystickID(unsigned int newid);
 
 		/**
 		 * Retrieves the joystick axis threshold.
@@ -384,9 +388,9 @@ namespace sfx {
 		 * @return The user's configured profile for the given game control, or a
 		 *         blank object if \c name couldn't uniquely identify a game
 		 *         control (an error will be logged).
+		 * @safety Strong guarantee.
 		 */
-		sfx::user_configuration getConfiguration(const std::string& name) const
-			noexcept;
+		sfx::user_configuration getConfiguration(const std::string& name) const;
 
 		/**
 		 * Updates the user's control configurations for a given game control.
@@ -394,11 +398,12 @@ namespace sfx {
 		 * This \b cannot be used to create new game controls on the fly. If a
 		 * non-existent game control is referenced via \c name, an error will be
 		 * logged.
-		 * @param name The name identifying the game control.
-		 * @param uc   The user configurations to set.
+		 * @param  name The name identifying the game control.
+		 * @param  uc   The user configurations to set.
+		 * @safety Strong guarantee.
 		 */
 		void setConfiguration(const std::string& name,
-			const sfx::user_configuration& uc) noexcept;
+			const sfx::user_configuration& uc);
 
 		/**
 		 * Retrieves the mouse position in pixels.
@@ -411,14 +416,15 @@ namespace sfx {
 		 * @return The mouse position as described above.
 		 * @sa     tieWindow()
 		 */
-		sf::Vector2i mousePosition() const noexcept;
+		sf::Vector2i mousePosition() const;
 
 		/**
 		 * Updates the signalling information for all controls for this user.
 		 * Should be called only once every iteration of the game loop. If not
 		 * called, the class will not work and no controls will be registered.
+		 * @safety No guarantee.
 		 */
-		void update() noexcept;
+		void update();
 
 		/**
 		 * Tests whether a game control is being triggered or not.
@@ -426,7 +432,7 @@ namespace sfx {
 		 * @return \c TRUE if the control is being input, \c FALSE if not, or if
 		 *         the \c name given didn't identify a game control.
 		 */
-		bool operator[](const std::string& name) noexcept;
+		bool operator[](const std::string& name) const;
 
 		/**
 		 * Returns a list of keys being pressed.
@@ -435,7 +441,7 @@ namespace sfx {
 		 *         that window is not in focus.
 		 * @sa     tieWindow()
 		 */
-		sfx::KeyboardKeyList keyboardKeysBeingPressed() const noexcept;
+		sfx::KeyboardKeyList keyboardKeysBeingPressed() const;
 
 		/**
 		 * Returns a list of mouse buttons being pressed.
@@ -444,7 +450,7 @@ namespace sfx {
 		 *         then an empty list is returned.
 		 * @sa     mousePosition()
 		 */
-		sfx::MouseButtonList mouseButtonsBeingPressed() const noexcept;
+		sfx::MouseButtonList mouseButtonsBeingPressed() const;
 
 		/**
 		 * Returns a list of joystick buttons being pressed.
@@ -452,7 +458,7 @@ namespace sfx {
 		 *         calling. An empty list is returned if this object is tied to a
 		 *         window and that window is not in focus.
 		 */
-		sfx::JoystickButtonList joystickButtonsBeingPressed() const noexcept;
+		sfx::JoystickButtonList joystickButtonsBeingPressed() const;
 
 		/**
 		 * Returns a list of joystick axes being pressed.
@@ -460,7 +466,7 @@ namespace sfx {
 		 *         calling. An empty list is returned if this object is tied to a
 		 *         window and that window is not in focus.
 		 */
-		sfx::JoystickAxisList joystickAxesBeingPressed() const noexcept;
+		sfx::JoystickAxisList joystickAxesBeingPressed() const;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -502,18 +508,17 @@ namespace sfx {
 		 *            stores an int representing the direction of the axis.</td>
 		 *        </tr></table>
 		 * All other keys within each game control object will be ignored.
-		 * @warning The internal user profile (control and signal configurations)
-		 *          is cleared upon calling this method.
-		 * @param   j The \c engine::json object representing the contents of the
-		 *            loaded script which this method reads.
-		 * @return  Always returns \c TRUE.
-		 * @sa      setJoystickAxisThreshold()
-		 * @sa      setJoystickID()
-		 * @sa      sfx::control_signal
-		 * @sa      sfx::convert
-		 * @sa      sfx::signal_properties
+		 * @param  j The \c engine::json object representing the contents of the
+		 *           loaded script which this method reads.
+		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee.
+		 * @sa     setJoystickAxisThreshold()
+		 * @sa     setJoystickID()
+		 * @sa     sfx::control_signal
+		 * @sa     sfx::convert
+		 * @sa     sfx::signal_properties
 		 */
-		bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j);
 
 		/**
 		 * The JSON save method for this class.
@@ -522,8 +527,9 @@ namespace sfx {
 		 * @param  j The \c nlohmann::ordered_json object representing the JSON
 		 *           script which this method writes to.
 		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee.
 		 */
-		bool _save(nlohmann::ordered_json& j) noexcept;
+		bool _save(nlohmann::ordered_json& j);
 
 		/**
 		 * Updates a given collection of control lists.
@@ -533,12 +539,13 @@ namespace sfx {
 		 * @param  ref The control lists to update.
 		 * @return \c TRUE if at least one key/button/axis was being pressed,
 		 *         \c FALSE if nothing was registered.
+		 * @safety Basic guarantee.
 		 * @sa     keyboardKeysBeingPressed()
 		 * @sa     mouseButtonsBeingPressed()
 		 * @sa     joystickButtonsBeingPressed()
 		 * @sa     joystickAxesBeingPressed()
 		 */
-		bool _scanInput(sfx::user_configuration& ref) const noexcept;
+		bool _scanInput(sfx::user_configuration& ref) const;
 
 		/**
 		 * Checks a user's mapped inputs of a specific device for a given game
@@ -558,16 +565,17 @@ namespace sfx {
 		 *         within \c list, \c FALSE otherwise.
 		 */
 		template<typename T>
-		bool _isBeingTriggered(const T& configured, const T& list) const noexcept;
+		bool _isBeingTriggered(const T& configured, const T& list) const;
 
 		/**
 		 * Updates a single control's signalling data.
 		 * Called for every configured control in \c update().
-		 * @param scan The input mappings of a single game control.
-		 * @param name The name of the game control to update.
+		 * @param  scan The input mappings of a single game control.
+		 * @param  name The name of the game control to update.
+		 * @safety No guarantee.
 		 */
 		void _updateSingle(const sfx::user_configuration& scan,
-			const std::string& name) noexcept;
+			const std::string& name);
 
 		/**
 		 * The ID of the joystick associated with this user.

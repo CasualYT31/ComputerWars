@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "userinput.hpp"
 
 void sfx::joystick::Register(asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	if (!engine->GetTypeInfoByName("JoystickAxis")) {
 		int r = engine->RegisterObjectType("JoystickAxis", sizeof(sfx::joystick),
 			asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sfx::joystick>() |
@@ -52,8 +52,6 @@ bool sfx::joystick::operator==(const sfx::joystick& rhs) const noexcept {
 bool sfx::joystick::operator!=(const sfx::joystick& rhs) const noexcept {
 	return !(*this == rhs);
 }
-
-sfx::convert::convert() noexcept {}
 
 sf::Keyboard::Key sfx::convert::tokeycode(unsigned int k,
 	engine::logger *const logger) noexcept {
@@ -107,10 +105,10 @@ sfx::control_signal sfx::convert::tosignaltype(unsigned int s,
 	return static_cast<sfx::control_signal>(s);
 }
 
-sfx::user_input::user_input(const engine::logger::data& data) noexcept :
+sfx::user_input::user_input(const engine::logger::data& data) :
 	json_script({data.sink, "json_script"}), _logger(data) {}
 
-std::unordered_set<std::string> sfx::user_input::getControls() const noexcept {
+std::unordered_set<std::string> sfx::user_input::getControls() const {
 	std::unordered_set<std::string> ret;
 	for (auto control : _control) ret.insert(control.first);
 	return ret;
@@ -128,11 +126,7 @@ unsigned int sfx::user_input::getJoystickID() const noexcept {
 	return _joystickid;
 }
 
-float sfx::user_input::getJoystickAxisThreshold() const noexcept {
-	return _joystickAxisThreshold;
-}
-
-void sfx::user_input::setJoystickID(unsigned int newid) noexcept {
+void sfx::user_input::setJoystickID(unsigned int newid) {
 	auto old = getJoystickID();
 	if (newid <= sf::Joystick::Count && sf::Joystick::isConnected(newid)) {
 		_joystickid = newid;
@@ -141,6 +135,10 @@ void sfx::user_input::setJoystickID(unsigned int newid) noexcept {
 			"connected, resetting the ID to {}.", newid, old);
 		_joystickid = old;
 	}
+}
+
+float sfx::user_input::getJoystickAxisThreshold() const noexcept {
+	return _joystickAxisThreshold;
 }
 
 void sfx::user_input::setJoystickAxisThreshold(float newthreshold) noexcept {
@@ -158,7 +156,7 @@ void sfx::user_input::setJoystickAxisThreshold(float newthreshold) noexcept {
 }
 
 sfx::user_configuration sfx::user_input::getConfiguration(const std::string& name)
-	const noexcept {
+	const {
 	if (_control.find(name) == _control.end()) {
 		_logger.error("Could not retrieve configurations for non-existent control "
 			"called \"{}\".", name);
@@ -168,7 +166,7 @@ sfx::user_configuration sfx::user_input::getConfiguration(const std::string& nam
 }
 
 void sfx::user_input::setConfiguration(const std::string& name,
-	const sfx::user_configuration& uc) noexcept {
+	const sfx::user_configuration& uc) {
 	if (_control.find(name) != _control.end()) {
 		_control[name].config = uc;
 	} else {
@@ -177,7 +175,7 @@ void sfx::user_input::setConfiguration(const std::string& name,
 	}
 }
 
-sf::Vector2i sfx::user_input::mousePosition() const noexcept {
+sf::Vector2i sfx::user_input::mousePosition() const {
 	if (_window) {
 		if (_window->hasFocus()) {
 			// Also ignore button presses if the mouse is currently outside of the
@@ -194,7 +192,7 @@ sf::Vector2i sfx::user_input::mousePosition() const noexcept {
 	}
 }
 
-void sfx::user_input::update() noexcept {
+void sfx::user_input::update() {
 	sf::Joystick::update();
 	user_configuration scan;
 	_scanInput(scan);
@@ -203,7 +201,7 @@ void sfx::user_input::update() noexcept {
 	}
 }
 
-bool sfx::user_input::operator[](const std::string& name) noexcept {
+bool sfx::user_input::operator[](const std::string& name) const {
 	if (_control.find(name) == _control.end()) {
 		_logger.error("Attempted to test if non-existent control called \"{}\" "
 			"was being triggered.", name);
@@ -212,8 +210,202 @@ bool sfx::user_input::operator[](const std::string& name) noexcept {
 	return _control.at(name).signal.signal;
 }
 
+sfx::KeyboardKeyList sfx::user_input::keyboardKeysBeingPressed() const {
+	sfx::KeyboardKeyList ret;
+	if (_window && !_window->hasFocus()) return ret;
+	for (unsigned int k = 0; k < sf::Keyboard::KeyCount; ++k) {
+		if (sf::Keyboard::isKeyPressed(sfx::convert::tokeycode(k, &_logger))) {
+			ret.push_back(sfx::convert::tokeycode(k, &_logger));
+		}
+	}
+	return ret;
+}
+
+sfx::MouseButtonList sfx::user_input::mouseButtonsBeingPressed() const {
+	sfx::MouseButtonList ret;
+	if (mousePosition() == INVALID_MOUSE) return ret;
+	for (unsigned int b = 0; b < sf::Mouse::ButtonCount; ++b) {
+		if (sf::Mouse::isButtonPressed(sfx::convert::tomousebtn(b, &_logger))) {
+			ret.push_back(sfx::convert::tomousebtn(b, &_logger));
+		}
+	}
+	return ret;
+}
+
+sfx::JoystickButtonList sfx::user_input::joystickButtonsBeingPressed() const {
+	sfx::JoystickButtonList ret;
+	if (_window && !_window->hasFocus()) return ret;
+	for (unsigned int b = 0;
+		b < sf::Joystick::getButtonCount(getJoystickID()); ++b) {
+		if (sf::Joystick::isButtonPressed(getJoystickID(), b)) {
+			ret.push_back(b);
+		}
+	}
+	return ret;
+}
+
+sfx::JoystickAxisList sfx::user_input::joystickAxesBeingPressed() const {
+	sfx::JoystickAxisList ret;
+	if (_window && !_window->hasFocus()) return ret;
+	for (unsigned int a = 0; a < sf::Joystick::AxisCount; ++a) {
+		if (sf::Joystick::hasAxis(getJoystickID(),
+			sfx::convert::toaxis(a, &_logger))) {
+			if (sf::Joystick::getAxisPosition(getJoystickID(),
+				sfx::convert::toaxis(a, &_logger)) >= getJoystickAxisThreshold()) {
+				sfx::joystick item;
+				item.axis = sfx::convert::toaxis(a, &_logger);
+				item.direction = sfx::axis_direction::Positive;
+				ret.push_back(item);
+			} else if (sf::Joystick::getAxisPosition(getJoystickID(),
+				sfx::convert::toaxis(a, &_logger)) <= -getJoystickAxisThreshold())
+			{
+				sfx::joystick item;
+				item.axis = sfx::convert::toaxis(a, &_logger);
+				item.direction = sfx::axis_direction::Negative;
+				ret.push_back(item);
+			}
+		}
+	}
+	return ret;
+}
+
+bool sfx::user_input::_load(engine::json& j) {
+	std::unordered_map<std::string, sfx::user_control> control;
+	nlohmann::ordered_json jj = j.nlohmannJSON();
+
+	for (auto& i : jj.items()) {
+		if (i.key() == "joystickid") {
+			j.apply(_joystickid, { "joystickid" }, true);
+			setJoystickID(getJoystickID());
+		} else if (i.key() == "joystickaxis") {
+			j.apply(_joystickAxisThreshold, { "joystickaxis" }, true);
+			setJoystickAxisThreshold(getJoystickAxisThreshold());
+		} else {
+			try {
+				if (i.value().find("keys") != i.value().end()) {
+					for (auto k = i.value()["keys"].begin(),
+						ek = i.value()["keys"].end(); k != ek; k++) {
+						control[i.key()].config.keyboard.push_back(
+							sfx::convert::tokeycode(*k, &_logger)
+						);
+					}
+				}
+			} catch (std::exception & e) {
+				_logger.error("An error occurred when attempting to load keyboard "
+					"controls for \"{}\": {}.", i.key(), e.what());
+			}
+			try {
+				if (i.value().find("mouse") != i.value().end()) {
+					for (auto m = i.value()["mouse"].begin(),
+						em = i.value()["mouse"].end(); m != em; m++) {
+						control[i.key()].config.mouse.push_back(
+							sfx::convert::tomousebtn(*m, &_logger)
+						);
+					}
+				}
+			} catch (std::exception & e) {
+				_logger.error("An error occurred when attempting to load mouse "
+					"button controls for \"{}\": {}.", i.key(), e.what());
+			}
+			try {
+				if (i.value().find("buttons") != i.value().end()) {
+					for (auto b = i.value()["buttons"].begin(),
+						eb = i.value()["buttons"].end(); b != eb; b++) {
+						control[i.key()].config.joystickButton.push_back(*b);
+					}
+				}
+			} catch (std::exception & e) {
+				_logger.error("An error occurred when attempting to load joystick "
+					"button controls for \"{}\": {}.", i.key(), e.what());
+			}
+			try {
+				if (i.value().find("axes") != i.value().end()) {
+					for (auto a = i.value()["axes"].begin(),
+						ea = i.value()["axes"].end(); a != ea; a++) {
+						sfx::joystick item;
+						item.axis = sfx::convert::toaxis((*a)[0], &_logger);
+						item.direction = sfx::convert::toaxisdir((*a)[1]);
+						control[i.key()].config.joystickAxis.push_back(item);
+					}
+				}
+			} catch (std::exception & e) {
+				_logger.error("An error occurred when attempting to load joystick "
+					"axis controls for \"{}\": {}.", i.key(), e.what());
+			}
+
+			unsigned int sigtype = control[i.key()].signal.type;
+			j.apply(sigtype, { i.key(), "type" }, true);
+			control[i.key()].signal.type =
+				sfx::convert::tosignaltype(sigtype, &_logger);
+			if (control[i.key()].signal.type == sfx::DelayedForm &&
+				i.value().find("delays") != i.value().end()) {
+				// If delays aren't given for a delayed-form control, they will be
+				// generated in operator[].
+				try {
+					for (auto d = i.value()["delays"].begin(),
+						ed = i.value()["delays"].end(); d != ed; d++) {
+						control[i.key()].signal.delayLength.push_back(
+							sf::milliseconds(*d)
+						);
+					}
+				} catch (std::exception & e) {
+					_logger.error("An error occurred when attempting to load "
+						"delays for the delayed-form control \"{}\": {}.",
+						i.key(), e.what());
+				}
+			}
+		}
+	}
+
+	_control = std::move(control);
+	return true;
+}
+
+bool sfx::user_input::_save(nlohmann::ordered_json& j) {
+	j["joystickid"] = getJoystickID();
+	j["joystickaxis"] = getJoystickAxisThreshold();
+	for (auto c = _control.begin(), ec = _control.end(); c != ec; ++c) {
+		for (auto k = c->second.config.keyboard.begin(),
+			ek = c->second.config.keyboard.end(); k != ek; ++k) {
+			j[c->first]["keys"].push_back(*k);
+		}
+		for (auto m = c->second.config.mouse.begin(),
+			em = c->second.config.mouse.end(); m != em; ++m) {
+			j[c->first]["mouse"].push_back(*m);
+		}
+		for (auto b = c->second.config.joystickButton.begin(),
+			eb = c->second.config.joystickButton.end(); b != eb; ++b) {
+			j[c->first]["buttons"].push_back(*b);
+		}
+		for (auto a = c->second.config.joystickAxis.begin(),
+			ea = c->second.config.joystickAxis.end(); a != ea; ++a) {
+			std::array<int, 2> axisItem;
+			axisItem[0] = a->axis;
+			axisItem[1] = a->direction;
+			j[c->first]["axes"].push_back(axisItem);
+		}
+		j[c->first]["type"] = c->second.signal.type;
+		if (c->second.signal.delayLength.size()) {
+			for (auto d = c->second.signal.delayLength.begin(),
+				ed = c->second.signal.delayLength.end(); d != ed; ++d) {
+				j[c->first]["delays"].push_back(d->asMilliseconds());
+			}
+		}
+	}
+	return true;
+}
+
+bool sfx::user_input::_scanInput(sfx::user_configuration& ref) const {
+	ref.keyboard = keyboardKeysBeingPressed();
+	ref.mouse = mouseButtonsBeingPressed();
+	ref.joystickButton = joystickButtonsBeingPressed();
+	ref.joystickAxis = joystickAxesBeingPressed();
+	return (ref.keyboard.size() || ref.mouse.size() || ref.joystickButton.size() ||
+		ref.joystickAxis.size());
+}
+
 void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
-	const std::string& name) noexcept {
+	const std::string& name) {
 	auto& signal = _control.at(name).signal;
 	signal.previous = signal.current;
 	signal.current = false;
@@ -261,198 +453,4 @@ void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
 		}
 		break;
 	}
-}
-
-sfx::KeyboardKeyList sfx::user_input::keyboardKeysBeingPressed() const noexcept {
-	sfx::KeyboardKeyList ret;
-	if (_window && !_window->hasFocus()) return ret;
-	for (unsigned int k = 0; k < sf::Keyboard::KeyCount; k++) {
-		if (sf::Keyboard::isKeyPressed(sfx::convert::tokeycode(k, &_logger))) {
-			ret.push_back(sfx::convert::tokeycode(k, &_logger));
-		}
-	}
-	return ret;
-}
-
-sfx::MouseButtonList sfx::user_input::mouseButtonsBeingPressed() const noexcept {
-	sfx::MouseButtonList ret;
-	if (mousePosition() == INVALID_MOUSE) return ret;
-	for (unsigned int b = 0; b < sf::Mouse::ButtonCount; b++) {
-		if (sf::Mouse::isButtonPressed(sfx::convert::tomousebtn(b, &_logger))) {
-			ret.push_back(sfx::convert::tomousebtn(b, &_logger));
-		}
-	}
-	return ret;
-}
-
-sfx::JoystickButtonList sfx::user_input::joystickButtonsBeingPressed() const
-	noexcept {
-	sfx::JoystickButtonList ret;
-	if (_window && !_window->hasFocus()) return ret;
-	for (unsigned int b = 0;
-		b < sf::Joystick::getButtonCount(getJoystickID()); b++) {
-		if (sf::Joystick::isButtonPressed(getJoystickID(), b)) {
-			ret.push_back(b);
-		}
-	}
-	return ret;
-}
-
-sfx::JoystickAxisList sfx::user_input::joystickAxesBeingPressed() const noexcept {
-	sfx::JoystickAxisList ret;
-	if (_window && !_window->hasFocus()) return ret;
-	for (unsigned int a = 0; a < sf::Joystick::AxisCount; a++) {
-		if (sf::Joystick::hasAxis(getJoystickID(),
-			sfx::convert::toaxis(a, &_logger))) {
-			if (sf::Joystick::getAxisPosition(getJoystickID(),
-				sfx::convert::toaxis(a, &_logger)) >= getJoystickAxisThreshold()) {
-				sfx::joystick item;
-				item.axis = sfx::convert::toaxis(a, &_logger);
-				item.direction = sfx::axis_direction::Positive;
-				ret.push_back(item);
-			} else if (sf::Joystick::getAxisPosition(getJoystickID(),
-				sfx::convert::toaxis(a, &_logger)) <= -getJoystickAxisThreshold())
-			{
-				sfx::joystick item;
-				item.axis = sfx::convert::toaxis(a, &_logger);
-				item.direction = sfx::axis_direction::Negative;
-				ret.push_back(item);
-			}
-		}
-	}
-	return ret;
-}
-
-bool sfx::user_input::_scanInput(sfx::user_configuration& ref) const noexcept {
-	ref.keyboard = keyboardKeysBeingPressed();
-	ref.mouse = mouseButtonsBeingPressed();
-	ref.joystickButton = joystickButtonsBeingPressed();
-	ref.joystickAxis = joystickAxesBeingPressed();
-	return (ref.keyboard.size() || ref.mouse.size() || ref.joystickButton.size() ||
-		ref.joystickAxis.size());
-}
-
-bool sfx::user_input::_load(engine::json& j) noexcept {
-	_control.clear();
-	nlohmann::ordered_json jj = j.nlohmannJSON();
-
-	for (auto& i : jj.items()) {
-		if (i.key() == "joystickid") {
-			j.apply(_joystickid, { "joystickid" }, true);
-			setJoystickID(getJoystickID());
-		} else if (i.key() == "joystickaxis") {
-			j.apply(_joystickAxisThreshold, { "joystickaxis" }, true);
-			setJoystickAxisThreshold(getJoystickAxisThreshold());
-		} else {
-			try {
-				if (i.value().find("keys") != i.value().end()) {
-					for (auto k = i.value()["keys"].begin(),
-						ek = i.value()["keys"].end(); k != ek; k++) {
-						_control[i.key()].config.keyboard.push_back(
-							sfx::convert::tokeycode(*k, &_logger)
-						);
-					}
-				}
-			} catch (std::exception & e) {
-				_logger.error("An error occurred when attempting to load keyboard "
-					"controls for \"{}\": {}.", i.key(), e.what());
-			}
-			try {
-				if (i.value().find("mouse") != i.value().end()) {
-					for (auto m = i.value()["mouse"].begin(),
-						em = i.value()["mouse"].end(); m != em; m++) {
-						_control[i.key()].config.mouse.push_back(
-							sfx::convert::tomousebtn(*m, &_logger)
-						);
-					}
-				}
-			} catch (std::exception & e) {
-				_logger.error("An error occurred when attempting to load mouse "
-					"button controls for \"{}\": {}.", i.key(), e.what());
-			}
-			try {
-				if (i.value().find("buttons") != i.value().end()) {
-					for (auto b = i.value()["buttons"].begin(),
-						eb = i.value()["buttons"].end(); b != eb; b++) {
-						_control[i.key()].config.joystickButton.push_back(*b);
-					}
-				}
-			} catch (std::exception & e) {
-				_logger.error("An error occurred when attempting to load joystick "
-					"button controls for \"{}\": {}.", i.key(), e.what());
-			}
-			try {
-				if (i.value().find("axes") != i.value().end()) {
-					for (auto a = i.value()["axes"].begin(),
-						ea = i.value()["axes"].end(); a != ea; a++) {
-						sfx::joystick item;
-						item.axis = sfx::convert::toaxis((*a)[0], &_logger);
-						item.direction = sfx::convert::toaxisdir((*a)[1]);
-						_control[i.key()].config.joystickAxis.push_back(item);
-					}
-				}
-			} catch (std::exception & e) {
-				_logger.error("An error occurred when attempting to load joystick "
-					"axis controls for \"{}\": {}.", i.key(), e.what());
-			}
-
-			unsigned int sigtype = _control[i.key()].signal.type;
-			j.apply(sigtype, { i.key(), "type" }, true);
-			_control[i.key()].signal.type =
-				sfx::convert::tosignaltype(sigtype, &_logger);
-			if (_control[i.key()].signal.type == sfx::DelayedForm &&
-				i.value().find("delays") != i.value().end()) {
-				// If delays aren't given for a delayed-form control, they will be
-				// generated in operator[].
-				try {
-					for (auto d = i.value()["delays"].begin(),
-						ed = i.value()["delays"].end(); d != ed; d++) {
-						_control[i.key()].signal.delayLength.push_back(
-							sf::milliseconds(*d)
-						);
-					}
-				} catch (std::exception & e) {
-					_logger.error("An error occurred when attempting to load "
-						"delays for the delayed-form control \"{}\": {}.",
-						i.key(), e.what());
-				}
-			}
-		}
-	}
-
-	return true;
-}
-
-bool sfx::user_input::_save(nlohmann::ordered_json& j) noexcept {
-	j["joystickid"] = getJoystickID();
-	j["joystickaxis"] = getJoystickAxisThreshold();
-	for (auto c = _control.begin(), ec = _control.end(); c != ec; c++) {
-		for (auto k = c->second.config.keyboard.begin(),
-			ek = c->second.config.keyboard.end(); k != ek; k++) {
-			j[c->first]["keys"].push_back(*k);
-		}
-		for (auto m = c->second.config.mouse.begin(),
-			em = c->second.config.mouse.end(); m != em; m++) {
-			j[c->first]["mouse"].push_back(*m);
-		}
-		for (auto b = c->second.config.joystickButton.begin(),
-			eb = c->second.config.joystickButton.end(); b != eb; b++) {
-			j[c->first]["buttons"].push_back(*b);
-		}
-		for (auto a = c->second.config.joystickAxis.begin(),
-			ea = c->second.config.joystickAxis.end(); a != ea; a++) {
-			std::array<int, 2> axisItem;
-			axisItem[0] = a->axis;
-			axisItem[1] = a->direction;
-			j[c->first]["axes"].push_back(axisItem);
-		}
-		j[c->first]["type"] = c->second.signal.type;
-		if (c->second.signal.delayLength.size()) {
-			for (auto d = c->second.signal.delayLength.begin(),
-				ed = c->second.signal.delayLength.end(); d != ed; d++) {
-				j[c->first]["delays"].push_back(d->asMilliseconds());
-			}
-		}
-	}
-	return true;
 }

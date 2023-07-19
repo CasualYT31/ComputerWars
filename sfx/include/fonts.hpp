@@ -64,7 +64,7 @@ namespace sfx {
 		 *         exist.
 		 * @safety Strong guarantee.
 		 */
-		std::string getFontPath(const std::string& key) const noexcept;
+		std::string getFontPath(const std::string& key) const;
 	private:
 		/**
 		 * The JSON load method for this class.

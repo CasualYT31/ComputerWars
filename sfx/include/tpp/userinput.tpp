@@ -23,10 +23,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 template<typename T>
-bool sfx::user_input::_isBeingTriggered(const T& configured, const T& list)
-const noexcept {
-	for (auto c = configured.begin(), ec = configured.end(); c != ec; c++) {
-		for (auto l = list.begin(), el = list.end(); l != el; l++) {
+bool sfx::user_input::_isBeingTriggered(const T& configured, const T& list) const {
+	for (auto c = configured.begin(), ec = configured.end(); c != ec; ++c) {
+		for (auto l = list.begin(), el = list.end(); l != el; ++l) {
 			if (*c == *l) return true;
 		}
 	}
