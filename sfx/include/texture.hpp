@@ -42,14 +42,14 @@ namespace sfx {
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		animated_spritesheet(const engine::logger::data& data) noexcept;
+		animated_spritesheet(const engine::logger::data& data);
 
 		/**
 		 * Determines whether or not a sprite with a given ID exists in this sheet.
 		 * @param  sprite The ID of the sprite to search for.
 		 * @return \c TRUE if a sprite exists with this ID, \c FALSE otherwise.
 		 */
-		inline bool doesSpriteExist(const std::string& sprite) const noexcept {
+		inline bool doesSpriteExist(const std::string& sprite) const {
 			return _frames.find(sprite) != _frames.end();
 		}
 
@@ -80,7 +80,7 @@ namespace sfx {
 		 *          not exist (an error will also be logged in this case).
 		 */
 		sf::IntRect getFrameRect(const std::string& sprite,
-			const std::size_t frame) const noexcept;
+			const std::size_t frame) const;
 
 		/**
 		 * Retrieves the intended duration that a given frame of a given sprite is
@@ -93,7 +93,7 @@ namespace sfx {
 		 *          (an error will also be logged in this case).
 		 */
 		sf::Time getFrameDuration(const std::string& sprite,
-			const std::size_t frame) const noexcept;
+			const std::size_t frame) const;
 
 		/**
 		 * Retrieves the offset intended to be applied to a sprite as it is being
@@ -104,7 +104,7 @@ namespace sfx {
 		 *          returned if the given sprite did not exist (an error will also
 		 *          be logged in this case).
 		 */
-		sf::Vector2f getSpriteOffset(const std::string& sprite) const noexcept;
+		sf::Vector2f getSpriteOffset(const std::string& sprite) const;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -132,8 +132,9 @@ namespace sfx {
 		 *         returned and the state of the object is not changed. Otherwise
 		 *         \c TRUE is returned and the old state is cleared, even if there
 		 *         was an error loading sprite info.
+		 * @safety No guarantee.
 		 */
-		bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j);
 
 		/**
 		 * The JSON save method for this class.
@@ -188,8 +189,7 @@ namespace sfx {
 		 *             the data that represents "no logger."
 		 * @sa    \c engine::logger
 		 */
-		animated_sprite(const engine::logger::data& data = { nullptr, "" })
-			noexcept;
+		animated_sprite(const engine::logger::data& data = { nullptr, "" });
 
 		/**
 		 * Constructs an animated sprite and initialises the internal logger
@@ -204,7 +204,7 @@ namespace sfx {
 		 */
 		animated_sprite(std::shared_ptr<const sfx::animated_spritesheet> sheet,
 			const std::string& sprite, const engine::logger::data& data =
-			{ nullptr, "" }) noexcept;
+			{ nullptr, "" });
 
 		/**
 		 * Sets a new \c animated_spritesheet to this animated sprite.
@@ -213,25 +213,26 @@ namespace sfx {
 		 * animated sprite whilst keeping the object alive. This method also
 		 * updates \c _hasNotBeenDrawn and \c _currentFrame so that the animated
 		 * sprite will start from the beginning of the animation.
-		 * @param sheet A pointer to the sheet to assign to this sprite.
+		 * @param  sheet A pointer to the sheet to assign to this sprite.
+		 * @safety No guarantee.
 		 */
-		void setSpritesheet(std::shared_ptr<const sfx::animated_spritesheet> sheet)
-			noexcept;
+		void setSpritesheet(
+			std::shared_ptr<const sfx::animated_spritesheet> sheet);
 
 		/**
 		 * Retrieves the spritesheet used with this sprite.
 		 * @return Pointer to the spritesheet used with this sprite. \c nullptr if
 		 *         no spritesheet has been assigned.
 		 */
-		std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet() const
-			noexcept;
+		std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet() const;
 
 		/**
 		 * Updates the sprite to animate and draw with this object.
 		 * This method also updates \c _hasNotBeenDrawn and \c _currentFrame so
 		 * that the animated sprite will start from the beginning of the animation.
 		 * \n The call will be ignored if the given sprite was already assigned.
-		 * @param sprite The name of the sprite to animate and draw.
+		 * @param  sprite The name of the sprite to animate and draw.
+		 * @safety Strong guarantee.
 		 */
 		void setSprite(const std::string& sprite) noexcept;
 
@@ -239,7 +240,13 @@ namespace sfx {
 		 * Retrieves the name of the sprite assigned to this object.
 		 * @return The name of the sprite to animate and draw with this object.
 		 */
-		std::string getSprite() const noexcept;
+		std::string getSprite() const;
+
+		/**
+		 * Retrieves the current frame ID.
+		 * @return The ID of the current frame.
+		 */
+		std::size_t getCurrentFrame() const noexcept;
 
 		/**
 		 * Sets the current frame.
@@ -252,12 +259,6 @@ namespace sfx {
 		 * @sa    \c animate()
 		 */
 		void setCurrentFrame(std::size_t newFrame) noexcept;
-
-		/**
-		 * Retrieves the current frame ID.
-		 * @return The ID of the current frame.
-		 */
-		std::size_t getCurrentFrame() const noexcept;
 
 		/**
 		 * The prefix frame increment operator.
@@ -302,16 +303,17 @@ namespace sfx {
 		 * @return The size of the internal sprite, specifically, the texture rect
 		 *         width and height, at the time of calling.
 		 */
-		inline sf::Vector2f getSize() const noexcept {
+		inline sf::Vector2f getSize() const {
 			return sf::Vector2f(static_cast<float>(_sprite.getTextureRect().width),
 				static_cast<float>(_sprite.getTextureRect().height));
 		}
 
 		/**
 		 * Sets the position of the internal sprite.
-		 * @param newPosition The new position, in pixels, of the sprite.
+		 * @param  newPosition The new position, in pixels, of the sprite.
+		 * @safety No guarantee.
 		 */
-		inline void setPosition(const sf::Vector2f& newPosition) noexcept {
+		inline void setPosition(const sf::Vector2f& newPosition) {
 			_sprite.setPosition(newPosition);
 		}
 
@@ -319,7 +321,7 @@ namespace sfx {
 		 * Gets the position of the internal sprite.
 		 * @return The position of the sprite, in pixels.
 		 */
-		inline sf::Vector2f getPosition() const noexcept {
+		inline sf::Vector2f getPosition() const {
 			return getPositionWithoutOffset() + ((_sheet) ?
 				(_sheet->getSpriteOffset(_spriteID)) : (sf::Vector2f()));
 		}
@@ -329,7 +331,7 @@ namespace sfx {
 		 * the spritesheet.
 		 * @return The position of the sprite, in pixels.
 		 */
-		inline sf::Vector2f getPositionWithoutOffset() const noexcept {
+		inline sf::Vector2f getPositionWithoutOffset() const {
 			return _sprite.getPosition();
 		}
 
@@ -351,19 +353,21 @@ namespace sfx {
 		 * @return \c TRUE if the current frame is the last frame, or if \c _sheet
 		 *         is \c NULL, or if there was an error in retrieving the sprite
 		 *         information, \c FALSE otherwise.
+		 * @safety No guarantee.
 		 */
 		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0) noexcept;
+			const double scaling = 1.0);
 	private:
 		/**
 		 * This drawable's \c draw() method.
 		 * Simply draws \c _sprite to the screen: to actually assign the correct
 		 * sprite graphic to this internal sprite object, please call \c animate()
 		 * first!
-		 * @param target The target to render the animated sprite to.
-		 * @param states The render states to apply to the sprite. Applying
-		 *               transforms is perfectly valid and will not alter the
-		 *               internal workings of the drawable.
+		 * @param  target The target to render the animated sprite to.
+		 * @param  states The render states to apply to the sprite. Applying
+		 *                transforms is perfectly valid and will not alter the
+		 *                internal workings of the drawable.
+		 * @safety No guarantee.
 		 */
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 

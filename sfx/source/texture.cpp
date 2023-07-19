@@ -22,8 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "texture.hpp"
 
-sfx::animated_spritesheet::animated_spritesheet(const engine::logger::data& data)
-	noexcept : json_script({ data.sink, "json_script" }), _logger(data) {}
+sfx::animated_spritesheet::animated_spritesheet(const engine::logger::data& data) :
+	json_script({ data.sink, "json_script" }), _logger(data) {}
 
 const sf::Texture& sfx::animated_spritesheet::getTexture() const noexcept {
 	return _texture;
@@ -42,7 +42,7 @@ std::size_t sfx::animated_spritesheet::getFrameCount(
 }
 
 sf::IntRect sfx::animated_spritesheet::getFrameRect(const std::string& sprite,
-	const std::size_t frame) const noexcept {
+	const std::size_t frame) const {
 	try {
 		const std::vector<sf::IntRect>& frames = _frames.at(sprite);
 		try {
@@ -62,7 +62,7 @@ sf::IntRect sfx::animated_spritesheet::getFrameRect(const std::string& sprite,
 }
 
 sf::Time sfx::animated_spritesheet::getFrameDuration(const std::string& sprite,
-	const std::size_t frame) const noexcept {
+	const std::size_t frame) const {
 	try {
 		const std::vector<sf::Time>& frames = _durations.at(sprite);
 		try {
@@ -83,7 +83,7 @@ sf::Time sfx::animated_spritesheet::getFrameDuration(const std::string& sprite,
 }
 
 sf::Vector2f sfx::animated_spritesheet::getSpriteOffset(const std::string& sprite)
-	const noexcept {
+	const {
 	try {
 		return _offsets.at(sprite);
 	} catch (const std::out_of_range&) {
@@ -94,7 +94,7 @@ sf::Vector2f sfx::animated_spritesheet::getSpriteOffset(const std::string& sprit
 	return {};
 }
 
-bool sfx::animated_spritesheet::_load(engine::json& j) noexcept {
+bool sfx::animated_spritesheet::_load(engine::json& j) {
 	// Firstly, load the spritesheet.
 	std::string imgpath;
 	j.apply(imgpath, { "path" });
@@ -159,19 +159,18 @@ bool sfx::animated_spritesheet::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }
 
-sfx::animated_sprite::animated_sprite(const engine::logger::data& data) noexcept :
+sfx::animated_sprite::animated_sprite(const engine::logger::data& data) :
 	_logger(data) {}
 
 sfx::animated_sprite::animated_sprite(
 	std::shared_ptr<const sfx::animated_spritesheet> sheet,
-	const std::string& sprite, const engine::logger::data& data) noexcept :
-	_logger(data) {
+	const std::string& sprite, const engine::logger::data& data) : _logger(data) {
 	setSpritesheet(sheet);
 	setSprite(sprite);
 }
 
 void sfx::animated_sprite::setSpritesheet(
-	std::shared_ptr<const sfx::animated_spritesheet> sheet) noexcept {
+	std::shared_ptr<const sfx::animated_spritesheet> sheet) {
 	_sheet = sheet;
 	if (!_sheet) _sprite.setTextureRect(sf::IntRect(0, 0, 0, 0));
 	_errored = false;
@@ -179,11 +178,11 @@ void sfx::animated_sprite::setSpritesheet(
 }
 
 std::shared_ptr<const sfx::animated_spritesheet>
-	sfx::animated_sprite::getSpritesheet() const noexcept {
+	sfx::animated_sprite::getSpritesheet() const {
 	return _sheet;
 }
 
-void sfx::animated_sprite::setSprite(const std::string& sprite) noexcept {
+void sfx::animated_sprite::setSprite(const std::string& sprite) {
 	if (sprite != _spriteID) {
 		_spriteID = sprite;
 		_errored = false;
@@ -191,36 +190,8 @@ void sfx::animated_sprite::setSprite(const std::string& sprite) noexcept {
 	}
 }
 
-std::string sfx::animated_sprite::getSprite() const noexcept {
+std::string sfx::animated_sprite::getSprite() const {
 	return _spriteID;
-}
-
-bool sfx::animated_sprite::animate(const sf::RenderTarget& target,
-	const double scaling) noexcept {
-	if (!_sheet) return true;
-	try {
-		if (_sheet->getFrameDuration(_spriteID, _currentFrame).asMilliseconds()
-			> 0) {
-			float delta = accumulatedDelta();
-			while (delta >=
-				_sheet->getFrameDuration(_spriteID, _currentFrame).asSeconds()) {
-				delta -=
-					_sheet->getFrameDuration(_spriteID, _currentFrame).asSeconds();
-				++(*this);
-			}
-			resetDeltaAccumulation(delta);
-		}
-		_sprite.setTexture(_sheet->getTexture());
-		_sprite.setTextureRect(_sheet->getFrameRect(_spriteID,_currentFrame));
-		return getCurrentFrame() == _sheet->getFrameCount(_spriteID) - 1;
-	} catch (const std::out_of_range& e) {
-		if (!_errored) {
-			_logger.error("Attempted to access non-existent frame {} of sprite {}"
-				": {}", _currentFrame, _spriteID, e.what());
-			_errored = true;
-		}
-		return true;
-	}
 }
 
 std::size_t sfx::animated_sprite::getCurrentFrame() const noexcept {
@@ -258,6 +229,34 @@ std::size_t sfx::animated_sprite::operator--(int) noexcept {
 	auto old = getCurrentFrame();
 	--(*this);
 	return old;
+}
+
+bool sfx::animated_sprite::animate(const sf::RenderTarget& target,
+	const double scaling) {
+	if (!_sheet) return true;
+	try {
+		if (_sheet->getFrameDuration(_spriteID, _currentFrame).asMilliseconds()
+			> 0) {
+			float delta = accumulatedDelta();
+			while (delta >=
+				_sheet->getFrameDuration(_spriteID, _currentFrame).asSeconds()) {
+				delta -=
+					_sheet->getFrameDuration(_spriteID, _currentFrame).asSeconds();
+				++(*this);
+			}
+			resetDeltaAccumulation(delta);
+		}
+		_sprite.setTexture(_sheet->getTexture());
+		_sprite.setTextureRect(_sheet->getFrameRect(_spriteID, _currentFrame));
+		return getCurrentFrame() == _sheet->getFrameCount(_spriteID) - 1;
+	} catch (const std::out_of_range& e) {
+		if (!_errored) {
+			_logger.error("Attempted to access non-existent frame {} of sprite {}"
+				": {}", _currentFrame, _spriteID, e.what());
+			_errored = true;
+		}
+		return true;
+	}
 }
 
 void sfx::animated_sprite::draw(sf::RenderTarget& target, sf::RenderStates states)
