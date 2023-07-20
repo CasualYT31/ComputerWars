@@ -342,6 +342,11 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the named "
 		"widget exists, <tt>FALSE</tt> otherwise.");
 
+	r = engine->RegisterGlobalFunction("bool menuExists(const string&in)",
+		asMETHOD(sfx::gui, _menuExists), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the named "
+		"menu exists, <tt>FALSE</tt> otherwise.");
+
 	r = engine->RegisterGlobalFunction("void addWidget(const string&in, const "
 		"string&in, const string&in = \"\")",
 		asMETHOD(sfx::gui, _addWidget), asCALL_THISCALL_ASGLOBAL, this);
@@ -452,6 +457,20 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"selected. The \"given widget\" should be given first, followed by the "
 		"widgets that should be selected, when up, down, left, and right are "
 		"input, respectively. All given widgets must be in the same menu!");
+
+	r = engine->RegisterGlobalFunction("void setWidgetDirectionalFlowStart("
+		"const string&in)",
+		asMETHOD(sfx::gui, _setWidgetDirectionalFlowStart),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets which widget should be selected "
+		"first when a directional control is first input on that widget's menu.");
+
+	r = engine->RegisterGlobalFunction("void clearWidgetDirectionalFlowStart("
+		"const string&in)",
+		asMETHOD(sfx::gui, _clearWidgetDirectionalFlowStart),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Used to explicitly prevent directional "
+		"controls from selecting a widget for the given menu.");
 
 	r = engine->RegisterGlobalFunction("void setWidgetText(const string&in, "
 		"const string&in, array<any>@ = null)",
@@ -1395,6 +1414,15 @@ bool sfx::gui::_widgetExists(const std::string& name) {
 	return _findWidget<Widget>(name).operator bool();
 }
 
+bool sfx::gui::_menuExists(const std::string& menu) {
+	// More efficient implementation would just cache the menu list, as menus can
+	// only be added or removed via load().
+	const auto menus = _gui.getWidgets();
+	for (const auto& widget : menus)
+		if (widget->getWidgetName() == menu) return true;
+	return false;
+}
+
 void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name,
 	const std::string& signalHandler) {
 	std::vector<std::string> fullname;
@@ -1691,6 +1719,28 @@ void sfx::gui::_setWidgetDirectionalFlow(const std::string& name,
 			"left=\"{}\", right=\"{}\". Not all of these widgets are in the same "
 			"menu!", name, fullname[0], fullnameAsStringUp, fullnameAsStringDown,
 			fullnameAsStringLeft, fullnameAsStringRight);
+	}
+}
+
+void sfx::gui::_setWidgetDirectionalFlowStart(const std::string& name) {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		_selectThisWidgetFirst[fullname[0]] = fullnameAsString;
+	} else {
+		_logger.error("Attempted to set the widget \"{}\" as the first to be "
+			"selected upon initial directional input, for the menu \"{}\". This "
+			"widget does not exist.", name, fullname[0]);
+	}
+}
+
+void sfx::gui::_clearWidgetDirectionalFlowStart(const std::string& menu) {
+	if (_menuExists(menu)) {
+		_selectThisWidgetFirst.erase(menu);
+	} else {
+		_logger.error("Attempted to disable directional input for the menu "
+			"\"{}\". Menu does not exist.", menu);
 	}
 }
 

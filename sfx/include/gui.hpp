@@ -552,6 +552,14 @@ namespace sfx {
 		 */
 		void _setGUI(const std::string& name);
 
+		/**
+		 * Determines if a menu exists.
+		 * @param  menu The name of the menu to search for.
+		 * @return \c TRUE if a menu with the given name exists, \c FALSE
+		 *         otherwise.
+		 */
+		bool _menuExists(const std::string& menu);
+
 		// BACKGROUND //
 
 		/**
@@ -758,7 +766,9 @@ namespace sfx {
 		 * If no widget exists with the given name, then an error will be logged
 		 * and no widget will be changed.\n
 		 * All widgets provided must be in the same menu. Otherwise, an error will
-		 * be logged, and no widget will be changed.
+		 * be logged, and no widget will be changed.\n
+		 * The second to fifth parameters can be blank, which case the given input
+		 * will not change the selection.
 		 * @param      name The name of the widget to amend.
 		 * @param    upName The name of the widget to move the selection to if "up"
 		 *                  is pressed.
@@ -772,6 +782,31 @@ namespace sfx {
 		void _setWidgetDirectionalFlow(const std::string& name,
 			const std::string& upName, const std::string& downName,
 			const std::string& leftName, const std::string& rightName);
+
+		/**
+		 * Used to select widgets that are selected first when a directional
+		 * control is input.
+		 * When a menu is active, and no widget has been selected on that menu yet
+		 * since the game was launched, a widget within that menu is always
+		 * selected first. The given widget is configured to be that first
+		 * widget.\n
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be changed.
+		 * @param name The name of the widget to assign as the first to be
+		 *             selected. Or the name of the menu to prevent directional
+		 *             controls for.
+		 */
+		void _setWidgetDirectionalFlowStart(const std::string& name);
+
+		/**
+		 * Used to prevent directional controls from selecting widgets on a given
+		 * menu.
+		 * This is the default behaviour for all menus.\n
+		 * If the given menu doesn't exist, an error will be logged and no menu
+		 * will be changed.
+		 * @param menu The name of the menu to amend.
+		 */
+		void _clearWidgetDirectionalFlowStart(const std::string& menu);
 
 		/**
 		 * Updates a widget's caption.
