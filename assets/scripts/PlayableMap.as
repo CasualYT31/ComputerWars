@@ -680,7 +680,8 @@ class PlayableMap {
 			// First, burn the moving unit's fuel.
 			map.burnUnitFuel(moving, burn);
 			// Perform join.
-			HP newHP = map.getUnitHP(stationary) + map.getUnitHP(moving);
+			HP newHP = GetInternalHP(GetDisplayedHP(map.getUnitHP(stationary)) +
+                GetDisplayedHP(map.getUnitHP(moving)));
 			Fuel newFuel = map.getUnitFuel(stationary) + map.getUnitFuel(moving);
 			const auto type = map.getUnitType(stationary);
 			dictionary newAmmos;
