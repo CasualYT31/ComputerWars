@@ -1066,6 +1066,12 @@ bool sfx::gui::_load(engine::json& j) {
 		// Leave with the current menu being MainMenu.
 		// _previousGUI will hold the name of the last menu in the JSON array.
 		setGUI("MainMenu", false, true);
+		// Load game control settings.
+		j.apply(_upControl, { "up" }, true);
+		j.apply(_downControl, { "down" }, true);
+		j.apply(_leftControl, { "left" }, true);
+		j.apply(_rightControl, { "right" }, true);
+		j.apply(_selectControl, { "select" }, true);
 		return true;
 	} else {
 		return false;

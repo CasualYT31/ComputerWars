@@ -407,14 +407,19 @@ namespace sfx {
 
 		/**
 		 * The JSON load method for this class.
-		 * There should be only one key-value pair in this script called "menus".
-		 * The value should be an array of string names, each one naming a menu.\n
+		 * The value of the key "menus" should be an array of string names, each
+		 * one naming a menu.\n
 		 * For each menu defined, the script function <tt><em>MenuName</em>
 		 * SetUp()</tt> is called, which accepts no parameters and does not return
 		 * any value. This is intended to be used to setup that menu, such as
 		 * adding all of its controls, and setting the background. If an
 		 * <tt>engine::script</tt> object was not given, then this function will
-		 * not be called, and the menu will remain empty.
+		 * not be called, and the menu will remain empty.\n
+		 * Additionally, five key-string pairs must be included, with the keys
+		 * "up", "down", "left", "right", and "select". The string values should
+		 * store the names of the game controls used to send those signals to the
+		 * GUI engine to move the setfocus around and to select the GUI currently
+		 * in setfocus.
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return \c TRUE if all existing menus before the call were deleted, \c
@@ -1158,6 +1163,36 @@ namespace sfx {
 		 * time.
 		 */
 		bool _handleInputErrorLogged = false;
+
+		/**
+		 * The game control name used to instruct the GUI engine to move the set
+		 * focus "up."
+		 */
+		std::string _upControl;
+
+		/**
+		 * The game control name used to instruct the GUI engine to move the set
+		 * focus "down."
+		 */
+		std::string _downControl;
+
+		/**
+		 * The game control name used to instruct the GUI engine to move the set
+		 * focus "left."
+		 */
+		std::string _leftControl;
+
+		/**
+		 * The game control name used to instruct the GUI engine to move the set
+		 * focus "right."
+		 */
+		std::string _rightControl;
+
+		/**
+		 * The game control name used to instruct the GUI engine to "select" the UI
+		 * element with the setfocus.
+		 */
+		std::string _selectControl;
 	};
 }
 
