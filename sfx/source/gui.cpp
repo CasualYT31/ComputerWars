@@ -720,6 +720,18 @@ bool sfx::gui::handleEvent(sf::Event e) {
 
 void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	if (ui) {
+		// Invoke the current menu's bespoke input handling function.
+		if (_scripts->functionExists(getGUI() + "HandleInput")) {
+			_handleInputErrorLogged = false;
+			// Construct the dictionary.
+			CScriptDictionary* controls = _scripts->createDictionary();
+			auto controlKeys = ui->getControls();
+			for (auto& key : controlKeys)
+				controls->Set(key, (asINT64)ui->operator[](key));
+			// Invoke the function.
+			_scripts->callFunction(getGUI() + "HandleInput", controls);
+			controls->Release();
+		}
 		// Handle directional input.
 		auto& cursel = _currentlySelectedWidget[_currentGUI];
 		if ((*ui)[_upControl]) {
@@ -758,17 +770,14 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 				cursel = _directionalFlow[cursel].right;
 			}
 		}
-		// Invoke the current menu's bespoke input handling function.
-		if (_scripts->functionExists(getGUI() + "HandleInput")) {
-			_handleInputErrorLogged = false;
-			// Construct the dictionary.
-			CScriptDictionary* controls = _scripts->createDictionary();
-			auto controlKeys = ui->getControls();
-			for (auto& key : controlKeys)
-				controls->Set(key, (asINT64)ui->operator[](key));
-			// Invoke the function.
-			_scripts->callFunction(getGUI() + "HandleInput", controls);
-			controls->Release();
+		// If select is issued, and there is currently a widget selected, then
+		// trigger an appropriate signal handler.
+		if ((*ui)[_selectControl] && !cursel.empty()) {
+			const auto widget = _findWidget<Widget>(cursel);
+			const auto widgetType = widget->getWidgetType();
+			if (widgetType == "Button" || widgetType == "BitmapButton") {
+				signalHandler(widget, "MouseReleased");
+			}
 		}
 	} else if (!_handleInputErrorLogged) {
 		_logger.error("Called handleInput() with nullptr user_input object for "

@@ -87,6 +87,6 @@ void MainMenu_NewGame_MouseReleased() {
 /**
  * Opens the map maker.
  */
-void MainMenu_MapMaker_Pressed() {
+void MainMenu_MapMaker_MouseReleased() {
 	setGUI("MapMakerMenu");
 }

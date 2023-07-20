@@ -139,7 +139,13 @@ namespace sfx {
 		 * control. @c user_input handles all the details of when a control is
 		 * triggered, so you don't have to worry about tracking the state of a
 		 * particular control, e.g. to ensure that it is only triggered "once."
-		 * You can just check for it directly and perform code whenever it happens.
+		 * You can just check for it directly and perform code whenever it
+		 * happens.\n
+		 * This method also handles directional controls selecting different
+		 * widgets based on the current menu's configuration. If "select" is
+		 * triggered, a \c MouseReleased signal will be issued to the currently
+		 * selected widget in the current menu, if there is any, and if that widget
+		 * is of type \c Button or \c BitmapButton.
 		 * @param  ui Pointer to the @c user_input instance to send information on.
 		 *            Note that the @c user_input::update() method should already
 		 *            have been called before a call to @c handleInput().
