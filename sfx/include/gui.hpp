@@ -1304,6 +1304,22 @@ namespace sfx {
 		 * Keyed on menu name.
 		 */
 		std::unordered_map<std::string, std::string> _currentlySelectedWidget;
+
+		/**
+		 * The current mouse position.
+		 */
+		sf::Vector2i _currentMousePosition;
+
+		/**
+		 * The mouse position the last time \c handleInput() was called.
+		 */
+		sf::Vector2i _previousMousePosition;
+
+		/**
+		 * If the mouse has moved, disable directional control influence until a
+		 * new directional control has been input.
+		 */
+		bool _enableDirectionalFlow = true;
 	};
 }
 

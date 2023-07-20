@@ -732,51 +732,62 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 			_scripts->callFunction(getGUI() + "HandleInput", controls);
 			controls->Release();
 		}
+		// Keep track of mouse movement. If the mouse has moved, then we disregard
+		// directional flow (and select inputs) until a new directional input has
+		// been made.
+		_previousMousePosition = _currentMousePosition;
+		_currentMousePosition = ui->mousePosition();
+		_enableDirectionalFlow = _previousMousePosition == _currentMousePosition;
 		// Handle directional input.
-		auto& cursel = _currentlySelectedWidget[_currentGUI];
-		if ((*ui)[_upControl]) {
-			if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-				_selectThisWidgetFirst.end()) {
-				cursel = _selectThisWidgetFirst[_currentGUI];
-			} else if (_directionalFlow.find(cursel) != _directionalFlow.end() &&
-				!_directionalFlow[cursel].up.empty()) {
-				cursel = _directionalFlow[cursel].up;
+		if (_enableDirectionalFlow) {
+			auto& cursel = _currentlySelectedWidget[_currentGUI];
+			if ((*ui)[_upControl]) {
+				if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+					_selectThisWidgetFirst.end()) {
+					cursel = _selectThisWidgetFirst[_currentGUI];
+				} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
+					&& !_directionalFlow[cursel].up.empty()) {
+					cursel = _directionalFlow[cursel].up;
+				}
 			}
-		}
-		if ((*ui)[_downControl]) {
-			if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-				_selectThisWidgetFirst.end()) {
-				cursel = _selectThisWidgetFirst[_currentGUI];
-			} else if (_directionalFlow.find(cursel) != _directionalFlow.end() &&
-				!_directionalFlow[cursel].down.empty()) {
-				cursel = _directionalFlow[cursel].down;
+			if ((*ui)[_downControl]) {
+				_enableDirectionalFlow = true;
+				if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+					_selectThisWidgetFirst.end()) {
+					cursel = _selectThisWidgetFirst[_currentGUI];
+				} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
+					&& !_directionalFlow[cursel].down.empty()) {
+					cursel = _directionalFlow[cursel].down;
+				}
 			}
-		}
-		if ((*ui)[_leftControl]) {
-			if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-				_selectThisWidgetFirst.end()) {
-				cursel = _selectThisWidgetFirst[_currentGUI];
-			} else if (_directionalFlow.find(cursel) != _directionalFlow.end() &&
-				!_directionalFlow[cursel].left.empty()) {
-				cursel = _directionalFlow[cursel].left;
+			if ((*ui)[_leftControl]) {
+				_enableDirectionalFlow = true;
+				if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+					_selectThisWidgetFirst.end()) {
+					cursel = _selectThisWidgetFirst[_currentGUI];
+				} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
+					&& !_directionalFlow[cursel].left.empty()) {
+					cursel = _directionalFlow[cursel].left;
+				}
 			}
-		}
-		if ((*ui)[_rightControl]) {
-			if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-				_selectThisWidgetFirst.end()) {
-				cursel = _selectThisWidgetFirst[_currentGUI];
-			} else if (_directionalFlow.find(cursel) != _directionalFlow.end() &&
-				!_directionalFlow[cursel].right.empty()) {
-				cursel = _directionalFlow[cursel].right;
+			if ((*ui)[_rightControl]) {
+				_enableDirectionalFlow = true;
+				if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+					_selectThisWidgetFirst.end()) {
+					cursel = _selectThisWidgetFirst[_currentGUI];
+				} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
+					&& !_directionalFlow[cursel].right.empty()) {
+					cursel = _directionalFlow[cursel].right;
+				}
 			}
-		}
-		// If select is issued, and there is currently a widget selected, then
-		// trigger an appropriate signal handler.
-		if ((*ui)[_selectControl] && !cursel.empty()) {
-			const auto widget = _findWidget<Widget>(cursel);
-			const auto widgetType = widget->getWidgetType();
-			if (widgetType == "Button" || widgetType == "BitmapButton") {
-				signalHandler(widget, "MouseReleased");
+			// If select is issued, and there is currently a widget selected, then
+			// trigger an appropriate signal handler.
+			if ((*ui)[_selectControl] && !cursel.empty()) {
+				const auto widget = _findWidget<Widget>(cursel);
+				const auto widgetType = widget->getWidgetType();
+				if (widgetType == "Button" || widgetType == "BitmapButton") {
+					signalHandler(widget, "MouseReleased");
+				}
 			}
 		}
 	} else if (!_handleInputErrorLogged) {
