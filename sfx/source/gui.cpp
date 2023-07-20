@@ -654,6 +654,8 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 		_widgetSprites.clear();
 		_previousGUI = old;
 		_currentGUI = newPanel;
+		// Deselect widget.
+		_currentlySelectedWidget.clear();
 		// Call NewPanelOpen() script function, if it has been defined.
 		auto openFuncName = newPanel + "Open",
 			openFuncEmptyDecl = "void " + _currentGUI + "Open()";
@@ -1047,6 +1049,15 @@ bool sfx::gui::_load(engine::json& j) {
 		_originalStrings.clear();
 		_originalStringsVariables.clear();
 		_customSignalHandlers.clear();
+		_upControl.clear();
+		_downControl.clear();
+		_leftControl.clear();
+		_rightControl.clear();
+		_selectControl.clear();
+		_directionalFlow.clear();
+		_selectThisWidgetFirst.clear();
+		_currentlySelectedWidget.clear();
+		_lastKnownSelectedWidget.clear();
 		// Create the main menu that always exists.
 		tgui::Group::Ptr menu = tgui::Group::create();
 		menu->setVisible(false);
@@ -1266,6 +1277,8 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 			_originalStringsVariables.end()) _originalStringsVariables.erase(name);
 		if (_customSignalHandlers.find(name) != _customSignalHandlers.end())
 			_customSignalHandlers.erase(name);
+		if (_directionalFlow.find(name) != _directionalFlow.end())
+			_directionalFlow.erase(name);
 		if (removeIt) container->remove(widget);
 	} else {
 		_logger.error("Attempted to remove a widget \"{}\", which did not have a "

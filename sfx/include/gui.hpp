@@ -1193,6 +1193,63 @@ namespace sfx {
 		 * element with the setfocus.
 		 */
 		std::string _selectControl;
+
+		/**
+		 * Dictates where setfocus should move to when the setfocus is on a given
+		 * widget.
+		 */
+		struct directional_flow {
+			/**
+			 * The full name of the widget to move the setfocus to when pressing
+			 * "up."
+			 */
+			std::string up;
+
+			/**
+			 * The full name of the widget to move the setfocus to when pressing
+			 * "down."
+			 */
+			std::string down;
+
+			/**
+			 * The full name of the widget to move the setfocus to when pressing
+			 * "left."
+			 */
+			std::string left;
+
+			/**
+			 * The full name of the widget to move the setfocus to when pressing
+			 * "right."
+			 */
+			std::string right;
+		};
+
+		/**
+		 * Stores the directional flow information for all widgets.
+		 * @sa \c sfx::gui::directional_flow.
+		 */
+		std::unordered_map<std::string, directional_flow> _directionalFlow;
+
+		/**
+		 * Stores the names of widgets to select first when a directional input is
+		 * made.
+		 * Keyed on menu name.
+		 */
+		std::unordered_map<std::string, std::string> _selectThisWidgetFirst;
+
+		/**
+		 * The currently selected widget based on directional input.
+		 * When a widget should be highlighted, its name should be stored here.
+		 */
+		std::string _currentlySelectedWidget;
+
+		/**
+		 * The last known selected widget based on directional input.
+		 * Keyed on menu name.\n
+		 * When a widget shouldn't be highlighted, but remembered for when another
+		 * directional input is made, its name should be stored here.
+		 */
+		std::unordered_map<std::string, std::string> _lastKnownSelectedWidget;
 	};
 }
 
