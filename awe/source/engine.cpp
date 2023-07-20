@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "army.hpp"
 #include <chrono>
 
-awe::game_engine::game_engine(const engine::logger::data& data) noexcept :
+awe::game_engine::game_engine(const engine::logger::data& data) :
 	engine::json_script({ data.sink, "json_script" }), _logger(data) {
 	// Credit: https://stackoverflow.com/a/13446015/6928376.
 	std::random_device randomDevice;
@@ -41,7 +41,7 @@ awe::game_engine::game_engine(const engine::logger::data& data) noexcept :
 	_prng = std::make_unique<std::mt19937>(seed);
 }
 
-int awe::game_engine::run() noexcept {
+int awe::game_engine::run() {
 	auto r = _initCheck();
 	if (r) return r;
 
@@ -91,7 +91,7 @@ int awe::game_engine::run() noexcept {
 				_script_quitMap();
 			}
 		}
-	} catch (std::exception& e) {
+	} catch (const std::exception& e) {
 		_logger.error("Exception: {}", e.what());
 	}
 
@@ -101,7 +101,7 @@ int awe::game_engine::run() noexcept {
 // Script interface.
 
 void awe::game_engine::registerInterface(asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	sfx::joystick::Register(engine, document);
 	engine::RegisterVectorTypes(engine, document);
 	engine::RegisterTimeTypes(engine, document);
@@ -316,7 +316,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"the given value (inclusive).");
 }
 
-bool awe::game_engine::_load(engine::json& j) noexcept {
+bool awe::game_engine::_load(engine::json& j) {
 	// Find the base path of the assets folder and make it the CWD.
 	std::filesystem::path basePath = getScriptPath();
 	basePath = basePath.parent_path();
@@ -432,7 +432,7 @@ bool awe::game_engine::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }
 
-int awe::game_engine::_initCheck() const noexcept {
+int awe::game_engine::_initCheck() const {
 	std::string errstring = "";
 	if (!_countries) errstring += "countries\n";
 	if (!_weathers) errstring += "weathers\n";
@@ -456,7 +456,7 @@ int awe::game_engine::_initCheck() const noexcept {
 	if (!_scripts) errstring += "scripts\n";
 	if (!_gui) errstring += "gui\n";
 	if (errstring.length()) {
-		_logger.error("Fatal error: could not run the game engine due to the "
+		_logger.critical("Fatal error: could not run the game engine due to the "
 			"following objects not being allocated correctly:\n{}Game will now "
 			"shut down.", errstring);
 		return 1;
@@ -553,8 +553,8 @@ void awe::game_engine::_script_quitMap() {
 	_gui->setGUI(_menuBeforeMapLoad);
 }
 
-std::string awe::game_engine::_script_translate(const std::string& nativeString)
-	const {
+std::string awe::game_engine::_script_translate(
+	const std::string& nativeString) const {
 	return _dictionary->operator()(nativeString);
 }
 
@@ -567,7 +567,7 @@ sf::Vector2i awe::game_engine::_script_scaledMousePosition() const {
 	}
 }
 
-unsigned int awe::game_engine::_script_rand(const unsigned int max) noexcept {
+unsigned int awe::game_engine::_script_rand(const unsigned int max) {
 	// Credit: https://stackoverflow.com/a/13446015/6928376.
 	std::uniform_int_distribution<unsigned> distribution(0, max);
 	return distribution(*_prng);

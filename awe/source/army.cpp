@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "army.hpp"
 #include <algorithm>
 
-awe::army::army(const std::shared_ptr<const awe::country>& country) noexcept :
+awe::army::army(const std::shared_ptr<const awe::country>& country) :
 	_country(country) {}
 
 void awe::army::setCOs(const std::shared_ptr<const awe::commander>& current,
@@ -41,26 +41,26 @@ void awe::army::tagCOs() noexcept {
 	if (_co_2) std::swap(_co_1, _co_2);
 }
 
-void awe::army::addUnit(const awe::UnitID unit) noexcept {
+void awe::army::addUnit(const awe::UnitID unit) {
 	_units.insert(unit);
 }
 
-void awe::army::removeUnit(const awe::UnitID unit) noexcept {
+void awe::army::removeUnit(const awe::UnitID unit) {
 	_units.erase(unit);
 }
 
-std::unordered_set<awe::UnitID> awe::army::getUnits() const noexcept {
+std::unordered_set<awe::UnitID> awe::army::getUnits() const {
 	return _units;
 }
 
-void awe::army::addTile(const sf::Vector2u tile) noexcept {
+void awe::army::addTile(const sf::Vector2u tile) {
 	_tiles.insert(tile);
 }
 
-void awe::army::removeTile(const sf::Vector2u tile) noexcept {
+void awe::army::removeTile(const sf::Vector2u tile) {
 	_tiles.erase(tile);
 }
 
-std::unordered_set<sf::Vector2u> awe::army::getTiles() const noexcept {
+std::unordered_set<sf::Vector2u> awe::army::getTiles() const {
 	return _tiles;
 }

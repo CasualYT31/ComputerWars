@@ -69,7 +69,7 @@ namespace awe {
 		 * Constructs a new army.
 		 * @param country The country the army belongs to, which can't be changed.
 		 */
-		army(const std::shared_ptr<const awe::country>& country) noexcept;
+		army(const std::shared_ptr<const awe::country>& country);
 
 		/**
 		 * Sets the team that this army belongs to.
@@ -91,7 +91,7 @@ namespace awe {
 		 * Gets the army's country information.
 		 * @return The army's country information.
 		 */
-		inline std::shared_ptr<const awe::country> getCountry() const noexcept {
+		inline std::shared_ptr<const awe::country> getCountry() const {
 			return _country;
 		}
 
@@ -136,8 +136,8 @@ namespace awe {
 		 * this army.
 		 * @return Information on the current CO, or \c nullptr if there is none.
 		 */
-		inline std::shared_ptr<const awe::commander> getCurrentCO() const noexcept
-			{
+		inline std::shared_ptr<const awe::commander>
+			getCurrentCO() const noexcept {
 			return _co_1;
 		}
 
@@ -151,44 +151,48 @@ namespace awe {
 
 		/**
 		 * Adds a unit to this army's unit list.
-		 * @param unit The ID of the unit to add.
+		 * @param  unit The ID of the unit to add.
+		 * @safety Strong guarantee.
 		 */
-		void addUnit(const awe::UnitID unit) noexcept;
+		void addUnit(const awe::UnitID unit);
 
 		/**
 		 * Removes a unit from this army's unit list.
-		 * @param unit The ID of the unit to remove.
+		 * @param  unit The ID of the unit to remove.
+		 * @safety Strong guarantee.
 		 */
-		void removeUnit(const awe::UnitID unit) noexcept;
+		void removeUnit(const awe::UnitID unit);
 
 		/**
 		 * Copies the internal list of all the units that belong to this army.
 		 * @return The IDs of all the units that belong to this army.
 		 */
-		std::unordered_set<awe::UnitID> getUnits() const noexcept;
+		std::unordered_set<awe::UnitID> getUnits() const;
 
 		/**
 		 * Adds a tile to this army's owned tiles list.
-		 * @param tile The X and Y location of the tile.
+		 * @param  tile The X and Y location of the tile.
+		 * @safety Strong guarantee.
 		 */
-		void addTile(const sf::Vector2u tile) noexcept;
+		void addTile(const sf::Vector2u tile);
 
 		/**
 		 * Removes a tile from this army's owned tiles list.
-		 * @param tile The X and Y location of the tile.
+		 * @param  tile The X and Y location of the tile.
+		 * @safety Strong guarantee.
 		 */
-		void removeTile(const sf::Vector2u tile) noexcept;
+		void removeTile(const sf::Vector2u tile);
 
 		/**
 		 * Retrieves a list of all the tiles this army owns.
 		 * @return The internal list of tile locations, copied.
 		 */
-		std::unordered_set<sf::Vector2u> getTiles() const noexcept;
+		std::unordered_set<sf::Vector2u> getTiles() const;
 	private:
 		/**
 		 * The team that this army belongs to.
 		 */
-		awe::TeamID _team;
+		awe::TeamID _team = 0;
 
 		/**
 		 * The country of the army.

@@ -65,14 +65,13 @@ namespace awe {
 			const std::shared_ptr<const awe::unit_type>& type,
 			const awe::ArmyID army = 0,
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr,
-			const std::shared_ptr<sfx::animated_spritesheet>& icons = nullptr)
-			noexcept;
+			const std::shared_ptr<sfx::animated_spritesheet>& icons = nullptr);
 
 		/**
 		 * Gets the unit's type.
 		 * @return The information on the unit's type.
 		 */
-		inline std::shared_ptr<const awe::unit_type> getType() const noexcept {
+		inline std::shared_ptr<const awe::unit_type> getType() const {
 			return _type;
 		}
 
@@ -86,9 +85,10 @@ namespace awe {
 
 		/**
 		 * Sets this unit's X and Y location.
-		 * @param pos The X and Y location of the tile this unit occupies.
+		 * @param  pos The X and Y location of the tile this unit occupies.
+		 * @safety No guarantee.
 		 */
-		inline void setPosition(const sf::Vector2u pos) noexcept {
+		inline void setPosition(const sf::Vector2u pos) {
 			_location = pos;
 		}
 
@@ -96,7 +96,7 @@ namespace awe {
 		 * Gets this unit's location.
 		 * @return The X and Y location of the tile this unit occupies.
 		 */
-		inline sf::Vector2u getPosition() const noexcept {
+		inline sf::Vector2u getPosition() const {
 			return _location;
 		}
 
@@ -104,8 +104,9 @@ namespace awe {
 		 * Used to determine if this unit is on a tile in the map.
 		 * Useful for loaded units, which are in the game but not on the map.
 		 * @return \c TRUE if the unit occupies a tile on the map, \c FALSE if not.
+		 * @safety No guarantee.
 		 */
-		inline bool isOnMap() const noexcept {
+		inline bool isOnMap() const {
 			return _location != awe::unit::NO_POSITION;
 		}
 
@@ -163,8 +164,7 @@ namespace awe {
 		 * @param weapon The script name of the weapon to amend.
 		 * @param ammo   The new ammo of this unit.
 		 */
-		inline void setAmmo(const std::string& weapon, const awe::Ammo ammo)
-			noexcept {
+		inline void setAmmo(const std::string& weapon, const awe::Ammo ammo) {
 			_ammos[weapon] = ((ammo < 0) ? (0) : (ammo));
 		}
 
@@ -173,7 +173,7 @@ namespace awe {
 		 * @param  weapon The script name of the weapon to query.
 		 * @return The current ammo of this unit.
 		 */
-		inline awe::Ammo getAmmo(const std::string& weapon) const noexcept {
+		inline awe::Ammo getAmmo(const std::string& weapon) const {
 			return ((_ammos.find(weapon) == _ammos.end()) ? (0) :
 				(_ammos.at(weapon)));
 		}
@@ -233,9 +233,10 @@ namespace awe {
 
 		/**
 		 * Loads another unit onto this one.
-		 * @param id The ID of the unit to load onto this one.
+		 * @param  id The ID of the unit to load onto this one.
+		 * @safety Strong guarantee.
 		 */
-		inline void loadUnit(const awe::UnitID id) noexcept {
+		inline void loadUnit(const awe::UnitID id) {
 			_loaded.insert(id);
 		}
 
@@ -244,8 +245,9 @@ namespace awe {
 		 * @param  id The ID of the unit to unload.
 		 * @return \c TRUE if the unit was unloaded successfully, \c FALSE if the
 		 *         unit wasn't loaded.
+		 * @safety Strong guarantee.
 		 */
-		inline bool unloadUnit(const awe::UnitID id) noexcept {
+		inline bool unloadUnit(const awe::UnitID id) {
 			return _loaded.erase(id);
 		}
 
@@ -253,7 +255,7 @@ namespace awe {
 		 * Copies the internal list of loaded units and returns it.
 		 * @return The IDs of the all the units that are loaded onto this one.
 		 */
-		inline std::unordered_set<awe::UnitID> loadedUnits() const noexcept {
+		inline std::unordered_set<awe::UnitID> loadedUnits() const {
 			return _loaded;
 		}
 
@@ -277,26 +279,28 @@ namespace awe {
 
 		/**
 		 * Sets the spritesheet to use with this unit.
-		 * @param sheet Pointer to the spritesheet to use with this unit.
+		 * @param  sheet Pointer to the spritesheet to use with this unit.
+		 * @safety No guarantee.
 		 */
 		inline void setSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 			_sprite.setSpritesheet(sheet);
 		}
 
 		/**
 		 * Sets the icon spritesheet to use with this unit.
-		 * @param sheet Pointer to the icon spritesheet to use with this unit.
+		 * @param  sheet Pointer to the icon spritesheet to use with this unit.
+		 * @safety No guarantee.
 		 */
 		void setIconSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
 
 		/**
 		 * Gets the spritesheet used with this unit.
 		 * @return Pointer to the spritesheet used with this unit.
 		 */
-		inline std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet()
-			const noexcept {
+		inline std::shared_ptr<const sfx::animated_spritesheet>
+			getSpritesheet() const {
 			return _sprite.getSpritesheet();
 		}
 
@@ -304,7 +308,7 @@ namespace awe {
 		 * Finds out the sprite name used with this unit's internal sprite.
 		 * @return The name of the sprite from the spritesheet used with this unit.
 		 */
-		inline std::string getSprite() const noexcept {
+		inline std::string getSprite() const {
 			return _sprite.getSprite();
 		}
 
@@ -313,7 +317,7 @@ namespace awe {
 		 * @param x The X position of the tile.
 		 * @param y The Y position of the tile.
 		 */
-		inline void setPixelPosition(float x, float y) noexcept {
+		inline void setPixelPosition(float x, float y) {
 			_sprite.setPosition(sf::Vector2f(x, y));
 		}
 
@@ -327,7 +331,7 @@ namespace awe {
 		 *         call.
 		 */
 		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0) noexcept;
+			const double scaling = 1.0);
 	private:
 		/**
 		 * This drawable's \c draw() method.
@@ -344,7 +348,7 @@ namespace awe {
 		 * @return \c TRUE if this unit has at least one weapon with finite ammo
 		 *         that has at most half of its ammo left. \c FALSE otherwise.
 		 */
-		bool _isLowOnAmmo() const noexcept;
+		bool _isLowOnAmmo() const;
 
 		/**
 		 * The type of the unit.

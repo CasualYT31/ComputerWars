@@ -24,22 +24,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 awe::tile::tile(const engine::logger::data& data,
 	const std::shared_ptr<const awe::tile_type>& type,
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept :
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) :
 	_sprite(sheet, "", {data.sink, data.name + "_sprite"}) {
 	setTileType(type);
 }
 
-void awe::tile::setTileType(const std::shared_ptr<const awe::tile_type>& type)
-	noexcept {
+void awe::tile::setTileType(const std::shared_ptr<const awe::tile_type>& type) {
 	_type = type;
 	_updateSpriteID();
 }
 
-std::shared_ptr<const awe::tile_type> awe::tile::getTileType() const noexcept {
+std::shared_ptr<const awe::tile_type> awe::tile::getTileType() const {
 	return _type;
 }
 
-void awe::tile::setTileOwner(const awe::ArmyID owner) noexcept {
+void awe::tile::setTileOwner(const awe::ArmyID owner) {
 	_owner = owner;
 	_updateSpriteID();
 }
@@ -69,33 +68,32 @@ awe::UnitID awe::tile::getUnit() const noexcept {
 }
 
 void awe::tile::setSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sprite.setSpritesheet(sheet);
 }
 
-std::shared_ptr<const sfx::animated_spritesheet> awe::tile::getSpritesheet() const
-	noexcept {
+std::shared_ptr<const sfx::animated_spritesheet>
+	awe::tile::getSpritesheet() const {
 	return _sprite.getSpritesheet();
 }
 
-std::string awe::tile::getSprite() const noexcept {
+std::string awe::tile::getSprite() const {
 	return _sprite.getSprite();
 }
 
-void awe::tile::setPixelPosition(float x, float y) noexcept {
+void awe::tile::setPixelPosition(float x, float y) {
 	_sprite.setPosition(sf::Vector2f(x, y));
 }
 
-sf::Vector2f awe::tile::getPixelPosition() const noexcept {
+sf::Vector2f awe::tile::getPixelPosition() const {
 	return _sprite.getPosition();
 }
 
-sf::Vector2f awe::tile::getPixelSize() const noexcept {
+sf::Vector2f awe::tile::getPixelSize() const {
 	return _sprite.getSize();
 }
 
-bool awe::tile::animate(const sf::RenderTarget& target, const double scaling)
-	noexcept {
+bool awe::tile::animate(const sf::RenderTarget& target, const double scaling) {
 	return _sprite.animate(target, scaling);
 }
 
@@ -103,7 +101,7 @@ void awe::tile::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_sprite, states);
 }
 
-void awe::tile::_updateSpriteID() noexcept {
+void awe::tile::_updateSpriteID() {
 	// If this tile has no type, leave the sprite ID alone.
 	if (_type) {
 		if (_owner == awe::NO_ARMY) {

@@ -48,6 +48,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "engine.hpp"
 #include <filesystem>
+#include <iostream>
 
 /**
  * Loads the game engine, then runs it.
@@ -58,50 +59,57 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @param argv The command-line arguments.
  */
 int main(int argc, char* argv[]) {
-    // Debugging measure. Since the application runs from within "out", I have to
-    // make the current directory match with where "main.cpp" is so that my default
-    // assets folder can be accessed by the application. It's also handy to keep
-    // the log file in the same folder as the root of my repository.
-    std::filesystem::current_path(
-        std::filesystem::current_path().parent_path().parent_path().parent_path().
-        parent_path()
-    );
-    // Initialise the sink all loggers output to.
+    try {
+        // Debugging measure. Since the application runs from within "out", I have
+        // to make the current directory match with where "main.cpp" is so that my
+        // default assets folder can be accessed by the application. It's also
+        // handy to keep the log file in the same folder as the root of my
+        // repository.
+        std::filesystem::current_path(
+            std::filesystem::current_path().parent_path().parent_path().
+            parent_path().parent_path()
+        );
+        // Initialise the sink all loggers output to.
 #ifdef COMPUTER_WARS_DEBUG
-    std::shared_ptr<engine::sink> sink = std::make_shared<engine::sink>(
-        "Computer Wars", "CasualYouTuber31", "", false, nullptr);
+        std::shared_ptr<engine::sink> sink = std::make_shared<engine::sink>(
+            "Computer Wars", "CasualYouTuber31", "", false, nullptr);
 #else
-    std::shared_ptr<engine::sink> sink = std::make_shared<engine::sink>(
-        "Computer Wars", "CasualYouTuber31", "", true,
-        std::make_shared<System::Properties>());
+        std::shared_ptr<engine::sink> sink = std::make_shared<engine::sink>(
+            "Computer Wars", "CasualYouTuber31", "", true,
+            std::make_shared<System::Properties>());
 #endif
-    engine::logger rootLogger({ sink, "main" });
-    awe::game_engine engine({ sink, "engine" });
-    {
-        // Find assets folder path from command-line arguments.
-        std::string assetsFolder = "./assets";
-        if (argc >= 2) {
-            assetsFolder = std::string(argv[1]);
-            rootLogger.write("Assets folder provided: \"{}\".", assetsFolder);
-        } else {
-            rootLogger.write("Assets folder not provided in command-line "
-                "arguments, assuming \"{}\".", assetsFolder);
+        engine::logger rootLogger({ sink, "main" });
+        awe::game_engine engine({ sink, "engine" });
+        {
+            // Find assets folder path from command-line arguments.
+            std::string assetsFolder = "./assets";
+            if (argc >= 2) {
+                assetsFolder = std::string(argv[1]);
+                rootLogger.write("Assets folder provided: \"{}\".", assetsFolder);
+            } else {
+                rootLogger.write("Assets folder not provided in command-line "
+                    "arguments, assuming \"{}\".", assetsFolder);
+            }
+            // Find config.json within the assets folder, then load the game engine
+            // with it.
+            std::string configPath = assetsFolder + "/config.json";
+            if (!std::filesystem::exists(configPath)) {
+                rootLogger.critical("config.json script not found in assets "
+                    "folder \"{}\", aborting.", assetsFolder);
+                return 2;
+            } else {
+                engine.load(configPath);
+            }
         }
-        // Find config.json within the assets folder, then load the game engine
-        // with it.
-        std::string configPath = assetsFolder + "/config.json";
-        if (!std::filesystem::exists(configPath)) {
-            rootLogger.critical("config.json script not found in assets folder "
-                "\"{}\", aborting.", assetsFolder);
-            return 2;
+        if (engine.inGoodState()) {
+            return engine.run();
         } else {
-            engine.load(configPath);
+            rootLogger.error("Game engine in bad state after loading, "
+                "aborting...");
+            return 3;
         }
-    }
-    if (engine.inGoodState()) {
-        return engine.run();
-    } else {
-        rootLogger.error("Game engine in bad state after loading, aborting...");
-        return 3;
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return 4;
     }
 }

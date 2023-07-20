@@ -32,11 +32,11 @@ awe::ArmyID NO_ARMY_SCRIPT = awe::NO_ARMY;
 static const std::runtime_error NO_SCRIPTS("No scripts object was given to this "
 	"map object!");
 
-awe::closed_list_node::closed_list_node(const sf::Vector2u& tileIn, const int gIn)
-	noexcept : tile(tileIn), g(gIn) {}
+awe::closed_list_node::closed_list_node(const sf::Vector2u& tileIn,
+	const int gIn) : tile(tileIn), g(gIn) {}
 
 void awe::closed_list_node::Register(asIScriptEngine * engine,
-		const std::shared_ptr<DocumentationGenerator>&document) noexcept {
+		const std::shared_ptr<DocumentationGenerator>&document) {
 	auto r = RegisterType(engine, "ClosedListNode");
 	document->DocumentObjectType(r, "Holds information on a node in a closed "
 		"list.");
@@ -49,7 +49,7 @@ void awe::closed_list_node::Register(asIScriptEngine * engine,
 }
 
 void awe::map::Register(asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	if (!engine->GetTypeInfoByName("Map")) {
 		//////////////////
 		// DEPENDENCIES //
@@ -599,7 +599,7 @@ void awe::map::Register(asIScriptEngine* engine,
 	}
 }
 
-awe::map::map(const engine::logger::data& data) noexcept : _logger(data),
+awe::map::map(const engine::logger::data& data) : _logger(data),
 	_file({ data.sink, data.name + "_binary_file" }),
 	_cursor({ data.sink, data.name + "_cursor_sprite" }) {
 	_initShaders();
@@ -609,7 +609,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-	const engine::logger::data& data) noexcept : _logger(data),
+	const engine::logger::data& data) : _logger(data),
 	_file({ data.sink, data.name + "_binary_file" }),
 	_cursor({data.sink, data.name + "_cursor_sprite"}) {
 	_countries = countries;
@@ -619,7 +619,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	_initShaders();
 }
 
-bool awe::map::load(std::string file, const unsigned char version) noexcept {
+bool awe::map::load(std::string file, const unsigned char version) {
 	if (file == "") file = _filename;
 	// Clear state.
 	_sel = sf::Vector2u(0, 0);
@@ -654,7 +654,7 @@ bool awe::map::load(std::string file, const unsigned char version) noexcept {
 	return true;
 }
 
-bool awe::map::save(std::string file, const unsigned char version) noexcept {
+bool awe::map::save(std::string file, const unsigned char version) {
 	if (file == "") file = _filename;
 	try {
 		_file.open(file, false);
@@ -677,34 +677,33 @@ bool awe::map::save(std::string file, const unsigned char version) noexcept {
 	return true;
 }
 
-bool awe::map::save() noexcept {
+bool awe::map::save() {
 	return save("");
 }
 
-void awe::map::setScripts(const std::shared_ptr<engine::scripts>& scripts)
-	noexcept {
-	_scripts = scripts;
-	if (_scripts) {
+void awe::map::setScripts(const std::shared_ptr<engine::scripts>& scripts) {
+	if (scripts) {
 		if (_selectedUnitRenderData.empty()) {
-			_selectedUnitRenderData.emplace(*_scripts);
+			_selectedUnitRenderData.emplace(*scripts);
 		}
 	}
+	_scripts = scripts;
 }
 
-bool awe::map::periodic() noexcept {
+bool awe::map::periodic() {
 	return defaultWinCondition();
 }
 
-void awe::map::setMapName(const std::string& name) noexcept {
+void awe::map::setMapName(const std::string& name) {
 	_mapName = name;
 }
 
-std::string awe::map::getMapName() const noexcept {
+std::string awe::map::getMapName() const {
 	return _mapName;
 }
 
 void awe::map::setMapSize(const sf::Vector2u& dim,
-	const std::shared_ptr<const awe::tile_type>& tile) noexcept {
+	const std::shared_ptr<const awe::tile_type>& tile) {
 	// First, resize the tiles vectors accordingly.
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
 	_tiles.resize(dim.x);
@@ -751,8 +750,7 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 	_mapSizeCache = dim;
 }
 
-void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile)
-	noexcept {
+void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile) {
 	setMapSize(dim, _tileTypes->operator[](tile));
 }
 
@@ -764,7 +762,7 @@ awe::Day awe::map::getDay() const noexcept {
 	return _day;
 }
 
-bool awe::map::defaultWinCondition() const noexcept {
+bool awe::map::defaultWinCondition() const {
 	if (_armies.size() == 0) return true;
 	const auto firstArmysTeam = _armies.begin()->second.getTeam();
 	for (const auto& army : _armies) {
@@ -773,8 +771,7 @@ bool awe::map::defaultWinCondition() const noexcept {
 	return true;
 }
 
-bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)
-	noexcept {
+bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
 	if (!country) {
 		_logger.error("createArmy operation cancelled: attempted to create an "
 			"army with no country!");
@@ -797,12 +794,12 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country)
 	return true;
 }
 
-bool awe::map::createArmy(const std::string& country) noexcept {
+bool awe::map::createArmy(const std::string& country) {
 	return createArmy(_countries->operator[](country));
 }
 
 void awe::map::deleteArmy(const awe::ArmyID army,
-	const awe::ArmyID transferOwnership) noexcept {
+	const awe::ArmyID transferOwnership) {
 	if (!_isArmyPresent(army)) {
 		_logger.error("deleteArmy operation cancelled: attempted to delete an "
 			"army, {}, that didn't exist on the map!", army);
@@ -833,7 +830,7 @@ std::size_t awe::map::getArmyCount() const noexcept {
 	return _armies.size();
 }
 
-std::set<awe::ArmyID> awe::map::getArmyIDs() const noexcept {
+std::set<awe::ArmyID> awe::map::getArmyIDs() const {
 	std::set<awe::ArmyID> ret;
 	for (auto& a : _armies) ret.insert(a.first);
 	return ret;
@@ -852,8 +849,7 @@ CScriptArray* awe::map::getArmyIDsAsArray() const {
 	}
 }
 
-void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team)
-	noexcept {
+void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team) {
 	if (_isArmyPresent(army)) {
 		_armies.at(army).setTeam(team);
 		// First, stop all of the army's units from capturing.
@@ -868,15 +864,14 @@ void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team)
 	}
 }
 
-awe::TeamID awe::map::getArmyTeam(const awe::ArmyID army) const noexcept {
+awe::TeamID awe::map::getArmyTeam(const awe::ArmyID army) const {
 	if (_isArmyPresent(army)) return _armies.at(army).getTeam();
 	_logger.error("getArmyTeam operation failed: army with ID {} didn't exist at "
 		"the time of calling!", army);
 	return 0;
 }
 
-void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds)
-	noexcept {
+void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 	if (_isArmyPresent(army)) {
 		_armies.at(army).setFunds(funds);
 	} else {
@@ -885,8 +880,7 @@ void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds)
 	}
 }
 
-void awe::map::offsetArmyFunds(const awe::ArmyID army, const awe::Funds funds)
-	noexcept {
+void awe::map::offsetArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 	if (_isArmyPresent(army)) {
 		setArmyFunds(army, getArmyFunds(army) + funds);
 	} else {
@@ -895,7 +889,7 @@ void awe::map::offsetArmyFunds(const awe::ArmyID army, const awe::Funds funds)
 	}
 }
 
-awe::Funds awe::map::getArmyFunds(const awe::ArmyID army) const noexcept {
+awe::Funds awe::map::getArmyFunds(const awe::ArmyID army) const {
 	if (_isArmyPresent(army)) return _armies.at(army).getFunds();
 	_logger.error("getArmyFunds operation failed: army with ID {} didn't exist at "
 		"the time of calling!", army);
@@ -903,7 +897,7 @@ awe::Funds awe::map::getArmyFunds(const awe::ArmyID army) const noexcept {
 }
 
 std::shared_ptr<const awe::country>
-	awe::map::getArmyCountry(const awe::ArmyID army) const noexcept {
+	awe::map::getArmyCountry(const awe::ArmyID army) const {
 	if (_isArmyPresent(army)) return _armies.at(army).getCountry();
 	_logger.error("getArmyCountry operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
@@ -921,7 +915,7 @@ const awe::country* awe::map::getArmyCountryObject(const awe::ArmyID army) const
 
 void awe::map::setArmyCOs(const awe::ArmyID army,
 	const std::shared_ptr<const awe::commander>& current,
-	const std::shared_ptr<const awe::commander>& tag) noexcept {
+	const std::shared_ptr<const awe::commander>& tag) {
 	if (_isArmyPresent(army)) {
 		if (!current && !tag) {
 			_logger.error("setCOs operation failed: army with ID {} was given no "
@@ -941,7 +935,7 @@ void awe::map::setArmyCOs(const awe::ArmyID army,
 }
 
 void awe::map::setArmyCOs(const awe::ArmyID army, const std::string& current,
-	const std::string& tag) noexcept {
+	const std::string& tag) {
 	if (tag.empty()) {
 		setArmyCOs(army, _commanders->operator[](current), nullptr);
 	} else {
@@ -951,22 +945,21 @@ void awe::map::setArmyCOs(const awe::ArmyID army, const std::string& current,
 }
 
 void awe::map::setArmyCurrentCO(const awe::ArmyID army,
-	const std::shared_ptr<const awe::commander>& current) noexcept {
+	const std::shared_ptr<const awe::commander>& current) {
 	setArmyCOs(army, current, getArmyTagCO(army));
 }
 
-void awe::map::setArmyCurrentCO(const awe::ArmyID army, const std::string& current)
-	noexcept {
+void awe::map::setArmyCurrentCO(const awe::ArmyID army,
+	const std::string& current) {
 	setArmyCOs(army, _commanders->operator[](current), getArmyTagCO(army));
 }
 
 void awe::map::setArmyTagCO(const awe::ArmyID army,
-	const std::shared_ptr<const awe::commander>& tag) noexcept {
+	const std::shared_ptr<const awe::commander>& tag) {
 	setArmyCOs(army, getArmyCurrentCO(army), tag);
 }
 
-void awe::map::setArmyTagCO(const awe::ArmyID army, const std::string& tag)
-	noexcept {
+void awe::map::setArmyTagCO(const awe::ArmyID army, const std::string& tag) {
 	if (tag.empty()) {
 		setArmyCOs(army, getArmyCurrentCO(army), nullptr);
 	} else {
@@ -974,7 +967,7 @@ void awe::map::setArmyTagCO(const awe::ArmyID army, const std::string& tag)
 	}
 }
 
-void awe::map::tagArmyCOs(const awe::ArmyID army) noexcept {
+void awe::map::tagArmyCOs(const awe::ArmyID army) {
 	if (!_isArmyPresent(army)) {
 		_logger.error("tagCOs operation failed: army with ID {} didn't exist at "
 			"the time of calling!", army);
@@ -989,15 +982,14 @@ void awe::map::tagArmyCOs(const awe::ArmyID army) noexcept {
 }
 
 std::shared_ptr<const awe::commander> awe::map::getArmyCurrentCO(
-	const awe::ArmyID army) const noexcept {
+	const awe::ArmyID army) const {
 	if (_isArmyPresent(army)) return _armies.at(army).getCurrentCO();
 	_logger.error("getCurrentCO operation failed: army with ID {} didn't exist at "
 		"the time of calling!", army);
 	return nullptr;
 }
 
-std::string awe::map::getArmyCurrentCOScriptName(const awe::ArmyID army) const
-	noexcept {
+std::string awe::map::getArmyCurrentCOScriptName(const awe::ArmyID army) const {
 	auto co = getArmyCurrentCO(army);
 	if (co) {
 		return co->getScriptName();
@@ -1007,15 +999,14 @@ std::string awe::map::getArmyCurrentCOScriptName(const awe::ArmyID army) const
 }
 
 std::shared_ptr<const awe::commander> awe::map::getArmyTagCO(
-	const awe::ArmyID army) const noexcept {
+	const awe::ArmyID army) const {
 	if (_isArmyPresent(army)) return _armies.at(army).getTagCO();
 	_logger.error("getTagCO operation failed: army with ID {} didn't exist at the "
 		"time of calling!", army);
 	return nullptr;
 }
 
-std::string awe::map::getArmyTagCOScriptName(const awe::ArmyID army) const noexcept
-	{
+std::string awe::map::getArmyTagCOScriptName(const awe::ArmyID army) const {
 	auto co = getArmyTagCO(army);
 	if (co) {
 		return co->getScriptName();
@@ -1024,15 +1015,15 @@ std::string awe::map::getArmyTagCOScriptName(const awe::ArmyID army) const noexc
 	}
 }
 
-bool awe::map::tagCOIsPresent(const awe::ArmyID army) const noexcept {
+bool awe::map::tagCOIsPresent(const awe::ArmyID army) const {
 	if (_isArmyPresent(army)) return _armies.at(army).getTagCO().operator bool();
 	_logger.error("tagCOIsPresent operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
 	return false;
 }
 
-std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army)
-	const noexcept {
+std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(
+	const awe::ArmyID army) const {
 	if (_isArmyPresent(army)) return _armies.at(army).getTiles();
 	_logger.error("getTilesOfArmy operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
@@ -1052,8 +1043,8 @@ CScriptArray* awe::map::getTilesOfArmyAsArray(const awe::ArmyID army) const {
 	}
 }
 
-std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(const awe::ArmyID army)
-	const noexcept {
+std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(
+	const awe::ArmyID army) const {
 	if (_isArmyPresent(army)) return _armies.at(army).getUnits();
 	_logger.error("getUnitsOfArmy operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
@@ -1074,7 +1065,7 @@ CScriptArray* awe::map::getUnitsOfArmyAsArray(const awe::ArmyID army) const {
 }
 
 std::map<unsigned int, std::unordered_set<awe::UnitID>>
-	awe::map::getUnitsOfArmyByPriority(const awe::ArmyID army) const noexcept {
+	awe::map::getUnitsOfArmyByPriority(const awe::ArmyID army) const {
 	if (!_isArmyPresent(army)) {
 		_logger.error("getUnitsOfArmyByPriority operation failed: army with ID {} "
 			"didn't exist at the time of calling!", army);
@@ -1087,8 +1078,8 @@ std::map<unsigned int, std::unordered_set<awe::UnitID>>
 	return ret;
 }
 
-CScriptArray* awe::map::getUnitsOfArmyByPriorityAsArray(const awe::ArmyID army)
-	const {
+CScriptArray* awe::map::getUnitsOfArmyByPriorityAsArray(
+	const awe::ArmyID army) const {
 	if (_scripts) {
 		auto set = getUnitsOfArmyByPriority(army);
 		CScriptArray* ret = _scripts->createArray("array<UnitID>@");
@@ -1108,7 +1099,7 @@ CScriptArray* awe::map::getUnitsOfArmyByPriorityAsArray(const awe::ArmyID army)
 }
 
 std::size_t awe::map::countTilesBelongingToArmy(const awe::ArmyID army,
-	const std::string& terrainType) const noexcept {
+	const std::string& terrainType) const {
 	if (!_isArmyPresent(army)) {
 		_logger.error("countTilesBelongingToArmy operation failed: army with ID "
 			"{} didn't exist at the time of calling!", army);
@@ -1127,7 +1118,7 @@ std::size_t awe::map::countTilesBelongingToArmy(const awe::ArmyID army,
 }
 
 awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& type,
-	const awe::ArmyID army) noexcept {
+	const awe::ArmyID army) {
 	if (!type) _logger.warning("createUnit warning: creating a unit for army {} "
 		"without a type!", army);
 	if (!_isArmyPresent(army)) {
@@ -1150,12 +1141,11 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 	return id;
 }
 
-awe::UnitID awe::map::createUnit(const std::string& type, const awe::ArmyID army)
-	noexcept {
+awe::UnitID awe::map::createUnit(const std::string& type, const awe::ArmyID army) {
 	return createUnit(_unitTypes->operator[](type), army);
 }
 
-void awe::map::deleteUnit(const awe::UnitID id) noexcept {
+void awe::map::deleteUnit(const awe::UnitID id) {
 	if (!_isUnitPresent(id)) {
 		_logger.error("deleteUnit operation cancelled: attempted to delete unit "
 			"with ID {} that didn't exist!", id);
@@ -1191,8 +1181,8 @@ void awe::map::deleteUnit(const awe::UnitID id) noexcept {
 	_units.erase(id);
 }
 
-std::shared_ptr<const awe::unit_type> awe::map::getUnitType(const awe::UnitID id)
-	const noexcept {
+std::shared_ptr<const awe::unit_type> awe::map::getUnitType(
+	const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).getType();
 	_logger.error("getUnitType operation failed: unit with ID {} doesn't exist!",
 		id);
@@ -1208,8 +1198,7 @@ const awe::unit_type* awe::map::getUnitTypeObject(const awe::UnitID id) const {
 	}
 }
 
-void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos)
-	noexcept {
+void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 	if (!_isUnitPresent(id)) {
 		_logger.error("setUnitPosition operation cancelled: unit with ID {} "
 			"doesn't exist!", id);
@@ -1248,7 +1237,7 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos)
 	_units.at(id).setPosition(pos);
 }
 
-sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const noexcept {
+sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const {
 	if (!_isUnitPresent(id)) {
 		_logger.error("getUnitPosition operation failed: unit with ID {} doesn't "
 			"exist!", id);
@@ -1257,7 +1246,7 @@ sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const noexcept {
 	return _units.at(id).getPosition();
 }
 
-bool awe::map::isUnitOnMap(const awe::UnitID id) const noexcept {
+bool awe::map::isUnitOnMap(const awe::UnitID id) const {
 	if (!_isUnitPresent(id)) {
 		_logger.error("isUnitOnMap operation failed: unit with ID {} doesn't "
 			"exist!", id);
@@ -1266,7 +1255,7 @@ bool awe::map::isUnitOnMap(const awe::UnitID id) const noexcept {
 	return _units.at(id).isOnMap();
 }
 
-void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) noexcept {
+void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).setHP(hp);
 	} else {
@@ -1275,21 +1264,21 @@ void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) noexcept {
 	}
 }
 
-awe::HP awe::map::getUnitHP(const awe::UnitID id) const noexcept {
+awe::HP awe::map::getUnitHP(const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).getHP();
 	_logger.error("getUnitHP operation failed: unit with ID {} doesn't exist!",
 		id);
 	return 0;
 }
 
-awe::HP awe::map::getUnitDisplayedHP(const awe::UnitID id) const noexcept {
+awe::HP awe::map::getUnitDisplayedHP(const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).getDisplayedHP();
 	_logger.error("getUnitDisplayedHP operation failed: unit with ID {} doesn't "
 		"exist!", id);
 	return 0;
 }
 
-void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept {
+void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).setFuel(fuel);
 	} else {
@@ -1298,7 +1287,7 @@ void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept 
 	}
 }
 
-void awe::map::burnUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept {
+void awe::map::burnUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 	if (_isUnitPresent(id)) {
 		setUnitFuel(id, getUnitFuel(id) - fuel);
 	} else {
@@ -1307,7 +1296,7 @@ void awe::map::burnUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept
 	}
 }
 
-awe::Fuel awe::map::getUnitFuel(const awe::UnitID id) const noexcept {
+awe::Fuel awe::map::getUnitFuel(const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).getFuel();
 	_logger.error("getUnitFuel operation failed: unit with ID {} doesn't exist!",
 		id);
@@ -1315,7 +1304,7 @@ awe::Fuel awe::map::getUnitFuel(const awe::UnitID id) const noexcept {
 }
 
 void awe::map::setUnitAmmo(const awe::UnitID id, const std::string& weapon,
-		const awe::Ammo ammo) noexcept {
+		const awe::Ammo ammo) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).setAmmo(weapon, ammo);
 	} else {
@@ -1325,15 +1314,15 @@ void awe::map::setUnitAmmo(const awe::UnitID id, const std::string& weapon,
 	}
 }
 
-awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id, const std::string& weapon)
-	const noexcept {
+awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id,
+	const std::string& weapon) const {
 	if (_isUnitPresent(id)) return _units.at(id).getAmmo(weapon);
 	_logger.error("getUnitAmmo operation with weapon \"{}\" failed: unit with ID "
 		"{} doesn't exist!", weapon, id);
 	return 0;
 }
 
-void awe::map::waitUnit(const awe::UnitID id, const bool waiting) noexcept {
+void awe::map::waitUnit(const awe::UnitID id, const bool waiting) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).wait(waiting);
 	} else {
@@ -1342,14 +1331,14 @@ void awe::map::waitUnit(const awe::UnitID id, const bool waiting) noexcept {
 	}
 }
 
-bool awe::map::isUnitWaiting(const awe::UnitID id) const noexcept {
+bool awe::map::isUnitWaiting(const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).isWaiting();
 	_logger.error("isUnitWaiting operation failed: unit with ID {} doesn't exist!",
 		id);
 	return false;
 }
 
-void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) noexcept {
+void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).capturing(capturing);
 	} else {
@@ -1359,14 +1348,14 @@ void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) noexcep
 	}
 }
 
-bool awe::map::isUnitCapturing(const awe::UnitID id) const noexcept {
+bool awe::map::isUnitCapturing(const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).isCapturing();
 	_logger.error("isUnitCapturing operation failed: unit with ID {} doesn't "
 		"exist!", id);
 	return false;
 }
 
-void awe::map::unitHiding(const awe::UnitID id, const bool hiding) noexcept {
+void awe::map::unitHiding(const awe::UnitID id, const bool hiding) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).hiding(hiding);
 	} else {
@@ -1375,15 +1364,15 @@ void awe::map::unitHiding(const awe::UnitID id, const bool hiding) noexcept {
 	}
 }
 
-bool awe::map::isUnitHiding(const awe::UnitID id) const noexcept {
+bool awe::map::isUnitHiding(const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).isHiding();
 	_logger.error("isUnitHiding operation failed: unit with ID {} doesn't exist!",
 		id);
 	return false;
 }
 
-bool awe::map::isUnitVisible(const awe::UnitID unit, const awe::ArmyID army) const
-	noexcept {
+bool awe::map::isUnitVisible(const awe::UnitID unit,
+	const awe::ArmyID army) const {
 	if (!_isUnitPresent(unit)) {
 		_logger.error("isUnitVisible operation failed: unit with ID {} doesn't "
 			"exist!", unit);
@@ -1419,7 +1408,7 @@ bool awe::map::isUnitVisible(const awe::UnitID unit, const awe::ArmyID army) con
 	return false;
 }
 
-void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) noexcept {
+void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 	if (!_isUnitPresent(onto)) {
 		_logger.error("loadUnit operation cancelled: attempted to load a unit "
 			"onto unit with ID {}, the latter of which does not exist!", onto);
@@ -1455,7 +1444,7 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) noexcept
 }
 
 void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
-	const sf::Vector2u& onto) noexcept {
+	const sf::Vector2u& onto) {
 	if (!_isUnitPresent(from)) {
 		_logger.error("unloadUnit operation cancelled: attempted to unload a unit "
 			"from unit with ID {}, the latter of which does not exist!", from);
@@ -1491,8 +1480,7 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 	}
 }
 
-awe::UnitID awe::map::getUnitWhichContainsUnit(const awe::UnitID unit) const
-	noexcept {
+awe::UnitID awe::map::getUnitWhichContainsUnit(const awe::UnitID unit) const {
 	if (!_isUnitPresent(unit)) {
 		_logger.error("getUnitWhichContainsUnit operation failed: unit with ID {} "
 			"does not exist!", unit);
@@ -1501,8 +1489,8 @@ awe::UnitID awe::map::getUnitWhichContainsUnit(const awe::UnitID unit) const
 	return _units.at(unit).loadedOnto();
 }
 
-bool awe::map::isUnitLoadedOntoUnit(const awe::UnitID unit, const awe::UnitID on)
-	const noexcept {
+bool awe::map::isUnitLoadedOntoUnit(const awe::UnitID unit,
+	const awe::UnitID on) const {
 	if (!_isUnitPresent(unit)) {
 		_logger.error("isUnitLoadedOntoUnit operation failed: unit with ID {} "
 			"does not exist!", unit);
@@ -1517,22 +1505,22 @@ bool awe::map::isUnitLoadedOntoUnit(const awe::UnitID unit, const awe::UnitID on
 	return units.find(unit) != units.end();
 }
 
-awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const noexcept {
+awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).getArmy();
 	_logger.error("getArmyOfUnit operation failed: unit with ID {} doesn't exist!",
 		id);
 	return awe::NO_ARMY;
 }
 
-awe::TeamID awe::map::getTeamOfUnit(const awe::UnitID id) const noexcept {
+awe::TeamID awe::map::getTeamOfUnit(const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _armies.at(_units.at(id).getArmy()).getTeam();
 	_logger.error("getTeamOfUnit operation failed: unit with ID {} doesn't exist!",
 		id);
 	return 0;
 }
 
-std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(const awe::UnitID id)
-	const noexcept {
+std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(
+	const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).loadedUnits();
 	_logger.error("getLoadedUnits operation failed: unit with ID {} doesn't "
 		"exist!", id);
@@ -1540,8 +1528,7 @@ std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(const awe::UnitID id)
 }
 
 
-CScriptArray* awe::map::getLoadedUnitsAsArray(const awe::UnitID id) const noexcept
-	{
+CScriptArray* awe::map::getLoadedUnitsAsArray(const awe::UnitID id) const {
 	auto set = getLoadedUnits(id);
 	CScriptArray* ret = _scripts->createArray("UnitID");
 	for (auto unit : set) {
@@ -1550,7 +1537,7 @@ CScriptArray* awe::map::getLoadedUnitsAsArray(const awe::UnitID id) const noexce
 	return ret;
 }
 
-unsigned int awe::map::getUnitDefence(const awe::UnitID id) const noexcept {
+unsigned int awe::map::getUnitDefence(const awe::UnitID id) const {
 	if (!_isUnitPresent(id)) {
 		_logger.error("getUnitDefence operation failed: unit with ID {} doesn't "
 			"exist!", id);
@@ -1570,7 +1557,7 @@ unsigned int awe::map::getUnitDefence(const awe::UnitID id) const noexcept {
 }
 
 bool awe::map::setTileType(const sf::Vector2u& pos,
-	const std::shared_ptr<const awe::tile_type>& type) noexcept {
+	const std::shared_ptr<const awe::tile_type>& type) {
 	if (!type) _logger.warning("setTileType warning: assigning the tile at "
 		"position ({},{}) an empty type!", pos.x, pos.y);
 	if (_isOutOfBounds(pos)) {
@@ -1588,13 +1575,12 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 	return true;
 }
 
-bool awe::map::setTileType(const sf::Vector2u& pos, const std::string& type)
-	noexcept {
+bool awe::map::setTileType(const sf::Vector2u& pos, const std::string& type) {
 	return setTileType(pos, _tileTypes->operator[](type));
 }
 
 std::shared_ptr<const awe::tile_type> awe::map::getTileType(
-	const sf::Vector2u& pos) const noexcept {
+	const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("getTileType operation failed: tile at position ({},{}) is "
 			"out of bounds with the map's size of ({},{})!",
@@ -1613,7 +1599,7 @@ const awe::tile_type* awe::map::getTileTypeObject(const sf::Vector2u& pos) const
 	}
 }
 
-void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) noexcept {
+void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {
 	if (!_isOutOfBounds(pos)) {
 		_tiles[pos.x][pos.y].setTileHP(hp);
 	} else {
@@ -1623,7 +1609,7 @@ void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) noexcept {
 	}
 }
 
-awe::HP awe::map::getTileHP(const sf::Vector2u& pos) const noexcept {
+awe::HP awe::map::getTileHP(const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("getTileHP operation failed: tile at position ({},{}) is "
 			"out of bounds with the map's size of ({},{})!",
@@ -1633,7 +1619,7 @@ awe::HP awe::map::getTileHP(const sf::Vector2u& pos) const noexcept {
 	return _tiles[pos.x][pos.y].getTileHP();
 }
 
-void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) noexcept {
+void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("setTileOwner operation cancelled: army with ID {} couldn't "
 			"be assigned to tile at position ({},{}), as it is out of bounds with "
@@ -1652,7 +1638,7 @@ void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) noexcept 
 	tile.setTileOwner(army);
 }
 
-awe::ArmyID awe::map::getTileOwner(const sf::Vector2u& pos) const noexcept {
+awe::ArmyID awe::map::getTileOwner(const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("getTileOwner operation failed: tile at position ({},{}) is "
 			"out of bounds with the map's size of ({},{})!",
@@ -1662,7 +1648,7 @@ awe::ArmyID awe::map::getTileOwner(const sf::Vector2u& pos) const noexcept {
 	return _tiles[pos.x][pos.y].getTileOwner();
 }
 
-awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u& pos) const noexcept {
+awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("getUnitOnTile operation failed: tile at position {} is out "
 			"of bounds with the map's size of {}!", pos, getMapSize());
@@ -1674,8 +1660,8 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u& pos) const noexcept {
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(
-	const sf::Vector2u& tile, unsigned int startFrom, const unsigned int endAt)
-	const noexcept {
+	const sf::Vector2u& tile, unsigned int startFrom,
+	const unsigned int endAt) const {
 	// Checking.
 	const sf::Vector2u mapSize = getMapSize();
 	if (_isOutOfBounds(tile)) {
@@ -1717,7 +1703,7 @@ std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(
 
 CScriptArray* awe::map::getAvailableTilesAsArray(
 	const sf::Vector2u& tile, unsigned int startFrom,
-	const unsigned int endAt) const noexcept {
+	const unsigned int endAt) const {
 	auto set = getAvailableTiles(tile, startFrom, endAt);
 	CScriptArray* ret = _scripts->createArray("Vector2");
 	for (auto tile : set) {
@@ -1730,7 +1716,7 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const unsigned int* const movePoints, const awe::Fuel* const fuel,
 	const awe::TeamID* const team, const awe::ArmyID* const army,
-	const std::unordered_set<awe::UnitID>& ignoredUnits) const noexcept {
+	const std::unordered_set<awe::UnitID>& ignoredUnits) const {
 	// openSet could be a min-heap or priority queue for added efficiency.
 	std::unordered_set<sf::Vector2u> openSet = { origin };
 	std::unordered_map<sf::Vector2u, sf::Vector2u> cameFrom;
@@ -1811,7 +1797,7 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
  * @return  The set. Empty if \c ignoredUnits is \c nullptr.
  */
 static std::unordered_set<awe::UnitID> convertCScriptArrayIntoSet(
-	CScriptArray* ignoredUnits) noexcept {
+	CScriptArray* ignoredUnits) {
 	std::unordered_set<awe::UnitID> ret;
 	if (ignoredUnits) {
 		for (asUINT i = 0; i < ignoredUnits->GetSize(); ++i) {
@@ -1825,8 +1811,8 @@ static std::unordered_set<awe::UnitID> convertCScriptArrayIntoSet(
 CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const unsigned int movePoints, const awe::Fuel fuel,
-	const awe::TeamID team, const awe::ArmyID army, CScriptArray* ignoredUnits)
-	const noexcept {
+	const awe::TeamID team, const awe::ArmyID army,
+	CScriptArray* ignoredUnits) const {
 	const auto vec = findPath(origin, dest, moveType, &movePoints, &fuel, &team,
 		&army, convertCScriptArrayIntoSet(ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
@@ -1840,7 +1826,7 @@ CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 
 CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
-	const awe::ArmyID army, CScriptArray* ignoredUnits) const noexcept {
+	const awe::ArmyID army, CScriptArray* ignoredUnits) const {
 	const auto vec = findPath(origin, dest, moveType, nullptr, nullptr, nullptr,
 		&army, convertCScriptArrayIntoSet(ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
@@ -1853,7 +1839,7 @@ CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 }
 
 int awe::map::scanPath(CScriptArray* path, const awe::UnitID unit,
-	std::size_t ignores) const noexcept {
+	std::size_t ignores) const {
 	if (path && _isUnitPresent(unit)) {
 		asUINT len = path->GetSize();
 		const auto armyID = getArmyOfUnit(unit);
@@ -1880,7 +1866,7 @@ int awe::map::scanPath(CScriptArray* path, const awe::UnitID unit,
 	return -1;
 }
 
-bool awe::map::setSelectedUnit(const awe::UnitID unit) noexcept {
+bool awe::map::setSelectedUnit(const awe::UnitID unit) {
 	if (unit == 0) {
 		_selectedUnitRenderData.top().selectedUnit = 0;
 		_selectedUnitRenderData.top().clearState();
@@ -1901,7 +1887,7 @@ bool awe::map::setSelectedUnit(const awe::UnitID unit) noexcept {
 	return false;
 }
 
-bool awe::map::pushSelectedUnit(const awe::UnitID unit) noexcept {
+bool awe::map::pushSelectedUnit(const awe::UnitID unit) {
 	_selectedUnitRenderData.emplace(*_scripts);
 	const auto ret = setSelectedUnit(unit);
 	if (!ret) {
@@ -1911,7 +1897,7 @@ bool awe::map::pushSelectedUnit(const awe::UnitID unit) noexcept {
 	return ret;
 }
 
-void awe::map::popSelectedUnit() noexcept {
+void awe::map::popSelectedUnit() {
 	if (_selectedUnitRenderData.size() > 1) {
 		_selectedUnitRenderData.pop();
 		// At some point, the previously selected unit might have been deleted, and
@@ -1930,11 +1916,11 @@ void awe::map::popSelectedUnit() noexcept {
 	}
 }
 
-awe::UnitID awe::map::getSelectedUnit() const noexcept {
+awe::UnitID awe::map::getSelectedUnit() const {
 	return _selectedUnitRenderData.top().selectedUnit;
 }
 
-void awe::map::addAvailableTile(const sf::Vector2u& tile) noexcept {
+void awe::map::addAvailableTile(const sf::Vector2u& tile) {
 	if (_isOutOfBounds(tile)) {
 		_logger.error("addAvailableTile operation failed: tile {} is out of "
 			"bounds!", tile);
@@ -1946,7 +1932,7 @@ void awe::map::addAvailableTile(const sf::Vector2u& tile) noexcept {
 	}
 }
 
-bool awe::map::isAvailableTile(const sf::Vector2u& tile) const noexcept {
+bool awe::map::isAvailableTile(const sf::Vector2u& tile) const {
 	if (_isOutOfBounds(tile)) {
 		_logger.error("isAvailableTile operation failed: tile {} is out of "
 			"bounds!", tile);
@@ -1957,24 +1943,23 @@ bool awe::map::isAvailableTile(const sf::Vector2u& tile) const noexcept {
 	}
 }
 
-void awe::map::clearAvailableTiles() noexcept {
+void awe::map::clearAvailableTiles() {
 	_selectedUnitRenderData.top().availableTiles.clear();
 }
 
-void awe::map::setAvailableTileShader(const awe::available_tile_shader shader)
-	noexcept {
+void awe::map::setAvailableTileShader(const awe::available_tile_shader shader) {
 	_selectedUnitRenderData.top().availableTileShader = shader;
 }
 
-awe::available_tile_shader awe::map::getAvailableTileShader() const noexcept {
+awe::available_tile_shader awe::map::getAvailableTileShader() const {
 	return _selectedUnitRenderData.top().availableTileShader;
 }
 
-CScriptArray* awe::map::getClosedList() noexcept {
+CScriptArray* awe::map::getClosedList() {
 	return _selectedUnitRenderData.top().closedList;
 }
 
-void awe::map::disableSelectedUnitRenderingEffects(const bool val) noexcept {
+void awe::map::disableSelectedUnitRenderingEffects(const bool val) {
 	_selectedUnitRenderData.top().disableRenderingEffects = val;
 }
 
@@ -1982,7 +1967,7 @@ void awe::map::disableShaderForAvailableUnits(const bool val) {
 	_selectedUnitRenderData.top().disableShaderForAvailableUnits = val;
 }
 
-void awe::map::regenerateClosedListSprites() noexcept {
+void awe::map::regenerateClosedListSprites() {
 	// Starting from the beginning; calculate the arrow sprites to draw for
 	// each tile.
 	CScriptArray* list = _selectedUnitRenderData.top().closedList;
@@ -2044,8 +2029,7 @@ void awe::map::regenerateClosedListSprites() noexcept {
 	}
 }
 
-void awe::map::addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos)
-	noexcept {
+void awe::map::addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos) {
 	if (!_isUnitPresent(unit)) {
 		_logger.error("addPreviewUnit operation failed: unit with ID {} does not "
 			"exist.", unit);
@@ -2059,7 +2043,7 @@ void awe::map::addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos)
 	_unitLocationOverrides[unit] = pos;
 }
 
-void awe::map::removePreviewUnit(const awe::UnitID unit) noexcept {
+void awe::map::removePreviewUnit(const awe::UnitID unit) {
 	if (_unitLocationOverrides.find(unit) == _unitLocationOverrides.end()) {
 		_logger.error("removePreviewUnit operation failed: unit with ID {} did "
 			"not have a position override at the time of calling.", unit);
@@ -2068,15 +2052,15 @@ void awe::map::removePreviewUnit(const awe::UnitID unit) noexcept {
 	}
 }
 
-void awe::map::removeAllPreviewUnits() noexcept {
+void awe::map::removeAllPreviewUnits() {
 	_unitLocationOverrides.clear();
 }
 
-std::size_t awe::map::getUnitPreviewsCount() const noexcept {
+std::size_t awe::map::getUnitPreviewsCount() const {
 	return _unitLocationOverrides.size();
 }
 
-void awe::map::setSelectedTile(const sf::Vector2u& pos) noexcept {
+void awe::map::setSelectedTile(const sf::Vector2u& pos) {
 	if (!_isOutOfBounds(pos)) {
 		_sel_old = _sel;
 		if (_sel != pos) {
@@ -2086,23 +2070,23 @@ void awe::map::setSelectedTile(const sf::Vector2u& pos) noexcept {
 	}
 }
 
-void awe::map::moveSelectedTileUp() noexcept {
+void awe::map::moveSelectedTileUp() {
 	setSelectedTile(sf::Vector2u(getSelectedTile().x, getSelectedTile().y - 1));
 }
 
-void awe::map::moveSelectedTileDown() noexcept {
+void awe::map::moveSelectedTileDown() {
 	setSelectedTile(sf::Vector2u(getSelectedTile().x, getSelectedTile().y + 1));
 }
 
-void awe::map::moveSelectedTileLeft() noexcept {
+void awe::map::moveSelectedTileLeft() {
 	setSelectedTile(sf::Vector2u(getSelectedTile().x - 1, getSelectedTile().y));
 }
 
-void awe::map::moveSelectedTileRight() noexcept {
+void awe::map::moveSelectedTileRight() {
 	setSelectedTile(sf::Vector2u(getSelectedTile().x + 1, getSelectedTile().y));
 }
 
-void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) noexcept {
+void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
 	const auto MAP_SIZE = getMapSize();
 	const auto REAL_TILE_MIN_WIDTH = awe::tile::MIN_WIDTH * _mapScalingFactor
 		* _scalingCache;
@@ -2131,7 +2115,7 @@ void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) noexcept {
 
 }
 
-void awe::map::setSelectedArmy(const awe::ArmyID army) noexcept {
+void awe::map::setSelectedArmy(const awe::ArmyID army) {
 	if (_isArmyPresent(army))
 		_currentArmy = army;
 	else
@@ -2139,25 +2123,25 @@ void awe::map::setSelectedArmy(const awe::ArmyID army) noexcept {
 			"exist!", army);
 }
 
-awe::ArmyID awe::map::getSelectedArmy() const noexcept {
+awe::ArmyID awe::map::getSelectedArmy() const {
 	return _currentArmy;
 }
 
-awe::ArmyID awe::map::getNextArmy() const noexcept {
+awe::ArmyID awe::map::getNextArmy() const {
 	if (_currentArmy == awe::NO_ARMY) return awe::NO_ARMY;
 	auto itr = ++_armies.find(_currentArmy);
 	if (itr == _armies.end()) itr = _armies.begin();
 	return itr->first;
 }
 
-void awe::map::setMapScalingFactor(const float factor) noexcept {
+void awe::map::setMapScalingFactor(const float factor) {
 	_mapScalingFactor = factor;
 	_updateTilePane = true;
 	_changedScaleFactor = true;
 	_mapOffset = sf::Vector2f(0.0f, 0.0f);
 }
 
-awe::quadrant awe::map::getCursorQuadrant() const noexcept {
+awe::quadrant awe::map::getCursorQuadrant() const {
 	const bool isTop = isCursorOnTopSide();
 	if (isCursorOnLeftSide()) {
 		if (isTop) {
@@ -2174,7 +2158,7 @@ awe::quadrant awe::map::getCursorQuadrant() const noexcept {
 	}
 }
 
-void awe::map::setULCursorSprite(const std::string& sprite) noexcept {
+void awe::map::setULCursorSprite(const std::string& sprite) {
 	_ulCursorSprite = sprite;
 	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
 		_logger.warning("setULCursorSprite was just given sprite with ID \"{}\", "
@@ -2182,7 +2166,7 @@ void awe::map::setULCursorSprite(const std::string& sprite) noexcept {
 	}
 }
 
-void awe::map::setURCursorSprite(const std::string& sprite) noexcept {
+void awe::map::setURCursorSprite(const std::string& sprite) {
 	_urCursorSprite = sprite;
 	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
 		_logger.warning("setURCursorSprite was just given sprite with ID \"{}\", "
@@ -2190,7 +2174,7 @@ void awe::map::setURCursorSprite(const std::string& sprite) noexcept {
 	}
 }
 
-void awe::map::setLLCursorSprite(const std::string& sprite) noexcept {
+void awe::map::setLLCursorSprite(const std::string& sprite) {
 	_llCursorSprite = sprite;
 	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
 		_logger.warning("setLLCursorSprite was just given sprite with ID \"{}\", "
@@ -2198,7 +2182,7 @@ void awe::map::setLLCursorSprite(const std::string& sprite) noexcept {
 	}
 }
 
-void awe::map::setLRCursorSprite(const std::string& sprite) noexcept {
+void awe::map::setLRCursorSprite(const std::string& sprite) {
 	_lrCursorSprite = sprite;
 	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
 		_logger.warning("setLRCursorSprite was just given sprite with ID \"{}\", "
@@ -2206,7 +2190,7 @@ void awe::map::setLRCursorSprite(const std::string& sprite) noexcept {
 	}
 }
 
-sf::Vector2u awe::map::getTileSize() const noexcept {
+sf::Vector2u awe::map::getTileSize() const {
 	return sf::Vector2u(awe::tile::MIN_WIDTH * (sf::Uint32)_scalingCache *
 		(sf::Uint32)_mapScalingFactor,
 		awe::tile::MIN_HEIGHT * (sf::Uint32)_scalingCache *
@@ -2214,7 +2198,7 @@ sf::Vector2u awe::map::getTileSize() const noexcept {
 }
 
 void awe::map::setTileSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sheet_tile = sheet;
 	// Go through all of the tiles and set the new spritesheet to each one.
 	for (auto& column : _tiles) {
@@ -2225,14 +2209,14 @@ void awe::map::setTileSpritesheet(
 }
 
 void awe::map::setUnitSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sheet_unit = sheet;
 	// Go through all of the units and set the new icon spritesheet to each one.
 	for (auto& unit : _units) unit.second.setSpritesheet(sheet);
 }
 
 void awe::map::setIconSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sheet_icon = sheet;
 	_cursor.setSpritesheet(sheet);
 	_damageTooltip.setSpritesheet(sheet);
@@ -2241,11 +2225,11 @@ void awe::map::setIconSpritesheet(
 }
 
 void awe::map::setCOSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sheet_co = sheet;
 }
 
-void awe::map::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
+void awe::map::setFont(const std::shared_ptr<sf::Font>& font) {
 	if (!font) {
 		_logger.error("setFont operation failed: nullptr was given!");
 		return;
@@ -2254,7 +2238,7 @@ void awe::map::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
 }
 
 void awe::map::setLanguageDictionary(
-	const std::shared_ptr<engine::language_dictionary>& dict) noexcept {
+	const std::shared_ptr<engine::language_dictionary>& dict) {
 	if (!dict) {
 		_logger.error("setLanguageDictionary operation failed: nullptr was "
 			"given!");
@@ -2262,8 +2246,7 @@ void awe::map::setLanguageDictionary(
 	}
 }
 
-bool awe::map::animate(const sf::RenderTarget& target, const double scaling)
-	noexcept {
+bool awe::map::animate(const sf::RenderTarget& target, const double scaling) {
 	_scalingCache = (float)scaling;
 	_targetSizeCache = sf::Vector2f(target.getSize());
 	auto mapSize = getMapSize();
@@ -2526,7 +2509,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_damageTooltip, mapStates);
 }
 
-void awe::map::_updateCapturingUnit(const awe::UnitID id) noexcept {
+void awe::map::_updateCapturingUnit(const awe::UnitID id) {
 	if (id > 0 && isUnitCapturing(id)) {
 		const auto t = getUnitPosition(id);
 		setTileHP(t, (awe::HP)getTileType(t)->getType()->getMaxHP());
@@ -2551,12 +2534,12 @@ awe::UnitID awe::map::_findUnitID() {
 }
 
 awe::map::selected_unit_render_data::selected_unit_render_data(
-	const engine::scripts& scripts) noexcept {
+	const engine::scripts& scripts) {
 	closedList = scripts.createArray("ClosedListNode");
 }
 
 awe::map::selected_unit_render_data::selected_unit_render_data(
-	const awe::map::selected_unit_render_data& o) noexcept {
+	const awe::map::selected_unit_render_data& o) {
 	*this = o;
 }
 
@@ -2577,7 +2560,7 @@ awe::map::selected_unit_render_data::~selected_unit_render_data() noexcept {
 
 awe::map::selected_unit_render_data&
 	awe::map::selected_unit_render_data::operator=(
-	const awe::map::selected_unit_render_data& o) noexcept {
+	const awe::map::selected_unit_render_data& o) {
 	selectedUnit = o.selectedUnit;
 	availableTiles = o.availableTiles;
 	availableTileShader = o.availableTileShader;
@@ -2588,7 +2571,7 @@ awe::map::selected_unit_render_data&
 	return *this;
 }
 
-void awe::map::selected_unit_render_data::clearState() noexcept {
+void awe::map::selected_unit_render_data::clearState() {
 	selectedUnit = 0;
 	availableTiles.clear();
 	availableTileShader = awe::available_tile_shader::None;
@@ -2597,7 +2580,7 @@ void awe::map::selected_unit_render_data::clearState() noexcept {
 	disableShaderForAvailableUnits = false;
 }
 
-void awe::map::_initShaders() noexcept {
+void awe::map::_initShaders() {
 	_unavailableTileShader.loadFromMemory("uniform sampler2D texUnit;"
 		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
 		"pixel.xyz /= 2.0; gl_FragColor = pixel;}", sf::Shader::Fragment);

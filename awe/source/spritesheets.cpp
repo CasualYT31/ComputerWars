@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "spritesheets.hpp"
 
-void awe::spritesheets::test(std::string& errstring) const noexcept {
+void awe::spritesheets::test(std::string& errstring) const {
 	if (!CO) errstring += "CO spritesheet\n";
 	if (!unit) {
 		errstring += "unit spritesheets\n";

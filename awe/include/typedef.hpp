@@ -93,7 +93,8 @@ namespace awe {
 	/**
 	 * Registers game-related typedefs with a given AngelScript engine, if any of
 	 * them haven't already been registered.
+	 * @safety No guarantee.
 	 */
 	void RegisterGameTypedefs(asIScriptEngine* engine,
-		const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+		const std::shared_ptr<DocumentationGenerator>& document);
 }

@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "typedef.hpp"
 
 void awe::RegisterGameTypedefs(asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	if (!engine->GetTypeInfoByName("TeamID")) {
 		engine->RegisterTypedef("TeamID", "uint8");
 		document->DocumentExpectedFunction("typedef uint8 TeamID",

@@ -24,23 +24,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T>
 awe::bank<T>::bank(const std::shared_ptr<engine::scripts>& scripts,
-	const std::string& name, const engine::logger::data& data) noexcept :
+	const std::string& name, const engine::logger::data& data) :
 	engine::json_script({ data.sink, "json_script" }), _logger(data),
 	_scripts(scripts), _propertyName(name) {
 	if (scripts) _scripts->addRegistrant(this);
 }
 
 template<typename T>
-std::unordered_set<std::string> awe::bank<T>::getScriptNames() const noexcept {
+std::unordered_set<std::string> awe::bank<T>::getScriptNames() const {
 	std::unordered_set<std::string> ret;
 	std::transform(_bank.begin(), _bank.end(),
-		std::inserter(ret, ret.end()), [](auto pair) {return pair.first; });
+		std::inserter(ret, ret.end()), [](auto pair) { return pair.first; });
 	return ret;
 }
 
 template<typename T>
 void awe::bank<T>::registerInterface(asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	// 1. Register the game typedefs to ensure that they are defined.
 	awe::RegisterGameTypedefs(engine, document);
 	// 2. Register the value type that this bank stores (i.e. T).
@@ -81,20 +81,21 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 }
 
 template<typename T>
-bool awe::bank<T>::_load(engine::json& j) noexcept {
-	_bank.clear();
+bool awe::bank<T>::_load(engine::json& j) {
+	bank_type bank;
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		// Loop through each object, allowing the template type T to construct its
 		// values based on each object.
 		engine::json input(i.value(), {_logger.getData().sink, "json"});
-		_bank[i.key()] = std::make_shared<const T>(i.key(), input);
+		bank[i.key()] = std::make_shared<const T>(i.key(), input);
 	}
+	_bank = std::move(bank);
 	return true;
 }
 
 template<typename T>
-CScriptArray* awe::bank<T>::_getScriptNamesArray() const noexcept {
+CScriptArray* awe::bank<T>::_getScriptNamesArray() const {
 	const auto names = getScriptNames();
 	CScriptArray* ret = _scripts->createArray("string");
 	for (auto name : names) ret->InsertLast(&name);
@@ -104,7 +105,7 @@ CScriptArray* awe::bank<T>::_getScriptNamesArray() const noexcept {
 template<typename T>
 void awe::bank_id::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	auto r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_scriptName() const property",
 		asMETHOD(T, getScriptName), asCALL_THISCALL);
@@ -116,7 +117,7 @@ template<typename T>
 void awe::common_properties::Register(const std::string& type,
 	asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document,
-	const std::string& extraIconDoc) noexcept {
+	const std::string& extraIconDoc) {
 	awe::bank_id::Register<T>(type, engine, document);
 	auto r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_name() const property",
@@ -144,7 +145,7 @@ void awe::common_properties::Register(const std::string& type,
 template<typename T>
 void awe::country::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document);
 	engine::RegisterColourType(engine, document);
 	auto r = engine->RegisterObjectMethod(type.c_str(),
@@ -160,28 +161,28 @@ void awe::country::Register(const std::string& type,
 template<typename T>
 void awe::weather::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document);
 }
 
 template<typename T>
 void awe::environment::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document);
 }
 
 template<typename T>
 void awe::movement_type::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document);
 }
 
 template<typename T>
 void awe::terrain::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document,
 		"For terrain types, this holds the sprite ID of the picture shown "
 		"for a tile that has no owner.");
@@ -216,7 +217,7 @@ void awe::terrain::Register(const std::string& type,
 template<typename T>
 void awe::tile_type::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::bank_id::Register<T>(type, engine, document);
 	auto r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_typeScriptName() const property",
@@ -250,7 +251,7 @@ void awe::tile_type::Register(const std::string& type,
 template<typename T>
 void awe::weapon::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document,
 		"For weapon types, this property holds the sprite ID of the small ammo "
 		"icon that is used with this weapon.");
@@ -313,7 +314,7 @@ void awe::weapon::Register(const std::string& type,
 template<typename T>
 void awe::unit_type::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document,
 		"For unit types, this property is unused.");
 	auto r = engine->RegisterObjectMethod(type.c_str(),
@@ -433,7 +434,7 @@ void awe::unit_type::Register(const std::string& type,
 template<typename T>
 void awe::commander::Register(const std::string& type,
 	asIScriptEngine* engine,
-	const std::shared_ptr<DocumentationGenerator>& document) noexcept {
+	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document,
 		"For commanders, this holds the sprite ID of the CO face shown on army "
 		"panels, etc.");

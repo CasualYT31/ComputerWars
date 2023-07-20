@@ -31,8 +31,8 @@ sf::Vector2u awe::unit::NO_POSITION_SCRIPT = awe::unit::NO_POSITION;
 awe::unit::unit(const engine::logger::data& data,
 	const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet,
-	const std::shared_ptr<sfx::animated_spritesheet>& icons) noexcept :
-	_type(type), _army(army),
+	const std::shared_ptr<sfx::animated_spritesheet>& icons) : _type(type),
+	_army(army),
 	_sprite(sheet, ((type) ? (type->getUnit(army)) : ("")),
 		{data.sink, data.name + "_animated_sprite"}),
 	_hpIcon(icons, "nohpicon", { data.sink, data.name + "_hp_icon" }),
@@ -50,23 +50,14 @@ awe::unit::unit(const engine::logger::data& data,
 }
 
 void awe::unit::setIconSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept {
+	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_hpIcon.setSpritesheet(sheet);
 	_fuelAmmoIcon.setSpritesheet(sheet);
 	_loadedIcon.setSpritesheet(sheet);
 	_capturingHidingIcon.setSpritesheet(sheet);
 }
 
-bool awe::unit::_isLowOnAmmo() const noexcept {
-	// TODO-1: determine when we should show the low ammo icon. What we have now
-	// might be fine.
-	const auto weapon = _type->getFirstWeaponWithFiniteAmmo();
-	if (!weapon) return false;
-	return getAmmo(weapon->getScriptName()) <= weapon->getMaxAmmo() / 2;
-}
-
-bool awe::unit::animate(const sf::RenderTarget& target, const double scaling)
-	noexcept {
+bool awe::unit::animate(const sf::RenderTarget& target, const double scaling) {
 	// Determine which icons to set.
 	if (getDisplayedHP() == 0 || getDisplayedHP() > 9) {
 		_hpIcon.setSprite("nohpicon");
@@ -125,4 +116,12 @@ void awe::unit::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	target.draw(_capturingHidingIcon, states);
 	target.draw(_fuelAmmoIcon, states);
 	target.draw(_hpIcon, states);
+}
+
+bool awe::unit::_isLowOnAmmo() const {
+	// TODO-1: determine when we should show the low ammo icon. What we have now
+	// might be fine.
+	const auto weapon = _type->getFirstWeaponWithFiniteAmmo();
+	if (!weapon) return false;
+	return getAmmo(weapon->getScriptName()) <= weapon->getMaxAmmo() / 2;
 }

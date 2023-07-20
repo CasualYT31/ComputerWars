@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T, typename... Ts>
 bool awe::game_engine::_loadObject(std::shared_ptr<T>& ptr, engine::json& j,
-	const engine::json::KeySequence& keys, Ts... constructorParams) noexcept {
+	const engine::json::KeySequence& keys, Ts... constructorParams) {
 	std::string path;
 	j.apply(path, keys);
 	ptr = std::make_shared<T>(constructorParams...);

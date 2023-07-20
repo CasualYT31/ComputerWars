@@ -23,12 +23,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "damage_sprite.hpp"
 
 void awe::damage_tooltip::setSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& spritesheet) noexcept {
+	const std::shared_ptr<sfx::animated_spritesheet>& spritesheet) {
 	_sprite.setSpritesheet(spritesheet);
 	_sprite.setSprite("damagetooltip");
 }
 
-void awe::damage_tooltip::setFont(const std::shared_ptr<sf::Font>& font) noexcept {
+void awe::damage_tooltip::setFont(const std::shared_ptr<sf::Font>& font) {
 	_damage.setFont(*font);
 	_damage.setCharacterSize(12);
 	_damage.setOutlineColor(sf::Color::Black);
@@ -36,12 +36,12 @@ void awe::damage_tooltip::setFont(const std::shared_ptr<sf::Font>& font) noexcep
 	_damage.setOutlineThickness(2.0f);
 }
 
-void awe::damage_tooltip::setDamage(const int dmg) noexcept {
+void awe::damage_tooltip::setDamage(const int dmg) {
 	_damage.setString(std::to_string(dmg));
 }
 
-void awe::damage_tooltip::setPosition(const sf::Vector2f& pos, const int quadrant)
-	noexcept {
+void awe::damage_tooltip::setPosition(const sf::Vector2f& pos,
+	const int quadrant) {
 	switch (quadrant) {
 	case 0:
 		_sprite.setPosition(pos + sf::Vector2f(28.0f, 27.0f));
@@ -62,17 +62,17 @@ void awe::damage_tooltip::setPosition(const sf::Vector2f& pos, const int quadran
 	}
 }
 
-void awe::damage_tooltip::visible(const bool v) noexcept {
+void awe::damage_tooltip::visible(const bool v) {
 	_visible = v;
 }
 
 bool awe::damage_tooltip::animate(const sf::RenderTarget& target,
-	const double scaling) noexcept {
+	const double scaling) {
 	return _sprite.animate(target, scaling);
 }
 
-void awe::damage_tooltip::draw(sf::RenderTarget& target, sf::RenderStates states)
-	const {
+void awe::damage_tooltip::draw(sf::RenderTarget& target,
+	sf::RenderStates states) const {
 	if (_visible) {
 		target.draw(_sprite, states);
 		target.draw(_damage, states);

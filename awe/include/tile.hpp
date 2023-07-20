@@ -54,30 +54,30 @@ namespace awe {
 		 */
 		tile(const engine::logger::data& data,
 			const std::shared_ptr<const awe::tile_type>& type = nullptr,
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr)
-			noexcept;
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr);
 
 		/**
 		 * Update's the tile's type.
 		 * This method does not handle any references to this tile in \c army
 		 * objects. See \c map::setTileType().
-		 * @param type The type to give to the tile.
+		 * @param  type The type to give to the tile.
+		 * @safety No guarantee.
 		 */
-		void setTileType(const std::shared_ptr<const awe::tile_type>& type)
-			noexcept;
+		void setTileType(const std::shared_ptr<const awe::tile_type>& type);
 
 		/**
 		 * Returns the tile's type.
 		 * @return Information on the tile's type.
 		 */
-		std::shared_ptr<const awe::tile_type> getTileType() const noexcept;
+		std::shared_ptr<const awe::tile_type> getTileType() const;
 
 		/**
 		 * Sets the owner of this tile.
 		 * Set this to <tt>awe::army::NO_ARMY</tt> to set no owner.
-		 * @param owner The army ID of the owner of this tile.
+		 * @param  owner The army ID of the owner of this tile.
+		 * @safety No guarantee.
 		 */
-		void setTileOwner(const awe::ArmyID owner) noexcept;
+		void setTileOwner(const awe::ArmyID owner);
 
 		/**
 		 * Retrieves the army ID of the army who owns this tile.
@@ -115,42 +115,43 @@ namespace awe {
 
 		/**
 		 * Sets the spritesheet to use with this tile.
-		 * @param sheet Pointer to the spritesheet to use with this tile.
+		 * @param  sheet Pointer to the spritesheet to use with this tile.
+		 * @safety No guarantee.
 		 */
 		void setSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet) noexcept;
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
 
 		/**
 		 * Gets the spritesheet used with this tile.
 		 * @return Pointer to the spritesheet used with this tile.
 		 */
-		std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet() const
-			noexcept;
+		std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet() const;
 
 		/**
 		 * Finds out the sprite name used with this tile's internal sprite.
 		 * @return The name of the sprite from the spritesheet used with this tile.
 		 */
-		std::string getSprite() const noexcept;
+		std::string getSprite() const;
 
 		/**
 		 * Sets the tile's pixel position to the internal sprite.
-		 * @param x The X position of the tile.
-		 * @param y The Y position of the tile.
+		 * @param  x The X position of the tile.
+		 * @param  y The Y position of the tile.
+		 * @safety No guarantee.
 		 */
-		void setPixelPosition(float x, float y) noexcept;
+		void setPixelPosition(float x, float y);
 
 		/**
 		 * Gets the tile's current pixel position.
 		 * @return The tile's pixel position.
 		 */
-		sf::Vector2f getPixelPosition() const noexcept;
+		sf::Vector2f getPixelPosition() const;
 
 		/**
 		 * Gets the tile's current pixel size.
 		 * @return The tile's pixel size.
 		 */
-		sf::Vector2f getPixelSize() const noexcept;
+		sf::Vector2f getPixelSize() const;
 
 		/**
 		 * This drawable's \c animate() method.
@@ -159,7 +160,7 @@ namespace awe {
 		 *         call.
 		 */
 		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0) noexcept;
+			const double scaling = 1.0);
 	private:
 		/**
 		 * This drawable's \c draw() method.
@@ -176,8 +177,9 @@ namespace awe {
 		 * This can change in a variety of different circumstances, and there are
 		 * quite a few conditions to check for, so it's best to keep it all in one
 		 * method and call it where necessary.
+		 * @safety No guarantee.
 		 */
-		void _updateSpriteID() noexcept;
+		void _updateSpriteID();
 
 		/**
 		 * The type of this tile.

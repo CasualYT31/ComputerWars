@@ -24,50 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <unordered_set>
 
-void awe::updateTerrainBank(awe::bank<awe::terrain>& terrainBank,
-	const awe::bank<awe::country>& countryBank) noexcept {
-	for (const auto& terrain : terrainBank) {
-		terrain.second->updatePictureMap(countryBank);
-	}
-}
-
-void awe::updateTileTypeBank(awe::bank<awe::tile_type>& tileBank,
-	const awe::bank<awe::terrain>& terrainBank,
-	const awe::bank<awe::country>& countryBank) noexcept {
-	for (const auto& tile : tileBank) {
-		tile.second->updateTerrain(terrainBank);
-		tile.second->updateOwnedTilesMap(countryBank);
-	}
-}
-
-void awe::updateUnitTypeBank(awe::bank<awe::unit_type>& unitBank,
-	const awe::bank<awe::movement_type>& movementBank,
-	const awe::bank<awe::terrain>& terrainBank,
-	const awe::bank<awe::weapon>& weaponBank,
-	const awe::bank<awe::country>& countryBank,
-	const std::shared_ptr<engine::sink>& sink) noexcept {
-	for (const auto& unit : unitBank) {
-		unit.second->updateMovementType(movementBank);
-		unit.second->updateUnitTypes(unitBank);
-		unit.second->updateTerrainTypes(terrainBank);
-		unit.second->updateWeapons(weaponBank, sink);
-		unit.second->updateSpriteMaps(countryBank);
-	}
-}
-
-bool awe::checkCountryTurnOrderIDs(const awe::bank<awe::country>& countries)
-	noexcept {
-	std::unordered_set<awe::ArmyID> turnOrderIDs;
-	for (const auto& country : countries) {
-		const auto turnOrder = country.second->getTurnOrder();
-		if (turnOrder == awe::NO_ARMY) return false;
-		turnOrderIDs.insert(turnOrder);
-	}
-	// If the set isn't the same length as the number of countries, then we know
-	// that at least two of the countries have the same turn order ID.
-	return countries.size() == turnOrderIDs.size();
-}
-
 /**
  * Creates a map keyed by turn order ID from another map keyed by country script
  * name.
@@ -77,11 +33,12 @@ bool awe::checkCountryTurnOrderIDs(const awe::bank<awe::country>& countries)
  * @param   dest      The map keyed by turn order IDs.
  * @param   countries The country bank allowing the function to match script names
  *                    with turn order IDs.
+ * @safety  Basic guarantee.
  */
 template<typename T>
 void updateTurnOrderMap(const std::unordered_map<std::string, T>& src,
 	std::unordered_map<awe::ArmyID, T>& dest,
-	const awe::bank<awe::country>& countries) noexcept {
+	const awe::bank<awe::country>& countries) {
 	dest.clear();
 	for (const auto& pair : src) {
 		if (countries.contains(pair.first)) {
@@ -99,7 +56,7 @@ const std::string awe::bank_id::EMPTY_STRING = "";
 //*COMMON PROPERTIES*
 //*******************
 awe::common_properties::common_properties(const std::string& scriptName,
-	engine::json& j) noexcept : bank_id(scriptName) {
+	engine::json& j) : bank_id(scriptName) {
 	j.apply(_name, { "longname" }, true);
 	j.apply(_shortName, { "shortname" }, true);
 	j.apply(_iconKey, { "icon" }, true);
@@ -110,7 +67,7 @@ awe::common_properties::common_properties(const std::string& scriptName,
 //*COUNTRY*
 //*********
 awe::ArmyID awe::country::_turnOrderCounter = 0;
-awe::country::country(const std::string& scriptName, engine::json& j) noexcept :
+awe::country::country(const std::string& scriptName, engine::json& j) :
 	common_properties(scriptName, j) {
 	j.applyColour(_colour, { "colour" }, true);
 	_turnOrder = _turnOrderCounter++;
@@ -134,7 +91,7 @@ awe::country::country(const std::string& scriptName, engine::json& j) noexcept :
 //*********
 //*TERRAIN*
 //*********
-awe::terrain::terrain(const std::string& scriptName, engine::json& j) noexcept :
+awe::terrain::terrain(const std::string& scriptName, engine::json& j) :
 	common_properties(scriptName, j) {
 	j.apply(_maxHP, { "hp" }, true);
 	if (_maxHP > INT_MAX) _maxHP = INT_MAX;
@@ -148,16 +105,16 @@ awe::terrain::terrain(const std::string& scriptName, engine::json& j) noexcept :
 		j.resetState();
 	}
 }
-void awe::terrain::updatePictureMap(const awe::bank<awe::country>& countries)
-	const noexcept {
+void awe::terrain::updatePictureMap(
+	const awe::bank<awe::country>& countries) const {
 	updateTurnOrderMap(_pictures, _picturesTurnOrder, countries);
 }
 
 //******
 //*TILE*
 //******
-awe::tile_type::tile_type(const std::string& scriptName, engine::json& j) noexcept
-	: bank_id(scriptName) {
+awe::tile_type::tile_type(const std::string& scriptName, engine::json& j) :
+	bank_id(scriptName) {
 	j.apply(_terrainTypeScriptName, { "type" }, true);
 	j.apply(_neutralTile, { "neutral" }, true);
 	if (j.keysExist({ "tiles" })) {
@@ -165,15 +122,15 @@ awe::tile_type::tile_type(const std::string& scriptName, engine::json& j) noexce
 		j.resetState();
 	}
 }
-void awe::tile_type::updateOwnedTilesMap(const awe::bank<awe::country>& countries)
-	const noexcept {
+void awe::tile_type::updateOwnedTilesMap(
+	const awe::bank<awe::country>& countries) const {
 	updateTurnOrderMap(_ownedTiles, _ownedTilesTurnOrder, countries);
 }
 
 //********
 //*WEAPON*
 //********
-awe::weapon::weapon(const std::string& scriptName, engine::json& j) noexcept :
+awe::weapon::weapon(const std::string& scriptName, engine::json& j) :
 	common_properties(scriptName, j), _jsonCache(j) {
 	if (j.keysExist({ "ammo" })) j.apply(_maxAmmo, { "ammo" }, true);
 	if (j.keysExist({ "canattackaftermoving" })) {
@@ -220,8 +177,8 @@ awe::weapon::weapon(const std::string& scriptName, engine::json& j) noexcept :
 //*UNIT*
 //******
 const unsigned int awe::unit_type::HP_GRANULARITY = 10;
-awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) noexcept
-	: common_properties(scriptName, j) {
+awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) :
+	common_properties(scriptName, j) {
 	j.apply(_movementTypeScriptName, { "movetype" }, true);
 	j.apply(_cost, { "price" }, true);
 	j.apply(_maxFuel, { "fuel" }, true);
@@ -264,7 +221,7 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) noexce
 	}
 }
 void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)
-	const noexcept {
+	const {
 	_canLoadTheseUnitTypes.clear();
 	for (const auto& unit : unitBank) {
 		for (auto& u : _canLoadThese) {
@@ -275,8 +232,8 @@ void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)
 		}
 	}
 }
-void awe::unit_type::updateTerrainTypes(const awe::bank<awe::terrain>& terrainBank)
-	const noexcept {
+void awe::unit_type::updateTerrainTypes(
+	const awe::bank<awe::terrain>& terrainBank) const {
 	_canCaptureTheseTerrainTypes.clear();
 	_canUnloadFromTheseTerrainTypes.clear();
 	for (const auto& terrain : terrainBank) {
@@ -294,8 +251,8 @@ void awe::unit_type::updateTerrainTypes(const awe::bank<awe::terrain>& terrainBa
 		}
 	}
 }
-std::shared_ptr<const awe::weapon> awe::unit_type::getFirstWeaponWithFiniteAmmo()
-	const noexcept {
+std::shared_ptr<const awe::weapon>
+	awe::unit_type::getFirstWeaponWithFiniteAmmo() const {
 	for (std::size_t i = 0, weaponCount = getWeaponCount(); i < weaponCount; ++i) {
 		const auto weapon = getWeaponByIndex(i);
 		if (!weapon->hasInfiniteAmmo()) return weapon;
@@ -323,7 +280,7 @@ void updateJJNew(nlohmann::ordered_json& jjNew,
 	}
 }
 void awe::unit_type::updateWeapons(const awe::bank<awe::weapon>& weaponBank,
-	const std::shared_ptr<engine::sink>& sink) const noexcept {
+	const std::shared_ptr<engine::sink>& sink) const {
 	_weapons.clear();
 	for (const auto weapon : _baseWeapons) {
 		if (weaponBank.contains(weapon.first)) {
@@ -352,8 +309,8 @@ void awe::unit_type::updateWeapons(const awe::bank<awe::weapon>& weaponBank,
 		}
 	}
 }
-void awe::unit_type::updateSpriteMaps(const awe::bank<awe::country>& countries)
-	const noexcept {
+void awe::unit_type::updateSpriteMaps(
+	const awe::bank<awe::country>& countries) const {
 	updateTurnOrderMap(_pictures, _picturesTurnOrder, countries);
 	updateTurnOrderMap(_units, _unitsTurnOrder, countries);
 }
@@ -361,3 +318,50 @@ void awe::unit_type::updateSpriteMaps(const awe::bank<awe::country>& countries)
 //***********
 //*COMMANDER*
 //***********
+
+//******************
+//*HELPER FUNCTIONS*
+//******************
+
+void awe::updateTerrainBank(awe::bank<awe::terrain>& terrainBank,
+	const awe::bank<awe::country>& countryBank) {
+	for (const auto& terrain : terrainBank) {
+		terrain.second->updatePictureMap(countryBank);
+	}
+}
+
+void awe::updateTileTypeBank(awe::bank<awe::tile_type>& tileBank,
+	const awe::bank<awe::terrain>& terrainBank,
+	const awe::bank<awe::country>& countryBank) {
+	for (const auto& tile : tileBank) {
+		tile.second->updateTerrain(terrainBank);
+		tile.second->updateOwnedTilesMap(countryBank);
+	}
+}
+
+void awe::updateUnitTypeBank(awe::bank<awe::unit_type>& unitBank,
+	const awe::bank<awe::movement_type>& movementBank,
+	const awe::bank<awe::terrain>& terrainBank,
+	const awe::bank<awe::weapon>& weaponBank,
+	const awe::bank<awe::country>& countryBank,
+	const std::shared_ptr<engine::sink>& sink) {
+	for (const auto& unit : unitBank) {
+		unit.second->updateMovementType(movementBank);
+		unit.second->updateUnitTypes(unitBank);
+		unit.second->updateTerrainTypes(terrainBank);
+		unit.second->updateWeapons(weaponBank, sink);
+		unit.second->updateSpriteMaps(countryBank);
+	}
+}
+
+bool awe::checkCountryTurnOrderIDs(const awe::bank<awe::country>& countries) {
+	std::unordered_set<awe::ArmyID> turnOrderIDs;
+	for (const auto& country : countries) {
+		const auto turnOrder = country.second->getTurnOrder();
+		if (turnOrder == awe::NO_ARMY) return false;
+		turnOrderIDs.insert(turnOrder);
+	}
+	// If the set isn't the same length as the number of countries, then we know
+	// that at least two of the countries have the same turn order ID.
+	return countries.size() == turnOrderIDs.size();
+}

@@ -43,15 +43,14 @@ namespace awe {
 	class damage_tooltip : public sfx::animated_drawable {
 	public:
 		void setSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& spritesheet)
-			noexcept;
-		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
-		void setDamage(const int dmg) noexcept;
+			const std::shared_ptr<sfx::animated_spritesheet>& spritesheet);
+		void setFont(const std::shared_ptr<sf::Font>& font);
+		void setDamage(const int dmg);
 		/// Should be the position of the attack cursor with offset applied!
-		void setPosition(const sf::Vector2f& pos, const int quadrant) noexcept;
-		void visible(const bool v) noexcept;
+		void setPosition(const sf::Vector2f& pos, const int quadrant);
+		void visible(const bool v);
 		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0) noexcept;
+			const double scaling = 1.0);
 	private:
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 		sfx::animated_sprite _sprite;

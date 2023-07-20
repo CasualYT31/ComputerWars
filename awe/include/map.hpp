@@ -58,17 +58,17 @@ namespace awe {
 		/**
 		 * Registers this struct with the script interface, if it hasn't been
 		 * already.
+		 * @safety No guarantee.
 		 */
 		static void Register(asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Constructs a closed list node.
 		 * @param tileIn The tile to construct the node with.
 		 * @param gIn    The G score to construct the node with.
 		 */
-		closed_list_node(const sf::Vector2u& tileIn = {}, const int gIn = 0)
-			noexcept;
+		closed_list_node(const sf::Vector2u& tileIn = {}, const int gIn = 0);
 
 		/**
 		 * The tile which this node represents.
@@ -119,16 +119,17 @@ namespace awe {
 		/**
 		 * Registers the \c Map script object type, if it hasn't already been
 		 * registered.
+		 * @safety No guarantee.
 		 */
 		static void Register(asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Initialises the internal logger object.
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		map(const engine::logger::data& data) noexcept;
+		map(const engine::logger::data& data);
 
 		/**
 		 * Initialises this object with \c bank pointers.
@@ -148,7 +149,7 @@ namespace awe {
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-			const engine::logger::data& data) noexcept;
+			const engine::logger::data& data);
 
 		/**
 		 * Replaces the state of this object with that given in the binary file.
@@ -163,8 +164,9 @@ namespace awe {
 		 *                 format to use.
 		 * @return \c TRUE if the load was successful, \c FALSE if the file
 		 *         couldn't be loaded (reason will be logged).
+		 * @safety No guarantee.
 		 */
-		bool load(std::string file, const unsigned char version = 0) noexcept;
+		bool load(std::string file, const unsigned char version = 0);
 
 		/**
 		 * Saves this \c map object's state to a given binary file.
@@ -175,15 +177,17 @@ namespace awe {
 		 *                 format to use.
 		 * @return \c TRUE if the save was successful, \c FALSE if the file
 		 *         couldn't be saved (reason will be logged).
+		 * @safety No guarantee.
 		 */
-		bool save(std::string file, const unsigned char version = 0) noexcept;
+		bool save(std::string file, const unsigned char version = 0);
 
 		/**
 		 * Gives access to the scripts to save the map.
 		 * @return \c TRUE if the save was successful, \c FALSE if the file
 		 *         couldn't be saved (reason will be logged).
+		 * @safety No guarantee.
 		 */
-		bool save() noexcept;
+		bool save();
 
 		/**
 		 * The \c scripts object which will allow this \c map object to create
@@ -193,16 +197,17 @@ namespace awe {
 		 * @warning Undefined behaviour will occur if you call this method more
 		 *          than once!
 		 * @param   scripts Pointer to the \c scripts object.
+		 * @safety  Strong guarantee.
 		 * @sa      @c getClosedList().
 		 */
-		void setScripts(const std::shared_ptr<engine::scripts>& scripts) noexcept;
+		void setScripts(const std::shared_ptr<engine::scripts>& scripts);
 
 		/**
 		 * Carry out periodic tasks, such as checking for win conditions.
 		 * @return If \c TRUE is returned, it signifies that the map's win
 		 *         condition has been met, and the map object should be deleted.
 		 */
-		bool periodic() noexcept;
+		bool periodic();
 
 		////////////////////
 		// MAP OPERATIONS //
@@ -210,15 +215,16 @@ namespace awe {
 		/**
 		 * Sets the map's name.
 		 * By default, a map's name is a blank string.
-		 * @param name The name to give to the map to replace the old name.
+		 * @param  name The name to give to the map to replace the old name.
+		 * @safety Strong guarantee.
 		 */
-		void setMapName(const std::string& name) noexcept;
+		void setMapName(const std::string& name);
 
 		/**
 		 * Retrieves the map's name.
 		 * @return The current name of the map.
 		 */
-		std::string getMapName() const noexcept;
+		std::string getMapName() const;
 
 		/**
 		 * Sets the map's size, in tiles.
@@ -246,20 +252,20 @@ namespace awe {
 		 * @param   tile The type of tile to assign to new tiles.
 		 */
 		void setMapSize(const sf::Vector2u& dim,
-			const std::shared_ptr<const awe::tile_type>& tile = nullptr) noexcept;
+			const std::shared_ptr<const awe::tile_type>& tile = nullptr);
 
 		/**
 		 * Overload of \c setMapSize() which accepts a tile type script name.
 		 * @param dim  The new size of the map.
 		 * @param tile The script name of the tile type to assign to new tiles.
 		 */
-		void setMapSize(const sf::Vector2u& dim, const std::string& tile) noexcept;
+		void setMapSize(const sf::Vector2u& dim, const std::string& tile);
 
 		/**
 		 * Retrieves the size of the map, in tiles.
 		 * @return The map's size. X = width, Y = height.
 		 */
-		inline sf::Vector2u getMapSize() const noexcept {
+		inline sf::Vector2u getMapSize() const {
 			return _mapSizeCache;
 		}
 
@@ -282,7 +288,7 @@ namespace awe {
 		 * returned.
 		 * @return \c TRUE if the win condition has been met, \c FALSE otherwise.
 		 */
-		bool defaultWinCondition() const noexcept;
+		bool defaultWinCondition() const;
 
 		/////////////////////
 		// ARMY OPERATIONS //
@@ -297,14 +303,13 @@ namespace awe {
 		 * @param  country The country of the army.
 		 * @return \c TRUE if the army was created, \c FALSE otherwise.
 		 */
-		bool createArmy(const std::shared_ptr<const awe::country>& country)
-			noexcept;
+		bool createArmy(const std::shared_ptr<const awe::country>& country);
 
 		/**
 		 * Overload of \c createArmy() which accepts a country script name.
 		 * @param country The script name of the country of the army.
 		 */
-		bool createArmy(const std::string& country) noexcept;
+		bool createArmy(const std::string& country);
 
 		/**
 		 * Deletes an army entirely from the map.
@@ -320,7 +325,7 @@ namespace awe {
 		 *                          neutral.
 		 */
 		void deleteArmy(const awe::ArmyID army,
-			const awe::ArmyID transferOwnership = awe::NO_ARMY) noexcept;
+			const awe::ArmyID transferOwnership = awe::NO_ARMY);
 
 		/**
 		 * Retrieves the number of armies currently on the map.
@@ -332,7 +337,7 @@ namespace awe {
 		 * Creates a set of each army's \c ArmyID, in their turn order.
 		 * @return The set.
 		 */
-		std::set<awe::ArmyID> getArmyIDs() const noexcept;
+		std::set<awe::ArmyID> getArmyIDs() const;
 
 		/**
 		 * Calls \c getArmyIDs() and converts the result into a \c CScriptArray.
@@ -346,7 +351,7 @@ namespace awe {
 		 * @param army The ID of the army to change.
 		 * @param team The ID of the team to assign this army to.
 		 */
-		void setArmyTeam(const awe::ArmyID army, const awe::TeamID team) noexcept;
+		void setArmyTeam(const awe::ArmyID army, const awe::TeamID team);
 
 		/**
 		 * Gets the team that a given army belongs to.
@@ -354,7 +359,7 @@ namespace awe {
 		 * @return The ID of the team that the given army belongs to. \c 0 if the
 		 *         given army doesn't exist.
 		 */
-		awe::TeamID getArmyTeam(const awe::ArmyID army) const noexcept;
+		awe::TeamID getArmyTeam(const awe::ArmyID army) const;
 
 		/**
 		 * Sets the amount of funds a specified army obtains.
@@ -362,7 +367,7 @@ namespace awe {
 		 * @param army  The ID of the army to amend.
 		 * @param funds The new fund amount to assign to the army.
 		 */
-		void setArmyFunds(const awe::ArmyID army, const awe::Funds funds) noexcept;
+		void setArmyFunds(const awe::ArmyID army, const awe::Funds funds);
 
 		/**
 		 * Offsets the amount of funds a specified army obtains.
@@ -371,8 +376,7 @@ namespace awe {
 		 * @param army  The ID of the army to amend.
 		 * @param funds The number of funds to award to the army.
 		 */
-		void offsetArmyFunds(const awe::ArmyID army, const awe::Funds funds)
-			noexcept;
+		void offsetArmyFunds(const awe::ArmyID army, const awe::Funds funds);
 
 		/**
 		 * Retrieves an army's fund count.
@@ -380,7 +384,7 @@ namespace awe {
 		 * @return The amount of funds this army possesses, or < 0 if the given
 		 *         army doesn't exist.
 		 */
-		awe::Funds getArmyFunds(const awe::ArmyID army) const noexcept;
+		awe::Funds getArmyFunds(const awe::ArmyID army) const;
 
 		/**
 		 * Retrieves an army's country.
@@ -389,8 +393,8 @@ namespace awe {
 		 *         \c nullptr is returned if the given army did not exist at the
 		 *         time of calling.
 		 */
-		std::shared_ptr<const awe::country> getArmyCountry(const awe::ArmyID army)
-			const noexcept;
+		std::shared_ptr<const awe::country> getArmyCountry(
+			const awe::ArmyID army) const;
 
 		/**
 		 * Retrieves an army's country, for use with the scripts.
@@ -413,7 +417,7 @@ namespace awe {
 		 */
 		void setArmyCOs(const awe::ArmyID army,
 			const std::shared_ptr<const awe::commander>& current,
-			const std::shared_ptr<const awe::commander>& tag = nullptr) noexcept;
+			const std::shared_ptr<const awe::commander>& tag = nullptr);
 
 		/**
 		 * Overload of \c setArmyCOs() which accepts script names.
@@ -423,7 +427,7 @@ namespace awe {
 		 *                string if there will not be one.
 		 */
 		void setArmyCOs(const awe::ArmyID army, const std::string& current,
-			 const std::string& tag = "") noexcept;
+			 const std::string& tag = "");
 
 		/**
 		 * Sets the current CO of a specified army.
@@ -432,15 +436,14 @@ namespace awe {
 		 * @sa    @c setArmyCOs()
 		 */
 		void setArmyCurrentCO(const awe::ArmyID army,
-			const std::shared_ptr<const awe::commander>& current) noexcept;
+			const std::shared_ptr<const awe::commander>& current);
 
 		/**
 		 * Overload of \c setArmyCurrentCO() which accepts a script name.
 		 * @param army    The ID of the army to set the CO of.
 		 * @param current The primary CO of the specified army.
 		 */
-		void setArmyCurrentCO(const awe::ArmyID army, const std::string& current)
-			noexcept;
+		void setArmyCurrentCO(const awe::ArmyID army, const std::string& current);
 
 		/**
 		 * Sets the tag CO of a specified army.
@@ -449,7 +452,7 @@ namespace awe {
 		 * @sa    @c setArmyCOs()
 		 */
 		void setArmyTagCO(const awe::ArmyID army,
-			const std::shared_ptr<const awe::commander>& tag) noexcept;
+			const std::shared_ptr<const awe::commander>& tag);
 
 		/**
 		 * Overload of \c setArmyTagCO() which accepts a script name.
@@ -457,7 +460,7 @@ namespace awe {
 		 * @param tag  The tag CO of the specified army. Can be an empty string to
 		 *             mean a lack of a tag CO.
 		 */
-		void setArmyTagCO(const awe::ArmyID army, const std::string& tag) noexcept;
+		void setArmyTagCO(const awe::ArmyID army, const std::string& tag);
 
 		/**
 		 * Performs a tag on a given army.
@@ -465,7 +468,7 @@ namespace awe {
 		 * COs to perform the tag with, then an error will be logged.
 		 * @param army The ID of the army to perform the tag on.
 		 */
-		void tagArmyCOs(const awe::ArmyID army) noexcept;
+		void tagArmyCOs(const awe::ArmyID army);
 
 		/**
 		 * Retrieves an army's primary/current CO.
@@ -475,7 +478,7 @@ namespace awe {
 		 *         time of calling, or if there was no current CO.
 		 */
 		std::shared_ptr<const awe::commander> getArmyCurrentCO(
-			const awe::ArmyID army) const noexcept;
+			const awe::ArmyID army) const;
 
 		/**
 		 * Gets the army's primary CO's script name.
@@ -483,8 +486,7 @@ namespace awe {
 		 * @return The script name of the primary CO assigned to this army, or an
 		 *         empty string if one is not assigned.
 		 */
-		std::string getArmyCurrentCOScriptName(const awe::ArmyID army) const
-			noexcept;
+		std::string getArmyCurrentCOScriptName(const awe::ArmyID army) const;
 
 		/**
 		 * Retrieves an army's secondary/tag CO.
@@ -493,8 +495,8 @@ namespace awe {
 		 *         \c nullptr is returned if the given army did not exist at the
 		 *         time of calling, or if there was no tag CO.
 		 */
-		std::shared_ptr<const awe::commander> getArmyTagCO(const awe::ArmyID army)
-			const noexcept;
+		std::shared_ptr<const awe::commander> getArmyTagCO(
+			const awe::ArmyID army) const;
 
 		/**
 		 * Gets the army's secondary CO's script name.
@@ -502,7 +504,7 @@ namespace awe {
 		 * @return The script name of the secondary CO assigned to this army, or an
 		 *         empty string if one is not assigned.
 		 */
-		std::string getArmyTagCOScriptName(const awe::ArmyID army) const noexcept;
+		std::string getArmyTagCOScriptName(const awe::ArmyID army) const;
 
 		/**
 		 * Finds out if an army has a tag CO.
@@ -511,7 +513,7 @@ namespace awe {
 		 *         has one (or if the specified army didn't exist at the time of
 		 *         calling).
 		 */
-		bool tagCOIsPresent(const awe::ArmyID army) const noexcept;
+		bool tagCOIsPresent(const awe::ArmyID army) const;
 
 		/**
 		 * Retrieves a list of tiles that belong to a specified army.
@@ -519,8 +521,8 @@ namespace awe {
 		 * @param  army The ID of the army to retrieve the owned tiles of.
 		 * @return A list of locations of tiles that belong to the given army.
 		 */
-		std::unordered_set<sf::Vector2u> getTilesOfArmy(const awe::ArmyID army)
-			const noexcept;
+		std::unordered_set<sf::Vector2u> getTilesOfArmy(
+			const awe::ArmyID army) const;
 
 		/**
 		 * Converts the result of a \c getTilesOfArmy() call into a
@@ -536,8 +538,8 @@ namespace awe {
 		 * @param  army The ID of the army to retrieve the units of.
 		 * @return A list of IDs identifying the units that belong to this army.
 		 */
-		std::unordered_set<awe::UnitID> getUnitsOfArmy(const awe::ArmyID army)
-			const noexcept;
+		std::unordered_set<awe::UnitID> getUnitsOfArmy(
+			const awe::ArmyID army) const;
 
 		/**
 		 * Converts the result of a \c getUnitsOfArmy() call into a
@@ -558,7 +560,7 @@ namespace awe {
 		 * @return Unit IDs, categorised by their turn start priority.
 		 */
 		std::map<unsigned int, std::unordered_set<awe::UnitID>>
-			getUnitsOfArmyByPriority(const awe::ArmyID army) const noexcept;
+			getUnitsOfArmyByPriority(const awe::ArmyID army) const;
 
 		/**
 		 * Converts the result of a \c getUnitsOfArmyByPriority() call into a
@@ -566,8 +568,8 @@ namespace awe {
 		 * @throws std::runtime_error if \c _scripts was \c nullptr.
 		 * @sa     @c getUnitsOfArmyByPriority().
 		 */
-		CScriptArray* getUnitsOfArmyByPriorityAsArray(const awe::ArmyID army)
-			const;
+		CScriptArray* getUnitsOfArmyByPriorityAsArray(
+			const awe::ArmyID army) const;
 
 		/**
 		 * Counts how many tiles of a specific terrain type the given army owns.
@@ -577,7 +579,7 @@ namespace awe {
 		 *         terrain type.
 		 */
 		std::size_t countTilesBelongingToArmy(const awe::ArmyID army,
-			const std::string& terrainType) const noexcept;
+			const std::string& terrainType) const;
 
 		/////////////////////
 		// UNIT OPERATIONS //
@@ -591,7 +593,7 @@ namespace awe {
 		 *         couldn't be created.
 		 */
 		awe::UnitID createUnit(const std::shared_ptr<const awe::unit_type>& type,
-			const awe::ArmyID army) noexcept;
+			const awe::ArmyID army);
 
 		/**
 		 * Overload of \c createUnit() which accepts a unit type script name.
@@ -600,8 +602,7 @@ namespace awe {
 		 * @return The 1-based ID of the unit created. Will be \c 0 if the unit
 		 *         couldn't be created.
 		 */
-		awe::UnitID createUnit(const std::string& type, const awe::ArmyID army)
-			noexcept;
+		awe::UnitID createUnit(const std::string& type, const awe::ArmyID army);
 
 		/**
 		 * Deletes a unit.
@@ -613,7 +614,7 @@ namespace awe {
 		 *          called!
 		 * @param   id The ID of the unit to delete.
 		 */
-		void deleteUnit(const awe::UnitID id) noexcept;
+		void deleteUnit(const awe::UnitID id);
 
 		/**
 		 * Gets a unit's type.
@@ -621,8 +622,8 @@ namespace awe {
 		 * @return Pointer to the unit's type properties. \c nullptr if the unit ID
 		 *         was invalid.
 		 */
-		std::shared_ptr<const awe::unit_type> getUnitType(const awe::UnitID id)
-			const noexcept;
+		std::shared_ptr<const awe::unit_type> getUnitType(
+			const awe::UnitID id) const;
 
 		/**
 		 * Script version of \c getUnitType().
@@ -638,8 +639,7 @@ namespace awe {
 		 * @param id  The ID of the unit to move.
 		 * @param pos The X and Y coordinate of the tile to move the unit to.
 		 */
-		void setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos)
-			noexcept;
+		void setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos);
 
 		/**
 		 * Retrieves a unit's position, indicating the tile it is occupying.
@@ -650,14 +650,14 @@ namespace awe {
 		 * @param  id The ID of the unit.
 		 * @return The X and Y location of the unit on the map.
 		 */
-		sf::Vector2u getUnitPosition(const awe::UnitID id) const noexcept;
+		sf::Vector2u getUnitPosition(const awe::UnitID id) const;
 
 		/**
 		 * Finds out if a unit occupies a tile or not.
 		 * @param  id The ID of the unit to check.
 		 * @return \c TRUE if this unit occupies a tile, \c FALSE if not.
 		 */
-		bool isUnitOnMap(const awe::UnitID id) const noexcept;
+		bool isUnitOnMap(const awe::UnitID id) const;
 
 		/**
 		 * Sets a unit's HP.
@@ -665,21 +665,21 @@ namespace awe {
 		 * @param id The ID of the unit to amend.
 		 * @param hp The new HP of the unit. In internal format.
 		 */
-		void setUnitHP(const awe::UnitID id, const awe::HP hp) noexcept;
+		void setUnitHP(const awe::UnitID id, const awe::HP hp);
 
 		/**
 		 * Gets a unit's HP.
 		 * @param  id The ID of the unit to inspect.
 		 * @return The internal HP of the unit. \c 0 if unit doesn't exist.
 		 */
-		awe::HP getUnitHP(const awe::UnitID id) const noexcept;
+		awe::HP getUnitHP(const awe::UnitID id) const;
 
 		/**
 		 * Gets a unit's HP in a user-friendly format.
 		 * @param  id The ID of the unit to inspect.
 		 * @return The user-friendly HP of the unit. \c 0 if unit doesn't exist.
 		 */
-		awe::HP getUnitDisplayedHP(const awe::UnitID id) const noexcept;
+		awe::HP getUnitDisplayedHP(const awe::UnitID id) const;
 
 		/**
 		 * Sets a unit's fuel.
@@ -687,7 +687,7 @@ namespace awe {
 		 * @param id   The ID of the unit to amend.
 		 * @param fuel The new fuel of the unit.
 		 */
-		void setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept;
+		void setUnitFuel(const awe::UnitID id, const awe::Fuel fuel);
 
 		/**
 		 * Offsets a unit's fuel.
@@ -696,14 +696,14 @@ namespace awe {
 		 * @param id   The ID of the unit whose fuel is being burned.
 		 * @param fuel The fuel units that are being removed from the unit.
 		 */
-		void burnUnitFuel(const awe::UnitID id, const awe::Fuel fuel) noexcept;
+		void burnUnitFuel(const awe::UnitID id, const awe::Fuel fuel);
 
 		/**
 		 * Gets a unit's fuel.
 		 * @param  id The ID of the unit to inspect.
 		 * @return The fuel of the unit. \c 0 if unit doesn't exist.
 		 */
-		awe::Fuel getUnitFuel(const awe::UnitID id) const noexcept;
+		awe::Fuel getUnitFuel(const awe::UnitID id) const;
 
 		/**
 		 * Sets a unit's ammo.
@@ -713,7 +713,7 @@ namespace awe {
 		 * @param ammo   The new ammo of the unit's weapon.
 		 */
 		void setUnitAmmo(const awe::UnitID id, const std::string& weapon,
-			const awe::Ammo ammo) noexcept;
+			const awe::Ammo ammo);
 
 		/**
 		 * Gets a unit's ammo.
@@ -722,15 +722,15 @@ namespace awe {
 		 * @return The ammo of the unit's weapon. \c 0 if unit or weapon doesn't
 		 *         exist.
 		 */
-		awe::Ammo getUnitAmmo(const awe::UnitID id, const std::string& weapon)
-			const noexcept;
+		awe::Ammo getUnitAmmo(const awe::UnitID id,
+			const std::string& weapon) const;
 
 		/**
 		 * Sets a unit's waiting state.
 		 * @param id      The ID of the unit to amend.
 		 * @param waiting \c TRUE if the unit should wait, \c FALSE if not.
 		 */
-		void waitUnit(const awe::UnitID id, const bool waiting) noexcept;
+		void waitUnit(const awe::UnitID id, const bool waiting);
 
 		/**
 		 * Gets a unit's waiting state.
@@ -738,14 +738,14 @@ namespace awe {
 		 * @return \c TRUE if the unit is waiting, \c FALSE if it is not. \c FALSE
 		 *         if the unit does not exist.
 		 */
-		bool isUnitWaiting(const awe::UnitID id) const noexcept;
+		bool isUnitWaiting(const awe::UnitID id) const;
 
 		/**
 		 * Sets a unit's capturing state.
 		 * @param id      The ID of the unit to amend.
 		 * @param capturing \c TRUE if the unit should capture, \c FALSE if not.
 		 */
-		void unitCapturing(const awe::UnitID id, const bool capturing) noexcept;
+		void unitCapturing(const awe::UnitID id, const bool capturing);
 
 		/**
 		 * Gets a unit's capturing state.
@@ -753,14 +753,14 @@ namespace awe {
 		 * @return \c TRUE if the unit is capturing, \c FALSE if it is not.
 		 *         \c FALSE if the unit does not exist.
 		 */
-		bool isUnitCapturing(const awe::UnitID id) const noexcept;
+		bool isUnitCapturing(const awe::UnitID id) const;
 
 		/**
 		 * Sets a unit's hiding state.
 		 * @param id     The ID of the unit to amend.
 		 * @param hiding \c TRUE if the unit should hide, \c FALSE if not.
 		 */
-		void unitHiding(const awe::UnitID id, const bool hiding) noexcept;
+		void unitHiding(const awe::UnitID id, const bool hiding);
 
 		/**
 		 * Gets a unit's hiding state.
@@ -768,7 +768,7 @@ namespace awe {
 		 * @return \c TRUE if the unit is hiding, \c FALSE if it is not. \c FALSE
 		 *         if the unit does not exist.
 		 */
-		bool isUnitHiding(const awe::UnitID id) const noexcept;
+		bool isUnitHiding(const awe::UnitID id) const;
 
 		/**
 		 * Figures out if a given unit is visible on the map from the perspective
@@ -778,8 +778,7 @@ namespace awe {
 		 * @return \c TRUE if \c army can see \c unit on the map,
 		 *         \c FALSE otherwise.
 		 */
-		bool isUnitVisible(const awe::UnitID unit, const awe::ArmyID army) const
-			noexcept;
+		bool isUnitVisible(const awe::UnitID unit, const awe::ArmyID army) const;
 
 		/**
 		 * Loads one unit onto another.
@@ -791,7 +790,7 @@ namespace awe {
 		 * @param   load The ID of the unit to load onto another.
 		 * @param   onto The ID of the unit which will load the unit.
 		 */
-		void loadUnit(const awe::UnitID load, const awe::UnitID onto) noexcept;
+		void loadUnit(const awe::UnitID load, const awe::UnitID onto);
 
 		/**
 		 * Unloads one unit onto a given tile.
@@ -803,7 +802,7 @@ namespace awe {
 		 * @param onto   The X and Y location to move the unloaded unit to.
 		 */
 		void unloadUnit(const awe::UnitID unload, const awe::UnitID from,
-			const sf::Vector2u& onto) noexcept;
+			const sf::Vector2u& onto);
 
 		/**
 		 * Gets the ID of the unit that a given unit is loaded on, if any.
@@ -813,8 +812,7 @@ namespace awe {
 		 * @return If \c unit is loaded onto another unit, then the latter's ID
 		 *         will be returned. Otherwise, \c 0 will be returned.
 		 */
-		awe::UnitID getUnitWhichContainsUnit(const awe::UnitID unit) const
-			noexcept;
+		awe::UnitID getUnitWhichContainsUnit(const awe::UnitID unit) const;
 
 		/**
 		 * Finds out if a unit is loaded onto another.
@@ -822,8 +820,8 @@ namespace awe {
 		 * @param  on   The ID of the unit which should have \c unit on it.
 		 * @return \c TRUE if \c unit is loaded onto \c on, \c FALSE otherwise.
 		 */
-		bool isUnitLoadedOntoUnit(const awe::UnitID unit, const awe::UnitID on)
-			const noexcept;
+		bool isUnitLoadedOntoUnit(const awe::UnitID unit,
+			const awe::UnitID on) const;
 
 		/**
 		 * Retrieves the ID of the army a specified unit belongs to.
@@ -831,7 +829,7 @@ namespace awe {
 		 * @param  id The ID of the unit to inspect.
 		 * @return The ID of the army that owns this unit.
 		 */
-		awe::ArmyID getArmyOfUnit(const awe::UnitID id) const noexcept;
+		awe::ArmyID getArmyOfUnit(const awe::UnitID id) const;
 
 		/**
 		 * Retrieves the ID of the team a specified unit belongs to.
@@ -839,7 +837,7 @@ namespace awe {
 		 * @param  id The ID of the unit to inspect.
 		 * @return The ID of the team of the army that owns this unit.
 		 */
-		awe::TeamID getTeamOfUnit(const awe::UnitID id) const noexcept;
+		awe::TeamID getTeamOfUnit(const awe::UnitID id) const;
 
 		/**
 		 * Retrieves the units that are loaded onto a specified one.
@@ -847,15 +845,14 @@ namespace awe {
 		 * @return The IDs of the loaded units. An empty set is returned if the
 		 *         given ID was invalid.
 		 */
-		std::unordered_set<awe::UnitID> getLoadedUnits(const awe::UnitID id) const
-			noexcept;
+		std::unordered_set<awe::UnitID> getLoadedUnits(const awe::UnitID id) const;
 
 		/**
 		 * Version of \c getLoadedUnits() that converts the returned set into a
 		 * \c CScriptArray.
 		 * @sa @c getLoadedUnits().
 		 */
-		CScriptArray* getLoadedUnitsAsArray(const awe::UnitID id) const noexcept;
+		CScriptArray* getLoadedUnitsAsArray(const awe::UnitID id) const;
 
 		/**
 		 * Finds out the number of defence stars this unit has based on its type
@@ -865,7 +862,7 @@ namespace awe {
 		 * @param  id The ID of the unit to getthe defence of.
 		 * @return The defence rating that this unit currently obtains.
 		 */
-		unsigned int getUnitDefence(const awe::UnitID id) const noexcept;
+		unsigned int getUnitDefence(const awe::UnitID id) const;
 
 		/////////////////////
 		// TILE OPERATIONS //
@@ -882,13 +879,12 @@ namespace awe {
 		 *         otherwise.
 		 */
 		bool setTileType(const sf::Vector2u& pos,
-			const std::shared_ptr<const awe::tile_type>& type) noexcept;
+			const std::shared_ptr<const awe::tile_type>& type);
 
 		/**
 		 * Version of \c setTileType() which accepts a tile type script name.
 		 */
-		bool setTileType(const sf::Vector2u& pos, const std::string& type)
-			noexcept;
+		bool setTileType(const sf::Vector2u& pos, const std::string& type);
 
 		/**
 		 * Retrieves the specified tile's type.
@@ -896,8 +892,8 @@ namespace awe {
 		 * @param  pos The X and Y coordinate of the tile to change.
 		 * @return The type of the tile and its information.
 		 */
-		std::shared_ptr<const awe::tile_type> getTileType(const sf::Vector2u& pos)
-			const noexcept;
+		std::shared_ptr<const awe::tile_type> getTileType(
+			const sf::Vector2u& pos) const;
 
 		/**
 		 * Script version of \c getTileType().
@@ -912,7 +908,7 @@ namespace awe {
 		 * @param pos The X and Y coordinate of the tile to change.
 		 * @param hp  The HP to assign to the tile.
 		 */
-		void setTileHP(const sf::Vector2u& pos, const awe::HP hp) noexcept;
+		void setTileHP(const sf::Vector2u& pos, const awe::HP hp);
 
 		/**
 		 * Retrieves a tile's HP.
@@ -920,7 +916,7 @@ namespace awe {
 		 * @return The HP of the tile, or \c 0 if the given coordinate was out of
 		 *         bounds.
 		 */
-		awe::HP getTileHP(const sf::Vector2u& pos) const noexcept;
+		awe::HP getTileHP(const sf::Vector2u& pos) const;
 
 		/**
 		 * Sets a tile's owner.
@@ -929,7 +925,7 @@ namespace awe {
 		 *             \c awe::army::NO_ARMY can be given to signal that the tile
 		 *             should not have an owner.
 		 */
-		void setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) noexcept;
+		void setTileOwner(const sf::Vector2u& pos, awe::ArmyID army);
 
 		/**
 		 * Gets a tile's owner.
@@ -938,7 +934,7 @@ namespace awe {
 		 * @return The ID of the army who owns this tile, or \c awe::army::NO_ARMY
 		 *         if no army owns it.
 		 */
-		awe::ArmyID getTileOwner(const sf::Vector2u& pos) const noexcept;
+		awe::ArmyID getTileOwner(const sf::Vector2u& pos) const;
 
 		/**
 		 * Retrieves the unit currently occupying a specified tile.
@@ -948,7 +944,7 @@ namespace awe {
 		 * @return The ID of the unit occupying this tile. \c 0 if the tile is
 		 *         vacant or out of bounds.
 		 */
-		awe::UnitID getUnitOnTile(const sf::Vector2u& pos) const noexcept;
+		awe::UnitID getUnitOnTile(const sf::Vector2u& pos) const;
 
 		/**
 		 * Calculates the tiles available from a specified tile.
@@ -964,7 +960,7 @@ namespace awe {
 		 */
 		std::unordered_set<sf::Vector2u> getAvailableTiles(
 			const sf::Vector2u& tile, unsigned int startFrom,
-			const unsigned int endAt) const noexcept;
+			const unsigned int endAt) const;
 
 		/**
 		 * Version of \c getAvailableTiles() which converts the result into a
@@ -973,7 +969,7 @@ namespace awe {
 		 */
 		CScriptArray* getAvailableTilesAsArray(
 			const sf::Vector2u& tile, unsigned int startFrom,
-			const unsigned int endAt) const noexcept;
+			const unsigned int endAt) const;
 
 		/**
 		 * Finds the shortest path from the origin to the destination.
@@ -999,7 +995,7 @@ namespace awe {
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
 			const unsigned int* const movePoints, const awe::Fuel* const fuel,
 			const awe::TeamID* const team, const awe::ArmyID* const army,
-			const std::unordered_set<awe::UnitID>& ignoredUnits) const noexcept;
+			const std::unordered_set<awe::UnitID>& ignoredUnits) const;
 
 		/**
 		 * Version of \c findPath() which converts the result into a
@@ -1010,7 +1006,7 @@ namespace awe {
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
 			const unsigned int movePoints, const awe::Fuel fuel,
 			const awe::TeamID team, const awe::ArmyID army,
-			CScriptArray* ignoredUnits) const noexcept;
+			CScriptArray* ignoredUnits) const;
 
 		/**
 		 * Version of \c findPath() which passes in \c nullptr where possible, and
@@ -1019,7 +1015,7 @@ namespace awe {
 		 */
 		CScriptArray* findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
-			const awe::ArmyID army, CScriptArray* ignoredUnits) const noexcept;
+			const awe::ArmyID army, CScriptArray* ignoredUnits) const;
 
 		/**
 		 * Finds out if there is an obstruction in a given path.
@@ -1039,7 +1035,7 @@ namespace awe {
 		 * @return The index to the obstruction, if any.
 		 */
 		int scanPath(CScriptArray* path, const awe::UnitID unit,
-			std::size_t ignores = 0) const noexcept;
+			std::size_t ignores = 0) const;
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
@@ -1054,7 +1050,7 @@ namespace awe {
 		 *              selected unit rendering data will be cleared.
 		 * @return \c TRUE if the unit was successfully selected, \c FALSE if not.
 		 */
-		bool setSelectedUnit(const awe::UnitID unit) noexcept;
+		bool setSelectedUnit(const awe::UnitID unit);
 
 		/**
 		 * Selects a new unit on the map and remembers the previously selected
@@ -1064,7 +1060,7 @@ namespace awe {
 		 * @return \c TRUE if the unit was selected successfully, \c FALSE if not.
 		 * @sa     @c setSelectedUnit().
 		 */
-		bool pushSelectedUnit(const awe::UnitID unit) noexcept;
+		bool pushSelectedUnit(const awe::UnitID unit);
 
 		/**
 		 * Pops the currently selected unit from the stack and reselects the
@@ -1077,14 +1073,14 @@ namespace awe {
 		 *          then \c setSelectedUnit(0) will be called and a warning will be
 		 *          logged.
 		 */
-		void popSelectedUnit() noexcept;
+		void popSelectedUnit();
 
 		/**
 		 * Gets the currently selected unit.
 		 * @return The ID of the currently selected unit. \c 0 if no unit is
 		 *         selected.
 		 */
-		awe::UnitID getSelectedUnit() const noexcept;
+		awe::UnitID getSelectedUnit() const;
 
 		/**
 		 * Adds a tile to the available tile set.
@@ -1093,7 +1089,7 @@ namespace awe {
 		 * @param tile The tile to add. If a tile is given that was already in the
 		 *             set, the tile won't be added again.
 		 */
-		void addAvailableTile(const sf::Vector2u& tile) noexcept;
+		void addAvailableTile(const sf::Vector2u& tile);
 
 		/**
 		 * Finds out if a given tile was previously added to the available tiles
@@ -1104,25 +1100,24 @@ namespace awe {
 		 * @return \c TRUE if \c tile was added as an available tile, \c FALSE
 		 *         otherwise.
 		 */
-		bool isAvailableTile(const sf::Vector2u& tile) const noexcept;
+		bool isAvailableTile(const sf::Vector2u& tile) const;
 
 		/**
 		 * Removes all available tiles.
 		 */
-		void clearAvailableTiles() noexcept;
+		void clearAvailableTiles();
 
 		/**
 		 * Sets the shader to use for available tiles.
 		 * @param shader The shader to use.
 		 */
-		void setAvailableTileShader(const awe::available_tile_shader shader)
-			noexcept;
+		void setAvailableTileShader(const awe::available_tile_shader shader);
 
 		/**
 		 * Gets the shader currently used for available tiles.
 		 * @return The shader in use.
 		 */
-		awe::available_tile_shader getAvailableTileShader() const noexcept;
+		awe::available_tile_shader getAvailableTileShader() const;
 
 		/**
 		 * Returns a pointer to the closed list.
@@ -1130,7 +1125,7 @@ namespace awe {
 		 * @return Pointer to the \c CScriptArray holding the closed list.
 		 * @sa     @c setScripts().
 		 */
-		CScriptArray* getClosedList() noexcept;
+		CScriptArray* getClosedList();
 
 		/**
 		 * Disables rendering effects for a selected unit without deselecting the
@@ -1139,7 +1134,7 @@ namespace awe {
 		 * @param val \c TRUE if the rendering effects for selected units are to be
 		 *            disabled, \c FALSE if they are to be enabled.
 		 */
-		void disableSelectedUnitRenderingEffects(const bool val) noexcept;
+		void disableSelectedUnitRenderingEffects(const bool val);
 
 		/**
 		 * Disables greyed out unit shading for units that are on an available
@@ -1151,7 +1146,7 @@ namespace awe {
 		 * Iterates through the closed list in its current state and updates each
 		 * node's animated sprite based on the stored path.
 		 */
-		void regenerateClosedListSprites() noexcept;
+		void regenerateClosedListSprites();
 
 		/**
 		 * Add a unit location override.
@@ -1168,8 +1163,7 @@ namespace awe {
 		 * @param   unit The ID of the unit to provide an override for.
 		 * @param   pos  The tile to render the unit at.
 		 */
-		void addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos)
-			noexcept;
+		void addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos);
 
 		/**
 		 * Removes a unit location override.
@@ -1177,12 +1171,12 @@ namespace awe {
 		 * and the state of the map will not change.
 		 * @param unit ID of the unit to remove the location override for.
 		 */
-		void removePreviewUnit(const awe::UnitID unit) noexcept;
+		void removePreviewUnit(const awe::UnitID unit);
 
 		/**
 		 * Removes all unit location overrides.
 		 */
-		void removeAllPreviewUnits() noexcept;
+		void removeAllPreviewUnits();
 
 		/**
 		 * Finds out if a unit has a location override.
@@ -1190,7 +1184,7 @@ namespace awe {
 		 * @return \c TRUE if a unit has a mapping that was previously given,
 		 *         \c FALSE otherwise.
 		 */
-		inline bool isPreviewUnit(const awe::UnitID unit) const noexcept {
+		inline bool isPreviewUnit(const awe::UnitID unit) const {
 			return _unitLocationOverrides.find(unit) !=
 				_unitLocationOverrides.end();
 		}
@@ -1203,7 +1197,7 @@ namespace awe {
 		 * @return \c TRUE if \c unit maps to \c tile, \c FALSE otherwise.
 		 */
 		inline bool tileHasPreviewUnit(const sf::Vector2u& tile,
-			const awe::UnitID unit) const noexcept {
+			const awe::UnitID unit) const {
 			return isPreviewUnit(unit) && _unitLocationOverrides.at(unit) == tile;
 		}
 
@@ -1213,8 +1207,7 @@ namespace awe {
 		 * @return The assigned location override, or the unit's real location if
 		 *         it has no location override.
 		 */
-		inline sf::Vector2u getUnitPreviewPosition(const awe::UnitID unit) const
-			noexcept {
+		inline sf::Vector2u getUnitPreviewPosition(const awe::UnitID unit) const {
 			return (isPreviewUnit(unit)) ? (_unitLocationOverrides.at(unit)) :
 				(getUnitPosition(unit));
 		}
@@ -1223,7 +1216,7 @@ namespace awe {
 		 * Retrieves the number of unit location overrides currently configured.
 		 * @return The number of unit location overrides currently configured.
 		 */
-		std::size_t getUnitPreviewsCount() const noexcept;
+		std::size_t getUnitPreviewsCount() const;
 
 		////////////////////////
 		// DRAWING OPERATIONS //
@@ -1235,31 +1228,31 @@ namespace awe {
 		 * call will be ignored.
 		 * @param pos The X and Y location of the tile which is selected.
 		 */
-		void setSelectedTile(const sf::Vector2u& pos) noexcept;
+		void setSelectedTile(const sf::Vector2u& pos);
 
 		/**
 		 * Moves the cursor up one tile, if possible.
 		 * If not possible, the call is ignored.
 		 */
-		void moveSelectedTileUp() noexcept;
+		void moveSelectedTileUp();
 
 		/**
 		 * Moves the cursor down one tile, if possible.
 		 * If not possible, the call is ignored.
 		 */
-		void moveSelectedTileDown() noexcept;
+		void moveSelectedTileDown();
 
 		/**
 		 * Moves the cursor left one tile, if possible.
 		 * If not possible, the call is ignored.
 		 */
-		void moveSelectedTileLeft() noexcept;
+		void moveSelectedTileLeft();
 
 		/**
 		 * Moves the cursor right one tile, if possible.
 		 * If not possible, the call is ignored.
 		 */
-		void moveSelectedTileRight() noexcept;
+		void moveSelectedTileRight();
 
 		/**
 		 * Selects a tile on the map based on a pixel.
@@ -1267,13 +1260,13 @@ namespace awe {
 		 * @param pixel The pixel relative to the render target to use to identify
 		 *              a tile to select.
 		 */
-		void setSelectedTileByPixel(const sf::Vector2i& pixel) noexcept;
+		void setSelectedTileByPixel(const sf::Vector2i& pixel);
 
 		/**
 		 * Gets the position of the currently selected tile.
 		 * @return The X and Y location of the selected tile.
 		 */
-		inline sf::Vector2u getSelectedTile() const noexcept {
+		inline sf::Vector2u getSelectedTile() const {
 			return _sel;
 		}
 
@@ -1283,13 +1276,13 @@ namespace awe {
 		 * @param army The ID of the army which should be having their turn at the
 		 *             time of the call.
 		 */
-		void setSelectedArmy(const awe::ArmyID army) noexcept;
+		void setSelectedArmy(const awe::ArmyID army);
 
 		/**
 		 * Returns the ID of the currently selected army.
 		 * @return The current army.
 		 */
-		awe::ArmyID getSelectedArmy() const noexcept;
+		awe::ArmyID getSelectedArmy() const;
 
 		/**
 		 * Returns the ID of the army that should be selected next.
@@ -1297,7 +1290,7 @@ namespace awe {
 		 *         army if the current army is the last one in the list. Returns
 		 *         \c NO_ARMY if \c _currentArmy is \c NO_ARMY.
 		 */
-		awe::ArmyID getNextArmy() const noexcept;
+		awe::ArmyID getNextArmy() const;
 
 		/**
 		 * Sets the amount by which the map is scaled.
@@ -1306,14 +1299,14 @@ namespace awe {
 		 * transforms given).
 		 * @param factor The factor by which to scale the map.
 		 */
-		void setMapScalingFactor(const float factor) noexcept;
+		void setMapScalingFactor(const float factor);
 
 		/**
 		 * Determines if the cursor is on the left or right side of the target.
 		 * @return \c TRUE if the UL of the cursor graphic is on the left half of
 		 *         the target, \c FALSE if it is on the right half of the target.
 		 */
-		inline bool isCursorOnLeftSide() const noexcept {
+		inline bool isCursorOnLeftSide() const {
 			return _cursor.getPositionWithoutOffset().x < _targetSizeCache.x /
 				_mapScalingFactor / _scalingCache / 2.0f;
 		}
@@ -1323,7 +1316,7 @@ namespace awe {
 		 * @return \c TRUE if the UL of the cursor graphic is on the top half of
 		 *         the target, \c FALSE if it is on the bottom half of the target.
 		 */
-		inline bool isCursorOnTopSide() const noexcept {
+		inline bool isCursorOnTopSide() const {
 			return _cursor.getPositionWithoutOffset().y < _targetSizeCache.y /
 				_mapScalingFactor / _scalingCache / 2.0f;
 		}
@@ -1332,7 +1325,7 @@ namespace awe {
 		 * Determines which quadrant of the render target the cursor is in.
 		 * @return Where the UL of the cursor sprite is determined to be.
 		 */
-		awe::quadrant getCursorQuadrant() const noexcept;
+		awe::quadrant getCursorQuadrant() const;
 
 		/**
 		 * Sets which sprite from the icon spritesheet to use as the cursor when
@@ -1344,7 +1337,7 @@ namespace awe {
 		 *          this quadrant!
 		 * @param   sprite The animated sprite to use as the UL cursor.
 		 */
-		void setULCursorSprite(const std::string& sprite) noexcept;
+		void setULCursorSprite(const std::string& sprite);
 
 		/**
 		 * Sets which sprite from the icon spritesheet to use as the cursor when
@@ -1356,7 +1349,7 @@ namespace awe {
 		 *          this quadrant!
 		 * @param   sprite The animated sprite to use as the UR cursor.
 		 */
-		void setURCursorSprite(const std::string& sprite) noexcept;
+		void setURCursorSprite(const std::string& sprite);
 
 		/**
 		 * Sets which sprite from the icon spritesheet to use as the cursor when
@@ -1368,7 +1361,7 @@ namespace awe {
 		 *          this quadrant!
 		 * @param   sprite The animated sprite to use as the LL cursor.
 		 */
-		void setLLCursorSprite(const std::string& sprite) noexcept;
+		void setLLCursorSprite(const std::string& sprite);
 
 		/**
 		 * Sets which sprite from the icon spritesheet to use as the cursor when
@@ -1380,48 +1373,48 @@ namespace awe {
 		 *          this quadrant!
 		 * @param   sprite The animated sprite to use as the LR cursor.
 		 */
-		void setLRCursorSprite(const std::string& sprite) noexcept;
+		void setLRCursorSprite(const std::string& sprite);
 
 		/**
 		 * Calculates the minimum pixel size of a tile as seen by the user.
 		 * @return The minimum size of a tile, after scaling has been applied.
 		 */
-		sf::Vector2u getTileSize() const noexcept;
+		sf::Vector2u getTileSize() const;
 
 		/**
 		 * Sets the spritesheet used for drawing tiles.
 		 * @param sheet Pointer to the animated spritesheet to use for tiles.
 		 */
-		void setTileSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
-			sheet) noexcept;
+		void setTileSpritesheet(
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
 
 		/**
 		 * Sets the spritesheet used for drawing units.
 		 * @param sheet Pointer to the animated spritesheet to use for units.
 		 */
-		void setUnitSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
-			sheet) noexcept;
+		void setUnitSpritesheet(
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
 
 		/**
 		 * Sets the spritesheet used for drawing map icons.
 		 * @param sheet Pointer to the animated spritesheet to use for icons.
 		 */
-		void setIconSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
-			sheet) noexcept;
+		void setIconSpritesheet(
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
 
 		/**
 		 * Sets the spritesheet used for drawing COs.
 		 * @param sheet Pointer to the animated spritesheet to use for COs.
 		 */
-		void setCOSpritesheet(const std::shared_ptr<sfx::animated_spritesheet>&
-			sheet) noexcept;
+		void setCOSpritesheet(
+			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
 
 		/**
 		 * Sets the font used with this map.
 		 * If \c nullptr is given, an error will be logged.
 		 * @param font Pointer to the font to use with this map.
 		 */
-		void setFont(const std::shared_ptr<sf::Font>& font) noexcept;
+		void setFont(const std::shared_ptr<sf::Font>& font);
 
 		/**
 		 * Sets the language dictionary to use with this map.
@@ -1429,7 +1422,7 @@ namespace awe {
 		 * @param dict Pointer to the dictionary to use with this map.
 		 */
 		void setLanguageDictionary(
-			const std::shared_ptr<engine::language_dictionary>& dict) noexcept;
+			const std::shared_ptr<engine::language_dictionary>& dict);
 
 		/**
 		 * This drawable's \c animate() method.
@@ -1439,7 +1432,7 @@ namespace awe {
 		 * @return \c FALSE, for now.
 		 */
 		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0) noexcept;
+			const double scaling = 1.0);
 	private:
 		/**
 		 * This drawable's \c draw() method.
@@ -1471,7 +1464,7 @@ namespace awe {
 		 * @param  pos The position to test.
 		 * @return \c TRUE if the position is out of bounds, \c FALSE if not.
 		 */
-		inline bool _isOutOfBounds(const sf::Vector2u& pos) const noexcept {
+		inline bool _isOutOfBounds(const sf::Vector2u& pos) const {
 			return pos.x >= getMapSize().x || pos.y >= getMapSize().y;
 		}
 
@@ -1491,7 +1484,7 @@ namespace awe {
 		 * @param  id The ID of the army to check.
 		 * @return \c TRUE if the army is on the map, \c FALSE if they are not.
 		 */
-		inline bool _isArmyPresent(const awe::ArmyID id) const noexcept {
+		inline bool _isArmyPresent(const awe::ArmyID id) const {
 			return _armies.find(id) != _armies.end();
 		}
 
@@ -1500,7 +1493,7 @@ namespace awe {
 		 * @param  id The ID of the unit to check.
 		 * @return \c TRUE if the unit is on the map, \c FALSE if they are not.
 		 */
-		inline bool _isUnitPresent(const awe::UnitID id) const noexcept {
+		inline bool _isUnitPresent(const awe::UnitID id) const {
 			return _units.find(id) != _units.end();
 		}
 
@@ -1522,7 +1515,7 @@ namespace awe {
 		 * state, if the given unit was capturing a tile.
 		 * @param id The ID of the unit to check
 		 */
-		void _updateCapturingUnit(const awe::UnitID id) noexcept;
+		void _updateCapturingUnit(const awe::UnitID id);
 
 		/**
 		 * Determines the ID the next unit should have.
@@ -1620,21 +1613,21 @@ namespace awe {
 			 * Default constructor.
 			 * @param scripts The scripts engine to allocate the array with.
 			 */
-			selected_unit_render_data(const engine::scripts& scripts) noexcept;
+			selected_unit_render_data(const engine::scripts& scripts);
 
 			/**
 			 * Copy constructor.
 			 * @param o The object to copy.
 			 */
-			selected_unit_render_data(const awe::map::selected_unit_render_data& o)
-				noexcept;
+			selected_unit_render_data(
+				const awe::map::selected_unit_render_data& o);
 
 			/**
 			 * Move constructor.
 			 * @param o The object to move.
 			 */
-			selected_unit_render_data(awe::map::selected_unit_render_data&& o)
-				noexcept;
+			selected_unit_render_data(
+				awe::map::selected_unit_render_data&& o) noexcept;
 
 			/**
 			 * Releases the reference to the closed list \c CScriptArray, if it has
@@ -1647,7 +1640,7 @@ namespace awe {
 			 * @param o The object to copy.
 			 */
 			selected_unit_render_data& operator=(
-				const awe::map::selected_unit_render_data& o) noexcept;
+				const awe::map::selected_unit_render_data& o);
 
 			/**
 			 * The ID of the unit that is selected.
@@ -1689,7 +1682,7 @@ namespace awe {
 			/**
 			 * Clears the state of the object.
 			 */
-			void clearState() noexcept;
+			void clearState();
 		};
 		
 		/**
@@ -1799,7 +1792,7 @@ namespace awe {
 		/**
 		 * Initialises the shaders used for selected unit rendering.
 		 */
-		void _initShaders() noexcept;
+		void _initShaders();
 
 		/**
 		 * Yellow tiles shader.

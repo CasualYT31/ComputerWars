@@ -53,7 +53,7 @@ namespace awe {
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		game_engine(const engine::logger::data& data) noexcept;
+		game_engine(const engine::logger::data& data);
 
 		/**
 		 * Executes the game based on given game data.
@@ -62,15 +62,16 @@ namespace awe {
 		 * @return \c 0 upon successful execution, \c !0 upon a fatal error
 		 *         occurring.
 		 */
-		int run() noexcept;
+		int run();
 
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
 		 * game engine functions with a \c scripts object.
-		 * @sa \c engine::scripts::registerInterface()
+		 * @safety No guarantee.
+		 * @sa     \c engine::scripts::registerInterface()
 		 */
 		void registerInterface(asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -104,8 +105,9 @@ namespace awe {
 		 * @param   j The \c engine::json object representing the contents of the
 		 *            loaded script which this method reads.
 		 * @return Always returns \c TRUE.
+		 * @safety No guarantee.
 		 */
-		bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j);
 
 		/**
 		 * Loads an @c engine::json_script object using a path stored at @c keys.
@@ -123,11 +125,11 @@ namespace awe {
 		 *                           point to.
 		 * @return @c TRUE if @c j and @c *ptr are in a good state, @c FALSE if at
 		 *         least one of them is not.
+		 * @safety No guarantee.
 		 */
 		template<typename T, typename... Ts>
 		bool _loadObject(std::shared_ptr<T>& ptr, engine::json& j,
-			const engine::json::KeySequence& keys, Ts... constructorParams)
-			noexcept;
+			const engine::json::KeySequence& keys, Ts... constructorParams);
 
 		/**
 		 * The JSON save method for this class.
@@ -145,7 +147,7 @@ namespace awe {
 		 * \c nullptr, \c 1 will be returned.
 		 * @return \c 0 if all tests passed, \c 1 if not.
 		 */
-		int _initCheck() const noexcept;
+		int _initCheck() const;
 
 		//=============================
 		//======SCRIPT INTERFACE=======
@@ -265,7 +267,7 @@ namespace awe {
 		 * @param  max The maximum value the result can be.
 		 * @return The random number.
 		 */
-		unsigned int _script_rand(const unsigned int max) noexcept;
+		unsigned int _script_rand(const unsigned int max);
 
 		//=============================
 		//==========GAME DATA==========

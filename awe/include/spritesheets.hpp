@@ -36,11 +36,12 @@ namespace awe {
 	struct spritesheets {
 		/**
 		 * Tests all the pointers to ensure they aren't empty.
-		 * @param errstring The error string within \c _initChecks(). If any
-		 *                  pointers are invalid, their names will be added to this
-		 *                  string.
+		 * @param  errstring The error string within \c _initChecks(). If any
+		 *                   pointers are invalid, their names will be added to
+		 *                   this string.
+		 * @safety Basic guarantee.
 		 */
-		void test(std::string& errstring) const noexcept;
+		void test(std::string& errstring) const;
 
 		/**
 		 * Pointer to the CO spritesheet.

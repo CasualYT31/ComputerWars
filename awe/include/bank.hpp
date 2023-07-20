@@ -90,7 +90,7 @@ namespace awe {
 		 * @param data    The data to initialise the logger object with.
 		 */
 		bank(const std::shared_ptr<engine::scripts>& scripts,
-			const std::string& name, const engine::logger::data& data) noexcept;
+			const std::string& name, const engine::logger::data& data);
 
 		/**
 		 * The type of container used to store bank values internally.
@@ -107,7 +107,7 @@ namespace awe {
 		 * Points to the beginning of the bank.
 		 * @return Internal bank \c const_iterator.
 		 */
-		inline const_iterator begin() const noexcept {
+		inline const_iterator begin() const {
 			return _bank.cbegin();
 		}
 
@@ -115,7 +115,7 @@ namespace awe {
 		 * Points to the end of the bank.
 		 * @return Internal bank \c const_iterator.
 		 */
-		inline const_iterator end() const noexcept {
+		inline const_iterator end() const {
 			return _bank.cend();
 		}
 
@@ -124,7 +124,7 @@ namespace awe {
 		 * @param  sn The script name of the member to access.
 		 * @return A pointer to the properties.
 		 */
-		std::shared_ptr<const T> operator[](const std::string& sn) const noexcept {
+		std::shared_ptr<const T> operator[](const std::string& sn) const {
 			if (_bank.find(sn) == _bank.end()) {
 				_logger.error("Game property \"{}\" does not exist in this bank!",
 					sn);
@@ -147,7 +147,7 @@ namespace awe {
 		 * @return \c TRUE if there is an entry with the given name, \c FALSE
 		 *         otherwise.
 		 */
-		inline bool contains(const std::string& scriptName) const noexcept {
+		inline bool contains(const std::string& scriptName) const {
 			return _bank.find(scriptName) != _bank.end();
 		}
 
@@ -155,15 +155,16 @@ namespace awe {
 		 * Returns a set of script names pointing to members of this bank.
 		 * @return All the script names found within this bank.
 		 */
-		std::unordered_set<std::string> getScriptNames() const noexcept;
+		std::unordered_set<std::string> getScriptNames() const;
 
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
 		 * game engine functions with a \c scripts object.
-		 * @sa \c engine::scripts::registerInterface()
+		 * @safety No guarantee.
+		 * @sa     \c engine::scripts::registerInterface()
 		 */
 		void registerInterface(asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -176,9 +177,10 @@ namespace awe {
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee.
 		 * @sa     @c awe::bank<T>
 		 */
-		bool _load(engine::json& j) noexcept;
+		bool _load(engine::json& j);
 
 		/**
 		 * The JSON save method for this class.
@@ -208,7 +210,7 @@ namespace awe {
 		 * of strings.
 		 * @return The array that can be used by scripts.
 		 */
-		CScriptArray* _getScriptNamesArray() const noexcept;
+		CScriptArray* _getScriptNamesArray() const;
 
 		/**
 		 * Internal logger object.
@@ -252,11 +254,12 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Retrieves the script name of this bank entry as defined by the JSON
@@ -294,8 +297,7 @@ namespace awe {
 		 * list, or in the code block of the subclass constructor.
 		 * @param scriptName The identifier of this bank entry.
 		 */
-		inline bank_id(const std::string& scriptName) noexcept :
-			_scriptName(scriptName) {}
+		inline bank_id(const std::string& scriptName) : _scriptName(scriptName) {}
 
 		/**
 		 * Used by subclasses to return an empty string when attempting to retrieve
@@ -336,12 +338,13 @@ namespace awe {
 		 *                      to register script interface documentation with.
 		 * @param  extraIconDoc Used by subclasses to provide extra documentation
 		 *                      on how their \c icon property should be used.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string & type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>&document,
-			const std::string& extraIconDoc = "") noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document,
+			const std::string& extraIconDoc = "");
 
 		/**
 		 * Retrieves the long name property.
@@ -400,7 +403,7 @@ namespace awe {
 		 *                   properties subclasses need to store (which this class
 		 *                   ignores).
 		 */
-		common_properties(const std::string& scriptName, engine::json& j) noexcept;
+		common_properties(const std::string& scriptName, engine::json& j);
 	private:
 		/**
 		 * The long name property.
@@ -454,7 +457,7 @@ namespace awe {
 		 *                   within game scripts.
 		 * @param j          The object value containing the country's properties.
 		 */
-		country(const std::string& scriptName, engine::json& j) noexcept;
+		country(const std::string& scriptName, engine::json& j);
 
 		/**
 		 * Registers \c country with a given type.
@@ -465,11 +468,12 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Retrieves the colour property.
@@ -518,7 +522,7 @@ namespace awe {
 		 *                   within game scripts.
 		 * @param j          The object value containing the weather's properties.
 		 */
-		inline weather(const std::string& scriptName, engine::json& j) noexcept :
+		inline weather(const std::string& scriptName, engine::json& j) :
 			common_properties(scriptName, j) {}
 
 		/**
@@ -530,11 +534,12 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 	};
 
 	/**
@@ -555,7 +560,7 @@ namespace awe {
 		 * @param j          The object value containing the environment's
 		 *                   properties.
 		 */
-		environment(const std::string& scriptName, engine::json& j) noexcept :
+		environment(const std::string& scriptName, engine::json& j) :
 			common_properties(scriptName, j) {}
 
 		/**
@@ -567,11 +572,12 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 	};
 
 	/**
@@ -590,7 +596,7 @@ namespace awe {
 		 * @param j          The object value containing the movement type's
 		 *                   properties.
 		 */
-		movement_type(const std::string& scriptName, engine::json& j) noexcept :
+		movement_type(const std::string& scriptName, engine::json& j) :
 			common_properties(scriptName, j) {}
 
 		/**
@@ -602,11 +608,12 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 	};
 
 	/**
@@ -648,7 +655,7 @@ namespace awe {
 		 * @param j          The object value containing the terrain type's
 		 *                   properties.
 		 */
-		terrain(const std::string& scriptName, engine::json& j) noexcept;
+		terrain(const std::string& scriptName, engine::json& j);
 
 		/**
 		 * Registers \c terrain with a given type.
@@ -659,11 +666,12 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Retrieves the maximum health property.
@@ -689,7 +697,7 @@ namespace awe {
 		 * @param  movecostName The script name of the type of movement.
 		 * @return The movement point cost.
 		 */
-		inline int getMoveCost(const std::string& movecostName) const noexcept {
+		inline int getMoveCost(const std::string& movecostName) const {
 			return (( _movecosts.find(movecostName) == _movecosts.end() ) ?
 				( -1 ) : ( _movecosts.at(movecostName) ));
 		}
@@ -700,8 +708,8 @@ namespace awe {
 		 * @return The sprite name of the terrain picture, or a blank string if the
 		 *         given country ID didn't identify a sprite name.
 		 */
-		inline const std::string& getPicture(const std::string& countryName) const
-			noexcept {
+		inline const std::string& getPicture(
+			const std::string& countryName) const {
 			return ((_pictures.find(countryName) == _pictures.end()) ?
 				(getIconName()) : (_pictures.at(countryName)));
 		}
@@ -712,8 +720,7 @@ namespace awe {
 		 * @return The sprite name of the terrain picture, or a blank string if the
 		 *         given country ID didn't identify a sprite name.
 		 */
-		inline const std::string& getPicture(const awe::ArmyID countryID) const
-			noexcept {
+		inline const std::string& getPicture(const awe::ArmyID countryID) const {
 			return
 				((_picturesTurnOrder.find(countryID) == _picturesTurnOrder.end()) ?
 				(getIconName()) : (_picturesTurnOrder.at(countryID)));
@@ -722,11 +729,11 @@ namespace awe {
 		/**
 		 * Updates \c _picturesTurnOrder by copying over the contents of
 		 * \c _pictures and supplying the respective turn order IDs as keys.
-		 * @param countries Pointer to the country bank to pull the turn order IDs
-		 *                  from.
+		 * @param  countries Pointer to the country bank to pull the turn order IDs
+		 *                   from.
+		 * @safety Basic guarantee.
 		 */
-		void updatePictureMap(const awe::bank<awe::country>& countries) const
-			noexcept;
+		void updatePictureMap(const awe::bank<awe::country>& countries) const;
 	private:
 		/**
 		 * Maximum health points property.
@@ -782,7 +789,7 @@ namespace awe {
 		 * @param j          The object value containing the tile type's
 		 *                   properties.
 		 */
-		tile_type(const std::string& scriptName, engine::json& j) noexcept;
+		tile_type(const std::string& scriptName, engine::json& j);
 
 		/**
 		 * Registers \c tile_type with a given type.
@@ -793,11 +800,12 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Retrieves the script name of the type of terrain this tile represents
@@ -814,8 +822,8 @@ namespace awe {
 		 * @return The name of the tile's sprite, or \c _neutralTile if the given
 		 *         country name didn't identify a sprite name.
 		 */
-		inline const std::string& getOwnedTile(const std::string& countryName)
-			const noexcept {
+		inline const std::string& getOwnedTile(
+			const std::string& countryName) const {
 			return ((_ownedTiles.find(countryName) == _ownedTiles.end()) ?
 				(getNeutralTile()) : (_ownedTiles.at(countryName)));
 		}
@@ -826,8 +834,7 @@ namespace awe {
 		 * @return The name of the tile's sprite, or \c _neutralTile if the given
 		 *         country name didn't identify a sprite name.
 		 */
-		inline const std::string& getOwnedTile(const awe::ArmyID countryID)
-			const noexcept {
+		inline const std::string& getOwnedTile(const awe::ArmyID countryID) const {
 			return ((_ownedTilesTurnOrder.find(countryID) ==
 				_ownedTilesTurnOrder.end()) ?
 				(getNeutralTile()) : (_ownedTilesTurnOrder.at(countryID)));
@@ -848,35 +855,36 @@ namespace awe {
 		 * @return The pointer to the terrain type's properties.
 		 * @sa     @c updateTerrain()
 		 */
-		inline std::shared_ptr<const awe::terrain> getType() const noexcept {
+		inline std::shared_ptr<const awe::terrain> getType() const {
 			return _terrain;
 		}
 
 		/**
 		 * Updates the stored terrain type properties pointer.
-		 * @param terrainBank A reference to the terrain bank to pull the pointer
-		 *        from.
+		 * @param  terrainBank A reference to the terrain bank to pull the pointer
+		 *         from.
+		 * @safety Strong guarantee.
 		 */
-		inline void updateTerrain(const awe::bank<awe::terrain>& terrainBank) const
-			noexcept {
+		inline void updateTerrain(
+			const awe::bank<awe::terrain>& terrainBank) const {
 			_terrain = terrainBank[_terrainTypeScriptName];
 		}
 
 		/**
 		 * Updates \c _ownedTilesTurnOrder by copying over the contents of
 		 * \c _ownedTiles and supplying the respective turn order IDs as keys.
-		 * @param countries Pointer to the country bank to pull the turn order IDs
-		 *                  from.
+		 * @param  countries Pointer to the country bank to pull the turn order IDs
+		 *                   from.
+		 * @safety Basic guarantee.
 		 */
-		void updateOwnedTilesMap(const awe::bank<awe::country>& countries) const
-			noexcept;
+		void updateOwnedTilesMap(const awe::bank<awe::country>& countries) const;
 	private:
 		/**
 		 * Script interface version of \c getType().
 		 * @return The terrain type's properties.
 		 * @sa     @c getType()
 		 */
-		inline const awe::terrain* _getTypeObj() const noexcept {
+		inline const awe::terrain* _getTypeObj() const {
 			return getType().get();
 		}
 
@@ -960,7 +968,7 @@ namespace awe {
 		 * @param j          The object value containing the tile type's
 		 *                   properties.
 		 */
-		weapon(const std::string& scriptName, engine::json& j) noexcept;
+		weapon(const std::string& scriptName, engine::json& j);
 
 		/**
 		 * Registers \c weapon with a given type.
@@ -971,10 +979,11 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type, asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Retrieves a reference to the JSON used to initialise this weapon.
@@ -1047,7 +1056,7 @@ namespace awe {
 		 *         if not.
 		 */
 		inline bool canAttackUnit(const std::string& unit,
-			const bool hidden = false) const noexcept {
+			const bool hidden = false) const {
 			return ((hidden) ? ( _canAttackTheseHiddenUnits.find(unit) !=
 				_canAttackTheseHiddenUnits.end()) :
 				(_canAttackTheseUnits.find(unit) != _canAttackTheseUnits.end()));
@@ -1061,7 +1070,7 @@ namespace awe {
 		 * @return The base damage, if this unit can be attacked. \c 0 otherwise.
 		 */
 		inline int getBaseDamageUnit(const std::string& unit,
-			const bool hidden = false) const noexcept {
+			const bool hidden = false) const {
 			return ((canAttackUnit(unit, hidden)) ?
 				((hidden) ? (_canAttackTheseHiddenUnits.at(unit)) :
 				(_canAttackTheseUnits.at(unit))) : (0));
@@ -1073,7 +1082,7 @@ namespace awe {
 		 * @return \c TRUE if the given terrain has a base damage stored, \c FALSE
 		 *         if not.
 		 */
-		inline bool canAttackTerrain(const std::string& terrain) const noexcept {
+		inline bool canAttackTerrain(const std::string& terrain) const {
 			return _canAttackTheseTerrains.find(terrain) !=
 				_canAttackTheseTerrains.end();
 		}
@@ -1084,8 +1093,7 @@ namespace awe {
 		 * @return The base damage, if this terrain can be attacked. \c 0
 		 *         otherwise.
 		 */
-		inline int getBaseDamageTerrain(const std::string& terrain) const noexcept
-			{
+		inline int getBaseDamageTerrain(const std::string& terrain) const {
 			return ((canAttackTerrain(terrain)) ?
 				(_canAttackTheseTerrains.at(terrain)) : (0));
 		}
@@ -1267,7 +1275,7 @@ namespace awe {
 		 *                   properties.
 		 * @sa    isInfiniteFuel()
 		 */
-		unit_type(const std::string& scriptName, engine::json& j) noexcept;
+		unit_type(const std::string& scriptName, engine::json& j);
 
 		/**
 		 * Registers \c unit_type with a given type.
@@ -1278,11 +1286,12 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Retrieves the movement type of this unit.
@@ -1298,8 +1307,7 @@ namespace awe {
 		 * @return The pointer to the movement type's properties.
 		 * @sa     @c updateMovementType()
 		 */
-		inline std::shared_ptr<const awe::movement_type> getMovementType() const
-			noexcept {
+		inline std::shared_ptr<const awe::movement_type> getMovementType() const {
 			return _movementType;
 		}
 
@@ -1309,7 +1317,7 @@ namespace awe {
 		 * pointer from.
 		 */
 		inline void updateMovementType(
-			const awe::bank<awe::movement_type>& movementBank) const noexcept {
+			const awe::bank<awe::movement_type>& movementBank) const {
 			_movementType = movementBank[_movementTypeScriptName];
 		}
 
@@ -1319,8 +1327,8 @@ namespace awe {
 		 * @return The sprite name, or a blank string if the given country ID
 		 *         didn't map to a sprite name in the internal list.
 		 */
-		inline const std::string& getPicture(const std::string& countryName) const
-			noexcept {
+		inline const std::string& getPicture(
+			const std::string& countryName) const {
 			return ((_pictures.find(countryName) == _pictures.end()) ?
 				(EMPTY_STRING) : (_pictures.at(countryName)));
 		}
@@ -1331,8 +1339,7 @@ namespace awe {
 		 * @return The sprite name, or a blank string if the given country ID
 		 *         didn't map to a sprite name in the internal list.
 		 */
-		inline const std::string& getPicture(const awe::ArmyID countryID) const
-			noexcept {
+		inline const std::string& getPicture(const awe::ArmyID countryID) const {
 			return
 				((_picturesTurnOrder.find(countryID) == _picturesTurnOrder.end()) ?
 				(EMPTY_STRING) : (_picturesTurnOrder.at(countryID)));
@@ -1344,8 +1351,7 @@ namespace awe {
 		 * @return The sprite name, or a blank string if the given country ID
 		 *         didn't map to a sprite name in the internal list.
 		 */
-		inline const std::string& getUnit(const std::string& countryName) const
-			noexcept {
+		inline const std::string& getUnit(const std::string& countryName) const {
 			return ((_units.find(countryName) == _units.end()) ? (EMPTY_STRING) :
 				(_units.at(countryName)));
 		}
@@ -1356,8 +1362,7 @@ namespace awe {
 		 * @return The sprite name, or a blank string if the given country ID
 		 *         didn't map to a sprite name in the internal list.
 		 */
-		inline const std::string& getUnit(const awe::ArmyID countryID) const
-			noexcept {
+		inline const std::string& getUnit(const awe::ArmyID countryID) const {
 			return ((_unitsTurnOrder.find(countryID) == _unitsTurnOrder.end()) ?
 				(EMPTY_STRING) : (_unitsTurnOrder.at(countryID)));
 		}
@@ -1417,7 +1422,7 @@ namespace awe {
 		 * @param  typeScriptName The script name of the type of unit to test.
 		 * @return \c TRUE if yes, \c FALSE otherwise.
 		 */
-		inline bool canLoad(const std::string& typeScriptName) const noexcept {
+		inline bool canLoad(const std::string& typeScriptName) const {
 			return std::find(_canLoadThese.begin(), _canLoadThese.end(),
 				typeScriptName) != _canLoadThese.end();
 		}
@@ -1442,17 +1447,18 @@ namespace awe {
 		/**
 		 * Updates the stored unit type properties pointers for units that can be
 		 * loaded onto this one.
-		 * @param unitBank A reference to the unit type bank to pull the pointers
-		 *                 from.
+		 * @param  unitBank A reference to the unit type bank to pull the pointers
+		 *                  from.
+		 * @safety Basic guarantee.
 		 */
-		void updateUnitTypes(const bank<unit_type>& unitBank) const noexcept;
+		void updateUnitTypes(const bank<unit_type>& unitBank) const;
 
 		/**
 		 * Finds out if this type of unit can capture a given terrain type.
 		 * @param  typeScriptName The script name of the type of terrain to test.
 		 * @return \c TRUE if yes, \c FALSE otherwise.
 		 */
-		inline bool canCapture(const std::string& typeScriptName) const noexcept {
+		inline bool canCapture(const std::string& typeScriptName) const {
 			return std::find(_canCaptureThese.begin(), _canCaptureThese.end(),
 				typeScriptName) != _canCaptureThese.end();
 		}
@@ -1462,8 +1468,7 @@ namespace awe {
 		 * @param  typeScriptName The script name of the type of terrain to test.
 		 * @return \c TRUE if yes, \c FALSE otherwise.
 		 */
-		inline bool canUnloadFrom(const std::string& typeScriptName) const noexcept
-			{
+		inline bool canUnloadFrom(const std::string& typeScriptName) const {
 			return _canUnloadFromThese.empty() || std::find(
 				_canUnloadFromThese.begin(), _canUnloadFromThese.end(),
 				typeScriptName) != _canUnloadFromThese.end();
@@ -1480,11 +1485,11 @@ namespace awe {
 		/**
 		 * Updates the stored terrain type properties pointers stored in this unit
 		 * type.
-		 * @param terrainBank A reference to the terrain type bank to pull the
-		 *                    pointers from.
+		 * @param  terrainBank A reference to the terrain type bank to pull the
+		 *                     pointers from.
+		 * @safety Basic guarantee.
 		 */
-		void updateTerrainTypes(const awe::bank<awe::terrain>& terrainBank) const
-			noexcept;
+		void updateTerrainTypes(const awe::bank<awe::terrain>& terrainBank) const;
 
 		/**
 		 * Retrieves a unit's weapon.
@@ -1493,7 +1498,7 @@ namespace awe {
 		 *         wasn't found.
 		 */
 		inline std::shared_ptr<const awe::weapon> getWeapon(
-			const std::string& name) const noexcept {
+			const std::string& name) const {
 			return ((_weapons.find(name) == _weapons.end()) ? (nullptr) :
 				(_weapons.at(name)));
 		}
@@ -1513,7 +1518,7 @@ namespace awe {
 		 *         \c nullptr will be returned.
 		 */
 		inline std::shared_ptr<const awe::weapon> getWeaponByIndex(
-			const std::size_t index) const noexcept {
+			const std::size_t index) const {
 			return ((index >= getWeaponCount()) ? (nullptr) :
 				(getWeapon(_baseWeapons.at(index).first)));
 		}
@@ -1524,8 +1529,7 @@ namespace awe {
 		 * @return Pointer to the information on the weapon with finite ammo. If
 		 *         no weapon with finite ammo could be found, \c nullptr.
 		 */
-		std::shared_ptr<const awe::weapon> getFirstWeaponWithFiniteAmmo() const
-			noexcept;
+		std::shared_ptr<const awe::weapon> getFirstWeaponWithFiniteAmmo() const;
 
 		/**
 		 * Sets up the weapons for a unit.
@@ -1537,19 +1541,20 @@ namespace awe {
 		 *                     from.
 		 * @param   sink       Pointer to the sink which JSON objects created in
 		 *                     this method will output to.
+		 * @safety  Basic guarantee.
 		 */
 		void updateWeapons(const awe::bank<awe::weapon>& weaponBank,
-			const std::shared_ptr<engine::sink>& sink) const noexcept;
+			const std::shared_ptr<engine::sink>& sink) const;
 
 		/**
 		 * Updates \c _picturesTurnOrder and \c _unitsTurnOrder by copying over the
 		 * contents of their respective maps and supplying the respective turn
 		 * order IDs as keys.
-		 * @param countries Pointer to the country bank to pull the turn order IDs
-		 *                  from.
+		 * @param  countries Pointer to the country bank to pull the turn order IDs
+		 *                   from.
+		 * @safety Basic guarantee.
 		 */
-		void updateSpriteMaps(const awe::bank<awe::country>& countries) const
-			noexcept;
+		void updateSpriteMaps(const awe::bank<awe::country>& countries) const;
 
 		/**
 		 * Does this type of unit ignore terrain defence?
@@ -1565,15 +1570,14 @@ namespace awe {
 		 * @return The movement type's properties.
 		 * @sa     @c getMovementType()
 		 */
-		inline const awe::movement_type* _getMovementTypeObj() const noexcept {
+		inline const awe::movement_type* _getMovementTypeObj() const {
 			return getMovementType().get();
 		}
 
 		/**
 		 * Script version of \c getWeapon().
 		 */
-		inline const awe::weapon* _getWeapon(const std::string& name) const
-			noexcept {
+		inline const awe::weapon* _getWeapon(const std::string& name) const {
 			// Will cause segfault if name doesn't exist...
 			return getWeapon(name).get();
 		}
@@ -1581,8 +1585,8 @@ namespace awe {
 		/**
 		 * Script version of \c getWeaponByIndex().
 		 */
-		inline const awe::weapon* _getWeaponByIndex(const std::size_t index) const
-			noexcept {
+		inline const awe::weapon* _getWeaponByIndex(
+			const std::size_t index) const {
 			// Will cause segfault if index doesn't exist...
 			return getWeaponByIndex(index).get();
 		}
@@ -1736,7 +1740,7 @@ namespace awe {
 		 * @param j          The object value containing the commander's
 		 *                   properties.
 		 */
-		inline commander(const std::string& scriptName, engine::json& j) noexcept :
+		inline commander(const std::string& scriptName, engine::json& j) :
 			common_properties(scriptName, j) {
 			j.apply(_portrait, { "portrait" }, true);
 		}
@@ -1750,11 +1754,12 @@ namespace awe {
 		 *                  with.
 		 * @param  document Pointer to the AngelScript documentation generator to
 		 *                  register script interface documentation with.
+		 * @safety No guarantee.
 		 */
 		template<typename T>
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
-			const std::shared_ptr<DocumentationGenerator>& document) noexcept;
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
 		 * Retrieves the animated sprite name of this commander's portrait.
@@ -1773,42 +1778,45 @@ namespace awe {
 	/**
 	 * Calls \c terrain::updatePictureMap() on an entire bank of \c terrain
 	 * objects.
-	 * @param terrainBank The \c terrain bank to update.
-	 * @param countryBank The \c country bank to pull turn order IDs from.
+	 * @param  terrainBank The \c terrain bank to update.
+	 * @param  countryBank The \c country bank to pull turn order IDs from.
+	 * @safety Basic guarantee.
 	 */
 	void updateTerrainBank(awe::bank<awe::terrain>& terrainBank,
-		const awe::bank<awe::country>& countryBank) noexcept;
+		const awe::bank<awe::country>& countryBank);
 
 	/**
 	 * Calls \c tile_type::updateTerrain() and \c tile_type::updateOwnedTilesMap()
 	 * on an entire bank of \c tile_type objects.
-	 * @param tileBank    The \c tile_type bank to update.
-	 * @param terrainBank The \c terrian bank to pull the pointers from.
-	 * @param countryBank The \c country bank to pull the turn order IDs from.
+	 * @param  tileBank    The \c tile_type bank to update.
+	 * @param  terrainBank The \c terrian bank to pull the pointers from.
+	 * @param  countryBank The \c country bank to pull the turn order IDs from.
+	 * @safety Basic guarantee.
 	 */
 	void updateTileTypeBank(awe::bank<awe::tile_type>& tileBank,
 		const awe::bank<awe::terrain>& terrainBank,
-		const awe::bank<awe::country>& countryBank) noexcept;
+		const awe::bank<awe::country>& countryBank);
 
 	/**
 	 * Calls \c unit_type::updateMovementType(), \c unit_type::updateUnitTypes(),
 	 * \c unit_type::updateTerrainTypes(), \c unit_type::updateWeapons(), and
 	 * \c unit_type::updateSpriteMaps() on an entire bank of \c unit_type objects.
-	 * @param unitBank     The \c unit_type bank to update. Also the \c unit_type
-	 *                     bank that is used to update itself.
-	 * @param movementBank The \c movement_type bank to pull the pointers from.
-	 * @param terrainBank  The \c terrain bank to pull the pointers from.
-	 * @param weaponBank   The \c weapon bank to pull the pointers from.
-	 * @param countryBank  The \c country bank to pull turn order IDs from.
-	 * @param sink         Pointer to the sink which JSON objects created in this
-	 *                     function will output to.
+	 * @param  unitBank     The \c unit_type bank to update. Also the \c unit_type
+	 *                      bank that is used to update itself.
+	 * @param  movementBank The \c movement_type bank to pull the pointers from.
+	 * @param  terrainBank  The \c terrain bank to pull the pointers from.
+	 * @param  weaponBank   The \c weapon bank to pull the pointers from.
+	 * @param  countryBank  The \c country bank to pull turn order IDs from.
+	 * @param  sink         Pointer to the sink which JSON objects created in this
+	 *                      function will output to.
+	 * @safety Basic guarantee.
 	 */
 	void updateUnitTypeBank(awe::bank<awe::unit_type>& unitBank,
 		const awe::bank<awe::movement_type>& movementBank,
 		const awe::bank<awe::terrain>& terrainBank,
 		const awe::bank<awe::weapon>& weaponBank,
 		const awe::bank<awe::country>& countryBank,
-		const std::shared_ptr<engine::sink>& sink) noexcept;
+		const std::shared_ptr<engine::sink>& sink);
 
 	/**
 	 * Checks an entire bank of countries to ensure each country's turn order ID is
@@ -1817,8 +1825,7 @@ namespace awe {
 	 * @return \c TRUE if each turn order ID is valid (i.e. they are unique and
 	 *         are not equal to \c NO_ARMY.
 	 */
-	bool checkCountryTurnOrderIDs(const awe::bank<awe::country>& countries)
-		noexcept;
+	bool checkCountryTurnOrderIDs(const awe::bank<awe::country>& countries);
 }
 
 #include "tpp/bank.tpp"
