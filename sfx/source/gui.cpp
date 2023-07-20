@@ -442,6 +442,17 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _getWidgetVisibility), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's visibility.");
 
+	r = engine->RegisterGlobalFunction("void setWidgetDirectionalFlow("
+		"const string&in, const string&in, const string&in, const string&in, "
+		"const string&in)",
+		asMETHOD(sfx::gui, _setWidgetDirectionalFlow),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the widgets that should be selected "
+		"if directional controls are input when the given widget is currently "
+		"selected. The \"given widget\" should be given first, followed by the "
+		"widgets that should be selected, when up, down, left, and right are "
+		"input, respectively. All given widgets must be in the same menu!");
+
 	r = engine->RegisterGlobalFunction("void setWidgetText(const string&in, "
 		"const string&in, array<any>@ = null)",
 		asMETHOD(sfx::gui, _setWidgetText), asCALL_THISCALL_ASGLOBAL, this);
@@ -1627,6 +1638,60 @@ bool sfx::gui::_getWidgetVisibility(const std::string& name) const {
 			fullname[0]);
 	}
 	return false;
+}
+
+void sfx::gui::_setWidgetDirectionalFlow(const std::string& name,
+	const std::string& upName, const std::string& downName,
+	const std::string& leftName, const std::string& rightName) {
+	std::vector<std::string> fullname, fullnameUp, fullnameDown, fullnameLeft,
+		fullnameRight;
+	std::string fullnameAsString, fullnameAsStringUp, fullnameAsStringDown,
+		fullnameAsStringLeft, fullnameAsStringRight;
+	static const auto widgetDoesNotExist = [&](const std::string& doesNotExist) {
+		_logger.error("Attempted to set the directional flow of a widget \"{}\", "
+			"within menu \"{}\", to the widgets up=\"{}\", down=\"{}\", "
+			"left=\"{}\", right=\"{}\". The widget \"{}\" does not exist.", name,
+			fullname[0], upName, downName, leftName, rightName, doesNotExist);
+	};
+	if (!_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
+		widgetDoesNotExist(name);
+		return;
+	}
+	if (!upName.empty() &&
+		!_findWidget<Widget>(upName, &fullnameUp, &fullnameAsStringUp)) {
+		widgetDoesNotExist(upName);
+		return;
+	}
+	if (!downName.empty() &&
+		!_findWidget<Widget>(downName, &fullnameDown, &fullnameAsStringDown)) {
+		widgetDoesNotExist(downName);
+		return;
+	}
+	if (!leftName.empty() &&
+		!_findWidget<Widget>(leftName, &fullnameLeft, &fullnameAsStringLeft)) {
+		widgetDoesNotExist(leftName);
+		return;
+	}
+	if (!rightName.empty() &&
+		!_findWidget<Widget>(rightName, &fullnameRight, &fullnameAsStringRight)) {
+		widgetDoesNotExist(rightName);
+		return;
+	}
+	if ((fullnameUp.empty() || fullname[0] == fullnameUp[0]) &&
+		(fullnameDown.empty() || fullname[0] == fullnameDown[0]) &&
+		(fullnameLeft.empty() || fullname[0] == fullnameLeft[0]) &&
+		(fullnameRight.empty() || fullname[0] == fullnameRight[0])) {
+		_directionalFlow[fullnameAsString].up = fullnameAsStringUp;
+		_directionalFlow[fullnameAsString].down = fullnameAsStringDown;
+		_directionalFlow[fullnameAsString].left = fullnameAsStringLeft;
+		_directionalFlow[fullnameAsString].right = fullnameAsStringRight;
+	} else {
+		_logger.error("Attempted to set the directional flow of a widget \"{}\", "
+			"within menu \"{}\", to the widgets up=\"{}\", down=\"{}\", "
+			"left=\"{}\", right=\"{}\". Not all of these widgets are in the same "
+			"menu!", name, fullname[0], fullnameAsStringUp, fullnameAsStringDown,
+			fullnameAsStringLeft, fullnameAsStringRight);
+	}
 }
 
 void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,

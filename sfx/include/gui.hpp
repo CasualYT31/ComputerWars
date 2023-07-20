@@ -753,6 +753,27 @@ namespace sfx {
 		bool _getWidgetVisibility(const std::string& name) const;
 
 		/**
+		 * Sets which directional controls should move the setfocus to which
+		 * widgets, if the current setfocus is on a given widget.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be changed.\n
+		 * All widgets provided must be in the same menu. Otherwise, an error will
+		 * be logged, and no widget will be changed.
+		 * @param      name The name of the widget to amend.
+		 * @param    upName The name of the widget to move the selection to if "up"
+		 *                  is pressed.
+		 * @param  downName The name of the widget to move the selection to if
+		 *                  "down" is pressed.
+		 * @param  leftName The name of the widget to move the selection to if
+		 *                  "left" is pressed.
+		 * @param rightName The name of the widget to move the selection to if
+		 *                  "right" is pressed.
+		 */
+		void _setWidgetDirectionalFlow(const std::string& name,
+			const std::string& upName, const std::string& downName,
+			const std::string& leftName, const std::string& rightName);
+
+		/**
 		 * Updates a widget's caption.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no caption will be changed.

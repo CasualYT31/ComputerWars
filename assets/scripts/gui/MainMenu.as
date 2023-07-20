@@ -18,6 +18,9 @@ void MainMenuSetUp() {
 	setWidgetPosition("MapMaker", "90%", "10%");
 	setWidgetOrigin("MapMaker", 1.0, 0.0);
 	setWidgetText("MapMaker", "~Map Maker");
+
+    setWidgetDirectionalFlow("NewGame", "", "", "MapMaker", "MapMaker");
+    setWidgetDirectionalFlow("MapMaker", "", "", "NewGame", "NewGame");
 }
 
 /**
