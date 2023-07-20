@@ -1294,18 +1294,10 @@ namespace sfx {
 		std::unordered_map<std::string, std::string> _selectThisWidgetFirst;
 
 		/**
-		 * The currently selected widget based on directional input.
-		 * When a widget should be highlighted, its name should be stored here.
-		 */
-		std::string _currentlySelectedWidget;
-
-		/**
 		 * The last known selected widget based on directional input.
-		 * Keyed on menu name.\n
-		 * When a widget shouldn't be highlighted, but remembered for when another
-		 * directional input is made, its name should be stored here.
+		 * Keyed on menu name.
 		 */
-		std::unordered_map<std::string, std::string> _lastKnownSelectedWidget;
+		std::unordered_map<std::string, std::string> _currentlySelectedWidget;
 	};
 }
 

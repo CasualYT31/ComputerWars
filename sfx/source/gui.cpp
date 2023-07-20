@@ -684,8 +684,6 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 		_widgetSprites.clear();
 		_previousGUI = old;
 		_currentGUI = newPanel;
-		// Deselect widget.
-		_currentlySelectedWidget.clear();
 		// Call NewPanelOpen() script function, if it has been defined.
 		auto openFuncName = newPanel + "Open",
 			openFuncEmptyDecl = "void " + _currentGUI + "Open()";
@@ -722,6 +720,45 @@ bool sfx::gui::handleEvent(sf::Event e) {
 
 void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	if (ui) {
+		// Handle directional input.
+		auto& cursel = _currentlySelectedWidget[_currentGUI];
+		if ((*ui)[_upControl]) {
+			if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+				_selectThisWidgetFirst.end()) {
+				cursel = _selectThisWidgetFirst[_currentGUI];
+			} else if (_directionalFlow.find(cursel) != _directionalFlow.end() &&
+				!_directionalFlow[cursel].up.empty()) {
+				cursel = _directionalFlow[cursel].up;
+			}
+		}
+		if ((*ui)[_downControl]) {
+			if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+				_selectThisWidgetFirst.end()) {
+				cursel = _selectThisWidgetFirst[_currentGUI];
+			} else if (_directionalFlow.find(cursel) != _directionalFlow.end() &&
+				!_directionalFlow[cursel].down.empty()) {
+				cursel = _directionalFlow[cursel].down;
+			}
+		}
+		if ((*ui)[_leftControl]) {
+			if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+				_selectThisWidgetFirst.end()) {
+				cursel = _selectThisWidgetFirst[_currentGUI];
+			} else if (_directionalFlow.find(cursel) != _directionalFlow.end() &&
+				!_directionalFlow[cursel].left.empty()) {
+				cursel = _directionalFlow[cursel].left;
+			}
+		}
+		if ((*ui)[_rightControl]) {
+			if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+				_selectThisWidgetFirst.end()) {
+				cursel = _selectThisWidgetFirst[_currentGUI];
+			} else if (_directionalFlow.find(cursel) != _directionalFlow.end() &&
+				!_directionalFlow[cursel].right.empty()) {
+				cursel = _directionalFlow[cursel].right;
+			}
+		}
+		// Invoke the current menu's bespoke input handling function.
 		if (_scripts->functionExists(getGUI() + "HandleInput")) {
 			_handleInputErrorLogged = false;
 			// Construct the dictionary.
@@ -1087,7 +1124,6 @@ bool sfx::gui::_load(engine::json& j) {
 		_directionalFlow.clear();
 		_selectThisWidgetFirst.clear();
 		_currentlySelectedWidget.clear();
-		_lastKnownSelectedWidget.clear();
 		// Create the main menu that always exists.
 		tgui::Group::Ptr menu = tgui::Group::create();
 		menu->setVisible(false);
