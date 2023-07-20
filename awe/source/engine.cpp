@@ -125,6 +125,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Writes to the log using the error "
 		"level.");
 
+	r = engine->RegisterGlobalFunction("void stacktrace()",
+		asMETHOD(engine::scripts, stacktraceToLog),
+		asCALL_THISCALL_ASGLOBAL, _scripts.get());
+	document->DocumentGlobalFunction(r, "Writes the stacktrace to the log.");
+
 	r = engine->RegisterGlobalFunction("float getSoundVolume()",
 		asMETHOD(sfx::audio, getVolume),
 		asCALL_THISCALL_ASGLOBAL, _sounds.get());

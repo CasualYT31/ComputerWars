@@ -26,6 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "SFML/System/Vector2.hpp"
 #include "SFML/System/Clock.hpp"
 #include "file.hpp"
+#include "boost/stacktrace.hpp"
 
 void AWEColourTypeConstructor(const int r, const int g, const int b,
     const int a, void* memory) {
@@ -480,6 +481,65 @@ void engine::scripts::warningToLog(const std::string& message) const {
 
 void engine::scripts::errorToLog(const std::string& message) const {
     _logger.error(_constructMessage(message));
+}
+
+/**
+ * Formats a given AngelScript context as a stacktrace.
+ * This function follows the same format as employed by the backend used to
+ * retrieve the C++ stacktrace:
+ * <tt>Index# FunctionName at SourceFilePath:LineNumber</tt>.
+ * @param  context         The context to retrieve the stacktrace of.
+ * @param  stackIndexWidth The width of the \c Index field, in characters.
+ * @return The stacktrace of the given AngelScript context.
+ * @safety No guarantee.
+ */
+static std::string asStacktrace(asIScriptContext* const context,
+    const std::streamsize stackIndexWidth) {
+    std::stringstream asStacktrace;
+    asStacktrace << "\n----------\n";
+    if (!context) {
+        asStacktrace << "AngelScript Context Does Not Exist!";
+    } else {
+        for (asUINT i = 0, stackSize = context->GetCallstackSize(); i < stackSize;
+            ++i) {
+            const auto asFunc = context->GetFunction(i);
+            asStacktrace << std::setfill(' ') << std::setw(stackIndexWidth) << i;
+            asStacktrace << "# " << asFunc->GetName() << " at " <<
+                asFunc->GetScriptSectionName() << ':' << context->GetLineNumber(i)
+                << std::endl;
+        }
+    }
+    asStacktrace << "----------";
+    return asStacktrace.str();
+}
+
+void engine::scripts::stacktraceToLog() const {
+    const auto boostStacktrace = boost::stacktrace::stacktrace();
+    std::stringstream strstream;
+    strstream << "Stacktrace\n" << boostStacktrace;
+    const auto stackIndexWidth = std::to_string(boostStacktrace.size()).size();
+    auto trace = strstream.str();
+    // Go through the C++ stacktrace and insert AngelScript stacktraces.
+    auto asStack = _context.rbegin(), asStackEnd = _context.rend();
+    const std::string SEARCH_FOR = " in angelscriptd";
+    std::size_t pointer = 0;
+    std::size_t asLocation = trace.find(SEARCH_FOR, pointer);
+    while (asLocation != std::string::npos) {
+        pointer = asLocation + SEARCH_FOR.size();
+        const auto asStacktraceStr = asStacktrace(*asStack, stackIndexWidth);
+        trace.insert(pointer, asStacktraceStr);
+        pointer += asStacktraceStr.size();
+        if (asStack != asStackEnd) ++asStack;
+        asLocation = trace.find(SEARCH_FOR, pointer);
+    }
+    if (asStack == asStackEnd) {
+        trace.append("\nAll AngelScript Contexts Were Output");
+    } else {
+        trace.append("\nSome AngelScript Contexts Were Not Output!");
+        for (; asStack != asStackEnd; ++asStack)
+            trace.append(asStacktrace(*asStack, stackIndexWidth));
+    }
+    _logger.write(trace);
 }
 
 bool engine::scripts::callFunction(const std::string& name) {

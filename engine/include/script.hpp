@@ -323,6 +323,12 @@ namespace engine {
 		void errorToLog(const std::string& message) const;
 
 		/**
+		 * Will write a complete C++ and AngelScript stacktrace to the log.
+		 * @safety No guarantee.
+		 */
+		void stacktraceToLog() const;
+
+		/**
 		 * Parameter pack method called when a script function requires parameters.
 		 * It is called recursively, so that each parameter is added, with the
 		 * first parameter being the first parameter passed to the function, etc.
