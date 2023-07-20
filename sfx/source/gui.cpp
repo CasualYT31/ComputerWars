@@ -1348,7 +1348,7 @@ void sfx::gui::_spriteBackground(std::string menu, const std::string& sheet,
 	if (menu == "") menu = getGUI();
 	try {
 		_guiBackground[menu].set(_sheet.at(sheet), sprite);
-	} catch (std::out_of_range&) {
+	} catch (const std::out_of_range&) {
 		_logger.error("Attempted to set sprite \"{}\" from sheet \"{}\" to the "
 			"background of menu \"{}\". The sheet does not exist!", sprite, sheet,
 			menu);
@@ -1843,11 +1843,11 @@ void sfx::gui::_setWidgetBgColour(const std::string& name,
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "panel") {
-			auto panel = _findWidget<Panel>(name);
-			panel->getRenderer()->setBackgroundColor(colour);
+			std::dynamic_pointer_cast<Panel>(widget)->getRenderer()->
+				setBackgroundColor(colour);
 		} else if (type == "scrollablepanel") {
-			auto panel = _findWidget<ScrollablePanel>(name);
-			panel->getRenderer()->setBackgroundColor(colour);
+			std::dynamic_pointer_cast<ScrollablePanel>(widget)->getRenderer()->
+				setBackgroundColor(colour);
 		} else {
 			_logger.error("Attempted to set the background colour \"{}\" to "
 				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
@@ -1867,8 +1867,8 @@ void sfx::gui::_setWidgetBorderSize(const std::string& name, const float size) {
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "panel") {
-			auto panel = _findWidget<Panel>(name);
-			panel->getRenderer()->setBorders(size);
+			std::dynamic_pointer_cast<Panel>(widget)->getRenderer()->
+				setBorders(size);
 		} else {
 			_logger.error("Attempted to set a border size of {} to widget \"{}\" "
 				"which is of type \"{}\", within menu \"{}\". This operation is "
@@ -1889,8 +1889,8 @@ void sfx::gui::_setWidgetBorderColour(const std::string& name,
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "panel") {
-			auto panel = _findWidget<Panel>(name);
-			panel->getRenderer()->setBorderColor(colour);
+			std::dynamic_pointer_cast<Panel>(widget)->getRenderer()->
+				setBorderColor(colour);
 		} else {
 			_logger.error("Attempted to set a border colour of {} to widget "
 				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
@@ -1911,8 +1911,8 @@ void sfx::gui::_setWidgetBorderRadius(const std::string& name,
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "panel") {
-			auto panel = _findWidget<Panel>(name);
-			panel->getRenderer()->setRoundedBorderRadius(radius);
+			std::dynamic_pointer_cast<Panel>(widget)->getRenderer()->
+				setRoundedBorderRadius(radius);
 		} else {
 			_logger.error("Attempted to set the border radius {} to "
 				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
@@ -2062,7 +2062,7 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text,
 		// Add the item differently depending on the type the widget is.
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "listbox") {
-			_findWidget<ListBox>(name)->addItem(text);
+			std::dynamic_pointer_cast<ListBox>(widget)->addItem(text);
 		} else {
 			_logger.error("Attempted to add an item \"{}\" to widget \"{}\" which "
 				"is of type \"{}\", within menu \"{}\". This operation is not "
@@ -2092,7 +2092,7 @@ void sfx::gui::_clearItems(const std::string& name) {
 		// Remove all the items differently depending on the type the widget is.
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (type == "listbox") {
-			_findWidget<ListBox>(name)->removeAllItems();
+			std::dynamic_pointer_cast<ListBox>(widget)->removeAllItems();
 		} else {
 			_logger.error("Attempted to clear all items from widget \"{}\" which "
 				"is of type \"{}\", within menu \"{}\". This operation is not "
@@ -2193,7 +2193,8 @@ std::size_t sfx::gui::_getWidgetCount(const std::string& name) {
 	if (widget) {
 		const std::string type = widget->getWidgetType().toLower().toStdString();
 		if (_isContainerWidget(type)) {
-			return _findWidget<Container>(name)->getWidgets().size();
+			return
+				std::dynamic_pointer_cast<Container>(widget)->getWidgets().size();
 		} else {
 			_logger.error("Attempted to get the widget count of a widget \"{}\" "
 				"which is of type \"{}\", within menu \"{}\". This operation is "
