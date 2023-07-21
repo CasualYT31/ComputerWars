@@ -336,6 +336,23 @@ namespace sfx {
 		}
 
 		/**
+		 * Sets the rotation of the internal sprite.
+		 * @param  newRotation The new rotation, in degrees, of the sprite.
+		 * @safety No guarantee.
+		 */
+		inline void setRotation(const float newRotation) {
+			_sprite.setRotation(newRotation);
+		}
+
+		/**
+		 * Gets the rotation of the internal sprite.
+		 * @return The rotation of the sprite, in degrees.
+		 */
+		inline float getRotation() const {
+			return _sprite.getRotation();
+		}
+
+		/**
 		 * This drawable's \c animate() method.
 		 * This method will look up the assigned sprite's details (such as frame
 		 * duration) and will advance the current frame based on these details.

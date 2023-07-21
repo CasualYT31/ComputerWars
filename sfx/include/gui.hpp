@@ -94,7 +94,9 @@ namespace sfx {
 		 * Gets the name of the menu currently showing.
 		 * @return The menu currently being drawn.
 		 */
-		std::string getGUI() const;
+		inline std::string getGUI() const {
+			return _currentGUI;
+		}
 
 		/**
 		 * Adds a spritesheet which can be uses with the GUI menus.
@@ -815,6 +817,20 @@ namespace sfx {
 		void _clearWidgetDirectionalFlowStart(const std::string& menu);
 
 		/**
+		 * Sets the sprite to use as the angle bracket which surrounds widgets
+		 * currently selected via the directional controls.
+		 * If neither the spritesheet or sprite exists, an error will be logged and
+		 * no changes will be made.
+		 * @param corner The angle bracket to amend. Either "UL", "UR", "LL", or
+		 *               "LR". Input is trimmed and case-insensitive.
+		 * @param sheet  The name of the spritesheet which contains the sprite to
+		 *               set.
+		 * @param key    The name of the sprite to set.
+		 */
+		void _setDirectionalFlowAngleBracketSprite(const std::string& corner,
+			const std::string& sheet, const std::string& key);
+
+		/**
 		 * Updates a widget's caption.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no caption will be changed.
@@ -1320,6 +1336,26 @@ namespace sfx {
 		 * new directional control has been input.
 		 */
 		bool _enableDirectionalFlow = true;
+
+		/**
+		 * The UL angle bracket sprite.
+		 */
+		sfx::animated_sprite _angleBracketUL;
+
+		/**
+		 * The UR angle bracket sprite.
+		 */
+		sfx::animated_sprite _angleBracketUR;
+
+		/**
+		 * The LL angle bracket sprite.
+		 */
+		sfx::animated_sprite _angleBracketLL;
+
+		/**
+		 * The LR angle bracket sprite.
+		 */
+		sfx::animated_sprite _angleBracketLR;
 	};
 }
 

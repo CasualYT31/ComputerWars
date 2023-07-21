@@ -6,6 +6,11 @@
  */
 void MainMenuSetUp() {
 	setGlobalFont("AW2");
+    setDirectionalFlowAngleBracketSprite("UL", "icon", "ulanglebracket");
+    setDirectionalFlowAngleBracketSprite("UR", "icon", "uranglebracket");
+    setDirectionalFlowAngleBracketSprite("LL", "icon", "llanglebracket");
+    setDirectionalFlowAngleBracketSprite("LR", "icon", "lranglebracket");
+
 	setBackground("", 200, 200, 200, 0);
 	addWidget("ListBox", "FileSelect");
 	setWidgetSize("FileSelect", "50%", "50%");

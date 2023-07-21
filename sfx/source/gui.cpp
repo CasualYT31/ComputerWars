@@ -472,6 +472,17 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Used to explicitly prevent directional "
 		"controls from selecting a widget for the given menu.");
 
+	r = engine->RegisterGlobalFunction("void setDirectionalFlowAngleBracketSprite("
+		"const string&in, const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setDirectionalFlowAngleBracketSprite),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Used to set the sprite used as a given "
+		"angle bracket, which surrounds the widget currently selected using the "
+		"directional controls. The first string denotes the corner (either "
+		"\"UL\", \"UR\", \"LL\", or \LR\"), the second string denotes the "
+		"spritesheet to retrieve the sprite from, and the third string stores the "
+		"name of the sprite.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetText(const string&in, "
 		"const string&in, array<any>@ = null)",
 		asMETHOD(sfx::gui, _setWidgetText), asCALL_THISCALL_ASGLOBAL, this);
@@ -698,10 +709,6 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 	}
 }
 
-std::string sfx::gui::getGUI() const {
-	return _currentGUI;
-}
-
 void sfx::gui::addSpritesheet(const std::string& name,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	if (_sheet.find(name) != _sheet.end()) {
@@ -857,6 +864,39 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 		percentage += "%";
 		menu->setSize(percentage);
 		_animate(target, scaling, menu);
+	}
+
+	// Whenever there isn't a widget currently selected via directional controls,
+	// always reset the animation.
+	const auto& cursel = _currentlySelectedWidget[getGUI()];
+	if (cursel.empty() || !_enableDirectionalFlow) {
+		_angleBracketUL.setCurrentFrame(0);
+		_angleBracketUR.setCurrentFrame(0);
+		_angleBracketLL.setCurrentFrame(0);
+		_angleBracketLR.setCurrentFrame(0);
+	} else if (!cursel.empty()) {
+		// Ensure the angle brackets are at the correct locations.
+		std::string fullname;
+		const auto widget = _findWidget<Widget>(cursel, nullptr, &fullname);
+		if (widget) {
+			const auto pos = widget->getAbsolutePosition(),
+				size = widget->getSize();
+			_angleBracketUL.setPosition(pos);
+			_angleBracketUL.animate(target, scaling);
+			_angleBracketUR.setPosition(pos + tgui::Vector2f(
+				size.x - _angleBracketUR.getSize().x, 0.0f));
+			_angleBracketUR.animate(target, scaling);
+			_angleBracketLL.setPosition(pos + tgui::Vector2f(0.0f,
+				size.y - _angleBracketLL.getSize().y));
+			_angleBracketLL.animate(target, scaling);
+			_angleBracketLR.setPosition(pos + size -
+				tgui::Vector2f(_angleBracketLR.getSize()));
+			_angleBracketLR.animate(target, scaling);
+		} else {
+			_logger.error("Currently selected widget \"{}\" couldn't be found! "
+				"Current menu is \"{}\". Deselecting...", fullname, getGUI());
+			_currentlySelectedWidget.erase(getGUI());
+		}
 	}
 
 	return false;
@@ -1119,6 +1159,16 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			// sprite. This should be emulated here in the future using scaling.
 			target.draw(sprite.second, states);
 		}
+	}
+	// Draw angle brackets, if there is currently a widget selected via the
+	// directional controls.
+	if (_enableDirectionalFlow && _currentlySelectedWidget.find(getGUI()) !=
+		_currentlySelectedWidget.end() &&
+		!_currentlySelectedWidget.at(getGUI()).empty()) {
+		target.draw(_angleBracketUL, states);
+		target.draw(_angleBracketUR, states);
+		target.draw(_angleBracketLL, states);
+		target.draw(_angleBracketLR, states);
 	}
 	target.setView(oldView);
 }
@@ -1797,6 +1847,42 @@ void sfx::gui::_clearWidgetDirectionalFlowStart(const std::string& menu) {
 	} else {
 		_logger.error("Attempted to disable directional input for the menu "
 			"\"{}\". Menu does not exist.", menu);
+	}
+}
+
+void sfx::gui::_setDirectionalFlowAngleBracketSprite(const std::string& corner,
+	const std::string& sheet, const std::string& key) {
+	const auto spritesheet = _sheet.find(sheet);
+	if (spritesheet == _sheet.end()) {
+		_logger.error("Attempted to set the sprite \"{}\" from spritesheet \"{}\" "
+			"as the directional flow angle bracket for the \"{}\" corner. This "
+			"spritesheet does not exist.", key, sheet, corner);
+		return;
+	}
+	if (!spritesheet->second->doesSpriteExist(key)) {
+		_logger.error("Attempted to set the sprite \"{}\" from spritesheet \"{}\" "
+			"as the directional flow angle bracket for the \"{}\" corner. This "
+			"sprite does not exist.", key, sheet, corner);
+		return;
+	}
+	const auto cornerFormatted = tgui::String(corner).trim().toLower();
+	if (cornerFormatted == "ul") {
+		_angleBracketUL.setSpritesheet(spritesheet->second);
+		_angleBracketUL.setSprite(key);
+	} else if (cornerFormatted == "ur") {
+		_angleBracketUR.setSpritesheet(spritesheet->second);
+		_angleBracketUR.setSprite(key);
+	} else if (cornerFormatted == "ll") {
+		_angleBracketLL.setSpritesheet(spritesheet->second);
+		_angleBracketLL.setSprite(key);
+	} else if (cornerFormatted == "lr") {
+		_angleBracketLR.setSpritesheet(spritesheet->second);
+		_angleBracketLR.setSprite(key);
+	} else {
+		_logger.error("Attempted to set the sprite \"{}\" from spritesheet \"{}\" "
+			"as the directional flow angle bracket for the \"{}\" corner. "
+			"Unrecognised corner, must be \"UL\", \"UR\", \"LL\", or \"LR\".", key,
+			sheet, corner);
 	}
 }
 
