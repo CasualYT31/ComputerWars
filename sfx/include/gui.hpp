@@ -778,6 +778,12 @@ namespace sfx {
 		bool _getWidgetVisibility(const std::string& name) const;
 
 		/**
+		 * Special string used with \c _setWidgetDirectionalFlow() to represent the
+		 * previous widget.
+		 */
+		static const std::string GOTO_PREVIOUS_WIDGET;
+
+		/**
 		 * Sets which directional controls should move the setfocus to which
 		 * widgets, if the current setfocus is on a given widget.
 		 * If no widget exists with the given name, then an error will be logged
@@ -785,7 +791,9 @@ namespace sfx {
 		 * All widgets provided must be in the same menu. Otherwise, an error will
 		 * be logged, and no widget will be changed.\n
 		 * The second to fifth parameters can be blank, which case the given input
-		 * will not change the selection.
+		 * will not change the selection. These parameters can also be the value of
+		 * `GOTO_PREVIOUS_WIDGET`. This is a special value which means "navigate
+		 * to the previously selected widget."
 		 * @param      name The name of the widget to amend.
 		 * @param    upName The name of the widget to move the selection to if "up"
 		 *                  is pressed.
@@ -795,6 +803,7 @@ namespace sfx {
 		 *                  "left" is pressed.
 		 * @param rightName The name of the widget to move the selection to if
 		 *                  "right" is pressed.
+		 * @sa    \c sfx::gui::GOTO_PREVIOUS_WIDGET.
 		 */
 		void _setWidgetDirectionalFlow(const std::string& name,
 			const std::string& upName, const std::string& downName,
@@ -1326,9 +1335,12 @@ namespace sfx {
 
 		/**
 		 * The last known selected widget based on directional input.
-		 * Keyed on menu name.
+		 * Keyed on menu name. The second string in the value stores the currently
+		 * selected widget, and the first string stored the previously selected
+		 * widget.
 		 */
-		std::unordered_map<std::string, std::string> _currentlySelectedWidget;
+		std::unordered_map<std::string, std::pair<std::string, std::string>>
+			_currentlySelectedWidget;
 
 		/**
 		 * The current mouse position.

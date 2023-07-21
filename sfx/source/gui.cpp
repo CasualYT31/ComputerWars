@@ -452,11 +452,14 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"const string&in)",
 		asMETHOD(sfx::gui, _setWidgetDirectionalFlow),
 		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Sets the widgets that should be selected "
-		"if directional controls are input when the given widget is currently "
-		"selected. The \"given widget\" should be given first, followed by the "
-		"widgets that should be selected, when up, down, left, and right are "
-		"input, respectively. All given widgets must be in the same menu!");
+	document->DocumentGlobalFunction(r, std::string("Sets the widgets that should "
+		"be selected if directional controls are input when the given widget is "
+		"currently selected. The \"given widget\" should be given first, followed "
+		"by the widgets that should be selected, when up, down, left, and right "
+		"are input, respectively. All given widgets must be in the same menu! A "
+		"blank string means that the input won't change the selected widget. A "
+		"value of \"").append(GOTO_PREVIOUS_WIDGET).append("\" means \"navigate "
+		"back to the previously selected widget.\"").c_str());
 
 	r = engine->RegisterGlobalFunction("void setWidgetDirectionalFlowStart("
 		"const string&in)",
@@ -765,7 +768,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 				(*ui)[_leftControl] || (*ui)[_rightControl];
 			// If there wasn't a selection made previously, go straight to making
 			// the selection.
-			if (_currentlySelectedWidget[_currentGUI].empty())
+			if (_currentlySelectedWidget[_currentGUI].second.empty())
 				_moveDirectionalFlow(ui);
 		}
 	} else if (!_handleInputErrorLogged) {
@@ -839,7 +842,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 
 	// Whenever there isn't a widget currently selected via directional controls,
 	// always reset the animation.
-	const auto& cursel = _currentlySelectedWidget[getGUI()];
+	const auto& cursel = _currentlySelectedWidget[getGUI()].second;
 	if (cursel.empty() || !_enableDirectionalFlow) {
 		_angleBracketUL.setCurrentFrame(0);
 		_angleBracketUR.setCurrentFrame(0);
@@ -866,7 +869,9 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 		} else {
 			_logger.error("Currently selected widget \"{}\" couldn't be found! "
 				"Current menu is \"{}\". Deselecting...", fullname, getGUI());
-			_currentlySelectedWidget.erase(getGUI());
+			_currentlySelectedWidget[getGUI()].first =
+				_currentlySelectedWidget[getGUI()].second;
+			_currentlySelectedWidget[getGUI()].second = "";
 		}
 	}
 
@@ -983,47 +988,57 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 
 std::string sfx::gui::_moveDirectionalFlow(
 	const std::shared_ptr<sfx::user_input>& ui) {
-	auto& cursel = _currentlySelectedWidget[_currentGUI];
+	static const auto makeNewSelection = [&](const std::string& newsel) {
+		if (newsel == GOTO_PREVIOUS_WIDGET) {
+			std::swap(_currentlySelectedWidget[_currentGUI].first,
+				_currentlySelectedWidget[_currentGUI].second);
+		} else {
+			_currentlySelectedWidget[_currentGUI].first =
+				_currentlySelectedWidget[_currentGUI].second;
+			_currentlySelectedWidget[_currentGUI].second = newsel;
+		}
+	};
+	const auto cursel = _currentlySelectedWidget[_currentGUI].second;
 	if ((*ui)[_upControl]) {
 		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
 			_selectThisWidgetFirst.end()) {
-			cursel = _selectThisWidgetFirst[_currentGUI];
+			makeNewSelection(_selectThisWidgetFirst[_currentGUI]);
 		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
 			&& !_directionalFlow[cursel].up.empty()) {
-			cursel = _directionalFlow[cursel].up;
+			makeNewSelection(_directionalFlow[cursel].up);
 		}
 	}
 	if ((*ui)[_downControl]) {
 		_enableDirectionalFlow = true;
 		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
 			_selectThisWidgetFirst.end()) {
-			cursel = _selectThisWidgetFirst[_currentGUI];
+			makeNewSelection(_selectThisWidgetFirst[_currentGUI]);
 		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
 			&& !_directionalFlow[cursel].down.empty()) {
-			cursel = _directionalFlow[cursel].down;
+			makeNewSelection(_directionalFlow[cursel].down);
 		}
 	}
 	if ((*ui)[_leftControl]) {
 		_enableDirectionalFlow = true;
 		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
 			_selectThisWidgetFirst.end()) {
-			cursel = _selectThisWidgetFirst[_currentGUI];
+			makeNewSelection(_selectThisWidgetFirst[_currentGUI]);
 		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
 			&& !_directionalFlow[cursel].left.empty()) {
-			cursel = _directionalFlow[cursel].left;
+			makeNewSelection(_directionalFlow[cursel].left);
 		}
 	}
 	if ((*ui)[_rightControl]) {
 		_enableDirectionalFlow = true;
 		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
 			_selectThisWidgetFirst.end()) {
-			cursel = _selectThisWidgetFirst[_currentGUI];
+			makeNewSelection(_selectThisWidgetFirst[_currentGUI]);
 		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
 			&& !_directionalFlow[cursel].right.empty()) {
-			cursel = _directionalFlow[cursel].right;
+			makeNewSelection(_directionalFlow[cursel].right);
 		}
 	}
-	return cursel;
+	return _currentlySelectedWidget[_currentGUI].second;
 }
 
 void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
@@ -1180,7 +1195,7 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// directional controls.
 	if (_enableDirectionalFlow && _currentlySelectedWidget.find(getGUI()) !=
 		_currentlySelectedWidget.end() &&
-		!_currentlySelectedWidget.at(getGUI()).empty()) {
+		!_currentlySelectedWidget.at(getGUI()).second.empty()) {
 		target.draw(_angleBracketUL, states);
 		target.draw(_angleBracketUR, states);
 		target.draw(_angleBracketLL, states);
@@ -1790,6 +1805,8 @@ bool sfx::gui::_getWidgetVisibility(const std::string& name) const {
 	return false;
 }
 
+const std::string sfx::gui::GOTO_PREVIOUS_WIDGET = "~";
+
 void sfx::gui::_setWidgetDirectionalFlow(const std::string& name,
 	const std::string& upName, const std::string& downName,
 	const std::string& leftName, const std::string& rightName) {
@@ -1807,22 +1824,22 @@ void sfx::gui::_setWidgetDirectionalFlow(const std::string& name,
 		widgetDoesNotExist(name);
 		return;
 	}
-	if (!upName.empty() &&
+	if (!upName.empty() && upName != GOTO_PREVIOUS_WIDGET &&
 		!_findWidget<Widget>(upName, &fullnameUp, &fullnameAsStringUp)) {
 		widgetDoesNotExist(upName);
 		return;
 	}
-	if (!downName.empty() &&
+	if (!downName.empty() && downName != GOTO_PREVIOUS_WIDGET &&
 		!_findWidget<Widget>(downName, &fullnameDown, &fullnameAsStringDown)) {
 		widgetDoesNotExist(downName);
 		return;
 	}
-	if (!leftName.empty() &&
+	if (!leftName.empty() && leftName != GOTO_PREVIOUS_WIDGET &&
 		!_findWidget<Widget>(leftName, &fullnameLeft, &fullnameAsStringLeft)) {
 		widgetDoesNotExist(leftName);
 		return;
 	}
-	if (!rightName.empty() &&
+	if (!rightName.empty() && rightName != GOTO_PREVIOUS_WIDGET &&
 		!_findWidget<Widget>(rightName, &fullnameRight, &fullnameAsStringRight)) {
 		widgetDoesNotExist(rightName);
 		return;
@@ -1831,10 +1848,14 @@ void sfx::gui::_setWidgetDirectionalFlow(const std::string& name,
 		(fullnameDown.empty() || fullname[0] == fullnameDown[0]) &&
 		(fullnameLeft.empty() || fullname[0] == fullnameLeft[0]) &&
 		(fullnameRight.empty() || fullname[0] == fullnameRight[0])) {
-		_directionalFlow[fullnameAsString].up = fullnameAsStringUp;
-		_directionalFlow[fullnameAsString].down = fullnameAsStringDown;
-		_directionalFlow[fullnameAsString].left = fullnameAsStringLeft;
-		_directionalFlow[fullnameAsString].right = fullnameAsStringRight;
+		_directionalFlow[fullnameAsString].up =
+			upName == GOTO_PREVIOUS_WIDGET ? upName : fullnameAsStringUp;
+		_directionalFlow[fullnameAsString].down =
+			downName == GOTO_PREVIOUS_WIDGET ? downName : fullnameAsStringDown;
+		_directionalFlow[fullnameAsString].left =
+			leftName == GOTO_PREVIOUS_WIDGET ? leftName : fullnameAsStringLeft;
+		_directionalFlow[fullnameAsString].right =
+			rightName == GOTO_PREVIOUS_WIDGET ? rightName : fullnameAsStringRight;
 	} else {
 		_logger.error("Attempted to set the directional flow of a widget \"{}\", "
 			"within menu \"{}\", to the widgets up=\"{}\", down=\"{}\", "

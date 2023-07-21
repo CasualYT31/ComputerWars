@@ -24,8 +24,11 @@ void MainMenuSetUp() {
 	setWidgetOrigin("MapMaker", 1.0, 0.0);
 	setWidgetText("MapMaker", "~Map Maker");
 
-    setWidgetDirectionalFlow("NewGame", "", "", "MapMaker", "MapMaker");
-    setWidgetDirectionalFlow("MapMaker", "", "", "NewGame", "NewGame");
+    setWidgetDirectionalFlow(
+        "NewGame", "FileSelect", "FileSelect", "MapMaker", "MapMaker");
+    setWidgetDirectionalFlow(
+        "MapMaker", "FileSelect", "FileSelect", "NewGame", "NewGame");
+    setWidgetDirectionalFlow("FileSelect", "~", "~", "NewGame", "MapMaker");
     setWidgetDirectionalFlowStart("NewGame");
 }
 
