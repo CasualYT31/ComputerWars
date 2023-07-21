@@ -753,12 +753,12 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 		if (_enableDirectionalFlow) {
 			const auto cursel = _moveDirectionalFlow(ui);
 			// If select is issued, and there is currently a widget selected, then
-			// trigger an appropriate signal handler.
+			// trigger an appropriate signal.
 			if ((*ui)[_selectControl] && !cursel.empty()) {
 				const auto widget = _findWidget<Widget>(cursel);
 				const auto widgetType = widget->getWidgetType();
 				if (widgetType == "Button" || widgetType == "BitmapButton" ||
-					widgetType == "ListBox") {
+					widgetType == "ListBox" || widgetType == "ScrollablePanel") {
 					signalHandler(widget, "MouseReleased");
 				}
 			}
@@ -851,8 +851,12 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 		_angleBracketLR.setCurrentFrame(0);
 	} else if (!cursel.first.empty()) {
 		// Ensure the angle brackets are at the correct locations.
-		const auto pos = cursel.second->getAbsolutePosition(),
+		auto pos = cursel.second->getAbsolutePosition(),
 			size = cursel.second->getSize();
+		if (cursel.second->getWidgetType() == "ScrollablePanel") {
+			pos += std::dynamic_pointer_cast<ScrollablePanel>(cursel.second)->
+				getContentOffset();
+		}
 		_angleBracketUL.setPosition(pos);
 		_angleBracketUL.animate(target, scaling);
 		_angleBracketUR.setPosition(pos + tgui::Vector2f(
@@ -991,10 +995,11 @@ std::string sfx::gui::_moveDirectionalFlow(
 		}
 	};
 	const auto cursel = _findCurrentlySelectedWidget();
+	const auto widgetType = !cursel.second ? "" : cursel.second->getWidgetType();
 	if ((*ui)[_upControl]) {
 		if (cursel.first.empty()) {
 			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
-		} else if (cursel.second->getWidgetType() == "ListBox") {
+		} else if (widgetType == "ListBox") {
 			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
 			const auto i = listbox->getSelectedItemIndex();
 			if (i == -1) {
@@ -1008,6 +1013,24 @@ std::string sfx::gui::_moveDirectionalFlow(
 			} else {
 				makeNewSelection(_directionalFlow[cursel.first].up);
 			}
+		} else if (widgetType == "ScrollablePanel") {
+			const auto panel =
+				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
+			const auto value = panel->getVerticalScrollbarValue();
+			if (panel->isVerticalScrollbarShown() && value > 0) {
+				// TODO-3: There is a bug with 0.9 where the VerticalScrollAmount
+				// is initialised to 0. Cba fixing it so will see if it's fixed
+				// when I upgrade.
+				if (static_cast<int>(value) -
+					static_cast<int>(panel->getHorizontalScrollAmount()) < 0) {
+					panel->setVerticalScrollbarValue(0);
+				} else {
+					panel->setVerticalScrollbarValue(
+						value - panel->getHorizontalScrollAmount());
+				}
+			} else {
+				makeNewSelection(_directionalFlow[cursel.first].up);
+			}
 		} else {
 			makeNewSelection(_directionalFlow[cursel.first].up);
 		}
@@ -1015,7 +1038,7 @@ std::string sfx::gui::_moveDirectionalFlow(
 	if ((*ui)[_downControl]) {
 		if (cursel.first.empty()) {
 			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
-		} else if (cursel.second->getWidgetType() == "ListBox") {
+		} else if (widgetType == "ListBox") {
 			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
 			const auto i = listbox->getSelectedItemIndex();
 			if (i == -1) {
@@ -1029,6 +1052,21 @@ std::string sfx::gui::_moveDirectionalFlow(
 			} else {
 				makeNewSelection(_directionalFlow[cursel.first].down);
 			}
+		} else if (widgetType == "ScrollablePanel") {
+			const auto panel =
+				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
+			const auto value = panel->getVerticalScrollbarValue();
+			if (panel->isVerticalScrollbarShown() &&
+				value < panel->getVerticalScrollbarMaximum() -
+					static_cast<unsigned int>(panel->getSize().y)) {
+				// TODO-3: There is a bug with 0.9 where the VerticalScrollAmount
+				// is initialised to 0. Cba fixing it so will see if it's fixed
+				// when I upgrade.
+				panel->setVerticalScrollbarValue(
+					value + panel->getHorizontalScrollAmount());
+			} else {
+				makeNewSelection(_directionalFlow[cursel.first].down);
+			}
 		} else {
 			makeNewSelection(_directionalFlow[cursel.first].down);
 		}
@@ -1036,6 +1074,21 @@ std::string sfx::gui::_moveDirectionalFlow(
 	if ((*ui)[_leftControl]) {
 		if (cursel.first.empty()) {
 			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+		} else if (widgetType == "ScrollablePanel") {
+			const auto panel =
+				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
+			const auto value = panel->getHorizontalScrollbarValue();
+			if (panel->isHorizontalScrollbarShown() && value > 0) {
+				if (static_cast<int>(value) -
+					static_cast<int>(panel->getHorizontalScrollAmount()) < 0) {
+					panel->setHorizontalScrollbarValue(0);
+				} else {
+					panel->setHorizontalScrollbarValue(
+						value - panel->getHorizontalScrollAmount());
+				}
+			} else {
+				makeNewSelection(_directionalFlow[cursel.first].left);
+			}
 		} else {
 			makeNewSelection(_directionalFlow[cursel.first].left);
 		}
@@ -1043,6 +1096,18 @@ std::string sfx::gui::_moveDirectionalFlow(
 	if ((*ui)[_rightControl]) {
 		if (cursel.first.empty()) {
 			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+		} else if (widgetType == "ScrollablePanel") {
+			const auto panel =
+				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
+			const auto value = panel->getHorizontalScrollbarValue();
+			if (panel->isHorizontalScrollbarShown() &&
+				value < panel->getHorizontalScrollbarMaximum() -
+				static_cast<unsigned int>(panel->getSize().x)) {
+				panel->setHorizontalScrollbarValue(
+					value + panel->getHorizontalScrollAmount());
+			} else {
+				makeNewSelection(_directionalFlow[cursel.first].right);
+			}
 		} else {
 			makeNewSelection(_directionalFlow[cursel.first].right);
 		}
