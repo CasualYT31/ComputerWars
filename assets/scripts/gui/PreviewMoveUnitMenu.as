@@ -121,7 +121,7 @@ void PreviewMoveUnitMenuHandleInput(const dictionary controls) {
 /**
  * Moves a unit and makes it wait at its new destination.
  */
-void PreviewMoveUnitMenu_Wait_Pressed() {
+void PreviewMoveUnitMenu_Wait_MouseReleased() {
 	game.moveUnit();
 	setGUI("Map");
 }
@@ -129,7 +129,7 @@ void PreviewMoveUnitMenu_Wait_Pressed() {
 /**
  * Joins two units together.
  */
-void PreviewMoveUnitMenu_Join_Pressed() {
+void PreviewMoveUnitMenu_Join_MouseReleased() {
 	game.joinUnits(
 		game.map.getUnitOnTile(game.map.getSelectedTile()),
 		game.map.getSelectedUnit(),
@@ -141,7 +141,7 @@ void PreviewMoveUnitMenu_Join_Pressed() {
 /**
  * Moves a unit and make it capture a property.
  */
-void PreviewMoveUnitMenu_Capture_Pressed() {
+void PreviewMoveUnitMenu_Capture_MouseReleased() {
 	game.moveUnitAndCapture();
 	setGUI("Map");
 }
@@ -149,7 +149,7 @@ void PreviewMoveUnitMenu_Capture_Pressed() {
 /**
  * Resupplies adjacent units and makes the selected unit wait.
  */
-void PreviewMoveUnitMenu_Supply_Pressed() {
+void PreviewMoveUnitMenu_Supply_MouseReleased() {
 	// Cache selected unit, as moveUnit() unselects it.
 	const auto selectedUnit = game.map.getSelectedUnit();
 	game.moveUnit();
@@ -160,7 +160,7 @@ void PreviewMoveUnitMenu_Supply_Pressed() {
 /**
  * Loads the moving unit onto the stationary one.
  */
-void PreviewMoveUnitMenu_Load_Pressed() {
+void PreviewMoveUnitMenu_Load_MouseReleased() {
 	game.loadUnit(
 		game.map.getSelectedUnit(),
 		game.map.getUnitOnTile(game.map.getSelectedTile()),
@@ -175,14 +175,14 @@ void PreviewMoveUnitMenu_Load_Pressed() {
 /**
  * Allows the user to select units to unload.
  */
-void PreviewMoveUnitMenu_Unload_Pressed() {
+void PreviewMoveUnitMenu_Unload_MouseReleased() {
 	setGUI("UnloadUnitsMenu");
 }
 
 /**
  * Move a unit and unhide it.
  */
-void PreviewMoveUnitMenu_Show_Pressed() {
+void PreviewMoveUnitMenu_Show_MouseReleased() {
 	game.moveUnitHide(false);
 	setGUI("Map");
 }
@@ -190,7 +190,7 @@ void PreviewMoveUnitMenu_Show_Pressed() {
 /**
  * Move a unit and hide it.
  */
-void PreviewMoveUnitMenu_Hide_Pressed() {
+void PreviewMoveUnitMenu_Hide_MouseReleased() {
 	game.moveUnitHide(true);
 	setGUI("Map");
 }
@@ -198,14 +198,14 @@ void PreviewMoveUnitMenu_Hide_Pressed() {
 /**
  * Allows the user to select a target for an attack.
  */
-void PreviewMoveUnitMenu_Fire_Pressed() {
+void PreviewMoveUnitMenu_Fire_MouseReleased() {
 	setGUI("SelectTargetMenu");
 }
 
 /**
  * Allows the user to preview a Black Bomb explosion.
  */
-void PreviewMoveUnitMenu_Explode_Pressed() {
+void PreviewMoveUnitMenu_Explode_MouseReleased() {
 	EXPLODE_PREVIEW_MENU_DISPLAYED_HP_TO_DEAL = 5;
 	EXPLODE_PREVIEW_MENU_RANGE.x = 1;
 	EXPLODE_PREVIEW_MENU_RANGE.y = 3;
@@ -221,6 +221,6 @@ void PreviewMoveUnitMenu_Explode_Pressed() {
 /**
  * Allows the user to select a unit to repair.
  */
-void PreviewMoveUnitMenu_Repair_Pressed() {
+void PreviewMoveUnitMenu_Repair_MouseReleased() {
 	setGUI("RepairMenu");
 }

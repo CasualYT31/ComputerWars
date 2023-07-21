@@ -128,7 +128,7 @@ void UnloadUnitsMenuHandleInput(const dictionary controls) {
 	if (getWidgetVisibility("panel")) {
 		if (bool(controls["back"])) {
 			// Cancel whole unloading operation.
-			UnloadUnitsMenu_cancel_Pressed();
+			UnloadUnitsMenu_cancel_MouseReleased();
 			return;
 		}
 	} else {
@@ -146,7 +146,7 @@ void UnloadUnitsMenuHandleInput(const dictionary controls) {
 					// progress to go ahead, and make the base unit wait.
 					if (game.map.getUnitOnTile(selectedTile) > 0) {
 						game.map.popSelectedUnit();
-						UnloadUnitsMenu_proceed_Pressed();
+						UnloadUnitsMenu_proceed_MouseReleased();
 						return;
 					} else {
 						game.map.addPreviewUnit(
@@ -170,7 +170,7 @@ void UnloadUnitsMenuHandleInput(const dictionary controls) {
 /**
  * Cancel the unload operation and go back to the command menu.
  */
-void UnloadUnitsMenu_cancel_Pressed() {
+void UnloadUnitsMenu_cancel_MouseReleased() {
 	// Remove all of the preview units that were added by this menu.
 	const auto loadedUnits =
 		game.map.getLoadedUnits(UnloadUnitsMenuBaseUnloadUnit);
@@ -191,7 +191,7 @@ void UnloadUnitsMenu_cancel_Pressed() {
 /**
  * Proceed with the unload operation.
  */
-void UnloadUnitsMenu_proceed_Pressed() {
+void UnloadUnitsMenu_proceed_MouseReleased() {
 	// Move the base unit as normal.
 	game.moveUnit();
 	// Set the locations of all the unloaded units.

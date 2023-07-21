@@ -52,7 +52,7 @@ void MapMenuHandleInput(const dictionary controls) {
 /**
  * Allows the user to save the map in its current state.
  */
-void MapMenu_Save_Pressed() {
+void MapMenu_Save_MouseReleased() {
 	game.map.save();
 	setGUI("Map");
 }
@@ -60,14 +60,14 @@ void MapMenu_Save_Pressed() {
 /**
  * Allows the user to delete units that belong to them.
  */
-void MapMenu_Delete_Pressed() {
+void MapMenu_Delete_MouseReleased() {
 	setGUI("DeleteUnitMenu");
 }
 
 /**
  * Allows the current army to tag their COs and end their turn.
  */
-void MapMenu_Tag_Pressed() {
+void MapMenu_Tag_MouseReleased() {
 	game.tagCOs();
 	setGUI("Map");
 }
@@ -75,7 +75,7 @@ void MapMenu_Tag_Pressed() {
 /**
  * Allows the current army to end their turn.
  */
-void MapMenu_EndTurn_Pressed() {
+void MapMenu_EndTurn_MouseReleased() {
 	game.endTurn();
 	setGUI("Map");
 }
@@ -84,6 +84,6 @@ void MapMenu_EndTurn_Pressed() {
  * Quits the map without saving and goes back to the menu the user was on before
  * loading the map.
  */
-void MapMenu_Quit_Pressed() {
+void MapMenu_Quit_MouseReleased() {
 	quitMap();
 }
