@@ -557,6 +557,18 @@ namespace sfx {
 			std::vector<std::string>* namesList = nullptr,
 			std::string* fullname = nullptr) const;
 
+		/**
+		 * Finds the currently selected widget.
+		 * In the event that there is a selected widget, but it cannot be found, an
+		 * error will be logged, it will be deselected, and the selection history
+		 * for the current GUI menu will also be erased.
+		 * @return If there isn't a widget currently selected (or it can't be
+		 *         found), a blank string and \c nullptr. If there is a widget
+		 *         currently selected, and it can be found, then its full name and
+		 *         widget object shall be returned.
+		 */
+		std::pair<std::string, tgui::Widget::Ptr> _findCurrentlySelectedWidget();
+
 		//////////////////////
 		// SCRIPT INTERFACE //
 		//////////////////////

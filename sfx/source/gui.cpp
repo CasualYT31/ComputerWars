@@ -757,7 +757,8 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 			if ((*ui)[_selectControl] && !cursel.empty()) {
 				const auto widget = _findWidget<Widget>(cursel);
 				const auto widgetType = widget->getWidgetType();
-				if (widgetType == "Button" || widgetType == "BitmapButton") {
+				if (widgetType == "Button" || widgetType == "BitmapButton" ||
+					widgetType == "ListBox") {
 					signalHandler(widget, "MouseReleased");
 				}
 			}
@@ -842,37 +843,27 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 
 	// Whenever there isn't a widget currently selected via directional controls,
 	// always reset the animation.
-	const auto& cursel = _currentlySelectedWidget[getGUI()].second;
-	if (cursel.empty() || !_enableDirectionalFlow) {
+	const auto& cursel = _findCurrentlySelectedWidget();
+	if (cursel.first.empty() || !_enableDirectionalFlow) {
 		_angleBracketUL.setCurrentFrame(0);
 		_angleBracketUR.setCurrentFrame(0);
 		_angleBracketLL.setCurrentFrame(0);
 		_angleBracketLR.setCurrentFrame(0);
-	} else if (!cursel.empty()) {
+	} else if (!cursel.first.empty()) {
 		// Ensure the angle brackets are at the correct locations.
-		std::string fullname;
-		const auto widget = _findWidget<Widget>(cursel, nullptr, &fullname);
-		if (widget) {
-			const auto pos = widget->getAbsolutePosition(),
-				size = widget->getSize();
-			_angleBracketUL.setPosition(pos);
-			_angleBracketUL.animate(target, scaling);
-			_angleBracketUR.setPosition(pos + tgui::Vector2f(
-				size.x - _angleBracketUR.getSize().x, 0.0f));
-			_angleBracketUR.animate(target, scaling);
-			_angleBracketLL.setPosition(pos + tgui::Vector2f(0.0f,
-				size.y - _angleBracketLL.getSize().y));
-			_angleBracketLL.animate(target, scaling);
-			_angleBracketLR.setPosition(pos + size -
-				tgui::Vector2f(_angleBracketLR.getSize()));
-			_angleBracketLR.animate(target, scaling);
-		} else {
-			_logger.error("Currently selected widget \"{}\" couldn't be found! "
-				"Current menu is \"{}\". Deselecting...", fullname, getGUI());
-			_currentlySelectedWidget[getGUI()].first =
-				_currentlySelectedWidget[getGUI()].second;
-			_currentlySelectedWidget[getGUI()].second = "";
-		}
+		const auto pos = cursel.second->getAbsolutePosition(),
+			size = cursel.second->getSize();
+		_angleBracketUL.setPosition(pos);
+		_angleBracketUL.animate(target, scaling);
+		_angleBracketUR.setPosition(pos + tgui::Vector2f(
+			size.x - _angleBracketUR.getSize().x, 0.0f));
+		_angleBracketUR.animate(target, scaling);
+		_angleBracketLL.setPosition(pos + tgui::Vector2f(0.0f,
+			size.y - _angleBracketLL.getSize().y));
+		_angleBracketLL.animate(target, scaling);
+		_angleBracketLR.setPosition(pos + size -
+			tgui::Vector2f(_angleBracketLR.getSize()));
+		_angleBracketLR.animate(target, scaling);
 	}
 
 	return false;
@@ -989,53 +980,71 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 std::string sfx::gui::_moveDirectionalFlow(
 	const std::shared_ptr<sfx::user_input>& ui) {
 	static const auto makeNewSelection = [&](const std::string& newsel) {
+		if (newsel.empty()) return;
 		if (newsel == GOTO_PREVIOUS_WIDGET) {
-			std::swap(_currentlySelectedWidget[_currentGUI].first,
-				_currentlySelectedWidget[_currentGUI].second);
+			std::swap(_currentlySelectedWidget[getGUI()].first,
+				_currentlySelectedWidget[getGUI()].second);
 		} else {
-			_currentlySelectedWidget[_currentGUI].first =
-				_currentlySelectedWidget[_currentGUI].second;
-			_currentlySelectedWidget[_currentGUI].second = newsel;
+			_currentlySelectedWidget[getGUI()].first =
+				_currentlySelectedWidget[getGUI()].second;
+			_currentlySelectedWidget[getGUI()].second = newsel;
 		}
 	};
-	const auto cursel = _currentlySelectedWidget[_currentGUI].second;
+	const auto cursel = _findCurrentlySelectedWidget();
 	if ((*ui)[_upControl]) {
-		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-			_selectThisWidgetFirst.end()) {
-			makeNewSelection(_selectThisWidgetFirst[_currentGUI]);
-		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
-			&& !_directionalFlow[cursel].up.empty()) {
-			makeNewSelection(_directionalFlow[cursel].up);
+		if (cursel.first.empty()) {
+			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+		} else if (cursel.second->getWidgetType() == "ListBox") {
+			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
+			const auto i = listbox->getSelectedItemIndex();
+			if (i == -1) {
+				listbox->setSelectedItemByIndex(0);
+			} else if (i > 0) {
+				listbox->setSelectedItemByIndex(i - 1);
+			} else if (_directionalFlow[cursel.first].up.empty()) {
+				// If there is nowhere to go from the top, loop through to the
+				// the bottom of the list.
+				listbox->setSelectedItemByIndex(listbox->getItemCount() - 1);
+			} else {
+				makeNewSelection(_directionalFlow[cursel.first].up);
+			}
+		} else {
+			makeNewSelection(_directionalFlow[cursel.first].up);
 		}
 	}
 	if ((*ui)[_downControl]) {
-		_enableDirectionalFlow = true;
-		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-			_selectThisWidgetFirst.end()) {
-			makeNewSelection(_selectThisWidgetFirst[_currentGUI]);
-		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
-			&& !_directionalFlow[cursel].down.empty()) {
-			makeNewSelection(_directionalFlow[cursel].down);
+		if (cursel.first.empty()) {
+			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+		} else if (cursel.second->getWidgetType() == "ListBox") {
+			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
+			const auto i = listbox->getSelectedItemIndex();
+			if (i == -1) {
+				listbox->setSelectedItemByIndex(0);
+			} else if (i < listbox->getItemCount() - 1) {
+				listbox->setSelectedItemByIndex(i + 1);
+			} else if (_directionalFlow[cursel.first].down.empty()) {
+				// If there is nowhere to go from the bottom, loop through to the
+				// the top of the list.
+				listbox->setSelectedItemByIndex(0);
+			} else {
+				makeNewSelection(_directionalFlow[cursel.first].down);
+			}
+		} else {
+			makeNewSelection(_directionalFlow[cursel.first].down);
 		}
 	}
 	if ((*ui)[_leftControl]) {
-		_enableDirectionalFlow = true;
-		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-			_selectThisWidgetFirst.end()) {
-			makeNewSelection(_selectThisWidgetFirst[_currentGUI]);
-		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
-			&& !_directionalFlow[cursel].left.empty()) {
-			makeNewSelection(_directionalFlow[cursel].left);
+		if (cursel.first.empty()) {
+			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+		} else {
+			makeNewSelection(_directionalFlow[cursel.first].left);
 		}
 	}
 	if ((*ui)[_rightControl]) {
-		_enableDirectionalFlow = true;
-		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-			_selectThisWidgetFirst.end()) {
-			makeNewSelection(_selectThisWidgetFirst[_currentGUI]);
-		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
-			&& !_directionalFlow[cursel].right.empty()) {
-			makeNewSelection(_directionalFlow[cursel].right);
+		if (cursel.first.empty()) {
+			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+		} else {
+			makeNewSelection(_directionalFlow[cursel.first].right);
 		}
 	}
 	return _currentlySelectedWidget[_currentGUI].second;
@@ -1431,21 +1440,34 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	// Remove widget.
 	const std::string name = widget->getWidgetName().toStdString();
 	if (container) {
-		if (_widgetSprites.find(name) != _widgetSprites.end())
-			_widgetSprites.erase(name);
-		if (_guiSpriteKeys.find(name) != _guiSpriteKeys.end())
-			_guiSpriteKeys.erase(name);
-		if (_dontOverridePictureSizeWithSpriteSize.find(name) !=
-			_dontOverridePictureSizeWithSpriteSize.end())
-			_dontOverridePictureSizeWithSpriteSize.erase(name);
-		if (_originalStrings.find(name) != _originalStrings.end())
-			_originalStrings.erase(name);
-		if (_originalStringsVariables.find(name) !=
-			_originalStringsVariables.end()) _originalStringsVariables.erase(name);
-		if (_customSignalHandlers.find(name) != _customSignalHandlers.end())
-			_customSignalHandlers.erase(name);
-		if (_directionalFlow.find(name) != _directionalFlow.end())
-			_directionalFlow.erase(name);
+		_widgetSprites.erase(name);
+		_guiSpriteKeys.erase(name);
+		_dontOverridePictureSizeWithSpriteSize.erase(name);
+		_originalStrings.erase(name);
+		_originalStringsVariables.erase(name);
+		_customSignalHandlers.erase(name);
+		_directionalFlow.erase(name);
+		// Also delete references to the removed sprite from other widgets.
+		for (auto& flowInfo : _directionalFlow) {
+			if (flowInfo.second.up == name) flowInfo.second.up.clear();
+			if (flowInfo.second.down == name) flowInfo.second.down.clear();
+			if (flowInfo.second.left == name) flowInfo.second.left.clear();
+			if (flowInfo.second.right == name) flowInfo.second.right.clear();
+		}
+		// If the removed widget was configured to be selected first at all, remove
+		// it.
+		for (auto& menu : _selectThisWidgetFirst)
+			if (menu.second == name) menu.second = "";
+		// If the removed widget was previously selected at all, then remove it
+		// from the history. If the removed widget is currently selected, then
+		// deselect it and erase the history, as well.
+		for (auto& selectedWidgetData : _currentlySelectedWidget) {
+			if (selectedWidgetData.second.second == name) {
+				selectedWidgetData.second = {};
+			} else if (selectedWidgetData.second.first == name) {
+				selectedWidgetData.second.first = "";
+			}
+		}
 		if (removeIt) container->remove(widget);
 	} else {
 		_logger.error("Attempted to remove a widget \"{}\", which did not have a "
@@ -1514,6 +1536,20 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 			name, menu);
 		return nullptr;
 	}
+}
+
+std::pair<std::string, tgui::Widget::Ptr>
+	sfx::gui::_findCurrentlySelectedWidget() {
+	const auto& cursel = _currentlySelectedWidget[getGUI()].second;
+	if (cursel.empty()) return {};
+	const auto widget = _findWidget<Widget>(cursel);
+	if (!widget) {
+		_logger.error("Currently selected widget \"{}\" couldn't be found! "
+			"Current menu is \"{}\". Deselecting...", cursel, getGUI());
+		_currentlySelectedWidget.erase(getGUI());
+		return {};
+	}
+	return { cursel, widget };
 }
 
 //////////////////////
