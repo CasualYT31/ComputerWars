@@ -475,6 +475,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Used to explicitly prevent directional "
 		"controls from selecting a widget for the given menu.");
 
+	r = engine->RegisterGlobalFunction("void setWidgetDirectionalFlowSelection("
+		"const string&in)",
+		asMETHOD(sfx::gui, _setWidgetDirectionalFlowSelection),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Manually select a widget which the user "
+		"can move away from using the directional controls.");
+
 	r = engine->RegisterGlobalFunction("void setDirectionalFlowAngleBracketSprite("
 		"const string&in, const string&in, const string&in)",
 		asMETHOD(sfx::gui, _setDirectionalFlowAngleBracketSprite),
@@ -731,6 +738,7 @@ bool sfx::gui::handleEvent(sf::Event e) {
 void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	if (ui) {
 		// Invoke the current menu's bespoke input handling function.
+		const auto previousGUI = getGUI();
 		if (_scripts->functionExists(getGUI() + "HandleInput")) {
 			_handleInputErrorLogged = false;
 			// Construct the dictionary.
@@ -742,6 +750,11 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 			_scripts->callFunction(getGUI() + "HandleInput", controls);
 			controls->Release();
 		}
+		// If the bespoke function changed the menu, drop all directional input for
+		// an iteration. If we don't, it can cause a game input made on the map,
+		// for example, to trigger a UI input in a base menu, for example, in the
+		// same iteration.
+		if (previousGUI != getGUI()) return;
 		// Keep track of mouse movement. If the mouse has moved, then we disregard
 		// directional flow (and select inputs) until a new directional input has
 		// been made.
@@ -758,7 +771,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 				const auto widget = _findWidget<Widget>(cursel);
 				const auto widgetType = widget->getWidgetType();
 				if (widgetType == "Button" || widgetType == "BitmapButton" ||
-					widgetType == "ListBox" || widgetType == "ScrollablePanel") {
+					widgetType == "ListBox") {
 					signalHandler(widget, "MouseReleased");
 				}
 			}
@@ -779,7 +792,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	}
 }
 
-void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
+bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const tgui::String& signalName) {
 	if (_scripts && getGUI() != "") {
 		std::string fullname = widget->getWidgetName().toStdString();
@@ -789,9 +802,8 @@ void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 			std::string decl = "void " + customHandler->second +
 				"(const string&in, const string&in)";
 			if (_scripts->functionDeclExists(decl)) {
-				_scripts->callFunction(customHandler->second, &fullname,
+				return _scripts->callFunction(customHandler->second, &fullname,
 					&signalNameStd);
-				return;
 			} else {
 				_logger.warning("Widget \"{}\" was configured with a custom "
 					"signal handler \"{}\", but a function of declaration \"{}\" "
@@ -802,9 +814,10 @@ void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 		std::string functionName = getGUI() + "_" + _extractWidgetName(fullname) +
 			"_" + signalNameStd;
 		if (_scripts->functionExists(functionName)) {
-			_scripts->callFunction(functionName);
+			return _scripts->callFunction(functionName);
 		}
 	}
+	return false;
 }
 
 void sfx::gui::setLanguageDictionary(
@@ -983,22 +996,12 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 
 std::string sfx::gui::_moveDirectionalFlow(
 	const std::shared_ptr<sfx::user_input>& ui) {
-	static const auto makeNewSelection = [&](const std::string& newsel) {
-		if (newsel.empty()) return;
-		if (newsel == GOTO_PREVIOUS_WIDGET) {
-			std::swap(_currentlySelectedWidget[getGUI()].first,
-				_currentlySelectedWidget[getGUI()].second);
-		} else {
-			_currentlySelectedWidget[getGUI()].first =
-				_currentlySelectedWidget[getGUI()].second;
-			_currentlySelectedWidget[getGUI()].second = newsel;
-		}
-	};
 	const auto cursel = _findCurrentlySelectedWidget();
 	const auto widgetType = !cursel.second ? "" : cursel.second->getWidgetType();
 	if ((*ui)[_upControl]) {
 		if (cursel.first.empty()) {
-			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+			_makeNewDirectionalSelection(_selectThisWidgetFirst[getGUI()],
+				getGUI());
 		} else if (widgetType == "ListBox") {
 			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
 			const auto i = listbox->getSelectedItemIndex();
@@ -1011,7 +1014,8 @@ std::string sfx::gui::_moveDirectionalFlow(
 				// the bottom of the list.
 				listbox->setSelectedItemByIndex(listbox->getItemCount() - 1);
 			} else {
-				makeNewSelection(_directionalFlow[cursel.first].up);
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].up,
+					getGUI());
 			}
 		} else if (widgetType == "ScrollablePanel") {
 			const auto panel =
@@ -1022,22 +1026,25 @@ std::string sfx::gui::_moveDirectionalFlow(
 				// is initialised to 0. Cba fixing it so will see if it's fixed
 				// when I upgrade.
 				if (static_cast<int>(value) -
-					static_cast<int>(panel->getHorizontalScrollAmount()) < 0) {
+					static_cast<int>(15) < 0) {
 					panel->setVerticalScrollbarValue(0);
 				} else {
 					panel->setVerticalScrollbarValue(
-						value - panel->getHorizontalScrollAmount());
+						value - 15);
 				}
 			} else {
-				makeNewSelection(_directionalFlow[cursel.first].up);
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].up,
+					getGUI());
 			}
 		} else {
-			makeNewSelection(_directionalFlow[cursel.first].up);
+			_makeNewDirectionalSelection(_directionalFlow[cursel.first].up,
+				getGUI());
 		}
 	}
 	if ((*ui)[_downControl]) {
 		if (cursel.first.empty()) {
-			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+			_makeNewDirectionalSelection(_selectThisWidgetFirst[getGUI()],
+				getGUI());
 		} else if (widgetType == "ListBox") {
 			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
 			const auto i = listbox->getSelectedItemIndex();
@@ -1050,7 +1057,8 @@ std::string sfx::gui::_moveDirectionalFlow(
 				// the top of the list.
 				listbox->setSelectedItemByIndex(0);
 			} else {
-				makeNewSelection(_directionalFlow[cursel.first].down);
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].down,
+					getGUI());
 			}
 		} else if (widgetType == "ScrollablePanel") {
 			const auto panel =
@@ -1063,17 +1071,20 @@ std::string sfx::gui::_moveDirectionalFlow(
 				// is initialised to 0. Cba fixing it so will see if it's fixed
 				// when I upgrade.
 				panel->setVerticalScrollbarValue(
-					value + panel->getHorizontalScrollAmount());
+					value + 15);
 			} else {
-				makeNewSelection(_directionalFlow[cursel.first].down);
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].down,
+					getGUI());
 			}
 		} else {
-			makeNewSelection(_directionalFlow[cursel.first].down);
+			_makeNewDirectionalSelection(_directionalFlow[cursel.first].down,
+				getGUI());
 		}
 	}
 	if ((*ui)[_leftControl]) {
 		if (cursel.first.empty()) {
-			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+			_makeNewDirectionalSelection(_selectThisWidgetFirst[getGUI()],
+				getGUI());
 		} else if (widgetType == "ScrollablePanel") {
 			const auto panel =
 				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
@@ -1087,15 +1098,18 @@ std::string sfx::gui::_moveDirectionalFlow(
 						value - panel->getHorizontalScrollAmount());
 				}
 			} else {
-				makeNewSelection(_directionalFlow[cursel.first].left);
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].left,
+					getGUI());
 			}
 		} else {
-			makeNewSelection(_directionalFlow[cursel.first].left);
+			_makeNewDirectionalSelection(_directionalFlow[cursel.first].left,
+				getGUI());
 		}
 	}
 	if ((*ui)[_rightControl]) {
 		if (cursel.first.empty()) {
-			makeNewSelection(_selectThisWidgetFirst[getGUI()]);
+			_makeNewDirectionalSelection(_selectThisWidgetFirst[getGUI()],
+				getGUI());
 		} else if (widgetType == "ScrollablePanel") {
 			const auto panel =
 				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
@@ -1106,14 +1120,31 @@ std::string sfx::gui::_moveDirectionalFlow(
 				panel->setHorizontalScrollbarValue(
 					value + panel->getHorizontalScrollAmount());
 			} else {
-				makeNewSelection(_directionalFlow[cursel.first].right);
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].right,
+					getGUI());
 			}
 		} else {
-			makeNewSelection(_directionalFlow[cursel.first].right);
+			_makeNewDirectionalSelection(_directionalFlow[cursel.first].right,
+				getGUI());
 		}
 	}
 	return _currentlySelectedWidget[_currentGUI].second;
 }
+
+void sfx::gui::_makeNewDirectionalSelection(const std::string& newsel,
+	const std::string& menu) {
+	if (newsel.empty()) return;
+	if (newsel == GOTO_PREVIOUS_WIDGET) {
+		std::swap(_currentlySelectedWidget[menu].first,
+			_currentlySelectedWidget[menu].second);
+	} else {
+		_currentlySelectedWidget[menu].first =
+			_currentlySelectedWidget[menu].second;
+		_currentlySelectedWidget[menu].second = newsel;
+	}
+	signalHandler(_findWidget<Widget>(_currentlySelectedWidget[menu].second),
+		"MouseEntered");
+};
 
 void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 	std::string widgetName = widget->getWidgetName().toStdString();
@@ -1412,7 +1443,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		// Okay... So... When I try to set ValueChanged on a SpinControl here, the
 		// program crashes without reporting any errors whatsoever, not even in
 		// debug mode... But the TGUI documentation says that it should have this
-		// signal...
+		// signal... TODO-3.
 		widget->getSignal("ValueChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "label" || type == "picture") {
@@ -1985,6 +2016,19 @@ void sfx::gui::_clearWidgetDirectionalFlowStart(const std::string& menu) {
 	} else {
 		_logger.error("Attempted to disable directional input for the menu "
 			"\"{}\". Menu does not exist.", menu);
+	}
+}
+
+void sfx::gui::_setWidgetDirectionalFlowSelection(const std::string& name) {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		_makeNewDirectionalSelection(fullnameAsString, fullname[0]);
+	} else {
+		_logger.error("Attempted to manually directionally select the widget "
+			"\"{}\", in the menu \"{}\". This widget does not exist.", name,
+			fullname[0]);
 	}
 }
 

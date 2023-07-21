@@ -36,6 +36,7 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 	const uint columnCount) {
 	const uint HEIGHT = 30;
 	addWidget("ScrollablePanel", panelName);
+    setWidgetDirectionalFlow(panelName, "", "", "~", "");
 	setWidgetVisibility(panelName, false);
 	setWidgetSize(panelName, "60%", "60%");
 	setWidgetOrigin(panelName, 0.5, 0.5);
@@ -50,10 +51,13 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 			unitsMatchingMovement.insertLast(unitTypeScriptNames[i]);
 		}
 	}
+    array<array<string>> widgetNames;
+    for (uint i = 0; i < columnCount; ++i) widgetNames.insertLast({});
 	for (uint i = 0, len = unitsMatchingMovement.length(); i < len; ++i) {
 		const auto type = unittype[unitsMatchingMovement[i]];
 		string widget = panelName + "." + type.scriptName;
 		addWidget("BitmapButton", widget, "BaseMenuHandleSignal");
+        widgetNames[i % columnCount].insertLast(widget);
 		setWidgetTextSize(widget, 16);
 		// Rounding errors that will need addressing in the future.
 		setWidgetSize(widget, formatFloat(100.0 / double(columnCount)) + "%",
@@ -66,6 +70,30 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 		setWidgetText(widget, "~" + translate(type.name) + " (G. " +
 			formatUInt(type.cost) + ")");
 	}
+    // Now organise directional flow.
+    for (uint col = 0, cols = widgetNames.length(); col < cols; ++col) {
+        for (uint row = 0, rows = widgetNames[col].length(); row < rows; ++row) {
+            const auto up = row == 0 ? widgetNames[col][rows - 1] :
+                widgetNames[col][row - 1];
+            const auto down = row == rows - 1 ? widgetNames[col][0] :
+                widgetNames[col][row + 1];
+            const auto left = col == 0 ? "" : widgetNames[col - 1][row];
+            string right = panelName; // col == cols - 1
+            if (col < cols - 1) {
+                if (widgetNames[col + 1].length() <= row) {
+                    // There isn't a unit to the immediate right, so pick the unit
+                    // that is on the row above, if possible.
+                    if (row > 0) {
+                        right = widgetNames[col + 1][row - 1];
+                    }
+                } else {
+                    right = widgetNames[col + 1][row];
+                }
+            }
+            setWidgetDirectionalFlow(
+                widgetNames[col][row], up, down, left, right);
+        }
+    }
 }
 
 /**
@@ -95,25 +123,29 @@ void BaseMenuSetUp() {
 /**
  * When this menu is opened, one of the panels has to be shown. This function
  * shows one of the panels.
- * @param panelName         The name of the panel to show.
- * @param movementTypeNames An array of movement types. If a unit has a movement
- *                          type from this list, then it can be built using this
- *                          panel.
+ * @param  panelName         The name of the panel to show.
+ * @param  movementTypeNames An array of movement types. If a unit has a movement
+ *                           type from this list, then it can be built using this
+ *                           panel.
+ * @return The name of the first unit widget.
  */
-void PanelOpen(const string&in panelName, const array<string>@ movementTypeNames)
-	{
+string PanelOpen(const string&in panelName,
+    const array<string>@ movementTypeNames) {
 	const auto country =
 		game.map.getArmyCountry(game.map.getSelectedArmy()).scriptName;
 	const auto unitTypeNames = unittype.scriptNames;
 	const uint unitTypeCount = unittype.length();
+    string ret;
 	for (uint i = 0; i < unitTypeCount; ++i) {
 		const auto type = unittype[unitTypeNames[i]];
 		if (movementTypeNames.find(type.movementType.scriptName) >= 0) {
+            if (ret.length() == 0) ret = panelName + "." + type.scriptName;
 			setWidgetSprite(panelName + "." + type.scriptName, "unit",
 				type.unitSprite(country));
 		}
 	}
 	setWidgetVisibility(panelName, true);
+    return ret;
 }
 
 /**
@@ -126,11 +158,11 @@ void BaseMenuOpen() {
 	const string terrain =
 		game.map.getTileType(game.map.getSelectedTile()).type.scriptName;
 	if (terrain == "BASE") {
-		PanelOpen("ground", GROUND_UNITS);
+        setWidgetDirectionalFlowSelection(PanelOpen("ground", GROUND_UNITS));
 	} else if (terrain == "AIRPORT") {
-		PanelOpen("air", AIR_UNITS);
+		setWidgetDirectionalFlowSelection(PanelOpen("air", AIR_UNITS));
 	} else if (terrain == "PORT") {
-		PanelOpen("sea", SEA_UNITS);
+		setWidgetDirectionalFlowSelection(PanelOpen("sea", SEA_UNITS));
 	}
 }
 
@@ -160,7 +192,7 @@ void BaseMenuHandleInput(const dictionary controls) {
  */
 void BaseMenuHandleSignal(const string&in widgetName, const string&in signal) {
 	const auto type = unittype[widgetName.substr(widgetName.findLast(".") + 1)];
-	if (signal == "Clicked") {
+	if (signal == "MouseReleased") {
 		const ArmyID army = game.map.getSelectedArmy();
 		if (game.buyUnit(type, army, game.map.getSelectedTile())) {
 			setGUI("Map");

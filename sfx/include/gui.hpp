@@ -147,7 +147,7 @@ namespace sfx {
 		 * widgets based on the current menu's configuration. If "select" is
 		 * triggered, a \c MouseReleased signal will be issued to the currently
 		 * selected widget in the current menu, if there is any, and if that widget
-		 * is of type \c Button or \c BitmapButton.
+		 * is of type \c Button, \c BitmapButton, or \c ListBox.
 		 * @param  ui Pointer to the @c user_input instance to send information on.
 		 *            Note that the @c user_input::update() method should already
 		 *            have been called before a call to @c handleInput().
@@ -174,9 +174,10 @@ namespace sfx {
 		 * \c _connectSignals() in \c gui.cpp.
 		 * @param  widget     The widget sending the signal.
 		 * @param  signalName The name of the signal being sent.
+		 * @return \c TRUE if a signal handler was called, \c FALSE if not.
 		 * @safety No guarantee.
 		 */
-		void signalHandler(tgui::Widget::Ptr widget,
+		bool signalHandler(tgui::Widget::Ptr widget,
 			const tgui::String& signalName);
 
 		/**
@@ -392,6 +393,14 @@ namespace sfx {
 		 */
 		std::string _moveDirectionalFlow(
 			const std::shared_ptr<sfx::user_input>& ui);
+
+		/**
+		 * Update the current directional flow selection.
+		 * @param newsel The name of the widget to select.
+		 * @param menu   The name of the menu that has the given widget.
+		 */
+		void _makeNewDirectionalSelection(const std::string& newsel,
+			const std::string& menu);
 
 		/**
 		 * Reapplies all the translations to a widget recursively.
@@ -845,6 +854,14 @@ namespace sfx {
 		 * @param menu The name of the menu to amend.
 		 */
 		void _clearWidgetDirectionalFlowStart(const std::string& menu);
+
+		/**
+		 * Used to manually set the directionally-selected widget.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be changed.
+		 * @param name The name of the widget to select.
+		 */
+		void _setWidgetDirectionalFlowSelection(const std::string& name);
 
 		/**
 		 * Sets the sprite to use as the angle bracket which surrounds widgets
