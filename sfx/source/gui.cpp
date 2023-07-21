@@ -479,7 +479,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Used to set the sprite used as a given "
 		"angle bracket, which surrounds the widget currently selected using the "
 		"directional controls. The first string denotes the corner (either "
-		"\"UL\", \"UR\", \"LL\", or \LR\"), the second string denotes the "
+		"\"UL\", \"UR\", \"LL\", or \"LR\"), the second string denotes the "
 		"spritesheet to retrieve the sprite from, and the third string stores the "
 		"name of the sprite.");
 
@@ -744,49 +744,11 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 		// been made.
 		_previousMousePosition = _currentMousePosition;
 		_currentMousePosition = ui->mousePosition();
-		_enableDirectionalFlow = _previousMousePosition == _currentMousePosition;
+		if (_previousMousePosition != _currentMousePosition)
+			_enableDirectionalFlow = false;
 		// Handle directional input.
 		if (_enableDirectionalFlow) {
-			auto& cursel = _currentlySelectedWidget[_currentGUI];
-			if ((*ui)[_upControl]) {
-				if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-					_selectThisWidgetFirst.end()) {
-					cursel = _selectThisWidgetFirst[_currentGUI];
-				} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
-					&& !_directionalFlow[cursel].up.empty()) {
-					cursel = _directionalFlow[cursel].up;
-				}
-			}
-			if ((*ui)[_downControl]) {
-				_enableDirectionalFlow = true;
-				if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-					_selectThisWidgetFirst.end()) {
-					cursel = _selectThisWidgetFirst[_currentGUI];
-				} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
-					&& !_directionalFlow[cursel].down.empty()) {
-					cursel = _directionalFlow[cursel].down;
-				}
-			}
-			if ((*ui)[_leftControl]) {
-				_enableDirectionalFlow = true;
-				if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-					_selectThisWidgetFirst.end()) {
-					cursel = _selectThisWidgetFirst[_currentGUI];
-				} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
-					&& !_directionalFlow[cursel].left.empty()) {
-					cursel = _directionalFlow[cursel].left;
-				}
-			}
-			if ((*ui)[_rightControl]) {
-				_enableDirectionalFlow = true;
-				if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
-					_selectThisWidgetFirst.end()) {
-					cursel = _selectThisWidgetFirst[_currentGUI];
-				} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
-					&& !_directionalFlow[cursel].right.empty()) {
-					cursel = _directionalFlow[cursel].right;
-				}
-			}
+			const auto cursel = _moveDirectionalFlow(ui);
 			// If select is issued, and there is currently a widget selected, then
 			// trigger an appropriate signal handler.
 			if ((*ui)[_selectControl] && !cursel.empty()) {
@@ -796,6 +758,15 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 					signalHandler(widget, "MouseReleased");
 				}
 			}
+		} else if (_previousMousePosition == _currentMousePosition) {
+			// Only re-enable directional flow if a directional input is made,
+			// whilst the mouse isn't moving.
+			_enableDirectionalFlow = (*ui)[_upControl] || (*ui)[_downControl] ||
+				(*ui)[_leftControl] || (*ui)[_rightControl];
+			// If there wasn't a selection made previously, go straight to making
+			// the selection.
+			if (_currentlySelectedWidget[_currentGUI].empty())
+				_moveDirectionalFlow(ui);
 		}
 	} else if (!_handleInputErrorLogged) {
 		_logger.error("Called handleInput() with nullptr user_input object for "
@@ -1008,6 +979,51 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 				std::dynamic_pointer_cast<Container>(widget));
 		}
 	}
+}
+
+std::string sfx::gui::_moveDirectionalFlow(
+	const std::shared_ptr<sfx::user_input>& ui) {
+	auto& cursel = _currentlySelectedWidget[_currentGUI];
+	if ((*ui)[_upControl]) {
+		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+			_selectThisWidgetFirst.end()) {
+			cursel = _selectThisWidgetFirst[_currentGUI];
+		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
+			&& !_directionalFlow[cursel].up.empty()) {
+			cursel = _directionalFlow[cursel].up;
+		}
+	}
+	if ((*ui)[_downControl]) {
+		_enableDirectionalFlow = true;
+		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+			_selectThisWidgetFirst.end()) {
+			cursel = _selectThisWidgetFirst[_currentGUI];
+		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
+			&& !_directionalFlow[cursel].down.empty()) {
+			cursel = _directionalFlow[cursel].down;
+		}
+	}
+	if ((*ui)[_leftControl]) {
+		_enableDirectionalFlow = true;
+		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+			_selectThisWidgetFirst.end()) {
+			cursel = _selectThisWidgetFirst[_currentGUI];
+		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
+			&& !_directionalFlow[cursel].left.empty()) {
+			cursel = _directionalFlow[cursel].left;
+		}
+	}
+	if ((*ui)[_rightControl]) {
+		_enableDirectionalFlow = true;
+		if (cursel.empty() && _selectThisWidgetFirst.find(_currentGUI) !=
+			_selectThisWidgetFirst.end()) {
+			cursel = _selectThisWidgetFirst[_currentGUI];
+		} else if (_directionalFlow.find(cursel) != _directionalFlow.end()
+			&& !_directionalFlow[cursel].right.empty()) {
+			cursel = _directionalFlow[cursel].right;
+		}
+	}
+	return cursel;
 }
 
 void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {

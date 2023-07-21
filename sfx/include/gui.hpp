@@ -385,6 +385,15 @@ namespace sfx {
 			tgui::Container::Ptr container);
 
 		/**
+		 * Handles moving the currently selected widget based on directional input.
+		 * @param  ui Pointer to the user interface information to read from.
+		 * @return The full name of the widget that is selected after the call is
+		 *         finished.
+		 */
+		std::string _moveDirectionalFlow(
+			const std::shared_ptr<sfx::user_input>& ui);
+
+		/**
 		 * Reapplies all the translations to a widget recursively.
 		 * @param  widget Pointer to the widget to translate.
 		 * @safety No guarantee.
