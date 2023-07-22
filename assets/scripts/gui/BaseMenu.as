@@ -36,7 +36,6 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 	const uint columnCount) {
 	const uint HEIGHT = 30;
 	addWidget("ScrollablePanel", panelName);
-    setWidgetDirectionalFlow(panelName, "", "", "~", "");
 	setWidgetVisibility(panelName, false);
 	setWidgetSize(panelName, "60%", "60%");
 	setWidgetOrigin(panelName, 0.5, 0.5);
@@ -77,18 +76,33 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
                 widgetNames[col][row - 1];
             const auto down = row == rows - 1 ? widgetNames[col][0] :
                 widgetNames[col][row + 1];
-            const auto left = col == 0 ? "" : widgetNames[col - 1][row];
-            string right = panelName; // col == cols - 1
+            string right;
+            // If there isn't a unit to the immediate right, pick the unit that is
+            // on the row above, if possible.
             if (col < cols - 1) {
                 if (widgetNames[col + 1].length() <= row) {
-                    // There isn't a unit to the immediate right, so pick the unit
-                    // that is on the row above, if possible.
                     if (row > 0) {
                         right = widgetNames[col + 1][row - 1];
                     }
-                } else {
-                    right = widgetNames[col + 1][row];
                 }
+            }
+            if (right.length() == 0) {
+                right = col == cols - 1 ? widgetNames[0][row] :
+                    widgetNames[col + 1][row];
+            }
+            string left;
+            // If there isn't a unit to the immediate left, pick the unit that is
+            // on the row above, if possible.
+            if (col == 0) {
+                if (widgetNames[cols - 1].length() <= row) {
+                    if (row > 0) {
+                        left = widgetNames[cols - 1][row - 1];
+                    }
+                }
+            }
+            if (left.length() == 0) {
+                left = col == 0 ? widgetNames[cols - 1][row] :
+                    widgetNames[col - 1][row];
             }
             setWidgetDirectionalFlow(
                 widgetNames[col][row], up, down, left, right);
