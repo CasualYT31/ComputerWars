@@ -4,12 +4,15 @@
 array<ArmyWidget> armyWidgets;
 
 /**
- * Sets up the army panel of the detailed info menu,
- * @param baseLayout The name of the widget in which the army panel will be added.
+ * Sets up the army panel of the detailed info menu.
+ * @param  baseLayout The name of the widget in which the army panel will be
+ *                    added.
+ * @return The name of the ScrollablePanel added.
  */
-void setUpArmyPanel(string baseLayout) {
+string setUpArmyPanel(string baseLayout) {
 	baseLayout += ".armyPanel";
 	addWidget("ScrollablePanel", baseLayout);
+    const auto ret = baseLayout;
 	setWidgetSize(baseLayout, "33.333%", "100%");
 	setHorizontalScrollbarAmount(baseLayout, 100);
 	baseLayout += ".day";
@@ -19,16 +22,19 @@ void setUpArmyPanel(string baseLayout) {
 	setWidgetTextColour(baseLayout, Colour(255, 255, 255, 255));
 	setWidgetTextOutlineColour(baseLayout, Colour(0, 0, 0, 255));
 	setWidgetTextOutlineThickness(baseLayout, 3.0);
+    return ret;
 }
 
 /**
- * Sets up the terrain panel of the detailed info menu,
- * @param baseLayout The name of the widget in which the terrain panel will be
- *                   added.
+ * Sets up the terrain panel of the detailed info menu.
+ * @param  baseLayout The name of the widget in which the terrain panel will be
+ *                    added.
+ * @return The name of the ScrollablePanel added.
  */
-void setUpTerrainPanel(string baseLayout) {
+string setUpTerrainPanel(string baseLayout) {
 	baseLayout += ".terrainPanel";
 	addWidget("ScrollablePanel", baseLayout);
+    const auto ret = baseLayout;
 	setWidgetSize(baseLayout, "33.333%", "100%");
 	setGroupPadding(baseLayout, "5%");
 	baseLayout += ".terrainLayout";
@@ -63,15 +69,19 @@ void setUpTerrainPanel(string baseLayout) {
 	addWidget("Label", baseLayout + "description");
 
 	addWidget("VerticalLayout", baseLayout + "moveCosts");
+    return ret;
 }
 
 /**
- * Sets up the unit panel of the detailed info menu,
- * @param baseLayout The name of the widget in which the unit panel will be added.
+ * Sets up the unit panel of the detailed info menu.
+ * @param  baseLayout The name of the widget in which the unit panel will be
+ *                    added.
+ * @return The name of the ScrollablePanel added.
  */
-void setUpUnitPanel(string baseLayout) {
+string setUpUnitPanel(string baseLayout) {
 	baseLayout += ".unitPanel";
 	addWidget("ScrollablePanel", baseLayout);
+    const auto ret = baseLayout;
 	setWidgetSize(baseLayout, "33.333%", "100%");
 	setGroupPadding(baseLayout, "5%");
 	baseLayout += ".unitLayout";
@@ -155,6 +165,7 @@ void setUpUnitPanel(string baseLayout) {
 	setWidgetRatioInLayout(details, 1, 1.0);
 
 	addWidget("Label", unitLayout + "description");
+    return ret;
 }
 
 /**
@@ -164,9 +175,13 @@ void DetailedInfoMenuSetUp() {
 	string baseLayout = "DetailedInfoMenu.baseLayout";
 	addWidget("HorizontalLayout", baseLayout);
 	setWidgetSize(baseLayout, "100%", "100%");
-	setUpArmyPanel(baseLayout);
-	setUpTerrainPanel(baseLayout);
-	setUpUnitPanel(baseLayout);
+	const auto armyPanel = setUpArmyPanel(baseLayout);
+	const auto terrainPanel = setUpTerrainPanel(baseLayout);
+	const auto unitPanel = setUpUnitPanel(baseLayout);
+    setWidgetDirectionalFlow(armyPanel, "", "", unitPanel, terrainPanel);
+    setWidgetDirectionalFlow(terrainPanel, "", "", armyPanel, unitPanel);
+    setWidgetDirectionalFlow(unitPanel, "", "", terrainPanel, armyPanel);
+    setWidgetDirectionalFlowStart(armyPanel);
 }
 
 /**

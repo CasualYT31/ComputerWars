@@ -14,5 +14,10 @@
 		"ExplodePreviewMenu",
 		"RepairMenu",
 		"MapMakerMenu"
-	]
+	],
+	"up": "up",
+	"down": "down",
+	"left": "left",
+	"right": "right",
+	"select": "select"
 }

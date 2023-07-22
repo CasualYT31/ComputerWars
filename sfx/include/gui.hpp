@@ -85,7 +85,7 @@ namespace sfx {
 		 *                   function will be called, if it exists.
 		 * @param  callOpen  If @c TRUE, the new menu's @c Open() script function
 		 *                   will be called, if it exists.
-		 * @safety Basic guarantee.
+		 * @safety No guarantee.
 		 */
 		void setGUI(const std::string& newPanel, const bool callClose = true,
 			const bool callOpen = true);
@@ -94,7 +94,9 @@ namespace sfx {
 		 * Gets the name of the menu currently showing.
 		 * @return The menu currently being drawn.
 		 */
-		std::string getGUI() const;
+		inline std::string getGUI() const {
+			return _currentGUI;
+		}
 
 		/**
 		 * Adds a spritesheet which can be uses with the GUI menus.
@@ -139,7 +141,13 @@ namespace sfx {
 		 * control. @c user_input handles all the details of when a control is
 		 * triggered, so you don't have to worry about tracking the state of a
 		 * particular control, e.g. to ensure that it is only triggered "once."
-		 * You can just check for it directly and perform code whenever it happens.
+		 * You can just check for it directly and perform code whenever it
+		 * happens.\n
+		 * This method also handles directional controls selecting different
+		 * widgets based on the current menu's configuration. If "select" is
+		 * triggered, a \c MouseReleased signal will be issued to the currently
+		 * selected widget in the current menu, if there is any, and if that widget
+		 * is of type \c Button, \c BitmapButton, or \c ListBox.
 		 * @param  ui Pointer to the @c user_input instance to send information on.
 		 *            Note that the @c user_input::update() method should already
 		 *            have been called before a call to @c handleInput().
@@ -166,9 +174,10 @@ namespace sfx {
 		 * \c _connectSignals() in \c gui.cpp.
 		 * @param  widget     The widget sending the signal.
 		 * @param  signalName The name of the signal being sent.
+		 * @return \c TRUE if a signal handler was called, \c FALSE if not.
 		 * @safety No guarantee.
 		 */
-		void signalHandler(tgui::Widget::Ptr widget,
+		bool signalHandler(tgui::Widget::Ptr widget,
 			const tgui::String& signalName);
 
 		/**
@@ -377,6 +386,23 @@ namespace sfx {
 			tgui::Container::Ptr container);
 
 		/**
+		 * Handles moving the currently selected widget based on directional input.
+		 * @param  ui Pointer to the user interface information to read from.
+		 * @return The full name of the widget that is selected after the call is
+		 *         finished.
+		 */
+		std::string _moveDirectionalFlow(
+			const std::shared_ptr<sfx::user_input>& ui);
+
+		/**
+		 * Update the current directional flow selection.
+		 * @param newsel The name of the widget to select.
+		 * @param menu   The name of the menu that has the given widget.
+		 */
+		void _makeNewDirectionalSelection(const std::string& newsel,
+			const std::string& menu);
+
+		/**
 		 * Reapplies all the translations to a widget recursively.
 		 * @param  widget Pointer to the widget to translate.
 		 * @safety No guarantee.
@@ -407,14 +433,19 @@ namespace sfx {
 
 		/**
 		 * The JSON load method for this class.
-		 * There should be only one key-value pair in this script called "menus".
-		 * The value should be an array of string names, each one naming a menu.\n
+		 * The value of the key "menus" should be an array of string names, each
+		 * one naming a menu.\n
 		 * For each menu defined, the script function <tt><em>MenuName</em>
 		 * SetUp()</tt> is called, which accepts no parameters and does not return
 		 * any value. This is intended to be used to setup that menu, such as
 		 * adding all of its controls, and setting the background. If an
 		 * <tt>engine::script</tt> object was not given, then this function will
-		 * not be called, and the menu will remain empty.
+		 * not be called, and the menu will remain empty.\n
+		 * Additionally, five key-string pairs must be included, with the keys
+		 * "up", "down", "left", "right", and "select". The string values should
+		 * store the names of the game controls used to send those signals to the
+		 * GUI engine to move the setfocus around and to select the GUI currently
+		 * in setfocus.
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return \c TRUE if all existing menus before the call were deleted, \c
@@ -535,6 +566,18 @@ namespace sfx {
 			std::vector<std::string>* namesList = nullptr,
 			std::string* fullname = nullptr) const;
 
+		/**
+		 * Finds the currently selected widget.
+		 * In the event that there is a selected widget, but it cannot be found, an
+		 * error will be logged, it will be deselected, and the selection history
+		 * for the current GUI menu will also be erased.
+		 * @return If there isn't a widget currently selected (or it can't be
+		 *         found), a blank string and \c nullptr. If there is a widget
+		 *         currently selected, and it can be found, then its full name and
+		 *         widget object shall be returned.
+		 */
+		std::pair<std::string, tgui::Widget::Ptr> _findCurrentlySelectedWidget();
+
 		//////////////////////
 		// SCRIPT INTERFACE //
 		//////////////////////
@@ -546,6 +589,14 @@ namespace sfx {
 		 * @sa @c sfx::gui::setGUI()
 		 */
 		void _setGUI(const std::string& name);
+
+		/**
+		 * Determines if a menu exists.
+		 * @param  menu The name of the menu to search for.
+		 * @return \c TRUE if a menu with the given name exists, \c FALSE
+		 *         otherwise.
+		 */
+		bool _menuExists(const std::string& menu);
 
 		// BACKGROUND //
 
@@ -746,6 +797,85 @@ namespace sfx {
 		 * @return \c TRUE if the widget is visible, \c FALSE otherwise.
 		 */
 		bool _getWidgetVisibility(const std::string& name) const;
+
+		/**
+		 * Special string used with \c _setWidgetDirectionalFlow() to represent the
+		 * previous widget.
+		 */
+		static const std::string GOTO_PREVIOUS_WIDGET;
+
+		/**
+		 * Sets which directional controls should move the setfocus to which
+		 * widgets, if the current setfocus is on a given widget.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be changed.\n
+		 * All widgets provided must be in the same menu. Otherwise, an error will
+		 * be logged, and no widget will be changed.\n
+		 * The second to fifth parameters can be blank, which case the given input
+		 * will not change the selection. These parameters can also be the value of
+		 * `GOTO_PREVIOUS_WIDGET`. This is a special value which means "navigate
+		 * to the previously selected widget."
+		 * @param      name The name of the widget to amend.
+		 * @param    upName The name of the widget to move the selection to if "up"
+		 *                  is pressed.
+		 * @param  downName The name of the widget to move the selection to if
+		 *                  "down" is pressed.
+		 * @param  leftName The name of the widget to move the selection to if
+		 *                  "left" is pressed.
+		 * @param rightName The name of the widget to move the selection to if
+		 *                  "right" is pressed.
+		 * @sa    \c sfx::gui::GOTO_PREVIOUS_WIDGET.
+		 */
+		void _setWidgetDirectionalFlow(const std::string& name,
+			const std::string& upName, const std::string& downName,
+			const std::string& leftName, const std::string& rightName);
+
+		/**
+		 * Used to select widgets that are selected first when a directional
+		 * control is input.
+		 * When a menu is active, and no widget has been selected on that menu yet
+		 * since the game was launched, a widget within that menu is always
+		 * selected first. The given widget is configured to be that first
+		 * widget.\n
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be changed.
+		 * @param name The name of the widget to assign as the first to be
+		 *             selected. Or the name of the menu to prevent directional
+		 *             controls for.
+		 */
+		void _setWidgetDirectionalFlowStart(const std::string& name);
+
+		/**
+		 * Used to prevent directional controls from selecting widgets on a given
+		 * menu.
+		 * This is the default behaviour for all menus.\n
+		 * If the given menu doesn't exist, an error will be logged and no menu
+		 * will be changed.
+		 * @param menu The name of the menu to amend.
+		 */
+		void _clearWidgetDirectionalFlowStart(const std::string& menu);
+
+		/**
+		 * Used to manually set the directionally-selected widget.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be changed.
+		 * @param name The name of the widget to select.
+		 */
+		void _setWidgetDirectionalFlowSelection(const std::string& name);
+
+		/**
+		 * Sets the sprite to use as the angle bracket which surrounds widgets
+		 * currently selected via the directional controls.
+		 * If neither the spritesheet or sprite exists, an error will be logged and
+		 * no changes will be made.
+		 * @param corner The angle bracket to amend. Either "UL", "UR", "LL", or
+		 *               "LR". Input is trimmed and case-insensitive.
+		 * @param sheet  The name of the spritesheet which contains the sprite to
+		 *               set.
+		 * @param key    The name of the sprite to set.
+		 */
+		void _setDirectionalFlowAngleBracketSprite(const std::string& corner,
+			const std::string& sheet, const std::string& key);
 
 		/**
 		 * Updates a widget's caption.
@@ -1158,6 +1288,124 @@ namespace sfx {
 		 * time.
 		 */
 		bool _handleInputErrorLogged = false;
+
+		/**
+		 * The game control name used to instruct the GUI engine to move the set
+		 * focus "up."
+		 */
+		std::string _upControl;
+
+		/**
+		 * The game control name used to instruct the GUI engine to move the set
+		 * focus "down."
+		 */
+		std::string _downControl;
+
+		/**
+		 * The game control name used to instruct the GUI engine to move the set
+		 * focus "left."
+		 */
+		std::string _leftControl;
+
+		/**
+		 * The game control name used to instruct the GUI engine to move the set
+		 * focus "right."
+		 */
+		std::string _rightControl;
+
+		/**
+		 * The game control name used to instruct the GUI engine to "select" the UI
+		 * element with the setfocus.
+		 */
+		std::string _selectControl;
+
+		/**
+		 * Dictates where setfocus should move to when the setfocus is on a given
+		 * widget.
+		 */
+		struct directional_flow {
+			/**
+			 * The full name of the widget to move the setfocus to when pressing
+			 * "up."
+			 */
+			std::string up;
+
+			/**
+			 * The full name of the widget to move the setfocus to when pressing
+			 * "down."
+			 */
+			std::string down;
+
+			/**
+			 * The full name of the widget to move the setfocus to when pressing
+			 * "left."
+			 */
+			std::string left;
+
+			/**
+			 * The full name of the widget to move the setfocus to when pressing
+			 * "right."
+			 */
+			std::string right;
+		};
+
+		/**
+		 * Stores the directional flow information for all widgets.
+		 * @sa \c sfx::gui::directional_flow.
+		 */
+		std::unordered_map<std::string, directional_flow> _directionalFlow;
+
+		/**
+		 * Stores the names of widgets to select first when a directional input is
+		 * made.
+		 * Keyed on menu name.
+		 */
+		std::unordered_map<std::string, std::string> _selectThisWidgetFirst;
+
+		/**
+		 * The last known selected widget based on directional input.
+		 * Keyed on menu name. The second string in the value stores the currently
+		 * selected widget, and the first string stored the previously selected
+		 * widget.
+		 */
+		std::unordered_map<std::string, std::pair<std::string, std::string>>
+			_currentlySelectedWidget;
+
+		/**
+		 * The current mouse position.
+		 */
+		sf::Vector2i _currentMousePosition;
+
+		/**
+		 * The mouse position the last time \c handleInput() was called.
+		 */
+		sf::Vector2i _previousMousePosition;
+
+		/**
+		 * If the mouse has moved, disable directional control influence until a
+		 * new directional control has been input.
+		 */
+		bool _enableDirectionalFlow = true;
+
+		/**
+		 * The UL angle bracket sprite.
+		 */
+		sfx::animated_sprite _angleBracketUL;
+
+		/**
+		 * The UR angle bracket sprite.
+		 */
+		sfx::animated_sprite _angleBracketUR;
+
+		/**
+		 * The LL angle bracket sprite.
+		 */
+		sfx::animated_sprite _angleBracketLL;
+
+		/**
+		 * The LR angle bracket sprite.
+		 */
+		sfx::animated_sprite _angleBracketLR;
 	};
 }
 

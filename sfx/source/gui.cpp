@@ -342,6 +342,11 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the named "
 		"widget exists, <tt>FALSE</tt> otherwise.");
 
+	r = engine->RegisterGlobalFunction("bool menuExists(const string&in)",
+		asMETHOD(sfx::gui, _menuExists), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the named "
+		"menu exists, <tt>FALSE</tt> otherwise.");
+
 	r = engine->RegisterGlobalFunction("void addWidget(const string&in, const "
 		"string&in, const string&in = \"\")",
 		asMETHOD(sfx::gui, _addWidget), asCALL_THISCALL_ASGLOBAL, this);
@@ -441,6 +446,52 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	r = engine->RegisterGlobalFunction("bool getWidgetVisibility(const string&in)",
 		asMETHOD(sfx::gui, _getWidgetVisibility), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's visibility.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetDirectionalFlow("
+		"const string&in, const string&in, const string&in, const string&in, "
+		"const string&in)",
+		asMETHOD(sfx::gui, _setWidgetDirectionalFlow),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, std::string("Sets the widgets that should "
+		"be selected if directional controls are input when the given widget is "
+		"currently selected. The \"given widget\" should be given first, followed "
+		"by the widgets that should be selected, when up, down, left, and right "
+		"are input, respectively. All given widgets must be in the same menu! A "
+		"blank string means that the input won't change the selected widget. A "
+		"value of \"").append(GOTO_PREVIOUS_WIDGET).append("\" means \"navigate "
+		"back to the previously selected widget.\"").c_str());
+
+	r = engine->RegisterGlobalFunction("void setWidgetDirectionalFlowStart("
+		"const string&in)",
+		asMETHOD(sfx::gui, _setWidgetDirectionalFlowStart),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets which widget should be selected "
+		"first when a directional control is first input on that widget's menu.");
+
+	r = engine->RegisterGlobalFunction("void clearWidgetDirectionalFlowStart("
+		"const string&in)",
+		asMETHOD(sfx::gui, _clearWidgetDirectionalFlowStart),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Used to explicitly prevent directional "
+		"controls from selecting a widget for the given menu.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetDirectionalFlowSelection("
+		"const string&in)",
+		asMETHOD(sfx::gui, _setWidgetDirectionalFlowSelection),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Manually select a widget which the user "
+		"can move away from using the directional controls.");
+
+	r = engine->RegisterGlobalFunction("void setDirectionalFlowAngleBracketSprite("
+		"const string&in, const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setDirectionalFlowAngleBracketSprite),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Used to set the sprite used as a given "
+		"angle bracket, which surrounds the widget currently selected using the "
+		"directional controls. The first string denotes the corner (either "
+		"\"UL\", \"UR\", \"LL\", or \"LR\"), the second string denotes the "
+		"spritesheet to retrieve the sprite from, and the third string stores the "
+		"name of the sprite.");
 
 	r = engine->RegisterGlobalFunction("void setWidgetText(const string&in, "
 		"const string&in, array<any>@ = null)",
@@ -662,14 +713,19 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 				_scripts->callFunction(openFuncName);
 			}
 		}
+		// If there is no widget currently selected, automatically select the first
+		// widget.
+		// Do this after invoking the Open function to allow that function to set
+		// the first selected widget, if said widget is being added by the Open
+		// function and is not available beforehand.
+		if (_findCurrentlySelectedWidget().first.empty()) {
+			_makeNewDirectionalSelection(
+				_selectThisWidgetFirst[_currentGUI], _currentGUI);
+		}
 	} catch (tgui::Exception& e) {
 		_logger.error("{}", e.what());
 		if (_gui.get(old)) _gui.get(old)->setVisible(true);
 	}
-}
-
-std::string sfx::gui::getGUI() const {
-	return _currentGUI;
 }
 
 void sfx::gui::addSpritesheet(const std::string& name,
@@ -688,9 +744,186 @@ bool sfx::gui::handleEvent(sf::Event e) {
 	return _gui.handleEvent(e);
 }
 
+/**
+ * Checks if a given widget is visible and/or enabled, and that the same can be
+ * said for all of its parents.
+ * @warning An assertion is made that at least one of the boolean parameters is
+ *          \c TRUE!
+ * @param   widget  Pointer to the widget to test.
+ * @param   visible If \c TRUE, will test each widget's visibility.
+ * @param   enabled If \c TRUE, will test each widget's enabled state.
+ * @return  \c TRUE if the given widget and all of its parents pass the specified
+ *          tests, \c FALSE if at least one of the widgets in the chain does not
+ *          pass a single test.
+ */
+static bool isWidgetFullyVisibleAndEnabled(const Widget* widget,
+	const bool visible, const bool enabled) {
+	assert((visible || enabled) && widget);
+	if ((!visible || widget->isVisible()) && (!enabled || widget->isEnabled())) {
+		if (widget = reinterpret_cast<Widget*>(widget->getParent()))
+			return isWidgetFullyVisibleAndEnabled(widget, visible, enabled);
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Makes a widget in a \c ScrollablePanel visible by scrolling the
+ * scrollbars to make the widget fully visible.
+ * If the given widget does not have a \c ScrollablePanel ancestor, then no
+ * changes will be made.
+ * @param widget             Pointer to the widget to show.
+ * @param panelAncestryDepth Recursion parameter. Leave to default.
+ */
+static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
+	const unsigned int panelAncestryDepth = 0) {
+	static const std::function<ScrollablePanel*(Widget*,const unsigned int)>
+		findScrollablePanelAncestor =
+		[](Widget* w, const unsigned int depth) -> ScrollablePanel* {
+		if (w = reinterpret_cast<Widget*>(w->getParent())) {
+			if (w->getWidgetType() == "ScrollablePanel") {
+				if (depth == 0)
+					return dynamic_cast<ScrollablePanel*>(w);
+				else
+					return findScrollablePanelAncestor(w, depth - 1);
+			}
+			return findScrollablePanelAncestor(w, depth);
+		} else return nullptr;
+	};
+
+	auto panel = findScrollablePanelAncestor(widget.get(), panelAncestryDepth);
+	if (!panel) return; // Exit condition.
+	// If there are no scrollbars, then don't do anything with this panel.
+	const auto horiShown = panel->isHorizontalScrollbarShown(),
+		vertShown = panel->isVerticalScrollbarShown();
+	if (!horiShown && !vertShown) {
+		showWidgetInScrollablePanel(widget, panelAncestryDepth + 1);
+		return;
+	}
+	// Figure out portion of ScrollablePanel that is being shown.
+	const auto scrollbarWidth = panel->getScrollbarWidth();
+
+	const sf::FloatRect panelRect(
+		panel->getAbsolutePosition().x + panel->getContentOffset().x,
+		panel->getAbsolutePosition().y + panel->getContentOffset().y,
+		// Gotta exclude the scrollbars from the visible portion.
+		panel->getSize().x - (vertShown ? scrollbarWidth : 0.0f),
+		panel->getSize().y - (horiShown ? scrollbarWidth : 0.0f)
+	);
+	// Figure out bounding rectangle of given widget.
+	const sf::FloatRect widgetRect(
+		widget->getAbsolutePosition().x,
+		widget->getAbsolutePosition().y,
+		widget->getSize().x,
+		widget->getSize().y
+	);
+	// Figure out if given widget is fully visible inside that portion.
+	// If not, scroll scrollbars by required amount, if possible.
+	if (horiShown) {
+		const int oldHori = static_cast<int>(panel->getHorizontalScrollbarValue());
+		int newHori = oldHori;
+		if (widgetRect.left >
+			panelRect.left + panelRect.width - widgetRect.width) {
+			// Too far right.
+			if (widgetRect.width < panelRect.width) {
+				newHori = oldHori + static_cast<int>(
+					::abs((widgetRect.left + widgetRect.width) -
+						(panelRect.left + panelRect.width)));
+			} else {
+				// If the widget is too wide for the panel, always favour the left
+				// side.
+				newHori = oldHori + static_cast<int>(
+					::abs(widgetRect.left - panelRect.left));
+			}
+		}
+		if (widgetRect.left < panelRect.left) {
+			// Too far left.
+			newHori = oldHori - static_cast<int>(
+				::abs(panelRect.left - widgetRect.left));
+		}
+		if (newHori <= 0)
+			panel->setHorizontalScrollbarValue(0);
+		else
+			panel->setHorizontalScrollbarValue(static_cast<unsigned int>(newHori));
+	}
+	if (vertShown) {
+		const auto oldVert = static_cast<int>(panel->getVerticalScrollbarValue());
+		int newVert = oldVert;
+		if (widgetRect.top >
+			panelRect.top + panelRect.height - widgetRect.height) {
+			// Too far down.
+			if (widgetRect.height < panelRect.height) {
+				newVert = oldVert + static_cast<int>(
+					::abs((widgetRect.top + widgetRect.height) -
+						(panelRect.top + panelRect.height)));
+			} else {
+				// If the widget is too high for the panel, always favour the top
+				// side.
+				newVert = oldVert + static_cast<int>(
+					::abs(widgetRect.top - panelRect.top));
+			}
+		}
+		if (widgetRect.top < panelRect.top) {
+			// Too far up.
+			newVert = oldVert - static_cast<int>(
+				::abs(panelRect.top - widgetRect.top));
+		}
+		if (newVert <= 0)
+			panel->setVerticalScrollbarValue(0);
+		else
+			panel->setVerticalScrollbarValue(static_cast<unsigned int>(newVert));
+	}
+	// The ScrollablePanel itself may be in more ScrollablePanels, so we need to
+	// make sure they're scrolled properly, too.
+	showWidgetInScrollablePanel(widget, panelAncestryDepth + 1);
+}
+
 void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	if (ui) {
-		if (_scripts->functionExists(getGUI() + "HandleInput")) {
+		// Keep track of mouse movement. If the mouse has moved, then we disregard
+		// directional flow (and select inputs) until a new directional input has
+		// been made.
+		_previousMousePosition = _currentMousePosition;
+		_currentMousePosition = ui->mousePosition();
+		if (_previousMousePosition != _currentMousePosition)
+			_enableDirectionalFlow = false;
+		// Handle directional input.
+		bool signalHandlerTriggered = false;
+		if (_enableDirectionalFlow) {
+			const auto cursel = _moveDirectionalFlow(ui);
+			// If select is issued, and there is currently a widget selected that
+			// isn't disabled, then trigger an appropriate signal.
+			if ((*ui)[_selectControl] && !cursel.empty()) {
+				const auto widget = _findWidget<Widget>(cursel);
+				if (isWidgetFullyVisibleAndEnabled(widget.get(), true, true)) {
+					const auto widgetType = widget->getWidgetType();
+					if (widgetType == "Button" || widgetType == "BitmapButton" ||
+						widgetType == "ListBox") {
+						signalHandler(widget, "MouseReleased");
+						signalHandlerTriggered = true;
+					}
+				}
+			}
+		} else if (_previousMousePosition == _currentMousePosition) {
+			// Only re-enable directional flow if a directional input is made,
+			// whilst the mouse isn't moving.
+			_enableDirectionalFlow = (*ui)[_upControl] || (*ui)[_downControl] ||
+				(*ui)[_leftControl] || (*ui)[_rightControl];
+			// If there wasn't a selection made previously, go straight to making
+			// the selection.
+			const auto cursel = _findCurrentlySelectedWidget();
+			if (cursel.first.empty())
+				_moveDirectionalFlow(ui);
+			// Otherwise, make sure what was selected is now visible to the user.
+			else if (_enableDirectionalFlow && cursel.second)
+				showWidgetInScrollablePanel(cursel.second);
+		}
+		// Invoke the current menu's bespoke input handling function.
+		// If the signal handler was invoked, do not invoke any bespoke input
+		// handler. If we do, it can cause multiple inputs that are typically
+		// carried out separately to be processed in a single iteration.
+		if (!signalHandlerTriggered &&
+			_scripts->functionExists(getGUI() + "HandleInput")) {
 			_handleInputErrorLogged = false;
 			// Construct the dictionary.
 			CScriptDictionary* controls = _scripts->createDictionary();
@@ -708,7 +941,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	}
 }
 
-void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
+bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const tgui::String& signalName) {
 	if (_scripts && getGUI() != "") {
 		std::string fullname = widget->getWidgetName().toStdString();
@@ -718,9 +951,8 @@ void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 			std::string decl = "void " + customHandler->second +
 				"(const string&in, const string&in)";
 			if (_scripts->functionDeclExists(decl)) {
-				_scripts->callFunction(customHandler->second, &fullname,
+				return _scripts->callFunction(customHandler->second, &fullname,
 					&signalNameStd);
-				return;
 			} else {
 				_logger.warning("Widget \"{}\" was configured with a custom "
 					"signal handler \"{}\", but a function of declaration \"{}\" "
@@ -731,9 +963,10 @@ void sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 		std::string functionName = getGUI() + "_" + _extractWidgetName(fullname) +
 			"_" + signalNameStd;
 		if (_scripts->functionExists(functionName)) {
-			_scripts->callFunction(functionName);
+			return _scripts->callFunction(functionName);
 		}
 	}
+	return false;
 }
 
 void sfx::gui::setLanguageDictionary(
@@ -768,6 +1001,37 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 		percentage += "%";
 		menu->setSize(percentage);
 		_animate(target, scaling, menu);
+	}
+
+	// Whenever there isn't a widget currently selected via directional controls,
+	// or the currently selected widget is not currently visible, always reset the
+	// animation.
+	const auto& cursel = _findCurrentlySelectedWidget();
+	if (cursel.first.empty() || !_enableDirectionalFlow || !cursel.second ||
+		!isWidgetFullyVisibleAndEnabled(cursel.second.get(), true, false)) {
+		_angleBracketUL.setCurrentFrame(0);
+		_angleBracketUR.setCurrentFrame(0);
+		_angleBracketLL.setCurrentFrame(0);
+		_angleBracketLR.setCurrentFrame(0);
+	} else if (!cursel.first.empty()) {
+		// Ensure the angle brackets are at the correct locations.
+		auto pos = cursel.second->getAbsolutePosition(),
+			size = cursel.second->getSize();
+		if (cursel.second->getWidgetType() == "ScrollablePanel") {
+			pos += std::dynamic_pointer_cast<ScrollablePanel>(cursel.second)->
+				getContentOffset();
+		}
+		_angleBracketUL.setPosition(pos);
+		_angleBracketUL.animate(target, scaling);
+		_angleBracketUR.setPosition(pos + tgui::Vector2f(
+			size.x - _angleBracketUR.getSize().x, 0.0f));
+		_angleBracketUR.animate(target, scaling);
+		_angleBracketLL.setPosition(pos + tgui::Vector2f(0.0f,
+			size.y - _angleBracketLL.getSize().y));
+		_angleBracketLL.animate(target, scaling);
+		_angleBracketLR.setPosition(pos + size -
+			tgui::Vector2f(_angleBracketLR.getSize()));
+		_angleBracketLR.animate(target, scaling);
 	}
 
 	return false;
@@ -880,6 +1144,169 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 		}
 	}
 }
+
+std::string sfx::gui::_moveDirectionalFlow(
+	const std::shared_ptr<sfx::user_input>& ui) {
+	const auto cursel = _findCurrentlySelectedWidget();
+	const auto widgetType = !cursel.second ? "" : cursel.second->getWidgetType();
+	if ((*ui)[_upControl]) {
+		if (cursel.first.empty()) {
+			_makeNewDirectionalSelection(_selectThisWidgetFirst[getGUI()],
+				getGUI());
+		} else if (widgetType == "ListBox") {
+			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
+			const auto i = listbox->getSelectedItemIndex();
+			if (i == -1) {
+				listbox->setSelectedItemByIndex(0);
+			} else if (i > 0) {
+				listbox->setSelectedItemByIndex(i - 1);
+			} else if (_directionalFlow[cursel.first].up.empty()) {
+				// If there is nowhere to go from the top, loop through to the
+				// the bottom of the list.
+				listbox->setSelectedItemByIndex(listbox->getItemCount() - 1);
+			} else {
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].up,
+					getGUI());
+			}
+		} else if (widgetType == "ScrollablePanel") {
+			const auto panel =
+				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
+			const auto value = panel->getVerticalScrollbarValue();
+			if (panel->isVerticalScrollbarShown() && value > 0) {
+				// TODO-3: There is a bug with 0.9 where the VerticalScrollAmount
+				// is initialised to 0. Cba fixing it so will see if it's fixed
+				// when I upgrade.
+				if (static_cast<int>(value) -
+					static_cast<int>(15) < 0) {
+					panel->setVerticalScrollbarValue(0);
+				} else {
+					panel->setVerticalScrollbarValue(
+						value - 15);
+				}
+			} else {
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].up,
+					getGUI());
+			}
+		} else {
+			_makeNewDirectionalSelection(_directionalFlow[cursel.first].up,
+				getGUI());
+		}
+	}
+	if ((*ui)[_downControl]) {
+		if (cursel.first.empty()) {
+			_makeNewDirectionalSelection(_selectThisWidgetFirst[getGUI()],
+				getGUI());
+		} else if (widgetType == "ListBox") {
+			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
+			const auto i = listbox->getSelectedItemIndex();
+			if (i == -1) {
+				listbox->setSelectedItemByIndex(0);
+			} else if (i < listbox->getItemCount() - 1) {
+				listbox->setSelectedItemByIndex(i + 1);
+			} else if (_directionalFlow[cursel.first].down.empty()) {
+				// If there is nowhere to go from the bottom, loop through to the
+				// the top of the list.
+				listbox->setSelectedItemByIndex(0);
+			} else {
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].down,
+					getGUI());
+			}
+		} else if (widgetType == "ScrollablePanel") {
+			const auto panel =
+				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
+			const auto value = panel->getVerticalScrollbarValue();
+			if (panel->isVerticalScrollbarShown() &&
+				value < panel->getVerticalScrollbarMaximum() -
+					static_cast<unsigned int>(panel->getSize().y)) {
+				// TODO-3: There is a bug with 0.9 where the VerticalScrollAmount
+				// is initialised to 0. Cba fixing it so will see if it's fixed
+				// when I upgrade.
+				panel->setVerticalScrollbarValue(
+					value + 15);
+			} else {
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].down,
+					getGUI());
+			}
+		} else {
+			_makeNewDirectionalSelection(_directionalFlow[cursel.first].down,
+				getGUI());
+		}
+	}
+	if ((*ui)[_leftControl]) {
+		if (cursel.first.empty()) {
+			_makeNewDirectionalSelection(_selectThisWidgetFirst[getGUI()],
+				getGUI());
+		} else if (widgetType == "ScrollablePanel") {
+			const auto panel =
+				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
+			const auto value = panel->getHorizontalScrollbarValue();
+			if (panel->isHorizontalScrollbarShown() && value > 0) {
+				if (static_cast<int>(value) -
+					static_cast<int>(panel->getHorizontalScrollAmount()) < 0) {
+					panel->setHorizontalScrollbarValue(0);
+				} else {
+					panel->setHorizontalScrollbarValue(
+						value - panel->getHorizontalScrollAmount());
+				}
+			} else {
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].left,
+					getGUI());
+			}
+		} else {
+			_makeNewDirectionalSelection(_directionalFlow[cursel.first].left,
+				getGUI());
+		}
+	}
+	if ((*ui)[_rightControl]) {
+		if (cursel.first.empty()) {
+			_makeNewDirectionalSelection(_selectThisWidgetFirst[getGUI()],
+				getGUI());
+		} else if (widgetType == "ScrollablePanel") {
+			const auto panel =
+				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
+			const auto value = panel->getHorizontalScrollbarValue();
+			if (panel->isHorizontalScrollbarShown() &&
+				value < panel->getHorizontalScrollbarMaximum() -
+				static_cast<unsigned int>(panel->getSize().x)) {
+				panel->setHorizontalScrollbarValue(
+					value + panel->getHorizontalScrollAmount());
+			} else {
+				_makeNewDirectionalSelection(_directionalFlow[cursel.first].right,
+					getGUI());
+			}
+		} else {
+			_makeNewDirectionalSelection(_directionalFlow[cursel.first].right,
+				getGUI());
+		}
+	}
+	return _currentlySelectedWidget[_currentGUI].second;
+}
+
+void sfx::gui::_makeNewDirectionalSelection(const std::string& newsel,
+	const std::string& menu) {
+	if (newsel.empty()) return;
+	if (newsel == GOTO_PREVIOUS_WIDGET) {
+		// Do not allow selection to go ahead if the previous widget is now not
+		// visible!
+		if (isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+			_currentlySelectedWidget[menu].first).get(), true, false))
+			std::swap(_currentlySelectedWidget[menu].first,
+				_currentlySelectedWidget[menu].second);
+		else
+			return;
+	} else {
+		// Do not allow selection to go ahead if the given widget is not visible!
+		if (isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+			newsel).get(), true, false)) {
+			_currentlySelectedWidget[menu].first =
+				_currentlySelectedWidget[menu].second;
+			_currentlySelectedWidget[menu].second = newsel;
+		} else return;
+	}
+	const auto widget = _findWidget<Widget>(_currentlySelectedWidget[menu].second);
+	signalHandler(widget, "MouseEntered");
+	showWidgetInScrollablePanel(widget);
+};
 
 void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 	std::string widgetName = widget->getWidgetName().toStdString();
@@ -1031,6 +1458,18 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			target.draw(sprite.second, states);
 		}
 	}
+	// Draw angle brackets, if there is currently a widget selected via the
+	// directional controls, and it is visible.
+	if (_enableDirectionalFlow && _currentlySelectedWidget.find(getGUI()) !=
+		_currentlySelectedWidget.end() &&
+		!_currentlySelectedWidget.at(getGUI()).second.empty() &&
+		isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+			_currentlySelectedWidget.at(getGUI()).second).get(), true, false)) {
+		target.draw(_angleBracketUL, states);
+		target.draw(_angleBracketUR, states);
+		target.draw(_angleBracketLL, states);
+		target.draw(_angleBracketLR, states);
+	}
 	target.setView(oldView);
 }
 
@@ -1047,6 +1486,14 @@ bool sfx::gui::_load(engine::json& j) {
 		_originalStrings.clear();
 		_originalStringsVariables.clear();
 		_customSignalHandlers.clear();
+		_upControl.clear();
+		_downControl.clear();
+		_leftControl.clear();
+		_rightControl.clear();
+		_selectControl.clear();
+		_directionalFlow.clear();
+		_selectThisWidgetFirst.clear();
+		_currentlySelectedWidget.clear();
 		// Create the main menu that always exists.
 		tgui::Group::Ptr menu = tgui::Group::create();
 		menu->setVisible(false);
@@ -1066,6 +1513,12 @@ bool sfx::gui::_load(engine::json& j) {
 		// Leave with the current menu being MainMenu.
 		// _previousGUI will hold the name of the last menu in the JSON array.
 		setGUI("MainMenu", false, true);
+		// Load game control settings.
+		j.apply(_upControl, { "up" }, true);
+		j.apply(_downControl, { "down" }, true);
+		j.apply(_leftControl, { "left" }, true);
+		j.apply(_rightControl, { "right" }, true);
+		j.apply(_selectControl, { "select" }, true);
 		return true;
 	} else {
 		return false;
@@ -1154,7 +1607,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		// Okay... So... When I try to set ValueChanged on a SpinControl here, the
 		// program crashes without reporting any errors whatsoever, not even in
 		// debug mode... But the TGUI documentation says that it should have this
-		// signal...
+		// signal... TODO-3.
 		widget->getSignal("ValueChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "label" || type == "picture") {
@@ -1247,19 +1700,34 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	// Remove widget.
 	const std::string name = widget->getWidgetName().toStdString();
 	if (container) {
-		if (_widgetSprites.find(name) != _widgetSprites.end())
-			_widgetSprites.erase(name);
-		if (_guiSpriteKeys.find(name) != _guiSpriteKeys.end())
-			_guiSpriteKeys.erase(name);
-		if (_dontOverridePictureSizeWithSpriteSize.find(name) !=
-			_dontOverridePictureSizeWithSpriteSize.end())
-			_dontOverridePictureSizeWithSpriteSize.erase(name);
-		if (_originalStrings.find(name) != _originalStrings.end())
-			_originalStrings.erase(name);
-		if (_originalStringsVariables.find(name) !=
-			_originalStringsVariables.end()) _originalStringsVariables.erase(name);
-		if (_customSignalHandlers.find(name) != _customSignalHandlers.end())
-			_customSignalHandlers.erase(name);
+		_widgetSprites.erase(name);
+		_guiSpriteKeys.erase(name);
+		_dontOverridePictureSizeWithSpriteSize.erase(name);
+		_originalStrings.erase(name);
+		_originalStringsVariables.erase(name);
+		_customSignalHandlers.erase(name);
+		_directionalFlow.erase(name);
+		// Also delete references to the removed sprite from other widgets.
+		for (auto& flowInfo : _directionalFlow) {
+			if (flowInfo.second.up == name) flowInfo.second.up.clear();
+			if (flowInfo.second.down == name) flowInfo.second.down.clear();
+			if (flowInfo.second.left == name) flowInfo.second.left.clear();
+			if (flowInfo.second.right == name) flowInfo.second.right.clear();
+		}
+		// If the removed widget was configured to be selected first at all, remove
+		// it.
+		for (auto& menu : _selectThisWidgetFirst)
+			if (menu.second == name) menu.second = "";
+		// If the removed widget was previously selected at all, then remove it
+		// from the history. If the removed widget is currently selected, then
+		// deselect it and erase the history, as well.
+		for (auto& selectedWidgetData : _currentlySelectedWidget) {
+			if (selectedWidgetData.second.second == name) {
+				selectedWidgetData.second = {};
+			} else if (selectedWidgetData.second.first == name) {
+				selectedWidgetData.second.first = "";
+			}
+		}
 		if (removeIt) container->remove(widget);
 	} else {
 		_logger.error("Attempted to remove a widget \"{}\", which did not have a "
@@ -1330,6 +1798,20 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 	}
 }
 
+std::pair<std::string, tgui::Widget::Ptr>
+	sfx::gui::_findCurrentlySelectedWidget() {
+	const auto& cursel = _currentlySelectedWidget[getGUI()].second;
+	if (cursel.empty()) return {};
+	const auto widget = _findWidget<Widget>(cursel);
+	if (!widget) {
+		_logger.error("Currently selected widget \"{}\" couldn't be found! "
+			"Current menu is \"{}\". Deselecting...", cursel, getGUI());
+		_currentlySelectedWidget.erase(getGUI());
+		return {};
+	}
+	return { cursel, widget };
+}
+
 //////////////////////
 // SCRIPT INTERFACE //
 //////////////////////
@@ -1363,6 +1845,15 @@ void sfx::gui::_colourBackground(std::string menu, const unsigned int r,
 
 bool sfx::gui::_widgetExists(const std::string& name) {
 	return _findWidget<Widget>(name).operator bool();
+}
+
+bool sfx::gui::_menuExists(const std::string& menu) {
+	// More efficient implementation would just cache the menu list, as menus can
+	// only be added or removed via load().
+	const auto menus = _gui.getWidgets();
+	for (const auto& widget : menus)
+		if (widget->getWidgetName() == menu) return true;
+	return false;
 }
 
 void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name,
@@ -1608,6 +2099,137 @@ bool sfx::gui::_getWidgetVisibility(const std::string& name) const {
 			fullname[0]);
 	}
 	return false;
+}
+
+const std::string sfx::gui::GOTO_PREVIOUS_WIDGET = "~";
+
+void sfx::gui::_setWidgetDirectionalFlow(const std::string& name,
+	const std::string& upName, const std::string& downName,
+	const std::string& leftName, const std::string& rightName) {
+	std::vector<std::string> fullname, fullnameUp, fullnameDown, fullnameLeft,
+		fullnameRight;
+	std::string fullnameAsString, fullnameAsStringUp, fullnameAsStringDown,
+		fullnameAsStringLeft, fullnameAsStringRight;
+	static const auto widgetDoesNotExist = [&](const std::string& doesNotExist) {
+		_logger.error("Attempted to set the directional flow of a widget \"{}\", "
+			"within menu \"{}\", to the widgets up=\"{}\", down=\"{}\", "
+			"left=\"{}\", right=\"{}\". The widget \"{}\" does not exist.", name,
+			fullname[0], upName, downName, leftName, rightName, doesNotExist);
+	};
+	if (!_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
+		widgetDoesNotExist(name);
+		return;
+	}
+	if (!upName.empty() && upName != GOTO_PREVIOUS_WIDGET &&
+		!_findWidget<Widget>(upName, &fullnameUp, &fullnameAsStringUp)) {
+		widgetDoesNotExist(upName);
+		return;
+	}
+	if (!downName.empty() && downName != GOTO_PREVIOUS_WIDGET &&
+		!_findWidget<Widget>(downName, &fullnameDown, &fullnameAsStringDown)) {
+		widgetDoesNotExist(downName);
+		return;
+	}
+	if (!leftName.empty() && leftName != GOTO_PREVIOUS_WIDGET &&
+		!_findWidget<Widget>(leftName, &fullnameLeft, &fullnameAsStringLeft)) {
+		widgetDoesNotExist(leftName);
+		return;
+	}
+	if (!rightName.empty() && rightName != GOTO_PREVIOUS_WIDGET &&
+		!_findWidget<Widget>(rightName, &fullnameRight, &fullnameAsStringRight)) {
+		widgetDoesNotExist(rightName);
+		return;
+	}
+	if ((fullnameUp.empty() || fullname[0] == fullnameUp[0]) &&
+		(fullnameDown.empty() || fullname[0] == fullnameDown[0]) &&
+		(fullnameLeft.empty() || fullname[0] == fullnameLeft[0]) &&
+		(fullnameRight.empty() || fullname[0] == fullnameRight[0])) {
+		_directionalFlow[fullnameAsString].up =
+			upName == GOTO_PREVIOUS_WIDGET ? upName : fullnameAsStringUp;
+		_directionalFlow[fullnameAsString].down =
+			downName == GOTO_PREVIOUS_WIDGET ? downName : fullnameAsStringDown;
+		_directionalFlow[fullnameAsString].left =
+			leftName == GOTO_PREVIOUS_WIDGET ? leftName : fullnameAsStringLeft;
+		_directionalFlow[fullnameAsString].right =
+			rightName == GOTO_PREVIOUS_WIDGET ? rightName : fullnameAsStringRight;
+	} else {
+		_logger.error("Attempted to set the directional flow of a widget \"{}\", "
+			"within menu \"{}\", to the widgets up=\"{}\", down=\"{}\", "
+			"left=\"{}\", right=\"{}\". Not all of these widgets are in the same "
+			"menu!", name, fullname[0], fullnameAsStringUp, fullnameAsStringDown,
+			fullnameAsStringLeft, fullnameAsStringRight);
+	}
+}
+
+void sfx::gui::_setWidgetDirectionalFlowStart(const std::string& name) {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		_selectThisWidgetFirst[fullname[0]] = fullnameAsString;
+	} else {
+		_logger.error("Attempted to set the widget \"{}\" as the first to be "
+			"selected upon initial directional input, for the menu \"{}\". This "
+			"widget does not exist.", name, fullname[0]);
+	}
+}
+
+void sfx::gui::_clearWidgetDirectionalFlowStart(const std::string& menu) {
+	if (_menuExists(menu)) {
+		_selectThisWidgetFirst.erase(menu);
+	} else {
+		_logger.error("Attempted to disable directional input for the menu "
+			"\"{}\". Menu does not exist.", menu);
+	}
+}
+
+void sfx::gui::_setWidgetDirectionalFlowSelection(const std::string& name) {
+	std::vector<std::string> fullname;
+	std::string fullnameAsString;
+	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
+	if (widget) {
+		_makeNewDirectionalSelection(fullnameAsString, fullname[0]);
+	} else {
+		_logger.error("Attempted to manually directionally select the widget "
+			"\"{}\", in the menu \"{}\". This widget does not exist.", name,
+			fullname[0]);
+	}
+}
+
+void sfx::gui::_setDirectionalFlowAngleBracketSprite(const std::string& corner,
+	const std::string& sheet, const std::string& key) {
+	const auto spritesheet = _sheet.find(sheet);
+	if (spritesheet == _sheet.end()) {
+		_logger.error("Attempted to set the sprite \"{}\" from spritesheet \"{}\" "
+			"as the directional flow angle bracket for the \"{}\" corner. This "
+			"spritesheet does not exist.", key, sheet, corner);
+		return;
+	}
+	if (!spritesheet->second->doesSpriteExist(key)) {
+		_logger.error("Attempted to set the sprite \"{}\" from spritesheet \"{}\" "
+			"as the directional flow angle bracket for the \"{}\" corner. This "
+			"sprite does not exist.", key, sheet, corner);
+		return;
+	}
+	const auto cornerFormatted = tgui::String(corner).trim().toLower();
+	if (cornerFormatted == "ul") {
+		_angleBracketUL.setSpritesheet(spritesheet->second);
+		_angleBracketUL.setSprite(key);
+	} else if (cornerFormatted == "ur") {
+		_angleBracketUR.setSpritesheet(spritesheet->second);
+		_angleBracketUR.setSprite(key);
+	} else if (cornerFormatted == "ll") {
+		_angleBracketLL.setSpritesheet(spritesheet->second);
+		_angleBracketLL.setSprite(key);
+	} else if (cornerFormatted == "lr") {
+		_angleBracketLR.setSpritesheet(spritesheet->second);
+		_angleBracketLR.setSprite(key);
+	} else {
+		_logger.error("Attempted to set the sprite \"{}\" from spritesheet \"{}\" "
+			"as the directional flow angle bracket for the \"{}\" corner. "
+			"Unrecognised corner, must be \"UL\", \"UR\", \"LL\", or \"LR\".", key,
+			sheet, corner);
+	}
 }
 
 void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,

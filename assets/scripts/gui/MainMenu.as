@@ -6,6 +6,11 @@
  */
 void MainMenuSetUp() {
 	setGlobalFont("AW2");
+    setDirectionalFlowAngleBracketSprite("UL", "icon", "ulanglebracket");
+    setDirectionalFlowAngleBracketSprite("UR", "icon", "uranglebracket");
+    setDirectionalFlowAngleBracketSprite("LL", "icon", "llanglebracket");
+    setDirectionalFlowAngleBracketSprite("LR", "icon", "lranglebracket");
+
 	setBackground("", 200, 200, 200, 0);
 	addWidget("ListBox", "FileSelect");
 	setWidgetSize("FileSelect", "50%", "50%");
@@ -18,6 +23,13 @@ void MainMenuSetUp() {
 	setWidgetPosition("MapMaker", "90%", "10%");
 	setWidgetOrigin("MapMaker", 1.0, 0.0);
 	setWidgetText("MapMaker", "~Map Maker");
+
+    setWidgetDirectionalFlow(
+        "NewGame", "FileSelect", "FileSelect", "MapMaker", "MapMaker");
+    setWidgetDirectionalFlow(
+        "MapMaker", "FileSelect", "FileSelect", "NewGame", "NewGame");
+    setWidgetDirectionalFlow("FileSelect", "~", "", "NewGame", "MapMaker");
+    setWidgetDirectionalFlowStart("NewGame");
 }
 
 /**
@@ -83,6 +95,6 @@ void MainMenu_NewGame_MouseReleased() {
 /**
  * Opens the map maker.
  */
-void MainMenu_MapMaker_Pressed() {
+void MainMenu_MapMaker_MouseReleased() {
 	setGUI("MapMakerMenu");
 }

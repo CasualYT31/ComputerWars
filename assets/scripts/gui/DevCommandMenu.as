@@ -62,7 +62,7 @@ void DevCommandMenuOpen() {
 /**
  * When the user clicks the Back button, go back to the \c Map menu.
  */
-void DevCommandMenu_Back_Pressed() {
+void DevCommandMenu_Back_MouseReleased() {
 	setGUI("Map");
 }
 

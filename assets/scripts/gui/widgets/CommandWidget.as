@@ -49,13 +49,14 @@ class CommandWidget {
 	 * Adds a command button.
 	 * If either \c spriteName or \c sheetName is empty, no sprite will be
 	 * assigned.
-	 * @param widgetName The name to give to the bitmap button. Must \b not be a
-	 *                   fullname!
-	 * @param widgetText The text to assign to the command button.
-	 * @param spriteName The key of the sprite to assign to this command button.
-	 * @param sheetName  The name of the sheet which contains the sprite.
+	 * @param  widgetName The name to give to the bitmap button. Must \b not be a
+	 *                    fullname!
+	 * @param  widgetText The text to assign to the command button.
+	 * @param  spriteName The key of the sprite to assign to this command button.
+	 * @param  sheetName  The name of the sheet which contains the sprite.
+     * @return The full name of the new command button widget.
 	 */
-	void addCommand(const string&in widgetName, const string&in widgetText,
+	string addCommand(const string&in widgetName, const string&in widgetText,
 		const string&in spriteName, const string&in sheetName = "icon") {
 		const string fullWidgetName = layout + "." + widgetName;
 		addWidget("BitmapButton", fullWidgetName);
@@ -64,6 +65,8 @@ class CommandWidget {
 		}
 		setWidgetText(fullWidgetName, widgetText);
 		_resizeLayout();
+        _configureDirectionalFlow(fullWidgetName);
+        return fullWidgetName;
 	}
 
 	/**
@@ -71,6 +74,7 @@ class CommandWidget {
 	 */
 	void removeAllCommands() {
 		removeWidgetsFromContainer(layout);
+        _bitmapButtons.resize(0);
 		_resizeLayout();
 	}
 
@@ -81,4 +85,31 @@ class CommandWidget {
 		setWidgetSize(layout, layoutWidth,
 			formatFloat(getWidgetCount(layout) * commandHeight) + "px");
 	}
+
+    /**
+     * Reconfigures the directional flow of each BitmapButton.
+     * @param newWidget Full name of the new widget being added.
+     */
+    private void _configureDirectionalFlow(const string&in newWidget) {
+        // Better implementation would be to implement getWidgetDirectionalFlow()
+        // in C++ and then just change the widgets I need to.
+        _bitmapButtons.insertLast(newWidget);
+        const auto len = _bitmapButtons.length();
+        if (len == 1) {
+            setWidgetDirectionalFlowStart(newWidget);
+        } else {
+            for (uint i = 0; i < len; ++i) {
+                const auto up =
+                    i == 0 ? _bitmapButtons[len - 1] : _bitmapButtons[i - 1];
+                const auto down =
+                    i == len - 1 ? _bitmapButtons[0] : _bitmapButtons[i + 1];
+                setWidgetDirectionalFlow(_bitmapButtons[i], up, down, "", "");
+            }
+        }
+    }
+
+    /**
+     * Cache of the BitmapButton names.
+     */
+    private array<string> _bitmapButtons;
 }

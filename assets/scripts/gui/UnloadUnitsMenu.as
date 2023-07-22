@@ -41,6 +41,7 @@ void UnloadUnitsMenuOpen() {
 	// Add the header widgets.
 	addWidgetToGrid("Button", "panel.grid.cancel", 0, 0);
 	setWidgetText("panel.grid.cancel", "cancelunload");
+    setWidgetDirectionalFlowStart("panel.grid.cancel");
 	addWidgetToGrid("Button", "panel.grid.proceed", 0, 1);
 	setWidgetText("panel.grid.proceed", "proceedwithunload");
 	addWidgetToGrid("Picture", "panel.grid.hpicon", 0, 2);
@@ -103,6 +104,85 @@ void UnloadUnitsMenuOpen() {
 			setWidgetTextOutlineThickness("panel.grid.ishiddenmsg" + name, 2.0);
 		}
 	}
+
+    // Configure directional flow.
+    const auto firstUnloadButton = loadedUnitsLength > 0 ? "panel.grid.button" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadButton = loadedUnitsLength > 0 ? "panel.grid.button" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "",
+        firstUnloadIcon = loadedUnitsLength > 0 ? "panel.grid.icon" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadIcon = loadedUnitsLength > 0 ? "panel.grid.icon" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "",
+        firstUnloadHP = loadedUnitsLength > 0 ? "panel.grid.hp" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadHP = loadedUnitsLength > 0 ? "panel.grid.hp" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "",
+        firstUnloadFuel = loadedUnitsLength > 0 ? "panel.grid.fuel" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadFuel = loadedUnitsLength > 0 ? "panel.grid.fuel" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "",
+        firstUnloadAmmo = loadedUnitsLength > 0 ? "panel.grid.ammo" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadAmmo = loadedUnitsLength > 0 ? "panel.grid.ammo" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "";
+    if (firstUnloadButton.length() > 0)
+        setWidgetDirectionalFlowStart(firstUnloadButton);
+    setWidgetDirectionalFlow("panel.grid.cancel", lastUnloadIcon,
+        firstUnloadIcon, "panel.grid.ammoicon", "panel.grid.proceed");
+    setWidgetDirectionalFlow("panel.grid.proceed", lastUnloadButton,
+        firstUnloadButton, "panel.grid.cancel", "panel.grid.hpicon");
+    setWidgetDirectionalFlow("panel.grid.hpicon", lastUnloadHP,
+        firstUnloadHP, "panel.grid.proceed", "panel.grid.fuelicon");
+    setWidgetDirectionalFlow("panel.grid.fuelicon", lastUnloadFuel,
+        firstUnloadFuel, "panel.grid.hpicon", "panel.grid.ammoicon");
+    setWidgetDirectionalFlow("panel.grid.ammoicon", lastUnloadAmmo,
+        firstUnloadAmmo, "panel.grid.fuelicon", "panel.grid.cancel");
+    for (uint i = 0; i < loadedUnitsLength; ++i) {
+        const auto FIRST = i == 0, LAST = i == loadedUnitsLength - 1;
+        const auto id = formatUInt(loadedUnits[i]),
+            prevID = FIRST ? formatUInt(loadedUnits[loadedUnitsLength - 1]) :
+                formatUInt(loadedUnits[i - 1]),
+            nextID = LAST ? formatUInt(loadedUnits[0]) :
+                formatUInt(loadedUnits[i + 1]);
+        const auto HIDDEN_MSG = widgetExists("panel.grid.ishiddenmsg" + id),
+            PREV_HIDDEN_MSG = widgetExists("panel.grid.ishiddenmsg" + prevID),
+            NEXT_HIDDEN_MSG = widgetExists("panel.grid.ishiddenmsg" + nextID);
+        setWidgetDirectionalFlow("panel.grid.icon" + id,
+            FIRST ? "panel.grid.cancel" : "panel.grid.icon" + prevID,
+            LAST ? "panel.grid.cancel" : "panel.grid.icon" + nextID,
+            HIDDEN_MSG ? "panel.grid.ishiddenmsg" + id : "panel.grid.ammo" + id,
+            "panel.grid.button" + id);
+        setWidgetDirectionalFlow("panel.grid.button" + id,
+            FIRST ? "panel.grid.proceed" : "panel.grid.button" + prevID,
+            LAST ? "panel.grid.proceed" : "panel.grid.button" + nextID,
+            "panel.grid.icon" + id,
+            "panel.grid.hp" + id);
+        setWidgetDirectionalFlow("panel.grid.hp" + id,
+            FIRST ? "panel.grid.hpicon" : "panel.grid.hp" + prevID,
+            LAST ? "panel.grid.hpicon" : "panel.grid.hp" + nextID,
+            "panel.grid.button" + id,
+            "panel.grid.fuel" + id);
+        setWidgetDirectionalFlow("panel.grid.fuel" + id,
+            FIRST ? "panel.grid.fuelicon" : "panel.grid.fuel" + prevID,
+            LAST ? "panel.grid.fuelicon" : "panel.grid.fuel" + nextID,
+            "panel.grid.hp" + id,
+            "panel.grid.ammo" + id);
+        setWidgetDirectionalFlow("panel.grid.ammo" + id,
+            FIRST ? "panel.grid.ammoicon" : "panel.grid.ammo" + prevID,
+            LAST ? "panel.grid.ammoicon" : "panel.grid.ammo" + nextID,
+            "panel.grid.fuel" + id,
+            HIDDEN_MSG ? "panel.grid.ishiddenmsg" + id : "panel.grid.icon" + id);
+        if (HIDDEN_MSG) {
+            setWidgetDirectionalFlow("panel.grid.ishiddenmsg" + id,
+                PREV_HIDDEN_MSG ? "panel.grid.ishiddenmsg" + prevID :
+                    (FIRST ? "panel.grid.ammoicon" : "panel.grid.ammo" + prevID),
+                NEXT_HIDDEN_MSG ? "panel.grid.ishiddenmsg" + nextID :
+                    (LAST ? "panel.grid.ammoicon" : "panel.grid.ammo" + nextID),
+                "panel.grid.ammo" + id,
+                "panel.grid.icon" + id);
+        }
+    }
 }
 
 /**
@@ -128,7 +208,7 @@ void UnloadUnitsMenuHandleInput(const dictionary controls) {
 	if (getWidgetVisibility("panel")) {
 		if (bool(controls["back"])) {
 			// Cancel whole unloading operation.
-			UnloadUnitsMenu_cancel_Pressed();
+			UnloadUnitsMenu_cancel_MouseReleased();
 			return;
 		}
 	} else {
@@ -146,7 +226,7 @@ void UnloadUnitsMenuHandleInput(const dictionary controls) {
 					// progress to go ahead, and make the base unit wait.
 					if (game.map.getUnitOnTile(selectedTile) > 0) {
 						game.map.popSelectedUnit();
-						UnloadUnitsMenu_proceed_Pressed();
+						UnloadUnitsMenu_proceed_MouseReleased();
 						return;
 					} else {
 						game.map.addPreviewUnit(
@@ -170,7 +250,7 @@ void UnloadUnitsMenuHandleInput(const dictionary controls) {
 /**
  * Cancel the unload operation and go back to the command menu.
  */
-void UnloadUnitsMenu_cancel_Pressed() {
+void UnloadUnitsMenu_cancel_MouseReleased() {
 	// Remove all of the preview units that were added by this menu.
 	const auto loadedUnits =
 		game.map.getLoadedUnits(UnloadUnitsMenuBaseUnloadUnit);
@@ -191,7 +271,7 @@ void UnloadUnitsMenu_cancel_Pressed() {
 /**
  * Proceed with the unload operation.
  */
-void UnloadUnitsMenu_proceed_Pressed() {
+void UnloadUnitsMenu_proceed_MouseReleased() {
 	// Move the base unit as normal.
 	game.moveUnit();
 	// Set the locations of all the unloaded units.
@@ -220,7 +300,7 @@ void UnloadUnitsMenu_proceed_Pressed() {
  * @param signal The signal emitted by the button widget.
  */
 void UnloadUnitsMenu_UnloadUnit(const string&in widget, const string&in signal) {
-	if (signal == "Pressed") {
+	if (signal == "MouseReleased") {
 		const auto index = widget.findLastNotOf("0123456789");
 		if (index < 0) {
 			error("Digit not found in widget name \"" + widget + "\", could not "

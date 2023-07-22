@@ -51,7 +51,7 @@ namespace sfx {
 	 * \c FreeForm (\c 0) triggers game controls so long as a configured key/button
 	 * is pressed or held.\n
 	 * \c ButtonForm (\c 1) triggers game controls only when a configured
-	 * key/button is initially pressed, and not when held.\n
+	 * key/button is released, and not when held.\n
 	 * \c DelayedForm (\c 2) triggers game controls at configured intervals if a
 	 * configured key/button is being held.\n
 	 * \c SignalTypeCount stores the number of control signal types and must
