@@ -767,6 +767,117 @@ static bool isWidgetFullyVisibleAndEnabled(const Widget* widget,
 	return false;
 }
 
+/**
+ * Makes a widget in a \c ScrollablePanel visible by scrolling the
+ * scrollbars to make the widget fully visible.
+ * If the given widget does not have a \c ScrollablePanel ancestor, then no
+ * changes will be made.
+ * @param widget             Pointer to the widget to show.
+ * @param panelAncestryDepth Recursion parameter. Leave to default.
+ */
+static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
+	const unsigned int panelAncestryDepth = 0) {
+	static const std::function<ScrollablePanel*(Widget*,const unsigned int)>
+		findScrollablePanelAncestor =
+		[](Widget* w, const unsigned int depth) -> ScrollablePanel* {
+		if (w = reinterpret_cast<Widget*>(w->getParent())) {
+			if (w->getWidgetType() == "ScrollablePanel") {
+				if (depth == 0)
+					return dynamic_cast<ScrollablePanel*>(w);
+				else
+					return findScrollablePanelAncestor(w, depth - 1);
+			}
+			return findScrollablePanelAncestor(w, depth);
+		} else return nullptr;
+	};
+
+	auto panel = findScrollablePanelAncestor(widget.get(), panelAncestryDepth);
+	if (!panel) return; // Exit condition.
+	// If there are no scrollbars, then don't do anything with this panel.
+	const auto horiShown = panel->isHorizontalScrollbarShown(),
+		vertShown = panel->isVerticalScrollbarShown();
+	if (!horiShown && !vertShown) {
+		showWidgetInScrollablePanel(widget, panelAncestryDepth + 1);
+		return;
+	}
+	// Figure out portion of ScrollablePanel that is being shown.
+	const auto scrollbarWidth = panel->getScrollbarWidth();
+
+	const sf::FloatRect panelRect(
+		panel->getAbsolutePosition().x + panel->getContentOffset().x,
+		panel->getAbsolutePosition().y + panel->getContentOffset().y,
+		// Gotta exclude the scrollbars from the visible portion.
+		panel->getSize().x - (vertShown ? scrollbarWidth : 0.0f),
+		panel->getSize().y - (horiShown ? scrollbarWidth : 0.0f)
+	);
+	// Figure out bounding rectangle of given widget.
+	const sf::FloatRect widgetRect(
+		widget->getAbsolutePosition().x,
+		widget->getAbsolutePosition().y,
+		widget->getSize().x,
+		widget->getSize().y
+	);
+	// Figure out if given widget is fully visible inside that portion.
+	// If not, scroll scrollbars by required amount, if possible.
+	if (horiShown) {
+		const int oldHori = static_cast<int>(panel->getHorizontalScrollbarValue());
+		int newHori = oldHori;
+		if (widgetRect.left >
+			panelRect.left + panelRect.width - widgetRect.width) {
+			// Too far right.
+			if (widgetRect.width < panelRect.width) {
+				newHori = oldHori + static_cast<int>(
+					::abs((widgetRect.left + widgetRect.width) -
+						(panelRect.left + panelRect.width)));
+			} else {
+				// If the widget is too wide for the panel, always favour the left
+				// side.
+				newHori = oldHori + static_cast<int>(
+					::abs(widgetRect.left - panelRect.left));
+			}
+		}
+		if (widgetRect.left < panelRect.left) {
+			// Too far left.
+			newHori = oldHori - static_cast<int>(
+				::abs(panelRect.left - widgetRect.left));
+		}
+		if (newHori <= 0)
+			panel->setHorizontalScrollbarValue(0);
+		else
+			panel->setHorizontalScrollbarValue(static_cast<unsigned int>(newHori));
+	}
+	if (vertShown) {
+		const auto oldVert = static_cast<int>(panel->getVerticalScrollbarValue());
+		int newVert = oldVert;
+		if (widgetRect.top >
+			panelRect.top + panelRect.height - widgetRect.height) {
+			// Too far down.
+			if (widgetRect.height < panelRect.height) {
+				newVert = oldVert + static_cast<int>(
+					::abs((widgetRect.top + widgetRect.height) -
+						(panelRect.top + panelRect.height)));
+			} else {
+				// If the widget is too high for the panel, always favour the top
+				// side.
+				newVert = oldVert + static_cast<int>(
+					::abs(widgetRect.top - panelRect.top));
+			}
+		}
+		if (widgetRect.top < panelRect.top) {
+			// Too far up.
+			newVert = oldVert - static_cast<int>(
+				::abs(panelRect.top - widgetRect.top));
+		}
+		if (newVert <= 0)
+			panel->setVerticalScrollbarValue(0);
+		else
+			panel->setVerticalScrollbarValue(static_cast<unsigned int>(newVert));
+	}
+	// The ScrollablePanel itself may be in more ScrollablePanels, so we need to
+	// make sure they're scrolled properly, too.
+	showWidgetInScrollablePanel(widget, panelAncestryDepth + 1);
+}
+
 void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	if (ui) {
 		// Keep track of mouse movement. If the mouse has moved, then we disregard
@@ -800,8 +911,12 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 				(*ui)[_leftControl] || (*ui)[_rightControl];
 			// If there wasn't a selection made previously, go straight to making
 			// the selection.
-			if (_currentlySelectedWidget[_currentGUI].second.empty())
+			const auto cursel = _findCurrentlySelectedWidget();
+			if (cursel.first.empty())
 				_moveDirectionalFlow(ui);
+			// Otherwise, make sure what was selected is now visible to the user.
+			else if (_enableDirectionalFlow && cursel.second)
+				showWidgetInScrollablePanel(cursel.second);
 		}
 		// Invoke the current menu's bespoke input handling function.
 		// If the signal handler was invoked, do not invoke any bespoke input
@@ -1188,8 +1303,9 @@ void sfx::gui::_makeNewDirectionalSelection(const std::string& newsel,
 			_currentlySelectedWidget[menu].second = newsel;
 		} else return;
 	}
-	signalHandler(_findWidget<Widget>(_currentlySelectedWidget[menu].second),
-		"MouseEntered");
+	const auto widget = _findWidget<Widget>(_currentlySelectedWidget[menu].second);
+	signalHandler(widget, "MouseEntered");
+	showWidgetInScrollablePanel(widget);
 };
 
 void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
