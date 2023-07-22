@@ -259,7 +259,7 @@ std::shared_ptr<const awe::weapon>
 	}
 	return nullptr;
 }
-void updateJJNew(nlohmann::ordered_json& jjNew,
+static void updateJJNew(nlohmann::ordered_json& jjNew,
 	const nlohmann::ordered_json& jjBase, const nlohmann::ordered_json& jjOver,
 	const std::string& objectKey) {
 	if (jjBase.contains(objectKey)) jjNew[objectKey] = jjBase[objectKey];
@@ -275,6 +275,8 @@ void updateJJNew(nlohmann::ordered_json& jjNew,
 				} else if (dmg.value().is_number()) {
 					jjNew[objectKey][dmg.key()] = dmg.value();
 				}
+			} else {
+				jjNew[objectKey][dmg.key()] = dmg.value();
 			}
 		}
 	}
