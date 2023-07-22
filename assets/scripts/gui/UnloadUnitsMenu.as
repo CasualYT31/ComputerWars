@@ -55,7 +55,6 @@ void UnloadUnitsMenuOpen() {
 	const auto loadedUnits =
 		game.map.getLoadedUnits(UnloadUnitsMenuBaseUnloadUnit);
 	const auto loadedUnitsLength = loadedUnits.length();
-    array<string> unloadButtons;
 	for (uint i = 0; i < loadedUnitsLength; ++i) {
 		const auto unitID = loadedUnits[i];
 		const string name = formatUInt(unitID);
@@ -69,7 +68,6 @@ void UnloadUnitsMenuOpen() {
 		// widget!
 		addWidgetToGrid("Button", "panel.grid.button" + name, i + 1, 1,
 			"UnloadUnitsMenu_UnloadUnit");
-        unloadButtons.insertLast("panel.grid.button" + name);
 		setWidgetText("panel.grid.button" + name, "unload");
 		addWidgetToGrid("Label", "panel.grid.hp" + name, i + 1, 2);
 		setWidgetText("panel.grid.hp" + name,
@@ -108,20 +106,82 @@ void UnloadUnitsMenuOpen() {
 	}
 
     // Configure directional flow.
-    const auto firstUnloadButton = loadedUnitsLength > 0 ? unloadButtons[0] : "",
-        lastUnloadButton = loadedUnitsLength > 0 ?
-            unloadButtons[unloadButtons.length() - 1] : "";
+    const auto firstUnloadButton = loadedUnitsLength > 0 ? "panel.grid.button" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadButton = loadedUnitsLength > 0 ? "panel.grid.button" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "",
+        firstUnloadIcon = loadedUnitsLength > 0 ? "panel.grid.icon" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadIcon = loadedUnitsLength > 0 ? "panel.grid.icon" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "",
+        firstUnloadHP = loadedUnitsLength > 0 ? "panel.grid.hp" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadHP = loadedUnitsLength > 0 ? "panel.grid.hp" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "",
+        firstUnloadFuel = loadedUnitsLength > 0 ? "panel.grid.fuel" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadFuel = loadedUnitsLength > 0 ? "panel.grid.fuel" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "",
+        firstUnloadAmmo = loadedUnitsLength > 0 ? "panel.grid.ammo" +
+            formatUInt(loadedUnits[0]) : "",
+        lastUnloadAmmo = loadedUnitsLength > 0 ? "panel.grid.ammo" +
+            formatUInt(loadedUnits[loadedUnitsLength - 1]) : "";
     if (firstUnloadButton.length() > 0)
         setWidgetDirectionalFlowStart(firstUnloadButton);
-    setWidgetDirectionalFlow("panel.grid.cancel", lastUnloadButton,
-        firstUnloadButton, "panel.grid.proceed", "panel.grid.proceed");
+    setWidgetDirectionalFlow("panel.grid.cancel", lastUnloadIcon,
+        firstUnloadIcon, "panel.grid.ammoicon", "panel.grid.proceed");
     setWidgetDirectionalFlow("panel.grid.proceed", lastUnloadButton,
-        firstUnloadButton, "panel.grid.cancel", "panel.grid.cancel");
-    for (uint i = 0, len = unloadButtons.length(); i < len; ++i) {
-        setWidgetDirectionalFlow(unloadButtons[i],
-            i == 0 ? "panel.grid.proceed" : unloadButtons[i - 1],
-            i == len - 1 ? "panel.grid.proceed" : unloadButtons[i + 1],
-            "", "");
+        firstUnloadButton, "panel.grid.cancel", "panel.grid.hpicon");
+    setWidgetDirectionalFlow("panel.grid.hpicon", lastUnloadHP,
+        firstUnloadHP, "panel.grid.proceed", "panel.grid.fuelicon");
+    setWidgetDirectionalFlow("panel.grid.fuelicon", lastUnloadFuel,
+        firstUnloadFuel, "panel.grid.hpicon", "panel.grid.ammoicon");
+    setWidgetDirectionalFlow("panel.grid.ammoicon", lastUnloadAmmo,
+        firstUnloadAmmo, "panel.grid.fuelicon", "panel.grid.cancel");
+    for (uint i = 0; i < loadedUnitsLength; ++i) {
+        const auto FIRST = i == 0, LAST = i == loadedUnitsLength - 1;
+        const auto id = formatUInt(loadedUnits[i]),
+            prevID = FIRST ? formatUInt(loadedUnits[loadedUnitsLength - 1]) :
+                formatUInt(loadedUnits[i - 1]),
+            nextID = LAST ? formatUInt(loadedUnits[0]) :
+                formatUInt(loadedUnits[i + 1]);
+        const auto HIDDEN_MSG = widgetExists("panel.grid.ishiddenmsg" + id),
+            PREV_HIDDEN_MSG = widgetExists("panel.grid.ishiddenmsg" + prevID),
+            NEXT_HIDDEN_MSG = widgetExists("panel.grid.ishiddenmsg" + nextID);
+        setWidgetDirectionalFlow("panel.grid.icon" + id,
+            FIRST ? "panel.grid.cancel" : "panel.grid.icon" + prevID,
+            LAST ? "panel.grid.cancel" : "panel.grid.icon" + nextID,
+            HIDDEN_MSG ? "panel.grid.ishiddenmsg" + id : "panel.grid.ammo" + id,
+            "panel.grid.button" + id);
+        setWidgetDirectionalFlow("panel.grid.button" + id,
+            FIRST ? "panel.grid.proceed" : "panel.grid.button" + prevID,
+            LAST ? "panel.grid.proceed" : "panel.grid.button" + nextID,
+            "panel.grid.icon" + id,
+            "panel.grid.hp" + id);
+        setWidgetDirectionalFlow("panel.grid.hp" + id,
+            FIRST ? "panel.grid.hpicon" : "panel.grid.hp" + prevID,
+            LAST ? "panel.grid.hpicon" : "panel.grid.hp" + nextID,
+            "panel.grid.button" + id,
+            "panel.grid.fuel" + id);
+        setWidgetDirectionalFlow("panel.grid.fuel" + id,
+            FIRST ? "panel.grid.fuelicon" : "panel.grid.fuel" + prevID,
+            LAST ? "panel.grid.fuelicon" : "panel.grid.fuel" + nextID,
+            "panel.grid.hp" + id,
+            "panel.grid.ammo" + id);
+        setWidgetDirectionalFlow("panel.grid.ammo" + id,
+            FIRST ? "panel.grid.ammoicon" : "panel.grid.ammo" + prevID,
+            LAST ? "panel.grid.ammoicon" : "panel.grid.ammo" + nextID,
+            "panel.grid.fuel" + id,
+            HIDDEN_MSG ? "panel.grid.ishiddenmsg" + id : "panel.grid.icon" + id);
+        if (HIDDEN_MSG) {
+            setWidgetDirectionalFlow("panel.grid.ishiddenmsg" + id,
+                PREV_HIDDEN_MSG ? "panel.grid.ishiddenmsg" + prevID :
+                    (FIRST ? "panel.grid.ammoicon" : "panel.grid.ammo" + prevID),
+                NEXT_HIDDEN_MSG ? "panel.grid.ishiddenmsg" + nextID :
+                    (LAST ? "panel.grid.ammoicon" : "panel.grid.ammo" + nextID),
+                "panel.grid.ammo" + id,
+                "panel.grid.icon" + id);
+        }
     }
 }
 
