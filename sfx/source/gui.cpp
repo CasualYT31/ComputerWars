@@ -735,26 +735,31 @@ bool sfx::gui::handleEvent(sf::Event e) {
 	return _gui.handleEvent(e);
 }
 
+/**
+ * Checks if a given widget is visible and/or enabled, and that the same can be
+ * said for all of its parents.
+ * @warning An assertion is made that at least one of the boolean parameters is
+ *          \c TRUE!
+ * @param   widget  Pointer to the widget to test.
+ * @param   visible If \c TRUE, will test each widget's visibility.
+ * @param   enabled If \c TRUE, will test each widget's enabled state.
+ * @return  \c TRUE if the given widget and all of its parents pass the specified
+ *          tests, \c FALSE if at least one of the widgets in the chain does not
+ *          pass a single test.
+ */
+static bool isWidgetFullyVisibleAndEnabled(const Widget* widget,
+	const bool visible, const bool enabled) {
+	assert((visible || enabled) && widget);
+	if ((!visible || widget->isVisible()) && (!enabled || widget->isEnabled())) {
+		if (widget = reinterpret_cast<Widget*>(widget->getParent()))
+			return isWidgetFullyVisibleAndEnabled(widget, visible, enabled);
+		return true;
+	}
+	return false;
+}
+
 void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	if (ui) {
-		// Invoke the current menu's bespoke input handling function.
-		const auto previousGUI = getGUI();
-		if (_scripts->functionExists(getGUI() + "HandleInput")) {
-			_handleInputErrorLogged = false;
-			// Construct the dictionary.
-			CScriptDictionary* controls = _scripts->createDictionary();
-			auto controlKeys = ui->getControls();
-			for (auto& key : controlKeys)
-				controls->Set(key, (asINT64)ui->operator[](key));
-			// Invoke the function.
-			_scripts->callFunction(getGUI() + "HandleInput", controls);
-			controls->Release();
-		}
-		// If the bespoke function changed the menu, drop all directional input for
-		// an iteration. If we don't, it can cause a game input made on the map,
-		// for example, to trigger a UI input in a base menu, for example, in the
-		// same iteration.
-		if (previousGUI != getGUI()) return;
 		// Keep track of mouse movement. If the mouse has moved, then we disregard
 		// directional flow (and select inputs) until a new directional input has
 		// been made.
@@ -763,16 +768,20 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 		if (_previousMousePosition != _currentMousePosition)
 			_enableDirectionalFlow = false;
 		// Handle directional input.
+		bool signalHandlerTriggered = false;
 		if (_enableDirectionalFlow) {
 			const auto cursel = _moveDirectionalFlow(ui);
-			// If select is issued, and there is currently a widget selected, then
-			// trigger an appropriate signal.
+			// If select is issued, and there is currently a widget selected that
+			// isn't disabled, then trigger an appropriate signal.
 			if ((*ui)[_selectControl] && !cursel.empty()) {
 				const auto widget = _findWidget<Widget>(cursel);
-				const auto widgetType = widget->getWidgetType();
-				if (widgetType == "Button" || widgetType == "BitmapButton" ||
-					widgetType == "ListBox") {
-					signalHandler(widget, "MouseReleased");
+				if (isWidgetFullyVisibleAndEnabled(widget.get(), true, true)) {
+					const auto widgetType = widget->getWidgetType();
+					if (widgetType == "Button" || widgetType == "BitmapButton" ||
+						widgetType == "ListBox") {
+						signalHandler(widget, "MouseReleased");
+						signalHandlerTriggered = true;
+					}
 				}
 			}
 		} else if (_previousMousePosition == _currentMousePosition) {
@@ -784,6 +793,22 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 			// the selection.
 			if (_currentlySelectedWidget[_currentGUI].second.empty())
 				_moveDirectionalFlow(ui);
+		}
+		// Invoke the current menu's bespoke input handling function.
+		// If the signal handler was invoked, do not invoke any bespoke input
+		// handler. If we do, it can cause multiple inputs that are typically
+		// carried out separately to be processed in a single iteration.
+		if (!signalHandlerTriggered &&
+			_scripts->functionExists(getGUI() + "HandleInput")) {
+			_handleInputErrorLogged = false;
+			// Construct the dictionary.
+			CScriptDictionary* controls = _scripts->createDictionary();
+			auto controlKeys = ui->getControls();
+			for (auto& key : controlKeys)
+				controls->Set(key, (asINT64)ui->operator[](key));
+			// Invoke the function.
+			_scripts->callFunction(getGUI() + "HandleInput", controls);
+			controls->Release();
 		}
 	} else if (!_handleInputErrorLogged) {
 		_logger.error("Called handleInput() with nullptr user_input object for "
@@ -855,9 +880,11 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 	}
 
 	// Whenever there isn't a widget currently selected via directional controls,
-	// always reset the animation.
+	// or the currently selected widget is not currently visible, always reset the
+	// animation.
 	const auto& cursel = _findCurrentlySelectedWidget();
-	if (cursel.first.empty() || !_enableDirectionalFlow) {
+	if (cursel.first.empty() || !_enableDirectionalFlow || !cursel.second ||
+		!isWidgetFullyVisibleAndEnabled(cursel.second.get(), true, false)) {
 		_angleBracketUL.setCurrentFrame(0);
 		_angleBracketUR.setCurrentFrame(0);
 		_angleBracketLL.setCurrentFrame(0);
@@ -1135,12 +1162,22 @@ void sfx::gui::_makeNewDirectionalSelection(const std::string& newsel,
 	const std::string& menu) {
 	if (newsel.empty()) return;
 	if (newsel == GOTO_PREVIOUS_WIDGET) {
-		std::swap(_currentlySelectedWidget[menu].first,
-			_currentlySelectedWidget[menu].second);
+		// Do not allow selection to go ahead if the previous widget is now not
+		// visible!
+		if (isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+			_currentlySelectedWidget[menu].first).get(), true, false))
+			std::swap(_currentlySelectedWidget[menu].first,
+				_currentlySelectedWidget[menu].second);
+		else
+			return;
 	} else {
-		_currentlySelectedWidget[menu].first =
-			_currentlySelectedWidget[menu].second;
-		_currentlySelectedWidget[menu].second = newsel;
+		// Do not allow selection to go ahead if the given widget is not visible!
+		if (isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+			newsel).get(), true, false)) {
+			_currentlySelectedWidget[menu].first =
+				_currentlySelectedWidget[menu].second;
+			_currentlySelectedWidget[menu].second = newsel;
+		} else return;
 	}
 	signalHandler(_findWidget<Widget>(_currentlySelectedWidget[menu].second),
 		"MouseEntered");
@@ -1297,10 +1334,12 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		}
 	}
 	// Draw angle brackets, if there is currently a widget selected via the
-	// directional controls.
+	// directional controls, and it is visible.
 	if (_enableDirectionalFlow && _currentlySelectedWidget.find(getGUI()) !=
 		_currentlySelectedWidget.end() &&
-		!_currentlySelectedWidget.at(getGUI()).second.empty()) {
+		!_currentlySelectedWidget.at(getGUI()).second.empty() &&
+		isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+			_currentlySelectedWidget.at(getGUI()).second).get(), true, false)) {
 		target.draw(_angleBracketUL, states);
 		target.draw(_angleBracketUR, states);
 		target.draw(_angleBracketLL, states);

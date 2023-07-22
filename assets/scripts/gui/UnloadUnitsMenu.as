@@ -41,6 +41,7 @@ void UnloadUnitsMenuOpen() {
 	// Add the header widgets.
 	addWidgetToGrid("Button", "panel.grid.cancel", 0, 0);
 	setWidgetText("panel.grid.cancel", "cancelunload");
+    setWidgetDirectionalFlowStart("panel.grid.cancel");
 	addWidgetToGrid("Button", "panel.grid.proceed", 0, 1);
 	setWidgetText("panel.grid.proceed", "proceedwithunload");
 	addWidgetToGrid("Picture", "panel.grid.hpicon", 0, 2);
@@ -54,6 +55,7 @@ void UnloadUnitsMenuOpen() {
 	const auto loadedUnits =
 		game.map.getLoadedUnits(UnloadUnitsMenuBaseUnloadUnit);
 	const auto loadedUnitsLength = loadedUnits.length();
+    array<string> unloadButtons;
 	for (uint i = 0; i < loadedUnitsLength; ++i) {
 		const auto unitID = loadedUnits[i];
 		const string name = formatUInt(unitID);
@@ -67,6 +69,7 @@ void UnloadUnitsMenuOpen() {
 		// widget!
 		addWidgetToGrid("Button", "panel.grid.button" + name, i + 1, 1,
 			"UnloadUnitsMenu_UnloadUnit");
+        unloadButtons.insertLast("panel.grid.button" + name);
 		setWidgetText("panel.grid.button" + name, "unload");
 		addWidgetToGrid("Label", "panel.grid.hp" + name, i + 1, 2);
 		setWidgetText("panel.grid.hp" + name,
@@ -103,6 +106,23 @@ void UnloadUnitsMenuOpen() {
 			setWidgetTextOutlineThickness("panel.grid.ishiddenmsg" + name, 2.0);
 		}
 	}
+
+    // Configure directional flow.
+    const auto firstUnloadButton = loadedUnitsLength > 0 ? unloadButtons[0] : "",
+        lastUnloadButton = loadedUnitsLength > 0 ?
+            unloadButtons[unloadButtons.length() - 1] : "";
+    if (firstUnloadButton.length() > 0)
+        setWidgetDirectionalFlowStart(firstUnloadButton);
+    setWidgetDirectionalFlow("panel.grid.cancel", lastUnloadButton,
+        firstUnloadButton, "panel.grid.proceed", "panel.grid.proceed");
+    setWidgetDirectionalFlow("panel.grid.proceed", lastUnloadButton,
+        firstUnloadButton, "panel.grid.cancel", "panel.grid.cancel");
+    for (uint i = 0, len = unloadButtons.length(); i < len; ++i) {
+        setWidgetDirectionalFlow(unloadButtons[i],
+            i == 0 ? "panel.grid.proceed" : unloadButtons[i - 1],
+            i == len - 1 ? "panel.grid.proceed" : unloadButtons[i + 1],
+            "", "");
+    }
 }
 
 /**
@@ -220,7 +240,7 @@ void UnloadUnitsMenu_proceed_MouseReleased() {
  * @param signal The signal emitted by the button widget.
  */
 void UnloadUnitsMenu_UnloadUnit(const string&in widget, const string&in signal) {
-	if (signal == "Pressed") {
+	if (signal == "MouseReleased") {
 		const auto index = widget.findLastNotOf("0123456789");
 		if (index < 0) {
 			error("Digit not found in widget name \"" + widget + "\", could not "
