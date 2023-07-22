@@ -210,7 +210,8 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"declaration and behaviour as this one, except it is called "
 		"MenuName<tt>Close()</tt>.");
 	document->DocumentExpectedFunction(
-		"void MainMenuHandleInput(const dictionary)",
+		"void MainMenuHandleInput(const dictionary[, const MousePosition&in, "
+		"const MousePosition&in])",
 		"Regardless of how the game is modded, there will <b>always</b> be a menu "
 		"called \"MainMenu\". Therefore, this function must be defined somewhere "
 		"within the GUI scripts.\n\n"
@@ -226,7 +227,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"defined by the UI JSON configuration script—to booleans, where "
 		"<tt>TRUE</tt> means that the control should be reacted to (if you are "
 		"interested in it), and <tt>FALSE</tt> means that you should ignore the "
-		"control for that iteration of the game loop.");
+		"control for that iteration of the game loop.\n\n"
+		"The <tt>MousePosition</tt> parameters are optional and do not have to be "
+		"defined. If they are, the first <tt>MousePosition</tt> holds the "
+		"position of the mouse during the previous iteration of the game loop, "
+		"and the second <tt>MousePosition</tt> holds the current position of the "
+		"mouse.\n\n"
+		"There must only be one <tt>HandleInput()</tt> function per menu.");
 	document->DocumentExpectedFunction("void MenuName_WidgetName_SignalName()",
 		"All GUI scripts can react to widget events by writing functions for "
 		"any signals they are interested in. If a signal handler isn't defined, "
@@ -235,7 +242,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"within a vertical layout container called <tt>MenuLayout</tt>, which is "
 		"in a menu called <tt>GameMenu</tt>, has been clicked, the following "
 		"function can be defined:\n"
-		"<pre><code>void GameMenu_ButtonName_Pressed() {\n"
+		"<pre><code>void GameMenu_ButtonName_MouseReleased() {\n"
 "\tinfo(\"I have been pressed!\");\n"
 "}</code></pre>\n"
 		"A list of supported signals can be found be in the "
@@ -880,6 +887,7 @@ static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
 
 void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 	if (ui) {
+		_handleInputErrorLogged = false;
 		// Keep track of mouse movement. If the mouse has moved, then we disregard
 		// directional flow (and select inputs) until a new directional input has
 		// been made.
@@ -922,17 +930,28 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 		// If the signal handler was invoked, do not invoke any bespoke input
 		// handler. If we do, it can cause multiple inputs that are typically
 		// carried out separately to be processed in a single iteration.
-		if (!signalHandlerTriggered &&
-			_scripts->functionExists(getGUI() + "HandleInput")) {
-			_handleInputErrorLogged = false;
-			// Construct the dictionary.
-			CScriptDictionary* controls = _scripts->createDictionary();
-			auto controlKeys = ui->getControls();
-			for (auto& key : controlKeys)
-				controls->Set(key, (asINT64)ui->operator[](key));
-			// Invoke the function.
-			_scripts->callFunction(getGUI() + "HandleInput", controls);
-			controls->Release();
+		if (!signalHandlerTriggered) {
+			const auto funcName = getGUI() + "HandleInput";
+			const auto basicHandleInputDecl = "void " + funcName +
+				"(const dictionary)",
+				extendedHandleInputDecl = "void " + funcName +
+				"(const dictionary, const MousePosition&in, "
+					"const MousePosition&in)";
+			if (_scripts->functionExists(funcName)) {
+				// Construct the dictionary.
+				CScriptDictionary* controls = _scripts->createDictionary();
+				auto controlKeys = ui->getControls();
+				for (auto& key : controlKeys)
+					controls->Set(key, (asINT64)ui->operator[](key));
+				// Invoke the function.
+				if (_scripts->functionDeclExists(basicHandleInputDecl)) {
+					_scripts->callFunction(funcName, controls);
+				} else if (_scripts->functionDeclExists(extendedHandleInputDecl)) {
+					_scripts->callFunction(funcName, controls,
+						&_previousMousePosition, &_currentMousePosition);
+				}
+				controls->Release();
+			}
 		}
 	} else if (!_handleInputErrorLogged) {
 		_logger.error("Called handleInput() with nullptr user_input object for "

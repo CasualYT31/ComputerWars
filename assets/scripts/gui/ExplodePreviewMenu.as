@@ -88,11 +88,15 @@ void ExplodePreviewMenuClose() {
 /**
  * Allows the user to change the selected tile, if configured to, and allows the
  * them to cancel the preview, or go ahead with the explosion.
- * @param controls The control map given by the engine.
+ * @param controls         The control map given by the engine.
+ * @param previousPosition The previous mouse position.
+ * @param currentPosition  The current mouse position.
  */
-void ExplodePreviewMenuHandleInput(const dictionary controls) {
+void ExplodePreviewMenuHandleInput(const dictionary controls,
+    const MousePosition&in previousPosition,
+    const MousePosition&in currentPosition) {
 	if (EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE) {
-		HandleCommonGameInput(controls);
+		HandleCommonGameInput(controls, previousPosition, currentPosition);
 	}
 	if (bool(controls["back"])) {
 		// Force the selection to go back to the originally selected unit (as the

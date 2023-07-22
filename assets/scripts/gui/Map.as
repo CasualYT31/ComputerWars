@@ -18,21 +18,18 @@ void MapSetUp() {
 }
 
 /**
- * Holds the previous mouse position.
- */
-MousePosition previousPosition;
-
-/**
  * Input handling code common to both Map and MoveUnitMenu.
- * @param  controls The control map given by the engine.
+ * @param  controls         The control map given by the engine.
+ * @param  previousPosition The previous mouse position.
+ * @param  currentPosition  The current mouse position.
  * @return \c TRUE if this function updated the selected tile, \c FALSE if not.
  */
-bool HandleCommonGameInput(const dictionary@ controls) {
+bool HandleCommonGameInput(const dictionary@ controls,
+    const MousePosition&in previousPosition,
+    const MousePosition&in currentPosition) {
 	bool ret = false;
 
-	// Handle mouse input.
-	MousePosition currentPosition = mousePosition();
-	// Ignore the mouse if the game doesn't have focus.
+	// Handle mouse input. Ignore the mouse if the game doesn't have focus.
 	if (currentPosition != INVALID_MOUSE) {
 		// Ignore the mouse if it's outside of the window.
 		Vector2 windowSize = getWindowSize();
@@ -46,7 +43,6 @@ bool HandleCommonGameInput(const dictionary@ controls) {
 			}
 		}
 	}
-	previousPosition = currentPosition;
 
 	// Handle controls.
 	if (bool(controls["up"])) {
@@ -84,9 +80,13 @@ bool CANCEL_DEV_INPUT = false;
 
 /**
  * Handles input specific to the \c Map menu.
- * @param controls The control map given by the engine.
+ * @param controls         The control map given by the engine.
+ * @param previousPosition The previous mouse position.
+ * @param currentPosition  The current mouse position.
  */
-void MapHandleInput(const dictionary controls) {
+void MapHandleInput(const dictionary controls,
+    const MousePosition&in previousPosition,
+    const MousePosition&in currentPosition) {
 	// If the dev key was hit, open the debug menu.
 	if (bool(controls["dev"])) {
 		if (CANCEL_DEV_INPUT) {
@@ -98,7 +98,7 @@ void MapHandleInput(const dictionary controls) {
 		}
 	}
 
-	HandleCommonGameInput(controls);
+	HandleCommonGameInput(controls, previousPosition, currentPosition);
 	
 	// Update army widget.
 	armyWidget.update(game.map.getSelectedArmy());

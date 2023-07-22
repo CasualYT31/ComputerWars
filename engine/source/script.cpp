@@ -82,6 +82,14 @@ std::string AWEVector2TypeToString(void* memory) {
     return "";
 }
 
+std::string AWEVector2iTypeToString(void* memory) {
+    if (memory) {
+        sf::Vector2i* v = (sf::Vector2i*)memory;
+        return "(" + std::to_string(v->x) + ", " + std::to_string(v->y) + ")";
+    }
+    return "";
+}
+
 std::string AWEVector2fTypeToString(void* memory) {
     if (memory) {
         sf::Vector2f* v = (sf::Vector2f*)memory;
@@ -152,6 +160,8 @@ void engine::RegisterVectorTypes(asIScriptEngine* engine,
         r = engine->RegisterObjectMethod("MousePosition",
             "bool opEquals(const Vector2&in) const",
             asFUNCTION(iEqU), asCALL_CDECL_OBJFIRST);
+        engine->RegisterObjectMethod("MousePosition", "string toString() const",
+            asFUNCTION(AWEVector2iTypeToString), asCALL_CDECL_OBJLAST);
 
         // Vector2 opEquals
         r = engine->RegisterObjectMethod("Vector2",

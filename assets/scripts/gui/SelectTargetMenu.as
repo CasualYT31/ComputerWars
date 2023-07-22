@@ -57,10 +57,14 @@ void SelectTargetMenuClose() {
 
 /**
  * Allows the user to move the selection, as well as cancel the attack.
- * @param controls The control map given by the engine.
+ * @param controls         The control map given by the engine.
+ * @param previousPosition The previous mouse position.
+ * @param currentPosition  The current mouse position.
  */
-void SelectTargetMenuHandleInput(const dictionary controls) {
-	HandleCommonGameInput(controls);
+void SelectTargetMenuHandleInput(const dictionary controls,
+    const MousePosition&in previousPosition,
+    const MousePosition&in currentPosition) {
+	HandleCommonGameInput(controls, previousPosition, currentPosition);
 
 	// If the currently selected tile is hovering over a target, find the base
 	// damage the selected weapon deals to the target and update the damage

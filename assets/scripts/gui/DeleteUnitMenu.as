@@ -19,10 +19,14 @@ void DeleteUnitMenuClose() {
 
 /**
  * If the user selects one of their own units, it will be deleted.
- * @param controls The map of controls given by the engine.
+ * @param controls         The control map given by the engine.
+ * @param previousPosition The previous mouse position.
+ * @param currentPosition  The current mouse position.
  */
-void DeleteUnitMenuHandleInput(const dictionary controls) {
-	HandleCommonGameInput(controls);
+void DeleteUnitMenuHandleInput(const dictionary controls,
+    const MousePosition&in previousPosition,
+    const MousePosition&in currentPosition) {
+	HandleCommonGameInput(controls, previousPosition, currentPosition);
 	auto unitID = game.map.getUnitOnTile(game.map.getSelectedTile());
 	if (bool(controls["select"]) && unitID > 0 &&
 		game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy()) {

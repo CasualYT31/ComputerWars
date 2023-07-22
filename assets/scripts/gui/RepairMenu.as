@@ -42,10 +42,14 @@ void RepairMenuClose() {
 
 /**
  * Allows the user to cancel the repair, or select a unit to repair.
- * @param controls The control map given by the engine.
+ * @param controls         The control map given by the engine.
+ * @param previousPosition The previous mouse position.
+ * @param currentPosition  The current mouse position.
  */
-void RepairMenuHandleInput(const dictionary controls) {
-	HandleCommonGameInput(controls);
+void RepairMenuHandleInput(const dictionary controls,
+    const MousePosition&in previousPosition,
+    const MousePosition&in currentPosition) {
+	HandleCommonGameInput(controls, previousPosition, currentPosition);
 	if (bool(controls["back"])) {
 		game.map.popSelectedUnit();
 		// Force the selection to go back to the originally selected unit (as the

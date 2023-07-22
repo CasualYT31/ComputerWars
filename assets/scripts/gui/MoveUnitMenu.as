@@ -6,10 +6,14 @@ void MoveUnitMenuSetUp() {}
 /**
  * Allows the user to move their selection whilst moving a unit.
  * Also allows the user to cancel moving a unit, or allows them to preview a move.
- * @param controls The control map given by the engine.
+ * @param controls         The control map given by the engine.
+ * @param previousPosition The previous mouse position.
+ * @param currentPosition  The current mouse position.
  */
-void MoveUnitMenuHandleInput(const dictionary controls) {
-	HandleCommonGameInput(controls);
+void MoveUnitMenuHandleInput(const dictionary controls,
+    const MousePosition&in previousPosition,
+    const MousePosition&in currentPosition) {
+	HandleCommonGameInput(controls, previousPosition, currentPosition);
 	if (bool(controls["back"])) {
 		game.selectUnit(0);
 		setGUI("Map");
