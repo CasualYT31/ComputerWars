@@ -85,7 +85,7 @@ namespace sfx {
 		 *                   function will be called, if it exists.
 		 * @param  callOpen  If @c TRUE, the new menu's @c Open() script function
 		 *                   will be called, if it exists.
-		 * @safety Basic guarantee.
+		 * @safety No guarantee.
 		 */
 		void setGUI(const std::string& newPanel, const bool callClose = true,
 			const bool callOpen = true);

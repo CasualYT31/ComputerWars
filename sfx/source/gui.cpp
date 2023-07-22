@@ -713,6 +713,15 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 				_scripts->callFunction(openFuncName);
 			}
 		}
+		// If there is no widget currently selected, automatically select the first
+		// widget.
+		// Do this after invoking the Open function to allow that function to set
+		// the first selected widget, if said widget is being added by the Open
+		// function and is not available beforehand.
+		if (_findCurrentlySelectedWidget().first.empty()) {
+			_makeNewDirectionalSelection(
+				_selectThisWidgetFirst[_currentGUI], _currentGUI);
+		}
 	} catch (tgui::Exception& e) {
 		_logger.error("{}", e.what());
 		if (_gui.get(old)) _gui.get(old)->setVisible(true);
