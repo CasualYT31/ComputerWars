@@ -121,6 +121,17 @@ CScriptAny* sfx::gui::CScriptAnyWrapper::operator->() const noexcept {
 	return _any;
 }
 
+//////////////////////
+// ORIGINAL_CAPTION //
+//////////////////////
+
+sfx::gui::original_caption::original_caption(const std::string& text,
+	CScriptArray* vars) : caption(text) {
+	if (!vars) return;
+	for (asUINT i = 0; i < vars->GetSize(); ++i)
+		variables.emplace_back((CScriptAny*)vars->At(i));
+}
+
 /////////
 // GUI //
 /////////
@@ -1330,81 +1341,77 @@ void sfx::gui::_makeNewDirectionalSelection(const std::string& newsel,
 void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 	std::string widgetName = widget->getWidgetName().toStdString();
 	String type = widget->getWidgetType();
-	if (!_originalStrings[widgetName].empty()) {
-		if (type == "Button") {
+	if (_originalCaptions.find(widgetName) != _originalCaptions.end()) {
+		if (type == "Button") { // SingleCaption
 			auto w = _findWidget<Button>(widgetName);
-			w->setText(_getTranslatedText(widgetName, 0));
-		} else if (type == "BitmapButton") {
+			w->setText(_getTranslatedText(widgetName));
+		} else if (type == "BitmapButton") { // SingleCaption
 			auto w = _findWidget<BitmapButton>(widgetName);
-			w->setText(_getTranslatedText(widgetName, 0));
-		} else if (type == "CheckBox") {
+			w->setText(_getTranslatedText(widgetName));
+		} else if (type == "CheckBox") { // SingleCaption
 			auto w = _findWidget<CheckBox>(widgetName);
-			w->setText(_getTranslatedText(widgetName, 0));
-		} else if (type == "ChildWindow") {
+			w->setText(_getTranslatedText(widgetName));
+		} else if (type == "ChildWindow") { // SingleCaption
 			auto w = _findWidget<ChildWindow>(widgetName);
-			w->setTitle(_getTranslatedText(widgetName, 0));
-		} else if (type == "ColorPicker") {
+			w->setTitle(_getTranslatedText(widgetName));
+		} else if (type == "ColorPicker") { // SingleCaption
 			auto w = _findWidget<ColorPicker>(widgetName);
-			w->setTitle(_getTranslatedText(widgetName, 0));
-		} else if (type == "ComboBox") {
+			w->setTitle(_getTranslatedText(widgetName));
+		} else if (type == "ComboBox") { // ListOfCaptions
 			auto w = _findWidget<ComboBox>(widgetName);
-			for (std::size_t i = 0; i < w->getItemCount(); i++) {
+			for (std::size_t i = 0; i < w->getItemCount(); ++i)
 				w->changeItemByIndex(i, _getTranslatedText(widgetName, i));
-			}
-		} else if (type == "EditBox") {
+		} else if (type == "EditBox") { // SingleCaption
 			auto w = _findWidget<EditBox>(widgetName);
-			w->setDefaultText(_getTranslatedText(widgetName, 0));
-		} else if (type == "FileDialog") {
+			w->setDefaultText(_getTranslatedText(widgetName));
+		} else if (type == "FileDialog") { // SingleCaption
 			auto w = _findWidget<FileDialog>(widgetName);
-			w->setTitle(_getTranslatedText(widgetName, 0));
-		} else if (type == "Label") {
+			w->setTitle(_getTranslatedText(widgetName));
+		} else if (type == "Label") { // SingleCaption
 			auto w = _findWidget<Label>(widgetName);
-			w->setText(_getTranslatedText(widgetName, 0));
-		} else if (type == "ListBox") {
+			w->setText(_getTranslatedText(widgetName));
+		} else if (type == "ListBox") { // ListOfCaptions
 			auto w = _findWidget<ListBox>(widgetName);
-			for (std::size_t i = 0; i < w->getItemCount(); i++) {
+			for (std::size_t i = 0; i < w->getItemCount(); ++i)
 				w->changeItemByIndex(i, _getTranslatedText(widgetName, i));
-			}
-		} else if (type == "ListView") {
+		} else if (type == "ListView") { // ListOfCaptions
 			auto w = _findWidget<ListView>(widgetName);
 			std::size_t colCount = w->getColumnCount();
-			for (std::size_t i = 0; i < colCount; i++) {
+			for (std::size_t i = 0; i < colCount; ++i) {
 				w->setColumnText(i, _getTranslatedText(widgetName, i));
-				for (std::size_t j = 0; j <= w->getItemCount(); j++) {
+				for (std::size_t j = 0; j <= w->getItemCount(); ++j) {
 					w->changeSubItem(i, j,
 						_getTranslatedText(widgetName, colCount * (i + 1) + j)
 					);
 				}
 			}
-		} else if (type == "MenuBar") {
+		} else if (type == "MenuBar") { // MapOfCaptions
 			auto w = _findWidget<MenuBar>(widgetName);
 			// It's possible, but we would somehow need to store the menu hierarchy
 			// separately to keep this as simple as possible. Potentially multiple
 			// menu hierarchies would have to be stored, though...
-		} else if (type == "MessageBox") {
+		} else if (type == "MessageBox") { // MapOfCaptions
 			auto w = _findWidget<tgui::MessageBox>(widgetName);
-			w->setTitle(_getTranslatedText(widgetName, 0));
-			w->setText(_getTranslatedText(widgetName, 1));
+			w->setTitle(_getTranslatedText(widgetName, "title"));
+			w->setText(_getTranslatedText(widgetName, "text"));
 			// Don't know how I'm going to translate buttons.
-		} else if (type == "ProgressBar") {
+		} else if (type == "ProgressBar") { // SingleCaption
 			auto w = _findWidget<ProgressBar>(widgetName);
-			w->setText(_getTranslatedText(widgetName, 0));
-		} else if (type == "RadioButton") {
+			w->setText(_getTranslatedText(widgetName));
+		} else if (type == "RadioButton") { // SingleCaption
 			auto w = _findWidget<RadioButton>(widgetName);
-			w->setText(_getTranslatedText(widgetName, 0));
-		} else if (type == "TabContainer") {
+			w->setText(_getTranslatedText(widgetName));
+		} else if (type == "TabContainer") { // ListOfCaptions
 			auto w = _findWidget<TabContainer>(widgetName);
-			for (std::size_t i = 0; i < w->getTabs()->getTabsCount(); i++) {
+			for (std::size_t i = 0; i < w->getTabs()->getTabsCount(); ++i)
 				w->changeTabText(i, _getTranslatedText(widgetName, i));
-			}
-		} else if (type == "Tabs") {
+		} else if (type == "Tabs") { // ListOfCaptions
 			auto w = _findWidget<Tabs>(widgetName);
-			for (std::size_t i = 0; i < w->getTabsCount(); i++) {
+			for (std::size_t i = 0; i < w->getTabsCount(); ++i)
 				w->changeText(i, _getTranslatedText(widgetName, i));
-			}
-		} else if (type == "ToggleButton") {
+		} else if (type == "ToggleButton") { // SingleCaption
 			auto w = _findWidget<ToggleButton>(widgetName);
-			w->setText(_getTranslatedText(widgetName, 0));
+			w->setText(_getTranslatedText(widgetName));
 		}
 	}
 	if (_isContainerWidget(type)) {
@@ -1412,38 +1419,6 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 		auto& widgetList = w->getWidgets();
 		for (auto& w : widgetList) _translateWidget(w);
 	}
-}
-
-std::string sfx::gui::_getTranslatedText(const std::string& name,
-	const std::size_t index) const {
-	std::string ret = (*_langdict)(_originalStrings.at(name).at(index));
-	// If there are any variables, insert them manually.
-	if (_originalStringsVariables.find(name) != _originalStringsVariables.end()) {
-		// Code will crash if you don't set up _originalStrings and
-		// _originalStringsVariables entries together!
-		for (auto& var : _originalStringsVariables.at(name).at(index)) {
-			int type = var->GetTypeId();
-			if (type == _scripts->getTypeID("int64")) {
-				asINT64 val = 0;
-				var->Retrieve(val);
-				ret = engine::expand_string::insert(ret, val);
-			} else if (type == _scripts->getTypeID("double")) {
-				double val = 0.0;
-				var->Retrieve(val);
-				ret = engine::expand_string::insert(ret, val);
-			} else if (type == _scripts->getTypeID("string")) {
-				std::string val;
-				var->Retrieve(&val, type);
-				ret = engine::expand_string::insert(ret, val);
-			} else {
-				_logger.warning("Unsupported type \"{}\" given when translating "
-					"widget \"{}\"'s #{} string: inserting blank string instead.",
-					_scripts->getTypeName(type), name, index);
-				ret = engine::expand_string::insert(ret, "");
-			}
-		}
-	}
-	return ret;
 }
 
 void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -1502,8 +1477,7 @@ bool sfx::gui::_load(engine::json& j) {
 		_widgetSprites.clear();
 		_guiSpriteKeys.clear();
 		_dontOverridePictureSizeWithSpriteSize.clear();
-		_originalStrings.clear();
-		_originalStringsVariables.clear();
+		_originalCaptions.clear();
 		_customSignalHandlers.clear();
 		_upControl.clear();
 		_downControl.clear();
@@ -1722,8 +1696,7 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 		_widgetSprites.erase(name);
 		_guiSpriteKeys.erase(name);
 		_dontOverridePictureSizeWithSpriteSize.erase(name);
-		_originalStrings.erase(name);
-		_originalStringsVariables.erase(name);
+		_originalCaptions.erase(name);
 		_customSignalHandlers.erase(name);
 		_directionalFlow.erase(name);
 		// Also delete references to the removed sprite from other widgets.
@@ -1754,24 +1727,86 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	}
 }
 
-void sfx::gui::_setTranslatedString(const std::string& text,
-	const std::string& fullname, const std::size_t index,
-	CScriptArray* variables) {
-	// Resize both containers to fit.
-	if (_originalStrings[fullname].size() <= index) {
-		_originalStrings[fullname].resize(index + 1);
-		_originalStringsVariables[fullname].resize(index + 1);
-	}
-	// Update _originalStrings.
-	_originalStrings[fullname][index] = text;
-	// Update _originalStringsVariables.
-	_originalStringsVariables[fullname][index].clear();
-	if (variables) {
-		for (asUINT i = 0; i < variables->GetSize(); ++i) {
-			_originalStringsVariables[fullname][index].emplace_back(
-				(CScriptAny*)variables->At(i));
+void sfx::gui::_setTranslatedString(const std::string& fullname,
+	const std::string& text, CScriptArray* variables) {
+	_originalCaptions[fullname] = sfx::gui::SingleCaption(text, variables);
+}
+
+void sfx::gui::_setTranslatedString(const std::string& fullname,
+	const std::string& text, CScriptArray* variables, const std::size_t index) {
+	if (!std::holds_alternative<sfx::gui::ListOfCaptions>(
+		_originalCaptions[fullname]))
+		_originalCaptions[fullname] = sfx::gui::ListOfCaptions();
+	auto& list = std::get<sfx::gui::ListOfCaptions>(_originalCaptions[fullname]);
+	if (list.size() <= index) list.resize(index + 1);
+	list[index] = sfx::gui::SingleCaption(text, variables);
+}
+
+void sfx::gui::_setTranslatedString(const std::string& fullname,
+	const std::string& text, CScriptArray* variables, const std::string& name) {
+	if (!std::holds_alternative<sfx::gui::MapOfCaptions>(
+		_originalCaptions[fullname]))
+		_originalCaptions[fullname] = sfx::gui::MapOfCaptions();
+	std::get<sfx::gui::MapOfCaptions>(_originalCaptions[fullname])[name] =
+		sfx::gui::SingleCaption(text, variables);
+}
+
+std::string sfx::gui::_getTranslatedText(const sfx::gui::original_caption& caption,
+	const std::function<void(engine::logger *const, const std::string&)>&
+	warningCallback) const {
+	std::string ret = (*_langdict)(caption.caption);
+	for (auto& var : caption.variables) {
+		int type = var->GetTypeId();
+		if (type == _scripts->getTypeID("int64")) {
+			asINT64 val = 0;
+			var->Retrieve(val);
+			ret = engine::expand_string::insert(ret, val);
+		} else if (type == _scripts->getTypeID("double")) {
+			double val = 0.0;
+			var->Retrieve(val);
+			ret = engine::expand_string::insert(ret, val);
+		} else if (type == _scripts->getTypeID("string")) {
+			std::string val;
+			var->Retrieve(&val, type);
+			ret = engine::expand_string::insert(ret, val);
+		} else {
+			warningCallback(&_logger, _scripts->getTypeName(type));
+			ret = engine::expand_string::insert(ret, "");
 		}
 	}
+	return ret;
+}
+
+std::string sfx::gui::_getTranslatedText(const std::string& fullname) const {
+	return _getTranslatedText(std::get<sfx::gui::SingleCaption>(
+		_originalCaptions.at(fullname)), [&](engine::logger *const logger,
+			const std::string& typeName) {
+				logger->warning("Unsupported type \"{}\" given when translating "
+					"widget \"{}\"'s caption: inserting blank string instead.",
+					typeName, fullname);
+		});
+}
+
+std::string sfx::gui::_getTranslatedText(const std::string& fullname,
+	const std::size_t index) const {
+	return _getTranslatedText(std::get<sfx::gui::ListOfCaptions>(
+		_originalCaptions.at(fullname)).at(index),
+			[&](engine::logger* const logger, const std::string& typeName) {
+				logger->warning("Unsupported type \"{}\" given when translating "
+					"widget \"{}\"'s #{} caption: inserting blank string instead.",
+					typeName, fullname, index);
+		});
+}
+
+std::string sfx::gui::_getTranslatedText(const std::string& fullname,
+	const std::string& name) const {
+	return _getTranslatedText(std::get<sfx::gui::MapOfCaptions>(
+		_originalCaptions.at(fullname)).at(name),
+		[&](engine::logger* const logger, const std::string& typeName) {
+			logger->warning("Unsupported type \"{}\" given when translating "
+				"widget \"{}\"'s \"{}\" caption: inserting blank string instead.",
+				typeName, fullname, name);
+		});
 }
 
 std::string sfx::gui::_extractWidgetName(const std::string& fullname) {
@@ -2273,8 +2308,7 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
 			if (variables) variables->Release();
 			return;
 		}
-		_setTranslatedString(text, fullnameAsString, 0, variables);
-		// Set it by translating it.
+		_setTranslatedString(fullnameAsString, text, variables);
 		_translateWidget(widget);
 	} else {
 		_logger.error("Attempted to set the caption \"{}\" to a widget \"{}\" "
@@ -2683,8 +2717,7 @@ void sfx::gui::_setWidgetDefaultText(const std::string& name,
 			if (variables) variables->Release();
 			return;
 		}
-		_setTranslatedString(text, fullnameAsString, 0, variables);
-		// Set it by translating it.
+		_setTranslatedString(fullnameAsString, text, variables);
 		_translateWidget(widget);
 	} else {
 		_logger.error("Attempted to set the default text \"{}\" to a widget "
@@ -2702,8 +2735,10 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text,
 	if (widget) {
 		// Add the item differently depending on the type the widget is.
 		const std::string type = widget->getWidgetType().toLower().toStdString();
+		std::size_t index = 0;
 		if (type == "listbox") {
-			std::dynamic_pointer_cast<ListBox>(widget)->addItem(text);
+			// Be aware that getMaximumItems() can cause this method to fail.
+			index = std::dynamic_pointer_cast<ListBox>(widget)->addItem(text);
 		} else {
 			_logger.error("Attempted to add an item \"{}\" to widget \"{}\" which "
 				"is of type \"{}\", within menu \"{}\". This operation is not "
@@ -2712,10 +2747,7 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text,
 			if (variables) variables->Release();
 			return;
 		}
-		_setTranslatedString(text, fullnameAsString,
-			_originalStrings[fullnameAsString].size(), variables);
-		// Translate the new item.
-		// We still have to add the new item itself so keep the code above!
+		_setTranslatedString(fullnameAsString, text, variables, index);
 		_translateWidget(widget);
 	} else {
 		_logger.error("Attempted to add a new item \"{}\" to a widget \"{}\" "
@@ -2740,9 +2772,7 @@ void sfx::gui::_clearItems(const std::string& name) {
 				"supported for this type of widget.", name, type, fullname[0]);
 			return;
 		}
-		// Clear this widget's entry in the _originalStrings container.
-		_originalStrings[fullnameAsString].clear();
-		_originalStringsVariables[fullnameAsString].clear();
+		_originalCaptions.erase(fullnameAsString);
 	} else {
 		_logger.error("Attempted to clear all items from a widget \"{}\" within "
 			"menu \"{}\". This widget does not exist.", name, fullname[0]);

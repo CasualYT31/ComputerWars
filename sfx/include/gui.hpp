@@ -376,6 +376,35 @@ namespace sfx {
 		};
 
 		/**
+		 * Stores information on a widget caption.
+		 */
+		struct original_caption {
+			/**
+			 * Default constructor.
+			 */
+			original_caption() = default;
+
+			/**
+			 * Construct a new caption.
+			 * @param text The original caption of the widget before translation.
+			 * @param vars The variables to insert into the caption when
+			 *             translating. If \c nullptr, \c variables will be left
+			 *             empty.
+			 */
+			original_caption(const std::string& text, CScriptArray* vars);
+
+			/**
+			 * The original caption before translation.
+			 */
+			std::string caption;
+
+			/**
+			 * The variables to insert into the caption when translating.
+			 */
+			std::vector<sfx::gui::CScriptAnyWrapper> variables;
+		};
+
+		/**
 		 * Performs animation calculations on a container of widgets.
 		 * @param  target    The target which the GUI will be drawn to later.
 		 * @param  scaling   Scaling factor which will be applied when drawing.
@@ -408,17 +437,6 @@ namespace sfx {
 		 * @safety No guarantee.
 		 */
 		void _translateWidget(tgui::Widget::Ptr widget);
-
-		/**
-		 * Calculates the translated widget text for a given widget.
-		 * @warning Assumes that a language dictionary has been set!
-		 * @param   name  The name of the widget whose text needs to be translated.
-		 * @param   index The text belonging to the widget which needs translating.
-		 * @return  The translated string with any variables inserted.
-		 * @safety  No guarantee.
-		 */
-		std::string _getTranslatedText(const std::string& name,
-			const std::size_t index) const;
 
 		/**
 		 * Draws the current GUI menu.
@@ -512,18 +530,96 @@ namespace sfx {
 
 		/**
 		 * Adds a translatable caption to a widget, or updates an existing one.
-		 * Note that if an out of range index is given, the internal lists will
-		 * grow in order to accomodate for the new entry.
-		 * @param  text      The translation key of the string to use.
+		 * Used for widgets that have only a single caption.
 		 * @param  fullname  The full name of the widget to assign the caption to.
-		 * @param  index     Which caption to set.
+		 * @param  text      The translation key of the string to use.
 		 * @param  variables Optional list of variables to later insert into the
 		 *                   caption when translating.
 		 * @safety No guarantee.
 		 */
-		void _setTranslatedString(const std::string& text,
-			const std::string& fullname, const std::size_t index,
-			CScriptArray* variables);
+		void _setTranslatedString(const std::string& fullname,
+			const std::string& text, CScriptArray* variables);
+
+		/**
+		 * Adds a translatable caption to a widget, or updates an existing one.
+		 * Used for widgets that have a list of captions that are most easily
+		 * identified via a numeric index, e.g. ListBoxes.\n
+		 * Note that if an out of range index is given, the internal lists will
+		 * grow in order to accomodate for the new entry.
+		 * @param  fullname  The full name of the widget to assign the caption to.
+		 * @param  text      The translation key of the string to use.
+		 * @param  variables Optional list of variables to later insert into the
+		 *                   caption when translating.
+		 * @param  index     Which caption to set.
+		 * @safety No guarantee.
+		 */
+		void _setTranslatedString(const std::string& fullname,
+			const std::string& text, CScriptArray* variables,
+			const std::size_t index);
+
+		/**
+		 * Adds a translatable caption to a widget, or updates an existing one.
+		 * Used for widgets that have a list of captions that are most easily
+		 * identified via a string, e.g. MenuBars.
+		 * @param  fullname  The full name of the widget to assign the caption to.
+		 * @param  text      The translation key of the string to use.
+		 * @param  variables Optional list of variables to later insert into the
+		 *                   caption when translating.
+		 * @param  name      Which caption to set.
+		 * @safety No guarantee.
+		 */
+		void _setTranslatedString(const std::string& fullname,
+			const std::string& text, CScriptArray* variables,
+			const std::string& name);
+
+		/**
+		 * Shared \c _getTranslatedText() implementation.
+		 * @warning Assumes that a language dictionary has been set!
+		 * @param   caption         Caption object to translate.
+		 * @param   warningCallback If a variable with an unsupported type is
+		 *                          identified, a blank string will be inserted
+		 *                          instead, and a warning should be logged in the
+		 *                          given function. The string parameter is the
+		 *                          variable's type name.
+		 * @safety  No guarantee.
+		 */
+		std::string _getTranslatedText(const sfx::gui::original_caption& caption,
+			const std::function<void(engine::logger *const, const std::string&)>&
+			warningCallback) const;
+
+		/**
+		 * Computes the translated caption for a given widget.
+		 * Used for widgets with a single caption.
+		 * @param  fullname The name of the widget whose caption needs to be
+		 *                  translated.
+		 * @return The translated string with any configured variables inserted.
+		 * @safety No guarantee.
+		 */
+		std::string _getTranslatedText(const std::string& fullname) const;
+
+		/**
+		 * Computes the translated widget text for a given widget.
+		 * Used for widgets with a list of captions, such as a ListBox.
+		 * @param  fullname The name of the widget whose caption needs to be
+		 *                  translated.
+		 * @param  index    The specific caption to translate.
+		 * @return The translated string with any configured variables inserted.
+		 * @safety No guarantee.
+		 */
+		std::string _getTranslatedText(const std::string& fullname,
+			const std::size_t index) const;
+
+		/**
+		 * Computes the translated widget text for a given widget.
+		 * Used for widgets with a map of captions, such as a MenuBar.
+		 * @param  fullname The name of the widget whose caption needs to be
+		 *                  translated.
+		 * @param  name     The specific caption to translate.
+		 * @return The translated string with any configured variables inserted.
+		 * @safety No guarantee.
+		 */
+		std::string _getTranslatedText(const std::string& fullname,
+			const std::string& name) const;
 
 		/**
 		 * Extracts a widget's short name from its full name.
@@ -1249,16 +1345,25 @@ namespace sfx {
 		std::unordered_set<std::string> _dontOverridePictureSizeWithSpriteSize;
 
 		/**
-		 * Stores the original captions assigned to each widget.
+		 * Used for widgets with a single caption.
 		 */
-		std::unordered_map<std::string, std::vector<std::string>> _originalStrings;
+		typedef original_caption SingleCaption;
 
 		/**
-		 * Stores variables that are to be provided to the translation method.
+		 * Used for widgets with a list of captions indexed using a number.
 		 */
-		std::unordered_map<std::string,
-			std::vector<std::vector<sfx::gui::CScriptAnyWrapper>>>
-			_originalStringsVariables;
+		typedef std::vector<original_caption> ListOfCaptions;
+
+		/**
+		 * Used for widgets with a list of captions indexed using a string.
+		 */
+		typedef std::unordered_map<std::string, original_caption> MapOfCaptions;
+
+		/**
+		 * Stores the original captions assigned to each widget.
+		 */
+		std::unordered_map<std::string, std::variant<SingleCaption, ListOfCaptions,
+			MapOfCaptions>> _originalCaptions;
 
 		/**
 		 * Stores the custom signal handler names associated with some widgets.
