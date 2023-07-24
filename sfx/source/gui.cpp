@@ -1070,8 +1070,11 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 	tgui::Container::Ptr container) {
 	static auto allocImage = [&](const tgui::String& type, Widget::Ptr widget,
-		const std::string& widgetName, const unsigned int w, const unsigned int h)
-		-> void {
+		const std::string& widgetName, unsigned int w, unsigned int h) -> void {
+		// We cannot allow an empty image to be allocated, so always ensure the
+		// image is at least 1x1 pixels.
+		if (!w) w = 1; if (!h) h = 1;
+
 		// Create an empty texture
 		sf::Uint8* pixels = (sf::Uint8*)calloc(w * h, 4);
 		sf::Texture blank;
@@ -1431,7 +1434,7 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	_gui.draw();
 	// Draw each widget's sprite if the widget isn't hidden.
 	sf::View oldView = target.getView();
-	target.setView(_gui.calculateGUIView());
+	target.setView(sf::View(_gui.getView().getRect().operator sf::Rect<float>()));
 	for (auto& sprite : _widgetSprites) {
 		Widget::Ptr widget = _findWidget<Widget>(sprite.first);
 		static const std::function<bool(const Widget* const)> isWidgetVisible =
@@ -1596,11 +1599,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		widget->getSignal("FileSelected").
 			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "knob" || type == "scrollbar" || type == "slider" ||
-		type == "spinbutton") { // || type == "spincontrol") {
-		// Okay... So... When I try to set ValueChanged on a SpinControl here, the
-		// program crashes without reporting any errors whatsoever, not even in
-		// debug mode... But the TGUI documentation says that it should have this
-		// signal... TODO-3.
+		type == "spinbutton" || type == "spincontrol") {
 		widget->getSignal("ValueChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "label" || type == "picture") {

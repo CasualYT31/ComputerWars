@@ -27,12 +27,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "tgui/tgui.hpp"
 #include "texture.hpp"
 #include "script.hpp"
 #include "language.hpp"
 #include "userinput.hpp"
 #include "fonts.hpp"
+#include "tgui/tgui.hpp"
+#include "tgui/Backend/SFML-Graphics.hpp"
 
 namespace sfx {
 	/**
