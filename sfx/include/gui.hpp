@@ -745,12 +745,12 @@ namespace sfx {
 		 * If the @c type parameter was invalid, or if a widget with the specified
 		 * name already existed at the time of the call, then an error will be
 		 * logged and no widget will be created.
-		 * @param widgetType    The type of widget to create.
+		 * @param newWidgetType The type of widget to create.
 		 * @param name          The name of the new widget.
 		 * @param signalHandler The name of the custom signal handler to assign to
 		 *                      this widget, if any.
 		 */
-		void _addWidget(const std::string& widgetType, const std::string& name,
+		void _addWidget(const std::string& newWidgetType, const std::string& name,
 			const std::string& signalHandler = "");
 
 		/**
@@ -762,14 +762,14 @@ namespace sfx {
 		 *     <li>If there was already a widget within the specified cell.
 		 *     </li></ul>
 		 * If an error is logged, no widget will be created or added.
-		 * @param widgetType    The type of widget to create.
+		 * @param newWidgetType The type of widget to create.
 		 * @param name          The name of the new widget. Must include the grid.
 		 * @param row           The row to add the widget to.
 		 * @param col           The column to add the widget to.
 		 * @param signalHandler The name of the custom signal handler to assign to
 		 *                      this widget, if any.
 		 */
-		void _addWidgetToGrid(const std::string& widgetType,
+		void _addWidgetToGrid(const std::string& newWidgetType,
 			const std::string& name, const std::size_t row, const std::size_t col,
 			const std::string& signalHandler = "");
 

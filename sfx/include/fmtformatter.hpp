@@ -71,6 +71,23 @@ template <> struct fmt::formatter<sf::Color> {
 };
 
 /**
+ * Fmt formatter for the \c tgui::String type.
+ */
+template <> struct fmt::formatter<tgui::String> {
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		auto it = ctx.begin(), end = ctx.end();
+		if (it != end && *it != '}') throw format_error("invalid format");
+		return it;
+	}
+
+	template <typename FormatContext>
+	auto format(const tgui::String& s, FormatContext& ctx) const ->
+		decltype(ctx.out()) {
+		return fmt::format_to(ctx.out(), "{}", s.toStdString());
+	}
+};
+
+/**
  * Fmt formatter for the \c tgui::Label::HorizontalAlignment type.
  */
 template <> struct fmt::formatter<tgui::Label::HorizontalAlignment> {

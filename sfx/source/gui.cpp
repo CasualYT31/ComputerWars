@@ -1869,6 +1869,126 @@ std::pair<std::string, tgui::Widget::Ptr>
 // SCRIPT INTERFACE //
 //////////////////////
 
+/**
+ * Used internally in the script interface when something goes wrong.
+ */
+class GuiScriptError : public std::exception {
+public:
+	GuiScriptError(const char* msg) : std::exception(msg) {}
+	GuiScriptError(const std::string& msg) : std::exception(msg.c_str()) {}
+	GuiScriptError(const tgui::String& msg) :
+		std::exception(msg.toStdString().c_str()) {}
+};
+
+#undef ERROR
+/**
+ * Abort the function call.
+ * @param m Message describing how the function call failed.
+ */
+#define ERROR(m) throw GuiScriptError(m);
+
+/**
+ * Abort the function call due to unsupported widget type.
+ */
+#define UNSUPPORTED_WIDGET_TYPE() ERROR("This operation is not supported for " \
+	"this type of widget.")
+
+/**
+ * Initialise the function call.
+ */
+#define START() try {
+
+/**
+ * Initialise the function call with widget information.
+ * This macro defines the following variables:
+ * <ul><li><tt>std::vector<std::string> fullname;</tt> Stores the full name of the
+ *     widget, with each element storing the name of each widget in the hierarchy.
+ *     This variable is accessible in \c END().</li>
+ *     <li><tt>std::string fullnameAsString;</tt> Stores the full name of the
+ *     widget as a single string. This variable is accessible in \c END().</tt>
+ *     <li><tt>tgui::string widgetType;</tt> Holds the type of the widget.
+ *     "Unknown" if the widget does not exist.</li>
+ *     <li><tt>Widget::Ptr widget;</tt> Points to the widget. If it was not found,
+ *     points to \c nullptr.</li>
+ *     <li><tt>std::string containerName;</tt> The full name of the container which
+ *     contains (or which would contain) the given widget. This is deduced using
+ *     \c fullnameAsString.</li>
+ *     <li><tt>Container::Ptr container;</tt> Will point to the container
+ *     identified by \c containerName. If it does not exist, an error will be
+ *     invoked.</li></ul>
+ * @param n          The name of the widget to search for.
+ * @param must_exist \c TRUE if the given widget must exist, \c FALSE if it must
+ *                   not exist. If the test does not pass, an error will be
+ *                   invoked.
+ */
+#define START_WITH_WIDGET_BASE(n, must_exist) std::vector<std::string> fullname; \
+	std::string fullnameAsString; \
+	tgui::String widgetType("Unknown"); \
+	try { \
+		Widget::Ptr widget = \
+			_findWidget<Widget>(n, &fullname, &fullnameAsString); \
+		if (widget.operator bool() != must_exist) { \
+			if (must_exist) { \
+				ERROR("This widget does not exist!"); \
+			} else { \
+				ERROR("This widget already exists!"); \
+			} \
+		} \
+		if (widget) widgetType = widget->getWidgetType(); \
+		std::string containerName = \
+				fullnameAsString.substr(0, fullnameAsString.rfind('.')); \
+		Container::Ptr container = _findWidget<Container>(containerName); \
+		if (!container) { \
+			ERROR(std::string("The container \"").append(containerName). \
+				append("\" does not exist!")); \
+		}
+
+/// <tt>START_WITH_WIDGET_BASE(n, true)</tt>.
+#define START_WITH_WIDGET(n) START_WITH_WIDGET_BASE(n, true)
+
+/// <tt>START_WITH_WIDGET_BASE(n, false)</tt>.
+#define START_WITH_NONEXISTENT_WIDGET(n) START_WITH_WIDGET_BASE(n, false)
+
+/**
+ * Finish initialising the function call.
+ * @param m   This message is always written when an \c ERROR() is reported.
+ * @param ... The variables to insert into the message.
+ */
+#define END(m, ...) } catch (const GuiScriptError& e) { \
+		_logger.error(std::string(m).append(" ").append(e.what()), __VA_ARGS__); \
+	}
+
+/**
+ * Execute code on \c widget if it is of a given type.
+ * The code to execute has access to a variable, \c castWidget, which is the
+ * result of dynamically casting the \c widget pointer to the given type of widget.
+ * @param type The widget type to test for, e.g. Container or ListBox.
+ * @param code The code to execute. If \c widget is not of the given type, this
+ *             code is not executed.
+ */
+#define IF_WIDGET_IS(type, code) if (widgetType == #type) { \
+		auto castWidget = std::dynamic_pointer_cast<type>(widget); \
+		code \
+	}
+
+/**
+ * Execute code on \c widget if it is of a given type.
+ * @sa \c IF_WIDGET_IS()
+ */
+#define ELSE_IF_WIDGET_IS(type, code) else if (widgetType == #type) { \
+		auto castWidget = std::dynamic_pointer_cast<type>(widget); \
+		code \
+	}
+
+/**
+ * Used at the end of a chain of \c IF_WIDGET_IS() and \c ELSE_IF_WIDGET_IS()
+ * macros, to invoke \C UNSUPPORTED_WIDGET_TYPE() if \c widget does not match any
+ * of the given types.
+ * @sa \c IF_WIDGET_IS()
+ * @sa \c ELSE_IF_WIDGET_IS()
+ */
+#define ELSE_UNSUPPORTED() else { UNSUPPORTED_WIDGET_TYPE() }
+
 void sfx::gui::_setGUI(const std::string& name) {
 	setGUI(name, true, true);
 }
@@ -1880,14 +2000,15 @@ void sfx::gui::_noBackground(std::string menu) {
 
 void sfx::gui::_spriteBackground(std::string menu, const std::string& sheet,
 	const std::string& sprite) {
+	START();
 	if (menu == "") menu = getGUI();
 	try {
 		_guiBackground[menu].set(_sheet.at(sheet), sprite);
 	} catch (const std::out_of_range&) {
-		_logger.error("Attempted to set sprite \"{}\" from sheet \"{}\" to the "
-			"background of menu \"{}\". The sheet does not exist!", sprite, sheet,
-			menu);
+		ERROR("This sheet does not exist!");
 	}
+	END("Attempted to set sprite \"{}\" from sheet \"{}\" to the background of "
+		"menu \"{}\".", sprite, sheet, menu);
 }
 
 void sfx::gui::_colourBackground(std::string menu, const unsigned int r,
@@ -1909,248 +2030,147 @@ bool sfx::gui::_menuExists(const std::string& menu) {
 	return false;
 }
 
-void sfx::gui::_addWidget(const std::string& widgetType, const std::string& name,
-	const std::string& signalHandler) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	if (_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
-		_logger.error("Attempted to create a new \"{}\" widget with name \"{}\": "
-			"a widget with that name already exists!", widgetType, name);
+void sfx::gui::_addWidget(const std::string& newWidgetType,
+	const std::string& name, const std::string& signalHandler) {
+	START_WITH_NONEXISTENT_WIDGET(name)
+	if (widget = _createWidget(newWidgetType, name, fullname[0])) {
+		container->add(widget, fullnameAsString);
+		_connectSignals(widget, signalHandler);
 	} else {
-		tgui::Widget::Ptr widget = _createWidget(widgetType, name, fullname[0]);
-		if (widget) {
-			const auto containerName =
-				fullnameAsString.substr(0, fullnameAsString.rfind('.'));
-			auto container = _findWidget<Container>(containerName);
-			if (!container) {
-				_logger.error("Attempted to add a \"{}\" widget called \"{}\" to "
-					"the container \"{}\". This container does not exist.",
-					widgetType, name, containerName);
-				return;
-			}
-			container->add(widget, fullnameAsString);
-			_connectSignals(widget, signalHandler);
-		}
+		ERROR("Could not create the new widget.")
 	}
+	END("Attempted to create a new \"{}\" widget with name \"{}\".", newWidgetType,
+		name)
 }
 
-void sfx::gui::_addWidgetToGrid(const std::string& widgetType,
+void sfx::gui::_addWidgetToGrid(const std::string& newWidgetType,
 	const std::string& name, const std::size_t row, const std::size_t col,
 	const std::string& signalHandler) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	if (_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
-		_logger.error("Attempted to create a new \"{}\" widget with name \"{}\": "
-			"a widget with that name already exists!", widgetType, name);
-	} else {
-		tgui::Widget::Ptr widget = _createWidget(widgetType, name, fullname[0]);
-		if (widget) {
-			const auto gridName =
-				fullnameAsString.substr(0, fullnameAsString.rfind('.'));
-			auto grid = _findWidget<Grid>(gridName);
-			if (!grid) {
-				_logger.error("Attempted to add a \"{}\" widget called \"{}\" to "
-					"the grid \"{}\". This grid does not exist.",
-					widgetType, name, gridName);
-			} else if (grid->getWidgetType() != "Grid") {
-				_logger.error("Attempted to add a \"{}\" widget called \"{}\" to "
-					"the grid \"{}\". This widget is not a grid.",
-					widgetType, name, gridName);
-			} else {
-				widget->setWidgetName(fullnameAsString);
-				_connectSignals(widget, signalHandler);
-				grid->addWidget(widget, row, col);
-			}
+	START_WITH_NONEXISTENT_WIDGET(name)
+	if (widget = _createWidget(newWidgetType, name, fullname[0])) {
+		if (container->getWidgetType() != "Grid") {
+			ERROR(std::string("The widget \"").append(containerName).append("\" "
+				"is of type \"").append(container->getWidgetType().toStdString()).
+				append("\", not Grid."))
+		} else {
+			widget->setWidgetName(fullnameAsString);
+			_connectSignals(widget, signalHandler);
+			std::dynamic_pointer_cast<Grid>(container)->addWidget(widget, row,
+				col);
 		}
 	}
+	END("Attempted to create a new \"{}\" widget with name \"{}\" and add it to a "
+		"grid at row {}, column {}.", newWidgetType, name, row, col)
 }
 
 void sfx::gui::_removeWidget(const std::string& name) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		if (fullname.size() < 2) {
-			_logger.error("Attempted to remove the \"{}\" menu using "
-				"removeWidget(), which is not supported.", fullname[0]);
-		} else {
-			auto container = _findWidget<Container>(
-				fullnameAsString.substr(0, fullnameAsString.rfind('.')));
-			_removeWidgets(widget, container, true);
-		}
-	} else {
-		_logger.error("Attempted to remove a widget \"{}\" within menu \"{}\". "
-			"This widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	if (fullname.size() < 2) ERROR("Removing entire menus is not supported.")
+	_removeWidgets(widget, container, true);
+	END("Attempted to remove the widget \"{}\" within menu \"{}\".", name,
+		fullname[0])
 }
 
 void sfx::gui::_removeWidgetsFromContainer(const std::string& name) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		if (fullname.size() < 2) {
-			_removeWidgets(widget, nullptr, false);
-		} else {
-			const std::string type =
-				widget->getWidgetType().toLower().toStdString();
-			if (_isContainerWidget(type)) {
-				auto container = _findWidget<Container>(
-					fullnameAsString.substr(0, fullnameAsString.rfind('.')));
-				_removeWidgets(widget, container, false);
-			} else {
-				_logger.error("Attempted to remove the widgets from a widget "
-					"\"{}\" which is of type \"{}\", within menu \"{}\". This "
-					"operation is not supported for this type of widget.", name,
-					type, fullname[0]);
-			}
-		}
+	START_WITH_WIDGET(name)
+	if (fullname.size() < 2) {
+		_removeWidgets(widget, nullptr, false);
 	} else {
-		_logger.error("Attempted to remove the widgets from a widget \"{}\" "
-			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
+		if (_isContainerWidget(widgetType.toLower().toStdString()))
+			_removeWidgets(widget, container, false);
+		else
+			UNSUPPORTED_WIDGET_TYPE()
 	}
-
+	END("Attempted to remove the widgets from a widget \"{}\", of type \"{}\", "
+		"within menu \"{}\".", name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetFocus(const std::string& name) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		widget->setFocused(true);
-	} else {
-		_logger.error("Attempted to set the focus to a widget \"{}\" within menu "
-			"\"{}\". This widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	widget->setFocused(true);
+	END("Attempted to set the focus to a widget \"{}\" within menu \"{}\".", name,
+		fullname[0])
 }
 
 void sfx::gui::_setWidgetFont(const std::string& name,
 	const std::string& fontName) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		if (_fonts) {
-			auto fontPath = _fonts->getFontPath(fontName);
-			// Invalid font name will be logged by fonts class.
-			if (!fontPath.empty())
-				widget->getRenderer()->setFont(tgui::Font(fontPath));
-		} else {
-			_logger.error("Attempted to set the font \"{}\" to a widget \"{}\" "
-				"within menu \"{}\". No fonts object has been given to this gui "
-				"object.", fontName, name, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the font \"{}\" to a widget \"{}\" within "
-			"menu \"{}\". This widget does not exist.", fontName, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	if (!_fonts) ERROR("No fonts object has been given to this gui object.")
+	auto fontPath = _fonts->getFontPath(fontName);
+	// Invalid font name will be logged by fonts class.
+	if (!fontPath.empty()) widget->getRenderer()->setFont(tgui::Font(fontPath));
+	END("Attempted to set the font \"{}\" to a widget \"{}\" within menu \"{}\".",
+		fontName, name, fullname[0])
 }
 
 void sfx::gui::_setGlobalFont(const std::string& fontName) {
-	if (_fonts) {
-		auto fontPath = _fonts->getFontPath(fontName);
-		// Invalid font name will be logged by fonts class.
-		if (!fontPath.empty()) _gui.setFont(tgui::Font(fontPath));
-	} else {
-		_logger.error("Attempted to update the global font without this gui "
-			"object having a fonts object!");
-	}
+	START()
+	if (!_fonts) ERROR("No fonts object has been given to this gui object.")
+	auto fontPath = _fonts->getFontPath(fontName);
+	// Invalid font name will be logged by fonts class.
+	if (!fontPath.empty()) _gui.setFont(tgui::Font(fontPath));
+	END("Attempted to set the font \"{}\" as the global font.", fontName)
 }
 
 void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,
 	const std::string& y) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		widget->setPosition(x.c_str(), y.c_str());
-	} else {
-		_logger.error("Attempted to set the position (\"{}\",\"{}\") to a widget "
-			"\"{}\" within menu \"{}\". This widget does not exist.", x, y, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	widget->setPosition(x.c_str(), y.c_str());
+	END("Attempted to set the position (\"{}\",\"{}\") to a widget \"{}\" within "
+		"menu \"{}\".", x, y, name, fullname[0])
 }
 
 void sfx::gui::_setWidgetOrigin(const std::string& name, const float x,
 	const float y) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		widget->setOrigin(x, y);
-	} else {
-		_logger.error("Attempted to set the origin (\"{}\",\"{}\") to a widget "
-			"\"{}\" within menu \"{}\". This widget does not exist.", x, y, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	widget->setOrigin(x, y);
+	END("Attempted to set the origin ({},{}) to a widget \"{}\" within menu "
+		"\"{}\".", x, y, name, fullname[0])
 }
 
 void sfx::gui::_setWidgetSize(const std::string& name, const std::string& w,
 	const std::string& h) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		widget->setSize(w.c_str(), h.c_str());
-	} else {
-		_logger.error("Attempted to set the size (\"{}\",\"{}\") to a widget "
-			"\"{}\" within menu \"{}\". This widget does not exist.", w, h, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	widget->setSize(w.c_str(), h.c_str());
+	END("Attempted to set the size (\"{}\",\"{}\") to a widget \"{}\" within menu "
+		"\"{}\".", w, h, name, fullname[0])
 }
 
 sf::Vector2f sfx::gui::_getWidgetFullSize(const std::string& name) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		return widget->getFullSize();
-	} else {
-		_logger.error("Attempted to get the full size of a widget \"{}\" within "
-			"menu \"{}\". This widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	return widget->getFullSize();
+	END("Attempted to get the full size of a widget \"{}\" within menu \"{}\".",
+		name, fullname[0])
 	return {};
 }
 
 void sfx::gui::_setWidgetEnabled(const std::string& name, const bool enable) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		widget->setEnabled(enable);
-	} else {
-		_logger.error("Attempted to update widget \"{}\"'s enabled state, within "
-			"menu \"{}\". This widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	widget->setEnabled(enable);
+	END("Attempted to update widget \"{}\"'s enabled state, within menu \"{}\"",
+		name, fullname[0])
 }
 
 bool sfx::gui::_getWidgetEnabled(const std::string& name) const {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		return widget->isEnabled();
-	} else {
-		_logger.error("Attempted to get the enabled property of a widget \"{}\" "
-			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	return widget->isEnabled();
+	END("Attempted to get the enabled property of a widget \"{}\" within menu "
+		"\"{}\".", name, fullname[0])
 	return false;
 }
 
 void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		widget->setVisible(visible);
-	} else {
-		_logger.error("Attempted to update widget \"{}\"'s visibility, within "
-			"menu \"{}\". This widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	widget->setVisible(visible);
+	END("Attempted to update widget \"{}\"'s visibility, within menu \"{}\".",
+		name, fullname[0])
 }
 
 bool sfx::gui::_getWidgetVisibility(const std::string& name) const {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		return widget->isVisible();
-	} else {
-		_logger.error("Attempted to get the visibility property of a widget "
-			"\"{}\" within menu \"{}\". This widget does not exist.", name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	return widget->isVisible();
+	END("Attempted to get the visibility property of a widget \"{}\" within menu "
+		"\"{}\".", name, fullname[0])
 	return false;
 }
 
@@ -2215,16 +2235,10 @@ void sfx::gui::_setWidgetDirectionalFlow(const std::string& name,
 }
 
 void sfx::gui::_setWidgetDirectionalFlowStart(const std::string& name) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		_selectThisWidgetFirst[fullname[0]] = fullnameAsString;
-	} else {
-		_logger.error("Attempted to set the widget \"{}\" as the first to be "
-			"selected upon initial directional input, for the menu \"{}\". This "
-			"widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	_selectThisWidgetFirst[fullname[0]] = fullnameAsString;
+	END("Attempted to set the widget \"{}\" as the first to be selected upon "
+		"initial directional input, for the menu \"{}\".", name, fullname[0])
 }
 
 void sfx::gui::_clearWidgetDirectionalFlowStart(const std::string& menu) {
@@ -2237,33 +2251,19 @@ void sfx::gui::_clearWidgetDirectionalFlowStart(const std::string& menu) {
 }
 
 void sfx::gui::_setWidgetDirectionalFlowSelection(const std::string& name) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		_makeNewDirectionalSelection(fullnameAsString, fullname[0]);
-	} else {
-		_logger.error("Attempted to manually directionally select the widget "
-			"\"{}\", in the menu \"{}\". This widget does not exist.", name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	_makeNewDirectionalSelection(fullnameAsString, fullname[0]);
+	END("Attempted to manually directionally select the widget \"{}\", in the "
+		"menu \"{}\".", name, fullname[0])
 }
 
 void sfx::gui::_setDirectionalFlowAngleBracketSprite(const std::string& corner,
 	const std::string& sheet, const std::string& key) {
+	START()
 	const auto spritesheet = _sheet.find(sheet);
-	if (spritesheet == _sheet.end()) {
-		_logger.error("Attempted to set the sprite \"{}\" from spritesheet \"{}\" "
-			"as the directional flow angle bracket for the \"{}\" corner. This "
-			"spritesheet does not exist.", key, sheet, corner);
-		return;
-	}
-	if (!spritesheet->second->doesSpriteExist(key)) {
-		_logger.error("Attempted to set the sprite \"{}\" from spritesheet \"{}\" "
-			"as the directional flow angle bracket for the \"{}\" corner. This "
-			"sprite does not exist.", key, sheet, corner);
-		return;
-	}
+	if (spritesheet == _sheet.end()) ERROR("This spritesheet does not exist.")
+	if (!spritesheet->second->doesSpriteExist(key))
+		ERROR("This sprite does not exist.")
 	const auto cornerFormatted = tgui::String(corner).trim().toLower();
 	if (cornerFormatted == "ul") {
 		_angleBracketUL.setSpritesheet(spritesheet->second);
@@ -2278,735 +2278,372 @@ void sfx::gui::_setDirectionalFlowAngleBracketSprite(const std::string& corner,
 		_angleBracketLR.setSpritesheet(spritesheet->second);
 		_angleBracketLR.setSprite(key);
 	} else {
-		_logger.error("Attempted to set the sprite \"{}\" from spritesheet \"{}\" "
-			"as the directional flow angle bracket for the \"{}\" corner. "
-			"Unrecognised corner, must be \"UL\", \"UR\", \"LL\", or \"LR\".", key,
-			sheet, corner);
+		ERROR("Unrecognised corner, must be \"UL\", \"UR\", \"LL\", or \"LR\".")
 	}
+	END("Attempted to set the sprite \"{}\" from spritesheet \"{}\" as the "
+		"directional flow angle bracket for the \"{}\" corner.", key, sheet,
+		corner)
 }
 
 void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
 	CScriptArray* variables) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		// For EditBoxes, don't translate the text, as this is text that the user
-		// can edit.
-		if (type == "editbox") {
-			std::dynamic_pointer_cast<EditBox>(widget)->setText(text);
-			if (variables) variables->Release();
-			return;
-		}
-		if (type != "bitmapbutton" && type != "label" && type != "button") {
-			_logger.error("Attempted to set the caption \"{}\" to widget \"{}\" "
-				"which is of type \"{}\", within menu \"{}\". This operation is "
-				"not supported for this type of widget.", text, name, type,
-				fullname[0]);
-			if (variables) variables->Release();
-			return;
-		}
-		_setTranslatedString(fullnameAsString, text, variables);
-		_translateWidget(widget);
+	START_WITH_WIDGET(name)
+	// For EditBoxes, don't translate the text, as this is text that the user can
+	// edit.
+	if (widgetType == "EditBox") {
+		std::dynamic_pointer_cast<EditBox>(widget)->setText(text);
 	} else {
-		_logger.error("Attempted to set the caption \"{}\" to a widget \"{}\" "
-			"within menu \"{}\". This widget does not exist.", text, name,
-			fullname[0]);
+		if (widgetType != "BitmapButton" && widgetType != "Label" &&
+			widgetType != "Button") UNSUPPORTED_WIDGET_TYPE()
+			_setTranslatedString(fullnameAsString, text, variables);
+		_translateWidget(widget);
 	}
+	END("Attempted to set the caption \"{}\" to a widget \"{}\" of type \"{}\" "
+		"within menu \"{}\".", text, name, widgetType, fullname[0])
 	if (variables) variables->Release();
 }
 
 std::string sfx::gui::_getWidgetText(const std::string& name) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		// Get the text differently depending on the type the widget is.
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "editbox") {
-			return std::dynamic_pointer_cast<EditBox>(widget)->
-				getText().toStdString();
-		} else {
-			_logger.error("Attempted to get the text of a widget \"{}\" which is "
-				"of type \"{}\", within menu \"{}\". This operation is not "
-				"supported for this type of widget.", name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to get the text of a widget \"{}\" within menu "
-			"\"{}\". This widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(EditBox, return castWidget->getText().toStdString();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the text of a widget \"{}\", which is of type \"{}\", "
+		"within menu \"{}\".", name, widgetType, fullname[0])
 	return "";
 }
 
 void sfx::gui::_setWidgetTextSize(const std::string& name,
 	const unsigned int size) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "label") {
-			std::dynamic_pointer_cast<Label>(widget)->setTextSize(size);
-		} else if (type == "bitmapbutton") {
-			std::dynamic_pointer_cast<BitmapButton>(widget)->setTextSize(size);
-		} else if (type == "button") {
-			std::dynamic_pointer_cast<Button>(widget)->setTextSize(size);
-		} else if (type == "editbox") {
-			std::dynamic_pointer_cast<EditBox>(widget)->setTextSize(size);
-		} else {
-			_logger.error("Attempted to set the character size {} to widget "
-				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", size,
-				name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the character size {} to a widget \"{}\" "
-			"within menu \"{}\". This widget does not exist.", size, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Label, castWidget->setTextSize(size);)
+		ELSE_IF_WIDGET_IS(BitmapButton, castWidget->setTextSize(size);)
+		ELSE_IF_WIDGET_IS(Button, castWidget->setTextSize(size);)
+		ELSE_IF_WIDGET_IS(EditBox, castWidget->setTextSize(size);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the character size {} to widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", size, name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetTextColour(const std::string& name,
 	const sf::Color& colour) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "label") {
-			std::dynamic_pointer_cast<Label>(widget)->
-				getRenderer()->setTextColor(colour);
-		} else if (type == "editbox") {
-			std::dynamic_pointer_cast<EditBox>(widget)->
-				getRenderer()->setTextColor(colour);
-		} else {
-			_logger.error("Attempted to set the text colour \"{}\" to widget "
-				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", colour,
-				name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the text colour \"{}\" to a widget \"{}\" "
-			"within menu \"{}\". This widget does not exist.", colour, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Label, castWidget->getRenderer()->setTextColor(colour);)
+		ELSE_IF_WIDGET_IS(EditBox,
+			castWidget->getRenderer()->setTextColor(colour);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the text colour \"{}\" to widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", colour, name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetTextOutlineColour(const std::string& name,
 	const sf::Color& colour) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "label") {
-			std::dynamic_pointer_cast<Label>(widget)->
-				getRenderer()->setTextOutlineColor(colour);
-		} else {
-			_logger.error("Attempted to set the text outline colour \"{}\" to "
-				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", colour,
-				name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the text outline colour \"{}\" to a "
-			"widget \"{}\" within menu \"{}\". This widget does not exist.",
-			colour, name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Label,
+			castWidget->getRenderer()->setTextOutlineColor(colour);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the text outline colour \"{}\" to widget \"{}\", which "
+		"is of type \"{}\", within menu \"{}\".", colour, name, widgetType,
+		fullname[0])
 }
 
 void sfx::gui::_setWidgetTextOutlineThickness(const std::string& name,
 	const float thickness) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "label") {
-			auto label = std::dynamic_pointer_cast<Label>(widget);
-			label->getRenderer()->setTextOutlineThickness(thickness);
-		} else {
-			_logger.error("Attempted to set the text outline thickness {} to "
-				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", thickness,
-				name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the text outline thickness {} to a widget "
-			"\"{}\" within menu \"{}\". This widget does not exist.", thickness,
-			name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Label,
+			castWidget->getRenderer()->setTextOutlineThickness(thickness);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the text outline thickness {} to widget \"{}\", which "
+		"is of type \"{}\", within menu \"{}\".", thickness, name, widgetType,
+		fullname[0])
 }
 
 void sfx::gui::_setWidgetTextAlignment(const std::string& name,
 	const tgui::Label::HorizontalAlignment h,
 	const tgui::Label::VerticalAlignment v) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "label") {
-			auto label = std::dynamic_pointer_cast<Label>(widget);
-			label->setHorizontalAlignment(h);
-			label->setVerticalAlignment(v);
-		} else {
-			_logger.error("Attempted to set the text horizontal alignment {} and "
-				"vertical alignment {} to widget \"{}\" which is of type \"{}\", "
-				"within menu \"{}\". This operation is not supported for this "
-				"type of widget.", h, v, name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the text horizontal alignment {} and "
-			"vertical alignment {} to a widget \"{}\" within menu \"{}\". This "
-			"widget does not exist.", h, v, name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Label, castWidget->setHorizontalAlignment(h);
+			castWidget->setVerticalAlignment(v);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the text horizontal alignment {} and vertical alignment "
+		"{} to widget \"{}\", which is of type \"{}\", within menu \"{}\".", h, v,
+		name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& sheet,
 	const std::string& key) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type != "bitmapbutton" && type != "picture") {
-			_logger.error("Attempted to set the sprite \"{}\" from sheet \"{}\" "
-				"to widget \"{}\" which is of type \"{}\", within menu \"{}\". "
-				"This operation is not supported for this type of widget.", key,
-				sheet, name, type, fullname[0]);
-			return;
-		}
-		// Prevent deleting sprite objects if there won't be any change.
-		if (_guiSpriteKeys[fullnameAsString].first != sheet ||
-			_guiSpriteKeys[fullnameAsString].second != key) {
-			_guiSpriteKeys[fullnameAsString] = std::make_pair(sheet, key);
-			_widgetSprites.erase(fullnameAsString);
-		}
-	} else {
-		_logger.error("Attempted to set the sprite \"{}\" from sheet \"{}\" to a "
-			"widget \"{}\" within menu \"{}\". This widget does not exist.", key,
-			sheet, name, fullname[0]);
+	START_WITH_WIDGET(name)
+	if (widgetType != "BitmapButton" && widgetType != "Picture")
+		UNSUPPORTED_WIDGET_TYPE()
+	// Prevent deleting sprite objects if there won't be any change.
+	if (_guiSpriteKeys[fullnameAsString].first != sheet ||
+		_guiSpriteKeys[fullnameAsString].second != key) {
+		_guiSpriteKeys[fullnameAsString] = std::make_pair(sheet, key);
+		_widgetSprites.erase(fullnameAsString);
 	}
+	END("Attempted to set the sprite \"{}\" from sheet \"{}\" to widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", key, sheet, name,
+		widgetType, fullname[0])
 }
 
 void sfx::gui::_matchWidgetSizeToSprite(const std::string& name,
 	const bool overrideSetSize) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type != "picture") {
-			_logger.error("Attempted to match widget \"{}\"'s size to its set "
-				"sprite. The widget is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", name, type,
-				fullname[0]);
-			return;
-		}
-		if (overrideSetSize)
-			_dontOverridePictureSizeWithSpriteSize.erase(fullnameAsString);
-		else
-			_dontOverridePictureSizeWithSpriteSize.insert(fullnameAsString);
-	} else {
-		_logger.error("Attempted to match widget \"{}\"'s size to its set sprite. "
-			"The widget is within menu \"{}\". This widget does not exist.", name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	if (widgetType != "Picture") UNSUPPORTED_WIDGET_TYPE()
+	if (overrideSetSize)
+		_dontOverridePictureSizeWithSpriteSize.erase(fullnameAsString);
+	else
+		_dontOverridePictureSizeWithSpriteSize.insert(fullnameAsString);
+	END("Attempted to match widget \"{}\"'s size to its set sprite. The widget is "
+		"of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetBgColour(const std::string& name,
 	const sf::Color& colour) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "panel") {
-			std::dynamic_pointer_cast<Panel>(widget)->getRenderer()->
-				setBackgroundColor(colour);
-		} else if (type == "scrollablepanel") {
-			std::dynamic_pointer_cast<ScrollablePanel>(widget)->getRenderer()->
-				setBackgroundColor(colour);
-		} else {
-			_logger.error("Attempted to set the background colour \"{}\" to "
-				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
-				"This operation is not supported for this type of widget.", colour,
-				name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the background colour \"{}\" to a widget "
-			"\"{}\" within menu \"{}\". This widget does not exist.", colour, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Panel, castWidget->getRenderer()->setBackgroundColor(colour);)
+		ELSE_IF_WIDGET_IS(ScrollablePanel,
+			castWidget->getRenderer()->setBackgroundColor(colour);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the background colour \"{}\" to widget \"{}\", which is "
+		"of type \"{}\", within menu \"{}\".", colour, name, widgetType,
+		fullname[0])
 }
 
 void sfx::gui::_setWidgetBorderSize(const std::string& name, const float size) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "panel") {
-			std::dynamic_pointer_cast<Panel>(widget)->getRenderer()->
-				setBorders(size);
-		} else {
-			_logger.error("Attempted to set a border size of {} to widget \"{}\" "
-				"which is of type \"{}\", within menu \"{}\". This operation is "
-				"not supported for this type of widget.", size, name, type,
-				fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set a border size of {} to a widget \"{}\" "
-			"within menu \"{}\". This widget does not exist.", size, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name);
+		IF_WIDGET_IS(Panel, castWidget->getRenderer()->setBorders(size);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set a border size of {} to widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", size, name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetBorderColour(const std::string& name,
 	const sf::Color& colour) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "panel") {
-			std::dynamic_pointer_cast<Panel>(widget)->getRenderer()->
-				setBorderColor(colour);
-		} else {
-			_logger.error("Attempted to set a border colour of {} to widget "
-				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", colour,
-				name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set a border colour of {} to a widget \"{}\" "
-			"within menu \"{}\". This widget does not exist.", colour, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Panel,
+			castWidget->getRenderer()->setBorderColor(colour);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set a border colour of {} to widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", colour, name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetBorderRadius(const std::string& name,
 	const float radius) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "panel") {
-			std::dynamic_pointer_cast<Panel>(widget)->getRenderer()->
-				setRoundedBorderRadius(radius);
-		} else {
-			_logger.error("Attempted to set the border radius {} to "
-				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
-				"This operation is not supported for this type of widget.", radius,
-				name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the border radius {} to a widget "
-			"\"{}\" within menu \"{}\". This widget does not exist.", radius, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Panel,
+			castWidget->getRenderer()->setRoundedBorderRadius(radius);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the border radius {} to widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", radius, name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetIndex(const std::string& name, const std::size_t index) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		if (fullname.size() >= 2) {
-			std::string containerName =
-				fullnameAsString.substr(0, fullnameAsString.rfind('.'));
-			Container::Ptr container = _findWidget<Container>(containerName);
-			if (container) {
-				if (!container->setWidgetIndex(widget, index)) {
-					// The size() should never be 0 here...
-					_logger.error("Could not set index {} to widget \"{}\" within "
-						"menu \"{}\". The index cannot be higher than {}.", index,
-						name, fullname[0], container->getWidgets().size() - 1);
-				}
-			} else {
-				_logger.error("Could not find container \"{}\" whilst setting "
-					"widget \"{}\"'s index to {}, within menu \"{}\".",
-					containerName, name, index, fullname[0]);
-			}
-		} else {
-			_logger.error("Attempted to set a menu \"{}\"'s widget index to {}. "
-				"This is unsupported for menu groups.", name, index);
-		}
-	} else {
-		_logger.error("Attempted to set the index {} to a widget \"{}\" within "
-			"menu \"{}\". This widget does not exist.", index, name, fullname[0]);
+	START_WITH_WIDGET(name)
+	if (fullname.size() < 2)
+		ERROR("This is operation is unsupported for entire menus.")
+	if (!container->setWidgetIndex(widget, index)) {
+		// The size() should never be 0 here...
+		ERROR(std::string("The index cannot be higher than ").append(
+			std::to_string(container->getWidgets().size() - 1)).append("."))
 	}
+	END("Attempted to set a widget \"{}\"'s index to {}.", name, index)
 }
 
 void sfx::gui::_setWidgetIndexInContainer(const std::string& name,
 	const std::size_t oldIndex, const std::size_t newIndex) {
-	std::vector<std::string> fullname;
-	Container::Ptr container = _findWidget<Container>(name, &fullname);
-	if (container) {
-		if (_isContainerWidget(container->getWidgetType())) {
-			Widget::Ptr widget;
-			try {
-				widget = container->getWidgets().at(oldIndex);
-			} catch (const std::out_of_range&) {
-				_logger.error("Attempted to set container \"{}\"'s number {} "
-					"widget to an index of {}, within menu \"{}\". This container "
-					"does not have a widget with index {}.", name, oldIndex,
-					newIndex, fullname[0], oldIndex);
-				return;
-			}
-			if (!container->setWidgetIndex(widget, newIndex)) {
-				const auto count = container->getWidgets().size();
-				if (count) {
-					_logger.error("Attempted to set container \"{}\"'s number {} "
-						"widget to an index of {}, within menu \"{}\". The new "
-						"index cannot be higher than {}.", name, oldIndex,
-						newIndex, fullname[0], count - 1);
-				} else {
-					_logger.error("Attempted to set container \"{}\"'s number {} "
-						"widget to an index of {}, within menu \"{}\". There are "
-						"no widgets in this container.", name, oldIndex, newIndex,
-						fullname[0]);
-				}
-			}
-		} else {
-			_logger.error("Attempted to set widget \"{}\"'s number {} widget to "
-				"an index of {}, within menu \"{}\". The first widget is of type "
-				"\"{}\". This operation is not supported for this widget type.",
-				name, oldIndex, newIndex, fullname[0],
-				container->getWidgetType().toStdString());
-		}
-	} else {
-		_logger.error("Attempted to set widget \"{}\"'s number {} widget to an "
-			"index of {}, within menu \"{}\". The first widget does not exist.",
-			name, oldIndex, newIndex, fullname[0]);
+	START_WITH_WIDGET(name)
+	if (!_isContainerWidget(widgetType)) UNSUPPORTED_WIDGET_TYPE()
+	container = std::dynamic_pointer_cast<Container>(widget);
+	try {
+		widget = container->getWidgets().at(oldIndex);
+	} catch (const std::out_of_range&) {
+		ERROR("This container does not have a widget with that number.")
 	}
+	if (!container->setWidgetIndex(widget, newIndex)) {
+		const auto count = container->getWidgets().size();
+		if (count) {
+			ERROR(std::string("The new index cannot be higher than ").append(
+				std::to_string(count - 1)).append("."))
+		} else {
+			ERROR("This container has no widgets.")
+		}
+	}
+	END("Attempted to set the widget \"{}\"'s number {} widget to an index of {}, "
+		"within menu \"{}\". The widget is of type \"{}\".", name, oldIndex,
+		newIndex, fullname[0], widgetType)
 }
 
 void sfx::gui::_setWidgetRatioInLayout(const std::string& name,
 	const std::size_t index, const float ratio) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "verticallayout" || type == "horizontallayout") {
-			auto boxRatios = std::dynamic_pointer_cast<BoxLayoutRatios>(widget);
-			if (!boxRatios->setRatio(index, ratio)) {
-				_logger.error("Attempted to set the widget ratio {} to widget {} "
-					"in layout \"{}\", within menu \"{}\". The widget index was "
-					"too high.", ratio, index, name, fullname[0]);
-			}
-		} else {
-			_logger.error("Attempted to set the widget ratio {} to widget {} in "
-				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
-				"This operation is not supported for this type of widget.", ratio,
-				index, name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the widget ratio {} to widget {} in "
-			"widget \"{}\" within menu \"{}\". This widget does not exist.", ratio,
-			index, name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(HorizontalLayout, if (!castWidget->setRatio(index, ratio))
+			ERROR("The widget index was too high.");)
+		ELSE_IF_WIDGET_IS(VerticalLayout, if (!castWidget->setRatio(index, ratio))
+			ERROR("The widget index was too high.");)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the widget ratio {} to widget {} in widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", ratio, index, name,
+		widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetDefaultText(const std::string& name,
 	const std::string& text, CScriptArray* variables) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type != "editbox") {
-			_logger.error("Attempted to set the default text \"{}\" to widget "
-				"\"{}\" which is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", text, name,
-				type, fullname[0]);
-			if (variables) variables->Release();
-			return;
-		}
-		_setTranslatedString(fullnameAsString, text, variables);
-		_translateWidget(widget);
-	} else {
-		_logger.error("Attempted to set the default text \"{}\" to a widget "
-			"\"{}\" within menu \"{}\". This widget does not exist.", text, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	if (widgetType != "EditBox") UNSUPPORTED_WIDGET_TYPE()
+	_setTranslatedString(fullnameAsString, text, variables);
+	_translateWidget(widget);
+	END("Attempted to set the default text \"{}\" to widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
 	if (variables) variables->Release();
 }
 
 void sfx::gui::_addItem(const std::string& name, const std::string& text,
 	CScriptArray* variables) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		// Add the item differently depending on the type the widget is.
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		std::size_t index = 0;
-		if (type == "listbox") {
-			// Be aware that getMaximumItems() can cause this method to fail.
-			index = std::dynamic_pointer_cast<ListBox>(widget)->addItem(text);
-		} else {
-			_logger.error("Attempted to add an item \"{}\" to widget \"{}\" which "
-				"is of type \"{}\", within menu \"{}\". This operation is not "
-				"supported for this type of widget.", text, name, type,
-				fullname[0]);
-			if (variables) variables->Release();
-			return;
-		}
-		_setTranslatedString(fullnameAsString, text, variables, index);
-		_translateWidget(widget);
-	} else {
-		_logger.error("Attempted to add a new item \"{}\" to a widget \"{}\" "
-			"within menu \"{}\". This widget does not exist.", text, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	std::size_t index = 0;
+		IF_WIDGET_IS(ListBox,
+			const auto limit = castWidget->getMaximumItems();
+			index = castWidget->addItem(text);
+			if (limit > 0 && index == limit) {
+				ERROR(std::string("This widget has reached its configured maximum "
+					"number of items, which is ").append(std::to_string(limit)).
+					append("."))
+			}
+		)
+		ELSE_UNSUPPORTED()
+	_setTranslatedString(fullnameAsString, text, variables, index);
+	_translateWidget(widget);
+	END("Attempted to add an item \"{}\" to widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
 	if (variables) variables->Release();
 }
 
 void sfx::gui::_clearItems(const std::string& name) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		// Remove all the items differently depending on the type the widget is.
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "listbox") {
-			std::dynamic_pointer_cast<ListBox>(widget)->removeAllItems();
-		} else {
-			_logger.error("Attempted to clear all items from widget \"{}\" which "
-				"is of type \"{}\", within menu \"{}\". This operation is not "
-				"supported for this type of widget.", name, type, fullname[0]);
-			return;
-		}
-		_originalCaptions.erase(fullnameAsString);
-	} else {
-		_logger.error("Attempted to clear all items from a widget \"{}\" within "
-			"menu \"{}\". This widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ListBox, castWidget->removeAllItems();)
+		ELSE_UNSUPPORTED()
+	_originalCaptions.erase(fullnameAsString);
+	END("Attempted to clear all items from widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		// Select the item differently depending on the type the widget is.
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "listbox") {
-			auto listbox = std::dynamic_pointer_cast<ListBox>(widget);
-			if (!listbox->setSelectedItemByIndex(index)) {
-				const auto count = listbox->getItemCount();
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ListBox,
+			if (!castWidget->setSelectedItemByIndex(index)) {
+				const auto count = castWidget->getItemCount();
 				if (count) {
-					_logger.error("Attempted to select item {} from listbox "
-						"\"{}\", within menu \"{}\". The item index cannot be "
-						"higher than {}.", index, name, fullname[0], count - 1);
+					ERROR(std::string("The item index cannot be higher than ").
+						append(std::to_string(count - 1)).append("."))
 				} else {
-					_logger.error("Attempted to select item {} from listbox "
-						"\"{}\", within menu \"{}\". There are no items in this "
-						"listbox.", index, name, fullname[0]);
+					ERROR("This widget has no items.")
 				}
 			}
-		} else {
-			_logger.error("Attempted to select item {} from widget \"{}\" which "
-				"is of type \"{}\", within menu \"{}\". This operation is not "
-				"supported for this type of widget.", index, name, type,
-				fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to select item {} from a widget \"{}\" within "
-			"menu \"{}\". This widget does not exist.", index, name, fullname[0]);
-	}
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to select item {} from widget \"{}\", which is of type \"{}\", "
+		"within menu \"{}\".", index, name, widgetType, fullname[0])
 }
 
 int sfx::gui::_getSelectedItem(const std::string& name) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		// Get the item index differently depending on the type the widget is.
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "listbox") {
-			return std::dynamic_pointer_cast<ListBox>(widget)->
-				getSelectedItemIndex();
-		} else {
-			_logger.error("Attempted to get the index of the selected item of a "
-				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", name, type,
-				fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to get the index of the selected item of a "
-			"widget \"{}\" within menu \"{}\". This widget does not exist.", name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ListBox, return castWidget->getSelectedItemIndex();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the index of the selected item of a widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", name, widgetType,
+		fullname[0])
 	return -1;
 }
 
 std::string sfx::gui::_getSelectedItemText(const std::string& name) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		// Get the item text differently depending on the type the widget is.
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "listbox") {
-			return std::dynamic_pointer_cast<ListBox>(widget)->
-				getSelectedItem().toStdString();
-		} else {
-			_logger.error("Attempted to get the text of the selected item of a "
-				"widget \"{}\" which is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", name, type,
-				fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to get the text of the selected item of a widget "
-			"\"{}\" within menu \"{}\". This widget does not exist.", name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ListBox, return castWidget->getSelectedItem().toStdString();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the text of the selected item of a widget \"{}\", which "
+		"is of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 	return "";
 }
 
 std::size_t sfx::gui::_getWidgetCount(const std::string& name) {
-	std::vector<std::string> fullname;
-	std::string fullnameAsString;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname, &fullnameAsString);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (_isContainerWidget(type)) {
-			return
-				std::dynamic_pointer_cast<Container>(widget)->getWidgets().size();
-		} else {
-			_logger.error("Attempted to get the widget count of a widget \"{}\" "
-				"which is of type \"{}\", within menu \"{}\". This operation is "
-				"not supported for this type of widget.", name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to get the widget count of a widget \"{}\" "
-			"within menu \"{}\". This widget does not exist.", name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+	if (_isContainerWidget(widgetType))
+		return std::dynamic_pointer_cast<Container>(widget)->getWidgets().size();
+	else
+		UNSUPPORTED_WIDGET_TYPE()
+	END("Attempted to get the widget count of a widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 	return 0;
 }
 
 void sfx::gui::_setHorizontalScrollbarPolicy(const std::string& name,
 	const tgui::Scrollbar::Policy policy) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "scrollablepanel") {
-			std::dynamic_pointer_cast<ScrollablePanel>(widget)->
-				setHorizontalScrollbarPolicy(policy);
-		} else {
-			_logger.error("Attempted to set the horizontal scrollbar policy {} to "
-				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
-				"This operation is not supported for this type of widget.", policy,
-				name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the horizontal scrollbar policy {} to a "
-			"widget \"{}\" within menu \"{}\". This widget does not exist.",
-			policy, name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ScrollablePanel,
+			castWidget->setHorizontalScrollbarPolicy(policy);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the horizontal scrollbar policy {} to widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", policy, name, widgetType,
+		fullname[0])
 }
 
 void sfx::gui::_setHorizontalScrollbarAmount(const std::string& name,
 	const unsigned int amount) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "scrollablepanel") {
-			std::dynamic_pointer_cast<ScrollablePanel>(widget)->
-				setHorizontalScrollAmount(amount);
-		} else {
-			_logger.error("Attempted to set the horizontal scrollbar amount {} to "
-				"widget \"{}\" which is of type \"{}\", within menu \"{}\". "
-				"This operation is not supported for this type of widget.", amount,
-				name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set the horizontal scrollbar amount {} to a "
-			"widget \"{}\" within menu \"{}\". This widget does not exist.",
-			amount, name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ScrollablePanel,
+			castWidget->setHorizontalScrollAmount(amount);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the horizontal scrollbar amount {} to widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", amount, name, widgetType,
+		fullname[0])
 }
 
 void sfx::gui::_setGroupPadding(const std::string& name,
 	const std::string& padding) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "scrollablepanel") {
-			std::dynamic_pointer_cast<ScrollablePanel>(widget)->
-				getRenderer()->setPadding(AbsoluteOrRelativeValue(padding));
-		} else if (type == "panel") {
-			std::dynamic_pointer_cast<Panel>(widget)->
-				getRenderer()->setPadding(AbsoluteOrRelativeValue(padding));
-		} else if (type == "verticallayout") {
-			std::dynamic_pointer_cast<VerticalLayout>(widget)->
-				getRenderer()->setPadding(AbsoluteOrRelativeValue(padding));
-		} else if (type == "horizontallayout") {
-			std::dynamic_pointer_cast<HorizontalLayout>(widget)->
-				getRenderer()->setPadding(AbsoluteOrRelativeValue(padding));
-		} else {
-			_logger.error("Attempted to set a padding {} to widget \"{}\" which "
-				"is of type \"{}\", within menu \"{}\". This operation is not "
-				"supported for this type of widget.", padding, name, type,
-				fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set a padding {} to a widget \"{}\" within "
-			"menu \"{}\". This widget does not exist.", padding, name,
-			fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ScrollablePanel, castWidget->getRenderer()->setPadding(
+			AbsoluteOrRelativeValue(padding));)
+		ELSE_IF_WIDGET_IS(Panel, castWidget->getRenderer()->setPadding(
+			AbsoluteOrRelativeValue(padding));)
+		ELSE_IF_WIDGET_IS(HorizontalLayout, castWidget->getRenderer()->setPadding(
+			AbsoluteOrRelativeValue(padding));)
+		ELSE_IF_WIDGET_IS(VerticalLayout, castWidget->getRenderer()->setPadding(
+			AbsoluteOrRelativeValue(padding));)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set a padding {} to widget \"{}\", which is of type \"{}\", "
+		"within menu \"{}\".", padding, name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
 	const std::size_t row, const std::size_t col,
 	const tgui::Grid::Alignment alignment) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "grid") {
-			auto grid = std::dynamic_pointer_cast<Grid>(widget);
-			auto& table = grid->getGridWidgets();
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Grid,
+			auto & table = castWidget->getGridWidgets();
 			if (row < table.size()) {
 				if (col < table[row].size()) {
-					grid->setWidgetAlignment(row, col, alignment);
+					castWidget->setWidgetAlignment(row, col, alignment);
 				} else {
-					_logger.error("Attempted to set an alignment {} to a grid "
-						"\"{}\" @ ({}, {}), within menu \"{}\". The column index "
-						"is out of range.", alignment, name, row, col,
-						fullname[0]);
+					ERROR("The column index is out of range.")
 				}
 			} else {
-				_logger.error("Attempted to set an alignment {} to a grid \"{}\" "
-					"@ ({}, {}), within menu \"{}\". The row index is out of "
-					"range.", alignment, name, row, col, fullname[0]);
+				ERROR("The row index is out of range.")
 			}
-		} else {
-			_logger.error("Attempted to set an alignment {} to a widget \"{}\" @ "
-				"({}, {}) which is of type \"{}\", within menu \"{}\". This "
-				"operation is not supported for this type of widget.", alignment,
-				name, row, col, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set an alignment {} to a widget \"{}\" @ ({}, "
-			"{}) within menu \"{}\". This widget does not exist.", alignment, name,
-			row, col, fullname[0]);
-	}
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set an alignment {} to a widget \"{}\", which is of type "
+		"\"{}\", @ ({}, {}), within menu \"{}\".", alignment, name, widgetType,
+		row, col, fullname[0])
 }
 
 void sfx::gui::_setSpaceBetweenWidgets(const std::string& name,
 	const float space) {
-	std::vector<std::string> fullname;
-	Widget::Ptr widget = _findWidget<Widget>(name, &fullname);
-	if (widget) {
-		const std::string type = widget->getWidgetType().toLower().toStdString();
-		if (type == "verticallayout" || type == "horizontallayout") {
-			auto layout = std::dynamic_pointer_cast<BoxLayout>(widget);
-			layout->getRenderer()->setSpaceBetweenWidgets(space);
-		} else {
-			_logger.error("Attempted to set {} to a widget \"{}\"'s space between "
-				"widgets property. The widget is of type \"{}\", within menu "
-				"\"{}\". This operation is not supported for this type of widget.",
-				space, name, type, fullname[0]);
-		}
-	} else {
-		_logger.error("Attempted to set {} to a widget \"{}\"'s space between "
-			"widgets property, within menu \"{}\". This widget does not exist.",
-			space, name, fullname[0]);
-	}
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(HorizontalLayout, castWidget->getRenderer()->
+			setSpaceBetweenWidgets(space);)
+		ELSE_IF_WIDGET_IS(VerticalLayout, castWidget->getRenderer()->
+			setSpaceBetweenWidgets(space);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set {} to a widget \"{}\"'s space between widgets property. "
+		"The widget is of type \"{}\", within menu \"{}\".", space, name,
+		widgetType, fullname[0])
 }
