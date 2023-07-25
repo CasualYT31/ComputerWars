@@ -206,6 +206,13 @@ namespace sfx {
 		void setFonts(const std::shared_ptr<sfx::fonts>& fonts) noexcept;
 
 		/**
+		 * Sets a scaling factor that is applied to all menus when drawn.
+		 * @param  factor The scaling factor.
+		 * @safety No guarantee.
+		 */
+		void setScalingFactor(const float factor);
+
+		/**
 		 * Animates the current GUI menu.
 		 * Any sprites are animated, and the colour background (if there is one) is
 		 * resized to match the size of the target. In addition, if a langauge
@@ -214,8 +221,7 @@ namespace sfx {
 		 * @safety No guarantee.
 		 * @sa     sfx::gui::setLanguageDictionary()
 		 */
-		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0);
+		bool animate(const sf::RenderTarget& target);
 	private:
 		/**
 		 * Represents a GUI background.
@@ -307,14 +313,12 @@ namespace sfx {
 			 *         result of the call to the sprite's \c animate() method if a
 			 *         sprite background.
 			 */
-			virtual bool animate(const sf::RenderTarget& target,
-				const double scaling = 1.0);
+			bool animate(const sf::RenderTarget& target);
 		private:
 			/**
 			 * Draws the GUI background.
 			 */
-			virtual void draw(sf::RenderTarget& target, sf::RenderStates states)
-				const;
+			void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 			/**
 			 * Tracks the type of background this instantiation represents.
@@ -408,12 +412,22 @@ namespace sfx {
 		/**
 		 * Performs animation calculations on a container of widgets.
 		 * @param  target    The target which the GUI will be drawn to later.
-		 * @param  scaling   Scaling factor which will be applied when drawing.
 		 * @param  container Pointer to the container widget.
 		 * @safety No guarantee.
 		 */
-		void _animate(const sf::RenderTarget& target, const double scaling,
+		void _animate(const sf::RenderTarget& target,
 			tgui::Container::Ptr container);
+
+		/**
+		 * Draws the current GUI menu.
+		 * @warning It is to be noted that this implementation of \c draw()
+		 *          \b ignores any given render states. This was done to remain
+		 *          consistent with TGUI (which does not seem to allow
+		 *          \c sf::RenderStates). The internal \c tgui::Gui object also
+		 *          ignores the given \c target when drawing: it must be previously
+		 *          set with \c setTarget().
+		 */
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
 		 * Handles moving the currently selected widget based on directional input.
@@ -438,17 +452,6 @@ namespace sfx {
 		 * @safety No guarantee.
 		 */
 		void _translateWidget(tgui::Widget::Ptr widget);
-
-		/**
-		 * Draws the current GUI menu.
-		 * @warning It is to be noted that this implementation of \c draw()
-		 *          \b ignores any given render states. This was done to remain
-		 *          consistent with TGUI (which does not seem to allow
-		 *          \c sf::RenderStates). The internal \c tgui::Gui object also
-		 *          ignores the given \c target when drawing: it must be previously
-		 *          set with \c setTarget().
-		 */
-		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
 		 * The JSON load method for this class.

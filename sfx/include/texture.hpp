@@ -372,8 +372,7 @@ namespace sfx {
 		 *         information, \c FALSE otherwise.
 		 * @safety No guarantee.
 		 */
-		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0);
+		bool animate(const sf::RenderTarget& target);
 	private:
 		/**
 		 * This drawable's \c draw() method.
@@ -386,7 +385,7 @@ namespace sfx {
 		 *                internal workings of the drawable.
 		 * @safety No guarantee.
 		 */
-		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
 		 * The internal logger object.

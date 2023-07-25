@@ -159,8 +159,7 @@ namespace awe {
 		 * @return The return value of <tt>animated_sprite</tt>'s \c animate()
 		 *         call.
 		 */
-		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0);
+		bool animate(const sf::RenderTarget& target);
 	private:
 		/**
 		 * This drawable's \c draw() method.
@@ -170,7 +169,7 @@ namespace awe {
 		 *               transforms is perfectly valid and will not alter the
 		 *               internal workings of the drawable.
 		 */
-		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/**
 		 * Updates the sprite ID to use with this tile.

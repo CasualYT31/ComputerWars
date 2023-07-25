@@ -231,8 +231,7 @@ std::size_t sfx::animated_sprite::operator--(int) noexcept {
 	return old;
 }
 
-bool sfx::animated_sprite::animate(const sf::RenderTarget& target,
-	const double scaling) {
+bool sfx::animated_sprite::animate(const sf::RenderTarget& target) {
 	if (!_sheet) return true;
 	try {
 		if (_sheet->getFrameDuration(_spriteID, _currentFrame).asMilliseconds()

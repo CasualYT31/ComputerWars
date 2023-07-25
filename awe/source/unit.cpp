@@ -57,7 +57,7 @@ void awe::unit::setIconSpritesheet(
 	_capturingHidingIcon.setSpritesheet(sheet);
 }
 
-bool awe::unit::animate(const sf::RenderTarget& target, const double scaling) {
+bool awe::unit::animate(const sf::RenderTarget& target) {
 	// Determine which icons to set.
 	if (getDisplayedHP() == 0 || getDisplayedHP() > 9) {
 		_hpIcon.setSprite("nohpicon");
@@ -91,11 +91,11 @@ bool awe::unit::animate(const sf::RenderTarget& target, const double scaling) {
 		_fuelAmmoIcon.setSprite("nostatusicon");
 	}
 	// Animate sprites.
-	_hpIcon.animate(target, scaling);
-	_fuelAmmoIcon.animate(target, scaling);
-	_loadedIcon.animate(target, scaling);
-	_capturingHidingIcon.animate(target, scaling);
-	bool ret = _sprite.animate(target, scaling);
+	_hpIcon.animate(target);
+	_fuelAmmoIcon.animate(target);
+	_loadedIcon.animate(target);
+	_capturingHidingIcon.animate(target);
+	bool ret = _sprite.animate(target);
 	// Calculate icon positions.
 	sf::Vector2f pos = _sprite.getPosition();
 	sf::Vector2f size = _sprite.getSize();

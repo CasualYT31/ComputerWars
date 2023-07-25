@@ -624,14 +624,14 @@ bool awe::map::load(std::string file, const unsigned char version) {
 	// Clear state.
 	_sel = sf::Vector2u(0, 0);
 	_currentArmy = awe::NO_ARMY;
-	_updateTilePane = false;
 	_lastUnitID = 1;
 	_armies.clear();
 	_units.clear();
 	_tiles.clear();
 	_mapName = "";
-	_mapOffset = sf::Vector2f(0.0f, 0.0f);
 	_day = 0;
+	_viewOffsetX.reset();
+	_viewOffsetY.reset();
 	// Load new state.
 	try {
 		_file.open(file, true);
@@ -2060,14 +2060,13 @@ std::size_t awe::map::getUnitPreviewsCount() const {
 	return _unitLocationOverrides.size();
 }
 
+void awe::map::setTarget(
+	const std::shared_ptr<sf::RenderTarget>& target) noexcept {
+	_target = target;
+}
+
 void awe::map::setSelectedTile(const sf::Vector2u& pos) {
-	if (!_isOutOfBounds(pos)) {
-		_sel_old = _sel;
-		if (_sel != pos) {
-			_sel = pos;
-			_updateTilePane = true;
-		}
-	}
+	if (!_isOutOfBounds(pos)) _sel = pos;
 }
 
 void awe::map::moveSelectedTileUp() {
@@ -2087,32 +2086,34 @@ void awe::map::moveSelectedTileRight() {
 }
 
 void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
-	const auto MAP_SIZE = getMapSize();
-	const auto REAL_TILE_MIN_WIDTH = awe::tile::MIN_WIDTH * _mapScalingFactor
-		* _scalingCache;
-	const auto REAL_TILE_MIN_HEIGHT = awe::tile::MIN_HEIGHT * _mapScalingFactor
-		* _scalingCache;
-	sf::Vector2f pixelF(pixel);
-	// Can the map fit on the screen?
-	sf::Vector2f mapCenterOffset = sf::Vector2f(
-		_targetSizeCache.x / 2.0f - MAP_SIZE.x * REAL_TILE_MIN_WIDTH / 2.0f,
-		_targetSizeCache.y / 2.0f - MAP_SIZE.y * REAL_TILE_MIN_HEIGHT / 2.0f
-	);
-	// X
-	if (mapCenterOffset.x < 0.0f)
-		pixelF.x -= _mapOffset.x;
-	else
-		pixelF.x -= mapCenterOffset.x;
-	pixelF.x /= REAL_TILE_MIN_WIDTH;
-	// Y
-	if (mapCenterOffset.y < 0.0f)
-		pixelF.y -= _mapOffset.y;
-	else
-		pixelF.y -= mapCenterOffset.y;
-	pixelF.y /= REAL_TILE_MIN_HEIGHT;
-	// Select the tile.
-	setSelectedTile(sf::Vector2u(pixelF));
+	if (!_target) return;
+	const auto coord = _target->mapPixelToCoords(pixel, _view);
+	auto sel = getSelectedTile(), size = getMapSize();
 
+	// Since each tile MUST be a set height, we can easily calculate the row.
+	if (coord.y < 0.0f) {
+		sel.y = 0;
+	} else if (coord.y >= size.y * awe::tile::MIN_HEIGHT) {
+		sel.y = size.y - 1;
+	} else {
+		sel.y = static_cast<sf::Uint32>(static_cast<float>(coord.y) /
+			awe::tile::MIN_HEIGHT);
+	}
+
+	// However, since tiles can technically be any width (though they really
+	// shouldn't be), we need to iterate through each column.
+	sel.x = 0;
+	if (coord.x >= 0.0f) {
+		for (float xCounter = 0.0f; sel.x < size.x; ++sel.x) {
+			auto tileWidth = _tiles[sel.x][sel.y].getPixelSize().x;
+			if (tileWidth < static_cast<float>(awe::tile::MIN_WIDTH))
+				tileWidth = static_cast<float>(awe::tile::MIN_WIDTH);
+			if (coord.x < (xCounter += tileWidth)) break;
+		}
+		if (sel.x >= size.x) sel.x = size.x - 1;
+	}
+
+	setSelectedTile(sel);
 }
 
 void awe::map::setSelectedArmy(const awe::ArmyID army) {
@@ -2135,10 +2136,22 @@ awe::ArmyID awe::map::getNextArmy() const {
 }
 
 void awe::map::setMapScalingFactor(const float factor) {
-	_mapScalingFactor = factor;
-	_updateTilePane = true;
-	_changedScaleFactor = true;
-	_mapOffset = sf::Vector2f(0.0f, 0.0f);
+	if (factor <= 0.0f) {
+		_logger.error("setMapScalingFactor operation failed: attempted to assign "
+			"a map scaling factor {} that was at or below 0.0.", factor);
+	} else {
+		_scaling = factor;
+	}
+}
+
+bool awe::map::isCursorOnLeftSide() const {
+	return _target && _target->mapCoordsToPixel(_cursor.getPositionWithoutOffset(),
+		_view).x < _target->getSize().x / 2.0f;
+}
+
+bool awe::map::isCursorOnTopSide() const {
+	return _target && _target->mapCoordsToPixel(_cursor.getPositionWithoutOffset(),
+		_view).y < _target->getSize().y / 2.0f;
 }
 
 awe::quadrant awe::map::getCursorQuadrant() const {
@@ -2190,13 +2203,6 @@ void awe::map::setLRCursorSprite(const std::string& sprite) {
 	}
 }
 
-sf::Vector2u awe::map::getTileSize() const {
-	return sf::Vector2u(awe::tile::MIN_WIDTH * (sf::Uint32)_scalingCache *
-		(sf::Uint32)_mapScalingFactor,
-		awe::tile::MIN_HEIGHT * (sf::Uint32)_scalingCache *
-		(sf::Uint32)_mapScalingFactor);
-}
-
 void awe::map::setTileSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sheet_tile = sheet;
@@ -2246,165 +2252,94 @@ void awe::map::setLanguageDictionary(
 	}
 }
 
-bool awe::map::animate(const sf::RenderTarget& target, const double scaling) {
-	_scalingCache = (float)scaling;
-	_targetSizeCache = sf::Vector2f(target.getSize());
-	auto mapSize = getMapSize();
-	auto REAL_TILE_MIN_WIDTH = awe::tile::MIN_WIDTH * _mapScalingFactor *
-		(float)scaling;
-	auto REAL_TILE_MIN_HEIGHT = awe::tile::MIN_HEIGHT * _mapScalingFactor *
-		(float)scaling;
-	if (_updateTilePane) {
-		if (_changedScaleFactor) {
-			// If the scale factor has changed, ensure that the cursor appears
-			// central to the screen.
-			auto cursorX = _sel.x * REAL_TILE_MIN_WIDTH + (_mapOffset.x),
-				cursorY = _sel.y * REAL_TILE_MIN_HEIGHT + (_mapOffset.y);
-			_mapOffset.x = (((float)target.getSize().x - REAL_TILE_MIN_WIDTH * 2)
-				/ 2.0f) - ((float)mapSize.x / 2.0f) - REAL_TILE_MIN_WIDTH / 2.0f;
-			_mapOffset.y = (((float)target.getSize().y - REAL_TILE_MIN_HEIGHT * 2)
-				/ 2.0f) - ((float)mapSize.y / 2.0f) - REAL_TILE_MIN_HEIGHT / 2.0f;
-			_mapOffset.x -= cursorX;
-			_mapOffset.y -= cursorY;
-			_changedScaleFactor = false;
-		}
-		// Predict the cursor's new position
-		auto newCursorX = _sel.x * REAL_TILE_MIN_WIDTH + (_mapOffset.x),
-			newCursorY = _sel.y * REAL_TILE_MIN_HEIGHT + (_mapOffset.y);
-		auto sel_old_cpyX = _sel_old.x * REAL_TILE_MIN_WIDTH + (_mapOffset.x),
-			sel_old_cpyY = _sel_old.y * REAL_TILE_MIN_HEIGHT + (_mapOffset.y);
-		// Update _mapOffset if the new selected tile is outside of the screen.
-		if (newCursorX < REAL_TILE_MIN_WIDTH) {
-			_mapOffset.x += (sel_old_cpyX - newCursorX);
-		}
-		if (newCursorY < REAL_TILE_MIN_HEIGHT) {
-			_mapOffset.y += (sel_old_cpyY - newCursorY);
-		}
-		if (newCursorX > target.getSize().x - REAL_TILE_MIN_WIDTH * 2) {
-			_mapOffset.x -= (newCursorX - sel_old_cpyX);
-		}
-		if (newCursorY > target.getSize().y - REAL_TILE_MIN_HEIGHT * 2) {
-			_mapOffset.y -= (newCursorY - sel_old_cpyY);
-		}
-	}
-	// Calculate if any of the screen would be left black by the current
-	// _mapOffset, and adjust the offset so that all of the screen is drawn over if
-	// this offset is used.
-	if (_mapOffset.x > 0.0f) _mapOffset.x = 0.0f;
-	if (_mapOffset.y > 0.0f) _mapOffset.y = 0.0f;
-	sf::Vector2f _mapOffsetLL(_mapOffset.x + mapSize.x * REAL_TILE_MIN_WIDTH,
-		_mapOffset.y + mapSize.y * REAL_TILE_MIN_HEIGHT);
-	if (_mapOffsetLL.x < target.getSize().x)
-		_mapOffset.x = target.getSize().x - mapSize.x * REAL_TILE_MIN_WIDTH;
-	if (_mapOffsetLL.y < target.getSize().y)
-		_mapOffset.y = target.getSize().y - mapSize.y * REAL_TILE_MIN_HEIGHT;
-	// Step 0. calculate offset to make map central to the render target.
-	sf::Vector2f mapCenterOffset = sf::Vector2f(
-		(float)target.getSize().x / 2.0f - mapSize.x * REAL_TILE_MIN_WIDTH / 2.0f,
-		(float)target.getSize().y / 2.0f - mapSize.y * REAL_TILE_MIN_HEIGHT / 2.0f
-	);
-	mapCenterOffset = sf::Vector2f(ceil(mapCenterOffset.x / _mapScalingFactor),
-		ceil(mapCenterOffset.y / _mapScalingFactor));
-	mapCenterOffset = sf::Vector2f(ceil(mapCenterOffset.x / (float)scaling),
-		ceil(mapCenterOffset.y / (float)scaling));
-	// Replace map centre offset values with _mapOffset if either of them are -ive.
-	if (mapCenterOffset.x < 0.0f)
-		mapCenterOffset.x = _mapOffset.x / _mapScalingFactor / (float)scaling;
-	if (mapCenterOffset.y < 0.0f)
-		mapCenterOffset.y = _mapOffset.y / _mapScalingFactor / (float)scaling;
-
+bool awe::map::animate(const sf::RenderTarget& target) {
 	// Create map of tiles -> units from _unitLocationOverrides.
 	std::unordered_map<sf::Vector2u, awe::UnitID> unitLocationOverrides;
-	for (auto pair : _unitLocationOverrides) {
+	for (auto pair : _unitLocationOverrides)
 		unitLocationOverrides[pair.second] = pair.first;
-	}
+
 	// Step 1. the tiles.
 	// Also update the position of the cursor here!
-	float tiley = 0.0;
-	for (sf::Uint32 y = 0, height = getMapSize().y; y < height; ++y) {
-		float tilex = 0.0;
-		for (sf::Uint32 x = 0, width = getMapSize().x; x < width; ++x) {
+	const auto mapSize = getMapSize(), selectedTile = getSelectedTile();
+	float tiley = 0.0f;
+	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
+		float tilex = 0.0f;
+		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			auto& tile = _tiles[x][y];
-			tile.animate(target, scaling);
+			tile.animate(target);
+
 			sf::Vector2u tilePos = sf::Vector2u(x, y);
-			// Position the tile and their unit if they are in the visible portion.
-			if (_tileIsVisible(tilePos)) {
-				sf::Uint32 tileWidth = 0, tileHeight = 0;
-				auto type = tile.getTileType();
-				if (type) {
-					tileWidth = (sf::Uint32)tile.getPixelSize().x;
-					tileHeight = (sf::Uint32)tile.getPixelSize().y;
-					/*if (tile.getTileOwner() == awe::NO_ARMY) {
-						tileWidth = (sf::Uint32)_sheet_tile->getFrameRect(
-							type->getNeutralTile()
-						).width;
-						tileHeight = (sf::Uint32)_sheet_tile->accessSprite(
-							type->getNeutralTile()
-						).height;
-					} else {
-						tileWidth = (sf::Uint32)_sheet_tile->accessSprite(
-							type->getOwnedTile(tile.getTileOwner())
-						).width;
-						tileHeight = (sf::Uint32)_sheet_tile->accessSprite(
-							type->getOwnedTile(tile.getTileOwner())
-						).height;
-					}*/
-				}
-				if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;
-				if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
-				tile.setPixelPosition(tilex + mapCenterOffset.x, tiley -
-					(float)(tileHeight - tile.MIN_HEIGHT) + mapCenterOffset.y);
-
-				// Update the tile's unit's pixel position accordingly, if it
-				// doesn't have an override.
-				const auto tilesUnit = tile.getUnit();
-				if (tilesUnit && _unitLocationOverrides.find(tilesUnit) ==
-					_unitLocationOverrides.end()) {
-					_units.at(tilesUnit).setPixelPosition(
-						tilex + mapCenterOffset.x, tiley + mapCenterOffset.y
-					);
-				}
-
-				// Check if this tile has a unit's location overridded onto it.
-				if (unitLocationOverrides.find(tilePos) !=
-					unitLocationOverrides.end()) {
-					_units.at(unitLocationOverrides[tilePos]).setPixelPosition(
-						tilex + mapCenterOffset.x, tiley + mapCenterOffset.y
-					);
-				}
-
-				// Update cursor position.
-				if (getSelectedTile() == tilePos) {
-					_cursor.setPosition(
-						sf::Vector2f(tilex + mapCenterOffset.x,
-							tiley + mapCenterOffset.y)
-					);
-				}
-				tilex += (float)tileWidth;
+			sf::Uint32 tileWidth = 0, tileHeight = 0;
+			auto type = tile.getTileType();
+			if (type) {
+				tileWidth = (sf::Uint32)tile.getPixelSize().x;
+				tileHeight = (sf::Uint32)tile.getPixelSize().y;
+				/*if (tile.getTileOwner() == awe::NO_ARMY) {
+					tileWidth = (sf::Uint32)_sheet_tile->getFrameRect(
+						type->getNeutralTile()
+					).width;
+					tileHeight = (sf::Uint32)_sheet_tile->accessSprite(
+						type->getNeutralTile()
+					).height;
+				} else {
+					tileWidth = (sf::Uint32)_sheet_tile->accessSprite(
+						type->getOwnedTile(tile.getTileOwner())
+					).width;
+					tileHeight = (sf::Uint32)_sheet_tile->accessSprite(
+						type->getOwnedTile(tile.getTileOwner())
+					).height;
+				}*/
 			}
+			if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;
+			if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
+			tile.setPixelPosition(tilex, tiley -
+				static_cast<float>((tileHeight - tile.MIN_HEIGHT)));
+
+			// Update the tile's unit's pixel position accordingly, if it
+			// doesn't have an override.
+			const auto tilesUnit = tile.getUnit();
+			if (tilesUnit && _unitLocationOverrides.find(tilesUnit) ==
+				_unitLocationOverrides.end()) {
+				_units.at(tilesUnit).setPixelPosition(tilex, tiley);
+			}
+
+			// Check if this tile has a unit's location overridded onto it.
+			if (unitLocationOverrides.find(tilePos) !=
+				unitLocationOverrides.end()) {
+				_units.at(unitLocationOverrides[tilePos]).setPixelPosition(
+					tilex, tiley
+				);
+			}
+
+			// Update cursor position.
+			if (selectedTile == tilePos)
+				_cursor.setPosition(sf::Vector2f(tilex, tiley));
+
+			tilex += static_cast<float>(tileWidth);
 		}
-		tiley += (float)awe::tile::MIN_HEIGHT;
+		tiley += static_cast<float>(awe::tile::MIN_HEIGHT);
 	}
+
 	// Step 2. the selected unit closed list tile icons.
 	if (_selectedUnitRenderData.top().selectedUnit > 0) {
 		for (asUINT i = 0, size = _selectedUnitRenderData.top().closedList->
 			GetSize(); i < size; ++i) {
 			awe::closed_list_node* pathNode = (awe::closed_list_node*)
 				_selectedUnitRenderData.top().closedList->At(i);
-			pathNode->sprite.animate(target, scaling);
+			pathNode->sprite.animate(target);
 			auto pos =
 				_tiles[pathNode->tile.x][pathNode->tile.y].getPixelPosition();
-			auto h =
+			const auto h =
 				_tiles[pathNode->tile.x][pathNode->tile.y].getPixelSize().y;
 			if (h > awe::tile::MIN_HEIGHT) pos.y += h - awe::tile::MIN_HEIGHT;
 			pathNode->sprite.setPosition(pos);
 		}
 	}
+
 	// Step 3. the units.
 	// Note that unit positioning was carried out in step 1.
-	for (auto& unit : _units) {
-		unit.second.animate(target, scaling);
-	}
+	for (auto& unit : _units) unit.second.animate(target);
+
 	// Step 4. the cursor.
 	const auto quadrant = getCursorQuadrant();
 	switch (quadrant) {
@@ -2420,18 +2355,78 @@ bool awe::map::animate(const sf::RenderTarget& target, const double scaling) {
 	default: // Let awe::quadrant::UpperLeft be the default.
 		_cursor.setSprite(_ulCursorSprite);
 	}
-	_cursor.animate(target, scaling);
+	_cursor.animate(target);
+
+	// Step 5. update the view to match the target's size, and apply the scaling.
+	// Additionally, update the view offset.
+	auto mapPixelSize = mapSize; // Ignore fancy tile heights and widths.
+	mapPixelSize.x *= awe::tile::MIN_WIDTH;
+	mapPixelSize.y *= awe::tile::MIN_HEIGHT;
+	const auto rect = sf::FloatRect(0.0f, 0.0f,
+		static_cast<float>(target.getSize().x) / _scaling,
+		static_cast<float>(target.getSize().y) / _scaling);
+	const auto cursorRect = sf::FloatRect(
+		sf::Vector2f(_target->mapCoordsToPixel(_cursor.getPosition(), _view)),
+		_cursor.getSize() * _scaling);
+	_view.reset(rect);
+	_view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+	static const auto moveOffsetAxis = [](const float viewSize,
+		const float mapPixelSize, std::optional<float>& viewOffset,
+		const float cursorPos, const float cursorSize, const float padding,
+		const float screenSize) {
+		if (viewSize > mapPixelSize) {
+			// Map appears smaller than the screen along this axis, so centre it on
+			// that axis. Also, reset the view offset to ensure that when the map
+			// appears larger in the future, the view will centre itself on the
+			// cursor along this axis.
+			viewOffset.reset();
+			return -(viewSize / 2.0f - mapPixelSize / 2.0f);
+		} else {
+			if (viewOffset) {
+				// If the cursor is too close to either edge of the screen, adjust
+				// the offset to bring the cursor a little further into the centre
+				// of the screen.
+				if (cursorPos <= padding * 2.0f) {
+					*viewOffset -= padding;
+				} else if (cursorPos + cursorSize >= screenSize - padding * 2.0f) {
+					*viewOffset += padding;
+				}
+			} else {
+				// Map appears larger immediately after appearing smaller. Default
+				// offset to centre on the cursor.
+				viewOffset = (cursorPos + cursorSize / 2.0f) - viewSize / 2.0f;
+			}
+			// Make sure the map fully fills the screen along this axis.
+			if (*viewOffset < 0.0f) {
+				viewOffset = 0.0f;
+			} else if (*viewOffset + viewSize >= mapPixelSize) {
+				viewOffset = mapPixelSize - viewSize;
+			}
+			return *viewOffset;
+		}
+	};
+	_view.move(
+		moveOffsetAxis(rect.width, static_cast<float>(mapPixelSize.x),
+			_viewOffsetX, cursorRect.left, cursorRect.width,
+			static_cast<float>(awe::tile::MIN_WIDTH),
+			static_cast<float>(target.getSize().x)),
+		moveOffsetAxis(rect.height, static_cast<float>(mapPixelSize.y),
+			_viewOffsetY, cursorRect.top, cursorRect.height,
+			static_cast<float>(awe::tile::MIN_HEIGHT),
+			static_cast<float>(target.getSize().y))
+	);
+
 	// End.
 	_damageTooltip.setPosition(_cursor.getPosition(), static_cast<int>(quadrant));
-	_damageTooltip.animate(target, scaling);
+	_damageTooltip.animate(target);
 	return false;
 }
 
 void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	_transformCache = states.transform;
-	sf::RenderStates mapStates = states;
-	mapStates.transform = sf::Transform().scale(sf::Vector2f(_mapScalingFactor,
-		_mapScalingFactor)).combine(states.transform);
+	// Step 0. temporarily apply our view.
+	const auto oldView = target.getView();
+	target.setView(_view);
+
 	// Step 1. the tiles.
 	auto mapSize = getMapSize();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
@@ -2439,7 +2434,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			if (_selectedUnitRenderData.top().selectedUnit > 0 &&
 				!_selectedUnitRenderData.top().disableRenderingEffects) {
 				sf::Vector2u currentTile(x, y);
-				sf::RenderStates tileStates = mapStates;
+				sf::RenderStates tileStates = states;
 				if (_selectedUnitRenderData.top().availableTiles.find(currentTile)
 					!= _selectedUnitRenderData.top().availableTiles.end()) {
 					// Apply configured shading.
@@ -2456,10 +2451,11 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 				}
 				target.draw(_tiles[x][y], tileStates);
 			} else {
-				target.draw(_tiles[x][y], mapStates);
+				target.draw(_tiles[x][y], states);
 			}
 		}
 	}
+
 	// Step 2. the selected unit closed list tiles.
 	if (_selectedUnitRenderData.top().selectedUnit > 0 &&
 		!_selectedUnitRenderData.top().disableRenderingEffects) {
@@ -2467,9 +2463,10 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			GetSize(); i < size; ++i) {
 			target.draw(((awe::closed_list_node*)
 				_selectedUnitRenderData.top().closedList->At(i))->sprite,
-					mapStates);
+				states);
 		}
 	}
+
 	// Step 3. the units.
 	// Unfortunately units have to be looped through separately to prevent tiles
 	// taller than the minimum height from drawing over units. If a unit has a
@@ -2481,7 +2478,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		if (_isUnitPresent(unitID) && ((isUnitOnMap(unitID) &&
 			isUnitVisible(unitID, currentArmy)) ||
 			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end())) {
-			sf::RenderStates unitStates = mapStates;
+			sf::RenderStates unitStates = states;
 			unitStates.shader = &_unavailableTileShader;
 			if (_selectedUnitRenderData.top().selectedUnit > 0 &&
 				!_selectedUnitRenderData.top().disableRenderingEffects &&
@@ -2495,18 +2492,18 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 				if (isUnitWaiting(unitID)) {
 					target.draw(_units.at(unitID), unitStates);
 				} else {
-					target.draw(_units.at(unitID), mapStates);
+					target.draw(_units.at(unitID), states);
 				}
 			}
 		}
 	}
+
 	// Step 4. the cursor.
-	// But only if it is within the visible portion!
-	// To tell the truth the cursor should never be not visible...
-	if (_tileIsVisible(getSelectedTile()) && !_cursor.getSprite().empty()) {
-		target.draw(_cursor, mapStates);
-	}
-	target.draw(_damageTooltip, mapStates);
+	if (!_cursor.getSprite().empty()) target.draw(_cursor, states);
+	target.draw(_damageTooltip, states);
+
+	// Step 5. restore old view.
+	target.setView(oldView);
 }
 
 void awe::map::_updateCapturingUnit(const awe::UnitID id) {
@@ -2527,7 +2524,7 @@ awe::UnitID awe::map::_findUnitID() {
 		if (temp == ~((awe::UnitID)0))
 			temp = 1;
 		else
-			temp++;
+			++temp;
 	}
 	_lastUnitID = temp;
 	return temp;

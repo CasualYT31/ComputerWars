@@ -49,10 +49,9 @@ namespace awe {
 		/// Should be the position of the attack cursor with offset applied!
 		void setPosition(const sf::Vector2f& pos, const int quadrant);
 		void visible(const bool v);
-		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0);
+		bool animate(const sf::RenderTarget& target);
 	private:
-		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 		sfx::animated_sprite _sprite;
 		sf::Text _damage;
 		bool _visible = false;

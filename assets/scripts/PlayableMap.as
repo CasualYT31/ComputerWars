@@ -56,6 +56,7 @@ class PlayableMap {
 				"PlayableMap; the game will crash soon!");
 		} else {
 			@map = mapToPlayOn;
+            map.setMapScalingFactor(_mapScalingFactor);
 			setNormalCursorSprites();
 		}
 	}

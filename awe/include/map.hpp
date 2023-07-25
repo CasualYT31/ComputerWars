@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "language.hpp"
 #include <cmath>
 #include <stack>
+#include <optional>
 #include "damage_sprite.hpp"
 
 #pragma once
@@ -1222,6 +1223,12 @@ namespace awe {
 		// DRAWING OPERATIONS //
 		////////////////////////
 		/**
+		 * Sets the target used with this map.
+		 * @param target Pointer to the target this map will be drawn on.
+		 */
+		void setTarget(const std::shared_ptr<sf::RenderTarget>& target) noexcept;
+
+		/**
 		 * Selects a tile on the map.
 		 * Used only to let \c map know what tile to draw information on, as well
 		 * as where to draw the cursor. If the given location is out of bounds, the
@@ -1256,7 +1263,9 @@ namespace awe {
 
 		/**
 		 * Selects a tile on the map based on a pixel.
-		 * The tile that is drawn underneath the pixel will be selected.
+		 * The tile that is drawn underneath the pixel will be selected, if there
+		 * is one.\n
+		 * Note that if \c _target is \c nullptr this method will have no effect.
 		 * @param pixel The pixel relative to the render target to use to identify
 		 *              a tile to select.
 		 */
@@ -1294,9 +1303,8 @@ namespace awe {
 
 		/**
 		 * Sets the amount by which the map is scaled.
-		 * Any scaling factors that are provided in @c animate() and @c draw() are
-		 * combined with this one (map scaling factor is applied /em before the
-		 * transforms given).
+		 * If it is detected that a value at or below \c 0.0f is given, an error
+		 * will be logged and \c _scaling will not be changed.
 		 * @param factor The factor by which to scale the map.
 		 */
 		void setMapScalingFactor(const float factor);
@@ -1304,22 +1312,18 @@ namespace awe {
 		/**
 		 * Determines if the cursor is on the left or right side of the target.
 		 * @return \c TRUE if the UL of the cursor graphic is on the left half of
-		 *         the target, \c FALSE if it is on the right half of the target.
+		 *         the target, \c FALSE if it is on the right half of the target,
+		 *         or if \c _target is \c nullptr.
 		 */
-		inline bool isCursorOnLeftSide() const {
-			return _cursor.getPositionWithoutOffset().x < _targetSizeCache.x /
-				_mapScalingFactor / _scalingCache / 2.0f;
-		}
+		bool isCursorOnLeftSide() const;
 
 		/**
 		 * Determines if the cursor is on the top or bottom side of the target.
 		 * @return \c TRUE if the UL of the cursor graphic is on the top half of
-		 *         the target, \c FALSE if it is on the bottom half of the target.
+		 *         the target, \c FALSE if it is on the bottom half of the target,
+		 *         or if \c _target is \c nullptr.
 		 */
-		inline bool isCursorOnTopSide() const {
-			return _cursor.getPositionWithoutOffset().y < _targetSizeCache.y /
-				_mapScalingFactor / _scalingCache / 2.0f;
-		}
+		bool isCursorOnTopSide() const;
 
 		/**
 		 * Determines which quadrant of the render target the cursor is in.
@@ -1376,12 +1380,6 @@ namespace awe {
 		void setLRCursorSprite(const std::string& sprite);
 
 		/**
-		 * Calculates the minimum pixel size of a tile as seen by the user.
-		 * @return The minimum size of a tile, after scaling has been applied.
-		 */
-		sf::Vector2u getTileSize() const;
-
-		/**
 		 * Sets the spritesheet used for drawing tiles.
 		 * @param sheet Pointer to the animated spritesheet to use for tiles.
 		 */
@@ -1426,13 +1424,10 @@ namespace awe {
 
 		/**
 		 * This drawable's \c animate() method.
-		 * @param  target  The target to render the map to.
-		 * @param  scaling An additional scaling factor applied to the entire map
-		 *                 graphic.
+		 * @param  target The target to render the map to.
 		 * @return \c FALSE, for now.
 		 */
-		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0);
+		bool animate(const sf::RenderTarget& target);
 	private:
 		/**
 		 * This drawable's \c draw() method.
@@ -1453,7 +1448,7 @@ namespace awe {
 		 *               is perfectly valid and will not alter the internal
 		 *               workings of the drawable.
 		 */
-		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 		/////////////
 		// UTILITY //
@@ -1466,17 +1461,6 @@ namespace awe {
 		 */
 		inline bool _isOutOfBounds(const sf::Vector2u& pos) const {
 			return pos.x >= getMapSize().x || pos.y >= getMapSize().y;
-		}
-
-		/**
-		 * Checks if a given X and Y coordinate are within the visible portion of
-		 * the map as defined by \c _visiblePortion.
-		 * @param  pos The position to test.
-		 * @return \c TRUE if the position is within the visible portion, \c FALSE
-		 *         if not.
-		 */
-		inline bool _tileIsVisible(const sf::Vector2u& pos) const noexcept {
-			return true;
 		}
 
 		/**
@@ -1684,6 +1668,31 @@ namespace awe {
 			 */
 			void clearState();
 		};
+
+		/**
+		 * The target set via \c setTarget().
+		 */
+		std::shared_ptr<sf::RenderTarget> _target;
+
+		/**
+		 * The view applied to the target whilst drawing.
+		 */
+		sf::View _view;
+
+		/**
+		 * The scaling factor to apply to the map when drawing.
+		 */
+		float _scaling = 1.0f;
+
+		/**
+		 * The amount to offset the view by in the X direction.
+		 */
+		std::optional<float> _viewOffsetX;
+
+		/**
+		 * The amount to offset the view by in the Y direction.
+		 */
+		std::optional<float> _viewOffsetY;
 		
 		/**
 		 * Stores selected unit render data.
@@ -1700,16 +1709,6 @@ namespace awe {
 		 * The currently selected tile.
 		 */
 		sf::Vector2u _sel;
-
-		/**
-		 * The tile that was selected before @c _sel.
-		 */
-		sf::Vector2u _sel_old;
-
-		/**
-		 * Flag used to inform _mapOffset that the map scaling factor has changed.
-		 */
-		bool _changedScaleFactor = false;
 
 		/**
 		 * The army who is having their turn.
@@ -1748,44 +1747,6 @@ namespace awe {
 		 * of the screen.
 		 */
 		std::string _lrCursorSprite;
-
-		/**
-		 * Flag used to update the old \c _tilePane.
-		 * Now just used for the map offset code.\n
-		 * When the selected tile is changed, this will be set to \c TRUE.
-		 */
-		bool _updateTilePane = false;
-
-		/**
-		 * Scales the map by an additional factor.
-		 */
-		float _mapScalingFactor = 2.0f;
-
-		/**
-		 * The offset to apply to the map if it can't be fully drawn to the screen
-		 * along either dimension. In pixels.
-		 * This has NO scaling applied to it when stored here.
-		 */
-		sf::Vector2f _mapOffset;
-
-		/**
-		 * Cache of the @c sf::Transform previously used with @c draw().
-		 * Used in \c setSelectedTileByPixel() calculations. Can only be
-		 * conveniently cached in @c draw() so it needs to be mutable. The scaling
-		 * value given to @c animate() must be the same as the one given with
-		 * @c draw().
-		 */
-		mutable sf::Transform _transformCache;
-
-		/**
-		 * Cache of the \c scaling parameter last given to \c animate().
-		 */
-		float _scalingCache;
-
-		/**
-		 * Cache of the last known render target size.
-		 */
-		sf::Vector2f _targetSizeCache;
 
 		// MOVE MODE DRAWING //
 

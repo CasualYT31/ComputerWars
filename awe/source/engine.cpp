@@ -46,6 +46,7 @@ int awe::game_engine::run() {
 	if (r) return r;
 
 	try {
+		_gui->setScalingFactor(_scaling);
 		while (_renderer->isOpen()) {
 			// Handle menu user input first before handling the events.
 			// Use case: Map menu and MapMenu menu. Selecting a vacant tile in Map
@@ -66,25 +67,16 @@ int awe::game_engine::run() {
 			}
 
 			_renderer->clear();
-			_renderer->animate(*_gui, _scaling);
+			_renderer->animate(*_gui);
 			if (_map) {
-				_renderer->animate(*_map, _scaling);
-				sf::View oldView = _renderer->getView();
-				sf::View view;
-				view.reset(sf::FloatRect(0.0f, 0.0f, (float)_renderer->getSize().x,
-					(float)_renderer->getSize().y));
-				view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
-				_renderer->setView(view);
-				_renderer->draw(*_map,
-					sf::RenderStates().transform.scale(_scaling, _scaling));
-				_renderer->setView(oldView);
+				_renderer->animate(*_map);
+				_renderer->draw(*_map);
 			}
-			_renderer->draw(*_gui,
-				sf::RenderStates().transform.scale(_scaling, _scaling));
+			_renderer->draw(*_gui);
 			_renderer->display();
 
-			// This will very likely not be the way I handle win conditions in the
-			// final version of the engine.
+			// This will not be the way I handle win conditions in the final
+			// version of the engine.
 			if (_map && _map->periodic()) {
 				boxer::show("The game has ended!", "Thanks for Playing!",
 					boxer::Style::Info);
@@ -534,6 +526,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 			_logger.error("Couldn't allocate the map object: {}", e.what());
 			return nullptr;
 		}
+		_map->setTarget(_renderer);
 		_map->setTileSpritesheet(_sprites->tile->normal);
 		_map->setUnitSpritesheet(_sprites->unit->idle);
 		_map->setIconSpritesheet(_sprites->icon);

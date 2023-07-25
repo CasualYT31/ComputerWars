@@ -70,10 +70,9 @@ sf::Color sfx::gui::gui_background::getColour() const {
 	return _bgColour.getFillColor();
 }
 
-bool sfx::gui::gui_background::animate(const sf::RenderTarget& target,
-	const double scaling) {
+bool sfx::gui::gui_background::animate(const sf::RenderTarget& target) {
 	if (_flag == sfx::gui::gui_background::type::Sprite) {
-		return _bgSprite.animate(target, scaling);
+		return _bgSprite.animate(target);
 	} else if (_flag == sfx::gui::gui_background::type::Colour) {
 		_bgColour.setSize(
 			sf::Vector2f(static_cast<float>(target.getSize().x),
@@ -1009,9 +1008,13 @@ void sfx::gui::setFonts(const std::shared_ptr<sfx::fonts>& fonts) noexcept {
 	_fonts = fonts;
 }
 
-bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
+void sfx::gui::setScalingFactor(const float factor) {
+	_gui.setRelativeView({0.0f, 0.0f, 1.0f / factor, 1.0f / factor});
+}
+
+bool sfx::gui::animate(const sf::RenderTarget& target) {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
-		_guiBackground.at(getGUI()).animate(target, scaling);
+		_guiBackground.at(getGUI()).animate(target);
 	}
 
 	if (getGUI() != "") {
@@ -1021,16 +1024,7 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 			for (auto& widget : widgetList) _translateWidget(widget);
 		}
 		std::size_t animatedSprite = 0;
-		// Update the menu's scaling factor.
-		// We also need to update the size of the group container, as percentage
-		// calculations made within the script setWidgetSize() calls will be off
-		// otherwise.
-		auto menu = _gui.get<Container>(getGUI());
-		menu->setScale((float)scaling);
-		tgui::String percentage(100.0f / (float)scaling);
-		percentage += "%";
-		menu->setSize(percentage);
-		_animate(target, scaling, menu);
+		_animate(target, _gui.get<Container>(getGUI()));
 	}
 
 	// Whenever there isn't a widget currently selected via directional controls,
@@ -1052,22 +1046,22 @@ bool sfx::gui::animate(const sf::RenderTarget& target, const double scaling) {
 				getContentOffset();
 		}
 		_angleBracketUL.setPosition(pos);
-		_angleBracketUL.animate(target, scaling);
+		_angleBracketUL.animate(target);
 		_angleBracketUR.setPosition(pos + tgui::Vector2f(
 			size.x - _angleBracketUR.getSize().x, 0.0f));
-		_angleBracketUR.animate(target, scaling);
+		_angleBracketUR.animate(target);
 		_angleBracketLL.setPosition(pos + tgui::Vector2f(0.0f,
 			size.y - _angleBracketLL.getSize().y));
-		_angleBracketLL.animate(target, scaling);
+		_angleBracketLL.animate(target);
 		_angleBracketLR.setPosition(pos + size -
 			tgui::Vector2f(_angleBracketLR.getSize()));
-		_angleBracketLR.animate(target, scaling);
+		_angleBracketLR.animate(target);
 	}
 
 	return false;
 }
 
-void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
+void sfx::gui::_animate(const sf::RenderTarget& target,
 	tgui::Container::Ptr container) {
 	static auto allocImage = [&](const tgui::String& type, Widget::Ptr widget,
 		const std::string& widgetName, unsigned int w, unsigned int h) -> void {
@@ -1138,7 +1132,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 					// matches up.
 					animatedSprite.setSpritesheet(sheet);
 					animatedSprite.setSprite(sprite);
-					animatedSprite.animate(target, scaling);
+					animatedSprite.animate(target);
 					sf::Vector2f spriteSizeF = animatedSprite.getSize();
 					sf::Vector2u spriteSize((unsigned int)spriteSizeF.x,
 						(unsigned int)spriteSizeF.y);
@@ -1147,7 +1141,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 				} else {
 					// If the widget's sprite hasn't changed, then simply animate
 					// it.
-					animatedSprite.animate(target, scaling);
+					animatedSprite.animate(target);
 				}
 
 				// Now reposition the animated sprites based on the locations and
@@ -1171,11 +1165,55 @@ void sfx::gui::_animate(const sf::RenderTarget& target, const double scaling,
 			}
 		}
 
-		if (_isContainerWidget(type)) {
-			_animate(target, scaling,
-				std::dynamic_pointer_cast<Container>(widget));
+		if (_isContainerWidget(type))
+			_animate(target, std::dynamic_pointer_cast<Container>(widget));
+	}
+}
+
+void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	// Draw background.
+	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
+		// This GUI has a background to animate.
+		target.draw(_guiBackground.at(getGUI()), states);
+	}
+	// Draw foreground.
+	_gui.draw();
+	// Draw each widget's sprite if the widget isn't hidden.
+	sf::View oldView = target.getView();
+	target.setView(sf::View(_gui.getView().getRect().operator sf::Rect<float>()));
+	for (auto& sprite : _widgetSprites) {
+		Widget::Ptr widget = _findWidget<Widget>(sprite.first);
+		static const std::function<bool(const Widget* const)> isWidgetVisible =
+			[](const Widget* const widget) -> bool {
+			if (widget->isVisible()) {
+				const auto parent = widget->getParent();
+				if (parent) {
+					return isWidgetVisible(parent);
+				} else {
+					return true;
+				}
+			}
+			return false;
+		};
+		if (widget && isWidgetVisible(widget.get())) {
+			// Pictures that don't match with their sprite's size will stretch the
+			// sprite. This should be emulated here in the future using scaling.
+			target.draw(sprite.second, states);
 		}
 	}
+	// Draw angle brackets, if there is currently a widget selected via the
+	// directional controls, and it is visible.
+	if (_enableDirectionalFlow && _currentlySelectedWidget.find(getGUI()) !=
+		_currentlySelectedWidget.end() &&
+		!_currentlySelectedWidget.at(getGUI()).second.empty() &&
+		isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+			_currentlySelectedWidget.at(getGUI()).second).get(), true, false)) {
+		target.draw(_angleBracketUL, states);
+		target.draw(_angleBracketUR, states);
+		target.draw(_angleBracketLL, states);
+		target.draw(_angleBracketLR, states);
+	}
+	target.setView(oldView);
 }
 
 std::string sfx::gui::_moveDirectionalFlow(
@@ -1422,52 +1460,6 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 		auto& widgetList = w->getWidgets();
 		for (auto& w : widgetList) _translateWidget(w);
 	}
-}
-
-void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	// Draw background.
-	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
-		// This GUI has a background to animate.
-		target.draw(_guiBackground.at(getGUI()), states);
-	}
-	// Draw foreground.
-	_gui.draw();
-	// Draw each widget's sprite if the widget isn't hidden.
-	sf::View oldView = target.getView();
-	target.setView(sf::View(_gui.getView().getRect().operator sf::Rect<float>()));
-	for (auto& sprite : _widgetSprites) {
-		Widget::Ptr widget = _findWidget<Widget>(sprite.first);
-		static const std::function<bool(const Widget* const)> isWidgetVisible =
-			[](const Widget* const widget) -> bool {
-			if (widget->isVisible()) {
-				const auto parent = widget->getParent();
-				if (parent) {
-					return isWidgetVisible(parent);
-				} else {
-					return true;
-				}
-			}
-			return false;
-		};
-		if (widget && isWidgetVisible(widget.get())) {
-			// Pictures that don't match with their sprite's size will stretch the
-			// sprite. This should be emulated here in the future using scaling.
-			target.draw(sprite.second, states);
-		}
-	}
-	// Draw angle brackets, if there is currently a widget selected via the
-	// directional controls, and it is visible.
-	if (_enableDirectionalFlow && _currentlySelectedWidget.find(getGUI()) !=
-		_currentlySelectedWidget.end() &&
-		!_currentlySelectedWidget.at(getGUI()).second.empty() &&
-		isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
-			_currentlySelectedWidget.at(getGUI()).second).get(), true, false)) {
-		target.draw(_angleBracketUL, states);
-		target.draw(_angleBracketUR, states);
-		target.draw(_angleBracketLL, states);
-		target.draw(_angleBracketLR, states);
-	}
-	target.setView(oldView);
 }
 
 bool sfx::gui::_load(engine::json& j) {

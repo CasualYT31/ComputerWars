@@ -66,9 +66,8 @@ void awe::damage_tooltip::visible(const bool v) {
 	_visible = v;
 }
 
-bool awe::damage_tooltip::animate(const sf::RenderTarget& target,
-	const double scaling) {
-	return _sprite.animate(target, scaling);
+bool awe::damage_tooltip::animate(const sf::RenderTarget& target) {
+	return _sprite.animate(target);
 }
 
 void awe::damage_tooltip::draw(sf::RenderTarget& target,
