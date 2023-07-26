@@ -182,6 +182,37 @@ namespace sfx {
 			const tgui::String& signalName);
 
 		/**
+		 * Handles \c MenuItemClicked signals.
+		 * The script function invoked follows the same format as
+		 * \c signalHandler() (e.g. \c GUIName_MenuBarName_MenuItemClicked).
+		 * However, a <tt>const uint64</tt> parameter is also passed, which stores
+		 * the 0-based ID of the menu item that was clicked.\n
+		 * Menu item IDs start from the first menu, and traverse through its items,
+		 * favouring depth over breadth. This means that in the following menu
+		 * hierarchy:
+		 * \code
+		 * File        Edit
+		 * \ New       \ Cut
+		 *   \ File2   \ Copy
+		 * 	 \ Folder
+		 * \ Open
+		 * \ Save
+		 * 	 \ As
+		 * 	   \ File3
+		 * 	 \ All
+		 * \endcode
+		 * The menu items would go in this order: File, New, File2, Folder, Open,
+		 * Save, As, File3, All, Edit, Cut, Copy. So, Copy would have an ID of 11
+		 * and File3 would have an ID of 7. Each \c MenuBar has a separate list of
+		 * menu item IDs.
+		 * @param menuBarName The short name of the \c MenuBar whose item was
+		 *                    selected.
+		 * @param index       The 0-based index of the item selected.
+		 */
+		void menuItemClickedSignalHandler(const std::string& menuBarName,
+			const std::size_t index);
+
+		/**
 		 * Sets the \c language_dictionary object to use with these GUI menus.
 		 * If a language dictionary is given, all GUI captions will be fed into it
 		 * for translation purposes, during the call to \c animate(). If one is not
@@ -411,6 +442,16 @@ namespace sfx {
 		};
 
 		/**
+		 * Used for widgets with a single caption.
+		 */
+		typedef original_caption SingleCaption;
+
+		/**
+		 * Used for widgets with a list of captions indexed using a number.
+		 */
+		typedef std::vector<original_caption> ListOfCaptions;
+
+		/**
 		 * Performs animation calculations on a container of widgets.
 		 * @param  target    The target which the GUI will be drawn to later.
 		 * @param  container Pointer to the container widget.
@@ -563,21 +604,6 @@ namespace sfx {
 			const std::size_t index);
 
 		/**
-		 * Adds a translatable caption to a widget, or updates an existing one.
-		 * Used for widgets that have a list of captions that are most easily
-		 * identified via a string, e.g. MenuBars.
-		 * @param  fullname  The full name of the widget to assign the caption to.
-		 * @param  text      The translation key of the string to use.
-		 * @param  variables Optional list of variables to later insert into the
-		 *                   caption when translating.
-		 * @param  name      Which caption to set.
-		 * @safety No guarantee.
-		 */
-		void _setTranslatedString(const std::string& fullname,
-			const std::string& text, CScriptArray* variables,
-			const std::string& name);
-
-		/**
 		 * Shared \c _getTranslatedText() implementation.
 		 * @warning Assumes that a language dictionary has been set!
 		 * @param   caption         Caption object to translate.
@@ -613,18 +639,6 @@ namespace sfx {
 		 */
 		std::string _getTranslatedText(const std::string& fullname,
 			const std::size_t index) const;
-
-		/**
-		 * Computes the translated widget text for a given widget.
-		 * Used for widgets with a map of captions, such as a MenuBar.
-		 * @param  fullname The name of the widget whose caption needs to be
-		 *                  translated.
-		 * @param  name     The specific caption to translate.
-		 * @return The translated string with any configured variables inserted.
-		 * @safety No guarantee.
-		 */
-		std::string _getTranslatedText(const std::string& fullname,
-			const std::string& name) const;
 
 		/**
 		 * Extracts a widget's short name from its full name.
@@ -1292,6 +1306,74 @@ namespace sfx {
 		 */
 		void _setSpaceBetweenWidgets(const std::string& name, const float space);
 
+		// MENUS //
+
+		/**
+		 * Adds a new menu to the given \c MenuBar.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.\n
+		 * If this method is called outside of \c _load(), an error will be logged
+		 * and no menu will be added.\n
+		 * If no items were added to the previously added menu, then a warning will
+		 * be logged.
+		 * @param  name      The name of the \c MenuBar widget to add to.
+		 * @param  text      The text of the new menu.
+		 * @param  variables Optional list of variables to insert into the text.
+		 * @return The menu item ID of the newly created menu.
+		 */
+		std::size_t _addMenu(const std::string& name, const std::string& text,
+			CScriptArray* variables);
+
+		/**
+		 * Adds a new menu item to the most recently added menu or submenu.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.\n
+		 * If this method is called outside of \c _load(), an error will be logged
+		 * and no menu item will be added.\n
+		 * If no menus were added yet, an error will be logged and no item will be
+		 * added.\n
+		 * @param  name      The name of the \c MenuBar widget to add to.
+		 * @param  text      The text of the new menu item.
+		 * @param  variables Optional list of variables to insert into the text.
+		 * @return The menu item ID of the newly created menu item.
+		 */
+		std::size_t _addMenuItem(const std::string& name, const std::string& text,
+			CScriptArray* variables);
+
+		/**
+		 * Creates a new submenu within the most recently added menu or submenu,
+		 * and adds an item to it.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.\n
+		 * If this method is called outside of \c _load(), an error will be logged
+		 * and no menu item will be added.\n
+		 * If no menus were added yet, an error will be logged and no item will be
+		 * added.\n
+		 * If the most recently added menu was empty, then a warning will be
+		 * logged, but the call will still have the same result as if
+		 * \c _addMenuItem() was called.
+		 * @param  name      The name of the \c MenuBar widget to add to.
+		 * @param  text      The text of the new menu item.
+		 * @param  variables Optional list of variables to insert into the text.
+		 * @return The menu item ID of the newly created menu item.
+		 */
+		std::size_t _addMenuItemIntoLastItem(const std::string& name,
+			const std::string& text, CScriptArray* variables);
+
+		/**
+		 * Exits the current submenu.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.\n
+		 * If this method is called outside of \c _load(), an error will be logged
+		 * and no changes will be made.\n
+		 * If the most recently created menu item is not in a submenu, an error
+		 * will be logged and no changes will be made.
+		 * @param name      The name of the \c MenuBar widget to add to.
+		 * @param text      The text of the new menu item.
+		 * @param variables Optional list of variables to insert into the text.
+		 */
+		void _exitSubmenu(const std::string& name);
+
 		//////////
 		// DATA //
 		//////////
@@ -1360,25 +1442,10 @@ namespace sfx {
 		std::unordered_set<std::string> _dontOverridePictureSizeWithSpriteSize;
 
 		/**
-		 * Used for widgets with a single caption.
-		 */
-		typedef original_caption SingleCaption;
-
-		/**
-		 * Used for widgets with a list of captions indexed using a number.
-		 */
-		typedef std::vector<original_caption> ListOfCaptions;
-
-		/**
-		 * Used for widgets with a list of captions indexed using a string.
-		 */
-		typedef std::unordered_map<std::string, original_caption> MapOfCaptions;
-
-		/**
 		 * Stores the original captions assigned to each widget.
 		 */
-		std::unordered_map<std::string, std::variant<SingleCaption, ListOfCaptions,
-			MapOfCaptions>> _originalCaptions;
+		std::unordered_map<std::string,
+			std::variant<SingleCaption, ListOfCaptions>> _originalCaptions;
 
 		/**
 		 * Stores the custom signal handler names associated with some widgets.
@@ -1526,6 +1593,27 @@ namespace sfx {
 		 * The LR angle bracket sprite.
 		 */
 		sfx::animated_sprite _angleBracketLR;
+
+		/**
+		 * Is set to \c TRUE whilst \c _load() is running.
+		 * Will always be set to \c FALSE when not in \c _load(), even if an
+		 * exception is thrown from within \c _load().
+		 */
+		bool _isLoading = false;
+
+		/**
+		 * The hierarchy of the last added menu or menu item, for each \c MenuBar.
+		 * @warning Since menu items are translated in \c animate(), unfortunately
+		 *          we can't easily let the scripts add menu items outside of
+		 *          SetUp() functions.
+		 */
+		std::unordered_map<std::string, std::vector<tgui::String>>
+			_hierarchyOfLastMenuItem;
+
+		/**
+		 * The number of menus and menu items in each \c MenuBar.
+		 */
+		std::unordered_map<std::string, std::size_t> _menuCounter;
 	};
 }
 

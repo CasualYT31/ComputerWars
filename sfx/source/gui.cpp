@@ -28,8 +28,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 using namespace tgui;
 
 // These values are intended to be constant.
-float NO_SPACE = -0.001f;
-sf::Color NO_COLOUR(0, 0, 0, 0);
+static float NO_SPACE = -0.001f;
+static sf::Color NO_COLOUR(0, 0, 0, 0);
+static std::size_t NO_MENU_ITEM_ID = std::numeric_limits<std::size_t>::max();
 
 ////////////////////
 // GUI_BACKGROUND //
@@ -257,6 +258,12 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 "}</code></pre>\n"
 		"A list of supported signals can be found be in the "
 		"<tt>sfx::gui::_connectSignals()</tt> method in the game engine's code.");
+	document->DocumentExpectedFunction(
+		"void MenuName_MenuBarName_MenuItemClicked(const uint64)",
+		"The <tt>MenuItemClicked</tt> signal handler is a special case. It "
+		"accepts the ID of the menu item that was clicked. See the documentation "
+		"on the C++ method <tt>sfx::gui::menuItemClickedSignalHandler()</tt> for "
+		"more information.");
 
 	// Register types.
 	engine::RegisterColourType(engine, document);
@@ -325,6 +332,11 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentExpectedFunction("const string PREVIOUS_MENU", "Holds the "
 		"name of the menu that was open before the current one. Scripts cannot "
 		"change this value, but the engine does update it when switching menus.");
+	r = engine->RegisterGlobalProperty("const uint64 NO_MENU_ITEM_ID",
+		&NO_MENU_ITEM_ID);
+	document->DocumentExpectedFunction("const uint64 NO_MENU_ITEM_ID", "Constant "
+		"which is returned when creating a menu or menu item in a "
+		"<tt>MenuBar</tt> failed.");
 
 	// Register non-widget global functions.
 	r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
@@ -701,6 +713,59 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets the space between widgets in a "
 		"vertical or horizontal layout.");
+
+	// MENUS //
+	
+	r = engine->RegisterGlobalFunction("uint64 addMenu(const string&in, "
+		"const string&in, array<any>@ = null)",
+		asMETHOD(sfx::gui, _addMenu), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Adds a new menu. The name of the "
+		"<tt>MenuBar</tt> is given, then the text of the new menu. An optional "
+		"list of variables can also be given. These variables will be inserted "
+		"into the text in the same way as setWidgetText().\n"
+		"<b><u>WARNING:</u></b> this function will fail if called outside of a "
+		"<tt>...SetUp()</tt> function!\n"
+		"The ID of the newly created menu is returned. If the function failed, "
+		"<tt>NO_MENU_ITEM_ID</tt> is returned.");
+
+	r = engine->RegisterGlobalFunction("uint64 addMenuItem(const string&in, "
+		"const string&in, array<any>@ = null)",
+		asMETHOD(sfx::gui, _addMenuItem), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Adds a new menu item. The name of the "
+		"<tt>MenuBar</tt> is given, then the text of the new menu item. See "
+		"addMenu() for an explanation of the array parameter. The menu item will "
+		"be added to the most recently created menu (addMenu()) or submenu "
+		"(addMenuItemIntoLastItem()). If there are no menus, the function will "
+		"fail.\n"
+		"<b><u>WARNING:</u></b> this function will fail if called outside of a "
+		"<tt>...SetUp()</tt> function!\n"
+		"The ID of the newly created menu item is returned. If the function "
+		"failed, <tt>NO_MENU_ITEM_ID</tt> is returned.");
+
+	r = engine->RegisterGlobalFunction("uint64 addMenuItemIntoLastItem(const "
+		"string&in, const string&in, array<any>@ = null)",
+		asMETHOD(sfx::gui, _addMenuItemIntoLastItem),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Creates a new submenu in the most "
+		"recently created menu or submenu, and adds a new menu item into it. The "
+		"name of the <tt>MenuBar</tt> is given, then the text of the new menu "
+		"item. See addMenu() for an explanation of the array parameter. If there "
+		"are no menus, the function will fail. If the most recently created menu "
+		"is empty, then this call will have the same effect as addMenuItem().\n"
+		"<b><u>WARNING:</u></b> this function will fail if called outside of a "
+		"<tt>...SetUp()</tt> function!\n"
+		"The ID of the newly created menu item is returned. If the function "
+		"failed, <tt>NO_MENU_ITEM_ID</tt> is returned.");
+
+	r = engine->RegisterGlobalFunction("void exitSubmenu(const string&in)",
+		asMETHOD(sfx::gui, _exitSubmenu), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Exits the current submenu. The name of "
+		"the <tt>MenuBar</tt> is given. This function can be used to go up one "
+		"level in the menu hierarchy at a time. If the current hierarchy level is "
+		"less than three (i.e. the given menu bar is not in a submenu), then the "
+		"function will fail.\n"
+		"<b><u>WARNING:</u></b> this function will fail if called outside of a "
+		"<tt>...SetUp()</tt> function!");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -716,8 +781,8 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 		// Call CurrentPanelClose() script function, if it has been defined.
 		auto closeFuncName = _currentGUI + "Close",
 			closeFuncEmptyDecl = "void " + _currentGUI + "Close()",
-			closeFuncDecl = "void " + _currentGUI + "Close(const string&in)",
-			newMenu = newPanel;
+			closeFuncDecl = "void " + _currentGUI + "Close(const string&in)";
+		std::string newMenu = newPanel; // Can't pass in pointer to const string :(
 		if (callClose && !_currentGUI.empty()) {
 			if (_scripts->functionDeclExists(closeFuncDecl)) {
 				_scripts->callFunction(closeFuncName, &newMenu);
@@ -921,7 +986,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 			if ((*ui)[_selectControl] && !cursel.empty()) {
 				const auto widget = _findWidget<Widget>(cursel);
 				if (isWidgetFullyVisibleAndEnabled(widget.get(), true, true)) {
-					const auto widgetType = widget->getWidgetType();
+					const auto& widgetType = widget->getWidgetType();
 					if (widgetType == "Button" || widgetType == "BitmapButton" ||
 						widgetType == "ListBox") {
 						signalHandler(widget, "MouseReleased");
@@ -1005,6 +1070,16 @@ bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	return false;
 }
 
+void sfx::gui::menuItemClickedSignalHandler(const std::string& menuBarName,
+	const std::size_t index) {
+	const auto funcName = getGUI() + "_" + menuBarName +
+		"_MenuItemClicked";
+	const auto funcDecl = "void " + funcName + "(const uint64)";
+	if (_scripts->functionDeclExists(funcDecl)) {
+		_scripts->callFunction(funcName, index);
+	}
+}
+
 void sfx::gui::setLanguageDictionary(
 	const std::shared_ptr<engine::language_dictionary>& lang) {
 	_lastlang = "";
@@ -1077,7 +1152,8 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 		if (!w) w = 1; if (!h) h = 1;
 
 		// Create an empty texture
-		sf::Uint8* pixels = (sf::Uint8*)calloc(w * h, 4);
+		sf::Uint8* pixels = (sf::Uint8*)calloc(
+			static_cast<std::size_t>(w) * static_cast<std::size_t>(h), 4);
 		sf::Texture blank;
 		blank.create(w, h);
 		blank.update(pixels);
@@ -1226,7 +1302,7 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 std::string sfx::gui::_moveDirectionalFlow(
 	const std::shared_ptr<sfx::user_input>& ui) {
 	const auto cursel = _findCurrentlySelectedWidget();
-	const auto widgetType = !cursel.second ? "" : cursel.second->getWidgetType();
+	const auto& widgetType = !cursel.second ? "" : cursel.second->getWidgetType();
 	if ((*ui)[_upControl]) {
 		if (cursel.first.empty()) {
 			_makeNewDirectionalSelection(_selectThisWidgetFirst[getGUI()],
@@ -1237,7 +1313,7 @@ std::string sfx::gui::_moveDirectionalFlow(
 			if (i == -1) {
 				listbox->setSelectedItemByIndex(0);
 			} else if (i > 0) {
-				listbox->setSelectedItemByIndex(i - 1);
+				listbox->setSelectedItemByIndex(static_cast<std::size_t>(i) - 1);
 			} else if (_directionalFlow[cursel.first].up.empty()) {
 				// If there is nowhere to go from the top, loop through to the
 				// the bottom of the list.
@@ -1280,7 +1356,7 @@ std::string sfx::gui::_moveDirectionalFlow(
 			if (i == -1) {
 				listbox->setSelectedItemByIndex(0);
 			} else if (i < listbox->getItemCount() - 1) {
-				listbox->setSelectedItemByIndex(i + 1);
+				listbox->setSelectedItemByIndex(static_cast<std::size_t>(i) + 1);
 			} else if (_directionalFlow[cursel.first].down.empty()) {
 				// If there is nowhere to go from the bottom, loop through to the
 				// the top of the list.
@@ -1441,15 +1517,35 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 					);
 				}
 			}
-		} else if (type == "MenuBar") { // MapOfCaptions
+		} else if (type == "MenuBar") { // ListOfCaptions
 			auto w = _findWidget<MenuBar>(widgetName);
-			// It's possible, but we would somehow need to store the menu hierarchy
-			// separately to keep this as simple as possible. Potentially multiple
-			// menu hierarchies would have to be stored, though...
-		} else if (type == "MessageBox") { // MapOfCaptions
+			// Each and every menu item is stored in _originalCaptions depth-first.
+			// See the documentation on menuItemClickedSignalHandler() for more
+			// info.
+			std::vector<tgui::String> hierarchy;
+			std::size_t index = 0;
+			static const std::function<void(
+				const std::vector<MenuBar::GetMenusElement>&)> translateItems =
+					[&](const std::vector<MenuBar::GetMenusElement>& items) {
+				for (const auto& item : items) {
+					hierarchy.push_back(item.text);
+					const tgui::String translatedCaption =
+						_getTranslatedText(widgetName, index);
+					w->changeMenuItem(hierarchy, translatedCaption);
+					hierarchy.back() = translatedCaption;
+					// I know, it's really ugly. Not much choice.
+					w->connectMenuItem(hierarchy,
+						&sfx::gui::menuItemClickedSignalHandler, this,
+						_extractWidgetName(widgetName), index++);
+					translateItems(item.menuItems);
+					hierarchy.pop_back();
+				}
+			};
+			translateItems(w->getMenus());
+		} else if (type == "MessageBox") { // ListOfCaptions
 			auto w = _findWidget<tgui::MessageBox>(widgetName);
-			w->setTitle(_getTranslatedText(widgetName, "title"));
-			w->setText(_getTranslatedText(widgetName, "text"));
+			w->setTitle(_getTranslatedText(widgetName, 0));
+			w->setText(_getTranslatedText(widgetName, 1));
 			// Don't know how I'm going to translate buttons.
 		} else if (type == "ProgressBar") { // SingleCaption
 			auto w = _findWidget<ProgressBar>(widgetName);
@@ -1478,54 +1574,64 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 }
 
 bool sfx::gui::_load(engine::json& j) {
-	std::vector<std::string> names;
-	j.applyVector(names, { "menus" });
-	if (j.inGoodState()) {
-		// Clear state.
-		_gui.removeAllWidgets();
-		_guiBackground.clear();
-		_widgetSprites.clear();
-		_guiSpriteKeys.clear();
-		_dontOverridePictureSizeWithSpriteSize.clear();
-		_originalCaptions.clear();
-		_customSignalHandlers.clear();
-		_upControl.clear();
-		_downControl.clear();
-		_leftControl.clear();
-		_rightControl.clear();
-		_selectControl.clear();
-		_directionalFlow.clear();
-		_selectThisWidgetFirst.clear();
-		_currentlySelectedWidget.clear();
-		// Create the main menu that always exists.
-		tgui::Group::Ptr menu = tgui::Group::create();
-		menu->setVisible(false);
-		_gui.add(menu, "MainMenu");
-		setGUI("MainMenu", false, false);
-		if (_scripts) _scripts->callFunction("MainMenuSetUp");
-		// Create each menu.
-		for (const auto& m : names) {
-			menu = tgui::Group::create();
+	_isLoading = true;
+	try {
+		std::vector<std::string> names;
+		j.applyVector(names, { "menus" });
+		if (j.inGoodState()) {
+			// Clear state.
+			_gui.removeAllWidgets();
+			_guiBackground.clear();
+			_widgetSprites.clear();
+			_guiSpriteKeys.clear();
+			_dontOverridePictureSizeWithSpriteSize.clear();
+			_originalCaptions.clear();
+			_customSignalHandlers.clear();
+			_upControl.clear();
+			_downControl.clear();
+			_leftControl.clear();
+			_rightControl.clear();
+			_selectControl.clear();
+			_directionalFlow.clear();
+			_selectThisWidgetFirst.clear();
+			_currentlySelectedWidget.clear();
+			_hierarchyOfLastMenuItem.clear();
+			_menuCounter.clear();
+			// Create the main menu that always exists.
+			tgui::Group::Ptr menu = tgui::Group::create();
 			menu->setVisible(false);
-			_gui.add(menu, m);
-			// Temporarily set the current GUI to this one to make _findWidget()
-			// work with relative widget names in SetUp() functions.
-			setGUI(m, false, false);
-			if (_scripts) _scripts->callFunction(m + "SetUp");
+			_gui.add(menu, "MainMenu");
+			setGUI("MainMenu", false, false);
+			if (_scripts) _scripts->callFunction("MainMenuSetUp");
+			// Create each menu.
+			for (const auto& m : names) {
+				menu = tgui::Group::create();
+				menu->setVisible(false);
+				_gui.add(menu, m);
+				// Temporarily set the current GUI to this one to make
+				// _findWidget() work with relative widget names in SetUp()
+				// functions.
+				setGUI(m, false, false);
+				if (_scripts) _scripts->callFunction(m + "SetUp");
+			}
+			_isLoading = false;
+			// Leave with the current menu being MainMenu.
+			// _previousGUI will hold the name of the last menu in the JSON array.
+			setGUI("MainMenu", false, true);
+			// Load game control settings.
+			j.apply(_upControl, { "up" }, true);
+			j.apply(_downControl, { "down" }, true);
+			j.apply(_leftControl, { "left" }, true);
+			j.apply(_rightControl, { "right" }, true);
+			j.apply(_selectControl, { "select" }, true);
+			return true;
 		}
-		// Leave with the current menu being MainMenu.
-		// _previousGUI will hold the name of the last menu in the JSON array.
-		setGUI("MainMenu", false, true);
-		// Load game control settings.
-		j.apply(_upControl, { "up" }, true);
-		j.apply(_downControl, { "down" }, true);
-		j.apply(_leftControl, { "left" }, true);
-		j.apply(_rightControl, { "right" }, true);
-		j.apply(_selectControl, { "select" }, true);
-		return true;
-	} else {
-		return false;
+	} catch (...) {
+		_isLoading = false;
+		throw;
 	}
+	_isLoading = false;
+	return false;
 }
 
 bool sfx::gui::_save(nlohmann::ordered_json& j) noexcept {
@@ -1631,8 +1737,9 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		widget->getSignal("DoubleClicked").
 			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "menubar") {
-		widget->getSignal("MenuItemClicked").
-			connectEx(&sfx::gui::signalHandler, this);
+		// Each item is connected individually, when created and when translated.
+		/*widget->getSignal("MenuItemClicked").
+			connectEx(&sfx::gui::signalHandler, this);*/
 	} else if (type == "messagebox") {
 		widget->getSignal("ButtonPressed").
 			connectEx(&sfx::gui::signalHandler, this);
@@ -1705,6 +1812,8 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 		_originalCaptions.erase(name);
 		_customSignalHandlers.erase(name);
 		_directionalFlow.erase(name);
+		_hierarchyOfLastMenuItem.erase(name);
+		_menuCounter.erase(name);
 		// Also delete references to the removed sprite from other widgets.
 		for (auto& flowInfo : _directionalFlow) {
 			if (flowInfo.second.up == name) flowInfo.second.up.clear();
@@ -1746,15 +1855,6 @@ void sfx::gui::_setTranslatedString(const std::string& fullname,
 	auto& list = std::get<sfx::gui::ListOfCaptions>(_originalCaptions[fullname]);
 	if (list.size() <= index) list.resize(index + 1);
 	list[index] = sfx::gui::SingleCaption(text, variables);
-}
-
-void sfx::gui::_setTranslatedString(const std::string& fullname,
-	const std::string& text, CScriptArray* variables, const std::string& name) {
-	if (!std::holds_alternative<sfx::gui::MapOfCaptions>(
-		_originalCaptions[fullname]))
-		_originalCaptions[fullname] = sfx::gui::MapOfCaptions();
-	std::get<sfx::gui::MapOfCaptions>(_originalCaptions[fullname])[name] =
-		sfx::gui::SingleCaption(text, variables);
 }
 
 std::string sfx::gui::_getTranslatedText(const sfx::gui::original_caption& caption,
@@ -1804,17 +1904,6 @@ std::string sfx::gui::_getTranslatedText(const std::string& fullname,
 		});
 }
 
-std::string sfx::gui::_getTranslatedText(const std::string& fullname,
-	const std::string& name) const {
-	return _getTranslatedText(std::get<sfx::gui::MapOfCaptions>(
-		_originalCaptions.at(fullname)).at(name),
-		[&](engine::logger* const logger, const std::string& typeName) {
-			logger->warning("Unsupported type \"{}\" given when translating "
-				"widget \"{}\"'s \"{}\" caption: inserting blank string instead.",
-				typeName, fullname, name);
-		});
-}
-
 std::string sfx::gui::_extractWidgetName(const std::string& fullname) {
 	if (fullname.rfind('.') == String::npos) {
 		return fullname;
@@ -1854,6 +1943,8 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::Button::create();
 	} else if (type == "editbox") {
 		return tgui::EditBox::create();
+	} else if (type == "menubar") {
+		return tgui::MenuBar::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -1880,125 +1971,7 @@ std::pair<std::string, tgui::Widget::Ptr>
 // SCRIPT INTERFACE //
 //////////////////////
 
-/**
- * Used internally in the script interface when something goes wrong.
- */
-class GuiScriptError : public std::exception {
-public:
-	GuiScriptError(const char* msg) : std::exception(msg) {}
-	GuiScriptError(const std::string& msg) : std::exception(msg.c_str()) {}
-	GuiScriptError(const tgui::String& msg) :
-		std::exception(msg.toStdString().c_str()) {}
-};
-
-#undef ERROR
-/**
- * Abort the function call.
- * @param m Message describing how the function call failed.
- */
-#define ERROR(m) throw GuiScriptError(m);
-
-/**
- * Abort the function call due to unsupported widget type.
- */
-#define UNSUPPORTED_WIDGET_TYPE() ERROR("This operation is not supported for " \
-	"this type of widget.")
-
-/**
- * Initialise the function call.
- */
-#define START() try {
-
-/**
- * Initialise the function call with widget information.
- * This macro defines the following variables:
- * <ul><li><tt>std::vector<std::string> fullname;</tt> Stores the full name of the
- *     widget, with each element storing the name of each widget in the hierarchy.
- *     This variable is accessible in \c END().</li>
- *     <li><tt>std::string fullnameAsString;</tt> Stores the full name of the
- *     widget as a single string. This variable is accessible in \c END().</tt>
- *     <li><tt>tgui::string widgetType;</tt> Holds the type of the widget.
- *     "Unknown" if the widget does not exist.</li>
- *     <li><tt>Widget::Ptr widget;</tt> Points to the widget. If it was not found,
- *     points to \c nullptr.</li>
- *     <li><tt>std::string containerName;</tt> The full name of the container which
- *     contains (or which would contain) the given widget. This is deduced using
- *     \c fullnameAsString.</li>
- *     <li><tt>Container::Ptr container;</tt> Will point to the container
- *     identified by \c containerName. If it does not exist, an error will be
- *     invoked.</li></ul>
- * @param n          The name of the widget to search for.
- * @param must_exist \c TRUE if the given widget must exist, \c FALSE if it must
- *                   not exist. If the test does not pass, an error will be
- *                   invoked.
- */
-#define START_WITH_WIDGET_BASE(n, must_exist) std::vector<std::string> fullname; \
-	std::string fullnameAsString; \
-	tgui::String widgetType("Unknown"); \
-	try { \
-		Widget::Ptr widget = \
-			_findWidget<Widget>(n, &fullname, &fullnameAsString); \
-		if (widget.operator bool() != must_exist) { \
-			if (must_exist) { \
-				ERROR("This widget does not exist!"); \
-			} else { \
-				ERROR("This widget already exists!"); \
-			} \
-		} \
-		if (widget) widgetType = widget->getWidgetType(); \
-		std::string containerName = \
-				fullnameAsString.substr(0, fullnameAsString.rfind('.')); \
-		Container::Ptr container = _findWidget<Container>(containerName); \
-		if (!container) { \
-			ERROR(std::string("The container \"").append(containerName). \
-				append("\" does not exist!")); \
-		}
-
-/// <tt>START_WITH_WIDGET_BASE(n, true)</tt>.
-#define START_WITH_WIDGET(n) START_WITH_WIDGET_BASE(n, true)
-
-/// <tt>START_WITH_WIDGET_BASE(n, false)</tt>.
-#define START_WITH_NONEXISTENT_WIDGET(n) START_WITH_WIDGET_BASE(n, false)
-
-/**
- * Finish initialising the function call.
- * @param m   This message is always written when an \c ERROR() is reported.
- * @param ... The variables to insert into the message.
- */
-#define END(m, ...) } catch (const GuiScriptError& e) { \
-		_logger.error(std::string(m).append(" ").append(e.what()), __VA_ARGS__); \
-	}
-
-/**
- * Execute code on \c widget if it is of a given type.
- * The code to execute has access to a variable, \c castWidget, which is the
- * result of dynamically casting the \c widget pointer to the given type of widget.
- * @param type The widget type to test for, e.g. Container or ListBox.
- * @param code The code to execute. If \c widget is not of the given type, this
- *             code is not executed.
- */
-#define IF_WIDGET_IS(type, code) if (widgetType == #type) { \
-		auto castWidget = std::dynamic_pointer_cast<type>(widget); \
-		code \
-	}
-
-/**
- * Execute code on \c widget if it is of a given type.
- * @sa \c IF_WIDGET_IS()
- */
-#define ELSE_IF_WIDGET_IS(type, code) else if (widgetType == #type) { \
-		auto castWidget = std::dynamic_pointer_cast<type>(widget); \
-		code \
-	}
-
-/**
- * Used at the end of a chain of \c IF_WIDGET_IS() and \c ELSE_IF_WIDGET_IS()
- * macros, to invoke \C UNSUPPORTED_WIDGET_TYPE() if \c widget does not match any
- * of the given types.
- * @sa \c IF_WIDGET_IS()
- * @sa \c ELSE_IF_WIDGET_IS()
- */
-#define ELSE_UNSUPPORTED() else { UNSUPPORTED_WIDGET_TYPE() }
+#include "guimacros.hpp"
 
 void sfx::gui::_setGUI(const std::string& name) {
 	setGUI(name, true, true);
@@ -2035,7 +2008,7 @@ bool sfx::gui::_widgetExists(const std::string& name) {
 bool sfx::gui::_menuExists(const std::string& menu) {
 	// More efficient implementation would just cache the menu list, as menus can
 	// only be added or removed via load().
-	const auto menus = _gui.getWidgets();
+	const auto& menus = _gui.getWidgets();
 	for (const auto& widget : menus)
 		if (widget->getWidgetName() == menu) return true;
 	return false;
@@ -2330,6 +2303,7 @@ void sfx::gui::_setWidgetTextSize(const std::string& name,
 		ELSE_IF_WIDGET_IS(BitmapButton, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(Button, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(EditBox, castWidget->setTextSize(size);)
+		ELSE_IF_WIDGET_IS(MenuBar, castWidget->setTextSize(size);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the character size {} to widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\".", size, name, widgetType, fullname[0])
@@ -2668,4 +2642,141 @@ void sfx::gui::_setSpaceBetweenWidgets(const std::string& name,
 	END("Attempted to set {} to a widget \"{}\"'s space between widgets property. "
 		"The widget is of type \"{}\", within menu \"{}\".", space, name,
 		widgetType, fullname[0])
+}
+
+// MENUS //
+
+std::size_t sfx::gui::_addMenu(const std::string& name, const std::string& text,
+	CScriptArray* variables) {
+	auto ret = NO_MENU_ITEM_ID;
+	START_WITH_WIDGET(name)
+		if (!_isLoading) {
+			ERROR("This function cannot be called outside of a menu's SetUp() "
+				"function!");
+		}
+		IF_WIDGET_IS(MenuBar,
+			if (_hierarchyOfLastMenuItem[fullnameAsString].size() == 1) {
+				_logger.warning("Menu \"{}\" in MenuBar \"{}\" is empty!",
+					_hierarchyOfLastMenuItem[fullnameAsString][0],
+						fullnameAsString);
+			}
+			castWidget->addMenu(text);
+			_hierarchyOfLastMenuItem[fullnameAsString] = { text };
+			if (_menuCounter.find(fullnameAsString) == _menuCounter.end())
+				_menuCounter.emplace(fullnameAsString, 0);
+			_setTranslatedString(fullnameAsString, text, variables,
+				_menuCounter[fullnameAsString]);
+			ret = _menuCounter[fullnameAsString]++;
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to add a new menu \"{}\" to a widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
+	if (variables) variables->Release();
+	return ret;
+}
+
+std::size_t sfx::gui::_addMenuItem(const std::string& name,
+	const std::string& text, CScriptArray* variables) {
+	auto ret = NO_MENU_ITEM_ID;
+	START_WITH_WIDGET(name)
+		if (!_isLoading) {
+			ERROR("This function cannot be called outside of a menu's SetUp() "
+				"function!");
+		}
+		IF_WIDGET_IS(MenuBar,
+			auto& hierarchy = _hierarchyOfLastMenuItem[fullnameAsString];
+			auto copy(hierarchy);
+			if (hierarchy.size() == 0) {
+				ERROR("No menu has been added yet!");
+			} else if (hierarchy.size() == 1) {
+				hierarchy.push_back(text);
+			} else {
+				hierarchy.back() = text;
+			}
+			if (!castWidget->addMenuItem(hierarchy)) {
+				std::string error = "Could not add item with hierarchy: ";
+				for (std::size_t i = 0, len = hierarchy.size(); i < len; ++i) {
+					error += hierarchy[i].toStdString() +
+						(i < len - 1 ? ", " : ". ");
+				}
+				hierarchy = copy;
+				ERROR(error);
+			}
+			_setTranslatedString(fullnameAsString, text, variables,
+				_menuCounter[fullnameAsString]);
+			// NOTE: we also must reconnect the signal handler after translating
+			// the menu item!
+			castWidget->connectMenuItem(hierarchy,
+				&sfx::gui::menuItemClickedSignalHandler, this, name,
+				_menuCounter[fullnameAsString]);
+			ret = _menuCounter[fullnameAsString]++;
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to add a new menu item \"{}\" to a widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
+	if (variables) variables->Release();
+	return ret;
+}
+
+std::size_t sfx::gui::_addMenuItemIntoLastItem(const std::string& name,
+	const std::string& text, CScriptArray* variables) {
+	auto ret = NO_MENU_ITEM_ID;
+	START_WITH_WIDGET(name)
+		if (!_isLoading) {
+			ERROR("This function cannot be called outside of a menu's SetUp() "
+				"function!");
+		}
+		IF_WIDGET_IS(MenuBar,
+			auto& hierarchy = _hierarchyOfLastMenuItem[fullnameAsString];
+			if (hierarchy.size() == 0) {
+				ERROR("No menu has been added yet!");
+			} else if (hierarchy.size() == 1) {
+				_logger.warning("Calling addMenuItemIntoLastItem() when "
+					"addMenuItem() was likely intended.");
+			}
+			hierarchy.push_back(text);
+			if (!castWidget->addMenuItem(hierarchy)) {
+				std::string error = "Could not add item with hierarchy: ";
+				for (std::size_t i = 0, len = hierarchy.size(); i < len; ++i) {
+					error += hierarchy[i].toStdString() +
+						(i < len - 1 ? ", " : ". ");
+				}
+				hierarchy.pop_back();
+				ERROR(error);
+			}
+			_setTranslatedString(fullnameAsString, text, variables,
+				_menuCounter[fullnameAsString]);
+			// NOTE: we also must reconnect the signal handler after translating
+			// the menu item!
+			castWidget->connectMenuItem(hierarchy,
+				&sfx::gui::menuItemClickedSignalHandler, this, name,
+				_menuCounter[fullnameAsString]);
+			ret = _menuCounter[fullnameAsString]++;
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to create a new submenu with item \"{}\" in a widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", text, name, widgetType,
+		fullname[0])
+	if (variables) variables->Release();
+	return ret;
+}
+
+void sfx::gui::_exitSubmenu(const std::string& name) {
+	START_WITH_WIDGET(name)
+		if (!_isLoading) {
+			ERROR("This function cannot be called outside of a menu's SetUp() "
+				"function!");
+		}
+		IF_WIDGET_IS(MenuBar,
+			auto& hierarchy = _hierarchyOfLastMenuItem[fullnameAsString];
+			if (hierarchy.size() == 0) {
+				ERROR("No menu has been added yet!");
+			} else if (hierarchy.size() < 3) {
+				ERROR("Not currently in a submenu!");
+			}
+			hierarchy.pop_back();
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to exit the current submenu of widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 }
