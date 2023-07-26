@@ -372,7 +372,7 @@ namespace sfx {
 		 *         information, \c FALSE otherwise.
 		 * @safety No guarantee.
 		 */
-		bool animate(const sf::RenderTarget& target);
+		bool animate(const sf::RenderTarget& target) final;
 	private:
 		/**
 		 * This drawable's \c draw() method.
@@ -385,7 +385,7 @@ namespace sfx {
 		 *                internal workings of the drawable.
 		 * @safety No guarantee.
 		 */
-		void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
 
 		/**
 		 * The internal logger object.

@@ -221,7 +221,7 @@ namespace sfx {
 		 * @safety No guarantee.
 		 * @sa     sfx::gui::setLanguageDictionary()
 		 */
-		bool animate(const sf::RenderTarget& target);
+		bool animate(const sf::RenderTarget& target) final;
 	private:
 		/**
 		 * Represents a GUI background.
@@ -313,12 +313,13 @@ namespace sfx {
 			 *         result of the call to the sprite's \c animate() method if a
 			 *         sprite background.
 			 */
-			bool animate(const sf::RenderTarget& target);
+			bool animate(const sf::RenderTarget& target) final;
 		private:
 			/**
 			 * Draws the GUI background.
 			 */
-			void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+			void draw(sf::RenderTarget& target,
+				sf::RenderStates states) const final;
 
 			/**
 			 * Tracks the type of background this instantiation represents.
@@ -427,7 +428,7 @@ namespace sfx {
 		 *          ignores the given \c target when drawing: it must be previously
 		 *          set with \c setTarget().
 		 */
-		void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
 
 		/**
 		 * Handles moving the currently selected widget based on directional input.
