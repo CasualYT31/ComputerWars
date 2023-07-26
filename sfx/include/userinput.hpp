@@ -249,6 +249,11 @@ namespace sfx {
 	class convert {
 	public:
 		/**
+		 * This class cannot be instantiated by the client.
+		 */
+		convert() = delete;
+
+		/**
 		 * Converts an unsigned integer to a keyboard key ID.
 		 * @param  k      The unsigned integer holding the key ID.
 		 * @param  logger Optional pointer to the logger object.
@@ -297,11 +302,6 @@ namespace sfx {
 		 */
 		static sfx::control_signal tosignaltype(unsigned int s,
 			engine::logger *const logger = nullptr) noexcept;
-	protected:
-		/**
-		 * This class cannot be instantiated by the client.
-		 */
-		convert() = default;
 	};
 
 	/**

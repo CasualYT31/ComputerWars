@@ -47,6 +47,11 @@ namespace engine {
 	class expand_string {
 	public:
 		/**
+		 * This class cannot be instantiated by the client.
+		 */
+		expand_string() = delete;
+
+		/**
 		 * Inserts variables into a given string.
 		 * This version of the \c insert() method scans through every character of
 		 * a given string in search of <em>var chars</em>. When a single var char
@@ -114,11 +119,6 @@ namespace engine {
 		 * @sa    getVarChar()
 		 */
 		static void setVarChar(const char varchar) noexcept;
-	protected:
-		/**
-		 * This class cannot be instantiated by the client.
-		 */
-		expand_string() noexcept = default;
 	private:
 		/**
 		 * The string stream which is used to piece together the final string.
