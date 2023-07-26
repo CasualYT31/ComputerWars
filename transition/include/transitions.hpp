@@ -70,7 +70,7 @@ namespace transition {
 		 * @return The approximate duration of this transition.
 		 * @sa     sfx::base::base()
 		 */
-		sf::Time duration() const noexcept;
+		sf::Time duration() const;
 	private:
 		/**
 		 * Stores the fade-in property of this transition.
@@ -94,34 +94,30 @@ namespace transition {
 		/**
 		 * Sets the transition up, ready for drawing.
 		 * @param isFadingIn The fade in property of this transition.
-		 * @param duration   The duration of this transition.
 		 * @param colour     The colour of the two rectangles.
+		 * @param duration   The duration of this transition.
 		 * @sa    sfx::base::base()
 		 */
-		rectangle(const bool isFadingIn, const sf::Time& duration = sf::seconds(1),
-			const sf::Color& colour = sf::Color()) noexcept;
+		rectangle(const bool isFadingIn, const sf::Color& colour = sf::Color(),
+			const sf::Time& duration = sf::seconds(1));
 		
 		/**
 		 * This drawable's \c animate() method.
 		 * Performs all the calculations on the rectangle shapes.
-		 * @param  target  The target to render the transition to.
-		 * @param  scaling Scaling applied to the transition.
+		 * @param  target The target to render the transition to.
 		 * @return \c TRUE if the transition has completed, \c FALSE otherwise.
 		 * @sa     transitions.hpp
 		 */
-		virtual bool animate(const sf::RenderTarget& target,
-			const double scaling = 1.0) noexcept;
+		bool animate(const sf::RenderTarget& target) final;
 	private:
 		/**
 		 * This drawable's \c draw() method.
 		 * Draws two rectangles to the screen. They will not move if the
 		 * \c animate() method isn't called, so remember to call it before drawing!
 		 * @param target The target to render the transition to.
-		 * @param states The render states to apply to the transition. Applying
-		 *               transforms is perfectly valid and will not alter the
-		 *               internal workings of the drawable.
+		 * @param states The render states to apply to the transition.
 		 */
-		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
 		
 		/**
 		 * Tracks the size of both rectangles.

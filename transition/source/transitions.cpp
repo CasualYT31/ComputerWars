@@ -29,52 +29,46 @@ bool transition::base::isFadingIn() const noexcept {
 	return _isFadingIn;
 }
 
-sf::Time transition::base::duration() const noexcept {
+sf::Time transition::base::duration() const {
 	return _duration;
 }
 
-transition::rectangle::rectangle(const bool isFadingIn, const sf::Time& duration,
-	const sf::Color& colour) noexcept : base(isFadingIn, duration) {
+transition::rectangle::rectangle(const bool isFadingIn, const sf::Color& colour,
+	const sf::Time& duration) : base(isFadingIn, duration) {
 	_toprect.setFillColor(colour);
 	_bottomrect.setFillColor(colour);
+	_toprect.setOutlineThickness(2.0f);
+	_toprect.setOutlineColor(sf::Color::Red);
+	_bottomrect.setOutlineThickness(2.0f);
+	_bottomrect.setOutlineColor(sf::Color::Red);
 }
 
-bool transition::rectangle::animate(const sf::RenderTarget& target,
-	const double scaling) noexcept {
-	if (isFinished()) return true;
-	// initialise animation
-	if (firstTimeAnimated()) {
-		if (isFadingIn()) {
-			_size.x = (float)target.getSize().x;
-			_size.y = (float)target.getSize().y;
-		} else {
-			_size = sf::Vector2f(0.0, 0.0);
-		}
-	}
-	// animate
-	float delta = calculateDelta();
-	if (isFadingIn()) {
-		_size.x -= (((float)target.getSize().y / duration().asSeconds()) *
-			((float)target.getSize().x / (float)target.getSize().y)) * delta;
-		_size.y -= (((float)target.getSize().x / duration().asSeconds()) *
-			((float)target.getSize().y / (float)target.getSize().x)) * delta;
-	}
-	else {
-		_size.x += (((float)target.getSize().y / duration().asSeconds()) *
-			((float)target.getSize().x / (float)target.getSize().y)) * delta;
-		_size.y += (((float)target.getSize().x / duration().asSeconds()) *
-			((float)target.getSize().y / (float)target.getSize().x)) * delta;
-	}
+bool transition::rectangle::animate(const sf::RenderTarget& target) {
+	if (isFinished())
+		return true;
+	const auto targetSize = sf::Vector2f(target.getSize());
+
+	if (firstTimeAnimated())
+		_size = isFadingIn() ? targetSize : sf::Vector2f(0.0f, 0.0f);
+
+	const float delta = calculateDelta();
+	const sf::Vector2f offset(
+		((targetSize.y / duration().asSeconds()) *
+			(targetSize.x / targetSize.y)) * delta,
+		((targetSize.x / duration().asSeconds()) *
+			(targetSize.y / targetSize.x)) * delta
+	);
+	_size += isFadingIn() ? -offset : offset;
 	_toprect.setSize(_size);
 	_bottomrect.setSize(_size);
-	_toprect.setPosition(0, 0);
-	_bottomrect.setPosition(target.getSize().x - _size.x,
-		target.getSize().y - _size.y);
-	// check to see if transition has completed
+	_toprect.setPosition(-50.0f, -50.0f);
+	_bottomrect.setPosition(targetSize.x - _size.x,
+		targetSize.y - _size.y);
+
 	if (isFadingIn() && (_size.x <= 0.0f && _size.y <= 0.0f)) {
 		finish();
-	} else if (!isFadingIn() && (_size.x >= target.getSize().x &&
-		_size.y >= target.getSize().y)) {
+	} else if (!isFadingIn() && (_size.x >= targetSize.x &&
+		_size.y >= targetSize.y)) {
 		finish();
 	}
 	if (isFinished()) {
