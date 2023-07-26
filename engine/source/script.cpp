@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "SFML/System/Clock.hpp"
 #include "file.hpp"
 #include "boost/stacktrace.hpp"
+#include "fmtengine.hpp"
 
 void AWEColourTypeConstructor(const int r, const int g, const int b,
     const int a, void* memory) {

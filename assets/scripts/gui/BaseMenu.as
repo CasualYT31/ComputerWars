@@ -131,7 +131,7 @@ void BaseMenuSetUp() {
 	setWidgetTextOutlineColour("calc.label", Colour(0, 0, 0, 255));
 	setWidgetTextOutlineThickness("calc.label", 1.5);
 	setWidgetTextAlignment("calc.label", HorizontalAlignment::Centre,
-		VerticalAlignment::Top);
+		VerticalAlignment::Centre);
 }
 
 /**
