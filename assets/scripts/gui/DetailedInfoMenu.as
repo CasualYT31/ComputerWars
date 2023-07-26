@@ -217,6 +217,7 @@ void DetailedInfoMenuOpen() {
 	for (uint a = 0, armyCount = armies.length(); a < armyCount; a++) {
 		armyWidgets.insertLast(ArmyWidget(
 			"DetailedInfoMenu.baseLayout.armyPanel.army" + formatUInt(a)));
+        armyWidgets[a].setAlignment(ArmyWidgetAlignment::Left);
 		armyWidgets[a].update(armies[a]);
 		setWidgetPosition(armyWidgets[a].panel, "2%", "2% + " +
 			formatUInt(55 + (ARMYWIDGET_HEIGHT + 10) * a) + "px");

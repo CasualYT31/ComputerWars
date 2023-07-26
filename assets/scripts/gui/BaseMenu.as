@@ -25,6 +25,16 @@ const array<string> SEA_UNITS = {
 };
 
 /**
+ * Stores the calc label text size.
+ */
+const uint BASEMENU_CALC_LABEL_TEXT_SIZE = 16;
+
+/**
+ * Stores the button text size.
+ */
+const uint BASEMENU_BUTTON_TEXT_SIZE = 12;
+
+/**
  * Sets up the panel shown for a particular type of production tile.
  * @param panelName         The name to give to the root panel widget.
  * @param movementTypeNames An array of movement types. If a unit has a movement
@@ -57,7 +67,7 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 		string widget = panelName + "." + type.scriptName;
 		addWidget("BitmapButton", widget, "BaseMenuHandleSignal");
         widgetNames[i % columnCount].insertLast(widget);
-		setWidgetTextSize(widget, 16);
+		setWidgetTextSize(widget, BASEMENU_BUTTON_TEXT_SIZE);
 		// Rounding errors that will need addressing in the future.
 		setWidgetSize(widget, formatFloat(100.0 / double(columnCount)) + "%",
 			formatUInt(HEIGHT) + "px");
@@ -126,7 +136,7 @@ void BaseMenuSetUp() {
 	setWidgetSize("calc", "60%", "30px");
 	addWidget("Label", "calc.label");
 	setWidgetSize("calc.label", "100%", "100%");
-	setWidgetTextSize("calc.label", 20);
+	setWidgetTextSize("calc.label", BASEMENU_CALC_LABEL_TEXT_SIZE);
 	setWidgetTextColour("calc.label", Colour(255, 255, 255, 255));
 	setWidgetTextOutlineColour("calc.label", Colour(0, 0, 0, 255));
 	setWidgetTextOutlineThickness("calc.label", 1.5);

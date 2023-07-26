@@ -20,6 +20,16 @@ const string PROPERTY_PANEL_WIDTH = formatUInt(PROPERTY_PANEL_SIZE.x) + "px";
 const string PROPERTY_PANEL_HEIGHT = formatUInt(PROPERTY_PANEL_SIZE.y) + "px";
 
 /**
+ * Stores the text size of the text in the \c namePanel.
+ */
+const uint PROPERTY_PANEL_NAME_TEXT_SIZE = 10;
+
+/**
+ * Stores the text size of properties.
+ */
+const uint PROPERTY_PANEL_PROPERTY_TEXT_SIZE = 8;
+
+/**
  * Used to create the widgets that represent a property panel in-game.
  */
 class PropertyPanel {
@@ -52,7 +62,8 @@ class PropertyPanel {
 		addWidget("Panel", layout + ".namePanel");
 		setWidgetBackgroundColour(layout + ".namePanel", NO_COLOUR);
 		addWidget("Label", layout + ".namePanel.name");
-		_configureLabel(layout + ".namePanel.name", 16);
+		_configureLabel(layout + ".namePanel.name",
+            PROPERTY_PANEL_NAME_TEXT_SIZE);
 		setWidgetOrigin(layout + ".namePanel.name", 0.5, 0.5);
 		setWidgetPosition(layout + ".namePanel.name", "50%", "50%");
 		addWidget("Grid", layout + ".properties");
@@ -128,7 +139,8 @@ class PropertyPanel {
 		}
 		if (!widgetExists(layout + ".properties.label" + i)) {
 			addWidgetToGrid("Label", layout + ".properties.label" + i, index, 1);
-			_configureLabel(layout + ".properties.label" + i, 12);
+			_configureLabel(layout + ".properties.label" + i,
+                PROPERTY_PANEL_PROPERTY_TEXT_SIZE);
 			setWidgetAlignmentInGrid(layout + ".properties", index, 1,
 				WidgetAlignment::Left);
 		}

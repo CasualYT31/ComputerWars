@@ -32,6 +32,21 @@ const float ARMYWIDGET_RADIUS = ARMYWIDGET_HEIGHT / 2.0;
 const float ARMYWIDGET_BORDER_SIZE = 2.0;
 
 /**
+ * Stores the text size of the team ID label.
+ */
+const uint ARMYWIDGET_TEAMID_TEXT_SIZE = 24;
+
+/**
+ * Stores the text size of the funds label.
+ */
+const uint ARMYWIDGET_FUNDS_TEXT_SIZE = 14;
+
+/**
+ * Stores the X offset of the team ID label.
+ */
+const string ARMYWIDGET_X_OFFSET_TEAMID = "3px";
+
+/**
  * Used to create the widgets that represent an army panel in-game.
  */
 class ArmyWidget {
@@ -61,7 +76,7 @@ class ArmyWidget {
 
 		team = panelName + ".team";
 		addWidget("Label", team);
-		setWidgetTextSize(team, 32);
+		setWidgetTextSize(team, ARMYWIDGET_TEAMID_TEXT_SIZE);
 		setWidgetTextColour(team, Colour(255,255,255,255));
 		setWidgetTextOutlineColour(team, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness(team, 2.0);
@@ -74,7 +89,7 @@ class ArmyWidget {
 
 		funds = panelName + ".funds";
 		addWidget("Label", funds);
-		setWidgetTextSize(funds, 20);
+		setWidgetTextSize(funds, ARMYWIDGET_FUNDS_TEXT_SIZE);
 		setWidgetTextColour(funds, Colour(255,255,255,255));
 		setWidgetTextOutlineColour(funds, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness(funds, 2.0);
@@ -124,8 +139,8 @@ class ArmyWidget {
 
 	/**
 	 * Configures an army widget to be either left-aligned or right-aligned.
-	 * This method will reposition everything inside the panel, but the panel itself
-	 * will not be repositioned.
+	 * This method will reposition everything inside the panel, but the panel
+     * itself will not be repositioned.
 	 * @param alignment The alignment. If an invalid value is given, an error will
 	 *                  be logged and the widget will not be changed.
 	 */
@@ -133,24 +148,27 @@ class ArmyWidget {
 		const float coX = ARMYWIDGET_RADIUS + 5;
 		switch (alignment) {
 		case ArmyWidgetAlignment::Left:
-			setWidgetOrigin(team, 0.0, 0.0);
-			setWidgetPosition(team, "8px", "19.5px");
-			setWidgetOrigin(currentCO, 0.0, 0.0);
+			setWidgetOrigin(team, 0.0f, 0.5f);
+			setWidgetPosition(team, ARMYWIDGET_X_OFFSET_TEAMID,
+                formatFloat(ARMYWIDGET_RADIUS) + "px");
+			setWidgetOrigin(currentCO, 0.0f, 0.0f);
 			setWidgetPosition(currentCO, formatFloat(coX) + "px", "5px");
-			setWidgetOrigin(tagCO, 0.0, 0.0);
+			setWidgetOrigin(tagCO, 0.0f, 0.0f);
 			setWidgetPosition(tagCO, formatFloat(coX) + "px", "30px");
-			setWidgetOrigin(funds, 0.0, 0.0);
-			setWidgetPosition(funds, "140px", "7.5px");
+			setWidgetOrigin(funds, 0.0f, 0.0f);
+			setWidgetPosition(funds, "140px", "5px");
 			break;
 		case ArmyWidgetAlignment::Right:
-			setWidgetOrigin(team, 1.0, 0.0);
-			setWidgetPosition(team, "100%-8px", "19.5px");
-			setWidgetOrigin(currentCO, 1.0, 0.0);
-			setWidgetPosition(currentCO, "100%-" + formatFloat(coX) + "px", "5px");
-			setWidgetOrigin(tagCO, 1.0, 0.0);
+			setWidgetOrigin(team, 1.0f, 0.5f);
+			setWidgetPosition(team, "100%-" + ARMYWIDGET_X_OFFSET_TEAMID,
+                formatFloat(ARMYWIDGET_RADIUS) + "px");
+			setWidgetOrigin(currentCO, 1.0f, 0.0f);
+			setWidgetPosition(currentCO, "100%-" + formatFloat(coX) + "px",
+                "5px");
+			setWidgetOrigin(tagCO, 1.0f, 0.0f);
 			setWidgetPosition(tagCO, "100%-" + formatFloat(coX) + "px", "30px");
-			setWidgetOrigin(funds, 1.0, 0.0);
-			setWidgetPosition(funds, "100%-140px", "7.5px");
+			setWidgetOrigin(funds, 1.0f, 0.0f);
+			setWidgetPosition(funds, "100%-140px", "5px");
 			break;
 		default:
 			error("Attempted to set the ArmyWidget \"" + panel + "\"'s alignment "

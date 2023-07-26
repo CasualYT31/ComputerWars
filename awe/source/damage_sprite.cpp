@@ -30,7 +30,7 @@ void awe::damage_tooltip::setSpritesheet(
 
 void awe::damage_tooltip::setFont(const std::shared_ptr<sf::Font>& font) {
 	_damage.setFont(*font);
-	_damage.setCharacterSize(12);
+	_damage.setCharacterSize(8);
 	_damage.setOutlineColor(sf::Color::Black);
 	_damage.setFillColor(sf::Color::White);
 	_damage.setOutlineThickness(2.0f);
