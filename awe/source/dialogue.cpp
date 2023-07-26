@@ -88,9 +88,8 @@ std::unique_ptr<awe::dialogue_box>
 	std::unique_ptr<awe::dialogue_box> ret;
 	try {
 		ret = std::make_unique<awe::dialogue_box>();
-	} catch (std::bad_alloc& e) {
-		_logger.error("Fatal allocation error of dialogue box {}: {}",
-			i, e.what());
+	} catch (const std::bad_alloc& e) {
+		_logger.error("Fatal allocation error of dialogue box {}: {}", i, e);
 		return nullptr;
 	}
 	awe::dialogue_sequence::dialogue_box_data& data = _boxes[i];

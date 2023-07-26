@@ -210,13 +210,13 @@ bool sfx::audio::_loadAudio() {
 }
 
 void sfx::audio::_validateVolume(float& v) noexcept {
-	if (v > 100.0) {
+	if (v > 100.0f) {
 		_logger.write("Volume value {} is too high: set to 100.0", v);
-		v = 100.0;
+		v = 100.0f;
 	}
-	if (v < 0.0) {
+	if (v < 0.0f) {
 		_logger.write("Volume value {} is too low: set to 0.0", v);
-		v = 0.0;
+		v = 0.0f;
 	}
 }
 

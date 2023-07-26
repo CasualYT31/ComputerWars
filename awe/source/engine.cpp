@@ -20,9 +20,9 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <chrono>
 #include "engine.hpp"
 #include "army.hpp"
-#include <chrono>
 
 awe::game_engine::game_engine(const engine::logger::data& data) :
 	engine::json_script({ data.sink, "json_script" }), _logger(data) {
@@ -84,7 +84,7 @@ int awe::game_engine::run() {
 			}
 		}
 	} catch (const std::exception& e) {
-		_logger.error("Exception: {}", e.what());
+		_logger.error("Exception: {}", e);
 	}
 
 	return 0;
@@ -523,7 +523,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 			_map = std::make_unique<awe::map>( _countries, _tiles, _units,
 				_commanders, engine::logger::data{_logger.getData().sink, "map"});
 		} catch (const std::bad_alloc& e) {
-			_logger.error("Couldn't allocate the map object: {}", e.what());
+			_logger.error("Couldn't allocate the map object: {}", e);
 			return nullptr;
 		}
 		_map->setTarget(_renderer);

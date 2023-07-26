@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "safejson.hpp"
 #include <fstream>
+#include "fmtengine.hpp"
 
 engine::json::json(const engine::logger::data& data) {
 	_logger.setData(data);
@@ -170,9 +171,8 @@ void engine::json::applyColour(sf::Color& dest, engine::json::KeySequence keys,
 	applyArray(colour, keys);
 	if (!inGoodState()) {
 		if (suppressErrors) resetState();
-		_logger.write("{} colour property faulty: left to the default of "
-			"[{},{},{},{}].", synthesiseKeySequence(keys),
-			dest.r, dest.g, dest.b, dest.a);
+		_logger.write("{} colour property faulty: left to the default of {}.",
+			synthesiseKeySequence(keys), dest);
 	} else {
 		dest = sf::Color(colour[0], colour[1], colour[2], colour[3]);
 	}
@@ -298,7 +298,7 @@ bool engine::json_script::_saveToScript(nlohmann::ordered_json& jobj) {
 		try {
 			jscript << jobj;
 			jscript.close();
-		} catch (std::exception& e) {
+		} catch (const std::exception& e) {
 			jscript.close();
 			_what = e.what();
 			_logger.error("Could not write JSON object to JSON script \"{}\": {}",

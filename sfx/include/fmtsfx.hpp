@@ -21,54 +21,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /**
- * @file fmtformatter.hpp
- * Defines the fmt formatters for custom types.
+ * @file fmtsfx.hpp
+ * Defines fmt formatters for custom types available in the \c sfx module.
  */
 
 #pragma once
 
-#include <spdlog/fmt/bundled/format.h>
-#include "SFML/System/Vector2.hpp"
-#include "SFML/Graphics/Color.hpp"
+#include "fmtengine.hpp"
 #include "TGUI/Widgets/Label.hpp"
 #include "TGUI/Widgets/Scrollbar.hpp"
 #include "TGUI/Widgets/Grid.hpp"
-
-/**
- * Fmt formatter for the \c sf::Vector2u type.
- * <a href="https://fmt.dev/latest/api.html#format-api" target="_blank">Code taken
- * from the fmt documentation.</a>
- */
-template <> struct fmt::formatter<sf::Vector2u> {
-	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
-		auto it = ctx.begin(), end = ctx.end();
-		if (it != end && *it != '}') throw format_error("invalid format");
-		return it;
-	}
-
-	template <typename FormatContext>
-	auto format(const sf::Vector2u& p, FormatContext& ctx) const ->
-		decltype(ctx.out()) {
-		return fmt::format_to(ctx.out(), "({}, {})", p.x, p.y);
-	}
-};
-
-/**
- * Fmt formatter for the \c sf::Color type.
- */
-template <> struct fmt::formatter<sf::Color> {
-	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
-		auto it = ctx.begin(), end = ctx.end();
-		if (it != end && *it != '}') throw format_error("invalid format");
-		return it;
-	}
-
-	template <typename FormatContext>
-	auto format(const sf::Color& p, FormatContext& ctx) const ->
-		decltype(ctx.out()) {
-		return fmt::format_to(ctx.out(), "[{}, {}, {}, {}]", p.r, p.g, p.b, p.a);
-	}
-};
 
 /**
  * Fmt formatter for the \c tgui::String type.

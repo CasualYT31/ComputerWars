@@ -58,7 +58,7 @@ namespace sfx {
 	 * \b remain as the last member of \c control_signal.
 	 * @sa user_input::operator[]()
 	 */
-	enum control_signal {
+	enum class control_signal {
 		FreeForm,
 		ButtonForm,
 		DelayedForm,
@@ -71,7 +71,7 @@ namespace sfx {
 	 * negative. This enum is used to differentiate between those directions for
 	 * the client.
 	 */
-	enum axis_direction {
+	enum class axis_direction {
 		Negative = -1,
 		Positive = 1
 	};
@@ -337,10 +337,11 @@ namespace sfx {
 		 *         ignore input that is not meant for the window or the process as
 		 *         a whole.</li></ol>
 		 * It is recommended to tie a window to a \c user_input object.
-		 * @param window Pointer to the window to tie to this object. If it is
-		 *               \c nullptr, this object will be untied from any window.
+		 * @param  window Pointer to the window to tie to this object. If it is
+		 *                \c nullptr, this object will be untied from any window.
+		 * @safety No guarantee.
 		 */
-		void tieWindow(const std::shared_ptr<const sf::Window>& window) noexcept;
+		void tieWindow(const std::shared_ptr<const sf::Window>& window);
 
 		/**
 		 * Retrieves the joystick ID associated with this user.

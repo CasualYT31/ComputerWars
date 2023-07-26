@@ -24,10 +24,18 @@ FetchContent_Declare(boxer
 )
 FetchContent_MakeAvailable(boxer)
 
+# FMT.
+FetchContent_Declare(fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt
+    GIT_TAG 10.0.0
+)
+FetchContent_MakeAvailable(fmt)
+
 # SPDLOG.
+set(SPDLOG_FMT_EXTERNAL ON CACHE BOOL "" FORCE)
 FetchContent_Declare(spdlog
 	GIT_REPOSITORY https://github.com/gabime/spdlog.git
-	GIT_TAG v1.11.0
+	GIT_TAG v1.12.0
 )
 FetchContent_MakeAvailable(spdlog)
 
@@ -72,6 +80,7 @@ find_package(Boost 1.65.0 REQUIRED) # boost_stacktrace_windbg
 set(${PROJECT_NAME}_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include"
 	${SystemProperties_INCLUDE_DIRS}
 	${Boxer_INCLUDE_DIRS}
+	${fmt_INCLUDE_DIRS}
 	${spdlog_INCLUDE_DIRS}
 	${nlohmann_json_INCLUDE_DIRS}
 	${sfml_INCLUDE_DIRS}
@@ -110,6 +119,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_link_libraries(${PROJECT_NAME}
 	SystemProperties
 	Boxer
+	fmt
 	spdlog
 	nlohmann_json::nlohmann_json
 	sfml-audio

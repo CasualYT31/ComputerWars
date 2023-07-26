@@ -46,9 +46,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @brief     The \c transition namespace contains all the transition drawables.
  */
 
-#include "engine.hpp"
 #include <filesystem>
-#include <iostream>
+#include "engine.hpp"
 
 /**
  * Loads the game engine, then runs it.
@@ -109,7 +108,7 @@ int main(int argc, char* argv[]) {
             return 3;
         }
     } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        boxer::show(e.what(), "Critical Error!", boxer::Style::Error);
         return 4;
     }
 }

@@ -56,7 +56,7 @@ void engine::binary_file::open(const std::string& filepath, const bool forInput)
 			((forInput) ? ("input") : ("output")));
 	} catch (const std::exception& e) {
 		_logger.error("Could not open file \"{}\" for {}: {}", filepath,
-			((forInput) ? ("input") : ("output")), e.what());
+			((forInput) ? ("input") : ("output")), e);
 		throw e;
 	}
 }
@@ -85,7 +85,7 @@ bool engine::binary_file::readBool() {
 		return inp;
 	} catch (const std::exception& e) {
 		_logger.error("Failed to read bool of size {} at position {}: {}",
-			sizeof(inp), _bytes, e.what());
+			sizeof(inp), _bytes, e);
 		throw e;
 	}
 }
@@ -102,7 +102,7 @@ void engine::binary_file::writeBool(const bool val) {
 		_bytes += sizeof(out);
 	} catch (const std::exception& e) {
 		_logger.error("Failed to write bool {} of size {} to position {}: {}", out,
-			sizeof(out), _bytes, e.what());
+			sizeof(out), _bytes, e);
 		throw e;
 	}
 }
@@ -114,7 +114,7 @@ std::string engine::binary_file::readString() {
 		_bytes += sizeof(len);
 	} catch (const std::exception& e) {
 		_logger.error("Failed to read string length of size {} at position {}: {}",
-			sizeof(len), _bytes, e.what());
+			sizeof(len), _bytes, e);
 		throw e;
 	}
 	sf::Uint32 i = 0;
@@ -129,7 +129,7 @@ std::string engine::binary_file::readString() {
 		return ret;
 	} catch (const std::exception& e) {
 		_logger.error("Failed to read character {} at position {} for string of "
-			"length {}: {}", i, _bytes, len, e.what());
+			"length {}: {}", i, _bytes, len, e);
 		throw e;
 	}
 }
@@ -146,7 +146,7 @@ void engine::binary_file::writeString(const std::string& str) {
 		_bytes += sizeof(len);
 	} catch (const std::exception& e) {
 		_logger.error("Failed to write string \"{}\"'s size {} to position {}: "
-			"{}", str, len, _bytes, e.what());
+			"{}", str, len, _bytes, e);
 		throw e;
 	}
 	sf::Uint32 i = 0;
@@ -157,8 +157,7 @@ void engine::binary_file::writeString(const std::string& str) {
 		}
 	} catch (const std::exception& e) {
 		_logger.error("Failed to write character {} ('{}') of string \"{}\" "
-			"(size {}) to position {}: {}", i, str.at(i), str, len, _bytes,
-			e.what());
+			"(size {}) to position {}: {}", i, str.at(i), str, len, _bytes, e);
 		throw e;
 	}
 }

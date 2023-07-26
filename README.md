@@ -31,6 +31,7 @@ For information on the versions of libraries I have used for this project, pleas
 - [TGUI](https://github.com/CasualYT31/TGUI) (check `sfx/CMakeLists.txt`)
 - [AngelScript](https://www.angelcode.com/angelscript/) (check `engine/CMakeLists.txt`)
 - [Boxer](https://github.com/aaronmjacobs/Boxer) (check `engine/CMakeLists.txt`)
+- [FMT](https://github.com/fmtlib/fmt) (check `engine/CMakeLists.txt`)
 - [SPDLOG](https://github.com/gabime/spdlog) (check `engine/CMakeLists.txt`)
 - [JSON for C++](https://github.com/nlohmann/json) (check `engine/CMakeLists.txt`)
 - [GoogleTest](https://github.com/google/googletest) (check `test/CMakeLists.txt`)

@@ -46,7 +46,7 @@ T engine::binary_file::readNumber() {
 		return ret;
 	} catch (const std::exception& e) {
 		_logger.error("Failed to read number of size {} at position {}: {}",
-			sizeof(T), _bytes, e.what());
+			sizeof(T), _bytes, e);
 		throw e;
 	}
 }
@@ -67,7 +67,7 @@ void engine::binary_file::writeNumber(T number) {
 		_bytes += sizeof(T);
 	} catch (const std::exception& e) {
 		_logger.error("Failed to write number {} of size {} to position {}: {}",
-			number, sizeof(T), _bytes, e.what());
+			number, sizeof(T), _bytes, e);
 		throw e;
 	}
 }

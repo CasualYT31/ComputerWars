@@ -150,7 +150,7 @@ bool sfx::animated_spritesheet::_load(engine::json& j) {
 		}
 	} catch (const nlohmann::json::exception& e) {
 		_logger.error("There was an error whilst attempting to read sprite info: "
-			"{}.", e.what());
+			"{}.", e);
 	}
 	return true;
 }
@@ -251,7 +251,7 @@ bool sfx::animated_sprite::animate(const sf::RenderTarget& target) {
 	} catch (const std::out_of_range& e) {
 		if (!_errored) {
 			_logger.error("Attempted to access non-existent frame {} of sprite {}"
-				": {}", _currentFrame, _spriteID, e.what());
+				": {}", _currentFrame, _spriteID, e);
 			_errored = true;
 		}
 		return true;

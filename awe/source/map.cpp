@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "map.hpp"
-#include "fmtformatter.hpp"
+#include "fmtawe.hpp"
 
 /* \c NO_ARMY that can be assigned to a script's interface. Due to limitations of
 AngelScript, I unfortunately cannot register a constant with the script interface,
@@ -645,9 +645,9 @@ bool awe::map::load(std::string file, const unsigned char version) {
 		}
 		_scripts->callFunction("LoadMap", &_file, this, version);
 		_file.close();
-	} catch (std::exception& e) {
+	} catch (const std::exception& e) {
 		_logger.critical("Map loading operation: couldn't load map file \"{}\": "
-			"{}", file, e.what());
+			"{}", file, e);
 		_file.close();
 		return false;
 	}
@@ -668,9 +668,9 @@ bool awe::map::save(std::string file, const unsigned char version) {
 		}
 		_scripts->callFunction("SaveMap", &_file, this, version);
 		_file.close();
-	} catch (std::exception& e) {
+	} catch (const std::exception& e) {
 		_logger.critical("Map saving operation: couldn't save map file \"{}\": {}",
-			file, e.what());
+			file, e);
 		_file.close();
 		return false;
 	}
@@ -1164,7 +1164,7 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 		_armies.at(_units.at(id).getArmy()).removeUnit(id);
 	} else {
 		_logger.warning("deleteUnit warning: unit with ID {} didn't have a valid "
-			"owning army ID, which was {}", id, _units.at(id).getArmy());
+			"owning army ID, which was {}.", id, _units.at(id).getArmy());
 	}
 	// Thirdly, delete all units that are loaded onto this one.
 	auto loaded = _units.at(id).loadedUnits();
@@ -1206,9 +1206,8 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 	}
 	if (_isOutOfBounds(pos) && pos != awe::unit::NO_POSITION) {
 		_logger.error("setUnitPosition operation cancelled: attempted to move "
-			"unit with ID {} to position ({},{}), which is out of bounds with the "
-			"map's size ({},{})!",
-			id, pos.x, pos.y, getMapSize().x, getMapSize().y);
+			"unit with ID {} to position {}, which is out of bounds with the "
+			"map's size {}!", id, pos, getMapSize());
 		return;
 	}
 	const auto idOfUnitOnTile = ((pos == awe::unit::NO_POSITION) ? (0) :
@@ -1219,8 +1218,8 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 		return;
 	} else if (idOfUnitOnTile > 0) {
 		_logger.error("setUnitPosition operation cancelled: attempted to move "
-			"unit with ID {} to position ({},{}), which is currently occupied by "
-			"unit with ID {}!", id, pos.x, pos.y, idOfUnitOnTile);
+			"unit with ID {} to position {}, which is currently occupied by unit "
+			"with ID {}!", id, pos, idOfUnitOnTile);
 		return;
 	}
 	_updateCapturingUnit(id);
@@ -1459,14 +1458,13 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 	if (auto u = getUnitOnTile(onto)) {
 		if (u) {
 			_logger.error("unloadUnit operation cancelled: attempted to unload "
-				"unit with ID {} from unit with ID {}, to position ({},{}), which "
-				"has a unit with ID {} already occupying it!",
-				unload, from, onto.x, onto.y, u);
+				"unit with ID {} from unit with ID {}, to position {}, which has "
+				"a unit with ID {} already occupying it!", unload, from, onto, u);
 		} else {
 			_logger.error("unloadUnit operation cancelled: attempted to unload "
-				"unit with ID {} from unit with ID {}, to position ({},{}), which "
-				"is out of bounds with the map's size of ({},{})!",
-				unload, from, onto.x, onto.y, getMapSize().x, getMapSize().y);
+				"unit with ID {} from unit with ID {}, to position {}, which "
+				"is out of bounds with the map's size of {}!", unload, from, onto,
+				getMapSize());
 		}
 		return;
 	}
@@ -1559,13 +1557,12 @@ unsigned int awe::map::getUnitDefence(const awe::UnitID id) const {
 bool awe::map::setTileType(const sf::Vector2u& pos,
 	const std::shared_ptr<const awe::tile_type>& type) {
 	if (!type) _logger.warning("setTileType warning: assigning the tile at "
-		"position ({},{}) an empty type!", pos.x, pos.y);
+		"position {} an empty type!", pos);
 	if (_isOutOfBounds(pos)) {
 		_logger.error("setTileType operation cancelled: attempted to assign type "
-			"\"{}\" to tile at position ({},{}), which is out of bounds with the "
-			"map's size of ({},{})!",
-			((type) ? (type->getType()->getName()) : ("[NULL]")),
-			pos.x, pos.y, getMapSize().x, getMapSize().y);
+			"\"{}\" to tile at position {}, which is out of bounds with the map's "
+			"size of {}!", ((type) ? (type->getType()->getName()) : ("[NULL]")),
+			pos, getMapSize());
 		return false;
 	}
 	_updateCapturingUnit(getUnitOnTile(pos));
@@ -1582,9 +1579,8 @@ bool awe::map::setTileType(const sf::Vector2u& pos, const std::string& type) {
 std::shared_ptr<const awe::tile_type> awe::map::getTileType(
 	const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
-		_logger.error("getTileType operation failed: tile at position ({},{}) is "
-			"out of bounds with the map's size of ({},{})!",
-			pos.x, pos.y, getMapSize().x, getMapSize().y);
+		_logger.error("getTileType operation failed: tile at position {} is out "
+			"of bounds with the map's size of {}!", pos, getMapSize());
 		return nullptr;
 	}
 	return _tiles[pos.x][pos.y].getTileType();
@@ -1603,17 +1599,15 @@ void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {
 	if (!_isOutOfBounds(pos)) {
 		_tiles[pos.x][pos.y].setTileHP(hp);
 	} else {
-		_logger.error("setTileHP operation cancelled: tile at position ({},{}) is "
-			"out of bounds with the map's size of ({},{})!",
-			pos.x, pos.y, getMapSize().x, getMapSize().y);
+		_logger.error("setTileHP operation cancelled: tile at position {} is out "
+			"of bounds with the map's size of {}!", pos, getMapSize());
 	}
 }
 
 awe::HP awe::map::getTileHP(const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
-		_logger.error("getTileHP operation failed: tile at position ({},{}) is "
-			"out of bounds with the map's size of ({},{})!",
-			pos.x, pos.y, getMapSize().x, getMapSize().y);
+		_logger.error("getTileHP operation failed: tile at position {} is out of "
+			"bounds with the map's size of {}!", pos, getMapSize());
 		return 0;
 	}
 	return _tiles[pos.x][pos.y].getTileHP();
@@ -1622,9 +1616,8 @@ awe::HP awe::map::getTileHP(const sf::Vector2u& pos) const {
 void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("setTileOwner operation cancelled: army with ID {} couldn't "
-			"be assigned to tile at position ({},{}), as it is out of bounds with "
-			"the map's size of ({},{})!",
-			army, pos.x, pos.y, getMapSize().x, getMapSize().y);
+			"be assigned to tile at position {}, as it is out of bounds with the "
+			"map's size of {}!", army, pos, getMapSize());
 		return;
 	}
 	_updateCapturingUnit(getUnitOnTile(pos));
@@ -1640,9 +1633,8 @@ void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
 
 awe::ArmyID awe::map::getTileOwner(const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
-		_logger.error("getTileOwner operation failed: tile at position ({},{}) is "
-			"out of bounds with the map's size of ({},{})!",
-			pos.x, pos.y, getMapSize().x, getMapSize().y);
+		_logger.error("getTileOwner operation failed: tile at position {} is out "
+			"of bounds with the map's size of {}!", pos, getMapSize());
 		return awe::NO_ARMY;
 	}
 	return _tiles[pos.x][pos.y].getTileOwner();

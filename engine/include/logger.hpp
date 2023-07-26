@@ -28,15 +28,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <sstream>
 #include "spdlog/spdlog.h"
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/ostream_sink.h"
 #include "spdlog/sinks/dup_filter_sink.h"
+#include "spdlog/fmt/std.h"
 #include "boxer/boxer.h"
 #include "SFML/System/NonCopyable.hpp"
 #include "SystemProperties.hpp"
-#include <sstream>
 
 namespace engine {
 	/**

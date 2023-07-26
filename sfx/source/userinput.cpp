@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "userinput.hpp"
+#include "fmtengine.hpp"
 
 void sfx::joystick::Register(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
@@ -95,9 +96,9 @@ sfx::axis_direction sfx::convert::toaxisdir(int d) noexcept {
 
 sfx::control_signal sfx::convert::tosignaltype(unsigned int s,
 	engine::logger *const logger) noexcept {
-	if (s >= sfx::SignalTypeCount) {
+	if (s >= static_cast<unsigned int>(sfx::control_signal::SignalTypeCount)) {
 		auto old = s;
-		s = sfx::ButtonForm;
+		s = static_cast<unsigned int>(sfx::control_signal::ButtonForm);
 		if (logger) logger->warning("Given signal type ID {} is larger than the "
 			"maximum signal type ID of {}: int {} will be converted to enum {}.",
 			old, s, old, s);
@@ -114,11 +115,11 @@ std::unordered_set<std::string> sfx::user_input::getControls() const {
 	return ret;
 }
 
-void sfx::user_input::tieWindow(const std::shared_ptr<const sf::Window>& window)
-	noexcept {
-	if (_window && !window)
+void sfx::user_input::tieWindow(const std::shared_ptr<const sf::Window>& window) {
+	if (_window && !window) {
 		_logger.warning("Untying user_input object from the window at position "
-			"({},{})!", _window->getPosition().x, _window->getPosition().y);
+			"{}!", _window->getPosition());
+	}
 	_window = window;
 }
 
@@ -284,74 +285,74 @@ bool sfx::user_input::_load(engine::json& j) {
 			try {
 				if (i.value().find("keys") != i.value().end()) {
 					for (auto k = i.value()["keys"].begin(),
-						ek = i.value()["keys"].end(); k != ek; k++) {
+						ek = i.value()["keys"].end(); k != ek; ++k) {
 						control[i.key()].config.keyboard.push_back(
 							sfx::convert::tokeycode(*k, &_logger)
 						);
 					}
 				}
-			} catch (std::exception & e) {
+			} catch (const std::exception & e) {
 				_logger.error("An error occurred when attempting to load keyboard "
-					"controls for \"{}\": {}.", i.key(), e.what());
+					"controls for \"{}\": {}.", i.key(), e);
 			}
 			try {
 				if (i.value().find("mouse") != i.value().end()) {
 					for (auto m = i.value()["mouse"].begin(),
-						em = i.value()["mouse"].end(); m != em; m++) {
+						em = i.value()["mouse"].end(); m != em; ++m) {
 						control[i.key()].config.mouse.push_back(
 							sfx::convert::tomousebtn(*m, &_logger)
 						);
 					}
 				}
-			} catch (std::exception & e) {
+			} catch (const std::exception & e) {
 				_logger.error("An error occurred when attempting to load mouse "
-					"button controls for \"{}\": {}.", i.key(), e.what());
+					"button controls for \"{}\": {}.", i.key(), e);
 			}
 			try {
 				if (i.value().find("buttons") != i.value().end()) {
 					for (auto b = i.value()["buttons"].begin(),
-						eb = i.value()["buttons"].end(); b != eb; b++) {
+						eb = i.value()["buttons"].end(); b != eb; ++b) {
 						control[i.key()].config.joystickButton.push_back(*b);
 					}
 				}
-			} catch (std::exception & e) {
+			} catch (const std::exception & e) {
 				_logger.error("An error occurred when attempting to load joystick "
-					"button controls for \"{}\": {}.", i.key(), e.what());
+					"button controls for \"{}\": {}.", i.key(), e);
 			}
 			try {
 				if (i.value().find("axes") != i.value().end()) {
 					for (auto a = i.value()["axes"].begin(),
-						ea = i.value()["axes"].end(); a != ea; a++) {
+						ea = i.value()["axes"].end(); a != ea; ++a) {
 						sfx::joystick item;
 						item.axis = sfx::convert::toaxis((*a)[0], &_logger);
 						item.direction = sfx::convert::toaxisdir((*a)[1]);
 						control[i.key()].config.joystickAxis.push_back(item);
 					}
 				}
-			} catch (std::exception & e) {
+			} catch (const std::exception & e) {
 				_logger.error("An error occurred when attempting to load joystick "
-					"axis controls for \"{}\": {}.", i.key(), e.what());
+					"axis controls for \"{}\": {}.", i.key(), e);
 			}
 
-			unsigned int sigtype = control[i.key()].signal.type;
+			auto sigtype = static_cast<unsigned int>(control[i.key()].signal.type);
 			j.apply(sigtype, { i.key(), "type" }, true);
 			control[i.key()].signal.type =
 				sfx::convert::tosignaltype(sigtype, &_logger);
-			if (control[i.key()].signal.type == sfx::DelayedForm &&
+			if (control[i.key()].signal.type == sfx::control_signal::DelayedForm &&
 				i.value().find("delays") != i.value().end()) {
 				// If delays aren't given for a delayed-form control, they will be
 				// generated in operator[].
 				try {
 					for (auto d = i.value()["delays"].begin(),
-						ed = i.value()["delays"].end(); d != ed; d++) {
+						ed = i.value()["delays"].end(); d != ed; ++d) {
 						control[i.key()].signal.delayLength.push_back(
 							sf::milliseconds(*d)
 						);
 					}
-				} catch (std::exception & e) {
+				} catch (const std::exception & e) {
 					_logger.error("An error occurred when attempting to load "
 						"delays for the delayed-form control \"{}\": {}.",
-						i.key(), e.what());
+						i.key(), e);
 				}
 			}
 		}
@@ -381,7 +382,7 @@ bool sfx::user_input::_save(nlohmann::ordered_json& j) {
 			ea = c->second.config.joystickAxis.end(); a != ea; ++a) {
 			std::array<int, 2> axisItem;
 			axisItem[0] = a->axis;
-			axisItem[1] = a->direction;
+			axisItem[1] = static_cast<int>(a->direction);
 			j[c->first]["axes"].push_back(axisItem);
 		}
 		j[c->first]["type"] = c->second.signal.type;
@@ -423,13 +424,13 @@ void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
 	}
 
 	switch (signal.type) {
-	case sfx::FreeForm:
+	case sfx::control_signal::FreeForm:
 		signal.signal = signal.current;
 		break;
-	case sfx::ButtonForm:
+	case sfx::control_signal::ButtonForm:
 		signal.signal = signal.previous && !signal.current;
 		break;
-	case sfx::DelayedForm:
+	case sfx::control_signal::DelayedForm:
 		signal.signal = false;
 		if (!signal.delayLength.size()) {
 			signal.delayLength.push_back(sf::seconds(1.0f));

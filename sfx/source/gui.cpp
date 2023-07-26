@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "gui.hpp"
-#include "fmtformatter.hpp"
+#include "fmtsfx.hpp"
 
 #undef MessageBox
 
@@ -746,8 +746,8 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 			_makeNewDirectionalSelection(
 				_selectThisWidgetFirst[_currentGUI], _currentGUI);
 		}
-	} catch (tgui::Exception& e) {
-		_logger.error("{}", e.what());
+	} catch (const tgui::Exception& e) {
+		_logger.error("{}", e);
 		if (_gui.get(old)) _gui.get(old)->setVisible(true);
 	}
 }
@@ -755,7 +755,7 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 void sfx::gui::addSpritesheet(const std::string& name,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	if (_sheet.find(name) != _sheet.end()) {
-		_logger.warning("Updated the spritesheet named {}!", name);
+		_logger.warning("Updated the spritesheet named \"{}\"!", name);
 	}
 	_sheet[name] = sheet;
 }

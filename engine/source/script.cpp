@@ -369,23 +369,20 @@ void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg,
         _cachedCol = "";
     }
     if (msg->type == asMSGTYPE_INFORMATION) {
-        _logger.write("INFO: (@{}:{},{}): {}.",
-            msg->section, msg->row, msg->col, msg->message);
+        _logger.write("INFO: {}.", *msg);
     } else if (msg->type == asMSGTYPE_WARNING) {
-        _logger.warning("WARNING: (@{}:{},{}): {}.",
-            msg->section, msg->row, msg->col, msg->message);
+        _logger.warning("WARNING: {}.", *msg);
     } else {
-        _logger.error("ERROR: (@{}:{},{}): {}.",
-            msg->section, msg->row, msg->col, msg->message);
+        _logger.error("ERROR: {}.", *msg);
     }
 }
 
-void engine::scripts::contextExceptionCallback(asIScriptContext* context) {
-    if (!context) return;
+void engine::scripts::contextExceptionCallback(asIScriptContext* c) {
+    if (!c) return;
     _logger.error("RUNTIME ERROR: (@{}:{}:{}): {}.",
-        context->GetExceptionFunction()->GetScriptSectionName(),
-        context->GetExceptionFunction()->GetDeclaration(),
-        context->GetExceptionLineNumber(), context->GetExceptionString());
+        c->GetExceptionFunction()->GetScriptSectionName(),
+        c->GetExceptionFunction()->GetDeclaration(),
+        c->GetExceptionLineNumber(), c->GetExceptionString());
 }
 
 void engine::scripts::translateExceptionCallback(asIScriptContext* context, void*)
@@ -394,7 +391,7 @@ void engine::scripts::translateExceptionCallback(asIScriptContext* context, void
     //https://www.angelcode.com/angelscript/sdk/docs/manual/doc_cpp_exceptions.html
     try {
         throw;
-    } catch (std::exception& e) {
+    } catch (const std::exception& e) {
         context->SetException(e.what());
     } catch (...) {}
 }
@@ -441,9 +438,8 @@ bool engine::scripts::loadScripts(std::string folder) {
             return true;
         };
         if (!directoryIterator(folder)) return false;
-    } catch (std::exception& e) {
-        _logger.error("Failed to interact with directory entry: {}.",
-            e.what());
+    } catch (const std::exception& e) {
+        _logger.error("Failed to interact with directory entry: {}.", e);
     }
     if ((r = builder.BuildModule()) < 0) {
         _logger.error("Failed to build the module: code {}.", r);
