@@ -1234,7 +1234,7 @@ namespace sfx {
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no policy will be changed.
 		 * @param name   The name of the widget to edit.
-		 * @param policy The amount the scrollbar should scroll by.
+		 * @param policy The policy the scrollbar should have.
 		 */
 		void _setHorizontalScrollbarPolicy(const std::string& name,
 			const tgui::Scrollbar::Policy policy);
@@ -1247,6 +1247,16 @@ namespace sfx {
 		 * @param amount The amount the scrollbar should scroll by.
 		 */
 		void _setHorizontalScrollbarAmount(const std::string& name,
+			const unsigned int amount);
+
+		/**
+		 * Sets the scroll amount for a scrollable panel's vertical scrollbar.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no amount will be changed.
+		 * @param name   The name of the widget to edit.
+		 * @param amount The amount the scrollbar should scroll by.
+		 */
+		void _setVerticalScrollbarAmount(const std::string& name,
 			const unsigned int amount);
 
 		/**

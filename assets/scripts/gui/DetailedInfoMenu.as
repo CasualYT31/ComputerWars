@@ -15,6 +15,7 @@ string setUpArmyPanel(string baseLayout) {
     const auto ret = baseLayout;
 	setWidgetSize(baseLayout, "33.333%", "100%");
 	setHorizontalScrollbarAmount(baseLayout, 100);
+    setVerticalScrollbarAmount(baseLayout, 50);
 	baseLayout += ".day";
 	addWidget("Label", baseLayout);
 	setWidgetPosition(baseLayout, "2%", "2%");

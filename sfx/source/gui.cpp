@@ -676,6 +676,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's horizontal "
 		"scroll amount.");
 
+	r = engine->RegisterGlobalFunction("void setVerticalScrollbarAmount("
+		"const string&in, const uint)",
+		asMETHOD(sfx::gui, _setVerticalScrollbarAmount),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's vertical scroll "
+		"amount.");
+
 	r = engine->RegisterGlobalFunction("void setGroupPadding("
 		"const string&in, const string&in)",
 		asMETHOD(sfx::gui, _setGroupPadding), asCALL_THISCALL_ASGLOBAL, this);
@@ -1243,16 +1250,16 @@ std::string sfx::gui::_moveDirectionalFlow(
 			const auto panel =
 				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
 			const auto value = panel->getVerticalScrollbarValue();
-			if (panel->isVerticalScrollbarShown() && value > 0) {
-				// TODO-3: There is a bug with 0.9 where the VerticalScrollAmount
-				// is initialised to 0. Cba fixing it so will see if it's fixed
-				// when I upgrade.
+			// If this scrollbar has no amount, don't let the directional control
+			// set the scroll value. Otherwise the input will be swallowed!
+			if (panel->getVerticalScrollAmount() > 0 &&
+				panel->isVerticalScrollbarShown() && value > 0) {
 				if (static_cast<int>(value) -
-					static_cast<int>(15) < 0) {
+					static_cast<int>(panel->getVerticalScrollAmount()) < 0) {
 					panel->setVerticalScrollbarValue(0);
 				} else {
 					panel->setVerticalScrollbarValue(
-						value - 15);
+						value - panel->getVerticalScrollAmount());
 				}
 			} else {
 				_makeNewDirectionalSelection(_directionalFlow[cursel.first].up,
@@ -1286,14 +1293,15 @@ std::string sfx::gui::_moveDirectionalFlow(
 			const auto panel =
 				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
 			const auto value = panel->getVerticalScrollbarValue();
-			if (panel->isVerticalScrollbarShown() &&
+			// If this scrollbar has no amount, don't let the directional control
+			// set the scroll value. Otherwise the input will be swallowed!
+			if (panel->getVerticalScrollAmount() > 0 &&
+				panel->isVerticalScrollbarShown() &&
 				value < panel->getVerticalScrollbarMaximum() -
-					static_cast<unsigned int>(panel->getSize().y)) {
-				// TODO-3: There is a bug with 0.9 where the VerticalScrollAmount
-				// is initialised to 0. Cba fixing it so will see if it's fixed
-				// when I upgrade.
+					static_cast<unsigned int>(panel->getSize().y) +
+					static_cast<unsigned int>(panel->getScrollbarWidth())) {
 				panel->setVerticalScrollbarValue(
-					value + 15);
+					value + panel->getVerticalScrollAmount());
 			} else {
 				_makeNewDirectionalSelection(_directionalFlow[cursel.first].down,
 					getGUI());
@@ -1311,7 +1319,10 @@ std::string sfx::gui::_moveDirectionalFlow(
 			const auto panel =
 				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
 			const auto value = panel->getHorizontalScrollbarValue();
-			if (panel->isHorizontalScrollbarShown() && value > 0) {
+			// If this scrollbar has no amount, don't let the directional control
+			// set the scroll value. Otherwise the input will be swallowed!
+			if (panel->getHorizontalScrollAmount() > 0 &&
+				panel->isHorizontalScrollbarShown() && value > 0) {
 				if (static_cast<int>(value) -
 					static_cast<int>(panel->getHorizontalScrollAmount()) < 0) {
 					panel->setHorizontalScrollbarValue(0);
@@ -1336,9 +1347,13 @@ std::string sfx::gui::_moveDirectionalFlow(
 			const auto panel =
 				std::dynamic_pointer_cast<ScrollablePanel>(cursel.second);
 			const auto value = panel->getHorizontalScrollbarValue();
-			if (panel->isHorizontalScrollbarShown() &&
+			// If this scrollbar has no amount, don't let the directional control
+			// set the scroll value. Otherwise the input will be swallowed!
+			if (panel->getHorizontalScrollAmount() > 0 &&
+				panel->isHorizontalScrollbarShown() &&
 				value < panel->getHorizontalScrollbarMaximum() -
-				static_cast<unsigned int>(panel->getSize().x)) {
+					static_cast<unsigned int>(panel->getSize().x) +
+					static_cast<unsigned int>(panel->getScrollbarWidth())) {
 				panel->setHorizontalScrollbarValue(
 					value + panel->getHorizontalScrollAmount());
 			} else {
@@ -1824,7 +1839,11 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 	} else if (type == "label") {
 		return tgui::Label::create();
 	} else if (type == "scrollablepanel") {
-		return tgui::ScrollablePanel::create();
+		auto panel = tgui::ScrollablePanel::create();
+		// Always set default scrollbar amounts to allow directional flow to work.
+		panel->setHorizontalScrollAmount(5);
+		panel->setVerticalScrollAmount(5);
+		return panel;
 	} else if (type == "panel") {
 		return tgui::Panel::create();
 	} else if (type == "group") {
@@ -2585,6 +2604,17 @@ void sfx::gui::_setHorizontalScrollbarAmount(const std::string& name,
 			castWidget->setHorizontalScrollAmount(amount);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the horizontal scrollbar amount {} to widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", amount, name, widgetType,
+		fullname[0])
+}
+
+void sfx::gui::_setVerticalScrollbarAmount(const std::string& name,
+	const unsigned int amount) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ScrollablePanel,
+			castWidget->setVerticalScrollAmount(amount);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the vertical scrollbar amount {} to widget \"{}\", "
 		"which is of type \"{}\", within menu \"{}\".", amount, name, widgetType,
 		fullname[0])
 }
