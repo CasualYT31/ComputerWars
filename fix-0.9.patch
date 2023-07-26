@@ -1,0 +1,12 @@
+diff --git a/sfx/CMakeLists.txt b/sfx/CMakeLists.txt
+index e828e9d..6cd81fc 100644
+--- a/sfx/CMakeLists.txt
++++ b/sfx/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ project("ComputerWarsSFX")
+ 
+ # TGUI
++set(TGUI_BACKEND "SFML")
+ FetchContent_Declare(tgui
+ 	GIT_REPOSITORY https://github.com/CasualYT31/TGUI.git
+ 	GIT_TAG 0.9
