@@ -25,6 +25,9 @@
 	"explode": "Explode",
 	"repair": "Repair",
 
+	"file": "File",
+	"new": "New",
+
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",
 	"INFANTRY_MOVEMENT_description": "Infantry movement type.",
