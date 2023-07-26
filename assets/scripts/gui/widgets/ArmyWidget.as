@@ -134,23 +134,23 @@ class ArmyWidget {
 		switch (alignment) {
 		case ArmyWidgetAlignment::Left:
 			setWidgetOrigin(team, 0.0, 0.0);
-			setWidgetPosition(team, "9px", "6px");
+			setWidgetPosition(team, "8px", "19.5px");
 			setWidgetOrigin(currentCO, 0.0, 0.0);
 			setWidgetPosition(currentCO, formatFloat(coX) + "px", "5px");
 			setWidgetOrigin(tagCO, 0.0, 0.0);
 			setWidgetPosition(tagCO, formatFloat(coX) + "px", "30px");
 			setWidgetOrigin(funds, 0.0, 0.0);
-			setWidgetPosition(funds, "140px", "0px");
+			setWidgetPosition(funds, "140px", "7.5px");
 			break;
 		case ArmyWidgetAlignment::Right:
 			setWidgetOrigin(team, 1.0, 0.0);
-			setWidgetPosition(team, "100%-9px", "6px");
+			setWidgetPosition(team, "100%-8px", "19.5px");
 			setWidgetOrigin(currentCO, 1.0, 0.0);
 			setWidgetPosition(currentCO, "100%-" + formatFloat(coX) + "px", "5px");
 			setWidgetOrigin(tagCO, 1.0, 0.0);
 			setWidgetPosition(tagCO, "100%-" + formatFloat(coX) + "px", "30px");
 			setWidgetOrigin(funds, 1.0, 0.0);
-			setWidgetPosition(funds, "100%-140px", "0px");
+			setWidgetPosition(funds, "100%-140px", "7.5px");
 			break;
 		default:
 			error("Attempted to set the ArmyWidget \"" + panel + "\"'s alignment "
