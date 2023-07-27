@@ -218,6 +218,43 @@ namespace sfx {
 			const MenuItemID index);
 
 		/**
+		 * Handles \c Closed signals.
+		 * If a \c ChildWindow is configured to automatically handle minimise and
+		 * maximise logic, this handler will carry it out, before either invoking
+		 * the script's signal handler, or the widget's custom signal handler. If
+		 * the \c ChildWindow was configured not to handle this logic, then the
+		 * appropriate script signal handler will still be invoked.
+		 * @warning This engine should never emit a Closed signal for any
+		 *          \c ChildWindow! Use the \c Closing signal instead!
+		 * @param   window Pointer to the \c ChildWindow that was closed.
+		 * @param   abort  Will always be set to \c TRUE.
+		 */
+		void closingSignalHandler(const tgui::ChildWindow::Ptr& window,
+			bool* abort);
+
+		/**
+		 * Handles \c Minimized signals.
+		 * If a \c ChildWindow is configured to automatically handle minimise and
+		 * maximise logic, this handler will carry it out, before either invoking
+		 * the script's signal handler, or the widget's custom signal handler. If
+		 * the \c ChildWindow was configured not to handle this logic, then the
+		 * appropriate script signal handler will still be invoked.
+		 * @param window Pointer to the \c ChildWindow that was minimised.
+		 */
+		void minimizedSignalHandler(const tgui::ChildWindow::Ptr& window);
+
+		/**
+		 * Handles \c Maximized signals.
+		 * If a \c ChildWindow is configured to automatically handle minimise and
+		 * maximise logic, this handler will carry it out, before either invoking
+		 * the script's signal handler, or the widget's custom signal handler. If
+		 * the \c ChildWindow was configured not to handle this logic, then the
+		 * appropriate script signal handler will still be invoked.
+		 * @param window Pointer to the \c ChildWindow that was mazimised.
+		 */
+		void maximizedSignalHandler(const tgui::ChildWindow::Ptr& window);
+
+		/**
 		 * Sets the \c language_dictionary object to use with these GUI menus.
 		 * If a language dictionary is given, all GUI captions will be fed into it
 		 * for translation purposes, during the call to \c animate(). If one is not
@@ -1379,6 +1416,43 @@ namespace sfx {
 		 */
 		void _exitSubmenu(const std::string& name);
 
+		// CHILDWINDOW //
+
+		/**
+		 * Instructs the engine to automatically handle minimise and maximise
+		 * functionality when the \c Minimize and \c Maximize buttons are pressed
+		 * on a \c ChildWindow.
+		 * Note that if this option is set, any defined script handlers for the
+		 * \c Minimize and \c Maximize signals will be called \em after the engine
+		 * has completed changing the properties of the \c ChildWindow.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name   The name of the \c ChildWindow to amend.
+		 * @param handle \c TRUE if the engine should handle minimise and maximise
+		 *               logic, \c FALSE if not. The default is \c TRUE.
+		 */
+		void _autoHandleMinMax(const std::string& name, const bool handle);
+
+		/**
+		 * Sets which buttons to show in the given \c ChildWindow's titlebar.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name    The name of the \c ChildWindow to amend.
+		 * @param buttons The buttons to assign.
+		 */
+		void _setChildWindowTitleButtons(const std::string& name,
+			const unsigned int buttons);
+
+		/**
+		 * Sets a widget to be resizable or not resizable.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name      The name of the widget to amend.
+		 * @param resizable \c TRUE if the widget should be resizableby the user,
+		 *                  \c FALSE if not.
+		 */
+		void _setWidgetResizable(const std::string& name, const bool resizable);
+
 		//////////
 		// DATA //
 		//////////
@@ -1619,6 +1693,105 @@ namespace sfx {
 		 * The number of menus and menu items in each \c MenuBar.
 		 */
 		std::unordered_map<std::string, MenuItemID> _menuCounter;
+
+		/**
+		 * Used to track whether a \c ChildWindow is minimised or maximised, as
+		 * well as track its properties so that the engine can restore them.
+		 */
+		struct child_window_properties {
+			/**
+			 * The \c ChildWindow's size layout.
+			 */
+			tgui::Layout2d size;
+
+			/**
+			 * The \c ChildWindow's position layout.
+			 */
+			tgui::Layout2d position;
+
+			/**
+			 * The \c ChildWindow's origin.
+			 */
+			tgui::Vector2f origin;
+
+			/**
+			 * Was the \c ChildWindow resizeable before minimising or maximising?
+			 */
+			bool isResizeable;
+
+			/**
+			 * Was the \c ChildWindow position locked before minimising or
+			 * maximising?
+			 */
+			bool isPositionLocked;
+
+			/**
+			 * Updates the \c ChildWindow properties, given a \c ChildWidget
+			 * pointer.
+			 * \c _size, \c _position, \c _origin, \c isResizable and
+			 * \c isPositionLocked are all updated with the properties of the given
+			 * \c ChildWindow.
+			 * @param window The window to pull the properties from.
+			 */
+			void cache(const tgui::ChildWindow::Ptr& window);
+
+			/**
+			 * Restores a \c ChildWindow based on the properties currently stored
+			 * in this object.
+			 * @param window The window to restore.
+			 */
+			void restore(const tgui::ChildWindow::Ptr& window);
+
+			/**
+			 * Is this \c ChildWindow currently minimised?
+			 */
+			bool isMinimised = false;
+
+			/**
+			 * Is this \c ChildWindow currently maximised?
+			 */
+			bool isMaximised = false;
+		};
+
+		/**
+		 * A list of \c ChildWindows that are currently minimised in a given
+		 * container.
+		 */
+		class minimised_child_window_list {
+		public:
+			/**
+			 * Adds a \c ChildWindow to the list.
+			 * @param  name The full name of the \c ChildWindow.
+			 * @return The X \c Layout2d coordinate that the \c ChildWindow should
+			 *         be moved to when minimised.
+			 */
+			tgui::String minimise(const std::string& name);
+
+			/**
+			 * Removes a \c ChildWindow from the list.
+			 * @param name The full name of the \c ChildWindow.
+			 */
+			void restore(const std::string& name);
+		private:
+			/**
+			 * The list of \c ChildWindows.
+			 */
+			std::vector<std::string> _windows;
+		};
+
+		/**
+		 * \c ChildWindow property cache used to handle minimise and maximise
+		 * logic.
+		 * If a \c ChildWindow is in this map, it means that the engine should
+		 * \b not automatically handle minimise and maximise logic.
+		 */
+		std::unordered_map<std::string, child_window_properties> _childWindowData;
+
+		/**
+		 * A list of container widgets with minimised \c ChildWindows in them.
+		 */
+		std::unordered_map<std::string, minimised_child_window_list>
+			_minimisedChildWindowList;
 	};
 }
 

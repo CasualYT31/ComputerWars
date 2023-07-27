@@ -274,50 +274,66 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentObjectEnum(r, "Values representing widget alignments in a "
 		"grid.");
 	engine->RegisterEnumValue("WidgetAlignment", "Centre",
-		(int)Grid::Alignment::Center);
+		static_cast<int>(Grid::Alignment::Center));
 	engine->RegisterEnumValue("WidgetAlignment", "UpperLeft",
-		(int)Grid::Alignment::UpperLeft);
+		static_cast<int>(Grid::Alignment::UpperLeft));
 	engine->RegisterEnumValue("WidgetAlignment", "Up",
-		(int)Grid::Alignment::Up);
+		static_cast<int>(Grid::Alignment::Up));
 	engine->RegisterEnumValue("WidgetAlignment", "UpperRight",
-		(int)Grid::Alignment::UpperRight);
+		static_cast<int>(Grid::Alignment::UpperRight));
 	engine->RegisterEnumValue("WidgetAlignment", "Right",
-		(int)Grid::Alignment::Right);
+		static_cast<int>(Grid::Alignment::Right));
 	engine->RegisterEnumValue("WidgetAlignment", "BottomRight",
-		(int)Grid::Alignment::BottomRight);
+		static_cast<int>(Grid::Alignment::BottomRight));
 	engine->RegisterEnumValue("WidgetAlignment", "Bottom",
-		(int)Grid::Alignment::Bottom);
+		static_cast<int>(Grid::Alignment::Bottom));
 	engine->RegisterEnumValue("WidgetAlignment", "BottomLeft",
-		(int)Grid::Alignment::BottomLeft);
+		static_cast<int>(Grid::Alignment::BottomLeft));
 	engine->RegisterEnumValue("WidgetAlignment", "Left",
-		(int)Grid::Alignment::Left);
+		static_cast<int>(Grid::Alignment::Left));
 
 	r = engine->RegisterEnum("ScrollbarPolicy");
 	document->DocumentObjectEnum(r, "Values representing scollbar policies.");
 	engine->RegisterEnumValue("ScrollbarPolicy", "Automatic",
-		(int)Scrollbar::Policy::Automatic);
+		static_cast<int>(Scrollbar::Policy::Automatic));
 	engine->RegisterEnumValue("ScrollbarPolicy", "Always",
-		(int)Scrollbar::Policy::Always);
+		static_cast<int>(Scrollbar::Policy::Always));
 	engine->RegisterEnumValue("ScrollbarPolicy", "Never",
-		(int)Scrollbar::Policy::Never);
+		static_cast<int>(Scrollbar::Policy::Never));
 
 	r = engine->RegisterEnum("HorizontalAlignment");
 	document->DocumentObjectEnum(r, "Values representing horizontal alignment.");
 	engine->RegisterEnumValue("HorizontalAlignment", "Left",
-		(int)Label::HorizontalAlignment::Left);
+		static_cast<int>(Label::HorizontalAlignment::Left));
 	engine->RegisterEnumValue("HorizontalAlignment", "Centre",
-		(int)Label::HorizontalAlignment::Center);
+		static_cast<int>(Label::HorizontalAlignment::Center));
 	engine->RegisterEnumValue("HorizontalAlignment", "Right",
-		(int)Label::HorizontalAlignment::Right);
+		static_cast<int>(Label::HorizontalAlignment::Right));
 
 	r = engine->RegisterEnum("VerticalAlignment");
 	document->DocumentObjectEnum(r, "Values representing vertical alignment.");
 	engine->RegisterEnumValue("VerticalAlignment", "Top",
-		(int)Label::VerticalAlignment::Top);
+		static_cast<int>(Label::VerticalAlignment::Top));
 	engine->RegisterEnumValue("VerticalAlignment", "Centre",
-		(int)Label::VerticalAlignment::Center);
+		static_cast<int>(Label::VerticalAlignment::Center));
 	engine->RegisterEnumValue("VerticalAlignment", "Bottom",
-		(int)Label::VerticalAlignment::Bottom);
+		static_cast<int>(Label::VerticalAlignment::Bottom));
+
+	r = engine->RegisterEnum("TitleButton");
+	document->DocumentObjectEnum(r, "Values representing different "
+		"<tt>ChildWindow</tt> titlebar buttons.");
+	engine->RegisterEnumValue("TitleButton", "None",
+		static_cast<int>(ChildWindow::TitleButton::None));
+	engine->RegisterEnumValue("TitleButton", "Close",
+		static_cast<int>(ChildWindow::TitleButton::Close));
+	engine->RegisterEnumValue("TitleButton", "Maximise",
+		static_cast<int>(ChildWindow::TitleButton::Maximize));
+	engine->RegisterEnumValue("TitleButton", "Minimise",
+		static_cast<int>(ChildWindow::TitleButton::Minimize));
+	engine->RegisterEnumValue("TitleButton", "All",
+		static_cast<int>(ChildWindow::TitleButton::Close |
+			ChildWindow::TitleButton::Maximize |
+			ChildWindow::TitleButton::Minimize));
 
 	// Register global constants and typdefs.
 	engine->RegisterTypedef("MenuItemID", "uint64");
@@ -393,7 +409,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"handlers will be assumed. The custom signal handler must have two "
 		"<tt>const string&in</tt> parameters. The first is the full name of the "
 		"widget that triggered the handler. The second is the name of the signal "
-		"that was emitted.");
+		"that was emitted. <b>Note that the following signals will never invoke "
+		"the custom signal handler!</b>\n"
+		"<ul><li><tt>MenuItemClicked</tt>.</li>"
+		"<li><tt>Closing</tt>.</li></ul>");
 
 	r = engine->RegisterGlobalFunction("void addWidgetToGrid(const string&in,"
 		"const string&in, const uint, const uint, const string&in = \"\")",
@@ -770,6 +789,35 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"function will fail.\n"
 		"<b><u>WARNING:</u></b> this function will fail if called outside of a "
 		"<tt>...SetUp()</tt> function!");
+
+	// CHILDWINDOWS //
+
+	r = engine->RegisterGlobalFunction("void autoHandleMinMax("
+		"const string&in, const bool)",
+		asMETHOD(sfx::gui, _autoHandleMinMax),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "If <tt>TRUE</tt>, instructs the engine "
+		"to handle the minimise and maximise functionality of the given "
+		"<tt>ChildWindow</tt>, before invoking the <tt>Minimized</tt> and "
+		"<tt>Maximised</tt> signal handlers. This is the default. Use "
+		"<tt>FALSE</tt> to disable this functionality for the given "
+		"<tt>ChildWindow</tt>.");
+
+	r = engine->RegisterGlobalFunction("void setChildWindowTitleButtons("
+		"const string&in, const uint)",
+		asMETHOD(sfx::gui, _setChildWindowTitleButtons),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the given <tt>ChildWindow</tt>'s "
+		"titlebar buttons. The given integer should be a bitwise-ORed list of "
+		"<tt>TitleButton</tt> enum values.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetResizable("
+		"const string&in, const bool)",
+		asMETHOD(sfx::gui, _setWidgetResizable),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "If <tt>TRUE</tt>, the given widget can "
+		"be resized by the user, if the widget supports it. If <tt>FALSE</tt>, "
+		"only the engine or scripts can resize the given widget.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -1082,6 +1130,130 @@ void sfx::gui::menuItemClickedSignalHandler(const std::string& menuBarName,
 	if (_scripts->functionDeclExists(funcDecl)) {
 		_scripts->callFunction(funcName, index);
 	}
+}
+
+void sfx::gui::child_window_properties::cache(
+	const tgui::ChildWindow::Ptr& window) {
+	size = window->getSizeLayout();
+	position = window->getPositionLayout();
+	origin = window->getOrigin();
+	isResizeable = window->isResizable();
+	isPositionLocked = window->isPositionLocked();
+}
+
+void sfx::gui::child_window_properties::restore(
+	const tgui::ChildWindow::Ptr& window) {
+	window->setSize(size);
+	window->setPosition(position);
+	window->setOrigin(origin);
+	window->setResizable(isResizeable);
+	window->setPositionLocked(isPositionLocked);
+}
+
+static const std::size_t PADDING = 5, WIDTH = 100;
+
+tgui::String sfx::gui::minimised_child_window_list::minimise(
+	const std::string& name) {
+	std::size_t x = PADDING;
+	for (auto& window : _windows) {
+		if (window.empty()) {
+			window = name;
+			return std::to_string(x).append("px");
+		}
+		x += WIDTH + PADDING;
+	}
+	_windows.push_back(name);
+	return std::to_string(x).append("px");
+}
+
+void sfx::gui::minimised_child_window_list::restore(const std::string& name) {
+	for (auto& window : _windows) if (window == name) window = "";
+	while (_windows.size() > 0 && _windows.back().empty()) _windows.pop_back();
+}
+
+void sfx::gui::closingSignalHandler(const tgui::ChildWindow::Ptr& window,
+	bool* abort) {
+	const auto widgetName = window->getWidgetName().toStdString();
+	// Firstly, invoke the signal handler, if it exists. If it doesn't, always
+	// "close" the window.
+	const auto funcName = getGUI() + "_" + _extractWidgetName(widgetName) +
+		"_Closing";
+	const auto funcDecl = "void " + funcName + "(bool&out)";
+	bool close = true;
+	if (_scripts->functionDeclExists(funcDecl)) {
+		_scripts->callFunction(funcName, &close);
+	}
+	if (close) {
+		// If the window was minimised when it was closed, we need to restore it.
+		if (_childWindowData.find(widgetName) != _childWindowData.end()) {
+			auto& data = _childWindowData[widgetName];
+			if (data.isMinimised) {
+				_minimisedChildWindowList[
+					window->getParent()->getWidgetName().toStdString()].
+					restore(widgetName);
+					data.restore(window);
+					data.isMinimised = false;
+					data.isMaximised = false;
+			}
+		}
+		// Instead of removing the window from its parent, we make it go invisible
+		// instead.
+		window->setVisible(false);
+	}
+	// We always abort the closing process to prevent TGUI from removing the window
+	// from its parent.
+	*abort = true;
+}
+
+void sfx::gui::minimizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
+	const auto widgetName = window->getWidgetName().toStdString();
+	if (_childWindowData.find(widgetName) != _childWindowData.end()) {
+		auto& data = _childWindowData[widgetName];
+		if (!data.isMinimised) {
+			if (!data.isMaximised) data.cache(window);
+			data.isMinimised = true;
+			data.isMaximised = false;
+			const auto x = _minimisedChildWindowList[
+				window->getParent()->getWidgetName().toStdString()].
+				minimise(widgetName);
+			window->setSize(WIDTH, tgui::String(std::to_string(
+				window->getRenderer()->getTitleBarHeight()).append("px")));
+			window->setPosition(x, "99%");
+			window->setOrigin(0.0f, 1.0f);
+			window->setResizable(false);
+			window->setPositionLocked(true);
+			window->moveToBack();
+		}
+	}
+	signalHandler(window, "Minimized");
+}
+
+void sfx::gui::maximizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
+	const auto widgetName = window->getWidgetName().toStdString();
+	if (_childWindowData.find(widgetName) != _childWindowData.end()) {
+		auto& data = _childWindowData[widgetName];
+		if (data.isMinimised || data.isMaximised) {
+			if (data.isMinimised) {
+				_minimisedChildWindowList[
+					window->getParent()->getWidgetName().toStdString()].
+					restore(widgetName);
+			}
+			data.restore(window);
+			data.isMinimised = false;
+			data.isMaximised = false;
+		} else {
+			data.cache(window);
+			data.isMinimised = false;
+			data.isMaximised = true;
+			window->setSize("100%", "100%");
+			window->setPosition("50%", "50%");
+			window->setOrigin(0.5f, 0.5f);
+			window->setResizable(false);
+			window->setPositionLocked(true);
+		}
+		window->moveToFront();
+	}
+	signalHandler(window, "Maximized");
 }
 
 void sfx::gui::setLanguageDictionary(
@@ -1602,6 +1774,8 @@ bool sfx::gui::_load(engine::json& j) {
 			_currentlySelectedWidget.clear();
 			_hierarchyOfLastMenuItem.clear();
 			_menuCounter.clear();
+			_childWindowData.clear();
+			_minimisedChildWindowList.clear();
 			// Create the main menu that always exists.
 			tgui::Group::Ptr menu = tgui::Group::create();
 			menu->setVisible(false);
@@ -1688,18 +1862,21 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 	if (type == "button" || type == "bitmapbutton") {
 		widget->getSignal("Pressed").connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == "childwindow") {
+		auto childWindow = std::dynamic_pointer_cast<ChildWindow>(widget);
 		widget->getSignal("MousePressed").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("Closed").
 			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Minimized").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Maximized").
-			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("EscapeKeyPressed").
 			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Closing").
-			connectEx(&sfx::gui::signalHandler, this);
+		// The engine can perform additional tasks upon receiving the Minimized,
+		// Maximized, and Closing signals. Eventually the signalHandler is called,
+		// though.
+		childWindow->onMinimize(&sfx::gui::minimizedSignalHandler, this,
+			childWindow);
+		childWindow->onMaximize(&sfx::gui::maximizedSignalHandler, this,
+			childWindow);
+		childWindow->onClosing(&sfx::gui::closingSignalHandler, this, childWindow);
 	} else if (type == "colorpicker") {
 		widget->getSignal("ColorChanged").
 			connectEx(&sfx::gui::signalHandler, this);
@@ -1819,6 +1996,11 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 		_directionalFlow.erase(name);
 		_hierarchyOfLastMenuItem.erase(name);
 		_menuCounter.erase(name);
+		_childWindowData.erase(name);
+		_minimisedChildWindowList.erase(name);
+		// If a ChildWindow, remove it from its parent's ChildWindowList.
+		_minimisedChildWindowList[container->getWidgetName().toStdString()].
+			restore(name);
 		// Also delete references to the removed sprite from other widgets.
 		for (auto& flowInfo : _directionalFlow) {
 			if (flowInfo.second.up == name) flowInfo.second.up.clear();
@@ -1950,6 +2132,8 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::EditBox::create();
 	} else if (type == "menubar") {
 		return tgui::MenuBar::create();
+	} else if (type == "childwindow") {
+		return tgui::ChildWindow::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -2025,6 +2209,17 @@ void sfx::gui::_addWidget(const std::string& newWidgetType,
 	if (widget = _createWidget(newWidgetType, name, fullname[0])) {
 		container->add(widget, fullnameAsString);
 		_connectSignals(widget, signalHandler);
+		// If the widget is a ChildWindow, don't forget to turn on automatic
+		// handling of minimise and maximise, apply all titlebar buttons by
+		// default, and make it resizable.
+		if (widget->getWidgetType() == "ChildWindow") {
+			_childWindowData[fullnameAsString];
+			const auto win = std::dynamic_pointer_cast<ChildWindow>(widget);
+			win->setTitleButtons(ChildWindow::TitleButton::Close |
+				ChildWindow::TitleButton::Minimize |
+				ChildWindow::TitleButton::Maximize);
+			win->setResizable();
+		}
 	} else {
 		ERROR("Could not create the new widget.")
 	}
@@ -2283,8 +2478,9 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
 		std::dynamic_pointer_cast<EditBox>(widget)->setText(text);
 	} else {
 		if (widgetType != "BitmapButton" && widgetType != "Label" &&
-			widgetType != "Button") UNSUPPORTED_WIDGET_TYPE()
-			_setTranslatedString(fullnameAsString, text, variables);
+			widgetType != "Button" && widgetType != "ChildWindow")
+				UNSUPPORTED_WIDGET_TYPE()
+		_setTranslatedString(fullnameAsString, text, variables);
 		_translateWidget(widget);
 	}
 	END("Attempted to set the caption \"{}\" to a widget \"{}\" of type \"{}\" "
@@ -2786,4 +2982,37 @@ void sfx::gui::_exitSubmenu(const std::string& name) {
 		ELSE_UNSUPPORTED()
 	END("Attempted to exit the current submenu of widget \"{}\", which is of type "
 		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+}
+
+void sfx::gui::_autoHandleMinMax(const std::string& name, const bool handle) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow,
+			if (handle)
+				_childWindowData.erase(fullnameAsString);
+			else
+				_childWindowData[fullnameAsString];
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the autoHandleMinMax property to {}, for the widget "
+		"\"{}\", which is of type \"{}\", within menu \"{}\".", handle, name,
+		widgetType, fullname[0]);
+}
+
+void sfx::gui::_setChildWindowTitleButtons(const std::string& name,
+	const unsigned int buttons) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow, castWidget->setTitleButtons(buttons);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the titlebar button mask {} to the widget \"{}\", which "
+		"is of type \"{}\", within menu \"{}\".", buttons, name, widgetType,
+		fullname[0])
+}
+
+void sfx::gui::_setWidgetResizable(const std::string& name, const bool resizable) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow, castWidget->setResizable(resizable);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the resizability property of widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\", to {}.", name, widgetType, fullname[0],
+		resizable);
 }

@@ -104,7 +104,14 @@ bool engine::scripts::callFunction(const std::string& name, T value,
 			_resetCallFunctionVariables();
 			return false;
 		}
-		r = _context[_contextId]->SetArgObject(_argumentID, value);
+		// If value points to a primitive type, pass it using Address(). Otherwise,
+		// assume it's an object.
+		if constexpr (std::is_integral<std::remove_pointer<T>::type>::value ||
+			std::is_floating_point<std::remove_pointer<T>::type>::value) {
+			r = _context[_contextId]->SetArgAddress(_argumentID, value);
+		} else {
+			r = _context[_contextId]->SetArgObject(_argumentID, value);
+		}
 	} else if constexpr (std::is_object<T>::value || std::is_reference<T>::value) {
 		_logger.error("Attempted to add an object to argument {} of function "
 			"\"{}\", which is not supported: function call aborted.", _argumentID,
