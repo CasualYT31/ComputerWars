@@ -3,7 +3,7 @@
  * The main map maker menu.
  */
 
-uint64 MAP_MAKER_QUIT;
+MenuItemID MAP_MAKER_QUIT;
 
 /**
  * Sets up the map maker menu.
@@ -21,11 +21,11 @@ void MapMakerMenuSetUp() {
  * Handles menu item selection signals.
  * @param id The ID of the menu or menu item selected.
  */
-void MapMakerMenu_Menu_MenuItemClicked(const uint64 id) {
+void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
     if (id == MAP_MAKER_QUIT) {
         setGUI("MainMenu");
     } else {
-        error("Unrecognised menu item ID " + formatUInt(id) + " received in the "
-            "Map Maker menu!");
+        error("Unrecognised menu item ID " + awe::formatMenuItemID(id) +
+            " received in the Map Maker menu!");
     }
 }

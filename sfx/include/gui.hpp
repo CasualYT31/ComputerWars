@@ -182,11 +182,16 @@ namespace sfx {
 			const tgui::String& signalName);
 
 		/**
+		 * Represents a menu item ID.
+		 */
+		typedef std::size_t MenuItemID;
+
+		/**
 		 * Handles \c MenuItemClicked signals.
 		 * The script function invoked follows the same format as
 		 * \c signalHandler() (e.g. \c GUIName_MenuBarName_MenuItemClicked).
-		 * However, a <tt>const uint64</tt> parameter is also passed, which stores
-		 * the 0-based ID of the menu item that was clicked.\n
+		 * However, a <tt>const MenuItemID</tt> parameter is also passed, which
+		 * stores the 0-based ID of the menu item that was clicked.\n
 		 * Menu item IDs start from the first menu, and traverse through its items,
 		 * favouring depth over breadth. This means that in the following menu
 		 * hierarchy:
@@ -210,7 +215,7 @@ namespace sfx {
 		 * @param index       The 0-based index of the item selected.
 		 */
 		void menuItemClickedSignalHandler(const std::string& menuBarName,
-			const std::size_t index);
+			const MenuItemID index);
 
 		/**
 		 * Sets the \c language_dictionary object to use with these GUI menus.
@@ -1321,7 +1326,7 @@ namespace sfx {
 		 * @param  variables Optional list of variables to insert into the text.
 		 * @return The menu item ID of the newly created menu.
 		 */
-		std::size_t _addMenu(const std::string& name, const std::string& text,
+		MenuItemID _addMenu(const std::string& name, const std::string& text,
 			CScriptArray* variables);
 
 		/**
@@ -1337,7 +1342,7 @@ namespace sfx {
 		 * @param  variables Optional list of variables to insert into the text.
 		 * @return The menu item ID of the newly created menu item.
 		 */
-		std::size_t _addMenuItem(const std::string& name, const std::string& text,
+		MenuItemID _addMenuItem(const std::string& name, const std::string& text,
 			CScriptArray* variables);
 
 		/**
@@ -1357,7 +1362,7 @@ namespace sfx {
 		 * @param  variables Optional list of variables to insert into the text.
 		 * @return The menu item ID of the newly created menu item.
 		 */
-		std::size_t _addMenuItemIntoLastItem(const std::string& name,
+		MenuItemID _addMenuItemIntoLastItem(const std::string& name,
 			const std::string& text, CScriptArray* variables);
 
 		/**
@@ -1613,7 +1618,7 @@ namespace sfx {
 		/**
 		 * The number of menus and menu items in each \c MenuBar.
 		 */
-		std::unordered_map<std::string, std::size_t> _menuCounter;
+		std::unordered_map<std::string, MenuItemID> _menuCounter;
 	};
 }
 

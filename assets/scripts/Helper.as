@@ -17,4 +17,12 @@ namespace awe {
 			info(keys[i] + " = " + value);
 		}
 	}
+
+    /**
+     * Formats a \c MenuItemID.
+     * @param id The menu item ID to format.
+     */
+    string formatMenuItemID(const MenuItemID id) {
+        return formatUInt(id);
+    }
 }

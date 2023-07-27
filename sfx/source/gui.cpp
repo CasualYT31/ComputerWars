@@ -30,7 +30,8 @@ using namespace tgui;
 // These values are intended to be constant.
 static float NO_SPACE = -0.001f;
 static sf::Color NO_COLOUR(0, 0, 0, 0);
-static std::size_t NO_MENU_ITEM_ID = std::numeric_limits<std::size_t>::max();
+static sfx::gui::MenuItemID NO_MENU_ITEM_ID =
+	std::numeric_limits<sfx::gui::MenuItemID>::max();
 
 ////////////////////
 // GUI_BACKGROUND //
@@ -259,7 +260,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"A list of supported signals can be found be in the "
 		"<tt>sfx::gui::_connectSignals()</tt> method in the game engine's code.");
 	document->DocumentExpectedFunction(
-		"void MenuName_MenuBarName_MenuItemClicked(const uint64)",
+		"void MenuName_MenuBarName_MenuItemClicked(const MenuItemID)",
 		"The <tt>MenuItemClicked</tt> signal handler is a special case. It "
 		"accepts the ID of the menu item that was clicked. See the documentation "
 		"on the C++ method <tt>sfx::gui::menuItemClickedSignalHandler()</tt> for "
@@ -318,7 +319,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	engine->RegisterEnumValue("VerticalAlignment", "Bottom",
 		(int)Label::VerticalAlignment::Bottom);
 
-	// Register global constants.
+	// Register global constants and typdefs.
+	engine->RegisterTypedef("MenuItemID", "uint64");
+	document->DocumentExpectedFunction("typedef uint64 MenuItemID",
+		"Index used to identify a menu item in a <tt>MenuBar</tt> widget.");
 	r = engine->RegisterGlobalProperty("const float NO_SPACE", &NO_SPACE);
 	document->DocumentExpectedFunction("const float NO_SPACE", "Constant which "
 		"represents \"no space between widgets in a vertical or horizontal "
@@ -332,10 +336,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentExpectedFunction("const string PREVIOUS_MENU", "Holds the "
 		"name of the menu that was open before the current one. Scripts cannot "
 		"change this value, but the engine does update it when switching menus.");
-	r = engine->RegisterGlobalProperty("const uint64 NO_MENU_ITEM_ID",
+	r = engine->RegisterGlobalProperty("const MenuItemID NO_MENU_ITEM_ID",
 		&NO_MENU_ITEM_ID);
-	document->DocumentExpectedFunction("const uint64 NO_MENU_ITEM_ID", "Constant "
-		"which is returned when creating a menu or menu item in a "
+	document->DocumentExpectedFunction("const MenuItemID NO_MENU_ITEM_ID",
+		"Constant which is returned when creating a menu or menu item in a "
 		"<tt>MenuBar</tt> failed.");
 
 	// Register non-widget global functions.
@@ -716,7 +720,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 
 	// MENUS //
 	
-	r = engine->RegisterGlobalFunction("uint64 addMenu(const string&in, "
+	r = engine->RegisterGlobalFunction("MenuItemID addMenu(const string&in, "
 		"const string&in, array<any>@ = null)",
 		asMETHOD(sfx::gui, _addMenu), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Adds a new menu. The name of the "
@@ -728,7 +732,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"The ID of the newly created menu is returned. If the function failed, "
 		"<tt>NO_MENU_ITEM_ID</tt> is returned.");
 
-	r = engine->RegisterGlobalFunction("uint64 addMenuItem(const string&in, "
+	r = engine->RegisterGlobalFunction("MenuItemID addMenuItem(const string&in, "
 		"const string&in, array<any>@ = null)",
 		asMETHOD(sfx::gui, _addMenuItem), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Adds a new menu item. The name of the "
@@ -742,7 +746,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"The ID of the newly created menu item is returned. If the function "
 		"failed, <tt>NO_MENU_ITEM_ID</tt> is returned.");
 
-	r = engine->RegisterGlobalFunction("uint64 addMenuItemIntoLastItem(const "
+	r = engine->RegisterGlobalFunction("MenuItemID addMenuItemIntoLastItem(const "
 		"string&in, const string&in, array<any>@ = null)",
 		asMETHOD(sfx::gui, _addMenuItemIntoLastItem),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -1071,10 +1075,10 @@ bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 }
 
 void sfx::gui::menuItemClickedSignalHandler(const std::string& menuBarName,
-	const std::size_t index) {
+	const sfx::gui::MenuItemID index) {
 	const auto funcName = getGUI() + "_" + menuBarName +
 		"_MenuItemClicked";
-	const auto funcDecl = "void " + funcName + "(const uint64)";
+	const auto funcDecl = "void " + funcName + "(const MenuItemID)";
 	if (_scripts->functionDeclExists(funcDecl)) {
 		_scripts->callFunction(funcName, index);
 	}
@@ -1536,7 +1540,8 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 					// I know, it's really ugly. Not much choice.
 					w->connectMenuItem(hierarchy,
 						&sfx::gui::menuItemClickedSignalHandler, this,
-						_extractWidgetName(widgetName), index++);
+						_extractWidgetName(widgetName),
+						static_cast<sfx::gui::MenuItemID>(index++));
 					translateItems(item.menuItems);
 					hierarchy.pop_back();
 				}
@@ -2646,8 +2651,8 @@ void sfx::gui::_setSpaceBetweenWidgets(const std::string& name,
 
 // MENUS //
 
-std::size_t sfx::gui::_addMenu(const std::string& name, const std::string& text,
-	CScriptArray* variables) {
+sfx::gui::MenuItemID sfx::gui::_addMenu(const std::string& name,
+	const std::string& text, CScriptArray* variables) {
 	auto ret = NO_MENU_ITEM_ID;
 	START_WITH_WIDGET(name)
 		if (!_isLoading) {
@@ -2675,7 +2680,7 @@ std::size_t sfx::gui::_addMenu(const std::string& name, const std::string& text,
 	return ret;
 }
 
-std::size_t sfx::gui::_addMenuItem(const std::string& name,
+sfx::gui::MenuItemID sfx::gui::_addMenuItem(const std::string& name,
 	const std::string& text, CScriptArray* variables) {
 	auto ret = NO_MENU_ITEM_ID;
 	START_WITH_WIDGET(name)
@@ -2695,7 +2700,8 @@ std::size_t sfx::gui::_addMenuItem(const std::string& name,
 			}
 			if (!castWidget->addMenuItem(hierarchy)) {
 				std::string error = "Could not add item with hierarchy: ";
-				for (std::size_t i = 0, len = hierarchy.size(); i < len; ++i) {
+				for (sfx::gui::MenuItemID i = 0, len = hierarchy.size(); i < len;
+					++i) {
 					error += hierarchy[i].toStdString() +
 						(i < len - 1 ? ", " : ". ");
 				}
@@ -2718,7 +2724,7 @@ std::size_t sfx::gui::_addMenuItem(const std::string& name,
 	return ret;
 }
 
-std::size_t sfx::gui::_addMenuItemIntoLastItem(const std::string& name,
+sfx::gui::MenuItemID sfx::gui::_addMenuItemIntoLastItem(const std::string& name,
 	const std::string& text, CScriptArray* variables) {
 	auto ret = NO_MENU_ITEM_ID;
 	START_WITH_WIDGET(name)
@@ -2737,7 +2743,8 @@ std::size_t sfx::gui::_addMenuItemIntoLastItem(const std::string& name,
 			hierarchy.push_back(text);
 			if (!castWidget->addMenuItem(hierarchy)) {
 				std::string error = "Could not add item with hierarchy: ";
-				for (std::size_t i = 0, len = hierarchy.size(); i < len; ++i) {
+				for (sfx::gui::MenuItemID i = 0, len = hierarchy.size(); i < len;
+					++i) {
 					error += hierarchy[i].toStdString() +
 						(i < len - 1 ? ", " : ". ");
 				}
