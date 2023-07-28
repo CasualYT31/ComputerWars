@@ -449,6 +449,70 @@
 		"unitArrowLeft": {
 			"frames": [ [ 48, 116, 16, 16 ] ],
 			"durations": [ 0 ]
+		},
+		"os": {
+			"frames": [ [ 0, 163, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"bm": {
+			"frames": [ [ 14, 163, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"ge": {
+			"frames": [ [ 28, 163, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"yc": {
+			"frames": [ [ 42, 163, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"bh": {
+			"frames": [ [ 56, 163, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"rf": {
+			"frames": [ [ 70, 163, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"gs": {
+			"frames": [ [ 84, 163, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"bd": {
+			"frames": [ [ 98, 163, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"ab": {
+			"frames": [ [ 0, 177, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"js": {
+			"frames": [ [ 14, 177, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"ci": {
+			"frames": [ [ 28, 177, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"pc": {
+			"frames": [ [ 42, 177, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"tg": {
+			"frames": [ [ 56, 177, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"pl": {
+			"frames": [ [ 70, 177, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"ar": {
+			"frames": [ [ 84, 177, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"wn": {
+			"frames": [ [ 98, 177, 14, 14 ] ],
+			"durations": [ 0 ]
 		}
 	}
 }

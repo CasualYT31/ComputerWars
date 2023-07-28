@@ -28,6 +28,8 @@ AngelScript, I unfortunately cannot register a constant with the script interfac
 despite it being a constant as far as the scripts are concerned. So I had to make
 this an evil global non-const. */
 awe::ArmyID NO_ARMY_SCRIPT = awe::NO_ARMY;
+auto MIN_TILE_WIDTH = awe::tile::MIN_WIDTH;
+auto MIN_TILE_HEIGHT = awe::tile::MIN_HEIGHT;
 
 static const std::runtime_error NO_SCRIPTS("No scripts object was given to this "
 	"map object!");
@@ -111,6 +113,14 @@ void awe::map::Register(asIScriptEngine* engine,
 		document->DocumentExpectedFunction("const Vector2 NO_POSITION",
 			"Represents \"no position/location\". Used to signify that a unit is "
 			"not located on the map.");
+		r = engine->RegisterGlobalProperty("const uint MIN_TILE_WIDTH",
+			&MIN_TILE_WIDTH);
+		document->DocumentExpectedFunction("const uint MIN_TILE_WIDTH",
+			"A tile's minimum width, in pixels.");
+		r = engine->RegisterGlobalProperty("const uint MIN_TILE_HEIGHT",
+			&MIN_TILE_HEIGHT);
+		document->DocumentExpectedFunction("const uint MIN_TILE_HEIGHT",
+			"A tile's minimum height, in pixels.");
 
 		//////////////
 		// MAP TYPE //

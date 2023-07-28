@@ -484,6 +484,65 @@ namespace sfx {
 		};
 
 		/**
+		 * Used to track whether a \c ChildWindow is minimised or maximised, as
+		 * well as track its properties so that the engine can restore them.
+		 */
+		struct child_window_properties {
+			/**
+			 * The \c ChildWindow's size layout.
+			 */
+			tgui::Layout2d size;
+
+			/**
+			 * The \c ChildWindow's position layout.
+			 */
+			tgui::Layout2d position;
+
+			/**
+			 * The \c ChildWindow's origin.
+			 */
+			tgui::Vector2f origin;
+
+			/**
+			 * Was the \c ChildWindow resizeable before minimising or maximising?
+			 */
+			bool isResizeable;
+
+			/**
+			 * Was the \c ChildWindow position locked before minimising or
+			 * maximising?
+			 */
+			bool isPositionLocked;
+
+			/**
+			 * Updates the \c ChildWindow properties, given a \c ChildWidget
+			 * pointer.
+			 * \c _size, \c _position, \c _origin, \c isResizable and
+			 * \c isPositionLocked are all updated with the properties of the given
+			 * \c ChildWindow.
+			 * @param window The window to pull the properties from.
+			 */
+			void cache(const tgui::ChildWindow::Ptr& window);
+
+			/**
+			 * Restores a \c ChildWindow based on the properties currently stored
+			 * in this object.
+			 * @param window The window to restore.
+			 */
+			void restore(const tgui::ChildWindow::Ptr& window);
+
+			/**
+			 * Is this \c ChildWindow currently minimised?
+			 */
+			bool isMinimised = false;
+
+			/**
+			 * Is this \c ChildWindow currently maximised?
+			 */
+			bool isMaximised = false;
+		};
+
+		/**
 		 * Used for widgets with a single caption.
 		 */
 		typedef original_caption SingleCaption;
@@ -1123,6 +1182,14 @@ namespace sfx {
 			const std::string& key);
 
 		/**
+		 * Removes a widget's sprite.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no sprite will be cleared.
+		 * @param name The name of the widget to change.
+		 */
+		void _clearWidgetSprite(const std::string& name);
+
+		/**
 		 * Configures a widget to always resize to match its sprite's size.
 		 * If you set this to \c FALSE for a widget who used to be set to \c TRUE,
 		 * then the size of the widget will be left at the last set sprite and will
@@ -1242,7 +1309,7 @@ namespace sfx {
 		 * Clears all items from a widget.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no item will be removed.
-		 * @param name The name of the widget to add the item to.
+		 * @param name The name of the widget to clear the items of.
 		 */
 		void _clearItems(const std::string& name);
 
@@ -1453,6 +1520,22 @@ namespace sfx {
 		 */
 		void _setWidgetResizable(const std::string& name, const bool resizable);
 
+		/**
+		 * Restores a \c ChildWindow if it was maximised or minimised.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name The name of the \c ChildWindow to restore.
+		 */
+		void _restoreChildWindow(const std::string& name);
+
+		/**
+		 * Implementation of \c _restoreChildWindow().
+		 * Has no effect if the given window was not maximised or minimised.
+		 * @param window Pointer to the \c ChildWindow.
+		 */
+		void _restoreChildWindowImpl(const tgui::ChildWindow::Ptr& window,
+			child_window_properties& data);
+
 		//////////
 		// DATA //
 		//////////
@@ -1502,7 +1585,7 @@ namespace sfx {
 		 * Cleared upon a call to \c setGUI(). Refilled once upon the first call to
 		 * \c animate() since \c setGUI() was last called.
 		 */
-		std::unordered_map<std::string, sfx::animated_sprite> _widgetSprites;
+		std::unordered_map<tgui::Widget::Ptr, sfx::animated_sprite> _widgetSprites;
 
 		/**
 		 * Stores the sprite names of all the widgets containing pictures that are
@@ -1693,65 +1776,6 @@ namespace sfx {
 		 * The number of menus and menu items in each \c MenuBar.
 		 */
 		std::unordered_map<std::string, MenuItemID> _menuCounter;
-
-		/**
-		 * Used to track whether a \c ChildWindow is minimised or maximised, as
-		 * well as track its properties so that the engine can restore them.
-		 */
-		struct child_window_properties {
-			/**
-			 * The \c ChildWindow's size layout.
-			 */
-			tgui::Layout2d size;
-
-			/**
-			 * The \c ChildWindow's position layout.
-			 */
-			tgui::Layout2d position;
-
-			/**
-			 * The \c ChildWindow's origin.
-			 */
-			tgui::Vector2f origin;
-
-			/**
-			 * Was the \c ChildWindow resizeable before minimising or maximising?
-			 */
-			bool isResizeable;
-
-			/**
-			 * Was the \c ChildWindow position locked before minimising or
-			 * maximising?
-			 */
-			bool isPositionLocked;
-
-			/**
-			 * Updates the \c ChildWindow properties, given a \c ChildWidget
-			 * pointer.
-			 * \c _size, \c _position, \c _origin, \c isResizable and
-			 * \c isPositionLocked are all updated with the properties of the given
-			 * \c ChildWindow.
-			 * @param window The window to pull the properties from.
-			 */
-			void cache(const tgui::ChildWindow::Ptr& window);
-
-			/**
-			 * Restores a \c ChildWindow based on the properties currently stored
-			 * in this object.
-			 * @param window The window to restore.
-			 */
-			void restore(const tgui::ChildWindow::Ptr& window);
-
-			/**
-			 * Is this \c ChildWindow currently minimised?
-			 */
-			bool isMinimised = false;
-
-			/**
-			 * Is this \c ChildWindow currently maximised?
-			 */
-			bool isMaximised = false;
-		};
 
 		/**
 		 * A list of \c ChildWindows that are currently minimised in a given

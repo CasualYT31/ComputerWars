@@ -596,6 +596,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"the widget is given, then the name of the sprite sheet, then the name of "
 		"the sprite.");
 
+	r = engine->RegisterGlobalFunction("void clearWidgetSprite(const string&in)",
+		asMETHOD(sfx::gui, _clearWidgetSprite), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Clears/removes a widget's sprite.");
+
 	r = engine->RegisterGlobalFunction("void matchWidgetSizeToSprite("
 		"const string & in, const bool)",
 		asMETHOD(sfx::gui, _matchWidgetSizeToSprite),
@@ -818,6 +822,12 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "If <tt>TRUE</tt>, the given widget can "
 		"be resized by the user, if the widget supports it. If <tt>FALSE</tt>, "
 		"only the engine or scripts can resize the given widget.");
+
+	r = engine->RegisterGlobalFunction("void restoreChildWindow(const string&in)",
+		asMETHOD(sfx::gui, _restoreChildWindow), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Restores a <tt>ChildWindow</tt> if it "
+		"was maximised or minimised. If the given <tt>ChildWindow</tt> was "
+		"neither, then this function will have no effect.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -1187,14 +1197,7 @@ void sfx::gui::closingSignalHandler(const tgui::ChildWindow::Ptr& window,
 		// If the window was minimised when it was closed, we need to restore it.
 		if (_childWindowData.find(widgetName) != _childWindowData.end()) {
 			auto& data = _childWindowData[widgetName];
-			if (data.isMinimised) {
-				_minimisedChildWindowList[
-					window->getParent()->getWidgetName().toStdString()].
-					restore(widgetName);
-					data.restore(window);
-					data.isMinimised = false;
-					data.isMaximised = false;
-			}
+			if (data.isMinimised) _restoreChildWindowImpl(window, data);
 		}
 		// Instead of removing the window from its parent, we make it go invisible
 		// instead.
@@ -1233,14 +1236,7 @@ void sfx::gui::maximizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
 	if (_childWindowData.find(widgetName) != _childWindowData.end()) {
 		auto& data = _childWindowData[widgetName];
 		if (data.isMinimised || data.isMaximised) {
-			if (data.isMinimised) {
-				_minimisedChildWindowList[
-					window->getParent()->getWidgetName().toStdString()].
-					restore(widgetName);
-			}
-			data.restore(window);
-			data.isMinimised = false;
-			data.isMaximised = false;
+			_restoreChildWindowImpl(window, data);
 		} else {
 			data.cache(window);
 			data.isMinimised = false;
@@ -1369,12 +1365,12 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 					_sheet[_guiSpriteKeys[widgetName].first];
 				const std::string& sprite = _guiSpriteKeys[widgetName].second;
 
-				if (_widgetSprites.find(widgetName) == _widgetSprites.end()) {
+				if (_widgetSprites.find(widget) == _widgetSprites.end()) {
 					// Animated sprite for this widget doesn't exist yet, so
 					// allocate it.
-					_widgetSprites.insert({ widgetName, sfx::animated_sprite() });
+					_widgetSprites.insert({ widget, sfx::animated_sprite() });
 				}
-				auto& animatedSprite = _widgetSprites.at(widgetName);
+				auto& animatedSprite = _widgetSprites.at(widget);
 
 				if (sprite == "" && animatedSprite.getSprite() != "") {
 					// If the sprite has been removed, then we also need to remove
@@ -1415,7 +1411,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 				}
 				animatedSprite.setPosition(newPosition);
 			} else if (_guiSpriteKeys.find(widgetName) != _guiSpriteKeys.end() &&
-				_widgetSprites.at(widgetName).getSpritesheet() != nullptr &&
+				_widgetSprites.at(widget).getSpritesheet() != nullptr &&
 				_sheet.find(_guiSpriteKeys.at(widgetName).first) == _sheet.end()) {
 				// Else if the widget DID have a valid spritesheet, then we're
 				// going to have to remove the image from the widget to ensure that
@@ -1441,7 +1437,6 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	sf::View oldView = target.getView();
 	target.setView(sf::View(_gui.getView().getRect().operator sf::Rect<float>()));
 	for (auto& sprite : _widgetSprites) {
-		Widget::Ptr widget = _findWidget<Widget>(sprite.first);
 		static const std::function<bool(const Widget* const)> isWidgetVisible =
 			[](const Widget* const widget) -> bool {
 			if (widget->isVisible()) {
@@ -1454,7 +1449,7 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			}
 			return false;
 		};
-		if (widget && isWidgetVisible(widget.get())) {
+		if (sprite.first && isWidgetVisible(sprite.first.get())) {
 			// Pictures that don't match with their sprite's size will stretch the
 			// sprite. This should be emulated here in the future using scaling.
 			target.draw(sprite.second, states);
@@ -1988,7 +1983,7 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	// Remove widget.
 	const std::string name = widget->getWidgetName().toStdString();
 	if (container) {
-		_widgetSprites.erase(name);
+		_widgetSprites.erase(widget);
 		_guiSpriteKeys.erase(name);
 		_dontOverridePictureSizeWithSpriteSize.erase(name);
 		_originalCaptions.erase(name);
@@ -2134,6 +2129,10 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::MenuBar::create();
 	} else if (type == "childwindow") {
 		return tgui::ChildWindow::create();
+	} else if (type == "combobox") {
+		const auto combobox = tgui::ComboBox::create();
+		combobox->setItemsToDisplay(5);
+		return combobox;
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -2564,11 +2563,21 @@ void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& shee
 	if (_guiSpriteKeys[fullnameAsString].first != sheet ||
 		_guiSpriteKeys[fullnameAsString].second != key) {
 		_guiSpriteKeys[fullnameAsString] = std::make_pair(sheet, key);
-		_widgetSprites.erase(fullnameAsString);
+		_widgetSprites.erase(widget);
 	}
 	END("Attempted to set the sprite \"{}\" from sheet \"{}\" to widget \"{}\", "
 		"which is of type \"{}\", within menu \"{}\".", key, sheet, name,
 		widgetType, fullname[0])
+}
+
+void sfx::gui::_clearWidgetSprite(const std::string& name) {
+	START_WITH_WIDGET(name)
+	if (widgetType != "BitmapButton" && widgetType != "Picture")
+		UNSUPPORTED_WIDGET_TYPE()
+	_guiSpriteKeys.erase(fullnameAsString);
+	_widgetSprites.erase(widget);
+	END("Attempted to clear the sprite from widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 }
 
 void sfx::gui::_matchWidgetSizeToSprite(const std::string& name,
@@ -2696,6 +2705,15 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text,
 					append("."))
 			}
 		)
+		ELSE_IF_WIDGET_IS(ComboBox,
+			const auto limit = castWidget->getMaximumItems();
+			index = castWidget->addItem(text);
+			if (limit > 0 && index == limit) {
+				ERROR(std::string("This widget has reached its configured maximum "
+					"number of items, which is ").append(std::to_string(limit)).
+					append("."))
+			}
+		)
 		ELSE_UNSUPPORTED()
 	_setTranslatedString(fullnameAsString, text, variables, index);
 	_translateWidget(widget);
@@ -2707,6 +2725,7 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text,
 void sfx::gui::_clearItems(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ListBox, castWidget->removeAllItems();)
+		ELSE_IF_WIDGET_IS(ComboBox, castWidget->removeAllItems();)
 		ELSE_UNSUPPORTED()
 	_originalCaptions.erase(fullnameAsString);
 	END("Attempted to clear all items from widget \"{}\", which is of type "
@@ -2726,6 +2745,17 @@ void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index
 				}
 			}
 		)
+		ELSE_IF_WIDGET_IS(ComboBox,
+			if (!castWidget->setSelectedItemByIndex(index)) {
+				const auto count = castWidget->getItemCount();
+				if (count) {
+					ERROR(std::string("The item index cannot be higher than ").
+						append(std::to_string(count - 1)).append("."))
+				} else {
+					ERROR("This widget has no items.")
+				}
+			}
+		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to select item {} from widget \"{}\", which is of type \"{}\", "
 		"within menu \"{}\".", index, name, widgetType, fullname[0])
@@ -2734,6 +2764,7 @@ void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index
 int sfx::gui::_getSelectedItem(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ListBox, return castWidget->getSelectedItemIndex();)
+		ELSE_IF_WIDGET_IS(ComboBox, return castWidget->getSelectedItemIndex();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the index of the selected item of a widget \"{}\", "
 		"which is of type \"{}\", within menu \"{}\".", name, widgetType,
@@ -2744,6 +2775,8 @@ int sfx::gui::_getSelectedItem(const std::string& name) {
 std::string sfx::gui::_getSelectedItemText(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ListBox, return castWidget->getSelectedItem().toStdString();)
+		ELSE_IF_WIDGET_IS(ComboBox,
+			return castWidget->getSelectedItem().toStdString();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the text of the selected item of a widget \"{}\", which "
 		"is of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
@@ -2804,6 +2837,8 @@ void sfx::gui::_setGroupPadding(const std::string& name,
 		ELSE_IF_WIDGET_IS(HorizontalLayout, castWidget->getRenderer()->setPadding(
 			AbsoluteOrRelativeValue(padding));)
 		ELSE_IF_WIDGET_IS(VerticalLayout, castWidget->getRenderer()->setPadding(
+			AbsoluteOrRelativeValue(padding));)
+		ELSE_IF_WIDGET_IS(Group, castWidget->getRenderer()->setPadding(
 			AbsoluteOrRelativeValue(padding));)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set a padding {} to widget \"{}\", which is of type \"{}\", "
@@ -3015,4 +3050,31 @@ void sfx::gui::_setWidgetResizable(const std::string& name, const bool resizable
 	END("Attempted to set the resizability property of widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\", to {}.", name, widgetType, fullname[0],
 		resizable);
+}
+
+void sfx::gui::_restoreChildWindow(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow,
+			if (_childWindowData.find(fullnameAsString) != _childWindowData.end()) {
+				_restoreChildWindowImpl(castWidget,
+					_childWindowData[fullnameAsString]);
+			}
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to restore the widget \"{}\", which is of type \"{}\", within "
+		"menu \"{}\".", name, widgetType, fullname[0]);
+}
+
+void sfx::gui::_restoreChildWindowImpl(const tgui::ChildWindow::Ptr& window,
+	child_window_properties& data) {
+	if (data.isMinimised || data.isMaximised) {
+		if (data.isMinimised) {
+			_minimisedChildWindowList[
+				window->getParent()->getWidgetName().toStdString()].
+				restore(window->getWidgetName().toStdString());
+		}
+		data.restore(window);
+		data.isMinimised = false;
+		data.isMaximised = false;
+	}
 }

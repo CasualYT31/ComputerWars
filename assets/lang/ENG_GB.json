@@ -27,6 +27,78 @@
 
 	"file": "File",
 	"new": "New",
+	"map": "Map",
+	"setmapprops": "Set Map Properties",
+	"mapprops": "Map Properties",
+	"tiledialog": "Tile Dialog",
+	"ok": "OK",
+	"owner": "Owner",
+	"view": "View",
+	"neutral": "Neutral",
+
+	"ORANGE_COUNTRY_longname": "Orange Star",
+	"ORANGE_COUNTRY_shortname": "OS",
+	"ORANGE_COUNTRY_description": "Orange Star.",
+
+	"BLUE_COUNTRY_longname": "Blue Moon",
+	"BLUE_COUNTRY_shortname": "BM",
+	"BLUE_COUNTRY_description": "Blue Moon.",
+
+	"GREEN_COUNTRY_longname": "Green Earth",
+	"GREEN_COUNTRY_shortname": "GE",
+	"GREEN_COUNTRY_description": "Green Earth.",
+
+	"YELLOW_COUNTRY_longname": "Yellow Comet",
+	"YELLOW_COUNTRY_shortname": "YC",
+	"YELLOW_COUNTRY_description": "Yellow Comet.",
+
+	"BLACK_COUNTRY_longname": "Black Hole",
+	"BLACK_COUNTRY_shortname": "BH",
+	"BLACK_COUNTRY_description": "Black Hole.",
+
+	"RED_COUNTRY_longname": "Red Fire",
+	"RED_COUNTRY_shortname": "RF",
+	"RED_COUNTRY_description": "Red Fire.",
+
+	"GREY_COUNTRY_longname": "Grey Sky",
+	"GREY_COUNTRY_shortname": "GS",
+	"GREY_COUNTRY_description": "Grey Sky.",
+
+	"BROWN_COUNTRY_longname": "Brown Desert",
+	"BROWN_COUNTRY_shortname": "BD",
+	"BROWN_COUNTRY_description": "Brown Desert.",
+
+	"AMBER_COUNTRY_longname": "Amber Blaze",
+	"AMBER_COUNTRY_shortname": "AB",
+	"AMBER_COUNTRY_description": "Amber Blaze.",
+
+	"JADE_COUNTRY_longname": "Jade Sun",
+	"JADE_COUNTRY_shortname": "JS",
+	"JADE_COUNTRY_description": "Jade Sun.",
+
+	"COBALT_COUNTRY_longname": "Cobalt Ice",
+	"COBALT_COUNTRY_shortname": "CI",
+	"COBALT_COUNTRY_description": "Cobalt Ice.",
+
+	"PINK_COUNTRY_longname": "Pink Cosmos",
+	"PINK_COUNTRY_shortname": "PC",
+	"PINK_COUNTRY_description": "Pink Cosmos.",
+
+	"TEAL_COUNTRY_longname": "Teal Galaxy",
+	"TEAL_COUNTRY_shortname": "TG",
+	"TEAL_COUNTRY_description": "Teal Galaxy.",
+
+	"PURPLE_COUNTRY_longname": "Purple Lightning",
+	"PURPLE_COUNTRY_shortname": "PL",
+	"PURPLE_COUNTRY_description": "Purple Lightning.",
+
+	"ACID_COUNTRY_longname": "Acid Rain",
+	"ACID_COUNTRY_shortname": "AR",
+	"ACID_COUNTRY_description": "Acid Rain.",
+
+	"WHITE_COUNTRY_longname": "White Nova",
+	"WHITE_COUNTRY_shortname": "WN",
+	"WHITE_COUNTRY_description": "White Nova.",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

@@ -230,6 +230,11 @@ void awe::tile_type::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Returns details on this tile's terrain "
 		"type.");
 	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasOwnedTiles() const property",
+		asMETHOD(T, hasOwnedTiles), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns <tt>TRUE</tt> if this tile type "
+		"has at least one owned tile sprite.");
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& ownedTileSprite(const string&in) const",
 		asMETHODPR(T, getOwnedTile, (const std::string&) const,
 			const std::string&), asCALL_THISCALL);

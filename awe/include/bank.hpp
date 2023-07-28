@@ -817,6 +817,15 @@ namespace awe {
 		}
 
 		/**
+		 * Finds out if this tile type has owned tile sprites.
+		 * @return \c TRUE if this tile type has at least one owned tile sprite.
+		 *         \c FALSE if it has none.
+		 */
+		inline bool hasOwnedTiles() const {
+			return !_ownedTiles.empty();
+		}
+
+		/**
 		 * Retrieves the name of the sprite that is shown for a given country.
 		 * @param  countryName The script name of the country.
 		 * @return The name of the tile's sprite, or \c _neutralTile if the given
