@@ -459,6 +459,14 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Sets a widget's position. The name of "
 		"the widget is given, then the X position, then the Y position.");
 
+	r = engine->RegisterGlobalFunction("Vector2f getWidgetAbsolutePosition("
+		"const string&in)",
+		asMETHOD(sfx::gui, _getWidgetAbsolutePosition),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's absolute position. The "
+		"name of the widget is given, then the position of the top-left point of "
+		"the widget is returned. Returns (0.0f,0.0f) upon an error.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetOrigin(const string&in, "
 		"const float, const float)",
 		asMETHOD(sfx::gui, _setWidgetOrigin), asCALL_THISCALL_ASGLOBAL, this);
@@ -2278,7 +2286,11 @@ void sfx::gui::_setWidgetFont(const std::string& name,
 	if (!_fonts) ERROR("No fonts object has been given to this gui object.")
 	auto fontPath = _fonts->getFontPath(fontName);
 	// Invalid font name will be logged by fonts class.
-	if (!fontPath.empty()) widget->getRenderer()->setFont(tgui::Font(fontPath));
+	if (!fontPath.empty()) {
+		auto font = tgui::Font(fontPath);
+		font.setSmooth(false);
+		widget->getRenderer()->setFont(font);
+	}
 	END("Attempted to set the font \"{}\" to a widget \"{}\" within menu \"{}\".",
 		fontName, name, fullname[0])
 }
@@ -2288,7 +2300,11 @@ void sfx::gui::_setGlobalFont(const std::string& fontName) {
 	if (!_fonts) ERROR("No fonts object has been given to this gui object.")
 	auto fontPath = _fonts->getFontPath(fontName);
 	// Invalid font name will be logged by fonts class.
-	if (!fontPath.empty()) _gui.setFont(tgui::Font(fontPath));
+	if (!fontPath.empty()) {
+		auto font = tgui::Font(fontPath);
+		font.setSmooth(false);
+		_gui.setFont(font);
+	}
 	END("Attempted to set the font \"{}\" as the global font.", fontName)
 }
 
@@ -2298,6 +2314,14 @@ void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,
 	widget->setPosition(x.c_str(), y.c_str());
 	END("Attempted to set the position (\"{}\",\"{}\") to a widget \"{}\" within "
 		"menu \"{}\".", x, y, name, fullname[0])
+}
+
+sf::Vector2f sfx::gui::_getWidgetAbsolutePosition(const std::string& name) {
+	START_WITH_WIDGET(name)
+	return widget->getAbsolutePosition();
+	END("Attempted to get the absolute position of a widget \"{}\" within menu "
+		"\"{}\".", name, fullname[0])
+	return {};
 }
 
 void sfx::gui::_setWidgetOrigin(const std::string& name, const float x,

@@ -27,7 +27,7 @@ void DevCommandMenuSetUp() {
 	setWidgetOrigin("Error", 0.0, 1.0);
 	setWidgetPosition("Error", "0%", "DevCommandMenu.Code.top");
 	setWidgetSize("Error", "87.5%", "30px");
-	setWidgetTextSize("Error", 22);
+	setWidgetTextSize("Error", 16);
 
 	addWidget("Label", "Info");
 	setWidgetTextColour("Info", Colour(0, 0, 0, 255));

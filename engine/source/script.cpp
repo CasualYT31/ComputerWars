@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "SFML/Graphics/Color.hpp"
 #include "SFML/System/Vector2.hpp"
 #include "SFML/System/Clock.hpp"
+#include "SFML/Graphics/Rect.hpp"
 #include "file.hpp"
 #include "boost/stacktrace.hpp"
 #include "fmtengine.hpp"
@@ -32,6 +33,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 void AWEColourTypeConstructor(const int r, const int g, const int b,
     const int a, void* memory) {
     new(memory) sf::Color((sf::Uint8)r, (sf::Uint8)g, (sf::Uint8)b, (sf::Uint8)a);
+}
+
+static sf::Uint8 gradient(const sf::Uint8 from, const sf::Uint8 to,
+    const double percent) {
+    return (from < to) ?
+        (from + static_cast<sf::Uint8>((to - from) * (percent / 100.0))) :
+        (from - static_cast<sf::Uint8>((from - to) * (percent / 100.0)));
+}
+
+sf::Color AWEColourGradientTo(void* memory, const sf::Color& colourTo,
+    double percent, const bool includeAlpha = false) {
+    if (percent < 0.0) percent = 0.0;
+    if (percent > 100.0) percent = 100.0;
+    auto colourFrom = (const sf::Color*)memory;
+    return sf::Color(
+        gradient(colourFrom->r, colourTo.r, percent),
+        gradient(colourFrom->g, colourTo.g, percent),
+        gradient(colourFrom->b, colourTo.b, percent),
+        includeAlpha ? gradient(colourFrom->a, colourTo.a, percent) : colourFrom->a
+    );
 }
 
 void engine::RegisterColourType(asIScriptEngine* engine,
@@ -51,6 +72,12 @@ void engine::RegisterColourType(asIScriptEngine* engine,
             "void Colour(const int, const int, const int, const int)",
             asFUNCTION(AWEColourTypeConstructor), asCALL_CDECL_OBJLAST);
         document->DocumentObjectType(r, "Represents a colour value.");
+        r = engine->RegisterObjectMethod("Colour", "Colour gradientTo("
+            "const Colour&in, double, const bool = false) const",
+            asFUNCTION(AWEColourGradientTo), asCALL_CDECL_OBJFIRST);
+        document->DocumentObjectMethod(r, "Calculates the colour that is "
+            "<tt>double</tt>% from the current colour, to the given colour. If "
+            "the bool is <tt>TRUE</tt>, then the alpha channel will be included.");
     }
 }
 
@@ -183,6 +210,43 @@ void engine::RegisterVectorTypes(asIScriptEngine* engine,
             asFUNCTION(AWEVector2fTypeConstructor), asCALL_CDECL_OBJLAST);
         engine->RegisterObjectMethod("Vector2f", "string toString() const",
             asFUNCTION(AWEVector2fTypeToString), asCALL_CDECL_OBJLAST);
+    }
+}
+
+void AWEIntRectTypeConstructor(const int left, const int top, const int width,
+    const int height, void* memory) {
+    new(memory) sf::IntRect(left, top, width, height);
+}
+
+std::string AWEIntRectTypeToString(void* memory) {
+    if (memory) {
+        sf::IntRect* r = (sf::IntRect*)memory;
+        return "RECT (" + std::to_string(r->left) + ", " + std::to_string(r->top) +
+            ") [" + std::to_string(r->width) + " x " + std::to_string(r->height) +
+            "]";
+    }
+    return "";
+}
+
+void engine::RegisterRectTypes(asIScriptEngine* engine,
+    const std::shared_ptr<DocumentationGenerator>& document) {
+    if (!engine->GetTypeInfoByName("IntRect")) {
+        auto r = engine->RegisterObjectType("IntRect", sizeof(sf::IntRect),
+            asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::IntRect>());
+        engine->RegisterObjectProperty("IntRect", "int left",
+            asOFFSET(sf::IntRect, left));
+        engine->RegisterObjectProperty("IntRect", "int top",
+            asOFFSET(sf::IntRect, top));
+        engine->RegisterObjectProperty("IntRect", "int width",
+            asOFFSET(sf::IntRect, width));
+        engine->RegisterObjectProperty("IntRect", "int height",
+            asOFFSET(sf::IntRect, height));
+        engine->RegisterObjectBehaviour("IntRect", asBEHAVE_CONSTRUCT,
+            "void IntRect(const int, const int, const int, const int)",
+            asFUNCTION(AWEIntRectTypeConstructor), asCALL_CDECL_OBJLAST);
+        engine->RegisterObjectMethod("IntRect", "string toString() const",
+            asFUNCTION(AWEIntRectTypeToString), asCALL_CDECL_OBJLAST);
+        document->DocumentObjectType(r, "Represents a rectangle.");
     }
 }
 

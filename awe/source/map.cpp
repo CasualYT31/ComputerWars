@@ -57,6 +57,7 @@ void awe::map::Register(asIScriptEngine* engine,
 		// DEPENDENCIES //
 		//////////////////
 		engine::RegisterVectorTypes(engine, document);
+		engine::RegisterRectTypes(engine, document);
 		engine::RegisterFileType(engine, document);
 		awe::RegisterGameTypedefs(engine, document);
 		awe::closed_list_node::Register(engine, document);
@@ -512,6 +513,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"void setLRCursorSprite(const string&in)",
 			asMETHOD(awe::map, setLRCursorSprite), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"IntRect getCursorBoundingBox() const",
+			asMETHOD(awe::map, getCursorBoundingBox), asCALL_THISCALL);
+
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
 		//////////////////////////////////////
@@ -596,16 +601,6 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"uint64 getUnitPreviewsCount() const",
 			asMETHOD(awe::map, getUnitPreviewsCount), asCALL_THISCALL);
-
-		// Temporary mappings.
-		r = engine->RegisterObjectMethod("Map",
-			"void TOOLTIP_setDamage(const int)",
-			asMETHOD(awe::damage_tooltip, setDamage), asCALL_THISCALL, 0,
-			asOFFSET(awe::map, _damageTooltip), false);
-		r = engine->RegisterObjectMethod("Map",
-			"void TOOLTIP_visible(const bool)",
-			asMETHOD(awe::damage_tooltip, visible), asCALL_THISCALL, 0,
-			asOFFSET(awe::map, _damageTooltip), false);
 	}
 }
 
@@ -2205,6 +2200,12 @@ void awe::map::setLRCursorSprite(const std::string& sprite) {
 	}
 }
 
+sf::IntRect awe::map::getCursorBoundingBox() const {
+	const auto pos = _cursor.getPosition(), size = _cursor.getSize();
+	const auto ul = _target->mapCoordsToPixel(pos, _view);
+	return { ul, _target->mapCoordsToPixel(pos + size, _view) - ul };
+}
+
 void awe::map::setTileSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sheet_tile = sheet;
@@ -2227,7 +2228,6 @@ void awe::map::setIconSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sheet_icon = sheet;
 	_cursor.setSpritesheet(sheet);
-	_damageTooltip.setSpritesheet(sheet);
 	// Go through all of the units and set the new spritesheet to each one.
 	for (auto& unit : _units) unit.second.setIconSpritesheet(sheet);
 }
@@ -2242,7 +2242,6 @@ void awe::map::setFont(const std::shared_ptr<sf::Font>& font) {
 		_logger.error("setFont operation failed: nullptr was given!");
 		return;
 	}
-	_damageTooltip.setFont(font);
 }
 
 void awe::map::setLanguageDictionary(
@@ -2419,8 +2418,6 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	);
 
 	// End.
-	_damageTooltip.setPosition(_cursor.getPosition(), static_cast<int>(quadrant));
-	_damageTooltip.animate(target);
 	return false;
 }
 
@@ -2502,7 +2499,6 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 
 	// Step 4. the cursor.
 	if (!_cursor.getSprite().empty()) target.draw(_cursor, states);
-	target.draw(_damageTooltip, states);
 
 	// Step 5. restore old view.
 	target.setView(oldView);

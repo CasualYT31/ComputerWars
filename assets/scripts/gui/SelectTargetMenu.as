@@ -4,9 +4,15 @@
  */
 
 /**
- * In the future, the damage tooltip will be widgets created here.
+ * The damage label widget.
+ */
+DamageWidget damageWidget;
+
+/**
+ * Sets up the damage label widget.
  */
 void SelectTargetMenuSetUp() {
+    damageWidget = DamageWidget("SelectTargetMenu");
 }
 
 /**
@@ -49,8 +55,6 @@ void SelectTargetMenuOpen() {
  * Always ensure to pop the attack unit data and re-enable the closed list.
  */
 void SelectTargetMenuClose() {
-	// Always ensure the damage tooltip is hidden before leaving the menu.
-	game.map.TOOLTIP_visible(false);
 	game.enableClosedList(true);
 	game.setNormalCursorSprites();
 }
@@ -65,20 +69,20 @@ void SelectTargetMenuHandleInput(const dictionary controls,
     const MousePosition&in previousPosition,
     const MousePosition&in currentPosition) {
 	HandleCommonGameInput(controls, previousPosition, currentPosition);
+    game.updateDamageWidgetPosition(damageWidget);
 
 	// If the currently selected tile is hovering over a target, find the base
-	// damage the selected weapon deals to the target and update the damage
-	// tooltip.
+	// damage the selected weapon deals to the target and update the damage label.
 	const auto selectedTile = game.map.getSelectedTile();
 	if (game.map.isAvailableTile(selectedTile)) {
 		string weaponName;
 		TILES_WITH_TARGETS.get(selectedTile.toString(), weaponName);
 		int baseDamage = game.calculateDamage(game.map.getSelectedUnit(),
 			weaponName, selectedTile, true);
-		game.map.TOOLTIP_setDamage(baseDamage);
-		game.map.TOOLTIP_visible(true);
+		damageWidget.setDamage(baseDamage);
+		damageWidget.setVisibility(true);
 	} else {
-		game.map.TOOLTIP_visible(false);
+		damageWidget.setVisibility(false);
 	}
 
 	if (bool(controls["back"])) {

@@ -57,6 +57,14 @@ namespace engine {
 		const std::shared_ptr<DocumentationGenerator>& document);
 
 	/**
+	 * Registers and documents the \c IntRect type, if it hasn't already been
+	 * registered.
+	 * @safety No guarantee.
+	 */
+	void RegisterRectTypes(asIScriptEngine* engine,
+		const std::shared_ptr<DocumentationGenerator>& document);
+
+	/**
 	 * Registers and documents the \c Time and \c Clock types, if they haven't
 	 * already been registered.
 	 * @safety No guarantee.

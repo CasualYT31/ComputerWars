@@ -144,23 +144,29 @@ class PlayableMap {
 	}
 
 	/**
-	 * Calculates where the base damage label should be drawn on an attack cursor,
-	 * along the X axis.
-	 * @return The X coorindate of the base damage label.
+	 * Updates a given damage label widget's position based on this map's current
+     * cursor position.
+     * @param widget The damage label widget to update.
 	 */
-	string getBaseDamageLabelX() const {
+	void updateDamageWidgetPosition(DamageWidget@ widget) const {
+        const auto rect = map.getCursorBoundingBox();
 		const auto quadrant = map.getCursorQuadrant();
 		switch (quadrant) {
 		case Quadrant::LowerLeft:
+            widget.updatePosition(MousePosition(rect.left + rect.width,
+                rect.top), quadrant);
 			break;
 		case Quadrant::LowerRight:
+            widget.updatePosition(MousePosition(rect.left, rect.top), quadrant);
 			break;
 		case Quadrant::UpperRight:
+            widget.updatePosition(MousePosition(rect.left,
+                rect.top + rect.height), quadrant);
 			break;
-		default:
-			return "px";
+		default: // UpperLeft:
+            widget.updatePosition(MousePosition(rect.left + rect.width,
+                rect.top + rect.height), quadrant);
 		}
-		return "placeholder function";
 	}
 
 	/**

@@ -954,6 +954,15 @@ namespace sfx {
 			const std::string& y);
 
 		/**
+		 * Retrieves a widget's absolute location.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and <tt>(0.0f,0.0f)</tt> will be returned.
+		 * @param  name The name of the widget to query.
+		 * @return The absolute position of the top-left point of the widget.
+		 */
+		sf::Vector2f _getWidgetAbsolutePosition(const std::string& name);
+
+		/**
 		 * Updates a widget's origin.
 		 * If no widget exists with the given name, then an error will be logged
 		 * and no widget will be updated.

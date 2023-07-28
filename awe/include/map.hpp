@@ -34,7 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cmath>
 #include <stack>
 #include <optional>
-#include "damage_sprite.hpp"
 
 #pragma once
 
@@ -1380,6 +1379,13 @@ namespace awe {
 		void setLRCursorSprite(const std::string& sprite);
 
 		/**
+		 * Calculates where the cursor's bounding rectangle is on the render
+		 * target.
+		 * @return The bounding rectangle of the cursor, in target coordinates.
+		 */
+		sf::IntRect getCursorBoundingBox() const;
+
+		/**
 		 * Sets the spritesheet used for drawing tiles.
 		 * @param sheet Pointer to the animated spritesheet to use for tiles.
 		 */
@@ -1769,13 +1775,6 @@ namespace awe {
 		 * Unavilable tiles shader.
 		 */
 		sf::Shader _unavailableTileShader;
-
-		// BASE DAMAGE SPRITE //
-
-		/**
-		 * The [temporary] damage tooltip.
-		 */
-		awe::damage_tooltip _damageTooltip;
 
 		//////////////////
 		// SPRITESHEETS //

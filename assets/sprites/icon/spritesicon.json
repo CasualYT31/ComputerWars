@@ -142,7 +142,7 @@
 			"offset": [ -10, -9 ]
 		},
 		"damagetooltip": {
-			"frames": [ [ 169, 93, 32, 23 ] ],
+			"frames": [ [ 0, 191, 64, 46 ] ],
 			"durations": [ 0 ],
 			"offset": [ 0, 0 ]
 		},
