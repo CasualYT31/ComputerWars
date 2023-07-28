@@ -573,6 +573,15 @@ namespace sfx {
 		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
 
 		/**
+		 * Callback given to \c BitmapButton and \c Picture widgets to allow the
+		 * GUI engine to draw animated sprites in the correct order.
+		 * @param target The target to draw to.
+		 * @param widget The widget being drawn.
+		 */
+		void _drawCallback(tgui::BackendRenderTarget& target,
+			tgui::Widget::ConstPtr widget) const;
+
+		/**
 		 * Handles moving the currently selected widget based on directional input.
 		 * @param  ui Pointer to the user interface information to read from.
 		 * @return The full name of the widget that is selected after the call is
@@ -1585,7 +1594,8 @@ namespace sfx {
 		 * Cleared upon a call to \c setGUI(). Refilled once upon the first call to
 		 * \c animate() since \c setGUI() was last called.
 		 */
-		std::unordered_map<tgui::Widget::Ptr, sfx::animated_sprite> _widgetSprites;
+		std::unordered_map<tgui::Widget::ConstPtr, sfx::animated_sprite>
+			_widgetSprites;
 
 		/**
 		 * Stores the sprite names of all the widgets containing pictures that are

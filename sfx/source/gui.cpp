@@ -1433,28 +1433,6 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	}
 	// Draw foreground.
 	_gui.draw();
-	// Draw each widget's sprite if the widget isn't hidden.
-	sf::View oldView = target.getView();
-	target.setView(sf::View(_gui.getView().getRect().operator sf::Rect<float>()));
-	for (auto& sprite : _widgetSprites) {
-		static const std::function<bool(const Widget* const)> isWidgetVisible =
-			[](const Widget* const widget) -> bool {
-			if (widget->isVisible()) {
-				const auto parent = widget->getParent();
-				if (parent) {
-					return isWidgetVisible(parent);
-				} else {
-					return true;
-				}
-			}
-			return false;
-		};
-		if (sprite.first && isWidgetVisible(sprite.first.get())) {
-			// Pictures that don't match with their sprite's size will stretch the
-			// sprite. This should be emulated here in the future using scaling.
-			target.draw(sprite.second, states);
-		}
-	}
 	// Draw angle brackets, if there is currently a widget selected via the
 	// directional controls, and it is visible.
 	if (_enableDirectionalFlow && _currentlySelectedWidget.find(getGUI()) !=
@@ -1462,12 +1440,25 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		!_currentlySelectedWidget.at(getGUI()).second.empty() &&
 		isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
 			_currentlySelectedWidget.at(getGUI()).second).get(), true, false)) {
+		sf::View oldView = target.getView();
+		target.setView(sf::View(
+			_gui.getView().getRect().operator sf::Rect<float>()));
 		target.draw(_angleBracketUL, states);
 		target.draw(_angleBracketUR, states);
 		target.draw(_angleBracketLL, states);
 		target.draw(_angleBracketLR, states);
+		target.setView(oldView);
 	}
-	target.setView(oldView);
+}
+
+// Maybe need to add RenderStates to this callback in the future.
+void sfx::gui::_drawCallback(BackendRenderTarget& target,
+	tgui::Widget::ConstPtr widget) const {
+	const auto widgetSprite = _widgetSprites.find(widget);
+	if (widgetSprite != _widgetSprites.end()) {
+		dynamic_cast<BackendRenderTargetSFML&>(target).getTarget()->
+			draw(widgetSprite->second);
+	}
 }
 
 std::string sfx::gui::_moveDirectionalFlow(
@@ -2098,7 +2089,10 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 	const std::string& name, const std::string& menu) const {
 	tgui::String type = tgui::String(wType).trim().toLower();
 	if (type == "bitmapbutton") {
-		return tgui::BitmapButton::create();
+		auto button = tgui::BitmapButton::create();
+		button->setCallback(std::bind(&sfx::gui::_drawCallback, this,
+			std::placeholders::_1, std::placeholders::_2));
+		return button;
 	} else if (type == "listbox") {
 		return tgui::ListBox::create();
 	} else if (type == "verticallayout") {
@@ -2106,7 +2100,10 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 	} else if (type == "horizontallayout") {
 		return tgui::HorizontalLayout::create();
 	} else if (type == "picture") {
-		return tgui::Picture::create();
+		const auto picture = tgui::Picture::create();
+		picture->setDrawCallback(std::bind(&sfx::gui::_drawCallback, this,
+			std::placeholders::_1, std::placeholders::_2));
+		return picture;
 	} else if (type == "label") {
 		return tgui::Label::create();
 	} else if (type == "scrollablepanel") {
