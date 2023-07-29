@@ -479,7 +479,9 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"const string&in, const string&in)",
 		asMETHOD(sfx::gui, _setWidgetSize), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's size. The name of the "
-		"widget is given, then the width, then the height.");
+		"widget is given, then the width, then the height. If either the width or "
+		"height is a blank string, then the engine will retain the layout that is "
+		"currently set to that width or height.");
 
 	r = engine->RegisterGlobalFunction(
 		"Vector2f getWidgetFullSize(const string&in)",
@@ -731,9 +733,27 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"amount.");
 
 	r = engine->RegisterGlobalFunction("void setGroupPadding("
-		"const string&in, const string&in)",
-		asMETHOD(sfx::gui, _setGroupPadding), asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Sets a group's padding.");
+		"const string&in, const string&in)", asMETHODPR(sfx::gui, _setGroupPadding,
+			(const std::string&, const std::string&), void),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a group's padding. If a "
+		"<tt>Grid</tt> is given, each of its widgets will be assigned the given "
+		"padding, but note that it will only work once all of its widgets have "
+		"been added and newly added widgets won't have the padding applied "
+		"automatically!");
+
+	r = engine->RegisterGlobalFunction("void setGroupPadding(const string&in, "
+		"const string&in, const string&in, const string&in, const string&in)",
+		asMETHODPR(sfx::gui, _setGroupPadding, (const std::string&,
+			const std::string&, const std::string&, const std::string&,
+			const std::string&), void),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a group's padding. The group's name "
+		"is given, then the padding applied to the left, top, right, and bottom "
+		"sides. If a <tt>Grid</tt> is given, each of its widgets will be assigned "
+		"the given padding, but note that it will only work once all of its "
+		"widgets have been added and newly added widgets won't have the padding "
+		"applied automatically!");
 
 	r = engine->RegisterGlobalFunction("void setWidgetAlignmentInGrid("
 		"const string&in, const uint, const uint, const WidgetAlignment)",
@@ -741,6 +761,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's alignment within its "
 		"grid cell.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetPaddingInGrid("
+		"const string&in, const uint, const uint, const string&in)",
+		asMETHOD(sfx::gui, _setWidgetPaddingInGrid),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's padding within its grid "
+		"cell.");
 
 	r = engine->RegisterGlobalFunction("void setSpaceBetweenWidgets("
 		"const string&in, const float)",
@@ -830,6 +857,24 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "If <tt>TRUE</tt>, the given widget can "
 		"be resized by the user, if the widget supports it. If <tt>FALSE</tt>, "
 		"only the engine or scripts can resize the given widget.");
+
+	r = engine->RegisterGlobalFunction("float getTitleBarHeight(const string&in)",
+		asMETHOD(sfx::gui, _getTitleBarHeight),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns the given widget's titlebar "
+		"height. Returns <tt>0.0f</tt> on error.");
+
+	r = engine->RegisterGlobalFunction("void openChildWindow(const string&in, "
+		"const string&in, const string&in)",
+		asMETHOD(sfx::gui, _openChildWindow), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Opens a <tt>ChildWindow</tt> to a given "
+		"location. It is also made visible, brought to the front, and restored if "
+		"it was maximised or minimised. If the <tt>ChildWindow</tt> was already "
+		"open, it will still carry out the aforementioned tasks.");
+
+	r = engine->RegisterGlobalFunction("void closeChildWindow(const string&in)",
+		asMETHOD(sfx::gui, _closeChildWindow), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Closes a <tt>ChildWindow</tt>.");
 
 	r = engine->RegisterGlobalFunction("void restoreChildWindow(const string&in)",
 		asMETHOD(sfx::gui, _restoreChildWindow), asCALL_THISCALL_ASGLOBAL, this);
@@ -2340,7 +2385,11 @@ void sfx::gui::_setWidgetOrigin(const std::string& name, const float x,
 void sfx::gui::_setWidgetSize(const std::string& name, const std::string& w,
 	const std::string& h) {
 	START_WITH_WIDGET(name)
-	widget->setSize(w.c_str(), h.c_str());
+	if (w.empty() && h.empty())
+		ERROR("Did you mean to provide an empty width and height?");
+	if (w.empty()) widget->setHeight(h.c_str());
+	else if (h.empty()) widget->setWidth(w.c_str());
+	else widget->setSize(w.c_str(), h.c_str());
 	END("Attempted to set the size (\"{}\",\"{}\") to a widget \"{}\" within menu "
 		"\"{}\".", w, h, name, fullname[0])
 }
@@ -2866,9 +2915,43 @@ void sfx::gui::_setGroupPadding(const std::string& name,
 			AbsoluteOrRelativeValue(padding));)
 		ELSE_IF_WIDGET_IS(Group, castWidget->getRenderer()->setPadding(
 			AbsoluteOrRelativeValue(padding));)
+		ELSE_IF_WIDGET_IS(Grid,
+			const auto& widgets = castWidget->getWidgets();
+			for (const auto& widget : widgets) {
+				castWidget->setWidgetPadding(widget,
+					AbsoluteOrRelativeValue(padding));
+			}
+		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set a padding {} to widget \"{}\", which is of type \"{}\", "
 		"within menu \"{}\".", padding, name, widgetType, fullname[0])
+}
+
+void sfx::gui::_setGroupPadding(const std::string& name, const std::string& left,
+	const std::string& top, const std::string& right, const std::string& bottom) {
+	const auto padding = Padding(AbsoluteOrRelativeValue(left),
+		AbsoluteOrRelativeValue(top), AbsoluteOrRelativeValue(right),
+		AbsoluteOrRelativeValue(bottom));
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ScrollablePanel,
+			castWidget->getRenderer()->setPadding(padding);)
+		ELSE_IF_WIDGET_IS(Panel,
+			castWidget->getRenderer()->setPadding(padding);)
+		ELSE_IF_WIDGET_IS(HorizontalLayout,
+			castWidget->getRenderer()->setPadding(padding);)
+		ELSE_IF_WIDGET_IS(VerticalLayout,
+			castWidget->getRenderer()->setPadding(padding);)
+		ELSE_IF_WIDGET_IS(Group,
+			castWidget->getRenderer()->setPadding(padding);)
+		ELSE_IF_WIDGET_IS(Grid,
+			const auto & widgets = castWidget->getWidgets();
+			for (const auto& widget : widgets)
+				castWidget->setWidgetPadding(widget, padding);
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set padding left:{}, top:{}, right:{}, bottom:{}, to widget "
+		"\"{}\", which is of type \"{}\", within menu \"{}\".", left, top, right,
+		bottom, name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
@@ -2876,7 +2959,7 @@ void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
 	const tgui::Grid::Alignment alignment) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(Grid,
-			auto & table = castWidget->getGridWidgets();
+			auto& table = castWidget->getGridWidgets();
 			if (row < table.size()) {
 				if (col < table[row].size()) {
 					castWidget->setWidgetAlignment(row, col, alignment);
@@ -2890,6 +2973,28 @@ void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
 		ELSE_UNSUPPORTED()
 	END("Attempted to set an alignment {} to a widget \"{}\", which is of type "
 		"\"{}\", @ ({}, {}), within menu \"{}\".", alignment, name, widgetType,
+		row, col, fullname[0])
+}
+
+void sfx::gui::_setWidgetPaddingInGrid(const std::string& name,
+	const std::size_t row, const std::size_t col, const std::string& padding) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Grid,
+			auto& table = castWidget->getGridWidgets();
+			if (row < table.size()) {
+				if (col < table[row].size()) {
+					castWidget->setWidgetPadding(row, col,
+						AbsoluteOrRelativeValue(padding));
+				} else {
+					ERROR("The column index is out of range.")
+				}
+			} else {
+				ERROR("The row index is out of range.")
+			}
+			)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set a padding {} to a widget \"{}\", which is of type "
+		"\"{}\", @ ({}, {}), within menu \"{}\".", padding, name, widgetType,
 		row, col, fullname[0])
 }
 
@@ -3078,10 +3183,49 @@ void sfx::gui::_setWidgetResizable(const std::string& name, const bool resizable
 		resizable);
 }
 
+float sfx::gui::_getTitleBarHeight(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow,
+			return castWidget->getRenderer()->getTitleBarHeight();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the titlebar height of a widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+	return 0.0f;
+}
+
+void sfx::gui::_openChildWindow(const std::string& name, const std::string& x,
+	const std::string& y) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow,
+			if (_childWindowData.find(fullnameAsString) !=
+				_childWindowData.end()) {
+				_restoreChildWindowImpl(castWidget,
+					_childWindowData[fullnameAsString]);
+			}
+			castWidget->setPosition(x.c_str(), y.c_str());
+			castWidget->moveToFront();
+			castWidget->setVisible(true);
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to open the widget \"{}\", which is of type \"{}\", within "
+		"menu \"{}\".", name, widgetType, fullname[0]);
+}
+
+void sfx::gui::_closeChildWindow(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow,
+			castWidget->setVisible(false);
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to close the widget \"{}\", which is of type \"{}\", within "
+		"menu \"{}\".", name, widgetType, fullname[0]);
+}
+
 void sfx::gui::_restoreChildWindow(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ChildWindow,
-			if (_childWindowData.find(fullnameAsString) != _childWindowData.end()) {
+			if (_childWindowData.find(fullnameAsString) !=
+				_childWindowData.end()) {
 				_restoreChildWindowImpl(castWidget,
 					_childWindowData[fullnameAsString]);
 			}

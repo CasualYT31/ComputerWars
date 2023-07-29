@@ -981,6 +981,8 @@ namespace sfx {
 
 		/**
 		 * Updates a widget's size.
+		 * If a blank string is given for either dimension, that means that the
+		 * widget should retain their size layout in that dimension.\n
 		 * If no widget exists with the given name, then an error will be logged
 		 * and no widget will be resized.
 		 * @param name The name of the widget to resize.
@@ -1408,12 +1410,32 @@ namespace sfx {
 
 		/**
 		 * Sets the padding applied to a group of widgets.
+		 * If the name of a \c Grid is given, each of its widgets will be assigned
+		 * the given padding. Note that this will only be applied to the widgets
+		 * that exist in the \c Grid at the time of calling!\n
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no padding will be changed.
 		 * @param name    The name of the widget to edit.
 		 * @param padding The padding to set.
 		 */
 		void _setGroupPadding(const std::string& name, const std::string& padding);
+
+		/**
+		 * Sets the padding applied to a group of widgets.
+		 * If the name of a \c Grid is given, each of its widgets will be assigned
+		 * the given padding. Note that this will only be applied to the widgets
+		 * that exist in the \c Grid at the time of calling!\n
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no padding will be changed.
+		 * @param name   The name of the widget to edit.
+		 * @param left   The padding to set to the left side.
+		 * @param top    The padding to set to the top side.
+		 * @param right  The padding to set to the right side.
+		 * @param bottom The padding to set to the bottom side.
+		 */
+		void _setGroupPadding(const std::string& name, const std::string& left,
+			const std::string& top, const std::string& right,
+			const std::string& bottom);
 
 		/**
 		 * Sets the alignment applied to a widget within a grid.
@@ -1429,6 +1451,21 @@ namespace sfx {
 		void _setWidgetAlignmentInGrid(const std::string& name,
 			const std::size_t row, const std::size_t col,
 			const tgui::Grid::Alignment alignment);
+
+		/**
+		 * Sets the padding applied to a widget within a grid.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no padding will be changed.
+		 * An error will also be logged if the \c row and \c col parameters are out
+		 * of range.
+		 * @param name    The name of the grid to edit.
+		 * @param row     The 0-based row ID of the widget to edit.
+		 * @param col     The 0-based column ID of the widget to edit.
+		 * @param padding The padding to set to the widget.
+		 */
+		void _setWidgetPaddingInGrid(const std::string& name,
+			const std::size_t row, const std::size_t col,
+			const std::string& padding);
 
 		/**
 		 * Sets the space between widgets in Vertical and Horizontal Layouts.
@@ -1543,6 +1580,38 @@ namespace sfx {
 		 *                  \c FALSE if not.
 		 */
 		void _setWidgetResizable(const std::string& name, const bool resizable);
+
+		/**
+		 * Gets a \c ChildWindow's titlebar height.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and \c 0.0f will be returned.
+		 * @param  name The name of the widget to query.
+		 * @return The titlebar height.
+		 */
+		float _getTitleBarHeight(const std::string& name);
+
+		/**
+		 * Opens a \c ChildWindow to a given location.
+		 * If the given \c ChildWindow was either maximised or minimised, it will
+		 * also be restored.\n
+		 * If the widget was already open (i.e. visible), then the widget will
+		 * still be moved and brought to the front.\n
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name The name of the \c ChildWindow to open.
+		 * @param x    The X position to move the \c ChildWindow to.
+		 * @param y    The Y position to move the \c ChildWindow to.
+		 */
+		void _openChildWindow(const std::string& name, const std::string& x,
+			const std::string& y);
+
+		/**
+		 * Closes a \c ChildWindow by making it invisible.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name The name of the \c ChildWindow to close.
+		 */
+		void _closeChildWindow(const std::string& name);
 
 		/**
 		 * Restores a \c ChildWindow if it was maximised or minimised.

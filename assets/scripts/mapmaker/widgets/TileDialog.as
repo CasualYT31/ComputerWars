@@ -28,15 +28,12 @@ namespace tile_dialog_internal {
 }
 
 /**
- * Makes a \c TileDialog visible and docks it to the left of its parent.
+ * Opens a \c TileDialog and docks it to the left of its parent.
  * @param dialog Name of the \c TileDialog to dock.
  */
 void DockTileDialog(const string&in dialog) {
-    restoreChildWindow(dialog);
+    openChildWindow(dialog, "100%-" + tile_dialog_internal::DEFAULT_WIDTH, "0");
     setWidgetSize(dialog, tile_dialog_internal::DEFAULT_WIDTH, "100%");
-    setWidgetPosition(dialog, "100%-" + formatFloat(getWidgetFullSize(dialog).x),
-        "0");
-    setWidgetVisibility(dialog, true);
 }
 
 /**

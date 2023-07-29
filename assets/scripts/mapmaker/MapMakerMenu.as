@@ -8,8 +8,6 @@ const auto CLIENT_AREA = "Main";
 
 string TILE_DIALOG;
 
-const auto MAP_PROPS = CLIENT_AREA + ".SetMapProperties";
-
 MenuItemID MAP_MAKER_FILE_QUIT;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
@@ -44,13 +42,7 @@ void MapMakerMenuSetUp() {
 
     // Map properties child window.
 
-    addWidget("ChildWindow", MAP_PROPS);
-    setWidgetText(MAP_PROPS, "mapprops");
-    setWidgetPosition(MAP_PROPS, "100px", "75px");
-    setWidgetSize(MAP_PROPS, "300px", "200px");
-    setWidgetVisibility(MAP_PROPS, false);
-    setWidgetResizable(MAP_PROPS, false);
-    setChildWindowTitleButtons(MAP_PROPS, TitleButton::Close);
+    MapPropertiesSetUp(CLIENT_AREA);
 }
 
 /**
@@ -61,7 +53,7 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
     if (id == MAP_MAKER_FILE_QUIT) {
         setGUI("MainMenu");
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
-        setWidgetVisibility(MAP_PROPS, true);
+        OpenMapProperties();
     } else if (id == MAP_MAKER_VIEW_TILE_DIALOG) {
         DockTileDialog(TILE_DIALOG);
     } else {

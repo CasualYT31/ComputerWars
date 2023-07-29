@@ -35,6 +35,9 @@
 	"owner": "Owner",
 	"view": "View",
 	"neutral": "Neutral",
+	"name": "Name",
+	"size": "Size",
+	"daylabel": "Day",
 
 	"ORANGE_COUNTRY_longname": "Orange Star",
 	"ORANGE_COUNTRY_shortname": "OS",
