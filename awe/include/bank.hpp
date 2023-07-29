@@ -152,10 +152,13 @@ namespace awe {
 		}
 
 		/**
-		 * Returns a set of script names pointing to members of this bank.
-		 * @return All the script names found within this bank.
+		 * Returns a list of script names pointing to members of this bank.
+		 * @return All the script names found within this bank, in the order they
+		 *         were given.
 		 */
-		std::unordered_set<std::string> getScriptNames() const;
+		inline const std::vector<std::string>& getScriptNames() const {
+			return _scriptNames;
+		}
 
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
@@ -221,6 +224,12 @@ namespace awe {
 		 * The internal map of game properties.
 		 */
 		bank_type _bank;
+
+		/**
+		 * The list of script names given to this bank, in the order they were
+		 * given.
+		 */
+		std::vector<std::string> _scriptNames;
 
 		/**
 		 * The pointer to the @c scripts instance.

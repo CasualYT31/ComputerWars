@@ -31,14 +31,6 @@ awe::bank<T>::bank(const std::shared_ptr<engine::scripts>& scripts,
 }
 
 template<typename T>
-std::unordered_set<std::string> awe::bank<T>::getScriptNames() const {
-	std::unordered_set<std::string> ret;
-	std::transform(_bank.begin(), _bank.end(),
-		std::inserter(ret, ret.end()), [](auto pair) { return pair.first; });
-	return ret;
-}
-
-template<typename T>
 void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	// 1. Register the game typedefs to ensure that they are defined.
@@ -73,7 +65,7 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 		"array<string>@ get_scriptNames() const property",
 		asMETHOD(awe::bank<T>, _getScriptNamesArray), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the script name of each game "
-		"property stored in this bank. No order is guaranteed.");
+		"property stored in this bank, in the order they were given to the bank.");
 	// 4. Register the global point of access to the _propertyName + "Bank" object.
 	engine->RegisterGlobalProperty(globalPropDecl.c_str(), this);
 	document->DocumentExpectedFunction(globalPropDecl, "The single point of "
@@ -83,14 +75,17 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 template<typename T>
 bool awe::bank<T>::_load(engine::json& j) {
 	bank_type bank;
+	std::vector<std::string> scriptNames;
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
 		// Loop through each object, allowing the template type T to construct its
 		// values based on each object.
 		engine::json input(i.value(), {_logger.getData().sink, "json"});
 		bank[i.key()] = std::make_shared<const T>(i.key(), input);
+		scriptNames.push_back(i.key());
 	}
 	_bank = std::move(bank);
+	_scriptNames = std::move(scriptNames);
 	return true;
 }
 
