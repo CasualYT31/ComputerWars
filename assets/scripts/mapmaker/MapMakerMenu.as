@@ -3,11 +3,17 @@
  * The main map maker menu.
  */
 
+/**
+ * The map object that the \c MapMakerMenu interacts with.
+ */
+Map@ editmap;
+
 const auto MENU = "Menu";
 const auto CLIENT_AREA = "Main";
 
 string TILE_DIALOG;
 
+MenuItemID MAP_MAKER_FILE_NEW_MAP;
 MenuItemID MAP_MAKER_FILE_QUIT;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
@@ -28,6 +34,7 @@ void MapMakerMenuSetUp() {
     // Menu bar.
 
     addMenu(MENU, "file");
+    MAP_MAKER_FILE_NEW_MAP = addMenuItem(MENU, "newmap");
     MAP_MAKER_FILE_QUIT = addMenuItem(MENU, "quit");
 
     addMenu(MENU, "map");
@@ -50,7 +57,10 @@ void MapMakerMenuSetUp() {
  * @param id The ID of the menu or menu item selected.
  */
 void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
-    if (id == MAP_MAKER_FILE_QUIT) {
+    if (id == MAP_MAKER_FILE_NEW_MAP) {
+        
+    } else if (id == MAP_MAKER_FILE_QUIT) {
+        if (!(editmap is null)) quitMap();
         setGUI("MainMenu");
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
         OpenMapProperties();

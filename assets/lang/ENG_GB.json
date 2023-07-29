@@ -38,6 +38,7 @@
 	"name": "Name",
 	"size": "Size",
 	"daylabel": "Day",
+	"newmap": "New Map",
 
 	"ORANGE_COUNTRY_longname": "Orange Star",
 	"ORANGE_COUNTRY_shortname": "OS",
