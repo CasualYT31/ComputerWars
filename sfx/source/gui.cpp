@@ -1272,6 +1272,11 @@ void sfx::gui::setFonts(const std::shared_ptr<sfx::fonts>& fonts) noexcept {
 
 void sfx::gui::setScalingFactor(const float factor) {
 	_gui.setRelativeView({0.0f, 0.0f, 1.0f / factor, 1.0f / factor});
+	_scalingFactor = factor;
+}
+
+float sfx::gui::getScalingFactor() const noexcept {
+	return _scalingFactor;
 }
 
 bool sfx::gui::animate(const sf::RenderTarget& target) {

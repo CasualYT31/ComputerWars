@@ -534,6 +534,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 		_map->setFont((*_fonts)["AW2"]);
 		_map->setLanguageDictionary(_dictionary);
 		_map->setScripts(_scripts);
+		_map->setGUI(_gui);
 		auto r = _map->load(file);
 		if (r) {
 			_menuBeforeMapLoad = _gui->getGUI();

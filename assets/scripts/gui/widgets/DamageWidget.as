@@ -30,6 +30,7 @@ class DamageWidget {
         setWidgetPosition(_damageLabel,
             _damageSprite + ".left + " + _damageSprite + ".width / 2",
             _damageSprite + ".top + " + _damageSprite + ".height / 2");
+        setVisibility(false);
     }
 
     /**
@@ -64,7 +65,7 @@ class DamageWidget {
      * @param quad The quadrant the cursor is currently in.
      */
     void updatePosition(const MousePosition&in pos, const Quadrant&in quad) {
-        setWidgetPosition(_damageSprite, formatInt(pos.x / 2), formatInt(pos.y / 2));
+        setWidgetPosition(_damageSprite, formatInt(pos.x), formatInt(pos.y));
 		switch (quad) {
 		case Quadrant::LowerLeft:
             setWidgetOrigin(_damageSprite, 0.0f, 1.0f);

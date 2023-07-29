@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "script.hpp"
 #include "file.hpp"
 #include "language.hpp"
+#include "gui.hpp"
 #include <cmath>
 #include <stack>
 #include <optional>
@@ -1379,9 +1380,8 @@ namespace awe {
 		void setLRCursorSprite(const std::string& sprite);
 
 		/**
-		 * Calculates where the cursor's bounding rectangle is on the render
-		 * target.
-		 * @return The bounding rectangle of the cursor, in target coordinates.
+		 * Calculates where the cursor's bounding rectangle is relative to the GUI.
+		 * @return The bounding rectangle of the cursor, in GUI coordinates.
 		 */
 		sf::IntRect getCursorBoundingBox() const;
 
@@ -1419,6 +1419,12 @@ namespace awe {
 		 * @param font Pointer to the font to use with this map.
 		 */
 		void setFont(const std::shared_ptr<sf::Font>& font);
+
+		/**
+		 * Sets the GUI engine to pull the GUI scaling factor from.
+		 * @param gui Pointer to the GUI engine to use with this map.
+		 */
+		void setGUI(const std::shared_ptr<sfx::gui>& gui);
 
 		/**
 		 * Sets the language dictionary to use with this map.
@@ -1798,6 +1804,11 @@ namespace awe {
 		 * Spritesheet used with all armies.
 		 */
 		std::shared_ptr<sfx::animated_spritesheet> _sheet_co = nullptr;
+		
+		/**
+		 * GUI engine.
+		 */
+		std::shared_ptr<sfx::gui> _gui = nullptr;
 
 		///////////
 		// BANKS //

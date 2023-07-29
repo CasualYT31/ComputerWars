@@ -105,11 +105,11 @@ class PlayableMap {
 	////////////////////////
 	/**
 	 * Increases the map scaling factor by \c 1.0.
-	 * The map scaling factor does not go above \c 3.0.
+	 * The map scaling factor does not go above \c 5.0.
 	 */
 	void zoomIn() {
 		_mapScalingFactor += 1.0;
-		if (_mapScalingFactor > 3.0) _mapScalingFactor = 3.0;
+		if (_mapScalingFactor > 5.0) _mapScalingFactor = 5.0;
 		map.setMapScalingFactor(_mapScalingFactor);
 	}
 	

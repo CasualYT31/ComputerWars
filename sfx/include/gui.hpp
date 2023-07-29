@@ -286,6 +286,12 @@ namespace sfx {
 		void setScalingFactor(const float factor);
 
 		/**
+		 * Gets the scaling factor that is applied to all menus when drawn.
+		 * @return factor The scaling factor.
+		 */
+		float getScalingFactor() const noexcept;
+
+		/**
 		 * Animates the current GUI menu.
 		 * Any sprites are animated, and the colour background (if there is one) is
 		 * resized to match the size of the target. In addition, if a langauge
@@ -1570,6 +1576,11 @@ namespace sfx {
 		 *         \c draw() implementation.
 		 */
 		mutable tgui::Gui _gui;
+
+		/**
+		 * Stores the scaling factor used with this GUI.
+		 */
+		float _scalingFactor = 1.0f;
 
 		/**
 		 * Stores the name of the GUI currently being displayed.
