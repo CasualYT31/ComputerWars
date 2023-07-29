@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include <chrono>
+#include <filesystem>
 #include "engine.hpp"
 #include "army.hpp"
 
@@ -77,11 +78,11 @@ int awe::game_engine::run() {
 
 			// This will not be the way I handle win conditions in the final
 			// version of the engine.
-			if (_map && _map->periodic()) {
+			/*if (_map && _map->periodic()) {
 				boxer::show("The game has ended!", "Thanks for Playing!",
 					boxer::Style::Info);
 				_script_quitMap();
-			}
+			}*/
 		}
 	} catch (const std::exception& e) {
 		_logger.error("Exception: {}", e);
@@ -253,6 +254,15 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Saves the UI configuration (i.e. the "
 		"joystick ID and axis threashold).");
 
+	r = engine->RegisterGlobalFunction("Map@ createMap(const string&in)",
+		asMETHOD(awe::game_engine, _script_createMap),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Saves a blank map (its file path being "
+		"the first parameter), then loads it, and returns a handle to it, if "
+		"successful. If there is already a map open at the time of the call, then "
+		"an error will be logged and no changes will occur. A null handle will be "
+		"returned if the map couldn't be created!");
+
 	r = engine->RegisterGlobalFunction("Map@ loadMap(const string&in)",
 		asMETHOD(awe::game_engine, _script_loadMap),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -311,6 +321,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Generates a random number between 0 and "
 		"the given value (inclusive).");
+
+	r = engine->RegisterGlobalFunction("bool doesPathExist(const string&in)",
+		asMETHOD(awe::game_engine, _script_doesPathExist),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the given path "
+		"is either a file or directory that exists. <tt>FALSE</tt> otherwise.");
 }
 
 bool awe::game_engine::_load(engine::json& j) {
@@ -512,6 +528,31 @@ void awe::game_engine::_script_saveUIConfig() {
 	_userinput->save();
 }
 
+awe::map* awe::game_engine::_script_createMap(const std::string& file) {
+	if (_map) {
+		_logger.error("Attempted to create a map file \"{}\" whilst map \"{}\" "
+			"was still loaded!", file, _map->getMapName());
+		return nullptr;
+	}
+	// Create a blank map, save it, then load it using _script_loadMap().
+	try {
+		_map = std::make_unique<awe::map>(_countries, _tiles, _units,
+			_commanders, engine::logger::data{ _logger.getData().sink, "map" });
+	} catch (const std::bad_alloc& e) {
+		_logger.error("Couldn't allocate the map object for creation: {}", e);
+		return nullptr;
+	}
+	_map->setScripts(_scripts);
+	if (_map->save(file)) {
+		_map = nullptr;
+		return _script_loadMap(file);
+	} else {
+		_map = nullptr;
+		_logger.error("Couldn't create map file \"{}\".", file);
+		return nullptr;
+	}
+}
+
 awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 	// Create the game.
 	if (_map) {
@@ -523,7 +564,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 			_map = std::make_unique<awe::map>( _countries, _tiles, _units,
 				_commanders, engine::logger::data{_logger.getData().sink, "map"});
 		} catch (const std::bad_alloc& e) {
-			_logger.error("Couldn't allocate the map object: {}", e);
+			_logger.error("Couldn't allocate the map object for loading: {}", e);
 			return nullptr;
 		}
 		_map->setTarget(_renderer);
@@ -570,4 +611,8 @@ unsigned int awe::game_engine::_script_rand(const unsigned int max) {
 	// Credit: https://stackoverflow.com/a/13446015/6928376.
 	std::uniform_int_distribution<unsigned> distribution(0, max);
 	return distribution(*_prng);
+}
+
+bool awe::game_engine::_script_doesPathExist(const std::string& path) const {
+	return std::filesystem::exists(path);
 }

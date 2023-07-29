@@ -78,6 +78,11 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
  * Open a new map for editting.
  */
 void MapMakerMenu_NewMap_FileSelected() {
-    auto list = getFileDialogSelectedPaths("NewMap");
-    info(list[0]);
+    const auto file = getFileDialogSelectedPaths("NewMap")[0];
+    if (doesPathExist(file)) {
+        // MessageBox!
+        return;
+    }
+    if (!(editmap is null)) quitMap();
+    @editmap = createMap(file);
 }

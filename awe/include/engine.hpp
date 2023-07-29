@@ -236,6 +236,18 @@ namespace awe {
 		void _script_saveRendererConfig();
 
 		/**
+		 * Creates a new map.
+		 * If a map was already loaded, then an error will be logged, that map
+		 * won't be unloaded, and no new map will be loaded.
+		 * @warning If the given path points to an existing map, it will be
+		 *          replaced!
+		 * @param   file The filepath of the new map.
+		 * @return  Pointer to the \c map object to give to the scripts. Returns
+		 *          \c nullptr if the map couldn't be loaded.
+		 */
+		awe::map* _script_createMap(const std::string& file);
+
+		/**
 		 * Loads a map.
 		 * If a map was already loaded, then an error will be logged, that map
 		 * won't be unloaded, and no new map will be loaded.
@@ -268,6 +280,14 @@ namespace awe {
 		 * @return The random number.
 		 */
 		unsigned int _script_rand(const unsigned int max);
+
+		/**
+		 * Finds out if the given path exists as either a file or directory.
+		 * @param  path The path to test.
+		 * @return \c TRUE if \c path is either an existing path or file, \c FALSE
+		 *         if not.
+		 */
+		bool _script_doesPathExist(const std::string& path) const;
 
 		//=============================
 		//==========GAME DATA==========
