@@ -218,14 +218,14 @@ namespace sfx {
 			const MenuItemID index);
 
 		/**
-		 * Handles \c Closed signals.
+		 * Handles \c Closing signals.
 		 * If a \c ChildWindow is configured to automatically handle minimise and
 		 * maximise logic, this handler will carry it out, before either invoking
 		 * the script's signal handler, or the widget's custom signal handler. If
 		 * the \c ChildWindow was configured not to handle this logic, then the
 		 * appropriate script signal handler will still be invoked.
-		 * @warning This engine should never emit a Closed signal for any
-		 *          \c ChildWindow! Use the \c Closing signal instead!
+		 * @warning This engine should never emit a Closed signal for normal
+		 *          \c ChildWindow widgets! Use the \c Closing signal instead!
 		 * @param   window Pointer to the \c ChildWindow that was closed.
 		 * @param   abort  Will always be set to \c TRUE.
 		 */
@@ -1628,6 +1628,102 @@ namespace sfx {
 		 */
 		void _restoreChildWindowImpl(const tgui::ChildWindow::Ptr& window,
 			child_window_properties& data);
+
+		// FILEDIALOG //
+
+		/**
+		 * Sets every caption in the given file dialog.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name          The name of the \c FileDialog widget.
+		 * @param title         The title of the \c FileDialog.
+		 * @param v0            The variables to insert into the above string.
+		 * @param confirm       The text of the confirm/open button.
+		 * @param v1            The variables to insert into the above string.
+		 * @param cancel        The text of the cancel button.
+		 * @param v2            The variables to insert into the above string.
+		 * @param createFolder  The text of the create folder button.
+		 * @param v3            The variables to insert into the above string.
+		 * @param filenameLabel The text of the filename label.
+		 * @param v4            The variables to insert into the above string.
+		 * @param nameColumn    The text of the name column in the listview.
+		 * @param v5            The variables to insert into the above string.
+		 * @param sizeColumn    The text of the size column in the listview.
+		 * @param v6            The variables to insert into the above string.
+		 * @param modifyColumn  The text of the modified column in the listview.
+		 * @param v7            The variables to insert into the above string.
+		 * @param allFiles      The caption assigned to the All files filter.
+		 * @param v8            The variables to insert into the above string.
+		 */
+		void _setFileDialogStrings(const std::string& name,
+			const std::string& title, CScriptArray* v0, const std::string& confirm,
+			CScriptArray* v1, const std::string& cancel, CScriptArray* v2,
+			const std::string& createFolder, CScriptArray* v3,
+			const std::string& filenameLabel, CScriptArray* v4,
+			const std::string& nameColumn, CScriptArray* v5,
+			const std::string& sizeColumn, CScriptArray* v6,
+			const std::string& modifyColumn, CScriptArray* v7,
+			const std::string& allFiles, CScriptArray* v8);
+
+		/**
+		 * Gets the selected files from the given file dialog.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param  name The name of the \c FileDialog widget.
+		 * @return The selected paths.
+		 */
+		CScriptArray* _getFileDialogSelectedPaths(const std::string& name);
+
+		/**
+		 * Adds a file type filter to a \c FileDialog.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name      The name of the \c FileDialog to update.
+		 * @param caption   The caption of the filter.
+		 * @param variables The variables to insert into the caption.
+		 * @param filters   The expressions that make up the filter.
+		 */
+		void _addFileDialogFileTypeFilter(const std::string& name,
+			const std::string& caption, CScriptArray *const variables,
+			CScriptArray *const filters);
+
+		/**
+		 * Clears the file type filters of a given \c FileDialog.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name The name of the \c FileDialog to update.
+		 */
+		void _clearFileDialogFileTypeFilters(const std::string& name);
+
+		/**
+		 * Sets whether a selected file in a \c FileDialog must exist or not.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name      The name of the \c FileDialog to update.
+		 * @param mustExist \c TRUE if the selected path must exist, \c FALSE if
+		 *                  not.
+		 */
+		void _setFileDialogFileMustExist(const std::string& name,
+			const bool mustExist);
+
+		/**
+		 * Sets the default file filter in a \c FileDialog.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name  The name of the \c FileDialog to update.
+		 * @param index The 0-based index of the file filter to set as the default.
+		 */
+		void _setFileDialogDefaultFileFilter(const std::string& name,
+			const std::size_t index);
+
+		/**
+		 * Sets a \c FileDialog's current path.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name The name of the \c FileDialog to update.
+		 * @param path The path to display the files of.
+		 */
+		void _setFileDialogPath(const std::string& name, const std::string& path);
 
 		//////////
 		// DATA //

@@ -58,7 +58,9 @@ void MapMakerMenuSetUp() {
  */
 void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
     if (id == MAP_MAKER_FILE_NEW_MAP) {
-        
+        awe::OpenFileDialog("NewMap", "newmap", "create", "./map", false);
+        addFileDialogFileTypeFilter("NewMap", "mapfiles", null, { "*.cwm" });
+        setFileDialogDefaultFileFilter("NewMap", 1);
     } else if (id == MAP_MAKER_FILE_QUIT) {
         if (!(editmap is null)) quitMap();
         setGUI("MainMenu");
@@ -70,4 +72,12 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
         error("Unrecognised menu item ID " + awe::formatMenuItemID(id) +
             " received in the Map Maker menu!");
     }
+}
+
+/**
+ * Open a new map for editting.
+ */
+void MapMakerMenu_NewMap_FileSelected() {
+    auto list = getFileDialogSelectedPaths("NewMap");
+    info(list[0]);
 }

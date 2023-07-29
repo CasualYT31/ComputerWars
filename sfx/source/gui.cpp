@@ -881,6 +881,80 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Restores a <tt>ChildWindow</tt> if it "
 		"was maximised or minimised. If the given <tt>ChildWindow</tt> was "
 		"neither, then this function will have no effect.");
+
+	// FILEDIALOGS //
+
+	r = engine->RegisterGlobalFunction("void setFileDialogStrings("
+		"const string&in, "
+		"const string&in, array<any>@, "
+		"const string&in, array<any>@, "
+		"const string&in, array<any>@, "
+		"const string&in, array<any>@, "
+		"const string&in, array<any>@, "
+		"const string&in, array<any>@, "
+		"const string&in, array<any>@, "
+		"const string&in, array<any>@, "
+		"const string&in, array<any>@)",
+		asMETHOD(sfx::gui, _setFileDialogStrings), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets every caption in a "
+		"<tt>FileDialog</tt>. The name of the widget is given, then each caption, "
+		"along with the variables to insert into each. If no variables are to be "
+		"inserted, then pass in <tt>null</tt>. See setWidgetText() for more "
+		"information. The captions are given in the following order:\n"
+		"<ol><li>Title.</li>"
+		"<li>Confirm/open button.</li>"
+		"<li>Cancel button.</li>"
+		"<li>Create folder button.</li>"
+		"<li>Filename label.</li>"
+		"<li>Name column.</li>"
+		"<li>Size column.</li>"
+		"<li>Modify column.</li>"
+		"<li>All files filter.</li></ol>");
+
+	r = engine->RegisterGlobalFunction("array<string>@ "
+		"getFileDialogSelectedPaths(const string&in)",
+		asMETHOD(sfx::gui, _getFileDialogSelectedPaths),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Retrieves a list of a "
+		"<tt>FileDialog</tt>'s selected paths.");
+
+	r = engine->RegisterGlobalFunction("void addFileDialogFileTypeFilter("
+		"const string&in, const string&in, array<any>@, array<string>@)",
+		asMETHOD(sfx::gui, _addFileDialogFileTypeFilter),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Adds a file type filter to the given "
+		"<tt>FileDialog</tt>. The name of the dialog is given first, and then the "
+		"caption that describes the filter. Variables to be inserted into the "
+		"caption come next (pass <tt>null</tt> to insert none). Then, the "
+		"expressions that make up the filter come next.");
+
+	r = engine->RegisterGlobalFunction(
+		"void clearFileDialogFileTypeFilters(const string&in)",
+		asMETHOD(sfx::gui, _clearFileDialogFileTypeFilters),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Clears a <tt>FileDialog</tt>'s file type "
+		"filters.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setFileDialogFileMustExist(const string&in, const bool)",
+		asMETHOD(sfx::gui, _setFileDialogFileMustExist),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets whether a <tt>FileDialog</tt>'s "
+		"selected path must exist or not.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setFileDialogDefaultFileFilter(const string&in, const uint64)",
+		asMETHOD(sfx::gui, _setFileDialogDefaultFileFilter),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Selects a <tt>FileDialog</tt>'s file "
+		"filter.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setFileDialogPath(const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setFileDialogPath),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Set a <tt>FileDialog</tt>'s current "
+		"path.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -1716,9 +1790,28 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 		} else if (type == "EditBox") { // SingleCaption
 			auto w = _findWidget<EditBox>(widgetName);
 			w->setDefaultText(_getTranslatedText(widgetName));
-		} else if (type == "FileDialog") { // SingleCaption
+		} else if (type == "FileDialog") { // ListOfCaptions
 			auto w = _findWidget<FileDialog>(widgetName);
-			w->setTitle(_getTranslatedText(widgetName));
+			const auto n = std::get<sfx::gui::ListOfCaptions>(
+				_originalCaptions.at(widgetName)).size();
+			if (n >= 1) w->setTitle(_getTranslatedText(widgetName, 0));
+			if (n >= 2) w->setConfirmButtonText(_getTranslatedText(widgetName, 1));
+			if (n >= 3) w->setCancelButtonText(_getTranslatedText(widgetName, 2));
+			if (n >= 4)
+				w->setCreateFolderButtonText(_getTranslatedText(widgetName, 3));
+			if (n >= 5) w->setFilenameLabelText(_getTranslatedText(widgetName, 4));
+			if (n >= 8) {
+				w->setListViewColumnCaptions(
+					_getTranslatedText(widgetName, 5),
+					_getTranslatedText(widgetName, 6),
+					_getTranslatedText(widgetName, 7)
+				);
+			}
+			std::vector<std::pair<String, std::vector<String>>> filters =
+				w->getFileTypeFilters();
+			for (std::size_t i = 0, len = filters.size(); i < len; ++i)
+				filters[i].first = _getTranslatedText(widgetName, i + 8);
+			w->setFileTypeFilters(filters);
 		} else if (type == "Label") { // SingleCaption
 			auto w = _findWidget<Label>(widgetName);
 			w->setText(_getTranslatedText(widgetName));
@@ -1937,6 +2030,9 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 	} else if (type == "filedialog") {
 		widget->getSignal("FileSelected").
 			connectEx(&sfx::gui::signalHandler, this);
+		// FileDialogs must be cleaned up correctly when closed!
+		std::dynamic_pointer_cast<FileDialog>(widget)->onClose(
+			&sfx::gui::_removeWidget, this, widget->getWidgetName().toStdString());
 	} else if (type == "knob" || type == "scrollbar" || type == "slider" ||
 		type == "spinbutton" || type == "spincontrol") {
 		widget->getSignal("ValueChanged").
@@ -2188,6 +2284,11 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		const auto combobox = tgui::ComboBox::create();
 		combobox->setItemsToDisplay(5);
 		return combobox;
+	} else if (type == "filedialog") {
+		auto filedialog = tgui::FileDialog::create();
+		filedialog->setResizable();
+		// Will need to find a way to apply the default font...
+		return filedialog;
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -3150,6 +3251,8 @@ void sfx::gui::_exitSubmenu(const std::string& name) {
 		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 }
 
+// CHILDWINDOWS //
+
 void sfx::gui::_autoHandleMinMax(const std::string& name, const bool handle) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ChildWindow,
@@ -3177,6 +3280,7 @@ void sfx::gui::_setChildWindowTitleButtons(const std::string& name,
 void sfx::gui::_setWidgetResizable(const std::string& name, const bool resizable) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ChildWindow, castWidget->setResizable(resizable);)
+		ELSE_IF_WIDGET_IS(FileDialog, castWidget->setResizable(resizable);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the resizability property of widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\", to {}.", name, widgetType, fullname[0],
@@ -3186,6 +3290,8 @@ void sfx::gui::_setWidgetResizable(const std::string& name, const bool resizable
 float sfx::gui::_getTitleBarHeight(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ChildWindow,
+			return castWidget->getRenderer()->getTitleBarHeight();)
+		ELSE_IF_WIDGET_IS(FileDialog,
 			return castWidget->getRenderer()->getTitleBarHeight();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the titlebar height of a widget \"{}\", which is of "
@@ -3247,4 +3353,127 @@ void sfx::gui::_restoreChildWindowImpl(const tgui::ChildWindow::Ptr& window,
 		data.isMinimised = false;
 		data.isMaximised = false;
 	}
+}
+
+// FILEDIALOG //
+
+void sfx::gui::_setFileDialogStrings(const std::string& name,
+	const std::string& title, CScriptArray* v0, const std::string& confirm,
+	CScriptArray* v1, const std::string& cancel, CScriptArray* v2,
+	const std::string& createFolder, CScriptArray* v3,
+	const std::string& filenameLabel, CScriptArray* v4,
+	const std::string& nameColumn, CScriptArray* v5,
+	const std::string& sizeColumn, CScriptArray* v6,
+	const std::string& modifyColumn, CScriptArray* v7,
+	const std::string& allFiles, CScriptArray* v8) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(FileDialog,
+			_setTranslatedString(fullnameAsString, title, v0, 0);
+			_setTranslatedString(fullnameAsString, confirm, v1, 1);
+			_setTranslatedString(fullnameAsString, cancel, v2, 2);
+			_setTranslatedString(fullnameAsString, createFolder, v3, 3);
+			_setTranslatedString(fullnameAsString, filenameLabel, v4, 4);
+			_setTranslatedString(fullnameAsString, nameColumn, v5, 5);
+			_setTranslatedString(fullnameAsString, sizeColumn, v6, 6);
+			_setTranslatedString(fullnameAsString, modifyColumn, v7, 7);
+			_setTranslatedString(fullnameAsString, allFiles, v8, 8);
+			_translateWidget(widget);
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to restore the widget \"{}\", which is of type \"{}\", within "
+		"menu \"{}\".", name, widgetType, fullname[0]);
+	if (v0) v0->Release();
+	if (v1) v1->Release();
+	if (v2) v2->Release();
+	if (v3) v3->Release();
+	if (v4) v4->Release();
+	if (v5) v5->Release();
+	if (v6) v6->Release();
+	if (v7) v7->Release();
+	if (v8) v8->Release();
+}
+
+CScriptArray* sfx::gui::_getFileDialogSelectedPaths(const std::string& name) {
+	auto ret = _scripts->createArray("string");
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(FileDialog,
+			const auto& paths = castWidget->getSelectedPaths();
+			for (const auto& path : paths)
+				ret->InsertLast(&path.asString().toStdString());
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the selected paths from widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+	return ret;
+}
+
+void sfx::gui::_addFileDialogFileTypeFilter(const std::string& name,
+	const std::string& caption, CScriptArray* const variables,
+	CScriptArray* const filters) {
+	std::vector<String> expressions;
+	if (filters) {
+		for (asUINT i = 0, len = filters->GetSize(); i < len; ++i)
+			expressions.emplace_back(*static_cast<std::string*>(filters->At(i)));
+		filters->Release();
+	}
+	std::vector<std::pair<String, std::vector<String>>> f;
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(FileDialog,
+			f = castWidget->getFileTypeFilters();
+			f.emplace_back(caption, expressions);
+			castWidget->setFileTypeFilters(f);
+			_setTranslatedString(fullnameAsString, caption, variables,
+				f.size() + 7);
+			_translateWidget(widget);
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the file type filters of widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+	if (variables) variables->Release();
+}
+
+void sfx::gui::_clearFileDialogFileTypeFilters(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(FileDialog,
+			castWidget->setFileTypeFilters({});
+			std::get<sfx::gui::ListOfCaptions>(
+				_originalCaptions[fullnameAsString]).resize(9);
+			_translateWidget(widget);
+			)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the file type filters of widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+}
+
+void sfx::gui::_setFileDialogFileMustExist(const std::string& name,
+	const bool mustExist) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(FileDialog, castWidget->setFileMustExist(mustExist);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the file must exist property to {}, for widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", mustExist, name,
+		widgetType, fullname[0]);
+}
+
+void sfx::gui::_setFileDialogDefaultFileFilter(const std::string& name,
+	const std::size_t index) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(FileDialog,
+			const auto copy = castWidget->getFileTypeFilters();
+			castWidget->setFileTypeFilters(copy, index);
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the default file filter to {}, for widget \"{}\", which "
+		"is of type \"{}\", within menu \"{}\".", index, name, widgetType,
+		fullname[0]);
+}
+
+void sfx::gui::_setFileDialogPath(const std::string& name,
+	const std::string& path) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(FileDialog, castWidget->setPath(path);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the current path of \"{}\", to widget \"{}\", which "
+		"is of type \"{}\", within menu \"{}\".", path, name, widgetType,
+		fullname[0]);
 }
