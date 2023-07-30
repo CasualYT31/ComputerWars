@@ -22,6 +22,7 @@ string TILE_DIALOG;
 
 MenuItemID MAP_MAKER_FILE_NEW_MAP;
 MenuItemID MAP_MAKER_FILE_SAVE_MAP;
+MenuItemID MAP_MAKER_FILE_SAVE_MAP_AS;
 MenuItemID MAP_MAKER_FILE_QUIT;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
@@ -51,6 +52,7 @@ void MapMakerMenuSetUp() {
     addMenu(MENU, "file");
     MAP_MAKER_FILE_NEW_MAP = addMenuItem(MENU, "newmap");
     MAP_MAKER_FILE_SAVE_MAP = addMenuItem(MENU, "savemap");
+    MAP_MAKER_FILE_SAVE_MAP_AS = addMenuItem(MENU, "savemapas");
     MAP_MAKER_FILE_QUIT = addMenuItem(MENU, "quit");
 
     addMenu(MENU, "map");
@@ -82,8 +84,10 @@ void MapMakerMenu_MessageBoxGroup_SizeChanged() {
  * Quits \c editmap.
  */
 void quitEditMap() {
-    if (!(editmap is null)) quitMap();
-    @editmap = null;
+    if (!(editmap is null)) {
+        quitMap();
+        @editmap = null;
+    }
 }
 
 /**
@@ -97,8 +101,14 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
         setFileDialogDefaultFileFilter("NewMap", 1);
     } else if (id == MAP_MAKER_FILE_SAVE_MAP) {
         if (!(editmap is null)) editmap.save();
+    } else if (id == MAP_MAKER_FILE_SAVE_MAP_AS) {
+        if (!(editmap is null)) {
+            awe::OpenFileDialog("SaveMap", "savemapas", "save", "./map", false);
+            addFileDialogFileTypeFilter("SaveMap", "mapfiles", null, { "*.cwm" });
+            setFileDialogDefaultFileFilter("SaveMap", 1);
+        }
     } else if (id == MAP_MAKER_FILE_QUIT) {
-        if (!(editmap is null)) quitEditMap();
+        quitEditMap();
         setGUI("MainMenu");
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
         OpenMapProperties();
@@ -114,6 +124,11 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
  * Stores the selected file across signal handlers.
  */
 string FileDialogFile;
+
+/**
+ * If an overwrite was authorised by the user, perform this code.
+ */
+awe::EmptyCallback@ FileDialogOverwrite;
 
 /**
  * Closes the currently open map and creates a new one.
@@ -134,7 +149,22 @@ void MapMakerMenu_NewMap_FileSelected() {
             {any(FileDialogFile)}, BASE_GROUP, MESSAGE_BOX_GROUP);
         addMessageBoxButton(FILE_ALREADY_EXISTS, "cancel");
         addMessageBoxButton(FILE_ALREADY_EXISTS, "ok");
+        @FileDialogOverwrite = function(){ createNewMap(); };
     } else createNewMap();
+}
+
+/**
+ * Save a map to a given location.
+ */
+void MapMakerMenu_SaveMap_FileSelected() {
+    FileDialogFile = getFileDialogSelectedPaths("SaveMap")[0];
+    if (doesPathExist(FileDialogFile)) {
+        awe::OpenMessageBox(FILE_ALREADY_EXISTS, "alert", "mapfilealreadyexists",
+            {any(FileDialogFile)}, BASE_GROUP, MESSAGE_BOX_GROUP);
+        addMessageBoxButton(FILE_ALREADY_EXISTS, "cancel");
+        addMessageBoxButton(FILE_ALREADY_EXISTS, "ok");
+        @FileDialogOverwrite = function(){ editmap.save(FileDialogFile); };
+    } else editmap.save(FileDialogFile);
 }
 
 /**
@@ -144,7 +174,7 @@ void MapMakerMenu_NewMap_FileSelected() {
  */
 void MapMakerMenu_FileAlreadyExists_ButtonPressed(const uint64 btn) {
     awe::CloseMessageBox(FILE_ALREADY_EXISTS, MESSAGE_BOX_GROUP, BASE_GROUP);
-    if (btn == 1) createNewMap();
+    if (btn == 1 && !(FileDialogOverwrite is null)) FileDialogOverwrite();
 }
 
 /**

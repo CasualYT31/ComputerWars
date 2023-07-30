@@ -4,6 +4,11 @@
  */
 
 namespace awe {
+    /**
+     * Empty callback signature.
+     */
+    funcdef void EmptyCallback();
+    
 	/**
 	 * Writes a dictionary to the logs, assuming all of its values are strings.
 	 * @param dict Handle to the dictionary to log.

@@ -180,15 +180,17 @@ namespace awe {
 		 *         couldn't be saved (reason will be logged).
 		 * @safety No guarantee.
 		 */
-		bool save(std::string file, const unsigned char version = 0);
+		bool save(std::string file, const unsigned char version);
 
 		/**
 		 * Gives access to the scripts to save the map.
+		 * @param  file The path to save the map to. If an empty string, the last
+		 *              known location will be used.
 		 * @return \c TRUE if the save was successful, \c FALSE if the file
 		 *         couldn't be saved (reason will be logged).
 		 * @safety No guarantee.
 		 */
-		bool save();
+		bool save(const std::string& file = "");
 
 		/**
 		 * The \c scripts object which will allow this \c map object to create

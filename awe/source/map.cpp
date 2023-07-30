@@ -133,8 +133,9 @@ void awe::map::Register(asIScriptEngine* engine,
 		// MAP OPERATIONS //
 		////////////////////
 		r = engine->RegisterObjectMethod("Map",
-			"bool save()",
-			asMETHODPR(awe::map, save, (), bool), asCALL_THISCALL);
+			"bool save(const string&in = \"\")",
+			asMETHODPR(awe::map, save, (const std::string&), bool),
+			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"void setMapName(const string&in)",
@@ -682,8 +683,8 @@ bool awe::map::save(std::string file, const unsigned char version) {
 	return true;
 }
 
-bool awe::map::save() {
-	return save("");
+bool awe::map::save(const std::string& file) {
+	return save(file, 0);
 }
 
 void awe::map::setScripts(const std::shared_ptr<engine::scripts>& scripts) {
