@@ -289,6 +289,12 @@ namespace awe {
 		 */
 		bool _script_doesPathExist(const std::string& path) const;
 
+		/**
+		 * Returns the last log entry made.
+		 * @return The last line of the log.
+		 */
+		std::string _script_getLatestLogEntry() const;
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================

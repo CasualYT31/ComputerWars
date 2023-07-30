@@ -21,6 +21,7 @@ const auto FILE_ALREADY_EXISTS = MESSAGE_BOX_GROUP + ".FileAlreadyExists";
 string TILE_DIALOG;
 
 MenuItemID MAP_MAKER_FILE_NEW_MAP;
+MenuItemID MAP_MAKER_FILE_SAVE_MAP;
 MenuItemID MAP_MAKER_FILE_QUIT;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
@@ -49,6 +50,7 @@ void MapMakerMenuSetUp() {
 
     addMenu(MENU, "file");
     MAP_MAKER_FILE_NEW_MAP = addMenuItem(MENU, "newmap");
+    MAP_MAKER_FILE_SAVE_MAP = addMenuItem(MENU, "savemap");
     MAP_MAKER_FILE_QUIT = addMenuItem(MENU, "quit");
 
     addMenu(MENU, "map");
@@ -77,6 +79,14 @@ void MapMakerMenu_MessageBoxGroup_SizeChanged() {
 }
 
 /**
+ * Quits \c editmap.
+ */
+void quitEditMap() {
+    if (!(editmap is null)) quitMap();
+    @editmap = null;
+}
+
+/**
  * Handles menu item selection signals.
  * @param id The ID of the menu or menu item selected.
  */
@@ -85,8 +95,10 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
         awe::OpenFileDialog("NewMap", "newmap", "create", "./map", false);
         addFileDialogFileTypeFilter("NewMap", "mapfiles", null, { "*.cwm" });
         setFileDialogDefaultFileFilter("NewMap", 1);
+    } else if (id == MAP_MAKER_FILE_SAVE_MAP) {
+        if (!(editmap is null)) editmap.save();
     } else if (id == MAP_MAKER_FILE_QUIT) {
-        if (!(editmap is null)) quitMap();
+        if (!(editmap is null)) quitEditMap();
         setGUI("MainMenu");
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
         OpenMapProperties();
@@ -107,7 +119,7 @@ string FileDialogFile;
  * Closes the currently open map and creates a new one.
  */
 void createNewMap() {
-    if (!(editmap is null)) quitMap();
+    quitEditMap();
     @editmap = createMap(FileDialogFile);
     OpenMapProperties();
 }

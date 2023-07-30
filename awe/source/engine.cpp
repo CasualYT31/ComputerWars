@@ -327,6 +327,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the given path "
 		"is either a file or directory that exists. <tt>FALSE</tt> otherwise.");
+
+	r = engine->RegisterGlobalFunction("string getLatestLogEntry()",
+		asMETHOD(awe::game_engine, _script_getLatestLogEntry),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "The latest line written in the log.");
 }
 
 bool awe::game_engine::_load(engine::json& j) {
@@ -615,4 +620,9 @@ unsigned int awe::game_engine::_script_rand(const unsigned int max) {
 
 bool awe::game_engine::_script_doesPathExist(const std::string& path) const {
 	return std::filesystem::exists(path);
+}
+
+std::string awe::game_engine::_script_getLatestLogEntry() const {
+	const auto log = _logger.getData().sink->getLog();
+	return log.substr(log.rfind("\n", log.size() - 2) + 1);
 }
