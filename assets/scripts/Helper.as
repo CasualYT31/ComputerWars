@@ -27,6 +27,56 @@ namespace awe {
     }
 
     /**
+     * Stores information on a button to add to a parent.
+     */
+    class ParentButton {
+        /**
+         * Constructs a \c ParentButton.
+         * @param w Assigned to \c widgetName.
+         * @param c Assigned to \c caption.
+         */
+        ParentButton(const string&in w, const string&in c) {
+            widgetName = w;
+            caption = c;
+        }
+
+        /**
+         * The short name of the button.
+         */
+        string widgetName;
+
+        /**
+         * The caption to assign to the button.
+         */
+        string caption;
+    }
+
+    /**
+     * Adds a list of buttons to the bottom right corner of the given parent.
+     * @param parent  The name of the widget to add the buttons to.
+     * @param buttons An array of button information.
+     * @param width   The width of each button.
+     * @param height  The height of each button.
+     */
+    void addButtonsToParent(const string&in parent,
+        const array<ParentButton@>@ buttons, const uint width,
+        const uint height) {
+        const uint PADDING = 5;
+        const string PADDING_S = formatUInt(PADDING),
+            WIDTH = formatUInt(width), HEIGHT = formatUInt(height);
+        uint x = PADDING;
+        for (uint i = 0, len = buttons.length(); i < len; ++i) {
+            const auto btn = parent + "." + buttons[i].widgetName;
+            addWidget("Button", btn);
+            setWidgetText(btn, buttons[i].caption);
+            setWidgetOrigin(btn, 1.0f, 1.0f);
+            setWidgetPosition(btn, "100%-" + formatUInt(x), "100%-" + PADDING_S);
+            setWidgetSize(btn, WIDTH, HEIGHT);
+            x += width + PADDING;
+        }
+    }
+
+    /**
      * Opens a \c FileDialog.
      * @param name      The widget name of the \c FileDialog.
      * @param title     The title of the \c FileDialog.

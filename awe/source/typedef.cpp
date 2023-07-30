@@ -22,6 +22,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "typedef.hpp"
 
+/**
+ * Formats a \c Day into a string.
+ * @param  day The day to format.
+ * @return The day in string form.
+ */
+std::string formatDay(const awe::Day day) {
+	return std::to_string(day);
+}
+
+/**
+ * Parses a \c Day from a string.
+ * @param  str       The string to parse.
+ * @param  base      The expected base of the number.
+ * @param  byteCount Stores the number of bytes processed.
+ * @return The \c Day value.
+ */
+awe::Day parseDay(const std::string& str, const unsigned int base = 10,
+	std::size_t* byteCount = nullptr) {
+	return std::stoul(str, byteCount, base);
+}
+
 void awe::RegisterGameTypedefs(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	if (!engine->GetTypeInfoByName("TeamID")) {
@@ -63,5 +84,13 @@ void awe::RegisterGameTypedefs(asIScriptEngine* engine,
 		engine->RegisterTypedef("Day", "uint32");
 		document->DocumentExpectedFunction("typdef uint32 Day",
 			"Represents a day number.");
+
+		auto r = engine->RegisterGlobalFunction("string formatDay(const Day)",
+			asFUNCTION(formatDay), asCALL_CDECL);
+		document->DocumentGlobalFunction(r, "Formats a day number as a string.");
+		r = engine->RegisterGlobalFunction("Day parseDay(const string&in, "
+			"const uint = 10, uint64&out = 0)",
+			asFUNCTION(parseDay), asCALL_CDECL);
+		document->DocumentGlobalFunction(r, "Parses a day number from a string.");
 	}
 }

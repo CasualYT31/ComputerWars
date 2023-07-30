@@ -13,6 +13,9 @@ const auto MENU = BASE_GROUP + ".Menu";
 const auto CLIENT_AREA = BASE_GROUP + ".Main";
 
 const auto MESSAGE_BOX_GROUP = "MessageBoxGroup";
+/// Used with \c MessageBoxes that shouldn't do anything special when a button is
+/// pressed beyond closing the \c MessageBox.
+const auto SIMPLE_MESSAGE_BOX = MESSAGE_BOX_GROUP + ".SimpleMessageBox";
 const auto FILE_ALREADY_EXISTS = MESSAGE_BOX_GROUP + ".FileAlreadyExists";
 
 string TILE_DIALOG;
@@ -101,6 +104,15 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
 string FileDialogFile;
 
 /**
+ * Closes the currently open map and creates a new one.
+ */
+void createNewMap() {
+    if (!(editmap is null)) quitMap();
+    @editmap = createMap(FileDialogFile);
+    OpenMapProperties();
+}
+
+/**
  * Open a new map for editting.
  */
 void MapMakerMenu_NewMap_FileSelected() {
@@ -110,20 +122,23 @@ void MapMakerMenu_NewMap_FileSelected() {
             {any(FileDialogFile)}, BASE_GROUP, MESSAGE_BOX_GROUP);
         addMessageBoxButton(FILE_ALREADY_EXISTS, "cancel");
         addMessageBoxButton(FILE_ALREADY_EXISTS, "ok");
-        return;
-    }
-    if (!(editmap is null)) quitMap();
-    @editmap = createMap(FileDialogFile);
+    } else createNewMap();
 }
 
 /**
  * Close the message box once it has been acknowledged.
  * If OK is selected, overwrite selected file.
+ * @param btn The button that was pressed.
  */
 void MapMakerMenu_FileAlreadyExists_ButtonPressed(const uint64 btn) {
     awe::CloseMessageBox(FILE_ALREADY_EXISTS, MESSAGE_BOX_GROUP, BASE_GROUP);
-    if (btn == 1) {
-        if (!(editmap is null)) quitMap();
-        @editmap = createMap(FileDialogFile);
-    }
+    if (btn == 1) createNewMap();
+}
+
+/**
+ * Closes the message box.
+ * @param btn Ignored.
+ */
+void MapMakerMenu_SimpleMessageBox_ButtonPressed(const uint64 btn) {
+    awe::CloseMessageBox(SIMPLE_MESSAGE_BOX, MESSAGE_BOX_GROUP, BASE_GROUP);
 }

@@ -1180,6 +1180,14 @@ namespace sfx {
 		std::string _getWidgetText(const std::string& name);
 
 		/**
+		 * Sets an \c EditBox to only accept unsigned ints.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name The name of the \c EditBox to change.
+		 */
+		void _onlyAcceptUIntsInEditBox(const std::string& name);
+
+		/**
 		 * Sets a widget's character size.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and no size will be changed.
@@ -1187,6 +1195,16 @@ namespace sfx {
 		 * @param size The new character size.
 		 */
 		void _setWidgetTextSize(const std::string& name, const unsigned int size);
+
+		/**
+		 * Sets a widget's text's maximum width.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no size will be changed.
+		 * @param name The name of the widget to change.
+		 * @param w    If the text exceeds this width, it will wrap around to the
+		 *             next line.
+		 */
+		void _setWidgetTextMaximumWidth(const std::string& name, const float w);
 
 		/**
 		 * Sets a widget's text colour.
@@ -1664,6 +1682,15 @@ namespace sfx {
 		 */
 		void _restoreChildWindowImpl(const tgui::ChildWindow::Ptr& window,
 			child_window_properties& data);
+
+		/**
+		 * Checks if a \c ChildWindow is currently open.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and \c FALSE will be returned.
+		 * @param  name The name of the \c ChildWindow to query.
+		 * @return \c TRUE if the \c ChildWindow is visible, \c FALSE if not.
+		 */
+		bool _isChildWindowOpen(const std::string& name);
 
 		// FILEDIALOG //
 

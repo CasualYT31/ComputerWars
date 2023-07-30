@@ -578,11 +578,25 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _getWidgetText), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's caption/text.");
 
+	r = engine->RegisterGlobalFunction(
+		"void onlyAcceptUIntsInEditBox(const string&in)",
+		asMETHOD(sfx::gui, _onlyAcceptUIntsInEditBox),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Configures an <tt>EditBox</tt> to only "
+		"accept unsigned integers.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetTextSize(const string&in, "
 		"const uint)",
 		asMETHOD(sfx::gui, _setWidgetTextSize), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's character size. The name "
 		"of the widget is given, then its new character size.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetTextMaximumWidth("
+		"const string&in, const float)",
+		asMETHOD(sfx::gui, _setWidgetTextMaximumWidth),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's maximum text width. The "
+		"name of the widget is given, then its new maximum text width.");
 
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetTextColour(const string&in, const Colour&in)",
@@ -891,6 +905,12 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Restores a <tt>ChildWindow</tt> if it "
 		"was maximised or minimised. If the given <tt>ChildWindow</tt> was "
 		"neither, then this function will have no effect.");
+
+	r = engine->RegisterGlobalFunction("bool isChildWindowOpen(const string&in)",
+		asMETHOD(sfx::gui, _isChildWindowOpen),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns if a given <tt>ChildWindow</tt> "
+		"is open or closed.");
 
 	// FILEDIALOGS //
 
@@ -2743,6 +2763,16 @@ std::string sfx::gui::_getWidgetText(const std::string& name) {
 	return "";
 }
 
+void sfx::gui::_onlyAcceptUIntsInEditBox(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(EditBox,
+			castWidget->setInputValidator(EditBox::Validator::UInt);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the widget \"{}\", which is of type \"{}\", "
+		"within menu \"{}\", to only accept unsigned integers.", name, widgetType,
+		fullname[0]);
+}
+
 void sfx::gui::_setWidgetTextSize(const std::string& name,
 	const unsigned int size) {
 	START_WITH_WIDGET(name)
@@ -2754,6 +2784,14 @@ void sfx::gui::_setWidgetTextSize(const std::string& name,
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the character size {} to widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\".", size, name, widgetType, fullname[0])
+}
+
+void sfx::gui::_setWidgetTextMaximumWidth(const std::string& name, const float w) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Label, castWidget->setMaximumTextWidth(w);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the text max width {} to widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", w, name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetTextColour(const std::string& name,
@@ -3426,6 +3464,16 @@ void sfx::gui::_restoreChildWindowImpl(const tgui::ChildWindow::Ptr& window,
 		data.isMinimised = false;
 		data.isMaximised = false;
 	}
+}
+
+bool sfx::gui::_isChildWindowOpen(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow,
+			return castWidget->isVisible();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to query if a widget \"{}\", which is of type \"{}\", within "
+		"menu \"{}\", is open.", name, widgetType, fullname[0]);
+	return false;
 }
 
 // FILEDIALOG //

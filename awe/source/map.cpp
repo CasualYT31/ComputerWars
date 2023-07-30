@@ -709,10 +709,11 @@ std::string awe::map::getMapName() const {
 
 void awe::map::setMapSize(const sf::Vector2u& dim,
 	const std::shared_ptr<const awe::tile_type>& tile) {
+	if (dim == getMapSize()) return;
 	// First, resize the tiles vectors accordingly.
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
 	_tiles.resize(dim.x);
-	for (std::size_t x = 0; x < dim.x; x++) {
+	for (std::size_t x = 0; x < dim.x; ++x) {
 		_tiles[x].resize(dim.y, { { _logger.getData().sink, "tile" }, tile,
 			_sheet_tile });
 	}

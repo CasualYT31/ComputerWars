@@ -47,9 +47,17 @@
 	"allfiles": "All files (*.*)",
 	"create": "Create",
 	"mapfiles": "Map files (*.cwm)",
+	"yes": "Yes",
+	"no": "No",
 
 	"alert": "Alert!",
-	"mapfilealreadyexists": "The map file \"#\" already exists!",
+	"mapfilealreadyexists": "The map file \"#\" already exists! Do you wish to overwrite it?",
+	"nomapisopen": "There isn't a map open right now!",
+	"resizemapconfirmation": "Are you sure you want to resize the map?",
+	"resizemapconfirmationsmaller": "Are you sure you want to resize the map? Some tiles will be lost!",
+	"resizemapconfirmationnotile": "Select a tile before resizing!",
+	"resizemapconfirmationtile": "New tiles will be set to:",
+	"cannotresizeto0": "You cannot set a map to be 0 tiles in size!",
 
 	"ORANGE_COUNTRY_longname": "Orange Star",
 	"ORANGE_COUNTRY_shortname": "OS",

@@ -5,9 +5,19 @@
 
 namespace CurrentlySelectedTileType {
     /**
+     * Signature of the callback that is invoked when a new tile type is selected.
+     */
+    funcdef void TileTypeSelectionUpdatedCallback();
+
+    /**
      * A list of all the \c CurrentlySelectedTile widgets that have been added.
      */
     array<string> currentlySelectedTileWidgetList;
+
+    /**
+     * A list of all the callbacks that have been given to \c AddWidget().
+     */
+    array<TileTypeSelectionUpdatedCallback@> callbacks;
 
     /**
      * The currently selected tile type.
@@ -22,8 +32,11 @@ namespace CurrentlySelectedTileType {
     /**
      * Adds a \c CurrentlySelectedTile widget to the given parent and registers it
      * with \c currentlySelectedTileWidgetList.
+     * @param parent   Name of the parent to add the widget to.
+     * @param callback Code to run when the tile type selection is updated.
      */
-    void AddWidget(const string&in parent) {
+    void AddWidget(const string&in parent,
+        TileTypeSelectionUpdatedCallback@ callback = null) {
         const auto layout =
             parent + (parent.isEmpty() ? "" : ".") + "CurSelTileLayout";
         addWidget("HorizontalLayout", layout);
@@ -47,6 +60,7 @@ namespace CurrentlySelectedTileType {
         setWidgetPosition(name, "0%", "50%");
 
         currentlySelectedTileWidgetList.insertLast(layout);
+        if (!(callback is null)) callbacks.insertLast(@callback);
     }
 
     /**
@@ -68,7 +82,8 @@ namespace CurrentlySelectedTileType {
     }
 
     /**
-     * Updates all registered \c CurrentlySelectedTile widgets.
+     * Updates all registered \c CurrentlySelectedTile widgets and invokes all
+     * callbacks.
      */
     void _Set() {
         if (mapMakerSelectedTileType is null) return;
@@ -86,6 +101,7 @@ namespace CurrentlySelectedTileType {
             setWidgetText(layout + ".NameGroup.TileName",
                 mapMakerSelectedTileType.type.name);
         }
+        for (uint i = 0, len = callbacks.length(); i < len; ++i) callbacks[i]();
     }
 
     /**
