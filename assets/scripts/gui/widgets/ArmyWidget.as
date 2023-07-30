@@ -110,31 +110,42 @@ class ArmyWidget {
 	 *               on.
 	 */
 	void update(const ArmyID armyID) {
-		Colour colour = game.map.getArmyCountry(armyID).colour;
-		colour.a = alpha;
-		setWidgetBackgroundColour(panel, colour);
+        // If the army doesn't exist, update with default values.
+        if (game.map.isArmyPresent(armyID)) {
+            Colour colour = game.map.getArmyCountry(armyID).colour;
+            colour.a = alpha;
+            setWidgetBackgroundColour(panel, colour);
 
-		TeamID teamID = game.map.getArmyTeam(armyID);
-		setWidgetText(team, "~" + formatUInt(teamID));
+            TeamID teamID = game.map.getArmyTeam(armyID);
+            setWidgetText(team, "~" + formatUInt(teamID));
 
-		string currentCommanderStr = game.map.getArmyCurrentCO(armyID);
-		if (currentCommanderStr.isEmpty()) {
-			setWidgetVisibility(currentCO, false);
-		} else {
-			const auto currentCommander = commander[currentCommanderStr];
-			setWidgetSprite(currentCO, "co", currentCommander.iconName);
-			setWidgetVisibility(currentCO, true);
-		}
+            string currentCommanderStr = game.map.getArmyCurrentCO(armyID);
+            if (currentCommanderStr.isEmpty()) {
+                setWidgetVisibility(currentCO, false);
+            } else {
+                const auto currentCommander = commander[currentCommanderStr];
+                setWidgetSprite(currentCO, "co", currentCommander.iconName);
+                setWidgetVisibility(currentCO, true);
+            }
 
-		if (game.map.tagCOIsPresent(armyID)) {
-			const auto tagCommander = commander[game.map.getArmyTagCO(armyID)];
-			setWidgetSprite(tagCO, "co", tagCommander.iconName);
-			setWidgetVisibility(tagCO, true);
-		} else {
-			setWidgetVisibility(tagCO, false);
-		}
+            if (game.map.tagCOIsPresent(armyID)) {
+                const auto tagCommander =
+                    commander[game.map.getArmyTagCO(armyID)];
+                setWidgetSprite(tagCO, "co", tagCommander.iconName);
+                setWidgetVisibility(tagCO, true);
+            } else {
+                setWidgetVisibility(tagCO, false);
+            }
 
-		setWidgetText(funds, "~G. " + formatInt(game.map.getArmyFunds(armyID)));
+            setWidgetText(funds, "~G. " +
+                formatInt(game.map.getArmyFunds(armyID)));
+        } else {
+            setWidgetBackgroundColour(panel, Colour(255, 255, 255, alpha));
+            setWidgetText(team, "~");
+            setWidgetVisibility(currentCO, false);
+            setWidgetVisibility(tagCO, false);
+            setWidgetText(funds, "~");
+        }
 	}
 
 	/**

@@ -1619,6 +1619,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 				}
 				animatedSprite.setPosition(newPosition);
 			} else if (_guiSpriteKeys.find(widgetName) != _guiSpriteKeys.end() &&
+				//_widgetSprites.find(widget) != _widgetSprites.end() &&
 				_widgetSprites.at(widget).getSpritesheet() != nullptr &&
 				_sheet.find(_guiSpriteKeys.at(widgetName).first) == _sheet.end()) {
 				// Else if the widget DID have a valid spritesheet, then we're

@@ -143,14 +143,16 @@ void MapHandleInput(const dictionary controls,
 	} else if (bool(controls["select"])) {
 		const auto currentArmy = game.map.getSelectedArmy();
 		if (unitID == 0) {
-			ArmyID owner = game.map.getTileOwner(selectedTile);
-			string type = game.map.getTileType(selectedTile).type.scriptName;
-			if (owner == currentArmy) {
-				if (type == "BASE" || type == "AIRPORT" || type == "PORT") {
-					setGUI("BaseMenu");
-					return;
-				}
-			}
+            if (!game.map.isOutOfBounds(selectedTile)) {
+                ArmyID owner = game.map.getTileOwner(selectedTile);
+                string type = game.map.getTileType(selectedTile).type.scriptName;
+                if (owner == currentArmy) {
+                    if (type == "BASE" || type == "AIRPORT" || type == "PORT") {
+                        setGUI("BaseMenu");
+                        return;
+                    }
+                }
+            }
 			setGUI("MapMenu");
 			return;
 		} else if (game.map.isUnitWaiting(unitID) ||

@@ -101,7 +101,8 @@ int main(int argc, char* argv[]) {
             }
         }
         if (engine.inGoodState()) {
-            return engine.run();
+            const auto r = engine.run();
+            return r;
         } else {
             rootLogger.error("Game engine in bad state after loading, "
                 "aborting...");

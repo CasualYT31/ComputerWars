@@ -159,6 +159,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getMapSize), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"bool isOutOfBounds(const Vector2&in) const",
+			asMETHOD(awe::map, _isOutOfBounds), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void setDay(const Day)",
 			asMETHOD(awe::map, setDay), asCALL_THISCALL);
 
@@ -189,6 +193,10 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"array<ArmyID>@ getArmyIDs() const",
 			asMETHOD(awe::map, getArmyIDsAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isArmyPresent(const ArmyID) const",
+			asMETHOD(awe::map, _isArmyPresent), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"void setArmyTeam(const ArmyID, const TeamID)",
@@ -2158,8 +2166,8 @@ void awe::map::setSelectedArmy(const awe::ArmyID army) {
 		_currentArmy = army;
 		_changed = true;
 	} else {
-		_logger.error("selectArmy operation cancelled: army with ID {} does not "
-			"exist!", army);
+		_logger.error("setSelectedArmy operation cancelled: army with ID {} does "
+			"not exist!", army);
 	}
 }
 

@@ -76,7 +76,10 @@ class PropertyPanel {
 	 * Updates the panel's icon.
 	 */
 	void setIcon(const string&in sheet, const string&in sprite) {
-		setWidgetSprite(layout + ".iconPanel.icon", sheet, sprite);
+        // if (sheet.isEmpty() || sprite.isEmpty())
+        //     clearWidgetSprite(layout + ".iconPanel.icon");
+        // else
+    		setWidgetSprite(layout + ".iconPanel.icon", sheet, sprite);
 	}
 
 	/**

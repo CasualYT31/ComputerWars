@@ -161,23 +161,32 @@ class TileWidget {
 	 * Updates the tile property panel with tile information.
 	 */
 	private void _updateTilePanel(const Vector2&in tilePos) {
-		const auto tileType = game.map.getTileType(tilePos);
-		const auto terrainType = tileType.type;
-		const ArmyID tileOwner = game.map.getTileOwner(tilePos);
-		if (tileOwner == NO_ARMY) {
-			_panels[0].setIcon("tile.normal",
-				tileType.neutralTileSprite);
-		} else {
-			_panels[0].setIcon("tile.normal",
-				tileType.ownedTileSprite(
-					game.map.getArmyCountry(tileOwner).turnOrder));
-		}
-		_panels[0].setName(terrainType.shortName);
-		_panels[0].setPropertyText(0,
-			"~" + formatInt(game.map.getTileHP(tilePos)));
-		_panels[0].setPropertyText(1,
-			"~" + formatUInt(terrainType.defence));
-		_panels[0].setPropertyVisibility(0, terrainType.maxHP > 0);
+        // If the given tile is out of bounds, update with default information.
+        if (game.map.isOutOfBounds(tilePos)) {
+            _panels[0].setIcon("", "");
+            _panels[0].setName("~");
+            _panels[0].setPropertyText(0, "~");
+            _panels[0].setPropertyText(1, "~");
+            _panels[0].setPropertyVisibility(0, false);
+        } else {
+            const auto tileType = game.map.getTileType(tilePos);
+            const auto terrainType = tileType.type;
+            const ArmyID tileOwner = game.map.getTileOwner(tilePos);
+            if (tileOwner == NO_ARMY) {
+                _panels[0].setIcon("tile.normal",
+                    tileType.neutralTileSprite);
+            } else {
+                _panels[0].setIcon("tile.normal",
+                    tileType.ownedTileSprite(
+                        game.map.getArmyCountry(tileOwner).turnOrder));
+            }
+            _panels[0].setName(terrainType.shortName);
+            _panels[0].setPropertyText(0,
+                "~" + formatInt(game.map.getTileHP(tilePos)));
+            _panels[0].setPropertyText(1,
+                "~" + formatUInt(terrainType.defence));
+            _panels[0].setPropertyVisibility(0, terrainType.maxHP > 0);
+        }
 	}
 
 	/**

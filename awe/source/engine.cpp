@@ -86,6 +86,7 @@ int awe::game_engine::run() {
 		}
 	} catch (const std::exception& e) {
 		_logger.error("Exception: {}", e);
+		throw e;
 	}
 
 	return 0;

@@ -194,7 +194,7 @@ namespace cwm {
 		}
 		ArmyID currentArmy;
 		file.read(currentArmy);
-		map.setSelectedArmy(currentArmy);
+        if (armyCount > 0) map.setSelectedArmy(currentArmy);
 		for (uint32 y = 0; y < height; ++y) {
 			for (uint32 x = 0; x < width; ++x) {
 				Vector2 tilePos(x, y);
