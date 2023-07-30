@@ -509,6 +509,16 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _getWidgetVisibility), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's visibility.");
 
+	r = engine->RegisterGlobalFunction("void moveWidgetToFront(const string&in)",
+		asMETHOD(sfx::gui, _moveWidgetToFront), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Moves a given widget to the front of its "
+		"parent container.");
+
+	r = engine->RegisterGlobalFunction("void moveWidgetToBack(const string&in)",
+		asMETHOD(sfx::gui, _moveWidgetToBack), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Moves a given widget to the back of its "
+		"parent container.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetDirectionalFlow("
 		"const string&in, const string&in, const string&in, const string&in, "
 		"const string&in)",
@@ -955,6 +965,23 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Set a <tt>FileDialog</tt>'s current "
 		"path.");
+
+	// MESSAGEBOXES //
+
+	r = engine->RegisterGlobalFunction(
+		"void setMessageBoxStrings(const string&in, const string&in, array<any>@, "
+		"const string&in, array<any>@)",
+		asMETHOD(sfx::gui, _setMessageBoxStrings),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Set a <tt>MessageBox</tt>'s title, then "
+		"text.");
+
+	r = engine->RegisterGlobalFunction(
+		"void addMessageBoxButton(const string&in, const string&in, "
+		"array<any>@ = null)",
+		asMETHOD(sfx::gui, _addMessageBoxButton),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Add a button to a <tt>MessageBox</tt>.");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -1266,6 +1293,25 @@ void sfx::gui::menuItemClickedSignalHandler(const std::string& menuBarName,
 	const auto funcDecl = "void " + funcName + "(const MenuItemID)";
 	if (_scripts->functionDeclExists(funcDecl)) {
 		_scripts->callFunction(funcName, index);
+	}
+}
+
+void sfx::gui::messageBoxButtonPressedSignalHandler(
+	const std::string& messageBoxName, const tgui::MessageBox::Ptr& widget,
+	const tgui::String& caption) {
+	const auto funcName = getGUI() + "_" + messageBoxName + "_ButtonPressed";
+	const auto funcDecl = "void " + funcName + "(const uint64)";
+	const auto btns = widget->getButtons();
+	std::size_t index = 0;
+	for (const auto len = btns.size(); index < len; ++index)
+		if (btns[index] == caption) break;
+	if (_scripts->functionDeclExists(funcDecl)) {
+		_scripts->callFunction(funcName, index);
+	} else {
+		_logger.critical("A message box button \"{}\" was pressed, but no signal "
+			"handler for the MessageBox \"{}\" was defined! The signal handler "
+			"must have the following declaration: \"{}\".", caption,
+			messageBoxName, funcDecl);
 	}
 }
 
@@ -1860,7 +1906,12 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 			auto w = _findWidget<tgui::MessageBox>(widgetName);
 			w->setTitle(_getTranslatedText(widgetName, 0));
 			w->setText(_getTranslatedText(widgetName, 1));
-			// Don't know how I'm going to translate buttons.
+			const auto buttonCaptions = std::get<sfx::gui::ListOfCaptions>(
+				_originalCaptions[widgetName]);
+			std::vector<String> newCaptions;
+			for (std::size_t i = 2, len = buttonCaptions.size(); i < len; ++i)
+				newCaptions.emplace_back(_getTranslatedText(widgetName, i));
+			w->renameButtons(newCaptions);
 		} else if (type == "ProgressBar") { // SingleCaption
 			auto w = _findWidget<ProgressBar>(widgetName);
 			w->setText(_getTranslatedText(widgetName));
@@ -2063,8 +2114,12 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		/*widget->getSignal("MenuItemClicked").
 			connectEx(&sfx::gui::signalHandler, this);*/
 	} else if (type == "messagebox") {
-		widget->getSignal("ButtonPressed").
-			connectEx(&sfx::gui::signalHandler, this);
+		const auto mb = std::dynamic_pointer_cast<MessageBox>(widget);
+		mb->onButtonPress(&sfx::gui::messageBoxButtonPressedSignalHandler, this,
+			_extractWidgetName(mb->getWidgetName().toStdString()), mb);
+		// MessageBoxes must be cleaned up correctly when closed!
+		mb->onClose(&sfx::gui::_removeWidget, this,
+			widget->getWidgetName().toStdString());
 	} else if (type == "panel") {
 		widget->getSignal("DoubleClicked").
 			connectEx(&sfx::gui::signalHandler, this);
@@ -2289,6 +2344,8 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		filedialog->setResizable();
 		// Will need to find a way to apply the default font...
 		return filedialog;
+	} else if (type == "messagebox") {
+		return tgui::MessageBox::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -2531,6 +2588,20 @@ bool sfx::gui::_getWidgetVisibility(const std::string& name) const {
 	END("Attempted to get the visibility property of a widget \"{}\" within menu "
 		"\"{}\".", name, fullname[0])
 	return false;
+}
+
+void sfx::gui::_moveWidgetToFront(const std::string& name) {
+	START_WITH_WIDGET(name)
+	widget->moveToFront();
+	END("Attempted to move the widget \"{}\" within menu \"{}\" to the front.",
+		name, fullname[0])
+}
+
+void sfx::gui::_moveWidgetToBack(const std::string& name) {
+	START_WITH_WIDGET(name)
+	widget->moveToBack();
+	END("Attempted to move the widget \"{}\" within menu \"{}\" to the back.",
+		name, fullname[0])
 }
 
 const std::string sfx::gui::GOTO_PREVIOUS_WIDGET = "~";
@@ -3293,6 +3364,8 @@ float sfx::gui::_getTitleBarHeight(const std::string& name) {
 			return castWidget->getRenderer()->getTitleBarHeight();)
 		ELSE_IF_WIDGET_IS(FileDialog,
 			return castWidget->getRenderer()->getTitleBarHeight();)
+		ELSE_IF_WIDGET_IS(MessageBox,
+			return castWidget->getRenderer()->getTitleBarHeight();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the titlebar height of a widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
@@ -3476,4 +3549,37 @@ void sfx::gui::_setFileDialogPath(const std::string& name,
 	END("Attempted to set the current path of \"{}\", to widget \"{}\", which "
 		"is of type \"{}\", within menu \"{}\".", path, name, widgetType,
 		fullname[0]);
+}
+
+// MESSAGEBOX //
+
+void sfx::gui::_setMessageBoxStrings(const std::string& name,
+	const std::string& title, CScriptArray* titleVars,
+	const std::string& text, CScriptArray* textVars) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(MessageBox,
+			_setTranslatedString(fullnameAsString, title, titleVars, 0);
+			_setTranslatedString(fullnameAsString, text, textVars, 1);
+			_translateWidget(widget);
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the title \"{}\" and text \"{}\" to widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", title, text, name,
+		widgetType, fullname[0])
+	if (titleVars) titleVars->Release();
+	if (textVars) textVars->Release();
+}
+
+void sfx::gui::_addMessageBoxButton(const std::string& name,
+	const std::string& text, CScriptArray* variables) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(MessageBox,
+			_setTranslatedString(fullnameAsString, text, variables,
+				castWidget->getButtons().size() + 2);
+			_translateWidget(widget);
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to add a button \"{}\" to widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
+	if (variables) variables->Release();
 }

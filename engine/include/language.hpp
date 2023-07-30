@@ -305,7 +305,8 @@ namespace engine {
 			 *                      string."
 			 * @param  values       The variables to insert into the language
 			 *                      string.
-			 * @return The final language string.
+			 * @return The final language string. If \c nativeString is empty, an
+			 *         empty string will be returned and nothing will be logged.
 			 * @safety Strong guarantee.
 			 */
 			template<typename... Ts>

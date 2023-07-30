@@ -218,6 +218,26 @@ namespace sfx {
 			const MenuItemID index);
 
 		/**
+		 * Handles \c ButtonPressed signals from \c MessageBox widgets.
+		 * The script function invoked follows the same format as
+		 * \c signalHandler() (e.g. \c GUIName_MessageBoxName_ButtonPressed).
+		 * However, a <tt>const uint64</tt> parameter is also passed, which stores
+		 * the 0-based ID of the button that was clicked. The first button added
+		 * will have an ID of 0, the second button will have an ID of 1, and so on.
+		 * If button's index couldn't be found, the number of buttons will be
+		 * given, but this should never happen.\n
+		 * If a \c MessageBox button was pressed, but the script defined no signal
+		 * handler for it, then a critical error will be logged.
+		 * @param messageBoxName The short name of the \c MessageBox whose button
+		 *                       was pressed.
+		 * @param widget         Pointer to the \c MessageBox widget.
+		 * @param caption        The caption of the selected button.
+		 */
+		void messageBoxButtonPressedSignalHandler(
+			const std::string& messageBoxName, const tgui::MessageBox::Ptr& widget,
+			const tgui::String& caption);
+
+		/**
 		 * Handles \c Closing signals.
 		 * If a \c ChildWindow is configured to automatically handle minimise and
 		 * maximise logic, this handler will carry it out, before either invoking
@@ -1041,6 +1061,22 @@ namespace sfx {
 		bool _getWidgetVisibility(const std::string& name) const;
 
 		/**
+		 * Moves a widget to the front of its parent container.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be moved in the Z order.
+		 * @param name The name of the widget to move to the front.
+		 */
+		void _moveWidgetToFront(const std::string& name);
+
+		/**
+		 * Moves a widget to the back of its parent container.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and no widget will be moved in the Z order.
+		 * @param name The name of the widget to move to the back.
+		 */
+		void _moveWidgetToBack(const std::string& name);
+
+		/**
 		 * Special string used with \c _setWidgetDirectionalFlow() to represent the
 		 * previous widget.
 		 */
@@ -1724,6 +1760,33 @@ namespace sfx {
 		 * @param path The path to display the files of.
 		 */
 		void _setFileDialogPath(const std::string& name, const std::string& path);
+
+		// MESSAGEBOX //
+
+		/**
+		 * Sets a \c MessageBox's title and text.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name      The name of the \c MessageBox to update.
+		 * @param title     The title of the \c MessageBox.
+		 * @param titleVars The variables to insert into the title.
+		 * @param text      The text of the \c MessageBox.
+		 * @param textVars  The variables to insert into the text.
+		 */
+		void _setMessageBoxStrings(const std::string& name,
+			const std::string& title, CScriptArray* titleVars,
+			const std::string& text, CScriptArray* textVars);
+
+		/**
+		 * Add a button to a \c MessageBox.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.
+		 * @param name      The name of the \c MessageBox to update.
+		 * @param text      The text of the new button.
+		 * @param variables The variables to insert into the text.
+		 */
+		void _addMessageBoxButton(const std::string& name, const std::string& text,
+			CScriptArray* variables);
 
 		//////////
 		// DATA //

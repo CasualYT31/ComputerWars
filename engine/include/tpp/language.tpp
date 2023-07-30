@@ -72,6 +72,7 @@ std::string engine::language_dictionary::operator()(
 template<typename... Ts>
 std::string engine::language_dictionary::language::get(
 	const std::string& nativeString, Ts... values) {
+	if (nativeString.empty()) return "";
 	if (_strings.find(nativeString) == _strings.end()) {
 		if (nativeString.size() > 0 && nativeString[0] == TRANSLATION_OVERRIDE) {
 			return nativeString.substr(1);

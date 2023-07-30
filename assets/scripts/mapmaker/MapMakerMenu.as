@@ -8,8 +8,12 @@
  */
 Map@ editmap;
 
-const auto MENU = "Menu";
-const auto CLIENT_AREA = "Main";
+const auto BASE_GROUP = "BaseGroup";
+const auto MENU = BASE_GROUP + ".Menu";
+const auto CLIENT_AREA = BASE_GROUP + ".Main";
+
+const auto MESSAGE_BOX_GROUP = "MessageBoxGroup";
+const auto FILE_ALREADY_EXISTS = MESSAGE_BOX_GROUP + ".FileAlreadyExists";
 
 string TILE_DIALOG;
 
@@ -24,6 +28,13 @@ MenuItemID MAP_MAKER_VIEW_TILE_DIALOG;
  * Sets up the map maker menu.
  */
 void MapMakerMenuSetUp() {
+    // MessageBox group.
+
+    addWidget("Group", MESSAGE_BOX_GROUP);
+
+    // Menu.
+
+    addWidget("Group", BASE_GROUP);
     addWidget("MenuBar", MENU);
     addWidget("Group", CLIENT_AREA);
     setWidgetSize(CLIENT_AREA, "100%", "100%-" +
@@ -53,6 +64,16 @@ void MapMakerMenuSetUp() {
 }
 
 /**
+ * Show the currently open \c MessageBox.
+ * This prevents the \c MessageBox from being lost in the event the game's window
+ * is made smaller and the \c MessageBox was previously moved to outside of the
+ * new screen's size.
+ */
+void MapMakerMenu_MessageBoxGroup_SizeChanged() {
+    awe::ShowMessageBox();
+}
+
+/**
  * Handles menu item selection signals.
  * @param id The ID of the menu or menu item selected.
  */
@@ -75,14 +96,34 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
 }
 
 /**
+ * Stores the selected file across signal handlers.
+ */
+string FileDialogFile;
+
+/**
  * Open a new map for editting.
  */
 void MapMakerMenu_NewMap_FileSelected() {
-    const auto file = getFileDialogSelectedPaths("NewMap")[0];
-    if (doesPathExist(file)) {
-        // MessageBox!
+    FileDialogFile = getFileDialogSelectedPaths("NewMap")[0];
+    if (doesPathExist(FileDialogFile)) {
+        awe::OpenMessageBox(FILE_ALREADY_EXISTS, "alert", "mapfilealreadyexists",
+            {any(FileDialogFile)}, BASE_GROUP, MESSAGE_BOX_GROUP);
+        addMessageBoxButton(FILE_ALREADY_EXISTS, "cancel");
+        addMessageBoxButton(FILE_ALREADY_EXISTS, "ok");
         return;
     }
     if (!(editmap is null)) quitMap();
-    @editmap = createMap(file);
+    @editmap = createMap(FileDialogFile);
+}
+
+/**
+ * Close the message box once it has been acknowledged.
+ * If OK is selected, overwrite selected file.
+ */
+void MapMakerMenu_FileAlreadyExists_ButtonPressed(const uint64 btn) {
+    awe::CloseMessageBox(FILE_ALREADY_EXISTS, MESSAGE_BOX_GROUP, BASE_GROUP);
+    if (btn == 1) {
+        if (!(editmap is null)) quitMap();
+        @editmap = createMap(FileDialogFile);
+    }
 }

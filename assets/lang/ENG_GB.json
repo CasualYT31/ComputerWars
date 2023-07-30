@@ -48,6 +48,9 @@
 	"create": "Create",
 	"mapfiles": "Map files (*.cwm)",
 
+	"alert": "Alert!",
+	"mapfilealreadyexists": "The map file \"#\" already exists!",
+
 	"ORANGE_COUNTRY_longname": "Orange Star",
 	"ORANGE_COUNTRY_shortname": "OS",
 	"ORANGE_COUNTRY_description": "Orange Star.",
