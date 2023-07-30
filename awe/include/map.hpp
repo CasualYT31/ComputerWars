@@ -1612,7 +1612,7 @@ namespace awe {
 		/**
 		 * Stores which day it currently is.
 		 */
-		awe::Day _day = 0;
+		awe::Day _day = 1;
 
 		/////////////
 		// DRAWING //

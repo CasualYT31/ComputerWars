@@ -81,6 +81,58 @@ void MapMakerMenuSetUp() {
 }
 
 /**
+ * The map scaling factor.
+ */
+float MapMakerScalingFactor = 2.0f;
+
+/**
+ * Handles input specific to the \c MapMakerMenu.
+ * @param controls         The control map given by the engine.
+ * @param previousPosition The previous mouse position.
+ * @param currentPosition  The current mouse position.
+ */
+void MapMakerMenuHandleInput(const dictionary controls,
+    const MousePosition&in previousPosition,
+    const MousePosition&in currentPosition) {
+    // If there currently isn't a map loaded, or it is 0x0 tiles, then don't try
+    // selecting any tiles or zooming in or out.
+    if (editmap is null) return;
+    // Handle mouse input. Ignore the mouse if the game doesn't have focus.
+	if (currentPosition != INVALID_MOUSE) {
+		// Ignore the mouse if it's outside of the window.
+		Vector2 windowSize = getWindowSize();
+		if (currentPosition.x >= 0 && currentPosition.y >= 0
+			&& currentPosition.x <= int(windowSize.x)
+			&& currentPosition.y <= int(windowSize.y)) {
+			// Only consider the mouse if it has moved.
+			if (currentPosition != previousPosition) {
+				editmap.setSelectedTileByPixel(currentPosition);
+			}
+		}
+	}
+    // Handle controls.
+	if (bool(controls["up"])) {
+		editmap.moveSelectedTileUp();
+	} else if (bool(controls["down"])) {
+		editmap.moveSelectedTileDown();
+	} else if (bool(controls["left"])) {
+		editmap.moveSelectedTileLeft();
+	} else if (bool(controls["right"])) {
+		editmap.moveSelectedTileRight();
+	}
+	if (bool(controls["zoomout"])) {
+        MapMakerScalingFactor -= 1.0f;
+        if (MapMakerScalingFactor < 1.0f) MapMakerScalingFactor = 1.0f;
+		editmap.setMapScalingFactor(MapMakerScalingFactor);
+	}
+	if (bool(controls["zoomin"])) {
+        MapMakerScalingFactor += 1.0f;
+        if (MapMakerScalingFactor > 5.0f) MapMakerScalingFactor = 5.0f;
+		editmap.setMapScalingFactor(MapMakerScalingFactor);
+	}
+}
+
+/**
  * Show the currently open \c MessageBox.
  * This prevents the \c MessageBox from being lost in the event the game's window
  * is made smaller and the \c MessageBox was previously moved to outside of the
@@ -202,6 +254,11 @@ awe::EmptyCallback@ FileDialogOverwrite;
 void createNewMap() {
     quitEditMap(function() {
         @editmap = createMap(FileDialogFile);
+        editmap.setMapScalingFactor(MapMakerScalingFactor);
+		editmap.setULCursorSprite("ulcursor");
+		editmap.setURCursorSprite("urcursor");
+		editmap.setLLCursorSprite("llcursor");
+		editmap.setLRCursorSprite("lrcursor");
         OpenMapProperties();
     });
 }
@@ -235,7 +292,14 @@ void MapMakerMenu_NewMap_Closing(bool&out abort) {
  */
 void MapMakerMenu_OpenMap_FileSelected() {
     FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
-    quitEditMap(function() { @editmap = loadMap(FileDialogFile); });
+    quitEditMap(function() {
+        @editmap = loadMap(FileDialogFile);
+        editmap.setMapScalingFactor(MapMakerScalingFactor);
+		editmap.setULCursorSprite("ulcursor");
+		editmap.setURCursorSprite("urcursor");
+		editmap.setLLCursorSprite("llcursor");
+		editmap.setLRCursorSprite("lrcursor");
+    });
 }
 
 /**

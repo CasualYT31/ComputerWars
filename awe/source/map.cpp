@@ -2108,10 +2108,7 @@ void awe::map::setTarget(
 }
 
 void awe::map::setSelectedTile(const sf::Vector2u& pos) {
-	if (!_isOutOfBounds(pos)) {
-		_sel = pos;
-		_changed = true;
-	}
+	if (!_isOutOfBounds(pos)) _sel = pos;
 }
 
 void awe::map::moveSelectedTileUp() {
