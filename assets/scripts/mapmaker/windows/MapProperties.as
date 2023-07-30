@@ -285,12 +285,15 @@ Vector2 GetSizeInEditBoxes() {
 
 /**
  * Applies changes and closes the map properties windows.
+ * @param resize \c TRUE if the map should be resized, \c FALSE if not.
  */
-void ApplyChangesAndClose() {
+void ApplyChangesAndClose(const bool resize) {
     editmap.setMapName(getWidgetText(map_properties_internal::MAP_NAME));
     editmap.setDay(parseDay(getWidgetText(map_properties_internal::DAY)));
-    editmap.setMapSize(GetSizeInEditBoxes(),
-        CurrentlySelectedTileType::Get().scriptName);
+    if (resize) {
+        editmap.setMapSize(GetSizeInEditBoxes(),
+            CurrentlySelectedTileType::Get().scriptName);
+    }
     CloseMapProperties();
 }
 
@@ -310,8 +313,8 @@ void MapMakerMenu_MapPropertiesOK_Pressed() {
         addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
     } else if (currentSize != newSize)
         map_properties_internal::openResizeConfirmation(currentSize, newSize);
-    else
-        ApplyChangesAndClose();
+    else // A tile type may not have been selected yet so don't try to resize.
+        ApplyChangesAndClose(false);
 }
 
 /**
@@ -325,7 +328,7 @@ void MapMakerMenu_MapPropertiesCancel_Pressed() {
  * Closes the resize map confirmation window and applies changes.
  */
 void MapMakerMenu_ConfirmResizeYes_Pressed() {
-    ApplyChangesAndClose();
+    ApplyChangesAndClose(true);
 }
 
 /**

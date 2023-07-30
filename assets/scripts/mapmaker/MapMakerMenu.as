@@ -17,10 +17,17 @@ const auto MESSAGE_BOX_GROUP = "MessageBoxGroup";
 /// pressed beyond closing the \c MessageBox.
 const auto SIMPLE_MESSAGE_BOX = MESSAGE_BOX_GROUP + ".SimpleMessageBox";
 const auto FILE_ALREADY_EXISTS = MESSAGE_BOX_GROUP + ".FileAlreadyExists";
+const auto SAVE_BEFORE_QUIT = MESSAGE_BOX_GROUP + ".SaveBeforeQuit";
+
+const auto FILE_DIALOG_GROUP = "FileDialogGroup";
+const auto NEW_MAP = FILE_DIALOG_GROUP + ".NewMap";
+const auto OPEN_MAP = FILE_DIALOG_GROUP + ".OpenMap";
+const auto SAVE_MAP = FILE_DIALOG_GROUP + ".SaveMap";
 
 string TILE_DIALOG;
 
 MenuItemID MAP_MAKER_FILE_NEW_MAP;
+MenuItemID MAP_MAKER_FILE_OPEN_MAP;
 MenuItemID MAP_MAKER_FILE_SAVE_MAP;
 MenuItemID MAP_MAKER_FILE_SAVE_MAP_AS;
 MenuItemID MAP_MAKER_FILE_QUIT;
@@ -33,9 +40,11 @@ MenuItemID MAP_MAKER_VIEW_TILE_DIALOG;
  * Sets up the map maker menu.
  */
 void MapMakerMenuSetUp() {
-    // MessageBox group.
+    // Dialog groups.
 
     addWidget("Group", MESSAGE_BOX_GROUP);
+    setWidgetEnabled(MESSAGE_BOX_GROUP, false);
+    addWidget("Group", FILE_DIALOG_GROUP);
 
     // Menu.
 
@@ -51,6 +60,7 @@ void MapMakerMenuSetUp() {
 
     addMenu(MENU, "file");
     MAP_MAKER_FILE_NEW_MAP = addMenuItem(MENU, "newmap");
+    MAP_MAKER_FILE_OPEN_MAP = addMenuItem(MENU, "openmap");
     MAP_MAKER_FILE_SAVE_MAP = addMenuItem(MENU, "savemap");
     MAP_MAKER_FILE_SAVE_MAP_AS = addMenuItem(MENU, "savemapas");
     MAP_MAKER_FILE_QUIT = addMenuItem(MENU, "quit");
@@ -81,12 +91,52 @@ void MapMakerMenu_MessageBoxGroup_SizeChanged() {
 }
 
 /**
- * Quits \c editmap.
+ * Code to perform after a quit operation.
  */
-void quitEditMap() {
+awe::EmptyCallback@ QuitCallback;
+
+/**
+ * If a quit operation wasn't cancelled, perform this code.
+ */
+awe::EmptyCallback@ QuitMapAuthorised = function() {
+    quitMap();
+    CloseMapProperties();
+    @editmap = null;
+    if (!(QuitCallback is null)) QuitCallback();
+};
+
+/**
+ * Quits \c editmap.
+ * @param callback If the quit operation wasn't cancelled, or the quit did not
+ *                 need to be carried out, perform this code.
+ */
+void quitEditMap(awe::EmptyCallback@ callback = null) {
     if (!(editmap is null)) {
-        quitMap();
-        @editmap = null;
+        @QuitCallback = callback;
+        if (editmap.hasChanged()) {
+            // Save? Or not? Or cancel?
+            awe::OpenMessageBox(SAVE_BEFORE_QUIT, "alert", "savebeforequit", null,
+                BASE_GROUP, MESSAGE_BOX_GROUP);
+            addMessageBoxButton(SAVE_BEFORE_QUIT, "yes");
+            addMessageBoxButton(SAVE_BEFORE_QUIT, "no");
+            addMessageBoxButton(SAVE_BEFORE_QUIT, "cancel");
+        } else QuitMapAuthorised();
+    } else callback();
+}
+
+/**
+ * Close the message box once it has been acknowledged.
+ * If "Yes" was pressed, save the map before quitting. If "No" was pressed, quit
+ * the map without saving. If "Cancel" was pressed, don't do anything more.
+ * @param btn The button that was pressed.
+ */
+void MapMakerMenu_SaveBeforeQuit_ButtonPressed(const uint64 btn) {
+    awe::CloseMessageBox(SAVE_BEFORE_QUIT, MESSAGE_BOX_GROUP, BASE_GROUP);
+    if (btn == 0) {
+        editmap.save();
+        QuitMapAuthorised();
+    } else if (btn == 1) {
+        QuitMapAuthorised();
     }
 }
 
@@ -96,24 +146,40 @@ void quitEditMap() {
  */
 void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
     if (id == MAP_MAKER_FILE_NEW_MAP) {
-        awe::OpenFileDialog("NewMap", "newmap", "create", "./map", false);
-        addFileDialogFileTypeFilter("NewMap", "mapfiles", null, { "*.cwm" });
-        setFileDialogDefaultFileFilter("NewMap", 1);
+        setWidgetEnabled(BASE_GROUP, false);
+        moveWidgetToFront(FILE_DIALOG_GROUP);
+        awe::OpenFileDialog(NEW_MAP, "newmap", "create", "./map", false);
+        addFileDialogFileTypeFilter(NEW_MAP, "mapfiles", null, { "*.cwm" });
+        setFileDialogDefaultFileFilter(NEW_MAP, 1);
+
+    } else if (id == MAP_MAKER_FILE_OPEN_MAP) {
+        setWidgetEnabled(BASE_GROUP, false);
+        moveWidgetToFront(FILE_DIALOG_GROUP);
+        awe::OpenFileDialog(OPEN_MAP, "openmap", "open", "./map");
+        addFileDialogFileTypeFilter(OPEN_MAP, "mapfiles", null, { "*.cwm" });
+        setFileDialogDefaultFileFilter(OPEN_MAP, 1);
+
     } else if (id == MAP_MAKER_FILE_SAVE_MAP) {
         if (!(editmap is null)) editmap.save();
+
     } else if (id == MAP_MAKER_FILE_SAVE_MAP_AS) {
         if (!(editmap is null)) {
-            awe::OpenFileDialog("SaveMap", "savemapas", "save", "./map", false);
-            addFileDialogFileTypeFilter("SaveMap", "mapfiles", null, { "*.cwm" });
-            setFileDialogDefaultFileFilter("SaveMap", 1);
+            setWidgetEnabled(BASE_GROUP, false);
+            moveWidgetToFront(FILE_DIALOG_GROUP);
+            awe::OpenFileDialog(SAVE_MAP, "savemapas", "save", "./map", false);
+            addFileDialogFileTypeFilter(SAVE_MAP, "mapfiles", null, { "*.cwm" });
+            setFileDialogDefaultFileFilter(SAVE_MAP, 1);
         }
+
     } else if (id == MAP_MAKER_FILE_QUIT) {
-        quitEditMap();
-        setGUI("MainMenu");
+        quitEditMap(function() { setGUI("MainMenu"); });
+
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
         OpenMapProperties();
+
     } else if (id == MAP_MAKER_VIEW_TILE_DIALOG) {
         DockTileDialog(TILE_DIALOG);
+
     } else {
         error("Unrecognised menu item ID " + awe::formatMenuItemID(id) +
             " received in the Map Maker menu!");
@@ -134,16 +200,17 @@ awe::EmptyCallback@ FileDialogOverwrite;
  * Closes the currently open map and creates a new one.
  */
 void createNewMap() {
-    quitEditMap();
-    @editmap = createMap(FileDialogFile);
-    OpenMapProperties();
+    quitEditMap(function() {
+        @editmap = createMap(FileDialogFile);
+        OpenMapProperties();
+    });
 }
 
 /**
  * Open a new map for editting.
  */
 void MapMakerMenu_NewMap_FileSelected() {
-    FileDialogFile = getFileDialogSelectedPaths("NewMap")[0];
+    FileDialogFile = getFileDialogSelectedPaths(NEW_MAP)[0];
     if (doesPathExist(FileDialogFile)) {
         awe::OpenMessageBox(FILE_ALREADY_EXISTS, "alert", "mapfilealreadyexists",
             {any(FileDialogFile)}, BASE_GROUP, MESSAGE_BOX_GROUP);
@@ -154,10 +221,38 @@ void MapMakerMenu_NewMap_FileSelected() {
 }
 
 /**
+ * Always make sure the map maker is re-enabled when the file dialog closes.
+ * But only when there isn't a message box open.
+ * @param abort Never abort.
+ */
+void MapMakerMenu_NewMap_Closing(bool&out abort) {
+    if (!getWidgetEnabled(MESSAGE_BOX_GROUP))
+        setWidgetEnabled(BASE_GROUP, true);
+}
+
+/**
+ * Open an existing map for editting.
+ */
+void MapMakerMenu_OpenMap_FileSelected() {
+    FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
+    quitEditMap(function() { @editmap = loadMap(FileDialogFile); });
+}
+
+/**
+ * Always make sure the map maker is re-enabled when the file dialog closes.
+ * But only when there isn't a message box open.
+ * @param abort Never abort.
+ */
+void MapMakerMenu_OpenMap_Closing(bool&out abort) {
+    if (!getWidgetEnabled(MESSAGE_BOX_GROUP))
+        setWidgetEnabled(BASE_GROUP, true);
+}
+
+/**
  * Save a map to a given location.
  */
 void MapMakerMenu_SaveMap_FileSelected() {
-    FileDialogFile = getFileDialogSelectedPaths("SaveMap")[0];
+    FileDialogFile = getFileDialogSelectedPaths(SAVE_MAP)[0];
     if (doesPathExist(FileDialogFile)) {
         awe::OpenMessageBox(FILE_ALREADY_EXISTS, "alert", "mapfilealreadyexists",
             {any(FileDialogFile)}, BASE_GROUP, MESSAGE_BOX_GROUP);
@@ -168,8 +263,18 @@ void MapMakerMenu_SaveMap_FileSelected() {
 }
 
 /**
+ * Always make sure the map maker is re-enabled when the file dialog closes.
+ * But only when there isn't a message box open.
+ * @param abort Never abort.
+ */
+void MapMakerMenu_SaveMap_Closing(bool&out abort) {
+    if (!getWidgetEnabled(MESSAGE_BOX_GROUP))
+        setWidgetEnabled(BASE_GROUP, true);
+}
+
+/**
  * Close the message box once it has been acknowledged.
- * If OK is selected, overwrite selected file.
+ * If OK is selected, trigger stored callback.
  * @param btn The button that was pressed.
  */
 void MapMakerMenu_FileAlreadyExists_ButtonPressed(const uint64 btn) {

@@ -60,6 +60,7 @@
 	"resizemapconfirmationnotile": "Select a tile before resizing!",
 	"resizemapconfirmationtile": "New tiles will be set to:",
 	"cannotresizeto0": "You cannot set a map to be 0 tiles in size!",
+	"savebeforequit": "There are unsaved changes on this map! Save before unloading it?",
 
 	"ORANGE_COUNTRY_longname": "Orange Star",
 	"ORANGE_COUNTRY_shortname": "OS",

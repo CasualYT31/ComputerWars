@@ -1401,6 +1401,16 @@ void sfx::gui::closingSignalHandler(const tgui::ChildWindow::Ptr& window,
 	*abort = true;
 }
 
+void sfx::gui::fileDialogClosingSignalHandler(const tgui::FileDialog::Ptr& window,
+	bool* abort) {
+	const auto widgetName = window->getWidgetName().toStdString();
+	const auto funcName = getGUI() + "_" + _extractWidgetName(widgetName) +
+		"_Closing";
+	const auto funcDecl = "void " + funcName + "(bool&out)";
+	if (_scripts->functionDeclExists(funcDecl))
+		_scripts->callFunction(funcName, abort);
+}
+
 void sfx::gui::minimizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
 	const auto widgetName = window->getWidgetName().toStdString();
 	if (_childWindowData.find(widgetName) != _childWindowData.end()) {
@@ -2101,9 +2111,12 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 	} else if (type == "filedialog") {
 		widget->getSignal("FileSelected").
 			connectEx(&sfx::gui::signalHandler, this);
+		const auto fd = std::dynamic_pointer_cast<FileDialog>(widget);
 		// FileDialogs must be cleaned up correctly when closed!
-		std::dynamic_pointer_cast<FileDialog>(widget)->onClose(
-			&sfx::gui::_removeWidget, this, widget->getWidgetName().toStdString());
+		fd->onClose(&sfx::gui::_removeWidget, this,
+			widget->getWidgetName().toStdString());
+		// Allow the scripts to handle FileDialog closing.
+		fd->onClosing(&sfx::gui::fileDialogClosingSignalHandler, this, fd);
 	} else if (type == "knob" || type == "scrollbar" || type == "slider" ||
 		type == "spinbutton" || type == "spincontrol") {
 		widget->getSignal("ValueChanged").

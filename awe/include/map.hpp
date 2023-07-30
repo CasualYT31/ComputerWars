@@ -206,6 +206,14 @@ namespace awe {
 		void setScripts(const std::shared_ptr<engine::scripts>& scripts);
 
 		/**
+		 * Has the map been changed since it was last saved successfully?
+		 * Only tests relevant map data, not if spritesheets were changed, or the
+		 * scripts object was changed, etc.
+		 * @return \c TRUE if the map has changed, \c FALSE if not.
+		 */
+		bool hasChanged() const;
+
+		/**
 		 * Carry out periodic tasks, such as checking for win conditions.
 		 * @return If \c TRUE is returned, it signifies that the map's win
 		 *         condition has been met, and the map object should be deleted.
@@ -1546,6 +1554,12 @@ namespace awe {
 		 * Pointer to a \c scripts object.
 		 */
 		std::shared_ptr<engine::scripts> _scripts = nullptr;
+
+		/**
+		 * Has the map been changed since it was last successfully saved?
+		 * @remark This is a temporary measure until I implement change history.
+		 */
+		bool _changed = false;
 
 		//////////
 		// DATA //

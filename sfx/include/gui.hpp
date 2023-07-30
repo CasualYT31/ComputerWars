@@ -240,16 +240,34 @@ namespace sfx {
 		/**
 		 * Handles \c Closing signals.
 		 * If a \c ChildWindow is configured to automatically handle minimise and
-		 * maximise logic, this handler will carry it out, before either invoking
-		 * the script's signal handler, or the widget's custom signal handler. If
-		 * the \c ChildWindow was configured not to handle this logic, then the
-		 * appropriate script signal handler will still be invoked.
+		 * maximise logic, this handler will carry it out, before invoking the
+		 * script's signal handler. If the \c ChildWindow was configured not to
+		 * handle this logic, then the appropriate script signal handler will still
+		 * be invoked.\n
+		 * The script function invoked follows the same format as
+		 * \c signalHandler() (e.g. \c GUIName_ChildWindowName_Closing).
+		 * However, a <tt>bool&out</tt> parameter is also passed, which should be
+		 * set to \c FALSE if the window should not be closed.
 		 * @warning This engine should never emit a Closed signal for normal
 		 *          \c ChildWindow widgets! Use the \c Closing signal instead!
 		 * @param   window Pointer to the \c ChildWindow that was closed.
 		 * @param   abort  Will always be set to \c TRUE.
 		 */
 		void closingSignalHandler(const tgui::ChildWindow::Ptr& window,
+			bool* abort);
+
+		/**
+		 * Handles \c Closing signals for \c FileDialogs.
+		 * The script function invoked follows the same format as
+		 * \c signalHandler() (e.g. \c GUIName_FileDialogName_Closing).
+		 * However, a <tt>bool&out</tt> parameter is also passed, which should be
+		 * set to \c TRUE if the dialog should not be closed.
+		 * @warning This engine should never emit a Closed signal for
+		 *          \c FileDialog widgets! Use the \c Closing signal instead!
+		 * @param   window Pointer to the \c FileDialog that was closed.
+		 * @param   abort  Will be updated by the script handler, if there is one.
+		 */
+		void fileDialogClosingSignalHandler(const tgui::FileDialog::Ptr& window,
 			bool* abort);
 
 		/**

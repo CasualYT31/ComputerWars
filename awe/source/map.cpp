@@ -138,6 +138,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"bool hasChanged()",
+			asMETHOD(awe::map, hasChanged), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void setMapName(const string&in)",
 			asMETHOD(awe::map, setMapName), asCALL_THISCALL);
 
@@ -657,6 +661,7 @@ bool awe::map::load(std::string file, const unsigned char version) {
 		_file.close();
 		return false;
 	}
+	_changed = false;
 	return true;
 }
 
@@ -680,6 +685,7 @@ bool awe::map::save(std::string file, const unsigned char version) {
 		_file.close();
 		return false;
 	}
+	_changed = false;
 	return true;
 }
 
@@ -696,12 +702,17 @@ void awe::map::setScripts(const std::shared_ptr<engine::scripts>& scripts) {
 	_scripts = scripts;
 }
 
+bool awe::map::hasChanged() const {
+	return _changed;
+}
+
 bool awe::map::periodic() {
 	return defaultWinCondition();
 }
 
 void awe::map::setMapName(const std::string& name) {
 	_mapName = name;
+	_changed = true;
 }
 
 std::string awe::map::getMapName() const {
@@ -755,6 +766,7 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 		}
 	}
 	_mapSizeCache = dim;
+	_changed = true;
 }
 
 void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile) {
@@ -763,6 +775,7 @@ void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile) {
 
 void awe::map::setDay(const awe::Day day) noexcept {
 	_day = day;
+	_changed = true;
 }
 
 awe::Day awe::map::getDay() const noexcept {
@@ -798,6 +811,7 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
 	// This will miss out the maximum value for a team ID, but I don't care.
 	if (_teamIDCounter == maxIDCounter) _teamIDCounter = 0;
 	_armies.at(country->getTurnOrder()).setTeam(_teamIDCounter++);
+	_changed = true;
 	return true;
 }
 
@@ -831,6 +845,7 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 	}
 	// Finally, delete the army from the army list.
 	_armies.erase(army);
+	_changed = true;
 }
 
 std::size_t awe::map::getArmyCount() const noexcept {
@@ -865,6 +880,7 @@ void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team) {
 		// Then, stop all of the units capturing that are on this army's tiles.
 		const auto tiles = getTilesOfArmy(army);
 		for (auto& tile : tiles) _updateCapturingUnit(getUnitOnTile(tile));
+		_changed = true;
 	} else {
 		_logger.error("setArmyTeam operation cancelled: attempted to set an army "
 			"{}'s team to {}, but that army didn't exist!", army, team);
@@ -881,6 +897,7 @@ awe::TeamID awe::map::getArmyTeam(const awe::ArmyID army) const {
 void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 	if (_isArmyPresent(army)) {
 		_armies.at(army).setFunds(funds);
+		_changed = true;
 	} else {
 		_logger.error("setArmyFunds operation cancelled: attempted to set {} "
 			"funds to an army, {}, that didn't exist!", funds, army);
@@ -890,6 +907,7 @@ void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 void awe::map::offsetArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 	if (_isArmyPresent(army)) {
 		setArmyFunds(army, getArmyFunds(army) + funds);
+		_changed = true;
 	} else {
 		_logger.error("offsetArmyFunds operation cancelled: attempted to award {} "
 			"funds to an army, {}, that didn't exist!", funds, army);
@@ -934,6 +952,7 @@ void awe::map::setArmyCOs(const awe::ArmyID army,
 					"a current CO and it will not be assigned a tag CO.", army);
 			}
 			_armies.at(army).setCOs(current, tag);
+			_changed = true;
 		}
 	} else {
 		_logger.error("setCOs operation failed: army with ID {} didn't exist at "
@@ -981,6 +1000,7 @@ void awe::map::tagArmyCOs(const awe::ArmyID army) {
 	} else {
 		if (_armies.at(army).getTagCO()) {
 			_armies.at(army).tagCOs();
+			_changed = true;
 		} else {
 			_logger.error("tagCOs operation failed: army with ID {} didn't have a "
 				"secondary CO at the time of calling!", army);
@@ -1138,13 +1158,14 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 	try {
 		id = _findUnitID();
 	} catch (const std::bad_alloc&) {
-		_logger.error("createUnit fatal error: could not generate a unique ID for "
-			"a new unit. There are too many units allocated!");
+		_logger.critical("createUnit fatal error: could not generate a unique ID "
+			"for a new unit. There are too many units allocated!");
 		return 0;
 	}
 	_units.insert({ id, awe::unit({_logger.getData().sink, "unit"}, type, army,
 		_sheet_unit, _sheet_icon) });
 	_armies.at(army).addUnit(id);
+	_changed = true;
 	return id;
 }
 
@@ -1186,6 +1207,7 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	if (isPreviewUnit(id)) removePreviewUnit(id);
 	// Finally, delete the unit from the main list.
 	_units.erase(id);
+	_changed = true;
 }
 
 std::shared_ptr<const awe::unit_type> awe::map::getUnitType(
@@ -1241,6 +1263,7 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 	}
 	// Assign new location to unit.
 	_units.at(id).setPosition(pos);
+	_changed = true;
 }
 
 sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const {
@@ -1264,6 +1287,7 @@ bool awe::map::isUnitOnMap(const awe::UnitID id) const {
 void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).setHP(hp);
+		_changed = true;
 	} else {
 		_logger.error("setUnitHP operation cancelled: attempted to assign HP {} "
 			"to unit with ID {}, which doesn't exist!", hp, id);
@@ -1287,6 +1311,7 @@ awe::HP awe::map::getUnitDisplayedHP(const awe::UnitID id) const {
 void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).setFuel(fuel);
+		_changed = true;
 	} else {
 		_logger.error("setUnitFuel operation cancelled: attempted to assign fuel "
 			"{} to unit with ID {}, which doesn't exist!", fuel, id);
@@ -1296,6 +1321,7 @@ void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 void awe::map::burnUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 	if (_isUnitPresent(id)) {
 		setUnitFuel(id, getUnitFuel(id) - fuel);
+		_changed = true;
 	} else {
 		_logger.error("burnUnitFuel operation cancelled: attempted to offset unit "
 			"{}'s fuel by {}. This unit doesn't exist!", id, fuel);
@@ -1313,6 +1339,7 @@ void awe::map::setUnitAmmo(const awe::UnitID id, const std::string& weapon,
 		const awe::Ammo ammo) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).setAmmo(weapon, ammo);
+		_changed = true;
 	} else {
 		_logger.error("setUnitAmmo operation cancelled: attempted to assign ammo "
 			"{} to unit with ID {}'s weapon \"{}\". This unit doesn't exist!",
@@ -1331,6 +1358,7 @@ awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id,
 void awe::map::waitUnit(const awe::UnitID id, const bool waiting) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).wait(waiting);
+		_changed = true;
 	} else {
 		_logger.error("waitUnit operation cancelled: attempted to assign waiting "
 			"state {} to unit with ID {}, which doesn't exist!", waiting, id);
@@ -1347,6 +1375,7 @@ bool awe::map::isUnitWaiting(const awe::UnitID id) const {
 void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).capturing(capturing);
+		_changed = true;
 	} else {
 		_logger.error("unitCapturing operation cancelled: attempted to assign "
 			"capturing state {} to unit with ID {}, which doesn't exist!",
@@ -1364,6 +1393,7 @@ bool awe::map::isUnitCapturing(const awe::UnitID id) const {
 void awe::map::unitHiding(const awe::UnitID id, const bool hiding) {
 	if (_isUnitPresent(id)) {
 		_units.at(id).hiding(hiding);
+		_changed = true;
 	} else {
 		_logger.error("unitHiding operation cancelled: attempted to assign hiding "
 			"state {} to unit with ID {}, which doesn't exist!", hiding, id);
@@ -1447,6 +1477,7 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 	// Perform loads.
 	_units.at(onto).loadUnit(load);
 	_units.at(load).loadOnto(onto);
+	_changed = true;
 }
 
 void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
@@ -1483,6 +1514,7 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 		_logger.error("unloadUnit operation failed: unit with ID {} was not "
 			"loaded onto unit with ID {}", unload, from);
 	}
+	_changed = true;
 }
 
 awe::UnitID awe::map::getUnitWhichContainsUnit(const awe::UnitID unit) const {
@@ -1576,6 +1608,7 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 	_tiles[pos.x][pos.y].setTileType(type);
 	// Remove ownership of the tile from the army who owns it, if any army does.
 	setTileOwner(pos, awe::NO_ARMY);
+	_changed = true;
 	return true;
 }
 
@@ -1605,6 +1638,7 @@ const awe::tile_type* awe::map::getTileTypeObject(const sf::Vector2u& pos) const
 void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {
 	if (!_isOutOfBounds(pos)) {
 		_tiles[pos.x][pos.y].setTileHP(hp);
+		_changed = true;
 	} else {
 		_logger.error("setTileHP operation cancelled: tile at position {} is out "
 			"of bounds with the map's size of {}!", pos, getMapSize());
@@ -1636,6 +1670,7 @@ void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
 	if (_isArmyPresent(army)) _armies.at(army).addTile(pos);
 	// Update the actual tile now.
 	tile.setTileOwner(army);
+	_changed = true;
 }
 
 awe::ArmyID awe::map::getTileOwner(const sf::Vector2u& pos) const {
@@ -2065,7 +2100,10 @@ void awe::map::setTarget(
 }
 
 void awe::map::setSelectedTile(const sf::Vector2u& pos) {
-	if (!_isOutOfBounds(pos)) _sel = pos;
+	if (!_isOutOfBounds(pos)) {
+		_sel = pos;
+		_changed = true;
+	}
 }
 
 void awe::map::moveSelectedTileUp() {
@@ -2116,11 +2154,13 @@ void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
 }
 
 void awe::map::setSelectedArmy(const awe::ArmyID army) {
-	if (_isArmyPresent(army))
+	if (_isArmyPresent(army)) {
 		_currentArmy = army;
-	else
+		_changed = true;
+	} else {
 		_logger.error("selectArmy operation cancelled: army with ID {} does not "
 			"exist!", army);
+	}
 }
 
 awe::ArmyID awe::map::getSelectedArmy() const {
