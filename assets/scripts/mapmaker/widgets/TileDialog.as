@@ -5,11 +5,6 @@
 
 namespace tile_dialog_internal {
     /**
-     * The default width of the \c TileDialog.
-     */
-    string DEFAULT_WIDTH;
-
-    /**
      * The name of the owner combobox.
      */
     string COMBOBOX;
@@ -18,6 +13,26 @@ namespace tile_dialog_internal {
      * The name of the owner icon.
      */
     string ICON;
+
+    /**
+     * The name of the \c ScrollablePanel that contains the wrap.
+     */
+    string PANEL;
+
+    /**
+     * The name of the \c HorizontalWrap that contains the buttons.
+     */
+    string WRAP;
+
+    /**
+     * Width of each tile button.
+     */
+    const float BUTTON_WIDTH = 35.0f;
+
+    /**
+     * HEIGHT of each tile button.
+     */
+    const float BUTTON_HEIGHT = 35.0f;
 
     /**
      * List of tile buttons which have owned tile sprites.
@@ -32,8 +47,12 @@ namespace tile_dialog_internal {
  * @param dialog Name of the \c TileDialog to dock.
  */
 void DockTileDialog(const string&in dialog) {
-    openChildWindow(dialog, "100%-" + tile_dialog_internal::DEFAULT_WIDTH, "0");
-    setWidgetSize(dialog, tile_dialog_internal::DEFAULT_WIDTH, "100%");
+    const auto defaultWidth = formatFloat(
+        tile_dialog_internal::BUTTON_WIDTH * 6.0f +
+        getScrollbarWidth(tile_dialog_internal::PANEL) + 2.0f
+    );
+    openChildWindow(dialog, "100%-" + defaultWidth, "0");
+    setWidgetSize(dialog, defaultWidth, "100%");
 }
 
 /**
@@ -75,35 +94,35 @@ string TileDialogSetUp(const string&in parent = "") {
 
     // ScrollablePanel //
 
-    const auto scrollablePanel = window + ".ScrollablePanel";
-    addWidget("ScrollablePanel", scrollablePanel);
-    setWidgetSize(scrollablePanel, "100%", "100%-" + GROUP_HEIGHT + "-" +
-        GROUP_HEIGHT);
-    setWidgetPosition(scrollablePanel, "50%", "50%");
-    setWidgetOrigin(scrollablePanel, 0.5f, 0.5f);
-    setVerticalScrollbarAmount(scrollablePanel, 25);
+    tile_dialog_internal::PANEL = window + ".ScrollablePanel";
+    addWidget("ScrollablePanel", tile_dialog_internal::PANEL);
+    setWidgetSize(tile_dialog_internal::PANEL, "100%", "100%-" + GROUP_HEIGHT +
+        "-" + GROUP_HEIGHT);
+    setWidgetPosition(tile_dialog_internal::PANEL, "50%", "50%");
+    setWidgetOrigin(tile_dialog_internal::PANEL, 0.5f, 0.5f);
+    setVerticalScrollbarAmount(tile_dialog_internal::PANEL, 25);
+    setHorizontalScrollbarPolicy(tile_dialog_internal::PANEL,
+        ScrollbarPolicy::Never);
 
-    const auto grid = scrollablePanel + ".Grid";
-    addWidget("Grid", grid);
-    const uint COLUMNS = 6;
+    tile_dialog_internal::WRAP = tile_dialog_internal::PANEL + ".TileDialogWrap";
+    addWidget("HorizontalWrap", tile_dialog_internal::WRAP);
     const auto@ tileScriptNames = tiletype.scriptNames;
-    float WIDTH_OF_CHILD_WINDOW = 45.0f;
-    for (uint t = 0, typeCount = tileScriptNames.length(); t < typeCount; ++t) {
+    for (uint t = 0, len = tileScriptNames.length(); t < len; ++t) {
         const auto tileName = tileScriptNames[t];
         const auto@ tile = tiletype[tileName];
-        const auto ROW = uint(t / COLUMNS), COL = t % COLUMNS;
-        const auto btn = grid + "." + tileName;
-        addWidgetToGrid("BitmapButton", btn, ROW, COL,
-            "TileDialogHandleBitmapButtonSignal");
+        const auto btn = tile_dialog_internal::WRAP + "." + tileName;
+        addWidget("BitmapButton", btn, "TileDialogHandleBitmapButtonSignal");
         setWidgetSprite(btn, "tile.normal", tile.neutralTileSprite);
-        setWidgetAlignmentInGrid(grid, ROW, COL, WidgetAlignment::Centre);
+        // TODO-4: We should really find the tallest tile sprite and base the
+        // button sizes on that.
+        setWidgetSize(btn, formatFloat(tile_dialog_internal::BUTTON_WIDTH),
+            formatFloat(tile_dialog_internal::BUTTON_HEIGHT));
         if (tile.hasOwnedTiles)
             tile_dialog_internal::BUTTONS_WITH_OWNED_SPRITES.set(btn, @tile);
-        if (ROW == 0) WIDTH_OF_CHILD_WINDOW += getWidgetFullSize(btn).x;
     }
+    MapMakerMenu_TileDialogWrap_MouseEntered();
 
     // SelectOwner widgets //
-
     const auto selectOwnerGroup = window + ".SelectOwnerGroup";
     const auto GROUP_PADDING = "5px";
     addWidget("Group", selectOwnerGroup);
@@ -138,12 +157,28 @@ string TileDialogSetUp(const string&in parent = "") {
             country[countryScriptNames[c]].name);
     }
 
-    // Calculate how wide the window has to be to hide the horizontal scrollbar by
-    // default.
-    tile_dialog_internal::DEFAULT_WIDTH = formatFloat(WIDTH_OF_CHILD_WINDOW +
-        5.0f);
     DockTileDialog(window);
     return window;
+}
+
+/**
+ * When the tile dialog window has changed size, we need to update the Wrap's
+ * height.
+ * Would've loved to register this with the \c ChildWindow's SizeChanged signal,
+ * but it's super slow as it gets triggered whilst the window is still being
+ * dragged.
+ */
+void MapMakerMenu_TileDialogWrap_MouseEntered() {
+    // Figure out how many rows of buttons there are and resize the wrap to fit.
+    const auto widthOfPanel = getWidgetFullSize(tile_dialog_internal::PANEL).x;
+    auto columns = widthOfPanel / tile_dialog_internal::BUTTON_WIDTH;
+    if (columns < 1.0f) columns = 1.0f;
+    const auto rows =
+        ceil(getWidgetCount(tile_dialog_internal::WRAP) / floor(columns));
+    setWidgetSize(tile_dialog_internal::WRAP,
+        "100%-" + getScrollbarWidth(tile_dialog_internal::PANEL),
+        formatFloat(rows * tile_dialog_internal::BUTTON_HEIGHT)
+    );
 }
 
 /**

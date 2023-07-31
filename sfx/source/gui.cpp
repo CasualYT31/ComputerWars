@@ -756,6 +756,12 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's vertical scroll "
 		"amount.");
 
+	r = engine->RegisterGlobalFunction("float getScrollbarWidth(const string&in)",
+		asMETHOD(sfx::gui, _getScrollbarWidth),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a ScrollablePanel's scrollbar "
+		"width.");
+
 	r = engine->RegisterGlobalFunction("void setGroupPadding("
 		"const string&in, const string&in)", asMETHODPR(sfx::gui, _setGroupPadding,
 			(const std::string&, const std::string&), void),
@@ -1629,7 +1635,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 			}
 		}
 
-		if (_isContainerWidget(type))
+		if (widget->isContainer())
 			_animate(target, std::dynamic_pointer_cast<Container>(widget));
 	}
 }
@@ -1962,7 +1968,7 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 			w->setText(_getTranslatedText(widgetName));
 		}
 	}
-	if (_isContainerWidget(type)) {
+	if (widget->isContainer()) {
 		auto w = _findWidget<Container>(widgetName);
 		auto& widgetList = w->getWidgets();
 		for (auto& w : widgetList) _translateWidget(w);
@@ -2202,7 +2208,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 
 void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	const tgui::Container::Ptr& container, const bool removeIt) {
-	if (_isContainerWidget(widget->getWidgetType())) {
+	if (widget->isContainer()) {
 		auto container = _findWidget<Container>(
 			widget->getWidgetName().toStdString());
 		auto& widgetsInContainer = container->getWidgets();
@@ -2380,6 +2386,8 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return filedialog;
 	} else if (type == "messagebox") {
 		return tgui::MessageBox::create();
+	} else if (type == "horizontalwrap") {
+		return tgui::HorizontalWrap::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -2506,10 +2514,8 @@ void sfx::gui::_removeWidgetsFromContainer(const std::string& name) {
 	if (fullname.size() < 2) {
 		_removeWidgets(widget, nullptr, false);
 	} else {
-		if (_isContainerWidget(widgetType.toLower().toStdString()))
-			_removeWidgets(widget, container, false);
-		else
-			UNSUPPORTED_WIDGET_TYPE()
+		if (widget->isContainer()) _removeWidgets(widget, container, false);
+		else UNSUPPORTED_WIDGET_TYPE()
 	}
 	END("Attempted to remove the widgets from a widget \"{}\", of type \"{}\", "
 		"within menu \"{}\".", name, widgetType, fullname[0])
@@ -2946,7 +2952,7 @@ void sfx::gui::_setWidgetIndex(const std::string& name, const std::size_t index)
 void sfx::gui::_setWidgetIndexInContainer(const std::string& name,
 	const std::size_t oldIndex, const std::size_t newIndex) {
 	START_WITH_WIDGET(name)
-	if (!_isContainerWidget(widgetType)) UNSUPPORTED_WIDGET_TYPE()
+	if (!widget->isContainer()) UNSUPPORTED_WIDGET_TYPE()
 	container = std::dynamic_pointer_cast<Container>(widget);
 	try {
 		widget = container->getWidgets().at(oldIndex);
@@ -3084,7 +3090,7 @@ std::string sfx::gui::_getSelectedItemText(const std::string& name) {
 
 std::size_t sfx::gui::_getWidgetCount(const std::string& name) {
 	START_WITH_WIDGET(name)
-	if (_isContainerWidget(widgetType))
+	if (widget->isContainer())
 		return std::dynamic_pointer_cast<Container>(widget)->getWidgets().size();
 	else
 		UNSUPPORTED_WIDGET_TYPE()
@@ -3126,6 +3132,15 @@ void sfx::gui::_setVerticalScrollbarAmount(const std::string& name,
 		fullname[0])
 }
 
+float sfx::gui::_getScrollbarWidth(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ScrollablePanel, return castWidget->getScrollbarWidth();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the scrollbar width of widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+	return 0.0f;
+}
+
 void sfx::gui::_setGroupPadding(const std::string& name,
 	const std::string& padding) {
 	START_WITH_WIDGET(name)
@@ -3138,6 +3153,8 @@ void sfx::gui::_setGroupPadding(const std::string& name,
 		ELSE_IF_WIDGET_IS(VerticalLayout, castWidget->getRenderer()->setPadding(
 			AbsoluteOrRelativeValue(padding));)
 		ELSE_IF_WIDGET_IS(Group, castWidget->getRenderer()->setPadding(
+			AbsoluteOrRelativeValue(padding));)
+		ELSE_IF_WIDGET_IS(HorizontalWrap, castWidget->getRenderer()->setPadding(
 			AbsoluteOrRelativeValue(padding));)
 		ELSE_IF_WIDGET_IS(Grid,
 			const auto& widgets = castWidget->getWidgets();
@@ -3166,6 +3183,8 @@ void sfx::gui::_setGroupPadding(const std::string& name, const std::string& left
 		ELSE_IF_WIDGET_IS(VerticalLayout,
 			castWidget->getRenderer()->setPadding(padding);)
 		ELSE_IF_WIDGET_IS(Group,
+			castWidget->getRenderer()->setPadding(padding);)
+		ELSE_IF_WIDGET_IS(HorizontalWrap,
 			castWidget->getRenderer()->setPadding(padding);)
 		ELSE_IF_WIDGET_IS(Grid,
 			const auto & widgets = castWidget->getWidgets();
@@ -3228,6 +3247,8 @@ void sfx::gui::_setSpaceBetweenWidgets(const std::string& name,
 		IF_WIDGET_IS(HorizontalLayout, castWidget->getRenderer()->
 			setSpaceBetweenWidgets(space);)
 		ELSE_IF_WIDGET_IS(VerticalLayout, castWidget->getRenderer()->
+			setSpaceBetweenWidgets(space);)
+		ELSE_IF_WIDGET_IS(HorizontalWrap, castWidget->getRenderer()->
 			setSpaceBetweenWidgets(space);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set {} to a widget \"{}\"'s space between widgets property. "

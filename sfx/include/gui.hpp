@@ -694,20 +694,6 @@ namespace sfx {
 			const std::string& customSignalHandler);
 
 		/**
-		 * Determines whether or not the given widget type is a container type.
-		 * @param  type The TGUI widget type.
-		 * @return \c TRUE if the widget type is a container, \c FALSE otherwise.
-		 */
-		static inline bool _isContainerWidget(tgui::String type) {
-			type = type.trim().toLower();
-			// Not all of them are here for future reference!
-			return type == "childwindow" || type == "grid" || type == "group" ||
-				type == "radiobuttongroup" || type == "verticallayout" ||
-				type == "horizontallayout" || type == "panel" ||
-				type == "scrollablepanel";
-		}
-
-		/**
 		 * Removes widgets from \c _gui.
 		 * @warning A grid within a grid may cause the game to crash!
 		 * @param   widget    Pointer to the widget to delete.
@@ -1479,6 +1465,15 @@ namespace sfx {
 		 */
 		void _setVerticalScrollbarAmount(const std::string& name,
 			const unsigned int amount);
+
+		/**
+		 * Gets the width of the scrollbars in a \c ScrollablePanel.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and \c 0.0f will be returned.
+		 * @param  name The name of the widget to query.
+		 * @return The width of the scrollbar.
+		 */
+		float _getScrollbarWidth(const std::string& name);
 
 		/**
 		 * Sets the padding applied to a group of widgets.

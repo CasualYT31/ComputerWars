@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "scriptfilesystem.h"
 #include "scripthelper.h"
 #include "scriptany.h"
+#include "scriptmath.h"
 #include "logger.hpp"
 #include <type_traits>
 #include "docgen.h"
