@@ -1400,6 +1400,23 @@ namespace awe {
 		sf::IntRect getCursorBoundingBox() const;
 
 		/**
+		 * Calculates where the map's bounding rectangle is relative to the screen.
+		 * If you are using this to check if the mouse position is within the map's
+		 * graphic, you may have to be aware that \c INVALID_MOUSE stores
+		 * <tt>(-1, -1)</tt>, so if the map is larger than the screen that may be
+		 * considered within the map graphic! If you are pairing that check with a
+		 * \c isMouseButtonTriggeringControl() check, though, you won't have to
+		 * worry as all mouse buttons are ignored if the mouse position is
+		 * \c INVALID_MOUSE.
+		 * @warning This method assumes each tile is \c awe::tile::MIN_WIDTH in
+		 *          width! A more complicated implementation would take variable
+		 *          widths into consideration, but it's not something I'd ever use
+		 *          so I'm not wasting time on it.
+		 * @return  The bounding rectangle of the map, in pixel coordinates.
+		 */
+		sf::IntRect getMapBoundingBox() const;
+
+		/**
 		 * Sets the spritesheet used for drawing tiles.
 		 * @param sheet Pointer to the animated spritesheet to use for tiles.
 		 */

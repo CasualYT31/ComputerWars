@@ -295,6 +295,13 @@ namespace awe {
 		 */
 		std::string _script_getLatestLogEntry() const;
 
+		/**
+		 * Formats a bool.
+		 * @param  b The bool value to convert into a string.
+		 * @return "true" if \c b is != 0, or "false" if b is 0.
+		 */
+		std::string _script_formatBool(const bool b) const;
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================

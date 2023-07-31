@@ -89,14 +89,16 @@ void ExplodePreviewMenuClose() {
  * Allows the user to change the selected tile, if configured to, and allows the
  * them to cancel the preview, or go ahead with the explosion.
  * @param controls         The control map given by the engine.
+ * @param mouseInputs      Stores which controls are being triggered by the mouse.
  * @param previousPosition The previous mouse position.
  * @param currentPosition  The current mouse position.
  */
 void ExplodePreviewMenuHandleInput(const dictionary controls,
-    const MousePosition&in previousPosition,
+    const dictionary mouseInputs, const MousePosition&in previousPosition,
     const MousePosition&in currentPosition) {
 	if (EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE) {
-		HandleCommonGameInput(controls, previousPosition, currentPosition);
+		HandleCommonGameInput(controls, mouseInputs, previousPosition,
+            currentPosition);
 	}
 	if (bool(controls["back"])) {
 		// Force the selection to go back to the originally selected unit (as the
@@ -106,6 +108,8 @@ void ExplodePreviewMenuHandleInput(const dictionary controls,
 		game.map.setSelectedTile(EXPLODE_PREVIEW_MENU_SELECTED_TILE);
 		setGUI(PREVIOUS_MENU);
 	} else if (bool(controls["select"])) {
+        // Since you can't move the cursor in this menu, allow the selection even
+        // if the mouse is outside of the map graphic.
 		// Perform explosion.
 		game.damageUnitsInRange(game.map.getSelectedTile(),
 			EXPLODE_PREVIEW_MENU_RANGE.x, EXPLODE_PREVIEW_MENU_RANGE.y,

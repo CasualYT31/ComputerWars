@@ -20,12 +20,14 @@ void MapSetUp() {
 /**
  * Input handling code common to both Map and MoveUnitMenu.
  * @param  controls         The control map given by the engine.
+ * @param  mouseInputs      Stores which controls are being triggered by the
+ *                          mouse.
  * @param  previousPosition The previous mouse position.
  * @param  currentPosition  The current mouse position.
  * @return \c TRUE if this function updated the selected tile, \c FALSE if not.
  */
 bool HandleCommonGameInput(const dictionary@ controls,
-    const MousePosition&in previousPosition,
+    const dictionary@ mouseInputs, const MousePosition&in previousPosition,
     const MousePosition&in currentPosition) {
 	bool ret = false;
 
@@ -81,11 +83,12 @@ bool CANCEL_DEV_INPUT = false;
 /**
  * Handles input specific to the \c Map menu.
  * @param controls         The control map given by the engine.
+ * @param mouseInputs      Stores which controls are being triggered by the mouse.
  * @param previousPosition The previous mouse position.
  * @param currentPosition  The current mouse position.
  */
 void MapHandleInput(const dictionary controls,
-    const MousePosition&in previousPosition,
+    const dictionary mouseInputs, const MousePosition&in previousPosition,
     const MousePosition&in currentPosition) {
 	// If the dev key was hit, open the debug menu.
 	if (bool(controls["dev"])) {
@@ -98,7 +101,8 @@ void MapHandleInput(const dictionary controls,
 		}
 	}
 
-	HandleCommonGameInput(controls, previousPosition, currentPosition);
+	HandleCommonGameInput(controls, mouseInputs, previousPosition,
+        currentPosition);
 	
 	// Update army widget.
 	armyWidget.update(game.map.getSelectedArmy());
@@ -141,6 +145,11 @@ void MapHandleInput(const dictionary controls,
 		game.enableClosedList(false);
 		game.showAttackRangeOfUnit(unitID);
 	} else if (bool(controls["select"])) {
+        // If the select control is being made by the mouse, and it is not inside
+        // the map's graphic, then drop it.
+        if (bool(mouseInputs["select"]) &&
+            !game.map.getMapBoundingBox().contains(currentPosition)) return;
+
 		const auto currentArmy = game.map.getSelectedArmy();
 		if (unitID == 0) {
             if (!game.map.isOutOfBounds(selectedTile)) {

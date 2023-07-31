@@ -333,6 +333,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game_engine, _script_getLatestLogEntry),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "The latest line written in the log.");
+
+	r = engine->RegisterGlobalFunction("string formatBool(const bool)",
+		asMETHOD(awe::game_engine, _script_formatBool),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Converts a bool into a string.");
 }
 
 bool awe::game_engine::_load(engine::json& j) {
@@ -626,4 +631,8 @@ bool awe::game_engine::_script_doesPathExist(const std::string& path) const {
 std::string awe::game_engine::_script_getLatestLogEntry() const {
 	const auto log = _logger.getData().sink->getLog();
 	return log.substr(log.rfind("\n", log.size() - 2) + 1);
+}
+
+std::string awe::game_engine::_script_formatBool(const bool b) const {
+	return b ? "true" : "false";
 }

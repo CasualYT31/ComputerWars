@@ -136,5 +136,29 @@
 			58
 		],
 		"type": 1
+	},
+	"painttile": {
+		"keys": [
+			25
+		],
+		"mouse": [
+			0
+		],
+		"buttons": [
+			0
+		],
+		"type": 0
+	},
+	"paintunit": {
+		"keys": [
+			21
+		],
+		"mouse": [
+			1
+		],
+		"buttons": [
+			0
+		],
+		"type": 0
 	}
 }

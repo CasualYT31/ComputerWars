@@ -62,13 +62,15 @@ void SelectTargetMenuClose() {
 /**
  * Allows the user to move the selection, as well as cancel the attack.
  * @param controls         The control map given by the engine.
+ * @param mouseInputs      Stores which controls are being triggered by the mouse.
  * @param previousPosition The previous mouse position.
  * @param currentPosition  The current mouse position.
  */
 void SelectTargetMenuHandleInput(const dictionary controls,
-    const MousePosition&in previousPosition,
+    const dictionary mouseInputs, const MousePosition&in previousPosition,
     const MousePosition&in currentPosition) {
-	HandleCommonGameInput(controls, previousPosition, currentPosition);
+	HandleCommonGameInput(controls, mouseInputs, previousPosition,
+        currentPosition);
     game.updateDamageWidgetPosition(damageWidget);
 
 	// If the currently selected tile is hovering over a target, find the base
@@ -94,6 +96,11 @@ void SelectTargetMenuHandleInput(const dictionary controls,
 		game.map.setSelectedTile(SELECT_TARGET_MENU_SELECTED_TILE);
 		setGUI("PreviewMoveUnitMenu");
 	} else if (bool(controls["select"])) {
+		// If the select control is being made by the mouse, and it is not inside
+        // the map's graphic, then drop it.
+        if (bool(mouseInputs["select"]) &&
+            !game.map.getMapBoundingBox().contains(currentPosition)) return;
+
 		// Ignore the selection if a non-available tile was selected.
 		if (game.map.isAvailableTile(selectedTile)) {
 			game.map.popSelectedUnit();

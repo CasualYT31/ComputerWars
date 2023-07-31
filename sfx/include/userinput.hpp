@@ -162,6 +162,12 @@ namespace sfx {
 		bool previous = false;
 
 		/**
+		 * Stores \c TRUE if a mouse button was triggering \c previous. \c FALSE if
+		 * a mouse button was not being used to trigger \c previous.
+		 */
+		bool previousTriggeredByMouse = false;
+
+		/**
 		 * Stores the current signal.
 		 * \c TRUE if a key/button is being pressed, \c FALSE if not.
 		 * @sa previous
@@ -169,10 +175,22 @@ namespace sfx {
 		bool current = false;
 
 		/**
+		 * Stores \c TRUE if a mouse button is triggering \c current. \c FALSE if
+		 * a mouse button is not being used to trigger \c current.
+		 */
+		bool currentTriggeredByMouse = false;
+
+		/**
 		 * Stores the signal that should be read by the client, based on the
 		 * \c type.
 		 */
 		bool signal = false;
+
+		/**
+		 * Stores \c TRUE if a mouse button is triggering \c signal. \c FALSE if
+		 * a mouse button is not being used to trigger \c signal.
+		 */
+		bool triggeredByMouse = false;
 
 		/**
 		 * Internal clock used for the timing of this individual signal.
@@ -434,6 +452,17 @@ namespace sfx {
 		 *         the \c name given didn't identify a game control.
 		 */
 		bool operator[](const std::string& name) const;
+
+		/**
+		 * Tests whether a game control is being triggered by one of its configured
+		 * mouse buttons.
+		 * @param  name The name of the game control to test.
+		 * @return \c TRUE if the control is being input, and at least one of its
+		 *         configured mouse buttons is being input. \c FALSE if the control
+		 *         isn't being input, or it is being input, but not by a mouse
+		 *         button.
+		 */
+		bool isMouseButtonTriggeringControl(const std::string& name) const;
 
 		/**
 		 * Returns a list of keys being pressed.

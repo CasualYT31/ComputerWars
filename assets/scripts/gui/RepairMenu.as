@@ -43,13 +43,15 @@ void RepairMenuClose() {
 /**
  * Allows the user to cancel the repair, or select a unit to repair.
  * @param controls         The control map given by the engine.
+ * @param mouseInputs      Stores which controls are being triggered by the mouse.
  * @param previousPosition The previous mouse position.
  * @param currentPosition  The current mouse position.
  */
 void RepairMenuHandleInput(const dictionary controls,
-    const MousePosition&in previousPosition,
+    const dictionary mouseInputs, const MousePosition&in previousPosition,
     const MousePosition&in currentPosition) {
-	HandleCommonGameInput(controls, previousPosition, currentPosition);
+	HandleCommonGameInput(controls, mouseInputs, previousPosition,
+        currentPosition);
 	if (bool(controls["back"])) {
 		game.map.popSelectedUnit();
 		// Force the selection to go back to the originally selected unit (as the
@@ -59,6 +61,11 @@ void RepairMenuHandleInput(const dictionary controls,
 		game.map.setSelectedTile(REPAIR_MENU_SELECTED_TILE);
 		setGUI("PreviewMoveUnitMenu");
 	} else if (bool(controls["select"])) {
+		// If the select control is being made by the mouse, and it is not inside
+        // the map's graphic, then drop it.
+        if (bool(mouseInputs["select"]) &&
+            !game.map.getMapBoundingBox().contains(currentPosition)) return;
+
 		if (game.map.isAvailableTile(game.map.getSelectedTile())) {
 			// Move black boat unit.
 			const auto blackBoatsArmy =

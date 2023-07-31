@@ -195,11 +195,12 @@ void UnloadUnitsMenuClose() {
 /**
  * Allows the user to cancel an unload operation.
  * @param controls         The control map given by the engine.
+ * @param mouseInputs      Stores which controls are being triggered by the mouse.
  * @param previousPosition The previous mouse position.
  * @param currentPosition  The current mouse position.
  */
 void UnloadUnitsMenuHandleInput(const dictionary controls,
-    const MousePosition&in previousPosition,
+    const dictionary mouseInputs, const MousePosition&in previousPosition,
     const MousePosition&in currentPosition) {
 	// Prevent user from accidentally proceeding with unload if they haven't
 	// selected any units to unload yet.
@@ -218,9 +219,15 @@ void UnloadUnitsMenuHandleInput(const dictionary controls,
 	} else {
 		// Move selection around when selecting a tile for an unload, or cancel
 		// unload operation.
-		HandleCommonGameInput(controls, previousPosition, currentPosition);
+		HandleCommonGameInput(controls, mouseInputs, previousPosition,
+            currentPosition);
 		if (bool(controls["select"]) || bool(controls["back"])) {
-			if (bool(controls["select"])) {
+			// If the select control is being made by the mouse, and it is not
+            // inside the map's graphic, then drop it.
+            if (bool(mouseInputs["select"]) &&
+                !game.map.getMapBoundingBox().contains(currentPosition)) return;
+
+            if (bool(controls["select"])) {
 				// Select the current tile for the currently unloading unit, but
 				// only if it is an available tile.
 				const auto selectedTile = game.map.getSelectedTile();

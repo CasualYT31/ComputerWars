@@ -222,8 +222,8 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"declaration and behaviour as this one, except it is called "
 		"MenuName<tt>Close()</tt>.");
 	document->DocumentExpectedFunction(
-		"void MainMenuHandleInput(const dictionary[, const MousePosition&in, "
-		"const MousePosition&in])",
+		"void MainMenuHandleInput(const dictionary[, const dictionary, "
+		"const MousePosition&in, const MousePosition&in])",
 		"Regardless of how the game is modded, there will <b>always</b> be a menu "
 		"called \"MainMenu\". Therefore, this function must be defined somewhere "
 		"within the GUI scripts.\n\n"
@@ -240,11 +240,16 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"<tt>TRUE</tt> means that the control should be reacted to (if you are "
 		"interested in it), and <tt>FALSE</tt> means that you should ignore the "
 		"control for that iteration of the game loop.\n\n"
-		"The <tt>MousePosition</tt> parameters are optional and do not have to be "
-		"defined. If they are, the first <tt>MousePosition</tt> holds the "
-		"position of the mouse during the previous iteration of the game loop, "
-		"and the second <tt>MousePosition</tt> holds the current position of the "
-		"mouse.\n\n"
+		"The second dictionary, and <tt>MousePosition</tt> parameters, are "
+		"optional and do not have to be defined. If they are, the first "
+		"<tt>MousePosition</tt> holds the position of the mouse during the "
+		"previous iteration of the game loop, and the second "
+		"<tt>MousePosition</tt> holds the current position of the mouse.\n\n"
+		"The second dictionary also maps to bools, and it has the same keys as "
+		"the first dictionary. If <tt>TRUE</tt> is stored at the key, it means "
+		"that control is being triggered by one of its configured mouse "
+		"buttons. If <tt>FALSE</tt> is stored, it means that either the control "
+		"isn't being triggered, or if it is, not by a mouse button.\n\n"
 		"There must only be one <tt>HandleInput()</tt> function per menu.");
 	document->DocumentExpectedFunction("void MenuName_WidgetName_SignalName()",
 		"All GUI scripts can react to widget events by writing functions for "
@@ -395,6 +400,12 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _menuExists), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the named "
 		"menu exists, <tt>FALSE</tt> otherwise.");
+
+	r = engine->RegisterGlobalFunction("string getWidgetUnderMouse()",
+		asMETHOD(sfx::gui, _getWidgetUnderMouse), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns the full name of the widget that "
+		"is under the current mouse position. An empty string if there isn't "
+		"one.");
 
 	r = engine->RegisterGlobalFunction("void addWidget(const string&in, const "
 		"string&in, const string&in = \"\")",
@@ -1210,6 +1221,7 @@ static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
 }
 
 void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
+	_ui = ui;
 	if (ui) {
 		_handleInputErrorLogged = false;
 		// Keep track of mouse movement. If the mouse has moved, then we disregard
@@ -1259,22 +1271,27 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 			const auto basicHandleInputDecl = "void " + funcName +
 				"(const dictionary)",
 				extendedHandleInputDecl = "void " + funcName +
-				"(const dictionary, const MousePosition&in, "
+				"(const dictionary, const dictionary, const MousePosition&in, "
 					"const MousePosition&in)";
 			if (_scripts->functionExists(funcName)) {
-				// Construct the dictionary.
-				CScriptDictionary* controls = _scripts->createDictionary();
+				// Construct the dictionaries.
+				CScriptDictionary *controls = _scripts->createDictionary(),
+					*triggeredByMouse = _scripts->createDictionary();
 				auto controlKeys = ui->getControls();
-				for (auto& key : controlKeys)
+				for (auto& key : controlKeys) {
 					controls->Set(key, (asINT64)ui->operator[](key));
+					triggeredByMouse->Set(key,
+						(asINT64)ui->isMouseButtonTriggeringControl(key));
+				}
 				// Invoke the function.
 				if (_scripts->functionDeclExists(basicHandleInputDecl)) {
 					_scripts->callFunction(funcName, controls);
 				} else if (_scripts->functionDeclExists(extendedHandleInputDecl)) {
-					_scripts->callFunction(funcName, controls,
+					_scripts->callFunction(funcName, controls, triggeredByMouse,
 						&_previousMousePosition, &_currentMousePosition);
 				}
 				controls->Release();
+				triggeredByMouse->Release();
 			}
 		}
 	} else if (!_handleInputErrorLogged) {
@@ -2455,6 +2472,17 @@ bool sfx::gui::_menuExists(const std::string& menu) {
 	for (const auto& widget : menus)
 		if (widget->getWidgetName() == menu) return true;
 	return false;
+}
+
+std::string sfx::gui::_getWidgetUnderMouse() {
+	if (_ui) {
+		if (const auto w = _gui.getWidgetBelowMouseCursor(_ui->mousePosition()))
+			return w->getWidgetName().toStdString();
+	} else {
+		_logger.error("Called getWidgetUnderMouse() when no user input object has "
+			"been given to this gui object!");
+	}
+	return "";
 }
 
 void sfx::gui::_addWidget(const std::string& newWidgetType,

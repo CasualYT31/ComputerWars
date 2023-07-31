@@ -853,6 +853,15 @@ namespace sfx {
 		 */
 		bool _menuExists(const std::string& menu);
 
+		/**
+		 * Gets the name of the widget under the current mouse position.
+		 * If a user input object hasn't been given, then an empty string will be
+		 * returned and an error will be logged.
+		 * @return The full name of the widget under the current mouse position,
+		 *         blank if there isn't a visible one.
+		 */
+		std::string _getWidgetUnderMouse();
+
 		// BACKGROUND //
 
 		/**
@@ -1869,6 +1878,11 @@ namespace sfx {
 		 * Pointer to the scripts object containing the signal handler functions.
 		 */
 		std::shared_ptr<engine::scripts> _scripts = nullptr;
+
+		/**
+		 * Cache of the user input object last given to \c handleInput().
+		 */
+		std::shared_ptr<sfx::user_input> _ui = nullptr;
 
 		/**
 		 * Pointer to the animated spritesheets that can be used with the GUI

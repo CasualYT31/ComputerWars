@@ -197,9 +197,7 @@ void sfx::user_input::update() {
 	sf::Joystick::update();
 	user_configuration scan;
 	_scanInput(scan);
-	for (auto& itr : _control) {
-		_updateSingle(scan, itr.first);
-	}
+	for (auto& itr : _control) _updateSingle(scan, itr.first);
 }
 
 bool sfx::user_input::operator[](const std::string& name) const {
@@ -209,6 +207,16 @@ bool sfx::user_input::operator[](const std::string& name) const {
 		return false;
 	}
 	return _control.at(name).signal.signal;
+}
+
+bool sfx::user_input::isMouseButtonTriggeringControl(
+	const std::string& name) const {
+	if (_control.find(name) == _control.end()) {
+		_logger.error("Attempted to test if non-existent control called \"{}\" "
+			"was being triggered by a mouse button.", name);
+		return false;
+	}
+	return _control.at(name).signal.triggeredByMouse;
 }
 
 sfx::KeyboardKeyList sfx::user_input::keyboardKeysBeingPressed() const {
@@ -408,6 +416,9 @@ bool sfx::user_input::_scanInput(sfx::user_configuration& ref) const {
 void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
 	const std::string& name) {
 	auto& signal = _control.at(name).signal;
+
+	signal.previousTriggeredByMouse = signal.currentTriggeredByMouse;
+	signal.currentTriggeredByMouse = false;
 	signal.previous = signal.current;
 	signal.current = false;
 
@@ -419,19 +430,24 @@ void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
 	} else if (_isBeingTriggered(_control.at(name).config.joystickButton,
 		scan.joystickButton)) {
 		signal.current = true;
-	} else if (_isBeingTriggered(_control.at(name).config.mouse, scan.mouse)) {
+	}
+	if (_isBeingTriggered(_control.at(name).config.mouse, scan.mouse)) {
 		signal.current = true;
+		signal.currentTriggeredByMouse = true;
 	}
 
 	switch (signal.type) {
 	case sfx::control_signal::FreeForm:
 		signal.signal = signal.current;
+		signal.triggeredByMouse = signal.signal && signal.currentTriggeredByMouse;
 		break;
 	case sfx::control_signal::ButtonForm:
 		signal.signal = signal.previous && !signal.current;
+		signal.triggeredByMouse = signal.signal && signal.previousTriggeredByMouse;
 		break;
 	case sfx::control_signal::DelayedForm:
 		signal.signal = false;
+		signal.triggeredByMouse = false;
 		if (!signal.delayLength.size()) {
 			signal.delayLength.push_back(sf::seconds(1.0f));
 			signal.delayLength.push_back(sf::seconds(0.1f));
@@ -446,12 +462,12 @@ void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
 			if (signal.clock.getElapsedTime() >=
 				signal.delayLength[signal.delayIndex]) {
 				signal.clock.restart();
-				signal.delayIndex++;
-				if (signal.delayIndex >= signal.delayLength.size())
+				if (++signal.delayIndex >= signal.delayLength.size())
 					signal.delayIndex = signal.delayLength.size() - 1;
 				signal.signal = true;
 			}
 		}
+		signal.triggeredByMouse = signal.signal && signal.currentTriggeredByMouse;
 		break;
 	}
 }

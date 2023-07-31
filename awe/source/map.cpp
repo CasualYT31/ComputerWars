@@ -530,6 +530,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"IntRect getCursorBoundingBox() const",
 			asMETHOD(awe::map, getCursorBoundingBox), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"IntRect getMapBoundingBox() const",
+			asMETHOD(awe::map, getMapBoundingBox), asCALL_THISCALL);
+
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
 		//////////////////////////////////////
@@ -2254,6 +2258,15 @@ sf::IntRect awe::map::getCursorBoundingBox() const {
 	const auto guiScaling = _gui ? static_cast<int>(_gui->getScalingFactor()) : 1;
 	return { ul / guiScaling,
 		(_target->mapCoordsToPixel(pos + size, _view) - ul) / guiScaling };
+}
+
+sf::IntRect awe::map::getMapBoundingBox() const {
+	// Map is always drawn at { 0, 0 } before the view is applied.
+	auto mapSize = sf::Vector2f(getMapSize());
+	mapSize.x *= static_cast<float>(awe::tile::MIN_WIDTH);
+	mapSize.y *= static_cast<float>(awe::tile::MIN_HEIGHT);
+	const auto ul = _target->mapCoordsToPixel({ 0.0f, 0.0f }, _view);
+	return { ul, _target->mapCoordsToPixel(mapSize, _view) - ul };
 }
 
 void awe::map::setTileSpritesheet(

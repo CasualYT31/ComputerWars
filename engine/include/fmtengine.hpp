@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "SFML/System/Vector2.hpp"
 #include "SFML/Graphics/Color.hpp"
+#include "SFML/Graphics/Rect.hpp"
 #include "angelscript.h"
 #include "logger.hpp"
 
@@ -47,6 +48,24 @@ template <typename T> struct fmt::formatter<sf::Vector2<T>> {
 	auto format(const sf::Vector2<T>& p, FormatContext& ctx) const ->
 		decltype(ctx.out()) {
 		return fmt::format_to(ctx.out(), "({}, {})", p.x, p.y);
+	}
+};
+
+/**
+ * Fmt formatter for the \c sf::Rect types.
+ */
+template <typename T> struct fmt::formatter<sf::Rect<T>> {
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		auto it = ctx.begin(), end = ctx.end();
+		if (it != end && *it != '}') throw format_error("invalid format");
+		return it;
+	}
+
+	template <typename FormatContext>
+	auto format(const sf::Rect<T>& p, FormatContext& ctx) const ->
+		decltype(ctx.out()) {
+		return fmt::format_to(ctx.out(), "({}, {}), [{}x{}]", p.left, p.top,
+			p.width, p.height);
 	}
 };
 

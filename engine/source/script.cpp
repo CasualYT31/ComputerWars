@@ -230,6 +230,7 @@ std::string AWEIntRectTypeToString(void* memory) {
 
 void engine::RegisterRectTypes(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) {
+    engine::RegisterVectorTypes(engine, document);
     if (!engine->GetTypeInfoByName("IntRect")) {
         auto r = engine->RegisterObjectType("IntRect", sizeof(sf::IntRect),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::IntRect>());
@@ -246,6 +247,10 @@ void engine::RegisterRectTypes(asIScriptEngine* engine,
             asFUNCTION(AWEIntRectTypeConstructor), asCALL_CDECL_OBJLAST);
         engine->RegisterObjectMethod("IntRect", "string toString() const",
             asFUNCTION(AWEIntRectTypeToString), asCALL_CDECL_OBJLAST);
+        engine->RegisterObjectMethod("IntRect",
+            "bool contains(const MousePosition&in) const",
+            asMETHODPR(sf::IntRect, contains, (const sf::Vector2i&) const, bool),
+            asCALL_THISCALL);
         document->DocumentObjectType(r, "Represents a rectangle.");
     }
 }

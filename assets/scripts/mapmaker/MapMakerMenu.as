@@ -88,15 +88,18 @@ float MapMakerScalingFactor = 2.0f;
 /**
  * Handles input specific to the \c MapMakerMenu.
  * @param controls         The control map given by the engine.
+ * @param mouseInputs      Stores which controls are being triggered by the mouse.
  * @param previousPosition The previous mouse position.
  * @param currentPosition  The current mouse position.
  */
 void MapMakerMenuHandleInput(const dictionary controls,
-    const MousePosition&in previousPosition,
+    const dictionary mouseInputs, const MousePosition&in previousPosition,
     const MousePosition&in currentPosition) {
     // If there currently isn't a map loaded, or it is 0x0 tiles, then don't try
     // selecting any tiles or zooming in or out.
     if (editmap is null) return;
+
+    bool mouseInMap = editmap.getMapBoundingBox().contains(currentPosition);
     // Handle mouse input. Ignore the mouse if the game doesn't have focus.
 	if (currentPosition != INVALID_MOUSE) {
 		// Ignore the mouse if it's outside of the window.
@@ -106,10 +109,11 @@ void MapMakerMenuHandleInput(const dictionary controls,
 			&& currentPosition.y <= int(windowSize.y)) {
 			// Only consider the mouse if it has moved.
 			if (currentPosition != previousPosition) {
-				editmap.setSelectedTileByPixel(currentPosition);
+                editmap.setSelectedTileByPixel(currentPosition);
 			}
 		}
 	}
+
     // Handle controls.
 	if (bool(controls["up"])) {
 		editmap.moveSelectedTileUp();
@@ -130,6 +134,39 @@ void MapMakerMenuHandleInput(const dictionary controls,
         if (MapMakerScalingFactor > 5.0f) MapMakerScalingFactor = 5.0f;
 		editmap.setMapScalingFactor(MapMakerScalingFactor);
 	}
+
+    // If there isn't a tile currently selected that is in bounds, return now.
+    const auto curTile = editmap.getSelectedTile();
+    if (editmap.isOutOfBounds(curTile)) return;
+    const auto curTileType = editmap.getTileType(curTile);
+    const auto curTileOwner = editmap.getTileOwner(curTile);
+
+    // If there isn't a currently selected tile type, do not paint with it.
+    const auto tileTypeSel = CurrentlySelectedTileType::Get();
+    if (tileTypeSel is null) return;
+    const auto tileOwnerSel = CurrentlySelectedTileType::GetOwner();
+    ArmyID tileOwnerSelID = NO_ARMY;
+    if (!tileOwnerSel.isEmpty()) tileOwnerSelID = country[tileOwnerSel].turnOrder;
+
+    // Only allow a mouse button to paint if the mouse is not hovering over a
+    // widget. It's not perfect but it gets the job done.
+    /* Case that doesn't work: if the mouse is hovering over a widget, the user
+    paints with the keyboard buttons, and is issuing the paint mouse button at the
+    same time. Actually, testing it now, that feels intuitive. And no one will be
+    doing it anyway. */
+    const bool mouseNotUnderWidget = getWidgetUnderMouse().isEmpty();
+    const bool paintTile = bool(controls["painttile"]) && (
+        !bool(mouseInputs["painttile"]) || (mouseNotUnderWidget && mouseInMap)
+    );
+
+    if (paintTile) {
+        if (curTileType.scriptName != tileTypeSel.scriptName) {
+            editmap.setTileType(curTile, tileTypeSel.scriptName);
+        }
+        if (curTileOwner != tileOwnerSelID) {
+            editmap.setTileOwner(curTile, tileOwnerSelID);
+        }
+    }
 }
 
 /**
