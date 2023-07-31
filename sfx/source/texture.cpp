@@ -199,7 +199,7 @@ std::size_t sfx::animated_sprite::getCurrentFrame() const noexcept {
 }
 
 void sfx::animated_sprite::setCurrentFrame(std::size_t newFrame) noexcept {
-	if (!_sheet) return;
+	if (!_sheet || _spriteID.empty()) return;
 	if (newFrame >= _sheet->getFrameCount(_spriteID)) newFrame = 0;
 	_currentFrame = newFrame;
 }
@@ -232,7 +232,7 @@ std::size_t sfx::animated_sprite::operator--(int) noexcept {
 }
 
 bool sfx::animated_sprite::animate(const sf::RenderTarget& target) {
-	if (!_sheet) return true;
+	if (!_sheet || _spriteID.empty()) return true;
 	try {
 		if (_sheet->getFrameDuration(_spriteID, _currentFrame).asMilliseconds()
 			> 0) {
@@ -258,8 +258,9 @@ bool sfx::animated_sprite::animate(const sf::RenderTarget& target) {
 	}
 }
 
-void sfx::animated_sprite::draw(sf::RenderTarget& target, sf::RenderStates states)
-	const {
-	if (_sheet) states.transform.translate(_sheet->getSpriteOffset(_spriteID));
+void sfx::animated_sprite::draw(sf::RenderTarget& target,
+	sf::RenderStates states) const {
+	if (!_sheet || _spriteID.empty()) return;
+	states.transform.translate(_sheet->getSpriteOffset(_spriteID));
 	target.draw(_sprite, states);
 }
