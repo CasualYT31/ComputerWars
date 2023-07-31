@@ -50,10 +50,12 @@ namespace awe {
 		 * @param type  The type of tile to create.
 		 *              \c nullptr if you don't wish to provide a type at this
 		 *              time.
+		 * @param owner The owner of the tile. \c NO_ARMY represents no owner.
 		 * @param sheet Pointer to the spritesheet to use with this tile.
 		 */
 		tile(const engine::logger::data& data,
 			const std::shared_ptr<const awe::tile_type>& type = nullptr,
+			const awe::ArmyID owner = awe::NO_ARMY,
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr);
 
 		/**

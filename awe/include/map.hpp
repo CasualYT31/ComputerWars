@@ -259,18 +259,22 @@ namespace awe {
 		 *          each relevant tile and remove their unit before the resize,
 		 *          rather than looping through \em all units and removing out of
 		 *          bounds ones, after the resize.
-		 * @param   dim  The width (x) and height (y) to make the map.
-		 * @param   tile The type of tile to assign to new tiles.
+		 * @param   dim   The width (x) and height (y) to make the map.
+		 * @param   tile  The type of tile to assign to new tiles.
+		 * @param   owner The owner to assign to new tiles.
 		 */
 		void setMapSize(const sf::Vector2u& dim,
-			const std::shared_ptr<const awe::tile_type>& tile = nullptr);
+			const std::shared_ptr<const awe::tile_type>& tile = nullptr,
+			const awe::ArmyID owner = awe::NO_ARMY);
 
 		/**
 		 * Overload of \c setMapSize() which accepts a tile type script name.
-		 * @param dim  The new size of the map.
-		 * @param tile The script name of the tile type to assign to new tiles.
+		 * @param dim   The new size of the map.
+		 * @param tile  The script name of the tile type to assign to new tiles.
+		 * @param owner The owner to assign to new tiles.
 		 */
-		void setMapSize(const sf::Vector2u& dim, const std::string& tile);
+		void setMapSize(const sf::Vector2u& dim, const std::string& tile,
+			const awe::ArmyID owner = awe::NO_ARMY);
 
 		/**
 		 * Retrieves the size of the map, in tiles.

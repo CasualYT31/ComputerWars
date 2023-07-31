@@ -149,10 +149,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"string getMapName() const",
 			asMETHOD(awe::map, getMapName), asCALL_THISCALL);
 
-		r = engine->RegisterObjectMethod("Map",
-			"void setMapSize(const Vector2&in, const string&in)",
+		r = engine->RegisterObjectMethod("Map", "void setMapSize("
+			"const Vector2&in, const string&in, const ArmyID = NO_ARMY)",
 			asMETHODPR(awe::map, setMapSize, (const sf::Vector2u&,
-				const std::string&), void), asCALL_THISCALL);
+				const std::string&, const awe::ArmyID), void), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"Vector2 getMapSize() const",
@@ -728,13 +728,13 @@ std::string awe::map::getMapName() const {
 }
 
 void awe::map::setMapSize(const sf::Vector2u& dim,
-	const std::shared_ptr<const awe::tile_type>& tile) {
+	const std::shared_ptr<const awe::tile_type>& tile, const awe::ArmyID owner) {
 	if (dim == getMapSize()) return;
 	// First, resize the tiles vectors accordingly.
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
 	_tiles.resize(dim.x);
 	for (std::size_t x = 0; x < dim.x; ++x) {
-		_tiles[x].resize(dim.y, { { _logger.getData().sink, "tile" }, tile,
+		_tiles[x].resize(dim.y, { { _logger.getData().sink, "tile" }, tile, owner,
 			_sheet_tile });
 	}
 	if (mapHasShrunk) {
@@ -777,8 +777,9 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 	_changed = true;
 }
 
-void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile) {
-	setMapSize(dim, _tileTypes->operator[](tile));
+void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile,
+	const awe::ArmyID owner) {
+	setMapSize(dim, _tileTypes->operator[](tile), owner);
 }
 
 void awe::map::setDay(const awe::Day day) noexcept {

@@ -291,8 +291,15 @@ void ApplyChangesAndClose(const bool resize) {
     editmap.setMapName(getWidgetText(map_properties_internal::MAP_NAME));
     editmap.setDay(parseDay(getWidgetText(map_properties_internal::DAY)));
     if (resize) {
-        editmap.setMapSize(GetSizeInEditBoxes(),
-            CurrentlySelectedTileType::Get().scriptName);
+        const auto owner = CurrentlySelectedTileType::GetOwner();
+        if (owner.isEmpty()) {
+            editmap.setMapSize(GetSizeInEditBoxes(),
+                CurrentlySelectedTileType::Get().scriptName);
+        } else {
+            editmap.setMapSize(GetSizeInEditBoxes(),
+                CurrentlySelectedTileType::Get().scriptName,
+                country[owner].turnOrder);
+        }
     }
     CloseMapProperties();
 }

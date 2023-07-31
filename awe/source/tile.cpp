@@ -24,9 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 awe::tile::tile(const engine::logger::data& data,
 	const std::shared_ptr<const awe::tile_type>& type,
+	const awe::ArmyID owner,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) :
 	_sprite(sheet, "", {data.sink, data.name + "_sprite"}) {
 	setTileType(type);
+	setTileOwner(owner);
 }
 
 void awe::tile::setTileType(const std::shared_ptr<const awe::tile_type>& type) {
