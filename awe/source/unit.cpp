@@ -49,6 +49,16 @@ awe::unit::unit(const engine::logger::data& data,
 	}
 }
 
+void awe::unit::replenish(const bool heal) {
+	if (heal) setHP(_type->getMaxHP());
+	if (!_type->hasInfiniteFuel()) setFuel(_type->getMaxFuel());
+	for (std::size_t i = 0, len = _type->getWeaponCount(); i < len; ++i) {
+		const auto weaponType = _type->getWeaponByIndex(i);
+		if (!weaponType->hasInfiniteAmmo())
+			setAmmo(weaponType->getScriptName(), weaponType->getMaxAmmo());
+	}
+}
+
 void awe::unit::setIconSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_hpIcon.setSpritesheet(sheet);

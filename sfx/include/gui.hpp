@@ -781,6 +781,23 @@ namespace sfx {
 			const std::size_t index) const;
 
 		/**
+		 * Applies a new sprite to a widget.
+		 * @param widget Pointer to the widget to apply the sprite to.
+		 * @param sheet  Name of the sheet containing the sprite to apply.
+		 * @param key    Key of the sprite to apply.
+		 */
+		inline void _applySprite(const tgui::Widget::Ptr& widget,
+			const std::string& sheet, const std::string& key) {
+			const auto fullname = widget->getWidgetName().toStdString();
+			// Prevent deleting sprite objects if there won't be any change.
+			if (_guiSpriteKeys[fullname].first != sheet ||
+				_guiSpriteKeys[fullname].second != key) {
+				_guiSpriteKeys[fullname] = std::make_pair(sheet, key);
+				_widgetSprites.erase(widget);
+			}
+		}
+
+		/**
 		 * Extracts a widget's short name from its full name.
 		 * @param  fullname The full name of the widget.
 		 * @return The short name of the widget.
@@ -1437,6 +1454,16 @@ namespace sfx {
 		std::string _getSelectedItemText(const std::string& name);
 
 		/**
+		 * Sets the number of items to display in a \c ComboBox.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no changes will be made.
+		 * @param name  The name of the \c ComboBox to edit.
+		 * @param items The number of items to display at one time when the
+		 *              \c ComboBox is opened. 0 means show all items.
+		 */
+		void _setItemsToDisplay(const std::string& name, const std::size_t items);
+
+		/**
 		 * Returns the number of widgets within a container.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and 0 will be returned.
@@ -1551,6 +1578,20 @@ namespace sfx {
 		 * @param space The new distance to apply.
 		 */
 		void _setSpaceBetweenWidgets(const std::string& name, const float space);
+
+		/**
+		 * Special method which applies a large collection of sprites to \c Picture
+		 * and/or \c BitmapButton widgets within a container.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no changes will be made. An
+		 * error will also be logged if \c sprites was \c nullptr or empty.
+		 * @param name        Name of the container containing the widgets to edit.
+		 * @param spritesheet The spritesheet to which all the \c sprites belong.
+		 * @param sprites     String array containing sprite keys, one element per
+		 *                    applicable widget.
+		 */
+		void _applySpritesToWidgetsInContainer(const std::string& name,
+			const std::string& spritesheet, const CScriptArray *const sprites);
 
 		// MENUS //
 

@@ -331,6 +331,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getUnitAmmo), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void replenishUnit(const UnitID, const bool = false)",
+			asMETHOD(awe::map, replenishUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void waitUnit(const UnitID, const bool)",
 			asMETHOD(awe::map, waitUnit), asCALL_THISCALL);
 
@@ -454,6 +458,10 @@ void awe::map::Register(asIScriptEngine* engine,
 		////////////////////////
 		// DRAWING OPERATIONS //
 		////////////////////////
+		r = engine->RegisterObjectMethod("Map",
+			"void alwaysShowHiddenUnits(const bool)",
+			asMETHOD(awe::map, alwaysShowHiddenUnits), asCALL_THISCALL);
+
 		r = engine->RegisterObjectMethod("Map",
 			"void setSelectedTile(const Vector2&in)",
 			asMETHOD(awe::map, setSelectedTile), asCALL_THISCALL);
@@ -975,6 +983,11 @@ void awe::map::setArmyCOs(const awe::ArmyID army,
 
 void awe::map::setArmyCOs(const awe::ArmyID army, const std::string& current,
 	const std::string& tag) {
+	if (current.empty() && tag.empty()) {
+		_logger.error("setArmyCOs operation cancelled: both the current and tag "
+			"CO script names given were blank!");
+		return;
+	}
 	if (tag.empty()) {
 		setArmyCOs(army, _commanders->operator[](current), nullptr);
 	} else {
@@ -1366,6 +1379,17 @@ awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id,
 	_logger.error("getUnitAmmo operation with weapon \"{}\" failed: unit with ID "
 		"{} doesn't exist!", weapon, id);
 	return 0;
+}
+
+void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
+	if (_isUnitPresent(id)) {
+		_units.at(id).replenish(heal);
+		_changed = true;
+	} else {
+		_logger.error("replenishUnit operation cancelled: attempted to replenish "
+			"{}unit with ID {}. This unit doesn't exist!", heal ? "and heal " : "",
+			id);
+	}
 }
 
 void awe::map::waitUnit(const awe::UnitID id, const bool waiting) {
@@ -2112,6 +2136,10 @@ void awe::map::setTarget(
 	_target = target;
 }
 
+void awe::map::alwaysShowHiddenUnits(const bool alwaysShow) noexcept {
+	_alwaysShowHiddenUnits = alwaysShow;
+}
+
 void awe::map::setSelectedTile(const sf::Vector2u& pos) {
 	if (!_isOutOfBounds(pos)) _sel = pos;
 }
@@ -2546,7 +2574,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	for (const auto unitsPair : _units) {
 		const awe::UnitID unitID = unitsPair.first;
 		if (_isUnitPresent(unitID) && ((isUnitOnMap(unitID) &&
-			isUnitVisible(unitID, currentArmy)) ||
+			(_alwaysShowHiddenUnits || isUnitVisible(unitID, currentArmy))) ||
 			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end())) {
 			sf::RenderStates unitStates = states;
 			unitStates.shader = &_unavailableTileShader;

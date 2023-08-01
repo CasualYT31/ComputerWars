@@ -741,6 +741,12 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _getSelectedItemText), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's selected item's text.");
 
+	r = engine->RegisterGlobalFunction(
+		"void setItemsToDisplay(const string&in, const uint64)",
+		asMETHOD(sfx::gui, _setItemsToDisplay), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the number of items to display in a "
+		"given widget when open, at one time. 0 means always show all items.");
+
 	r = engine->RegisterGlobalFunction("uint getWidgetCount(const string&in)",
 		asMETHOD(sfx::gui, _getWidgetCount), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets the number of widgets that are in "
@@ -816,6 +822,17 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets the space between widgets in a "
 		"vertical or horizontal layout.");
+
+	r = engine->RegisterGlobalFunction("void applySpritesToWidgetsInContainer("
+		"const string&in, const string&in, const array<string>@ const)",
+		asMETHOD(sfx::gui, _applySpritesToWidgetsInContainer),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Loops through a given container (whose "
+		"name is given as the first parameter), and applies sprites from a given "
+		"spritesheet (second parameter) to each <tt>BitmapButton</tt> and "
+		"<tt>Picture</tt> that is found. The first applicable widget will receive "
+		"the first sprite in the array, the second applicable widget the second "
+		"sprite, and so on.");
 
 	// MENUS //
 	
@@ -2393,9 +2410,7 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 	} else if (type == "childwindow") {
 		return tgui::ChildWindow::create();
 	} else if (type == "combobox") {
-		const auto combobox = tgui::ComboBox::create();
-		combobox->setItemsToDisplay(5);
-		return combobox;
+		return tgui::ComboBox::create();
 	} else if (type == "filedialog") {
 		auto filedialog = tgui::FileDialog::create();
 		filedialog->setResizable();
@@ -2890,14 +2905,9 @@ void sfx::gui::_setWidgetTextAlignment(const std::string& name,
 void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& sheet,
 	const std::string& key) {
 	START_WITH_WIDGET(name)
-	if (widgetType != "BitmapButton" && widgetType != "Picture")
-		UNSUPPORTED_WIDGET_TYPE()
-	// Prevent deleting sprite objects if there won't be any change.
-	if (_guiSpriteKeys[fullnameAsString].first != sheet ||
-		_guiSpriteKeys[fullnameAsString].second != key) {
-		_guiSpriteKeys[fullnameAsString] = std::make_pair(sheet, key);
-		_widgetSprites.erase(widget);
-	}
+		if (widgetType != "BitmapButton" && widgetType != "Picture")
+			UNSUPPORTED_WIDGET_TYPE()
+		_applySprite(widget, sheet, key);
 	END("Attempted to set the sprite \"{}\" from sheet \"{}\" to widget \"{}\", "
 		"which is of type \"{}\", within menu \"{}\".", key, sheet, name,
 		widgetType, fullname[0])
@@ -3116,6 +3126,16 @@ std::string sfx::gui::_getSelectedItemText(const std::string& name) {
 	return "";
 }
 
+void sfx::gui::_setItemsToDisplay(const std::string& name,
+	const std::size_t items) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ComboBox, castWidget->setItemsToDisplay(items);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the number of items to display to {} for widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", items, name, widgetType,
+		fullname[0])
+}
+
 std::size_t sfx::gui::_getWidgetCount(const std::string& name) {
 	START_WITH_WIDGET(name)
 	if (widget->isContainer())
@@ -3282,6 +3302,30 @@ void sfx::gui::_setSpaceBetweenWidgets(const std::string& name,
 	END("Attempted to set {} to a widget \"{}\"'s space between widgets property. "
 		"The widget is of type \"{}\", within menu \"{}\".", space, name,
 		widgetType, fullname[0])
+}
+
+void sfx::gui::_applySpritesToWidgetsInContainer(const std::string& name,
+	const std::string& spritesheet, const CScriptArray* const sprites) {
+	std::size_t spritesCount = 0;
+	START_WITH_WIDGET(name)
+		if (!sprites) ERROR("No sprites given!")
+		if (!widget->isContainer()) UNSUPPORTED_WIDGET_TYPE()
+		const auto& widgets =
+			std::dynamic_pointer_cast<Container>(widget)->getWidgets();
+		spritesCount = sprites->GetSize();
+		asUINT counter = 0;
+		for (const auto& widget : widgets) {
+			if (widget->getWidgetType() == "BitmapButton" ||
+				widget->getWidgetType() == "Picture") {
+				_applySprite(widget, spritesheet,
+					*static_cast<const std::string*>(sprites->At(counter++)));
+				if (counter >= spritesCount) break;
+			}
+		}
+	END("Attempted to apply {} sprites from spritesheet \"{}\", to widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", spritesCount, spritesheet,
+		name, widgetType, fullname[0])
+	if (sprites) sprites->Release();
 }
 
 // MENUS //

@@ -24,8 +24,6 @@ const auto NEW_MAP = FILE_DIALOG_GROUP + ".NewMap";
 const auto OPEN_MAP = FILE_DIALOG_GROUP + ".OpenMap";
 const auto SAVE_MAP = FILE_DIALOG_GROUP + ".SaveMap";
 
-string TILE_DIALOG;
-
 MenuItemID MAP_MAKER_FILE_NEW_MAP;
 MenuItemID MAP_MAKER_FILE_OPEN_MAP;
 MenuItemID MAP_MAKER_FILE_SAVE_MAP;
@@ -35,6 +33,7 @@ MenuItemID MAP_MAKER_FILE_QUIT;
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
 
 MenuItemID MAP_MAKER_VIEW_TILE_DIALOG;
+MenuItemID MAP_MAKER_VIEW_UNIT_DIALOG;
 
 /**
  * Sets up the map maker menu.
@@ -70,10 +69,13 @@ void MapMakerMenuSetUp() {
 
     addMenu(MENU, "view");
     MAP_MAKER_VIEW_TILE_DIALOG = addMenuItem(MENU, "tiledialog");
+    MAP_MAKER_VIEW_UNIT_DIALOG = addMenuItem(MENU, "unitdialog");
 
     // Dialogs.
     
-    TILE_DIALOG = TileDialogSetUp(CLIENT_AREA);
+    TileDialog.setUp(DefaultTileDialogData(CLIENT_AREA));
+
+    UnitDialog.setUp(DefaultUnitDialogData(CLIENT_AREA));
 
     // Map properties child window.
 
@@ -140,13 +142,21 @@ void MapMakerMenuHandleInput(const dictionary controls,
     if (editmap.isOutOfBounds(curTile)) return;
     const auto curTileType = editmap.getTileType(curTile);
     const auto curTileOwner = editmap.getTileOwner(curTile);
+    const auto curTileUnit = editmap.getUnitOnTile(curTile);
+    const auto curTileUnitType = curTileUnit == 0 ? null :
+        editmap.getUnitType(curTileUnit);
+    const auto curTileUnitArmy = curTileUnit == 0 ? NO_ARMY :
+        editmap.getArmyOfUnit(curTileUnit);
 
-    // If there isn't a currently selected tile type, do not paint with it.
     const auto tileTypeSel = cast<TileType>(CurrentlySelectedTileType.object);
-    if (tileTypeSel is null) return;
     const auto tileOwnerSel = CurrentlySelectedTileType.owner;
     ArmyID tileOwnerSelID = NO_ARMY;
     if (!tileOwnerSel.isEmpty()) tileOwnerSelID = country[tileOwnerSel].turnOrder;
+
+    const auto unitTypeSel = cast<UnitType>(CurrentlySelectedUnitType.object);
+    const auto unitArmySel = CurrentlySelectedUnitType.owner;
+    ArmyID unitArmySelID = NO_ARMY;
+    if (!unitArmySel.isEmpty()) unitArmySelID = country[unitArmySel].turnOrder;
 
     // Only allow a mouse button to paint if the mouse is not hovering over a
     // widget. It's not perfect but it gets the job done.
@@ -158,13 +168,42 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const bool paintTile = bool(controls["painttile"]) && (
         !bool(mouseInputs["painttile"]) || (mouseNotUnderWidget && mouseInMap)
     );
+    const bool paintUnit = bool(controls["paintunit"]) && (
+        !bool(mouseInputs["paintunit"]) || (mouseNotUnderWidget && mouseInMap)
+    );
 
-    if (paintTile) {
+    // If there isn't a currently selected tile type, do not paint with it.
+    if (paintTile && tileTypeSel !is null) {
         if (curTileType.scriptName != tileTypeSel.scriptName) {
             editmap.setTileType(curTile, tileTypeSel.scriptName);
         }
         if (curTileOwner != tileOwnerSelID) {
             editmap.setTileOwner(curTile, tileOwnerSelID);
+        }
+    }
+    // If there isn't a currently selected unit type, do not paint with it.
+    if (paintUnit && unitTypeSel !is null) {
+        if (curTileUnitType is null ||
+            curTileUnitType.scriptName != unitTypeSel.scriptName ||
+            curTileUnitArmy != unitArmySelID) {
+            // This logic really needs consolidating into an EditableMap class.
+            if (curTileUnitType !is null) {
+                editmap.deleteUnit(curTileUnit);
+                if (editmap.getUnitsOfArmy(curTileUnitArmy).isEmpty()) {
+                    // If that was the last unit belonging to an army, delete the
+                    // army, too.
+                    editmap.deleteArmy(curTileUnitArmy);
+                }
+            }
+            // If the army doesn't exist yet, create it.
+            if (!editmap.isArmyPresent(unitArmySelID)) {
+                editmap.createArmy(unitArmySel);
+            }
+            const auto newUnit =
+                editmap.createUnit(unitTypeSel.scriptName, unitArmySelID);
+		    editmap.setUnitPosition(newUnit, curTile);
+            editmap.replenishUnit(newUnit, true);
+            editmap.waitUnit(newUnit, false);
         }
     }
 }
@@ -267,7 +306,10 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
         OpenMapProperties();
 
     } else if (id == MAP_MAKER_VIEW_TILE_DIALOG) {
-        DockTileDialog(TILE_DIALOG);
+        TileDialog.dock();
+
+    } else if (id == MAP_MAKER_VIEW_UNIT_DIALOG) {
+        UnitDialog.dock();
 
     } else {
         error("Unrecognised menu item ID " + awe::formatMenuItemID(id) +
@@ -291,6 +333,7 @@ awe::EmptyCallback@ FileDialogOverwrite;
 void createNewMap() {
     quitEditMap(function() {
         @editmap = createMap(FileDialogFile);
+        editmap.alwaysShowHiddenUnits(true);
         editmap.setMapScalingFactor(MapMakerScalingFactor);
 		editmap.setULCursorSprite("ulcursor");
 		editmap.setURCursorSprite("urcursor");
@@ -331,6 +374,7 @@ void MapMakerMenu_OpenMap_FileSelected() {
     FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
     quitEditMap(function() {
         @editmap = loadMap(FileDialogFile);
+        editmap.alwaysShowHiddenUnits(true);
         editmap.setMapScalingFactor(MapMakerScalingFactor);
 		editmap.setULCursorSprite("ulcursor");
 		editmap.setURCursorSprite("urcursor");

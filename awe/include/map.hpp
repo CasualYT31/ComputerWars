@@ -741,6 +741,13 @@ namespace awe {
 			const std::string& weapon) const;
 
 		/**
+		 * Replenishes a unit's fuel and all of its ammo.
+		 * @param id   The ID of the unit to replenish.
+		 * @param heal If \c TRUE, the unit's HP is set to max, too.
+		 */
+		void replenishUnit(const awe::UnitID id, const bool heal = false);
+
+		/**
 		 * Sets a unit's waiting state.
 		 * @param id      The ID of the unit to amend.
 		 * @param waiting \c TRUE if the unit should wait, \c FALSE if not.
@@ -1241,6 +1248,14 @@ namespace awe {
 		 * @param target Pointer to the target this map will be drawn on.
 		 */
 		void setTarget(const std::shared_ptr<sf::RenderTarget>& target) noexcept;
+
+		/**
+		 * Used to always draw units that are hidden from the perspective of the
+		 * current army.
+		 * @param alwaysShow \c TRUE if all hidden units should be shown, \c FALSE
+		 *                   to not override a unit's hidden flag.
+		 */
+		void alwaysShowHiddenUnits(const bool alwaysShow) noexcept;
 
 		/**
 		 * Selects a tile on the map.
@@ -1753,6 +1768,12 @@ namespace awe {
 		 * their real location.
 		 */
 		std::unordered_map<awe::UnitID, sf::Vector2u> _unitLocationOverrides;
+
+		/**
+		 * If set to \c TRUE, all units are drawn, regardless of whether they are
+		 * hidden to the current army or not.
+		 */
+		bool _alwaysShowHiddenUnits = false;
 
 		/**
 		 * The currently selected tile.

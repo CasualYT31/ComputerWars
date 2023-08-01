@@ -179,6 +179,12 @@ namespace awe {
 		}
 
 		/**
+		 * Replenishs this unit's fuel and all of its ammo.
+		 * @param heal If \c TRUE, fully heal the unit, too.
+		 */
+		void replenish(const bool heal = false);
+
+		/**
 		 * Sets this unit's waiting/moved status.
 		 * By default, a unit is created with the waiting status turned on.
 		 * @param moved \c TRUE if the unit is in wait mode, \c FALSE if it can be

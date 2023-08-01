@@ -373,8 +373,7 @@ class PlayableMap {
 		}
 		map.setUnitPosition(unitID, position);
 		map.setArmyFunds(army, newFunds);
-		map.setUnitHP(unitID, type.maxHP);
-		replenishUnit(unitID);
+		map.replenishUnit(unitID, true);
 		return true;
 	}
 
@@ -444,25 +443,6 @@ class PlayableMap {
 					map.setArmyFunds(army, currentFunds - charge);
 					break;
 				}
-			}
-		}
-	}
-
-	/**
-	 * Replenishes a unit.
-	 * @param  unit The ID of the unit to replenish.
-	 * @throws If the given unit ID was invalid.
-	 */
-	void replenishUnit(const UnitID unit) {
-		const auto type = map.getUnitType(unit);
-		if (!type.hasInfiniteFuel) {
-			map.setUnitFuel(unit, type.maxFuel);
-		}
-		const auto weaponCount = type.weaponCount;
-		for (uint64 i = 0; i < weaponCount; ++i) {
-			const auto weaponType = type.weapon(i);
-			if (!weaponType.hasInfiniteAmmo) {
-				map.setUnitAmmo(unit, weaponType.scriptName, weaponType.maxAmmo);
 			}
 		}
 	}
@@ -906,7 +886,7 @@ class PlayableMap {
 		auto apcArmy = map.getArmyOfUnit(unit);
 		for (uint i = 0; i < units.length(); ++i) {
 			if (apcArmy == map.getArmyOfUnit(units[i]))
-				replenishUnit(units[i]);
+				map.replenishUnit(units[i]);
 		}
 	}
 
@@ -1487,7 +1467,7 @@ class PlayableMap {
 				const auto loadedUnits = map.getLoadedUnits(unit);
 				const auto loadedUnitsLength = loadedUnits.length();
 				for (uint i = 0; i < loadedUnitsLength; ++i) {
-					replenishUnit(loadedUnits[i]);
+					map.replenishUnit(loadedUnits[i]);
 				}
 			}
 		}
@@ -1537,17 +1517,17 @@ class PlayableMap {
 							unitType == "INFANTRY" || unitType == "MECH" ||
 							unitType == "PIPELINE") {
 							healUnit(unitOnTile, 2, currentArmy);
-							replenishUnit(unitOnTile);
+							map.replenishUnit(unitOnTile);
 						}
 					} else if (terrainType == "AIRPORT") {
 						if (unitType == "AIR") {
 							healUnit(unitOnTile, 2, currentArmy);
-							replenishUnit(unitOnTile);
+							map.replenishUnit(unitOnTile);
 						}
 					} else if (terrainType == "PORT") {
 						if (unitType == "SHIPS" || unitType == "TRANSPORT") {
 							healUnit(unitOnTile, 2, currentArmy);
-							replenishUnit(unitOnTile);
+							map.replenishUnit(unitOnTile);
 						}
 					}
 				}

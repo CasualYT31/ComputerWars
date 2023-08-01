@@ -302,6 +302,25 @@ namespace awe {
 		 */
 		std::string _script_formatBool(const bool b) const;
 
+		/**
+		 * Generates an array of all of a tile type's sprites, given an owner.
+		 * @param  owner Get a specific country's sprites by giving its script name
+		 *               here. Give an empty string to grab neutral tiles.
+		 * @return String array, one sprite per tile type.
+		 */
+		CScriptArray* _script_generateTileSpriteArray(
+			const std::string& owner) const;
+
+		/**
+		 * Generates an array of all of a unit type's sprites, given an owner.
+		 * @param  owner Get a specific country's sprites by giving its script name
+		 *               here.
+		 * @return String array, one sprite per unit type. An array full of blank
+		 *         strings if \c owner is empty.
+		 */
+		CScriptArray* _script_generateUnitSpriteArray(
+			const std::string& owner) const;
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================

@@ -75,7 +75,7 @@ void RepairMenuHandleInput(const dictionary controls,
 			// Perform repair and replenish.
 			const auto unitToRepair =
 				game.map.getUnitOnTile(game.map.getSelectedTile());
-			game.replenishUnit(unitToRepair);
+			game.map.replenishUnit(unitToRepair);
 			game.healUnit(unitToRepair, 1, blackBoatsArmy);
 			// Go back to the map menu.
 			setGUI("Map");
