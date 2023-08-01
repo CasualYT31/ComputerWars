@@ -90,7 +90,7 @@ string TileDialogSetUp(const string&in parent = "") {
     setWidgetOrigin(currentTileGroup, 0.5f, 0.0f);
     setWidgetPosition(currentTileGroup, "50%", "0%");
 
-    CurrentlySelectedTileType::AddWidget(currentTileGroup);
+    CurrentlySelectedTileType.addWidget(currentTileGroup + ".CurSelTileLayout");
 
     // ScrollablePanel //
 
@@ -189,8 +189,8 @@ void MapMakerMenu_TileDialogWrap_MouseEntered() {
 void TileDialogHandleBitmapButtonSignal(const string&in widgetName,
     const string&in signal) {
     if (signal == "Pressed") {
-        CurrentlySelectedTileType::Set(
-            widgetName.substr(widgetName.findLast(".") + 1));
+        CurrentlySelectedTileType.object =
+            tiletype[widgetName.substr(widgetName.findLast(".") + 1)];
     }
 }
 
@@ -202,11 +202,11 @@ void MapMakerMenu_OwnerCombobox_ItemSelected() {
     if (itemID <= 0) {
         clearWidgetSprite(tile_dialog_internal::ICON);
         RefreshTileDialogGrid();
-        CurrentlySelectedTileType::SetOwner("");
+        CurrentlySelectedTileType.owner = "";
     } else {
         const auto c = country.scriptNames[itemID - 1];
         setWidgetSprite(tile_dialog_internal::ICON, "icon", country[c].iconName);
         RefreshTileDialogGrid(c);
-        CurrentlySelectedTileType::SetOwner(c);
+        CurrentlySelectedTileType.owner = c;
     }
 }

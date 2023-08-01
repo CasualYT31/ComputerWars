@@ -407,6 +407,7 @@ engine::scripts::scripts(const engine::logger::data& data) : _logger(data) {
         RegisterScriptDateTime(_engine);
         RegisterScriptFileSystem(_engine);
         RegisterScriptMath(_engine);
+        RegisterScriptHandle(_engine);
         RegisterExceptionRoutines(_engine);
     } else {
         _logger.error("Fatal error: script engine failed to load. Ensure that "

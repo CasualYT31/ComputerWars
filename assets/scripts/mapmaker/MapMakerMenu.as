@@ -142,9 +142,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const auto curTileOwner = editmap.getTileOwner(curTile);
 
     // If there isn't a currently selected tile type, do not paint with it.
-    const auto tileTypeSel = CurrentlySelectedTileType::Get();
+    const auto tileTypeSel = cast<TileType>(CurrentlySelectedTileType.object);
     if (tileTypeSel is null) return;
-    const auto tileOwnerSel = CurrentlySelectedTileType::GetOwner();
+    const auto tileOwnerSel = CurrentlySelectedTileType.owner;
     ArmyID tileOwnerSelID = NO_ARMY;
     if (!tileOwnerSel.isEmpty()) tileOwnerSelID = country[tileOwnerSel].turnOrder;
 

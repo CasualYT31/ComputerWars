@@ -62,7 +62,7 @@ namespace map_properties_internal {
             setWidgetText(RESIZE_TEXT, "resizemapconfirmationsmaller");
         else
             setWidgetText(RESIZE_TEXT, "resizemapconfirmation");
-        if (CurrentlySelectedTileType::Get() is null) {
+        if (CurrentlySelectedTileType.object is null) {
             setWidgetText(RESIZE_TILE_TEXT, "resizemapconfirmationnotile");
             setWidgetEnabled(RESIZE_YES_BUTTON, false);
         } else {
@@ -223,7 +223,8 @@ void MapPropertiesSetUp(const string&in parent = "") {
     const auto resizeTileTileGroup = resizeTileLayout + ".TileGroup";
     addWidget("Group", resizeTileTileGroup);
 
-    CurrentlySelectedTileType::AddWidget(resizeTileTileGroup, function(){
+    CurrentlySelectedTileType.addWidget(resizeTileTileGroup + ".CurSelTileLayout",
+    function(){
         /// Make sure to enable the Yes button when a tile is selected.
         setWidgetEnabled(map_properties_internal::RESIZE_YES_BUTTON, true);
     });
@@ -291,14 +292,13 @@ void ApplyChangesAndClose(const bool resize) {
     editmap.setMapName(getWidgetText(map_properties_internal::MAP_NAME));
     editmap.setDay(parseDay(getWidgetText(map_properties_internal::DAY)));
     if (resize) {
-        const auto owner = CurrentlySelectedTileType::GetOwner();
-        if (owner.isEmpty()) {
+        if (CurrentlySelectedTileType.owner.isEmpty()) {
             editmap.setMapSize(GetSizeInEditBoxes(),
-                CurrentlySelectedTileType::Get().scriptName);
+                cast<TileType>(CurrentlySelectedTileType.object).scriptName);
         } else {
             editmap.setMapSize(GetSizeInEditBoxes(),
-                CurrentlySelectedTileType::Get().scriptName,
-                country[owner].turnOrder);
+                cast<TileType>(CurrentlySelectedTileType.object).scriptName,
+                country[CurrentlySelectedTileType.owner].turnOrder);
         }
     }
     CloseMapProperties();
