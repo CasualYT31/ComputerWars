@@ -91,13 +91,6 @@ namespace cwm {
 			file.read(unitTypeScriptName);
 			const auto unitID = map.createUnit(unitTypeScriptName, unitOwner);
 			if (unitID > 0) {
-				// Setting the unit's position needs to come before, at least,
-				// reading the capturing property. This is because, if a unit is
-				// capturing something, setting its position will try to set the
-				// unit's old tile's HP to its max. But the unit doesn't have a
-				// previous position, causing a read access violation. Maybe I
-				// should at least add a safe guard in the engine code for this
-				// case...
 				if (loadOnto > 0) {
 					map.loadUnit(unitID, loadOnto);
 				} else {

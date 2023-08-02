@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sfml/Config.hpp"
 #include "angelscript.h"
 #include <memory>
+#include <limits>
 #include "docgen.h"
 
 namespace awe {
@@ -83,7 +84,7 @@ namespace awe {
 	 * Reserved value representing no army.
 	 * Assigned the maximum value of the unsigned type of \c awe::ArmyID.
 	 */
-	const awe::ArmyID NO_ARMY = ~((awe::ArmyID)0);
+	const awe::ArmyID NO_ARMY = std::numeric_limits<awe::ArmyID>::max();
 
 	/**
 	 * Typedef representing a day number.

@@ -749,6 +749,7 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 		_tiles[x].resize(dim.y, { { _logger.getData().sink, "tile" }, tile, owner,
 			_sheet_tile });
 	}
+	_mapSizeCache = dim;
 	if (mapHasShrunk) {
 		// Then, go through all owned tiles in each army and delete those that are
 		// now out of bounds.
@@ -764,11 +765,9 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 			if (_isOutOfBounds(itr.second.getPosition()))
 				unitsToDelete.push_back(itr.first);
 		}
-		// I decided to separate out identification and deletion because I wasn't
-		// (and still am not) sure if deleting elements will invalidate iterators.
-		for (auto& itr : unitsToDelete) {
-			deleteUnit(itr);
-		}
+		// Check if they are still present, as some of those IDs may be for units
+		// that are loaded, which will be deleted as their holder unit is deleted.
+		for (auto& itr : unitsToDelete) if (_isUnitPresent(itr)) deleteUnit(itr);
 		// Finally, if the currently selected tile is now out of bounds, adjust it.
 		if (_isOutOfBounds(_sel)) {
 			if (dim.x == 0)
@@ -785,7 +784,6 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 				_sel.y = dim.y - 1;
 		}
 	}
-	_mapSizeCache = dim;
 	_changed = true;
 }
 
@@ -828,9 +826,9 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
 	_armies.insert(
 		std::pair<awe::ArmyID, awe::army>(country->getTurnOrder(), country)
 	);
-	static const awe::TeamID maxIDCounter = ~((awe::TeamID)0);
 	// This will miss out the maximum value for a team ID, but I don't care.
-	if (_teamIDCounter == maxIDCounter) _teamIDCounter = 0;
+	if (_teamIDCounter == std::numeric_limits<awe::TeamID>::max())
+		_teamIDCounter = 0;
 	_armies.at(country->getTurnOrder()).setTeam(_teamIDCounter++);
 	_changed = true;
 	return true;
@@ -2606,7 +2604,10 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 void awe::map::_updateCapturingUnit(const awe::UnitID id) {
 	if (id > 0 && isUnitCapturing(id)) {
 		const auto t = getUnitPosition(id);
-		setTileHP(t, (awe::HP)getTileType(t)->getType()->getMaxHP());
+		// If unit is out-of-bounds, don't do anything. This case can come about
+		// when a capturing unit is deleted as a map is shrinking.
+		if (!_isOutOfBounds(t))
+			setTileHP(t, (awe::HP)getTileType(t)->getType()->getMaxHP());
 		unitCapturing(id, false);
 	}
 }
@@ -2614,14 +2615,12 @@ void awe::map::_updateCapturingUnit(const awe::UnitID id) {
 awe::UnitID awe::map::_findUnitID() {
 	if (_units.size() == 0) return _lastUnitID;
 	// Minus 1 to account for the reserved value, 0.
-	if (_units.size() == (~((awe::UnitID)0)) - 1) 
+	if (_units.size() == std::numeric_limits<awe::UnitID>::max() - 1) 
 		throw std::bad_alloc();
 	awe::UnitID temp = _lastUnitID + 1;
 	while (_isUnitPresent(temp)) {
-		if (temp == ~((awe::UnitID)0))
-			temp = 1;
-		else
-			++temp;
+		if (temp == std::numeric_limits<awe::UnitID>::max()) temp = 1;
+		else ++temp;
 	}
 	_lastUnitID = temp;
 	return temp;

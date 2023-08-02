@@ -4,9 +4,9 @@
  */
 
 /**
- * The map object that the \c MapMakerMenu interacts with.
+ * Global point of access to the map being editted in the map maker.
  */
-Map@ editmap;
+EditableMap@ edit;
 
 const auto BASE_GROUP = "BaseGroup";
 const auto MENU = BASE_GROUP + ".Menu";
@@ -83,11 +83,6 @@ void MapMakerMenuSetUp() {
 }
 
 /**
- * The map scaling factor.
- */
-float MapMakerScalingFactor = 2.0f;
-
-/**
  * Handles input specific to the \c MapMakerMenu.
  * @param controls         The control map given by the engine.
  * @param mouseInputs      Stores which controls are being triggered by the mouse.
@@ -99,9 +94,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const MousePosition&in currentPosition) {
     // If there currently isn't a map loaded, or it is 0x0 tiles, then don't try
     // selecting any tiles or zooming in or out.
-    if (editmap is null) return;
+    if (edit is null) return;
 
-    bool mouseInMap = editmap.getMapBoundingBox().contains(currentPosition);
+    bool mouseInMap = edit.map.getMapBoundingBox().contains(currentPosition);
     // Handle mouse input. Ignore the mouse if the game doesn't have focus.
 	if (currentPosition != INVALID_MOUSE) {
 		// Ignore the mouse if it's outside of the window.
@@ -111,52 +106,37 @@ void MapMakerMenuHandleInput(const dictionary controls,
 			&& currentPosition.y <= int(windowSize.y)) {
 			// Only consider the mouse if it has moved.
 			if (currentPosition != previousPosition) {
-                editmap.setSelectedTileByPixel(currentPosition);
+                edit.setSelectedTileByPixel(currentPosition);
 			}
 		}
 	}
 
     // Handle controls.
 	if (bool(controls["up"])) {
-		editmap.moveSelectedTileUp();
+		edit.moveSelectedTileUp();
 	} else if (bool(controls["down"])) {
-		editmap.moveSelectedTileDown();
+		edit.moveSelectedTileDown();
 	} else if (bool(controls["left"])) {
-		editmap.moveSelectedTileLeft();
+		edit.moveSelectedTileLeft();
 	} else if (bool(controls["right"])) {
-		editmap.moveSelectedTileRight();
+		edit.moveSelectedTileRight();
 	}
 	if (bool(controls["zoomout"])) {
-        MapMakerScalingFactor -= 1.0f;
-        if (MapMakerScalingFactor < 1.0f) MapMakerScalingFactor = 1.0f;
-		editmap.setMapScalingFactor(MapMakerScalingFactor);
+        edit.zoomOut();
 	}
 	if (bool(controls["zoomin"])) {
-        MapMakerScalingFactor += 1.0f;
-        if (MapMakerScalingFactor > 5.0f) MapMakerScalingFactor = 5.0f;
-		editmap.setMapScalingFactor(MapMakerScalingFactor);
+        edit.zoomIn();
 	}
 
     // If there isn't a tile currently selected that is in bounds, return now.
-    const auto curTile = editmap.getSelectedTile();
-    if (editmap.isOutOfBounds(curTile)) return;
-    const auto curTileType = editmap.getTileType(curTile);
-    const auto curTileOwner = editmap.getTileOwner(curTile);
-    const auto curTileUnit = editmap.getUnitOnTile(curTile);
-    const auto curTileUnitType = curTileUnit == 0 ? null :
-        editmap.getUnitType(curTileUnit);
-    const auto curTileUnitArmy = curTileUnit == 0 ? NO_ARMY :
-        editmap.getArmyOfUnit(curTileUnit);
+    const auto curTile = edit.map.getSelectedTile();
+    if (edit.map.isOutOfBounds(curTile)) return;
 
+    // Get the currently selected tile and unit types.
     const auto tileTypeSel = cast<TileType>(CurrentlySelectedTileType.object);
     const auto tileOwnerSel = CurrentlySelectedTileType.owner;
-    ArmyID tileOwnerSelID = NO_ARMY;
-    if (!tileOwnerSel.isEmpty()) tileOwnerSelID = country[tileOwnerSel].turnOrder;
-
     const auto unitTypeSel = cast<UnitType>(CurrentlySelectedUnitType.object);
     const auto unitArmySel = CurrentlySelectedUnitType.owner;
-    ArmyID unitArmySelID = NO_ARMY;
-    if (!unitArmySel.isEmpty()) unitArmySelID = country[unitArmySel].turnOrder;
 
     // Only allow a mouse button to paint if the mouse is not hovering over a
     // widget. It's not perfect but it gets the job done.
@@ -172,40 +152,13 @@ void MapMakerMenuHandleInput(const dictionary controls,
         !bool(mouseInputs["paintunit"]) || (mouseNotUnderWidget && mouseInMap)
     );
 
-    // If there isn't a currently selected tile type, do not paint with it.
-    if (paintTile && tileTypeSel !is null) {
-        if (curTileType.scriptName != tileTypeSel.scriptName) {
-            editmap.setTileType(curTile, tileTypeSel.scriptName);
-        }
-        if (curTileOwner != tileOwnerSelID) {
-            editmap.setTileOwner(curTile, tileOwnerSelID);
-        }
-    }
-    // If there isn't a currently selected unit type, do not paint with it.
-    if (paintUnit && unitTypeSel !is null) {
-        if (curTileUnitType is null ||
-            curTileUnitType.scriptName != unitTypeSel.scriptName ||
-            curTileUnitArmy != unitArmySelID) {
-            // This logic really needs consolidating into an EditableMap class.
-            if (curTileUnitType !is null) {
-                editmap.deleteUnit(curTileUnit);
-                if (editmap.getUnitsOfArmy(curTileUnitArmy).isEmpty()) {
-                    // If that was the last unit belonging to an army, delete the
-                    // army, too.
-                    editmap.deleteArmy(curTileUnitArmy);
-                }
-            }
-            // If the army doesn't exist yet, create it.
-            if (!editmap.isArmyPresent(unitArmySelID)) {
-                editmap.createArmy(unitArmySel);
-            }
-            const auto newUnit =
-                editmap.createUnit(unitTypeSel.scriptName, unitArmySelID);
-		    editmap.setUnitPosition(newUnit, curTile);
-            editmap.replenishUnit(newUnit, true);
-            editmap.waitUnit(newUnit, false);
-        }
-    }
+    // If there isn't a currently selected tile type, do not try to paint with it.
+    if (paintTile && tileTypeSel !is null)
+        edit.setTile(curTile, tileTypeSel, tileOwnerSel);
+
+    // If there isn't a currently selected unit type, do not try to paint with it.
+    if (paintUnit && unitTypeSel !is null)
+        edit.createUnit(curTile, unitTypeSel, unitArmySel);
 }
 
 /**
@@ -229,20 +182,19 @@ awe::EmptyCallback@ QuitCallback;
 awe::EmptyCallback@ QuitMapAuthorised = function() {
     quitMap();
     CloseMapProperties();
-    @editmap = null;
+    @edit = null;
     if (!(QuitCallback is null)) QuitCallback();
 };
 
 /**
- * Quits \c editmap.
+ * Quits \c edit.
  * @param callback If the quit operation wasn't cancelled, or the quit did not
  *                 need to be carried out, perform this code.
  */
 void quitEditMap(awe::EmptyCallback@ callback = null) {
-    if (!(editmap is null)) {
+    if (edit !is null) {
         @QuitCallback = callback;
-        if (editmap.hasChanged()) {
-            // Save? Or not? Or cancel?
+        if (edit.map.hasChanged()) {
             awe::OpenMessageBox(SAVE_BEFORE_QUIT, "alert", "savebeforequit", null,
                 BASE_GROUP, MESSAGE_BOX_GROUP);
             addMessageBoxButton(SAVE_BEFORE_QUIT, "yes");
@@ -261,7 +213,7 @@ void quitEditMap(awe::EmptyCallback@ callback = null) {
 void MapMakerMenu_SaveBeforeQuit_ButtonPressed(const uint64 btn) {
     awe::CloseMessageBox(SAVE_BEFORE_QUIT, MESSAGE_BOX_GROUP, BASE_GROUP);
     if (btn == 0) {
-        editmap.save();
+        edit.map.save();
         QuitMapAuthorised();
     } else if (btn == 1) {
         QuitMapAuthorised();
@@ -288,10 +240,10 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
         setFileDialogDefaultFileFilter(OPEN_MAP, 1);
 
     } else if (id == MAP_MAKER_FILE_SAVE_MAP) {
-        if (!(editmap is null)) editmap.save();
+        if (edit !is null) edit.map.save();
 
     } else if (id == MAP_MAKER_FILE_SAVE_MAP_AS) {
-        if (!(editmap is null)) {
+        if (edit !is null) {
             setWidgetEnabled(BASE_GROUP, false);
             moveWidgetToFront(FILE_DIALOG_GROUP);
             awe::OpenFileDialog(SAVE_MAP, "savemapas", "save", "./map", false);
@@ -332,13 +284,7 @@ awe::EmptyCallback@ FileDialogOverwrite;
  */
 void createNewMap() {
     quitEditMap(function() {
-        @editmap = createMap(FileDialogFile);
-        editmap.alwaysShowHiddenUnits(true);
-        editmap.setMapScalingFactor(MapMakerScalingFactor);
-		editmap.setULCursorSprite("ulcursor");
-		editmap.setURCursorSprite("urcursor");
-		editmap.setLLCursorSprite("llcursor");
-		editmap.setLRCursorSprite("lrcursor");
+        @edit = EditableMap(createMap(FileDialogFile));
         OpenMapProperties();
     });
 }
@@ -373,13 +319,7 @@ void MapMakerMenu_NewMap_Closing(bool&out abort) {
 void MapMakerMenu_OpenMap_FileSelected() {
     FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
     quitEditMap(function() {
-        @editmap = loadMap(FileDialogFile);
-        editmap.alwaysShowHiddenUnits(true);
-        editmap.setMapScalingFactor(MapMakerScalingFactor);
-		editmap.setULCursorSprite("ulcursor");
-		editmap.setURCursorSprite("urcursor");
-		editmap.setLLCursorSprite("llcursor");
-		editmap.setLRCursorSprite("lrcursor");
+        @edit = EditableMap(loadMap(FileDialogFile));
     });
 }
 
@@ -403,8 +343,8 @@ void MapMakerMenu_SaveMap_FileSelected() {
             {any(FileDialogFile)}, BASE_GROUP, MESSAGE_BOX_GROUP);
         addMessageBoxButton(FILE_ALREADY_EXISTS, "cancel");
         addMessageBoxButton(FILE_ALREADY_EXISTS, "ok");
-        @FileDialogOverwrite = function(){ editmap.save(FileDialogFile); };
-    } else editmap.save(FileDialogFile);
+        @FileDialogOverwrite = function(){ edit.map.save(FileDialogFile); };
+    } else edit.map.save(FileDialogFile);
 }
 
 /**

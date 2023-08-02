@@ -251,14 +251,14 @@ void OpenMapProperties() {
             "35px");
         return;
     }
-    if (editmap is null) {
+    if (edit is null) {
         awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert", "nomapisopen", null,
             BASE_GROUP, MESSAGE_BOX_GROUP);
         addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
     } else {
-        setWidgetText(map_properties_internal::MAP_NAME, editmap.getMapName());
-        setWidgetText(map_properties_internal::DAY, formatDay(editmap.getDay()));
-        const auto size = editmap.getMapSize();
+        setWidgetText(map_properties_internal::MAP_NAME, edit.map.getMapName());
+        setWidgetText(map_properties_internal::DAY, formatDay(edit.map.getDay()));
+        const auto size = edit.map.getMapSize();
         setWidgetText(map_properties_internal::WIDTH, formatUInt(size.x));
         setWidgetText(map_properties_internal::HEIGHT, formatUInt(size.y));
         openChildWindow(map_properties_internal::WINDOW, "50px", "35px");
@@ -289,14 +289,14 @@ Vector2 GetSizeInEditBoxes() {
  * @param resize \c TRUE if the map should be resized, \c FALSE if not.
  */
 void ApplyChangesAndClose(const bool resize) {
-    editmap.setMapName(getWidgetText(map_properties_internal::MAP_NAME));
-    editmap.setDay(parseDay(getWidgetText(map_properties_internal::DAY)));
+    edit.map.setMapName(getWidgetText(map_properties_internal::MAP_NAME));
+    edit.map.setDay(parseDay(getWidgetText(map_properties_internal::DAY)));
     if (resize) {
         if (CurrentlySelectedTileType.owner.isEmpty()) {
-            editmap.setMapSize(GetSizeInEditBoxes(),
+            edit.map.setMapSize(GetSizeInEditBoxes(),
                 cast<TileType>(CurrentlySelectedTileType.object).scriptName);
         } else {
-            editmap.setMapSize(GetSizeInEditBoxes(),
+            edit.map.setMapSize(GetSizeInEditBoxes(),
                 cast<TileType>(CurrentlySelectedTileType.object).scriptName,
                 country[CurrentlySelectedTileType.owner].turnOrder);
         }
@@ -309,11 +309,12 @@ void ApplyChangesAndClose(const bool resize) {
  * If the map size is changing, open up the confirmation window instead.
  */
 void MapMakerMenu_MapPropertiesOK_Pressed() {
-    if (editmap is null) {
-        error("MapPropertiesOK button was pressed when editmap was null!");
+    if (edit is null) {
+        error("MapPropertiesOK button was pressed when @edit was null!");
         return;
     }
-    const auto currentSize = editmap.getMapSize(), newSize = GetSizeInEditBoxes();
+    const auto currentSize = edit.map.getMapSize(),
+        newSize = GetSizeInEditBoxes();
     if (newSize.x == 0 && newSize.y == 0) {
         awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert", "cannotresizeto0", null,
             BASE_GROUP, MESSAGE_BOX_GROUP);
