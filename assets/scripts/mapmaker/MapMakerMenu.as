@@ -32,8 +32,7 @@ MenuItemID MAP_MAKER_FILE_QUIT;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
 
-MenuItemID MAP_MAKER_VIEW_TILE_DIALOG;
-MenuItemID MAP_MAKER_VIEW_UNIT_DIALOG;
+MenuItemID MAP_MAKER_VIEW_OBJECT_DIALOG;
 
 /**
  * Sets up the map maker menu.
@@ -68,14 +67,12 @@ void MapMakerMenuSetUp() {
     MAP_MAKER_MAP_SET_PROPS = addMenuItem(MENU, "setmapprops");
 
     addMenu(MENU, "view");
-    MAP_MAKER_VIEW_TILE_DIALOG = addMenuItem(MENU, "tiledialog");
-    MAP_MAKER_VIEW_UNIT_DIALOG = addMenuItem(MENU, "unitdialog");
+    MAP_MAKER_VIEW_OBJECT_DIALOG = addMenuItem(MENU, "objectdialog");
 
     // Dialogs.
-    
-    TileDialog.setUp(DefaultTileDialogData(CLIENT_AREA));
 
-    UnitDialog.setUp(DefaultUnitDialogData(CLIENT_AREA));
+    PaletteWindow.setUp(DefaultObjectDialogData(CLIENT_AREA));
+    PaletteWindow.dock();
 
     // Map properties child window.
 
@@ -137,6 +134,7 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const auto tileOwnerSel = CurrentlySelectedTileType.owner;
     const auto unitTypeSel = cast<UnitType>(CurrentlySelectedUnitType.object);
     const auto unitArmySel = CurrentlySelectedUnitType.owner;
+    const auto currentPaletteWindowTab = PaletteWindow.getSelectedTab();
 
     // Only allow a mouse button to paint if the mouse is not hovering over a
     // widget. It's not perfect but it gets the job done.
@@ -145,19 +143,16 @@ void MapMakerMenuHandleInput(const dictionary controls,
     same time. Actually, testing it now, that feels intuitive. And no one will be
     doing it anyway. */
     const bool mouseNotUnderWidget = getWidgetUnderMouse().isEmpty();
-    const bool paintTile = bool(controls["painttile"]) && (
-        !bool(mouseInputs["painttile"]) || (mouseNotUnderWidget && mouseInMap)
-    );
-    const bool paintUnit = bool(controls["paintunit"]) && (
-        !bool(mouseInputs["paintunit"]) || (mouseNotUnderWidget && mouseInMap)
+    const bool paint = bool(controls["paint"]) && (
+        !bool(mouseInputs["paint"]) || (mouseNotUnderWidget && mouseInMap)
     );
 
     // If there isn't a currently selected tile type, do not try to paint with it.
-    if (paintTile && tileTypeSel !is null)
+    if (paint && currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null)
         edit.setTile(curTile, tileTypeSel, tileOwnerSel);
 
     // If there isn't a currently selected unit type, do not try to paint with it.
-    if (paintUnit && unitTypeSel !is null)
+    if (paint && currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null)
         edit.createUnit(curTile, unitTypeSel, unitArmySel);
 }
 
@@ -257,11 +252,8 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
         OpenMapProperties();
 
-    } else if (id == MAP_MAKER_VIEW_TILE_DIALOG) {
-        TileDialog.dock();
-
-    } else if (id == MAP_MAKER_VIEW_UNIT_DIALOG) {
-        UnitDialog.dock();
+    } else if (id == MAP_MAKER_VIEW_OBJECT_DIALOG) {
+        PaletteWindow.dock();
 
     } else {
         error("Unrecognised menu item ID " + awe::formatMenuItemID(id) +

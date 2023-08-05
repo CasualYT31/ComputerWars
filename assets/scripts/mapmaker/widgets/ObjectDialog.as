@@ -1,43 +1,47 @@
 /**
  * @file ObjectDialog.as
- * Defines code that manages \c ObjectDialog windows.
+ * Defines code that manages a \c ChildWindow that collects a group of
+ * \c ObjectPanels.
  */
 
 /**
- * Holds data \c ObjectDialog uses to set itself up with.
+ * Holds data on each \c ObjectPanel.
  */
-class ObjectDialogSetUpData {
+class ObjectPanelSetUpData {
+    /// Signature of the callback invoked when mapping an object button's short
+    /// name to its object.
+    funcdef ref@ MapNameToObject(const string&in);
+
     /**
-     * Signature of the function that is invoked when an sprite array has to be
+     * Signature of the function that is invoked when a sprite array has to be
      * generated for a list of object buttons.
      * @param  const string&in Owner script name.
      * @return Array of sprite keys.
      */
     funcdef array<string>@ GetSpritesFunc(const string&in);
 
-    /// Name of the \c ChildWindow that represents the \c ObjectDialog.
-    string window;
+    /// The short name to give to the base \c Group widget.
+    string group;
 
-    /// The text/title to assign to the \c ChildWindow.
-    string windowText;
+    /// The text to assign to this \c ObjectPanel's tab.
+    string tabText;
+    
+    /// \c CurrentlySelectedObject class which this \c ObjectPanel interacts with.
+    CurrentlySelectedObject@ currentlySelectedObject;
 
     /// The size of each object button.
     Vector2f buttonSize;
-
-    /// Name of the signal handler to assign to each object button.
-    string buttonSignalHandler;
-
-    /// Reference to the \c CurrentlySelectedObject widget to add.
-    CurrentlySelectedObject@ csoWidget;
-
-    /// \c TRUE if the \c ObjectDialog should dock to the right side of the
-    /// screen, \c FALSE if it should dock to the left.
-    bool dockOnRight;
 
     /// \c TRUE if a Neutral option should be prepended to the owner \c ComboBox.
     /// \c FALSE if the first army in the turn order should be selected in
     /// \c setUp().
     bool neutralAvailable;
+
+    /// The number of items to show in the owner \c ComboBox at one time.
+    uint64 numberOfOwnerItems;
+
+    /// Maps a name to an object.
+    MapNameToObject@ mapNameToObject;
 
     /// Spritesheet to use with the object buttons.
     string spritesheet;
@@ -50,94 +54,169 @@ class ObjectDialogSetUpData {
     /// A list of script names to generate object buttons for.
     const array<string>@ scriptNames;
 
-    /// Defines the number of columns that should show in the Dialog when
-    /// \c dock() is called.
-    float defaultColumnCount;
+    /// Name of the owner icon \c Picture widget.
+    /// Set by the \c ObjectDialog class, so you can leave this blank.
+    string ownerIcon;
 
-    /// The number of items to show in the owner \c ComboBox at one time.
-    uint64 numberOfOwnerItems;
+    /// Name of the \c HorizontalWrap widget.
+    /// Set by the \c ObjectDialog class, so you can leave this blank.
+    string wrap;
+
+    /// Name of the \c ScrollablePanel widget.
+    /// Set by the \c ObjectDialog class, so you can leave this blank.
+    string scrollablePanel;
+
+    /// Name of the \c ComboBox widget.
+    /// Set by the \c ObjectDialog class, so you can leave this blank.
+    string comboBox;
+
+    /// Name of the base \c Group widget.
+    /// Set by the \c ObjectDialog class, so you can leave this blank.
+    string groupFullname;
 }
 
 /**
- * Represents a dialog box that contains a \c CurrentlySelectedObject widget, a
- * \c HorizontalWrap of \c BitmapButtons, each representing an object from a given
- * pool, and an owner combobox that allows the user to change the owner associated
- * with the currently selected object.
+ * Holds data \c ObjectDialog uses to set itself up with.
+ */
+class ObjectDialogSetUpData {
+    /// Name of the \c ChildWindow that represents the \c ObjectDialog.
+    string window;
+
+    /// The text/title to assign to the \c ChildWindow.
+    string windowText;
+
+    /// The \c ObjectPanel widgets to create in this \c ChildWindow.
+    array<ObjectPanelSetUpData@> objectPanels;
+}
+
+/**
+ * Allows the user to switch between different \c ObjectPanel widgets.
  */
 class ObjectDialog {
     /**
+     * Sets up the \c ChildWindow, \c Tabs, and \c ObjectPanel widgets.
+     * @param data Data to initialise the \c ObjectDialog with.
+     */
+    void setUp(ObjectDialogSetUpData@ const data) {
+        @initData = data;
+
+        // Child window.
+        addWidget("ChildWindow", data.window);
+        setWidgetText(data.window, data.windowText);
+
+        // Tabs.
+        tabsName = data.window + ".Tabs";
+        addWidget("Tabs", tabsName);
+        connectSignalHandler(tabsName, SignalHandler(this.tabsSignalHandler));
+
+        // Set up each ObjectPanel, and select the first tab if there is one.
+        const auto len = data.objectPanels.length();
+        for (uint i = 0; i < len; ++i)
+            addPanel(data.window, data.objectPanels[i], i == 0);
+    }
+
+    /**
+     * Opens and docks an \c ObjectDialog to one side of the screen.
+     * Does nothing and logs an error if there is no tab selected.
+     * @param onRight If \c TRUE, dock to the right of the screen. If \c FALSE,
+     *                dock to the left.
+     */
+    void dock(const bool onRight = true, const float defaultColumnCount = 5.0f) {
+        const auto data = getCurrentPanelData();
+        if (data !is null) {
+            const auto defaultWidth = formatFloat(
+                data.buttonSize.x * defaultColumnCount +
+                getScrollbarWidth(data.scrollablePanel) + 2.0f
+            );
+            if (onRight) {
+                openChildWindow(initData.window, "100%-" + defaultWidth, "0");
+                setWidgetSize(initData.window, defaultWidth, "100%");
+            } else {
+                openChildWindow(initData.window, "0", "0");
+                setWidgetSize(initData.window, defaultWidth, "100%");
+            }
+        }
+    }
+
+    /**
+     * Gets the index of the currently selected tab.
+     * @return The index. <tt>< 0</tt> if no tab is selected.
+     */
+    int getSelectedTab() const {
+        return ::getSelectedTab(tabsName);
+    }
+    
+    /**
      * The height of the owner group and \c CurrentlySelectedObject group.
      */
-    string GROUP_HEIGHT = "35px";
+    private string GROUP_HEIGHT = "35px";
     
     /**
      * The padding of the owner group and \c CurrentlySelectedObject group.
      */
-    string GROUP_PADDING = "5px";
+    private string GROUP_PADDING = "5px";
 
     /**
-     * Cache of the \c ObjectDialogSetUpData given at \c setUp().
+     * Handle to the data given to \c setUp().
      */
-    private const ObjectDialogSetUpData@ initData;
+    private ObjectDialogSetUpData@ initData;
 
     /**
-     * The name of the \c ScrollablePanel containing the \c HorizontalWrap.
+     * Name of the \c Tabs widget.
      */
-    private string ScrollablePanel;
+    private string tabsName;
 
     /**
-     * The name of the \c HorizontalWrap containing the object buttons.
+     * Adds an \c ObjectPanel to the \c ObjectDialog.
+     * @param childWindow The name of the \c ChildWindow to add the
+     *                    \c ObjectDialog to.
+     * @param data        The data to set the \c ObjectPanel up with.
+     * @param selectTab   If \c TRUE, select the newly created tab.
      */
-    private string HorizontalWrap;
+    private void addPanel(const string&in childWindow,
+        ObjectPanelSetUpData@ const data, const bool selectTab) {
+        // Add a tab for the ObjectPanel.
+        addTab(tabsName, data.tabText);
+        const auto tabsHeight = formatFloat(getWidgetFullSize(tabsName).y);
 
-    /**
-     * The name of the \c Picture containing the owner icon.
-     */
-    private string OwnerIconPicture;
+        // Add base Group widget.
+        data.groupFullname = childWindow + "." + data.group;
+        addWidget("Group", data.groupFullname);
+        setWidgetSize(data.groupFullname, "100%", "100%-" + tabsHeight);
+        setWidgetOrigin(data.groupFullname, 0.5f, 1.0f);
+        setWidgetPosition(data.groupFullname, "50%", "100%");
+        setWidgetVisibility(data.groupFullname, false);
 
-    /**
-     * The name of the \c ComboBox containing the owners.
-     */
-    private string OwnerComboBox;
-    
-    /**
-     * Sets up the \c ObjectDialog window.
-     * DOCUMENT SIGNALS TO IMPLEMENT AND THEIR WIDGET NAMES!
-     * @param data Data to initialise the \c ObjectDialog with.
-     */
-    void setUp(const ObjectDialogSetUpData@ data) {
-        @initData = data;
-
-        // Child window.
-        const auto shortName = data.window.substr(data.window.findLast(".") + 1);
-        addWidget("ChildWindow", data.window);
-        setWidgetText(data.window, data.windowText);
-
-        // CurrentlySelectObject group.
-        const auto csoGroup = data.window + ".CurrentObjectGroup";
+        // CurrentlySelectedObject group.
+        const auto csoGroup = data.groupFullname + ".CurrentObjectGroup";
         addWidget("Group", csoGroup);
         setWidgetSize(csoGroup, "100%", GROUP_HEIGHT);
         setWidgetOrigin(csoGroup, 0.5f, 0.0f);
         setWidgetPosition(csoGroup, "50%", "0%");
-        data.csoWidget.addWidget(csoGroup + ".CurSelObjectLayout");
+        data.currentlySelectedObject.addWidget(csoGroup + ".CurSelObjectLayout");
 
         // Scrollable panel.
-        ScrollablePanel = data.window + ".ScrollablePanel";
-        addWidget("ScrollablePanel", ScrollablePanel);
-        setWidgetSize(ScrollablePanel, "100%", "100%-" + GROUP_HEIGHT + "-" +
+        data.scrollablePanel = data.groupFullname + ".ScrollablePanel";
+        addWidget("ScrollablePanel", data.scrollablePanel);
+        setWidgetSize(data.scrollablePanel, "100%", "100%-" + GROUP_HEIGHT + "-" +
             GROUP_HEIGHT);
-        setWidgetPosition(ScrollablePanel, "50%", "50%");
-        setWidgetOrigin(ScrollablePanel, 0.5f, 0.5f);
-        setVerticalScrollbarAmount(ScrollablePanel, 25);
-        setHorizontalScrollbarPolicy(ScrollablePanel, ScrollbarPolicy::Never);
+        setWidgetPosition(data.scrollablePanel, "50%", "50%");
+        setWidgetOrigin(data.scrollablePanel, 0.5f, 0.5f);
+        setVerticalScrollbarAmount(data.scrollablePanel, 25);
+        setHorizontalScrollbarPolicy(data.scrollablePanel,
+            ScrollbarPolicy::Never);
 
         // Object buttons.
-        HorizontalWrap = ScrollablePanel + "." + shortName + "Wrap";
-        addWidget("HorizontalWrap", HorizontalWrap);
+        data.wrap = data.scrollablePanel + "." + data.group + "Wrap";
+        addWidget("HorizontalWrap", data.wrap);
+        connectSignalHandler(data.wrap,
+            SignalHandler(this.horizontalWrapSignalHandler));
         for (uint t = 0, len = data.scriptNames.length(); t < len; ++t) {
             const auto objName = data.scriptNames[t];
-            const auto btn = HorizontalWrap + "." + objName;
-            addWidget("BitmapButton", btn, data.buttonSignalHandler);
+            const auto btn = data.wrap + "." + objName;
+            addWidget("BitmapButton", btn);
+            connectSignalHandler(btn,
+                SignalHandler(this.objectButtonSignalHandler));
             // TODO-4: We should really find the tallest sprite and base the
             // button sizes on that.
             setWidgetSize(btn, formatFloat(data.buttonSize.x),
@@ -145,7 +224,7 @@ class ObjectDialog {
         }
         
         // SelectOwner widgets //
-        const auto selectOwnerGroup = data.window + ".SelectOwnerGroup";
+        const auto selectOwnerGroup = data.groupFullname + ".SelectOwnerGroup";
         addWidget("Group", selectOwnerGroup);
         setWidgetSize(selectOwnerGroup, "100%", GROUP_HEIGHT);
         setWidgetOrigin(selectOwnerGroup, 0.5f, 1.0f);
@@ -156,10 +235,10 @@ class ObjectDialog {
         setWidgetSize(ownerIconGroup, GROUP_HEIGHT, "100%");
         setGroupPadding(ownerIconGroup, "5px");
 
-        OwnerIconPicture = ownerIconGroup + ".OwnerIcon";
-        addWidget("Picture", OwnerIconPicture);
-        setWidgetOrigin(OwnerIconPicture, 0.5f, 0.5f);
-        setWidgetPosition(OwnerIconPicture, "50%", "50%");
+        data.ownerIcon = ownerIconGroup + ".OwnerIcon";
+        addWidget("Picture", data.ownerIcon);
+        setWidgetOrigin(data.ownerIcon, 0.5f, 0.5f);
+        setWidgetPosition(data.ownerIcon, "50%", "50%");
 
         const auto ownerComboboxGroup = selectOwnerGroup + ".OwnerComboboxGroup";
         addWidget("Group", ownerComboboxGroup);
@@ -167,185 +246,202 @@ class ObjectDialog {
         setWidgetPosition(ownerComboboxGroup, GROUP_HEIGHT, "0px");
         setGroupPadding(ownerComboboxGroup, "0px", "5px", "5px", "5px");
 
-        OwnerComboBox = ownerComboboxGroup + "." + shortName + "OwnerCombobox";
-        addWidget("ComboBox", OwnerComboBox);
-        setWidgetSize(OwnerComboBox, "100%", "100%");
-        if (data.neutralAvailable) addItem(OwnerComboBox, "neutral");
+        if (selectTab) setSelectedTab(tabsName, getTabCount(tabsName) - 1);
+        data.comboBox = data.group + "OwnerCombobox";
+        const auto ownerComboBox = ownerComboboxGroup + "." + data.comboBox;
+        addWidget("ComboBox", ownerComboBox);
+        connectSignalHandler(ownerComboBox,
+            SignalHandler(this.comboBoxSignalHandler));
+        setWidgetSize(ownerComboBox, "100%", "100%");
+        if (data.neutralAvailable) addItem(ownerComboBox, "neutral");
         const auto@ countryScriptNames = country.scriptNames;
         for (uint c = 0, len = countryScriptNames.length(); c < len; ++c)
-            addItem(OwnerComboBox, country[countryScriptNames[c]].name);
-        setSelectedItem(OwnerComboBox, 0);
-        setItemsToDisplay(OwnerComboBox, data.numberOfOwnerItems);
-        ownerSelected();
-
-        dock();
-        resize();
-    }
-    
-    /**
-     * Opens and docks a \c ObjectDialog to one side of the screen.
-     */
-    void dock() {
-        const auto defaultWidth = formatFloat(
-            initData.buttonSize.x * initData.defaultColumnCount +
-            getScrollbarWidth(ScrollablePanel) + 2.0f
-        );
-        if (initData.dockOnRight) {
-            openChildWindow(initData.window, "100%-" + defaultWidth, "0");
-            setWidgetSize(initData.window, defaultWidth, "100%");
-        } else {
-            openChildWindow(initData.window, "0", "0");
-            setWidgetSize(initData.window, defaultWidth, "100%");
-        }
+            addItem(ownerComboBox, country[countryScriptNames[c]].name);
+        setItemsToDisplay(ownerComboBox, data.numberOfOwnerItems);
+        setSelectedItem(ownerComboBox, 0);
     }
 
     /**
-     * Figures out how many rows of object buttons there are in the
-     * \c HorizontalWrap and resizes the wrap to fit.
+     * Gets a handle to the currently selected \c ObjectPanel's data.
+     * If \c null is returned, an error will be logged.
+     * @return Handle to the data, \c null if it could not be retrieved.
      */
-    void resize() {
-        const auto widthOfPanel = getWidgetFullSize(ScrollablePanel).x;
-        auto columns = widthOfPanel / initData.buttonSize.x;
-        if (columns < 1.0f) columns = 1.0f;
-        const auto rows = ceil(getWidgetCount(HorizontalWrap) / floor(columns));
-        setWidgetSize(HorizontalWrap,
-            "100%-" + getScrollbarWidth(ScrollablePanel),
-            formatFloat(rows * initData.buttonSize.y)
-        );
+    private ObjectPanelSetUpData@ getCurrentPanelData() {
+        const auto tab = ::getSelectedTab(tabsName);
+        if (tab < 0) {
+            error("Unexpected selected tab value: " + formatInt(tab));
+            return null;
+        } else return initData.objectPanels[tab];
     }
 
     /**
-     * Handles the owner \c ComboBox's \c ItemSelected event.
+     * Resizes the new \c HorizontalWrap when a new tab is selected.
+     * @param widgetName The full name of the \c Tabs widget.
+     * @param signalName The name of the signal emitted.
      */
-    void ownerSelected() {
-        const auto itemID = getSelectedItem(OwnerComboBox);
-        if (itemID < 0) return;
-        string c;
-        if (initData.neutralAvailable) {
-            if (itemID == 0) {
-                clearWidgetSprite(OwnerIconPicture);
-                initData.csoWidget.owner = "";
-            } else {
-                c = country.scriptNames[itemID - 1];
-                setWidgetSprite(OwnerIconPicture, "icon", country[c].iconName);
-                initData.csoWidget.owner = c;
+    private void tabsSignalHandler(const string&in widgetName,
+        const string&in signalName) {
+        if (signalName == "TabSelected") {
+            const auto data = getCurrentPanelData();
+            if (data !is null) {
+                for (int i = 0, len = initData.objectPanels.length(); i < len;
+                    ++i) {
+                    const auto groupName = initData.objectPanels[i].groupFullname;
+                    if (groupName.length() == 0) continue;
+                    setWidgetVisibility(groupName,
+                        false);
+                }
+                setWidgetVisibility(data.groupFullname, true);
+                horizontalWrapSignalHandler(data.wrap, "MouseEntered");
             }
-        } else {
-            c = country.scriptNames[itemID];
-            setWidgetSprite(OwnerIconPicture, "icon", country[c].iconName);
-            initData.csoWidget.owner = c;
         }
-        applySpritesToWidgetsInContainer(HorizontalWrap, initData.spritesheet,
-            initData.generateSpritesArray(c));
+    }
+
+    /**
+     * Select an object when an object button is pressed.
+     * @param widgetName The full name of the object button.
+     * @param signalName The name of the signal emitted.
+     */
+    private void objectButtonSignalHandler(const string&in widgetName,
+        const string&in signalName) {
+        if (signalName == "Pressed") {
+            const auto data = getCurrentPanelData();
+            if (data !is null) {
+                data.currentlySelectedObject.object =
+                    data.mapNameToObject(
+                        widgetName.substr(widgetName.findLast(".") + 1)
+                    );
+            }
+        }
+    }
+
+    /**
+     * Resize the \c HorizontalWrap if the mouse enters it.
+     * @param widgetName The full name of the \c HorizontalWrap.
+     * @param signalName The name of the signal emitted.
+     */
+    private void horizontalWrapSignalHandler(const string&in widgetName,
+        const string&in signalName) {
+        if (signalName == "MouseEntered") {
+            const auto data = getCurrentPanelData();
+            if (data !is null) {
+                const auto scrollablePanel = getParent(widgetName);
+                const auto widthOfPanel = getWidgetFullSize(scrollablePanel).x;
+                auto columns = widthOfPanel / data.buttonSize.x;
+                if (columns < 1.0f) columns = 1.0f;
+                const auto rows =
+                    ceil(getWidgetCount(widgetName) / floor(columns));
+                setWidgetSize(widgetName,
+                    "100%-" + getScrollbarWidth(scrollablePanel),
+                    formatFloat(rows * data.buttonSize.y)
+                );
+            }
+        }
+    }
+
+    /**
+     * Gets a handle to an \c ObjectPanel's data.
+     * If \c null is returned, an error will be logged.
+     * @param  comboBox The name of the \c ComboBox to use as a search criterion.
+     * @return Handle to the data, \c null if it could not be retrieved.
+     */
+    private ObjectPanelSetUpData@ getPanelData(const string&in comboBox) {
+        for (uint i = 0, len = initData.objectPanels.length(); i < len; ++i)
+            if (initData.objectPanels[i].comboBox == comboBox)
+                return initData.objectPanels[i];
+        return null;
+    }
+
+    /**
+     * Refreshes the object buttons when a new owner is selected.
+     * @param widgetName The full name of the \c ComboBox.
+     * @param signalName The name of the signal emitted.
+     */
+    private void comboBoxSignalHandler(const string&in widgetName,
+        const string&in signalName) {
+        if (signalName == "ItemSelected") {
+            const auto data =
+                getPanelData(widgetName.substr(widgetName.findLast(".") + 1));
+            if (data !is null) {
+                const auto itemID = getSelectedItem(widgetName);
+                if (itemID < 0) return;
+                string c;
+                if (data.neutralAvailable) {
+                    if (itemID == 0) {
+                        clearWidgetSprite(data.ownerIcon);
+                        data.currentlySelectedObject.owner = "";
+                    } else {
+                        c = country.scriptNames[itemID - 1];
+                        setWidgetSprite(data.ownerIcon, "icon",
+                            country[c].iconName);
+                        data.currentlySelectedObject.owner = c;
+                    }
+                } else {
+                    c = country.scriptNames[itemID];
+                    setWidgetSprite(data.ownerIcon, "icon", country[c].iconName);
+                    data.currentlySelectedObject.owner = c;
+                }
+                applySpritesToWidgetsInContainer(data.wrap, data.spritesheet,
+                    data.generateSpritesArray(c));
+            }
+        }
     }
 }
 
 /**
- * Defines the \c TileDialog.
+ * Defines the \c ObjectDialog.
  */
-ObjectDialog TileDialog;
+ObjectDialog PaletteWindow;
 
 /**
- * Returns the default setup data for the \c TileDialog.
- * @param  parent Parent widget of the \c TileDialog.
+ * Index of the Tiles tab.
+ */
+const int TILE_DIALOG = 0;
+
+/**
+ * Index of the Units tab.
+ */
+const int UNIT_DIALOG = 1;
+
+/**
+ * Returns the default setup data for the \c ObjectDialog.
+ * @param  parent Parent widget of the \c ObjectDialog.
  * @return Can be passed directly into the \c setUp() method.
  */
-ObjectDialogSetUpData@ DefaultTileDialogData(const string&in parent) {
-    ObjectDialogSetUpData TileDialogData;
-    TileDialogData.window = parent + ".TileDialog";
-    TileDialogData.windowText = "tiledialog";
-    TileDialogData.buttonSize.x = 35.0f;
-    TileDialogData.buttonSize.y = 35.0f;
-    TileDialogData.buttonSignalHandler = "TileDialogHandleObjectButtonSignal";
-    @TileDialogData.csoWidget = CurrentlySelectedTileType;
-    TileDialogData.dockOnRight = true;
-    TileDialogData.neutralAvailable = true;
-    TileDialogData.spritesheet = "tile.normal";
-    @TileDialogData.generateSpritesArray = @generateTileSpriteArray;
-    @TileDialogData.scriptNames = tiletype.scriptNames;
-    TileDialogData.defaultColumnCount = 6.0f;
-    TileDialogData.numberOfOwnerItems = 6;
-    return TileDialogData;
-}
+ObjectDialogSetUpData@ DefaultObjectDialogData(const string&in parent) {
+    ObjectDialogSetUpData SetUpData;
+    SetUpData.window = parent + ".ObjectDialog";
+    SetUpData.windowText = "objectdialog";
 
-/**
- * Trigger a \c resize() call when the mouse enters a \c TileDialog's wrap.
- */
-void MapMakerMenu_TileDialogWrap_MouseEntered() {
-    TileDialog.resize();
-}
+    // Tile group.
+    ObjectPanelSetUpData Tiles;
+    Tiles.group = "TileDialog";
+    Tiles.tabText = "tiledialog";
+    @Tiles.currentlySelectedObject = CurrentlySelectedTileType;
+    Tiles.buttonSize.x = 35.0f;
+    Tiles.buttonSize.y = 35.0f;
+    Tiles.neutralAvailable = true;
+    Tiles.numberOfOwnerItems = 6;
+    @Tiles.mapNameToObject = function(shortName){return tiletype[shortName];};
+    Tiles.spritesheet = "tile.normal";
+    @Tiles.generateSpritesArray = @generateTileSpriteArray;
+    @Tiles.scriptNames = tiletype.scriptNames;
+    SetUpData.objectPanels.insertLast(Tiles);
 
-/**
- * Trigger an \c ownerSelected() call when the user selects an owner.
- */
-void MapMakerMenu_TileDialogOwnerCombobox_ItemSelected() {
-    TileDialog.ownerSelected();
-}
+    // Unit group.
+    ObjectPanelSetUpData Units;
+    Units.group = "UnitDialog";
+    Units.tabText = "unitdialog";
+    @Units.currentlySelectedObject = CurrentlySelectedUnitType;
+    Units.buttonSize.x = 35.0f;
+    Units.buttonSize.y = 35.0f;
+    Units.neutralAvailable = false;
+    Units.numberOfOwnerItems = 5;
+    @Units.mapNameToObject = function(shortName){return unittype[shortName];};
+    Units.spritesheet = "unit";
+    @Units.generateSpritesArray = @generateUnitSpriteArray;
+    @Units.scriptNames = unittype.scriptNames;
+    SetUpData.objectPanels.insertLast(Units);
 
-/**
- * Signal handler for tile type object buttons.
- * @param widgetName Full name of the button.
- * @param signal     The signal that was emitted.
- */
-void TileDialogHandleObjectButtonSignal(const string&in widgetName,
-    const string&in signal) {
-    if (signal == "Pressed") {
-        CurrentlySelectedTileType.object =
-            tiletype[widgetName.substr(widgetName.findLast(".") + 1)];
-    }
-}
-
-/**
- * Defines the \c UnitDialog.
- */
-ObjectDialog UnitDialog;
-
-/**
- * Returns the default setup data for the \c UnitDialog.
- * @param  parent Parent widget of the \c UnitDialog.
- * @return Can be passed directly into the \c setUp() method.
- */
-ObjectDialogSetUpData@ DefaultUnitDialogData(const string&in parent) {
-    ObjectDialogSetUpData UnitDialogData;
-    UnitDialogData.window = parent + ".UnitDialog";
-    UnitDialogData.windowText = "unitdialog";
-    UnitDialogData.buttonSize.x = 35.0f;
-    UnitDialogData.buttonSize.y = 35.0f;
-    UnitDialogData.buttonSignalHandler = "UnitDialogHandleObjectButtonSignal";
-    @UnitDialogData.csoWidget = CurrentlySelectedUnitType;
-    UnitDialogData.dockOnRight = false;
-    UnitDialogData.neutralAvailable = false;
-    UnitDialogData.spritesheet = "unit";
-    @UnitDialogData.generateSpritesArray = @generateUnitSpriteArray;
-    @UnitDialogData.scriptNames = unittype.scriptNames;
-    UnitDialogData.defaultColumnCount = 3.0f;
-    UnitDialogData.numberOfOwnerItems = 5;
-    return UnitDialogData;
-}
-
-/**
- * Trigger a \c resize() call when the mouse enters a \c UnitDialog's wrap.
- */
-void MapMakerMenu_UnitDialogWrap_MouseEntered() {
-    UnitDialog.resize();
-}
-
-/**
- * Trigger an \c ownerSelected() call when the user selects an owner.
- */
-void MapMakerMenu_UnitDialogOwnerCombobox_ItemSelected() {
-    UnitDialog.ownerSelected();
-}
-
-/**
- * Signal handler for unit type object buttons.
- * @param widgetName Full name of the button.
- * @param signal     The signal that was emitted.
- */
-void UnitDialogHandleObjectButtonSignal(const string&in widgetName,
-    const string&in signal) {
-    if (signal == "Pressed") {
-        CurrentlySelectedUnitType.object =
-            unittype[widgetName.substr(widgetName.findLast(".") + 1)];
-    }
+    return SetUpData;
 }

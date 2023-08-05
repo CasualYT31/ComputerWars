@@ -56,12 +56,25 @@ int engine::script_reference_type<T>::RegisterType(asIScriptEngine* engine,
 	return r;
 }
 
+template<typename... Ts>
+bool engine::scripts::callFunction(const std::string& name, Ts... values) {
+	asIScriptFunction* const func =
+		_engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
+	if (!func) {
+		_logger.error("Failed to access function \"{}\": either it was not "
+			"defined in any of the scripts or it was defined more than once.",
+			name);
+		return false;
+	}
+	return callFunction(func, values...);
+}
+
 template<typename T, typename... Ts>
-bool engine::scripts::callFunction(const std::string& name, T value,
+bool engine::scripts::callFunction(asIScriptFunction* const func, T value,
 	Ts... values) {
 	if (!_callFunction_TemplateCall) {
 		// First call to the template version, so setup the context.
-		if (!_setupContext(name)) return false;
+		if (!_setupContext(func)) return false;
 		_callFunction_TemplateCall = true;
 	}
 	// Add the parameter then call either the template version (if more parameters
@@ -87,7 +100,7 @@ bool engine::scripts::callFunction(const std::string& name, T value,
 		default:
 			_logger.error("Unexpected length {} of integer variable, it will not "
 				"be set to argument {} of function \"{}\": function call aborted.",
-				sizeof value, _argumentID, name);
+				sizeof value, _argumentID, func->GetName());
 			_resetCallFunctionVariables();
 			return false;
 		}
@@ -100,7 +113,8 @@ bool engine::scripts::callFunction(const std::string& name, T value,
 	} else if constexpr (std::is_pointer<T>::value) {
 		if (!value) {
 			_logger.error("Attempted to assign a null pointer to argument {} of "
-				"function \"{}\": function call aborted.", _argumentID, name);
+				"function \"{}\": function call aborted.", _argumentID,
+				func->GetName());
 			_resetCallFunctionVariables();
 			return false;
 		}
@@ -115,7 +129,7 @@ bool engine::scripts::callFunction(const std::string& name, T value,
 	} else if constexpr (std::is_object<T>::value || std::is_reference<T>::value) {
 		_logger.error("Attempted to add an object to argument {} of function "
 			"\"{}\", which is not supported: function call aborted.", _argumentID,
-			name);
+			func->GetName());
 		_resetCallFunctionVariables();
 		return false;
 	}
@@ -123,16 +137,17 @@ bool engine::scripts::callFunction(const std::string& name, T value,
 		if constexpr (std::is_pointer<T>::value) {
 			if (!value) {
 				_logger.error("Failed to set argument {} of function \"{}\" to "
-					"the value nullptr: code {}.", _argumentID, name, r);
+					"the value nullptr: code {}.", _argumentID, func->GetName(),
+					r);
 				_resetCallFunctionVariables();
 				return false;
 			}
 		}
 		_logger.error("Failed to set argument {} of function \"{}\": code {}.",
-			_argumentID, name, r);
+			_argumentID, func->GetName(), r);
 		_resetCallFunctionVariables();
 		return false;
 	}
-	_argumentID++;
-	return callFunction(name, values...);
+	++_argumentID;
+	return callFunction(func, values...);
 }

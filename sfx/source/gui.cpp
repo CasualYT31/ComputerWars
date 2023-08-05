@@ -96,32 +96,6 @@ void sfx::gui::gui_background::draw(sf::RenderTarget& target,
 	}
 }
 
-///////////////////////
-// CSCRIPTANYWRAPPER //
-///////////////////////
-
-sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(CScriptAny* const obj) : _any(obj) {
-	if (_any) _any->AddRef();
-}
-
-sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(
-	const sfx::gui::CScriptAnyWrapper& obj) : _any(obj.operator->()) {
-	if (_any) _any->AddRef();
-}
-
-sfx::gui::CScriptAnyWrapper::CScriptAnyWrapper(sfx::gui::CScriptAnyWrapper&& obj)
-	noexcept : _any(std::move(obj.operator->())) {
-	if (_any) _any->AddRef();
-}
-
-sfx::gui::CScriptAnyWrapper::~CScriptAnyWrapper() noexcept {
-	if (_any) _any->Release();
-}
-
-CScriptAny* sfx::gui::CScriptAnyWrapper::operator->() const noexcept {
-	return _any;
-}
-
 //////////////////////
 // ORIGINAL_CAPTION //
 //////////////////////
@@ -340,7 +314,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 			ChildWindow::TitleButton::Maximize |
 			ChildWindow::TitleButton::Minimize));
 
-	// Register global constants and typdefs.
+	// Register global constants, funcdefs and typedefs.
 	engine->RegisterTypedef("MenuItemID", "uint64");
 	document->DocumentExpectedFunction("typedef uint64 MenuItemID",
 		"Index used to identify a menu item in a <tt>MenuBar</tt> widget.");
@@ -362,6 +336,12 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentExpectedFunction("const MenuItemID NO_MENU_ITEM_ID",
 		"Constant which is returned when creating a menu or menu item in a "
 		"<tt>MenuBar</tt> failed.");
+	r = engine->RegisterFuncdef(
+		"void SignalHandler(const string&in, const string&in)");
+	document->DocumentObjectFuncDef(r, "The signature of a callback that is "
+		"invoked when a widget emits a signal. The first string is the full name "
+		"of the widget emitting the signal, and the second string is the name of "
+		"the signal that was emitted.");
 
 	// Register non-widget global functions.
 	r = engine->RegisterGlobalFunction("void setGUI(const string& in)",
@@ -434,6 +414,18 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"widget's row and column index are then specified, in that order.\n"
 		"See <tt>addWidget()</tt> for information on the final parameter to this "
 		"function.");
+
+	r = engine->RegisterGlobalFunction("void connectSignalHandler(const string&in,"
+		"SignalHandler@ const)",
+		asMETHOD(sfx::gui, _connectSignalHandler), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "This method is used to provide an "
+		"additional signal handler that is called before any others. Pass in "
+		"<tt>null</tt> to remove it.");
+
+	r = engine->RegisterGlobalFunction("string getParent(const string&in)",
+		asMETHOD(sfx::gui, _getParent), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "This method returns the full name of the "
+		"parent of the given widget.");
 
 	r = engine->RegisterGlobalFunction("void removeWidget(const string&in)",
 		asMETHOD(sfx::gui, _removeWidget), asCALL_THISCALL_ASGLOBAL, this);
@@ -726,7 +718,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"The name of the widget should be given.");
 
 	r = engine->RegisterGlobalFunction("void setSelectedItem(const string&in, "
-		"const uint)", asMETHODPR(sfx::gui, _setSelectedItem,
+		"const uint64)", asMETHODPR(sfx::gui, _setSelectedItem,
 		(const std::string&, const std::size_t), void),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Selects an item from a widget. The name "
@@ -746,6 +738,28 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _setItemsToDisplay), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets the number of items to display in a "
 		"given widget when open, at one time. 0 means always show all items.");
+
+	r = engine->RegisterGlobalFunction("void addTab(const string&in, const "
+		"string&in, array<any>@ = null)",
+		asMETHOD(sfx::gui, _addTab), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Appends a new tab to a widget. The name "
+		"of the widget is given, then the text of the new tab. An optional list "
+		"variables can also be given: see setWidgetText() for more information.");
+
+	r = engine->RegisterGlobalFunction("void setSelectedTab(const string&in, "
+		"const uint64)", asMETHODPR(sfx::gui, _setSelectedTab,
+			(const std::string&, const std::size_t), void),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Selects a tab from a widget. The name of "
+		"the widget is given, then the 0-based index of the tab to select.");
+
+	r = engine->RegisterGlobalFunction("int getSelectedTab(const string&in)",
+		asMETHOD(sfx::gui, _getSelectedTab), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's selected tab's index.");
+
+	r = engine->RegisterGlobalFunction("uint64 getTabCount(const string&in)",
+		asMETHOD(sfx::gui, _getTabCount), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's tab count.");
 
 	r = engine->RegisterGlobalFunction("uint getWidgetCount(const string&in)",
 		asMETHOD(sfx::gui, _getWidgetCount), asCALL_THISCALL_ASGLOBAL, this);
@@ -1323,6 +1337,14 @@ bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	if (_scripts && getGUI() != "") {
 		std::string fullname = widget->getWidgetName().toStdString();
 		std::string signalNameStd = signalName.toStdString();
+		// Call additional signal handler before the main one.
+		if (_additionalSignalHandlers.find(fullname) !=
+			_additionalSignalHandlers.end()) {
+			_scripts->callFunction(
+				_additionalSignalHandlers[fullname].operator->(), &fullname,
+				&signalNameStd);
+		}
+		// Call basic or extended signal handler.
 		auto customHandler = _customSignalHandlers.find(fullname);
 		if (customHandler != _customSignalHandlers.end()) {
 			std::string decl = "void " + customHandler->second +
@@ -2023,6 +2045,7 @@ bool sfx::gui::_load(engine::json& j) {
 			_dontOverridePictureSizeWithSpriteSize.clear();
 			_originalCaptions.clear();
 			_customSignalHandlers.clear();
+			_additionalSignalHandlers.clear();
 			_upControl.clear();
 			_downControl.clear();
 			_leftControl.clear();
@@ -2262,6 +2285,7 @@ void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 		_dontOverridePictureSizeWithSpriteSize.erase(name);
 		_originalCaptions.erase(name);
 		_customSignalHandlers.erase(name);
+		_additionalSignalHandlers.erase(name);
 		_directionalFlow.erase(name);
 		_hierarchyOfLastMenuItem.erase(name);
 		_menuCounter.erase(name);
@@ -2420,6 +2444,8 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::MessageBox::create();
 	} else if (type == "horizontalwrap") {
 		return tgui::HorizontalWrap::create();
+	} else if (type == "tabs") {
+		return tgui::Tabs::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -2542,6 +2568,26 @@ void sfx::gui::_addWidgetToGrid(const std::string& newWidgetType,
 	}
 	END("Attempted to create a new \"{}\" widget with name \"{}\" and add it to a "
 		"grid at row {}, column {}.", newWidgetType, name, row, col)
+}
+
+void sfx::gui::_connectSignalHandler(const std::string& name,
+	asIScriptFunction* const handler) {
+	START_WITH_WIDGET(name)
+		_additionalSignalHandlers.erase(fullnameAsString);
+		if (handler) _additionalSignalHandlers.emplace(fullnameAsString, handler);
+	END("Attempted to connect a signal handler to a widget with name \"{}\", in "
+		"menu \"{}\".", name, fullname[0])
+	if (handler) handler->Release();
+}
+
+std::string sfx::gui::_getParent(const std::string& name) {
+	START_WITH_WIDGET(name)
+		if (fullname.size() < 2)
+			ERROR("This operation is not supported on menus themselves.")
+		return widget->getParent()->getWidgetName().toStdString();
+	END("Attempted to get the name of a widget \"{}\"'s parent, in menu \"{}\".",
+		name, fullname[0])
+	return "";
 }
 
 void sfx::gui::_removeWidget(const std::string& name) {
@@ -2844,6 +2890,7 @@ void sfx::gui::_setWidgetTextSize(const std::string& name,
 		ELSE_IF_WIDGET_IS(Button, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(EditBox, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(MenuBar, castWidget->setTextSize(size);)
+		ELSE_IF_WIDGET_IS(Tabs, castWidget->setTextSize(size);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the character size {} to widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\".", size, name, widgetType, fullname[0])
@@ -3134,6 +3181,66 @@ void sfx::gui::_setItemsToDisplay(const std::string& name,
 	END("Attempted to set the number of items to display to {} for widget \"{}\", "
 		"which is of type \"{}\", within menu \"{}\".", items, name, widgetType,
 		fullname[0])
+}
+
+void sfx::gui::_addTab(const std::string& name, const std::string& text,
+	CScriptArray* variables) {
+	START_WITH_WIDGET(name)
+	std::size_t index = 0;
+		IF_WIDGET_IS(Tabs, index = castWidget->add(text, false);)
+		ELSE_UNSUPPORTED()
+	_setTranslatedString(fullnameAsString, text, variables, index);
+	_translateWidget(widget);
+	END("Attempted to add a tab \"{}\" to widget \"{}\", which is of type \"{}\", "
+		"within menu \"{}\".", text, name, widgetType, fullname[0])
+	if (variables) variables->Release();
+}
+
+void sfx::gui::_setSelectedTab(const std::string& name, const std::size_t index) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Tabs,
+			const auto prevSelected = castWidget->getSelectedIndex();
+			if (!castWidget->select(index)) {
+				if (prevSelected >= 0) castWidget->select(prevSelected);
+				const auto count = castWidget->getTabsCount();
+				if (count == 0) {
+					ERROR("This widget has no items.")
+				} else if (count <= index) {
+					ERROR(std::string("The item index cannot be higher than ").
+						append(std::to_string(count - 1)).append("."))
+				}
+				const auto disabled = !castWidget->getTabEnabled(index);
+				const auto invisible = !castWidget->getTabVisible(index);
+				if (invisible && disabled) {
+					ERROR("This tab is invisible and disabled.")
+				} else if (invisible) {
+					ERROR("This tab is invisible.")
+				} else if (disabled) {
+					ERROR("This tab is disabled.")
+				}
+			}
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to select tab {} from widget \"{}\", which is of type \"{}\", "
+		"within menu \"{}\".", index, name, widgetType, fullname[0])
+}
+
+int sfx::gui::_getSelectedTab(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Tabs, return castWidget->getSelectedIndex();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the index of the selected tab of a widget \"{}\", which "
+		"is of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+	return -1;
+}
+
+std::size_t sfx::gui::_getTabCount(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Tabs, return castWidget->getTabsCount();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the tab count of a widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+	return 0;
 }
 
 std::size_t sfx::gui::_getWidgetCount(const std::string& name) {

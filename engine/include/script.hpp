@@ -339,6 +339,21 @@ namespace engine {
 		void stacktraceToLog() const;
 
 		/**
+		 * Version of \c callFunction() which accepts a name to an existing script
+		 * function.
+		 * If the function didn't exist, or there was more than one function with
+		 * the given name, then this method will fail.
+		 * @tparam Ts     The types of the parameters to pass to the function, if
+		 *                any.
+		 * @param  name   The name of the function written in the scripts to call.
+		 * @param  values The parameters to provide to the function call, if any.
+		 * @return See the other template version of \c callFunction().
+		 * @safety No guarantee.
+		 */
+		template<typename... Ts>
+		bool callFunction(const std::string& name, Ts... values);
+
+		/**
 		 * Parameter pack method called when a script function requires parameters.
 		 * It is called recursively, so that each parameter is added, with the
 		 * first parameter being the first parameter passed to the function, etc.
@@ -352,10 +367,9 @@ namespace engine {
 		 * which uses fmt). Your object type must also be copyable. Expect
 		 * seemingly unrelated [template] build errors if these conditions aren't
 		 * met. Strings are also supported, \b however, string literals are not.
-		 * This may change in the future.
 		 * @tparam T      The type of the first parameter to add.
 		 * @tparam Ts     The types of the next parameters to add, if any.
-		 * @param  name   The name of the script function to call.
+		 * @param  func   Pointer to the script function to call.
 		 * @param  value  The first parameter to add.
 		 * @param  values The next parameters to add, if any.
 		 * @return \c FALSE if a parameter couldn't be added to the script function
@@ -365,16 +379,16 @@ namespace engine {
 		 * @safety No guarantee.
 		 */
 		template<typename T, typename... Ts>
-		bool callFunction(const std::string& name, T value, Ts... values);
+		bool callFunction(asIScriptFunction* const func, T value, Ts... values);
 
 		/**
 		 * Calls a script function when no more parameters have to be added to the
 		 * function call.
-		 * @param  name The name of the script function to call.
+		 * @param  func Pointer to the script function to call.
 		 * @return See the template version of \c callFunction().
 		 * @safety No guarantee.
 		 */
-		bool callFunction(const std::string& name);
+		bool callFunction(asIScriptFunction* const func);
 
 		/**
 		 * Compiles and executes the given code, which can call any code that is in
@@ -440,12 +454,12 @@ namespace engine {
 
 		/**
 		 * Prepares the function context when making a call to \c callFunction().
-		 * @param  name The name of the function to call.
+		 * @param  func Pointer to the script function to call.
 		 * @return \c TRUE if the context was setup successfully, \c FALSE
 		 *         otherwise.
 		 * @safety No guarantee.
 		 */
-		bool _setupContext(const std::string& name);
+		bool _setupContext(asIScriptFunction* const func);
 
 		/**
 		 * Resets \c callFunction() variables.

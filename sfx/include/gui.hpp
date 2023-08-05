@@ -455,21 +455,27 @@ namespace sfx {
 		};
 
 		/**
-		 * Class used to automatically handle reference counting of \c CScriptAny
+		 * Class used to automatically handle reference counting of AngelScript
 		 * objects.
+		 * @tparam The AngelScript object type to handle.
 		 */
-		class CScriptAnyWrapper {
+		template<typename T>
+		class CScriptWrapper {
 		public:
 			/**
-			 * Initialises the wrapper object with an existing \c CScriptAny
-			 * object.
+			 * Initialises the wrapper object with no object.
 			 */
-			CScriptAnyWrapper(CScriptAny* const obj);
+			CScriptWrapper() = default;
+
+			/**
+			 * Initialises the wrapper object with an existing AngelScript object.
+			 */
+			CScriptWrapper(T* const obj);
 
 			/**
 			 * Copies the pointer and increases its reference count.
 			 */
-			CScriptAnyWrapper(const CScriptAnyWrapper& obj);
+			CScriptWrapper(const CScriptWrapper<T>& obj);
 
 			/**
 			 * Moves the pointer over and increases the reference count.
@@ -479,23 +485,23 @@ namespace sfx {
 			 * the reference count to fall down by one, which will cause a nasty
 			 * crash later on at whatever point.
 			 */
-			CScriptAnyWrapper(CScriptAnyWrapper&& obj) noexcept;
+			CScriptWrapper(CScriptWrapper<T>&& obj) noexcept;
 
 			/**
-			 * Releases the reference to the stored \c CScriptAny object.
+			 * Releases the reference to the stored AngelScript object.
 			 */
-			~CScriptAnyWrapper() noexcept;
+			~CScriptWrapper() noexcept;
 
 			/**
-			 * Allows direct access to the stored \c CScriptAny object.
-			 * @return Pointer to the \c CScriptAny object.
+			 * Allows direct access to the stored AngelScript object.
+			 * @return Pointer to the AngelScript object.
 			 */
-			CScriptAny* operator->() const noexcept;
+			T* operator->() const noexcept;
 		private:
 			/**
-			 * The \c CScriptAny object.
+			 * The AngelScript object.
 			 */
-			CScriptAny* _any = nullptr;
+			T* _ptr = nullptr;
 		};
 
 		/**
@@ -524,7 +530,7 @@ namespace sfx {
 			/**
 			 * The variables to insert into the caption when translating.
 			 */
-			std::vector<sfx::gui::CScriptAnyWrapper> variables;
+			std::vector<sfx::gui::CScriptWrapper<CScriptAny>> variables;
 		};
 
 		/**
@@ -956,6 +962,28 @@ namespace sfx {
 		void _addWidgetToGrid(const std::string& newWidgetType,
 			const std::string& name, const std::size_t row, const std::size_t col,
 			const std::string& signalHandler = "");
+
+		/**
+		 * Connects a signal handler to a given widget.
+		 * See the script interface documentation in \c registerInterface() for a
+		 * rundown on how signal handlers work. This method is used to provide an
+		 * additional signal handler for a given widget by directly invoking a
+		 * callback given to the engine. If \c nullptr is given, then the
+		 * registered callback will be freed.
+		 * @param name    The name of the widget to configure.
+		 * @param handler The function to invoke when a widget emits a signal.
+		 */
+		void _connectSignalHandler(const std::string& name,
+			asIScriptFunction* const handler);
+
+		/**
+		 * Gets the name of the given widget's parent.
+		 * If no widget exists with the given name, then an error will be logged
+		 * and a blank string will be returned.
+		 * @param  name The name of the widget to query.
+		 * @return The full name of the parent.
+		 */
+		std::string _getParent(const std::string& name);
 
 		/**
 		 * Removes a specified widget, and all the widgets that are within it.
@@ -1464,6 +1492,51 @@ namespace sfx {
 		void _setItemsToDisplay(const std::string& name, const std::size_t items);
 
 		/**
+		 * Adds a tab to a widget.
+		 * E.g. appends a tab to a \c Tabs widget.\n
+		 * Adding a tab will not select it.\n
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no tab will be added.
+		 * @param name      The name of the widget to add the tab to.
+		 * @param text      The text of the new tab.
+		 * @param variables Optional list of variables to insert into the tab text.
+		 */
+		void _addTab(const std::string& name, const std::string& text,
+			CScriptArray* variables);
+
+		/**
+		 * Selects a tab by index.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no tab will be selected. An
+		 * error will also be reported if the given index was out of range, or if
+		 * the given tab is either invisible or disabled. If a selection operation
+		 * failed and the widget was a \c Tabs widget, an attempt will be made to
+		 * select the previously selected tab, if there was one.
+		 * @param name  The name of the widget which contains the tab to select.
+		 * @param index The 0-based index of the tab to select.
+		 */
+		void _setSelectedTab(const std::string& name, const std::size_t index);
+
+		/**
+		 * Gets the currently selected tab's index.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and \c -1 will be returned. If
+		 * no tab was selected, \c -1 will also be returned.
+		 * @param  name The name of the widget to query.
+		 * @return The index of the currently selected tab.
+		 */
+		int _getSelectedTab(const std::string& name);
+
+		/**
+		 * Gets the number of tabs in a \c Tabs widget.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and \c 0 will be returned.
+		 * @param  name The name of the widget to query.
+		 * @return The number of tabs in the given widget.
+		 */
+		std::size_t _getTabCount(const std::string& name);
+
+		/**
 		 * Returns the number of widgets within a container.
 		 * If no widget exists with the given name, or if it doesn't support the
 		 * operation, then an error will be logged and 0 will be returned.
@@ -1966,6 +2039,12 @@ namespace sfx {
 		 * Stores the custom signal handler names associated with some widgets.
 		 */
 		std::unordered_map<std::string, std::string> _customSignalHandlers;
+
+		/**
+		 * Stores additional signal handlers for each widget.
+		 */
+		std::unordered_map<std::string, CScriptWrapper<asIScriptFunction>>
+			_additionalSignalHandlers;
 
 		/**
 		 * Pointer to the language dictionary used to translate all captions.

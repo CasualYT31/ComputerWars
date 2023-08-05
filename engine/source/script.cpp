@@ -620,23 +620,23 @@ void engine::scripts::stacktraceToLog() const {
     _logger.write(trace);
 }
 
-bool engine::scripts::callFunction(const std::string& name) {
+bool engine::scripts::callFunction(asIScriptFunction* const func) {
     if (!_callFunction_TemplateCall) {
         // If this method is being called directly and not from the template
         // version then we must set up the context.
-        if (!_setupContext(name)) return false;
+        if (!_setupContext(func)) return false;
     }
     // First check that all parameters have been accounted for. Passing too few
     // arguments is dangerous when object pointer paramters haven't been given as
     // this will cause the program to crash. _setupContext() ensures that the
     // function exists.
-    auto expected = _engine->GetModule("ComputerWars")->
-        GetFunctionByName(name.c_str())->GetParamCount();
+    auto expected = func->GetParamCount();
     if (expected != _argumentID) {
         // Passing in too many arguments would have caused an error earlier.
         _logger.error("Too few arguments have been given to function call \"{}\": "
-            "{} {} been given, but {} {} expected: function call aborted.", name,
-            _argumentID, ((_argumentID == 1) ? ("has") : ("have")), expected,
+            "{} {} been given, but {} {} expected: function call aborted.",
+            func->GetName(),  _argumentID,
+            ((_argumentID == 1) ? ("has") : ("have")), expected,
             ((expected == 1) ? ("was") : ("were")));
         _resetCallFunctionVariables();
         return false;
@@ -650,7 +650,8 @@ bool engine::scripts::callFunction(const std::string& name) {
     // This context is free now.
     --_contextId;
     if (r != asEXECUTION_FINISHED) {
-        _logger.error("Failed to execute function \"{}\": code {}.", name, r);
+        _logger.error("Failed to execute function \"{}\": code {}.",
+            func->GetName(), r);
         return false;
     }
     return true;
@@ -844,31 +845,26 @@ int engine::scripts::_allocateContext() {
     }
 }
 
-bool engine::scripts::_setupContext(const std::string& name) {
+bool engine::scripts::_setupContext(asIScriptFunction* const func) {
     if (!_engine) return false;
-    asIScriptFunction* func =
-        _engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
     if (!func) {
-        _logger.error("Failed to access function \"{}\": either it was not "
-            "defined in any of the scripts or it was defined more than once.",
-            name);
+        _logger.error("Attempted to call a NULL script function!");
         return false;
     }
-
-    static const std::string errorMsg = "Failed to prepare context for function "
-        "\"{}\": code {}.";
+    static const auto errorMsg = "Failed to prepare context for function \"{}\": "
+        "code {}.";
     int r = 0;
     if (_contextId >= _context.size()) {
         // All the existing contexts are in use, so allocate a new one.
         r = _allocateContext();
         if (r < 0) {
-            _logger.error(errorMsg, name, r);
+            _logger.error(errorMsg, func->GetName(), r);
             return false;
         }
     }
     r = _context[_contextId]->Prepare(func);
     if (r < 0) {
-        _logger.error(errorMsg, name, r);
+        _logger.error(errorMsg, func->GetName(), r);
         return false;
     }
     return true;

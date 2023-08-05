@@ -79,3 +79,34 @@ typename T::Ptr sfx::gui::_findWidget(std::string name,
 		return nullptr;
 	}
 }
+
+////////////////////
+// CSCRIPTWRAPPER //
+////////////////////
+
+template<typename T>
+sfx::gui::CScriptWrapper<T>::CScriptWrapper(T* const obj) : _ptr(obj) {
+	if (_ptr) _ptr->AddRef();
+}
+
+template<typename T>
+sfx::gui::CScriptWrapper<T>::CScriptWrapper(
+	const sfx::gui::CScriptWrapper<T>& obj) : _ptr(obj.operator->()) {
+	if (_ptr) _ptr->AddRef();
+}
+
+template<typename T>
+sfx::gui::CScriptWrapper<T>::CScriptWrapper(sfx::gui::CScriptWrapper<T>&& obj)
+noexcept : _ptr(std::move(obj.operator->())) {
+	if (_ptr) _ptr->AddRef();
+}
+
+template<typename T>
+sfx::gui::CScriptWrapper<T>::~CScriptWrapper() noexcept {
+	if (_ptr) _ptr->Release();
+}
+
+template<typename T>
+T* sfx::gui::CScriptWrapper<T>::operator->() const noexcept {
+	return _ptr;
+}
