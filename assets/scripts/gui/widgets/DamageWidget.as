@@ -25,11 +25,7 @@ class DamageWidget {
         setWidgetTextColour(_damageLabel, Colour(250,100,0,255));
         setWidgetTextOutlineColour(_damageLabel, Colour(0,0,0,255));
         setWidgetTextOutlineThickness(_damageLabel, 2.0f);
-        setWidgetTextSize(_damageLabel, 15);
-        setWidgetOrigin(_damageLabel, 0.5f, 0.2f);
-        setWidgetPosition(_damageLabel,
-            _damageSprite + ".left + " + _damageSprite + ".width / 2",
-            _damageSprite + ".top + " + _damageSprite + ".height / 2");
+        updateDamageLabelPosition();
         setVisibility(false);
     }
 
@@ -66,6 +62,7 @@ class DamageWidget {
      */
     void updatePosition(const MousePosition&in pos, const Quadrant&in quad) {
         setWidgetPosition(_damageSprite, formatInt(pos.x), formatInt(pos.y));
+        updateDamageLabelPosition();
 		switch (quad) {
 		case Quadrant::LowerLeft:
             setWidgetOrigin(_damageSprite, 0.0f, 1.0f);
@@ -79,6 +76,17 @@ class DamageWidget {
 		default: // UpperLeft:
             setWidgetOrigin(_damageSprite, 0.0f, 0.0f);
 		}
+    }
+
+    /**
+     * Updates the position of the damage label.
+     */
+    private void updateDamageLabelPosition() {
+        setWidgetTextSize(_damageLabel, 15);
+        setWidgetOrigin(_damageLabel, 0.5f, 0.2f);
+        setWidgetPosition(_damageLabel,
+            _damageSprite + ".left + " + _damageSprite + ".width / 2",
+            _damageSprite + ".top + " + _damageSprite + ".height / 2");
     }
 
     /**
