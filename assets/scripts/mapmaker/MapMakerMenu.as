@@ -128,6 +128,7 @@ void MapMakerMenuHandleInput(const dictionary controls,
     // If there isn't a tile currently selected that is in bounds, return now.
     const auto curTile = edit.map.getSelectedTile();
     if (edit.map.isOutOfBounds(curTile)) return;
+    const auto curUnit = edit.map.getUnitOnTile(curTile);
 
     // Get the currently selected tile and unit types.
     const auto tileTypeSel = cast<TileType>(CurrentlySelectedTileType.object);
@@ -146,14 +147,30 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const bool paint = bool(controls["paint"]) && (
         !bool(mouseInputs["paint"]) || (mouseNotUnderWidget && mouseInMap)
     );
+    const bool pick = bool(controls["pick"]) && (
+        !bool(mouseInputs["pick"]) || (mouseNotUnderWidget && mouseInMap)
+    );
+    
+    if (paint) {
+        // If there isn't a currently selected tile type, do not try to paint with
+        // it.
+        if (currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null)
+            edit.setTile(curTile, tileTypeSel, tileOwnerSel);
 
-    // If there isn't a currently selected tile type, do not try to paint with it.
-    if (paint && currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null)
-        edit.setTile(curTile, tileTypeSel, tileOwnerSel);
+        // If there isn't a currently selected unit type, do not try to paint with
+        // it.
+        if (currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null)
+            edit.createUnit(curTile, unitTypeSel, unitArmySel);
 
-    // If there isn't a currently selected unit type, do not try to paint with it.
-    if (paint && currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null)
-        edit.createUnit(curTile, unitTypeSel, unitArmySel);
+    } else if (pick) {
+        if (currentPaletteWindowTab == TILE_DIALOG) {
+            CurrentlySelectedTileType.object = edit.map.getTileType(curTile);
+            PaletteWindow.setSelectedOwner(edit.map.getTileOwner(curTile));
+        } else if (currentPaletteWindowTab == UNIT_DIALOG && curUnit != 0) {
+            CurrentlySelectedUnitType.object = edit.map.getUnitType(curUnit);
+            PaletteWindow.setSelectedOwner(edit.map.getArmyOfUnit(curUnit));
+        }
+    }
 }
 
 /**

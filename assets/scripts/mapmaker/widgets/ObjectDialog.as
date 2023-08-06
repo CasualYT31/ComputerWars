@@ -73,6 +73,10 @@ class ObjectPanelSetUpData {
     /// Name of the base \c Group widget.
     /// Set by the \c ObjectDialog class, so you can leave this blank.
     string groupFullname;
+
+    /// Full name of the \c ComboBox widget.
+    /// Set by the \c ObjectDialog class, so you can leave this blank.
+    string comboBoxFullname;
 }
 
 /**
@@ -144,6 +148,28 @@ class ObjectDialog {
      */
     int getSelectedTab() const {
         return ::getSelectedTab(tabsName);
+    }
+
+    /**
+     * Selects an owner from the currently selected tab's \c ComboBox.
+     * Logs an error if \c NO_ARMY is given for a \c ComboBox that does not
+     * support neutral owners.
+     * @param newOwner \c ArmyID of the new owner.
+     */
+    void setSelectedOwner(const ArmyID newOwner) {
+        const auto data = getCurrentPanelData();
+        if (data !is null) {
+            if (newOwner == NO_ARMY && !data.neutralAvailable) {
+                error("Attempted to set owner with ID " + formatArmyID(newOwner) +
+                    "to ComboBox in group \"" + data.group + "\", which does not "
+                    "allow a neutral owner.");
+            } else if (data.neutralAvailable) {
+                setSelectedItem(data.comboBoxFullname,
+                    newOwner == NO_ARMY ? 0 : newOwner + 1);
+            } else {
+                setSelectedItem(data.comboBoxFullname, newOwner);
+            }
+        }
     }
     
     /**
@@ -248,17 +274,17 @@ class ObjectDialog {
 
         if (selectTab) setSelectedTab(tabsName, getTabCount(tabsName) - 1);
         data.comboBox = data.group + "OwnerCombobox";
-        const auto ownerComboBox = ownerComboboxGroup + "." + data.comboBox;
-        addWidget("ComboBox", ownerComboBox);
-        connectSignalHandler(ownerComboBox,
+        data.comboBoxFullname = ownerComboboxGroup + "." + data.comboBox;
+        addWidget("ComboBox", data.comboBoxFullname);
+        connectSignalHandler(data.comboBoxFullname,
             SignalHandler(this.comboBoxSignalHandler));
-        setWidgetSize(ownerComboBox, "100%", "100%");
-        if (data.neutralAvailable) addItem(ownerComboBox, "neutral");
+        setWidgetSize(data.comboBoxFullname, "100%", "100%");
+        if (data.neutralAvailable) addItem(data.comboBoxFullname, "neutral");
         const auto@ countryScriptNames = country.scriptNames;
         for (uint c = 0, len = countryScriptNames.length(); c < len; ++c)
-            addItem(ownerComboBox, country[countryScriptNames[c]].name);
-        setItemsToDisplay(ownerComboBox, data.numberOfOwnerItems);
-        setSelectedItem(ownerComboBox, 0);
+            addItem(data.comboBoxFullname, country[countryScriptNames[c]].name);
+        setItemsToDisplay(data.comboBoxFullname, data.numberOfOwnerItems);
+        setSelectedItem(data.comboBoxFullname, 0);
     }
 
     /**

@@ -32,6 +32,15 @@ std::string formatDay(const awe::Day day) {
 }
 
 /**
+ * Formats an \c ArmyID into a string.
+ * @param  armyID The \c ArmyID to format.
+ * @return The \c ArmyID in string form.
+ */
+std::string formatArmyID(const awe::ArmyID armyID) {
+	return std::to_string(armyID);
+}
+
+/**
  * Parses a \c Day from a string.
  * @param  str       The string to parse.
  * @param  base      The expected base of the number.
@@ -79,6 +88,12 @@ void awe::RegisterGameTypedefs(asIScriptEngine* engine,
 		engine->RegisterTypedef("ArmyID", "uint32");
 		document->DocumentExpectedFunction("typedef uint32 ArmyID",
 			"Index used to identify an army.");
+
+		auto r = engine->RegisterGlobalFunction(
+			"string formatArmyID(const ArmyID)",
+			asFUNCTION(formatArmyID), asCALL_CDECL);
+		document->DocumentGlobalFunction(r, "Formats an <tt>ArmyID</tt> as a "
+			"string.");
 	}
 	if (!engine->GetTypeInfoByName("Day")) {
 		engine->RegisterTypedef("Day", "uint32");
