@@ -150,6 +150,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const bool pick = bool(controls["pick"]) && (
         !bool(mouseInputs["pick"]) || (mouseNotUnderWidget && mouseInMap)
     );
+    const bool delete = bool(controls["delete"]) && (
+        !bool(mouseInputs["delete"]) || (mouseNotUnderWidget && mouseInMap)
+    );
     
     if (paint) {
         // If there isn't a currently selected tile type, do not try to paint with
@@ -170,6 +173,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
             CurrentlySelectedUnitType.object = edit.map.getUnitType(curUnit);
             PaletteWindow.setSelectedOwner(edit.map.getArmyOfUnit(curUnit));
         }
+
+    } else if (delete) {
+        edit.deleteUnit(curUnit);
     }
 }
 

@@ -148,11 +148,7 @@ class EditableMap {
         if (oldUnit == 0 || oldUnitType.scriptName != unitType.scriptName ||
             oldUnitArmyID != armyID) {
             // Delete existing unit, and its army if appropriate.
-            if (oldUnit != 0) {
-                map.deleteUnit(oldUnit);
-                if (map.getUnitsOfArmy(oldUnitArmyID).isEmpty())
-                    map.deleteArmy(oldUnitArmyID);
-            }
+            deleteUnit(oldUnit);
 
             // Create new unit, after creating its army if it doesn't exist yet.
             if (!map.isArmyPresent(armyID)) map.createArmy(army);
@@ -160,6 +156,21 @@ class EditableMap {
             map.setUnitPosition(newUnit, unitPosition);
             map.replenishUnit(newUnit, true);
             map.waitUnit(newUnit, false);
+        }
+    }
+
+    /**
+     * Deletes a given unit, and deletes its army, if that was the army's last
+     * unit.
+     * If \c 0 is given, don't do anything.
+     * @param unit ID of the unit to delete.
+     */
+    void deleteUnit(const UnitID unit) {
+        if (unit != 0) {
+            const auto unitArmyID = map.getArmyOfUnit(unit);
+            map.deleteUnit(unit);
+            if (map.getUnitsOfArmy(unitArmyID).isEmpty())
+                map.deleteArmy(unitArmyID);
         }
     }
 
