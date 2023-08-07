@@ -2988,6 +2988,8 @@ void sfx::gui::_setWidgetBgColour(const std::string& name,
 		IF_WIDGET_IS(Panel, castWidget->getRenderer()->setBackgroundColor(colour);)
 		ELSE_IF_WIDGET_IS(ScrollablePanel,
 			castWidget->getRenderer()->setBackgroundColor(colour);)
+		ELSE_IF_WIDGET_IS(BitmapButton,
+			castWidget->getRenderer()->setBackgroundColor(colour);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the background colour \"{}\" to widget \"{}\", which is "
 		"of type \"{}\", within menu \"{}\".", colour, name, widgetType,

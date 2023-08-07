@@ -8,7 +8,7 @@
  */
 EditableMap@ edit;
 
-const auto BASE_GROUP = "BaseGroup";
+const auto BASE_GROUP = "MapMakerMenu.BaseGroup";
 const auto MENU = BASE_GROUP + ".Menu";
 const auto CLIENT_AREA = BASE_GROUP + ".Main";
 
@@ -32,7 +32,12 @@ MenuItemID MAP_MAKER_FILE_QUIT;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
 
+MenuItemID MAP_MAKER_VIEW_TOOLBAR;
 MenuItemID MAP_MAKER_VIEW_OBJECT_DIALOG;
+
+ToolBar TOOLBAR;
+ToolBarButtonSetUpData PAINT_TOOL("paint", "painttool");
+ToolBarButtonSetUpData DELETE_TOOL("delete", "deletetool");
 
 /**
  * Sets up the map maker menu.
@@ -67,6 +72,7 @@ void MapMakerMenuSetUp() {
     MAP_MAKER_MAP_SET_PROPS = addMenuItem(MENU, "setmapprops");
 
     addMenu(MENU, "view");
+    MAP_MAKER_VIEW_TOOLBAR = addMenuItem(MENU, "toolbar");
     MAP_MAKER_VIEW_OBJECT_DIALOG = addMenuItem(MENU, "objectdialog");
 
     // Dialogs.
@@ -77,6 +83,10 @@ void MapMakerMenuSetUp() {
     // Map properties child window.
 
     MapPropertiesSetUp(CLIENT_AREA);
+
+    // ToolBar.
+
+    TOOLBAR.setUp(CLIENT_AREA + ".ToolBar", {PAINT_TOOL, DELETE_TOOL});
 }
 
 /**
@@ -144,17 +154,14 @@ void MapMakerMenuHandleInput(const dictionary controls,
     same time. Actually, testing it now, that feels intuitive. And no one will be
     doing it anyway. */
     const bool mouseNotUnderWidget = getWidgetUnderMouse().isEmpty();
-    const bool paint = bool(controls["paint"]) && (
-        !bool(mouseInputs["paint"]) || (mouseNotUnderWidget && mouseInMap)
+    const bool action = bool(controls["action"]) && (
+        !bool(mouseInputs["action"]) || (mouseNotUnderWidget && mouseInMap)
     );
     const bool pick = bool(controls["pick"]) && (
         !bool(mouseInputs["pick"]) || (mouseNotUnderWidget && mouseInMap)
     );
-    const bool delete = bool(controls["delete"]) && (
-        !bool(mouseInputs["delete"]) || (mouseNotUnderWidget && mouseInMap)
-    );
     
-    if (paint) {
+    if (action && TOOLBAR.tool == PAINT_TOOL.shortName) {
         // If there isn't a currently selected tile type, do not try to paint with
         // it.
         if (currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null)
@@ -174,7 +181,7 @@ void MapMakerMenuHandleInput(const dictionary controls,
             PaletteWindow.setSelectedOwner(edit.map.getArmyOfUnit(curUnit));
         }
 
-    } else if (delete) {
+    } else if (action && TOOLBAR.tool == DELETE_TOOL.shortName) {
         edit.deleteUnit(curUnit);
     }
 }
@@ -274,6 +281,9 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
 
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
         OpenMapProperties();
+
+    } else if (id == MAP_MAKER_VIEW_TOOLBAR) {
+        TOOLBAR.dock();
 
     } else if (id == MAP_MAKER_VIEW_OBJECT_DIALOG) {
         PaletteWindow.dock();

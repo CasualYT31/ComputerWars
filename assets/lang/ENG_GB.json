@@ -53,6 +53,7 @@
 	"mapfiles": "Map files (*.cwm)",
 	"yes": "Yes",
 	"no": "No",
+	"toolbar": "ToolBar",
 
 	"alert": "Alert!",
 	"mapfilealreadyexists": "The map file \"#\" already exists! Do you wish to overwrite it?",
