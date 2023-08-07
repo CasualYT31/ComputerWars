@@ -39,6 +39,7 @@ string setUpTerrainPanel(string baseLayout) {
 	setWidgetSize(baseLayout, "33.333%", "100%");
 	setGroupPadding(baseLayout, "5%");
 	baseLayout += ".terrainLayout";
+    const auto verticalLayout = baseLayout;
 	addWidget("VerticalLayout", baseLayout);
 	baseLayout += ".";
 
@@ -70,6 +71,7 @@ string setUpTerrainPanel(string baseLayout) {
 	addWidget("Label", baseLayout + "description");
 
 	addWidget("VerticalLayout", baseLayout + "moveCosts");
+    setWidgetRatioInLayout(verticalLayout, 0, 1.5f);
     return ret;
 }
 

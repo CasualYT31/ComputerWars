@@ -2,7 +2,7 @@
 	"PLAINS": {
 		"longname": "PLAINS_longname",
 		"shortname": "PLAINS_shortname",
-		"icon": "",
+		"icon": "plains",
 		"description": "PLAINS_description",
 		"hp": 0,
 		"defence": 1,
@@ -31,7 +31,7 @@
 	"ROAD": {
 		"longname": "ROAD_longname",
 		"shortname": "ROAD_shortname",
-		"icon": "",
+		"icon": "road",
 		"description": "ROAD_description",
 		"hp": 0,
 		"defence": 0,
@@ -47,7 +47,7 @@
 	"BRIDGE": {
 		"longname": "BRIDGE_longname",
 		"shortname": "BRIDGE_shortname",
-		"icon": "",
+		"icon": "bridge",
 		"description": "BRIDGE_description",
 		"hp": 0,
 		"defence": 0,
@@ -63,7 +63,7 @@
 	"MOUNTAIN": {
 		"longname": "MOUNTAIN_longname",
 		"shortname": "MOUNTAIN_shortname",
-		"icon": "",
+		"icon": "mountain",
 		"description": "MOUNTAIN_description",
 		"hp": 0,
 		"defence": 4,
@@ -77,7 +77,7 @@
 	"WOODS": {
 		"longname": "WOODS_longname",
 		"shortname": "WOODS_shortname",
-		"icon": "",
+		"icon": "woods",
 		"description": "WOODS_description",
 		"hp": 0,
 		"defence": 2,
@@ -93,7 +93,7 @@
 	"RIVER": {
 		"longname": "RIVER_longname",
 		"shortname": "RIVER_shortname",
-		"icon": "",
+		"icon": "river",
 		"description": "RIVER_description",
 		"hp": 0,
 		"defence": 0,
@@ -107,7 +107,7 @@
 	"REEF": {
 		"longname": "REEF_longname",
 		"shortname": "REEF_shortname",
-		"icon": "",
+		"icon": "sea",
 		"description": "REEF_description",
 		"hp": 0,
 		"defence": 1,
@@ -120,7 +120,7 @@
 	"SHOAL": {
 		"longname": "SHOAL_longname",
 		"shortname": "SHOAL_shortname",
-		"icon": "",
+		"icon": "shoal",
 		"description": "SHOAL_description",
 		"hp": 0,
 		"defence": 0,
@@ -137,7 +137,7 @@
 	"PIPE": {
 		"longname": "PIPE_longname",
 		"shortname": "PIPE_shortname",
-		"icon": "",
+		"icon": "noentry",
 		"description": "PIPE_description",
 		"hp": 0,
 		"defence": 0,
@@ -148,7 +148,7 @@
 	"PIPESEAM": {
 		"longname": "PIPESEAM_longname",
 		"shortname": "PIPESEAM_shortname",
-		"icon": "",
+		"icon": "noentry",
 		"description": "PIPESEAM_description",
 		"hp": 99,
 		"defence": 0,
@@ -159,7 +159,7 @@
 	"MISSILESILO": {
 		"longname": "MISSILESILO_longname",
 		"shortname": "MISSILESILO_shortname",
-		"icon": "",
+		"icon": "silo",
 		"description": "MISSILESILO_description",
 		"hp": 0,
 		"defence": 3,
@@ -175,7 +175,7 @@
 	"CITY": {
 		"longname": "CITY_longname",
 		"shortname": "CITY_shortname",
-		"icon": "",
+		"icon": "city",
 		"description": "CITY_description",
 		"hp": 20,
 		"defence": 3,
@@ -191,7 +191,7 @@
 	"BASE": {
 		"longname": "BASE_longname",
 		"shortname": "BASE_shortname",
-		"icon": "",
+		"icon": "base",
 		"description": "BASE_description",
 		"hp": 20,
 		"defence": 3,
@@ -208,7 +208,7 @@
 	"AIRPORT": {
 		"longname": "AIRPORT_longname",
 		"shortname": "AIRPORT_shortname",
-		"icon": "",
+		"icon": "airport",
 		"description": "AIRPORT_description",
 		"hp": 20,
 		"defence": 3,
@@ -224,7 +224,7 @@
 	"PORT": {
 		"longname": "PORT_longname",
 		"shortname": "PORT_shortname",
-		"icon": "",
+		"icon": "port",
 		"description": "PORT_description",
 		"hp": 20,
 		"defence": 3,
@@ -242,7 +242,7 @@
 	"COMTOWER": {
 		"longname": "COMTOWER_longname",
 		"shortname": "COMTOWER_shortname",
-		"icon": "",
+		"icon": "silo",
 		"description": "COMTOWER_description",
 		"hp": 20,
 		"defence": 3,
@@ -269,6 +269,24 @@
 			"TREAD": 1,
 			"AIR": 1,
 			"SLIME": 1
+		},
+		"pictures": {
+			"ORANGE": "oshq",
+			"BLUE": "bmhq",
+			"GREEN": "gehq",
+			"YELLOW": "ychq",
+			"BLACK": "bhhq",
+			"RED": "rfhq",
+			"GREY": "gshq",
+			"BROWN": "bdhq",
+			"AMBER": "abhq",
+			"JADE": "jshq",
+			"COBALT": "cihq",
+			"PINK": "pchq",
+			"TEAL": "tghq",
+			"PURPLE": "plhq",
+			"ACID": "arhq",
+			"WHITE": "wnhq"
 		}
 	},
 	"VOLCANO": {
@@ -295,7 +313,22 @@
 			"SLIME": 1
 		},
 		"pictures": {
-			"ORANGE": "oshq"
+			"ORANGE": "oshq",
+			"BLUE": "bmhq",
+			"GREEN": "gehq",
+			"YELLOW": "ychq",
+			"BLACK": "bhhq",
+			"RED": "rfhq",
+			"GREY": "gshq",
+			"BROWN": "bdhq",
+			"AMBER": "abhq",
+			"JADE": "jshq",
+			"COBALT": "cihq",
+			"PINK": "pchq",
+			"TEAL": "tghq",
+			"PURPLE": "plhq",
+			"ACID": "arhq",
+			"WHITE": "wnhq"
 		}
 	}
 }
