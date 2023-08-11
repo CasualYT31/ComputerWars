@@ -279,10 +279,7 @@ class ObjectDialog {
         connectSignalHandler(data.comboBoxFullname,
             SignalHandler(this.comboBoxSignalHandler));
         setWidgetSize(data.comboBoxFullname, "100%", "100%");
-        if (data.neutralAvailable) addItem(data.comboBoxFullname, "neutral");
-        const auto@ countryScriptNames = country.scriptNames;
-        for (uint c = 0, len = countryScriptNames.length(); c < len; ++c)
-            addItem(data.comboBoxFullname, country[countryScriptNames[c]].name);
+        awe::addCountriesToList(data.comboBoxFullname, data.neutralAvailable);
         setItemsToDisplay(data.comboBoxFullname, data.numberOfOwnerItems);
         setSelectedItem(data.comboBoxFullname, 0);
     }

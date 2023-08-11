@@ -837,6 +837,21 @@ namespace awe {
 		awe::UnitID getUnitWhichContainsUnit(const awe::UnitID unit) const;
 
 		/**
+		 * Gets the ID of the unit that a given unit is loaded on, directly or
+		 * indirectly.
+		 * Gets the ID of the unit that has a valid position on the map and that
+		 * either directly or indirectly contains the given unit. If the given unit
+		 * is not loaded onto any other unit, then \c 0 will be returned.
+		 * @param  unit The ID of the unit which should be loaded onto another.
+		 * @return If the given unit is loaded, this method will find the unit it
+		 *         is loaded on, and if that unit is loaded, it will then find the
+		 *         unit \em it is loaded on, etc. When an unloaded unit is
+		 *         discovered, its ID will be returned. If the given unit was
+		 *         present, but unloaded, \c unit will be returned.
+		 */
+		awe::UnitID getUnloadedUnitWhichContainsUnit(const awe::UnitID unit) const;
+
+		/**
 		 * Finds out if a unit is loaded onto another.
 		 * @param  unit The ID of the unit to test for.
 		 * @param  on   The ID of the unit which should have \c unit on it.

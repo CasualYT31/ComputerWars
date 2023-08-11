@@ -137,8 +137,7 @@ class ArmyWidget {
                 setWidgetVisibility(tagCO, false);
             }
 
-            setWidgetText(funds, "~G. " +
-                formatInt(game.map.getArmyFunds(armyID)));
+            setWidgetText(funds, "price", {any(game.map.getArmyFunds(armyID))});
         } else {
             setWidgetBackgroundColour(panel, Colour(255, 255, 255, alpha));
             setWidgetText(team, "~");

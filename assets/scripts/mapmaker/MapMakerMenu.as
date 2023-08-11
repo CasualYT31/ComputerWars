@@ -34,10 +34,14 @@ MenuItemID MAP_MAKER_MAP_SET_PROPS;
 
 MenuItemID MAP_MAKER_VIEW_TOOLBAR;
 MenuItemID MAP_MAKER_VIEW_OBJECT_DIALOG;
+MenuItemID MAP_MAKER_VIEW_TILE_PROPS;
 
 ToolBar TOOLBAR;
 ToolBarButtonSetUpData PAINT_TOOL("paint", "painttool");
 ToolBarButtonSetUpData DELETE_TOOL("delete", "deletetool");
+
+TilePropertiesWindow TilePropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
+    MESSAGE_BOX_GROUP);
 
 /**
  * Sets up the map maker menu.
@@ -74,6 +78,7 @@ void MapMakerMenuSetUp() {
     addMenu(MENU, "view");
     MAP_MAKER_VIEW_TOOLBAR = addMenuItem(MENU, "toolbar");
     MAP_MAKER_VIEW_OBJECT_DIALOG = addMenuItem(MENU, "objectdialog");
+    MAP_MAKER_VIEW_TILE_PROPS = addMenuItem(MENU, "tileprops");
 
     // Dialogs.
 
@@ -83,6 +88,10 @@ void MapMakerMenuSetUp() {
     // Map properties child window.
 
     MapPropertiesSetUp(CLIENT_AREA);
+
+    // Tile properties child window.
+
+    TilePropertiesDialog.setUp(CLIENT_AREA);
 
     // ToolBar.
 
@@ -102,6 +111,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
     // If there currently isn't a map loaded, or it is 0x0 tiles, then don't try
     // selecting any tiles or zooming in or out.
     if (edit is null) return;
+    // If the BASE_GROUP is disabled, we can assume a MessageBox is open, so we
+    // must prevent input until it is re-enabled.
+    if (!getWidgetEnabled(BASE_GROUP)) return;
 
     bool mouseInMap = edit.map.getMapBoundingBox().contains(currentPosition);
     // Handle mouse input. Ignore the mouse if the game doesn't have focus.
@@ -160,6 +172,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const bool pick = bool(controls["pick"]) && (
         !bool(mouseInputs["pick"]) || (mouseNotUnderWidget && mouseInMap)
     );
+    const bool tileinfo = bool(controls["tileinfo"]) && (
+        !bool(mouseInputs["tileinfo"]) || (mouseNotUnderWidget && mouseInMap)
+    );
     
     if (action && TOOLBAR.tool == PAINT_TOOL.shortName) {
         // If there isn't a currently selected tile type, do not try to paint with
@@ -184,6 +199,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
     } else if (action && TOOLBAR.tool == DELETE_TOOL.shortName) {
         edit.deleteUnit(curUnit);
     }
+
+    // If more detail on the current tile is desired, display its information.
+    if (tileinfo) edit.selectTile(curTile);
 }
 
 /**
@@ -288,6 +306,9 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
     } else if (id == MAP_MAKER_VIEW_OBJECT_DIALOG) {
         PaletteWindow.dock();
 
+    } else if (id == MAP_MAKER_VIEW_TILE_PROPS) {
+        TilePropertiesDialog.dock();
+
     } else {
         error("Unrecognised menu item ID " + awe::formatMenuItemID(id) +
             " received in the Map Maker menu!");
@@ -309,7 +330,8 @@ awe::EmptyCallback@ FileDialogOverwrite;
  */
 void createNewMap() {
     quitEditMap(function() {
-        @edit = EditableMap(createMap(FileDialogFile));
+        TilePropertiesDialog.deselect();
+        @edit = EditableMap(createMap(FileDialogFile), TilePropertiesDialog);
         OpenMapProperties();
     });
 }
@@ -344,7 +366,8 @@ void MapMakerMenu_NewMap_Closing(bool&out abort) {
 void MapMakerMenu_OpenMap_FileSelected() {
     FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
     quitEditMap(function() {
-        @edit = EditableMap(loadMap(FileDialogFile));
+        TilePropertiesDialog.deselect();
+        @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog);
     });
 }
 

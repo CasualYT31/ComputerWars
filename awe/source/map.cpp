@@ -378,7 +378,15 @@ void awe::map::Register(asIScriptEngine* engine,
 			"UnitID getUnitWhichContainsUnit(const UnitID)",
 			asMETHOD(awe::map, getUnitWhichContainsUnit), asCALL_THISCALL);
 		document->DocumentObjectMethod(r, "Finds out the unit that a given unit "
-			"is loaded on, if any. Returns 0 otherwise.");
+			"is loaded on, if any. Returns 0 if none.");
+
+		r = engine->RegisterObjectMethod("Map",
+			"UnitID getUnloadedUnitWhichContainsUnit(const UnitID)",
+			asMETHOD(awe::map, getUnloadedUnitWhichContainsUnit), asCALL_THISCALL);
+		document->DocumentObjectMethod(r, "Finds out the unloaded unit that a "
+			"given unit is loaded on, directly or indirectly. Returns 0 if any "
+			"unit in the chain was considered \"not present.\" Returns the given "
+			"<tt>UnitID</tt> if the unit wasn't loaded onto another unit.");
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool isUnitLoadedOntoUnit(const UnitID, const UnitID)",
@@ -1219,15 +1227,21 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 			"owning army ID, which was {}.", id, _units.at(id).getArmy());
 	}
 	// Thirdly, delete all units that are loaded onto this one.
-	auto loaded = _units.at(id).loadedUnits();
-	for (awe::UnitID unit : loaded) {
-		deleteUnit(unit);
+	const auto loaded = _units.at(id).loadedUnits();
+	for (const auto unit : loaded) deleteUnit(unit);
+	// Fourthly, if this unit was loaded onto another, remove it from that unit's
+	// list.
+	const auto loadedOnto = _units.at(id).loadedOnto();
+	if (loadedOnto != 0 && !_units.at(loadedOnto).unloadUnit(id)) {
+		_logger.warning("deleteUnit warning: unit with ID {}, that is being "
+			"deleted, was loaded onto unit with ID {}, but the former could not "
+			"be unloaded from the latter!", id, loadedOnto);
 	}
-	// Fourthly, if this unit was selected, deselect it if it's on top of the
+	// Fifthly, if this unit was selected, deselect it if it's on top of the
 	// stack. If it is further down the stack, then it will have to be removed
 	// later: see popSelectedUnit().
 	if (getSelectedUnit() == id) setSelectedUnit(0);
-	// Fifthly, if this unit has a location override, remove it from the map.
+	// Sixthly, if this unit has a location override, remove it from the map.
 	if (isPreviewUnit(id)) removePreviewUnit(id);
 	// Finally, delete the unit from the main list.
 	_units.erase(id);
@@ -1559,6 +1573,19 @@ awe::UnitID awe::map::getUnitWhichContainsUnit(const awe::UnitID unit) const {
 		return 0;
 	}
 	return _units.at(unit).loadedOnto();
+}
+
+awe::UnitID awe::map::getUnloadedUnitWhichContainsUnit(
+	const awe::UnitID unit) const {
+	if (!_isUnitPresent(unit)) {
+		_logger.error("getUnloadedUnitWhichContainsUnit operation failed: unit "
+			"with ID {} does not exist!", unit);
+		return 0;
+	}
+	const auto loadedOnto = _units.at(unit).loadedOnto();
+	if (loadedOnto == 0) return unit;
+	// Either return 0 on first call or check if unit given by scripts == return.
+	else return getUnloadedUnitWhichContainsUnit(loadedOnto);
 }
 
 bool awe::map::isUnitLoadedOntoUnit(const awe::UnitID unit,
@@ -2527,7 +2554,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	auto mapSize = getMapSize();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
-			if (_selectedUnitRenderData.top().selectedUnit > 0 &&
+			if ((_selectedUnitRenderData.top().selectedUnit > 0 ||
+				_selectedUnitRenderData.top().availableTiles.size() > 0) &&
 				!_selectedUnitRenderData.top().disableRenderingEffects) {
 				sf::Vector2u currentTile(x, y);
 				sf::RenderStates tileStates = states;

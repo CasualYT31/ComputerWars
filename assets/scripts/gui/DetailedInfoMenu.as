@@ -102,7 +102,7 @@ string setUpUnitPanel(string baseLayout) {
 	addWidget("Grid", stats);
 	stats += ".";
 	addWidgetToGrid("Label", stats + "priceLabel", 0, 0);
-	setWidgetText(stats + "priceLabel", "~G.");
+	setWidgetText(stats + "priceLabel", "price", {any("")});
 	addWidgetToGrid("Picture", stats + "fuelIcon", 1, 0);
 	setWidgetSprite(stats + "fuelIcon", "icon", "fuel");
 	addWidgetToGrid("Picture", stats + "ammoIcon", 2, 0);

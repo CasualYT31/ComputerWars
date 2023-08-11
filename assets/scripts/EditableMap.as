@@ -14,17 +14,23 @@ class EditableMap {
     //////////////////
     /**
      * Constructs an editable map from a previously loaded map.
-     * @param mapToEdit The map to edit.
+     * @param mapToEdit   The map to edit.
+     * @param propsWindow The \c TilePropertiesWindow to link up with this
+     *                    \c EditableMap.
      */
-    EditableMap(Map@ mapToEdit) {
+    EditableMap(Map@ mapToEdit, TilePropertiesWindow@ propsWindow) {
         if (mapToEdit is null) {
             error("An invalid Map handle was given to the constructor of "
                 "EditableMap; the game will crash soon!");
+        } else if (propsWindow is null) {
+            error("An invalid TileProperties handle was given to the constructor "
+                "of EditableMap; the game will crash soon!");
         } else {
             @map = mapToEdit;
             map.alwaysShowHiddenUnits(true);
             map.setMapScalingFactor(_mapScalingFactor);
             setNormalCursorSprites();
+            @tilePropsWindow = propsWindow;
         }
     }
 
@@ -100,6 +106,31 @@ class EditableMap {
         map.setSelectedTileByPixel(pixel);
     }
 
+    ////////////////////
+    // MAP OPERATIONS //
+    ////////////////////
+    /**
+     * Updates a map's properties.
+     * @param mapName The name of the map.
+     * @param day     The current day of the map.
+     */
+    void setMapProperties(const string&in mapName, const Day day) {
+        map.setMapName(mapName);
+        map.setDay(day);
+    }
+
+    /**
+     * Resizes a map.
+     * @param mapSize  The new size of the map.
+     * @param tileType The type of tile to create if the map is getting larger.
+     * @param army     The owner to assign to new tiles.
+     */
+    void setMapSize(const Vector2&in mapSize, const string&in tileType,
+        const ArmyID army = NO_ARMY) {
+        map.setMapSize(mapSize, tileType, army);
+        _updateTileProps(tilePropsTile);
+    }
+
     ////////////////////////////////
     // TILE MANAGEMENT OPERATIONS //
     ////////////////////////////////
@@ -118,10 +149,33 @@ class EditableMap {
 
         if (fromType.scriptName != toType.scriptName) {
             map.setTileType(tileToChange, toType.scriptName);
-        }
-        if (oldOwnerID != newOwnerID) {
+            map.setTileOwner(tileToChange, newOwnerID);
+        } else if (oldOwnerID != newOwnerID) {
             map.setTileOwner(tileToChange, newOwnerID);
         }
+        
+        _updateTileProps(tileToChange);
+    }
+
+    /**
+     * Set the HP of the tile that is being displayed in the properties window.
+     * @param  newHP The new HP value to set.
+     * @return The actual HP assigned.
+     */
+    HP setSelectedTileHP(HP newHP) {
+        const auto max = map.getTileType(tilePropsTile).type.maxHP;
+        if (newHP < 0) newHP = 0;
+        else if (newHP > HP(max)) newHP = HP(max);
+        map.setTileHP(tilePropsTile, newHP);
+        return newHP;
+    }
+
+    /**
+     * Set the owner of the tile that is being displayed in the properties window.
+     * @param newOwner The ID of the new owner.
+     */
+    void setSelectedTileOwner(const ArmyID newOwner) {
+        map.setTileOwner(tilePropsTile, newOwner);
     }
 
     ////////////////////////////////
@@ -156,7 +210,27 @@ class EditableMap {
             map.setUnitPosition(newUnit, unitPosition);
             map.replenishUnit(newUnit, true);
             map.waitUnit(newUnit, false);
+
+            _updateTileProps(unitPosition);
         }
+    }
+    /**
+     * Creates a unit, and loads it onto another unit.
+     * The created unit will have the same army as the unit it will be loaded
+     * onto.
+     * @param loadedOnto The ID of the unit to load the new one on to.
+     * @param unitType   Handle to the unit type to assign to the new unit.
+     */
+    void createAndLoadUnit(const UnitID loadedOnto,
+        const UnitType@ const unitType) {
+        const auto army = map.getArmyOfUnit(loadedOnto);
+        const auto newUnit = map.createUnit(unitType.scriptName, army);
+        map.replenishUnit(newUnit, true);
+        map.waitUnit(newUnit, false);
+        map.loadUnit(newUnit, loadedOnto);
+        const auto parentOfLoadedOnto =
+            map.getUnloadedUnitWhichContainsUnit(loadedOnto);
+        _updateTileProps(map.getUnitPosition(parentOfLoadedOnto));
     }
 
     /**
@@ -167,11 +241,100 @@ class EditableMap {
      */
     void deleteUnit(const UnitID unit) {
         if (unit != 0) {
+            const auto parentUnit = map.getUnloadedUnitWhichContainsUnit(unit);
+            const auto parentUnitTile = map.getUnitPosition(parentUnit);
             const auto unitArmyID = map.getArmyOfUnit(unit);
             map.deleteUnit(unit);
             if (map.getUnitsOfArmy(unitArmyID).isEmpty())
                 map.deleteArmy(unitArmyID);
+            _updateTileProps(parentUnitTile);
         }
+    }
+
+    /**
+     * Updates a unit's HP.
+     * @param  unit  The ID of the unit to update.
+     * @param  newHP The new HP to assign to the unit.
+     * @return The actual HP assigned to the unit.
+     */
+    HP setUnitHP(const UnitID unit, HP newHP) {
+        if (unit == 0) return 0;
+        const auto max = map.getUnitType(unit).maxHP;
+        if (newHP < 1) newHP = 1;
+        else if (newHP > HP(max)) newHP = HP(max);
+        map.setUnitHP(unit, newHP);
+        return newHP;
+    }
+
+    /**
+     * Updates a unit's fuel.
+     * @param  unit    The ID of the unit to update.
+     * @param  newFuel The new fuel to assign to the unit.
+     * @return The actual fuel assigned to the unit.
+     */
+    Fuel setUnitFuel(const UnitID unit, Fuel newFuel) {
+        if (unit == 0) return 0;
+        const auto max = map.getUnitType(unit).maxFuel;
+        if (newFuel < 0) newFuel = 0;
+        else if (newFuel > Fuel(max)) newFuel = Fuel(max);
+        map.setUnitFuel(unit, newFuel);
+        return newFuel;
+    }
+
+    /**
+     * Updates a unit's weapon's ammo.
+     * @param  unit    The ID of the unit to update.
+     * @param  weapon  The index of the weapon to update.
+     * @param  newAmmo The new ammo to assign to the unit.
+     * @return The actual ammo assigned to the unit.
+     */
+    Ammo setUnitAmmo(const UnitID unit, const uint64 weapon, Ammo newAmmo) {
+        if (unit == 0) return 0;
+        const auto weaponType = map.getUnitType(unit).weapon(weapon);
+        const auto max = weaponType.maxAmmo;
+        if (newAmmo < 0) newAmmo = 0;
+        else if (newAmmo > Ammo(max)) newAmmo = Ammo(max);
+        map.setUnitAmmo(unit, weaponType.scriptName, newAmmo);
+        return newAmmo;
+    }
+
+    /////////////////////////////////////
+    // TILE PROPERTIES WINDOW HANDLING //
+    /////////////////////////////////////
+    /**
+     * Display tile properties on the given tile.
+     * @param tile The tile to display information on.
+     */
+    void selectTile(const Vector2&in tile) {
+        tilePropsTile = tile;
+        tilePropsTileSet = true;
+        map.clearAvailableTiles();
+        map.addAvailableTile(tile);
+        _updateTileProps(tile);
+    }
+
+    /**
+     * Clear tile properties from the \c TilePropertiesWindow.
+     */
+    void deselectTile() {
+        if (!tilePropsTileSet) return;
+        tilePropsTileSet = false;
+        map.clearAvailableTiles();
+        if (tilePropsWindow !is null) tilePropsWindow.deselect();
+    }
+
+    /**
+     * Updates the linked \c TilePropertiesWindow to ensure it is always
+     * displaying the correct information.
+     * Ensures to disable future calls to this method if \c tilePropsTile becomes
+     * out-of-bounds, until a new tile is selected via \c selectTile().
+     * @param tileThatIsChanging The tile that is changing.
+     */
+    private void _updateTileProps(const Vector2&in tileThatIsChanging) {
+        if (!tilePropsTileSet) return;
+        if (tileThatIsChanging == tilePropsTile)
+            tilePropsWindow.refresh(tilePropsTile);
+        if (map.isOutOfBounds(tilePropsTile)) deselectTile();
     }
 
     /////////
@@ -189,6 +352,21 @@ class EditableMap {
     //////////
     // DATA //
     //////////
+    /**
+     * The \c TilePropertiesWindow to link up with this \c EditableMap.
+     */
+    private TilePropertiesWindow@ tilePropsWindow;
+
+    /**
+     * The currently selected tile used to fill the \c TilePropertiesWindow.
+     */
+    private Vector2 tilePropsTile;
+
+    /**
+     * Does \c tilePropsTile contains a valid value?
+     */
+    private bool tilePropsTileSet = false;
+
     /**
      * The map scaling factor.
      */

@@ -289,14 +289,14 @@ Vector2 GetSizeInEditBoxes() {
  * @param resize \c TRUE if the map should be resized, \c FALSE if not.
  */
 void ApplyChangesAndClose(const bool resize) {
-    edit.map.setMapName(getWidgetText(map_properties_internal::MAP_NAME));
-    edit.map.setDay(parseDay(getWidgetText(map_properties_internal::DAY)));
+    edit.setMapProperties(getWidgetText(map_properties_internal::MAP_NAME),
+        parseDay(getWidgetText(map_properties_internal::DAY)));
     if (resize) {
         if (CurrentlySelectedTileType.owner.isEmpty()) {
-            edit.map.setMapSize(GetSizeInEditBoxes(),
+            edit.setMapSize(GetSizeInEditBoxes(),
                 cast<TileType>(CurrentlySelectedTileType.object).scriptName);
         } else {
-            edit.map.setMapSize(GetSizeInEditBoxes(),
+            edit.setMapSize(GetSizeInEditBoxes(),
                 cast<TileType>(CurrentlySelectedTileType.object).scriptName,
                 country[CurrentlySelectedTileType.owner].turnOrder);
         }

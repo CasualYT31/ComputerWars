@@ -581,6 +581,18 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _getWidgetText), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's caption/text.");
 
+	r = engine->RegisterGlobalFunction("void setWidgetChecked(const string&in, "
+		"const bool)",
+		asMETHOD(sfx::gui, _setWidgetChecked), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's checked state. The name "
+		"of the widget is given, then if it should be checked or not.");
+
+	r = engine->RegisterGlobalFunction("bool isWidgetChecked(const string&in)",
+		asMETHOD(sfx::gui, _isWidgetChecked), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's checked state. The name "
+		"of the widget is given. Returns <tt>FALSE</tt> if the checked status "
+		"could not be retrieved.");
+
 	r = engine->RegisterGlobalFunction(
 		"void onlyAcceptUIntsInEditBox(const string&in)",
 		asMETHOD(sfx::gui, _onlyAcceptUIntsInEditBox),
@@ -593,6 +605,14 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _setWidgetTextSize), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's character size. The name "
 		"of the widget is given, then its new character size.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetTextStyles(const string&in, "
+		"const string&in)",
+		asMETHOD(sfx::gui, _setWidgetTextStyles), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's text styles. The name of "
+		"the widget is given, then its new styles. It can be a combination of "
+		"<a href=\"https://tgui.eu/documentation/1.0/namespacetgui.html#aafa478ba31ef52a263be37506428943b\" target=\"_blank\">"
+		"these enums in string form</a>, joined together using \" | \".");
 
 	r = engine->RegisterGlobalFunction("void setWidgetTextMaximumWidth("
 		"const string&in, const float)",
@@ -734,6 +754,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Gets a widget's selected item's text.");
 
 	r = engine->RegisterGlobalFunction(
+		"array<string>@ getSelectedItemTextHierarchy(const string&in)",
+		asMETHOD(sfx::gui, _getSelectedItemTextHierarchy),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a <tt>TreeView</tt>'s selected "
+		"item's text, including the text of its parents.");
+
+	r = engine->RegisterGlobalFunction(
 		"void setItemsToDisplay(const string&in, const uint64)",
 		asMETHOD(sfx::gui, _setItemsToDisplay), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets the number of items to display in a "
@@ -786,6 +813,13 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's vertical scroll "
 		"amount.");
+
+	r = engine->RegisterGlobalFunction("void setVerticalScrollbarValue("
+		"const string&in, const uint)",
+		asMETHOD(sfx::gui, _setVerticalScrollbarValue),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's vertical scroll "
+		"value.");
 
 	r = engine->RegisterGlobalFunction("float getScrollbarWidth(const string&in)",
 		asMETHOD(sfx::gui, _getScrollbarWidth),
@@ -1050,6 +1084,17 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asMETHOD(sfx::gui, _addMessageBoxButton),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Add a button to a <tt>MessageBox</tt>.");
+
+	// TREEVIEW //
+
+	r = engine->RegisterGlobalFunction(
+		"void addTreeViewItem(const string&in, const array<string>@ const)",
+		asMETHOD(sfx::gui, _addTreeViewItem),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Adds an item to a <tt>TreeView</tt> "
+		"widget. The array describes the hierarchy of the new item. If parent "
+		"items do not exist, then they will be created. Note that "
+		"<tt>TreeView</tt> items are not translated!");
 }
 
 void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
@@ -2126,7 +2171,8 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 	tgui::String type = widget->getWidgetType().toLower();
 	if (type == "button" || type == "editbox" || type == "label" ||
 		type == "picture" || type == "progressbar" || type == "radiobutton" ||
-		type == "spinbutton" || type == "panel" || type == "bitmapbutton") {
+		type == "spinbutton" || type == "panel" || type == "bitmapbutton" ||
+		type == "checkbox") {
 		widget->getSignal("MousePressed").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("MouseReleased").
@@ -2225,7 +2271,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("Full").
 			connectEx(&sfx::gui::signalHandler, this);
-	} else if (type == "radiobutton") {
+	} else if (type == "radiobutton" || type == "checkbox") {
 		widget->getSignal("Checked").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("Unchecked").
@@ -2446,6 +2492,10 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::HorizontalWrap::create();
 	} else if (type == "tabs") {
 		return tgui::Tabs::create();
+	} else if (type == "treeview") {
+		return tgui::TreeView::create();
+	} else if (type == "checkbox") {
+		return tgui::CheckBox::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -2853,7 +2903,8 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
 		std::dynamic_pointer_cast<EditBox>(widget)->setText(text);
 	} else {
 		if (widgetType != "BitmapButton" && widgetType != "Label" &&
-			widgetType != "Button" && widgetType != "ChildWindow")
+			widgetType != "Button" && widgetType != "ChildWindow" &&
+			widgetType != "CheckBox")
 				UNSUPPORTED_WIDGET_TYPE()
 		_setTranslatedString(fullnameAsString, text, variables);
 		_translateWidget(widget);
@@ -2870,6 +2921,26 @@ std::string sfx::gui::_getWidgetText(const std::string& name) {
 	END("Attempted to get the text of a widget \"{}\", which is of type \"{}\", "
 		"within menu \"{}\".", name, widgetType, fullname[0])
 	return "";
+}
+
+void sfx::gui::_setWidgetChecked(const std::string& name, const bool checked) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(RadioButton, castWidget->setChecked(checked);)
+		IF_WIDGET_IS(CheckBox, castWidget->setChecked(checked);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the check status to {} for widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", checked, name, widgetType,
+		fullname[0]);
+}
+
+bool sfx::gui::_isWidgetChecked(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(RadioButton, return castWidget->isChecked();)
+		IF_WIDGET_IS(CheckBox, return castWidget->isChecked();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the check status of a widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+	return false;
 }
 
 void sfx::gui::_onlyAcceptUIntsInEditBox(const std::string& name) {
@@ -2894,6 +2965,15 @@ void sfx::gui::_setWidgetTextSize(const std::string& name,
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the character size {} to widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\".", size, name, widgetType, fullname[0])
+}
+
+void sfx::gui::_setWidgetTextStyles(const std::string& name,
+	const std::string& styles) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Label, castWidget->getRenderer()->setTextStyle({ styles });)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the text styles \"{}\" to widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", styles, name, widgetType, fullname[0])
 }
 
 void sfx::gui::_setWidgetTextMaximumWidth(const std::string& name, const float w) {
@@ -3118,6 +3198,7 @@ void sfx::gui::_clearItems(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ListBox, castWidget->removeAllItems();)
 		ELSE_IF_WIDGET_IS(ComboBox, castWidget->removeAllItems();)
+		ELSE_IF_WIDGET_IS(TreeView, castWidget->removeAllItems();)
 		ELSE_UNSUPPORTED()
 	_originalCaptions.erase(fullnameAsString);
 	END("Attempted to clear all items from widget \"{}\", which is of type "
@@ -3173,6 +3254,23 @@ std::string sfx::gui::_getSelectedItemText(const std::string& name) {
 	END("Attempted to get the text of the selected item of a widget \"{}\", which "
 		"is of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 	return "";
+}
+
+CScriptArray* sfx::gui::_getSelectedItemTextHierarchy(const std::string& name) {
+	auto const arr = _scripts->createArray("string");
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(TreeView,
+			const auto item = castWidget->getSelectedItem();
+			arr->Resize(item.size());
+			asUINT i = 0;
+			for (const auto& parent : item)
+				arr->SetValue(i++, &parent.toStdString());
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the hierarchy of the selected item of a widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", name, widgetType,
+		fullname[0])
+	return arr;
 }
 
 void sfx::gui::_setItemsToDisplay(const std::string& name,
@@ -3286,6 +3384,23 @@ void sfx::gui::_setVerticalScrollbarAmount(const std::string& name,
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the vertical scrollbar amount {} to widget \"{}\", "
 		"which is of type \"{}\", within menu \"{}\".", amount, name, widgetType,
+		fullname[0])
+}
+
+void sfx::gui::_setVerticalScrollbarValue(const std::string& name,
+	const unsigned int value) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ScrollablePanel,
+			if (value > castWidget->getVerticalScrollbarMaximum()) {
+				castWidget->setVerticalScrollbarValue(
+					castWidget->getVerticalScrollbarMaximum());
+			} else {
+				castWidget->setVerticalScrollbarValue(value);
+			}
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the vertical scrollbar value {} to widget \"{}\", which "
+		"is of type \"{}\", within menu \"{}\".", value, name, widgetType,
 		fullname[0])
 }
 
@@ -3846,4 +3961,24 @@ void sfx::gui::_addMessageBoxButton(const std::string& name,
 	END("Attempted to add a button \"{}\" to widget \"{}\", which is of type "
 		"\"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
 	if (variables) variables->Release();
+}
+
+// TREEVIEW //
+
+void sfx::gui::_addTreeViewItem(const std::string& name,
+	const CScriptArray* const hierarchy) {
+	START_WITH_WIDGET(name)
+		if (!hierarchy) ERROR("No item hierarchy was given!")
+		IF_WIDGET_IS(TreeView,
+			std::vector<String> newItem;
+			for (asUINT i = 0, len = hierarchy->GetSize(); i < len; ++i) {
+				newItem.emplace_back(*static_cast<const std::string* const>(
+					hierarchy->At(i)));
+			}
+			castWidget->addItem(newItem, true);
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to add a TreeView item to widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+	if (hierarchy) hierarchy->Release();
 }

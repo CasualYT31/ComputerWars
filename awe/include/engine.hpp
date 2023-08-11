@@ -265,9 +265,10 @@ namespace awe {
 		void _script_quitMap();
 
 		/**
-		 * Translates a string without variables.
+		 * Translates a string, with or without variables.
 		 */
-		std::string _script_translate(const std::string& nativeString) const;
+		std::string _script_translate(const std::string& nativeString,
+			CScriptArray* variables = nullptr) const;
 
 		/**
 		 * Returns the current mouse position, scaled down by \c _scaling.

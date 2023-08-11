@@ -1237,6 +1237,10 @@ namespace sfx {
 		 */
 		std::string _getWidgetText(const std::string& name);
 
+		void _setWidgetChecked(const std::string& name, const bool checked);
+
+		bool _isWidgetChecked(const std::string& name);
+
 		/**
 		 * Sets an \c EditBox to only accept unsigned ints.
 		 * If no widget exists with the given name, or if it doesn't support the
@@ -1253,6 +1257,9 @@ namespace sfx {
 		 * @param size The new character size.
 		 */
 		void _setWidgetTextSize(const std::string& name, const unsigned int size);
+
+		void _setWidgetTextStyles(const std::string& name,
+			const std::string& styles);
 
 		/**
 		 * Sets a widget's text's maximum width.
@@ -1481,6 +1488,8 @@ namespace sfx {
 		 */
 		std::string _getSelectedItemText(const std::string& name);
 
+		CScriptArray* _getSelectedItemTextHierarchy(const std::string& name);
+
 		/**
 		 * Sets the number of items to display in a \c ComboBox.
 		 * If no widget exists with the given name, or if it doesn't support the
@@ -1574,6 +1583,9 @@ namespace sfx {
 		 */
 		void _setVerticalScrollbarAmount(const std::string& name,
 			const unsigned int amount);
+
+		void _setVerticalScrollbarValue(const std::string& name,
+			const unsigned int value);
 
 		/**
 		 * Gets the width of the scrollbars in a \c ScrollablePanel.
@@ -1950,6 +1962,20 @@ namespace sfx {
 		 */
 		void _addMessageBoxButton(const std::string& name, const std::string& text,
 			CScriptArray* variables);
+
+		// TREEVIEW //
+
+		/**
+		 * Adds an item to a \c TreeView.
+		 * If no widget exists with the given name, or if it doesn't support the
+		 * operation, then an error will be logged and no widget will be changed.\n
+		 * @warning Note that \c TreeView items cannot be translated!
+		 * @param   name      The name of the \c TreeView to edit.
+		 * @param   hierarchy The new item hierarchy. If any parent item does not
+		 *                    exist, they will be created.
+		 */
+		void _addTreeViewItem(const std::string& name,
+			const CScriptArray* const hierarchy);
 
 		//////////
 		// DATA //

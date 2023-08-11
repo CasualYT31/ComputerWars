@@ -305,11 +305,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Returns the render window's client "
 		"region's size, in pixels.");
 
-	r = engine->RegisterGlobalFunction("string translate(const string&in)",
+	r = engine->RegisterGlobalFunction(
+		"string translate(const string&in, array<any>@ = null)",
 		asMETHOD(awe::game_engine, _script_translate),
 		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Translates a string without inserting "
-		"any variables.");
+	document->DocumentGlobalFunction(r, "Translates a string with or without "
+		"variables.");
 
 	r = engine->RegisterGlobalFunction("string execute(string)",
 		asMETHOD(engine::scripts, executeCode),
@@ -618,9 +619,39 @@ void awe::game_engine::_script_quitMap() {
 	_gui->setGUI(_menuBeforeMapLoad);
 }
 
-std::string awe::game_engine::_script_translate(
-	const std::string& nativeString) const {
-	return _dictionary->operator()(nativeString);
+std::string awe::game_engine::_script_translate(const std::string& nativeString,
+	CScriptArray* variables) const {
+	if (variables) {
+		std::string translatedString = (*_dictionary)(nativeString);
+		for (asUINT i = 0, len = variables->GetSize(); i < len; ++i) {
+			CScriptAny* var = static_cast<CScriptAny*>(variables->At(i));
+			auto type = var->GetTypeId();
+			if (type == _scripts->getTypeID("int64")) {
+				asINT64 val = 0;
+				var->Retrieve(val);
+				translatedString =
+					engine::expand_string::insert(translatedString, val);
+			} else if (type == _scripts->getTypeID("double")) {
+				double val = 0.0;
+				var->Retrieve(val);
+				translatedString =
+					engine::expand_string::insert(translatedString, val);
+			} else if (type == _scripts->getTypeID("string")) {
+				std::string val;
+				var->Retrieve(&val, type);
+				translatedString =
+					engine::expand_string::insert(translatedString, val);
+			} else {
+				_logger.warning("Unsupported type \"{}\" given when translating "
+					"string \"{}\": inserting blank string instead.",
+					_scripts->getTypeName(type), nativeString);
+				translatedString =
+					engine::expand_string::insert(translatedString, "");
+			}
+		}
+		variables->Release();
+		return translatedString;
+	} else return (*_dictionary)(nativeString);
 }
 
 sf::Vector2i awe::game_engine::_script_scaledMousePosition() const {

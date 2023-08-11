@@ -157,5 +157,17 @@
 			2
 		],
 		"type": 1
+	},
+	"tileinfo": {
+		"keys": [
+			23
+		],
+		"mouse": [
+			1
+		],
+		"buttons": [
+			1
+		],
+		"type": 1
 	}
 }

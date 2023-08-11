@@ -76,8 +76,8 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 		const string y = formatUInt(uint(i / columnCount)
 			* HEIGHT) + "px";
 			setWidgetPosition(widget, x, y);
-		setWidgetText(widget, "~" + translate(type.name) + " (G. " +
-			formatUInt(type.cost) + ")");
+		setWidgetText(widget, "~" + translate(type.name) + " (" +
+			translate("price", {any(type.cost)}) + ")");
 	}
     // Now organise directional flow.
     for (uint col = 0, cols = widgetNames.length(); col < cols; ++col) {
@@ -226,7 +226,8 @@ void BaseMenuHandleSignal(const string&in widgetName, const string&in signal) {
 		const Funds current = game.map.getArmyFunds(army);
 		const Funds cost = type.cost;
 		const Funds result = current - cost;
-		setWidgetText("calc.label", "~G. " + formatInt(current) + " - G. " +
-			formatInt(cost) + " = G. " + formatInt(result));
+		setWidgetText("calc.label", "~" + translate("price", {any(current)}) +
+            " - " + translate("price", {any(cost)}) + " = " +
+            translate("price", {any(result)}));
 	}
 }
