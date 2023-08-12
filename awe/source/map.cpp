@@ -159,6 +159,25 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getMapSize), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"bool fillMap(const string&in, const ArmyID = NO_ARMY)",
+			asMETHODPR(awe::map, fillMap, (const std::string&, const awe::ArmyID),
+				bool), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool rectangleFillTiles(const Vector2&in, const Vector2&in,"
+				"const string& in, const ArmyID = NO_ARMY)",
+			asMETHODPR(awe::map, rectangleFillTiles, (const sf::Vector2u&,
+				const sf::Vector2u&, const std::string&, const awe::ArmyID), bool),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool rectangleFillUnits(const Vector2&in, const Vector2&in,"
+			"const string& in, const ArmyID)",
+			asMETHODPR(awe::map, rectangleFillUnits, (const sf::Vector2u&,
+				const sf::Vector2u&, const std::string&, const awe::ArmyID), bool),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"bool isOutOfBounds(const Vector2&in) const",
 			asMETHOD(awe::map, _isOutOfBounds), asCALL_THISCALL);
 
@@ -423,11 +442,6 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getTileTypeObject), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"bool fillMap(const string&in, const ArmyID = NO_ARMY)",
-			asMETHODPR(awe::map, fillMap, (const std::string&, const awe::ArmyID),
-				bool), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
 			"void setTileHP(const Vector2&in, const HP)",
 			asMETHOD(awe::map, setTileHP), asCALL_THISCALL);
 
@@ -530,6 +544,26 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"Quadrant getCursorQuadrant() const",
 			asMETHOD(awe::map, getCursorQuadrant), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setRectangleSelectionStart(const Vector2&in)",
+			asMETHOD(awe::map, setRectangleSelectionStart), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setRectangleSelectionEnd(const Vector2&in)",
+			asMETHOD(awe::map, setRectangleSelectionEnd), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void removeRectangleSelection()",
+			asMETHOD(awe::map, removeRectangleSelection), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"Vector2 getRectangleSelectionStart() const",
+			asMETHOD(awe::map, getRectangleSelectionStart), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"Vector2 getRectangleSelectionEnd() const",
+			asMETHOD(awe::map, getRectangleSelectionEnd), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"void setULCursorSprite(const string&in)",
@@ -755,6 +789,7 @@ std::string awe::map::getMapName() const {
 void awe::map::setMapSize(const sf::Vector2u& dim,
 	const std::shared_ptr<const awe::tile_type>& tile, const awe::ArmyID owner) {
 	if (dim == getMapSize()) return;
+	removeRectangleSelection();
 	// First, resize the tiles vectors accordingly.
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
 	_tiles.resize(dim.x);
@@ -803,6 +838,119 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile,
 	const awe::ArmyID owner) {
 	setMapSize(dim, _tileTypes->operator[](tile), owner);
+}
+
+bool awe::map::fillMap(const std::shared_ptr<const awe::tile_type>& type,
+	const awe::ArmyID owner) {
+	if (!type) {
+		_logger.error("fillMap operation failed: an empty tile type was given!");
+		return false;
+	}
+	return rectangleFillTiles(sf::Vector2u(0, 0),
+		getMapSize() - sf::Vector2u(1, 1), type, owner);
+}
+
+bool awe::map::fillMap(const std::string& type, const awe::ArmyID owner) {
+	return fillMap(_tileTypes->operator[](type), owner);
+}
+
+bool awe::map::rectangleFillTiles(const sf::Vector2u& start,
+	const sf::Vector2u& end, const std::shared_ptr<const awe::tile_type>& type,
+	const awe::ArmyID owner) {
+	if (!type) {
+		_logger.error("rectangleFillTiles operation failed: an empty tile type "
+			"was given!");
+		return false;
+	}
+	if (_isOutOfBounds(start)) {
+		_logger.error("rectangleFillTiles operation failed: the start tile {} is "
+			"out of bounds.", start);
+		return false;
+	}
+	if (_isOutOfBounds(end)) {
+		_logger.error("rectangleFillTiles operation failed: the end tile {} is "
+			"out of bounds.", end);
+		return false;
+	}
+	bool ret = true;
+	const unsigned int startX = std::min(start.x, end.x),
+		startY = std::min(start.y, end.y);
+	for (unsigned int x = startX, width = static_cast<unsigned int>(::abs(
+		static_cast<sf::Int64>(start.x) - static_cast<sf::Int64>(end.x)) + 1);
+		x < startX + width; ++x) {
+		for (unsigned int y = startY, height = static_cast<unsigned int>(::abs(
+			static_cast<sf::Int64>(start.y) - static_cast<sf::Int64>(end.y)) + 1);
+			y < startY + height; ++y) {
+			if (!setTileType({ x, y }, type)) ret = false;
+			setTileOwner({ x, y }, owner);
+		}
+	}
+	_changed = true;
+	return ret;
+}
+
+bool awe::map::rectangleFillTiles(const sf::Vector2u& start,
+	const sf::Vector2u& end, const std::string& type, const awe::ArmyID owner) {
+	return rectangleFillTiles(start, end, _tileTypes->operator[](type), owner);
+}
+
+bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
+	const sf::Vector2u& end, const std::shared_ptr<const awe::unit_type>& type,
+	const awe::ArmyID army) {
+	if (!type) {
+		_logger.error("rectangleFillUnits operation failed: an empty tile type "
+			"was given!");
+		return false;
+	}
+	if (army == awe::NO_ARMY) {
+		_logger.error("rectangleFillUnits operation failed: the given army was "
+			"{}, which is invalid!", army);
+		return false;
+	}
+	if (_isOutOfBounds(start)) {
+		_logger.error("rectangleFillUnits operation failed: the start tile {} is "
+			"out of bounds.", start);
+		return false;
+	}
+	if (_isOutOfBounds(end)) {
+		_logger.error("rectangleFillUnits operation failed: the end tile {} is "
+			"out of bounds.", end);
+		return false;
+	}
+	if (_countries->getScriptNames().size() <= static_cast<std::size_t>(army)) {
+		_logger.error("rectangleFillUnits operation failed: the army ID {} is "
+			"invalid.", army);
+		return false;
+	}
+	if (!_isArmyPresent(army)) createArmy(_countries->getScriptNames()[army]);
+	bool ret = true;
+	const unsigned int startX = std::min(start.x, end.x),
+		startY = std::min(start.y, end.y);
+	for (unsigned int x = startX, width = static_cast<unsigned int>(::abs(
+		static_cast<sf::Int64>(start.x) - static_cast<sf::Int64>(end.x)) + 1);
+		x < startX + width; ++x) {
+		for (unsigned int y = startY, height = static_cast<unsigned int>(::abs(
+			static_cast<sf::Int64>(start.y) - static_cast<sf::Int64>(end.y)) + 1);
+			y < startY + height; ++y) {
+			auto unit = getUnitOnTile({ x, y });
+			if (unit != 0) deleteUnit(unit);
+			unit = createUnit(type, army);
+			if (unit == 0) {
+				ret = false;
+				continue;
+			}
+			waitUnit(unit, false);
+			replenishUnit(unit, true);
+			setUnitPosition(unit, { x, y });
+		}
+	}
+	_changed = true;
+	return ret;
+}
+
+bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
+	const sf::Vector2u& end, const std::string& type, const awe::ArmyID army) {
+	return rectangleFillUnits(start, end, _unitTypes->operator[](type), army);
 }
 
 void awe::map::setDay(const awe::Day day) noexcept {
@@ -1702,27 +1850,6 @@ const awe::tile_type* awe::map::getTileTypeObject(const sf::Vector2u& pos) const
 	}
 }
 
-bool awe::map::fillMap(const std::shared_ptr<const awe::tile_type>& type,
-	const awe::ArmyID owner) {
-	if (!type) {
-		_logger.error("fillMap operation failed: an empty tile type was given!");
-		return false;
-	}
-	bool ret = true;
-	for (unsigned int x = 0, width = _tiles.size(); x < width; ++x) {
-		for (unsigned int y = 0, height = _tiles[x].size(); y < height; ++y) {
-			if (!setTileType({ x, y }, type)) ret = false;
-			setTileOwner({ x, y }, owner);
-		}
-	}
-	_changed = true;
-	return ret;
-}
-
-bool awe::map::fillMap(const std::string& type, const awe::ArmyID owner) {
-	return fillMap(_tileTypes->operator[](type), owner);
-}
-
 void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {
 	if (!_isOutOfBounds(pos)) {
 		_tiles[pos.x][pos.y].setTileHP(hp);
@@ -2299,6 +2426,27 @@ awe::quadrant awe::map::getCursorQuadrant() const {
 	}
 }
 
+void awe::map::setRectangleSelectionStart(const sf::Vector2u& tile) {
+	if (!_isOutOfBounds(tile)) _startOfRectSel = tile;
+}
+
+void awe::map::setRectangleSelectionEnd(const sf::Vector2u& tile) {
+	if (!_isOutOfBounds(tile)) _endOfRectSel = tile;
+}
+
+void awe::map::removeRectangleSelection() {
+	_startOfRectSel.reset();
+	_endOfRectSel.reset();
+}
+
+sf::Vector2u awe::map::getRectangleSelectionStart() const {
+	return _startOfRectSel ? *_startOfRectSel : sf::Vector2u(0, 0);
+}
+
+sf::Vector2u awe::map::getRectangleSelectionEnd() const {
+	return _endOfRectSel ? *_endOfRectSel : sf::Vector2u(0, 0);
+}
+
 void awe::map::setULCursorSprite(const std::string& sprite) {
 	_ulCursorSprite = sprite;
 	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
@@ -2508,7 +2656,33 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	}
 	_cursor.animate(target);
 
-	// Step 5. update the view to match the target's size, and apply the scaling.
+	// Step 5. the rectangle selection graphic. Doesn't take crazy tile widths into
+	// account.
+	if (_startOfRectSel && _endOfRectSel) {
+		const sf::Vector2f rectSelStart(
+			static_cast<float>(awe::tile::MIN_WIDTH) * _startOfRectSel->x +
+			static_cast<float>(awe::tile::MIN_WIDTH) / 2.0f,
+			static_cast<float>(awe::tile::MIN_HEIGHT) * _startOfRectSel->y +
+			static_cast<float>(awe::tile::MIN_HEIGHT) / 2.0f
+		);
+		const sf::Vector2f rectSelEnd(
+			static_cast<float>(awe::tile::MIN_WIDTH) * _endOfRectSel->x +
+			static_cast<float>(awe::tile::MIN_WIDTH) / 2.0f,
+			static_cast<float>(awe::tile::MIN_HEIGHT) * _endOfRectSel->y +
+			static_cast<float>(awe::tile::MIN_HEIGHT) / 2.0f
+		);
+		_rectangle.setPosition(sf::Vector2f{
+			std::min(rectSelStart.x, rectSelEnd.x),
+			std::min(rectSelStart.y, rectSelEnd.y)
+			});
+		_rectangle.setSize(sf::Vector2f{
+			::abs(rectSelStart.x - rectSelEnd.x),
+			::abs(rectSelStart.y - rectSelEnd.y)
+			});
+		_rectangle.setOutlineThickness(_scaling);
+	}
+
+	// Step 6. update the view to match the target's size, and apply the scaling.
 	// Additionally, update the view offset.
 	auto mapPixelSize = mapSize; // Ignore fancy tile heights and widths.
 	mapPixelSize.x *= awe::tile::MIN_WIDTH;
@@ -2651,7 +2825,10 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// Step 4. the cursor.
 	if (!_cursor.getSprite().empty()) target.draw(_cursor, states);
 
-	// Step 5. restore old view.
+	// Step 5. the rectangle selection graphic.
+	if (_startOfRectSel && _endOfRectSel) target.draw(_rectangle, states);
+
+	// Step 6. restore old view.
 	target.setView(oldView);
 }
 
@@ -2728,6 +2905,8 @@ void awe::map::selected_unit_render_data::clearState() {
 }
 
 void awe::map::_initShaders() {
+	_rectangle.setFillColor(sf::Color::Transparent);
+	_rectangle.setOutlineColor(sf::Color::Red);
 	_unavailableTileShader.loadFromMemory("uniform sampler2D texUnit;"
 		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
 		"pixel.xyz /= 2.0; gl_FragColor = pixel;}", sf::Shader::Fragment);

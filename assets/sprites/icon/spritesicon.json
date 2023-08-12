@@ -374,6 +374,10 @@
 			"frames": [ [ 94, 191, 30, 30 ] ],
 			"durations": [ 0 ]
 		},
+		"recttool": {
+			"frames": [ [ 124, 191, 30, 30 ] ],
+			"durations": [ 0 ]
+		},
 		"infmove": {
 			"frames": [ [ 0, 48, 32, 15 ] ],
 			"durations": [ 0 ]

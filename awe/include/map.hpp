@@ -285,6 +285,70 @@ namespace awe {
 		}
 
 		/**
+		 * Fills the map with a given type of tile, and sets their owners.
+		 * If \c nullptr is given, an error will be logged and the method will
+		 * fail.
+		 * @param  type  The type of tile to change each tile in the map to.
+		 * @param  owner The owner to assign to each tile. Can be \c NO_ARMY.
+		 * @return \c TRUE if filling the map was successful, \c FALSE otherwise.
+		 */
+		bool fillMap(const std::shared_ptr<const awe::tile_type>& type,
+			const awe::ArmyID owner);
+
+		/**
+		 * Version of \c fillMap() which accepts a tile type script name.
+		 */
+		bool fillMap(const std::string& type, const awe::ArmyID owner);
+
+		/**
+		 * Fills a selection of tiles on the map with a given type of tile, and
+		 * sets their owners.
+		 * If \c nullptr is given, an error will be logged and the method will
+		 * fail.
+		 * @param  start The tile from which the rectangle spreads.
+		 * @param  end   The tile which the rectangle spreads to.
+		 * @param  type  The type of tile to change each tile in the rectangle to.
+		 * @param  owner The owner to assign to each tile. Can be \c NO_ARMY.
+		 * @return \c TRUE if filling the tiles was successful, \c FALSE otherwise.
+		 */
+		bool rectangleFillTiles(const sf::Vector2u& start, const sf::Vector2u& end,
+			const std::shared_ptr<const awe::tile_type>& type,
+			const awe::ArmyID owner);
+
+		/**
+		 * Version of \c rectangleFillTiles() which accepts a tile type script
+		 * name.
+		 */
+		bool rectangleFillTiles(const sf::Vector2u& start, const sf::Vector2u& end,
+			const std::string& type, const awe::ArmyID owner);
+
+		/**
+		 * Fills a selection of tiles on the map with a given type of unit, and
+		 * deletes any old units that were occupying any of those tiles.
+		 * The newly created units will not be waiting, and will be fully healed
+		 * and replenished.\n
+		 * If \c nullptr or \c NO_ARMY are given, an error will be logged and the
+		 * method will fail.\n
+		 * If the the given army doesn't exist, it will be created.
+		 * @param  start The tile from which the rectangle spreads.
+		 * @param  end   The tile which the rectangle spreads to.
+		 * @param  type  The type of unit to create on each tile in the rectangle.
+		 * @param  army  The army to assign to each unit.
+		 * @return \c TRUE if creating the units was successful, \c FALSE
+		 *         otherwise.
+		 */
+		bool rectangleFillUnits(const sf::Vector2u& start, const sf::Vector2u& end,
+			const std::shared_ptr<const awe::unit_type>& type,
+			const awe::ArmyID army);
+
+		/**
+		 * Version of \c rectangleFillUnits() which accepts a unit type script
+		 * name.
+		 */
+		bool rectangleFillUnits(const sf::Vector2u& start, const sf::Vector2u& end,
+			const std::string& type, const awe::ArmyID army);
+
+		/**
 		 * Sets the current day.
 		 * @param day The new day.
 		 */
@@ -940,22 +1004,6 @@ namespace awe {
 		const awe::tile_type* getTileTypeObject(const sf::Vector2u& pos) const;
 
 		/**
-		 * Fills the map with a given type of tile, and sets their owners.
-		 * If \c nullptr is given, an error will be logged and the method will
-		 * fail.
-		 * @param  type  The type of tile to change each tile in the map to.
-		 * @param  owner The owner to assign to each tile. Can be \c NO_ARMY.
-		 * @return \c TRUE if filling the map was successful, \c FALSE otherwise.
-		 */
-		bool fillMap(const std::shared_ptr<const awe::tile_type>& type,
-			const awe::ArmyID owner);
-
-		/**
-		 * Version of \c fillMap() which accepts a tile type script name.
-		 */
-		bool fillMap(const std::string& type, const awe::ArmyID owner);
-
-		/**
 		 * Sets a tile's HP.
 		 * If a negative value is given, it will be adjusted to \c 0.
 		 * @param pos The X and Y coordinate of the tile to change.
@@ -1392,6 +1440,39 @@ namespace awe {
 		awe::quadrant getCursorQuadrant() const;
 
 		/**
+		 * Determines which tile the selection tile graphic should be drawn from.
+		 * @param tile The tile from which to draw the outline rectangle.
+		 * @sa    \c setRectangleSelectionEnd().
+		 */
+		void setRectangleSelectionStart(const sf::Vector2u& tile);
+
+		/**
+		 * Determines which tile the selection tile graphic should be drawn to.
+		 * @param tile The tile to which the outline rectangle should be drawn.
+		 * @sa    \c setRectangleSelectionStart().
+		 */
+		void setRectangleSelectionEnd(const sf::Vector2u& tile);
+
+		/**
+		 * Clears the rectangle selection.
+		 */
+		void removeRectangleSelection();
+
+		/**
+		 * Retrieves the previously set start tile of the rectangle selection.
+		 * @return The tile from which the rectangle selection is currently being
+		 *         drawn, or <tt>(0, 0)</tt> if there isn't any being drawn.
+		 */
+		sf::Vector2u getRectangleSelectionStart() const;
+
+		/**
+		 * Retrieves the previously set end tile of the rectangle selection.
+		 * @return The tile to which the rectangle selection is currently being
+		 *         drawn, or <tt>(0, 0)</tt> if there isn't any being drawn.
+		 */
+		sf::Vector2u getRectangleSelectionEnd() const;
+
+		/**
 		 * Sets which sprite from the icon spritesheet to use as the cursor when
 		 * the cursor is in the upper left quadrant of the screen.
 		 * If \c _sheet_icon isn't \c nullptr, and the given sprite doesn't exist
@@ -1810,6 +1891,21 @@ namespace awe {
 		 * The currently selected tile.
 		 */
 		sf::Vector2u _sel;
+
+		/**
+		 * The start of the rectangle tile selection.
+		 */
+		std::optional<sf::Vector2u> _startOfRectSel;
+
+		/**
+		 * The end of the rectangle tile selection.
+		 */
+		std::optional<sf::Vector2u> _endOfRectSel;
+
+		/**
+		 * The rectangle selection graphic.
+		 */
+		sf::RectangleShape _rectangle;
 
 		/**
 		 * The army who is having their turn.

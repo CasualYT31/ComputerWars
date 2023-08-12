@@ -89,6 +89,10 @@ void AWEVector2fTypeConstructor(const float x, const float y, void* memory) {
     new(memory) sf::Vector2f(x, y);
 }
 
+void AWEVector2fTypeConstructorFromVector2i(const sf::Vector2i& v, void* memory) {
+    new(memory) sf::Vector2f(v);
+}
+
 void AWEVector2TypeConstructor(const unsigned int x, const unsigned int y,
     void* memory) {
     new(memory) sf::Vector2u(x, y);
@@ -208,6 +212,10 @@ void engine::RegisterVectorTypes(asIScriptEngine* engine,
         engine->RegisterObjectBehaviour("Vector2f", asBEHAVE_CONSTRUCT,
             "void Vector2f(const float, const float)",
             asFUNCTION(AWEVector2fTypeConstructor), asCALL_CDECL_OBJLAST);
+        engine->RegisterObjectBehaviour("Vector2f", asBEHAVE_CONSTRUCT,
+            "void Vector2f(const MousePosition&in)",
+            asFUNCTION(AWEVector2fTypeConstructorFromVector2i),
+            asCALL_CDECL_OBJLAST);
         engine->RegisterObjectMethod("Vector2f", "string toString() const",
             asFUNCTION(AWEVector2fTypeToString), asCALL_CDECL_OBJLAST);
     }

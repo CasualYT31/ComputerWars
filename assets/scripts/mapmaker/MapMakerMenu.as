@@ -41,6 +41,7 @@ MenuItemID MAP_MAKER_VIEW_ARMY_PROPS;
 ToolBar TOOLBAR;
 ToolBarButtonSetUpData PAINT_TOOL("paint", "painttool");
 ToolBarButtonSetUpData DELETE_TOOL("delete", "deletetool");
+ToolBarButtonSetUpData RECT_TOOL("rect", "recttool");
 
 MapPropertiesWindow MapPropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
     MESSAGE_BOX_GROUP);
@@ -91,7 +92,8 @@ void MapMakerMenuSetUp() {
 
     // ToolBar.
 
-    TOOLBAR.setUp(CLIENT_AREA + ".ToolBar", {PAINT_TOOL, DELETE_TOOL});
+    TOOLBAR.setUp(CLIENT_AREA + ".ToolBar",
+        {PAINT_TOOL, DELETE_TOOL, RECT_TOOL });
 
     // Dialogs.
 
@@ -125,6 +127,10 @@ void MapMakerMenuSetUp() {
     );
 }
 
+/// Keeps track of the action control's signal state during the previous
+/// iteration of the HandleInput() function.
+bool prevAction = false;
+
 /**
  * Handles input specific to the \c MapMakerMenu.
  * @param controls         The control map given by the engine.
@@ -157,35 +163,6 @@ void MapMakerMenuHandleInput(const dictionary controls,
 		}
 	}
 
-    // Handle controls.
-	if (bool(controls["up"])) {
-		edit.moveSelectedTileUp();
-	} else if (bool(controls["down"])) {
-		edit.moveSelectedTileDown();
-	} else if (bool(controls["left"])) {
-		edit.moveSelectedTileLeft();
-	} else if (bool(controls["right"])) {
-		edit.moveSelectedTileRight();
-	}
-	if (bool(controls["zoomout"])) {
-        edit.zoomOut();
-	}
-	if (bool(controls["zoomin"])) {
-        edit.zoomIn();
-	}
-
-    // If there isn't a tile currently selected that is in bounds, return now.
-    const auto curTile = edit.map.getSelectedTile();
-    if (edit.map.isOutOfBounds(curTile)) return;
-    const auto curUnit = edit.map.getUnitOnTile(curTile);
-
-    // Get the currently selected tile and unit types.
-    const auto tileTypeSel = cast<TileType>(CurrentlySelectedTileType.object);
-    const auto tileOwnerSel = CurrentlySelectedTileType.owner;
-    const auto unitTypeSel = cast<UnitType>(CurrentlySelectedUnitType.object);
-    const auto unitArmySel = CurrentlySelectedUnitType.owner;
-    const auto currentPaletteWindowTab = PaletteWindow.getSelectedTab();
-
     // Only allow a mouse button to paint if the mouse is not hovering over a
     // widget. It's not perfect but it gets the job done.
     /* Case that doesn't work: if the mouse is hovering over a widget, the user
@@ -202,6 +179,35 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const bool tileinfo = bool(controls["tileinfo"]) && (
         !bool(mouseInputs["tileinfo"]) || (mouseNotUnderWidget && mouseInMap)
     );
+
+    // Handle controls.
+	if (bool(controls["up"])) {
+		edit.moveSelectedTileUp();
+	} else if (bool(controls["down"])) {
+		edit.moveSelectedTileDown();
+	} else if (bool(controls["left"])) {
+		edit.moveSelectedTileLeft();
+	} else if (bool(controls["right"])) {
+		edit.moveSelectedTileRight();
+	}
+    if (bool(controls["zoomout"])) {
+        edit.zoomOut();
+    }
+    if (bool(controls["zoomin"])) {
+        edit.zoomIn();
+    }
+
+    // If there isn't a tile currently selected that is in bounds, return now.
+    const auto curTile = edit.map.getSelectedTile();
+    if (edit.map.isOutOfBounds(curTile)) return;
+    const auto curUnit = edit.map.getUnitOnTile(curTile);
+
+    // Get the currently selected tile and unit types.
+    const auto tileTypeSel = cast<TileType>(CurrentlySelectedTileType.object);
+    const auto tileOwnerSel = CurrentlySelectedTileType.owner;
+    const auto unitTypeSel = cast<UnitType>(CurrentlySelectedUnitType.object);
+    const auto unitArmySel = CurrentlySelectedUnitType.owner;
+    const auto currentPaletteWindowTab = PaletteWindow.getSelectedTab();
     
     if (action && TOOLBAR.tool == PAINT_TOOL.shortName) {
         // If there isn't a currently selected tile type, do not try to paint with
@@ -225,7 +231,29 @@ void MapMakerMenuHandleInput(const dictionary controls,
 
     } else if (action && TOOLBAR.tool == DELETE_TOOL.shortName) {
         edit.deleteUnit(curUnit);
+    
+    } else if (TOOLBAR.tool == RECT_TOOL.shortName) {
+        if (!prevAction && action) {        // Start rectangle.
+            edit.map.setRectangleSelectionStart(curTile);
+        } else if (prevAction && action) {  // Continue rectangle.
+            edit.map.setRectangleSelectionEnd(curTile);
+        } else if (prevAction && !action) { // Finish rectangle.
+            const auto start = edit.map.getRectangleSelectionStart();
+            const auto end = edit.map.getRectangleSelectionEnd();
+            edit.map.removeRectangleSelection();
+            if (currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null) {
+                edit.rectangleFillTiles(start, end, tileTypeSel.scriptName,
+                    tileOwnerSel.isEmpty() ? NO_ARMY :
+                        country[tileOwnerSel].turnOrder);
+            }
+            if (currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null) {
+                edit.rectangleFillUnits(start, end, unitTypeSel.scriptName,
+                    country[unitArmySel].turnOrder);
+            }
+        }
     }
+
+    prevAction = action;
 
     // If more detail on the current tile is desired, display its information.
     if (tileinfo) edit.selectTile(curTile);

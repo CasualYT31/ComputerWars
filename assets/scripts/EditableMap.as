@@ -138,6 +138,28 @@ class EditableMap {
         _updateTileProps(tilePropsTile);
     }
 
+    /**
+     * Changes the tiles within a given rectangle to a given type, and gives them
+     * to the specified army.
+     * @sa \c Map::rectangleFillTiles().
+     */
+    void rectangleFillTiles(const Vector2&in start, const Vector2&in end,
+        const string&in type, const ArmyID owner = NO_ARMY) {
+        map.rectangleFillTiles(start, end, type, owner);
+        _updateTileProps(tilePropsTile);
+    }
+
+    /**
+     * Creates fully replenished units on the tiles within a given rectangle.
+     * @sa \c Map::rectangleFillUnits().
+     */
+    void rectangleFillUnits(const Vector2&in start, const Vector2&in end,
+        const string&in type, const ArmyID army) {
+        map.rectangleFillUnits(start, end, type, army);
+        _updateTileProps(tilePropsTile);
+        _updateArmyProps();
+    }
+
     ////////////////////////////////
     // ARMY MANAGEMENT OPERATIONS //
     ////////////////////////////////
