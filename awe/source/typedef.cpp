@@ -23,6 +23,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "typedef.hpp"
 
 /**
+ * Formats a \c TeamID into a string.
+ * @param  teamID The \c TeamID to format.
+ * @return The \c TeamID in string form.
+ */
+std::string formatTeamID(const awe::TeamID teamID) {
+	return std::to_string(teamID);
+}
+
+/**
+ * Formats a \c Funds into a string.
+ * @param  funds The \c Funds to format.
+ * @return The \c Funds in string form.
+ */
+std::string formatFunds(const awe::Funds funds) {
+	return std::to_string(funds);
+}
+
+/**
  * Formats an \c HP into a string.
  * @param  hp The \c HP to format.
  * @return The \c HP in string form.
@@ -74,6 +92,32 @@ std::string formatDay(const awe::Day day) {
  */
 std::string formatArmyID(const awe::ArmyID armyID) {
 	return std::to_string(armyID);
+}
+
+/**
+ * Parses a \c TeamID from a string.
+ * @param  str       The string to parse.
+ * @param  base      The expected base of the number.
+ * @param  byteCount Stores the number of bytes processed.
+ * @return The \c TeamID value.
+ */
+awe::TeamID parseTeamID(const std::string& str, const unsigned int base = 10,
+	std::size_t* byteCount = nullptr) {
+	if (str.empty()) return 0;
+	return static_cast<awe::TeamID>(std::stoul(str, byteCount, base));
+}
+
+/**
+ * Parses a \c Funds from a string.
+ * @param  str       The string to parse.
+ * @param  base      The expected base of the number.
+ * @param  byteCount Stores the number of bytes processed.
+ * @return The \c Funds value.
+ */
+awe::Funds parseFunds(const std::string& str, const unsigned int base = 10,
+	std::size_t* byteCount = nullptr) {
+	if (str.empty()) return 0;
+	return std::stol(str, byteCount, base);
 }
 
 /**
@@ -147,11 +191,31 @@ void awe::RegisterGameTypedefs(asIScriptEngine* engine,
 		engine->RegisterTypedef("TeamID", "uint8");
 		document->DocumentExpectedFunction("typedef uint8 TeamID",
 			"Index used to identify a team.");
+
+		auto r = engine->RegisterGlobalFunction(
+			"string formatTeamID(const TeamID)",
+			asFUNCTION(formatTeamID), asCALL_CDECL);
+		document->DocumentGlobalFunction(r, "Formats a TeamID value as a string.");
+		r = engine->RegisterGlobalFunction("TeamID parseTeamID(const string&in, "
+			"const uint = 10, uint64&out = 0)",
+			asFUNCTION(parseTeamID), asCALL_CDECL);
+		document->DocumentGlobalFunction(r, "Parses a TeamID value from a "
+			"string.");
 	}
 	if (!engine->GetTypeInfoByName("Funds")) {
 		engine->RegisterTypedef("Funds", "int32");
 		document->DocumentExpectedFunction("typedef int32 Funds",
 			"Represents a fund amount.");
+
+		auto r = engine->RegisterGlobalFunction(
+			"string formatFunds(const Funds)",
+			asFUNCTION(formatFunds), asCALL_CDECL);
+		document->DocumentGlobalFunction(r, "Formats a Funds value as a string.");
+		r = engine->RegisterGlobalFunction("Funds parseFunds(const string&in, "
+			"const uint = 10, uint64&out = 0)",
+			asFUNCTION(parseFunds), asCALL_CDECL);
+		document->DocumentGlobalFunction(r, "Parses a Funds value from a "
+			"string.");
 	}
 	if (!engine->GetTypeInfoByName("HP")) {
 		engine->RegisterTypedef("HP", "int32");

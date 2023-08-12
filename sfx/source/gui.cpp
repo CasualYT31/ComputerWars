@@ -422,6 +422,15 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"additional signal handler that is called before any others. Pass in "
 		"<tt>null</tt> to remove it.");
 
+	r = engine->RegisterGlobalFunction(
+		"void disconnectSignalHandlers(const array<string>@ const)",
+		asMETHOD(sfx::gui, _disconnectSignalHandlers),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "This method disconnects all additional "
+		"signal handlers that have been assigned to each of the widgets given in "
+		"the array. If null is given, a warning will be logged and nothing will "
+		"be changed.");
+
 	r = engine->RegisterGlobalFunction("string getParent(const string&in)",
 		asMETHOD(sfx::gui, _getParent), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "This method returns the full name of the "
@@ -744,6 +753,10 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Selects an item from a widget. The name "
 		"of the widget is given, then the 0-based index of the item to select.");
 
+	r = engine->RegisterGlobalFunction("void deselectItem(const string&in)",
+		asMETHOD(sfx::gui, _deselectItem), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Deselects an item from a widget.");
+
 	r = engine->RegisterGlobalFunction("int getSelectedItem(const string&in)",
 		asMETHOD(sfx::gui, _getSelectedItem), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's selected item's index.");
@@ -969,6 +982,14 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Returns the given widget's titlebar "
 		"height. Returns <tt>0.0f</tt> on error.");
+
+	r = engine->RegisterGlobalFunction(
+		"array<float>@ getBorderWidths(const string&in)",
+		asMETHOD(sfx::gui, _getBorderWidths), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns the given widget's border "
+		"widths. Always returns an array of size four, even if the function "
+		"fails. If the function succeeds, the border widths will be stored in the "
+		"following order: left, top, right, bottom.");
 
 	r = engine->RegisterGlobalFunction("void openChildWindow(const string&in, "
 		"const string&in, const string&in)",
@@ -2630,6 +2651,23 @@ void sfx::gui::_connectSignalHandler(const std::string& name,
 	if (handler) handler->Release();
 }
 
+void sfx::gui::_disconnectSignalHandlers(const CScriptArray* const names) {
+	if (!names) {
+		_logger.warning("Null array given to disconnectSignalHandlers(): doing "
+			"nothing.");
+		return;
+	}
+	for (asUINT i = 0, len = names->GetSize(); i < len; ++i) {
+		const std::string name =
+			*static_cast<const std::string* const>(names->At(i));
+		START_WITH_WIDGET(name)
+			_additionalSignalHandlers.erase(fullnameAsString);
+		END("Attempted to disconnect signal handler from a widget with name "
+			"\"{}\", in menu \"{}\".", name, fullname[0])
+	}
+	names->Release();
+}
+
 std::string sfx::gui::_getParent(const std::string& name) {
 	START_WITH_WIDGET(name)
 		if (fullname.size() < 2)
@@ -3234,6 +3272,16 @@ void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index
 		"within menu \"{}\".", index, name, widgetType, fullname[0])
 }
 
+void sfx::gui::_deselectItem(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ListBox, castWidget->deselectItem();)
+		ELSE_IF_WIDGET_IS(ComboBox, castWidget->deselectItem();)
+		ELSE_IF_WIDGET_IS(TreeView, castWidget->deselectItem();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to deselect the selected item of a widget \"{}\", which is of "
+		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+}
+
 int sfx::gui::_getSelectedItem(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ListBox, return castWidget->getSelectedItemIndex();)
@@ -3261,7 +3309,7 @@ CScriptArray* sfx::gui::_getSelectedItemTextHierarchy(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(TreeView,
 			const auto item = castWidget->getSelectedItem();
-			arr->Resize(item.size());
+			arr->Resize(static_cast<asUINT>(item.size()));
 			asUINT i = 0;
 			for (const auto& parent : item)
 				arr->SetValue(i++, &parent.toStdString());
@@ -3739,6 +3787,28 @@ float sfx::gui::_getTitleBarHeight(const std::string& name) {
 	END("Attempted to get the titlebar height of a widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
 	return 0.0f;
+}
+
+CScriptArray* sfx::gui::_getBorderWidths(const std::string& name) {
+	auto arr = _scripts->createArray("float");
+	arr->Resize(4);
+	static const auto fromBorders = [arr](const Borders& borders) {
+		auto temp = borders.getLeft(); arr->SetValue(0, &temp);
+		      temp = borders.getTop(); arr->SetValue(1, &temp);
+		    temp = borders.getRight(); arr->SetValue(2, &temp);
+		   temp = borders.getBottom(); arr->SetValue(3, &temp);
+	};
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow,
+			fromBorders(castWidget->getRenderer()->getBorders());)
+		ELSE_IF_WIDGET_IS(FileDialog,
+			fromBorders(castWidget->getRenderer()->getBorders());)
+		ELSE_IF_WIDGET_IS(MessageBox,
+			fromBorders(castWidget->getRenderer()->getBorders());)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the border widths of a widget \"{}\", which is of type "
+		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+	return arr;
 }
 
 void sfx::gui::_openChildWindow(const std::string& name, const std::string& x,

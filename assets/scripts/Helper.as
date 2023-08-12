@@ -182,11 +182,28 @@ namespace awe {
      * Adds the list of countries to a \c ComboBox or \c ListBox.
      * @param widget  The widget to amend.
      * @param neutral If \c TRUE, a "Neutral" option will be added first.
+     * @param filter  A list of turn order IDs of countries to exclude from the
+     *                list.
      */
-    void addCountriesToList(const string&in widget, const bool neutral) {
+    void addCountriesToList(const string&in widget, const bool neutral,
+        const array<ArmyID>@ const filter = {}) {
         if (neutral) addItem(widget, "neutral");
         const auto@ countryScriptNames = country.scriptNames;
-        for (uint c = 0, len = countryScriptNames.length(); c < len; ++c)
-            addItem(widget, country[countryScriptNames[c]].name);
+        for (uint c = 0, len = countryScriptNames.length(); c < len; ++c) {
+            if (filter.find(ArmyID(c)) < 0)
+                addItem(widget, country[countryScriptNames[c]].name);
+        }
+    }
+
+    /**
+     * Adds the list of COs to a \c ComboBox or \c ListBox.
+     * @param widget The widget to amend.
+     * @param noCO   If \c TRUE, a "No CO" option will be added first.
+     */
+    void addCOsToList(const string&in widget, const bool noCO) {
+        if (noCO) addItem(widget, "noco");
+        const auto@ coScriptNames = commander.scriptNames;
+        for (uint c = 0, len = coScriptNames.length(); c < len; ++c)
+            addItem(widget, commander[coScriptNames[c]].name);
     }
 }

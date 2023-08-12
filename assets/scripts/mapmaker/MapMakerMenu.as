@@ -35,12 +35,15 @@ MenuItemID MAP_MAKER_MAP_SET_PROPS;
 MenuItemID MAP_MAKER_VIEW_TOOLBAR;
 MenuItemID MAP_MAKER_VIEW_OBJECT_DIALOG;
 MenuItemID MAP_MAKER_VIEW_TILE_PROPS;
+MenuItemID MAP_MAKER_VIEW_ARMY_PROPS;
 
 ToolBar TOOLBAR;
 ToolBarButtonSetUpData PAINT_TOOL("paint", "painttool");
 ToolBarButtonSetUpData DELETE_TOOL("delete", "deletetool");
 
 TilePropertiesWindow TilePropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
+    MESSAGE_BOX_GROUP);
+ArmyPropertiesWindow ArmyPropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
     MESSAGE_BOX_GROUP);
 
 /**
@@ -73,29 +76,25 @@ void MapMakerMenuSetUp() {
     MAP_MAKER_FILE_QUIT = addMenuItem(MENU, "quit");
 
     addMenu(MENU, "map");
-    MAP_MAKER_MAP_SET_PROPS = addMenuItem(MENU, "setmapprops");
+    MAP_MAKER_MAP_SET_PROPS = addMenuItem(MENU, "mapprops");
 
     addMenu(MENU, "view");
     MAP_MAKER_VIEW_TOOLBAR = addMenuItem(MENU, "toolbar");
     MAP_MAKER_VIEW_OBJECT_DIALOG = addMenuItem(MENU, "objectdialog");
     MAP_MAKER_VIEW_TILE_PROPS = addMenuItem(MENU, "tileprops");
+    MAP_MAKER_VIEW_ARMY_PROPS = addMenuItem(MENU, "armyprops");
+
+    // ToolBar.
+
+    TOOLBAR.setUp(CLIENT_AREA + ".ToolBar", {PAINT_TOOL, DELETE_TOOL});
 
     // Dialogs.
 
     PaletteWindow.setUp(DefaultObjectDialogData(CLIENT_AREA));
     PaletteWindow.dock();
-
-    // Map properties child window.
-
     MapPropertiesSetUp(CLIENT_AREA);
-
-    // Tile properties child window.
-
     TilePropertiesDialog.setUp(CLIENT_AREA);
-
-    // ToolBar.
-
-    TOOLBAR.setUp(CLIENT_AREA + ".ToolBar", {PAINT_TOOL, DELETE_TOOL});
+    ArmyPropertiesDialog.setUp(CLIENT_AREA);
 }
 
 /**
@@ -226,6 +225,8 @@ awe::EmptyCallback@ QuitMapAuthorised = function() {
     quitMap();
     CloseMapProperties();
     @edit = null;
+    TilePropertiesDialog.refresh(Vector2(0,0));
+    ArmyPropertiesDialog.refresh();
     if (!(QuitCallback is null)) QuitCallback();
 };
 
@@ -309,6 +310,9 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
     } else if (id == MAP_MAKER_VIEW_TILE_PROPS) {
         TilePropertiesDialog.dock();
 
+    } else if (id == MAP_MAKER_VIEW_ARMY_PROPS) {
+        ArmyPropertiesDialog.restore();
+
     } else {
         error("Unrecognised menu item ID " + awe::formatMenuItemID(id) +
             " received in the Map Maker menu!");
@@ -331,7 +335,9 @@ awe::EmptyCallback@ FileDialogOverwrite;
 void createNewMap() {
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
-        @edit = EditableMap(createMap(FileDialogFile), TilePropertiesDialog);
+        @edit = EditableMap(createMap(FileDialogFile), TilePropertiesDialog,
+            ArmyPropertiesDialog);
+        ArmyPropertiesDialog.refresh();
         OpenMapProperties();
     });
 }
@@ -367,7 +373,9 @@ void MapMakerMenu_OpenMap_FileSelected() {
     FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
-        @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog);
+        @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
+            ArmyPropertiesDialog);
+        ArmyPropertiesDialog.refresh();
     });
 }
 

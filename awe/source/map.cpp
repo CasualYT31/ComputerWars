@@ -827,7 +827,7 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
 	if (_isArmyPresent(country->getTurnOrder())) {
 		_logger.error("createArmy operation cancelled: attempted to create an "
 			"army with a country, \"{}\", that already existed on the map!",
-			country->getName());
+			country->getScriptName());
 		return false;
 	}
 	// Create the army.

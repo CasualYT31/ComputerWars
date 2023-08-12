@@ -182,15 +182,6 @@ class TilePropertiesWindow {
         setWidgetOrigin(tileHPEditBox, 0.5f, 0.5f);
         setWidgetPosition(tileHPEditBox, "50%", "50%");
         onlyAcceptUIntsInEditBox(tileHPEditBox);
-        connectSignalHandler(tileHPEditBox, function(widgetName, signalName){
-            if (signalName == "TextChanged") {
-                const auto text = getWidgetText(widgetName);
-                const auto hp = parseHP(text);
-                const auto actualHP = edit.setSelectedTileHP(hp);
-                if (hp != actualHP || text.isEmpty())
-                    setWidgetText(widgetName, formatHP(actualHP));
-            }
-        });
 
         const auto slashLabelGroup = hpLayout + ".SlashLabelGroup";
         addWidget("Group", slashLabelGroup);
@@ -232,8 +223,6 @@ class TilePropertiesWindow {
         setWidgetPosition(tileOwnerComboBox, "50%", "50%");
         awe::addCountriesToList(tileOwnerComboBox, true);
         setItemsToDisplay(tileOwnerComboBox, 6);
-        connectSignalHandler(tileOwnerComboBox,
-            SignalHandler(this.tileOwnerComboBoxSignalHandler));
 
         // Units header.
         const auto unitsHeaderGroup = tilesLayout + ".UnitsHeaderGroup";
@@ -255,8 +244,6 @@ class TilePropertiesWindow {
         unitTreeView = unitsTreeViewGroup + ".UnitsTreeView";
         addWidget("TreeView", unitTreeView);
         setWidgetSize(unitTreeView, "100%", "100%");
-        connectSignalHandler(unitTreeView,
-            SignalHandler(this.unitTreeViewSignalHandler));
 
         // UNITS //
         
@@ -349,8 +336,6 @@ class TilePropertiesWindow {
         setWidgetOrigin(unitHPEditBox, 0.5f, 0.5f);
         setWidgetPosition(unitHPEditBox, "50%", "50%");
         onlyAcceptUIntsInEditBox(unitHPEditBox);
-        connectSignalHandler(unitHPEditBox,
-            SignalHandler(this.unitHPEditBoxSignalHandler));
 
         const auto slashLabelGroup2 = unitHPLayout + ".SlashLabelGroup";
         addWidget("Group", slashLabelGroup2);
@@ -391,8 +376,6 @@ class TilePropertiesWindow {
         setWidgetOrigin(unitFuelEditBox, 0.5f, 0.5f);
         setWidgetPosition(unitFuelEditBox, "50%", "50%");
         onlyAcceptUIntsInEditBox(unitFuelEditBox);
-        connectSignalHandler(unitFuelEditBox,
-            SignalHandler(this.unitFuelEditBoxSignalHandler));
 
         const auto slashLabelGroup3 = unitFuelLayout + ".SlashLabelGroup";
         addWidget("Group", slashLabelGroup3);
@@ -494,8 +477,6 @@ class TilePropertiesWindow {
         addWidget("CheckBox", unitWaitingCheckBox);
         setWidgetOrigin(unitWaitingCheckBox, 0.0f, 0.5f);
         setWidgetPosition(unitWaitingCheckBox, "0%", "50%");
-        connectSignalHandler(unitWaitingCheckBox,
-            SignalHandler(this.unitWaitingCheckBoxSignalHandler));
 
         // Capturing?
         const auto capturingLayout = unitLayout + ".CapturingLayout";
@@ -517,8 +498,6 @@ class TilePropertiesWindow {
         addWidget("CheckBox", unitCapturingCheckBox);
         setWidgetOrigin(unitCapturingCheckBox, 0.0f, 0.5f);
         setWidgetPosition(unitCapturingCheckBox, "0%", "50%");
-        connectSignalHandler(unitCapturingCheckBox,
-            SignalHandler(this.unitCapturingCheckBoxSignalHandler));
 
         // Hiding?
         const auto hidingLayout = unitLayout + ".HidingLayout";
@@ -540,8 +519,6 @@ class TilePropertiesWindow {
         addWidget("CheckBox", unitHidingCheckBox);
         setWidgetOrigin(unitHidingCheckBox, 0.0f, 0.5f);
         setWidgetPosition(unitHidingCheckBox, "0%", "50%");
-        connectSignalHandler(unitHidingCheckBox,
-            SignalHandler(this.unitHidingCheckBoxSignalHandler));
 
         // Army.
         const auto armyLayout = unitLayout + ".ArmyLayout";
@@ -634,10 +611,11 @@ class TilePropertiesWindow {
     void refresh(const Vector2&in tile) {
         // If the tile is out-of-bounds, display a message in the window by hiding
         // everything else.
-        if (edit.map.isOutOfBounds(tile)) {
+        if (edit is null || edit.map.isOutOfBounds(tile)) {
             deselect();
             return;
         }
+        disconnectTileLayoutSignalHandlers();
 
         // If the window is currently closed, dock it.
         // If it is minimised, restore it.
@@ -684,6 +662,33 @@ class TilePropertiesWindow {
 
         setWidgetVisibility(layout, true);
         setWidgetVisibility(errorMessageLabel, false);
+        connectTileLayoutSignalHandlers();
+    }
+
+    /// Connects all tile layout signal handlers.
+    private void connectTileLayoutSignalHandlers() {
+        connectSignalHandler(tileHPEditBox, function(widgetName, signalName){
+            if (signalName == "TextChanged") {
+                const auto text = getWidgetText(widgetName);
+                const auto hp = parseHP(text);
+                const auto actualHP = edit.setSelectedTileHP(hp);
+                if (hp != actualHP || text.isEmpty())
+                    setWidgetText(widgetName, formatHP(actualHP));
+            }
+        });
+        connectSignalHandler(tileOwnerComboBox,
+            SignalHandler(this.tileOwnerComboBoxSignalHandler));
+        connectSignalHandler(unitTreeView,
+            SignalHandler(this.unitTreeViewSignalHandler));
+    }
+
+    /// Disconnects all tile layout signal handlers.
+    /// Used to prevent \c refresh() from applying changes to the map that already
+    /// exist.
+    private void disconnectTileLayoutSignalHandlers() {
+        ::disconnectSignalHandlers(
+            { tileHPEditBox, tileOwnerComboBox, unitTreeView }
+        );
     }
 
     /**
@@ -691,6 +696,7 @@ class TilePropertiesWindow {
      * @param tileUnit The ID of the unit to display information on.
      */
     void refreshUnit(const UnitID tileUnit) {
+        disconnectUnitLayoutSignalHandlers();
         const auto unitType = edit.map.getUnitType(tileUnit);
         const auto unitArmy = edit.map.getArmyOfUnit(tileUnit);
 
@@ -780,8 +786,6 @@ class TilePropertiesWindow {
                 setWidgetText(maxUnitAmmo, "inf");
             else
                 setWidgetText(maxUnitAmmo, "~" + formatInt(weapon.maxAmmo));
-            
-            info(formatFloat(getWidgetFullSize(unitAmmoLayout).y));
         }
 
         setWidgetChecked(unitWaitingCheckBox,
@@ -800,6 +804,31 @@ class TilePropertiesWindow {
         // corrected, remove this line.
         setWidgetSize(layout, "100%-" + scrollBarWidth, "1017+39*" +
             formatUInt(unitType.weaponCount));
+        connectUnitLayoutSignalHandlers();
+    }
+
+    /// Connects all unit layout signal handlers (except \c Button handlers).
+    private void connectUnitLayoutSignalHandlers() {
+        connectSignalHandler(unitHPEditBox,
+            SignalHandler(this.unitHPEditBoxSignalHandler));
+        connectSignalHandler(unitFuelEditBox,
+            SignalHandler(this.unitFuelEditBoxSignalHandler));
+        connectSignalHandler(unitWaitingCheckBox,
+            SignalHandler(this.unitWaitingCheckBoxSignalHandler));
+        connectSignalHandler(unitCapturingCheckBox,
+            SignalHandler(this.unitCapturingCheckBoxSignalHandler));
+        connectSignalHandler(unitHidingCheckBox,
+            SignalHandler(this.unitHidingCheckBoxSignalHandler));
+    }
+
+    /// Disconnects all unit layout signal handlers (except \c Button handlers).
+    /// Used to prevent \c refreshUnit() from applying changes to the map that
+    /// already exist.
+    private void disconnectUnitLayoutSignalHandlers() {
+        ::disconnectSignalHandlers(
+            { unitHPEditBox, unitFuelEditBox, unitWaitingCheckBox,
+                unitCapturingCheckBox, unitHidingCheckBox }
+        );
     }
 
     /**

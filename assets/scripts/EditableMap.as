@@ -14,23 +14,30 @@ class EditableMap {
     //////////////////
     /**
      * Constructs an editable map from a previously loaded map.
-     * @param mapToEdit   The map to edit.
-     * @param propsWindow The \c TilePropertiesWindow to link up with this
-     *                    \c EditableMap.
+     * @param mapToEdit    The map to edit.
+     * @param tPropsWindow The \c TilePropertiesWindow to link up with this
+     *                     \c EditableMap.
+     * @param aPropsWindow The \c ArmyPropertiesWindow to link up with this
+     *                     \c EditableMap.
      */
-    EditableMap(Map@ mapToEdit, TilePropertiesWindow@ propsWindow) {
+    EditableMap(Map@ mapToEdit, TilePropertiesWindow@ tPropsWindow,
+        ArmyPropertiesWindow@ aPropsWindow) {
         if (mapToEdit is null) {
             error("An invalid Map handle was given to the constructor of "
                 "EditableMap; the game will crash soon!");
-        } else if (propsWindow is null) {
+        } else if (tPropsWindow is null) {
             error("An invalid TileProperties handle was given to the constructor "
+                "of EditableMap; the game will crash soon!");
+        } else if (aPropsWindow is null) {
+            error("An invalid ArmyProperties handle was given to the constructor "
                 "of EditableMap; the game will crash soon!");
         } else {
             @map = mapToEdit;
             map.alwaysShowHiddenUnits(true);
             map.setMapScalingFactor(_mapScalingFactor);
             setNormalCursorSprites();
-            @tilePropsWindow = propsWindow;
+            @tilePropsWindow = tPropsWindow;
+            @armyPropsWindow = aPropsWindow;
         }
     }
 
@@ -132,6 +139,39 @@ class EditableMap {
     }
 
     ////////////////////////////////
+    // ARMY MANAGEMENT OPERATIONS //
+    ////////////////////////////////
+    /**
+     * Creates an army.
+     * @param country The turn-order ID of the country to assign to the new army.
+     */
+    void createArmy(const ArmyID country) {
+        map.createArmy(::country.scriptNames[uint64(country)]);
+        _updateArmyProps();
+    }
+
+    /**
+     * Deletes an army.
+     * @param army The ID of the army to delete.
+     */
+    void deleteArmy(const ArmyID army) {
+        map.deleteArmy(army);
+        _updateArmyProps();
+    }
+
+    /**
+     * Updates an army's funds.
+     * @param  army     The ID of the army to update.
+     * @param  newFunds The new funds to assign to the army.
+     * @return The actual funds assigned to the army.
+     */
+    Funds setArmyFunds(const ArmyID army, Funds newFunds) {
+        if (newFunds < 0) newFunds = 0;
+        map.setArmyFunds(army, newFunds);
+        return newFunds;
+    }
+
+    ////////////////////////////////
     // TILE MANAGEMENT OPERATIONS //
     ////////////////////////////////
     /**
@@ -205,7 +245,7 @@ class EditableMap {
             deleteUnit(oldUnit);
 
             // Create new unit, after creating its army if it doesn't exist yet.
-            if (!map.isArmyPresent(armyID)) map.createArmy(army);
+            if (!map.isArmyPresent(armyID)) createArmy(armyID);
             const auto newUnit = map.createUnit(unitType.scriptName, armyID);
             map.setUnitPosition(newUnit, unitPosition);
             map.replenishUnit(newUnit, true);
@@ -234,8 +274,7 @@ class EditableMap {
     }
 
     /**
-     * Deletes a given unit, and deletes its army, if that was the army's last
-     * unit.
+     * Deletes a given unit.
      * If \c 0 is given, don't do anything.
      * @param unit ID of the unit to delete.
      */
@@ -245,8 +284,6 @@ class EditableMap {
             const auto parentUnitTile = map.getUnitPosition(parentUnit);
             const auto unitArmyID = map.getArmyOfUnit(unit);
             map.deleteUnit(unit);
-            if (map.getUnitsOfArmy(unitArmyID).isEmpty())
-                map.deleteArmy(unitArmyID);
             _updateTileProps(parentUnitTile);
         }
     }
@@ -298,9 +335,9 @@ class EditableMap {
         return newAmmo;
     }
 
-    /////////////////////////////////////
-    // TILE PROPERTIES WINDOW HANDLING //
-    /////////////////////////////////////
+    ///////////////////////////////////////////////
+    // TILE AND ARMY PROPERTIES WINDOWS HANDLING //
+    ///////////////////////////////////////////////
     /**
      * Display tile properties on the given tile.
      * @param tile The tile to display information on.
@@ -337,6 +374,14 @@ class EditableMap {
         if (map.isOutOfBounds(tilePropsTile)) deselectTile();
     }
 
+    /**
+     * Updates the linked \c ArmyPropertiesWindow to ensure it is always
+     * displaying the correct information.
+     */
+    private void _updateArmyProps() {
+        armyPropsWindow.refresh();
+    }
+
     /////////
     // MAP //
     /////////
@@ -356,6 +401,11 @@ class EditableMap {
      * The \c TilePropertiesWindow to link up with this \c EditableMap.
      */
     private TilePropertiesWindow@ tilePropsWindow;
+    
+    /**
+     * The \c ArmyPropertiesWindow to link up with this \c EditableMap.
+     */
+    private ArmyPropertiesWindow@ armyPropsWindow;
 
     /**
      * The currently selected tile used to fill the \c TilePropertiesWindow.

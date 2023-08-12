@@ -30,9 +30,9 @@
 	"file": "File",
 	"new": "New",
 	"map": "Map",
-	"setmapprops": "Set Map Properties",
 	"mapprops": "Map Properties",
 	"tileprops": "Tile Properties",
+	"armyprops": "Army Properties",
 	"tiledialog": "Tiles",
 	"unitdialog": "Units",
 	"unitsheader": "Units",
@@ -41,6 +41,7 @@
 	"owner": "Owner",
 	"view": "View",
 	"neutral": "Neutral",
+	"noco": "- None -",
 	"name": "Name",
 	"size": "Size",
 	"daylabel": "Day",
@@ -60,6 +61,7 @@
 	"toolbar": "ToolBar",
 	"createandload": "Create and\nLoad Unit",
 	"deleteunit": "Delete Unit",
+	"createarmy": "Create Army",
 
 	"hp": "HP",
 	"fuel": "Fuel",
@@ -74,6 +76,10 @@
 	"capturing": "Capturing?",
 	"hiding": "Hiding?",
 	"army": "Army",
+	"team": "Team",
+	"funds": "Funds",
+	"currentco": "Current CO",
+	"tagco": "Tag CO",
 
 	"alert": "Alert!",
 	"mapfilealreadyexists": "The map file \"#\" already exists! Do you wish to overwrite it?",
@@ -87,6 +93,9 @@
 	"pleaseselecttile": "Please select a tile!",
 	"pleaseselectunittype": "Please select the unit type (from the palette) of the unit to create and load onto this one!",
 	"invalidunittypeforload": "\"#\" units cannot be loaded onto \"#\" units!",
+	"pleaseselectcountry": "Please select a country to assign to the new army!",
+
+	"mapmakerarmydescription": "When a unit is placed on the map, and its army doesn't exist yet, it will be automatically created, and it can be amended here. Note that a Team ID can only be a value between 0 and 255, so if you input large numbers expect weird results.",
 
 	"ORANGE_COUNTRY_longname": "Orange Star",
 	"ORANGE_COUNTRY_shortname": "OS",
@@ -415,5 +424,13 @@
 
 	"OOZIUM_longname": "Oozium 238",
 	"OOZIUM_shortname": "Oozi",
-	"OOZIUM_description": "An odd giant mass of gelatinous goo that consumes everything it touches. Extremely resistant to damage, but very slow."
+	"OOZIUM_description": "An odd giant mass of gelatinous goo that consumes everything it touches. Extremely resistant to damage, but very slow.",
+
+	"NOCO_longname": "No CO",
+	"NOCO_shortname": "NoCO",
+	"NOCO_description": "Default CO.",
+
+	"JAKE_longname": "Jake",
+	"JAKE_shortname": "Jake",
+	"JAKE_description": ""
 }

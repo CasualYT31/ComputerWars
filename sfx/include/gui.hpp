@@ -976,6 +976,8 @@ namespace sfx {
 		void _connectSignalHandler(const std::string& name,
 			asIScriptFunction* const handler);
 
+		void _disconnectSignalHandlers(const CScriptArray* const names);
+
 		/**
 		 * Gets the name of the given widget's parent.
 		 * If no widget exists with the given name, then an error will be logged
@@ -1468,6 +1470,8 @@ namespace sfx {
 		 */
 		void _setSelectedItem(const std::string& name, const std::size_t index);
 
+		void _deselectItem(const std::string& name);
+
 		/**
 		 * Gets the currently selected item's index.
 		 * If no widget exists with the given name, or if it doesn't support the
@@ -1791,6 +1795,8 @@ namespace sfx {
 		 * @return The titlebar height.
 		 */
 		float _getTitleBarHeight(const std::string& name);
+
+		CScriptArray* _getBorderWidths(const std::string& name);
 
 		/**
 		 * Opens a \c ChildWindow to a given location.
