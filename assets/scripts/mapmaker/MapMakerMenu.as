@@ -31,6 +31,7 @@ MenuItemID MAP_MAKER_FILE_SAVE_MAP_AS;
 MenuItemID MAP_MAKER_FILE_QUIT;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
+MenuItemID MAP_MAKER_MAP_FILL;
 
 MenuItemID MAP_MAKER_VIEW_TOOLBAR;
 MenuItemID MAP_MAKER_VIEW_OBJECT_DIALOG;
@@ -41,10 +42,13 @@ ToolBar TOOLBAR;
 ToolBarButtonSetUpData PAINT_TOOL("paint", "painttool");
 ToolBarButtonSetUpData DELETE_TOOL("delete", "deletetool");
 
+MapPropertiesWindow MapPropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
+    MESSAGE_BOX_GROUP);
 TilePropertiesWindow TilePropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
     MESSAGE_BOX_GROUP);
 ArmyPropertiesWindow ArmyPropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
     MESSAGE_BOX_GROUP);
+ConfirmTileTypeWindow FillWindow;
 
 /**
  * Sets up the map maker menu.
@@ -77,6 +81,7 @@ void MapMakerMenuSetUp() {
 
     addMenu(MENU, "map");
     MAP_MAKER_MAP_SET_PROPS = addMenuItem(MENU, "mapprops");
+    MAP_MAKER_MAP_FILL = addMenuItem(MENU, "fill");
 
     addMenu(MENU, "view");
     MAP_MAKER_VIEW_TOOLBAR = addMenuItem(MENU, "toolbar");
@@ -92,9 +97,32 @@ void MapMakerMenuSetUp() {
 
     PaletteWindow.setUp(DefaultObjectDialogData(CLIENT_AREA));
     PaletteWindow.dock();
-    MapPropertiesSetUp(CLIENT_AREA);
+    MapPropertiesDialog.setUp(CLIENT_AREA);
     TilePropertiesDialog.setUp(CLIENT_AREA);
     ArmyPropertiesDialog.setUp(CLIENT_AREA);
+    FillWindow.setUp(CLIENT_AREA + ".ConfirmTileTypeForFillWindow",
+        "fillmapconfirmationnotile", "fillmapconfirmationtile",
+        function(widgetName, signalName) {
+            if (signalName == "Pressed") {
+                if (edit is null) { // Safe guard: code should never get here.
+                    awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert",
+                        "nomapisopen", null, BASE_GROUP, MESSAGE_BOX_GROUP);
+                    addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
+                } else {
+                    edit.map.fillMap(
+                        cast<TileType>(CurrentlySelectedTileType.object).
+                            scriptName,
+                        CurrentlySelectedTileType.owner.isEmpty() ? NO_ARMY :
+                            country[CurrentlySelectedTileType.owner].turnOrder
+                    );
+                    FillWindow.close();
+                }
+            }
+        },
+        function(widgetName, signalName) {
+            if (signalName == "Pressed") FillWindow.close();
+        }
+    );
 }
 
 /**
@@ -223,7 +251,8 @@ awe::EmptyCallback@ QuitCallback;
  */
 awe::EmptyCallback@ QuitMapAuthorised = function() {
     quitMap();
-    CloseMapProperties();
+    MapPropertiesDialog.close();
+    FillWindow.close();
     @edit = null;
     TilePropertiesDialog.refresh(Vector2(0,0));
     ArmyPropertiesDialog.refresh();
@@ -299,7 +328,18 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
         quitEditMap(function() { setGUI("MainMenu"); });
 
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
-        OpenMapProperties();
+        if (edit is null) {
+            awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert", "nomapisopen", null,
+                BASE_GROUP, MESSAGE_BOX_GROUP);
+            addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
+        } else MapPropertiesDialog.restore();
+
+    } else if (id == MAP_MAKER_MAP_FILL) {
+        if (edit is null) {
+            awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert", "nomapisopen", null,
+                BASE_GROUP, MESSAGE_BOX_GROUP);
+            addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
+        } else FillWindow.restore("fillmapconfirmation");
 
     } else if (id == MAP_MAKER_VIEW_TOOLBAR) {
         TOOLBAR.dock();
@@ -338,7 +378,7 @@ void createNewMap() {
         @edit = EditableMap(createMap(FileDialogFile), TilePropertiesDialog,
             ArmyPropertiesDialog);
         ArmyPropertiesDialog.refresh();
-        OpenMapProperties();
+        MapPropertiesDialog.restore();
     });
 }
 

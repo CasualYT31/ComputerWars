@@ -39,10 +39,13 @@ namespace awe {
          * Constructs a \c ParentButton.
          * @param w Assigned to \c widgetName.
          * @param c Assigned to \c caption.
+         * @param h Assigned to \c handler.
          */
-        ParentButton(const string&in w, const string&in c) {
+        ParentButton(const string&in w, const string&in c,
+            SignalHandler@ const h = null) {
             widgetName = w;
             caption = c;
+            @handler = h;
         }
 
         /**
@@ -54,6 +57,11 @@ namespace awe {
          * The caption to assign to the button.
          */
         string caption;
+
+        /**
+         * The signal handler to connect to the button, if any.
+         */
+        SignalHandler@ handler;
     }
 
     /**
@@ -77,6 +85,8 @@ namespace awe {
             setWidgetOrigin(btn, 1.0f, 1.0f);
             setWidgetPosition(btn, "100%-" + formatUInt(x), "100%-" + PADDING_S);
             setWidgetSize(btn, WIDTH, HEIGHT);
+            if (buttons[i].handler !is null)
+                connectSignalHandler(btn, buttons[i].handler);
             x += width + PADDING;
         }
     }

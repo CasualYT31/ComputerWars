@@ -423,6 +423,11 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getTileTypeObject), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"bool fillMap(const string&in, const ArmyID = NO_ARMY)",
+			asMETHODPR(awe::map, fillMap, (const std::string&, const awe::ArmyID),
+				bool), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void setTileHP(const Vector2&in, const HP)",
 			asMETHOD(awe::map, setTileHP), asCALL_THISCALL);
 
@@ -1695,6 +1700,27 @@ const awe::tile_type* awe::map::getTileTypeObject(const sf::Vector2u& pos) const
 	} else {
 		throw std::out_of_range("This tile does not exist!");
 	}
+}
+
+bool awe::map::fillMap(const std::shared_ptr<const awe::tile_type>& type,
+	const awe::ArmyID owner) {
+	if (!type) {
+		_logger.error("fillMap operation failed: an empty tile type was given!");
+		return false;
+	}
+	bool ret = true;
+	for (unsigned int x = 0, width = _tiles.size(); x < width; ++x) {
+		for (unsigned int y = 0, height = _tiles[x].size(); y < height; ++y) {
+			if (!setTileType({ x, y }, type)) ret = false;
+			setTileOwner({ x, y }, owner);
+		}
+	}
+	_changed = true;
+	return ret;
+}
+
+bool awe::map::fillMap(const std::string& type, const awe::ArmyID owner) {
+	return fillMap(_tileTypes->operator[](type), owner);
 }
 
 void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {

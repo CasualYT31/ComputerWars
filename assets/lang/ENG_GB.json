@@ -30,6 +30,7 @@
 	"file": "File",
 	"new": "New",
 	"map": "Map",
+	"fill": "Fill",
 	"mapprops": "Map Properties",
 	"tileprops": "Tile Properties",
 	"armyprops": "Army Properties",
@@ -84,10 +85,16 @@
 	"alert": "Alert!",
 	"mapfilealreadyexists": "The map file \"#\" already exists! Do you wish to overwrite it?",
 	"nomapisopen": "There isn't a map open right now!",
+
 	"resizemapconfirmation": "Are you sure you want to resize the map?",
 	"resizemapconfirmationsmaller": "Are you sure you want to resize the map? Some tiles will be lost!",
 	"resizemapconfirmationnotile": "Select a tile before resizing!",
 	"resizemapconfirmationtile": "New tiles will be set to:",
+
+	"fillmapconfirmation": "Are you sure you want to fill the map?",
+	"fillmapconfirmationnotile": "Select a tile before filling!",
+	"fillmapconfirmationtile": "All tiles will be set to:",
+
 	"cannotresizeto0": "You cannot set a map to be 0 tiles in size!",
 	"savebeforequit": "There are unsaved changes on this map! Save before unloading it?",
 	"pleaseselecttile": "Please select a tile!",

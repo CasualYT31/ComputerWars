@@ -940,6 +940,22 @@ namespace awe {
 		const awe::tile_type* getTileTypeObject(const sf::Vector2u& pos) const;
 
 		/**
+		 * Fills the map with a given type of tile, and sets their owners.
+		 * If \c nullptr is given, an error will be logged and the method will
+		 * fail.
+		 * @param  type  The type of tile to change each tile in the map to.
+		 * @param  owner The owner to assign to each tile. Can be \c NO_ARMY.
+		 * @return \c TRUE if filling the map was successful, \c FALSE otherwise.
+		 */
+		bool fillMap(const std::shared_ptr<const awe::tile_type>& type,
+			const awe::ArmyID owner);
+
+		/**
+		 * Version of \c fillMap() which accepts a tile type script name.
+		 */
+		bool fillMap(const std::string& type, const awe::ArmyID owner);
+
+		/**
 		 * Sets a tile's HP.
 		 * If a negative value is given, it will be adjusted to \c 0.
 		 * @param pos The X and Y coordinate of the tile to change.

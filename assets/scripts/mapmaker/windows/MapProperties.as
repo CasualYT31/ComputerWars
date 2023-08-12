@@ -3,345 +3,281 @@
  * Defines code that manages the map properties child window.
  */
 
-namespace map_properties_internal {
+/**
+ * Represents the Map Properties window.
+ */
+class MapPropertiesWindow {
     /**
-     * Stores the name of the map properties \c ChildWindow.
+     * Sets up \c MessageBox related data that can't be changed after
+     * construction.
+     * @param messageBoxName \c name parameter passed into \c OpenMessageBox()
+     *                       when a \c MessageBox is required to be displayed.
+     *                       Intended to be \c SIMPLE_MESSAGE_BOX.
+     * @param disableThis    \c disableThis parameter pass into
+     *                       \c OpenMessageBox() when a \c MessageBox is required
+     *                       to be displayed. Intended to be \c BASE_GROUP.
+     * @param enableThis     \c enableThis parameter pass into \c OpenMessageBox()
+     *                       when a \c MessageBox is required to be displayed.
+     *                       Intended to be \c MESSAGE_BOX_GROUP.
      */
-    string WINDOW;
+    MapPropertiesWindow(const string&in messageBoxName,
+        const string&in disableThis, const string&in enableThis) {
+        mbName = messageBoxName;
+        mbDisableThis = disableThis;
+        mbEnableThis = enableThis;
+    }
 
     /**
-     * Stores the name of the map name \c EditBox.
+     * Sets up the map properties child window.
+     * @param parent The parent of the child window.
      */
-    string MAP_NAME;
+    void setUp(const string&in parent) {
+        window = parent + ".SetMapProperties";
+        addWidget("ChildWindow", window);
+        setWidgetText(window, "mapprops");
+        setWidgetSize(window, "250px", "175px");
+        setWidgetResizable(window, false);
+        setChildWindowTitleButtons(window, TitleButton::Close);
 
-    /**
-     * Stores the name of the day \c EditBox.
-     */
-    string DAY;
+        const auto baseLayout = window + ".BaseLayout";
+        addWidget("HorizontalLayout", baseLayout);
+        setWidgetSize(baseLayout, "100%", "100%-30px");
+        setGroupPadding(baseLayout, "5px");
 
-    /**
-     * Stores the name of the width \c EditBox.
-     */
-    string WIDTH;
+        const auto labelLayout = baseLayout + ".LabelLayout";
+        addWidget("VerticalLayout", labelLayout);
+        setWidgetRatioInLayout(baseLayout, 0, 0.2f);
 
-    /**
-     * Stores the name of the height \c EditBox.
-     */
-    string HEIGHT;
+        const auto nameLabelGroup = labelLayout + ".MapNameLabelGroup";
+        addWidget("Group", nameLabelGroup);
 
-    /**
-     * Stores the name of the map resize confirmation \c ChildWindow.
-     */
-    string CONFIRM_RESIZE;
+        const auto nameLabel = nameLabelGroup + ".MapNameLabel";
+        addWidget("Label", nameLabel);
+        setWidgetText(nameLabel, "name");
+        setWidgetOrigin(nameLabel, 1.0f, 0.5f);
+        setWidgetPosition(nameLabel, "100%", "50%");
 
-    /**
-     * Stores the name of the map resize confirmation text label.
-     */
-    string RESIZE_TEXT;
+        const auto dayLabelGroup = labelLayout + ".DayLabelGroup";
+        addWidget("Group", dayLabelGroup);
 
-    /**
-     * Stores the name of the map resize confirmation current tile text label.
-     */
-    string RESIZE_TILE_TEXT;
+        const auto dayLabel = dayLabelGroup + ".DayLabel";
+        addWidget("Label", dayLabel);
+        setWidgetText(dayLabel, "daylabel");
+        setWidgetOrigin(dayLabel, 1.0f, 0.5f);
+        setWidgetPosition(dayLabel, "100%", "50%");
 
-    /**
-     * Stores the name of the yes button in the resize confirmation window.
-     */
-    string RESIZE_YES_BUTTON;
-    
-    /**
-     * Opens the resize confirmation window and updates its labels.
-     * @warning Assumes a map is loaded!
-     * @param   currentSize The current size of the map
-     * @param   newSize     The new size of the map.
-     */
-    void openResizeConfirmation(const Vector2&in currentSize,
-        const Vector2&in newSize) {
-        setWidgetEnabled(WINDOW, false);
-        if (currentSize.x > newSize.x || currentSize.y > newSize.y)
-            setWidgetText(RESIZE_TEXT, "resizemapconfirmationsmaller");
-        else
-            setWidgetText(RESIZE_TEXT, "resizemapconfirmation");
-        if (CurrentlySelectedTileType.object is null) {
-            setWidgetText(RESIZE_TILE_TEXT, "resizemapconfirmationnotile");
-            setWidgetEnabled(RESIZE_YES_BUTTON, false);
+        const auto sizeLabelGroup = labelLayout + ".SizeLabelGroup";
+        addWidget("Group", sizeLabelGroup);
+
+        const auto sizeLabel = sizeLabelGroup + ".SizeLabel";
+        addWidget("Label", sizeLabel);
+        setWidgetText(sizeLabel, "size");
+        setWidgetOrigin(sizeLabel, 1.0f, 0.5f);
+        setWidgetPosition(sizeLabel, "100%", "50%");
+
+        const auto editLayout = baseLayout + ".EditLayout";
+        addWidget("VerticalLayout", editLayout);
+
+        const auto nameEditGroup = editLayout + ".MapNameEditGroup";
+        addWidget("Group", nameEditGroup);
+        setGroupPadding(nameEditGroup, "5px", "20%", "5px", "20%");
+
+        mapName = nameEditGroup + ".MapNameEdit";
+        addWidget("EditBox", mapName);
+        setWidgetSize(mapName, "100%", "100%");
+
+        const auto dayEditGroup = editLayout + ".DayEditGroup";
+        addWidget("Group", dayEditGroup);
+        setGroupPadding(dayEditGroup, "5px", "20%", "5px", "20%");
+
+        day = dayEditGroup + ".DayEdit";
+        addWidget("EditBox", day);
+        setWidgetSize(day, "100%", "100%");
+        onlyAcceptUIntsInEditBox(day);
+
+        const auto sizeLayout = editLayout + ".SizeLayout";
+        addWidget("HorizontalLayout", sizeLayout);
+
+        const auto widthEditGroup = sizeLayout + ".WidthEditGroup";
+        addWidget("Group", widthEditGroup);
+        setGroupPadding(widthEditGroup, "5px", "20%", "5px", "20%");
+
+        width = widthEditGroup + ".WidthEdit";
+        addWidget("EditBox", width);
+        setWidgetSize(width, "100%", "100%");
+        onlyAcceptUIntsInEditBox(width);
+
+        const auto xLabelGroup = sizeLayout + ".XGroup";
+        addWidget("Group", xLabelGroup);
+        setWidgetRatioInLayout(sizeLayout, 1, 0.2f);
+
+        const auto xLabel = xLabelGroup + ".X";
+        addWidget("Label", xLabel);
+        setWidgetText(xLabel, "~x");
+        setWidgetOrigin(xLabel, 0.5f, 0.5f);
+        setWidgetPosition(xLabel, "50%", "50%");
+
+        const auto heightEditGroup = sizeLayout + ".HeightEditGroup";
+        addWidget("Group", heightEditGroup);
+        setGroupPadding(heightEditGroup, "5px", "20%", "5px", "20%");
+
+        height = heightEditGroup + ".HeightEdit";
+        addWidget("EditBox", height);
+        setWidgetSize(height, "100%", "100%");
+        onlyAcceptUIntsInEditBox(height);
+
+        awe::addButtonsToParent(window, {
+            awe::ParentButton("MapPropertiesOK", "ok",
+                SignalHandler(this.okButtonSignalHandler)),
+            awe::ParentButton("MapPropertiesCancel", "cancel",
+                SignalHandler(this.cancelButtonSignalHandler))
+        }, 50, 25);
+
+        confirmResize.setUp(parent + ".ConfirmTileTypeForResizeWindow",
+            "resizemapconfirmationnotile", "resizemapconfirmationtile",
+            SignalHandler(this.yesButtonSignalHandler),
+            SignalHandler(this.noButtonSignalHandler));
+
+        close();
+    }
+
+    /// Ensures any windows are open and visible.
+    void restore() {
+        if (isChildWindowOpen(window)) {
+            setWidgetPosition(window, "50px", "35px");
+            setWidgetPosition(confirmResize.windowName, "50px", "35px");
         } else {
-            setWidgetText(RESIZE_TILE_TEXT, "resizemapconfirmationtile");
-            setWidgetEnabled(RESIZE_YES_BUTTON, true);
-        }
-        openChildWindow(CONFIRM_RESIZE, "50px", "35px");
-    }
-
-    /**
-     * Closes the resize confirmation window.
-     */
-    void closeResizeConfirmation() {
-        setWidgetEnabled(WINDOW, true);
-        closeChildWindow(CONFIRM_RESIZE);
-    }
-}
-
-/**
- * Sets up the map properties child window.
- * @param parent The parent of the child window.
- */
-void MapPropertiesSetUp(const string&in parent = "") {
-    map_properties_internal::WINDOW =
-        parent + (parent.isEmpty() ? "" : ".") + "SetMapProperties";
-    addWidget("ChildWindow", map_properties_internal::WINDOW);
-    setWidgetText(map_properties_internal::WINDOW, "mapprops");
-    setWidgetSize(map_properties_internal::WINDOW, "250px", "175px");
-    setWidgetResizable(map_properties_internal::WINDOW, false);
-    setChildWindowTitleButtons(map_properties_internal::WINDOW,
-        TitleButton::Close);
-
-    const auto baseLayout = map_properties_internal::WINDOW + ".BaseLayout";
-    addWidget("HorizontalLayout", baseLayout);
-    setWidgetSize(baseLayout, "100%", "100%-30px");
-    setGroupPadding(baseLayout, "5px");
-
-    const auto labelLayout = baseLayout + ".LabelLayout";
-    addWidget("VerticalLayout", labelLayout);
-    setWidgetRatioInLayout(baseLayout, 0, 0.2f);
-
-    const auto nameLabelGroup = labelLayout + ".MapNameLabelGroup";
-    addWidget("Group", nameLabelGroup);
-
-    const auto nameLabel = nameLabelGroup + ".MapNameLabel";
-    addWidget("Label", nameLabel);
-    setWidgetText(nameLabel, "name");
-    setWidgetOrigin(nameLabel, 1.0f, 0.5f);
-    setWidgetPosition(nameLabel, "100%", "50%");
-
-    const auto dayLabelGroup = labelLayout + ".DayLabelGroup";
-    addWidget("Group", dayLabelGroup);
-
-    const auto dayLabel = dayLabelGroup + ".DayLabel";
-    addWidget("Label", dayLabel);
-    setWidgetText(dayLabel, "daylabel");
-    setWidgetOrigin(dayLabel, 1.0f, 0.5f);
-    setWidgetPosition(dayLabel, "100%", "50%");
-
-    const auto sizeLabelGroup = labelLayout + ".SizeLabelGroup";
-    addWidget("Group", sizeLabelGroup);
-
-    const auto sizeLabel = sizeLabelGroup + ".SizeLabel";
-    addWidget("Label", sizeLabel);
-    setWidgetText(sizeLabel, "size");
-    setWidgetOrigin(sizeLabel, 1.0f, 0.5f);
-    setWidgetPosition(sizeLabel, "100%", "50%");
-
-    const auto editLayout = baseLayout + ".EditLayout";
-    addWidget("VerticalLayout", editLayout);
-
-    const auto nameEditGroup = editLayout + ".MapNameEditGroup";
-    addWidget("Group", nameEditGroup);
-    setGroupPadding(nameEditGroup, "5px", "20%", "5px", "20%");
-
-    map_properties_internal::MAP_NAME = nameEditGroup + ".MapNameEdit";
-    addWidget("EditBox", map_properties_internal::MAP_NAME);
-    setWidgetSize(map_properties_internal::MAP_NAME, "100%", "100%");
-
-    const auto dayEditGroup = editLayout + ".DayEditGroup";
-    addWidget("Group", dayEditGroup);
-    setGroupPadding(dayEditGroup, "5px", "20%", "5px", "20%");
-
-    map_properties_internal::DAY = dayEditGroup + ".DayEdit";
-    addWidget("EditBox", map_properties_internal::DAY);
-    setWidgetSize(map_properties_internal::DAY, "100%", "100%");
-    onlyAcceptUIntsInEditBox(map_properties_internal::DAY);
-
-    const auto sizeLayout = editLayout + ".SizeLayout";
-    addWidget("HorizontalLayout", sizeLayout);
-
-    const auto widthEditGroup = sizeLayout + ".WidthEditGroup";
-    addWidget("Group", widthEditGroup);
-    setGroupPadding(widthEditGroup, "5px", "20%", "5px", "20%");
-
-    map_properties_internal::WIDTH = widthEditGroup + ".WidthEdit";
-    addWidget("EditBox", map_properties_internal::WIDTH);
-    setWidgetSize(map_properties_internal::WIDTH, "100%", "100%");
-    onlyAcceptUIntsInEditBox(map_properties_internal::WIDTH);
-
-    const auto xLabelGroup = sizeLayout + ".XGroup";
-    addWidget("Group", xLabelGroup);
-    setWidgetRatioInLayout(sizeLayout, 1, 0.2f);
-
-    const auto xLabel = xLabelGroup + ".X";
-    addWidget("Label", xLabel);
-    setWidgetText(xLabel, "~x");
-    setWidgetOrigin(xLabel, 0.5f, 0.5f);
-    setWidgetPosition(xLabel, "50%", "50%");
-
-    const auto heightEditGroup = sizeLayout + ".HeightEditGroup";
-    addWidget("Group", heightEditGroup);
-    setGroupPadding(heightEditGroup, "5px", "20%", "5px", "20%");
-
-    map_properties_internal::HEIGHT = heightEditGroup + ".HeightEdit";
-    addWidget("EditBox", map_properties_internal::HEIGHT);
-    setWidgetSize(map_properties_internal::HEIGHT, "100%", "100%");
-    onlyAcceptUIntsInEditBox(map_properties_internal::HEIGHT);
-
-    awe::addButtonsToParent(map_properties_internal::WINDOW, {
-        awe::ParentButton("MapPropertiesOK", "ok"),
-        awe::ParentButton("MapPropertiesCancel", "cancel")
-    }, 50, 25);
-
-    map_properties_internal::CONFIRM_RESIZE =
-        parent + (parent.isEmpty() ? "" : ".") + "MapPropertiesConfirmResize";
-    addWidget("ChildWindow", map_properties_internal::CONFIRM_RESIZE);
-    setWidgetText(map_properties_internal::CONFIRM_RESIZE, "alert");
-    setWidgetSize(map_properties_internal::CONFIRM_RESIZE, "250px", "175px");
-    setWidgetResizable(map_properties_internal::CONFIRM_RESIZE, false);
-    setChildWindowTitleButtons(map_properties_internal::CONFIRM_RESIZE,
-        TitleButton::None);
-    
-    const auto resizeBaseLayout = map_properties_internal::CONFIRM_RESIZE +
-        ".BaseLayout";
-    addWidget("VerticalLayout", resizeBaseLayout);
-    setWidgetSize(resizeBaseLayout, "100%", "100%-30px");
-    setGroupPadding(resizeBaseLayout, "5px");
-
-    const auto resizeTextGroup = resizeBaseLayout + ".TextGroup";
-    addWidget("Group", resizeTextGroup);
-
-    map_properties_internal::RESIZE_TEXT = resizeTextGroup + ".Text";
-    addWidget("Label", map_properties_internal::RESIZE_TEXT);
-    setWidgetSize(map_properties_internal::RESIZE_TEXT, "100%", "100%");
-    setWidgetTextMaximumWidth(map_properties_internal::RESIZE_TEXT,
-        getWidgetFullSize(map_properties_internal::RESIZE_TEXT).x);
-
-    const auto resizeTileLayout = resizeBaseLayout + ".TileLayout";
-    addWidget("VerticalLayout", resizeTileLayout);
-
-    const auto resizeTileTextGroup = resizeTileLayout + ".TextGroup";
-    addWidget("Group", resizeTileTextGroup);
-
-    map_properties_internal::RESIZE_TILE_TEXT = resizeTileTextGroup + ".Text";
-    addWidget("Label", map_properties_internal::RESIZE_TILE_TEXT);
-
-    const auto resizeTileTileGroup = resizeTileLayout + ".TileGroup";
-    addWidget("Group", resizeTileTileGroup);
-
-    CurrentlySelectedTileType.addWidget(resizeTileTileGroup + ".CurSelTileLayout",
-    function(){
-        /// Make sure to enable the Yes button when a tile is selected.
-        setWidgetEnabled(map_properties_internal::RESIZE_YES_BUTTON, true);
-    });
-
-    awe::addButtonsToParent(map_properties_internal::CONFIRM_RESIZE, {
-        awe::ParentButton("ConfirmResizeYes", "yes"),
-        awe::ParentButton("ConfirmResizeNo", "no")
-    }, 50, 25);
-    map_properties_internal::RESIZE_YES_BUTTON =
-        map_properties_internal::CONFIRM_RESIZE + ".ConfirmResizeYes";
-
-    CloseMapProperties();
-}
-
-/**
- * Opens the map properties dialog window.
- * If the map properties windows are already open, they will be repositioned to
- * the UL corner of the screen.
- */
-void OpenMapProperties() {
-    if (isChildWindowOpen(map_properties_internal::WINDOW)) {
-        setWidgetPosition(map_properties_internal::WINDOW, "50px", "35px");
-        setWidgetPosition(map_properties_internal::CONFIRM_RESIZE, "50px",
-            "35px");
-        return;
-    }
-    if (edit is null) {
-        awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert", "nomapisopen", null,
-            BASE_GROUP, MESSAGE_BOX_GROUP);
-        addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
-    } else {
-        setWidgetText(map_properties_internal::MAP_NAME, edit.map.getMapName());
-        setWidgetText(map_properties_internal::DAY, formatDay(edit.map.getDay()));
-        const auto size = edit.map.getMapSize();
-        setWidgetText(map_properties_internal::WIDTH, formatUInt(size.x));
-        setWidgetText(map_properties_internal::HEIGHT, formatUInt(size.y));
-        openChildWindow(map_properties_internal::WINDOW, "50px", "35px");
-    }
-}
-
-/**
- * Closes the map properties dialog window and its associated windows.
- */
-void CloseMapProperties() {
-    closeChildWindow(map_properties_internal::WINDOW);
-    map_properties_internal::closeResizeConfirmation();
-}
-
-/**
- * Gets the width and height currently in the \c EditBoxes.
- * @return The size.
- */
-Vector2 GetSizeInEditBoxes() {
-    return Vector2(
-        parseUInt(getWidgetText(map_properties_internal::WIDTH)),
-        parseUInt(getWidgetText(map_properties_internal::HEIGHT))
-    );
-}
-
-/**
- * Applies changes and closes the map properties windows.
- * @param resize \c TRUE if the map should be resized, \c FALSE if not.
- */
-void ApplyChangesAndClose(const bool resize) {
-    edit.setMapProperties(getWidgetText(map_properties_internal::MAP_NAME),
-        parseDay(getWidgetText(map_properties_internal::DAY)));
-    if (resize) {
-        if (CurrentlySelectedTileType.owner.isEmpty()) {
-            edit.setMapSize(GetSizeInEditBoxes(),
-                cast<TileType>(CurrentlySelectedTileType.object).scriptName);
-        } else {
-            edit.setMapSize(GetSizeInEditBoxes(),
-                cast<TileType>(CurrentlySelectedTileType.object).scriptName,
-                country[CurrentlySelectedTileType.owner].turnOrder);
+            setWidgetText(mapName, edit.map.getMapName());
+            setWidgetText(day, formatDay(edit.map.getDay()));
+            const auto size = edit.map.getMapSize();
+            setWidgetText(width, formatUInt(size.x));
+            setWidgetText(height, formatUInt(size.y));
+            openChildWindow(window, "50px", "35px");
         }
     }
-    CloseMapProperties();
-}
 
-/**
- * Closes the map properties dialog and applies changes.
- * If the map size is changing, open up the confirmation window instead.
- */
-void MapMakerMenu_MapPropertiesOK_Pressed() {
-    if (edit is null) {
-        error("MapPropertiesOK button was pressed when @edit was null!");
-        return;
+    /// Closes both the MapProperties window and the resize confirmation window.
+    void close() {
+        setWidgetEnabled(window, true);
+        closeChildWindow(window);
+        confirmResize.close();
     }
-    const auto currentSize = edit.map.getMapSize(),
-        newSize = GetSizeInEditBoxes();
-    if (newSize.x == 0 && newSize.y == 0) {
-        awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert", "cannotresizeto0", null,
-            BASE_GROUP, MESSAGE_BOX_GROUP);
-        addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
-    } else if (currentSize != newSize)
-        map_properties_internal::openResizeConfirmation(currentSize, newSize);
-    else // A tile type may not have been selected yet so don't try to resize.
-        ApplyChangesAndClose(false);
-}
 
-/**
- * Closes the map properties dialog without applying any changes.
- */
-void MapMakerMenu_MapPropertiesCancel_Pressed() {
-    CloseMapProperties();
-}
+    /**
+     * Gets the width and height currently in the \c EditBoxes.
+     * @return The size.
+     */
+    private Vector2 _getSizeInEditBoxes() {
+        return Vector2(parseUInt(getWidgetText(width)),
+            parseUInt(getWidgetText(height)));
+    }
 
-/**
- * Closes the resize map confirmation window and applies changes.
- */
-void MapMakerMenu_ConfirmResizeYes_Pressed() {
-    ApplyChangesAndClose(true);
-}
+    /**
+     * Applies changes and closes the MapProperties windows.
+     * @param resize \c TRUE if the map should be resized, \c FALSE if not.
+     */
+    private void _applyChangesAndClose(const bool resize) {
+        edit.setMapProperties(getWidgetText(mapName),
+            parseDay(getWidgetText(day)));
+        if (resize) {
+            if (CurrentlySelectedTileType.owner.isEmpty()) {
+                edit.setMapSize(_getSizeInEditBoxes(),
+                    cast<TileType>(CurrentlySelectedTileType.object).scriptName);
+            } else {
+                edit.setMapSize(_getSizeInEditBoxes(),
+                    cast<TileType>(CurrentlySelectedTileType.object).scriptName,
+                    country[CurrentlySelectedTileType.owner].turnOrder);
+            }
+        }
+        close();
+    }
 
-/**
- * Closes the resize map confirmation window without applying any changes.
- */
-void MapMakerMenu_ConfirmResizeNo_Pressed() {
-    map_properties_internal::closeResizeConfirmation();
+    /**
+     * Handles the OK \c Button widget's signals.
+     * @param widgetName The full name of the \c Button.
+     * @param signalName The name of the signal emitted.
+     */
+    private void okButtonSignalHandler(const string&in widgetName,
+        const string&in signalName) {
+        if (signalName == "Pressed") {
+            if (edit is null) {
+                error("MapPropertiesOK button was pressed when @edit was null!");
+                return;
+            }
+            const auto currentSize = edit.map.getMapSize(),
+                newSize = _getSizeInEditBoxes();
+            if (newSize.x == 0 || newSize.y == 0) {
+                awe::OpenMessageBox(mbName, "alert", "cannotresizeto0", null,
+                    mbDisableThis, mbEnableThis);
+                addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
+            } else if (currentSize != newSize) {
+                setWidgetEnabled(window, false);
+                confirmResize.restore(
+                    (currentSize.x > newSize.x || currentSize.y > newSize.y) ?
+                        "resizemapconfirmationsmaller" : "resizemapconfirmation"
+                );
+            // A tile type may not have been selected yet so don't try to resize:
+            } else _applyChangesAndClose(false);
+        }
+    }
+
+    /**
+     * Handles the cancel \c Button widget's signals.
+     * @param widgetName The full name of the \c Button.
+     * @param signalName The name of the signal emitted.
+     */
+    private void cancelButtonSignalHandler(const string&in widgetName,
+        const string&in signalName) {
+        if (signalName == "Pressed") close();
+    }
+
+    /**
+     * Handles the yes \c Button widget's signals.
+     * @param widgetName The full name of the \c Button.
+     * @param signalName The name of the signal emitted.
+     */
+    private void yesButtonSignalHandler(const string&in widgetName,
+        const string&in signalName) {
+        if (signalName == "Pressed") _applyChangesAndClose(true);
+    }
+
+    /**
+     * Handles the no \c Button widget's signals.
+     * @param widgetName The full name of the \c Button.
+     * @param signalName The name of the signal emitted.
+     */
+    private void noButtonSignalHandler(const string&in widgetName,
+        const string&in signalName) {
+        if (signalName == "Pressed") {
+            setWidgetEnabled(window, true);
+            confirmResize.close();
+        }
+    }
+
+    /// Name of the \c MessageBox to create.
+    private string mbName;
+
+    /// Name of the widget to disable when opening a \c MessageBox.
+    private string mbDisableThis;
+
+    /// Name of the widget to enable when opening a \c MessageBox.
+    private string mbEnableThis;
+
+    /// Window used to allow the user to confirm a resize operation.
+    private ConfirmTileTypeWindow confirmResize;
+
+    /// The name of the \c ChildWindow.
+    private string window;
+
+    /// Name of the map name's \c EditBox.
+    private string mapName;
+
+    /// Name of the day's \c EditBox.
+    private string day;
+
+    /// Name of the width \c EditBox.
+    private string width;
+
+    /// Name of the height \c EditBox.
+    private string height;
 }
