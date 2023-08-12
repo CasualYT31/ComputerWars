@@ -330,6 +330,15 @@ namespace sfx {
 		float getScalingFactor() const noexcept;
 
 		/**
+		 * Gets the name of the widget under the current mouse position.
+		 * If a user input object hasn't been given, then an empty string will be
+		 * returned and an error will be logged.
+		 * @return The full name of the widget under the current mouse position,
+		 *         blank if there isn't a visible one.
+		 */
+		std::string getWidgetUnderMouse() const;
+
+		/**
 		 * Animates the current GUI menu.
 		 * Any sprites are animated, and the colour background (if there is one) is
 		 * resized to match the size of the target. In addition, if a langauge
@@ -875,15 +884,6 @@ namespace sfx {
 		 *         otherwise.
 		 */
 		bool _menuExists(const std::string& menu);
-
-		/**
-		 * Gets the name of the widget under the current mouse position.
-		 * If a user input object hasn't been given, then an empty string will be
-		 * returned and an error will be logged.
-		 * @return The full name of the widget under the current mouse position,
-		 *         blank if there isn't a visible one.
-		 */
-		std::string _getWidgetUnderMouse();
 
 		// BACKGROUND //
 

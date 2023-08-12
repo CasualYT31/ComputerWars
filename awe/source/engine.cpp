@@ -464,6 +464,7 @@ bool awe::game_engine::_load(engine::json& j) {
 	if (!_gui->inGoodState()) return false;
 	// If one of the objects failed to initialise properly, return FALSE.
 	_userinput->tieWindow(_renderer);
+	_userinput->setGUI(_gui);
 	return true;
 }
 

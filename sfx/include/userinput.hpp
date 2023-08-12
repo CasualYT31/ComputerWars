@@ -38,6 +38,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <unordered_set>
 
 namespace sfx {
+	// Needed to block held mouse button inputs when they start over a widget.
+	class gui;
+
 	/**
 	 * Value representing an invalid mouse position.
 	 * @warning If you need to change this value, make sure to also update
@@ -191,6 +194,12 @@ namespace sfx {
 		 * a mouse button is not being used to trigger \c signal.
 		 */
 		bool triggeredByMouse = false;
+
+		/**
+		 * Stores \c TRUE if the control was triggered by the mouse, but it was
+		 * initially triggered whilst it was hovering over a GUI widget.
+		 */
+		bool startedWhenMouseOverWidget = false;
 
 		/**
 		 * Internal clock used for the timing of this individual signal.
@@ -497,6 +506,15 @@ namespace sfx {
 		 *         window and that window is not in focus.
 		 */
 		sfx::JoystickAxisList joystickAxesBeingPressed() const;
+
+		/**
+		 * Sets the \c sfx::gui object used to block held mouse button inputs when
+		 * the mouse is initially pressed down over a widget.
+		 * If none is given, which is the default, this checking isn't carried out.
+		 * @param gui Pointer to the object to use, which should already have been
+		 *            configured with the \c user_input object.
+		 */
+		void setGUI(const std::shared_ptr<const sfx::gui>& gui);
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -631,6 +649,11 @@ namespace sfx {
 		 * A pointer to the window tied to this \c user_input object.
 		 */
 		std::shared_ptr<const sf::Window> _window;
+
+		/**
+		 * A pointer to the GUI object that this \c user_input object was given to.
+		 */
+		std::shared_ptr<const sfx::gui> _gui;
 	};
 }
 

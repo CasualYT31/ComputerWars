@@ -382,7 +382,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 		"menu exists, <tt>FALSE</tt> otherwise.");
 
 	r = engine->RegisterGlobalFunction("string getWidgetUnderMouse()",
-		asMETHOD(sfx::gui, _getWidgetUnderMouse), asCALL_THISCALL_ASGLOBAL, this);
+		asMETHOD(sfx::gui, getWidgetUnderMouse), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Returns the full name of the widget that "
 		"is under the current mouse position. An empty string if there isn't "
 		"one.");
@@ -1602,6 +1602,17 @@ float sfx::gui::getScalingFactor() const noexcept {
 	return _scalingFactor;
 }
 
+std::string sfx::gui::getWidgetUnderMouse() const {
+	if (_ui) {
+		if (const auto w = _gui.getWidgetBelowMouseCursor(_ui->mousePosition()))
+			return w->getWidgetName().toStdString();
+	} else {
+		_logger.error("Called getWidgetUnderMouse() when no user input object has "
+			"been given to this gui object!");
+	}
+	return "";
+}
+
 bool sfx::gui::animate(const sf::RenderTarget& target) {
 	if (_guiBackground.find(getGUI()) != _guiBackground.end()) {
 		_guiBackground.at(getGUI()).animate(target);
@@ -2584,17 +2595,6 @@ bool sfx::gui::_menuExists(const std::string& menu) {
 	for (const auto& widget : menus)
 		if (widget->getWidgetName() == menu) return true;
 	return false;
-}
-
-std::string sfx::gui::_getWidgetUnderMouse() {
-	if (_ui) {
-		if (const auto w = _gui.getWidgetBelowMouseCursor(_ui->mousePosition()))
-			return w->getWidgetName().toStdString();
-	} else {
-		_logger.error("Called getWidgetUnderMouse() when no user input object has "
-			"been given to this gui object!");
-	}
-	return "";
 }
 
 void sfx::gui::_addWidget(const std::string& newWidgetType,
