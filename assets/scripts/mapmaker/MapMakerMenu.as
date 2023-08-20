@@ -42,6 +42,7 @@ ToolBar TOOLBAR;
 ToolBarButtonSetUpData PAINT_TOOL("paint", "painttool");
 ToolBarButtonSetUpData DELETE_TOOL("delete", "deletetool");
 ToolBarButtonSetUpData RECT_TOOL("rect", "recttool");
+ToolBarButtonSetUpData RECT_DELETE_TOOL("rectdelete", "rectdeletetool");
 
 MapPropertiesWindow MapPropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
     MESSAGE_BOX_GROUP);
@@ -93,7 +94,7 @@ void MapMakerMenuSetUp() {
     // ToolBar.
 
     TOOLBAR.setUp(CLIENT_AREA + ".ToolBar",
-        {PAINT_TOOL, DELETE_TOOL, RECT_TOOL });
+        {PAINT_TOOL, DELETE_TOOL, RECT_TOOL, RECT_DELETE_TOOL });
 
     // Dialogs.
 
@@ -125,6 +126,34 @@ void MapMakerMenuSetUp() {
             if (signalName == "Pressed") FillWindow.close();
         }
     );
+}
+
+/**
+ * Continuously draw a rectangle on the map.
+ * @param  prevAction \c TRUE if the action control was being triggered during the
+ *                    previous iteration of the game loop.
+ * @param  action     \c TRUE if the action control is being triggered during this
+ *                    iteration of the game loop.
+ * @param  curTile    The currently selected tile.
+ * @param  start      If \c TRUE is returned, the start of the rectangle is stored
+ *                    here.
+ * @param  end        If \c TRUE is returned, the end of the rectangle is stored
+ *                    here.
+ * @return \c TRUE if the rectangle is finished, \c FALSE if not.
+ */
+bool drawRectangle(const bool prevAction, const bool action,
+    const Vector2&in curTile, Vector2&out start, Vector2&out end) {
+    if (!prevAction && action) {        // Start rectangle.
+        edit.map.setRectangleSelectionStart(curTile);
+    } else if (prevAction && action) {  // Continue rectangle.
+        edit.map.setRectangleSelectionEnd(curTile);
+    } else if (prevAction && !action) { // Finish rectangle.
+        start = edit.map.getRectangleSelectionStart();
+        end = edit.map.getRectangleSelectionEnd();
+        edit.map.removeRectangleSelection();
+        return true;
+    }
+    return false;
 }
 
 /// Keeps track of the action control's signal state during the previous
@@ -233,14 +262,8 @@ void MapMakerMenuHandleInput(const dictionary controls,
         edit.deleteUnit(curUnit);
     
     } else if (TOOLBAR.tool == RECT_TOOL.shortName) {
-        if (!prevAction && action) {        // Start rectangle.
-            edit.map.setRectangleSelectionStart(curTile);
-        } else if (prevAction && action) {  // Continue rectangle.
-            edit.map.setRectangleSelectionEnd(curTile);
-        } else if (prevAction && !action) { // Finish rectangle.
-            const auto start = edit.map.getRectangleSelectionStart();
-            const auto end = edit.map.getRectangleSelectionEnd();
-            edit.map.removeRectangleSelection();
+        Vector2 start, end;
+        if (drawRectangle(prevAction, action, curTile, start, end)) {
             if (currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null) {
                 edit.rectangleFillTiles(start, end, tileTypeSel.scriptName,
                     tileOwnerSel.isEmpty() ? NO_ARMY :
@@ -251,6 +274,11 @@ void MapMakerMenuHandleInput(const dictionary controls,
                     country[unitArmySel].turnOrder);
             }
         }
+    
+    } else if (TOOLBAR.tool == RECT_DELETE_TOOL.shortName) {
+        Vector2 start, end;
+        if (drawRectangle(prevAction, action, curTile, start, end))
+            edit.rectangleDeleteUnits(start, end);
     }
 
     prevAction = action;

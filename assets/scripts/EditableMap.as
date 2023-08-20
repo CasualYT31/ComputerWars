@@ -160,6 +160,16 @@ class EditableMap {
         _updateArmyProps();
     }
 
+    /**
+     * Deletes all units on the tiles within a given rectangle.
+     * @sa \c Map::rectangleDeleteUnits().
+     */
+    void rectangleDeleteUnits(const Vector2&in start, const Vector2&in end) {
+        map.rectangleDeleteUnits(start, end);
+        _updateTileProps(tilePropsTile);
+        _updateArmyProps();
+    }
+
     ////////////////////////////////
     // ARMY MANAGEMENT OPERATIONS //
     ////////////////////////////////

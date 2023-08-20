@@ -349,6 +349,17 @@ namespace awe {
 			const std::string& type, const awe::ArmyID army);
 
 		/**
+		 * Deletes a selection of units from the map.
+		 * Goes through each tile in a rectangle, and if the tile has a unit upon
+		 * it, it shall be deleted.
+		 * @param  start The tile from which the rectangle spreads.
+		 * @param  end   The tile which the rectangle spreads to.
+		 * @return \c FALSE if \c start or \c end were out-of-bounds.
+		 */
+		bool rectangleDeleteUnits(const sf::Vector2u& start,
+			const sf::Vector2u& end);
+
+		/**
 		 * Sets the current day.
 		 * @param day The new day.
 		 */

@@ -178,6 +178,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"bool rectangleDeleteUnits(const Vector2&in, const Vector2&in)",
+			asMETHOD(awe::map, rectangleDeleteUnits), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"bool isOutOfBounds(const Vector2&in) const",
 			asMETHOD(awe::map, _isOutOfBounds), asCALL_THISCALL);
 
@@ -951,6 +955,34 @@ bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 	const sf::Vector2u& end, const std::string& type, const awe::ArmyID army) {
 	return rectangleFillUnits(start, end, _unitTypes->operator[](type), army);
+}
+
+bool awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
+	const sf::Vector2u& end) {
+	if (_isOutOfBounds(start)) {
+		_logger.error("rectangleDeleteUnits operation failed: the start tile {} "
+			"is out of bounds.", start);
+		return false;
+	}
+	if (_isOutOfBounds(end)) {
+		_logger.error("rectangleDeleteUnits operation failed: the end tile {} is "
+			"out of bounds.", end);
+		return false;
+	}
+	const unsigned int startX = std::min(start.x, end.x),
+		startY = std::min(start.y, end.y);
+	for (unsigned int x = startX, width = static_cast<unsigned int>(::abs(
+		static_cast<sf::Int64>(start.x) - static_cast<sf::Int64>(end.x)) + 1);
+		x < startX + width; ++x) {
+		for (unsigned int y = startY, height = static_cast<unsigned int>(::abs(
+			static_cast<sf::Int64>(start.y) - static_cast<sf::Int64>(end.y)) + 1);
+			y < startY + height; ++y) {
+			auto unit = getUnitOnTile({ x, y });
+			if (unit != 0) deleteUnit(unit);
+		}
+	}
+	_changed = true;
+	return true;
 }
 
 void awe::map::setDay(const awe::Day day) noexcept {
