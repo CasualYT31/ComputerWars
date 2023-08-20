@@ -369,6 +369,13 @@ bool sfx::user_input::_load(engine::json& j) {
 						i.key(), e);
 				}
 			}
+
+			if (i.value().find("triggerviamouseevenifmouseisoverwidget") !=
+				i.value().end()) {
+				j.apply(
+					control[i.key()].config.triggerViaMouseEvenIfMouseIsOverWidget,
+					{ i.key(), "triggerviamouseevenifmouseisoverwidget" }, true);
+			}
 		}
 	}
 
@@ -406,6 +413,8 @@ bool sfx::user_input::_save(nlohmann::ordered_json& j) {
 				j[c->first]["delays"].push_back(d->asMilliseconds());
 			}
 		}
+		j[c->first]["triggerviamouseevenifmouseisoverwidget"] =
+			c->second.config.triggerViaMouseEvenIfMouseIsOverWidget;
 	}
 	return true;
 }
@@ -483,7 +492,9 @@ void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
 	}
 
 	// If the input started when the mouse was over a widget, cancel the signal.
-	if (signal.startedWhenMouseOverWidget) {
+	// BUT, only perform this logic if the control's config says so.
+	if (signal.startedWhenMouseOverWidget &&
+		!_control.at(name).config.triggerViaMouseEvenIfMouseIsOverWidget) {
 		signal.signal = false;
 		signal.triggeredByMouse = false;
 	}

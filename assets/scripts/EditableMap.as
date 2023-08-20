@@ -168,7 +168,12 @@ class EditableMap {
      * @param country The turn-order ID of the country to assign to the new army.
      */
     void createArmy(const ArmyID country) {
-        map.createArmy(::country.scriptNames[uint64(country)]);
+        const auto successful =
+            map.createArmy(::country.scriptNames[uint64(country)]);
+        if (successful && map.getArmyCount() == 1) {
+            // If the first army has been created, automatically select them.
+            map.setSelectedArmy(map.getArmyIDs()[0]);
+        }
         _updateArmyProps();
     }
 
@@ -177,7 +182,12 @@ class EditableMap {
      * @param army The ID of the army to delete.
      */
     void deleteArmy(const ArmyID army) {
+        // If we are deleting the current army, select the next one.
+        const auto getNextArmy = map.getSelectedArmy() == army;
+        const auto nextArmy =
+            map.getArmyCount() == 1 ? NO_ARMY : map.getNextArmy();
         map.deleteArmy(army);
+        if (getNextArmy) map.setSelectedArmy(nextArmy);
         _updateArmyProps();
     }
 
@@ -192,6 +202,15 @@ class EditableMap {
         map.setArmyFunds(army, newFunds);
         return newFunds;
     }
+
+    /**
+     * Update's which army is having their turn.
+     * @param army The ID of the army to set as the current one.
+     */
+     void setSelectedArmy(const ArmyID army) {
+        map.setSelectedArmy(army);
+        _updateArmyProps();
+     }
 
     ////////////////////////////////
     // TILE MANAGEMENT OPERATIONS //

@@ -1161,6 +1161,7 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 			_makeNewDirectionalSelection(
 				_selectThisWidgetFirst[_currentGUI], _currentGUI);
 		}
+		_logger.write("Opened menu {} from menu {}.", _currentGUI, _previousGUI);
 	} catch (const tgui::Exception& e) {
 		_logger.error("{}", e);
 		if (_gui.get(old)) _gui.get(old)->setVisible(true);
@@ -2528,6 +2529,8 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::TreeView::create();
 	} else if (type == "checkbox") {
 		return tgui::CheckBox::create();
+	} else if (type == "radiobutton") {
+		return tgui::RadioButton::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
@@ -2942,7 +2945,7 @@ void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
 	} else {
 		if (widgetType != "BitmapButton" && widgetType != "Label" &&
 			widgetType != "Button" && widgetType != "ChildWindow" &&
-			widgetType != "CheckBox")
+			widgetType != "CheckBox" && widgetType != "RadioButton")
 				UNSUPPORTED_WIDGET_TYPE()
 		_setTranslatedString(fullnameAsString, text, variables);
 		_translateWidget(widget);
@@ -2964,7 +2967,7 @@ std::string sfx::gui::_getWidgetText(const std::string& name) {
 void sfx::gui::_setWidgetChecked(const std::string& name, const bool checked) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(RadioButton, castWidget->setChecked(checked);)
-		IF_WIDGET_IS(CheckBox, castWidget->setChecked(checked);)
+		ELSE_IF_WIDGET_IS(CheckBox, castWidget->setChecked(checked);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the check status to {} for widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\".", checked, name, widgetType,
@@ -2974,7 +2977,7 @@ void sfx::gui::_setWidgetChecked(const std::string& name, const bool checked) {
 bool sfx::gui::_isWidgetChecked(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(RadioButton, return castWidget->isChecked();)
-		IF_WIDGET_IS(CheckBox, return castWidget->isChecked();)
+		ELSE_IF_WIDGET_IS(CheckBox, return castWidget->isChecked();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the check status of a widget \"{}\", which is of type "
 		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])

@@ -248,6 +248,15 @@ namespace sfx {
 		 * The list of joystick axes assigned to this game control.
 		 */
 		sfx::JoystickAxisList joystickAxis = {};
+
+		/**
+		 * Usually, all controls triggered by mouse buttons are cancelled if they
+		 * are made whilst the mouse is over a GUI widget.
+		 * If this is set to \c TRUE, this checking is cancelled, meaning the
+		 * control will still register as being triggered even if the mouse is over
+		 * a widget.
+		 */
+		bool triggerViaMouseEvenIfMouseIsOverWidget = false;
 	};
 
 	/**
@@ -554,7 +563,13 @@ namespace sfx {
 		 *            trigger this game control. The first element stores an
 		 *            unsigned int representing the axis ID. The second element
 		 *            stores an int representing the direction of the axis.</td>
-		 *        </tr></table>
+		 *        </tr>
+		 *        <tr><td>triggerviamouseevenifmouseisoverwidget</td>
+		 *        <td>bool</td>
+		 *        <td><em>Optional</em> Usually, controls triggered via mouse
+		 *            buttons are cancelled if the mouse is over a GUI widget.
+		 *            Setting this to <tt>TRUE</tt> cancels this logic.</td></tr>
+		 *        </table>
 		 * All other keys within each game control object will be ignored.
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.

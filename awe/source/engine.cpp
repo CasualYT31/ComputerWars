@@ -57,8 +57,8 @@ int awe::game_engine::run() {
 			// after and triggers MapMenu again, ensuring the MapMenu never goes
 			// away. By handling the click in MapMenu last, Map doesn't get to see
 			// the click and so safely ignores it for that iteration.
-			_userinput->update();
 			_gui->handleInput(_userinput);
+			_userinput->update();
 
 			// Now handle the events.
 			sf::Event event;

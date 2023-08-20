@@ -98,7 +98,7 @@ engine::sink::sink(const std::string& name, const std::string& dev,
 		// Then, attempt to create the spdlog sinks.
 		_sharedSink = std::make_shared<spdlog::sinks::dup_filter_sink_st>(
 			std::chrono::seconds(5)
-			);
+		);
 		_sharedSink->add_sink(
 			std::make_shared<spdlog::sinks::basic_file_sink_st>(filename)
 		);
@@ -186,6 +186,7 @@ void engine::logger::_initialiseLogger(const std::string& name,
 void engine::logger::_dropLogger() noexcept {
 	if (_logger) {
 		try {
+			_logger->flush();
 			spdlog::drop(_name);
 		} catch (const std::exception& e) {
 			try {

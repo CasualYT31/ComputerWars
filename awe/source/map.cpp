@@ -1016,7 +1016,10 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 	// Firstly, delete all units belonging to the army.
 	auto units = _armies.at(army).getUnits();
 	for (auto unit : units) {
-		deleteUnit(unit);
+		// Ignore loaded units, as they will be handled automatically by
+		// deleteUnit().
+		if (_isUnitPresent(unit) && _units.at(unit).loadedOnto() == 0)
+			deleteUnit(unit);
 	}
 	// Then, disown all tiles.
 	auto tiles = _armies.at(army).getTiles();
@@ -2370,7 +2373,7 @@ void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
 }
 
 void awe::map::setSelectedArmy(const awe::ArmyID army) {
-	if (_isArmyPresent(army)) {
+	if (army == awe::NO_ARMY || _isArmyPresent(army)) {
 		_currentArmy = army;
 		_changed = true;
 	} else {
@@ -2384,7 +2387,7 @@ awe::ArmyID awe::map::getSelectedArmy() const {
 }
 
 awe::ArmyID awe::map::getNextArmy() const {
-	if (_currentArmy == awe::NO_ARMY) return awe::NO_ARMY;
+	if (_currentArmy == awe::NO_ARMY || _armies.size() == 0) return awe::NO_ARMY;
 	auto itr = ++_armies.find(_currentArmy);
 	if (itr == _armies.end()) itr = _armies.begin();
 	return itr->first;

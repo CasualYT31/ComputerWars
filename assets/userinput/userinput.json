@@ -87,7 +87,8 @@
 		"buttons": [
 			1
 		],
-		"type": 1
+		"type": 1,
+		"triggerviamouseevenifmouseisoverwidget": true
 	},
 	"zoomin": {
 		"keys": [
@@ -120,7 +121,8 @@
 		"mouse": [
 			2
 		],
-		"type": 1
+		"type": 1,
+		"triggerviamouseevenifmouseisoverwidget": true
 	},
 	"range": {
 		"keys": [

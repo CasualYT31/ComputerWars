@@ -106,8 +106,15 @@ class ArmyLayout {
         setWidgetOrigin(funds, 0.0f, 0.5f);
         setWidgetPosition(funds, "0%", "50%");
         
-        // Empty group to ensure top and bottom row widget counts match.
-        addWidget("Group", topLayout + ".Placeholder");
+        // Current Army?
+        const auto currentArmyGroup = topLayout + ".CurrentArmyGroup";
+        addWidget("Group", currentArmyGroup);
+
+        currentArmy = currentArmyGroup + ".CurrentArmy";
+        addWidget("RadioButton", currentArmy);
+        setWidgetText(currentArmy, "currentarmy");
+        setWidgetOrigin(currentArmy, 0.0f, 0.5f);
+        setWidgetPosition(currentArmy, "0%", "50%");
 
         // Bottom row.
         const auto bottomLayout = layout + ".BottomLayout";
@@ -191,6 +198,10 @@ class ArmyLayout {
         disconnectSignalHandlers();
         setWidgetText(team, formatTeamID(edit.map.getArmyTeam(army)));
         setWidgetText(funds, formatFunds(edit.map.getArmyFunds(army)));
+        if (edit.map.getSelectedArmy() == army)
+            setWidgetChecked(currentArmy, true);
+        else
+            setWidgetChecked(currentArmy, false);
         const auto current = edit.map.getArmyCurrentCO(army),
             tag = edit.map.getArmyTagCO(army);
         const auto currentIndex = commander.scriptNames.find(current),
@@ -218,6 +229,8 @@ class ArmyLayout {
             SignalHandler(this.armyTeamEditBoxSignalHandler));
         connectSignalHandler(funds,
             SignalHandler(this.armyFundsEditBoxSignalHandler));
+        connectSignalHandler(currentArmy,
+            SignalHandler(this.currentArmyRadioButtonSignalHandler));
         connectSignalHandler(currentCO,
             SignalHandler(this.currentCOComboBoxSignalHandler));
         connectSignalHandler(tagCO,
@@ -228,7 +241,8 @@ class ArmyLayout {
     /// Used to prevent \c refresh() from applying changes to the map that already
     /// exist.
     private void disconnectSignalHandlers() {
-        ::disconnectSignalHandlers({ team, funds, currentCO, tagCO });
+        ::disconnectSignalHandlers(
+            { team, funds, currentArmy, currentCO, tagCO });
     }
 
     /**
@@ -260,6 +274,16 @@ class ArmyLayout {
             if (funds != actualFunds || text.isEmpty())
                 setWidgetText(widgetName, formatFunds(actualFunds));
         }
+    }
+
+    /**
+     * Handles the army's Current Army? \c RadioButton signals.
+     * @param widgetName The full name of the \c RadioButton.
+     * @param signalName The name of the signal emitted.
+     */
+    private void currentArmyRadioButtonSignalHandler(const string&in widgetName,
+        const string&in signalName) {
+        if (signalName == "Checked") edit.setSelectedArmy(army);
     }
 
     /**
@@ -327,6 +351,9 @@ class ArmyLayout {
 
     /// The name of the funds \c EditBox.
     private string funds;
+
+    /// The name of the Current Army? \c RadioButton.
+    private string currentArmy;
 
     /// The name of the current CO \c ComboBox.
     private string currentCO;
