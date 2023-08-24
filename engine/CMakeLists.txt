@@ -92,7 +92,6 @@ add_library(${PROJECT_NAME} STATIC
 	"source/logger.cpp"
 	"source/safejson.cpp"
 	"source/language.cpp"
-	"source/file.cpp"
 	"source/script.cpp"
 	"source/binary.cpp"
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp

@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.hpp"
 #include "fmtawe.hpp"
+#include "binary.hpp"
 
 /* \c NO_ARMY that can be assigned to a script's interface. Due to limitations of
 AngelScript, I unfortunately cannot register a constant with the script interface,
@@ -58,7 +59,7 @@ void awe::map::Register(asIScriptEngine* engine,
 		//////////////////
 		engine::RegisterVectorTypes(engine, document);
 		engine::RegisterRectTypes(engine, document);
-		engine::RegisterFileType(engine, document);
+		engine::RegisterStreamTypes(engine, document);
 		awe::RegisterGameTypedefs(engine, document);
 		awe::closed_list_node::Register(engine, document);
 
@@ -681,7 +682,6 @@ void awe::map::Register(asIScriptEngine* engine,
 }
 
 awe::map::map(const engine::logger::data& data) : _logger(data),
-	_file({ data.sink, data.name + "_binary_file" }),
 	_cursor({ data.sink, data.name + "_cursor_sprite" }) {
 	_initShaders();
 }
@@ -691,7 +691,6 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const engine::logger::data& data) : _logger(data),
-	_file({ data.sink, data.name + "_binary_file" }),
 	_cursor({data.sink, data.name + "_cursor_sprite"}) {
 	_countries = countries;
 	_tileTypes = tiles;
@@ -715,21 +714,24 @@ bool awe::map::load(std::string file, const unsigned char version) {
 	_viewOffsetY.reset();
 	// Load new state.
 	try {
-		_file.open(file, true);
+		engine::binary_istream binaryData({ _logger.getData().sink,
+			_logger.getData().name + "_binary_istream" });
+		{
+			std::ifstream binaryFile(file, std::ios::binary);
+			binaryFile >> binaryData;
+		}
 		_filename = file;
 		if (!_scripts) {
 			throw std::runtime_error("no scripts object!");
 		} else if (!_scripts->functionDeclExists(
-			"void LoadMap(BinaryFile@, Map@, uint8)")) {
-			throw std::runtime_error("void LoadMap(BinaryFile@, Map@, uint8) not "
-				"found in the scripts!");
+			"void LoadMap(BinaryIStream@, Map@, uint8)")) {
+			throw std::runtime_error("void LoadMap(BinaryIStream@, Map@, uint8) "
+				"not found in the scripts!");
 		}
-		_scripts->callFunction("LoadMap", &_file, this, version);
-		_file.close();
+		_scripts->callFunction("LoadMap", &binaryData, this, version);
 	} catch (const std::exception& e) {
 		_logger.critical("Map loading operation: couldn't load map file \"{}\": "
 			"{}", file, e);
-		_file.close();
 		return false;
 	}
 	_changed = false;
@@ -739,21 +741,24 @@ bool awe::map::load(std::string file, const unsigned char version) {
 bool awe::map::save(std::string file, const unsigned char version) {
 	if (file == "") file = _filename;
 	try {
-		_file.open(file, false);
-		_filename = file;
+		engine::binary_ostream binaryData({ _logger.getData().sink,
+			_logger.getData().name + "_binary_ostream" });
 		if (!_scripts) {
 			throw std::runtime_error("no scripts object!");
 		} else if (!_scripts->functionDeclExists(
-			"void SaveMap(BinaryFile@, Map@, uint8)")) {
-			throw std::runtime_error("void SaveMap(BinaryFile@, Map@, uint8) not "
-				"found in the scripts!");
+			"void SaveMap(BinaryOStream@, Map@, uint8)")) {
+			throw std::runtime_error("void SaveMap(BinaryOStream@, Map@, uint8) "
+				"not found in the scripts!");
 		}
-		_scripts->callFunction("SaveMap", &_file, this, version);
-		_file.close();
+		_scripts->callFunction("SaveMap", &binaryData, this, version);
+		{
+			std::ofstream binaryFile(file, std::ios::binary);
+			binaryFile << binaryData;
+		}
+		_filename = file;
 	} catch (const std::exception& e) {
 		_logger.critical("Map saving operation: couldn't save map file \"{}\": {}",
 			file, e);
-		_file.close();
 		return false;
 	}
 	_changed = false;
