@@ -72,23 +72,24 @@ namespace cwm {
 	const CWMFileVersion LATEST_CWM_FILE_VERSION = 1297564416;
 
 	/**
-	 * Deserialises unit data from a binary file.
-	 * You are permitted to throw exceptions to signify unrecoverable errors.
-	 * @param file     Handle to the binary file to read from.
-	 * @param map      Handle to the map object to update.
-	 * @param tile     The tile to place the read unit onto.
-	 * @param loadOnto The ID of the unit to load the read unit onto. If \c 0 is
-	 *                 given, the read unit will not be loaded onto any unit.
+	 * Deserialises unit data from a binary stream.
+	 * @param  stream   Handle to the binary stream to read from.
+	 * @param  map      Handle to the map object to update.
+	 * @param  tile     The tile to place the read unit onto.
+	 * @param  loadOnto The ID of the unit to load the read unit onto. If \c 0 is
+	 *                  given, the read unit will not be loaded onto any unit.
+     * @throws You are permitted to throw exceptions to signify unrecoverable
+     *         errors.
 	 */
-	bool LoadMapUnit(BinaryFile@ file, Map@ map, const Vector2&in tile,
+	bool LoadMapUnit(BinaryIStream@ stream, Map@ map, const Vector2&in tile,
 		const UnitID loadOnto = 0) {
 		ArmyID unitOwner;
-		file.read(unitOwner);
+		stream.read(unitOwner);
 		if (unitOwner == NO_ARMY) {
 			return false;
 		} else {
 			string unitTypeScriptName;
-			file.read(unitTypeScriptName);
+			stream.read(unitTypeScriptName);
 			const auto unitID = map.createUnit(unitTypeScriptName, unitOwner);
 			if (unitID > 0) {
 				if (loadOnto > 0) {
@@ -97,28 +98,28 @@ namespace cwm {
 					map.setUnitPosition(unitID, tile);
 				}
 				HP hp;
-				file.read(hp);
+				stream.read(hp);
 				map.setUnitHP(unitID, hp);
 				Fuel fuel;
-				file.read(fuel);
+				stream.read(fuel);
 				map.setUnitFuel(unitID, fuel);
 				const auto type = unittype[unitTypeScriptName];
 				for (uint64 i = 0, weaponCount = type.weaponCount;
 					i < weaponCount; ++i) {
 					Ammo ammo;
-					file.read(ammo);
+					stream.read(ammo);
 					map.setUnitAmmo(unitID, type.weapon(i).scriptName, ammo);
 				}
 				bool isWaiting;
-				file.read(isWaiting);
+				stream.read(isWaiting);
 				map.waitUnit(unitID, isWaiting);
 				bool isCapturing;
-				file.read(isCapturing);
+				stream.read(isCapturing);
 				map.unitCapturing(unitID, isCapturing);
 				bool isHiding;
-				file.read(isHiding);
+				stream.read(isHiding);
 				map.unitHiding(unitID, isHiding);
-				while (LoadMapUnit(file, map, tile,
+				while (LoadMapUnit(stream, map, tile,
 					((loadOnto > 0) ? (loadOnto) : (unitID))));
 			} else {
 				throw("read above");
@@ -128,27 +129,28 @@ namespace cwm {
 	}
 
 	/**
-	 * Loads a binary file and updates a map object based on the file's contents.
+	 * Updates a map object based on the given binary stream's contents.
 	 * The engine will clear the state of the map object before invoking this
-	 * function. You will not be able to perform write operations.\n
-	 * You are permitted to throw exceptions to signify unrecoverable errors.
-	 * @param file   Handle to the binary file to read from.
-	 * @param map    Handle to the map object to update.
-	 * @param format A number indicating which format the binary file's data is
-	 *               expected to take.
+	 * function. You will not be able to perform write operations.
+	 * @param  stream Handle to the binary stream to read from.
+	 * @param  map    Handle to the map object to update.
+	 * @param  format A number indicating which format the binary stream's data is
+	 *                expected to take.
+     * @throws You are permitted to throw exceptions to signify unrecoverable
+     *         errors.
 	 */
-	void LoadMap(BinaryFile@ file, Map@ map, uint8 format) {
+	void LoadMap(BinaryIStream@ stream, Map@ map, uint8 format) {
 		// For now, ignore the first four bytes. In the future, this will signify
 		// the version of the file format used, but whilst I'm still working
 		// towards a full release, it's not worth tracking differences in
 		// versions.
-		CWMFileVersion fileVersion; file.read(fileVersion);
+		CWMFileVersion fileVersion; stream.read(fileVersion);
 		string mapName;
-		file.read(mapName);
+		stream.read(mapName);
 		map.setMapName(mapName);
 		uint32 width, height, selX, selY, armyCount;
-		file.read(width);
-		file.read(height);
+		stream.read(width);
+		stream.read(height);
 		// Find the first tile type and use that. They will get replaced with
 		// setTileType() later.
 		string firstTileType =
@@ -158,49 +160,49 @@ namespace cwm {
 		if (firstTileType == "")
 			throw("No tile types were configured; failed to load map!");
 		map.setMapSize(Vector2(width, height), firstTileType);
-		file.read(selX);
-		file.read(selY);
+		stream.read(selX);
+		stream.read(selY);
 		map.setSelectedTile(Vector2(selX, selY));
 		Day day;
-		file.read(day);
+		stream.read(day);
 		map.setDay(day);
-		file.read(armyCount);
+		stream.read(armyCount);
 		for (uint64 army = 0; army < armyCount; ++army) {
 			string countryScriptName;
-			file.read(countryScriptName);
+			stream.read(countryScriptName);
 			if (map.createArmy(countryScriptName)) {
 				const auto armyID = country[countryScriptName].turnOrder;
 				TeamID team;
-				file.read(team);
+				stream.read(team);
 				map.setArmyTeam(armyID, team);
 				Funds funds;
-				file.read(funds);
+				stream.read(funds);
 				map.setArmyFunds(armyID, funds);
 				string currentCOScriptName;
-				file.read(currentCOScriptName);
+				stream.read(currentCOScriptName);
 				string tagCOScriptName;
-				file.read(tagCOScriptName);
+				stream.read(tagCOScriptName);
 				map.setArmyCOs(armyID, currentCOScriptName, tagCOScriptName);
 			} else {
 				throw("read above");
 			}
 		}
 		ArmyID currentArmy;
-		file.read(currentArmy);
+		stream.read(currentArmy);
         if (armyCount > 0) map.setSelectedArmy(currentArmy);
 		for (uint32 y = 0; y < height; ++y) {
 			for (uint32 x = 0; x < width; ++x) {
 				Vector2 tilePos(x, y);
 				string tileTypeScriptName;
-				file.read(tileTypeScriptName);
+				stream.read(tileTypeScriptName);
 				if (map.setTileType(tilePos, tileTypeScriptName)) {
 					HP tileHP;
-					file.read(tileHP);
+					stream.read(tileHP);
 					map.setTileHP(tilePos, tileHP);
 					ArmyID tileOwner;
-					file.read(tileOwner);
+					stream.read(tileOwner);
 					map.setTileOwner(tilePos, tileOwner);
-					LoadMapUnit(file, map, tilePos);
+					LoadMapUnit(stream, map, tilePos);
 				} else {
 					throw("read above");
 				}
@@ -209,76 +211,76 @@ namespace cwm {
 	}
 
 	/**
-	 * Serialises unit data to a binary file.
-	 * You are permitted to throw exceptions to signify unrecoverable errors.
-	 * @param file Handle to the binary file to write to.
-	 * @param map  Handle to the map object to read from.
-	 * @param unit The ID of the unit to write data of.
+	 * Serialises unit data to a binary stream.
+	 * @param  stream Handle to the binary stream to write to.
+	 * @param  map    Handle to the map object to read from.
+	 * @param  unit   The ID of the unit to write data of.
+     * @throws You are permitted to throw exceptions to signify unrecoverable
+     *         errors.
 	 */
-	void SaveMapUnit(BinaryFile@ file, Map@ map, const UnitID unit) {
-		file.write(map.getArmyOfUnit(unit));
+	void SaveMapUnit(BinaryOStream@ stream, Map@ map, const UnitID unit) {
+		stream.write(map.getArmyOfUnit(unit));
 		const auto type = map.getUnitType(unit);
-		file.write(type.scriptName);
-		file.write(map.getUnitHP(unit));
-		file.write(map.getUnitFuel(unit));
+		stream.write(type.scriptName);
+		stream.write(map.getUnitHP(unit));
+		stream.write(map.getUnitFuel(unit));
 		for (uint64 i = 0, weaponCount = type.weaponCount; i < weaponCount; ++i) {
-			file.write(map.getUnitAmmo(unit, type.weapon(i).scriptName));
+			stream.write(map.getUnitAmmo(unit, type.weapon(i).scriptName));
 		}
-		file.write(map.isUnitWaiting(unit));
-		file.write(map.isUnitCapturing(unit));
-		file.write(map.isUnitHiding(unit));
+		stream.write(map.isUnitWaiting(unit));
+		stream.write(map.isUnitCapturing(unit));
+		stream.write(map.isUnitHiding(unit));
 		const auto loadedUnits = map.getLoadedUnits(unit);
 		const auto loadedUnitCount = loadedUnits.length();
 		for (uint i = 0; i < loadedUnitCount; ++i) {
-			SaveMapUnit(file, map, loadedUnits[i]);
+			SaveMapUnit(stream, map, loadedUnits[i]);
 		}
-		file.write(NO_ARMY);
+		stream.write(NO_ARMY);
 	}
 
 	/**
-	 * Serialises a map object to a binary file.
-	 * The given file will be empty. You will not be able to perform read
-	 * operations.\n
+	 * Serialises a map object to a binary stream.
+	 * The given stream will be empty.
 	 * You are permitted to throw exceptions to signify unrecoverable errors.
-	 * @param file   Handle to the binary file to write to.
+	 * @param stream Handle to the binary stream to write to.
 	 * @param map    Handle to the map object to update.
-	 * @param format A number indicating which format the binary file's data must
-	 *               take.
+	 * @param format A number indicating which format the binary stream's data
+	 *               must take.
 	 */
-	void SaveMap(BinaryFile@ file, Map@ map, uint8 format) {
+	void SaveMap(BinaryOStream@ stream, Map@ map, uint8 format) {
 		// For now, save the same file version every time. See LoadMap().
-		file.write(LATEST_CWM_FILE_VERSION);
-		file.write(map.getMapName());
+		stream.write(LATEST_CWM_FILE_VERSION);
+		stream.write(map.getMapName());
 		const auto mapSize = map.getMapSize();
-		file.write(mapSize.x);
-		file.write(mapSize.y);
+		stream.write(mapSize.x);
+		stream.write(mapSize.y);
 		const auto cursor = map.getSelectedTile();
-		file.write(cursor.x);
-		file.write(cursor.y);
-		file.write(map.getDay());
+		stream.write(cursor.x);
+		stream.write(cursor.y);
+		stream.write(map.getDay());
 		const auto armyCount = map.getArmyCount();
-		file.write(armyCount);
+		stream.write(armyCount);
 		const auto armyIDs = map.getArmyIDs();
 		for (uint i = 0; i < armyCount; ++i) {
 			const auto armyID = armyIDs[i];
-			file.write(map.getArmyCountry(armyID).scriptName);
-			file.write(map.getArmyTeam(armyID));
-			file.write(map.getArmyFunds(armyID));
-			file.write(map.getArmyCurrentCO(armyID));
-			file.write(map.getArmyTagCO(armyID));
+			stream.write(map.getArmyCountry(armyID).scriptName);
+			stream.write(map.getArmyTeam(armyID));
+			stream.write(map.getArmyFunds(armyID));
+			stream.write(map.getArmyCurrentCO(armyID));
+			stream.write(map.getArmyTagCO(armyID));
 		}
-		file.write(map.getSelectedArmy());
+		stream.write(map.getSelectedArmy());
 		for (uint32 y = 0; y < mapSize.y; ++y) {
 			for (uint32 x = 0; x < mapSize.x; ++x) {
 				Vector2 tilePos(x, y);
-				file.write(map.getTileType(tilePos).scriptName);
-				file.write(map.getTileHP(tilePos));
-				file.write(map.getTileOwner(tilePos));
+				stream.write(map.getTileType(tilePos).scriptName);
+				stream.write(map.getTileHP(tilePos));
+				stream.write(map.getTileOwner(tilePos));
 				const auto unitID = map.getUnitOnTile(tilePos);
 				if (unitID > 0) {
-					SaveMapUnit(file, map, unitID);
+					SaveMapUnit(stream, map, unitID);
 				} else {
-					file.write(NO_ARMY);
+					stream.write(NO_ARMY);
 				}
 			}
 		}

@@ -75,11 +75,11 @@ namespace engine {
 		const std::shared_ptr<DocumentationGenerator>& document);
 
 	/**
-	 * Registers and documents the \c BinaryFile type, if it hasn't already been
-	 * registered.
+	 * Registers and documents the \c BinaryIStream and \c BinaryOStream types, if
+	 * they haven't already been registered.
 	 * @safety No guarantee.
 	 */
-	void RegisterFileType(asIScriptEngine* engine,
+	void RegisterStreamTypes(asIScriptEngine* engine,
 		const std::shared_ptr<DocumentationGenerator>& document);
 
 	/**

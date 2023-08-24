@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "unit.hpp"
 #include "army.hpp"
 #include "script.hpp"
-#include "file.hpp"
 #include "language.hpp"
 #include "gui.hpp"
 #include <cmath>
@@ -1703,11 +1702,6 @@ namespace awe {
 		 * File name of the binary file previously read from or written to.
 		 */
 		std::string _filename = "";
-
-		/**
-		 * Binary file object used to read files.
-		 */
-		engine::binary_file _file;
 
 		/**
 		 * Pointer to a \c scripts object.

@@ -21,12 +21,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "script.hpp"
+#include "binary.hpp"
 #include <filesystem>
 #include "SFML/Graphics/Color.hpp"
 #include "SFML/System/Vector2.hpp"
 #include "SFML/System/Clock.hpp"
 #include "SFML/Graphics/Rect.hpp"
-#include "file.hpp"
 #include "boost/stacktrace.hpp"
 #include "fmtengine.hpp"
 
@@ -311,77 +311,87 @@ void engine::RegisterTimeTypes(asIScriptEngine* engine,
     }
 }
 
-void engine::RegisterFileType(asIScriptEngine* engine,
+void engine::RegisterStreamTypes(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) {
-    if (!engine->GetTypeInfoByName("BinaryFile")) {
-        auto r = engine->RegisterObjectType("BinaryFile", 0,
+    if (!engine->GetTypeInfoByName("BinaryIStream")) {
+        auto r = engine->RegisterObjectType("BinaryIStream", 0,
             asOBJ_REF | asOBJ_NOCOUNT);
-        document->DocumentObjectType(r, "Represents a binary file written in "
-            "Little Endian encoding.");
-        r = engine->RegisterObjectMethod("BinaryFile", "uint64 position() const",
-            asMETHOD(engine::binary_file, position), asCALL_THISCALL);
-        document->DocumentObjectMethod(r, "Retrieves the current byte position of "
-            "the file.");
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(int8&out)",
-            asMETHODPR(engine::binary_file, readNumber, (sf::Int8&), void),
+        document->DocumentObjectType(r, "Represents an input stream of binary "
+            "data.");
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(int8&out)",
+            asMETHODPR(engine::binary_istream, readNumber, (sf::Int8&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(int16&out)",
-            asMETHODPR(engine::binary_file, readNumber, (sf::Int16&), void),
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(int16&out)",
+            asMETHODPR(engine::binary_istream, readNumber, (sf::Int16&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(int32&out)",
-            asMETHODPR(engine::binary_file, readNumber, (sf::Int32&), void),
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(int32&out)",
+            asMETHODPR(engine::binary_istream, readNumber, (sf::Int32&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(int64&out)",
-            asMETHODPR(engine::binary_file, readNumber, (sf::Int64&), void),
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(int64&out)",
+            asMETHODPR(engine::binary_istream, readNumber, (sf::Int64&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(uint8&out)",
-            asMETHODPR(engine::binary_file, readNumber, (sf::Uint8&), void),
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(uint8&out)",
+            asMETHODPR(engine::binary_istream, readNumber, (sf::Uint8&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(uint16&out)",
-            asMETHODPR(engine::binary_file, readNumber, (sf::Uint16&), void),
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(uint16&out)",
+            asMETHODPR(engine::binary_istream, readNumber, (sf::Uint16&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(uint32&out)",
-            asMETHODPR(engine::binary_file, readNumber, (sf::Uint32&), void),
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(uint32&out)",
+            asMETHODPR(engine::binary_istream, readNumber, (sf::Uint32&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(uint64&out)",
-            asMETHODPR(engine::binary_file, readNumber, (sf::Uint64&), void),
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(uint64&out)",
+            asMETHODPR(engine::binary_istream, readNumber, (sf::Uint64&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(bool&out)",
-            asMETHODPR(engine::binary_file, readBool, (bool&), void),
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(bool&out)",
+            asMETHODPR(engine::binary_istream, readBool, (bool&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void read(string&out)",
-            asMETHODPR(engine::binary_file, readString, (std::string&), void),
+        r = engine->RegisterObjectMethod("BinaryIStream", "void read(string&out)",
+            asMETHODPR(engine::binary_istream, readString, (std::string&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void write(int8)",
-            asMETHOD(engine::binary_file, writeNumber<sf::Int8>),
+
+        r = engine->RegisterObjectType("BinaryOStream", 0,
+            asOBJ_REF | asOBJ_NOCOUNT);
+        document->DocumentObjectType(r, "Represents an output stream of binary "
+            "data.");
+        r = engine->RegisterObjectMethod("BinaryOStream",
+            "void write(const int8)",
+            asMETHOD(engine::binary_ostream, writeNumber<sf::Int8>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void write(int16)",
-            asMETHOD(engine::binary_file, writeNumber<sf::Int16>),
+        r = engine->RegisterObjectMethod("BinaryOStream",
+            "void write(const int16)",
+            asMETHOD(engine::binary_ostream, writeNumber<sf::Int16>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void write(int32)",
-            asMETHOD(engine::binary_file, writeNumber<sf::Int32>),
+        r = engine->RegisterObjectMethod("BinaryOStream",
+            "void write(const int32)",
+            asMETHOD(engine::binary_ostream, writeNumber<sf::Int32>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void write(int64)",
-            asMETHOD(engine::binary_file, writeNumber<sf::Int64>),
+        r = engine->RegisterObjectMethod("BinaryOStream",
+            "void write(const int64)",
+            asMETHOD(engine::binary_ostream, writeNumber<sf::Int64>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void write(uint8)",
-            asMETHOD(engine::binary_file, writeNumber<sf::Uint8>),
+        r = engine->RegisterObjectMethod("BinaryOStream",
+            "void write(const uint8)",
+            asMETHOD(engine::binary_ostream, writeNumber<sf::Uint8>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void write(uint16)",
-            asMETHOD(engine::binary_file, writeNumber<sf::Uint16>),
+        r = engine->RegisterObjectMethod("BinaryOStream",
+            "void write(const uint16)",
+            asMETHOD(engine::binary_ostream, writeNumber<sf::Uint16>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void write(uint32)",
-            asMETHOD(engine::binary_file, writeNumber<sf::Uint32>),
+        r = engine->RegisterObjectMethod("BinaryOStream",
+            "void write(const uint32)",
+            asMETHOD(engine::binary_ostream, writeNumber<sf::Uint32>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void write(uint64)",
-            asMETHOD(engine::binary_file, writeNumber<sf::Uint64>),
+        r = engine->RegisterObjectMethod("BinaryOStream",
+            "void write(const uint64)",
+            asMETHOD(engine::binary_ostream, writeNumber<sf::Uint64>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile", "void write(const bool)",
-            asMETHOD(engine::binary_file, writeBool),
+        r = engine->RegisterObjectMethod("BinaryOStream",
+            "void write(const bool)",
+            asMETHOD(engine::binary_ostream, writeBool),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryFile",
+        r = engine->RegisterObjectMethod("BinaryOStream",
             "void write(const string&in)",
-            asMETHOD(engine::binary_file, writeString), asCALL_THISCALL);
+            asMETHOD(engine::binary_ostream, writeString), asCALL_THISCALL);
     }
 }
 
