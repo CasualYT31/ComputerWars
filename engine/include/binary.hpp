@@ -82,6 +82,20 @@ namespace engine {
 		binary_istream(const std::string& file, const engine::logger::data& data);
 
 		/**
+		 * Moves a binary input stream.
+		 * @param stream The stream to move.
+		 */
+		binary_istream(engine::binary_istream&& stream) noexcept;
+
+		/**
+		 * Moves a binary input stream.
+		 * @param  stream The stream to move into this one.
+		 * @return Reference to \c this.
+		 */
+		engine::binary_istream& operator=(
+			engine::binary_istream&& stream) noexcept;
+
+		/**
 		 * Reads a number and sets it to the variable given.
 		 * @tparam T      The type of number of read.
 		 * @param  number If the number was retrieved from the binary file
@@ -174,6 +188,20 @@ namespace engine {
 		 * @sa    \c engine::logger
 		 */
 		binary_ostream(const engine::logger::data& data);
+
+		/**
+		 * Moves a binary output stream.
+		 * @param stream The stream to move.
+		 */
+		binary_ostream(engine::binary_ostream&& stream) noexcept;
+
+		/**
+		 * Moves a binary output stream.
+		 * @param  stream The stream to move into this one.
+		 * @return Reference to \c this.
+		 */
+		engine::binary_ostream& operator=(
+			engine::binary_ostream&& stream) noexcept;
 
 		/**
 		 * Writes a number value to the binary file.

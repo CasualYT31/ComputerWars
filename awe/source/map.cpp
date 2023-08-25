@@ -22,7 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.hpp"
 #include "fmtawe.hpp"
-#include "binary.hpp"
 
 /* \c NO_ARMY that can be assigned to a script's interface. Due to limitations of
 AngelScript, I unfortunately cannot register a constant with the script interface,
@@ -35,25 +34,84 @@ auto MIN_TILE_HEIGHT = awe::tile::MIN_HEIGHT;
 static const std::runtime_error NO_SCRIPTS("No scripts object was given to this "
 	"map object!");
 
+void awe::closed_list_node::Register(asIScriptEngine * engine,
+		const std::shared_ptr<DocumentationGenerator>&document) {
+	if ((!engine->GetTypeInfoByName("ClosedListNode"))) {
+		auto r = RegisterType(engine, "ClosedListNode",
+			[](asIScriptEngine* engine, const std::string& type) {
+				engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
+					std::string(type + "@ f()").c_str(),
+					asFUNCTION(awe::closed_list_node::Create), asCALL_CDECL);
+			});
+		document->DocumentObjectType(r, "Holds information on a node in a closed "
+			"list.");
+
+		r = engine->RegisterObjectProperty("ClosedListNode", "Vector2 tile",
+			asOFFSET(awe::closed_list_node, tile));
+
+		r = engine->RegisterObjectProperty("ClosedListNode", "int g",
+			asOFFSET(awe::closed_list_node, g));
+	}
+}
+
 awe::closed_list_node::closed_list_node(const sf::Vector2u& tileIn,
 	const int gIn) : tile(tileIn), g(gIn) {}
 
-void awe::closed_list_node::Register(asIScriptEngine * engine,
-		const std::shared_ptr<DocumentationGenerator>&document) {
-	auto r = RegisterType(engine, "ClosedListNode");
-	document->DocumentObjectType(r, "Holds information on a node in a closed "
-		"list.");
+awe::closed_list_node* awe::closed_list_node::Create() {
+	return new awe::closed_list_node();
+}
 
-	r = engine->RegisterObjectProperty("ClosedListNode", "Vector2 tile",
-		asOFFSET(awe::closed_list_node, tile));
+void awe::disable_mementos::Register(asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) {
+	if ((!engine->GetTypeInfoByName("DisableMementos"))) {
+		auto r = RegisterType(engine, "DisableMementos",
+			[](asIScriptEngine* engine, const std::string& type) {
+				engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
+					std::string(type + "@ f(Map@ const)").c_str(),
+					asFUNCTION(awe::disable_mementos::Create), asCALL_CDECL);
+			});
+		document->DocumentObjectType(r, "A memento disable token. Used to disable "
+			"creating mementos when performing operations on a map, then create a "
+			"memento once those operations are complete.");
 
-	r = engine->RegisterObjectProperty("ClosedListNode", "int g",
-		asOFFSET(awe::closed_list_node, g));
+		r = engine->RegisterObjectMethod("DisableMementos", "void discard()",
+			asMETHOD(awe::disable_mementos, discard), asCALL_THISCALL);
+		document->DocumentObjectMethod(r, "If an operation fails, but a disable "
+			"token has already been made, you can use this method to cancel "
+			"creating the memento.");
+	}
+}
+
+awe::disable_mementos::disable_mementos(awe::map* const map) : _map(map) {
+	if (_map) _map->disableMementos();
+}
+awe::disable_mementos::~disable_mementos() noexcept {
+	try {
+		if (_map) _map->enableMementos();
+	} catch (...) {} // Swallow them... :/ We can't let destructors throw.
+}
+
+awe::disable_mementos* awe::disable_mementos::Create(awe::map* const map) {
+	return new awe::disable_mementos(map);
+}
+
+void awe::disable_mementos::discard() {
+	if (_map) {
+		_map->enableMementos(true);
+		_map = nullptr;
+	}
 }
 
 void awe::map::Register(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	if (!engine->GetTypeInfoByName("Map")) {
+		//////////////
+		// MAP TYPE //
+		//////////////
+		// DisableMementos relies on Map, so declare it early.
+		auto r = engine->RegisterObjectType("Map", 0, asOBJ_REF | asOBJ_NOCOUNT);
+		document->DocumentObjectType(r, "Class representing a map.");
+
 		//////////////////
 		// DEPENDENCIES //
 		//////////////////
@@ -62,11 +120,12 @@ void awe::map::Register(asIScriptEngine* engine,
 		engine::RegisterStreamTypes(engine, document);
 		awe::RegisterGameTypedefs(engine, document);
 		awe::closed_list_node::Register(engine, document);
+		awe::disable_mementos::Register(engine, document);
 
 		/////////////////
 		// SHADER ENUM //
 		/////////////////
-		auto r = engine->RegisterEnum("AvailableTileShader");
+		r = engine->RegisterEnum("AvailableTileShader");
 		engine->RegisterEnumValue("AvailableTileShader", "None",
 			(int)awe::available_tile_shader::None);
 		engine->RegisterEnumValue("AvailableTileShader", "Yellow",
@@ -124,12 +183,6 @@ void awe::map::Register(asIScriptEngine* engine,
 		document->DocumentExpectedFunction("const uint MIN_TILE_HEIGHT",
 			"A tile's minimum height, in pixels.");
 
-		//////////////
-		// MAP TYPE //
-		//////////////
-		r = engine->RegisterObjectType("Map", 0, asOBJ_REF | asOBJ_NOCOUNT);
-		document->DocumentObjectType(r, "Class representing a map.");
-
 		////////////////////
 		// MAP OPERATIONS //
 		////////////////////
@@ -179,7 +232,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"bool rectangleDeleteUnits(const Vector2&in, const Vector2&in)",
+			"uint64 rectangleDeleteUnits(const Vector2&in, const Vector2&in)",
 			asMETHOD(awe::map, rectangleDeleteUnits), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
@@ -487,6 +540,110 @@ void awe::map::Register(asIScriptEngine* engine,
 			"const",
 			asMETHOD(awe::map, scanPath), asCALL_THISCALL);
 
+		//////////////////////////////////////
+		// SELECTED UNIT DRAWING OPERATIONS //
+		//////////////////////////////////////
+		r = engine->RegisterObjectMethod("Map",
+			"bool setSelectedUnit(const UnitID)",
+			asMETHOD(awe::map, setSelectedUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool pushSelectedUnit(const UnitID)",
+			asMETHOD(awe::map, pushSelectedUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void popSelectedUnit()",
+			asMETHOD(awe::map, popSelectedUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"UnitID getSelectedUnit() const",
+			asMETHOD(awe::map, getSelectedUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void addAvailableTile(const Vector2&in)",
+			asMETHOD(awe::map, addAvailableTile), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isAvailableTile(const Vector2&in) const",
+			asMETHOD(awe::map, isAvailableTile), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void clearAvailableTiles()",
+			asMETHOD(awe::map, clearAvailableTiles), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setAvailableTileShader(const AvailableTileShader)",
+			asMETHOD(awe::map, setAvailableTileShader), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"AvailableTileShader getAvailableTileShader() const",
+			asMETHOD(awe::map, getAvailableTileShader), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"array<ClosedListNode>& get_closedList() property",
+			asMETHOD(awe::map, getClosedList), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void disableSelectedUnitRenderingEffects(const bool)",
+			asMETHOD(awe::map, disableSelectedUnitRenderingEffects),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void disableShaderForAvailableUnits(const bool)",
+			asMETHOD(awe::map, disableShaderForAvailableUnits),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void regenerateClosedListSprites()",
+			asMETHOD(awe::map, regenerateClosedListSprites), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void addPreviewUnit(const UnitID, const Vector2&in)",
+			asMETHOD(awe::map, addPreviewUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void removePreviewUnit(const UnitID)",
+			asMETHOD(awe::map, removePreviewUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void removeAllPreviewUnits()",
+			asMETHOD(awe::map, removeAllPreviewUnits), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isPreviewUnit(const UnitID) const",
+			asMETHOD(awe::map, isPreviewUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool tileHasPreviewUnit(const Vector2&in, const UnitID) const",
+			asMETHOD(awe::map, tileHasPreviewUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"Vector2 getUnitPreviewPosition(const UnitID) const",
+			asMETHOD(awe::map, getUnitPreviewPosition), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"uint64 getUnitPreviewsCount() const",
+			asMETHOD(awe::map, getUnitPreviewsCount), asCALL_THISCALL);
+
+		////////////////////////
+		// MEMENTO OPERATIONS //
+		////////////////////////
+		r = engine->RegisterObjectMethod("Map", "void addMemento()",
+			asMETHOD(awe::map, addMemento), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "void undo()",
+			asMETHOD(awe::map, undo), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "void redo()",
+			asMETHOD(awe::map, redo), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "void disableMementos()",
+			asMETHOD(awe::map, disableMementos), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void enableMementos(const bool = false)",
+			asMETHOD(awe::map, enableMementos), asCALL_THISCALL);
+
 		////////////////////////
 		// DRAWING OPERATIONS //
 		////////////////////////
@@ -593,91 +750,6 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"IntRect getMapBoundingBox() const",
 			asMETHOD(awe::map, getMapBoundingBox), asCALL_THISCALL);
-
-		//////////////////////////////////////
-		// SELECTED UNIT DRAWING OPERATIONS //
-		//////////////////////////////////////
-		r = engine->RegisterObjectMethod("Map",
-			"bool setSelectedUnit(const UnitID)",
-			asMETHOD(awe::map, setSelectedUnit), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"bool pushSelectedUnit(const UnitID)",
-			asMETHOD(awe::map, pushSelectedUnit), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void popSelectedUnit()",
-			asMETHOD(awe::map, popSelectedUnit), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"UnitID getSelectedUnit() const",
-			asMETHOD(awe::map, getSelectedUnit), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void addAvailableTile(const Vector2&in)",
-			asMETHOD(awe::map, addAvailableTile), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"bool isAvailableTile(const Vector2&in) const",
-			asMETHOD(awe::map, isAvailableTile), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void clearAvailableTiles()",
-			asMETHOD(awe::map, clearAvailableTiles), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void setAvailableTileShader(const AvailableTileShader)",
-			asMETHOD(awe::map, setAvailableTileShader), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"AvailableTileShader getAvailableTileShader() const",
-			asMETHOD(awe::map, getAvailableTileShader), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"array<ClosedListNode>& get_closedList() property",
-			asMETHOD(awe::map, getClosedList), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void disableSelectedUnitRenderingEffects(const bool)",
-			asMETHOD(awe::map, disableSelectedUnitRenderingEffects),
-			asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void disableShaderForAvailableUnits(const bool)",
-			asMETHOD(awe::map, disableShaderForAvailableUnits),
-			asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void regenerateClosedListSprites()",
-			asMETHOD(awe::map, regenerateClosedListSprites), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void addPreviewUnit(const UnitID, const Vector2&in)",
-			asMETHOD(awe::map, addPreviewUnit), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void removePreviewUnit(const UnitID)",
-			asMETHOD(awe::map, removePreviewUnit), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"void removeAllPreviewUnits()",
-			asMETHOD(awe::map, removeAllPreviewUnits), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"bool isPreviewUnit(const UnitID) const",
-			asMETHOD(awe::map, isPreviewUnit), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"bool tileHasPreviewUnit(const Vector2&in, const UnitID) const",
-			asMETHOD(awe::map, tileHasPreviewUnit), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"Vector2 getUnitPreviewPosition(const UnitID) const",
-			asMETHOD(awe::map, getUnitPreviewPosition), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"uint64 getUnitPreviewsCount() const",
-			asMETHOD(awe::map, getUnitPreviewsCount), asCALL_THISCALL);
 	}
 }
 
@@ -701,67 +773,46 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 
 bool awe::map::load(std::string file, const unsigned char version) {
 	if (file == "") file = _filename;
-	// Clear state.
-	_sel = sf::Vector2u(0, 0);
-	_currentArmy = awe::NO_ARMY;
-	_lastUnitID = 1;
-	_armies.clear();
-	_units.clear();
-	_tiles.clear();
-	_mapName = "";
-	_day = 0;
-	_viewOffsetX.reset();
-	_viewOffsetY.reset();
-	// Load new state.
 	try {
-		engine::binary_istream binaryData({ _logger.getData().sink,
-			_logger.getData().name + "_binary_istream" });
+		auto binaryData = _binaryIStreamFactory();
 		{
 			std::ifstream binaryFile(file, std::ios::binary);
 			binaryFile >> binaryData;
 		}
 		_filename = file;
-		if (!_scripts) {
-			throw std::runtime_error("no scripts object!");
-		} else if (!_scripts->functionDeclExists(
-			"void LoadMap(BinaryIStream@, Map@, uint8)")) {
-			throw std::runtime_error("void LoadMap(BinaryIStream@, Map@, uint8) "
-				"not found in the scripts!");
-		}
-		_scripts->callFunction("LoadMap", &binaryData, this, version);
+		_loadMapFromInputStream(binaryData, version);
+		// Reinitialise memento data.
+		_undoDeque.clear();
+		_redoDeque.clear();
+		_mementoDisableCounter = 0;
+		// Always create the first memento, even if mementos are disabled,
+		// otherwise the first memento given if they are enabled again wouldn't be
+		// undoable.
+		_createMemento();
+		_changed = false;
 	} catch (const std::exception& e) {
 		_logger.critical("Map loading operation: couldn't load map file \"{}\": "
 			"{}", file, e);
 		return false;
 	}
-	_changed = false;
 	return true;
 }
 
 bool awe::map::save(std::string file, const unsigned char version) {
 	if (file == "") file = _filename;
 	try {
-		engine::binary_ostream binaryData({ _logger.getData().sink,
-			_logger.getData().name + "_binary_ostream" });
-		if (!_scripts) {
-			throw std::runtime_error("no scripts object!");
-		} else if (!_scripts->functionDeclExists(
-			"void SaveMap(BinaryOStream@, Map@, uint8)")) {
-			throw std::runtime_error("void SaveMap(BinaryOStream@, Map@, uint8) "
-				"not found in the scripts!");
-		}
-		_scripts->callFunction("SaveMap", &binaryData, this, version);
+		engine::binary_ostream binaryData = _saveMapIntoOutputStream(version);
 		{
 			std::ofstream binaryFile(file, std::ios::binary);
 			binaryFile << binaryData;
 		}
 		_filename = file;
+		_changed = false;
 	} catch (const std::exception& e) {
 		_logger.critical("Map saving operation: couldn't save map file \"{}\": {}",
 			file, e);
 		return false;
 	}
-	_changed = false;
 	return true;
 }
 
@@ -787,8 +838,8 @@ bool awe::map::periodic() {
 }
 
 void awe::map::setMapName(const std::string& name) {
+	awe::disable_mementos token(this);
 	_mapName = name;
-	_changed = true;
 }
 
 std::string awe::map::getMapName() const {
@@ -798,6 +849,7 @@ std::string awe::map::getMapName() const {
 void awe::map::setMapSize(const sf::Vector2u& dim,
 	const std::shared_ptr<const awe::tile_type>& tile, const awe::ArmyID owner) {
 	if (dim == getMapSize()) return;
+	awe::disable_mementos token(this);
 	removeRectangleSelection();
 	// First, resize the tiles vectors accordingly.
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
@@ -841,7 +893,6 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 				_sel.y = dim.y - 1;
 		}
 	}
-	_changed = true;
 }
 
 void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile,
@@ -881,6 +932,7 @@ bool awe::map::rectangleFillTiles(const sf::Vector2u& start,
 			"out of bounds.", end);
 		return false;
 	}
+	awe::disable_mementos token(this);
 	bool ret = true;
 	const unsigned int startX = std::min(start.x, end.x),
 		startY = std::min(start.y, end.y);
@@ -894,7 +946,6 @@ bool awe::map::rectangleFillTiles(const sf::Vector2u& start,
 			setTileOwner({ x, y }, owner);
 		}
 	}
-	_changed = true;
 	return ret;
 }
 
@@ -931,6 +982,7 @@ bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 			"invalid.", army);
 		return false;
 	}
+	awe::disable_mementos token(this);
 	if (!_isArmyPresent(army)) createArmy(_countries->getScriptNames()[army]);
 	bool ret = true;
 	const unsigned int startX = std::min(start.x, end.x),
@@ -953,7 +1005,6 @@ bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 			setUnitPosition(unit, { x, y });
 		}
 	}
-	_changed = true;
 	return ret;
 }
 
@@ -962,20 +1013,22 @@ bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 	return rectangleFillUnits(start, end, _unitTypes->operator[](type), army);
 }
 
-bool awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
+std::size_t awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
 	const sf::Vector2u& end) {
 	if (_isOutOfBounds(start)) {
 		_logger.error("rectangleDeleteUnits operation failed: the start tile {} "
 			"is out of bounds.", start);
-		return false;
+		return 0;
 	}
 	if (_isOutOfBounds(end)) {
 		_logger.error("rectangleDeleteUnits operation failed: the end tile {} is "
 			"out of bounds.", end);
-		return false;
+		return 0;
 	}
+	awe::disable_mementos token(this);
 	const unsigned int startX = std::min(start.x, end.x),
 		startY = std::min(start.y, end.y);
+	std::size_t counter = 0;
 	for (unsigned int x = startX, width = static_cast<unsigned int>(::abs(
 		static_cast<sf::Int64>(start.x) - static_cast<sf::Int64>(end.x)) + 1);
 		x < startX + width; ++x) {
@@ -983,16 +1036,18 @@ bool awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
 			static_cast<sf::Int64>(start.y) - static_cast<sf::Int64>(end.y)) + 1);
 			y < startY + height; ++y) {
 			auto unit = getUnitOnTile({ x, y });
-			if (unit != 0) deleteUnit(unit);
+			if (unit != 0) {
+				deleteUnit(unit);
+				++counter;
+			}
 		}
 	}
-	_changed = true;
-	return true;
+	return counter;
 }
 
-void awe::map::setDay(const awe::Day day) noexcept {
+void awe::map::setDay(const awe::Day day) {
+	awe::disable_mementos token(this);
 	_day = day;
-	_changed = true;
 }
 
 awe::Day awe::map::getDay() const noexcept {
@@ -1020,6 +1075,7 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
 			country->getScriptName());
 		return false;
 	}
+	awe::disable_mementos token(this);
 	// Create the army.
 	_armies.insert(
 		std::pair<awe::ArmyID, awe::army>(country->getTurnOrder(), country)
@@ -1028,7 +1084,6 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
 	if (_teamIDCounter == std::numeric_limits<awe::TeamID>::max())
 		_teamIDCounter = 0;
 	_armies.at(country->getTurnOrder()).setTeam(_teamIDCounter++);
-	_changed = true;
 	return true;
 }
 
@@ -1050,6 +1105,7 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 			"exist on the map!", army, transferOwnership);
 		return;
 	}
+	awe::disable_mementos token(this);
 	// Firstly, delete all units belonging to the army.
 	auto units = _armies.at(army).getUnits();
 	for (auto unit : units) {
@@ -1060,12 +1116,9 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 	}
 	// Then, disown all tiles.
 	auto tiles = _armies.at(army).getTiles();
-	for (auto& tile : tiles) {
-		setTileOwner(tile, transferOwnership);
-	}
+	for (auto& tile : tiles) setTileOwner(tile, transferOwnership);
 	// Finally, delete the army from the army list.
 	_armies.erase(army);
-	_changed = true;
 }
 
 std::size_t awe::map::getArmyCount() const noexcept {
@@ -1093,6 +1146,7 @@ CScriptArray* awe::map::getArmyIDsAsArray() const {
 
 void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team) {
 	if (_isArmyPresent(army)) {
+		awe::disable_mementos token(this);
 		_armies.at(army).setTeam(team);
 		// First, stop all of the army's units from capturing.
 		const auto units = getUnitsOfArmy(army);
@@ -1100,7 +1154,6 @@ void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team) {
 		// Then, stop all of the units capturing that are on this army's tiles.
 		const auto tiles = getTilesOfArmy(army);
 		for (auto& tile : tiles) _updateCapturingUnit(getUnitOnTile(tile));
-		_changed = true;
 	} else {
 		_logger.error("setArmyTeam operation cancelled: attempted to set an army "
 			"{}'s team to {}, but that army didn't exist!", army, team);
@@ -1116,8 +1169,8 @@ awe::TeamID awe::map::getArmyTeam(const awe::ArmyID army) const {
 
 void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 	if (_isArmyPresent(army)) {
+		awe::disable_mementos token(this);
 		_armies.at(army).setFunds(funds);
-		_changed = true;
 	} else {
 		_logger.error("setArmyFunds operation cancelled: attempted to set {} "
 			"funds to an army, {}, that didn't exist!", funds, army);
@@ -1127,7 +1180,6 @@ void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 void awe::map::offsetArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 	if (_isArmyPresent(army)) {
 		setArmyFunds(army, getArmyFunds(army) + funds);
-		_changed = true;
 	} else {
 		_logger.error("offsetArmyFunds operation cancelled: attempted to award {} "
 			"funds to an army, {}, that didn't exist!", funds, army);
@@ -1166,13 +1218,13 @@ void awe::map::setArmyCOs(const awe::ArmyID army,
 			_logger.error("setCOs operation failed: army with ID {} was given no "
 				"COs!", army);
 		} else {
+			awe::disable_mementos token(this);
 			if (!current && tag) {
 				_logger.warning("setCOs operation: army with ID {} was given a "
 					"tag CO but not current CO! The army will instead be assigned "
 					"a current CO and it will not be assigned a tag CO.", army);
 			}
 			_armies.at(army).setCOs(current, tag);
-			_changed = true;
 		}
 	} else {
 		_logger.error("setCOs operation failed: army with ID {} didn't exist at "
@@ -1224,8 +1276,8 @@ void awe::map::tagArmyCOs(const awe::ArmyID army) {
 			"the time of calling!", army);
 	} else {
 		if (_armies.at(army).getTagCO()) {
+			awe::disable_mementos token(this);
 			_armies.at(army).tagCOs();
-			_changed = true;
 		} else {
 			_logger.error("tagCOs operation failed: army with ID {} didn't have a "
 				"secondary CO at the time of calling!", army);
@@ -1286,9 +1338,7 @@ CScriptArray* awe::map::getTilesOfArmyAsArray(const awe::ArmyID army) const {
 	if (_scripts) {
 		auto set = getTilesOfArmy(army);
 		CScriptArray* ret = _scripts->createArray("Vector2");
-		for (auto tile : set) {
-			ret->InsertLast(&tile);
-		}
+		for (auto tile : set) ret->InsertLast(&tile);
 		return ret;
 	} else {
 		throw NO_SCRIPTS;
@@ -1307,9 +1357,7 @@ CScriptArray* awe::map::getUnitsOfArmyAsArray(const awe::ArmyID army) const {
 	if (_scripts) {
 		auto set = getUnitsOfArmy(army);
 		CScriptArray* ret = _scripts->createArray("UnitID");
-		for (auto unit : set) {
-			ret->InsertLast(&unit);
-		}
+		for (auto unit : set) ret->InsertLast(&unit);
 		return ret;
 	} else {
 		throw NO_SCRIPTS;
@@ -1387,10 +1435,10 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 			"for a new unit. There are too many units allocated!");
 		return 0;
 	}
+	awe::disable_mementos token(this);
 	_units.insert({ id, awe::unit({_logger.getData().sink, "unit"}, type, army,
 		_sheet_unit, _sheet_icon) });
 	_armies.at(army).addUnit(id);
-	_changed = true;
 	return id;
 }
 
@@ -1404,6 +1452,7 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 			"with ID {} that didn't exist!", id);
 		return;
 	}
+	awe::disable_mementos token(this);
 	_updateCapturingUnit(id);
 	// Firstly, remove the unit from the tile, if it was on a tile.
 	// We don't need to check if the unit "is actually on the map or not," since
@@ -1438,7 +1487,6 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	if (isPreviewUnit(id)) removePreviewUnit(id);
 	// Finally, delete the unit from the main list.
 	_units.erase(id);
-	_changed = true;
 }
 
 std::shared_ptr<const awe::unit_type> awe::map::getUnitType(
@@ -1482,11 +1530,10 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 			"with ID {}!", id, pos, idOfUnitOnTile);
 		return;
 	}
+	awe::disable_mementos token(this);
 	_updateCapturingUnit(id);
 	// Make new tile occupied.
-	if (pos != awe::unit::NO_POSITION) {
-		_tiles[pos.x][pos.y].setUnit(id);
-	}
+	if (pos != awe::unit::NO_POSITION) _tiles[pos.x][pos.y].setUnit(id);
 	// Make old tile vacant.
 	if (_units.at(id).isOnMap()) {
 		const auto oldLocation = _units.at(id).getPosition();
@@ -1494,7 +1541,6 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 	}
 	// Assign new location to unit.
 	_units.at(id).setPosition(pos);
-	_changed = true;
 }
 
 sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const {
@@ -1517,8 +1563,8 @@ bool awe::map::isUnitOnMap(const awe::UnitID id) const {
 
 void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) {
 	if (_isUnitPresent(id)) {
+		awe::disable_mementos token(this);
 		_units.at(id).setHP(hp);
-		_changed = true;
 	} else {
 		_logger.error("setUnitHP operation cancelled: attempted to assign HP {} "
 			"to unit with ID {}, which doesn't exist!", hp, id);
@@ -1541,8 +1587,8 @@ awe::HP awe::map::getUnitDisplayedHP(const awe::UnitID id) const {
 
 void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 	if (_isUnitPresent(id)) {
+		awe::disable_mementos token(this);
 		_units.at(id).setFuel(fuel);
-		_changed = true;
 	} else {
 		_logger.error("setUnitFuel operation cancelled: attempted to assign fuel "
 			"{} to unit with ID {}, which doesn't exist!", fuel, id);
@@ -1552,7 +1598,6 @@ void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 void awe::map::burnUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 	if (_isUnitPresent(id)) {
 		setUnitFuel(id, getUnitFuel(id) - fuel);
-		_changed = true;
 	} else {
 		_logger.error("burnUnitFuel operation cancelled: attempted to offset unit "
 			"{}'s fuel by {}. This unit doesn't exist!", id, fuel);
@@ -1569,8 +1614,8 @@ awe::Fuel awe::map::getUnitFuel(const awe::UnitID id) const {
 void awe::map::setUnitAmmo(const awe::UnitID id, const std::string& weapon,
 		const awe::Ammo ammo) {
 	if (_isUnitPresent(id)) {
+		awe::disable_mementos token(this);
 		_units.at(id).setAmmo(weapon, ammo);
-		_changed = true;
 	} else {
 		_logger.error("setUnitAmmo operation cancelled: attempted to assign ammo "
 			"{} to unit with ID {}'s weapon \"{}\". This unit doesn't exist!",
@@ -1588,8 +1633,8 @@ awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id,
 
 void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
 	if (_isUnitPresent(id)) {
+		awe::disable_mementos token(this);
 		_units.at(id).replenish(heal);
-		_changed = true;
 	} else {
 		_logger.error("replenishUnit operation cancelled: attempted to replenish "
 			"{}unit with ID {}. This unit doesn't exist!", heal ? "and heal " : "",
@@ -1599,8 +1644,8 @@ void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
 
 void awe::map::waitUnit(const awe::UnitID id, const bool waiting) {
 	if (_isUnitPresent(id)) {
+		awe::disable_mementos token(this);
 		_units.at(id).wait(waiting);
-		_changed = true;
 	} else {
 		_logger.error("waitUnit operation cancelled: attempted to assign waiting "
 			"state {} to unit with ID {}, which doesn't exist!", waiting, id);
@@ -1616,8 +1661,8 @@ bool awe::map::isUnitWaiting(const awe::UnitID id) const {
 
 void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) {
 	if (_isUnitPresent(id)) {
+		awe::disable_mementos token(this);
 		_units.at(id).capturing(capturing);
-		_changed = true;
 	} else {
 		_logger.error("unitCapturing operation cancelled: attempted to assign "
 			"capturing state {} to unit with ID {}, which doesn't exist!",
@@ -1634,8 +1679,8 @@ bool awe::map::isUnitCapturing(const awe::UnitID id) const {
 
 void awe::map::unitHiding(const awe::UnitID id, const bool hiding) {
 	if (_isUnitPresent(id)) {
+		awe::disable_mementos token(this);
 		_units.at(id).hiding(hiding);
-		_changed = true;
 	} else {
 		_logger.error("unitHiding operation cancelled: attempted to assign hiding "
 			"state {} to unit with ID {}, which doesn't exist!", hiding, id);
@@ -1708,6 +1753,7 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 			"onto unit with ID {}", load, onto);
 		return;
 	}
+	awe::disable_mementos token(this);
 	_updateCapturingUnit(load);
 	// Make the tile that `load` was on vacant, and remove the unit ID from the
 	// tile.
@@ -1719,7 +1765,6 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 	// Perform loads.
 	_units.at(onto).loadUnit(load);
 	_units.at(load).loadOnto(onto);
-	_changed = true;
 }
 
 void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
@@ -1735,28 +1780,27 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 			unload);
 		return;
 	}
+	if (_isOutOfBounds(onto)) {
+		_logger.error("unloadUnit operation cancelled: attempted to unload unit "
+			"with ID {} from unit with ID {}, to position {}, which is out of "
+			"bounds with the map's size of {}!", unload, from, onto, getMapSize());
+		return;
+	}
 	if (auto u = getUnitOnTile(onto)) {
-		if (u) {
-			_logger.error("unloadUnit operation cancelled: attempted to unload "
-				"unit with ID {} from unit with ID {}, to position {}, which has "
-				"a unit with ID {} already occupying it!", unload, from, onto, u);
-		} else {
-			_logger.error("unloadUnit operation cancelled: attempted to unload "
-				"unit with ID {} from unit with ID {}, to position {}, which "
-				"is out of bounds with the map's size of {}!", unload, from, onto,
-				getMapSize());
-		}
+		_logger.error("unloadUnit operation cancelled: attempted to unload unit "
+			"with ID {} from unit with ID {}, to position {}, which has a unit "
+			"with ID {} already occupying it!", unload, from, onto, u);
 		return;
 	}
 	if (_units.at(from).unloadUnit(unload)) {
 		// Unload successful, continue with operation.
+		awe::disable_mementos token(this);
 		_units.at(unload).loadOnto(0);
 		setUnitPosition(unload, onto);
 	} else {
 		_logger.error("unloadUnit operation failed: unit with ID {} was not "
 			"loaded onto unit with ID {}", unload, from);
 	}
-	_changed = true;
 }
 
 awe::UnitID awe::map::getUnitWhichContainsUnit(const awe::UnitID unit) const {
@@ -1859,11 +1903,11 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 			pos, getMapSize());
 		return false;
 	}
+	awe::disable_mementos token(this);
 	_updateCapturingUnit(getUnitOnTile(pos));
 	_tiles[pos.x][pos.y].setTileType(type);
 	// Remove ownership of the tile from the army who owns it, if any army does.
 	setTileOwner(pos, awe::NO_ARMY);
-	_changed = true;
 	return true;
 }
 
@@ -1892,8 +1936,8 @@ const awe::tile_type* awe::map::getTileTypeObject(const sf::Vector2u& pos) const
 
 void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {
 	if (!_isOutOfBounds(pos)) {
+		awe::disable_mementos token(this);
 		_tiles[pos.x][pos.y].setTileHP(hp);
-		_changed = true;
 	} else {
 		_logger.error("setTileHP operation cancelled: tile at position {} is out "
 			"of bounds with the map's size of {}!", pos, getMapSize());
@@ -1916,6 +1960,7 @@ void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
 			"map's size of {}!", army, pos, getMapSize());
 		return;
 	}
+	awe::disable_mementos token(this);
 	_updateCapturingUnit(getUnitOnTile(pos));
 	auto& tile = _tiles[pos.x][pos.y];
 	// First, remove the tile from the army who currently owns it.
@@ -1925,7 +1970,6 @@ void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
 	if (_isArmyPresent(army)) _armies.at(army).addTile(pos);
 	// Update the actual tile now.
 	tile.setTileOwner(army);
-	_changed = true;
 }
 
 awe::ArmyID awe::map::getTileOwner(const sf::Vector2u& pos) const {
@@ -2349,6 +2393,32 @@ std::size_t awe::map::getUnitPreviewsCount() const {
 	return _unitLocationOverrides.size();
 }
 
+void awe::map::undo() {
+	if (_undoDeque.size() <= 1) return;
+	// Pop front memento of undo deque and push to the redo deque.
+	auto popped = _undoDeque.front();
+	_undoDeque.pop_front();
+	_redoDeque.push_front(popped);
+	// Apply next memento in the undo deque.
+	auto memento = _undoDeque.front();
+	auto binaryData = _binaryIStreamFactory();
+	*memento >> binaryData;
+	_loadMapFromInputStream(binaryData, 0);
+}
+
+void awe::map::redo() {
+	if (_redoDeque.empty()) return;
+	// Pop front memento of redo deque.
+	auto memento = _redoDeque.front();
+	_redoDeque.pop_front();
+	// Apply it.
+	auto binaryData = _binaryIStreamFactory();
+	*memento >> binaryData;
+	_loadMapFromInputStream(binaryData, 0);
+	// Push to the undo deque.
+	_undoDeque.push_front(memento);
+}
+
 void awe::map::setTarget(
 	const std::shared_ptr<sf::RenderTarget>& target) noexcept {
 	_target = target;
@@ -2411,8 +2481,8 @@ void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
 
 void awe::map::setSelectedArmy(const awe::ArmyID army) {
 	if (army == awe::NO_ARMY || _isArmyPresent(army)) {
+		awe::disable_mementos token(this);
 		_currentArmy = army;
-		_changed = true;
 	} else {
 		_logger.error("setSelectedArmy operation cancelled: army with ID {} does "
 			"not exist!", army);
@@ -2541,9 +2611,7 @@ void awe::map::setTileSpritesheet(
 	_sheet_tile = sheet;
 	// Go through all of the tiles and set the new spritesheet to each one.
 	for (auto& column : _tiles) {
-		for (auto& tile : column) {
-			tile.setSpritesheet(sheet);
-		}
+		for (auto& tile : column) tile.setSpritesheet(sheet);
 	}
 }
 
@@ -2895,6 +2963,59 @@ awe::UnitID awe::map::_findUnitID() {
 	}
 	_lastUnitID = temp;
 	return temp;
+}
+
+void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
+	const unsigned char version) {
+	if (!_scripts) {
+		throw std::runtime_error("no scripts object!");
+	} else if (!_scripts->functionDeclExists(
+		"void LoadMap(BinaryIStream@, Map@, uint8)")) {
+		throw std::runtime_error("void LoadMap(BinaryIStream@, Map@, uint8) "
+			"not found in the scripts!");
+	}
+	// Clear state (excluding mementos).
+	_sel = sf::Vector2u(0, 0);
+	_currentArmy = awe::NO_ARMY;
+	_lastUnitID = 1;
+	_armies.clear();
+	_units.clear();
+	_tiles.clear();
+	_mapName = "";
+	_day = 0;
+	_viewOffsetX.reset();
+	_viewOffsetY.reset();
+	_mapSizeCache = { 0, 0 };
+	// Load state.
+	_mementoHardDisable = true;
+	_scripts->callFunction("LoadMap", &stream, this, version);
+	_mementoHardDisable = false;
+}
+
+engine::binary_ostream awe::map::_saveMapIntoOutputStream(
+	const unsigned char version) {
+	if (!_scripts) {
+		throw std::runtime_error("no scripts object!");
+	} else if (!_scripts->functionDeclExists(
+		"void SaveMap(BinaryOStream@, Map@, uint8)")) {
+		throw std::runtime_error("void SaveMap(BinaryOStream@, Map@, uint8) "
+			"not found in the scripts!");
+	}
+	engine::binary_ostream stream({ _logger.getData().sink,
+		_logger.getData().name + "_binary_ostream" });
+	_mementoHardDisable = true;
+	_scripts->callFunction("SaveMap", &stream, this, version);
+	_mementoHardDisable = false;
+	return stream;
+}
+
+void awe::map::_createMemento() {
+	if (_mementoHardDisable) return;
+	_undoDeque.push_front(std::make_shared<engine::binary_ostream>(
+		_saveMapIntoOutputStream(0)));
+	_redoDeque.clear();
+	if (_undoDeque.size() > _MEMENTO_LIMIT) _undoDeque.pop_back();
+	_changed = true;
 }
 
 awe::map::selected_unit_render_data::selected_unit_render_data(

@@ -30,6 +30,9 @@ MenuItemID MAP_MAKER_FILE_SAVE_MAP;
 MenuItemID MAP_MAKER_FILE_SAVE_MAP_AS;
 MenuItemID MAP_MAKER_FILE_QUIT;
 
+MenuItemID MAP_MAKER_EDIT_UNDO;
+MenuItemID MAP_MAKER_EDIT_REDO;
+
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
 MenuItemID MAP_MAKER_MAP_FILL;
 
@@ -80,6 +83,10 @@ void MapMakerMenuSetUp() {
     MAP_MAKER_FILE_SAVE_MAP = addMenuItem(MENU, "savemap");
     MAP_MAKER_FILE_SAVE_MAP_AS = addMenuItem(MENU, "savemapas");
     MAP_MAKER_FILE_QUIT = addMenuItem(MENU, "quit");
+
+    addMenu(MENU, "edit");
+    MAP_MAKER_EDIT_UNDO = addMenuItem(MENU, "undo");
+    MAP_MAKER_EDIT_REDO = addMenuItem(MENU, "redo");
 
     addMenu(MENU, "map");
     MAP_MAKER_MAP_SET_PROPS = addMenuItem(MENU, "mapprops");
@@ -156,9 +163,22 @@ bool drawRectangle(const bool prevAction, const bool action,
     return false;
 }
 
+/// Calls \c undo() on an \c EditableMap, if one is loaded.
+void undo() {
+    if (edit !is null) edit.undo();
+}
+
+/// Calls \c redo() on an \c EditableMap, if one is loaded.
+void redo() {
+    if (edit !is null) edit.redo();
+}
+
 /// Keeps track of the action control's signal state during the previous
 /// iteration of the HandleInput() function.
 bool prevAction = false;
+
+/// After a tool has finished, should the memento be discarded?
+bool discardMemento = false;
 
 /**
  * Handles input specific to the \c MapMakerMenu.
@@ -199,15 +219,18 @@ void MapMakerMenuHandleInput(const dictionary controls,
     same time. Actually, testing it now, that feels intuitive. And no one will be
     doing it anyway. */
     const bool mouseNotUnderWidget = getWidgetUnderMouse().isEmpty();
-    const bool action = bool(controls["action"]) && (
+    const bool modifier = bool(controls["modifier"]);
+    const bool action = (bool(controls["action"]) && !modifier) && (
         !bool(mouseInputs["action"]) || (mouseNotUnderWidget && mouseInMap)
     );
-    const bool pick = bool(controls["pick"]) && (
+    const bool pick = (bool(controls["pick"]) && !modifier) && (
         !bool(mouseInputs["pick"]) || (mouseNotUnderWidget && mouseInMap)
     );
-    const bool tileinfo = bool(controls["tileinfo"]) && (
+    const bool tileinfo = (bool(controls["tileinfo"]) && !modifier) && (
         !bool(mouseInputs["tileinfo"]) || (mouseNotUnderWidget && mouseInMap)
     );
+    const bool undoControl = modifier && bool(controls["undo"]);
+    const bool redoControl = modifier && bool(controls["redo"]);
 
     // Handle controls.
 	if (bool(controls["up"])) {
@@ -226,6 +249,16 @@ void MapMakerMenuHandleInput(const dictionary controls,
         edit.zoomIn();
     }
 
+    // Undo and redo.
+    if (undoControl) {
+        undo();
+        return;
+    }
+    if (redoControl) {
+        redo();
+        return;
+    }
+
     // If there isn't a tile currently selected that is in bounds, return now.
     const auto curTile = edit.map.getSelectedTile();
     if (edit.map.isOutOfBounds(curTile)) return;
@@ -238,16 +271,29 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const auto unitArmySel = CurrentlySelectedUnitType.owner;
     const auto currentPaletteWindowTab = PaletteWindow.getSelectedTab();
     
+    // If the paint tool has just been triggered, disable mementos.
+    // This is so that an entire paint stroke can be saved in one memento.
+    // It's not strickly needed for the rectangle tools but it's a lot easier to
+    // handle it this way.
+    if (!prevAction && action) {
+        edit.map.disableMementos();
+        discardMemento = true;
+    }
+    
     if (action && TOOLBAR.tool == PAINT_TOOL.shortName) {
         // If there isn't a currently selected tile type, do not try to paint with
         // it.
-        if (currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null)
+        if (currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null) {
             edit.setTile(curTile, tileTypeSel, tileOwnerSel);
+            discardMemento = false;
+        }
 
         // If there isn't a currently selected unit type, do not try to paint with
         // it.
-        if (currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null)
+        if (currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null) {
             edit.createUnit(curTile, unitTypeSel, unitArmySel);
+            discardMemento = false;
+        }
 
     } else if (pick) {
         if (currentPaletteWindowTab == TILE_DIALOG) {
@@ -260,6 +306,7 @@ void MapMakerMenuHandleInput(const dictionary controls,
 
     } else if (action && TOOLBAR.tool == DELETE_TOOL.shortName) {
         edit.deleteUnit(curUnit);
+        if (discardMemento && curUnit != 0) discardMemento = false;
     
     } else if (TOOLBAR.tool == RECT_TOOL.shortName) {
         Vector2 start, end;
@@ -268,18 +315,24 @@ void MapMakerMenuHandleInput(const dictionary controls,
                 edit.rectangleFillTiles(start, end, tileTypeSel.scriptName,
                     tileOwnerSel.isEmpty() ? NO_ARMY :
                         country[tileOwnerSel].turnOrder);
+                discardMemento = false;
             }
             if (currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null) {
                 edit.rectangleFillUnits(start, end, unitTypeSel.scriptName,
                     country[unitArmySel].turnOrder);
+                discardMemento = false;
             }
         }
     
     } else if (TOOLBAR.tool == RECT_DELETE_TOOL.shortName) {
         Vector2 start, end;
-        if (drawRectangle(prevAction, action, curTile, start, end))
-            edit.rectangleDeleteUnits(start, end);
+        if (drawRectangle(prevAction, action, curTile, start, end)) {
+            if (edit.rectangleDeleteUnits(start, end) > 0) discardMemento = false;
+        }
     }
+        
+    // If the paint tool is finished with, re-enable mementos.
+    if (prevAction && !action) edit.map.enableMementos(discardMemento);
 
     prevAction = action;
 
@@ -382,6 +435,12 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
 
     } else if (id == MAP_MAKER_FILE_QUIT) {
         quitEditMap(function() { setGUI("MainMenu"); });
+
+    } else if (id == MAP_MAKER_EDIT_UNDO) {
+        undo();
+
+    } else if (id == MAP_MAKER_EDIT_REDO) {
+        redo();
 
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
         if (edit is null) {

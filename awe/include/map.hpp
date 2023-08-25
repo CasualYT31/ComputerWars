@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "script.hpp"
 #include "language.hpp"
 #include "gui.hpp"
+#include "binary.hpp"
 #include <cmath>
 #include <stack>
 #include <optional>
@@ -71,6 +72,12 @@ namespace awe {
 		closed_list_node(const sf::Vector2u& tileIn = {}, const int gIn = 0);
 
 		/**
+		 * Creates the closed list node.
+		 * @return Pointer to the closed list node.
+		 */
+		static awe::closed_list_node* Create();
+
+		/**
 		 * The tile which this node represents.
 		 */
 		sf::Vector2u tile;
@@ -84,6 +91,66 @@ namespace awe {
 		 * The animated sprite of the icon.
 		 */
 		sfx::animated_sprite sprite;
+	};
+
+	class map;
+
+	/**
+	 * An RAII memento disable token.
+	 * When a disable token is created, it is given a pointer to an \c awe::map,
+	 * and \c disableMementos() is invoked on that \c map. When the disable token's
+	 * reference counter reaches \c 0, \c enableMementos() is invoked. This allows
+	 * the client to disable and enable mementos on a \c map object without having
+	 * to do so manually. When a bunch of operations have to be performed on a map,
+	 * you can create a disable token within a scope, perform the operations, then
+	 * let the control flow leave that scope. You can also have multiple disable
+	 * tokens active at one time, across the scripts and the game engine proper.
+	 * Only when the first token is destroyed will a memento will be created.
+	 */
+	class disable_mementos :
+		public engine::script_reference_type<awe::disable_mementos> {
+	public:
+		/**
+		 * Registers this struct with the script interface, if it hasn't been
+		 * already.
+		 * @safety No guarantee.
+		 */
+		static void Register(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		/**
+		 * Constructs a memento disable token.
+		 * If \c nullptr is given, this token won't do anything.
+		 * @param map Pointer to the map to manage the mementos of.
+		 */
+		disable_mementos(awe::map* const map);
+
+		/**
+		 * When a disable token is deleted, mementos are re-enabled.
+		 */
+		~disable_mementos() noexcept;
+
+		/**
+		 * Creates the disable token.
+		 * @param  map Pointer to the map to managed the mementos of.
+		 * @return Pointer to the disable token.
+		 */
+		static awe::disable_mementos* Create(awe::map* const map);
+
+		/**
+		 * Enables mementos on the map but does not go on to create a memento, and
+		 * sets the internal \c map pointer to \c nullptr.
+		 * Used when a token is created, but an operation failed, and so a memento
+		 * should not be created. Only employ this method when necessary; the
+		 * better alternative is to perform checks before creating the token and
+		 * performing operations so that you can guarantee they will succeed.
+		 */
+		void discard();
+	private:
+		/**
+		 * The map the disable token is acting upon.
+		 */
+		awe::map* _map;
 	};
 
 	/**
@@ -353,16 +420,16 @@ namespace awe {
 		 * it, it shall be deleted.
 		 * @param  start The tile from which the rectangle spreads.
 		 * @param  end   The tile which the rectangle spreads to.
-		 * @return \c FALSE if \c start or \c end were out-of-bounds.
+		 * @return The number of units deleted.
 		 */
-		bool rectangleDeleteUnits(const sf::Vector2u& start,
+		std::size_t rectangleDeleteUnits(const sf::Vector2u& start,
 			const sf::Vector2u& end);
 
 		/**
 		 * Sets the current day.
 		 * @param day The new day.
 		 */
-		void setDay(const awe::Day day) noexcept;
+		void setDay(const awe::Day day);
 
 		/**
 		 * Gets the current day.
@@ -1330,6 +1397,72 @@ namespace awe {
 		std::size_t getUnitPreviewsCount() const;
 
 		////////////////////////
+		// MEMENTO OPERATIONS //
+		////////////////////////
+		/**
+		 * Captures the current state of the \c map object, stores it in a binary
+		 * output stream, and pushes it to the front of the undo deque.
+		 * Additionally, the redo deque is cleared.\n
+		 * If the number of mementos in the undo deque exceeds the limit, then the
+		 * back memento will be popped.\n
+		 * If \c disableMementos() has been called at least once, then a call to
+		 * this method will do nothing. For each call to \c disableMementos(), a
+		 * call to \c enableMementos() needs to be made, before \c addMemento() can
+		 * add mementos again.
+		 * @safety If an exception is thrown when writing the map's data, both
+		 *         deques will not be changed.
+		 * @sa     \c disableMementos().
+		 */
+		inline void addMemento() {
+			if (_mementoDisableCounter == 0) _createMemento();
+		}
+
+		/**
+		 * Pops memento off the front of the undo deque, pushes it to the front of
+		 * the redo deque, and replaces the map's state with the next memento in
+		 * the undo deque.
+		 * Does nothing if the undo deque has only one memento stored (or none).
+		 */
+		void undo();
+
+		/**
+		 * Pops memento off the front of the redo deque, pushes it to the front of
+		 * the undo deque, and replaces the map's state with that memento.
+		 * Does nothing if the redo deque is empty.
+		 */
+		void redo();
+
+		/**
+		 * Prevents \c addMemento() from creating mementos.
+		 * Used to prevent many mementos from being created when performing larger
+		 * operations (such as fill operations), so that an entire fill can be
+		 * undone at once instead of having to undo each new unit (and each
+		 * property that is set for each unit) individually, for example.\n
+		 * Each call to \c disableMementos() must be paired with a call to
+		 * \c enableMementos().
+		 * @sa \c enableMementos().
+		 */
+		inline void disableMementos() {
+			++_mementoDisableCounter;
+		}
+
+		/**
+		 * Allows \c addMemento() to create mementos again if the number of calls
+		 * to \c disableMementos() matches the number of calls to this method.
+		 * This means that, if \c disableMementos() is called twice,
+		 * \c enableMementos() must also be called twice before \c addMemento() can
+		 * create mementos again. On the second call to \c enableMementos(), a
+		 * memento will be created automatically.
+		 * @param doNotCreateMemento If set to \c TRUE, does not automatically
+		 *                           create any memento.
+		 * @sa    \c disableMementos().
+		 */
+		inline void enableMementos(const bool doNotCreateMemento = false) {
+			if (_mementoDisableCounter > 0 && --_mementoDisableCounter == 0 &&
+				!doNotCreateMemento) _createMemento();
+		}
+
+		////////////////////////
 		// DRAWING OPERATIONS //
 		////////////////////////
 		/**
@@ -1691,13 +1824,54 @@ namespace awe {
 		awe::UnitID _findUnitID();
 
 		/**
+		 * Constructs a new binary input stream.
+		 * @return A binary input stream constructed with logger data based on the
+		 *         data given to the \c map object.
+		 */
+		inline engine::binary_istream _binaryIStreamFactory() const {
+			return engine::binary_istream({ _logger.getData().sink,
+				_logger.getData().name + "_binary_istream" });
+		}
+
+		/**
+		 * Replaces the state of the map with data given in a binary input stream.
+		 * @param  stream  The stream to read from.
+		 * @param  version The 0-based number identifying the iteration of the
+		 *                 format to use.
+		 * @throws \c std::runtime_error if the \c LoadMap() script function cannot
+		 *         be invoked.
+		 * @safety If an \c std::runtime_error is thrown, the map's state will not
+		 *         be cleared.
+		 */
+		void _loadMapFromInputStream(engine::binary_istream& stream,
+			const unsigned char version);
+
+		/**
+		 * Writes the map's current state into a binary output stream.
+		 * @param  version The 0-based number identifying the iteration of the
+		 *                 format to use.
+		 * @return Moves the binary output stream containing the map's data.
+		 * @throws \c std::runtime_error if the \c SaveMap() script function cannot
+		 *         be invoked.
+		 */
+		engine::binary_ostream _saveMapIntoOutputStream(
+			const unsigned char version);
+
+		/**
+		 * Creates a memento and pushes it to the front of the undo deque.
+		 * Also makes sure the undo deque doesn't surpass the limit, and that the
+		 * redo deque is cleared.
+		 */
+		void _createMemento();
+
+		/**
 		 * Internal logger object.
 		 */
 		mutable engine::logger _logger;
 
-		//////////
-		// FILE //
-		//////////
+		///////////////////////
+		// FILE AND MEMENTOS //
+		///////////////////////
 		/**
 		 * File name of the binary file previously read from or written to.
 		 */
@@ -1709,10 +1883,39 @@ namespace awe {
 		std::shared_ptr<engine::scripts> _scripts = nullptr;
 
 		/**
-		 * Has the map been changed since it was last successfully saved?
-		 * @remark This is a temporary measure until I implement change history.
+		 * Has a memento been added since the map was last successfully loaded or
+		 * saved?
 		 */
 		bool _changed = false;
+
+		/**
+		 * Deque of mementos used to track states to undo to.
+		 */
+		std::deque<std::shared_ptr<engine::binary_ostream>> _undoDeque;
+
+		/**
+		 * Deque of mementos used to track undone states that can be redone.
+		 */
+		std::deque<std::shared_ptr<engine::binary_ostream>> _redoDeque;
+
+		/**
+		 * Mementos are only added via \c addMemento() if this field is \c 0.
+		 */
+		sf::Uint64 _mementoDisableCounter = 0;
+
+		/**
+		 * If \c TRUE, mementos are \b always disabled, regardless of how they are
+		 * created.
+		 * Used to prevent mementos from being created when loading and saving the
+		 * map.
+		 */
+		bool _mementoHardDisable = false;
+
+		/**
+		 * Defines the number of mementos that can be stored in \c _undoDeque at
+		 * one time.
+		 */
+		static constexpr std::size_t _MEMENTO_LIMIT = 30;
 
 		//////////
 		// DATA //
