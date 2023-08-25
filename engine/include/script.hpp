@@ -95,12 +95,6 @@ namespace engine {
 		virtual ~script_reference_type() noexcept = default;
 
 		/**
-		 * Creates the reference type.
-		 * @return Pointer to the reference type.
-		 */
-		static T* Create();
-
-		/**
 		 * Copies a reference to the object.
 		 */
 		void AddRef() const noexcept;
@@ -119,12 +113,17 @@ namespace engine {
 		/**
 		 * Registers the reference type with a given script engine and registers
 		 * the factory and reference counting behaviours.
-		 * @param  engine Pointer to the script engine to register with.
-		 * @param  type   The name of the type to register.
+		 * @param  engine          Pointer to the script engine to register with.
+		 * @param  type            The name of the type to register.
+		 * @param  registerFactory Callback used to register the factory function
+		 *                         behaviour/s of this type. Your reference type
+		 *                         must define its own factory function/s.
 		 * @return The result of the \c RegisterObjectType() method.
 	     * @safety No guarantee.
 		 */
-		static int RegisterType(asIScriptEngine* engine, const std::string& type);
+		static int RegisterType(asIScriptEngine* engine, const std::string& type,
+			const std::function<void(asIScriptEngine*, const std::string&)>&
+				registerFactory);
 	private:
 		/**
 		 * The reference counter.

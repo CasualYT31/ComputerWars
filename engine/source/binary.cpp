@@ -39,6 +39,19 @@ engine::binary_istream::binary_istream(const std::string& file,
 	bin >> *this;
 }
 
+engine::binary_istream::binary_istream(engine::binary_istream&& stream) noexcept {
+	*this = std::move(stream);
+}
+
+engine::binary_istream& engine::binary_istream::operator=(
+	engine::binary_istream&& stream) noexcept {
+	_logger = std::move(stream._logger);
+	_stream = std::move(stream._stream);
+	_bytes = std::move(stream._bytes);
+	_totalBytes = std::move(stream._totalBytes);
+	return *this;
+}
+
 void engine::binary_istream::readBool(bool& boolean) {
 	unsigned char inp = 0;
 	try {
@@ -102,6 +115,18 @@ engine::binary_ostream::binary_ostream(const engine::logger::data& data) :
 	_logger(data) {
 	_stream.exceptions(std::stringstream::failbit |
 		std::stringstream::badbit | std::stringstream::eofbit);
+}
+
+engine::binary_ostream::binary_ostream(engine::binary_ostream&& stream) noexcept {
+	*this = std::move(stream);
+}
+
+engine::binary_ostream& engine::binary_ostream::operator=(
+	engine::binary_ostream&& stream) noexcept {
+	_logger = std::move(stream._logger);
+	_stream = std::move(stream._stream);
+	_bytes = std::move(stream._bytes);
+	return *this;
 }
 
 void engine::binary_ostream::writeBool(const bool val) {

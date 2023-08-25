@@ -42,6 +42,29 @@ class EditableMap {
     }
 
     ////////////////////////
+    // MEMENTO OPERATIONS //
+    ////////////////////////
+    /**
+     * Undo an operation.
+     * Also updates all windows.
+     */
+    void undo() {
+        map.undo();
+        _updateTileProps(tilePropsTile);
+        _updateArmyProps();
+    }
+    
+    /**
+     * Redo an operation.
+     * Also updates all windows.
+     */
+    void redo() {
+        map.redo();
+        _updateTileProps(tilePropsTile);
+        _updateArmyProps();
+    }
+
+    ////////////////////////
     // DRAWING OPERATIONS //
     ////////////////////////
     /**
@@ -122,6 +145,7 @@ class EditableMap {
      * @param day     The current day of the map.
      */
     void setMapProperties(const string&in mapName, const Day day) {
+        DisableMementos token(map);
         map.setMapName(mapName);
         map.setDay(day);
     }
@@ -162,12 +186,14 @@ class EditableMap {
 
     /**
      * Deletes all units on the tiles within a given rectangle.
-     * @sa \c Map::rectangleDeleteUnits().
+     * @return The number of units deleted.
+     * @sa     \c Map::rectangleDeleteUnits().
      */
-    void rectangleDeleteUnits(const Vector2&in start, const Vector2&in end) {
-        map.rectangleDeleteUnits(start, end);
+    uint64 rectangleDeleteUnits(const Vector2&in start, const Vector2&in end) {
+        const auto count = map.rectangleDeleteUnits(start, end);
         _updateTileProps(tilePropsTile);
         _updateArmyProps();
+        return count;
     }
 
     ////////////////////////////////
@@ -178,11 +204,14 @@ class EditableMap {
      * @param country The turn-order ID of the country to assign to the new army.
      */
     void createArmy(const ArmyID country) {
+        DisableMementos token(map);
         const auto successful =
             map.createArmy(::country.scriptNames[uint64(country)]);
         if (successful && map.getArmyCount() == 1) {
             // If the first army has been created, automatically select them.
             map.setSelectedArmy(map.getArmyIDs()[0]);
+        } else if (!successful) {
+            token.discard();
         }
         _updateArmyProps();
     }
@@ -192,6 +221,7 @@ class EditableMap {
      * @param army The ID of the army to delete.
      */
     void deleteArmy(const ArmyID army) {
+        DisableMementos token(map);
         // If we are deleting the current army, select the next one.
         const auto getNextArmy = map.getSelectedArmy() == army;
         const auto nextArmy =
@@ -239,9 +269,11 @@ class EditableMap {
             newOwner.isEmpty() ? NO_ARMY : country[newOwner].turnOrder;
 
         if (fromType.scriptName != toType.scriptName) {
+            DisableMementos token(map);
             map.setTileType(tileToChange, toType.scriptName);
             map.setTileOwner(tileToChange, newOwnerID);
         } else if (oldOwnerID != newOwnerID) {
+            DisableMementos token(map);
             map.setTileOwner(tileToChange, newOwnerID);
         }
         
@@ -292,6 +324,7 @@ class EditableMap {
 
         if (oldUnit == 0 || oldUnitType.scriptName != unitType.scriptName ||
             oldUnitArmyID != armyID) {
+            DisableMementos token(map);
             // Delete existing unit, and its army if appropriate.
             deleteUnit(oldUnit);
 
@@ -314,6 +347,7 @@ class EditableMap {
      */
     void createAndLoadUnit(const UnitID loadedOnto,
         const UnitType@ const unitType) {
+        DisableMementos token(map);
         const auto army = map.getArmyOfUnit(loadedOnto);
         const auto newUnit = map.createUnit(unitType.scriptName, army);
         map.replenishUnit(newUnit, true);

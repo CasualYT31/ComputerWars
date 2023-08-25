@@ -27,6 +27,9 @@
 	"explode": "Explode",
 	"repair": "Repair",
 
+	"edit": "Edit",
+	"undo": "Undo",
+	"redo": "Redo",
 	"file": "File",
 	"new": "New",
 	"map": "Map",
