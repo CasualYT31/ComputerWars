@@ -25,6 +25,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Unit, armies, and tiles are all stored and managed here.
  */
 
+#pragma once
+
 #include "tile.hpp"
 #include "unit.hpp"
 #include "army.hpp"
@@ -32,11 +34,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "language.hpp"
 #include "gui.hpp"
 #include "binary.hpp"
+#include "mapstrings.hpp"
 #include <cmath>
 #include <stack>
 #include <optional>
-
-#pragma once
 
 namespace awe {
 	/**
@@ -121,9 +122,11 @@ namespace awe {
 		/**
 		 * Constructs a memento disable token.
 		 * If \c nullptr is given, this token won't do anything.
-		 * @param map Pointer to the map to manage the mementos of.
+		 * @param map  Pointer to the map to manage the mementos of.
+		 * @param name The name to give the memento created when this token is
+		 *             destroyed.
 		 */
-		disable_mementos(awe::map* const map);
+		disable_mementos(awe::map* const map, const std::string& name);
 
 		/**
 		 * When a disable token is deleted, mementos are re-enabled.
@@ -132,10 +135,13 @@ namespace awe {
 
 		/**
 		 * Creates the disable token.
-		 * @param  map Pointer to the map to managed the mementos of.
+		 * @param  map  Pointer to the map to manage the mementos of.
+		 * @param  name The name to give the memento created when this token is
+		 *              destroyed.
 		 * @return Pointer to the disable token.
 		 */
-		static awe::disable_mementos* Create(awe::map* const map);
+		static awe::disable_mementos* Create(awe::map* const map,
+			const std::string& name);
 
 		/**
 		 * Enables mementos on the map but does not go on to create a memento, and
@@ -151,6 +157,11 @@ namespace awe {
 		 * The map the disable token is acting upon.
 		 */
 		awe::map* _map;
+
+		/**
+		 * The name to give the memento created from this token.
+		 */
+		const std::string _name;
 	};
 
 	/**
@@ -217,6 +228,11 @@ namespace awe {
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 			const engine::logger::data& data);
+
+		/**
+		 * Makes sure to release any given script callbacks.
+		 */
+		~map() noexcept;
 
 		/**
 		 * Replaces the state of this object with that given in the binary file.
@@ -1028,7 +1044,8 @@ namespace awe {
 		/**
 		 * Version of \c getLoadedUnits() that converts the returned set into a
 		 * \c CScriptArray.
-		 * @sa @c getLoadedUnits().
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c getLoadedUnits().
 		 */
 		CScriptArray* getLoadedUnitsAsArray(const awe::UnitID id) const;
 
@@ -1143,7 +1160,8 @@ namespace awe {
 		/**
 		 * Version of \c getAvailableTiles() which converts the result into a
 		 * \c CScriptArray.
-		 * @sa @c getAvailableTiles().
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c getAvailableTiles().
 		 */
 		CScriptArray* getAvailableTilesAsArray(
 			const sf::Vector2u& tile, unsigned int startFrom,
@@ -1409,28 +1427,43 @@ namespace awe {
 		 * this method will do nothing. For each call to \c disableMementos(), a
 		 * call to \c enableMementos() needs to be made, before \c addMemento() can
 		 * add mementos again.
+		 * @param  name The name to give to the new memento.
 		 * @safety If an exception is thrown when writing the map's data, both
 		 *         deques will not be changed.
 		 * @sa     \c disableMementos().
 		 */
-		inline void addMemento() {
-			if (_mementoDisableCounter == 0) _createMemento();
+		inline void addMemento(const std::string& name) {
+			if (_mementoDisableCounter == 0) _createMemento(name);
 		}
 
 		/**
 		 * Pops memento off the front of the undo deque, pushes it to the front of
 		 * the redo deque, and replaces the map's state with the next memento in
 		 * the undo deque.
-		 * Does nothing if the undo deque has only one memento stored (or none).
+		 * Does nothing if the undo deque has only one memento stored (or none).\n
+		 * If the number of undos specified is too much, then it will be reduced to
+		 * the maximum possible value and a warning will be logged.
+		 * @param additionalUndos If more than \c 0 is given, it defines the number
+		 *                        of additional mementos to pop off the undo deque
+		 *                        and push on to the redo deque before replacing
+		 *                        the map's state with the next memento in the undo
+		 *                        deque.
 		 */
-		void undo();
+		void undo(std::size_t additionalUndos = 0);
 
 		/**
 		 * Pops memento off the front of the redo deque, pushes it to the front of
 		 * the undo deque, and replaces the map's state with that memento.
-		 * Does nothing if the redo deque is empty.
+		 * Does nothing if the redo deque is empty.\n
+		 * If the number of redos specified is too much, then it will be reduced to
+		 * the maximum possible value and a warning will be logged.
+		 * @param additionalRedos If more than \c 0 is given, it defines the number
+		 *                        of additional mementos to pop off the redo deque
+		 *                        and push on to the undo deque before replacing
+		 *                        the map's state with the last memento that was
+		 *                        popped then pushed.
 		 */
-		void redo();
+		void redo(std::size_t additionalRedos = 0);
 
 		/**
 		 * Prevents \c addMemento() from creating mementos.
@@ -1453,14 +1486,59 @@ namespace awe {
 		 * \c enableMementos() must also be called twice before \c addMemento() can
 		 * create mementos again. On the second call to \c enableMementos(), a
 		 * memento will be created automatically.
-		 * @param doNotCreateMemento If set to \c TRUE, does not automatically
-		 *                           create any memento.
-		 * @sa    \c disableMementos().
+		 * @param  name The name to give the created memento. If set to an empty
+		 *              string, does not automatically create any memento.
+		 * @return \c TRUE if a memento was created, \c FALSE if not.
+		 * @sa     \c disableMementos().
 		 */
-		inline void enableMementos(const bool doNotCreateMemento = false) {
+		inline bool enableMementos(const std::string& name) {
 			if (_mementoDisableCounter > 0 && --_mementoDisableCounter == 0 &&
-				!doNotCreateMemento) _createMemento();
+				!name.empty()) {
+				_createMemento(name);
+				return true;
+			} else return false;
 		}
+
+		/**
+		 * Gets the names of every memento currently in the undo and redo deque.
+		 * @param  lastKnownMemento The 0-based index of the memento that is at the
+		 *                          front of the undo deque is set to this
+		 *                          variable.
+		 * @return Returns the mementos in order of creation time, with the one
+		 *         that is most recent being placed first in the vector.
+		 */
+		std::vector<std::string> getMementos(std::size_t& lastKnownMemento) const;
+
+		/**
+		 * Calls \c getMementos() and converts the result into a \c CScriptArray.
+		 * @param  lastKnownMemento The 0-based index of the memento that is at the
+		 *                          front of the undo deque is set to this
+		 *                          variable.
+		 * @return The array listing each memento's name in order.
+		 * @throws std::runtime_error if \c _scripts was \c nullptr.
+		 */
+		CScriptArray* getMementosAsArray(std::size_t& lastKnownMemento) const;
+
+		/**
+		 * Gets the name of the next memento in the undo deque.
+		 * @return The name of the memento to undo next.
+		 */
+		std::string getNextUndoMementoName() const;
+
+		/**
+		 * Gets the name of the next memento in the redo deque.
+		 * @return The name of the memento to redo next, or a blank string if there
+		 *         is none.
+		 */
+		std::string getNextRedoMementoName() const;
+
+		/**
+		 * Sets the script callback that is invoked when a memento is added or
+		 * removed, or undone or redone.
+		 * @param callback Pointer to the callback, or \c nullptr to not execute
+		 *                 any code when memento state is changed.
+		 */
+		void setMementoStateChangedCallback(asIScriptFunction* const callback);
 
 		////////////////////////
 		// DRAWING OPERATIONS //
@@ -1728,12 +1806,21 @@ namespace awe {
 		void setGUI(const std::shared_ptr<sfx::gui>& gui);
 
 		/**
-		 * Sets the language dictionary to use with this map.
-		 * If \c nullptr is given, an error will be logged.
-		 * @param dict Pointer to the dictionary to use with this map.
+		 * Sets the language dictionary to use with this object.
+		 * If \c nullptr is given, an error will be logged, and the internal
+		 * pointer won't change.
+		 * @param dict Pointer to the dictionary to use with this object.
 		 */
 		void setLanguageDictionary(
 			const std::shared_ptr<engine::language_dictionary>& dict);
+
+		/**
+		 * Sets the strings to use with this map.
+		 * If \c nullptr is given, an error will be logged, and the internal
+		 * pointer won't change.
+		 * @param strs Pointer to the strings to use with this map.
+		 */
+		void setMapStrings(const std::shared_ptr<awe::map_strings>& strs);
 
 		/**
 		 * This drawable's \c animate() method.
@@ -1861,8 +1948,29 @@ namespace awe {
 		 * Creates a memento and pushes it to the front of the undo deque.
 		 * Also makes sure the undo deque doesn't surpass the limit, and that the
 		 * redo deque is cleared.
+		 * @param name The name to give to the new memento.
 		 */
-		void _createMemento();
+		void _createMemento(const std::string& name);
+
+		/**
+		 * Gets a map operation's name.
+		 * @param  op The map operation to retrieve the name of.
+		 * @return The translation key of the operation's name, or
+		 *         \c awe::map_strings::ERROR_STRING if \c _mapStrings is
+		 *         \c nullptr, or the translation key could not be found.
+		 */
+		inline std::string _getMementoName(awe::map_strings::operation op) {
+			if (_mapStrings) return (*_mapStrings)[op];
+			else return awe::map_strings::ERROR_STRING;
+		}
+
+		/**
+		 * The state of the mementos has changes, so invoke callback if possible.
+		 */
+		inline void _mementosHaveChanged() {
+			if (_scripts && _mementosChangedCallback)
+				_scripts->callFunction(_mementosChangedCallback);
+		}
 
 		/**
 		 * Internal logger object.
@@ -1872,6 +1980,21 @@ namespace awe {
 		///////////////////////
 		// FILE AND MEMENTOS //
 		///////////////////////
+		/**
+		 * Represents a single memento.
+		 */
+		struct memento {
+			/**
+			 * The memento.
+			 */
+			std::shared_ptr<engine::binary_ostream> data;
+
+			/**
+			 * A description of the memento.
+			 */
+			std::string name;
+		};
+
 		/**
 		 * File name of the binary file previously read from or written to.
 		 */
@@ -1891,12 +2014,12 @@ namespace awe {
 		/**
 		 * Deque of mementos used to track states to undo to.
 		 */
-		std::deque<std::shared_ptr<engine::binary_ostream>> _undoDeque;
+		std::deque<memento> _undoDeque;
 
 		/**
 		 * Deque of mementos used to track undone states that can be redone.
 		 */
-		std::deque<std::shared_ptr<engine::binary_ostream>> _redoDeque;
+		std::deque<memento> _redoDeque;
 
 		/**
 		 * Mementos are only added via \c addMemento() if this field is \c 0.
@@ -1916,6 +2039,22 @@ namespace awe {
 		 * one time.
 		 */
 		static constexpr std::size_t _MEMENTO_LIMIT = 30;
+
+		/**
+		 * The language dictionary to use with this object.
+		 */
+		std::shared_ptr<engine::language_dictionary> _dict;
+
+		/**
+		 * Stores the name of each map operation, to use with memento names.
+		 */
+		std::shared_ptr<awe::map_strings> _mapStrings;
+
+		/**
+		 * Pointer to a script function that is invoked when the state of the undo
+		 * and/or redo deques has changed.
+		 */
+		asIScriptFunction* _mementosChangedCallback = nullptr;
 
 		//////////
 		// DATA //

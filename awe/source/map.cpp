@@ -67,7 +67,7 @@ void awe::disable_mementos::Register(asIScriptEngine* engine,
 		auto r = RegisterType(engine, "DisableMementos",
 			[](asIScriptEngine* engine, const std::string& type) {
 				engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
-					std::string(type + "@ f(Map@ const)").c_str(),
+					std::string(type + "@ f(Map@ const, const string&in)").c_str(),
 					asFUNCTION(awe::disable_mementos::Create), asCALL_CDECL);
 			});
 		document->DocumentObjectType(r, "A memento disable token. Used to disable "
@@ -82,22 +82,24 @@ void awe::disable_mementos::Register(asIScriptEngine* engine,
 	}
 }
 
-awe::disable_mementos::disable_mementos(awe::map* const map) : _map(map) {
+awe::disable_mementos::disable_mementos(awe::map* const map,
+	const std::string& name) : _map(map), _name(name) {
 	if (_map) _map->disableMementos();
 }
 awe::disable_mementos::~disable_mementos() noexcept {
 	try {
-		if (_map) _map->enableMementos();
+		if (_map) _map->enableMementos(_name);
 	} catch (...) {} // Swallow them... :/ We can't let destructors throw.
 }
 
-awe::disable_mementos* awe::disable_mementos::Create(awe::map* const map) {
-	return new awe::disable_mementos(map);
+awe::disable_mementos* awe::disable_mementos::Create(awe::map* const map,
+	const std::string& name) {
+	return new awe::disable_mementos(map, name);
 }
 
 void awe::disable_mementos::discard() {
 	if (_map) {
-		_map->enableMementos(true);
+		_map->enableMementos("");
 		_map = nullptr;
 	}
 }
@@ -182,6 +184,13 @@ void awe::map::Register(asIScriptEngine* engine,
 			&MIN_TILE_HEIGHT);
 		document->DocumentExpectedFunction("const uint MIN_TILE_HEIGHT",
 			"A tile's minimum height, in pixels.");
+
+		//////////////
+		// FUNCDEFS //
+		//////////////
+		r = engine->RegisterFuncdef("void MementoStateChangedCallback()");
+		document->DocumentObjectFuncDef(r, "The signature of the callback that is "
+			"invoked after memento state changes.");
 
 		////////////////////
 		// MAP OPERATIONS //
@@ -628,21 +637,37 @@ void awe::map::Register(asIScriptEngine* engine,
 		////////////////////////
 		// MEMENTO OPERATIONS //
 		////////////////////////
-		r = engine->RegisterObjectMethod("Map", "void addMemento()",
+		r = engine->RegisterObjectMethod("Map", "void addMemento(const string&in)",
 			asMETHOD(awe::map, addMemento), asCALL_THISCALL);
 
-		r = engine->RegisterObjectMethod("Map", "void undo()",
+		r = engine->RegisterObjectMethod("Map", "void undo(uint64 = 0)",
 			asMETHOD(awe::map, undo), asCALL_THISCALL);
 
-		r = engine->RegisterObjectMethod("Map", "void redo()",
+		r = engine->RegisterObjectMethod("Map", "void redo(uint64 = 0)",
 			asMETHOD(awe::map, redo), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "void disableMementos()",
 			asMETHOD(awe::map, disableMementos), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void enableMementos(const bool = false)",
+			"bool enableMementos(const string&in)",
 			asMETHOD(awe::map, enableMementos), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"array<string>@ getMementos(uint64&out) const",
+			asMETHOD(awe::map, getMementosAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"string getNextUndoMementoName() const",
+			asMETHOD(awe::map, getNextUndoMementoName), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"string getNextRedoMementoName() const",
+			asMETHOD(awe::map, getNextRedoMementoName), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "void "
+			"setMementoStateChangedCallback(MementoStateChangedCallback@ const)",
+			asMETHOD(awe::map, setMementoStateChangedCallback), asCALL_THISCALL);
 
 		////////////////////////
 		// DRAWING OPERATIONS //
@@ -771,6 +796,10 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	_initShaders();
 }
 
+awe::map::~map() noexcept {
+	if (_mementosChangedCallback) _mementosChangedCallback->Release();
+}
+
 bool awe::map::load(std::string file, const unsigned char version) {
 	if (file == "") file = _filename;
 	try {
@@ -788,7 +817,7 @@ bool awe::map::load(std::string file, const unsigned char version) {
 		// Always create the first memento, even if mementos are disabled,
 		// otherwise the first memento given if they are enabled again wouldn't be
 		// undoable.
-		_createMemento();
+		_createMemento(_getMementoName(awe::map_strings::operation::LOAD_MAP));
 		_changed = false;
 	} catch (const std::exception& e) {
 		_logger.critical("Map loading operation: couldn't load map file \"{}\": "
@@ -838,7 +867,8 @@ bool awe::map::periodic() {
 }
 
 void awe::map::setMapName(const std::string& name) {
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::MAP_NAME));
 	_mapName = name;
 }
 
@@ -849,7 +879,8 @@ std::string awe::map::getMapName() const {
 void awe::map::setMapSize(const sf::Vector2u& dim,
 	const std::shared_ptr<const awe::tile_type>& tile, const awe::ArmyID owner) {
 	if (dim == getMapSize()) return;
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::MAP_SIZE));
 	removeRectangleSelection();
 	// First, resize the tiles vectors accordingly.
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
@@ -932,7 +963,8 @@ bool awe::map::rectangleFillTiles(const sf::Vector2u& start,
 			"out of bounds.", end);
 		return false;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::RECT_FILL_TILES));
 	bool ret = true;
 	const unsigned int startX = std::min(start.x, end.x),
 		startY = std::min(start.y, end.y);
@@ -982,7 +1014,8 @@ bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 			"invalid.", army);
 		return false;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::RECT_FILL_UNITS));
 	if (!_isArmyPresent(army)) createArmy(_countries->getScriptNames()[army]);
 	bool ret = true;
 	const unsigned int startX = std::min(start.x, end.x),
@@ -1025,7 +1058,8 @@ std::size_t awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
 			"out of bounds.", end);
 		return 0;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::RECT_DEL_UNITS));
 	const unsigned int startX = std::min(start.x, end.x),
 		startY = std::min(start.y, end.y);
 	std::size_t counter = 0;
@@ -1046,7 +1080,8 @@ std::size_t awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
 }
 
 void awe::map::setDay(const awe::Day day) {
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::DAY));
 	_day = day;
 }
 
@@ -1075,7 +1110,8 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
 			country->getScriptName());
 		return false;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::CREATE_ARMY));
 	// Create the army.
 	_armies.insert(
 		std::pair<awe::ArmyID, awe::army>(country->getTurnOrder(), country)
@@ -1105,7 +1141,8 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 			"exist on the map!", army, transferOwnership);
 		return;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::DELETE_ARMY));
 	// Firstly, delete all units belonging to the army.
 	auto units = _armies.at(army).getUnits();
 	for (auto unit : units) {
@@ -1146,7 +1183,8 @@ CScriptArray* awe::map::getArmyIDsAsArray() const {
 
 void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team) {
 	if (_isArmyPresent(army)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::ARMY_TEAM));
 		_armies.at(army).setTeam(team);
 		// First, stop all of the army's units from capturing.
 		const auto units = getUnitsOfArmy(army);
@@ -1169,7 +1207,8 @@ awe::TeamID awe::map::getArmyTeam(const awe::ArmyID army) const {
 
 void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 	if (_isArmyPresent(army)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::ARMY_FUNDS));
 		_armies.at(army).setFunds(funds);
 	} else {
 		_logger.error("setArmyFunds operation cancelled: attempted to set {} "
@@ -1218,7 +1257,8 @@ void awe::map::setArmyCOs(const awe::ArmyID army,
 			_logger.error("setCOs operation failed: army with ID {} was given no "
 				"COs!", army);
 		} else {
-			awe::disable_mementos token(this);
+			awe::disable_mementos token(this,
+				_getMementoName(awe::map_strings::operation::ARMY_COS));
 			if (!current && tag) {
 				_logger.warning("setCOs operation: army with ID {} was given a "
 					"tag CO but not current CO! The army will instead be assigned "
@@ -1276,7 +1316,8 @@ void awe::map::tagArmyCOs(const awe::ArmyID army) {
 			"the time of calling!", army);
 	} else {
 		if (_armies.at(army).getTagCO()) {
-			awe::disable_mementos token(this);
+			awe::disable_mementos token(this,
+				_getMementoName(awe::map_strings::operation::TAG_COS));
 			_armies.at(army).tagCOs();
 		} else {
 			_logger.error("tagCOs operation failed: army with ID {} didn't have a "
@@ -1386,9 +1427,7 @@ CScriptArray* awe::map::getUnitsOfArmyByPriorityAsArray(
 		// Loop through backwards: see documentation on unit_type::unit_type().
 		for (auto itr = set.rbegin(), enditr = set.rend(); itr != enditr; ++itr) {
 			CScriptArray* list = _scripts->createArray("UnitID");
-			for (auto unit : itr->second) {
-				list->InsertLast(&unit);
-			}
+			for (auto unit : itr->second) list->InsertLast(&unit);
 			ret->InsertLast(&list);
 			list->Release();
 		}
@@ -1435,7 +1474,8 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 			"for a new unit. There are too many units allocated!");
 		return 0;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::CREATE_UNIT));
 	_units.insert({ id, awe::unit({_logger.getData().sink, "unit"}, type, army,
 		_sheet_unit, _sheet_icon) });
 	_armies.at(army).addUnit(id);
@@ -1452,7 +1492,8 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 			"with ID {} that didn't exist!", id);
 		return;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::DELETE_UNIT));
 	_updateCapturingUnit(id);
 	// Firstly, remove the unit from the tile, if it was on a tile.
 	// We don't need to check if the unit "is actually on the map or not," since
@@ -1530,7 +1571,8 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 			"with ID {}!", id, pos, idOfUnitOnTile);
 		return;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::UNIT_POSITION));
 	_updateCapturingUnit(id);
 	// Make new tile occupied.
 	if (pos != awe::unit::NO_POSITION) _tiles[pos.x][pos.y].setUnit(id);
@@ -1563,7 +1605,8 @@ bool awe::map::isUnitOnMap(const awe::UnitID id) const {
 
 void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) {
 	if (_isUnitPresent(id)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::UNIT_HP));
 		_units.at(id).setHP(hp);
 	} else {
 		_logger.error("setUnitHP operation cancelled: attempted to assign HP {} "
@@ -1587,7 +1630,8 @@ awe::HP awe::map::getUnitDisplayedHP(const awe::UnitID id) const {
 
 void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 	if (_isUnitPresent(id)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::UNIT_FUEL));
 		_units.at(id).setFuel(fuel);
 	} else {
 		_logger.error("setUnitFuel operation cancelled: attempted to assign fuel "
@@ -1614,7 +1658,8 @@ awe::Fuel awe::map::getUnitFuel(const awe::UnitID id) const {
 void awe::map::setUnitAmmo(const awe::UnitID id, const std::string& weapon,
 		const awe::Ammo ammo) {
 	if (_isUnitPresent(id)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::UNIT_AMMO));
 		_units.at(id).setAmmo(weapon, ammo);
 	} else {
 		_logger.error("setUnitAmmo operation cancelled: attempted to assign ammo "
@@ -1633,7 +1678,8 @@ awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id,
 
 void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
 	if (_isUnitPresent(id)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::UNIT_REPLENISH));
 		_units.at(id).replenish(heal);
 	} else {
 		_logger.error("replenishUnit operation cancelled: attempted to replenish "
@@ -1644,7 +1690,8 @@ void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
 
 void awe::map::waitUnit(const awe::UnitID id, const bool waiting) {
 	if (_isUnitPresent(id)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::UNIT_WAIT));
 		_units.at(id).wait(waiting);
 	} else {
 		_logger.error("waitUnit operation cancelled: attempted to assign waiting "
@@ -1661,7 +1708,8 @@ bool awe::map::isUnitWaiting(const awe::UnitID id) const {
 
 void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) {
 	if (_isUnitPresent(id)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::UNIT_CAPTURE));
 		_units.at(id).capturing(capturing);
 	} else {
 		_logger.error("unitCapturing operation cancelled: attempted to assign "
@@ -1679,7 +1727,8 @@ bool awe::map::isUnitCapturing(const awe::UnitID id) const {
 
 void awe::map::unitHiding(const awe::UnitID id, const bool hiding) {
 	if (_isUnitPresent(id)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::UNIT_HIDE));
 		_units.at(id).hiding(hiding);
 	} else {
 		_logger.error("unitHiding operation cancelled: attempted to assign hiding "
@@ -1753,7 +1802,8 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 			"onto unit with ID {}", load, onto);
 		return;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::UNIT_LOAD));
 	_updateCapturingUnit(load);
 	// Make the tile that `load` was on vacant, and remove the unit ID from the
 	// tile.
@@ -1794,7 +1844,8 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 	}
 	if (_units.at(from).unloadUnit(unload)) {
 		// Unload successful, continue with operation.
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::UNIT_UNLOAD));
 		_units.at(unload).loadOnto(0);
 		setUnitPosition(unload, onto);
 	} else {
@@ -1865,12 +1916,12 @@ std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(
 
 
 CScriptArray* awe::map::getLoadedUnitsAsArray(const awe::UnitID id) const {
-	auto set = getLoadedUnits(id);
-	CScriptArray* ret = _scripts->createArray("UnitID");
-	for (auto unit : set) {
-		ret->InsertLast(&unit);
-	}
-	return ret;
+	if (_scripts) {
+		auto set = getLoadedUnits(id);
+		CScriptArray* ret = _scripts->createArray("UnitID");
+		for (auto unit : set) ret->InsertLast(&unit);
+		return ret;
+	} else throw NO_SCRIPTS;
 }
 
 unsigned int awe::map::getUnitDefence(const awe::UnitID id) const {
@@ -1903,7 +1954,8 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 			pos, getMapSize());
 		return false;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::TILE_TYPE));
 	_updateCapturingUnit(getUnitOnTile(pos));
 	_tiles[pos.x][pos.y].setTileType(type);
 	// Remove ownership of the tile from the army who owns it, if any army does.
@@ -1936,7 +1988,8 @@ const awe::tile_type* awe::map::getTileTypeObject(const sf::Vector2u& pos) const
 
 void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {
 	if (!_isOutOfBounds(pos)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::TILE_HP));
 		_tiles[pos.x][pos.y].setTileHP(hp);
 	} else {
 		_logger.error("setTileHP operation cancelled: tile at position {} is out "
@@ -1960,7 +2013,8 @@ void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
 			"map's size of {}!", army, pos, getMapSize());
 		return;
 	}
-	awe::disable_mementos token(this);
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::TILE_OWNER));
 	_updateCapturingUnit(getUnitOnTile(pos));
 	auto& tile = _tiles[pos.x][pos.y];
 	// First, remove the tile from the army who currently owns it.
@@ -2037,12 +2091,12 @@ std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(
 CScriptArray* awe::map::getAvailableTilesAsArray(
 	const sf::Vector2u& tile, unsigned int startFrom,
 	const unsigned int endAt) const {
-	auto set = getAvailableTiles(tile, startFrom, endAt);
-	CScriptArray* ret = _scripts->createArray("Vector2");
-	for (auto tile : set) {
-		ret->InsertLast(&tile);
-	}
-	return ret;
+	if (_scripts) {
+		auto set = getAvailableTiles(tile, startFrom, endAt);
+		CScriptArray* ret = _scripts->createArray("Vector2");
+		for (auto tile : set) ret->InsertLast(&tile);
+		return ret;
+	} else throw NO_SCRIPTS;
 }
 
 std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin,
@@ -2393,30 +2447,87 @@ std::size_t awe::map::getUnitPreviewsCount() const {
 	return _unitLocationOverrides.size();
 }
 
-void awe::map::undo() {
+void awe::map::undo(std::size_t additionalUndos) {
 	if (_undoDeque.size() <= 1) return;
-	// Pop front memento of undo deque and push to the redo deque.
-	auto popped = _undoDeque.front();
-	_undoDeque.pop_front();
-	_redoDeque.push_front(popped);
+	const auto maxAdditionalUndos = _undoDeque.size() - 2;
+	if (additionalUndos > maxAdditionalUndos) {
+		_logger.warning("undo operation: additionalUndos was given {}, which is "
+			"greater than the allowed number of undos at this time. "
+			"additionalUndos will be set to {}.", additionalUndos,
+			maxAdditionalUndos);
+		additionalUndos = maxAdditionalUndos;
+	}
+	// Pop front memento/s of undo deque and push to the redo deque.
+	for (std::size_t i = 0; i <= additionalUndos; ++i) {
+		auto popped = _undoDeque.front();
+		_undoDeque.pop_front();
+		_redoDeque.push_front(popped);
+	}
 	// Apply next memento in the undo deque.
-	auto memento = _undoDeque.front();
 	auto binaryData = _binaryIStreamFactory();
-	*memento >> binaryData;
+	*_undoDeque.front().data >> binaryData;
 	_loadMapFromInputStream(binaryData, 0);
+	_mementosHaveChanged();
 }
 
-void awe::map::redo() {
+void awe::map::redo(std::size_t additionalRedos) {
 	if (_redoDeque.empty()) return;
-	// Pop front memento of redo deque.
-	auto memento = _redoDeque.front();
-	_redoDeque.pop_front();
-	// Apply it.
+	const auto maxAdditionalRedos = _redoDeque.size() - 1;
+	if (additionalRedos > maxAdditionalRedos) {
+		_logger.warning("redo operation: additionalRedos was given {}, which is "
+			"greater than the allowed number of redos at this time. "
+			"additionalRedos will be set to {}.", additionalRedos,
+			maxAdditionalRedos);
+		additionalRedos = maxAdditionalRedos;
+	}
+	// Pop front memento/s of redo deque and push to the undo deque.
+	for (std::size_t i = 0; i <= additionalRedos; ++i) {
+		auto popped = _redoDeque.front();
+		_redoDeque.pop_front();
+		_undoDeque.push_front(popped);
+	}
+	// Apply first undo memento.
 	auto binaryData = _binaryIStreamFactory();
-	*memento >> binaryData;
+	*_undoDeque.front().data >> binaryData;
 	_loadMapFromInputStream(binaryData, 0);
-	// Push to the undo deque.
-	_undoDeque.push_front(memento);
+	_mementosHaveChanged();
+}
+
+std::vector<std::string> awe::map::getMementos(
+	std::size_t& lastKnownMemento) const {
+	std::vector<std::string> ret;
+	// The back of the redo deque will hold the most recent memento, so iterate
+	// through it backwards.
+	for (auto i = _redoDeque.crbegin(), end = _redoDeque.crend(); i != end; ++i)
+		ret.push_back(i->name);
+	lastKnownMemento = ret.size();
+	// The front of the undo deque will hold the most recent memento (if there are
+	// none in the redo deque), so iterate through it forwards.
+	for (const auto& memento : _undoDeque) ret.push_back(memento.name);
+	return ret;
+}
+
+CScriptArray* awe::map::getMementosAsArray(std::size_t& lastKnownMemento) const {
+	if (_scripts) {
+		const auto result = getMementos(lastKnownMemento);
+		CScriptArray* ret = _scripts->createArray("string");
+		for (std::string element : result) ret->InsertLast(&element);
+		return ret;
+	} else throw NO_SCRIPTS;
+}
+
+std::string awe::map::getNextUndoMementoName() const {
+	return _undoDeque.front().name;
+}
+
+std::string awe::map::getNextRedoMementoName() const {
+	if (_redoDeque.empty()) return "";
+	else return _redoDeque.front().name;
+}
+
+void awe::map::setMementoStateChangedCallback(asIScriptFunction* const callback) {
+	if (_mementosChangedCallback) _mementosChangedCallback->Release();
+	_mementosChangedCallback = callback;
 }
 
 void awe::map::setTarget(
@@ -2481,7 +2592,8 @@ void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
 
 void awe::map::setSelectedArmy(const awe::ArmyID army) {
 	if (army == awe::NO_ARMY || _isArmyPresent(army)) {
-		awe::disable_mementos token(this);
+		awe::disable_mementos token(this,
+			_getMementoName(awe::map_strings::operation::SELECT_ARMY));
 		_currentArmy = army;
 	} else {
 		_logger.error("setSelectedArmy operation cancelled: army with ID {} does "
@@ -2652,17 +2764,19 @@ void awe::map::setGUI(const std::shared_ptr<sfx::gui>& gui) {
 
 void awe::map::setLanguageDictionary(
 	const std::shared_ptr<engine::language_dictionary>& dict) {
-	if (!dict) {
-		_logger.error("setLanguageDictionary operation failed: nullptr was "
-			"given!");
-		return;
-	}
+	if (dict) _dict = dict;
+	else _logger.error("Attempted to set NULL language dictionary!");
+}
+
+void awe::map::setMapStrings(const std::shared_ptr<awe::map_strings>& strs) {
+	if (strs) _mapStrings = strs;
+	else _logger.error("setMapStrings operation failed: nullptr was given!");
 }
 
 bool awe::map::animate(const sf::RenderTarget& target) {
 	// Create map of tiles -> units from _unitLocationOverrides.
 	std::unordered_map<sf::Vector2u, awe::UnitID> unitLocationOverrides;
-	for (auto pair : _unitLocationOverrides)
+	for (const auto& pair : _unitLocationOverrides)
 		unitLocationOverrides[pair.second] = pair.first;
 
 	// Step 1. the tiles.
@@ -3009,13 +3123,14 @@ engine::binary_ostream awe::map::_saveMapIntoOutputStream(
 	return stream;
 }
 
-void awe::map::_createMemento() {
+void awe::map::_createMemento(const std::string& name) {
 	if (_mementoHardDisable) return;
-	_undoDeque.push_front(std::make_shared<engine::binary_ostream>(
-		_saveMapIntoOutputStream(0)));
+	_undoDeque.push_front({ std::make_shared<engine::binary_ostream>(
+		_saveMapIntoOutputStream(0)), name });
 	_redoDeque.clear();
 	if (_undoDeque.size() > _MEMENTO_LIMIT) _undoDeque.pop_back();
 	_changed = true;
+	_mementosHaveChanged();
 }
 
 awe::map::selected_unit_render_data::selected_unit_render_data(

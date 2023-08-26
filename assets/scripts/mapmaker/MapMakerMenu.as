@@ -11,6 +11,7 @@ EditableMap@ edit;
 const auto BASE_GROUP = "MapMakerMenu.BaseGroup";
 const auto MENU = BASE_GROUP + ".Menu";
 const auto CLIENT_AREA = BASE_GROUP + ".Main";
+StatusBarWidget StatusBar;
 
 const auto MESSAGE_BOX_GROUP = "MessageBoxGroup";
 /// Used with \c MessageBoxes that shouldn't do anything special when a button is
@@ -32,6 +33,7 @@ MenuItemID MAP_MAKER_FILE_QUIT;
 
 MenuItemID MAP_MAKER_EDIT_UNDO;
 MenuItemID MAP_MAKER_EDIT_REDO;
+MenuItemID MAP_MAKER_EDIT_MEMENTO_WINDOW;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
 MenuItemID MAP_MAKER_MAP_FILL;
@@ -54,6 +56,7 @@ TilePropertiesWindow TilePropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
 ArmyPropertiesWindow ArmyPropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
     MESSAGE_BOX_GROUP);
 ConfirmTileTypeWindow FillWindow;
+MementoWindow UndoRedoWindow;
 
 /**
  * Sets up the map maker menu.
@@ -70,10 +73,12 @@ void MapMakerMenuSetUp() {
     addWidget("Group", BASE_GROUP);
     addWidget("MenuBar", MENU);
     addWidget("Group", CLIENT_AREA);
-    setWidgetSize(CLIENT_AREA, "100%", "100%-" +
+    StatusBar.setUp(BASE_GROUP, formatFloat(getWidgetFullSize(MENU).y) + "px");
+
+    setWidgetSize(CLIENT_AREA, "100%", "100%-2*" +
         formatFloat(getWidgetFullSize(MENU).y) + "px");
-    setWidgetPosition(CLIENT_AREA, "50%", "100%");
-    setWidgetOrigin(CLIENT_AREA, 0.5f, 1.0f);
+    setWidgetPosition(CLIENT_AREA, "50%", "50%");
+    setWidgetOrigin(CLIENT_AREA, 0.5f, 0.5f);
 
     // Menu bar.
 
@@ -87,6 +92,7 @@ void MapMakerMenuSetUp() {
     addMenu(MENU, "edit");
     MAP_MAKER_EDIT_UNDO = addMenuItem(MENU, "undo");
     MAP_MAKER_EDIT_REDO = addMenuItem(MENU, "redo");
+    MAP_MAKER_EDIT_MEMENTO_WINDOW = addMenuItem(MENU, "mementowindow");
 
     addMenu(MENU, "map");
     MAP_MAKER_MAP_SET_PROPS = addMenuItem(MENU, "mapprops");
@@ -133,6 +139,7 @@ void MapMakerMenuSetUp() {
             if (signalName == "Pressed") FillWindow.close();
         }
     );
+    UndoRedoWindow.setUp(CLIENT_AREA);
 }
 
 /**
@@ -177,8 +184,9 @@ void redo() {
 /// iteration of the HandleInput() function.
 bool prevAction = false;
 
-/// After a tool has finished, should the memento be discarded?
-bool discardMemento = false;
+/// After a tool has finished, what should its name be? Assign to an empty string
+/// to discard the memento.
+string mementoName;
 
 /**
  * Handles input specific to the \c MapMakerMenu.
@@ -277,7 +285,7 @@ void MapMakerMenuHandleInput(const dictionary controls,
     // handle it this way.
     if (!prevAction && action) {
         edit.map.disableMementos();
-        discardMemento = true;
+        mementoName = "";
     }
     
     if (action && TOOLBAR.tool == PAINT_TOOL.shortName) {
@@ -285,14 +293,14 @@ void MapMakerMenuHandleInput(const dictionary controls,
         // it.
         if (currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null) {
             edit.setTile(curTile, tileTypeSel, tileOwnerSel);
-            discardMemento = false;
+            mementoName = OPERATION[Operation::PAINT_TILE_TOOL];
         }
 
         // If there isn't a currently selected unit type, do not try to paint with
         // it.
         if (currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null) {
             edit.createUnit(curTile, unitTypeSel, unitArmySel);
-            discardMemento = false;
+            mementoName = OPERATION[Operation::PAINT_UNIT_TOOL];
         }
 
     } else if (pick) {
@@ -306,7 +314,8 @@ void MapMakerMenuHandleInput(const dictionary controls,
 
     } else if (action && TOOLBAR.tool == DELETE_TOOL.shortName) {
         edit.deleteUnit(curUnit);
-        if (discardMemento && curUnit != 0) discardMemento = false;
+        if (mementoName.isEmpty() && curUnit != 0)
+            mementoName = OPERATION[Operation::DELETE_UNIT_TOOL];
     
     } else if (TOOLBAR.tool == RECT_TOOL.shortName) {
         Vector2 start, end;
@@ -315,24 +324,25 @@ void MapMakerMenuHandleInput(const dictionary controls,
                 edit.rectangleFillTiles(start, end, tileTypeSel.scriptName,
                     tileOwnerSel.isEmpty() ? NO_ARMY :
                         country[tileOwnerSel].turnOrder);
-                discardMemento = false;
+            mementoName = OPERATION[Operation::RECT_PAINT_TILE_TOOL];
             }
             if (currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null) {
                 edit.rectangleFillUnits(start, end, unitTypeSel.scriptName,
                     country[unitArmySel].turnOrder);
-                discardMemento = false;
+            mementoName = OPERATION[Operation::RECT_PAINT_UNIT_TOOL];
             }
         }
     
     } else if (TOOLBAR.tool == RECT_DELETE_TOOL.shortName) {
         Vector2 start, end;
         if (drawRectangle(prevAction, action, curTile, start, end)) {
-            if (edit.rectangleDeleteUnits(start, end) > 0) discardMemento = false;
+            if (edit.rectangleDeleteUnits(start, end) > 0)
+                mementoName = OPERATION[Operation::RECT_DELETE_UNIT_TOOL];
         }
     }
         
     // If the paint tool is finished with, re-enable mementos.
-    if (prevAction && !action) edit.map.enableMementos(discardMemento);
+    if (prevAction && !action) edit.map.enableMementos(mementoName);
 
     prevAction = action;
 
@@ -365,6 +375,7 @@ awe::EmptyCallback@ QuitMapAuthorised = function() {
     @edit = null;
     TilePropertiesDialog.refresh(Vector2(0,0));
     ArmyPropertiesDialog.refresh();
+    UndoRedoWindow.refresh();
     if (!(QuitCallback is null)) QuitCallback();
 };
 
@@ -442,6 +453,9 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
     } else if (id == MAP_MAKER_EDIT_REDO) {
         redo();
 
+    } else if (id == MAP_MAKER_EDIT_MEMENTO_WINDOW) {
+        UndoRedoWindow.restore();
+
     } else if (id == MAP_MAKER_MAP_SET_PROPS) {
         if (edit is null) {
             awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert", "nomapisopen", null,
@@ -475,6 +489,16 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
 }
 
 /**
+ * When the state of the mementos change, update the MementoWindow and the status
+ * bar.
+ */
+void MementosHaveChanged() {
+    UndoRedoWindow.refresh();
+    StatusBar.setUndoAction(edit.map.getNextUndoMementoName());
+    StatusBar.setRedoAction(edit.map.getNextRedoMementoName());
+}
+
+/**
  * Stores the selected file across signal handlers.
  */
 string FileDialogFile;
@@ -492,8 +516,10 @@ void createNewMap() {
         TilePropertiesDialog.deselect();
         @edit = EditableMap(createMap(FileDialogFile), TilePropertiesDialog,
             ArmyPropertiesDialog, MapPropertiesDialog);
+        edit.map.setMementoStateChangedCallback(MementosHaveChanged);
         ArmyPropertiesDialog.refresh();
         MapPropertiesDialog.restore();
+        MementosHaveChanged();
     });
 }
 
@@ -530,7 +556,9 @@ void MapMakerMenu_OpenMap_FileSelected() {
         TilePropertiesDialog.deselect();
         @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
             ArmyPropertiesDialog, MapPropertiesDialog);
+        edit.map.setMementoStateChangedCallback(MementosHaveChanged);
         ArmyPropertiesDialog.refresh();
+        MementosHaveChanged();
     });
 }
 

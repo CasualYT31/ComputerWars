@@ -4,6 +4,50 @@
  */
 
 /**
+ * Each map operation that can be performed in or on \c EditableMap.
+ * @sa \c OPERATION.
+ */
+enum Operation {
+    // Internal.
+    MAP_PROPS,
+    CREATE_ARMY_SCRIPT,
+    DELETE_ARMY_SCRIPT,
+    TILE_TYPE_AND_OWNER,
+    CREATE_UNIT_SCRIPT,
+    CREATE_LOAD_UNIT,
+    
+    // External.
+    PAINT_TILE_TOOL,
+    PAINT_UNIT_TOOL,
+    DELETE_UNIT_TOOL,
+    RECT_PAINT_TILE_TOOL,
+    RECT_PAINT_UNIT_TOOL,
+    RECT_DELETE_UNIT_TOOL
+}
+
+/**
+ * Maps \c Operation values to translation keys.
+ * @sa \c Operation.
+ */
+const array<string> OPERATION = {
+    // Internal.
+    "OPERATION_mapprops",
+    "OPERATION_createarmy",
+    "OPERATION_deletearmy",
+    "OPERATION_tiletypeandowner",
+    "OPERATION_createunit",
+    "OPERATION_createloadunit",
+
+    // External.
+    "OPERATION_painttiletool",
+    "OPERATION_paintunittool",
+    "OPERATION_deleteunittool",
+    "OPERATION_rectpainttiletool",
+    "OPERATION_rectpaintunittool",
+    "OPERATION_rectdeleteunittool"
+};
+
+/**
  * Represents a map with game logic attached.
  * <b>Note that all the HP values that are <em>given</em> to and <em>received</em>
  * from this class are internal.</b>
@@ -18,6 +62,8 @@ class EditableMap {
      * @param tPropsWindow The \c TilePropertiesWindow to link up with this
      *                     \c EditableMap.
      * @param aPropsWindow The \c ArmyPropertiesWindow to link up with this
+     *                     \c EditableMap.
+     * @param mPropsWindow The \c MapPropertiesWindow to link up with this
      *                     \c EditableMap.
      */
     EditableMap(Map@ mapToEdit, TilePropertiesWindow@ tPropsWindow,
@@ -51,9 +97,10 @@ class EditableMap {
     /**
      * Undo an operation.
      * Also updates all windows.
+     * @param additionalUndos The number of additional undos to make.
      */
-    void undo() {
-        map.undo();
+    void undo(const uint64 additionalUndos = 0) {
+        map.undo(additionalUndos);
         _updateTileProps(tilePropsTile);
         _updateArmyProps();
         _updateMapProps();
@@ -62,9 +109,10 @@ class EditableMap {
     /**
      * Redo an operation.
      * Also updates all windows.
+     * @param additionalRedos The number of additional redos to make.
      */
-    void redo() {
-        map.redo();
+    void redo(const uint64 additionalRedos = 0) {
+        map.redo(additionalRedos);
         _updateTileProps(tilePropsTile);
         _updateArmyProps();
         _updateMapProps();
@@ -151,10 +199,9 @@ class EditableMap {
      * @param day     The current day of the map.
      */
     void setMapProperties(const string&in mapName, const Day day) {
-        DisableMementos token(map);
+        DisableMementos token(map, OPERATION[Operation::MAP_PROPS]);
         map.setMapName(mapName);
         map.setDay(day);
-        _updateMapProps();
     }
 
     /**
@@ -167,7 +214,6 @@ class EditableMap {
         const ArmyID army = NO_ARMY) {
         map.setMapSize(mapSize, tileType, army);
         _updateTileProps(tilePropsTile);
-        _updateMapProps();
     }
 
     /**
@@ -212,7 +258,7 @@ class EditableMap {
      * @param country The turn-order ID of the country to assign to the new army.
      */
     void createArmy(const ArmyID country) {
-        DisableMementos token(map);
+        DisableMementos token(map, OPERATION[Operation::CREATE_ARMY_SCRIPT]);
         const auto successful =
             map.createArmy(::country.scriptNames[uint64(country)]);
         if (successful && map.getArmyCount() == 1) {
@@ -229,7 +275,7 @@ class EditableMap {
      * @param army The ID of the army to delete.
      */
     void deleteArmy(const ArmyID army) {
-        DisableMementos token(map);
+        DisableMementos token(map, OPERATION[Operation::DELETE_ARMY_SCRIPT]);
         // If we are deleting the current army, select the next one.
         const auto getNextArmy = map.getSelectedArmy() == army;
         const auto nextArmy =
@@ -277,11 +323,11 @@ class EditableMap {
             newOwner.isEmpty() ? NO_ARMY : country[newOwner].turnOrder;
 
         if (fromType.scriptName != toType.scriptName) {
-            DisableMementos token(map);
+            DisableMementos token(map, OPERATION[Operation::TILE_TYPE_AND_OWNER]);
             map.setTileType(tileToChange, toType.scriptName);
             map.setTileOwner(tileToChange, newOwnerID);
         } else if (oldOwnerID != newOwnerID) {
-            DisableMementos token(map);
+            DisableMementos token(map, OPERATION[Operation::TILE_TYPE_AND_OWNER]);
             map.setTileOwner(tileToChange, newOwnerID);
         }
         
@@ -332,7 +378,7 @@ class EditableMap {
 
         if (oldUnit == 0 || oldUnitType.scriptName != unitType.scriptName ||
             oldUnitArmyID != armyID) {
-            DisableMementos token(map);
+            DisableMementos token(map, OPERATION[Operation::CREATE_UNIT_SCRIPT]);
             // Delete existing unit, and its army if appropriate.
             deleteUnit(oldUnit);
 
@@ -355,7 +401,7 @@ class EditableMap {
      */
     void createAndLoadUnit(const UnitID loadedOnto,
         const UnitType@ const unitType) {
-        DisableMementos token(map);
+        DisableMementos token(map, OPERATION[Operation::CREATE_LOAD_UNIT]);
         const auto army = map.getArmyOfUnit(loadedOnto);
         const auto newUnit = map.createUnit(unitType.scriptName, army);
         map.replenishUnit(newUnit, true);

@@ -27,6 +27,7 @@
   "weapons": "property/weapon.json",
   "units": "property/unit.json",
   "commanders": "property/co.json",
+  "mapstrings": "lang/mapstrings.json",
   "gui": "gui/menus.json",
   "scripts": "scripts"
 }
