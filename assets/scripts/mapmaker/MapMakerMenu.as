@@ -376,6 +376,7 @@ awe::EmptyCallback@ QuitMapAuthorised = function() {
     TilePropertiesDialog.refresh(Vector2(0,0));
     ArmyPropertiesDialog.refresh();
     UndoRedoWindow.refresh();
+    StatusBar.clear();
     if (!(QuitCallback is null)) QuitCallback();
 };
 
@@ -515,7 +516,7 @@ void createNewMap() {
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
         @edit = EditableMap(createMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog, MapPropertiesDialog);
+            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar);
         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
         ArmyPropertiesDialog.refresh();
         MapPropertiesDialog.restore();
@@ -555,7 +556,7 @@ void MapMakerMenu_OpenMap_FileSelected() {
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
         @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog, MapPropertiesDialog);
+            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar);
         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
         ArmyPropertiesDialog.refresh();
         MementosHaveChanged();

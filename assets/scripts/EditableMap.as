@@ -65,9 +65,12 @@ class EditableMap {
      *                     \c EditableMap.
      * @param mPropsWindow The \c MapPropertiesWindow to link up with this
      *                     \c EditableMap.
+     * @param sBar         The \c StatusBarWidget to link up with this
+     *                     \c EditableMap.
      */
     EditableMap(Map@ mapToEdit, TilePropertiesWindow@ tPropsWindow,
-        ArmyPropertiesWindow@ aPropsWindow, MapPropertiesWindow@ mPropsWindow) {
+        ArmyPropertiesWindow@ aPropsWindow, MapPropertiesWindow@ mPropsWindow,
+        StatusBarWidget@ sBar) {
         if (mapToEdit is null) {
             error("An invalid Map handle was given to the constructor of "
                 "EditableMap; the game will crash soon!");
@@ -80,14 +83,19 @@ class EditableMap {
         } else if (mPropsWindow is null) {
             error("An invalid MapPropertiesWindow handle was given to the "
                 "constructor of EditableMap; the game will crash soon!");
+        } else if (sBar is null) {
+            error("An invalid StatusBarWidget handle was given to the "
+                "constructor of EditableMap; the game will crash soon!");
         } else {
             @map = mapToEdit;
             @tilePropsWindow = tPropsWindow;
             @armyPropsWindow = aPropsWindow;
             @mapPropsWindow = mPropsWindow;
+            @statusBar = sBar;
             map.alwaysShowHiddenUnits(true);
             map.setMapScalingFactor(_mapScalingFactor);
             setNormalCursorSprites();
+            _updateStatusBar();
         }
     }
 
@@ -104,6 +112,7 @@ class EditableMap {
         _updateTileProps(tilePropsTile);
         _updateArmyProps();
         _updateMapProps();
+        _updateStatusBar();
     }
     
     /**
@@ -116,6 +125,7 @@ class EditableMap {
         _updateTileProps(tilePropsTile);
         _updateArmyProps();
         _updateMapProps();
+        _updateStatusBar();
     }
 
     ////////////////////////
@@ -129,6 +139,7 @@ class EditableMap {
         _mapScalingFactor += 1.0;
         if (_mapScalingFactor > 5.0) _mapScalingFactor = 5.0;
         map.setMapScalingFactor(_mapScalingFactor);
+        _updateStatusBar();
     }
     
     /**
@@ -139,6 +150,7 @@ class EditableMap {
         _mapScalingFactor -= 1.0;
         if (_mapScalingFactor < 1.0) _mapScalingFactor = 1.0;
         map.setMapScalingFactor(_mapScalingFactor);
+        _updateStatusBar();
     }
 
     /**
@@ -159,6 +171,7 @@ class EditableMap {
      */
     void moveSelectedTileUp() {
         map.moveSelectedTileUp();
+        _updateStatusBar();
     }
     
     /**
@@ -166,6 +179,7 @@ class EditableMap {
      */
     void moveSelectedTileDown() {
         map.moveSelectedTileDown();
+        _updateStatusBar();
     }
     
     /**
@@ -173,6 +187,7 @@ class EditableMap {
      */
     void moveSelectedTileLeft() {
         map.moveSelectedTileLeft();
+        _updateStatusBar();
     }
     
     /**
@@ -180,6 +195,7 @@ class EditableMap {
      */
     void moveSelectedTileRight() {
         map.moveSelectedTileRight();
+        _updateStatusBar();
     }
     
     /**
@@ -188,6 +204,7 @@ class EditableMap {
      */
     void setSelectedTileByPixel(const MousePosition&in pixel) {
         map.setSelectedTileByPixel(pixel);
+        _updateStatusBar();
     }
 
     ////////////////////
@@ -214,6 +231,7 @@ class EditableMap {
         const ArmyID army = NO_ARMY) {
         map.setMapSize(mapSize, tileType, army);
         _updateTileProps(tilePropsTile);
+        _updateStatusBar();
     }
 
     /**
@@ -529,6 +547,18 @@ class EditableMap {
         mapPropsWindow.refresh();
     }
 
+    /**
+     * Update the linked \c StatusBarWidget to ensure it is always displaying the
+     * correct information.
+     * Note that the undo and redo action labels must be handled separately as
+     * the C++ itself game engine may be respnsible for changing the state of the
+     * mementos.
+     */
+    private void _updateStatusBar() {
+        statusBar.setTileXY(map.getSelectedTile());
+        statusBar.setZoom(_mapScalingFactor);
+    }
+
     /////////
     // MAP //
     /////////
@@ -558,6 +588,11 @@ class EditableMap {
      * The \c MapPropertiesWindow to link up with this \c EditableMap.
      */
     private MapPropertiesWindow@ mapPropsWindow;
+
+    /**
+     * The \c StatusBarWidget to link up with this \c EditableMap.
+     */
+    private StatusBarWidget@ statusBar;
 
     /**
      * The currently selected tile used to fill the \c TilePropertiesWindow.

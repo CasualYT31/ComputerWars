@@ -66,6 +66,7 @@
 	"createandload": "Create and\nLoad Unit",
 	"deleteunit": "Delete Unit",
 	"createarmy": "Create Army",
+	"zoom": "#x Zoom",
 
 	"hp": "HP",
 	"fuel": "Fuel",
