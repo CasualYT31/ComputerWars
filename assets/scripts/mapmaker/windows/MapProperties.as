@@ -147,12 +147,19 @@ class MapPropertiesWindow {
             setWidgetPosition(window, "50px", "35px");
             setWidgetPosition(confirmResize.windowName, "50px", "35px");
         } else {
+            openChildWindow(window, "50px", "35px");
+            refresh();
+        }
+    }
+
+    /// If the window is open, refresh it with up-to-date data.
+    void refresh() {
+        if (isChildWindowOpen(window)) {
             setWidgetText(mapName, edit.map.getMapName());
             setWidgetText(day, formatDay(edit.map.getDay()));
             const auto size = edit.map.getMapSize();
             setWidgetText(width, formatUInt(size.x));
             setWidgetText(height, formatUInt(size.y));
-            openChildWindow(window, "50px", "35px");
         }
     }
 

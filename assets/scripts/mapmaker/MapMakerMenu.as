@@ -491,7 +491,7 @@ void createNewMap() {
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
         @edit = EditableMap(createMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog);
+            ArmyPropertiesDialog, MapPropertiesDialog);
         ArmyPropertiesDialog.refresh();
         MapPropertiesDialog.restore();
     });
@@ -529,7 +529,7 @@ void MapMakerMenu_OpenMap_FileSelected() {
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
         @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog);
+            ArmyPropertiesDialog, MapPropertiesDialog);
         ArmyPropertiesDialog.refresh();
     });
 }
