@@ -4,7 +4,7 @@ project("ComputerWarsSFX")
 set(TGUI_BACKEND "SFML_GRAPHICS")
 FetchContent_Declare(tgui
 	GIT_REPOSITORY https://github.com/CasualYT31/TGUI.git
-	GIT_TAG 0.10
+	GIT_TAG 355f7ce
 )
 FetchContent_MakeAvailable(tgui)
 

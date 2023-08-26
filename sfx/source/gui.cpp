@@ -1244,8 +1244,8 @@ static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
 	const auto scrollbarWidth = panel->getScrollbarWidth();
 
 	const sf::FloatRect panelRect(
-		panel->getAbsolutePosition().x + panel->getContentOffset().x,
-		panel->getAbsolutePosition().y + panel->getContentOffset().y,
+		panel->getAbsolutePosition(panel->getContentOffset()).x,
+		panel->getAbsolutePosition(panel->getContentOffset()).y,
 		// Gotta exclude the scrollbars from the visible portion.
 		panel->getSize().x - (vertShown ? scrollbarWidth : 0.0f),
 		panel->getSize().y - (horiShown ? scrollbarWidth : 0.0f)
