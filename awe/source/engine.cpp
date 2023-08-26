@@ -431,7 +431,9 @@ bool awe::game_engine::_load(engine::json& j) {
 		&& _loadObject(_units, j, { "units" }, _scripts, "UnitType",
 			engine::logger::data{ _logger.getData().sink, "unit_bank" })
 		&& _loadObject(_commanders, j, { "commanders" }, _scripts, "Commander",
-			engine::logger::data{ _logger.getData().sink, "commander_bank" });
+			engine::logger::data{ _logger.getData().sink, "commander_bank" })
+		&& _loadObject(_mapStrings, j, { "mapstrings" },
+			engine::logger::data{ _logger.getData().sink, "map_strings" });
 	if (!ret) return false;
 	// Finish initialisation of banks.
 	if (!awe::checkCountryTurnOrderIDs(*_countries)) {
@@ -482,6 +484,7 @@ int awe::game_engine::_initCheck() const {
 	if (!_tiles) errstring += "tiles\n";
 	if (!_units) errstring += "units\n";
 	if (!_commanders) errstring += "commanders\n";
+	if (!_mapStrings) errstring += "map strings\n";
 	if (!_dictionary) errstring += "dictionary\n";
 	if (!_fonts) errstring += "fonts\n";
 	if (!_sounds) errstring += "sounds\n";
@@ -601,6 +604,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 		_map->setCOSpritesheet(_sprites->CO);
 		_map->setFont((*_fonts)["AW2"]);
 		_map->setLanguageDictionary(_dictionary);
+		_map->setMapStrings(_mapStrings);
 		_map->setScripts(_scripts);
 		_map->setGUI(_gui);
 		auto r = _map->load(file);

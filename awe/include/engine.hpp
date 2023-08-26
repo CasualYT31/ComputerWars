@@ -37,6 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "bank.hpp"
 #include "spritesheets.hpp"
 #include "map.hpp"
+#include "mapstrings.hpp"
 #include <filesystem>
 #include <random>
 
@@ -370,6 +371,11 @@ namespace awe {
 		 * Pointer to the static information on all the commanders available.
 		 */
 		std::shared_ptr<awe::bank<awe::commander>> _commanders;
+
+		/**
+		 * Pointer to the map strings to use with all \c map objects.
+		 */
+		std::shared_ptr<awe::map_strings> _mapStrings;
 		
 		/**
 		 * Stores a game's data, including its map and the armies.
