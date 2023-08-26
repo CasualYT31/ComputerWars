@@ -654,7 +654,6 @@ class TilePropertiesWindow {
             // We increase the layout's height for each weapon a unit has so that
             // if a unit has a lot of weapons, every widget in the unit layout can
             // still be presented nicely.
-            // TODO-5.
             setWidgetSize(layout, "100%-" + scrollBarWidth, "1017+39*" +
                 formatUInt(edit.map.getUnitType(currentUnit).weaponCount));
             refreshUnit(currentUnit);
@@ -798,12 +797,6 @@ class TilePropertiesWindow {
         setWidgetEnabled(unitCreateAndLoadButton,
             edit.map.getLoadedUnits(tileUnit).length() < unitType.loadLimit);
 
-        // TODO-5: setWidgetIndexInContainer() doesn't show results unless it is
-        // called again, or the container is resized. Will need to look into this
-        // more, seems to be a bug with the backend library. Once the bug has been
-        // corrected, remove this line.
-        setWidgetSize(layout, "100%-" + scrollBarWidth, "1017+39*" +
-            formatUInt(unitType.weaponCount));
         connectUnitLayoutSignalHandlers();
     }
 
