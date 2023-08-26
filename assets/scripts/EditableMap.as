@@ -21,23 +21,27 @@ class EditableMap {
      *                     \c EditableMap.
      */
     EditableMap(Map@ mapToEdit, TilePropertiesWindow@ tPropsWindow,
-        ArmyPropertiesWindow@ aPropsWindow) {
+        ArmyPropertiesWindow@ aPropsWindow, MapPropertiesWindow@ mPropsWindow) {
         if (mapToEdit is null) {
             error("An invalid Map handle was given to the constructor of "
                 "EditableMap; the game will crash soon!");
         } else if (tPropsWindow is null) {
-            error("An invalid TileProperties handle was given to the constructor "
-                "of EditableMap; the game will crash soon!");
+            error("An invalid TilePropertiesWindow handle was given to the "
+                "constructor of EditableMap; the game will crash soon!");
         } else if (aPropsWindow is null) {
-            error("An invalid ArmyProperties handle was given to the constructor "
-                "of EditableMap; the game will crash soon!");
+            error("An invalid ArmyPropertiesWindow handle was given to the "
+                "constructor of EditableMap; the game will crash soon!");
+        } else if (mPropsWindow is null) {
+            error("An invalid MapPropertiesWindow handle was given to the "
+                "constructor of EditableMap; the game will crash soon!");
         } else {
             @map = mapToEdit;
+            @tilePropsWindow = tPropsWindow;
+            @armyPropsWindow = aPropsWindow;
+            @mapPropsWindow = mPropsWindow;
             map.alwaysShowHiddenUnits(true);
             map.setMapScalingFactor(_mapScalingFactor);
             setNormalCursorSprites();
-            @tilePropsWindow = tPropsWindow;
-            @armyPropsWindow = aPropsWindow;
         }
     }
 
@@ -52,6 +56,7 @@ class EditableMap {
         map.undo();
         _updateTileProps(tilePropsTile);
         _updateArmyProps();
+        _updateMapProps();
     }
     
     /**
@@ -62,6 +67,7 @@ class EditableMap {
         map.redo();
         _updateTileProps(tilePropsTile);
         _updateArmyProps();
+        _updateMapProps();
     }
 
     ////////////////////////
@@ -148,6 +154,7 @@ class EditableMap {
         DisableMementos token(map);
         map.setMapName(mapName);
         map.setDay(day);
+        _updateMapProps();
     }
 
     /**
@@ -160,6 +167,7 @@ class EditableMap {
         const ArmyID army = NO_ARMY) {
         map.setMapSize(mapSize, tileType, army);
         _updateTileProps(tilePropsTile);
+        _updateMapProps();
     }
 
     /**
@@ -467,6 +475,14 @@ class EditableMap {
         armyPropsWindow.refresh();
     }
 
+    /**
+     * Updates the linked \c MapPropertiesWindow to ensure it is always
+     * displaying the correct information.
+     */
+    private void _updateMapProps() {
+        mapPropsWindow.refresh();
+    }
+
     /////////
     // MAP //
     /////////
@@ -491,6 +507,11 @@ class EditableMap {
      * The \c ArmyPropertiesWindow to link up with this \c EditableMap.
      */
     private ArmyPropertiesWindow@ armyPropsWindow;
+
+    /**
+     * The \c MapPropertiesWindow to link up with this \c EditableMap.
+     */
+    private MapPropertiesWindow@ mapPropsWindow;
 
     /**
      * The currently selected tile used to fill the \c TilePropertiesWindow.
