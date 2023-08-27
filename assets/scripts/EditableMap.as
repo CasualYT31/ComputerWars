@@ -436,7 +436,7 @@ class EditableMap {
      * @param unit ID of the unit to delete.
      */
     void deleteUnit(const UnitID unit) {
-        if (unit != 0) {
+        if (unit != NO_UNIT) {
             const auto parentUnit = map.getUnloadedUnitWhichContainsUnit(unit);
             const auto parentUnitTile = map.getUnitPosition(parentUnit);
             const auto unitArmyID = map.getArmyOfUnit(unit);
@@ -452,7 +452,7 @@ class EditableMap {
      * @return The actual HP assigned to the unit.
      */
     HP setUnitHP(const UnitID unit, HP newHP) {
-        if (unit == 0) return 0;
+        if (unit == NO_UNIT) return 0;
         const auto max = map.getUnitType(unit).maxHP;
         if (newHP < 1) newHP = 1;
         else if (newHP > HP(max)) newHP = HP(max);
@@ -467,7 +467,7 @@ class EditableMap {
      * @return The actual fuel assigned to the unit.
      */
     Fuel setUnitFuel(const UnitID unit, Fuel newFuel) {
-        if (unit == 0) return 0;
+        if (unit == NO_UNIT) return 0;
         const auto max = map.getUnitType(unit).maxFuel;
         if (newFuel < 0) newFuel = 0;
         else if (newFuel > Fuel(max)) newFuel = Fuel(max);
@@ -483,7 +483,7 @@ class EditableMap {
      * @return The actual ammo assigned to the unit.
      */
     Ammo setUnitAmmo(const UnitID unit, const uint64 weapon, Ammo newAmmo) {
-        if (unit == 0) return 0;
+        if (unit == NO_UNIT) return 0;
         const auto weaponType = map.getUnitType(unit).weapon(weapon);
         const auto max = weaponType.maxAmmo;
         if (newAmmo < 0) newAmmo = 0;

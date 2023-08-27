@@ -37,8 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace awe {
 	/**
 	 * Typedef representing a team ID.
-	 * @warning Do \b not make this a signed type!
-	 * @sa      @c awe::map::createArmy
 	 */
 	typedef sf::Uint8 TeamID;
 
@@ -67,11 +65,19 @@ namespace awe {
 
 	/**
 	 * Typedef representing a unit ID.
-	 * \c 0 should be reserved.
-	 * @warning Do \b not make this a signed type!
-	 * @sa      @c awe::map::_findUnitID()
 	 */
 	typedef sf::Uint32 UnitID;
+
+	/**
+	 * Reserved value representing no unit.
+	 * Assigned the minimum value of an \c awe::UnitID.
+	 */
+	constexpr awe::UnitID NO_UNIT = std::numeric_limits<awe::UnitID>::min();
+
+	/**
+	 * The ID of the first unit that'll be created.
+	 */
+	constexpr awe::UnitID ID_OF_FIRST_UNIT = NO_UNIT + 1;
 
 	/**
 	 * Typedef representing an army ID.
@@ -84,7 +90,7 @@ namespace awe {
 	 * Reserved value representing no army.
 	 * Assigned the maximum value of the unsigned type of \c awe::ArmyID.
 	 */
-	const awe::ArmyID NO_ARMY = std::numeric_limits<awe::ArmyID>::max();
+	constexpr awe::ArmyID NO_ARMY = std::numeric_limits<awe::ArmyID>::max();
 
 	/**
 	 * Typedef representing a day number.

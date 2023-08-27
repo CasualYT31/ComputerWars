@@ -103,8 +103,8 @@ namespace awe {
 
 		/**
 		 * Sets the unit currently occupying the tile.
-		 * @param id The ID of the unit now occupying the tile. \c 0 indicates this
-		 *           tile should be vacant.
+		 * @param id The ID of the unit now occupying the tile. \c NO_UNIT
+		 *           indicates this tile should be vacant.
 		 */
 		void setUnit(const awe::UnitID id) noexcept;
 
@@ -199,9 +199,9 @@ namespace awe {
 
 		/**
 		 * The ID of the unit currently occupying the tile.
-		 * \c 0 indicates vacancy.
+		 * \c NO_UNIT indicates vacancy.
 		 */
-		awe::UnitID _unit = 0;
+		awe::UnitID _unit = awe::NO_UNIT;
 
 		/**
 		 * This tile's animated sprite object.

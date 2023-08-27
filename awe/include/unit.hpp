@@ -267,8 +267,8 @@ namespace awe {
 
 		/**
 		 * Loads this unit onto another.
-		 * Provide \c 0 to indicate that this unit is not to be loaded onto another
-		 * unit.
+		 * Provide \c NO_UNIT to indicate that this unit is not to be loaded onto
+		 * another unit.
 		 * @param id The ID of the unit this one is loaded onto.
 		 */
 		inline void loadOnto(const awe::UnitID id) noexcept {
@@ -408,7 +408,7 @@ namespace awe {
 		/**
 		 * The unit this unit is loaded onto.
 		 */
-		awe::UnitID _loadedOnto = 0;
+		awe::UnitID _loadedOnto = awe::NO_UNIT;
 
 		/**
 		 * The unit's animated sprite object.

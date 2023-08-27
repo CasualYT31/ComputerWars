@@ -761,7 +761,7 @@ namespace awe {
 		 * The unit won't be created if the army ID isn't valid.
 		 * @param  type The type of unit to create.
 		 * @param  army The ID of the army who will own this unit.
-		 * @return The 1-based ID of the unit created. Will be \c 0 if the unit
+		 * @return The ID of the unit created. Will be \c NO_UNIT if the unit
 		 *         couldn't be created.
 		 */
 		awe::UnitID createUnit(const std::shared_ptr<const awe::unit_type>& type,
@@ -771,7 +771,7 @@ namespace awe {
 		 * Overload of \c createUnit() which accepts a unit type script name.
 		 * @param  type The script name of the type of unit to create.
 		 * @param  army The ID of the army who will own this unit.
-		 * @return The 1-based ID of the unit created. Will be \c 0 if the unit
+		 * @return The ID of the unit created. Will be \c NO_UNIT if the unit
 		 *         couldn't be created.
 		 */
 		awe::UnitID createUnit(const std::string& type, const awe::ArmyID army);
@@ -782,8 +782,8 @@ namespace awe {
 		 * well as the tile it was on. Any location override associated with the
 		 * unit will also be deleted.
 		 * @warning Any loaded units will \b also be deleted. Additionally, if the
-		 *          deleted unit was selected, then \c setSelectedUnit(0) will be
-		 *          called!
+		 *          deleted unit was selected, then \c setSelectedUnit(NO_UNIT)
+		 *          will be called!
 		 * @param   id The ID of the unit to delete.
 		 */
 		void deleteUnit(const awe::UnitID id);
@@ -1903,8 +1903,8 @@ namespace awe {
 
 		/**
 		 * Determines the ID the next unit should have.
-		 * A unit ID cannot be \c 0. Automatically assigns the returned value to
-		 * \c _lastUnitID.
+		 * A unit ID cannot be \c NO_UNIT. Automatically assigns the returned value
+		 * to \c _lastUnitID.
 		 * @throws std::bad_alloc in the [practically impossible] case that a new
 		 *                        unique unit ID cannot be generated.
 		 */
@@ -2096,13 +2096,13 @@ namespace awe {
 		/**
 		 * The \c TeamID counter used to ensure each army is on their own team.
 		 */
-		awe::TeamID _teamIDCounter = 0;
+		awe::TeamID _teamIDCounter = std::numeric_limits<awe::TeamID>::min();
 
 		/**
 		 * The ID of the last unit created.
 		 * Used to generate unit IDs once the initial unit has been created.
 		 */
-		awe::UnitID _lastUnitID = 1;
+		awe::UnitID _lastUnitID = awe::ID_OF_FIRST_UNIT;
 
 		/**
 		 * Stores which day it currently is.
@@ -2154,7 +2154,7 @@ namespace awe {
 			 * \c 0 represents no selected unit and can be used to disable selected
 			 * unit rendering.
 			 */
-			awe::UnitID selectedUnit = 0;
+			awe::UnitID selectedUnit = awe::NO_UNIT;
 
 			/**
 			 * The set of available tiles.

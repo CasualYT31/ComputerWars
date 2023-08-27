@@ -28,6 +28,7 @@ AngelScript, I unfortunately cannot register a constant with the script interfac
 despite it being a constant as far as the scripts are concerned. So I had to make
 this an evil global non-const. */
 awe::ArmyID NO_ARMY_SCRIPT = awe::NO_ARMY;
+awe::UnitID NO_UNIT_SCRIPT = awe::NO_UNIT;
 auto MIN_TILE_WIDTH = awe::tile::MIN_WIDTH;
 auto MIN_TILE_HEIGHT = awe::tile::MIN_HEIGHT;
 
@@ -170,7 +171,11 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterGlobalProperty("const ArmyID NO_ARMY",
 			&NO_ARMY_SCRIPT);
 		document->DocumentExpectedFunction("const ArmyID NO_ARMY", "Represents "
-			"\"no army\". Used to signify \"no ownership.\"");
+			"\"no army.\" Used to signify \"no ownership.\"");
+		r = engine->RegisterGlobalProperty("const UnitID NO_UNIT",
+			&NO_UNIT_SCRIPT);
+		document->DocumentExpectedFunction("const UnitID NO_UNIT", "Represents "
+			"\"no unit.\"");
 		r = engine->RegisterGlobalProperty("const Vector2 NO_POSITION",
 			&awe::unit::NO_POSITION_SCRIPT);
 		document->DocumentExpectedFunction("const Vector2 NO_POSITION",
@@ -464,15 +469,15 @@ void awe::map::Register(asIScriptEngine* engine,
 			"UnitID getUnitWhichContainsUnit(const UnitID)",
 			asMETHOD(awe::map, getUnitWhichContainsUnit), asCALL_THISCALL);
 		document->DocumentObjectMethod(r, "Finds out the unit that a given unit "
-			"is loaded on, if any. Returns 0 if none.");
+			"is loaded on, if any. Returns NO_UNIT if none.");
 
 		r = engine->RegisterObjectMethod("Map",
 			"UnitID getUnloadedUnitWhichContainsUnit(const UnitID)",
 			asMETHOD(awe::map, getUnloadedUnitWhichContainsUnit), asCALL_THISCALL);
 		document->DocumentObjectMethod(r, "Finds out the unloaded unit that a "
-			"given unit is loaded on, directly or indirectly. Returns 0 if any "
-			"unit in the chain was considered \"not present.\" Returns the given "
-			"<tt>UnitID</tt> if the unit wasn't loaded onto another unit.");
+			"given unit is loaded on, directly or indirectly. Returns NO_UNIT if "
+			"any unit in the chain was considered \"not present.\" Returns the "
+			"given <tt>UnitID</tt> if the unit wasn't loaded onto another unit.");
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool isUnitLoadedOntoUnit(const UnitID, const UnitID)",
@@ -1027,9 +1032,9 @@ bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 			static_cast<sf::Int64>(start.y) - static_cast<sf::Int64>(end.y)) + 1);
 			y < startY + height; ++y) {
 			auto unit = getUnitOnTile({ x, y });
-			if (unit != 0) deleteUnit(unit);
+			if (unit != awe::NO_UNIT) deleteUnit(unit);
 			unit = createUnit(type, army);
-			if (unit == 0) {
+			if (unit == awe::NO_UNIT) {
 				ret = false;
 				continue;
 			}
@@ -1070,7 +1075,7 @@ std::size_t awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
 			static_cast<sf::Int64>(start.y) - static_cast<sf::Int64>(end.y)) + 1);
 			y < startY + height; ++y) {
 			auto unit = getUnitOnTile({ x, y });
-			if (unit != 0) {
+			if (unit != awe::NO_UNIT) {
 				deleteUnit(unit);
 				++counter;
 			}
@@ -1118,7 +1123,7 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
 	);
 	// This will miss out the maximum value for a team ID, but I don't care.
 	if (_teamIDCounter == std::numeric_limits<awe::TeamID>::max())
-		_teamIDCounter = 0;
+		_teamIDCounter = std::numeric_limits<awe::TeamID>::min();
 	_armies.at(country->getTurnOrder()).setTeam(_teamIDCounter++);
 	return true;
 }
@@ -1148,7 +1153,7 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 	for (auto unit : units) {
 		// Ignore loaded units, as they will be handled automatically by
 		// deleteUnit().
-		if (_isUnitPresent(unit) && _units.at(unit).loadedOnto() == 0)
+		if (_isUnitPresent(unit) && _units.at(unit).loadedOnto() == awe::NO_UNIT)
 			deleteUnit(unit);
 	}
 	// Then, disown all tiles.
@@ -1464,7 +1469,7 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 		_logger.error("createUnit operation failed: attempted to create \"{}\" "
 			"for army with ID {} that didn't exist!",
 			((type) ? (type->getName()) : ("[NULL]")), army);
-		return 0;
+		return awe::NO_UNIT;
 	}
 	awe::UnitID id;
 	try {
@@ -1472,7 +1477,7 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 	} catch (const std::bad_alloc&) {
 		_logger.critical("createUnit fatal error: could not generate a unique ID "
 			"for a new unit. There are too many units allocated!");
-		return 0;
+		return awe::NO_UNIT;
 	}
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::CREATE_UNIT));
@@ -1501,7 +1506,7 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	// we need the "actually" check to begin with.
 	if (!_isOutOfBounds(_units.at(id).getPosition()))
 		_tiles[_units.at(id).getPosition().x]
-		      [_units.at(id).getPosition().y].setUnit(0);
+		      [_units.at(id).getPosition().y].setUnit(awe::NO_UNIT);
 	// Secondly, remove the unit from the army's list.
 	if (_isArmyPresent(_units.at(id).getArmy())) {
 		_armies.at(_units.at(id).getArmy()).removeUnit(id);
@@ -1515,7 +1520,7 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	// Fourthly, if this unit was loaded onto another, remove it from that unit's
 	// list.
 	const auto loadedOnto = _units.at(id).loadedOnto();
-	if (loadedOnto != 0 && !_units.at(loadedOnto).unloadUnit(id)) {
+	if (loadedOnto != awe::NO_UNIT && !_units.at(loadedOnto).unloadUnit(id)) {
 		_logger.warning("deleteUnit warning: unit with ID {}, that is being "
 			"deleted, was loaded onto unit with ID {}, but the former could not "
 			"be unloaded from the latter!", id, loadedOnto);
@@ -1523,7 +1528,7 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	// Fifthly, if this unit was selected, deselect it if it's on top of the
 	// stack. If it is further down the stack, then it will have to be removed
 	// later: see popSelectedUnit().
-	if (getSelectedUnit() == id) setSelectedUnit(0);
+	if (getSelectedUnit() == id) setSelectedUnit(awe::NO_UNIT);
 	// Sixthly, if this unit has a location override, remove it from the map.
 	if (isPreviewUnit(id)) removePreviewUnit(id);
 	// Finally, delete the unit from the main list.
@@ -1559,13 +1564,13 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 			"map's size {}!", id, pos, getMapSize());
 		return;
 	}
-	const auto idOfUnitOnTile = ((pos == awe::unit::NO_POSITION) ? (0) :
+	const auto idOfUnitOnTile = ((pos == awe::unit::NO_POSITION) ? (awe::NO_UNIT) :
 		(getUnitOnTile(pos)));
 	if (idOfUnitOnTile == id) {
 		// If the unit's position is being set to the tile it is on, then drop the
 		// call.
 		return;
-	} else if (idOfUnitOnTile > 0) {
+	} else if (idOfUnitOnTile != awe::NO_UNIT) {
 		_logger.error("setUnitPosition operation cancelled: attempted to move "
 			"unit with ID {} to position {}, which is currently occupied by unit "
 			"with ID {}!", id, pos, idOfUnitOnTile);
@@ -1579,7 +1584,7 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 	// Make old tile vacant.
 	if (_units.at(id).isOnMap()) {
 		const auto oldLocation = _units.at(id).getPosition();
-		_tiles[oldLocation.x][oldLocation.y].setUnit(0);
+		_tiles[oldLocation.x][oldLocation.y].setUnit(awe::NO_UNIT);
 	}
 	// Assign new location to unit.
 	_units.at(id).setPosition(pos);
@@ -1809,7 +1814,7 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 	// tile.
 	if (_units.at(load).isOnMap()) {
 		const auto location = _units.at(load).getPosition();
-		_tiles[location.x][location.y].setUnit(0);
+		_tiles[location.x][location.y].setUnit(awe::NO_UNIT);
 	}
 	_units.at(load).setPosition(awe::unit::NO_POSITION);
 	// Perform loads.
@@ -1846,7 +1851,7 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 		// Unload successful, continue with operation.
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::UNIT_UNLOAD));
-		_units.at(unload).loadOnto(0);
+		_units.at(unload).loadOnto(awe::NO_UNIT);
 		setUnitPosition(unload, onto);
 	} else {
 		_logger.error("unloadUnit operation failed: unit with ID {} was not "
@@ -1858,7 +1863,7 @@ awe::UnitID awe::map::getUnitWhichContainsUnit(const awe::UnitID unit) const {
 	if (!_isUnitPresent(unit)) {
 		_logger.error("getUnitWhichContainsUnit operation failed: unit with ID {} "
 			"does not exist!", unit);
-		return 0;
+		return awe::NO_UNIT;
 	}
 	return _units.at(unit).loadedOnto();
 }
@@ -1868,11 +1873,12 @@ awe::UnitID awe::map::getUnloadedUnitWhichContainsUnit(
 	if (!_isUnitPresent(unit)) {
 		_logger.error("getUnloadedUnitWhichContainsUnit operation failed: unit "
 			"with ID {} does not exist!", unit);
-		return 0;
+		return awe::NO_UNIT;
 	}
 	const auto loadedOnto = _units.at(unit).loadedOnto();
-	if (loadedOnto == 0) return unit;
-	// Either return 0 on first call or check if unit given by scripts == return.
+	if (loadedOnto == awe::NO_UNIT) return unit;
+	// Either return NO_UNIT on first call or check if unit given by scripts ==
+	// return.
 	else return getUnloadedUnitWhichContainsUnit(loadedOnto);
 }
 
@@ -1881,12 +1887,12 @@ bool awe::map::isUnitLoadedOntoUnit(const awe::UnitID unit,
 	if (!_isUnitPresent(unit)) {
 		_logger.error("isUnitLoadedOntoUnit operation failed: unit with ID {} "
 			"does not exist!", unit);
-		return 0;
+		return false;
 	}
 	if (!_isUnitPresent(on)) {
 		_logger.error("isUnitLoadedOntoUnit operation failed: unit with ID {} "
 			"does not exist!", on);
-		return 0;
+		return false;
 	}
 	const auto units = _units.at(on).loadedUnits();
 	return units.find(unit) != units.end();
@@ -2042,7 +2048,7 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u& pos) const {
 		return 0;
 	}
 	auto u = _tiles[pos.x][pos.y].getUnit();
-	if (u != 0 && _units.at(u).isOnMap()) return u;
+	if (u != awe::NO_UNIT && _units.at(u).isOnMap()) return u;
 	return 0;
 }
 
@@ -2254,8 +2260,8 @@ int awe::map::scanPath(CScriptArray* path, const awe::UnitID unit,
 }
 
 bool awe::map::setSelectedUnit(const awe::UnitID unit) {
-	if (unit == 0) {
-		_selectedUnitRenderData.top().selectedUnit = 0;
+	if (unit == awe::NO_UNIT) {
+		_selectedUnitRenderData.top().selectedUnit = awe::NO_UNIT;
 		_selectedUnitRenderData.top().clearState();
 		return true;
 	}
@@ -2290,12 +2296,12 @@ void awe::map::popSelectedUnit() {
 		// At some point, the previously selected unit might have been deleted, and
 		// if this is the case, we need to deselect it.
 		if (!_isUnitPresent(_selectedUnitRenderData.top().selectedUnit) &&
-			_selectedUnitRenderData.top().selectedUnit != 0) {
+			_selectedUnitRenderData.top().selectedUnit != awe::NO_UNIT) {
 			_logger.warning("popSelectUnit operation: newly selected unit with ID "
 				"{} is now no longer present: the selected unit render data state "
 				"will now be cleared!",
 				_selectedUnitRenderData.top().selectedUnit);
-			setSelectedUnit(0);
+			setSelectedUnit(awe::NO_UNIT);
 		}
 	} else {
 		_logger.error("popSelectUnit operation failed: the size of the stack was "
@@ -2842,7 +2848,7 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	}
 
 	// Step 2. the selected unit closed list tile icons.
-	if (_selectedUnitRenderData.top().selectedUnit > 0) {
+	if (_selectedUnitRenderData.top().selectedUnit != awe::NO_UNIT) {
 		for (asUINT i = 0, size = _selectedUnitRenderData.top().closedList->
 			GetSize(); i < size; ++i) {
 			awe::closed_list_node* pathNode = (awe::closed_list_node*)
@@ -2976,7 +2982,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	auto mapSize = getMapSize();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
-			if ((_selectedUnitRenderData.top().selectedUnit > 0 ||
+			if ((_selectedUnitRenderData.top().selectedUnit != awe::NO_UNIT ||
 				_selectedUnitRenderData.top().availableTiles.size() > 0) &&
 				!_selectedUnitRenderData.top().disableRenderingEffects) {
 				sf::Vector2u currentTile(x, y);
@@ -3003,7 +3009,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	}
 
 	// Step 2. the selected unit closed list tiles.
-	if (_selectedUnitRenderData.top().selectedUnit > 0 &&
+	if (_selectedUnitRenderData.top().selectedUnit != awe::NO_UNIT &&
 		!_selectedUnitRenderData.top().disableRenderingEffects) {
 		for (asUINT i = 0, size = _selectedUnitRenderData.top().closedList->
 			GetSize(); i < size; ++i) {
@@ -3026,7 +3032,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end())) {
 			sf::RenderStates unitStates = states;
 			unitStates.shader = &_unavailableTileShader;
-			if (_selectedUnitRenderData.top().selectedUnit > 0 &&
+			if (_selectedUnitRenderData.top().selectedUnit != awe::NO_UNIT &&
 				!_selectedUnitRenderData.top().disableRenderingEffects &&
 				unitID != _selectedUnitRenderData.top().selectedUnit &&
 				(!_selectedUnitRenderData.top().disableShaderForAvailableUnits ||
@@ -3067,12 +3073,13 @@ void awe::map::_updateCapturingUnit(const awe::UnitID id) {
 
 awe::UnitID awe::map::_findUnitID() {
 	if (_units.size() == 0) return _lastUnitID;
-	// Minus 1 to account for the reserved value, 0.
+	// Minus 1 to account for the reserved value, NO_UNIT.
 	if (_units.size() == std::numeric_limits<awe::UnitID>::max() - 1) 
 		throw std::bad_alloc();
 	awe::UnitID temp = _lastUnitID + 1;
 	while (_isUnitPresent(temp)) {
-		if (temp == std::numeric_limits<awe::UnitID>::max()) temp = 1;
+		if (temp == std::numeric_limits<awe::UnitID>::max())
+			temp = awe::ID_OF_FIRST_UNIT;
 		else ++temp;
 	}
 	_lastUnitID = temp;
@@ -3091,7 +3098,7 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	// Clear state (excluding mementos).
 	_sel = sf::Vector2u(0, 0);
 	_currentArmy = awe::NO_ARMY;
-	_lastUnitID = 1;
+	_lastUnitID = awe::ID_OF_FIRST_UNIT;
 	_armies.clear();
 	_units.clear();
 	_tiles.clear();
@@ -3172,7 +3179,7 @@ awe::map::selected_unit_render_data&
 }
 
 void awe::map::selected_unit_render_data::clearState() {
-	selectedUnit = 0;
+	selectedUnit = awe::NO_UNIT;
 	availableTiles.clear();
 	availableTileShader = awe::available_tile_shader::None;
 	closedList->RemoveRange(0, closedList->GetSize());

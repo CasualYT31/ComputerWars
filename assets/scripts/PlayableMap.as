@@ -364,7 +364,7 @@ class PlayableMap {
      */
     bool buyUnit(const UnitType@ type, const ArmyID army,
         const Vector2&in position) {
-        if (map.getUnitOnTile(position) > 0) {
+        if (map.getUnitOnTile(position) != NO_UNIT) {
             throw("Could not buy unit of type \"" + type.scriptName + "\" for "
                 "army " + formatUInt(army) + " on tile " + position.toString() +
                 ": this tile is occupied!");
@@ -372,7 +372,7 @@ class PlayableMap {
         Funds newFunds = map.getArmyFunds(army) - type.cost;
         if (newFunds < 0) return false;
         const auto unitID = map.createUnit(type.scriptName, army);
-        if (unitID == 0) {
+        if (unitID == NO_UNIT) {
             throw("Could not buy unit of type \"" + type.scriptName + "\" for "
                 "army " + formatUInt(army) + " on tile " + position.toString() +
                 ": this army ID is invalid!");
@@ -442,7 +442,7 @@ class PlayableMap {
                         GetInternalHP(GetDisplayedHP(map.getUnitHP(unit))));
                     break;
                 } else if (charge > currentFunds) {
-                    hp -= 1;
+                    --hp;
                     newHP -= GetInternalHP(1);
                 } else {
                     map.setUnitHP(unit, newHP);
@@ -455,12 +455,12 @@ class PlayableMap {
 
     /**
      * Selects a unit for movement mode.
-     * @param unit The ID of the unit to put into move mode. \c 0 should be given
-     *             if the currently selected unit is to be deselected.
+     * @param unit The ID of the unit to put into move mode. \c NO_UNIT should be
+     *             given if the currently selected unit is to be deselected.
      */
     void selectUnit(const UnitID unit) {
         map.setSelectedUnit(unit);
-        if (unit > 0) {
+        if (unit != NO_UNIT) {
             map.setAvailableTileShader(AvailableTileShader::Yellow);
             newClosedListNode(map.closedList, -1, map.getUnitPosition(unit), 0);
             map.disableSelectedUnitRenderingEffects(false);
@@ -490,12 +490,12 @@ class PlayableMap {
      * unit possesses, not just the first eligible one found.
      * @warning The client must ensure the closed list is disabled whilst the unit
      *          is still selected by this method!
-     * @param   unitID The ID of the unit to show the attack range of. \c 0 to
-     *                 show no attack range.
+     * @param   unitID The ID of the unit to show the attack range of. \c NO_UNIT
+     *                 to show no attack range.
      */
     void showAttackRangeOfUnit(const UnitID unitID) {
         map.setSelectedUnit(unitID);
-        if (unitID > 0) {
+        if (unitID != NO_UNIT) {
             map.setAvailableTileShader(AvailableTileShader::Red);
             map.disableSelectedUnitRenderingEffects(false);
 
@@ -546,7 +546,7 @@ class PlayableMap {
                     // sure to give in the CURRENT army to findPath(), and not the
                     // army who owns the unit.
                     if (path.length() > 0 &&
-                        (map.getUnitOnTile(moveableTiles[i]) == 0 ||
+                        (map.getUnitOnTile(moveableTiles[i]) == NO_UNIT ||
                         map.getUnitOnTile(moveableTiles[i]) == unitID ||
                         !map.isUnitVisible(map.getUnitOnTile(moveableTiles[i]),
                             map.getSelectedArmy()))) {
@@ -558,7 +558,7 @@ class PlayableMap {
                 for (uint i = 0, len = availableTiles.length(); i < len; ++i) {
                     const auto availableTilesUnit =
                         map.getUnitOnTile(availableTiles[i]);
-                    bool availableTileIsOccupied = availableTilesUnit != 0;
+                    bool availableTileIsOccupied = availableTilesUnit != NO_UNIT;
                     // If the unit occupying the tile is the unit being queried,
                     // then consider it unoccupied.
                     if (availableTilesUnit == unitID) {
@@ -591,9 +591,7 @@ class PlayableMap {
             // Add each available tile. Don't add the available tile if the given
             // unit is occupying it.
             for (uint i = 0, length = allTiles.length(); i < length; ++i) {
-                if (allTiles[i] != tile) {
-                    map.addAvailableTile(allTiles[i]);
-                }
+                if (allTiles[i] != tile) map.addAvailableTile(allTiles[i]);
             }
         }
     }
@@ -605,12 +603,12 @@ class PlayableMap {
      */
     void moveUnit() {
         const auto id = map.getSelectedUnit();
-        if (id > 0) {
+        if (id != NO_UNIT) {
             const auto node = map.closedList[map.closedList.length() - 1];
             map.burnUnitFuel(id, node.g);
             map.setUnitPosition(id, node.tile);
             map.waitUnit(id, true);
-            selectUnit(0);
+            selectUnit(NO_UNIT);
             map.removePreviewUnit(id);
         } else {
             throw("Cannot move a unit as no unit is currently selected!");
@@ -645,10 +643,12 @@ class PlayableMap {
         3. Both units cannot have any units loaded onto them.
         4. The user-friendly HP of the stationary unit must be below its maximum
            user-friendly HP.
-        5. The IDs of both the stationary unit and the moving unit cannot be 0.
+        5. The IDs of both the stationary unit and the moving unit cannot be
+           NO_UNIT.
         6. A unit cannot join with itself.
         */
-        return stationary > 0 && moving > 0 && stationary != moving &&
+        return stationary != NO_UNIT && moving != NO_UNIT &&
+            stationary != moving &&
             map.getUnitType(stationary).scriptName ==
                 map.getUnitType(moving).scriptName &&
             map.getArmyOfUnit(stationary) == map.getArmyOfUnit(moving) &&
@@ -744,11 +744,12 @@ class PlayableMap {
            team that is against the unit.
         3. The tile must be vacant, unless the given unit is already occupying it.
         */
-        return unit > 0 && map.getUnitType(unit).canCapture[
+        return unit != NO_UNIT && map.getUnitType(unit).canCapture[
                 map.getTileType(tile).type.scriptName] &&
             (map.getTileOwner(tile) == NO_ARMY ||
             map.getTeamOfUnit(unit) != map.getArmyTeam(map.getTileOwner(tile))) &&
-            (map.getUnitOnTile(tile) == 0 || map.getUnitOnTile(tile) == unit);
+            (map.getUnitOnTile(tile) == NO_UNIT ||
+                map.getUnitOnTile(tile) == unit);
     }
 
     /**
@@ -908,9 +909,10 @@ class PlayableMap {
         2. `onto` must be able to load units of `load`'s type.
         3. `onto` must have space for `load`.
         4. There are other conditions that are already covered by map.loadUnit().
-        5. The IDs of both the stationary unit and the moving unit cannot be 0.
+        5. The IDs of both the stationary unit and the moving unit cannot be
+           NO_UNIT.
         */
-        if (load == 0 || onto == 0) return false;
+        if (load == NO_UNIT || onto == NO_UNIT) return false;
         const auto ontoType = map.getUnitType(onto);
         return map.getArmyOfUnit(load) == map.getArmyOfUnit(onto) &&
             ontoType.canLoad[map.getUnitType(load).scriptName] &&
@@ -951,7 +953,7 @@ class PlayableMap {
      */
     bool canUnload(const UnitID unit, const Vector2&in from) const {
         /* Conditions:
-        1. The unit ID must not be 0.
+        1. The unit ID must not be NO_UNIT.
         2. The unit must have at least one unit loaded onto it.
         3. `from` must be vacant, unless the unit occupying the tile is the same
            as `unit`.
@@ -960,8 +962,8 @@ class PlayableMap {
         5. `unit` cannot itself be loaded onto another unit.
         6. `from` is a tile which `unit` can unload from.
         */
-        if (unit == 0) return false;
-        if (map.getUnitWhichContainsUnit(unit) != 0) return false;
+        if (unit == NO_UNIT) return false;
+        if (map.getUnitWhichContainsUnit(unit) != NO_UNIT) return false;
         if (!map.getUnitType(unit).canUnloadFrom[
             map.getTileType(from).type.scriptName]) {
             return false;
@@ -969,7 +971,8 @@ class PlayableMap {
         const auto loadedUnits = map.getLoadedUnits(unit);
         const auto loadedUnitsLength = loadedUnits.length();
         if (loadedUnitsLength == 0 ||
-            (map.getUnitOnTile(from) != unit && map.getUnitOnTile(from) != 0))
+            (map.getUnitOnTile(from) != unit &&
+            map.getUnitOnTile(from) != NO_UNIT))
             return false;
         const auto adjacentTiles = map.getAvailableTiles(from, 1, 1);
         for (uint i = 0; i < loadedUnitsLength; ++i) {
@@ -1004,7 +1007,7 @@ class PlayableMap {
     bool canUnload(const UnitID fromUnit, const Vector2&in fromTile,
         const UnitID unloadingUnit, const array<Vector2>&in toTiles) const {
         /* Conditions:
-        1. The unit IDs must not be 0.
+        1. The unit IDs must not be NO_UNIT.
         2. `unloadingUnit` must be loaded onto `fromUnit`.
         3. None of `toTiles` can be equal to `fromTile`.
         4. `fromTile` and `toTiles` must all be vacant, unless any tile is
@@ -1014,16 +1017,16 @@ class PlayableMap {
         6. `fromUnit` cannot itself be loaded onto another unit.
         7. `toTiles` cannot be empty.
         */
-        if (fromUnit == 0 || unloadingUnit == 0) return false;
+        if (fromUnit == NO_UNIT || unloadingUnit == NO_UNIT) return false;
         if (toTiles.length() == 0) return false;
-        if (map.getUnitWhichContainsUnit(fromUnit) != 0) return false;
+        if (map.getUnitWhichContainsUnit(fromUnit) != NO_UNIT) return false;
         if (!map.getUnitType(fromUnit).
             canUnloadFrom[map.getTileType(fromTile).type.scriptName]) {
             return false;
         }
         if (!map.isUnitLoadedOntoUnit(unloadingUnit, fromUnit)) return false;
         const auto unitOnFromTile = map.getUnitOnTile(fromTile);
-        if (unitOnFromTile != 0 && unitOnFromTile != fromUnit) return false;
+        if (unitOnFromTile != NO_UNIT && unitOnFromTile != fromUnit) return false;
         const auto unloadingUnitMoveType =
             map.getUnitType(unloadingUnit).movementType;
         const auto toTilesLength = toTiles.length();
@@ -1057,10 +1060,10 @@ class PlayableMap {
     void findTilesWithTargets(dictionary@ result, const UnitID attackingUnit,
         const Vector2&in fromTile, const bool isCounterattacking = false) const {
         // No tiles can contain targets if there isn't a unit who is attacking.
-        if (attackingUnit == 0) return;
+        if (attackingUnit == NO_UNIT) return;
         // If `fromTile` isn't vacant and the unit on that tile isn't the
         // attacking unit, then the unit can't attack.
-        if (map.getUnitOnTile(fromTile) != 0 &&
+        if (map.getUnitOnTile(fromTile) != NO_UNIT &&
             map.getUnitOnTile(fromTile) != attackingUnit) return;
         const bool isMoving = map.getUnitPosition(attackingUnit) != fromTile;
         const auto unitType = map.getUnitType(attackingUnit);
@@ -1106,7 +1109,8 @@ class PlayableMap {
                 // aren't visible to the attacking unit, or if they are on the
                 // same team as the attacking unit.
                 const auto defendingUnit = map.getUnitOnTile(tile);
-                if (defendingUnit > 0 && map.getTeamOfUnit(attackingUnit) !=
+                if (defendingUnit != NO_UNIT &&
+                    map.getTeamOfUnit(attackingUnit) !=
                     map.getTeamOfUnit(defendingUnit) &&
                     map.isUnitVisible(defendingUnit,
                     map.getArmyOfUnit(attackingUnit))) {
@@ -1158,7 +1162,7 @@ class PlayableMap {
                     // selected weapon if it deals more damage, or if it deals the
                     // same damage, but has infinite ammo, and the stored weapon
                     // has finite ammo.
-                    if (defendingUnit == 0) {
+                    if (defendingUnit == NO_UNIT) {
                         if (result.exists(tileStr)) {
                             const auto terrainTypeName =
                                 map.getTileType(tile).type.scriptName;
@@ -1223,7 +1227,7 @@ class PlayableMap {
         const auto defenderTerrainType = map.getTileType(defender).type;
         int displayedHPOfDefender = 0;
         uint defenderDefenceRating = 0;
-        if (defenderUnit > 0) {
+        if (defenderUnit != NO_UNIT) {
             // Unit is the defender.
             baseDamage = attackerWeapon.getBaseDamageUnit(
                 map.getUnitType(defenderUnit).scriptName,
@@ -1302,7 +1306,7 @@ class PlayableMap {
         const auto defenderUnit = map.getUnitOnTile(defender);
         const auto attackerWeapon = attackerType.weapon(weaponName);
         bool attackerIsAlive = true;
-        if (defenderUnit > 0) {
+        if (defenderUnit != NO_UNIT) {
             // Defender is a unit.
             const auto defenderUnitIsHidden = map.isUnitHiding(defenderUnit);
             const auto defenderUnitType = map.getUnitType(defenderUnit);
@@ -1497,7 +1501,7 @@ class PlayableMap {
         const uint tilesSize = tiles.length();
         for (uint i = 0; i < tilesSize; ++i) {
             const UnitID unitOnTile = map.getUnitOnTile(tiles[i]);
-            if (unitOnTile > 0) {
+            if (unitOnTile != NO_UNIT) {
                 if (map.getArmyOfUnit(unitOnTile) == currentArmy) {
                     // Heal and replenish the unit based on the tile and unit's
                     // movement type.
@@ -1561,7 +1565,7 @@ class PlayableMap {
         const auto tiles = map.getAvailableTiles(position, startFrom, endAt);
         for (uint i = 0, tileCount = tiles.length(); i < tileCount; ++i) {
             const auto unitID = map.getUnitOnTile(tiles[i]);
-            if (unitID > 0) ret.insertLast(unitID);
+            if (unitID != NO_UNIT) ret.insertLast(unitID);
         }
         return ret;
     }
@@ -1623,7 +1627,7 @@ class PlayableMap {
         // Find data.
         const auto tile = map.getSelectedTile();
         const auto unitID = map.getSelectedUnit();
-        if (unitID > 0 && map.isAvailableTile(tile)) {
+        if (unitID != NO_UNIT && map.isAvailableTile(tile)) {
             const auto unitType = map.getUnitType(unitID);
 
             // If the selection has changed...
