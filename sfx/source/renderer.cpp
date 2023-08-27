@@ -25,21 +25,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Windows.h>
 #endif
 
-float sfx::animated_drawable::calculateDelta(const sf::Time& timeout) {
-	_firsttime = false;
+float sfx::delta_timer::calculateDelta(const sf::Time& timeout) {
 	// If the delta timer has timed out, restart the delta timer twice to
 	// achieved the desired effect.
 	if (_deltaTimer.getElapsedTime() >= timeout) _deltaTimer.restart();
 	return _deltaTimer.restart().asSeconds();
 }
 
-float sfx::animated_drawable::accumulatedDelta(const sf::Time& timeout) {
+float sfx::delta_timer::accumulatedDelta(const sf::Time& timeout) {
 	_delta += calculateDelta(timeout);
 	return _delta;
 }
 
-void sfx::animated_drawable::resetDeltaAccumulation(const float to) noexcept {
+void sfx::delta_timer::resetDeltaAccumulation(const float to) noexcept {
 	_delta = to;
+}
+
+float sfx::animated_drawable::calculateDelta(const sf::Time& timeout) {
+	_firsttime = false;
+	return delta_timer::calculateDelta(timeout);
 }
 
 void sfx::animated_drawable::finish() noexcept {
