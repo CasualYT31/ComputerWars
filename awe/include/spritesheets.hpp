@@ -44,6 +44,12 @@ namespace awe {
 		void test(std::string& errstring) const;
 
 		/**
+		 * Goes through every global frame counter in every spritesheet and
+		 * increments them based on a static delta timer.
+		 */
+		void updateGlobalFrameIDs();
+
+		/**
 		 * Pointer to the CO spritesheet.
 		 */
 		std::shared_ptr<sfx::animated_spritesheet> CO;

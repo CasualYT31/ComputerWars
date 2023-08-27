@@ -108,22 +108,21 @@ engine::json& engine::json::operator=(nlohmann::ordered_json&& jobj) noexcept {
 	return *this;
 }
 
-bool engine::json::keysExist(engine::json::KeySequence keys,
-	nlohmann::ordered_json* ret) const noexcept {
-	if (!keys.empty()) {
-		nlohmann::ordered_json jCopy = _j;
-		for (const auto& key : keys) {
-			if (jCopy.contains(key)) {
-				// This statement should never throw, as we first tested that jCopy
-				// is an object—and that the key exists—using contains().
-				jCopy = jCopy[key];
-			} else {
-				return false;
-			}
-		}
-		if (ret) *ret = jCopy;
+static bool keyExists(const nlohmann::ordered_json& obj,
+	const engine::json::KeySequence::const_iterator& key,
+	const engine::json::KeySequence::const_iterator& end,
+	nlohmann::ordered_json* const ret) {
+	if (key == end) {
+		if (ret) *ret = obj;
 		return true;
 	}
+	if (obj.contains(*key)) return keyExists(obj[*key], key + 1, end, ret);
+	return false;
+}
+
+bool engine::json::keysExist(const engine::json::KeySequence& keys,
+	nlohmann::ordered_json* const ret) const noexcept {
+	if (!keys.empty()) return keyExists(_j, keys.cbegin(), keys.cend(), ret);
 	return false;
 }
 
@@ -165,8 +164,8 @@ std::string engine::json::synthesiseKeySequence(
 	}
 }
 
-void engine::json::applyColour(sf::Color& dest, engine::json::KeySequence keys,
-	const bool suppressErrors) {
+void engine::json::applyColour(sf::Color& dest,
+	const engine::json::KeySequence& keys, const bool suppressErrors) {
 	std::array<unsigned int, 4> colour = { 0, 0, 0, 255 };
 	applyArray(colour, keys);
 	if (!inGoodState()) {
@@ -178,7 +177,7 @@ void engine::json::applyColour(sf::Color& dest, engine::json::KeySequence keys,
 	}
 }
 
-bool engine::json::_performInitialChecks(engine::json::KeySequence& keys,
+bool engine::json::_performInitialChecks(const engine::json::KeySequence& keys,
 	nlohmann::ordered_json& test, nlohmann::ordered_json dest, std::string type) {
 	if (type == "") type = _getTypeName(dest);
 	if (keys.empty()) {

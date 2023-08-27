@@ -43,3 +43,19 @@ void awe::spritesheets::test(std::string& errstring) const {
 	if (!icon) errstring += "icon spritesheet\n";
 	if (!GUI) errstring += "GUI spritesheet\n";
 }
+
+void awe::spritesheets::updateGlobalFrameIDs() {
+	if (CO) CO->updateGlobalFrameIDs();
+	if (unit) {
+		if (unit->idle) unit->idle->updateGlobalFrameIDs();
+	}
+	if (tile) {
+		if (tile->normal) tile->normal->updateGlobalFrameIDs();
+	}
+	if (unitPicture) unitPicture->updateGlobalFrameIDs();
+	if (tilePicture) {
+		if (tilePicture->normal) tilePicture->normal->updateGlobalFrameIDs();
+	}
+	if (icon) icon->updateGlobalFrameIDs();
+	if (GUI) GUI->updateGlobalFrameIDs();
+}

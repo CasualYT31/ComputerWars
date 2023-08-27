@@ -50,7 +50,7 @@ namespace sfx {
 		 * @return \c TRUE if a sprite exists with this ID, \c FALSE otherwise.
 		 */
 		inline bool doesSpriteExist(const std::string& sprite) const {
-			return _frames.find(sprite) != _frames.end();
+			return _data.find(sprite) != _data.end();
 		}
 
 		/**
@@ -105,6 +105,32 @@ namespace sfx {
 		 *          be logged in this case).
 		 */
 		sf::Vector2f getSpriteOffset(const std::string& sprite) const;
+
+		/**
+		 * Should every copy of this sprite animate in sync?
+		 * @warning Logging has been disabled in this method.
+		 * @param   sprite The sprite to query.
+		 * @return  \c TRUE if every copy of this sprite should base its frame ID
+		 *          on the same frame counter, \c FALSE if each copy should run on
+		 *          its own frame counter.
+		 */
+		bool doesSpriteHaveGlobalFrameID(const std::string& sprite) const;
+
+		/**
+		 * Gets the sprite's global frame ID.
+		 * @warning Logging has been disabled in this method.
+		 * @param   sprite The sprite to query.
+		 * @return  The current frame ID that every copy of this sprite should
+		 *          currently be showing. \c 0 if this sprite does not run on a
+		 *          global frame counter.
+		 */
+		std::size_t getSpriteGlobalFrameID(const std::string& sprite) const;
+
+		/**
+		 * Goes through every global frame counter in this spritesheet and
+		 * increments them based on a static delta timer.
+		 */
+		void updateGlobalFrameIDs();
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -125,7 +151,11 @@ namespace sfx {
 		 *     <li>\c offset - An array that must contain two floats, [X, Y]. This
 		 *         will store offsets along the X and Y axes that the sprite will
 		 *         always be drawn with. If this array isn't provided, then an
-		 *         offset of [0, 0] is assumed.</li></ul>
+		 *         offset of [0, 0] is assumed.</li>
+		 *     <li>\c globalframeid - A bool. By default, it is \c false and does
+		 *         not have to be specified. If \c true is given, however, the game
+		 *         engine will make sure all copies of this sprite animate in
+		 *         sync.</li></ul>
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return If the spritesheet graphic could not be loaded, \c FALSE is
@@ -151,24 +181,45 @@ namespace sfx {
 		mutable engine::logger _logger;
 
 		/**
+		 * All sprites that animate in sync will increment their frame IDs based on
+		 * this clock.
+		 */
+		static sfx::delta_timer _globalTimer;
+
+		/**
 		 * The texture storing the spritesheet.
 		 */
 		sf::Texture _texture;
 
 		/**
-		 * The bounding rectangles of each frame of all of the sprites.
+		 * Information pertaining to each sprite.
 		 */
-		std::unordered_map<std::string, std::vector<sf::IntRect>> _frames;
+		struct sprite_data {
+			/// The bounding rectangle of each frame of the sprite.
+			std::vector<sf::IntRect> frames;
 
-		/**
-		 * The durations of each frame of all of the sprites.
-		 */
-		std::unordered_map<std::string, std::vector<sf::Time>> _durations;
+			/// The durations of each frame of the sprite.
+			std::vector<sf::Time> durations;
 
-		/**
-		 * The offsets that are to be applied to each sprite.
-		 */
-		std::unordered_map<std::string, sf::Vector2f> _offsets;
+			/// The offset that is applied to this sprite.
+			sf::Vector2f offset;
+
+			/// Does this sprite run on a global frame counter?
+			bool globalFrameCounter = false;
+
+			/// The global frame counter for this sprite.
+			std::size_t globalFrameID = 0;
+
+			/// Each frame counter must have its own accumulated delta since
+			/// resetting the static timer's accumulated delta would interfere with
+			/// other sprites. To achieve this, an offset is applied to the timer's
+			/// accumulated delta to effectively make it start from \c 0 when
+			/// required.
+			float accumulatedDeltaOffset = 0.0f;
+		};
+
+		/// Stores information on every sprite in this sheet.
+		std::unordered_map<std::string, sprite_data> _data;
 	};
 
 	/**

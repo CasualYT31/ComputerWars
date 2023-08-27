@@ -308,8 +308,8 @@ namespace engine {
 		 *         least one expected key did not exist.
 		 * @sa     KeySequence
 		 */
-		bool keysExist(KeySequence keys, nlohmann::ordered_json* ret = nullptr)
-			const noexcept;
+		bool keysExist(const KeySequence& keys,
+			nlohmann::ordered_json* const ret = nullptr) const noexcept;
 
 		/**
 		 * Determines if two \c nlohmann::ordered_json objects contain a value with
@@ -410,7 +410,8 @@ namespace engine {
 		 * @sa      \c applyMap()
 		 */
 		template<typename T>
-		void apply(T& dest, KeySequence keys, const bool suppressErrors = false);
+		void apply(T& dest, const KeySequence& keys,
+			const bool suppressErrors = false);
 
 		/**
 		 * Applies a JSON array of homogenous values to a given
@@ -452,7 +453,7 @@ namespace engine {
 		 * @sa      \c applyMap()
 		 */
 		template<typename T, std::size_t N>
-		void applyArray(std::array<T, N>& dest, KeySequence keys);
+		void applyArray(std::array<T, N>& dest, const KeySequence& keys);
 		
 		/**
 		 * Applies a JSON array of a specific format to an \c sf::Color object.
@@ -479,7 +480,7 @@ namespace engine {
 		 * @sa      \c applyVector()
 		 * @sa      \c applyMap()
 		 */
-		void applyColour(sf::Color& dest, KeySequence keys,
+		void applyColour(sf::Color& dest, const KeySequence& keys,
 			const bool suppressErrors = false);
 		
 		/**
@@ -507,7 +508,7 @@ namespace engine {
 		 * @sa      \c applyMap()
 		 */
 		template<typename T>
-		void applyVector(std::vector<T>& dest, KeySequence keys);
+		void applyVector(std::vector<T>& dest, const KeySequence& keys);
 
 		/**
 		 * Applies a JSON object to a given \c std::unordered_map object.
@@ -539,8 +540,8 @@ namespace engine {
 		 * @sa      \c applyColour()
 		 */
 		template<typename T>
-		void applyMap(std::unordered_map<std::string, T>& dest, KeySequence keys,
-			const bool continueReadingOnTypeError = true);
+		void applyMap(std::unordered_map<std::string, T>& dest,
+			const KeySequence& keys, const bool continueReadingOnTypeError = true);
 	private:
 		/**
 		 * Returns the data type of the value stored in a given
@@ -575,7 +576,7 @@ namespace engine {
 		 * @safety Strong guarantee: if an exception is thrown, no error bit will
 		 *         be set, even if an error condition was detected.
 		 */
-		bool _performInitialChecks(engine::json::KeySequence& keys,
+		bool _performInitialChecks(const engine::json::KeySequence& keys,
 			nlohmann::ordered_json& test, nlohmann::ordered_json dest,
 			std::string type = "");
 

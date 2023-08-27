@@ -68,6 +68,7 @@ int awe::game_engine::run() {
 			}
 
 			_renderer->clear();
+			_sprites->updateGlobalFrameIDs();
 			_renderer->animate(*_gui);
 			if (_map) {
 				_renderer->animate(*_map);

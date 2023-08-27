@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 template<typename T>
-void engine::json::apply(T& dest, engine::json::KeySequence keys,
+void engine::json::apply(T& dest, const engine::json::KeySequence& keys,
 	const bool suppressErrors) {
 	nlohmann::ordered_json test;
 	if (_performInitialChecks(keys, test, dest)) {
@@ -37,7 +37,7 @@ void engine::json::apply(T& dest, engine::json::KeySequence keys,
 
 template<typename T, std::size_t N>
 void engine::json::applyArray(std::array<T, N>& dest,
-	engine::json::KeySequence keys) {
+	const engine::json::KeySequence& keys) {
 	if (!N) return;
 	nlohmann::ordered_json test;
 	if (_performInitialChecks(keys, test, dest, "array")) {
@@ -71,7 +71,7 @@ void engine::json::applyArray(std::array<T, N>& dest,
 
 template<typename T>
 void engine::json::applyVector(std::vector<T>& dest,
-	engine::json::KeySequence keys) {
+	const engine::json::KeySequence& keys) {
 	nlohmann::ordered_json test;
 	if (_performInitialChecks(keys, test, dest, "vector")) {
 		nlohmann::ordered_json testDataType = T();
@@ -96,7 +96,7 @@ void engine::json::applyVector(std::vector<T>& dest,
 
 template<typename T>
 void engine::json::applyMap(std::unordered_map<std::string, T>& dest,
-	KeySequence keys, const bool continueReadingOnTypeError) {
+	const KeySequence& keys, const bool continueReadingOnTypeError) {
 	nlohmann::ordered_json test;
 	if (_performInitialChecks(keys, test, dest, "map")) {
 		nlohmann::ordered_json testDataType = T();

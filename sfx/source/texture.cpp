@@ -22,6 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "texture.hpp"
 
+sfx::delta_timer sfx::animated_spritesheet::_globalTimer = {};
+
 sfx::animated_spritesheet::animated_spritesheet(const engine::logger::data& data) :
 	json_script({ data.sink, "json_script" }), _logger(data) {}
 
@@ -32,7 +34,7 @@ const sf::Texture& sfx::animated_spritesheet::getTexture() const noexcept {
 std::size_t sfx::animated_spritesheet::getFrameCount(
 	const std::string& sprite) const noexcept {
 	try {
-		return _frames.at(sprite).size();
+		return _data.at(sprite).frames.size();
 	} catch (const std::out_of_range&) {
 		/*
 		_logger.error("Error whilst attempting to retrieve the frame count of the "
@@ -44,7 +46,7 @@ std::size_t sfx::animated_spritesheet::getFrameCount(
 sf::IntRect sfx::animated_spritesheet::getFrameRect(const std::string& sprite,
 	const std::size_t frame) const {
 	try {
-		const std::vector<sf::IntRect>& frames = _frames.at(sprite);
+		const std::vector<sf::IntRect>& frames = _data.at(sprite).frames;
 		try {
 			return frames.at(frame);
 		} catch (const std::out_of_range&) {
@@ -64,7 +66,7 @@ sf::IntRect sfx::animated_spritesheet::getFrameRect(const std::string& sprite,
 sf::Time sfx::animated_spritesheet::getFrameDuration(const std::string& sprite,
 	const std::size_t frame) const {
 	try {
-		const std::vector<sf::Time>& frames = _durations.at(sprite);
+		const std::vector<sf::Time>& frames = _data.at(sprite).durations;
 		try {
 			return frames.at(frame);
 		} catch (const std::out_of_range&) {
@@ -85,13 +87,75 @@ sf::Time sfx::animated_spritesheet::getFrameDuration(const std::string& sprite,
 sf::Vector2f sfx::animated_spritesheet::getSpriteOffset(const std::string& sprite)
 	const {
 	try {
-		return _offsets.at(sprite);
+		return _data.at(sprite).offset;
 	} catch (const std::out_of_range&) {
 		/*
 		_logger.error("Error whilst attempting to retrieve the offset of sprite "
 			"\"{}\": the sprite does not exist!", sprite); */
 	}
 	return {};
+}
+
+bool sfx::animated_spritesheet::doesSpriteHaveGlobalFrameID(
+	const std::string& sprite) const {
+	try {
+		return _data.at(sprite).globalFrameCounter;
+	} catch (const std::out_of_range&) {
+		/*
+		_logger.error("Error whilst attempting to retrieve the globalFrameCounter "
+			"property of sprite \"{}\": the sprite does not exist!", sprite); */
+	}
+	return false;
+}
+
+std::size_t sfx::animated_spritesheet::getSpriteGlobalFrameID(
+	const std::string& sprite) const {
+	try {
+		return _data.at(sprite).globalFrameID;
+	} catch (const std::out_of_range&) {
+		/*
+		_logger.error("Error whilst attempting to retrieve the globalFrameID "
+			"property of sprite \"{}\": the sprite does not exist!", sprite); */
+	}
+	return false;
+}
+
+/**
+ * Increments a sprite's frame counter.
+ * @param frameDuration The duration of the sprite's current frame.
+ * @param frameCount    The number of frames the sprite has.
+ * @param timer         The delta timer used to acquire accumulated delta.
+ * @param frameID       The frame counter to increment.
+ * @param deltaOffset   If \c nullptr, the \c delta_timer's accumulated delta will
+ *                      be reset. If a pointer is given, it will be assigned to the
+ *                      delta that's been accumulated so far. It will be assumed
+ *                      that the timer is not being reset, so the value of the
+ *                      float will be used to offset the accumulated delta, causing
+ *                      a reset local to a given sprite.
+ */
+static void incrementFrameID(const sf::Time& frameDuration,
+	const std::size_t frameCount, sfx::delta_timer& timer, std::size_t& frameID,
+	float* deltaOffset = nullptr) {
+	if (frameDuration.asMilliseconds() > 0) {
+		const float accumulatedDelta = timer.accumulatedDelta();
+		const float offset = deltaOffset ? *deltaOffset : 0.f;
+		float delta = accumulatedDelta - offset;
+		while (delta >= frameDuration.asSeconds()) {
+			delta -= frameDuration.asSeconds();
+			if (++frameID >= frameCount) frameID = 0;
+		}
+		if (deltaOffset) *deltaOffset = accumulatedDelta - delta;
+		else timer.resetDeltaAccumulation(delta);
+	}
+}
+
+void sfx::animated_spritesheet::updateGlobalFrameIDs() {
+	for (auto& data : _data) {
+		if (!data.second.globalFrameCounter) continue;
+		incrementFrameID(data.second.durations[data.second.globalFrameID],
+			data.second.frames.size(), _globalTimer, data.second.globalFrameID,
+			&data.second.accumulatedDeltaOffset);
+	}
 }
 
 bool sfx::animated_spritesheet::_load(engine::json& j) {
@@ -109,13 +173,13 @@ bool sfx::animated_spritesheet::_load(engine::json& j) {
 		return false;
 	}
 	// Secondly, go through all the sprites and store the info.
-	_frames.clear();
-	_durations.clear();
+	_data.clear();
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	try {
 		for (auto& i : jj["sprites"].items()) {
 			// Ignore any key-value pairs where the value is not an object.
 			if (i.value().is_object()) {
+				sfx::animated_spritesheet::sprite_data data;
 				// Go through the frames.
 				for (std::size_t f = 0; f < i.value()["frames"].size(); f++) {
 					sf::IntRect rect;
@@ -123,29 +187,36 @@ bool sfx::animated_spritesheet::_load(engine::json& j) {
 					rect.top = i.value()["frames"][f][1];
 					rect.width = i.value()["frames"][f][2];
 					rect.height = i.value()["frames"][f][3];
-					_frames[i.key()].push_back(rect);
+					data.frames.push_back(rect);
 				}
 				// Go through the durations.
 				for (std::size_t f = 0; f < i.value()["durations"].size(); f++) {
 					sf::Time time;
 					time = sf::milliseconds(i.value()["durations"][f]);
-					_durations[i.key()].push_back(time);
+					data.durations.push_back(time);
 				}
 				// Report a warning if the frame count did not match the duration
 				// count.
-				if (_frames[i.key()].size() != _durations[i.key()].size()) {
+				if (data.frames.size() != data.durations.size()) {
 					_logger.warning("The number of frames for sprite \"{}\" was "
 						"{} and the number of durations was {}.", i.key(),
-						_frames[i.key()].size(), _durations[i.key()].size());
+						data.frames.size(), data.durations.size());
 				}
 				// Read the sprite's offset, if one was given.
-				_offsets[i.key()] = sf::Vector2f();
 				if (i.value().contains("offset")) {
 					std::array<float, 2> offset;
 					j.applyArray(offset, { "sprites", i.key(), "offset" });
 					j.resetState();
-					_offsets[i.key()] = sf::Vector2f(offset.at(0), offset.at(1));
+					data.offset = sf::Vector2f(offset.at(0), offset.at(1));
 				}
+				// Does every copy of this sprite animate in sync?
+				if (i.value().contains("globalframeid")) {
+					j.apply(data.globalFrameCounter,
+						{ "sprites", i.key(), "globalframeid" });
+					j.resetState();
+				}
+				// Store the sprite's data.
+				_data[i.key()] = std::move(data);
 			}
 		}
 	} catch (const nlohmann::json::exception& e) {
@@ -234,16 +305,11 @@ std::size_t sfx::animated_sprite::operator--(int) noexcept {
 bool sfx::animated_sprite::animate(const sf::RenderTarget& target) {
 	if (!_sheet || _spriteID.empty()) return true;
 	try {
-		if (_sheet->getFrameDuration(_spriteID, _currentFrame).asMilliseconds()
-			> 0) {
-			float delta = accumulatedDelta();
-			while (delta >=
-				_sheet->getFrameDuration(_spriteID, _currentFrame).asSeconds()) {
-				delta -=
-					_sheet->getFrameDuration(_spriteID, _currentFrame).asSeconds();
-				++(*this);
-			}
-			resetDeltaAccumulation(delta);
+		if (_sheet->doesSpriteHaveGlobalFrameID(_spriteID)) {
+			_currentFrame = _sheet->getSpriteGlobalFrameID(_spriteID);
+		} else {
+			incrementFrameID(_sheet->getFrameDuration(_spriteID, _currentFrame),
+				_sheet->getFrameCount(_spriteID), *this, _currentFrame);
 		}
 		_sprite.setTexture(_sheet->getTexture());
 		_sprite.setTextureRect(_sheet->getFrameRect(_spriteID, _currentFrame));
