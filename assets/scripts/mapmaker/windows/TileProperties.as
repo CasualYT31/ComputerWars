@@ -1148,5 +1148,5 @@ class TilePropertiesWindow {
  * @param close Always close the window.
  */
 void MapMakerMenu_TileProperties_Closing(bool&out close) {
-    edit.deselectTile();
+    if (edit !is null) edit.deselectTile();
 }
