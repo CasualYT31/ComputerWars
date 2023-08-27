@@ -42,7 +42,7 @@ class CommandWidget {
 		layout = layoutName;
 		layoutWidth = width;
 		commandHeight = height;
-		addWidget("VerticalLayout", layout);
+		addWidget(VerticalLayout, layout);
 	}
 
 	/**
@@ -59,7 +59,7 @@ class CommandWidget {
 	string addCommand(const string&in widgetName, const string&in widgetText,
 		const string&in spriteName, const string&in sheetName = "icon") {
 		const string fullWidgetName = layout + "." + widgetName;
-		addWidget("BitmapButton", fullWidgetName);
+		addWidget(BitmapButton, fullWidgetName);
 		if (!spriteName.isEmpty() && !sheetName.isEmpty()) {
 			setWidgetSprite(fullWidgetName, sheetName, spriteName);
 		}

@@ -15,13 +15,13 @@ class StatusBarWidget {
      */
     void setUp(const string&in parent, const string&in height) {
         const auto statusBar = parent + ".StatusBar";
-        addWidget("Panel", statusBar);
+        addWidget(Panel, statusBar);
         setWidgetSize(statusBar, "100%", height);
         setWidgetPosition(statusBar, "50%", "100%");
         setWidgetOrigin(statusBar, 0.5f, 1.0f);
 
         statusBarLayout = statusBar + ".StatusBarLayout";
-        addWidget("HorizontalLayout", statusBarLayout);
+        addWidget(HorizontalLayout, statusBarLayout);
 
         undoActionLabel = _addLabel("UndoAction");
         redoActionLabel = _addLabel("RedoAction");
@@ -78,10 +78,10 @@ class StatusBarWidget {
      */
     private string _addLabel(const string&in widgetName) {
         const auto group = statusBarLayout + "." + widgetName + "Group";
-        addWidget("Group", group);
+        addWidget(Group, group);
 
         const auto name = group + "." + widgetName;
-        addWidget("Label", name);
+        addWidget(Label, name);
         return name;
     }
 

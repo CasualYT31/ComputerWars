@@ -349,6 +349,10 @@ namespace sfx {
 		 */
 		bool animate(const sf::RenderTarget& target) final;
 	private:
+		///////////
+		// TYPES //
+		///////////
+
 		/**
 		 * Represents a GUI background.
 		 * The background of a GUI can be either a solid colour or a sprite from a
@@ -464,56 +468,6 @@ namespace sfx {
 		};
 
 		/**
-		 * Class used to automatically handle reference counting of AngelScript
-		 * objects.
-		 * @tparam The AngelScript object type to handle.
-		 */
-		template<typename T>
-		class CScriptWrapper {
-		public:
-			/**
-			 * Initialises the wrapper object with no object.
-			 */
-			CScriptWrapper() = default;
-
-			/**
-			 * Initialises the wrapper object with an existing AngelScript object.
-			 */
-			CScriptWrapper(T* const obj);
-
-			/**
-			 * Copies the pointer and increases its reference count.
-			 */
-			CScriptWrapper(const CScriptWrapper<T>& obj);
-
-			/**
-			 * Moves the pointer over and increases the reference count.
-			 * Even though it's a move, we are technically creating another
-			 * reference to the object, so increase the reference count anyway. If
-			 * you remove this, \c emplace_back() and other "move" calls will cause
-			 * the reference count to fall down by one, which will cause a nasty
-			 * crash later on at whatever point.
-			 */
-			CScriptWrapper(CScriptWrapper<T>&& obj) noexcept;
-
-			/**
-			 * Releases the reference to the stored AngelScript object.
-			 */
-			~CScriptWrapper() noexcept;
-
-			/**
-			 * Allows direct access to the stored AngelScript object.
-			 * @return Pointer to the AngelScript object.
-			 */
-			T* operator->() const noexcept;
-		private:
-			/**
-			 * The AngelScript object.
-			 */
-			T* _ptr = nullptr;
-		};
-
-		/**
 		 * Stores information on a widget caption.
 		 */
 		struct original_caption {
@@ -539,7 +493,7 @@ namespace sfx {
 			/**
 			 * The variables to insert into the caption when translating.
 			 */
-			std::vector<sfx::gui::CScriptWrapper<CScriptAny>> variables;
+			std::vector<engine::CScriptWrapper<CScriptAny>> variables;
 		};
 
 		/**
@@ -602,6 +556,32 @@ namespace sfx {
 		};
 
 		/**
+		 * A list of \c ChildWindows that are currently minimised in a given
+		 * container.
+		 */
+		class minimised_child_window_list {
+		public:
+			/**
+			 * Adds a \c ChildWindow to the list.
+			 * @param  name The full name of the \c ChildWindow.
+			 * @return The X \c Layout2d coordinate that the \c ChildWindow should
+			 *         be moved to when minimised.
+			 */
+			tgui::String minimise(const std::string& name);
+
+			/**
+			 * Removes a \c ChildWindow from the list.
+			 * @param name The full name of the \c ChildWindow.
+			 */
+			void restore(const std::string& name);
+		private:
+			/**
+			 * The list of \c ChildWindows.
+			 */
+			std::vector<std::string> _windows;
+		};
+
+		/**
 		 * Used for widgets with a single caption.
 		 */
 		typedef original_caption SingleCaption;
@@ -635,10 +615,11 @@ namespace sfx {
 		 * Callback given to \c BitmapButton and \c Picture widgets to allow the
 		 * GUI engine to draw animated sprites in the correct order.
 		 * @param target The target to draw to.
+		 * @param states The render states to apply.
 		 * @param widget The widget being drawn.
 		 */
 		void _drawCallback(tgui::BackendRenderTarget& target,
-			tgui::Widget::ConstPtr widget) const;
+			const tgui::RenderStates& states, tgui::Widget::ConstPtr widget) const;
 
 		/**
 		 * Handles moving the currently selected widget based on directional input.
@@ -865,1123 +846,405 @@ namespace sfx {
 		 */
 		std::pair<std::string, tgui::Widget::Ptr> _findCurrentlySelectedWidget();
 
+		/**
+		 * Clears GUI state.
+		 */
+		void _clearState();
+
+		/**
+		 * Erases state pertaining to a single widget.
+		 * @param widget   The widget to erase the state of.
+		 * @param removeIt See \c _removeWidgets(). If \c TRUE, removes the widget
+		 *                 from its parent.
+		 * @sa    \c _removeWidgets().
+		 */
+		void _eraseWidgetState(const tgui::Widget::Ptr& widget,
+			const bool removeIt);
+
 		//////////////////////
 		// SCRIPT INTERFACE //
 		//////////////////////
 
-		// SET GUI //
+		/**
+		 * Documents the GUI library in general.
+		 */
+		void _documentGUILibrary(
+			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
-		 * Calls @c setGUI(), passing @c TRUE to both @c callClose and @c callOpen.
-		 * @sa @c sfx::gui::setGUI()
+		 * Registers and documents the types, enums, funcdefs and typedefs that can
+		 * be used by the scripts.
 		 */
+		void _registerTypes(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		/**
+		 * Registers and documents global constants.
+		 */
+		void _registerConstants(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		// NON-WIDGET GLOBAL FUNCTIONS //
+
+		/**
+		 * Register non-widget global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
+		 */
+		void _registerNonWidgetGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
 		void _setGUI(const std::string& name);
-
-		/**
-		 * Determines if a menu exists.
-		 * @param  menu The name of the menu to search for.
-		 * @return \c TRUE if a menu with the given name exists, \c FALSE
-		 *         otherwise.
-		 */
 		bool _menuExists(const std::string& menu);
-
-		// BACKGROUND //
-
-		/**
-		 * Removes a menu's background.
-		 * @param menu The name of the menu whose background is to be removed. If a
-		 *             blank string is given, the current menu is chosen.
-		 */
 		void _noBackground(std::string menu);
-
-		/**
-		 * Makes a menu have an animated sprite for a background.
-		 * @param menu   The name of the menu to apply the animated sprite to the
-		 *               background of. If a blank string is given, the current
-		 *               menu is chosen.
-		 * @param sheet  The name of the spritesheet which contains the sprite to
-		 *               draw.
-		 * @param sprite The name of the sprite to draw.
-		 */
 		void _spriteBackground(std::string menu, const std::string& sheet,
 			const std::string& sprite);
-
-		/**
-		 * Makes a menu have a solid colour background.
-		 * @param menu The name of the menu to apply the colour to the background
-		 *             of. If a blank string is given, the current menu is chosen.
-		 * @param r    The red attribute.
-		 * @param g    The green attribute.
-		 * @param b    The blue attribute.
-		 * @param a    The alpha attribute.
-		 */
-		void _colourBackground(std::string menu, const unsigned int r,
-			const unsigned int g, const unsigned int b, const unsigned int a);
+		void _colourBackground(std::string menu, const sf::Color& colour);
+		void _setGlobalFont(const std::string& fontName);
 
 		// WIDGETS //
 
 		/**
-		 * Determines if a widget exists.
-		 * @param  name The name of the widget to search for.
-		 * @return \c TRUE if a widget with the given name exists, \c FALSE
-		 *         otherwise.
+		 * Registers generic widget global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
-		bool _widgetExists(const std::string& name);
+		void _registerWidgetGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
 
-		/**
-		 * Creates a new widget and adds it to a container.
-		 * If no menu is specified, the currently displayed menu is chosen. This is
-		 * true for all GUI global script functions.\n
-		 * If the @c type parameter was invalid, or if a widget with the specified
-		 * name already existed at the time of the call, then an error will be
-		 * logged and no widget will be created.
-		 * @param newWidgetType The type of widget to create.
-		 * @param name          The name of the new widget.
-		 * @param signalHandler The name of the custom signal handler to assign to
-		 *                      this widget, if any.
-		 */
+		bool _widgetExists(const std::string& name);
 		void _addWidget(const std::string& newWidgetType, const std::string& name,
 			const std::string& signalHandler = "");
-
-		/**
-		 * Creates a widget and adds it to a grid.
-		 * An error will be logged in the following circumstances:
-		 * <ul><li>If the @c type parameter was invalid.</li>
-		 *     <li>If the second to last short name in the full name of the new
-		 *         widget did not identify a grid.</li>
-		 *     <li>If there was already a widget within the specified cell.
-		 *     </li></ul>
-		 * If an error is logged, no widget will be created or added.
-		 * @param newWidgetType The type of widget to create.
-		 * @param name          The name of the new widget. Must include the grid.
-		 * @param row           The row to add the widget to.
-		 * @param col           The column to add the widget to.
-		 * @param signalHandler The name of the custom signal handler to assign to
-		 *                      this widget, if any.
-		 */
-		void _addWidgetToGrid(const std::string& newWidgetType,
-			const std::string& name, const std::size_t row, const std::size_t col,
-			const std::string& signalHandler = "");
-
-		/**
-		 * Connects a signal handler to a given widget.
-		 * See the script interface documentation in \c registerInterface() for a
-		 * rundown on how signal handlers work. This method is used to provide an
-		 * additional signal handler for a given widget by directly invoking a
-		 * callback given to the engine. If \c nullptr is given, then the
-		 * registered callback will be freed.
-		 * @param name    The name of the widget to configure.
-		 * @param handler The function to invoke when a widget emits a signal.
-		 */
 		void _connectSignalHandler(const std::string& name,
 			asIScriptFunction* const handler);
-
 		void _disconnectSignalHandlers(const CScriptArray* const names);
-
-		/**
-		 * Gets the name of the given widget's parent.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and a blank string will be returned.
-		 * @param  name The name of the widget to query.
-		 * @return The full name of the parent.
-		 */
 		std::string _getParent(const std::string& name);
-
-		/**
-		 * Removes a specified widget, and all the widgets that are within it.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be removed.
-		 * @param name The name of the widget to remove.
-		 */
 		void _removeWidget(const std::string& name);
-
-		/**
-		 * Removes all the widgets from a given container.
-		 * If no widget exists with the given name, or if the widget wasn't a
-		 * container, then an error will be logged and no widget will be removed.
-		 * @param name The name of the container whose widgets are to be removed.
-		 */
-		void _removeWidgetsFromContainer(const std::string& name);
-
-		/**
-		 * Updates the setfocus to point to a given widget.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and the setfocus will not be changed.
-		 * @param name The name fo the widget who will have the setfocus.
-		 */
 		void _setWidgetFocus(const std::string& name);
-
-		/**
-		 * Sets a widget's font.
-		 * If no widget or font exists with the given name, then an error will be
-		 * logged and no font will be changed.
-		 * @param name     The name of the widget to change.
-		 * @param fontName The name of the font to assign to the widget.
-		 */
 		void _setWidgetFont(const std::string& name, const std::string& fontName);
-
-		/**
-		 * Sets the global UI font.
-		 * If no font exists with the given name, then an error will be logged and
-		 * no font will be changed.
-		 * @param fontName The name of the font to assign.
-		 */
-		void _setGlobalFont(const std::string& fontName);
-
-		/**
-		 * Updates a widget's location.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be moved.
-		 * @param name The name of the widget to relocate.
-		 * @param x    The expression to assign to the widget's X coordinate.
-		 * @param y    The expression to assign to the widget's Y coordinate.
-		 */
 		void _setWidgetPosition(const std::string& name, const std::string& x,
 			const std::string& y);
-
-		/**
-		 * Retrieves a widget's absolute location.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and <tt>(0.0f,0.0f)</tt> will be returned.
-		 * @param  name The name of the widget to query.
-		 * @return The absolute position of the top-left point of the widget.
-		 */
 		sf::Vector2f _getWidgetAbsolutePosition(const std::string& name);
-
-		/**
-		 * Updates a widget's origin.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be updated.
-		 * @param name The name of the widget to update.
-		 * @param x    The new origin to set along the widget's X axis (0.0-1.0).
-		 * @param y    The new origin to set along the widget's Y axis (0.0-1.0).
-		 */
 		void _setWidgetOrigin(const std::string& name, const float x,
 			const float y);
-
-		/**
-		 * Updates a widget's size.
-		 * If a blank string is given for either dimension, that means that the
-		 * widget should retain their size layout in that dimension.\n
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be resized.
-		 * @param name The name of the widget to resize.
-		 * @param w    The expression to assign to the widget's width.
-		 * @param h    The expression to assign to the widget's height.
-		 */
 		void _setWidgetSize(const std::string& name, const std::string& w,
 			const std::string& h);
-
-		/**
-		 * Gets the full size of a widget.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and a blank vector will be
-		 * returned.
-		 * @param  name The name of the widget to query.
-		 * @return The full size of the widget, which includes any borders, etc.
-		 */
 		sf::Vector2f _getWidgetFullSize(const std::string& name);
-
-		/**
-		 * Updates a widget's enabled property.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be changed.
-		 * @param name   The name of the widget to enable/disable.
-		 * @param enable \c TRUE if the widget should be enabled, \c FALSE if it
-		 *               should be disabled.
-		 */
 		void _setWidgetEnabled(const std::string& name, const bool enable);
-
-		/**
-		 * Retrieves the enabled property of a widget.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and \c FALSE will be returned.
-		 * @param  name The name of the widget to query.
-		 * @return \c TRUE if the widget is enabled, \c FALSE otherwise.
-		 */
 		bool _getWidgetEnabled(const std::string& name) const;
-
-		/**
-		 * Updates a widget's visibility property.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be changed.
-		 * @param name    The name of the widget to show/hide.
-		 * @param visible \c TRUE if the widget should be shown, \c FALSE if it
-		 *                should be hidden.
-		 */
 		void _setWidgetVisibility(const std::string& name, const bool visible);
-
-		/**
-		 * Retrieves the visibility property of a widget.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and \c FALSE will be returned.
-		 * @param  name The name of the widget to query.
-		 * @return \c TRUE if the widget is visible, \c FALSE otherwise.
-		 */
 		bool _getWidgetVisibility(const std::string& name) const;
-
-		/**
-		 * Moves a widget to the front of its parent container.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be moved in the Z order.
-		 * @param name The name of the widget to move to the front.
-		 */
 		void _moveWidgetToFront(const std::string& name);
-
-		/**
-		 * Moves a widget to the back of its parent container.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be moved in the Z order.
-		 * @param name The name of the widget to move to the back.
-		 */
 		void _moveWidgetToBack(const std::string& name);
+		void _setWidgetText(const std::string& name, const std::string& text,
+			CScriptArray* const variables);
+		void _setWidgetIndex(const std::string& name, const std::size_t index);
+
+		// DIRECTIONAL FLOW //
 
 		/**
-		 * Special string used with \c _setWidgetDirectionalFlow() to represent the
-		 * previous widget.
+		 * Registers directional flow global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
-		static const std::string GOTO_PREVIOUS_WIDGET;
+		void _registerDirectionalFlowGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
 
-		/**
-		 * Sets which directional controls should move the setfocus to which
-		 * widgets, if the current setfocus is on a given widget.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be changed.\n
-		 * All widgets provided must be in the same menu. Otherwise, an error will
-		 * be logged, and no widget will be changed.\n
-		 * The second to fifth parameters can be blank, which case the given input
-		 * will not change the selection. These parameters can also be the value of
-		 * `GOTO_PREVIOUS_WIDGET`. This is a special value which means "navigate
-		 * to the previously selected widget."
-		 * @param      name The name of the widget to amend.
-		 * @param    upName The name of the widget to move the selection to if "up"
-		 *                  is pressed.
-		 * @param  downName The name of the widget to move the selection to if
-		 *                  "down" is pressed.
-		 * @param  leftName The name of the widget to move the selection to if
-		 *                  "left" is pressed.
-		 * @param rightName The name of the widget to move the selection to if
-		 *                  "right" is pressed.
-		 * @sa    \c sfx::gui::GOTO_PREVIOUS_WIDGET.
-		 */
 		void _setWidgetDirectionalFlow(const std::string& name,
 			const std::string& upName, const std::string& downName,
 			const std::string& leftName, const std::string& rightName);
-
-		/**
-		 * Used to select widgets that are selected first when a directional
-		 * control is input.
-		 * When a menu is active, and no widget has been selected on that menu yet
-		 * since the game was launched, a widget within that menu is always
-		 * selected first. The given widget is configured to be that first
-		 * widget.\n
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be changed.
-		 * @param name The name of the widget to assign as the first to be
-		 *             selected. Or the name of the menu to prevent directional
-		 *             controls for.
-		 */
 		void _setWidgetDirectionalFlowStart(const std::string& name);
-
-		/**
-		 * Used to prevent directional controls from selecting widgets on a given
-		 * menu.
-		 * This is the default behaviour for all menus.\n
-		 * If the given menu doesn't exist, an error will be logged and no menu
-		 * will be changed.
-		 * @param menu The name of the menu to amend.
-		 */
 		void _clearWidgetDirectionalFlowStart(const std::string& menu);
-
-		/**
-		 * Used to manually set the directionally-selected widget.
-		 * If no widget exists with the given name, then an error will be logged
-		 * and no widget will be changed.
-		 * @param name The name of the widget to select.
-		 */
 		void _setWidgetDirectionalFlowSelection(const std::string& name);
-
-		/**
-		 * Sets the sprite to use as the angle bracket which surrounds widgets
-		 * currently selected via the directional controls.
-		 * If neither the spritesheet or sprite exists, an error will be logged and
-		 * no changes will be made.
-		 * @param corner The angle bracket to amend. Either "UL", "UR", "LL", or
-		 *               "LR". Input is trimmed and case-insensitive.
-		 * @param sheet  The name of the spritesheet which contains the sprite to
-		 *               set.
-		 * @param key    The name of the sprite to set.
-		 */
 		void _setDirectionalFlowAngleBracketSprite(const std::string& corner,
 			const std::string& sheet, const std::string& key);
 
-		/**
-		 * Updates a widget's caption.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no caption will be changed.
-		 * @param name      The name of the widget to change.
-		 * @param text      The new caption.
-		 * @param variables Optional list of variables to insert into the caption.
-		 */
-		void _setWidgetText(const std::string& name, const std::string& text,
-			CScriptArray* variables);
+		// SPRITES //
 
 		/**
-		 * Gets the widget's caption.
-		 * For most widget types, this will return the translated caption. For
-		 * \c EditBox widgets, this will return the text that the user has typed
-		 * in.\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and a blank string will be
-		 * returned.
-		 * @param  name The name of the widget to query.
-		 * @return The caption/text assigned to the widget.
+		 * Registers sprite-related global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
-		std::string _getWidgetText(const std::string& name);
+		void _registerSpriteGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
 
-		void _setWidgetChecked(const std::string& name, const bool checked);
+		void _setWidgetSprite(const std::string& name, const std::string& sheet,
+			const std::string& key);
+		void _clearWidgetSprite(const std::string& name);
+		void _matchWidgetSizeToSprite(const std::string& name,
+			const bool overrideSetSize);
 
-		bool _isWidgetChecked(const std::string& name);
+		// LABEL //
 
 		/**
-		 * Sets an \c EditBox to only accept unsigned ints.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name The name of the \c EditBox to change.
+		 * Registers global functions that act on labels within widgets.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
-		void _onlyAcceptUIntsInEditBox(const std::string& name);
+		void _registerLabelGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
 
-		/**
-		 * Sets a widget's character size.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no size will be changed.
-		 * @param name The name of the widget to change.
-		 * @param size The new character size.
-		 */
 		void _setWidgetTextSize(const std::string& name, const unsigned int size);
-
 		void _setWidgetTextStyles(const std::string& name,
 			const std::string& styles);
-
-		/**
-		 * Sets a widget's text's maximum width.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no size will be changed.
-		 * @param name The name of the widget to change.
-		 * @param w    If the text exceeds this width, it will wrap around to the
-		 *             next line.
-		 */
 		void _setWidgetTextMaximumWidth(const std::string& name, const float w);
-
-		/**
-		 * Sets a widget's text colour.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no caption will be changed.
-		 * @param name   The name of the widget to change.
-		 * @param colour The new text colour.
-		 */
 		void _setWidgetTextColour(const std::string& name,
 			const sf::Color& colour);
-
-		/**
-		 * Sets a widget's text outline colour.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no caption will be changed.
-		 * @param name   The name of the widget to change.
-		 * @param colour The new text outline colour.
-		 */
 		void _setWidgetTextOutlineColour(const std::string& name,
 			const sf::Color& colour);
-
-		/**
-		 * Sets a widget's text outline thickness.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no caption will be changed.
-		 * @param name      The name of the widget to change.
-		 * @param thickness The new text outline thickness.
-		 */
 		void _setWidgetTextOutlineThickness(const std::string& name,
 			const float thickness);
-
-		/**
-		 * Sets a widget's text alignment.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no alignment will be
-		 * changed.
-		 * @param name The name of the widget to change.
-		 * @param h    The new horizontal alignment.
-		 * @param v    The new vertical alignment.
-		 */
 		void _setWidgetTextAlignment(const std::string& name,
 			const tgui::Label::HorizontalAlignment h,
 			const tgui::Label::VerticalAlignment v);
 
-		/**
-		 * Updates a widget's sprite.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no sprite will be set.
-		 * @param name  The name of the widget to change.
-		 * @param sheet The name of the spritesheet which contains the sprite to
-		 *              set.
-		 * @param key   The name of the sprite to set.
-		 */
-		void _setWidgetSprite(const std::string& name, const std::string& sheet,
-			const std::string& key);
+		// EDITBOX //
 
 		/**
-		 * Removes a widget's sprite.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no sprite will be cleared.
-		 * @param name The name of the widget to change.
+		 * Registers \c EditBox global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
-		void _clearWidgetSprite(const std::string& name);
+		void _registerEditBoxGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
 
-		/**
-		 * Configures a widget to always resize to match its sprite's size.
-		 * If you set this to \c FALSE for a widget who used to be set to \c TRUE,
-		 * then the size of the widget will be left at the last set sprite and will
-		 * no longer automatically update. If you set this to \c TRUE, and you
-		 * attempt to manually set the size to something else, that will be
-		 * overriden by the sprite's size.\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no change will be made.
-		 * @param name            The name of the widget to change.
-		 * @param overrideSetSize The new value.
-		 */
-		void _matchWidgetSizeToSprite(const std::string& name,
-			const bool overrideSetSize);
-
-		/**
-		 * Sets a widget's background colour.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no colour will be set.
-		 * @param name   The name of the widget to change.
-		 * @param colour The colour to set to the background of the widget.
-		 */
-		void _setWidgetBgColour(const std::string& name, const sf::Color& colour);
-
-		/**
-		 * Sets a widget's border size.
-		 * Sets each side's border to the same size.\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no border size will be set.
-		 * @param name The name of the widget to change.
-		 * @param size The size to set to the widget's border.
-		 */
-		void _setWidgetBorderSize(const std::string& name, const float size);
-
-		/**
-		 * Sets a widget's border colour.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no colour will be set.
-		 * @param name   The name of the widget to change.
-		 * @param colour The colour to set to the widget's border.
-		 */
-		void _setWidgetBorderColour(const std::string& name,
-			const sf::Color& colour);
-
-		/**
-		 * Sets a widget's rounded border radius.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no radius will be set.
-		 * @param name   The name of the widget to change.
-		 * @param radius The radius to set to the widget's rounded border.
-		 */
-		void _setWidgetBorderRadius(const std::string& name, const float radius);
-
-		/**
-		 * Sets a widget's index within its container.
-		 * Used to reorder widgets within the container.\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no index will be set. An
-		 * error will also be logged if a given index is too high.
-		 * @param name  The name of the widget to change.
-		 * @param index The new index to set to the widget.
-		 */
-		void _setWidgetIndex(const std::string& name, const std::size_t index);
-
-		/**
-		 * Updates a widget's index within a given container.
-		 * Used to reorder widgets within the container.\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no index will be set. Errors
-		 * will also be logged if either index is invalid.
-		 * @param name     The name of the container containing the widget to
-		 *                 update.
-		 * @param oldIndex The index of the widget to update.
-		 * @param newIndex The new index of the widget.
-		 */
-		void _setWidgetIndexInContainer(const std::string& name,
-			const std::size_t oldIndex, const std::size_t newIndex);
-
-		/**
-		 * Sets a widget's size in relation to others in its layout.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no ratio will be set. An
-		 * error will also be logged if the given index was too high.
-		 * @param name  The name of the vertical or horizontal layout to change.
-		 * @param index The 0-based index of the widget to readjust.
-		 * @param ratio The ratio to apply.
-		 */
-		void _setWidgetRatioInLayout(const std::string& name,
-			const std::size_t index, const float ratio);
-		
-		/**
-		 * Updates a widget's default text.
-		 * E.g. the editbox will display the default text when it has no
-		 * text/caption.\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no text will be changed.
-		 * @param name      The name of the widget to change.
-		 * @param text      The new default text.
-		 * @param variables Optional list of variables to insert into the text.
-		 */
+		std::string _getWidgetText(const std::string& name);
+		void _onlyAcceptUIntsInEditBox(const std::string& name);
 		void _setWidgetDefaultText(const std::string& name,
 			const std::string& text, CScriptArray* variables);
 
+		// RADIOBUTTON & CHECKBOX //
+
 		/**
-		 * Adds an item to a widget.
-		 * E.g. appends an item to a listbox.\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no item will be added.
-		 * @param name      The name of the widget to add the item to.
-		 * @param text      The text of the new item.
-		 * @param variables Optional list of variables to insert into the item
-		 *                  text.
+		 * Registers \c RadioButton and \c CheckBox global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
+		void _registerRadioButtonAndCheckBoxGlobalFunctions(
+			asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		void _setWidgetChecked(const std::string& name, const bool checked);
+		bool _isWidgetChecked(const std::string& name);
+
+		// LIST //
+
+		/**
+		 * Registers \c ListBox and \c ComboBox global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
+		 */
+		void _registerListGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
 		void _addItem(const std::string& name, const std::string& text,
-			CScriptArray* variables);
-
-		/**
-		 * Clears all items from a widget.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no item will be removed.
-		 * @param name The name of the widget to clear the items of.
-		 */
+			CScriptArray* const variables);
 		void _clearItems(const std::string& name);
-
-		/**
-		 * Selects an item by index.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no item will be selected. An
-		 * error will also be reported if the given index was out of range.
-		 * @param name  The name of the widget which contains the item to select.
-		 * @param index The 0-based index of the item to select.
-		 */
 		void _setSelectedItem(const std::string& name, const std::size_t index);
-
 		void _deselectItem(const std::string& name);
-
-		/**
-		 * Gets the currently selected item's index.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and \c -1 will be returned. If
-		 * no item was selected, \c -1 will also be returned.
-		 * @param  name The name of the widget to query.
-		 * @return The index of the currently selected item.
-		 */
 		int _getSelectedItem(const std::string& name);
-
-		/**
-		 * Retrieves the text of the currently selected item of a widget.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and a blank string will be
-		 * returned.
-		 * @param  name The name of the widget to query.
-		 * @return The translated text of the item.
-		 */
 		std::string _getSelectedItemText(const std::string& name);
-
-		CScriptArray* _getSelectedItemTextHierarchy(const std::string& name);
-
-		/**
-		 * Sets the number of items to display in a \c ComboBox.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no changes will be made.
-		 * @param name  The name of the \c ComboBox to edit.
-		 * @param items The number of items to display at one time when the
-		 *              \c ComboBox is opened. 0 means show all items.
-		 */
 		void _setItemsToDisplay(const std::string& name, const std::size_t items);
 
+		// TREEVIEW //
+
 		/**
-		 * Adds a tab to a widget.
-		 * E.g. appends a tab to a \c Tabs widget.\n
-		 * Adding a tab will not select it.\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no tab will be added.
-		 * @param name      The name of the widget to add the tab to.
-		 * @param text      The text of the new tab.
-		 * @param variables Optional list of variables to insert into the tab text.
+		 * Registers \c TreeView global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
+		void _registerTreeViewGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		CScriptArray* _getSelectedItemTextHierarchy(const std::string& name);
+		void _addTreeViewItem(const std::string& name,
+			const CScriptArray* const hierarchy);
+
+		// TABS //
+
+		/**
+		 * Registers \c Tabs global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
+		 */
+		void _registerTabsGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
 		void _addTab(const std::string& name, const std::string& text,
-			CScriptArray* variables);
-
-		/**
-		 * Selects a tab by index.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no tab will be selected. An
-		 * error will also be reported if the given index was out of range, or if
-		 * the given tab is either invisible or disabled. If a selection operation
-		 * failed and the widget was a \c Tabs widget, an attempt will be made to
-		 * select the previously selected tab, if there was one.
-		 * @param name  The name of the widget which contains the tab to select.
-		 * @param index The 0-based index of the tab to select.
-		 */
+			CScriptArray* const variables);
 		void _setSelectedTab(const std::string& name, const std::size_t index);
-
-		/**
-		 * Gets the currently selected tab's index.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and \c -1 will be returned. If
-		 * no tab was selected, \c -1 will also be returned.
-		 * @param  name The name of the widget to query.
-		 * @return The index of the currently selected tab.
-		 */
 		int _getSelectedTab(const std::string& name);
-
-		/**
-		 * Gets the number of tabs in a \c Tabs widget.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and \c 0 will be returned.
-		 * @param  name The name of the widget to query.
-		 * @return The number of tabs in the given widget.
-		 */
 		std::size_t _getTabCount(const std::string& name);
 
+		// CONTAINER //
+
 		/**
-		 * Returns the number of widgets within a container.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and 0 will be returned.
-		 * @param  name The name of the container to query.
-		 * @return The number of widgets within the container.
+		 * Registers \c Container widget global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
+		void _registerContainerGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		void _removeWidgetsFromContainer(const std::string& name);
+		void _setWidgetIndexInContainer(const std::string& name,
+			const std::size_t oldIndex, const std::size_t newIndex);
 		std::size_t _getWidgetCount(const std::string& name);
-
-		/**
-		 * Sets the scrollbar policy for a scrollable panel's horizontal scrollbar.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no policy will be changed.
-		 * @param name   The name of the widget to edit.
-		 * @param policy The policy the scrollbar should have.
-		 */
-		void _setHorizontalScrollbarPolicy(const std::string& name,
-			const tgui::Scrollbar::Policy policy);
-
-		/**
-		 * Sets the scroll amount for a scrollable panel's horizontal scrollbar.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no amount will be changed.
-		 * @param name   The name of the widget to edit.
-		 * @param amount The amount the scrollbar should scroll by.
-		 */
-		void _setHorizontalScrollbarAmount(const std::string& name,
-			const unsigned int amount);
-
-		/**
-		 * Sets the scroll amount for a scrollable panel's vertical scrollbar.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no amount will be changed.
-		 * @param name   The name of the widget to edit.
-		 * @param amount The amount the scrollbar should scroll by.
-		 */
-		void _setVerticalScrollbarAmount(const std::string& name,
-			const unsigned int amount);
-
-		void _setVerticalScrollbarValue(const std::string& name,
-			const unsigned int value);
-
-		/**
-		 * Gets the width of the scrollbars in a \c ScrollablePanel.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and \c 0.0f will be returned.
-		 * @param  name The name of the widget to query.
-		 * @return The width of the scrollbar.
-		 */
-		float _getScrollbarWidth(const std::string& name);
-
-		/**
-		 * Sets the padding applied to a group of widgets.
-		 * If the name of a \c Grid is given, each of its widgets will be assigned
-		 * the given padding. Note that this will only be applied to the widgets
-		 * that exist in the \c Grid at the time of calling!\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no padding will be changed.
-		 * @param name    The name of the widget to edit.
-		 * @param padding The padding to set.
-		 */
 		void _setGroupPadding(const std::string& name, const std::string& padding);
-
-		/**
-		 * Sets the padding applied to a group of widgets.
-		 * If the name of a \c Grid is given, each of its widgets will be assigned
-		 * the given padding. Note that this will only be applied to the widgets
-		 * that exist in the \c Grid at the time of calling!\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no padding will be changed.
-		 * @param name   The name of the widget to edit.
-		 * @param left   The padding to set to the left side.
-		 * @param top    The padding to set to the top side.
-		 * @param right  The padding to set to the right side.
-		 * @param bottom The padding to set to the bottom side.
-		 */
 		void _setGroupPadding(const std::string& name, const std::string& left,
 			const std::string& top, const std::string& right,
 			const std::string& bottom);
+		void _applySpritesToWidgetsInContainer(const std::string& name,
+			const std::string& spritesheet, const CScriptArray* const sprites);
+
+		// PANEL //
 
 		/**
-		 * Sets the alignment applied to a widget within a grid.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no alignment will be
-		 * changed. An error will also be logged if the \c row and \c col
-		 * parameters are out of range.
-		 * @param name      The name of the grid to edit.
-		 * @param row       The 0-based row ID of the widget to edit.
-		 * @param col       The 0-based column ID of the widget to edit.
-		 * @param alignment The alignment to set to the widget.
+		 * Registers \c Panel and \c ScrollablePanel widget global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
+		void _registerPanelGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		void _setWidgetBgColour(const std::string& name, const sf::Color& colour);
+		void _setWidgetBorderSize(const std::string& name, const float size);
+		void _setWidgetBorderColour(const std::string& name,
+			const sf::Color& colour);
+		void _setWidgetBorderRadius(const std::string& name, const float radius);
+		void _setHorizontalScrollbarPolicy(const std::string& name,
+			const tgui::Scrollbar::Policy policy);
+		void _setHorizontalScrollbarAmount(const std::string& name,
+			const unsigned int amount);
+		void _setVerticalScrollbarAmount(const std::string& name,
+			const unsigned int amount);
+		void _setVerticalScrollbarValue(const std::string& name,
+			const unsigned int value);
+		float _getScrollbarWidth(const std::string& name);
+
+		// LAYOUT //
+
+		/**
+		 * Registers \c BoxLayout widget global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
+		 */
+		void _registerLayoutGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		void _setWidgetRatioInLayout(const std::string& name,
+			const std::size_t index, const float ratio);
+		void _setSpaceBetweenWidgets(const std::string& name, const float space);
+
+		// GRID //
+
+		/**
+		 * Registers \c Grid widget global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
+		 */
+		void _registerGridGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		void _addWidgetToGrid(const std::string& newWidgetType,
+			const std::string& name, const std::size_t row, const std::size_t col,
+			const std::string& signalHandler = "");
 		void _setWidgetAlignmentInGrid(const std::string& name,
 			const std::size_t row, const std::size_t col,
 			const tgui::Grid::Alignment alignment);
-
-		/**
-		 * Sets the padding applied to a widget within a grid.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no padding will be changed.
-		 * An error will also be logged if the \c row and \c col parameters are out
-		 * of range.
-		 * @param name    The name of the grid to edit.
-		 * @param row     The 0-based row ID of the widget to edit.
-		 * @param col     The 0-based column ID of the widget to edit.
-		 * @param padding The padding to set to the widget.
-		 */
 		void _setWidgetPaddingInGrid(const std::string& name,
 			const std::size_t row, const std::size_t col,
 			const std::string& padding);
 
-		/**
-		 * Sets the space between widgets in Vertical and Horizontal Layouts.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no space will be applied.
-		 * @param name  The name of the layout to edit.
-		 * @param space The new distance to apply.
-		 */
-		void _setSpaceBetweenWidgets(const std::string& name, const float space);
-
-		/**
-		 * Special method which applies a large collection of sprites to \c Picture
-		 * and/or \c BitmapButton widgets within a container.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no changes will be made. An
-		 * error will also be logged if \c sprites was \c nullptr or empty.
-		 * @param name        Name of the container containing the widgets to edit.
-		 * @param spritesheet The spritesheet to which all the \c sprites belong.
-		 * @param sprites     String array containing sprite keys, one element per
-		 *                    applicable widget.
-		 */
-		void _applySpritesToWidgetsInContainer(const std::string& name,
-			const std::string& spritesheet, const CScriptArray *const sprites);
-
 		// MENUS //
 
 		/**
-		 * Adds a new menu to the given \c MenuBar.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.\n
-		 * If this method is called outside of \c _load(), an error will be logged
-		 * and no menu will be added.\n
-		 * If no items were added to the previously added menu, then a warning will
-		 * be logged.
-		 * @param  name      The name of the \c MenuBar widget to add to.
-		 * @param  text      The text of the new menu.
-		 * @param  variables Optional list of variables to insert into the text.
-		 * @return The menu item ID of the newly created menu.
+		 * Registers \c MenuBar widget global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
+		void _registerMenuBarGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
 		MenuItemID _addMenu(const std::string& name, const std::string& text,
-			CScriptArray* variables);
-
-		/**
-		 * Adds a new menu item to the most recently added menu or submenu.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.\n
-		 * If this method is called outside of \c _load(), an error will be logged
-		 * and no menu item will be added.\n
-		 * If no menus were added yet, an error will be logged and no item will be
-		 * added.\n
-		 * @param  name      The name of the \c MenuBar widget to add to.
-		 * @param  text      The text of the new menu item.
-		 * @param  variables Optional list of variables to insert into the text.
-		 * @return The menu item ID of the newly created menu item.
-		 */
+			CScriptArray* const variables);
 		MenuItemID _addMenuItem(const std::string& name, const std::string& text,
-			CScriptArray* variables);
-
-		/**
-		 * Creates a new submenu within the most recently added menu or submenu,
-		 * and adds an item to it.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.\n
-		 * If this method is called outside of \c _load(), an error will be logged
-		 * and no menu item will be added.\n
-		 * If no menus were added yet, an error will be logged and no item will be
-		 * added.\n
-		 * If the most recently added menu was empty, then a warning will be
-		 * logged, but the call will still have the same result as if
-		 * \c _addMenuItem() was called.
-		 * @param  name      The name of the \c MenuBar widget to add to.
-		 * @param  text      The text of the new menu item.
-		 * @param  variables Optional list of variables to insert into the text.
-		 * @return The menu item ID of the newly created menu item.
-		 */
+			CScriptArray* const variables);
 		MenuItemID _addMenuItemIntoLastItem(const std::string& name,
-			const std::string& text, CScriptArray* variables);
-
-		/**
-		 * Exits the current submenu.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.\n
-		 * If this method is called outside of \c _load(), an error will be logged
-		 * and no changes will be made.\n
-		 * If the most recently created menu item is not in a submenu, an error
-		 * will be logged and no changes will be made.
-		 * @param name      The name of the \c MenuBar widget to add to.
-		 * @param text      The text of the new menu item.
-		 * @param variables Optional list of variables to insert into the text.
-		 */
+			const std::string& text, CScriptArray* const variables);
 		void _exitSubmenu(const std::string& name);
 
 		// CHILDWINDOW //
 
 		/**
-		 * Instructs the engine to automatically handle minimise and maximise
-		 * functionality when the \c Minimize and \c Maximize buttons are pressed
-		 * on a \c ChildWindow.
-		 * Note that if this option is set, any defined script handlers for the
-		 * \c Minimize and \c Maximize signals will be called \em after the engine
-		 * has completed changing the properties of the \c ChildWindow.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name   The name of the \c ChildWindow to amend.
-		 * @param handle \c TRUE if the engine should handle minimise and maximise
-		 *               logic, \c FALSE if not. The default is \c TRUE.
+		 * Registers \c ChildWindow global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
-		void _autoHandleMinMax(const std::string& name, const bool handle);
+		void _registerChildWindowGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
 
-		/**
-		 * Sets which buttons to show in the given \c ChildWindow's titlebar.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name    The name of the \c ChildWindow to amend.
-		 * @param buttons The buttons to assign.
-		 */
+		void _autoHandleMinMax(const std::string& name, const bool handle);
 		void _setChildWindowTitleButtons(const std::string& name,
 			const unsigned int buttons);
-
-		/**
-		 * Sets a widget to be resizable or not resizable.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name      The name of the widget to amend.
-		 * @param resizable \c TRUE if the widget should be resizableby the user,
-		 *                  \c FALSE if not.
-		 */
 		void _setWidgetResizable(const std::string& name, const bool resizable);
-
-		/**
-		 * Gets a \c ChildWindow's titlebar height.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and \c 0.0f will be returned.
-		 * @param  name The name of the widget to query.
-		 * @return The titlebar height.
-		 */
 		float _getTitleBarHeight(const std::string& name);
-
 		CScriptArray* _getBorderWidths(const std::string& name);
-
-		/**
-		 * Opens a \c ChildWindow to a given location.
-		 * If the given \c ChildWindow was either maximised or minimised, it will
-		 * also be restored.\n
-		 * If the widget was already open (i.e. visible), then the widget will
-		 * still be moved and brought to the front.\n
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name The name of the \c ChildWindow to open.
-		 * @param x    The X position to move the \c ChildWindow to.
-		 * @param y    The Y position to move the \c ChildWindow to.
-		 */
 		void _openChildWindow(const std::string& name, const std::string& x,
 			const std::string& y);
-
-		/**
-		 * Closes a \c ChildWindow by making it invisible.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name The name of the \c ChildWindow to close.
-		 */
 		void _closeChildWindow(const std::string& name);
-
-		/**
-		 * Restores a \c ChildWindow if it was maximised or minimised.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name The name of the \c ChildWindow to restore.
-		 */
 		void _restoreChildWindow(const std::string& name);
-
-		/**
-		 * Implementation of \c _restoreChildWindow().
-		 * Has no effect if the given window was not maximised or minimised.
-		 * @param window Pointer to the \c ChildWindow.
-		 */
 		void _restoreChildWindowImpl(const tgui::ChildWindow::Ptr& window,
 			child_window_properties& data);
-
-		/**
-		 * Checks if a \c ChildWindow is currently open.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and \c FALSE will be returned.
-		 * @param  name The name of the \c ChildWindow to query.
-		 * @return \c TRUE if the \c ChildWindow is visible, \c FALSE if not.
-		 */
 		bool _isChildWindowOpen(const std::string& name);
 
 		// FILEDIALOG //
 
 		/**
-		 * Sets every caption in the given file dialog.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name          The name of the \c FileDialog widget.
-		 * @param title         The title of the \c FileDialog.
-		 * @param v0            The variables to insert into the above string.
-		 * @param confirm       The text of the confirm/open button.
-		 * @param v1            The variables to insert into the above string.
-		 * @param cancel        The text of the cancel button.
-		 * @param v2            The variables to insert into the above string.
-		 * @param createFolder  The text of the create folder button.
-		 * @param v3            The variables to insert into the above string.
-		 * @param filenameLabel The text of the filename label.
-		 * @param v4            The variables to insert into the above string.
-		 * @param nameColumn    The text of the name column in the listview.
-		 * @param v5            The variables to insert into the above string.
-		 * @param sizeColumn    The text of the size column in the listview.
-		 * @param v6            The variables to insert into the above string.
-		 * @param modifyColumn  The text of the modified column in the listview.
-		 * @param v7            The variables to insert into the above string.
-		 * @param allFiles      The caption assigned to the All files filter.
-		 * @param v8            The variables to insert into the above string.
+		 * Registers \c FileDialog global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
+		void _registerFileDialogGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
 		void _setFileDialogStrings(const std::string& name,
-			const std::string& title, CScriptArray* v0, const std::string& confirm,
-			CScriptArray* v1, const std::string& cancel, CScriptArray* v2,
-			const std::string& createFolder, CScriptArray* v3,
-			const std::string& filenameLabel, CScriptArray* v4,
-			const std::string& nameColumn, CScriptArray* v5,
-			const std::string& sizeColumn, CScriptArray* v6,
-			const std::string& modifyColumn, CScriptArray* v7,
-			const std::string& allFiles, CScriptArray* v8);
-
-		/**
-		 * Gets the selected files from the given file dialog.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param  name The name of the \c FileDialog widget.
-		 * @return The selected paths.
-		 */
+			const std::string& title, CScriptArray* const v0,
+			const std::string& confirm, CScriptArray* const v1,
+			const std::string& cancel, CScriptArray* const v2,
+			const std::string& createFolder, CScriptArray* const v3,
+			const std::string& filenameLabel, CScriptArray* const v4,
+			const std::string& nameColumn, CScriptArray* const v5,
+			const std::string& sizeColumn, CScriptArray* const v6,
+			const std::string& modifyColumn, CScriptArray* const v7,
+			const std::string& allFiles, CScriptArray* const v8);
 		CScriptArray* _getFileDialogSelectedPaths(const std::string& name);
-
-		/**
-		 * Adds a file type filter to a \c FileDialog.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name      The name of the \c FileDialog to update.
-		 * @param caption   The caption of the filter.
-		 * @param variables The variables to insert into the caption.
-		 * @param filters   The expressions that make up the filter.
-		 */
 		void _addFileDialogFileTypeFilter(const std::string& name,
 			const std::string& caption, CScriptArray *const variables,
 			CScriptArray *const filters);
-
-		/**
-		 * Clears the file type filters of a given \c FileDialog.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name The name of the \c FileDialog to update.
-		 */
 		void _clearFileDialogFileTypeFilters(const std::string& name);
-
-		/**
-		 * Sets whether a selected file in a \c FileDialog must exist or not.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name      The name of the \c FileDialog to update.
-		 * @param mustExist \c TRUE if the selected path must exist, \c FALSE if
-		 *                  not.
-		 */
 		void _setFileDialogFileMustExist(const std::string& name,
 			const bool mustExist);
-
-		/**
-		 * Sets the default file filter in a \c FileDialog.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name  The name of the \c FileDialog to update.
-		 * @param index The 0-based index of the file filter to set as the default.
-		 */
 		void _setFileDialogDefaultFileFilter(const std::string& name,
 			const std::size_t index);
-
-		/**
-		 * Sets a \c FileDialog's current path.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name The name of the \c FileDialog to update.
-		 * @param path The path to display the files of.
-		 */
 		void _setFileDialogPath(const std::string& name, const std::string& path);
 
 		// MESSAGEBOX //
 
 		/**
-		 * Sets a \c MessageBox's title and text.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name      The name of the \c MessageBox to update.
-		 * @param title     The title of the \c MessageBox.
-		 * @param titleVars The variables to insert into the title.
-		 * @param text      The text of the \c MessageBox.
-		 * @param textVars  The variables to insert into the text.
+		 * Registers \c MessageBox global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
 		 */
+		void _registerMessageBoxGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
 		void _setMessageBoxStrings(const std::string& name,
-			const std::string& title, CScriptArray* titleVars,
-			const std::string& text, CScriptArray* textVars);
-
-		/**
-		 * Add a button to a \c MessageBox.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.
-		 * @param name      The name of the \c MessageBox to update.
-		 * @param text      The text of the new button.
-		 * @param variables The variables to insert into the text.
-		 */
+			const std::string& title, CScriptArray* const titleVars,
+			const std::string& text, CScriptArray* const textVars);
 		void _addMessageBoxButton(const std::string& name, const std::string& text,
-			CScriptArray* variables);
-
-		// TREEVIEW //
-
-		/**
-		 * Adds an item to a \c TreeView.
-		 * If no widget exists with the given name, or if it doesn't support the
-		 * operation, then an error will be logged and no widget will be changed.\n
-		 * @warning Note that \c TreeView items cannot be translated!
-		 * @param   name      The name of the \c TreeView to edit.
-		 * @param   hierarchy The new item hierarchy. If any parent item does not
-		 *                    exist, they will be created.
-		 */
-		void _addTreeViewItem(const std::string& name,
-			const CScriptArray* const hierarchy);
+			CScriptArray* const variables);
 
 		//////////
 		// DATA //
@@ -2075,7 +1338,7 @@ namespace sfx {
 		/**
 		 * Stores additional signal handlers for each widget.
 		 */
-		std::unordered_map<std::string, CScriptWrapper<asIScriptFunction>>
+		std::unordered_map<std::string, engine::CScriptWrapper<asIScriptFunction>>
 			_additionalSignalHandlers;
 
 		/**
@@ -2240,32 +1503,6 @@ namespace sfx {
 		 * The number of menus and menu items in each \c MenuBar.
 		 */
 		std::unordered_map<std::string, MenuItemID> _menuCounter;
-
-		/**
-		 * A list of \c ChildWindows that are currently minimised in a given
-		 * container.
-		 */
-		class minimised_child_window_list {
-		public:
-			/**
-			 * Adds a \c ChildWindow to the list.
-			 * @param  name The full name of the \c ChildWindow.
-			 * @return The X \c Layout2d coordinate that the \c ChildWindow should
-			 *         be moved to when minimised.
-			 */
-			tgui::String minimise(const std::string& name);
-
-			/**
-			 * Removes a \c ChildWindow from the list.
-			 * @param name The full name of the \c ChildWindow.
-			 */
-			void restore(const std::string& name);
-		private:
-			/**
-			 * The list of \c ChildWindows.
-			 */
-			std::vector<std::string> _windows;
-		};
 
 		/**
 		 * \c ChildWindow property cache used to handle minimise and maximise

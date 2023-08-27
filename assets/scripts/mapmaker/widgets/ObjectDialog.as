@@ -105,12 +105,12 @@ class ObjectDialog {
         @initData = data;
 
         // Child window.
-        addWidget("ChildWindow", data.window);
+        addWidget(ChildWindow, data.window);
         setWidgetText(data.window, data.windowText);
 
         // Tabs.
         tabsName = data.window + ".Tabs";
-        addWidget("Tabs", tabsName);
+        addWidget(Tabs, tabsName);
         connectSignalHandler(tabsName, SignalHandler(this.tabsSignalHandler));
 
         // Set up each ObjectPanel, and select the first tab if there is one.
@@ -207,7 +207,7 @@ class ObjectDialog {
 
         // Add base Group widget.
         data.groupFullname = childWindow + "." + data.group;
-        addWidget("Group", data.groupFullname);
+        addWidget(Group, data.groupFullname);
         setWidgetSize(data.groupFullname, "100%", "100%-" + tabsHeight);
         setWidgetOrigin(data.groupFullname, 0.5f, 1.0f);
         setWidgetPosition(data.groupFullname, "50%", "100%");
@@ -215,7 +215,7 @@ class ObjectDialog {
 
         // CurrentlySelectedObject group.
         const auto csoGroup = data.groupFullname + ".CurrentObjectGroup";
-        addWidget("Group", csoGroup);
+        addWidget(Group, csoGroup);
         setWidgetSize(csoGroup, "100%", GROUP_HEIGHT);
         setWidgetOrigin(csoGroup, 0.5f, 0.0f);
         setWidgetPosition(csoGroup, "50%", "0%");
@@ -223,7 +223,7 @@ class ObjectDialog {
 
         // Scrollable panel.
         data.scrollablePanel = data.groupFullname + ".ScrollablePanel";
-        addWidget("ScrollablePanel", data.scrollablePanel);
+        addWidget(ScrollablePanel, data.scrollablePanel);
         setWidgetSize(data.scrollablePanel, "100%", "100%-" + GROUP_HEIGHT + "-" +
             GROUP_HEIGHT);
         setWidgetPosition(data.scrollablePanel, "50%", "50%");
@@ -234,13 +234,13 @@ class ObjectDialog {
 
         // Object buttons.
         data.wrap = data.scrollablePanel + "." + data.group + "Wrap";
-        addWidget("HorizontalWrap", data.wrap);
+        addWidget(HorizontalWrap, data.wrap);
         connectSignalHandler(data.wrap,
             SignalHandler(this.horizontalWrapSignalHandler));
         for (uint t = 0, len = data.scriptNames.length(); t < len; ++t) {
             const auto objName = data.scriptNames[t];
             const auto btn = data.wrap + "." + objName;
-            addWidget("BitmapButton", btn);
+            addWidget(BitmapButton, btn);
             connectSignalHandler(btn,
                 SignalHandler(this.objectButtonSignalHandler));
             // TODO-4: We should really find the tallest sprite and base the
@@ -251,23 +251,23 @@ class ObjectDialog {
         
         // SelectOwner widgets //
         const auto selectOwnerGroup = data.groupFullname + ".SelectOwnerGroup";
-        addWidget("Group", selectOwnerGroup);
+        addWidget(Group, selectOwnerGroup);
         setWidgetSize(selectOwnerGroup, "100%", GROUP_HEIGHT);
         setWidgetOrigin(selectOwnerGroup, 0.5f, 1.0f);
         setWidgetPosition(selectOwnerGroup, "50%", "100%");
 
         const auto ownerIconGroup = selectOwnerGroup + ".OwnerIconGroup";
-        addWidget("Group", ownerIconGroup);
+        addWidget(Group, ownerIconGroup);
         setWidgetSize(ownerIconGroup, GROUP_HEIGHT, "100%");
         setGroupPadding(ownerIconGroup, "5px");
 
         data.ownerIcon = ownerIconGroup + ".OwnerIcon";
-        addWidget("Picture", data.ownerIcon);
+        addWidget(Picture, data.ownerIcon);
         setWidgetOrigin(data.ownerIcon, 0.5f, 0.5f);
         setWidgetPosition(data.ownerIcon, "50%", "50%");
 
         const auto ownerComboboxGroup = selectOwnerGroup + ".OwnerComboboxGroup";
-        addWidget("Group", ownerComboboxGroup);
+        addWidget(Group, ownerComboboxGroup);
         setWidgetSize(ownerComboboxGroup, "100%-" + GROUP_HEIGHT, "100%");
         setWidgetPosition(ownerComboboxGroup, GROUP_HEIGHT, "0px");
         setGroupPadding(ownerComboboxGroup, "0px", "5px", "5px", "5px");
@@ -275,7 +275,7 @@ class ObjectDialog {
         if (selectTab) setSelectedTab(tabsName, getTabCount(tabsName) - 1);
         data.comboBox = data.group + "OwnerCombobox";
         data.comboBoxFullname = ownerComboboxGroup + "." + data.comboBox;
-        addWidget("ComboBox", data.comboBoxFullname);
+        addWidget(ComboBox, data.comboBoxFullname);
         connectSignalHandler(data.comboBoxFullname,
             SignalHandler(this.comboBoxSignalHandler));
         setWidgetSize(data.comboBoxFullname, "100%", "100%");

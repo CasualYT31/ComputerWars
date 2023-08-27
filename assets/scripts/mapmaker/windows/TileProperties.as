@@ -34,23 +34,23 @@ class TilePropertiesWindow {
     void setUp(const string&in parent) {
         // Child window.
         window = parent + ".TileProperties";
-        addWidget("ChildWindow", window);
+        addWidget(ChildWindow, window);
         setWidgetText(window, "tileprops");
 
         // Scrollable panel.
         const auto panel = window + ".ScrollablePanel";
-        addWidget("ScrollablePanel", panel);
+        addWidget(ScrollablePanel, panel);
         setGroupPadding(panel, "5px");
         setVerticalScrollbarAmount(panel, 80);
         scrollBarWidth = formatFloat(getScrollbarWidth(panel));
 
         // Message displayed when no tile is selected.
         const auto errorMessageGroup = panel + ".ErrorMessageGroup";
-        addWidget("Group", errorMessageGroup);
+        addWidget(Group, errorMessageGroup);
         setWidgetSize(errorMessageGroup, "100%-" + scrollBarWidth, "100%");
 
         errorMessageLabel = errorMessageGroup + ".ErrorMessage";
-        addWidget("Label", errorMessageLabel);
+        addWidget(Label, errorMessageLabel);
         setWidgetOrigin(errorMessageLabel, 0.5f, 0.0f);
         setWidgetPosition(errorMessageLabel, "50%", "0px");
         setWidgetSize(errorMessageLabel, "100%", "100px");
@@ -60,30 +60,30 @@ class TilePropertiesWindow {
 
         // Vertical layout.
         layout = panel + ".VerticalLayout";
-        addWidget("VerticalLayout", layout);
+        addWidget(VerticalLayout, layout);
         setSpaceBetweenWidgets(layout, 20.f);
         
         // Tiles vertical layout.
         const auto tilesLayout = layout + ".TilesLayout";
-        addWidget("VerticalLayout", tilesLayout);
+        addWidget(VerticalLayout, tilesLayout);
 
         // Tile picture.
         const auto tilePictureGroup = tilesLayout + ".TilePictureGroup";
-        addWidget("Group", tilePictureGroup);
+        addWidget(Group, tilePictureGroup);
         setWidgetRatioInLayout(tilesLayout, 0, 2.5f);
 
         tilePicture = tilePictureGroup + ".TilePicture";
-        addWidget("Picture", tilePicture);
+        addWidget(Picture, tilePicture);
         setWidgetOrigin(tilePicture, 0.5f, 0.0f);
         setWidgetPosition(tilePicture, "50%", "0%");
 
         // Tile type long name.
         const auto tileTypeLongNameGroup = tilesLayout + ".TileTypeLongNameGroup";
-        addWidget("Group", tileTypeLongNameGroup);
+        addWidget(Group, tileTypeLongNameGroup);
         setWidgetRatioInLayout(tilesLayout, 1, 0.4f);
 
         tileTypeLabel = tileTypeLongNameGroup + ".TileTypeLongName";
-        addWidget("Label", tileTypeLabel);
+        addWidget(Label, tileTypeLabel);
         setWidgetOrigin(tileTypeLabel, 0.5f, 0.0f);
         setWidgetPosition(tileTypeLabel, "50%", "0%");
         setWidgetTextSize(tileTypeLabel, 12);
@@ -92,10 +92,10 @@ class TilePropertiesWindow {
 
         // Terrain long name.
         const auto terrainLongNameGroup = tilesLayout + ".TerrainLongNameGroup";
-        addWidget("Group", terrainLongNameGroup);
+        addWidget(Group, terrainLongNameGroup);
 
         terrainTypeLabel = terrainLongNameGroup + ".TerrainLongName";
-        addWidget("Label", terrainTypeLabel);
+        addWidget(Label, terrainTypeLabel);
         setWidgetOrigin(terrainTypeLabel, 0.5f, 0.0f);
         setWidgetPosition(terrainTypeLabel, "50%", "0%");
         setWidgetTextSize(terrainTypeLabel, 24);
@@ -103,121 +103,121 @@ class TilePropertiesWindow {
 
         // Location.
         const auto locationLayout = tilesLayout + ".LocationLayout";
-        addWidget("HorizontalLayout", locationLayout);
+        addWidget(HorizontalLayout, locationLayout);
 
         const auto xLabelGroup = locationLayout + ".XLabelGroup";
-        addWidget("Group", xLabelGroup);
+        addWidget(Group, xLabelGroup);
 
         const auto xLabel = xLabelGroup + ".XLabel";
-        addWidget("Label", xLabel);
+        addWidget(Label, xLabel);
         setWidgetText(xLabel, "~X");
         setWidgetOrigin(xLabel, 1.0f, 0.5f);
         setWidgetPosition(xLabel, "100%", "50%");
 
         const auto xGroup = locationLayout + ".XGroup";
-        addWidget("Group", xGroup);
+        addWidget(Group, xGroup);
 
         tileXLabel = xGroup + ".X";
-        addWidget("Label", tileXLabel);
+        addWidget(Label, tileXLabel);
         setWidgetOrigin(tileXLabel, 0.0f, 0.5f);
         setWidgetPosition(tileXLabel, "0%", "50%");
 
         const auto yLabelGroup = locationLayout + ".YLabelGroup";
-        addWidget("Group", yLabelGroup);
+        addWidget(Group, yLabelGroup);
 
         const auto yLabel = yLabelGroup + ".YLabel";
-        addWidget("Label", yLabel);
+        addWidget(Label, yLabel);
         setWidgetText(yLabel, "~Y");
         setWidgetOrigin(yLabel, 1.0f, 0.5f);
         setWidgetPosition(yLabel, "100%", "50%");
 
         const auto yGroup = locationLayout + ".YGroup";
-        addWidget("Group", yGroup);
+        addWidget(Group, yGroup);
 
         tileYLabel = yGroup + ".Y";
-        addWidget("Label", tileYLabel);
+        addWidget(Label, tileYLabel);
         setWidgetOrigin(tileYLabel, 0.0f, 0.5f);
         setWidgetPosition(tileYLabel, "0%", "50%");
 
         // Defence.
         const auto defenceLayout = tilesLayout + ".DefenceLayout";
-        addWidget("HorizontalLayout", defenceLayout);
+        addWidget(HorizontalLayout, defenceLayout);
 
         const auto defenceLabelGroup = defenceLayout + ".DefenceLabelGroup";
-        addWidget("Group", defenceLabelGroup);
+        addWidget(Group, defenceLabelGroup);
 
         const auto defenceLabel = defenceLabelGroup + ".DefenceLabel";
-        addWidget("Label", defenceLabel);
+        addWidget(Label, defenceLabel);
         setWidgetText(defenceLabel, "def");
         setWidgetOrigin(defenceLabel, 1.0f, 0.5f);
         setWidgetPosition(defenceLabel, "100%", "50%");
 
         const auto defenceRatingGroup = defenceLayout + ".DefenceRatingGroup";
-        addWidget("Group", defenceRatingGroup);
+        addWidget(Group, defenceRatingGroup);
 
         tileDefenceLabel = defenceRatingGroup + ".DefenceRating";
-        addWidget("Label", tileDefenceLabel);
+        addWidget(Label, tileDefenceLabel);
         setWidgetOrigin(tileDefenceLabel, 0.0f, 0.5f);
         setWidgetPosition(tileDefenceLabel, "0%", "50%");
 
         // HP.
         const auto hpLayout = tilesLayout + ".HPLayout";
-        addWidget("HorizontalLayout", hpLayout);
+        addWidget(HorizontalLayout, hpLayout);
 
         const auto hpLabelGroup = hpLayout + ".HPLableGroup";
-        addWidget("Group", hpLabelGroup);
+        addWidget(Group, hpLabelGroup);
 
         const auto hpLabel = hpLabelGroup + ".HPLabel";
-        addWidget("Label", hpLabel);
+        addWidget(Label, hpLabel);
         setWidgetText(hpLabel, "hp");
         setWidgetOrigin(hpLabel, 1.0f, 0.5f);
         setWidgetPosition(hpLabel, "100%", "50%");
 
         const auto hpGroup = hpLayout + ".HPGroup";
-        addWidget("Group", hpGroup);
+        addWidget(Group, hpGroup);
 
         tileHPEditBox = hpGroup + ".HP";
-        addWidget("EditBox", tileHPEditBox);
+        addWidget(EditBox, tileHPEditBox);
         setWidgetSize(tileHPEditBox, "100%", "30px");
         setWidgetOrigin(tileHPEditBox, 0.5f, 0.5f);
         setWidgetPosition(tileHPEditBox, "50%", "50%");
         onlyAcceptUIntsInEditBox(tileHPEditBox);
 
         const auto slashLabelGroup = hpLayout + ".SlashLabelGroup";
-        addWidget("Group", slashLabelGroup);
+        addWidget(Group, slashLabelGroup);
 
         const auto slashLabel = slashLabelGroup + ".SlashLabel";
-        addWidget("Label", slashLabel);
+        addWidget(Label, slashLabel);
         setWidgetText(slashLabel, "~/");
         setWidgetOrigin(slashLabel, 0.5f, 0.5f);
         setWidgetPosition(slashLabel, "50%", "50%");
 
         const auto maxHpGroup = hpLayout + ".MaxHPGroup";
-        addWidget("Group", maxHpGroup);
+        addWidget(Group, maxHpGroup);
 
         tileMaxHPLabel = maxHpGroup + ".MaxHP";
-        addWidget("Label", tileMaxHPLabel);
+        addWidget(Label, tileMaxHPLabel);
         setWidgetOrigin(tileMaxHPLabel, 0.0f, 0.5f);
         setWidgetPosition(tileMaxHPLabel, "0%", "50%");
 
         // Owner.
         const auto ownerLayout = tilesLayout + ".OwnerLayout";
-        addWidget("HorizontalLayout", ownerLayout);
+        addWidget(HorizontalLayout, ownerLayout);
 
         const auto ownerLabelGroup = ownerLayout + ".OwnerLabelGroup";
-        addWidget("Group", ownerLabelGroup);
+        addWidget(Group, ownerLabelGroup);
 
         const auto ownerLabel = ownerLabelGroup + ".OwnerLabel";
-        addWidget("Label", ownerLabel);
+        addWidget(Label, ownerLabel);
         setWidgetText(ownerLabel, "owner");
         setWidgetOrigin(ownerLabel, 1.0f, 0.5f);
         setWidgetPosition(ownerLabel, "100%", "50%");
 
         const auto ownerListGroup = ownerLayout + ".OwnerListGroup";
-        addWidget("Group", ownerListGroup);
+        addWidget(Group, ownerListGroup);
 
         tileOwnerComboBox = ownerListGroup + ".OwnerList";
-        addWidget("ComboBox", tileOwnerComboBox);
+        addWidget(ComboBox, tileOwnerComboBox);
         setWidgetSize(tileOwnerComboBox, "100%", "30px");
         setWidgetOrigin(tileOwnerComboBox, 0.5f, 0.5f);
         setWidgetPosition(tileOwnerComboBox, "50%", "50%");
@@ -226,10 +226,10 @@ class TilePropertiesWindow {
 
         // Units header.
         const auto unitsHeaderGroup = tilesLayout + ".UnitsHeaderGroup";
-        addWidget("Group", unitsHeaderGroup);
+        addWidget(Group, unitsHeaderGroup);
 
         const auto unitsHeader = unitsHeaderGroup + ".UnitsHeader";
-        addWidget("Label", unitsHeader);
+        addWidget(Label, unitsHeader);
         setWidgetText(unitsHeader, "unitsheader");
         setWidgetOrigin(unitsHeader, 0.5f, 0.5f);
         setWidgetPosition(unitsHeader, "50%", "50%");
@@ -238,35 +238,35 @@ class TilePropertiesWindow {
 
         // Units TreeView.
         const auto unitsTreeViewGroup = tilesLayout + ".UnitsTreeViewGroup";
-        addWidget("Group", unitsTreeViewGroup);
+        addWidget(Group, unitsTreeViewGroup);
         setWidgetRatioInLayout(tilesLayout, 8, 2.0f);
 
         unitTreeView = unitsTreeViewGroup + ".UnitsTreeView";
-        addWidget("TreeView", unitTreeView);
+        addWidget(TreeView, unitTreeView);
         setWidgetSize(unitTreeView, "100%", "100%");
 
         // UNITS //
         
         // Units vertical layout.
         unitLayout = layout + ".UnitsLayout";
-        addWidget("VerticalLayout", unitLayout);
+        addWidget(VerticalLayout, unitLayout);
 
         // Unit picture.
         const auto unitPictureGroup = unitLayout + ".UnitPictureGroup";
-        addWidget("Group", unitPictureGroup);
+        addWidget(Group, unitPictureGroup);
         setWidgetRatioInLayout(unitLayout, 0, 1.5f);
 
         unitPicture = unitPictureGroup + ".UnitPicture";
-        addWidget("Picture", unitPicture);
+        addWidget(Picture, unitPicture);
         setWidgetOrigin(unitPicture, 0.5f, 0.0f);
         setWidgetPosition(unitPicture, "50%", "0%");
 
         // Unit type long name.
         const auto unitTypeLongNameGroup = unitLayout + ".UnitTypeLongNameGroup";
-        addWidget("Group", unitTypeLongNameGroup);
+        addWidget(Group, unitTypeLongNameGroup);
 
         unitTypeLabel = unitTypeLongNameGroup + ".UnitTypeLongName";
-        addWidget("Label", unitTypeLabel);
+        addWidget(Label, unitTypeLabel);
         setWidgetOrigin(unitTypeLabel, 0.5f, 0.5f);
         setWidgetPosition(unitTypeLabel, "50%", "50%");
         setWidgetTextSize(unitTypeLabel, 24);
@@ -274,284 +274,284 @@ class TilePropertiesWindow {
 
         // Movement type.
         const auto movementLayout = unitLayout + ".MovementLayout";
-        addWidget("HorizontalLayout", movementLayout);
+        addWidget(HorizontalLayout, movementLayout);
 
         const auto movementLabelGroup = movementLayout + ".MovementLabelGroup";
-        addWidget("Group", movementLabelGroup);
+        addWidget(Group, movementLabelGroup);
 
         const auto movementLabel = movementLabelGroup + ".MovementLabel";
-        addWidget("Label", movementLabel);
+        addWidget(Label, movementLabel);
         setWidgetText(movementLabel, "movement");
         setWidgetOrigin(movementLabel, 1.0f, 0.5f);
         setWidgetPosition(movementLabel, "100%", "50%");
 
         const auto movementTypeGroup = movementLayout + ".MovementTypeGroup";
-        addWidget("Group", movementTypeGroup);
+        addWidget(Group, movementTypeGroup);
 
         unitMovementType = movementTypeGroup + ".MovementType";
-        addWidget("Label", unitMovementType);
+        addWidget(Label, unitMovementType);
         setWidgetOrigin(unitMovementType, 0.0f, 0.5f);
         setWidgetPosition(unitMovementType, "0%", "50%");
 
         // Price.
         const auto priceLayout = unitLayout + ".PriceLayout";
-        addWidget("HorizontalLayout", priceLayout);
+        addWidget(HorizontalLayout, priceLayout);
 
         const auto priceLabelGroup = priceLayout + ".PriceLabelGroup";
-        addWidget("Group", priceLabelGroup);
+        addWidget(Group, priceLabelGroup);
 
         const auto priceLabel = priceLabelGroup + ".PriceLabel";
-        addWidget("Label", priceLabel);
+        addWidget(Label, priceLabel);
         setWidgetText(priceLabel, "pricelabel");
         setWidgetOrigin(priceLabel, 1.0f, 0.5f);
         setWidgetPosition(priceLabel, "100%", "50%");
 
         const auto priceGroup = priceLayout + ".PriceGroup";
-        addWidget("Group", priceGroup);
+        addWidget(Group, priceGroup);
 
         unitPrice = priceGroup + ".Price";
-        addWidget("Label", unitPrice);
+        addWidget(Label, unitPrice);
         setWidgetOrigin(unitPrice, 0.0f, 0.5f);
         setWidgetPosition(unitPrice, "0%", "50%");
 
         // HP.
         const auto unitHPLayout = unitLayout + ".UnitHPLayout";
-        addWidget("HorizontalLayout", unitHPLayout);
+        addWidget(HorizontalLayout, unitHPLayout);
 
         const auto unitHPLabelGroup = unitHPLayout + ".UnitHPLableGroup";
-        addWidget("Group", unitHPLabelGroup);
+        addWidget(Group, unitHPLabelGroup);
 
         const auto unitHPLabel = unitHPLabelGroup + ".UnitHPLabel";
-        addWidget("Label", unitHPLabel);
+        addWidget(Label, unitHPLabel);
         setWidgetText(unitHPLabel, "hp");
         setWidgetOrigin(unitHPLabel, 1.0f, 0.5f);
         setWidgetPosition(unitHPLabel, "100%", "50%");
 
         const auto unitHPGroup = unitHPLayout + ".UnitHPGroup";
-        addWidget("Group", unitHPGroup);
+        addWidget(Group, unitHPGroup);
 
         unitHPEditBox = unitHPGroup + ".UnitHP";
-        addWidget("EditBox", unitHPEditBox);
+        addWidget(EditBox, unitHPEditBox);
         setWidgetSize(unitHPEditBox, "100%", "30px");
         setWidgetOrigin(unitHPEditBox, 0.5f, 0.5f);
         setWidgetPosition(unitHPEditBox, "50%", "50%");
         onlyAcceptUIntsInEditBox(unitHPEditBox);
 
         const auto slashLabelGroup2 = unitHPLayout + ".SlashLabelGroup";
-        addWidget("Group", slashLabelGroup2);
+        addWidget(Group, slashLabelGroup2);
 
         const auto slashLabel2 = slashLabelGroup2 + ".SlashLabel";
-        addWidget("Label", slashLabel2);
+        addWidget(Label, slashLabel2);
         setWidgetText(slashLabel2, "~/");
         setWidgetOrigin(slashLabel2, 0.5f, 0.5f);
         setWidgetPosition(slashLabel2, "50%", "50%");
 
         const auto maxUnitHpGroup = unitHPLayout + ".MaxUnitHPGroup";
-        addWidget("Group", maxUnitHpGroup);
+        addWidget(Group, maxUnitHpGroup);
 
         unitMaxHPLabel = maxUnitHpGroup + ".MaxUnitHP";
-        addWidget("Label", unitMaxHPLabel);
+        addWidget(Label, unitMaxHPLabel);
         setWidgetOrigin(unitMaxHPLabel, 0.0f, 0.5f);
         setWidgetPosition(unitMaxHPLabel, "0%", "50%");
 
         // Fuel.
         const auto unitFuelLayout = unitLayout + ".UnitFuelLayout";
-        addWidget("HorizontalLayout", unitFuelLayout);
+        addWidget(HorizontalLayout, unitFuelLayout);
 
         const auto unitFuelLabelGroup = unitFuelLayout + ".UnitFuelLableGroup";
-        addWidget("Group", unitFuelLabelGroup);
+        addWidget(Group, unitFuelLabelGroup);
 
         const auto unitFuelLabel = unitFuelLabelGroup + ".UnitFuelLabel";
-        addWidget("Label", unitFuelLabel);
+        addWidget(Label, unitFuelLabel);
         setWidgetText(unitFuelLabel, "fuel");
         setWidgetOrigin(unitFuelLabel, 1.0f, 0.5f);
         setWidgetPosition(unitFuelLabel, "100%", "50%");
 
         const auto unitFuelGroup = unitFuelLayout + ".UnitFuelGroup";
-        addWidget("Group", unitFuelGroup);
+        addWidget(Group, unitFuelGroup);
 
         unitFuelEditBox = unitFuelGroup + ".UnitFuel";
-        addWidget("EditBox", unitFuelEditBox);
+        addWidget(EditBox, unitFuelEditBox);
         setWidgetSize(unitFuelEditBox, "100%", "30px");
         setWidgetOrigin(unitFuelEditBox, 0.5f, 0.5f);
         setWidgetPosition(unitFuelEditBox, "50%", "50%");
         onlyAcceptUIntsInEditBox(unitFuelEditBox);
 
         const auto slashLabelGroup3 = unitFuelLayout + ".SlashLabelGroup";
-        addWidget("Group", slashLabelGroup3);
+        addWidget(Group, slashLabelGroup3);
 
         const auto slashLabel3 = slashLabelGroup3 + ".SlashLabel";
-        addWidget("Label", slashLabel3);
+        addWidget(Label, slashLabel3);
         setWidgetText(slashLabel3, "~/");
         setWidgetOrigin(slashLabel3, 0.5f, 0.5f);
         setWidgetPosition(slashLabel3, "50%", "50%");
 
         const auto maxUnitFuelGroup = unitFuelLayout + ".MaxUnitFuelGroup";
-        addWidget("Group", maxUnitFuelGroup);
+        addWidget(Group, maxUnitFuelGroup);
 
         unitMaxFuelLabel = maxUnitFuelGroup + ".MaxUnitFuel";
-        addWidget("Label", unitMaxFuelLabel);
+        addWidget(Label, unitMaxFuelLabel);
         setWidgetOrigin(unitMaxFuelLabel, 0.0f, 0.5f);
         setWidgetPosition(unitMaxFuelLabel, "0%", "50%");
 
         // MP.
         const auto mpLayout = unitLayout + ".MPLayout";
-        addWidget("HorizontalLayout", mpLayout);
+        addWidget(HorizontalLayout, mpLayout);
 
         const auto mpLabelGroup = mpLayout + ".MPLabelGroup";
-        addWidget("Group", mpLabelGroup);
+        addWidget(Group, mpLabelGroup);
 
         const auto mpLabel = mpLabelGroup + ".MPLabel";
-        addWidget("Label", mpLabel);
+        addWidget(Label, mpLabel);
         setWidgetText(mpLabel, "mp");
         setWidgetOrigin(mpLabel, 1.0f, 0.5f);
         setWidgetPosition(mpLabel, "100%", "50%");
 
         const auto mpGroup = mpLayout + ".MPGroup";
-        addWidget("Group", mpGroup);
+        addWidget(Group, mpGroup);
 
         unitMPLabel = mpGroup + ".MP";
-        addWidget("Label", unitMPLabel);
+        addWidget(Label, unitMPLabel);
         setWidgetOrigin(unitMPLabel, 0.0f, 0.5f);
         setWidgetPosition(unitMPLabel, "0%", "50%");
 
         // Vision.
         const auto visionLayout = unitLayout + ".VisionLayout";
-        addWidget("HorizontalLayout", visionLayout);
+        addWidget(HorizontalLayout, visionLayout);
 
         const auto visionLabelGroup = visionLayout + ".VisionLabelGroup";
-        addWidget("Group", visionLabelGroup);
+        addWidget(Group, visionLabelGroup);
 
         const auto visionLabel = visionLabelGroup + ".VisionLabel";
-        addWidget("Label", visionLabel);
+        addWidget(Label, visionLabel);
         setWidgetText(visionLabel, "vision");
         setWidgetOrigin(visionLabel, 1.0f, 0.5f);
         setWidgetPosition(visionLabel, "100%", "50%");
 
         const auto visionGroup = visionLayout + ".VisionGroup";
-        addWidget("Group", visionGroup);
+        addWidget(Group, visionGroup);
 
         unitVisionLabel = visionGroup + ".Vision";
-        addWidget("Label", unitVisionLabel);
+        addWidget(Label, unitVisionLabel);
         setWidgetOrigin(unitVisionLabel, 0.0f, 0.5f);
         setWidgetPosition(unitVisionLabel, "0%", "50%");
 
         // Load limit.
         const auto loadLimitLayout = unitLayout + ".LoadLimitLayout";
-        addWidget("HorizontalLayout", loadLimitLayout);
+        addWidget(HorizontalLayout, loadLimitLayout);
 
         const auto loadLimitLabelGroup = loadLimitLayout + ".LoadLimitLabelGroup";
-        addWidget("Group", loadLimitLabelGroup);
+        addWidget(Group, loadLimitLabelGroup);
 
         const auto loadLimitLabel = loadLimitLabelGroup + ".LoadLimitLabel";
-        addWidget("Label", loadLimitLabel);
+        addWidget(Label, loadLimitLabel);
         setWidgetText(loadLimitLabel, "loadlimit");
         setWidgetOrigin(loadLimitLabel, 1.0f, 0.5f);
         setWidgetPosition(loadLimitLabel, "100%", "50%");
 
         const auto loadLimitGroup = loadLimitLayout + ".LoadLimitGroup";
-        addWidget("Group", loadLimitGroup);
+        addWidget(Group, loadLimitGroup);
 
         unitLoadLimitLabel = loadLimitGroup + ".LoadLimit";
-        addWidget("Label", unitLoadLimitLabel);
+        addWidget(Label, unitLoadLimitLabel);
         setWidgetOrigin(unitLoadLimitLabel, 0.0f, 0.5f);
         setWidgetPosition(unitLoadLimitLabel, "0%", "50%");
 
         // Waiting?
         const auto waitingLayout = unitLayout + ".WaitingLayout";
-        addWidget("HorizontalLayout", waitingLayout);
+        addWidget(HorizontalLayout, waitingLayout);
 
         const auto waitingLabelGroup = waitingLayout + ".WaitingLabelGroup";
-        addWidget("Group", waitingLabelGroup);
+        addWidget(Group, waitingLabelGroup);
 
         const auto waitingLabel = waitingLabelGroup + ".WaitingLabel";
-        addWidget("Label", waitingLabel);
+        addWidget(Label, waitingLabel);
         setWidgetText(waitingLabel, "waiting");
         setWidgetOrigin(waitingLabel, 1.0f, 0.5f);
         setWidgetPosition(waitingLabel, "100%", "50%");
 
         const auto waitingGroup = waitingLayout + ".WaitingGroup";
-        addWidget("Group", waitingGroup);
+        addWidget(Group, waitingGroup);
 
         unitWaitingCheckBox = waitingGroup + ".Waiting";
-        addWidget("CheckBox", unitWaitingCheckBox);
+        addWidget(CheckBox, unitWaitingCheckBox);
         setWidgetOrigin(unitWaitingCheckBox, 0.0f, 0.5f);
         setWidgetPosition(unitWaitingCheckBox, "0%", "50%");
 
         // Capturing?
         const auto capturingLayout = unitLayout + ".CapturingLayout";
-        addWidget("HorizontalLayout", capturingLayout);
+        addWidget(HorizontalLayout, capturingLayout);
 
         const auto capturingLabelGroup = capturingLayout + ".CapturingLabelGroup";
-        addWidget("Group", capturingLabelGroup);
+        addWidget(Group, capturingLabelGroup);
 
         const auto capturingLabel = capturingLabelGroup + ".CapturingLabel";
-        addWidget("Label", capturingLabel);
+        addWidget(Label, capturingLabel);
         setWidgetText(capturingLabel, "capturing");
         setWidgetOrigin(capturingLabel, 1.0f, 0.5f);
         setWidgetPosition(capturingLabel, "100%", "50%");
 
         const auto capturingGroup = capturingLayout + ".CapturingGroup";
-        addWidget("Group", capturingGroup);
+        addWidget(Group, capturingGroup);
 
         unitCapturingCheckBox = capturingGroup + ".Capturing";
-        addWidget("CheckBox", unitCapturingCheckBox);
+        addWidget(CheckBox, unitCapturingCheckBox);
         setWidgetOrigin(unitCapturingCheckBox, 0.0f, 0.5f);
         setWidgetPosition(unitCapturingCheckBox, "0%", "50%");
 
         // Hiding?
         const auto hidingLayout = unitLayout + ".HidingLayout";
-        addWidget("HorizontalLayout", hidingLayout);
+        addWidget(HorizontalLayout, hidingLayout);
 
         const auto hidingLabelGroup = hidingLayout + ".HidingLabelGroup";
-        addWidget("Group", hidingLabelGroup);
+        addWidget(Group, hidingLabelGroup);
 
         const auto hidingLabel = hidingLabelGroup + ".HidingLabel";
-        addWidget("Label", hidingLabel);
+        addWidget(Label, hidingLabel);
         setWidgetText(hidingLabel, "hiding");
         setWidgetOrigin(hidingLabel, 1.0f, 0.5f);
         setWidgetPosition(hidingLabel, "100%", "50%");
 
         const auto hidingGroup = hidingLayout + ".HidingGroup";
-        addWidget("Group", hidingGroup);
+        addWidget(Group, hidingGroup);
 
         unitHidingCheckBox = hidingGroup + ".Hiding";
-        addWidget("CheckBox", unitHidingCheckBox);
+        addWidget(CheckBox, unitHidingCheckBox);
         setWidgetOrigin(unitHidingCheckBox, 0.0f, 0.5f);
         setWidgetPosition(unitHidingCheckBox, "0%", "50%");
 
         // Army.
         const auto armyLayout = unitLayout + ".ArmyLayout";
-        addWidget("HorizontalLayout", armyLayout);
+        addWidget(HorizontalLayout, armyLayout);
 
         const auto armyLabelGroup = armyLayout + ".ArmyLabelGroup";
-        addWidget("Group", armyLabelGroup);
+        addWidget(Group, armyLabelGroup);
 
         const auto armyLabel = armyLabelGroup + ".ArmyLabel";
-        addWidget("Label", armyLabel);
+        addWidget(Label, armyLabel);
         setWidgetText(armyLabel, "army");
         setWidgetOrigin(armyLabel, 1.0f, 0.5f);
         setWidgetPosition(armyLabel, "100%", "50%");
 
         const auto armyListGroup = armyLayout + ".ArmyListGroup";
-        addWidget("Group", armyListGroup);
+        addWidget(Group, armyListGroup);
 
         unitArmyLabel = armyListGroup + ".ArmyList";
-        addWidget("Label", unitArmyLabel);
+        addWidget(Label, unitArmyLabel);
         setWidgetOrigin(unitArmyLabel, 0.0f, 0.5f);
         setWidgetPosition(unitArmyLabel, "0%", "50%");
 
         // Load and delete buttons.
         const auto unitButtonsLayout = unitLayout + ".UnitButtonsLayout";
-        addWidget("HorizontalLayout", unitButtonsLayout);
+        addWidget(HorizontalLayout, unitButtonsLayout);
 
         const auto unitCreateAndLoadButtonGroup = unitButtonsLayout +
             ".UnitCreateAndLoadButtonGroup";
-        addWidget("Group", unitCreateAndLoadButtonGroup);
+        addWidget(Group, unitCreateAndLoadButtonGroup);
 
         unitCreateAndLoadButton =
             unitCreateAndLoadButtonGroup + ".UnitCreateAndLoadButton";
-        addWidget("BitmapButton", unitCreateAndLoadButton);
+        addWidget(BitmapButton, unitCreateAndLoadButton);
         setWidgetText(unitCreateAndLoadButton, "createandload");
         setWidgetSize(unitCreateAndLoadButton, "100%", "100%");
         setWidgetSprite(unitCreateAndLoadButton, "icon", "loadicon");
@@ -560,10 +560,10 @@ class TilePropertiesWindow {
 
         const auto unitDeleteButtonGroup = unitButtonsLayout +
             ".UnitDeleteButtonGroup";
-        addWidget("Group", unitDeleteButtonGroup);
+        addWidget(Group, unitDeleteButtonGroup);
 
         const auto unitDeleteButton = unitDeleteButtonGroup + ".UnitDeleteButton";
-        addWidget("BitmapButton", unitDeleteButton);
+        addWidget(BitmapButton, unitDeleteButton);
         setWidgetText(unitDeleteButton, "deleteunit");
         setWidgetSize(unitDeleteButton, "100%", "100%");
         setWidgetSprite(unitDeleteButton, "icon", "deleteicon");
@@ -730,27 +730,27 @@ class TilePropertiesWindow {
 
             const string unitAmmoLayout = unitLayout + ".UnitAmmoLayout" +
                 formatUInt(i);
-            addWidget("HorizontalLayout", unitAmmoLayout);
+            addWidget(HorizontalLayout, unitAmmoLayout);
             setWidgetIndexInContainer(unitLayout,
                 getWidgetCount(unitLayout) - 1, 9 + i);
             unitAmmoLayouts.insertLast(unitAmmoLayout);
 
             const auto unitAmmoLabelGroup =
                 unitAmmoLayout + ".UnitAmmoLableGroup";
-            addWidget("Group", unitAmmoLabelGroup);
+            addWidget(Group, unitAmmoLabelGroup);
 
             const auto unitAmmoLabel = unitAmmoLabelGroup + ".UnitAmmoLabel";
-            addWidget("Label", unitAmmoLabel);
+            addWidget(Label, unitAmmoLabel);
             setWidgetText(unitAmmoLabel, weapon.name);
             setWidgetOrigin(unitAmmoLabel, 1.0f, 0.5f);
             setWidgetPosition(unitAmmoLabel, "100%", "50%");
 
             const auto unitAmmoGroup = unitAmmoLayout + ".UnitAmmoGroup";
-            addWidget("Group", unitAmmoGroup);
+            addWidget(Group, unitAmmoGroup);
 
             const auto unitAmmo = unitAmmoGroup + ".UnitAmmo" +
                 formatUInt(i);
-            addWidget("EditBox", unitAmmo);
+            addWidget(EditBox, unitAmmo);
             setWidgetSize(unitAmmo, "100%", "30px");
             setWidgetOrigin(unitAmmo, 0.5f, 0.5f);
             setWidgetPosition(unitAmmo, "50%", "50%");
@@ -765,20 +765,20 @@ class TilePropertiesWindow {
                 SignalHandler(this.unitAmmoEditBoxSignalHandler));
 
             const auto slashLabelGroup = unitAmmoLayout + ".SlashLabelGroup";
-            addWidget("Group", slashLabelGroup);
+            addWidget(Group, slashLabelGroup);
 
             const auto slashLabel = slashLabelGroup + ".SlashLabel";
-            addWidget("Label", slashLabel);
+            addWidget(Label, slashLabel);
             setWidgetText(slashLabel, "~/");
             setWidgetOrigin(slashLabel, 0.5f, 0.5f);
             setWidgetPosition(slashLabel, "50%", "50%");
 
             const auto maxUnitAmmoGroup =
                 unitAmmoLayout + ".MaxUnitAmmoGroup";
-            addWidget("Group", maxUnitAmmoGroup);
+            addWidget(Group, maxUnitAmmoGroup);
 
             const auto maxUnitAmmo = maxUnitAmmoGroup + ".MaxUnitAmmo";
-            addWidget("Label", maxUnitAmmo);
+            addWidget(Label, maxUnitAmmo);
             setWidgetOrigin(maxUnitAmmo, 0.0f, 0.5f);
             setWidgetPosition(maxUnitAmmo, "0%", "50%");
             if (weapon.hasInfiniteAmmo)

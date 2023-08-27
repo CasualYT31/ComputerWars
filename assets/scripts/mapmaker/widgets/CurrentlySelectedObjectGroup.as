@@ -39,23 +39,23 @@ class CurrentlySelectedObject {
      * @param callback Code to run when the selected object is updated.
      */
     void addWidget(const string&in layout, Callback@ callback = null) {
-        ::addWidget("HorizontalLayout", layout);
+        ::addWidget(HorizontalLayout, layout);
         setWidgetSize(layout, "100%", "100%");
         setSpaceBetweenWidgets(layout, 10.0f);
 
         const auto leftGroup = layout + ".IconGroup";
-        ::addWidget("Group", leftGroup);
+        ::addWidget(Group, leftGroup);
         
         const auto tile = leftGroup + ".ObjIcon";
-        ::addWidget("Picture", tile);
+        ::addWidget(Picture, tile);
         setWidgetOrigin(tile, 1.0f, 0.5f);
         setWidgetPosition(tile, "100%", "50%");
 
         const auto rightGroup = layout + ".NameGroup";
-        ::addWidget("Group", rightGroup);
+        ::addWidget(Group, rightGroup);
 
         const auto name = rightGroup + ".ObjName";
-        ::addWidget("Label", name);
+        ::addWidget(Label, name);
         setWidgetOrigin(name, 0.0f, 0.5f);
         setWidgetPosition(name, "0%", "50%");
 

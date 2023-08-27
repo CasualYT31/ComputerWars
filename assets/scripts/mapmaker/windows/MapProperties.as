@@ -33,96 +33,96 @@ class MapPropertiesWindow {
      */
     void setUp(const string&in parent) {
         window = parent + ".SetMapProperties";
-        addWidget("ChildWindow", window);
+        addWidget(ChildWindow, window);
         setWidgetText(window, "mapprops");
         setWidgetSize(window, "250px", "175px");
         setWidgetResizable(window, false);
         setChildWindowTitleButtons(window, TitleButton::Close);
 
         const auto baseLayout = window + ".BaseLayout";
-        addWidget("HorizontalLayout", baseLayout);
+        addWidget(HorizontalLayout, baseLayout);
         setWidgetSize(baseLayout, "100%", "100%-30px");
         setGroupPadding(baseLayout, "5px");
 
         const auto labelLayout = baseLayout + ".LabelLayout";
-        addWidget("VerticalLayout", labelLayout);
+        addWidget(VerticalLayout, labelLayout);
         setWidgetRatioInLayout(baseLayout, 0, 0.2f);
 
         const auto nameLabelGroup = labelLayout + ".MapNameLabelGroup";
-        addWidget("Group", nameLabelGroup);
+        addWidget(Group, nameLabelGroup);
 
         const auto nameLabel = nameLabelGroup + ".MapNameLabel";
-        addWidget("Label", nameLabel);
+        addWidget(Label, nameLabel);
         setWidgetText(nameLabel, "name");
         setWidgetOrigin(nameLabel, 1.0f, 0.5f);
         setWidgetPosition(nameLabel, "100%", "50%");
 
         const auto dayLabelGroup = labelLayout + ".DayLabelGroup";
-        addWidget("Group", dayLabelGroup);
+        addWidget(Group, dayLabelGroup);
 
         const auto dayLabel = dayLabelGroup + ".DayLabel";
-        addWidget("Label", dayLabel);
+        addWidget(Label, dayLabel);
         setWidgetText(dayLabel, "daylabel");
         setWidgetOrigin(dayLabel, 1.0f, 0.5f);
         setWidgetPosition(dayLabel, "100%", "50%");
 
         const auto sizeLabelGroup = labelLayout + ".SizeLabelGroup";
-        addWidget("Group", sizeLabelGroup);
+        addWidget(Group, sizeLabelGroup);
 
         const auto sizeLabel = sizeLabelGroup + ".SizeLabel";
-        addWidget("Label", sizeLabel);
+        addWidget(Label, sizeLabel);
         setWidgetText(sizeLabel, "size");
         setWidgetOrigin(sizeLabel, 1.0f, 0.5f);
         setWidgetPosition(sizeLabel, "100%", "50%");
 
         const auto editLayout = baseLayout + ".EditLayout";
-        addWidget("VerticalLayout", editLayout);
+        addWidget(VerticalLayout, editLayout);
 
         const auto nameEditGroup = editLayout + ".MapNameEditGroup";
-        addWidget("Group", nameEditGroup);
+        addWidget(Group, nameEditGroup);
         setGroupPadding(nameEditGroup, "5px", "20%", "5px", "20%");
 
         mapName = nameEditGroup + ".MapNameEdit";
-        addWidget("EditBox", mapName);
+        addWidget(EditBox, mapName);
         setWidgetSize(mapName, "100%", "100%");
 
         const auto dayEditGroup = editLayout + ".DayEditGroup";
-        addWidget("Group", dayEditGroup);
+        addWidget(Group, dayEditGroup);
         setGroupPadding(dayEditGroup, "5px", "20%", "5px", "20%");
 
         day = dayEditGroup + ".DayEdit";
-        addWidget("EditBox", day);
+        addWidget(EditBox, day);
         setWidgetSize(day, "100%", "100%");
         onlyAcceptUIntsInEditBox(day);
 
         const auto sizeLayout = editLayout + ".SizeLayout";
-        addWidget("HorizontalLayout", sizeLayout);
+        addWidget(HorizontalLayout, sizeLayout);
 
         const auto widthEditGroup = sizeLayout + ".WidthEditGroup";
-        addWidget("Group", widthEditGroup);
+        addWidget(Group, widthEditGroup);
         setGroupPadding(widthEditGroup, "5px", "20%", "5px", "20%");
 
         width = widthEditGroup + ".WidthEdit";
-        addWidget("EditBox", width);
+        addWidget(EditBox, width);
         setWidgetSize(width, "100%", "100%");
         onlyAcceptUIntsInEditBox(width);
 
         const auto xLabelGroup = sizeLayout + ".XGroup";
-        addWidget("Group", xLabelGroup);
+        addWidget(Group, xLabelGroup);
         setWidgetRatioInLayout(sizeLayout, 1, 0.2f);
 
         const auto xLabel = xLabelGroup + ".X";
-        addWidget("Label", xLabel);
+        addWidget(Label, xLabel);
         setWidgetText(xLabel, "~x");
         setWidgetOrigin(xLabel, 0.5f, 0.5f);
         setWidgetPosition(xLabel, "50%", "50%");
 
         const auto heightEditGroup = sizeLayout + ".HeightEditGroup";
-        addWidget("Group", heightEditGroup);
+        addWidget(Group, heightEditGroup);
         setGroupPadding(heightEditGroup, "5px", "20%", "5px", "20%");
 
         height = heightEditGroup + ".HeightEdit";
-        addWidget("EditBox", height);
+        addWidget(EditBox, height);
         setWidgetSize(height, "100%", "100%");
         onlyAcceptUIntsInEditBox(height);
 

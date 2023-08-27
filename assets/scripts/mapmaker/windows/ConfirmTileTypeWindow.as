@@ -25,7 +25,7 @@ class ConfirmTileTypeWindow {
         SignalHandler@ const no) {
         // ChildWindow.
         window = name;
-        addWidget("ChildWindow", window);
+        addWidget(ChildWindow, window);
         setWidgetText(window, "alert");
         setWidgetSize(window, "250px", "175px");
         setWidgetResizable(window, false);
@@ -34,33 +34,33 @@ class ConfirmTileTypeWindow {
     
         // Base layout.
         const auto baseLayout = window + ".BaseLayout";
-        addWidget("VerticalLayout", baseLayout);
+        addWidget(VerticalLayout, baseLayout);
         setWidgetSize(baseLayout, "100%", "100%-30px");
         setGroupPadding(baseLayout, "5px");
 
         // The main label.
         const auto textGroup = baseLayout + ".TextGroup";
-        addWidget("Group", textGroup);
+        addWidget(Group, textGroup);
 
         text = textGroup + ".Text";
-        addWidget("Label", text);
+        addWidget(Label, text);
         setWidgetSize(text, "100%", "100%");
         setWidgetTextMaximumWidth(text, getWidgetFullSize(text).x);
 
         // The CurrentlySelectedTileType widget and label.
         const auto tileLayout = baseLayout + ".TileLayout";
-        addWidget("VerticalLayout", tileLayout);
+        addWidget(VerticalLayout, tileLayout);
 
         const auto tileTextGroup = tileLayout + ".TextGroup";
-        addWidget("Group", tileTextGroup);
+        addWidget(Group, tileTextGroup);
 
         tileText = tileTextGroup + ".Text";
-        addWidget("Label", tileText);
+        addWidget(Label, tileText);
         setWidgetText(tileText, beforeTileSelected);
         tileTextAfterTileSelected = afterTileSelected;
 
         const auto tileGroup = tileLayout + ".TileGroup";
-        addWidget("Group", tileGroup);
+        addWidget(Group, tileGroup);
 
         CurrentlySelectedTileType.addWidget(tileGroup + ".CurSelTileLayout",
             CurrentlySelectedObject::Callback(this.enableYesButton));

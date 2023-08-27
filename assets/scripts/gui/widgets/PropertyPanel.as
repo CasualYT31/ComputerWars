@@ -49,24 +49,24 @@ class PropertyPanel {
 	 *                   other widgets.
 	 */
 	PropertyPanel(const string&in layoutName) explicit {
-		addWidget("Panel", layoutName);
+		addWidget(Panel, layoutName);
 		setWidgetBackgroundColour(layoutName, Colour(255,255,255,128));
 		setWidgetBorderSize(layoutName, 0.0);
 		layout = layoutName + ".layout";
-		addWidget("VerticalLayout", layout);
-		addWidget("Panel", layout + ".iconPanel");
+		addWidget(VerticalLayout, layout);
+		addWidget(Panel, layout + ".iconPanel");
 		setWidgetBackgroundColour(layout + ".iconPanel", NO_COLOUR);
-		addWidget("Picture", layout + ".iconPanel.icon");
+		addWidget(Picture, layout + ".iconPanel.icon");
 		setWidgetOrigin(layout + ".iconPanel.icon", 0.5, 0.5);
 		setWidgetPosition(layout + ".iconPanel.icon", "50%", "50%");
-		addWidget("Panel", layout + ".namePanel");
+		addWidget(Panel, layout + ".namePanel");
 		setWidgetBackgroundColour(layout + ".namePanel", NO_COLOUR);
-		addWidget("Label", layout + ".namePanel.name");
+		addWidget(Label, layout + ".namePanel.name");
 		_configureLabel(layout + ".namePanel.name",
             PROPERTY_PANEL_NAME_TEXT_SIZE);
 		setWidgetOrigin(layout + ".namePanel.name", 0.5, 0.5);
 		setWidgetPosition(layout + ".namePanel.name", "50%", "50%");
-		addWidget("Grid", layout + ".properties");
+		addWidget(Grid, layout + ".properties");
 		setWidgetRatioInLayout(layout, 0, 72.5);
 		setWidgetRatioInLayout(layout, 1, 30.0);
 		setWidgetRatioInLayout(layout, 2, 87.5);
@@ -136,12 +136,12 @@ class PropertyPanel {
 	void _ensurePropertyCreation(const uint index) {
 		const string i = formatUInt(index);
 		if (!widgetExists(layout + ".properties.icon" + i)) {
-			addWidgetToGrid("Picture", layout + ".properties.icon" + i, index, 0);
+			addWidgetToGrid(Picture, layout + ".properties.icon" + i, index, 0);
 			setWidgetAlignmentInGrid(layout + ".properties", index, 0,
 				WidgetAlignment::Right);
 		}
 		if (!widgetExists(layout + ".properties.label" + i)) {
-			addWidgetToGrid("Label", layout + ".properties.label" + i, index, 1);
+			addWidgetToGrid(Label, layout + ".properties.label" + i, index, 1);
 			_configureLabel(layout + ".properties.label" + i,
                 PROPERTY_PANEL_PROPERTY_TEXT_SIZE);
 			setWidgetAlignmentInGrid(layout + ".properties", index, 1,

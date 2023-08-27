@@ -18,10 +18,10 @@ class DamageWidget {
      */
     DamageWidget(const string&in parent) explicit {
         _damageSprite = parent + ".DamageSprite";
-        addWidget("Picture", _damageSprite);
+        addWidget(Picture, _damageSprite);
         setWidgetSprite(_damageSprite, "icon", "damagetooltip");
         _damageLabel = parent + ".DamageLabel";
-        addWidget("Label", _damageLabel);
+        addWidget(Label, _damageLabel);
         setWidgetTextColour(_damageLabel, Colour(250,100,0,255));
         setWidgetTextOutlineColour(_damageLabel, Colour(0,0,0,255));
         setWidgetTextOutlineThickness(_damageLabel, 2.0f);

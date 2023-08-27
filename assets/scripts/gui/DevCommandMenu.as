@@ -7,20 +7,20 @@
  * Adds the widgets to the developer command menu.
  */
 void DevCommandMenuSetUp() {
-	addWidget("EditBox", "Code");
+	addWidget(EditBox, "Code");
 	setWidgetSize("Code", "100%", "30px");
 	setWidgetOrigin("Code", 0.0, 1.0);
 	setWidgetPosition("Code", "0%", "100%");
 	setWidgetTextSize("Code", 22);
 
-	addWidget("Button", "Back");
+	addWidget(Button, "Back");
 	setWidgetText("Back", "back");
 	setWidgetSize("Back", "12.5%", "30px");
 	setWidgetOrigin("Back", 1.0, 1.0);
 	setWidgetPosition("Back", "100%", "DevCommandMenu.Code.top");
 	setWidgetTextSize("Back", 22);
 	
-	addWidget("Label", "Error");
+	addWidget(Label, "Error");
 	setWidgetTextColour("Error", Colour(128, 0, 0, 255));
 	setWidgetTextOutlineColour("Error", Colour(255, 255, 255, 255));
 	setWidgetTextOutlineThickness("Error", 2.0);
@@ -29,7 +29,7 @@ void DevCommandMenuSetUp() {
 	setWidgetSize("Error", "87.5%", "30px");
 	setWidgetTextSize("Error", 16);
 
-	addWidget("Label", "Info");
+	addWidget(Label, "Info");
 	setWidgetTextColour("Info", Colour(0, 0, 0, 255));
 	setWidgetTextOutlineColour("Info", Colour(255, 255, 255, 255));
 	setWidgetTextOutlineThickness("Info", 2.0);

@@ -64,15 +64,15 @@ MementoWindow UndoRedoWindow;
 void MapMakerMenuSetUp() {
     // Dialog groups.
 
-    addWidget("Group", MESSAGE_BOX_GROUP);
+    addWidget(Group, MESSAGE_BOX_GROUP);
     setWidgetEnabled(MESSAGE_BOX_GROUP, false);
-    addWidget("Group", FILE_DIALOG_GROUP);
+    addWidget(Group, FILE_DIALOG_GROUP);
 
     // Menu.
 
-    addWidget("Group", BASE_GROUP);
-    addWidget("MenuBar", MENU);
-    addWidget("Group", CLIENT_AREA);
+    addWidget(Group, BASE_GROUP);
+    addWidget(MenuBar, MENU);
+    addWidget(Group, CLIENT_AREA);
     StatusBar.setUp(BASE_GROUP, formatFloat(getWidgetFullSize(MENU).y) + "px");
 
     setWidgetSize(CLIENT_AREA, "100%", "100%-2*" +
@@ -484,8 +484,8 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
         ArmyPropertiesDialog.restore();
 
     } else {
-        error("Unrecognised menu item ID " + awe::formatMenuItemID(id) +
-            " received in the Map Maker menu!");
+        error("Unrecognised menu item ID " + formatMenuItemID(id) + " received "
+            "in the Map Maker menu!");
     }
 }
 

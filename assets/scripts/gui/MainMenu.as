@@ -11,15 +11,15 @@ void MainMenuSetUp() {
     setDirectionalFlowAngleBracketSprite("LL", "icon", "llanglebracket");
     setDirectionalFlowAngleBracketSprite("LR", "icon", "lranglebracket");
 
-	setBackground("", 200, 200, 200, 0);
-	addWidget("ListBox", "FileSelect");
+	setBackground("", Colour(200, 200, 200, 0));
+	addWidget(ListBox, "FileSelect");
 	setWidgetSize("FileSelect", "50%", "50%");
 	setWidgetPosition("FileSelect", "25%", "50%");
 	setWidgetOrigin("FileSelect", 0.25, 0.5);
-	addWidget("Button", "NewGame");
+	addWidget(Button, "NewGame");
 	setWidgetPosition("NewGame", "10%", "10%");
 	setWidgetText("NewGame", "~New Game");
-	addWidget("Button", "MapMaker");
+	addWidget(Button, "MapMaker");
 	setWidgetPosition("MapMaker", "90%", "10%");
 	setWidgetOrigin("MapMaker", 1.0, 0.0);
 	setWidgetText("MapMaker", "~Map Maker");

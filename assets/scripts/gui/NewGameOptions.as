@@ -4,50 +4,50 @@
  */
 
 void NewGameOptionsSetUp() {
-	setBackground("", 128, 128, 128, 255);
-	addWidget("Button", "GoBack");
+	setBackground("", Colour(128, 128, 128, 255));
+	addWidget(Button, "GoBack");
 	setWidgetText("GoBack", "~Back");
 	setWidgetPosition("GoBack", "5%", "5%");
-	addWidget("Button", "Play");
+	addWidget(Button, "Play");
 	setWidgetText("Play", "~Play");
 	setWidgetPosition("Play", "95%", "95%");
 	setWidgetOrigin("Play", 1.0, 1.0);
-	addWidget("Button", "DeletePlay");
+	addWidget(Button, "DeletePlay");
 	setWidgetText("DeletePlay", "~Delete & Play");
 	setWidgetPosition("DeletePlay", "5%", "95%");
 	setWidgetOrigin("DeletePlay", 0.0, 1.0);
 
-	addWidget("VerticalLayout", "Teams");
+	addWidget(VerticalLayout, "Teams");
 	setWidgetOrigin("Teams", 1.0, 0.5);
 	setWidgetPosition("Teams", "100%", "50%");
 	setWidgetSize("Teams", "10%", "200px");
-	addWidget("EditBox", "Teams.OS");
+	addWidget(EditBox, "Teams.OS");
 	setWidgetDefaultText("Teams.OS", "~OS's Team");
-	addWidget("EditBox", "Teams.BM");
+	addWidget(EditBox, "Teams.BM");
 	setWidgetDefaultText("Teams.BM", "~BM's Team");
-	addWidget("EditBox", "Teams.GE");
+	addWidget(EditBox, "Teams.GE");
 	setWidgetDefaultText("Teams.GE", "~GE's Team");
-	addWidget("EditBox", "Teams.YC");
+	addWidget(EditBox, "Teams.YC");
 	setWidgetDefaultText("Teams.YC", "~YC's Team");
 
-	addWidget("Grid", "COs");
+	addWidget(Grid, "COs");
 	setWidgetOrigin("COs", 0.5, 0.5);
 	setWidgetPosition("COs", "50%", "50%");
 	setWidgetSize("COs", "50%", "200px");
 
-	addWidgetToGrid("Label", "COs.OSCurrentLabel", 0, 0);
-	addWidgetToGrid("Label", "COs.BMCurrentLabel", 1, 0);
-	addWidgetToGrid("Label", "COs.GECurrentLabel", 2, 0);
-	addWidgetToGrid("Label", "COs.YCCurrentLabel", 3, 0);
+	addWidgetToGrid(Label, "COs.OSCurrentLabel", 0, 0);
+	addWidgetToGrid(Label, "COs.BMCurrentLabel", 1, 0);
+	addWidgetToGrid(Label, "COs.GECurrentLabel", 2, 0);
+	addWidgetToGrid(Label, "COs.YCCurrentLabel", 3, 0);
 	setWidgetText("COs.OSCurrentLabel", "~OS Current CO");
 	setWidgetText("COs.BMCurrentLabel", "~BM Current CO");
 	setWidgetText("COs.GECurrentLabel", "~GE Current CO");
 	setWidgetText("COs.YCCurrentLabel", "~YC Current CO");
 
-	addWidgetToGrid("Listbox", "COs.OSCurrentList", 0, 1);
-	addWidgetToGrid("Listbox", "COs.BMCurrentList", 1, 1);
-	addWidgetToGrid("Listbox", "COs.GECurrentList", 2, 1);
-	addWidgetToGrid("Listbox", "COs.YCCurrentList", 3, 1);
+	addWidgetToGrid(ListBox, "COs.OSCurrentList", 0, 1);
+	addWidgetToGrid(ListBox, "COs.BMCurrentList", 1, 1);
+	addWidgetToGrid(ListBox, "COs.GECurrentList", 2, 1);
+	addWidgetToGrid(ListBox, "COs.YCCurrentList", 3, 1);
 	setWidgetSize("COs.OSCurrentList", "100px", "50px");
 	setWidgetSize("COs.BMCurrentList", "100px", "50px");
 	setWidgetSize("COs.GECurrentList", "100px", "50px");
@@ -61,19 +61,19 @@ void NewGameOptionsSetUp() {
 	addItem("COs.YCCurrentList", "~" + commander["NOCO"].name);
 	addItem("COs.YCCurrentList", "~" + commander["JAKE"].name);
 
-	addWidgetToGrid("Label", "COs.OSTagLabel", 0, 2);
-	addWidgetToGrid("Label", "COs.BMTagLabel", 1, 2);
-	addWidgetToGrid("Label", "COs.GETagLabel", 2, 2);
-	addWidgetToGrid("Label", "COs.YCTagLabel", 3, 2);
+	addWidgetToGrid(Label, "COs.OSTagLabel", 0, 2);
+	addWidgetToGrid(Label, "COs.BMTagLabel", 1, 2);
+	addWidgetToGrid(Label, "COs.GETagLabel", 2, 2);
+	addWidgetToGrid(Label, "COs.YCTagLabel", 3, 2);
 	setWidgetText("COs.OSTagLabel", "~OS Tag CO");
 	setWidgetText("COs.BMTagLabel", "~BM Tag CO");
 	setWidgetText("COs.GETagLabel", "~GE Tag CO");
 	setWidgetText("COs.YCTagLabel", "~YC Tag CO");
 
-	addWidgetToGrid("Listbox", "COs.OSTagList", 0, 3);
-	addWidgetToGrid("Listbox", "COs.BMTagList", 1, 3);
-	addWidgetToGrid("Listbox", "COs.GETagList", 2, 3);
-	addWidgetToGrid("Listbox", "COs.YCTagList", 3, 3);
+	addWidgetToGrid(ListBox, "COs.OSTagList", 0, 3);
+	addWidgetToGrid(ListBox, "COs.BMTagList", 1, 3);
+	addWidgetToGrid(ListBox, "COs.GETagList", 2, 3);
+	addWidgetToGrid(ListBox, "COs.YCTagList", 3, 3);
 	setWidgetSize("COs.OSTagList", "100px", "50px");
 	setWidgetSize("COs.BMTagList", "100px", "50px");
 	setWidgetSize("COs.GETagList", "100px", "50px");

@@ -4,7 +4,7 @@ project("ComputerWarsSFX")
 set(TGUI_BACKEND "SFML_GRAPHICS")
 FetchContent_Declare(tgui
 	GIT_REPOSITORY https://github.com/CasualYT31/TGUI.git
-	GIT_TAG 355f7ce
+	GIT_TAG 074cc4d
 )
 FetchContent_MakeAvailable(tgui)
 
@@ -19,7 +19,9 @@ add_library(${PROJECT_NAME} STATIC
 	"source/texture.cpp"
 	"source/userinput.cpp"
 	"source/audio.cpp"
-	"source/gui.cpp")
+	"source/gui/gui.cpp"
+	"source/gui/guiregisterinterface.cpp"
+	"source/gui/guiscriptinterface.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsSFX_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

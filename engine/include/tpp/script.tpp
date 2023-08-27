@@ -22,6 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+///////////////////////////
+// SCRIPT_REFERENCE_TYPE //
+///////////////////////////
+
 template<typename T>
 void engine::script_reference_type<T>::AddRef() const noexcept {
 	++_refCount;
@@ -47,6 +51,41 @@ int engine::script_reference_type<T>::RegisterType(asIScriptEngine* engine,
 		asCALL_THISCALL);
 	return r;
 }
+
+////////////////////
+// CSCRIPTWRAPPER //
+////////////////////
+
+template<typename T>
+engine::CScriptWrapper<T>::CScriptWrapper(T* const obj) : _ptr(obj) {
+	if (_ptr) _ptr->AddRef();
+}
+
+template<typename T>
+engine::CScriptWrapper<T>::CScriptWrapper(
+	const engine::CScriptWrapper<T>& obj) : _ptr(obj.operator->()) {
+	if (_ptr) _ptr->AddRef();
+}
+
+template<typename T>
+engine::CScriptWrapper<T>::CScriptWrapper(
+	engine::CScriptWrapper<T>&& obj) noexcept : _ptr(std::move(obj.operator->())) {
+	if (_ptr) _ptr->AddRef();
+}
+
+template<typename T>
+engine::CScriptWrapper<T>::~CScriptWrapper() noexcept {
+	if (_ptr) _ptr->Release();
+}
+
+template<typename T>
+T* engine::CScriptWrapper<T>::operator->() const noexcept {
+	return _ptr;
+}
+
+/////////////
+// SCRIPTS //
+/////////////
 
 template<typename... Ts>
 bool engine::scripts::callFunction(const std::string& name, Ts... values) {

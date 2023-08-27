@@ -7,12 +7,12 @@
  * Sets up the grid used to display available units to unload.
  */
 void UnloadUnitsMenuSetUp() {
-	addWidget("ScrollablePanel", "panel");
+	addWidget(ScrollablePanel, "panel");
 	setWidgetBackgroundColour("panel", Colour(0,0,0,128));
 	setWidgetOrigin("panel", 0.5, 0.5);
 	setWidgetPosition("panel", "50%", "50%");
 	setWidgetSize("panel", "38%", "38%");
-	addWidget("Grid", "panel.grid");
+	addWidget(Grid, "panel.grid");
 }
 
 /**
@@ -39,16 +39,16 @@ void UnloadUnitsMenuOpen() {
 	UnloadUnitsMenuBaseUnloadUnit = game.map.getSelectedUnit();
 
 	// Add the header widgets.
-	addWidgetToGrid("Button", "panel.grid.cancel", 0, 0);
+	addWidgetToGrid(Button, "panel.grid.cancel", 0, 0);
 	setWidgetText("panel.grid.cancel", "cancelunload");
     setWidgetDirectionalFlowStart("panel.grid.cancel");
-	addWidgetToGrid("Button", "panel.grid.proceed", 0, 1);
+	addWidgetToGrid(Button, "panel.grid.proceed", 0, 1);
 	setWidgetText("panel.grid.proceed", "proceedwithunload");
-	addWidgetToGrid("Picture", "panel.grid.hpicon", 0, 2);
+	addWidgetToGrid(Picture, "panel.grid.hpicon", 0, 2);
 	setWidgetSprite("panel.grid.hpicon", "icon", "hp");
-	addWidgetToGrid("Picture", "panel.grid.fuelicon", 0, 3);
+	addWidgetToGrid(Picture, "panel.grid.fuelicon", 0, 3);
 	setWidgetSprite("panel.grid.fuelicon", "icon", "fuel");
-	addWidgetToGrid("Picture", "panel.grid.ammoicon", 0, 4);
+	addWidgetToGrid(Picture, "panel.grid.ammoicon", 0, 4);
 	setWidgetSprite("panel.grid.ammoicon", "icon", "ammo");
 
 	// Go through all the units that are currently loaded on the selected unit.
@@ -59,29 +59,29 @@ void UnloadUnitsMenuOpen() {
 		const auto unitID = loadedUnits[i];
 		const string name = formatUInt(unitID);
 		const auto type = game.map.getUnitType(unitID);
-		addWidgetToGrid("Picture", "panel.grid.icon" + name, i + 1, 0);
+		addWidgetToGrid(Picture, "panel.grid.icon" + name, i + 1, 0);
 		setWidgetSprite("panel.grid.icon" + name, "unit",
 			type.unitSprite(
 				game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).turnOrder
 		));
 		// Update UnloadUnitsMenuHandleInput() if you change the name of this
 		// widget!
-		addWidgetToGrid("Button", "panel.grid.button" + name, i + 1, 1,
+		addWidgetToGrid(Button, "panel.grid.button" + name, i + 1, 1,
 			"UnloadUnitsMenu_UnloadUnit");
 		setWidgetText("panel.grid.button" + name, "unload");
-		addWidgetToGrid("Label", "panel.grid.hp" + name, i + 1, 2);
+		addWidgetToGrid(Label, "panel.grid.hp" + name, i + 1, 2);
 		setWidgetText("panel.grid.hp" + name,
 			"~" + formatInt(game.map.getUnitDisplayedHP(unitID)));
 		setWidgetTextColour("panel.grid.hp" + name, Colour(255, 255, 255, 255));
 		setWidgetTextOutlineColour("panel.grid.hp" + name, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness("panel.grid.hp" + name, 2.0);
-		addWidgetToGrid("Label", "panel.grid.fuel" + name, i + 1, 3);
+		addWidgetToGrid(Label, "panel.grid.fuel" + name, i + 1, 3);
 		setWidgetText("panel.grid.fuel" + name,
 			"~" + formatInt(game.map.getUnitFuel(unitID)));
 		setWidgetTextColour("panel.grid.fuel" + name, Colour(255, 255, 255, 255));
 		setWidgetTextOutlineColour("panel.grid.fuel" + name, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness("panel.grid.fuel" + name, 2.0);
-		addWidgetToGrid("Label", "panel.grid.ammo" + name, i + 1, 4);
+		addWidgetToGrid(Label, "panel.grid.ammo" + name, i + 1, 4);
 		// TODO-1 {
 		if (type.weaponCount > 0 && !type.weapon(0).hasInfiniteAmmo) {
 			setWidgetText("panel.grid.ammo" + name,
@@ -95,7 +95,7 @@ void UnloadUnitsMenuOpen() {
 		setWidgetTextOutlineColour("panel.grid.ammo" + name, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness("panel.grid.ammo" + name, 2.0);
 		if (game.map.isUnitHiding(unitID)) {
-			addWidgetToGrid("Label", "panel.grid.ishiddenmsg" + name, i + 1, 5);
+			addWidgetToGrid(Label, "panel.grid.ishiddenmsg" + name, i + 1, 5);
 			setWidgetText("panel.grid.ishiddenmsg" + name, "hidden");
 			setWidgetTextColour("panel.grid.ishiddenmsg" + name,
 				Colour(255, 255, 255, 255));

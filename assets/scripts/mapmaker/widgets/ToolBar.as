@@ -34,7 +34,7 @@ class ToolBar {
         const array<const ToolBarButtonSetUpData@>@ const buttons) {
         // Create the ChildWindow.
         window = name;
-        addWidget("ChildWindow", window);
+        addWidget(ChildWindow, window);
         setWidgetText(window, "toolbar");
         setChildWindowTitleButtons(window, TitleButton::Close);
         setWidgetResizable(window, false);
@@ -44,7 +44,7 @@ class ToolBar {
         for (uint i = 0, len = buttons.length(); i < len; ++i) {
             const auto data = buttons[i];
             const auto btn = window + "." + data.shortName;
-            addWidget("BitmapButton", btn);
+            addWidget(BitmapButton, btn);
             connectSignalHandler(btn, SignalHandler(this.buttonHandler));
             setWidgetPosition(btn,
                 PADDING + "+(" + BUTTON_WIDTH + "+" + PADDING + ")*" +

@@ -39,48 +39,48 @@ class ArmyLayout {
     void create(const string&in parent, const ArmyID id) {
         army = id; const auto countryType = country[country.scriptNames[id]];
         layout = parent + ".ArmyLayout" + formatArmyID(id);
-        addWidget("VerticalLayout", layout);
+        addWidget(VerticalLayout, layout);
 
         // Top row.
         const auto topLayout = layout + ".TopLayout";
-        addWidget("HorizontalLayout", topLayout);
+        addWidget(HorizontalLayout, topLayout);
         setSpaceBetweenWidgets(topLayout, 5.0f);
 
         // Country icon.
         const auto iconGroup = topLayout + ".IconGroup";
-        addWidget("Group", iconGroup);
+        addWidget(Group, iconGroup);
 
         const auto icon = iconGroup + ".Icon";
-        addWidget("Picture", icon);
+        addWidget(Picture, icon);
         setWidgetSprite(icon, "icon", countryType.iconName);
         setWidgetOrigin(icon, 1.0f, 0.5f);
         setWidgetPosition(icon, "100%", "50%");
 
         // Country name.
         const auto nameGroup = topLayout + ".NameGroup";
-        addWidget("Group", nameGroup);
+        addWidget(Group, nameGroup);
 
         const auto name = nameGroup + ".Name";
-        addWidget("Label", name);
+        addWidget(Label, name);
         setWidgetText(name, countryType.name);
         setWidgetOrigin(name, 0.0f, 0.5f);
         setWidgetPosition(name, "0%", "50%");
 
         // Team.
         const auto teamLabelGroup = topLayout + ".TeamLabelGroup";
-        addWidget("Group", teamLabelGroup);
+        addWidget(Group, teamLabelGroup);
 
         const auto teamLabel = teamLabelGroup + ".TeamLabel";
-        addWidget("Label", teamLabel);
+        addWidget(Label, teamLabel);
         setWidgetText(teamLabel, "team");
         setWidgetOrigin(teamLabel, 1.0f, 0.5f);
         setWidgetPosition(teamLabel, "100%", "50%");
 
         const auto teamGroup = topLayout + ".TeamGroup";
-        addWidget("Group", teamGroup);
+        addWidget(Group, teamGroup);
 
         team = teamGroup + ".Team";
-        addWidget("EditBox", team);
+        addWidget(EditBox, team);
         onlyAcceptUIntsInEditBox(team);
         setWidgetSize(team, "100%", "20px");
         setWidgetOrigin(team, 0.0f, 0.5f);
@@ -88,19 +88,19 @@ class ArmyLayout {
 
         // Funds.
         const auto fundsLabelGroup = topLayout + ".FundsLabelGroup";
-        addWidget("Group", fundsLabelGroup);
+        addWidget(Group, fundsLabelGroup);
 
         const auto fundsLabel = fundsLabelGroup + ".FundsLabel";
-        addWidget("Label", fundsLabel);
+        addWidget(Label, fundsLabel);
         setWidgetText(fundsLabel, "funds");
         setWidgetOrigin(fundsLabel, 1.0f, 0.5f);
         setWidgetPosition(fundsLabel, "100%", "50%");
 
         const auto fundsGroup = topLayout + ".FundsGroup";
-        addWidget("Group", fundsGroup);
+        addWidget(Group, fundsGroup);
 
         funds = fundsGroup + ".Funds";
-        addWidget("EditBox", funds);
+        addWidget(EditBox, funds);
         onlyAcceptUIntsInEditBox(funds);
         setWidgetSize(funds, "100%", "20px");
         setWidgetOrigin(funds, 0.0f, 0.5f);
@@ -108,34 +108,34 @@ class ArmyLayout {
         
         // Current Army?
         const auto currentArmyGroup = topLayout + ".CurrentArmyGroup";
-        addWidget("Group", currentArmyGroup);
+        addWidget(Group, currentArmyGroup);
 
         currentArmy = currentArmyGroup + ".CurrentArmy";
-        addWidget("RadioButton", currentArmy);
+        addWidget(RadioButton, currentArmy);
         setWidgetText(currentArmy, "currentarmy");
         setWidgetOrigin(currentArmy, 0.0f, 0.5f);
         setWidgetPosition(currentArmy, "0%", "50%");
 
         // Bottom row.
         const auto bottomLayout = layout + ".BottomLayout";
-        addWidget("HorizontalLayout", bottomLayout);
+        addWidget(HorizontalLayout, bottomLayout);
         setSpaceBetweenWidgets(bottomLayout, 5.0f);
 
         // Current CO.
         const auto currentCOLabelGroup = bottomLayout + ".CurrentCOLabelGroup";
-        addWidget("Group", currentCOLabelGroup);
+        addWidget(Group, currentCOLabelGroup);
 
         const auto currentCOLabel = currentCOLabelGroup + ".CurrentCOLabel";
-        addWidget("Label", currentCOLabel);
+        addWidget(Label, currentCOLabel);
         setWidgetText(currentCOLabel, "currentco");
         setWidgetOrigin(currentCOLabel, 1.0f, 0.5f);
         setWidgetPosition(currentCOLabel, "100%", "50%");
 
         const auto currentCOGroup = bottomLayout + ".CurrentCOGroup";
-        addWidget("Group", currentCOGroup);
+        addWidget(Group, currentCOGroup);
 
         currentCO = currentCOGroup + ".CurrentCO";
-        addWidget("ComboBox", currentCO);
+        addWidget(ComboBox, currentCO);
         setItemsToDisplay(currentCO, 5);
         awe::addCOsToList(currentCO, false);
         setWidgetSize(currentCO, "100%", "20px");
@@ -143,28 +143,28 @@ class ArmyLayout {
         setWidgetPosition(currentCO, "50%", "50%");
         
         const auto currentCOIconGroup = bottomLayout + ".CurrentCOIconGroup";
-        addWidget("Group", currentCOIconGroup);
+        addWidget(Group, currentCOIconGroup);
 
         currentCOIcon = currentCOIconGroup + ".CurrentCOIcon";
-        addWidget("Picture", currentCOIcon);
+        addWidget(Picture, currentCOIcon);
         setWidgetOrigin(currentCOIcon, 0.0f, 0.5f);
         setWidgetPosition(currentCOIcon, "0%", "50%");
 
         // Tag CO.
         const auto tagCOLabelGroup = bottomLayout + ".TagCOLabelGroup";
-        addWidget("Group", tagCOLabelGroup);
+        addWidget(Group, tagCOLabelGroup);
 
         const auto tagCOLabel = tagCOLabelGroup + ".TagCOLabel";
-        addWidget("Label", tagCOLabel);
+        addWidget(Label, tagCOLabel);
         setWidgetText(tagCOLabel, "tagco");
         setWidgetOrigin(tagCOLabel, 1.0f, 0.5f);
         setWidgetPosition(tagCOLabel, "100%", "50%");
 
         const auto tagCOGroup = bottomLayout + ".TagCOGroup";
-        addWidget("Group", tagCOGroup);
+        addWidget(Group, tagCOGroup);
 
         tagCO = tagCOGroup + ".TagCO";
-        addWidget("ComboBox", tagCO);
+        addWidget(ComboBox, tagCO);
         setItemsToDisplay(tagCO, 5);
         awe::addCOsToList(tagCO, true);
         setWidgetSize(tagCO, "100%", "20px");
@@ -172,19 +172,19 @@ class ArmyLayout {
         setWidgetPosition(tagCO, "50%", "50%");
         
         const auto tagCOIconGroup = bottomLayout + ".TagCOIconGroup";
-        addWidget("Group", tagCOIconGroup);
+        addWidget(Group, tagCOIconGroup);
 
         tagCOIcon = tagCOIconGroup + ".TagCOIcon";
-        addWidget("Picture", tagCOIcon);
+        addWidget(Picture, tagCOIcon);
         setWidgetOrigin(tagCOIcon, 0.0f, 0.5f);
         setWidgetPosition(tagCOIcon, "0%", "50%");
 
         // Delete button.
         const auto deleteButtonGroup = bottomLayout + ".DeleteButtonGroup";
-        addWidget("Group", deleteButtonGroup);
+        addWidget(Group, deleteButtonGroup);
 
         const auto deleteButton = deleteButtonGroup + ".DeleteButton";
-        addWidget("Button", deleteButton);
+        addWidget(Button, deleteButton);
         setWidgetText(deleteButton, "delete");
         setWidgetSize(deleteButton, "100%", "20px");
         setWidgetOrigin(deleteButton, 0.5f, 0.5f);
@@ -418,7 +418,7 @@ class ArmyPropertiesWindow {
 
         // Child window.
         window = parent + ".ArmyProperties";
-        addWidget("ChildWindow", window);
+        addWidget(ChildWindow, window);
         setWidgetText(window, "armyprops");
         closeChildWindow(window);
         const auto BORDER_WIDTH = formatFloat(getBorderWidths(window)[0]);
@@ -427,7 +427,7 @@ class ArmyPropertiesWindow {
         // Scrollable panel.
         const auto PADDING = "5";
         const auto panel = window + ".ScrollablePanel";
-        addWidget("ScrollablePanel", panel);
+        addWidget(ScrollablePanel, panel);
         setGroupPadding(panel, PADDING);
         setVerticalScrollbarAmount(panel, 25);
         setHorizontalScrollbarAmount(panel, 30);
@@ -443,34 +443,34 @@ class ArmyPropertiesWindow {
 
         // Vertical layout.
         layout = panel + ".ArmyLayout";
-        addWidget("VerticalLayout", layout);
+        addWidget(VerticalLayout, layout);
         setWidgetSize(layout, ARMY_LAYOUT_WIDTH, ARMY_LAYOUT_HEIGHT);
         setSpaceBetweenWidgets(layout, parseFloat(SPACE_BETWEEN_ARMY_LAYOUTS));
 
         // Create Army button, country list, and description label.
         const auto controlsGroup = layout + ".ControlsGroup";
-        addWidget("Group", controlsGroup);
+        addWidget(Group, controlsGroup);
 
         const auto controlsLayout = controlsGroup + ".ControlsLayout";
-        addWidget("HorizontalLayout", controlsLayout);
+        addWidget(HorizontalLayout, controlsLayout);
 
         const auto descriptionGroup = controlsLayout + ".ArmyDescriptionGroup";
-        addWidget("Group", descriptionGroup);
+        addWidget(Group, descriptionGroup);
         setGroupPadding(descriptionGroup, PADDING);
 
         const auto description = descriptionGroup + ".ArmyDescription";
-        addWidget("Label", description);
+        addWidget(Label, description);
         setWidgetText(description, "mapmakerarmydescription");
         setWidgetSize(description, "100%", "100%");
         setWidgetTextAlignment(description, HorizontalAlignment::Centre,
             VerticalAlignment::Centre);
 
         const auto countryGroup = controlsLayout + ".CountryGroup";
-        addWidget("Group", countryGroup);
+        addWidget(Group, countryGroup);
         setGroupPadding(countryGroup, PADDING);
 
         countryComboBox = countryGroup + ".CountryComboBox";
-        addWidget("ComboBox", countryComboBox);
+        addWidget(ComboBox, countryComboBox);
         setItemsToDisplay(countryComboBox, 5);
         awe::addCountriesToList(countryComboBox, false);
         setWidgetSize(countryComboBox, "100%", "30px");
@@ -478,11 +478,11 @@ class ArmyPropertiesWindow {
         setWidgetPosition(countryComboBox, "50%", "50%");
 
         const auto createButtonGroup = controlsLayout + ".CreateButtonGroup";
-        addWidget("Group", createButtonGroup);
+        addWidget(Group, createButtonGroup);
         setGroupPadding(createButtonGroup, PADDING);
 
         const auto createArmyButton = createButtonGroup + ".CreateArmyButton";
-        addWidget("Button", createArmyButton);
+        addWidget(Button, createArmyButton);
         setWidgetText(createArmyButton, "createarmy");
         setWidgetSize(createArmyButton, "100%", "30px");
         setWidgetOrigin(createArmyButton, 0.5f, 0.5f);

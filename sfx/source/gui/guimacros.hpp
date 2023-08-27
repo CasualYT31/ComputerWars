@@ -145,3 +145,22 @@ public:
  * @sa \c ELSE_IF_WIDGET_IS()
  */
 #define ELSE_UNSUPPORTED() else { UNSUPPORTED_WIDGET_TYPE() }
+
+/**
+ * Defines a widget type static variable which holds the string name of a given
+ * widget type.
+ * @param t The case-sensitive name of the widget type.
+ */
+#define WIDGET_TYPE(t) static std::string t = #t;
+
+/**
+ * Registers a widget type constant with a script interface and documents it.
+ * @param e The engine to register the constant with.
+ * @param d The documentation generator to send documentation to.
+ * @param t The widget type.
+ */
+#define REGISTER_WIDGET_TYPE_NAME(e, d, t) \
+	e->RegisterGlobalProperty("const string " #t, &type::t); \
+	d->DocumentExpectedFunction("const string " #t, "The name of the <tt>" #t \
+		"</tt> widget type, should be given to functions such as " \
+		"<tt>addWidget()</tt>.");

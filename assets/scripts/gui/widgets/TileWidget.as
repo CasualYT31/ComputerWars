@@ -32,7 +32,7 @@ class TileWidget {
 	 */
 	TileWidget(const string&in layoutName) explicit {
 		layout = layoutName;
-		addWidget("HorizontalLayout", layout);
+		addWidget(HorizontalLayout, layout);
 		setSpaceBetweenWidgets(layout, NO_SPACE);
 		// Setup the property panels that will always exist, plus any widgets
 		// within those panels that will always exist.
@@ -40,7 +40,7 @@ class TileWidget {
 		_panels[0].setPropertyIcon(0, "icon", "hp");
 		_panels[0].setPropertyVisibility(0, false);
 		_panels[0].setPropertyIcon(1, "icon", "defstar");
-		addWidget("Picture", layout + ".curve");
+		addWidget(Picture, layout + ".curve");
 		// Default to left alignment.
 		_alignment = TileWidgetAlignment::Left;
 		setAlignment(TileWidgetAlignment::Left);

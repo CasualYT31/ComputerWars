@@ -13,17 +13,17 @@ class MementoWindow {
      */
     void setUp(const string&in parent) {
         window = parent + ".MementoWindow";
-        addWidget("ChildWindow", window);
+        addWidget(ChildWindow, window);
         setWidgetText(window, "mementowindow");
         setWidgetSize(window, "200px", "400px");
         closeChildWindow(window);
 
         const auto listboxGroup = window + ".MementoGroup";
-        addWidget("Group", listboxGroup);
+        addWidget(Group, listboxGroup);
         setGroupPadding(listboxGroup, "5px");
 
         listbox = listboxGroup + ".MementoList";
-        addWidget("ListBox", listbox);
+        addWidget(ListBox, listbox);
         setWidgetSize(listbox, "100%", "100%");
     }
 

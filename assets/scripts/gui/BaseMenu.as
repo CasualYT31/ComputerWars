@@ -45,7 +45,7 @@ const uint BASEMENU_BUTTON_TEXT_SIZE = 12;
 void PanelSetUp(const string&in panelName, const array<string>@ movementTypeNames,
 	const uint columnCount) {
 	const uint HEIGHT = 30;
-	addWidget("ScrollablePanel", panelName);
+	addWidget(ScrollablePanel, panelName);
 	setWidgetVisibility(panelName, false);
 	setWidgetSize(panelName, "60%", "60%");
 	setWidgetOrigin(panelName, 0.5, 0.5);
@@ -65,7 +65,7 @@ void PanelSetUp(const string&in panelName, const array<string>@ movementTypeName
 	for (uint i = 0, len = unitsMatchingMovement.length(); i < len; ++i) {
 		const auto type = unittype[unitsMatchingMovement[i]];
 		string widget = panelName + "." + type.scriptName;
-		addWidget("BitmapButton", widget, "BaseMenuHandleSignal");
+		addWidget(BitmapButton, widget, "BaseMenuHandleSignal");
         widgetNames[i % columnCount].insertLast(widget);
 		setWidgetTextSize(widget, BASEMENU_BUTTON_TEXT_SIZE);
 		// Rounding errors that will need addressing in the future.
@@ -128,13 +128,13 @@ void BaseMenuSetUp() {
 	PanelSetUp("air", AIR_UNITS, 1);
 	PanelSetUp("sea", SEA_UNITS, 1);
 	
-	addWidget("Panel", "calc");
+	addWidget(Panel, "calc");
 	setWidgetOrigin("calc", 0.5, 1.0);
 	// They're all taking up the same size, so it shouldn't matter which panel
 	// we're basing the position on.
 	setWidgetPosition("calc", "50%", "BaseMenu.ground.top");
 	setWidgetSize("calc", "60%", "30px");
-	addWidget("Label", "calc.label");
+	addWidget(Label, "calc.label");
 	setWidgetSize("calc.label", "100%", "100%");
 	setWidgetTextSize("calc.label", BASEMENU_CALC_LABEL_TEXT_SIZE);
 	setWidgetTextColour("calc.label", Colour(255, 255, 255, 255));

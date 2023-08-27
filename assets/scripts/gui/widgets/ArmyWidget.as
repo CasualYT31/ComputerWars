@@ -67,7 +67,7 @@ class ArmyWidget {
 		alpha = transparency;
 
 		panel = panelName;
-		addWidget("Panel", panel);
+		addWidget(Panel, panel);
 		setWidgetSize(panel, formatUInt(ARMYWIDGET_WIDTH) + "px",
 			formatUInt(ARMYWIDGET_HEIGHT) + "px");
 		setWidgetBorderSize(panel, ARMYWIDGET_BORDER_SIZE);
@@ -75,20 +75,20 @@ class ArmyWidget {
 		setWidgetBorderColour(panel, Colour(0,0,0,alpha));
 
 		team = panelName + ".team";
-		addWidget("Label", team);
+		addWidget(Label, team);
 		setWidgetTextSize(team, ARMYWIDGET_TEAMID_TEXT_SIZE);
 		setWidgetTextColour(team, Colour(255,255,255,255));
 		setWidgetTextOutlineColour(team, Colour(0,0,0,255));
 		setWidgetTextOutlineThickness(team, 2.0);
 
 		currentCO = panelName + ".currentCO";
-		addWidget("Picture", currentCO);
+		addWidget(Picture, currentCO);
 
 		tagCO = panelName + ".tagCO";
-		addWidget("Picture", tagCO);
+		addWidget(Picture, tagCO);
 
 		funds = panelName + ".funds";
-		addWidget("Label", funds);
+		addWidget(Label, funds);
 		setWidgetTextSize(funds, ARMYWIDGET_FUNDS_TEXT_SIZE);
 		setWidgetTextColour(funds, Colour(255,255,255,255));
 		setWidgetTextOutlineColour(funds, Colour(0,0,0,255));

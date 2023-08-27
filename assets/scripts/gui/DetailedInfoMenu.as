@@ -11,13 +11,13 @@ array<ArmyWidget> armyWidgets;
  */
 string setUpArmyPanel(string baseLayout) {
 	baseLayout += ".armyPanel";
-	addWidget("ScrollablePanel", baseLayout);
+	addWidget(ScrollablePanel, baseLayout);
     const auto ret = baseLayout;
 	setWidgetSize(baseLayout, "33.333%", "100%");
 	setHorizontalScrollbarAmount(baseLayout, 100);
     setVerticalScrollbarAmount(baseLayout, 50);
 	baseLayout += ".day";
-	addWidget("Label", baseLayout);
+	addWidget(Label, baseLayout);
 	setWidgetPosition(baseLayout, "2%", "2%");
 	setWidgetTextSize(baseLayout, 32);
 	setWidgetTextColour(baseLayout, Colour(255, 255, 255, 255));
@@ -34,43 +34,37 @@ string setUpArmyPanel(string baseLayout) {
  */
 string setUpTerrainPanel(string baseLayout) {
 	baseLayout += ".terrainPanel";
-	addWidget("ScrollablePanel", baseLayout);
+	addWidget(ScrollablePanel, baseLayout);
     const auto ret = baseLayout;
 	setWidgetSize(baseLayout, "33.333%", "100%");
 	setGroupPadding(baseLayout, "5%");
 	baseLayout += ".terrainLayout";
     const auto verticalLayout = baseLayout;
-	addWidget("VerticalLayout", baseLayout);
+	addWidget(VerticalLayout, baseLayout);
 	baseLayout += ".";
 
-	addWidget("HorizontalLayout", baseLayout + "detailsAndPicture");
-	addWidget("VerticalLayout", baseLayout + "detailsAndPicture.details");
-	addWidget("Label", baseLayout + "detailsAndPicture.details.longName");
-	addWidget("HorizontalLayout",
-		baseLayout + "detailsAndPicture.details.defence");
-	addWidget("Picture",
-		baseLayout + "detailsAndPicture.details.defence.icon");
+	addWidget(HorizontalLayout, baseLayout + "detailsAndPicture");
+	addWidget(VerticalLayout, baseLayout + "detailsAndPicture.details");
+	addWidget(Label, baseLayout + "detailsAndPicture.details.longName");
+	addWidget(HorizontalLayout, baseLayout + "detailsAndPicture.details.defence");
+	addWidget(Picture, baseLayout + "detailsAndPicture.details.defence.icon");
 	setWidgetSprite(baseLayout + "detailsAndPicture.details.defence.icon", "icon",
 		"defstar");
-	addWidget("Label",
-		baseLayout + "detailsAndPicture.details.defence.label");
-	addWidget("HorizontalLayout",
-		baseLayout + "detailsAndPicture.details.hp");
-	addWidget("Picture",
-		baseLayout + "detailsAndPicture.details.hp.icon");
+	addWidget(Label, baseLayout + "detailsAndPicture.details.defence.label");
+	addWidget(HorizontalLayout, baseLayout + "detailsAndPicture.details.hp");
+	addWidget(Picture, baseLayout + "detailsAndPicture.details.hp.icon");
 	setWidgetSprite(baseLayout + "detailsAndPicture.details.hp.icon", "icon",
 		"hp");
-	addWidget("Label",
-		baseLayout + "detailsAndPicture.details.hp.label");
-	addWidget("Group", baseLayout + "detailsAndPicture.group");
-	addWidget("Picture", baseLayout + "detailsAndPicture.group.picture");
-	setWidgetPosition(baseLayout + "detailsAndPicture.group.picture",
-		"100%", "50%");
+	addWidget(Label, baseLayout + "detailsAndPicture.details.hp.label");
+	addWidget(Group, baseLayout + "detailsAndPicture.group");
+	addWidget(Picture, baseLayout + "detailsAndPicture.group.picture");
+	setWidgetPosition(baseLayout + "detailsAndPicture.group.picture", "100%",
+        "50%");
 	setWidgetOrigin(baseLayout + "detailsAndPicture.group.picture", 1.0, 0.5);
 
-	addWidget("Label", baseLayout + "description");
+	addWidget(Label, baseLayout + "description");
 
-	addWidget("VerticalLayout", baseLayout + "moveCosts");
+	addWidget(VerticalLayout, baseLayout + "moveCosts");
     setWidgetRatioInLayout(verticalLayout, 0, 1.5f);
     return ret;
 }
@@ -83,41 +77,41 @@ string setUpTerrainPanel(string baseLayout) {
  */
 string setUpUnitPanel(string baseLayout) {
 	baseLayout += ".unitPanel";
-	addWidget("ScrollablePanel", baseLayout);
+	addWidget(ScrollablePanel, baseLayout);
     const auto ret = baseLayout;
 	setWidgetSize(baseLayout, "33.333%", "100%");
 	setGroupPadding(baseLayout, "5%");
 	baseLayout += ".unitLayout";
-	addWidget("VerticalLayout", baseLayout);
+	addWidget(VerticalLayout, baseLayout);
 	string unitLayout = baseLayout + ".";
 	string details = unitLayout + "details";
 
-	addWidget("HorizontalLayout", details);
+	addWidget(HorizontalLayout, details);
 	details += ".";
 	string stats = details + "stats";
-	addWidget("VerticalLayout", stats);
+	addWidget(VerticalLayout, stats);
 	stats += ".";
-	addWidget("Label", stats + "name");
+	addWidget(Label, stats + "name");
 	stats += "grid";
-	addWidget("Grid", stats);
+	addWidget(Grid, stats);
 	stats += ".";
-	addWidgetToGrid("Label", stats + "priceLabel", 0, 0);
+	addWidgetToGrid(Label, stats + "priceLabel", 0, 0);
 	setWidgetText(stats + "priceLabel", "price", {any("")});
-	addWidgetToGrid("Picture", stats + "fuelIcon", 1, 0);
+	addWidgetToGrid(Picture, stats + "fuelIcon", 1, 0);
 	setWidgetSprite(stats + "fuelIcon", "icon", "fuel");
-	addWidgetToGrid("Picture", stats + "ammoIcon", 2, 0);
+	addWidgetToGrid(Picture, stats + "ammoIcon", 2, 0);
 	setWidgetSprite(stats + "ammoIcon", "icon", "ammo");
-	addWidgetToGrid("Label", stats + "price", 0, 1);
-	addWidgetToGrid("Label", stats + "fuel", 1, 1);
-	addWidgetToGrid("Label", stats + "ammo", 2, 1);
-	addWidgetToGrid("Picture", stats + "moveIcon", 0, 2);
+	addWidgetToGrid(Label, stats + "price", 0, 1);
+	addWidgetToGrid(Label, stats + "fuel", 1, 1);
+	addWidgetToGrid(Label, stats + "ammo", 2, 1);
+	addWidgetToGrid(Picture, stats + "moveIcon", 0, 2);
 	setWidgetSprite(stats + "moveIcon", "icon", "move");
-	addWidgetToGrid("Picture", stats + "typeIcon", 1, 2);
-	addWidgetToGrid("Picture", stats + "visionIcon", 2, 2);
+	addWidgetToGrid(Picture, stats + "typeIcon", 1, 2);
+	addWidgetToGrid(Picture, stats + "visionIcon", 2, 2);
 	setWidgetSprite(stats + "visionIcon", "icon", "vision");
-	addWidgetToGrid("Label", stats + "mp", 0, 3);
-	addWidgetToGrid("Label", stats + "movement", 1, 3);
-	addWidgetToGrid("Label", stats + "vision", 2, 3);
+	addWidgetToGrid(Label, stats + "mp", 0, 3);
+	addWidgetToGrid(Label, stats + "movement", 1, 3);
+	addWidgetToGrid(Label, stats + "vision", 2, 3);
 	stats.erase(stats.length() - 1);
 	setWidgetAlignmentInGrid(stats, 0, 0, WidgetAlignment::Right);
 	setWidgetAlignmentInGrid(stats, 1, 0, WidgetAlignment::Right);
@@ -134,28 +128,26 @@ string setUpUnitPanel(string baseLayout) {
 	setWidgetRatioInLayout(details + "stats", 0, 1.0);
 	setWidgetRatioInLayout(details + "stats", 1, 9.0);
 
-	addWidget("VerticalLayout", details + "pictureAndRange");
-	addWidget("Panel", details + "pictureAndRange.panel");
-	addWidget("Picture", details + "pictureAndRange.panel.picture");
-	setWidgetOrigin(
-		details + "pictureAndRange.panel.picture", 1.0, 0.5);
-	setWidgetPosition(
-		details + "pictureAndRange.panel.picture", "100%", "50%");
-	addWidget("HorizontalLayout", details + "pictureAndRange.rangeLayout");
-	addWidget("Panel", details + "pictureAndRange.rangeLayout.panel");
-	addWidget("Label", details + "pictureAndRange.rangeLayout.panel.label");
-	setWidgetOrigin(
-		details + "pictureAndRange.rangeLayout.panel.label", 1.0, 0.5);
-	setWidgetPosition(
-		details + "pictureAndRange.rangeLayout.panel.label", "100%", "50%");
+	addWidget(VerticalLayout, details + "pictureAndRange");
+	addWidget(Panel, details + "pictureAndRange.panel");
+	addWidget(Picture, details + "pictureAndRange.panel.picture");
+	setWidgetOrigin(details + "pictureAndRange.panel.picture", 1.0, 0.5);
+	setWidgetPosition(details + "pictureAndRange.panel.picture", "100%", "50%");
+	addWidget(HorizontalLayout, details + "pictureAndRange.rangeLayout");
+	addWidget(Panel, details + "pictureAndRange.rangeLayout.panel");
+	addWidget(Label, details + "pictureAndRange.rangeLayout.panel.label");
+	setWidgetOrigin(details + "pictureAndRange.rangeLayout.panel.label", 1.0,
+        0.5);
+	setWidgetPosition(details + "pictureAndRange.rangeLayout.panel.label", "100%",
+        "50%");
 	setWidgetText(details + "pictureAndRange.rangeLayout.panel.label", "range");
 	string ranges = details + "pictureAndRange.rangeLayout.ranges";
-	addWidget("Grid", ranges);
+	addWidget(Grid, ranges);
 	ranges += ".";
-	addWidgetToGrid("Label", ranges + "lower", 0, 0);
-	addWidgetToGrid("Picture", ranges + "icon", 0, 1);
+	addWidgetToGrid(Label, ranges + "lower", 0, 0);
+	addWidgetToGrid(Picture, ranges + "icon", 0, 1);
 	setWidgetSprite(ranges + "icon", "icon", "range");
-	addWidgetToGrid("Label", ranges + "higher", 0, 2);
+	addWidgetToGrid(Label, ranges + "higher", 0, 2);
 	ranges.erase(ranges.length() - 1);
 	setWidgetAlignmentInGrid(ranges, 0, 0, WidgetAlignment::Centre);
 	setWidgetAlignmentInGrid(ranges, 0, 1, WidgetAlignment::Centre);
@@ -167,7 +159,7 @@ string setUpUnitPanel(string baseLayout) {
 	setWidgetRatioInLayout(details, 0, 1.5);
 	setWidgetRatioInLayout(details, 1, 1.0);
 
-	addWidget("Label", unitLayout + "description");
+	addWidget(Label, unitLayout + "description");
     return ret;
 }
 
@@ -176,7 +168,7 @@ string setUpUnitPanel(string baseLayout) {
  */
 void DetailedInfoMenuSetUp() {
 	string baseLayout = "DetailedInfoMenu.baseLayout";
-	addWidget("HorizontalLayout", baseLayout);
+	addWidget(HorizontalLayout, baseLayout);
 	setWidgetSize(baseLayout, "100%", "100%");
 	const auto armyPanel = setUpArmyPanel(baseLayout);
 	const auto terrainPanel = setUpTerrainPanel(baseLayout);
@@ -198,9 +190,7 @@ const string tilePicture(const Vector2&in pos) {
 	const auto ownerID = game.map.getTileOwner(pos);
 	if (ownerID != NO_ARMY) {
 		const auto owned = t.picture(game.map.getArmyCountry(ownerID).scriptName);
-		if (!owned.isEmpty()) {
-			return owned;
-		}
+		if (!owned.isEmpty()) return owned;
 	}
 	// If it can't be retrieved, or if the tile isn't owned, present the icon
 	// instead.
@@ -250,12 +240,12 @@ void DetailedInfoMenuOpen() {
 		if (terrainType.moveCost[movementTypeNames[moveID]] >= 0) {
 			const auto movementType = movement[movementTypeNames[moveID]];
 			const string costName = base + "move" + formatUInt(moveID);
-			addWidget("HorizontalLayout", costName);
-			addWidget("Picture", costName + ".icon");
+			addWidget(HorizontalLayout, costName);
+			addWidget(Picture, costName + ".icon");
 			setWidgetSprite(costName + ".icon", "icon", movementType.iconName);
-			addWidget("Label", costName + ".shortName");
+			addWidget(Label, costName + ".shortName");
 			setWidgetText(costName + ".shortName", movementType.shortName);
-			addWidget("Label", costName + ".cost");
+			addWidget(Label, costName + ".cost");
 			setWidgetText(costName + ".cost", "~" +
 				terrainType.moveCost[movementTypeNames[moveID]]);
 		}

@@ -158,6 +158,56 @@ namespace engine {
 	};
 
 	/**
+	 * Class used to automatically handle reference counting of AngelScript
+	 * objects.
+	 * @tparam The AngelScript object type to handle.
+	 */
+	template<typename T>
+	class CScriptWrapper {
+	public:
+		/**
+		 * Initialises the wrapper object with no object.
+		 */
+		CScriptWrapper() = default;
+
+		/**
+		 * Initialises the wrapper object with an existing AngelScript object.
+		 */
+		CScriptWrapper(T* const obj);
+
+		/**
+		 * Copies the pointer and increases its reference count.
+		 */
+		CScriptWrapper(const CScriptWrapper<T>& obj);
+
+		/**
+		 * Moves the pointer over and increases the reference count.
+		 * Even though it's a move, we are technically creating another reference
+		 * to the object, so increase the reference count anyway. If you remove
+		 * this, \c emplace_back() and other "move" calls will cause the reference
+		 * counter to fall down by one, which will cause a nasty crash later on at
+		 * whatever point.
+		 */
+		CScriptWrapper(CScriptWrapper<T>&& obj) noexcept;
+
+		/**
+		 * Releases the reference to the stored AngelScript object.
+		 */
+		~CScriptWrapper() noexcept;
+
+		/**
+		 * Allows direct access to the stored AngelScript object.
+		 * @return Pointer to the AngelScript object.
+		 */
+		T* operator->() const noexcept;
+	private:
+		/**
+		 * The AngelScript object.
+		 */
+		T* _ptr = nullptr;
+	};
+
+	/**
 	 * Class representing a layer of abstraction between a script engine and the
 	 * client.
 	 * A folder of scripts is loaded from disc. This class can then be used to call

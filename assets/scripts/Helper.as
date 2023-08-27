@@ -24,14 +24,6 @@ namespace awe {
 	}
 
     /**
-     * Formats a \c MenuItemID.
-     * @param id The menu item ID to format.
-     */
-    string formatMenuItemID(const MenuItemID id) {
-        return formatUInt(id);
-    }
-
-    /**
      * Stores information on a button to add to a parent.
      */
     class ParentButton {
@@ -80,7 +72,7 @@ namespace awe {
         uint x = PADDING;
         for (uint i = 0, len = buttons.length(); i < len; ++i) {
             const auto btn = parent + "." + buttons[i].widgetName;
-            addWidget("Button", btn);
+            addWidget(Button, btn);
             setWidgetText(btn, buttons[i].caption);
             setWidgetOrigin(btn, 1.0f, 1.0f);
             setWidgetPosition(btn, "100%-" + formatUInt(x), "100%-" + PADDING_S);
@@ -104,7 +96,7 @@ namespace awe {
     void OpenFileDialog(const string&in name, const string&in title,
         const string&in confirm, const string&in path = "",
         const bool mustExist = true) {
-        addWidget("FileDialog", name);
+        addWidget(FileDialog, name);
         setFileDialogStrings(name, title, null,
             confirm, null,
             "cancel", null,
@@ -149,7 +141,7 @@ namespace awe {
         const string&in enableThis = "") {
         internal::lastOpenedMessageBox = name;
         if (!disableThis.isEmpty()) setWidgetEnabled(disableThis, false);
-        addWidget("MessageBox", name);
+        addWidget(MessageBox, name);
         ShowMessageBox();
         setMessageBoxStrings(name, title, null, text, vars);
         if (!enableThis.isEmpty()) {

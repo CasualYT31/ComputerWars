@@ -61,52 +61,18 @@ typename T::Ptr sfx::gui::_findWidget(std::string name,
 		for (std::size_t w = 1; w < names.size() - 1; ++w) {
 			if (!container) return nullptr;
 			tgui::String containerName;
-			for (std::size_t v = 0; v <= w; ++v) {
-				containerName += names[v] + ".";
-			}
+			for (std::size_t v = 0; v <= w; ++v) containerName += names[v] + ".";
 			containerName.pop_back();
 			container = container->get<tgui::Container>(containerName);
 		}
 	}
 	if (container) {
 		tgui::String widgetName;
-		for (std::size_t v = 0; v < names.size(); ++v) {
+		for (std::size_t v = 0; v < names.size(); ++v)
 			widgetName += names[v] + ".";
-		}
 		widgetName.pop_back();
 		return container->get<T>(widgetName);
 	} else {
 		return nullptr;
 	}
-}
-
-////////////////////
-// CSCRIPTWRAPPER //
-////////////////////
-
-template<typename T>
-sfx::gui::CScriptWrapper<T>::CScriptWrapper(T* const obj) : _ptr(obj) {
-	if (_ptr) _ptr->AddRef();
-}
-
-template<typename T>
-sfx::gui::CScriptWrapper<T>::CScriptWrapper(
-	const sfx::gui::CScriptWrapper<T>& obj) : _ptr(obj.operator->()) {
-	if (_ptr) _ptr->AddRef();
-}
-
-template<typename T>
-sfx::gui::CScriptWrapper<T>::CScriptWrapper(sfx::gui::CScriptWrapper<T>&& obj)
-noexcept : _ptr(std::move(obj.operator->())) {
-	if (_ptr) _ptr->AddRef();
-}
-
-template<typename T>
-sfx::gui::CScriptWrapper<T>::~CScriptWrapper() noexcept {
-	if (_ptr) _ptr->Release();
-}
-
-template<typename T>
-T* sfx::gui::CScriptWrapper<T>::operator->() const noexcept {
-	return _ptr;
 }
