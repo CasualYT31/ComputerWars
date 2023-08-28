@@ -1174,16 +1174,21 @@ namespace awe {
 		 * assumed that there are an infinite number of units of fuel available. Or
 		 * if \c team is \c nullptr, then any occupied tile will be considered
 		 * impassable, even if the tile is occupied by a unit on the same team.
-		 * @param  origin       The origin tile.
-		 * @param  dest         The intended destination.
-		 * @param  moveType     The movement type used for traversal calculations.
-		 * @param  movePoints   Pointer to the movement points available.
-		 * @param  fuel         Pointer to the units of fuel that we have to work
-		 *                      with.
-		 * @param  team         Pointer to the team the moving unit is on.
-		 * @param  army         Pointer to the army the moving unit is on.
-		 * @param  ignoredUnits A set of units that can be moved through,
-		 *                      regardless of team.
+		 * @param  origin           The origin tile.
+		 * @param  dest             The intended destination.
+		 * @param  moveType         The movement type used for traversal
+		 *                          calculations.
+		 * @param  movePoints       Pointer to the movement points available.
+		 * @param  fuel             Pointer to the units of fuel that we have to
+		 *                          work with.
+		 * @param  team             Pointer to the team the moving unit is on.
+		 * @param  army             Pointer to the army the moving unit is on.
+		 * @param  hasInfiniteFuel  Does the actor that is moving have infinite
+		 *                          fuel?
+		 * @param  ignoreUnitChecks If \c TRUE, a tile will be traversable even if
+		 *                          a unit is positioned on it.
+		 * @param  ignoredUnits     A set of units that can be moved through,
+		 *                          regardless of team.
 		 * @return The shortest path, if a path could be found. An empty vector if
 		 *         no path could be found.
 		 */
@@ -1191,6 +1196,7 @@ namespace awe {
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
 			const unsigned int* const movePoints, const awe::Fuel* const fuel,
 			const awe::TeamID* const team, const awe::ArmyID* const army,
+			const bool hasInfiniteFuel, const bool ignoreUnitChecks,
 			const std::unordered_set<awe::UnitID>& ignoredUnits) const;
 
 		/**
@@ -1202,7 +1208,8 @@ namespace awe {
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
 			const unsigned int movePoints, const awe::Fuel fuel,
 			const awe::TeamID team, const awe::ArmyID army,
-			CScriptArray* ignoredUnits) const;
+			const bool hasInfiniteFuel, const bool ignoreUnitChecks,
+			const CScriptArray* const ignoredUnits) const;
 
 		/**
 		 * Version of \c findPath() which passes in \c nullptr where possible, and
@@ -1211,7 +1218,7 @@ namespace awe {
 		 */
 		CScriptArray* findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
-			const awe::ArmyID army, CScriptArray* ignoredUnits) const;
+			const awe::ArmyID army, const CScriptArray* const ignoredUnits) const;
 
 		/**
 		 * Finds out if there is an obstruction in a given path.

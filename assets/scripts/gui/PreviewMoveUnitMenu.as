@@ -81,7 +81,11 @@ void PreviewMoveUnitMenuOpen() {
             if (unitType.scriptName == "BLACKBOMB") {
                 PreviewCommands.addCommand("Explode", "explode", "attackicon");
             }
-            PreviewCommands.addCommand("Wait", "wait", "waiticon");
+            if (unitType.scriptName == "OOZIUM" && unitOnTile != NO_UNIT) {
+                PreviewCommands.addCommand("OoziumFire", "fire", "attackicon");
+            } else {
+                PreviewCommands.addCommand("Wait", "wait", "waiticon");
+            }
         }
     }
 
@@ -207,6 +211,16 @@ void PreviewMoveUnitMenu_Hide_MouseReleased() {
  */
 void PreviewMoveUnitMenu_Fire_MouseReleased() {
     setGUI("SelectTargetMenu");
+}
+
+/**
+ * Allows the user to attack with an Oozium.
+ * The unit occupying the selected tile is deleted, and the Oozium moves to the
+ * selected tile.
+ */
+void PreviewMoveUnitMenu_OoziumFire_MouseReleased() {
+    game.deleteUnit(game.map.getUnitOnTile(game.map.getSelectedTile()));
+    PreviewMoveUnitMenu_Wait_MouseReleased();
 }
 
 /**

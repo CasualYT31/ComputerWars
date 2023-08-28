@@ -466,8 +466,9 @@ class PlayableMap {
             for (uint i = 0, length = allTiles.length(); i < length; ++i) {
                 if (map.findPath(tile, allTiles[i], unitType.movementType,
                     unitType.movementPoints, map.getUnitFuel(unit),
-                    map.getTeamOfUnit(unit),
-                    map.getArmyOfUnit(unit)).length() > 0) {
+                    map.getTeamOfUnit(unit), map.getArmyOfUnit(unit),
+                    unitType.hasInfiniteFuel,
+                    unitType.scriptName == "OOZIUM").length() > 0) {
                     map.addAvailableTile(allTiles[i]);
                 }
             }
@@ -532,7 +533,8 @@ class PlayableMap {
                     const auto path = map.findPath(tile, moveableTiles[i],
                         unitType.movementType, unitType.movementPoints,
                         map.getUnitFuel(unitID), map.getTeamOfUnit(unitID),
-                        map.getSelectedArmy());
+                        map.getSelectedArmy(), unitType.hasInfiniteFuel,
+                        unitType.scriptName == "OOZIUM");
                     // Army ID checks refer only to visible unit checks, so make
                     // sure to give in the CURRENT army to findPath(), and not the
                     // army who owns the unit.
@@ -1028,6 +1030,28 @@ class PlayableMap {
                 { fromUnit }).length() > 0) return true;
         }
         return false;
+    }
+
+    /**
+     * Checks if the given Oozium unit can move onto a tile.
+     * Does not check if the Oozium can perform a join. <b>It is assumed that the
+     * Oozium can find a path to the given tile.</b>
+     * @param  oozium The ID of the Oozium unit.
+     * @param  toTile The tile to move the Oozium to.
+     * @return \c TRUE if the given unit is an Oozium and it can move onto the
+     *         given tile.
+     */
+    bool canOoziumMove(const UnitID oozium, const Vector2&in toTile) const {
+        /* Conditions:
+        1. The given unit exists, and is an Oozium.
+        2. The tile is vacant,
+        3. OR, the tile is occupied by a unit on an opposing team.
+        */
+        if (oozium == NO_UNIT) return false;
+        if (map.getUnitType(oozium).scriptName != "OOZIUM") return false;
+        const auto unitOnTile = map.getUnitOnTile(toTile);
+        return unitOnTile == NO_UNIT ||
+            map.getTeamOfUnit(unitOnTile) != map.getTeamOfUnit(oozium);
     }
 
     /**
@@ -1594,7 +1618,9 @@ class PlayableMap {
                 unitType.movementPoints,
                 pThis.map.getUnitFuel(unitID),
                 pThis.map.getTeamOfUnit(unitID),
-                pThis.map.getArmyOfUnit(unitID)
+                pThis.map.getArmyOfUnit(unitID),
+                unitType.hasInfiniteFuel,
+                unitType.scriptName == "OOZIUM"
             );
             for (uint i = 0, length = arr.length(); i < length; ++i) {
                 pThis.newClosedListNode(pThis.map.closedList, -1, arr[i].tile,

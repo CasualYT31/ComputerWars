@@ -37,7 +37,8 @@ void MoveUnitMenuHandleInput(const dictionary controls,
 					game.canJoin(otherUnit, unitID) ||
 					game.canLoad(unitID, otherUnit) ||
 					!game.map.isUnitVisible(otherUnit,
-						game.map.getArmyOfUnit(unitID))) {
+						game.map.getArmyOfUnit(unitID)) ||
+                    game.canOoziumMove(unitID, selectedTile)) {
 					const auto obstructionIndex =
 						game.map.scanPath(game.map.closedList, unitID);
 					if (obstructionIndex >= 0) {

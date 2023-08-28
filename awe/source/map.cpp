@@ -540,13 +540,14 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPath(const Vector2&in origin, const Vector2&in dest, "
 			"const Movement&in moveType, const uint movePoints, const Fuel fuel, "
-			"const TeamID team, const ArmyID army, array<UnitID>@ = null) const",
+			"const TeamID team, const ArmyID army, const bool, const bool, "
+			"const array<UnitID>@ const = null) const",
 			asMETHOD(awe::map, findPathAsArray), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPathForUnloadUnit(const Vector2&in origin, "
 			"const Vector2&in dest, const Movement&in moveType, const ArmyID, "
-			"array<UnitID>@ = null) const",
+			"const array<UnitID>@ const = null) const",
 			asMETHOD(awe::map, findPathAsArrayUnloadUnit), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
@@ -2119,6 +2120,7 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const unsigned int* const movePoints, const awe::Fuel* const fuel,
 	const awe::TeamID* const team, const awe::ArmyID* const army,
+	const bool hasInfiniteFuel, const bool ignoreUnitChecks,
 	const std::unordered_set<awe::UnitID>& ignoredUnits) const {
 	// openSet could be a min-heap or priority queue for added efficiency.
 	std::unordered_set<sf::Vector2u> openSet = { origin };
@@ -2162,16 +2164,18 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 			int tentativeGScore = gScore[currentTile] + moveCost;
 
 			// If:
-			// 1. The unit does not have enough fuel.
+			// 1. The unit does not have enough fuel (if it has finite fuel).
 			// 2. The unit has ran out of movement points.
 			// 3. The tile has a unit belonging to an opposing team that isn't
 			//    ignored or invisible/hidden.
 			// then it cannot traverse the tile, so don't add it to the open set.
 			const auto unitOnAdjacentTile = getUnitOnTile(adjacentTile);
-			const auto fuelCheck = fuel == nullptr || tentativeGScore <= *fuel;
+			const auto fuelCheck =
+				hasInfiniteFuel || fuel == nullptr || tentativeGScore <= *fuel;
 			const auto mpCheck = movePoints == nullptr ||
 				static_cast<unsigned int>(tentativeGScore) <= *movePoints;
-			const auto unitCheck = !_isUnitPresent(unitOnAdjacentTile) ||
+			const auto unitCheck = ignoreUnitChecks ||
+				!_isUnitPresent(unitOnAdjacentTile) ||
 				(ignoredUnits.find(unitOnAdjacentTile) != ignoredUnits.end()) ||
 				(army == nullptr || !isUnitVisible(unitOnAdjacentTile, *army)) ||
 				(team != nullptr && getTeamOfUnit(unitOnAdjacentTile) == *team);
@@ -2196,11 +2200,12 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const unsigned int movePoints, const awe::Fuel fuel,
-	const awe::TeamID team, const awe::ArmyID army,
-	CScriptArray* ignoredUnits) const {
+	const awe::TeamID team, const awe::ArmyID army, const bool hasInfiniteFuel,
+	const bool ignoreUnitChecks, const CScriptArray* const ignoredUnits) const {
 	const auto vec = findPath(origin, dest, moveType, &movePoints, &fuel, &team,
-		&army, engine::ConvertCScriptArray<std::unordered_set<awe::UnitID>,
-		awe::UnitID>(ignoredUnits));
+		&army, hasInfiniteFuel, ignoreUnitChecks,
+		engine::ConvertCScriptArray<std::unordered_set<awe::UnitID>, awe::UnitID>(
+			ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
 	for (auto& node : vec) {
 		ret->InsertLast(&awe::closed_list_node());
@@ -2212,10 +2217,11 @@ CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 
 CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
-	const awe::ArmyID army, CScriptArray* ignoredUnits) const {
+	const awe::ArmyID army, const CScriptArray* const ignoredUnits) const {
 	const auto vec = findPath(origin, dest, moveType, nullptr, nullptr, nullptr,
-		&army, engine::ConvertCScriptArray<std::unordered_set<awe::UnitID>,
-		awe::UnitID>(ignoredUnits));
+		&army, true, false,
+		engine::ConvertCScriptArray<std::unordered_set<awe::UnitID>, awe::UnitID>(
+			ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
 	for (auto& node : vec) {
 		ret->InsertLast(&awe::closed_list_node());
@@ -3058,13 +3064,19 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// Unfortunately units have to be looped through separately to prevent tiles
 	// taller than the minimum height from drawing over units. If a unit has a
 	// location override, then render it, even if it isn't on the map according to
-	// `isUnitOnMap()`.
+	// `isUnitOnMap()`. Units with location overrides are also drawn after all
+	// other units to ensure they are as visible as possible.
+	std::list<std::pair<const awe::unit&, sf::RenderStates>>
+		unitsWithLocationOverrides;
 	const auto currentArmy = getSelectedArmy();
-	for (const auto unitsPair : _units) {
+	for (const auto& unitsPair : _units) {
 		const awe::UnitID unitID = unitsPair.first;
+		const auto hasLocationOverride =
+			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end();
+
 		if (_isUnitPresent(unitID) && ((isUnitOnMap(unitID) &&
-			(_alwaysShowHiddenUnits || isUnitVisible(unitID, currentArmy))) ||
-			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end())) {
+				(_alwaysShowHiddenUnits || isUnitVisible(unitID, currentArmy))) ||
+			hasLocationOverride)) {
 			sf::RenderStates unitStates = states;
 			unitStates.shader = &_unavailableTileShader;
 			if (_selectedUnitRenderData.top().selectedUnit != awe::NO_UNIT &&
@@ -3074,16 +3086,27 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 				_selectedUnitRenderData.top().availableTiles.find(
 					getUnitPosition(unitID)) ==
 					_selectedUnitRenderData.top().availableTiles.end())) {
-				target.draw(_units.at(unitID), unitStates);
+				if (hasLocationOverride) {
+					unitsWithLocationOverrides.emplace_back(_units.at(unitID),
+						unitStates);
+				} else target.draw(_units.at(unitID), unitStates);
 			} else {
 				if (isUnitWaiting(unitID)) {
-					target.draw(_units.at(unitID), unitStates);
+					if (hasLocationOverride) {
+						unitsWithLocationOverrides.emplace_back(_units.at(unitID),
+							unitStates);
+					} else target.draw(_units.at(unitID), unitStates);
 				} else {
-					target.draw(_units.at(unitID), states);
+					if (hasLocationOverride) {
+						unitsWithLocationOverrides.emplace_back(_units.at(unitID),
+							states);
+					} else target.draw(_units.at(unitID), states);
 				}
 			}
 		}
 	}
+	for (const auto& overridden : unitsWithLocationOverrides)
+		target.draw(overridden.first, overridden.second);
 
 	// Step 4. the cursor.
 	if (!_cursor.getSprite().empty()) target.draw(_cursor, states);

@@ -1225,8 +1225,7 @@
 			"ANTIAIR",
 			"ARTILLERY",
 			"ROCKETS",
-			"MISSILES",
-			"OOZIUM"
+			"MISSILES"
 		],
 		"loadlimit": 2,
 		"turnstartpriority": 2000,
