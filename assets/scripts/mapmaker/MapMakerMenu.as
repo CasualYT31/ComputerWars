@@ -132,6 +132,7 @@ void MapMakerMenuSetUp() {
                             country[CurrentlySelectedTileType.owner].turnOrder
                     );
                     FillWindow.close();
+                    edit.refreshTileProps();
                 }
             }
         },

@@ -1067,7 +1067,7 @@ namespace awe {
 		 * By default, a tile does not have a type, unless it was given in the call
 		 * to \c setMapSize().\n
 		 * Changing a tile's type will automatically remove any ownership of the
-		 * tile, but it will not reset the tile's HP.
+		 * tile, and will reset its HP to the maximum allowed by the given type.
 		 * @param  pos  The X and Y coordinate of the tile to change.
 		 * @param  type The type to assign to the tile.
 		 * @return \c TRUE if setting the tile's type was successful, \c FALSE
@@ -1232,6 +1232,27 @@ namespace awe {
 		 */
 		int scanPath(CScriptArray* path, const awe::UnitID unit,
 			std::size_t ignores = 0) const;
+
+		/**
+		 * Converts tiles from a list to a given tile type if their tile type
+		 * matches a given tile type.
+		 * For every out-of-bounds tile given, an error will be logged.
+		 * @param tiles             The tiles that could be converted.
+		 * @param fromTileType      If a tile from \c tiles is of this tile type,
+		 *                          it will be converted.
+		 * @param toTileType        The tile type to assign to converted tiles.
+		 * @param transferOwnership If the tile is converted, its owner will also
+		 *                          be set to the given army.
+		 */
+		void convertTiles(const std::vector<sf::Vector2u>& tiles,
+			const std::shared_ptr<const awe::tile_type>& fromTileType,
+			const std::shared_ptr<const awe::tile_type>& toTileType,
+			const awe::ArmyID transferOwnership);
+
+		/// Script interface version of \c convertTiles().
+		void convertTiles(const CScriptArray* const tiles,
+			const std::string& fromTileType, const std::string& toTileType,
+			const awe::ArmyID transferOwnership);
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //

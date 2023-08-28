@@ -83,6 +83,22 @@ T* engine::CScriptWrapper<T>::operator->() const noexcept {
 	return _ptr;
 }
 
+///////////////
+// FUNCTIONS //
+///////////////
+
+template<typename T, typename U>
+T engine::ConvertCScriptArray(const CScriptArray* const a) {
+	T ret = {};
+	if (a) {
+		engine::AttemptToReserve(ret, a->GetSize());
+		for (asUINT i = 0; i < a->GetSize(); ++i)
+			ret.insert(ret.end(), *static_cast<const U*>(a->At(i)));
+		a->Release();
+	}
+	return ret;
+}
+
 /////////////
 // SCRIPTS //
 /////////////

@@ -208,6 +208,53 @@ namespace engine {
 	};
 
 	/**
+	 * Okay tbh idk wtf this does but it should work.
+	 * @sa <a href="https://stackoverflow.com/a/19392596" target="_blank">
+	 *     Credit.</a>
+	 */
+	template<typename C, typename = void>
+	struct has_reserve : std::false_type {};
+
+	/**
+	 * Sees if a type has the correct \c reserve() method available by attempting
+	 * to call it.
+	 * @sa <a href="https://stackoverflow.com/a/19392596" target="_blank">
+	 *     Credit.</a>
+	 */
+	template<typename C>
+	struct has_reserve<C, std::enable_if_t<std::is_same<decltype(
+		std::declval<C>().reserve(std::declval<typename C::size_type>())),
+		void>::value>> : std::true_type {};
+
+	/**
+	 * Attempts to reserve space in a container.
+	 * Since this container cannot reserve space, don't do anything.
+	 * @sa <a href="https://stackoverflow.com/a/19392596" target="_blank">
+	 *     Credit.</a>
+	 */
+	template<typename C> std::enable_if_t<!has_reserve<C>::value>
+		AttemptToReserve(C& c, const std::size_t n) {}
+
+	/**
+	 * Attempts to reserve space in a container.
+	 * Since this container can reserve space, invoke \c reserve() on it.
+	 * @sa <a href="https://stackoverflow.com/a/19392596" target="_blank">
+	 *     Credit.</a>
+	 */
+	template<typename C> std::enable_if_t<has_reserve<C>::value>
+		AttemptToReserve(C& c, const std::size_t n) { c.reserve(c.size() + n); }
+
+	/**
+	 * Converts a \c CScriptArray into an STL container and releases the array.
+	 * @tparam T The type of container to convert the array into.
+	 * @tparam U The type of elements stored in the container.
+	 * @param  a The \c CScriptArray to convert.
+	 * @return The converted array. An empty container if \c a is \c nullptr.
+	 */
+	template<typename T, typename U>
+	T ConvertCScriptArray(const CScriptArray* const a);
+
+	/**
 	 * Class representing a layer of abstraction between a script engine and the
 	 * client.
 	 * A folder of scripts is loaded from disc. This class can then be used to call

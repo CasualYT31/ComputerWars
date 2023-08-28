@@ -332,19 +332,10 @@ class PlayableMap {
         {
         // Find all HQs belonging to the army and convert them to cities. Transfer
         // ownership of them, too.
-        const auto tiles = map.getTilesOfArmy(armyID);
-        for (uint i = 0, len = tiles.length(); i < len; ++i) {
-            const auto tile = tiles[i];
-            if (map.getTileType(tile).type.scriptName == "HQ") {
-                map.setTileType(tile, "064city");
-                map.setTileOwner(tile, transferOwnership);
-            }
-        }
-        if (map.getSelectedArmy() == armyID) {
-            endTurn(true);
-        } else {
-            map.deleteArmy(armyID, transferOwnership);
-        }
+        map.convertTiles(map.getTilesOfArmy(armyID), "06Ahq", "064city",
+            transferOwnership);
+        if (map.getSelectedArmy() == armyID) endTurn(true);
+        else map.deleteArmy(armyID, transferOwnership);
     }
 
     ////////////////////////////////

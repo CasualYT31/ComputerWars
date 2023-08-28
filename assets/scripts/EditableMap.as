@@ -109,7 +109,7 @@ class EditableMap {
      */
     void undo(const uint64 additionalUndos = 0) {
         map.undo(additionalUndos);
-        _updateTileProps(tilePropsTile);
+        refreshTileProps();
         _updateArmyProps();
         _updateMapProps();
         _updateStatusBar();
@@ -122,7 +122,7 @@ class EditableMap {
      */
     void redo(const uint64 additionalRedos = 0) {
         map.redo(additionalRedos);
-        _updateTileProps(tilePropsTile);
+        refreshTileProps();
         _updateArmyProps();
         _updateMapProps();
         _updateStatusBar();
@@ -230,7 +230,7 @@ class EditableMap {
     void setMapSize(const Vector2&in mapSize, const string&in tileType,
         const ArmyID army = NO_ARMY) {
         map.setMapSize(mapSize, tileType, army);
-        _updateTileProps(tilePropsTile);
+        refreshTileProps();
         _updateStatusBar();
     }
 
@@ -242,7 +242,7 @@ class EditableMap {
     void rectangleFillTiles(const Vector2&in start, const Vector2&in end,
         const string&in type, const ArmyID owner = NO_ARMY) {
         map.rectangleFillTiles(start, end, type, owner);
-        _updateTileProps(tilePropsTile);
+        refreshTileProps();
     }
 
     /**
@@ -252,7 +252,7 @@ class EditableMap {
     void rectangleFillUnits(const Vector2&in start, const Vector2&in end,
         const string&in type, const ArmyID army) {
         map.rectangleFillUnits(start, end, type, army);
-        _updateTileProps(tilePropsTile);
+        refreshTileProps();
         _updateArmyProps();
     }
 
@@ -263,7 +263,7 @@ class EditableMap {
      */
     uint64 rectangleDeleteUnits(const Vector2&in start, const Vector2&in end) {
         const auto count = map.rectangleDeleteUnits(start, end);
-        _updateTileProps(tilePropsTile);
+        refreshTileProps();
         _updateArmyProps();
         return count;
     }
@@ -294,6 +294,8 @@ class EditableMap {
      */
     void deleteArmy(const ArmyID army) {
         DisableMementos token(map, OPERATION[Operation::DELETE_ARMY_SCRIPT]);
+        // Find all HQs belonging to the army and convert them to neutral cities.
+        map.convertTiles(map.getTilesOfArmy(army), "06Ahq", "064city", NO_ARMY);
         // If we are deleting the current army, select the next one.
         const auto getNextArmy = map.getSelectedArmy() == army;
         const auto nextArmy =
@@ -301,6 +303,7 @@ class EditableMap {
         map.deleteArmy(army);
         if (getNextArmy) map.setSelectedArmy(nextArmy);
         _updateArmyProps();
+        refreshTileProps();
     }
 
     /**
@@ -515,6 +518,14 @@ class EditableMap {
         tilePropsTileSet = false;
         map.clearAvailableTiles();
         if (tilePropsWindow !is null) tilePropsWindow.deselect();
+    }
+
+    /**
+     * Allows external code to refresh the Tile Properties window without changing
+     * the selected tile.
+     */
+    void refreshTileProps() {
+        _updateTileProps(tilePropsTile);
     }
 
     /**

@@ -554,6 +554,13 @@ void awe::map::Register(asIScriptEngine* engine,
 			"const",
 			asMETHOD(awe::map, scanPath), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map", "void convertTiles("
+			"const array<Vector2>@ const, const string&in, const string&in, "
+			"const ArmyID)",
+			asMETHODPR(awe::map, convertTiles, (const CScriptArray* const,
+				const std::string&, const std::string&, const awe::ArmyID), void),
+			asCALL_THISCALL);
+
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
 		//////////////////////////////////////
@@ -1964,6 +1971,9 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 		_getMementoName(awe::map_strings::operation::TILE_TYPE));
 	_updateCapturingUnit(getUnitOnTile(pos));
 	_tiles[pos.x][pos.y].setTileType(type);
+	// Set the tile's HP to the max.
+	_tiles[pos.x][pos.y].setTileHP(
+		static_cast<awe::HP>(type->getType()->getMaxHP()));
 	// Remove ownership of the tile from the army who owns it, if any army does.
 	setTileOwner(pos, awe::NO_ARMY);
 	return true;
@@ -2183,31 +2193,14 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 	return {};
 }
 
-/**
- * Converts a \c CScriptArray into an unordered set of unit IDs.
- * @warning This function will release the array if the pointer is not \c nullptr!
- * @param   ignoredUnits Pointer to the array.
- * @return  The set. Empty if \c ignoredUnits is \c nullptr.
- */
-static std::unordered_set<awe::UnitID> convertCScriptArrayIntoSet(
-	CScriptArray* ignoredUnits) {
-	std::unordered_set<awe::UnitID> ret;
-	if (ignoredUnits) {
-		for (asUINT i = 0; i < ignoredUnits->GetSize(); ++i) {
-			ret.insert(*(awe::UnitID*)ignoredUnits->At(i));
-		}
-		ignoredUnits->Release();
-	}
-	return ret;
-}
-
 CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const unsigned int movePoints, const awe::Fuel fuel,
 	const awe::TeamID team, const awe::ArmyID army,
 	CScriptArray* ignoredUnits) const {
 	const auto vec = findPath(origin, dest, moveType, &movePoints, &fuel, &team,
-		&army, convertCScriptArrayIntoSet(ignoredUnits));
+		&army, engine::ConvertCScriptArray<std::unordered_set<awe::UnitID>,
+		awe::UnitID>(ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
 	for (auto& node : vec) {
 		ret->InsertLast(&awe::closed_list_node());
@@ -2221,7 +2214,8 @@ CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const awe::ArmyID army, CScriptArray* ignoredUnits) const {
 	const auto vec = findPath(origin, dest, moveType, nullptr, nullptr, nullptr,
-		&army, convertCScriptArrayIntoSet(ignoredUnits));
+		&army, engine::ConvertCScriptArray<std::unordered_set<awe::UnitID>,
+		awe::UnitID>(ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
 	for (auto& node : vec) {
 		ret->InsertLast(&awe::closed_list_node());
@@ -2257,6 +2251,47 @@ int awe::map::scanPath(CScriptArray* path, const awe::UnitID unit,
 	}
 	if (path) path->Release();
 	return -1;
+}
+
+void awe::map::convertTiles(const std::vector<sf::Vector2u>& tiles,
+	const std::shared_ptr<const awe::tile_type>& fromTileType,
+	const std::shared_ptr<const awe::tile_type>& toTileType,
+	const awe::ArmyID transferOwnership) {
+	if (!fromTileType) {
+		_logger.error("convertTiles operation failed: a tile type filter was not "
+			"given!");
+		return;
+	}
+	if (!toTileType) {
+		_logger.error("convertTiles operation failed: the tile type to convert to "
+			"was not given!");
+		return;
+	}
+	if (transferOwnership != awe::NO_ARMY && !_isArmyPresent(transferOwnership)) {
+		_logger.error("convertTiles operation failed: cannot transfer ownership "
+			"of converted tiles to non-existent army {}.", transferOwnership);
+		return;
+	}
+	for (const auto& tile : tiles) {
+		if (_isOutOfBounds(tile)) {
+			_logger.error("convertTiles operation: cannot convert tile {} to the "
+				"tile type \"{}\", with new owner {}: tile is out-of-bounds!",
+				tile, toTileType->getScriptName(), transferOwnership);
+			continue;
+		}
+		if (getTileType(tile)->getScriptName() == fromTileType->getScriptName()) {
+			setTileType(tile, toTileType);
+			setTileOwner(tile, transferOwnership);
+		}
+	}
+}
+
+void awe::map::convertTiles(const CScriptArray* const tiles,
+	const std::string& fromTileType, const std::string& toTileType,
+	const awe::ArmyID transferOwnership) {
+	convertTiles(engine::ConvertCScriptArray<std::vector<sf::Vector2u>,
+		sf::Vector2u>(tiles), (*_tileTypes)[fromTileType],
+		(*_tileTypes)[toTileType], transferOwnership);
 }
 
 bool awe::map::setSelectedUnit(const awe::UnitID unit) {

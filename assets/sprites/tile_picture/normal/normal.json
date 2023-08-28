@@ -54,7 +54,7 @@
       "durations": [ 0 ]
     },
     "noentry": {
-      "frames": [ [ 768, 0, 128, 160 ] ],
+      "frames": [ [ 768, 160, 128, 160 ] ],
       "durations": [ 0 ]
     },
     "oshq": {
