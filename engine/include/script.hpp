@@ -264,6 +264,22 @@ namespace engine {
 	class scripts {
 	public:
 		/**
+		 * Represents a script file.
+		 */
+		struct file {
+			/// The name of the script file.
+			std::string name;
+
+			/// The contents of the script file.
+			std::string code;
+		};
+
+		/**
+		 * The name of the main module in which all script files are built.
+		 */
+		static constexpr const char* const MAIN_MODULE = "ComputerWars";
+
+		/**
 		 * Sets up the script engine and initialises the internal logger object.
 		 * The following steps are carried out:
 		 * <ol><li>The script engine is loaded.</li>
@@ -386,23 +402,27 @@ namespace engine {
 		const std::string& getScriptsFolder() const noexcept;
 
 		/**
-		 * Tests to see if a function with the given name exists in any of the
-		 * loaded scripts.
-		 * @param  name The name of the function.
-		 * @return \c TRUE if the function exists, \c FALSE if not, or if there
-		 *         were multiple matches.
+		 * Tests to see if a function with the given name exists in the specified
+		 * module.
+		 * @param  module The name of the module that is to contain the function.
+		 * @param  name   The name of the function.
+		 * @return \c TRUE if the module and function exists, \c FALSE if not, or
+		 *         if there were multiple function matches.
 		 * @safety No guarantee.
 		 */
-		bool functionExists(const std::string& name) const;
+		bool functionExists(const std::string& module,
+			const std::string& name) const;
 
 		/**
-		 * Tests to see if a function with the given declaration exists in any of
-		 * the loaded scripts.
-		 * @param  decl The declaration of the function.
-		 * @return \c TRUE if the function exists, \c FALSE otherwise.
+		 * Tests to see if a function with the given declaration exists in the
+		 * specified module.
+		 * @param  module The module to search in.
+		 * @param  decl   The declaration of the function.
+		 * @return \c TRUE if the module and function exists, \c FALSE otherwise.
 		 * @safety No guarantee.
 		 */
-		bool functionDeclExists(const std::string& decl) const;
+		bool functionDeclExists(const std::string& module,
+			const std::string& decl) const;
 
 		/**
 		 * Will write a message to the log, using the current context to retrieve
@@ -438,16 +458,19 @@ namespace engine {
 		 * Version of \c callFunction() which accepts a name to an existing script
 		 * function.
 		 * If the function didn't exist, or there was more than one function with
-		 * the given name, then this method will fail.
+		 * the given name, or the given module didn't exist, then this method will
+		 * fail.
 		 * @tparam Ts     The types of the parameters to pass to the function, if
 		 *                any.
+		 * @param  module The name of the module which contains the named function.
 		 * @param  name   The name of the function written in the scripts to call.
 		 * @param  values The parameters to provide to the function call, if any.
 		 * @return See the other template version of \c callFunction().
 		 * @safety No guarantee.
 		 */
 		template<typename... Ts>
-		bool callFunction(const std::string& name, Ts... values);
+		bool callFunction(const std::string& module, const std::string& name,
+			Ts... values);
 
 		/**
 		 * Parameter pack method called when a script function requires parameters.
@@ -488,7 +511,7 @@ namespace engine {
 
 		/**
 		 * Compiles and executes the given code, which can call any code that is in
-		 * the \c ComputerWars module.
+		 * the \c MAIN_MODULE.
 		 * @param  code The code to execute. It is automatically put into a
 		 *              function so you don't have to do this maually in the code.
 		 * @return If execution was successful, an empty string is returned. If
@@ -540,6 +563,32 @@ namespace engine {
 		 * @safety No guarantee.
 		 */
 		std::string getTypeName(const int id) const;
+
+		/**
+		 * Creates a new module, or replaces an existing one.
+		 * This method will fail in the following circumstances:
+		 * <ol><li>If \c name == \c MAIN_MODULE. The main module is managed
+		 *     separately and so cannot be amended using this method.</li>
+		 *     <li>If the code given couldn't be built or added.</li>
+		 *     <li>If the given module name contains \c ~.</li></ol>
+		 * If a failure occurs, information will be logged as to why.
+		 * @param  name        The name of the module.
+		 * @param  code        The code to build and store in the new module.
+		 * @param  errorString If an error occurred, a string describing the error
+		 *                     will be stored here.
+		 * @return \c TRUE if the module could be built and added/updated, \c FALSE
+		 *         otherwise.
+		 */
+		bool createModule(const std::string& name, const std::vector<file>& code,
+			std::string& errorString);
+
+		/**
+		 * Deletes a non-main module.
+		 * @param  name The name of the module to discard.
+		 * @return \c TRUE if the module could be discarded, \c FALSE if not (the
+		 *         reason why will be logged).
+		 */
+		bool deleteModule(const std::string& name);
 	private:
 		/**
 		 * Allocates a new function context.
@@ -565,10 +614,17 @@ namespace engine {
 
 		/**
 		 * Constructs a log message from the most current context.
-		 * @param msg The message to log.
+		 * @param  msg The message to log.
 		 * @safety No guarantee.
 		 */
 		std::string _constructMessage(const std::string& msg) const;
+
+		/**
+		 * Constructs an error log message from a failed build or compile.
+		 * @param  code The error code.
+		 * @return The error string.
+		 */
+		std::string _constructBuildErrorMessage(const int code) const;
 
 		/**
 		 * The internal logger object.
@@ -629,14 +685,14 @@ namespace engine {
 		std::string _cachedMsg;
 
 		/**
-		 * Caches the last given column number to the \c scriptMessageCallback().
-		 */
-		std::string _cachedCol;
-
-		/**
 		 * The context used with \c executeCode().
 		 */
 		asIScriptContext* _executeCodeContext = nullptr;
+
+		/**
+		 * The module builder.
+		 */
+		CScriptBuilder _builder;
 	};
 }
 

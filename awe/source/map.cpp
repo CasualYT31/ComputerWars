@@ -3148,7 +3148,7 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	const unsigned char version) {
 	if (!_scripts) {
 		throw std::runtime_error("no scripts object!");
-	} else if (!_scripts->functionDeclExists(
+	} else if (!_scripts->functionDeclExists(_scripts->MAIN_MODULE,
 		"void LoadMap(BinaryIStream@, Map@, uint8)")) {
 		throw std::runtime_error("void LoadMap(BinaryIStream@, Map@, uint8) "
 			"not found in the scripts!");
@@ -3167,7 +3167,8 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	_mapSizeCache = { 0, 0 };
 	// Load state.
 	_mementoHardDisable = true;
-	_scripts->callFunction("LoadMap", &stream, this, version);
+	_scripts->callFunction(_scripts->MAIN_MODULE, "LoadMap", &stream, this,
+		version);
 	_mementoHardDisable = false;
 }
 
@@ -3175,7 +3176,7 @@ engine::binary_ostream awe::map::_saveMapIntoOutputStream(
 	const unsigned char version) {
 	if (!_scripts) {
 		throw std::runtime_error("no scripts object!");
-	} else if (!_scripts->functionDeclExists(
+	} else if (!_scripts->functionDeclExists(_scripts->MAIN_MODULE,
 		"void SaveMap(BinaryOStream@, Map@, uint8)")) {
 		throw std::runtime_error("void SaveMap(BinaryOStream@, Map@, uint8) "
 			"not found in the scripts!");
@@ -3183,7 +3184,8 @@ engine::binary_ostream awe::map::_saveMapIntoOutputStream(
 	engine::binary_ostream stream({ _logger.getData().sink,
 		_logger.getData().name + "_binary_ostream" });
 	_mementoHardDisable = true;
-	_scripts->callFunction("SaveMap", &stream, this, version);
+	_scripts->callFunction(_scripts->MAIN_MODULE, "SaveMap", &stream, this,
+		version);
 	_mementoHardDisable = false;
 	return stream;
 }

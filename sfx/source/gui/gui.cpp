@@ -133,10 +133,13 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 			closeFuncDecl = "void " + _currentGUI + "Close(const string&in)";
 		std::string newMenu = newPanel; // Can't pass in pointer to const string :(
 		if (callClose && !_currentGUI.empty()) {
-			if (_scripts->functionDeclExists(closeFuncDecl)) {
-				_scripts->callFunction(closeFuncName, &newMenu);
-			} else if (_scripts->functionDeclExists(closeFuncEmptyDecl)) {
-				_scripts->callFunction(closeFuncName);
+			if (_scripts->functionDeclExists(_scripts->MAIN_MODULE,
+				closeFuncDecl)) {
+				_scripts->callFunction(_scripts->MAIN_MODULE, closeFuncName,
+					&newMenu);
+			} else if (_scripts->functionDeclExists(_scripts->MAIN_MODULE,
+				closeFuncEmptyDecl)) {
+				_scripts->callFunction(_scripts->MAIN_MODULE, closeFuncName);
 			}
 		}
 		// Clear widget sprites.
@@ -147,8 +150,9 @@ void sfx::gui::setGUI(const std::string& newPanel, const bool callClose,
 		auto openFuncName = newPanel + "Open",
 			openFuncEmptyDecl = "void " + _currentGUI + "Open()";
 		if (callOpen) {
-			if (_scripts->functionDeclExists(openFuncEmptyDecl)) {
-				_scripts->callFunction(openFuncName);
+			if (_scripts->functionDeclExists(_scripts->MAIN_MODULE,
+				openFuncEmptyDecl)) {
+				_scripts->callFunction(_scripts->MAIN_MODULE, openFuncName);
 			}
 		}
 		// If there is no widget currently selected, automatically select the first
@@ -370,7 +374,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 				extendedHandleInputDecl = "void " + funcName +
 				"(const dictionary, const dictionary, const MousePosition&in, "
 					"const MousePosition&in)";
-			if (_scripts->functionExists(funcName)) {
+			if (_scripts->functionExists(_scripts->MAIN_MODULE, funcName)) {
 				// Construct the dictionaries.
 				CScriptDictionary *controls = _scripts->createDictionary(),
 					*triggeredByMouse = _scripts->createDictionary();
@@ -381,11 +385,15 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 						(asINT64)ui->isMouseButtonTriggeringControl(key));
 				}
 				// Invoke the function.
-				if (_scripts->functionDeclExists(basicHandleInputDecl)) {
-					_scripts->callFunction(funcName, controls);
-				} else if (_scripts->functionDeclExists(extendedHandleInputDecl)) {
-					_scripts->callFunction(funcName, controls, triggeredByMouse,
-						&_previousMousePosition, &_currentMousePosition);
+				if (_scripts->functionDeclExists(_scripts->MAIN_MODULE,
+					basicHandleInputDecl)) {
+					_scripts->callFunction(_scripts->MAIN_MODULE, funcName,
+						controls);
+				} else if (_scripts->functionDeclExists(_scripts->MAIN_MODULE,
+					extendedHandleInputDecl)) {
+					_scripts->callFunction(_scripts->MAIN_MODULE, funcName,
+						controls, triggeredByMouse, &_previousMousePosition,
+						&_currentMousePosition);
 				}
 				controls->Release();
 				triggeredByMouse->Release();
@@ -415,9 +423,9 @@ bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 		if (customHandler != _customSignalHandlers.end()) {
 			std::string decl = "void " + customHandler->second +
 				"(const string&in, const string&in)";
-			if (_scripts->functionDeclExists(decl)) {
-				return _scripts->callFunction(customHandler->second, &fullname,
-					&signalNameStd);
+			if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, decl)) {
+				return _scripts->callFunction(_scripts->MAIN_MODULE,
+					customHandler->second, &fullname, &signalNameStd);
 			} else {
 				_logger.warning("Widget \"{}\" was configured with a custom "
 					"signal handler \"{}\", but a function of declaration \"{}\" "
@@ -427,8 +435,8 @@ bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 		}
 		std::string functionName = getGUI() + "_" + _extractWidgetName(fullname) +
 			"_" + signalNameStd;
-		if (_scripts->functionExists(functionName)) {
-			return _scripts->callFunction(functionName);
+		if (_scripts->functionExists(_scripts->MAIN_MODULE, functionName)) {
+			return _scripts->callFunction(_scripts->MAIN_MODULE, functionName);
 		}
 	}
 	return false;
@@ -439,8 +447,8 @@ void sfx::gui::menuItemClickedSignalHandler(const std::string& menuBarName,
 	const auto funcName = getGUI() + "_" + menuBarName +
 		"_MenuItemClicked";
 	const auto funcDecl = "void " + funcName + "(const MenuItemID)";
-	if (_scripts->functionDeclExists(funcDecl)) {
-		_scripts->callFunction(funcName, index);
+	if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, funcDecl)) {
+		_scripts->callFunction(_scripts->MAIN_MODULE, funcName, index);
 	}
 }
 
@@ -453,8 +461,8 @@ void sfx::gui::messageBoxButtonPressedSignalHandler(
 	std::size_t index = 0;
 	for (const auto len = btns.size(); index < len; ++index)
 		if (btns[index] == caption) break;
-	if (_scripts->functionDeclExists(funcDecl)) {
-		_scripts->callFunction(funcName, index);
+	if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, funcDecl)) {
+		_scripts->callFunction(_scripts->MAIN_MODULE, funcName, index);
 	} else {
 		_logger.critical("A message box button \"{}\" was pressed, but no signal "
 			"handler for the MessageBox \"{}\" was defined! The signal handler "
@@ -511,8 +519,8 @@ void sfx::gui::closingSignalHandler(const tgui::ChildWindow::Ptr& window,
 		"_Closing";
 	const auto funcDecl = "void " + funcName + "(bool&out)";
 	bool close = true;
-	if (_scripts->functionDeclExists(funcDecl)) {
-		_scripts->callFunction(funcName, &close);
+	if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, funcDecl)) {
+		_scripts->callFunction(_scripts->MAIN_MODULE, funcName, &close);
 	}
 	if (close) {
 		// If the window was minimised when it was closed, we need to restore it.
@@ -535,8 +543,8 @@ void sfx::gui::fileDialogClosingSignalHandler(const tgui::FileDialog::Ptr& windo
 	const auto funcName = getGUI() + "_" + _extractWidgetName(widgetName) +
 		"_Closing";
 	const auto funcDecl = "void " + funcName + "(bool&out)";
-	if (_scripts->functionDeclExists(funcDecl))
-		_scripts->callFunction(funcName, abort);
+	if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, funcDecl))
+		_scripts->callFunction(_scripts->MAIN_MODULE, funcName, abort);
 }
 
 void sfx::gui::minimizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
@@ -1079,7 +1087,7 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 			auto w = _findWidget<tgui::MessageBox>(widgetName);
 			w->setTitle(_getTranslatedText(widgetName, 0));
 			w->setText(_getTranslatedText(widgetName, 1));
-			const auto buttonCaptions = std::get<sfx::gui::ListOfCaptions>(
+			const auto& buttonCaptions = std::get<sfx::gui::ListOfCaptions>(
 				_originalCaptions[widgetName]);
 			std::vector<String> newCaptions;
 			for (std::size_t i = 2, len = buttonCaptions.size(); i < len; ++i)
@@ -1123,7 +1131,8 @@ bool sfx::gui::_load(engine::json& j) {
 			menu->setVisible(false);
 			_gui.add(menu, "MainMenu");
 			setGUI("MainMenu", false, false);
-			if (_scripts) _scripts->callFunction("MainMenuSetUp");
+			if (_scripts)
+				_scripts->callFunction(_scripts->MAIN_MODULE, "MainMenuSetUp");
 			// Create each menu.
 			for (const auto& m : names) {
 				menu = tgui::Group::create();
@@ -1133,7 +1142,8 @@ bool sfx::gui::_load(engine::json& j) {
 				// _findWidget() work with relative widget names in SetUp()
 				// functions.
 				setGUI(m, false, false);
-				if (_scripts) _scripts->callFunction(m + "SetUp");
+				if (_scripts)
+					_scripts->callFunction(_scripts->MAIN_MODULE, m + "SetUp");
 			}
 			_isLoading = false;
 			// Leave with the current menu being MainMenu.

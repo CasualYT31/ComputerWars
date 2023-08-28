@@ -104,13 +104,19 @@ T engine::ConvertCScriptArray(const CScriptArray* const a) {
 /////////////
 
 template<typename... Ts>
-bool engine::scripts::callFunction(const std::string& name, Ts... values) {
-	asIScriptFunction* const func =
-		_engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
+bool engine::scripts::callFunction(const std::string& module,
+	const std::string& name, Ts... values) {
+	auto const m = _engine->GetModule(module.c_str());
+	if (!m) {
+		_logger.error("Failed to call function \"{}\" in module \"{}\": that "
+			"module does not exist.", name, module);
+		return false;
+	}
+	auto const func = m->GetFunctionByName(name.c_str());
 	if (!func) {
-		_logger.error("Failed to access function \"{}\": either it was not "
-			"defined in any of the scripts or it was defined more than once.",
-			name);
+		_logger.error("Failed to access function \"{}\" in module \"{}\": either "
+			"it was not defined in any of the scripts or it was defined more than "
+			"once.", name, module);
 		return false;
 	}
 	return callFunction(func, values...);

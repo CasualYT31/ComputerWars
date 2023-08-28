@@ -452,11 +452,10 @@ void engine::scripts::scriptMessageCallback(const asSMessageInfo* msg,
     void* param) {
     if (_fillCachedMsg) {
         _cachedMsg += msg->message;
-        _cachedMsg += ", ";
-        _cachedCol = "Col " + std::to_string(msg->col) + ".";
+        _cachedMsg += " (Section \"" + std::string(msg->section) + "\", Row " +
+            std::to_string(msg->row) + ", Col " + std::to_string(msg->col) + "), ";
     } else {
         _cachedMsg = "";
-        _cachedCol = "";
     }
     if (msg->type == asMSGTYPE_INFORMATION) {
         _logger.write("INFO: {}.", *msg);
@@ -498,15 +497,14 @@ bool engine::scripts::loadScripts(std::string folder) {
     if (folder == "") folder = getScriptsFolder();
     _logger.write("Loading scripts from \"{}\"...", folder);
     if (folder == "" || !_engine) return false;
-    CScriptBuilder builder;
-    // Before starting a new module, if it already exists, the ComputerWars module
-    // should be discarded before being replaced. If it doesn't yet exist, then the
+    // Before starting a new module, if it already exists, the MAIN_MODULE should
+    // be discarded before being replaced. If it doesn't yet exist, then the
     // negative value returned is ignored.
-    _engine->DiscardModule("ComputerWars");
-    int r = builder.StartNewModule(_engine, "ComputerWars");
+    _engine->DiscardModule(MAIN_MODULE);
+    int r = _builder.StartNewModule(_engine, MAIN_MODULE);
     if (r < 0) {
-        _logger.error("Failure to start a new module while loading scripts: code "
-            "{}.", r);
+        _logger.error("Failed to start the main module while loading scripts: "
+            "code {}.", r);
         return false;
     }
     try {
@@ -515,10 +513,10 @@ bool engine::scripts::loadScripts(std::string folder) {
             for (const auto& entry : std::filesystem::directory_iterator(dir)) {
                 if (entry.is_regular_file()) {
                     if ((r =
-                        builder.AddSectionFromFile(entry.path().string().c_str()))
+                        _builder.AddSectionFromFile(entry.path().string().c_str()))
                         < 0) {
-                        _logger.error("Failed to add script \"{}\" to the module: "
-                            "code {}.", entry.path().string().c_str(), r);
+                        _logger.error("Failed to add script \"{}\" to the main "
+                            "module: code {}.", entry.path().string().c_str(), r);
                         return false;
                     }
                 } else if (entry.is_directory()) {
@@ -531,8 +529,8 @@ bool engine::scripts::loadScripts(std::string folder) {
     } catch (const std::exception& e) {
         _logger.error("Failed to interact with directory entry: {}.", e);
     }
-    if ((r = builder.BuildModule()) < 0) {
-        _logger.error("Failed to build the module: code {}.", r);
+    if ((r = _builder.BuildModule()) < 0) {
+        _logger.error("Failed to build the main module: code {}.", r);
         return false;
     }
     _scriptsFolder = folder;
@@ -559,12 +557,16 @@ const std::string& engine::scripts::getScriptsFolder() const noexcept {
     return _scriptsFolder;
 }
 
-bool engine::scripts::functionExists(const std::string& name) const {
-    return _engine->GetModule("ComputerWars")->GetFunctionByName(name.c_str());
+bool engine::scripts::functionExists(const std::string& module,
+    const std::string& name) const {
+    const auto* const m = _engine->GetModule(module.c_str());
+    return m && m->GetFunctionByName(name.c_str());
 }
 
-bool engine::scripts::functionDeclExists(const std::string& decl) const {
-    return _engine->GetModule("ComputerWars")->GetFunctionByDecl(decl.c_str());
+bool engine::scripts::functionDeclExists(const std::string& module,
+    const std::string& decl) const {
+    const auto* const m = _engine->GetModule(module.c_str());
+    return m && m->GetFunctionByDecl(decl.c_str());
 }
 
 void engine::scripts::writeToLog(const std::string& message) const {
@@ -681,7 +683,7 @@ std::string engine::scripts::executeCode(std::string code) {
     static const auto Log = [&](const std::string& m) -> std::string {
         _logger.error(m); return m;
     };
-    auto m = _engine->GetModule("ComputerWars");
+    auto m = _engine->GetModule(MAIN_MODULE);
     if (m) {
         static std::size_t counter = 0;
         asIScriptFunction* func = nullptr;
@@ -689,7 +691,6 @@ std::string engine::scripts::executeCode(std::string code) {
             "}";
         _fillCachedMsg = true;
         _cachedMsg = "";
-        _cachedCol = "";
         auto r = m->CompileFunction("EXECUTE_CODE_SECTION", code.c_str(),
             0, 0, &func);
         _fillCachedMsg = false;
@@ -729,32 +730,10 @@ std::string engine::scripts::executeCode(std::string code) {
                     std::to_string(r) + ".");
             }
         } else {
-            switch (r) {
-            case asINVALID_ARG:
-                return Log("asINVALID_ARG: One or more arguments have invalid "
-                    "values.");
-                break;
-            case asINVALID_CONFIGURATION:
-                return Log("asINVALID_CONFIGURATION: The engine configuration is "
-                    "invalid.");
-                break;
-            case asBUILD_IN_PROGRESS:
-                return Log("asBUILD_IN_PROGRESS: Another build is in progress.");
-                break;
-            case asERROR:
-                return Log("asERROR: " + _cachedMsg + _cachedCol);
-                break;
-            case asNOT_SUPPORTED:
-                return Log("asNOT_SUPPORTED: Compiler support is disabled in the "
-                    "engine.");
-                break;
-            default:
-                return Log("An unknown error occurred during compilation: code " +
-                    std::to_string(r) + ".");
-            }
+            return Log(_constructBuildErrorMessage(r));
         }
     } else {
-        return Log("The ComputerWars module does not exist!");
+        return Log("The main module does not exist!");
     }
 }
 
@@ -837,10 +816,70 @@ std::string engine::scripts::getTypeName(const int id) const {
     }
     // Handle other types.
     auto typeInfo = _engine->GetTypeInfoById(id);
-    if (typeInfo)
-        return typeInfo->GetName();
-    else
-        return "";
+    if (typeInfo) return typeInfo->GetName();
+    else return "";
+}
+
+bool engine::scripts::createModule(const std::string& name,
+    const std::vector<engine::scripts::file>& code, std::string& errorString) {
+    if (name == MAIN_MODULE) {
+        _logger.error("Attempted to create new module called \"{}\", which is not "
+            "allowed!", name);
+        return false;
+    }
+    if (name.find('~') != std::string::npos) {
+        _logger.error("Attempted to create a new module called \"{}\" that "
+            "contains illegal character '~'!", name);
+        return false;
+    }
+    _logger.write("Creating module \"{}\"...", name);
+    const std::string tempName = name + "~temp";
+    auto r = _builder.StartNewModule(_engine, tempName.c_str());
+    if (r < 0) {
+        _logger.error("Failed to start a new module \"{}\": code {}.", tempName,
+            r);
+        return false;
+    }
+    for (const auto& file : code) {
+        r = _builder.AddSectionFromMemory(file.name.c_str(), file.code.c_str(),
+            static_cast<int>(file.code.size()));
+        if (r < 0) {
+            _logger.error("Failed to add code file \"{}\" to new module \"{}\": "
+                "code {}.", file.name, tempName, r);
+            return false;
+        }
+    }
+    _fillCachedMsg = true;
+    _cachedMsg = "";
+    r = _builder.BuildModule();
+    _fillCachedMsg = false;
+    if (r < 0) {
+        _logger.error("Failed to build the new module \"{}\": code {}.", tempName,
+            r);
+        errorString = _constructBuildErrorMessage(r);
+        return false;
+    }
+    auto const newModule = _engine->GetModule(tempName.c_str());
+    if (!newModule) {
+        _logger.error("Could not get new module \"{}\" to rename it.", tempName);
+        return false;
+    }
+    // Discard the old module if it exists.
+    _engine->DiscardModule(name.c_str());
+    newModule->SetName(name.c_str());
+    _logger.write("Successfully created module \"{}\".", name);
+    return true;
+}
+
+bool engine::scripts::deleteModule(const std::string& name) {
+    if (name == MAIN_MODULE) {
+        _logger.error("Cannot discard module \"{}\"!", name);
+        return false;
+    }
+    const auto r = _engine->DiscardModule(name.c_str());
+    if (r < 0) _logger.error("Could not discard module \"{}\": code {}.", name, r);
+    else _logger.write("Successfully discarded module \"{}\".", name);
+    return r == 0;
 }
 
 int engine::scripts::_allocateContext() {
@@ -901,4 +940,22 @@ std::string engine::scripts::_constructMessage(const std::string& msg) const {
     return "In " + std::string(sectionName) + ", function " +
         std::string(function->GetDeclaration()) + ", at line " +
         std::to_string(lineNumber) + ": " + msg;
+}
+
+std::string engine::scripts::_constructBuildErrorMessage(const int code) const {
+    switch (code) {
+    case asINVALID_ARG:
+        return "asINVALID_ARG: One or more arguments have invalid values.";
+    case asINVALID_CONFIGURATION:
+        return "asINVALID_CONFIGURATION: The engine configuration is invalid.";
+    case asBUILD_IN_PROGRESS:
+        return "asBUILD_IN_PROGRESS: Another build is in progress.";
+    case asERROR:
+        return "asERROR: " + _cachedMsg;
+    case asNOT_SUPPORTED:
+        return "asNOT_SUPPORTED: Compiler support is disabled in the engine.";
+    default:
+        return "An unknown error occurred during compilation: code " +
+            std::to_string(code) + ".";
+    }
 }
