@@ -26,7 +26,7 @@ bool EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE = true;
 funcdef void EXPLODE_PREVIEW_MENU_EXPLOSION_CALLBACK();
 
 /**
- * Allows code that invokes this menu to call custom code after performing an
+ * Allows code that invokes this menu to call custom code before performing an
  * explosion.
  */
 EXPLODE_PREVIEW_MENU_EXPLOSION_CALLBACK@ EXPLODE_PREVIEW_MENU_CALLBACK = null;
@@ -42,47 +42,57 @@ Vector2 EXPLODE_PREVIEW_MENU_SELECTED_TILE;
 void ExplodePreviewMenuSetUp() {}
 
 /**
+ * Find all tiles within the range and add them to the available tile list.
+ * @param fromTile The tile to draw the explosion preview from.
+ */
+void updateExplosionTiles(const Vector2&in fromTile) {
+    const auto availableTiles = game.map.getAvailableTiles(fromTile,
+        EXPLODE_PREVIEW_MENU_RANGE.x, EXPLODE_PREVIEW_MENU_RANGE.y);
+    if (EXPLODE_PREVIEW_MENU_RANGE.x == 0) availableTiles.insertLast(fromTile);
+    game.map.clearAvailableTiles();
+    for (uint i = 0, len = availableTiles.length(); i < len; ++i)
+        game.map.addAvailableTile(availableTiles[i]);
+}
+
+/**
  * When the menu is opened, push select the currently selected unit, add the tiles
  * in the configured range to the available list, and disable the closed list.
  */
 void ExplodePreviewMenuOpen() {
-	EXPLODE_PREVIEW_MENU_SELECTED_TILE = game.map.getSelectedTile();
-	game.enableClosedList(false);
-	game.setAttackCursorSprites();
-	game.map.pushSelectedUnit(game.map.getSelectedUnit());
-	game.map.setAvailableTileShader(AvailableTileShader::Red);
-	// Fix the range vector if the values aren't in the correct fields.
-	if (EXPLODE_PREVIEW_MENU_RANGE.x > EXPLODE_PREVIEW_MENU_RANGE.y) {
-		uint copy = EXPLODE_PREVIEW_MENU_RANGE.y;
-		EXPLODE_PREVIEW_MENU_RANGE.y = EXPLODE_PREVIEW_MENU_RANGE.x;
-		EXPLODE_PREVIEW_MENU_RANGE.x = copy;
-	}
-	// Find all tiles within the range and add them to the available tile list.
-	const auto availableTiles = game.map.getAvailableTiles(
-		EXPLODE_PREVIEW_MENU_SELECTED_TILE, EXPLODE_PREVIEW_MENU_RANGE.x,
-		EXPLODE_PREVIEW_MENU_RANGE.y);
-	for (uint i = 0, len = availableTiles.length(); i < len; ++i) {
-		game.map.addAvailableTile(availableTiles[i]);
-	}
+    EXPLODE_PREVIEW_MENU_SELECTED_TILE = game.map.getSelectedTile();
+    game.enableClosedList(false);
+    game.setAttackCursorSprites();
+    game.map.pushSelectedUnit(game.map.getSelectedUnit());
+    game.map.setAvailableTileShader(AvailableTileShader::Red);
+    // Fix the range vector if the values aren't in the correct fields.
+    if (EXPLODE_PREVIEW_MENU_RANGE.x > EXPLODE_PREVIEW_MENU_RANGE.y) {
+        uint copy = EXPLODE_PREVIEW_MENU_RANGE.y;
+        EXPLODE_PREVIEW_MENU_RANGE.y = EXPLODE_PREVIEW_MENU_RANGE.x;
+        EXPLODE_PREVIEW_MENU_RANGE.x = copy;
+    }
+    updateExplosionTiles(EXPLODE_PREVIEW_MENU_SELECTED_TILE);
+}
+
+/**
+ * Explosion has been either cancelled or accepted, so we can pop the data
+ * required for that now.
+ */
+void clearExplodeSelectedUnitData() {
+    game.map.popSelectedUnit();
+    game.enableClosedList(true);
+    game.setNormalCursorSprites();
 }
 
 /**
  * When the menu is closed, reverse the effects made when the menu was opened.
  */
 void ExplodePreviewMenuClose() {
-	// TODO-2: for black bombs, who are deleted as they explode, popping the black
-	// bomb here will attempt to reselect it, but as it's been deleted, a warning
-	// will be logged, and the selected unit data will be reset. This is fine, but
-	// I need to find a way to prevent the warning in some way in the future.
-	game.map.popSelectedUnit();
-	game.enableClosedList(true);
-	game.setNormalCursorSprites();
-	// As a safety precaution, reset the state of the global variables.
-	EXPLODE_PREVIEW_MENU_DISPLAYED_HP_TO_DEAL = 0;
-	EXPLODE_PREVIEW_MENU_RANGE.x = 0;
-	EXPLODE_PREVIEW_MENU_RANGE.y = 0;
-	EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE = true;
-	@EXPLODE_PREVIEW_MENU_CALLBACK = null;
+    // As a safety precaution, reset the state of the global variables.
+    EXPLODE_PREVIEW_MENU_DISPLAYED_HP_TO_DEAL = 0;
+    EXPLODE_PREVIEW_MENU_RANGE.x = 0;
+    EXPLODE_PREVIEW_MENU_RANGE.y = 0;
+    EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE = true;
+    @EXPLODE_PREVIEW_MENU_CALLBACK = null;
 }
 
 /**
@@ -96,30 +106,37 @@ void ExplodePreviewMenuClose() {
 void ExplodePreviewMenuHandleInput(const dictionary controls,
     const dictionary mouseInputs, const MousePosition&in previousPosition,
     const MousePosition&in currentPosition) {
-	if (EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE) {
-		HandleCommonGameInput(controls, mouseInputs, previousPosition,
+    if (EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE) {
+        HandleCommonGameInput(controls, mouseInputs, previousPosition,
             currentPosition);
-	}
-	if (bool(controls["back"])) {
-		// Force the selection to go back to the originally selected unit (as the
-		// currently selected tile could be moved whilst in this menu, and this
-		// menu relies on the selected tile being on the original unit as the menu
-		// opens).
-		game.map.setSelectedTile(EXPLODE_PREVIEW_MENU_SELECTED_TILE);
-		setGUI(PREVIOUS_MENU);
-	} else if (bool(controls["select"])) {
-        // Since you can't move the cursor in this menu, allow the selection even
-        // if the mouse is outside of the map graphic.
-		// Perform explosion.
-		game.damageUnitsInRange(game.map.getSelectedTile(),
-			EXPLODE_PREVIEW_MENU_RANGE.x, EXPLODE_PREVIEW_MENU_RANGE.y,
-			EXPLODE_PREVIEW_MENU_DISPLAYED_HP_TO_DEAL, { "OOZIUM" });
-		// Perform any custom code, then switch back to the previous menu.
-		if (EXPLODE_PREVIEW_MENU_CALLBACK is null) {
-			setGUI("Map");
-		} else {
-			EXPLODE_PREVIEW_MENU_CALLBACK();
-			setGUI("Map");
-		}
-	}
+        updateExplosionTiles(game.map.getSelectedTile());
+    }
+    if (bool(controls["back"])) {
+        // Force the selection to go back to the originally selected unit (as the
+        // currently selected tile could be moved whilst in this menu, and this
+        // menu relies on the selected tile being on the original unit as the menu
+        // opens).
+        game.map.setSelectedTile(EXPLODE_PREVIEW_MENU_SELECTED_TILE);
+        clearExplodeSelectedUnitData();
+        setGUI(PREVIOUS_MENU);
+    } else if (bool(controls["select"])) {
+        // If the cursor can be moved in this menu, the select control is being
+        // input by the mouse, and the mouse is not inside the map's graphic, then
+        // drop the input.
+        if (EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE &&
+            bool(mouseInputs["select"]) &&
+            !game.map.getMapBoundingBox().contains(currentPosition)) return;
+        // Clear selected unit render data for this menu so that if the callback
+        // needs to move a unit, it's free to do so.
+        clearExplodeSelectedUnitData();
+        // Perform any custom code before exploding.
+        if (EXPLODE_PREVIEW_MENU_CALLBACK !is null)
+            EXPLODE_PREVIEW_MENU_CALLBACK();
+        // Perform explosion.
+        game.damageUnitsInRange(game.map.getSelectedTile(),
+            EXPLODE_PREVIEW_MENU_RANGE.x, EXPLODE_PREVIEW_MENU_RANGE.y,
+            EXPLODE_PREVIEW_MENU_DISPLAYED_HP_TO_DEAL, { "OOZIUM" });
+        // Go back to the Map menu.
+        setGUI("Map");
+    }
 }

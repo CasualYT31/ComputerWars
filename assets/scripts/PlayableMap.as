@@ -1553,8 +1553,7 @@ class PlayableMap {
      * Creates a list of units that are within the specified range of a given
      * tile, regardless of whether or not they are visible to any given army.
      * @param  position  The tile to begin the search from.
-     * @param  startFrom The number of tiles away from the given tile to start on
-     *                   will always be at least \c 1.
+     * @param  startFrom The number of tiles away from the given tile to start on.
      * @param  endAt     The number of tiles away from the given tile where the
      *                   search will end.
      * @return An array of unit IDs.
@@ -1565,6 +1564,10 @@ class PlayableMap {
         const auto tiles = map.getAvailableTiles(position, startFrom, endAt);
         for (uint i = 0, tileCount = tiles.length(); i < tileCount; ++i) {
             const auto unitID = map.getUnitOnTile(tiles[i]);
+            if (unitID != NO_UNIT) ret.insertLast(unitID);
+        }
+        if (startFrom == 0) {
+            const auto unitID = map.getUnitOnTile(position);
             if (unitID != NO_UNIT) ret.insertLast(unitID);
         }
         return ret;
