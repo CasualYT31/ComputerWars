@@ -81,7 +81,8 @@ void PreviewMoveUnitMenuOpen() {
             if (unitType.scriptName == "BLACKBOMB") {
                 PreviewCommands.addCommand("Explode", "explode", "attackicon");
             }
-            if (unitType.scriptName == "OOZIUM" && unitOnTile != NO_UNIT) {
+            if (unitType.scriptName == "OOZIUM" && unitOnTile != NO_UNIT &&
+                unitOnTile != unit) {
                 PreviewCommands.addCommand("OoziumFire", "fire", "attackicon");
             } else {
                 PreviewCommands.addCommand("Wait", "wait", "waiticon");
