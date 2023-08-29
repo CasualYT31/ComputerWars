@@ -883,6 +883,11 @@ class TilePropertiesWindow {
         if (signalName == "ItemSelected") {
             // Find ID of the unit and refresh the unit layout.
             const auto selectedItem = getSelectedItemTextHierarchy(widgetName);
+            // This signal can also be emitted when an item is deselected, in
+            // which case the above array will be empty. We don't want to do
+            // anything special, just prevent refreshing the unit widgets/throwing
+            // a runtime error.
+            if (selectedItem.isEmpty()) return;
             const auto unitStr = selectedItem[selectedItem.length() - 1];
             const auto hash = unitStr.findFirst("#");
             const auto space = unitStr.findFirst(" ", hash);
