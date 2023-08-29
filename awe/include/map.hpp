@@ -307,11 +307,13 @@ namespace awe {
 		////////////////////
 		/**
 		 * Sets the map's name.
-		 * By default, a map's name is a blank string.
+		 * By default, a map's name is a blank string.\n
+		 * If there any \c ~ characters in the given string, then they will be
+		 * removed and a warning will be logged.
 		 * @param  name The name to give to the map to replace the old name.
 		 * @safety Strong guarantee.
 		 */
-		void setMapName(const std::string& name);
+		void setMapName(std::string name);
 
 		/**
 		 * Retrieves the map's name.

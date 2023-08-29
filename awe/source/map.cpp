@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.hpp"
 #include "fmtawe.hpp"
+#include <regex>
 
 /* \c NO_ARMY that can be assigned to a script's interface. Due to limitations of
 AngelScript, I unfortunately cannot register a constant with the script interface,
@@ -210,7 +211,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, hasChanged), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void setMapName(const string&in)",
+			"void setMapName(string)",
 			asMETHOD(awe::map, setMapName), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
@@ -914,7 +915,12 @@ bool awe::map::periodic() {
 	}
 }
 
-void awe::map::setMapName(const std::string& name) {
+void awe::map::setMapName(std::string name) {
+	if (name.find('~') != std::string::npos) {
+		_logger.warning("setMapName operation: illegal character \"~\" in new "
+			"name \"{}\", removing all instances of character \"~\".", name);
+		name = std::regex_replace(name, std::regex("~"), "");
+	}
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::MAP_NAME));
 	_mapName = name;

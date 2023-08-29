@@ -211,9 +211,14 @@ class MapPropertiesWindow {
                 error("MapPropertiesOK button was pressed when @edit was null!");
                 return;
             }
+            const auto newName = getWidgetText(mapName);
             const auto currentSize = edit.map.getMapSize(),
                 newSize = _getSizeInEditBoxes();
-            if (newSize.x == 0 || newSize.y == 0) {
+            if (newName.findFirst("~") >= 0) {
+                awe::OpenMessageBox(mbName, "alert", "cannotsetmaptoillegalname",
+                    { any("~") }, mbDisableThis, mbEnableThis);
+                addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
+            } else if (newSize.x == 0 || newSize.y == 0) {
                 awe::OpenMessageBox(mbName, "alert", "cannotresizeto0", null,
                     mbDisableThis, mbEnableThis);
                 addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
