@@ -683,6 +683,33 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, setMementoStateChangedCallback), asCALL_THISCALL);
 
 		////////////////////////
+		// SCRIPTS OPERATIONS //
+		////////////////////////
+		r = engine->RegisterObjectMethod("Map",
+			"void addScriptFile(const string&in, const string&in)",
+			asMETHOD(awe::map, addScriptFile), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void removeScriptFile(const string&in)",
+			asMETHOD(awe::map, removeScriptFile), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"string buildScriptFiles()",
+			asMETHOD(awe::map, buildScriptFiles), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool doesScriptExist(const string&in) const",
+			asMETHOD(awe::map, doesScriptExist), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"string getScript(const string&in) const",
+			asMETHOD(awe::map, getScript), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"array<string>@ getScriptNames() const",
+			asMETHOD(awe::map, getScriptNamesAsArray), asCALL_THISCALL);
+
+		////////////////////////
 		// DRAWING OPERATIONS //
 		////////////////////////
 		r = engine->RegisterObjectMethod("Map",
@@ -811,6 +838,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 
 awe::map::~map() noexcept {
 	if (_mementosChangedCallback) _mementosChangedCallback->Release();
+	if (_scripts && !_moduleName.empty()) _scripts->deleteModule(_moduleName);
 }
 
 bool awe::map::load(std::string file, const unsigned char version) {
@@ -876,7 +904,14 @@ bool awe::map::hasChanged() const {
 }
 
 bool awe::map::periodic() {
-	return defaultWinCondition();
+	if (_scripts && _scripts->functionDeclExists(_moduleName,
+		"void periodic(Map@ const, bool&out)")) {
+		bool winConditionMet = false;
+		_scripts->callFunction(_moduleName, "periodic", this, &winConditionMet);
+		return winConditionMet;
+	} else {
+		return defaultWinCondition();
+	}
 }
 
 void awe::map::setMapName(const std::string& name) {
@@ -2577,6 +2612,60 @@ void awe::map::setMementoStateChangedCallback(asIScriptFunction* const callback)
 	_mementosChangedCallback = callback;
 }
 
+void awe::map::addScriptFile(const std::string& name, const std::string& code) {
+	awe::disable_mementos token(this, doesScriptExist(name) ?
+		_getMementoName(awe::map_strings::operation::UPDATE_SCRIPT) :
+		_getMementoName(awe::map_strings::operation::ADD_SCRIPT));
+	_scriptFiles[name] = code;
+}
+
+void awe::map::removeScriptFile(const std::string& name) {
+	if (!doesScriptExist(name)) {
+		_logger.error("removeScriptFile operation failed: could not locate script "
+			"with name \"{}\".", name);
+		return;
+	}
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::REMOVE_SCRIPT));
+	_scriptFiles.erase(name);
+}
+
+std::string awe::map::buildScriptFiles() {
+	if (!_scripts) throw NO_SCRIPTS;
+	std::string newModuleName = getMapName() + ":map";
+	std::string reason;
+	const bool success =
+		_scripts->createModule(newModuleName, _scriptFiles, reason);
+	if (success && !_moduleName.empty() && newModuleName != _moduleName) {
+		// The map was renamed since the last build, so the old module still
+		// exists. Delete it!
+		_scripts->deleteModule(_moduleName);
+	}
+	if (success) _moduleName = newModuleName;
+	return reason;
+}
+
+std::string awe::map::getScript(const std::string& name) const {
+	if (doesScriptExist(name)) return _scriptFiles.at(name);
+	_logger.error("getScript operation failed: could not locate script with name "
+		"\"{}\".", name);
+	return "";
+}
+
+std::vector<std::string> awe::map::getScriptNames() const {
+	std::vector<std::string> names;
+	std::transform(_scriptFiles.begin(), _scriptFiles.end(),
+		std::back_inserter(names),
+		[](const std::pair<std::string, std::string>& p) { return p.first; });
+	return names;
+}
+
+CScriptArray* awe::map::getScriptNamesAsArray() const {
+	if (_scripts)
+		return _scripts->createArrayFromContainer("string", getScriptNames());
+	throw NO_SCRIPTS;
+}
+
 void awe::map::setTarget(
 	const std::shared_ptr<sf::RenderTarget>& target) noexcept {
 	_target = target;
@@ -3160,11 +3249,15 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	_armies.clear();
 	_units.clear();
 	_tiles.clear();
-	_mapName = "";
+	_mapName.clear();
 	_day = 0;
 	_viewOffsetX.reset();
 	_viewOffsetY.reset();
 	_mapSizeCache = { 0, 0 };
+	_scriptFiles.clear();
+	if (_scripts->doesModuleExist(_moduleName))
+		_scripts->deleteModule(_moduleName);
+	_moduleName.clear();
 	// Load state.
 	_mementoHardDisable = true;
 	_scripts->callFunction(_scripts->MAIN_MODULE, "LoadMap", &stream, this,

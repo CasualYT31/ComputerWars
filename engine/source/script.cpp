@@ -821,7 +821,7 @@ std::string engine::scripts::getTypeName(const int id) const {
 }
 
 bool engine::scripts::createModule(const std::string& name,
-    const std::vector<engine::scripts::file>& code, std::string& errorString) {
+    const engine::scripts::files& code, std::string& errorString) {
     if (name == MAIN_MODULE) {
         _logger.error("Attempted to create new module called \"{}\", which is not "
             "allowed!", name);
@@ -841,11 +841,11 @@ bool engine::scripts::createModule(const std::string& name,
         return false;
     }
     for (const auto& file : code) {
-        r = _builder.AddSectionFromMemory(file.name.c_str(), file.code.c_str(),
-            static_cast<int>(file.code.size()));
+        r = _builder.AddSectionFromMemory(file.first.c_str(), file.second.c_str(),
+            static_cast<int>(file.second.size()));
         if (r < 0) {
             _logger.error("Failed to add code file \"{}\" to new module \"{}\": "
-                "code {}.", file.name, tempName, r);
+                "code {}.", file.first, tempName, r);
             return false;
         }
     }
@@ -880,6 +880,10 @@ bool engine::scripts::deleteModule(const std::string& name) {
     if (r < 0) _logger.error("Could not discard module \"{}\": code {}.", name, r);
     else _logger.write("Successfully discarded module \"{}\".", name);
     return r == 0;
+}
+
+bool engine::scripts::doesModuleExist(const std::string& name) const {
+    return _engine->GetModule(name.c_str());
 }
 
 int engine::scripts::_allocateContext() {

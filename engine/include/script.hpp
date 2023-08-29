@@ -264,15 +264,11 @@ namespace engine {
 	class scripts {
 	public:
 		/**
-		 * Represents a script file.
+		 * Represents a collection of script files.
+		 * The key stores the name of the file, and the value stores the contents
+		 * of the file.
 		 */
-		struct file {
-			/// The name of the script file.
-			std::string name;
-
-			/// The contents of the script file.
-			std::string code;
-		};
+		typedef std::unordered_map<std::string, std::string> files;
 
 		/**
 		 * The name of the main module in which all script files are built.
@@ -539,6 +535,19 @@ namespace engine {
 		CScriptArray* createArray(const std::string& type) const;
 
 		/**
+		 * Creates a @c CScriptArray object and fills it with the contents of a
+		 * given STL container.
+		 * @tparam T    The type of container to copy the elements of.
+		 * @param  type The name of the type to give as the array's type.
+		 * @param  stl  The STL container whose items should be added to the array.
+		 * @return Pointer to a new AngelScript @c array object, or @c nullptr if
+		 *         it could not be created.
+		 */
+		template<typename T>
+		CScriptArray* createArrayFromContainer(const std::string& type,
+			T& stl) const;
+
+		/**
 		 * Creates a @c CScriptAny object.
 		 * @warning You must remember to \c delete or \c Release() the returned
 		 *          pointer!
@@ -579,7 +588,7 @@ namespace engine {
 		 * @return \c TRUE if the module could be built and added/updated, \c FALSE
 		 *         otherwise.
 		 */
-		bool createModule(const std::string& name, const std::vector<file>& code,
+		bool createModule(const std::string& name, const files& code,
 			std::string& errorString);
 
 		/**
@@ -589,6 +598,13 @@ namespace engine {
 		 *         reason why will be logged).
 		 */
 		bool deleteModule(const std::string& name);
+
+		/**
+		 * Does a module with the given name exist?
+		 * @param  name The name to test.
+		 * @return \c TRUE if a module exists with the given name, \c FALSE if not.
+		 */
+		bool doesModuleExist(const std::string& name) const;
 	private:
 		/**
 		 * Allocates a new function context.

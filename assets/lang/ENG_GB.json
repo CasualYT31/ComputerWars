@@ -141,6 +141,9 @@
 	"OPERATION_tilehp": "Set Tile's HP",
 	"OPERATION_tileowner": "Set Tile's Owner",
 	"OPERATION_selectarmy": "Select Current Army",
+	"OPERATION_addscript": "Add Script",
+	"OPERATION_updatescript": "Update Script",
+	"OPERATION_removescript": "Remove Script",
 
 	"OPERATION_mapprops": "Update Map's Name and/or Day",
 	"OPERATION_tiletypeandowner": "Set Tile's Type and/or Owner",

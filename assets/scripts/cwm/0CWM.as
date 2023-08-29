@@ -12,6 +12,11 @@ uint32 mapHeight;
 uint32 selectedTileX;
 uint32 selectedTileY;
 Day currentDay;
+uint32 scriptCount;
+foreach script {
+    string name;
+    string code;
+}
 uint32 armyCount;
 foreach army {
 	string countryScriptName;
@@ -166,6 +171,15 @@ namespace cwm {
 		Day day;
 		stream.read(day);
 		map.setDay(day);
+        uint32 scriptCount;
+        stream.read(scriptCount);
+        for (uint32 i = 0; i < scriptCount; ++i) {
+            string scriptName, scriptCode;
+            stream.read(scriptName);
+            stream.read(scriptCode);
+            map.addScriptFile(scriptName, scriptCode);
+        }
+        if (scriptCount > 0) map.buildScriptFiles();
 		stream.read(armyCount);
 		for (uint64 army = 0; army < armyCount; ++army) {
 			string countryScriptName;
@@ -258,6 +272,14 @@ namespace cwm {
 		stream.write(cursor.x);
 		stream.write(cursor.y);
 		stream.write(map.getDay());
+        const auto scriptFileNames = map.getScriptNames();
+        const uint scriptFileCount = scriptFileNames.length();
+        stream.write(scriptFileCount);
+        for (uint32 i = 0; i < scriptFileCount; ++i) {
+            const string scriptName = scriptFileNames[i];
+            stream.write(scriptName);
+            stream.write(map.getScript(scriptName));
+        }
 		const auto armyCount = map.getArmyCount();
 		stream.write(armyCount);
 		const auto armyIDs = map.getArmyIDs();

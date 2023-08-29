@@ -1568,6 +1568,66 @@ namespace awe {
 		 */
 		void setMementoStateChangedCallback(asIScriptFunction* const callback);
 
+		///////////////////////
+		// SCRIPT OPERATIONS //
+		///////////////////////
+		/**
+		 * Adds a new script, or updates an existing one.
+		 * @param name The name of the new script, or the name of the script to
+		 *             update.
+		 * @param code The code of the new script, or the new code of the existing
+		 *             script.
+		 */
+		void addScriptFile(const std::string& name, const std::string& code);
+
+		/**
+		 * Removes a script file.
+		 * An error will be logged if the given script does not exist.
+		 * @param name The name of the script to remove.
+		 */
+		void removeScriptFile(const std::string& name);
+
+		/**
+		 * Builds the scripts.
+		 * If the build was successful, any previous builds will be discarded.
+		 * @return If an error ocurred, a message describing the reason shall be
+		 *         returned. If the build was successful, an empty string will be
+		 *         returned.
+		 * @throws \c std::runtime_error if no \c scripts object is present at the
+		 *         time of calling.
+		 */
+		std::string buildScriptFiles();
+
+		/**
+		 * Does a script with the given name exist?
+		 * @param  name The name to test.
+		 * @return \c TRUE if there is a script with the given name stored in this
+		 *         map \c FALSE otherwise.
+		 */
+		inline bool doesScriptExist(const std::string& name) const {
+			return _scriptFiles.find(name) != _scriptFiles.end();
+		}
+
+		/**
+		 * Gets a script.
+		 * @param  name The name of the script to retrieve.
+		 * @return The code in the script, or a blank string if a script with the
+		 *         given name doesn't exist. In this case, an error will be logged.
+		 */
+		std::string getScript(const std::string& name) const;
+
+		/**
+		 * Gets a list of the names of the scripts stored with this map.
+		 * @return The name of each script stored with this map.
+		 */
+		std::vector<std::string> getScriptNames() const;
+
+		/// Version of \c getScriptNames() that converts the result into a script
+		/// array.
+		/// @throws \c std::runtime_error if no \c scripts object is currently
+		///         stored in this \c map object.
+		CScriptArray* getScriptNamesAsArray() const;
+
 		////////////////////////
 		// DRAWING OPERATIONS //
 		////////////////////////
@@ -2029,11 +2089,6 @@ namespace awe {
 		std::string _filename = "";
 
 		/**
-		 * Pointer to a \c scripts object.
-		 */
-		std::shared_ptr<engine::scripts> _scripts = nullptr;
-
-		/**
 		 * Has a memento been added since the map was last successfully loaded or
 		 * saved?
 		 */
@@ -2136,6 +2191,24 @@ namespace awe {
 		 * Stores which day it currently is.
 		 */
 		awe::Day _day = 1;
+
+		/////////////
+		// SCRIPTS //
+		/////////////
+		/**
+		 * Pointer to a \c scripts object.
+		 */
+		std::shared_ptr<engine::scripts> _scripts = nullptr;
+
+		/**
+		 * The scripts loaded with this map.
+		 */
+		engine::scripts::files _scriptFiles;
+
+		/**
+		 * The name of the module associated with this map.
+		 */
+		std::string _moduleName;
 
 		/////////////
 		// DRAWING //

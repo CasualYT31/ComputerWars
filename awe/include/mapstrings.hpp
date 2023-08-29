@@ -71,6 +71,9 @@ namespace awe {
 			TILE_HP,
 			TILE_OWNER,
 			SELECT_ARMY,
+			ADD_SCRIPT,
+			UPDATE_SCRIPT,
+			REMOVE_SCRIPT,
 			count
 		};
 
@@ -107,6 +110,9 @@ namespace awe {
 			"tilehp",
 			"tileowner",
 			"selectarmy",
+			"addscript",
+			"updatescript",
+			"removescript"
 		};
 
 		/**

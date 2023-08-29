@@ -204,3 +204,11 @@ bool engine::scripts::callFunction(asIScriptFunction* const func, T value,
 	++_argumentID;
 	return callFunction(func, values...);
 }
+
+template<typename T>
+CScriptArray* engine::scripts::createArrayFromContainer(const std::string& type,
+	T& stl) const {
+	CScriptArray* const ret = createArray(type);
+	if (ret) for (auto& obj : stl) ret->InsertLast(&obj);
+	return ret;
+}
