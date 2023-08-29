@@ -1223,16 +1223,8 @@ std::set<awe::ArmyID> awe::map::getArmyIDs() const {
 }
 
 CScriptArray* awe::map::getArmyIDsAsArray() const {
-	if (_scripts) {
-		auto set = getArmyIDs();
-		CScriptArray* ret = _scripts->createArray("ArmyID");
-		for (auto element : set) {
-			ret->InsertLast(&element);
-		}
-		return ret;
-	} else {
-		throw NO_SCRIPTS;
-	}
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("ArmyID", getArmyIDs());
 }
 
 void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team) {
@@ -1430,14 +1422,8 @@ std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(
 }
 
 CScriptArray* awe::map::getTilesOfArmyAsArray(const awe::ArmyID army) const {
-	if (_scripts) {
-		auto set = getTilesOfArmy(army);
-		CScriptArray* ret = _scripts->createArray("Vector2");
-		for (auto tile : set) ret->InsertLast(&tile);
-		return ret;
-	} else {
-		throw NO_SCRIPTS;
-	}
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("Vector2", getTilesOfArmy(army));
 }
 
 std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(
@@ -1449,14 +1435,8 @@ std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(
 }
 
 CScriptArray* awe::map::getUnitsOfArmyAsArray(const awe::ArmyID army) const {
-	if (_scripts) {
-		auto set = getUnitsOfArmy(army);
-		CScriptArray* ret = _scripts->createArray("UnitID");
-		for (auto unit : set) ret->InsertLast(&unit);
-		return ret;
-	} else {
-		throw NO_SCRIPTS;
-	}
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("UnitID", getUnitsOfArmy(army));
 }
 
 std::map<unsigned int, std::unordered_set<awe::UnitID>>
@@ -1475,20 +1455,17 @@ std::map<unsigned int, std::unordered_set<awe::UnitID>>
 
 CScriptArray* awe::map::getUnitsOfArmyByPriorityAsArray(
 	const awe::ArmyID army) const {
-	if (_scripts) {
-		auto set = getUnitsOfArmyByPriority(army);
-		CScriptArray* ret = _scripts->createArray("array<UnitID>@");
-		// Loop through backwards: see documentation on unit_type::unit_type().
-		for (auto itr = set.rbegin(), enditr = set.rend(); itr != enditr; ++itr) {
-			CScriptArray* list = _scripts->createArray("UnitID");
-			for (auto unit : itr->second) list->InsertLast(&unit);
-			ret->InsertLast(&list);
-			list->Release();
-		}
-		return ret;
-	} else {
-		throw NO_SCRIPTS;
+	if (!_scripts) throw NO_SCRIPTS;
+	auto set = getUnitsOfArmyByPriority(army);
+	CScriptArray* ret = _scripts->createArray("array<UnitID>@");
+	// Loop through backwards: see documentation on unit_type::unit_type().
+	for (auto itr = set.rbegin(), enditr = set.rend(); itr != enditr; ++itr) {
+		CScriptArray* list =
+			_scripts->createArrayFromContainer("UnitID", itr->second);
+		ret->InsertLast(&list);
+		list->Release();
 	}
+	return ret;
 }
 
 std::size_t awe::map::countTilesBelongingToArmy(const awe::ArmyID army,
@@ -1971,12 +1948,8 @@ std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(
 
 
 CScriptArray* awe::map::getLoadedUnitsAsArray(const awe::UnitID id) const {
-	if (_scripts) {
-		auto set = getLoadedUnits(id);
-		CScriptArray* ret = _scripts->createArray("UnitID");
-		for (auto unit : set) ret->InsertLast(&unit);
-		return ret;
-	} else throw NO_SCRIPTS;
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("UnitID", getLoadedUnits(id));
 }
 
 unsigned int awe::map::getUnitDefence(const awe::UnitID id) const {
@@ -2149,12 +2122,9 @@ std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(
 CScriptArray* awe::map::getAvailableTilesAsArray(
 	const sf::Vector2u& tile, unsigned int startFrom,
 	const unsigned int endAt) const {
-	if (_scripts) {
-		auto set = getAvailableTiles(tile, startFrom, endAt);
-		CScriptArray* ret = _scripts->createArray("Vector2");
-		for (auto tile : set) ret->InsertLast(&tile);
-		return ret;
-	} else throw NO_SCRIPTS;
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("Vector2",
+		getAvailableTiles(tile, startFrom, endAt));
 }
 
 std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin,
@@ -2243,6 +2213,7 @@ CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 	const unsigned int movePoints, const awe::Fuel fuel,
 	const awe::TeamID team, const awe::ArmyID army, const bool hasInfiniteFuel,
 	const bool ignoreUnitChecks, const CScriptArray* const ignoredUnits) const {
+	if (!_scripts) throw NO_SCRIPTS;
 	const auto vec = findPath(origin, dest, moveType, &movePoints, &fuel, &team,
 		&army, hasInfiniteFuel, ignoreUnitChecks,
 		engine::ConvertCScriptArray<std::unordered_set<awe::UnitID>, awe::UnitID>(
@@ -2259,6 +2230,7 @@ CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 	const sf::Vector2u& dest, const awe::movement_type& moveType,
 	const awe::ArmyID army, const CScriptArray* const ignoredUnits) const {
+	if (!_scripts) throw NO_SCRIPTS;
 	const auto vec = findPath(origin, dest, moveType, nullptr, nullptr, nullptr,
 		&army, true, false,
 		engine::ConvertCScriptArray<std::unordered_set<awe::UnitID>, awe::UnitID>(
@@ -2596,12 +2568,9 @@ std::vector<std::string> awe::map::getMementos(
 }
 
 CScriptArray* awe::map::getMementosAsArray(std::size_t& lastKnownMemento) const {
-	if (_scripts) {
-		const auto result = getMementos(lastKnownMemento);
-		CScriptArray* ret = _scripts->createArray("string");
-		for (std::string element : result) ret->InsertLast(&element);
-		return ret;
-	} else throw NO_SCRIPTS;
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("string",
+		getMementos(lastKnownMemento));
 }
 
 std::string awe::map::getNextUndoMementoName() const {
@@ -2667,9 +2636,8 @@ std::vector<std::string> awe::map::getScriptNames() const {
 }
 
 CScriptArray* awe::map::getScriptNamesAsArray() const {
-	if (_scripts)
-		return _scripts->createArrayFromContainer("string", getScriptNames());
-	throw NO_SCRIPTS;
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("string", getScriptNames());
 }
 
 void awe::map::setTarget(

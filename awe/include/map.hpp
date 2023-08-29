@@ -1204,7 +1204,8 @@ namespace awe {
 		/**
 		 * Version of \c findPath() which converts the result into a
 		 * \c CScriptArray.
-		 * @sa @c findPath().
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c findPath().
 		 */
 		CScriptArray* findPathAsArray(const sf::Vector2u& origin,
 			const sf::Vector2u& dest, const awe::movement_type& moveType,
@@ -1216,7 +1217,8 @@ namespace awe {
 		/**
 		 * Version of \c findPath() which passes in \c nullptr where possible, and
 		 * converts the result into a \c CScriptArray.
-		 * @sa @c findPath().
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c findPath().
 		 */
 		CScriptArray* findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 			const sf::Vector2u& dest, const awe::movement_type& moveType,

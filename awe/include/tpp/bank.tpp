@@ -31,6 +31,11 @@ awe::bank<T>::bank(const std::shared_ptr<engine::scripts>& scripts,
 }
 
 template<typename T>
+awe::bank<T>::~bank() noexcept {
+	if (_scriptNamesAsArray) _scriptNamesAsArray->Release();
+}
+
+template<typename T>
 void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	// 1. Register the game typedefs to ensure that they are defined.
@@ -86,15 +91,10 @@ bool awe::bank<T>::_load(engine::json& j) {
 	}
 	_bank = std::move(bank);
 	_scriptNames = std::move(scriptNames);
+	if (_scriptNamesAsArray) _scriptNamesAsArray->Release();
+	_scriptNamesAsArray =
+		_scripts->createArrayFromContainer("string", _scriptNames);
 	return true;
-}
-
-template<typename T>
-CScriptArray* awe::bank<T>::_getScriptNamesArray() const {
-	const auto names = getScriptNames();
-	CScriptArray* ret = _scripts->createArray("string");
-	for (auto name : names) ret->InsertLast(&name);
-	return ret;
 }
 
 template<typename T>

@@ -93,6 +93,11 @@ namespace awe {
 			const std::string& name, const engine::logger::data& data);
 
 		/**
+		 * Releases AngelScript objects.
+		 */
+		~bank() noexcept;
+
+		/**
 		 * The type of container used to store bank values internally.
 		 */
 		typedef typename std::unordered_map<std::string, std::shared_ptr<const T>>
@@ -213,7 +218,10 @@ namespace awe {
 		 * of strings.
 		 * @return The array that can be used by scripts.
 		 */
-		CScriptArray* _getScriptNamesArray() const;
+		inline CScriptArray* _getScriptNamesArray() const {
+			if (_scriptNamesAsArray) _scriptNamesAsArray->AddRef();
+			return _scriptNamesAsArray;
+		}
 
 		/**
 		 * Internal logger object.
@@ -230,6 +238,11 @@ namespace awe {
 		 * given.
 		 */
 		std::vector<std::string> _scriptNames;
+
+		/**
+		 * Copy of \c _scriptNames, for use with the scripts.
+		 */
+		CScriptArray* _scriptNamesAsArray = nullptr;
 
 		/**
 		 * The pointer to the @c scripts instance.

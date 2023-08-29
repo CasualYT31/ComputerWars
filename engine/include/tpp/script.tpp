@@ -209,6 +209,8 @@ template<typename T>
 CScriptArray* engine::scripts::createArrayFromContainer(const std::string& type,
 	T& stl) const {
 	CScriptArray* const ret = createArray(type);
-	if (ret) for (auto& obj : stl) ret->InsertLast(&obj);
+	ret->Resize(static_cast<asUINT>(stl.size()));
+	asUINT x = 0;
+	if (ret) for (typename T::value_type i : stl) ret->SetValue(x++, &i);
 	return ret;
 }
