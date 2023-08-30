@@ -265,18 +265,20 @@ void sfx::gui::_moveWidgetToBack(const std::string& name) {
 void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
 	CScriptArray* const variables) {
 	START_WITH_WIDGET(name)
-	// For EditBoxes, don't translate the text, as this is text that the user can
-	// edit.
-	if (widgetType == type::EditBox) {
-		std::dynamic_pointer_cast<EditBox>(widget)->setText(text);
-	} else {
-		if (widgetType != type::BitmapButton && widgetType != type::Label &&
-			widgetType != type::Button && widgetType != type::ChildWindow &&
-			widgetType != type::CheckBox && widgetType != type::RadioButton)
-				UNSUPPORTED_WIDGET_TYPE()
-		_setTranslatedString(fullnameAsString, text, variables);
-		_translateWidget(widget);
-	}
+		// For EditBoxes and TextAreas, don't translate the text, as this is text
+		// that the user can edit.
+		if (widgetType == type::EditBox) {
+			std::dynamic_pointer_cast<EditBox>(widget)->setText(text);
+		} else if (widgetType == type::TextArea) {
+			std::dynamic_pointer_cast<TextArea>(widget)->setText(text);
+		} else {
+			if (widgetType != type::BitmapButton && widgetType != type::Label &&
+				widgetType != type::Button && widgetType != type::ChildWindow &&
+				widgetType != type::CheckBox && widgetType != type::RadioButton)
+					UNSUPPORTED_WIDGET_TYPE()
+			_setTranslatedString(fullnameAsString, text, variables);
+			_translateWidget(widget);
+		}
 	END("Attempted to set the caption \"{}\" to a widget \"{}\" of type \"{}\" "
 		"within menu \"{}\".", text, name, widgetType, fullname[0])
 	if (variables) variables->Release();
@@ -450,6 +452,7 @@ void sfx::gui::_setWidgetTextSize(const std::string& name,
 		ELSE_IF_WIDGET_IS(BitmapButton, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(Button, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(EditBox, castWidget->setTextSize(size);)
+		ELSE_IF_WIDGET_IS(TextArea, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(MenuBar, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(Tabs, castWidget->setTextSize(size);)
 		ELSE_UNSUPPORTED()
@@ -519,11 +522,12 @@ void sfx::gui::_setWidgetTextAlignment(const std::string& name,
 		name, widgetType, fullname[0])
 }
 
-// EDITBOX //
+// EDITBOX AND TEXTAREA //
 
 std::string sfx::gui::_getWidgetText(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(EditBox, return castWidget->getText().toStdString();)
+		IF_WIDGET_IS(TextArea, return castWidget->getText().toStdString();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the text of a widget \"{}\", which is of type \"{}\", "
 		"within menu \"{}\".", name, widgetType, fullname[0])
@@ -543,7 +547,8 @@ void sfx::gui::_onlyAcceptUIntsInEditBox(const std::string& name) {
 void sfx::gui::_setWidgetDefaultText(const std::string& name,
 	const std::string& text, CScriptArray* variables) {
 	START_WITH_WIDGET(name)
-		if (widgetType != type::EditBox) UNSUPPORTED_WIDGET_TYPE()
+		if (widgetType != type::EditBox && widgetType != type::TextArea)
+			UNSUPPORTED_WIDGET_TYPE()
 		_setTranslatedString(fullnameAsString, text, variables);
 		_translateWidget(widget);
 	END("Attempted to set the default text \"{}\" to widget \"{}\", which is of "
@@ -729,11 +734,11 @@ void sfx::gui::_addTreeViewItem(const std::string& name,
 void sfx::gui::_addTab(const std::string& name, const std::string& text,
 	CScriptArray* const variables) {
 	START_WITH_WIDGET(name)
-	std::size_t index = 0;
+		std::size_t index = 0;
 		IF_WIDGET_IS(Tabs, index = castWidget->add(text, false);)
 		ELSE_UNSUPPORTED()
-	_setTranslatedString(fullnameAsString, text, variables, index);
-	_translateWidget(widget);
+		_setTranslatedString(fullnameAsString, text, variables, index);
+		_translateWidget(widget);
 	END("Attempted to add a tab \"{}\" to widget \"{}\", which is of type \"{}\", "
 		"within menu \"{}\".", text, name, widgetType, fullname[0])
 	if (variables) variables->Release();
@@ -793,6 +798,9 @@ void sfx::gui::_removeWidgetsFromContainer(const std::string& name) {
 		if (fullname.size() < 2) {
 			_removeWidgets(widget, nullptr, false);
 		} else {
+			// Using isContainer() conveniently prevents deleting all of a
+			// SubwidgetContainer's widgets without removing the SubwidgetContainer
+			// itself.
 			if (widget->isContainer()) _removeWidgets(widget, container, false);
 			else UNSUPPORTED_WIDGET_TYPE()
 		}
@@ -963,6 +971,8 @@ void sfx::gui::_setHorizontalScrollbarPolicy(const std::string& name,
 	const tgui::Scrollbar::Policy policy) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ScrollablePanel,
+			castWidget->setHorizontalScrollbarPolicy(policy);)
+		ELSE_IF_WIDGET_IS(TextArea,
 			castWidget->setHorizontalScrollbarPolicy(policy);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the horizontal scrollbar policy {} to widget \"{}\", "
@@ -1515,7 +1525,6 @@ void sfx::gui::_setFileDialogPath(const std::string& name,
 		fullname[0]);
 }
 
-
 // MESSAGEBOX //
 
 void sfx::gui::_setMessageBoxStrings(const std::string& name,
@@ -1547,4 +1556,28 @@ void sfx::gui::_addMessageBoxButton(const std::string& name,
 	END("Attempted to add a button \"{}\" to widget \"{}\", which is of type "
 		"\"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
 	if (variables) variables->Release();
+}
+
+// TABCONTAINER //
+
+std::string sfx::gui::_addTabAndPanel(const std::string& name,
+	const std::string& text, CScriptArray* const vars) {
+	std::string panelName = "";
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(TabContainer,
+			const auto panel = castWidget->addTab(text, true);
+			if (!panel) ERROR("Could not create panel!");
+			_setTranslatedString(fullnameAsString, text, vars,
+				static_cast<std::size_t>(castWidget->getIndex(panel)));
+			_translateWidget(widget);
+			// Fix Panel's name so that it can be accessed by the scripts/engine.
+			panel->setWidgetName(name + "." +
+				panel->getWidgetName().replace(".", ""));
+			panelName = panel->getWidgetName().toStdString();
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to add a tab \"{}\" to widget \"{}\", which is of type \"{}\", "
+		"within menu \"{}\".", text, name, widgetType, fullname[0])
+	if (vars) vars->Release();
+	return panelName;
 }

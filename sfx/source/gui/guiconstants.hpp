@@ -67,6 +67,8 @@ namespace type {
 	WIDGET_TYPE(TreeView);
 	WIDGET_TYPE(CheckBox);
 	WIDGET_TYPE(RadioButton);
+	WIDGET_TYPE(TabContainer);
+	WIDGET_TYPE(TextArea);
 
 	// Widgets that can't be created by the scripts yet.
 	WIDGET_TYPE(ProgressBar);
@@ -78,7 +80,18 @@ namespace type {
 	WIDGET_TYPE(SpinControl);
 	WIDGET_TYPE(ListView);
 	WIDGET_TYPE(RangeSlider);
-	WIDGET_TYPE(TabContainer);
-	WIDGET_TYPE(TextArea);
 	WIDGET_TYPE(ToggleButton);
+
+	// ~~~ ALERT ~~~
+	// When adding support for widgets that derive from SubwidgetContainer, you
+	// MUST fix the names of the widgets that the SubwidgetContainer creates to
+	// allow the engine to access additional widgets within the SubwidgetContainer
+	// that YOU can create. For example, a TabContainer is able to create Panel
+	// widgets, and if these Panel's names are not fixed, the engine will not be
+	// able to find any widgets that you add to them! SubwidgetContainers should
+	// work just like orindary containers. For example, a panel "Panel1" within
+	// TabContainer "Menu.TabContainer" should have a full name of
+	// "Menu.TabContainer.Panel1", or at least "TabContainer.Panel1". Be careful
+	// not to leave any '.' characters in the short name of any of the
+	// SubwidgetContainer's widgets!
 }

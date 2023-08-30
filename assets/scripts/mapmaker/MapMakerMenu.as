@@ -37,6 +37,7 @@ MenuItemID MAP_MAKER_EDIT_MEMENTO_WINDOW;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
 MenuItemID MAP_MAKER_MAP_FILL;
+MenuItemID MAP_MAKER_MAP_SCRIPTS;
 
 MenuItemID MAP_MAKER_VIEW_TOOLBAR;
 MenuItemID MAP_MAKER_VIEW_OBJECT_DIALOG;
@@ -57,6 +58,7 @@ ArmyPropertiesWindow ArmyPropertiesDialog(SIMPLE_MESSAGE_BOX, BASE_GROUP,
     MESSAGE_BOX_GROUP);
 ConfirmTileTypeWindow FillWindow;
 MementoWindow UndoRedoWindow;
+ScriptsWindow ScriptsDialog;
 
 /**
  * Sets up the map maker menu.
@@ -97,6 +99,7 @@ void MapMakerMenuSetUp() {
     addMenu(MENU, "map");
     MAP_MAKER_MAP_SET_PROPS = addMenuItem(MENU, "mapprops");
     MAP_MAKER_MAP_FILL = addMenuItem(MENU, "fill");
+    MAP_MAKER_MAP_SCRIPTS = addMenuItem(MENU, "scripts");
 
     addMenu(MENU, "view");
     MAP_MAKER_VIEW_TOOLBAR = addMenuItem(MENU, "toolbar");
@@ -141,6 +144,7 @@ void MapMakerMenuSetUp() {
         }
     );
     UndoRedoWindow.setUp(CLIENT_AREA);
+    ScriptsDialog.setUp(CLIENT_AREA);
 }
 
 /**
@@ -373,6 +377,7 @@ awe::EmptyCallback@ QuitMapAuthorised = function() {
     quitMap();
     MapPropertiesDialog.close();
     FillWindow.close();
+    ScriptsDialog.close();
     @edit = null;
     TilePropertiesDialog.refresh(Vector2(0,0));
     ArmyPropertiesDialog.refresh();
@@ -471,6 +476,13 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
                 BASE_GROUP, MESSAGE_BOX_GROUP);
             addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
         } else FillWindow.restore("fillmapconfirmation");
+    
+    } else if (id == MAP_MAKER_MAP_SCRIPTS) {
+        if (edit is null) {
+            awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert", "nomapisopen", null,
+                BASE_GROUP, MESSAGE_BOX_GROUP);
+            addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
+        } else ScriptsDialog.restore();
 
     } else if (id == MAP_MAKER_VIEW_TOOLBAR) {
         TOOLBAR.dock();
@@ -517,7 +529,7 @@ void createNewMap() {
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
         @edit = EditableMap(createMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar);
+            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
         ArmyPropertiesDialog.refresh();
         MapPropertiesDialog.restore();
@@ -557,7 +569,20 @@ void MapMakerMenu_OpenMap_FileSelected() {
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
         @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar);
+            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
+        edit.map.setMementoStateChangedCallback(MementosHaveChanged);
+        ArmyPropertiesDialog.refresh();
+        MementosHaveChanged();
+    });
+}
+
+// Debugging.
+void MapMakerMenuOpen() {
+    FileDialogFile = "map/islandx.cwm";
+    quitEditMap(function() {
+        TilePropertiesDialog.deselect();
+        @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
+            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
         ArmyPropertiesDialog.refresh();
         MementosHaveChanged();

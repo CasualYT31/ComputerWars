@@ -646,6 +646,14 @@ namespace sfx {
 		void _translateWidget(tgui::Widget::Ptr widget);
 
 		/**
+		 * Translates a set of menu items recursively.
+		 */
+		void _translateMenuItems(const tgui::MenuBar::Ptr& w,
+			const std::string& widgetName,
+			const std::vector<tgui::MenuBar::GetMenusElement>& items,
+			std::vector<tgui::String>& hierarchy, std::size_t& index);
+
+		/**
 		 * The JSON load method for this class.
 		 * The value of the key "menus" should be an array of string names, each
 		 * one naming a menu.\n
@@ -799,6 +807,17 @@ namespace sfx {
 		 * @return The short name of the widget.
 		 */
 		static std::string _extractWidgetName(const std::string& fullname);
+
+		/**
+		 * Does the given widget inherit from \c SubwidgetContainer?
+		 * @warning Do not pass in \c nullptr!
+		 * @param   widget Pointer to the widget to test.
+		 * @return  If \c widget derives from \c SubwidgetContainer, its internal
+		 *          \c Container will be extracted and returned as a \c shared_ptr.
+		 *          Otherwise, \c nullptr is returned.
+		 */
+		static tgui::Container::Ptr _getSubwidgetContainer(
+			const tgui::Widget::Ptr& widget);
 
 		/**
 		 * Creates a widget of a given type and returns it.
@@ -999,10 +1018,10 @@ namespace sfx {
 			const tgui::Label::HorizontalAlignment h,
 			const tgui::Label::VerticalAlignment v);
 
-		// EDITBOX //
+		// EDITBOX AND TEXTAREA //
 
 		/**
-		 * Registers \c EditBox global functions.
+		 * Registers \c EditBox and \c TextArea global functions.
 		 * See implementation for documentation on all of the methods used to
 		 * implement these functions.
 		 */
@@ -1245,6 +1264,19 @@ namespace sfx {
 			const std::string& text, CScriptArray* const textVars);
 		void _addMessageBoxButton(const std::string& name, const std::string& text,
 			CScriptArray* const variables);
+
+		// TABCONTAINER //
+
+		/**
+		 * Registers \c TabContainer global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
+		 */
+		void _registerTabContainerGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		std::string _addTabAndPanel(const std::string& name,
+			const std::string& text, CScriptArray* const vars = nullptr);
 
 		//////////
 		// DATA //

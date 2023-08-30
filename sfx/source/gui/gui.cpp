@@ -202,6 +202,10 @@ static bool isWidgetFullyVisibleAndEnabled(const Widget* widget,
 	const bool visible, const bool enabled) {
 	assert((visible || enabled) && widget);
 	if ((!visible || widget->isVisible()) && (!enabled || widget->isEnabled())) {
+		// TODO-6
+		// If the given widget has no parent, it might be a container within a
+		// SubwidgetContainer. Try to find it using `widget`'s name. If it still
+		// can't be found, then assume the widget is visible and enabled.
 		if (widget = reinterpret_cast<Widget*>(widget->getParent()))
 			return isWidgetFullyVisibleAndEnabled(widget, visible, enabled);
 		return true;
@@ -219,9 +223,10 @@ static bool isWidgetFullyVisibleAndEnabled(const Widget* widget,
  */
 static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
 	const unsigned int panelAncestryDepth = 0) {
-	static const std::function<ScrollablePanel*(Widget*,const unsigned int)>
+	static const std::function<ScrollablePanel*(Widget*, const unsigned int)>
 		findScrollablePanelAncestor =
 		[](Widget* w, const unsigned int depth) -> ScrollablePanel* {
+		auto const wCopy = w;
 		if (w = reinterpret_cast<Widget*>(w->getParent())) {
 			if (w->getWidgetType() == type::ScrollablePanel) {
 				if (depth == 0)
@@ -230,7 +235,13 @@ static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
 					return findScrollablePanelAncestor(w, depth - 1);
 			}
 			return findScrollablePanelAncestor(w, depth);
-		} else return nullptr;
+		} else {
+			// TODO-6
+			// If the given widget has no parent, it might be a container within a
+			// SubwidgetContainer. Try to find it using `widget`'s name. If it
+			// still can't be found, then assume no ScrollablePanel can be found.
+			return nullptr;
+		}
 	};
 
 	auto panel = findScrollablePanelAncestor(widget.get(), panelAncestryDepth);
@@ -776,8 +787,11 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 			}
 		}
 
-		if (widget->isContainer())
+		if (widget->isContainer()) {
 			_animate(target, std::dynamic_pointer_cast<Container>(widget));
+		} else if (auto subwidgetContainer = _getSubwidgetContainer(widget)) {
+			_animate(target, subwidgetContainer);
+		}
 	}
 }
 
@@ -1058,31 +1072,10 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 				}
 			}
 		} else if (type == type::MenuBar) { // ListOfCaptions
-			auto w = _findWidget<MenuBar>(widgetName);
-			// Each and every menu item is stored in _originalCaptions depth-first.
-			// See the documentation on menuItemClickedSignalHandler() for more
-			// info.
-			std::vector<tgui::String> hierarchy;
+			auto w = std::dynamic_pointer_cast<MenuBar>(widget);
+			std::vector<String> hierarchy;
 			std::size_t index = 0;
-			static const std::function<void(
-				const std::vector<MenuBar::GetMenusElement>&)> translateItems =
-					[&](const std::vector<MenuBar::GetMenusElement>& items) {
-				for (const auto& item : items) {
-					hierarchy.push_back(item.text);
-					const tgui::String translatedCaption =
-						_getTranslatedText(widgetName, index);
-					w->changeMenuItem(hierarchy, translatedCaption);
-					hierarchy.back() = translatedCaption;
-					// I know, it's really ugly. Not much choice.
-					w->connectMenuItem(hierarchy,
-						&sfx::gui::menuItemClickedSignalHandler, this,
-						_extractWidgetName(widgetName),
-						static_cast<sfx::gui::MenuItemID>(index++));
-					translateItems(item.menuItems);
-					hierarchy.pop_back();
-				}
-			};
-			translateItems(w->getMenus());
+			_translateMenuItems(w, widgetName, w->getMenus(), hierarchy, index);
 		} else if (type == type::MessageBox) { // ListOfCaptions
 			auto w = _findWidget<tgui::MessageBox>(widgetName);
 			w->setTitle(_getTranslatedText(widgetName, 0));
@@ -1107,15 +1100,43 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 			auto w = _findWidget<Tabs>(widgetName);
 			for (std::size_t i = 0; i < w->getTabsCount(); ++i)
 				w->changeText(i, _getTranslatedText(widgetName, i));
+		} else if (type == type::TextArea) { // SingleCaption
+			auto w = std::dynamic_pointer_cast<TextArea>(widget);
+			w->setDefaultText(_getTranslatedText(widgetName));
 		} else if (type == type::ToggleButton) { // SingleCaption
 			auto w = _findWidget<ToggleButton>(widgetName);
 			w->setText(_getTranslatedText(widgetName));
 		}
 	}
 	if (widget->isContainer()) {
-		auto w = _findWidget<Container>(widgetName);
-		auto& widgetList = w->getWidgets();
+		const auto& widgetList =
+			std::dynamic_pointer_cast<Container>(widget)->getWidgets();
 		for (auto& w : widgetList) _translateWidget(w);
+	} else if (auto subwidgetContainer = _getSubwidgetContainer(widget)) {
+		const auto& widgetList = subwidgetContainer->getWidgets();
+		for (auto& w : widgetList) _translateWidget(w);
+	}
+}
+
+void sfx::gui::_translateMenuItems(const tgui::MenuBar::Ptr& w,
+	const std::string& widgetName,
+	const std::vector<MenuBar::GetMenusElement>& items,
+	std::vector<String>& hierarchy, std::size_t& index) {
+	// Each and every menu item is stored in _originalCaptions depth-first.
+	// See the documentation on menuItemClickedSignalHandler() for more
+	// info.
+	for (const auto& item : items) {
+		hierarchy.push_back(item.text);
+		const tgui::String translatedCaption =
+			_getTranslatedText(widgetName, index);
+		w->changeMenuItem(hierarchy, translatedCaption);
+		hierarchy.back() = translatedCaption;
+		// I know, it's really ugly. Not much choice.
+		w->connectMenuItem(hierarchy, &sfx::gui::menuItemClickedSignalHandler,
+			this, _extractWidgetName(widgetName),
+			static_cast<sfx::gui::MenuItemID>(index++));
+		_translateMenuItems(w, widgetName, item.menuItems, hierarchy, index);
+		hierarchy.pop_back();
 	}
 }
 
@@ -1309,7 +1330,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		widget->getSignal("RangeChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 	} else if (type == type::TabContainer) {
-		widget->getSignal("SeletionChanging").
+		widget->getSignal("SelectionChanging").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("SelectionChanged").
 			connectEx(&sfx::gui::signalHandler, this);
@@ -1338,16 +1359,24 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 
 void sfx::gui::_removeWidgets(const tgui::Widget::Ptr& widget,
 	const tgui::Container::Ptr& container, const bool removeIt) {
+	Container::Ptr widgetIsContainer;
 	if (widget->isContainer()) {
-		auto container = _findWidget<Container>(
-			widget->getWidgetName().toStdString());
-		auto& widgetsInContainer = container->getWidgets();
+		widgetIsContainer = std::dynamic_pointer_cast<Container>(widget);
+	} else if (auto subwidgetContainer = _getSubwidgetContainer(widget)) {
+		// We should be able to safely remove a SubwidgetContainer's widgets
+		// ourselves. Might not be the best idea to leave the base
+		// SubwidgetContainer active if we do, though, so this should be blocked
+		// further up the call chain.
+		widgetIsContainer = subwidgetContainer;
+	}
+	if (widgetIsContainer) {
+		auto& widgetsInContainer = widgetIsContainer->getWidgets();
 		for (auto& widgetInContainer : widgetsInContainer) {
 			// Remove each child widget's internal data entries only.
-			_removeWidgets(widgetInContainer, container, false);
+			_removeWidgets(widgetInContainer, widgetIsContainer, false);
 		}
 		// Now remove each child widget fr.
-		container->removeAllWidgets();
+		widgetIsContainer->removeAllWidgets();
 		if (!removeIt) return;
 	}
 	// Remove widget.
@@ -1426,6 +1455,15 @@ std::string sfx::gui::_extractWidgetName(const std::string& fullname) {
 	else return fullname.substr(fullname.rfind('.') + 1);
 }
 
+Container::Ptr sfx::gui::_getSubwidgetContainer(
+	const tgui::Widget::Ptr& widget) {
+	if (widget->getWidgetType() == type::TabContainer ||
+		widget->getWidgetType() == type::SpinControl)
+		return std::dynamic_pointer_cast<SubwidgetContainer>(
+			widget)->getContainerSharedPtr();
+	else return nullptr;
+}
+
 Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 	const std::string& name, const std::string& menu) const {
 	tgui::String type = tgui::String(wType).trim();
@@ -1486,6 +1524,16 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::CheckBox::create();
 	} else if (type == type::RadioButton) {
 		return tgui::RadioButton::create();
+	} else if (type == type::TabContainer) {
+		auto tabContainer = tgui::TabContainer::create();
+		// Fix the name of the Tabs widget within the TabContainer so that it can
+		// be accessed by the engine.
+		const auto& widgetList = tabContainer->getContainer()->getWidgets();
+		for (auto& w : widgetList)
+			w->setWidgetName(name + "." + w->getWidgetName().replace(".", ""));
+		return tabContainer;
+	} else if (type == type::TextArea) {
+		return tgui::TextArea::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,

@@ -33,7 +33,7 @@ typename T::Ptr sfx::gui::_findWidget(std::string name,
 		names.push_back(name.substr(0, pos));
 		if (pos != std::string::npos) name = name.substr(pos + 1);
 	} while (pos != std::string::npos);
-	// If group name was not given, insert it.
+	// If menu name was not given, insert it.
 	tgui::Group::Ptr groupPtr = _gui.get<tgui::Group>(names[0]);
 	if (!groupPtr) {
 		names.insert(names.begin(), _currentGUI);
@@ -63,7 +63,13 @@ typename T::Ptr sfx::gui::_findWidget(std::string name,
 			tgui::String containerName;
 			for (std::size_t v = 0; v <= w; ++v) containerName += names[v] + ".";
 			containerName.pop_back();
-			container = container->get<tgui::Container>(containerName);
+			const auto widget = container->get<tgui::Widget>(containerName);
+			// If the widget is a SubwidgetContainer type, we need to get the
+			// underlying container. Otherwise, assume the widget is a valid
+			// container.
+			if (auto subwidgetContainer = _getSubwidgetContainer(widget)) {
+				container = subwidgetContainer;
+			} else container = std::dynamic_pointer_cast<tgui::Container>(widget);
 		}
 	}
 	if (container) {

@@ -67,10 +67,12 @@ class EditableMap {
      *                     \c EditableMap.
      * @param sBar         The \c StatusBarWidget to link up with this
      *                     \c EditableMap.
+     * @param sWindow      The \c ScriptsWindow to link up with this
+     *                     \c EditableMap.
      */
     EditableMap(Map@ mapToEdit, TilePropertiesWindow@ tPropsWindow,
         ArmyPropertiesWindow@ aPropsWindow, MapPropertiesWindow@ mPropsWindow,
-        StatusBarWidget@ sBar) {
+        StatusBarWidget@ sBar, ScriptsWindow@ sWindow) {
         if (mapToEdit is null) {
             error("An invalid Map handle was given to the constructor of "
                 "EditableMap; the game will crash soon!");
@@ -86,12 +88,16 @@ class EditableMap {
         } else if (sBar is null) {
             error("An invalid StatusBarWidget handle was given to the "
                 "constructor of EditableMap; the game will crash soon!");
+        } else if (sWindow is null) {
+            error("An invalid ScriptsWindow handle was given to the constructor "
+                "of EditableMap; the game will crash soon!");
         } else {
             @map = mapToEdit;
             @tilePropsWindow = tPropsWindow;
             @armyPropsWindow = aPropsWindow;
             @mapPropsWindow = mPropsWindow;
             @statusBar = sBar;
+            @scriptsWindow = sWindow;
             map.alwaysShowHiddenUnits(true);
             map.setMapScalingFactor(_mapScalingFactor);
             setNormalCursorSprites();
@@ -113,6 +119,7 @@ class EditableMap {
         _updateArmyProps();
         _updateMapProps();
         _updateStatusBar();
+        _updateScriptsWindow();
     }
     
     /**
@@ -126,6 +133,7 @@ class EditableMap {
         _updateArmyProps();
         _updateMapProps();
         _updateStatusBar();
+        _updateScriptsWindow();
     }
 
     ////////////////////////
@@ -570,6 +578,14 @@ class EditableMap {
         statusBar.setZoom(_mapScalingFactor);
     }
 
+    /**
+     * Updates the linked \c ScriptsWindow to ensure it is always displaying the
+     * correct information.
+     */
+    private void _updateScriptsWindow() {
+        scriptsWindow.refresh();
+    }
+
     /////////
     // MAP //
     /////////
@@ -604,6 +620,11 @@ class EditableMap {
      * The \c StatusBarWidget to link up with this \c EditableMap.
      */
     private StatusBarWidget@ statusBar;
+
+    /**
+     * The \c ScriptsWindow to link up with this \c EditableMap.
+     */
+    private ScriptsWindow@ scriptsWindow;
 
     /**
      * The currently selected tile used to fill the \c TilePropertiesWindow.

@@ -96,7 +96,10 @@ public:
 				fullnameAsString.substr(0, fullnameAsString.rfind('.')); \
 		Container::Ptr container = _findWidget<Container>(containerName); \
 		if (!container) { \
-			ERROR(std::string("The container \"").append(containerName). \
+			SubwidgetContainer::Ptr subwidget = \
+				_findWidget<SubwidgetContainer>(containerName); \
+			if (subwidget) container = subwidget->getContainerSharedPtr(); \
+			else ERROR(std::string("The container \"").append(containerName). \
 				append("\" does not exist!")); \
 		}
 

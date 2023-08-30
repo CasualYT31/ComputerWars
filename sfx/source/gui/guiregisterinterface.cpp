@@ -301,6 +301,8 @@ void sfx::gui::_registerConstants(asIScriptEngine* const engine,
 	REGISTER_WIDGET_TYPE_NAME(engine, document, TreeView);
 	REGISTER_WIDGET_TYPE_NAME(engine, document, CheckBox);
 	REGISTER_WIDGET_TYPE_NAME(engine, document, RadioButton);
+	REGISTER_WIDGET_TYPE_NAME(engine, document, TabContainer);
+	REGISTER_WIDGET_TYPE_NAME(engine, document, TextArea);
 }
 
 void sfx::gui::_registerNonWidgetGlobalFunctions(asIScriptEngine* const engine,
@@ -491,10 +493,11 @@ void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
 		"variables can also be given. These variables will be inserted into the "
 		"text wherever a '" + std::to_string(engine::expand_string::getVarChar()) +
 		"' is found.\n"
-		"This function has special behaviour for <tt>EditBox</tt> widgets. No "
-		"variables are inserted into the given string, and it is not translated. "
-		"The <tt>EditBox</tt>'s current text is simply replaced with whatever "
-		"string is given.").c_str());
+		"This function has special behaviour for <tt>EditBox</tt> and "
+		"<tt>TextArea</tt>widgets. No variables are inserted into the given "
+		"string, and it is not translated. The <tt>EditBox</tt>'s or "
+		"<tt>TextArea</tt>'s current text is simply replaced with whatever string "
+		"is given.").c_str());
 
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetIndex(const string&in, const uint)",
@@ -633,7 +636,8 @@ void sfx::gui::_registerEditBoxGlobalFunctions(asIScriptEngine* const engine,
 	auto r = engine->RegisterGlobalFunction(
 		"string getWidgetText(const string&in)",
 		asMETHOD(sfx::gui, _getWidgetText), asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Gets an <tt>EditBox</tt>'s text.");
+	document->DocumentGlobalFunction(r, "Gets an <tt>EditBox</tt>'s or "
+		"<tt>TextArea</tt>'s text.");
 
 	r = engine->RegisterGlobalFunction(
 		"void onlyAcceptUIntsInEditBox(const string&in)",
@@ -647,9 +651,9 @@ void sfx::gui::_registerEditBoxGlobalFunctions(asIScriptEngine* const engine,
 		"array<any>@ = null)",
 		asMETHOD(sfx::gui, _setWidgetDefaultText), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, std::string("Sets an <tt>EditBox</tt>'s "
-		"default text, which is shown when there isn't any text in the "
-		"<tt>EditBox</tt>. The name of the <tt>EditBox</tt> is given, then its "
-		"new default text. An optional list of variables can also be given. These "
+		"or <tt>TextArea</tt>'s default text, which is shown when there isn't any "
+		"text in the widget. The name of the widget is given, then its new "
+		"default text. An optional list of variables can also be given. These "
 		"variables will be inserted into the text wherever a '" +
 		std::to_string(engine::expand_string::getVarChar()) + "' is "
 		"found.").c_str());
@@ -853,8 +857,8 @@ void sfx::gui::_registerPanelGlobalFunctions(asIScriptEngine* const engine,
 		"const string&in, const ScrollbarPolicy)",
 		asMETHOD(sfx::gui, _setHorizontalScrollbarPolicy),
 		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's horizontal "
-		"scrollbar policy.");
+	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's or TextArea's "
+		"horizontal scrollbar policy.");
 
 	r = engine->RegisterGlobalFunction("void setHorizontalScrollbarAmount("
 		"const string&in, const uint)",
@@ -1153,6 +1157,19 @@ void sfx::gui::_registerMessageBoxGlobalFunctions(asIScriptEngine* const engine,
 	document->DocumentGlobalFunction(r, "Add a button to a <tt>MessageBox</tt>.");
 }
 
+void sfx::gui::_registerTabContainerGlobalFunctions(asIScriptEngine* const engine,
+	const std::shared_ptr<DocumentationGenerator>& document) {
+	auto r = engine->RegisterGlobalFunction(
+		"string addTabAndPanel(const string&in, const string&in, "
+		"array<any>@ const = null)",
+		asMETHOD(sfx::gui, _addTabAndPanel),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Adds a tab to a <tt>TabContainer</tt>. "
+		"Returns the name of the <tt>Panel</tt> associated with the tab, or an "
+		"empty string if the tab and panel could not be added. The new tab will "
+		"be selected.");
+}
+
 void sfx::gui::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	_documentGUILibrary(document);
@@ -1176,4 +1193,5 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	_registerChildWindowGlobalFunctions(engine, document);
 	_registerFileDialogGlobalFunctions(engine, document);
 	_registerMessageBoxGlobalFunctions(engine, document);
+	_registerTabContainerGlobalFunctions(engine, document);
 }
