@@ -22,22 +22,40 @@ class ScriptsWindow {
 
         addMenu(menu, "file");
 
-        tabContainer = window + ".TabContainer";
+        // A lot of strange code to test TODO-6 with.
+
+        auto ttttt = window + ".ScrollablePanel";
+        addWidget(ScrollablePanel, ttttt);
+
+        tabContainer = ttttt + ".TabContainer";
         addWidget(TabContainer, tabContainer);
         setWidgetSize(tabContainer, "100%", "100%-2*" +
             formatFloat(getWidgetFullSize(menu).y) + "px");
-        setWidgetPosition(tabContainer, "50%", "50%");
+        setWidgetPosition(tabContainer, "2000px", "50%");
         setWidgetOrigin(tabContainer, 0.5f, 0.5f);
 
-        const auto test = addTabAndPanel(tabContainer, "~Script File Name.as");
+        auto test = addTabAndPanel(tabContainer, "~Script File Name.as");
         setWidgetBackgroundColour(test, Colour(180, 180, 180, 255));
 
+        test += ".Scrollable";
+        addWidget(ScrollablePanel, test);
+
+        addWidget(BitmapButton, test + ".Bitm");
+        setWidgetSprite(test + ".Bitm", "unit", "infos");
+        setWidgetPosition(test + ".Bitm", "50", "5");
+
+        addWidget(Picture, test + ".Pic");
+        setWidgetSprite(test + ".Pic", "unit", "infos");
+        setWidgetPosition(test + ".Pic", "50", "50");
+
         addWidget(TextArea, test + ".TextArea");
-        setWidgetSize(test + ".TextArea", "100%", "100%");
+        setWidgetSize(test + ".TextArea", "50%", "50%");
+        setWidgetPosition(test + ".TextArea", "2000px", "50%");
         setHorizontalScrollbarPolicy(test + ".TextArea",
             ScrollbarPolicy::Automatic);
+        setWidgetDirectionalFlowStart(test + ".TextArea");
 
-        statusBar.setUp(window, formatFloat(getWidgetFullSize(menu).y));
+        // statusBar.setUp(window, formatFloat(getWidgetFullSize(menu).y));
     }
 
     /// Opens and/or restores the scripts window to a known location.

@@ -820,6 +820,16 @@ namespace sfx {
 			const tgui::Widget::Ptr& widget);
 
 		/**
+		 * Does the given widget inherit from \c SubwidgetContainer?
+		 * @warning Do not pass in \c nullptr!
+		 * @param   widget Pointer to the widget to test.
+		 * @return  If \c widget derives from \c SubwidgetContainer, its internal
+		 *          \c Container will be extracted and returned as a raw pointer.
+		 *          Otherwise, \c nullptr is returned.
+		 */
+		static tgui::Container* _getSubwidgetContainer(tgui::Widget* const widget);
+
+		/**
 		 * Creates a widget of a given type and returns it.
 		 * Logs an error if the given type isn't supported. In this case, no widget
 		 * will be created.
@@ -854,6 +864,52 @@ namespace sfx {
 			std::string* fullname = nullptr) const;
 
 		/**
+		 * Retrieves the parent of a given widget.
+		 * If the given widget has no parent, it could refer to a
+		 * \c SubwidgetContainer, which has a \c Container that is detached from
+		 * the rest of the GUI. We can use \c _findWidget() to attempt to find the
+		 * parent, and if that's the case, its internal parent will be returned.
+		 * @param  child The widget to find the parent of.
+		 * @return Pointer to the child widget's parent if it exists, \c nullptr if
+		 *         the widget has no parent.
+		 */
+		tgui::Container* _findParent(const tgui::Widget* const child) const;
+
+		/**
+		 * Used to calculate the absolute position of a widget.
+		 * Usually, you would be able to call \c Widget::getAbsolutePosition()
+		 * directly and receive the correct value. But for widgets within
+		 * \c SubwidgetContainers, the result will be relative to its internal
+		 * container, not the entire window. So after getting the absolute
+		 * position, we will need to traverse through the widget's hierarchy and if
+		 * a \c SubwidgetContainer is found, its absolute position is applied to
+		 * the original widget's absolute position.
+		 * @remark Ideally this would be fixed in the backend library. I might find
+		 *         a way to fix it there in the future.
+		 * @param  widget Pointer to the widget to get the absolute position of.
+		 * @param  offset The offset to apply to the widget's
+		 *                \c getAbsolutePosition() call.
+		 * @return The absolute position of the widget.
+		 */
+		tgui::Vector2f _findWidgetAbsolutePosition(tgui::Widget* const widget,
+			const tgui::Vector2f& offset = {}) const;
+
+		/**
+		 * Checks if a given widget is visible and/or enabled, and that the same
+		 * can be said for all of its parents.
+		 * @warning An assertion is made that at least one of the boolean
+		 *          parameters is \c TRUE!
+		 * @param   widget  Pointer to the widget to test.
+		 * @param   visible If \c TRUE, will test each widget's visibility.
+		 * @param   enabled If \c TRUE, will test each widget's enabled state.
+		 * @return  \c TRUE if the given widget and all of its parents pass the
+		 *          specified tests, \c FALSE if at least one of the widgets in the
+		 *          hierarchy does not pass a single test.
+		 */
+		bool _isWidgetFullyVisibleAndEnabled(tgui::Widget* widget,
+			const bool visible, const bool enabled) const;
+
+		/**
 		 * Finds the currently selected widget.
 		 * In the event that there is a selected widget, but it cannot be found, an
 		 * error will be logged, it will be deselected, and the selection history
@@ -864,6 +920,17 @@ namespace sfx {
 		 *         widget object shall be returned.
 		 */
 		std::pair<std::string, tgui::Widget::Ptr> _findCurrentlySelectedWidget();
+
+		/**
+		 * Makes a widget in a \c ScrollablePanel visible by scrolling the
+		 * scrollbars to make the widget fully visible.
+		 * If the given widget does not have a \c ScrollablePanel ancestor, then no
+		 * changes will be made.
+		 * @param widget             Pointer to the widget to show.
+		 * @param panelAncestryDepth Recursion parameter. Leave to default.
+		 */
+		void _showWidgetInScrollablePanel(const tgui::Widget::Ptr& widget,
+			const unsigned int panelAncestryDepth = 0);
 
 		/**
 		 * Clears GUI state.

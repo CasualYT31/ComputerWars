@@ -184,7 +184,7 @@ void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,
 
 sf::Vector2f sfx::gui::_getWidgetAbsolutePosition(const std::string& name) {
 	START_WITH_WIDGET(name)
-	return widget->getAbsolutePosition();
+	return _findWidgetAbsolutePosition(widget.get());
 	END("Attempted to get the absolute position of a widget \"{}\" within menu "
 		"\"{}\".", name, fullname[0])
 	return {};

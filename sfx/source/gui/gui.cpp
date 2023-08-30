@@ -186,48 +186,23 @@ bool sfx::gui::handleEvent(sf::Event e) {
 	return _gui.handleEvent(e);
 }
 
-/**
- * Checks if a given widget is visible and/or enabled, and that the same can be
- * said for all of its parents.
- * @warning An assertion is made that at least one of the boolean parameters is
- *          \c TRUE!
- * @param   widget  Pointer to the widget to test.
- * @param   visible If \c TRUE, will test each widget's visibility.
- * @param   enabled If \c TRUE, will test each widget's enabled state.
- * @return  \c TRUE if the given widget and all of its parents pass the specified
- *          tests, \c FALSE if at least one of the widgets in the chain does not
- *          pass a single test.
- */
-static bool isWidgetFullyVisibleAndEnabled(const Widget* widget,
-	const bool visible, const bool enabled) {
+bool sfx::gui::_isWidgetFullyVisibleAndEnabled(tgui::Widget* widget,
+	const bool visible, const bool enabled) const {
 	assert((visible || enabled) && widget);
 	if ((!visible || widget->isVisible()) && (!enabled || widget->isEnabled())) {
-		// TODO-6
-		// If the given widget has no parent, it might be a container within a
-		// SubwidgetContainer. Try to find it using `widget`'s name. If it still
-		// can't be found, then assume the widget is visible and enabled.
-		if (widget = reinterpret_cast<Widget*>(widget->getParent()))
-			return isWidgetFullyVisibleAndEnabled(widget, visible, enabled);
+		if (widget = reinterpret_cast<Widget*>(_findParent(widget)))
+			return _isWidgetFullyVisibleAndEnabled(widget, visible, enabled);
 		return true;
 	}
 	return false;
 }
 
-/**
- * Makes a widget in a \c ScrollablePanel visible by scrolling the
- * scrollbars to make the widget fully visible.
- * If the given widget does not have a \c ScrollablePanel ancestor, then no
- * changes will be made.
- * @param widget             Pointer to the widget to show.
- * @param panelAncestryDepth Recursion parameter. Leave to default.
- */
-static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
-	const unsigned int panelAncestryDepth = 0) {
+void sfx::gui::_showWidgetInScrollablePanel(const Widget::Ptr& widget,
+	const unsigned int panelAncestryDepth) {
 	static const std::function<ScrollablePanel*(Widget*, const unsigned int)>
 		findScrollablePanelAncestor =
-		[](Widget* w, const unsigned int depth) -> ScrollablePanel* {
-		auto const wCopy = w;
-		if (w = reinterpret_cast<Widget*>(w->getParent())) {
+		[&](Widget* w, const unsigned int depth) -> ScrollablePanel* {
+		if (w = reinterpret_cast<Widget*>(_findParent(w))) {
 			if (w->getWidgetType() == type::ScrollablePanel) {
 				if (depth == 0)
 					return dynamic_cast<ScrollablePanel*>(w);
@@ -235,41 +210,41 @@ static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
 					return findScrollablePanelAncestor(w, depth - 1);
 			}
 			return findScrollablePanelAncestor(w, depth);
-		} else {
-			// TODO-6
-			// If the given widget has no parent, it might be a container within a
-			// SubwidgetContainer. Try to find it using `widget`'s name. If it
-			// still can't be found, then assume no ScrollablePanel can be found.
-			return nullptr;
-		}
+		} else return nullptr;
 	};
 
 	auto panel = findScrollablePanelAncestor(widget.get(), panelAncestryDepth);
 	if (!panel) return; // Exit condition.
+
 	// If there are no scrollbars, then don't do anything with this panel.
 	const auto horiShown = panel->isHorizontalScrollbarShown(),
 		vertShown = panel->isVerticalScrollbarShown();
 	if (!horiShown && !vertShown) {
-		showWidgetInScrollablePanel(widget, panelAncestryDepth + 1);
+		_showWidgetInScrollablePanel(widget, panelAncestryDepth + 1);
 		return;
 	}
+
 	// Figure out portion of ScrollablePanel that is being shown.
 	const auto scrollbarWidth = panel->getScrollbarWidth();
-
+	const auto panelAbsolutePosition =
+		_findWidgetAbsolutePosition(panel, panel->getContentOffset());
 	const sf::FloatRect panelRect(
-		panel->getAbsolutePosition(panel->getContentOffset()).x,
-		panel->getAbsolutePosition(panel->getContentOffset()).y,
+		panelAbsolutePosition.x,
+		panelAbsolutePosition.y,
 		// Gotta exclude the scrollbars from the visible portion.
 		panel->getSize().x - (vertShown ? scrollbarWidth : 0.0f),
 		panel->getSize().y - (horiShown ? scrollbarWidth : 0.0f)
 	);
+
 	// Figure out bounding rectangle of given widget.
+	const auto widgetAbsolutePosition = _findWidgetAbsolutePosition(widget.get());
 	const sf::FloatRect widgetRect(
-		widget->getAbsolutePosition().x,
-		widget->getAbsolutePosition().y,
+		widgetAbsolutePosition.x,
+		widgetAbsolutePosition.y,
 		widget->getSize().x,
 		widget->getSize().y
 	);
+
 	// Figure out if given widget is fully visible inside that portion.
 	// If not, scroll scrollbars by required amount, if possible.
 	if (horiShown) {
@@ -299,6 +274,7 @@ static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
 		else
 			panel->setHorizontalScrollbarValue(static_cast<unsigned int>(newHori));
 	}
+
 	if (vertShown) {
 		const auto oldVert = static_cast<int>(panel->getVerticalScrollbarValue());
 		int newVert = oldVert;
@@ -326,9 +302,10 @@ static void showWidgetInScrollablePanel(const Widget::Ptr& widget,
 		else
 			panel->setVerticalScrollbarValue(static_cast<unsigned int>(newVert));
 	}
+
 	// The ScrollablePanel itself may be in more ScrollablePanels, so we need to
 	// make sure they're scrolled properly, too.
-	showWidgetInScrollablePanel(widget, panelAncestryDepth + 1);
+	_showWidgetInScrollablePanel(widget, panelAncestryDepth + 1);
 }
 
 void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
@@ -350,7 +327,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 			// isn't disabled, then trigger an appropriate signal.
 			if ((*ui)[_selectControl] && !cursel.empty()) {
 				const auto widget = _findWidget<Widget>(cursel);
-				if (isWidgetFullyVisibleAndEnabled(widget.get(), true, true)) {
+				if (_isWidgetFullyVisibleAndEnabled(widget.get(), true, true)) {
 					const auto& widgetType = widget->getWidgetType();
 					if (widgetType == type::Button ||
 						widgetType == type::BitmapButton ||
@@ -372,7 +349,7 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 				_moveDirectionalFlow(ui);
 			// Otherwise, make sure what was selected is now visible to the user.
 			else if (_enableDirectionalFlow && cursel.second)
-				showWidgetInScrollablePanel(cursel.second);
+				_showWidgetInScrollablePanel(cursel.second);
 		}
 		// Invoke the current menu's bespoke input handling function.
 		// If the signal handler was invoked, do not invoke any bespoke input
@@ -652,14 +629,14 @@ bool sfx::gui::animate(const sf::RenderTarget& target) {
 	// animation.
 	const auto& cursel = _findCurrentlySelectedWidget();
 	if (cursel.first.empty() || !_enableDirectionalFlow || !cursel.second ||
-		!isWidgetFullyVisibleAndEnabled(cursel.second.get(), true, false)) {
+		!_isWidgetFullyVisibleAndEnabled(cursel.second.get(), true, false)) {
 		_angleBracketUL.setCurrentFrame(0);
 		_angleBracketUR.setCurrentFrame(0);
 		_angleBracketLL.setCurrentFrame(0);
 		_angleBracketLR.setCurrentFrame(0);
 	} else if (!cursel.first.empty()) {
 		// Ensure the angle brackets are at the correct locations.
-		auto pos = cursel.second->getAbsolutePosition(),
+		auto pos = _findWidgetAbsolutePosition(cursel.second.get()),
 			size = cursel.second->getSize();
 		if (cursel.second->getWidgetType() == type::ScrollablePanel) {
 			pos += std::dynamic_pointer_cast<ScrollablePanel>(cursel.second)->
@@ -683,29 +660,37 @@ bool sfx::gui::animate(const sf::RenderTarget& target) {
 
 void sfx::gui::_animate(const sf::RenderTarget& target,
 	tgui::Container::Ptr container) {
-	static auto allocImage = [&](const tgui::String& type, Widget::Ptr widget,
-		const std::string& widgetName, unsigned int w, unsigned int h) -> void {
+	static auto allocImage = [](const tgui::String& type, Widget::Ptr widget,
+		const std::string& widgetName, unsigned int w, unsigned int h,
+		const std::unordered_set<std::string>&
+			dontOverridePictureSizeWithSpriteSize) -> void {
 		// We cannot allow an empty image to be allocated, so always ensure the
 		// image is at least 1x1 pixels.
 		if (!w) w = 1; if (!h) h = 1;
 
-		// Create an empty texture
-		sf::Uint8* pixels = (sf::Uint8*)calloc(
-			static_cast<std::size_t>(w) * static_cast<std::size_t>(h), 4);
+		// Create an empty texture.
 		sf::Texture blank;
-		blank.create(w, h);
-		blank.update(pixels);
-		free(pixels);
+		sf::Uint8* pixels = (sf::Uint8*)::calloc(
+			static_cast<std::size_t>(w) * static_cast<std::size_t>(h), 4);
+		try {
+			blank.create(w, h);
+			blank.update(pixels);
+		} catch (...) {
+			// Make absolutely sure nothing leaks.
+			if (pixels) ::free(pixels);
+			throw;
+		}
+		::free(pixels);
 
-		// Assign the empty texture
+		// Assign the empty texture.
 		if (type == type::BitmapButton) {
 			std::dynamic_pointer_cast<BitmapButton>(widget)->
 				setImage(blank);
 		} else if (type == type::Picture) {
 			auto picture = std::dynamic_pointer_cast<tgui::Picture>(widget);
 			picture->getRenderer()->setTexture(blank);
-			if (_dontOverridePictureSizeWithSpriteSize.find(widgetName)
-				== _dontOverridePictureSizeWithSpriteSize.end()) {
+			if (dontOverridePictureSizeWithSpriteSize.find(widgetName)
+				== dontOverridePictureSizeWithSpriteSize.end()) {
 				// Resize the Picture to match with the sprite's size.
 				picture->setSize(w, h);
 			}
@@ -738,10 +723,11 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 				}
 				auto& animatedSprite = _widgetSprites.at(widget);
 
-				if (sprite == "" && animatedSprite.getSprite() != "") {
+				if (sprite.empty() && !animatedSprite.getSprite().empty()) {
 					// If the sprite has been removed, then we also need to remove
 					// the image from the widget, see else if case at the bottom.
-					allocImage(type, widget, widgetName, 0, 0);
+					allocImage(type, widget, widgetName, 0, 0,
+						_dontOverridePictureSizeWithSpriteSize);
 					continue;
 				}
 
@@ -755,27 +741,17 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 					animatedSprite.setSprite(sprite);
 					animatedSprite.animate(target);
 					sf::Vector2f spriteSizeF = animatedSprite.getSize();
-					sf::Vector2u spriteSize((unsigned int)spriteSizeF.x,
-						(unsigned int)spriteSizeF.y);
+					sf::Vector2u spriteSize(
+						static_cast<unsigned int>(spriteSizeF.x),
+						static_cast<unsigned int>(spriteSizeF.y)
+					);
 					allocImage(type, widget, widgetName, spriteSize.x,
-						spriteSize.y);
+						spriteSize.y, _dontOverridePictureSizeWithSpriteSize);
 				} else {
 					// If the widget's sprite hasn't changed, then simply animate
 					// it.
 					animatedSprite.animate(target);
 				}
-
-				// Now reposition the animated sprites based on the locations and
-				// sizes of the widget's image.
-				sf::Vector2f newPosition;
-				if (type == type::BitmapButton) {
-					newPosition = std::dynamic_pointer_cast<BitmapButton>(widget)->
-						getAbsolutePositionOfImage();
-				} else if (type == type::Picture) {
-					newPosition = std::dynamic_pointer_cast<tgui::Picture>(widget)
-						->getAbsolutePosition();
-				}
-				animatedSprite.setPosition(newPosition);
 			} else if (_guiSpriteKeys.find(widgetName) != _guiSpriteKeys.end() &&
 				_widgetSprites.find(widget) != _widgetSprites.end() &&
 				_widgetSprites.at(widget).getSpritesheet() != nullptr &&
@@ -783,7 +759,8 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 				// Else if the widget DID have a valid spritesheet, then we're
 				// going to have to remove the image from the widget to ensure that
 				// sizing works out.
-				allocImage(type, widget, widgetName, 0, 0);
+				allocImage(type, widget, widgetName, 0, 0,
+					_dontOverridePictureSizeWithSpriteSize);
 			}
 		}
 
@@ -808,7 +785,7 @@ void sfx::gui::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	if (_enableDirectionalFlow && _currentlySelectedWidget.find(getGUI()) !=
 		_currentlySelectedWidget.end() &&
 		!_currentlySelectedWidget.at(getGUI()).second.empty() &&
-		isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+		_isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
 			_currentlySelectedWidget.at(getGUI()).second).get(), true, false)) {
 		sf::View oldView = target.getView();
 		target.setView(sf::View(
@@ -825,12 +802,23 @@ void sfx::gui::_drawCallback(BackendRenderTarget& target,
 	const tgui::RenderStates& states, tgui::Widget::ConstPtr widget) const {
 	const auto widgetSprite = _widgetSprites.find(widget);
 	if (widgetSprite != _widgetSprites.end()) {
-		// tgui::RenderStates only has a transform, which is already (partially?)
-		// applied to the sprite itself, so they're not useful for us right now.
-		// See tgui::Transform::combine() for an example of how two 4x4 matrices
-		// can be combined to convert a TGUI Transform to an SFML transform.
+		// tgui::Transform::combine(). Bruno, you're a legend.
+		sf::Transform original;
+		const auto a = original.getMatrix();
+		const auto& b = states.transform.getMatrix();
+		original = sf::Transform(
+			a[0] * b[0] + a[4] * b[1] + a[12] * b[3],
+			a[0] * b[4] + a[4] * b[5] + a[12] * b[7],
+			a[0] * b[12] + a[4] * b[13] + a[12] * b[15],
+			a[1] * b[0] + a[5] * b[1] + a[13] * b[3],
+			a[1] * b[4] + a[5] * b[5] + a[13] * b[7],
+			a[1] * b[12] + a[5] * b[13] + a[13] * b[15],
+			a[3] * b[0] + a[7] * b[1] + a[15] * b[3],
+			a[3] * b[4] + a[7] * b[5] + a[15] * b[7],
+			a[3] * b[12] + a[7] * b[13] + a[15] * b[15]
+		);
 		dynamic_cast<BackendRenderTargetSFML&>(target).getTarget()->
-			draw(widgetSprite->second);
+			draw(widgetSprite->second, original);
 	}
 }
 
@@ -985,15 +973,14 @@ void sfx::gui::_makeNewDirectionalSelection(const std::string& newsel,
 	if (newsel == GOTO_PREVIOUS_WIDGET) {
 		// Do not allow selection to go ahead if the previous widget is now not
 		// visible!
-		if (isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
-			_currentlySelectedWidget[menu].first).get(), true, false))
+		if (_isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+			_currentlySelectedWidget[menu].first).get(), true, false)) {
 			std::swap(_currentlySelectedWidget[menu].first,
 				_currentlySelectedWidget[menu].second);
-		else
-			return;
+		} else return;
 	} else {
 		// Do not allow selection to go ahead if the given widget is not visible!
-		if (isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
+		if (_isWidgetFullyVisibleAndEnabled(_findWidget<Widget>(
 			newsel).get(), true, false)) {
 			_currentlySelectedWidget[menu].first =
 				_currentlySelectedWidget[menu].second;
@@ -1002,7 +989,7 @@ void sfx::gui::_makeNewDirectionalSelection(const std::string& newsel,
 	}
 	const auto widget = _findWidget<Widget>(_currentlySelectedWidget[menu].second);
 	signalHandler(widget, "MouseEntered");
-	showWidgetInScrollablePanel(widget);
+	_showWidgetInScrollablePanel(widget);
 };
 
 void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
@@ -1464,6 +1451,13 @@ Container::Ptr sfx::gui::_getSubwidgetContainer(
 	else return nullptr;
 }
 
+Container* sfx::gui::_getSubwidgetContainer(Widget* const widget) {
+	if (widget->getWidgetType() == type::TabContainer ||
+		widget->getWidgetType() == type::SpinControl)
+		return reinterpret_cast<SubwidgetContainer* const>(widget)->getContainer();
+	else return nullptr;
+}
+
 Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 	const std::string& name, const std::string& menu) const {
 	tgui::String type = tgui::String(wType).trim();
@@ -1526,9 +1520,13 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::RadioButton::create();
 	} else if (type == type::TabContainer) {
 		auto tabContainer = tgui::TabContainer::create();
+		// Fix the name of the Container within the TabContainer so that we can
+		// get the parent of the container when we need to: see _findParent().
+		auto const internalContainer = tabContainer->getContainer();
+		internalContainer->setWidgetName(name);
 		// Fix the name of the Tabs widget within the TabContainer so that it can
 		// be accessed by the engine.
-		const auto& widgetList = tabContainer->getContainer()->getWidgets();
+		const auto& widgetList = internalContainer->getWidgets();
 		for (auto& w : widgetList)
 			w->setWidgetName(name + "." + w->getWidgetName().replace(".", ""));
 		return tabContainer;
@@ -1540,6 +1538,27 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 			name, menu);
 		return nullptr;
 	}
+}
+
+tgui::Container* sfx::gui::_findParent(const tgui::Widget* const child) const {
+	const auto const parent = child->getParent();
+	if (parent) return parent;
+	if (const auto subwidgetContainer =
+		_findWidget<SubwidgetContainer>(child->getWidgetName().toStdString())) {
+		return subwidgetContainer->getParent();
+	}
+	return nullptr;
+}
+
+tgui::Vector2f sfx::gui::_findWidgetAbsolutePosition(
+	tgui::Widget* const widget, const tgui::Vector2f& offset) const {
+	auto pos = widget->getAbsolutePosition(offset);
+	for (Widget* p = widget; p; p = reinterpret_cast<Widget*>(_findParent(p))) {
+		if (auto sharedW = _findWidget<Widget>(p->getWidgetName().toStdString()))
+			if (auto subwidgetContainer = _getSubwidgetContainer(sharedW.get()))
+				pos += sharedW->getAbsolutePosition();
+	}
+	return pos;
 }
 
 std::pair<std::string, tgui::Widget::Ptr>
