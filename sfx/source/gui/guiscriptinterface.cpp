@@ -579,6 +579,17 @@ bool sfx::gui::_editBoxOrTextAreaHasFocus() const {
 	return _editBoxOrTextAreaHasSetFocus;
 }
 
+void sfx::gui::_optimiseTextAreaForMonospaceFont(const std::string& name,
+	const bool optimise) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(TextArea,
+			castWidget->enableMonospacedFontOptimization(optimise);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to turn optimisation for monospace fonts {} for widget \"{}\", "
+		"which is of type \"{}\", within menu \"{}\".", optimise ? "on" : "off",
+		name, widgetType, fullname[0])
+}
+
 // RADIOBUTTON & CHECKBOX //
 
 void sfx::gui::_setWidgetChecked(const std::string& name, const bool checked) {

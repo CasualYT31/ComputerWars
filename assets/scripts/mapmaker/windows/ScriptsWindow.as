@@ -22,12 +22,7 @@ class ScriptsWindow {
 
         addMenu(menu, "file");
 
-        // A lot of strange code to test TODO-6 with.
-
-        auto ttttt = window + ".ScrollablePanel";
-        addWidget(ScrollablePanel, ttttt);
-
-        tabContainer = ttttt + ".TabContainer";
+        tabContainer = window + ".TabContainer";
         addWidget(TabContainer, tabContainer);
         setWidgetSize(tabContainer, "100%", "100%-2*" +
             formatFloat(getWidgetFullSize(menu).y) + "px");
@@ -37,23 +32,13 @@ class ScriptsWindow {
         auto test = addTabAndPanel(tabContainer, "~Script File Name.as");
         setWidgetBackgroundColour(test, Colour(180, 180, 180, 255));
 
-        test += ".Scrollable";
-        addWidget(ScrollablePanel, test);
-
-        addWidget(BitmapButton, test + ".Bitm");
-        setWidgetSprite(test + ".Bitm", "unit", "infos");
-        setWidgetPosition(test + ".Bitm", "50", "5");
-
-        addWidget(Picture, test + ".Pic");
-        setWidgetSprite(test + ".Pic", "unit", "infos");
-        setWidgetPosition(test + ".Pic", "50", "50");
-
         addWidget(TextArea, test + ".TextArea");
-        setWidgetSize(test + ".TextArea", "50%", "50%");
-        setWidgetPosition(test + ".TextArea", "2000px", "50%");
+        setWidgetSize(test + ".TextArea", "100%", "100%");
         setHorizontalScrollbarPolicy(test + ".TextArea",
             ScrollbarPolicy::Automatic);
         setWidgetDirectionalFlowStart(test + ".TextArea");
+        setWidgetFont(test + ".TextArea", "Monospace");
+        optimiseTextAreaForMonospaceFont(test + ".TextArea", true);
 
         statusBar.setUp(window, formatFloat(getWidgetFullSize(menu).y));
         statusBar.setCompilerResult("Success");

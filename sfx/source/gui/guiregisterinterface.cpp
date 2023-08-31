@@ -674,6 +674,13 @@ void sfx::gui::_registerEditBoxGlobalFunctions(asIScriptEngine* const engine,
 	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if an "
 		"<tt>EditBox</tt> or a <tt>TextArea</tt> currently has set focus, "
 		"<tt>FALSE</tt> otherwise.");
+
+	r = engine->RegisterGlobalFunction(
+		"void optimiseTextAreaForMonospaceFont(const string&in, const bool)",
+		asMETHOD(sfx::gui, _optimiseTextAreaForMonospaceFont),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Enables or disables monospace font "
+		"optimisations for a given <tt>TextArea</tt>. By default it is off.");
 }
 
 void sfx::gui::_registerRadioButtonAndCheckBoxGlobalFunctions(

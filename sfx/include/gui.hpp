@@ -1129,6 +1129,8 @@ namespace sfx {
 		void _setWidgetDefaultText(const std::string& name,
 			const std::string& text, CScriptArray* variables);
 		bool _editBoxOrTextAreaHasFocus() const;
+		void _optimiseTextAreaForMonospaceFont(const std::string& name,
+			const bool optimise);
 
 		// RADIOBUTTON & CHECKBOX //
 
