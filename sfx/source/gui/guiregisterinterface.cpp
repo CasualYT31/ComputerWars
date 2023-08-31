@@ -358,6 +358,15 @@ void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
 	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the named "
 		"widget exists, <tt>FALSE</tt> otherwise.");
 
+	r = engine->RegisterGlobalFunction(
+		"string getWidgetFocused(const string&in = \"\")",
+		asMETHOD(sfx::gui, _getWidgetFocused), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns the full name of the widget that "
+		"currently has setfocus within the given container widget. If there is no "
+		"widget with setfocus in the given container, or an error occurred, an "
+		"empty string will be returned. If an empty string is given, the root GUI "
+		"will be queried. This function does not search recursively.");
+
 	r = engine->RegisterGlobalFunction("void addWidget(const string&in, const "
 		"string&in, const string&in = \"\")",
 		asMETHOD(sfx::gui, _addWidget), asCALL_THISCALL_ASGLOBAL, this);
@@ -657,6 +666,14 @@ void sfx::gui::_registerEditBoxGlobalFunctions(asIScriptEngine* const engine,
 		"variables will be inserted into the text wherever a '" +
 		std::to_string(engine::expand_string::getVarChar()) + "' is "
 		"found.").c_str());
+
+	r = engine->RegisterGlobalFunction(
+		"bool editBoxOrTextAreaHasFocus()",
+		asMETHOD(sfx::gui, _editBoxOrTextAreaHasFocus),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if an "
+		"<tt>EditBox</tt> or a <tt>TextArea</tt> currently has set focus, "
+		"<tt>FALSE</tt> otherwise.");
 }
 
 void sfx::gui::_registerRadioButtonAndCheckBoxGlobalFunctions(

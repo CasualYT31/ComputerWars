@@ -34,6 +34,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #undef MessageBox
 
+/// The padding between minimised child windows.
+static const std::size_t MINIMISED_CHILD_WINDOW_PADDING = 5;
+
+/// The width of a minimised child window.
+static const std::size_t MINIMISED_CHILD_WINDOW_WIDTH = 100;
+
  // All of these values are intended to be constant.
 
 static float NO_SPACE = -0.001f;

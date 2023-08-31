@@ -31,7 +31,7 @@ class ScriptsWindow {
         addWidget(TabContainer, tabContainer);
         setWidgetSize(tabContainer, "100%", "100%-2*" +
             formatFloat(getWidgetFullSize(menu).y) + "px");
-        setWidgetPosition(tabContainer, "2000px", "50%");
+        setWidgetPosition(tabContainer, "50%", "50%");
         setWidgetOrigin(tabContainer, 0.5f, 0.5f);
 
         auto test = addTabAndPanel(tabContainer, "~Script File Name.as");

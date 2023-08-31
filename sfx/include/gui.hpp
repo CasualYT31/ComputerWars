@@ -288,9 +288,26 @@ namespace sfx {
 		 * the script's signal handler, or the widget's custom signal handler. If
 		 * the \c ChildWindow was configured not to handle this logic, then the
 		 * appropriate script signal handler will still be invoked.
-		 * @param window Pointer to the \c ChildWindow that was mazimised.
+		 * @param window Pointer to the \c ChildWindow that was maximised.
 		 */
 		void maximizedSignalHandler(const tgui::ChildWindow::Ptr& window);
+
+		/**
+		 * If an \c EditBox or \c TextArea gains focus, an internal flag is set to
+		 * \c TRUE.
+		 * This can be used to cancel game input when the user intends to type.
+		 * @param widget Pointer to the widget that gained focus.
+		 */
+		void textBoxFocusedSignalHandler(const tgui::Widget::Ptr& widget);
+
+		/**
+		 * If an \c EditBox or \c TextArea loses focus, an internal flag is set to
+		 * \c FALSE.
+		 * This can be used to re-enable game input when the user no longer intends
+		 * to type.
+		 * @param widget Pointer to the widget that gained focus.
+		 */
+		void textBoxUnfocusedSignalHandler(const tgui::Widget::Ptr& widget);
 
 		/**
 		 * Sets the \c language_dictionary object to use with these GUI menus.
@@ -830,6 +847,17 @@ namespace sfx {
 		static tgui::Container* _getSubwidgetContainer(tgui::Widget* const widget);
 
 		/**
+		 * Removes illegal characters from a widget name.
+		 * This method assumes that a given widget's name is its intended short
+		 * name. Its parent's long name will be prepended to it, and all illegal
+		 * characters will be removed from the short name, so that the widget's
+		 * name will store its valid, long name. Make sure to assign a correct long
+		 * name to the given widget's parent!
+		 * @param w The widget to sanitise.
+		 */
+		static void _sanitiseWidgetName(const tgui::Widget::Ptr& w);
+
+		/**
 		 * Creates a widget of a given type and returns it.
 		 * Logs an error if the given type isn't supported. In this case, no widget
 		 * will be created.
@@ -998,7 +1026,8 @@ namespace sfx {
 		void _registerWidgetGlobalFunctions(asIScriptEngine* const engine,
 			const std::shared_ptr<DocumentationGenerator>& document);
 
-		bool _widgetExists(const std::string& name);
+		bool _widgetExists(const std::string& name) const;
+		std::string _getWidgetFocused(const std::string& parent = "") const;
 		void _addWidget(const std::string& newWidgetType, const std::string& name,
 			const std::string& signalHandler = "");
 		void _connectSignalHandler(const std::string& name,
@@ -1099,6 +1128,7 @@ namespace sfx {
 		void _onlyAcceptUIntsInEditBox(const std::string& name);
 		void _setWidgetDefaultText(const std::string& name,
 			const std::string& text, CScriptArray* variables);
+		bool _editBoxOrTextAreaHasFocus() const;
 
 		// RADIOBUTTON & CHECKBOX //
 
@@ -1616,6 +1646,11 @@ namespace sfx {
 		 */
 		std::unordered_map<std::string, minimised_child_window_list>
 			_minimisedChildWindowList;
+
+		/**
+		 * Does an \c EditBox or a \c TextArea have set focus right now?
+		 */
+		bool _editBoxOrTextAreaHasSetFocus = false;
 	};
 }
 

@@ -79,8 +79,27 @@ void sfx::gui::_setGlobalFont(const std::string& fontName) {
 
 // WIDGETS //
 
-bool sfx::gui::_widgetExists(const std::string& name) {
+bool sfx::gui::_widgetExists(const std::string& name) const {
 	return _findWidget<Widget>(name).operator bool();
+}
+
+std::string sfx::gui::_getWidgetFocused(const std::string& parent) const {
+	if (parent.empty() && _gui.getFocusedChild()) {
+		return _gui.getFocusedChild()->getWidgetName().toStdString();
+	} else {
+		START_WITH_WIDGET(parent)
+			Container::ConstPtr c = nullptr;
+			if (widget->isContainer()) {
+				c = std::dynamic_pointer_cast<Container>(widget);
+			} else if (auto subwidgetContainer = _getSubwidgetContainer(widget)) {
+				c = subwidgetContainer;
+			} else UNSUPPORTED_WIDGET_TYPE()
+			if (c->getFocusedChild())
+				return c->getFocusedChild()->getWidgetName().toStdString();
+		END("Attempted to find the widget with setfocus that is within widget "
+			"\"{}\".", parent)
+	}
+	return "";
 }
 
 void sfx::gui::_addWidget(const std::string& newWidgetType,
@@ -554,6 +573,10 @@ void sfx::gui::_setWidgetDefaultText(const std::string& name,
 	END("Attempted to set the default text \"{}\" to widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
 	if (variables) variables->Release();
+}
+
+bool sfx::gui::_editBoxOrTextAreaHasFocus() const {
+	return _editBoxOrTextAreaHasSetFocus;
 }
 
 // RADIOBUTTON & CHECKBOX //
@@ -1571,8 +1594,7 @@ std::string sfx::gui::_addTabAndPanel(const std::string& name,
 				static_cast<std::size_t>(castWidget->getIndex(panel)));
 			_translateWidget(widget);
 			// Fix Panel's name so that it can be accessed by the scripts/engine.
-			panel->setWidgetName(name + "." +
-				panel->getWidgetName().replace(".", ""));
+			_sanitiseWidgetName(panel);
 			panelName = panel->getWidgetName().toStdString();
 		)
 		ELSE_UNSUPPORTED()

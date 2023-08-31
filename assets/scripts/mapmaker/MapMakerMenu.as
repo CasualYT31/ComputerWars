@@ -224,6 +224,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
 			}
 		}
 	}
+    
+    // If the user is currently typing into a textbox, cancel most in-game input.
+    if (editBoxOrTextAreaHasFocus()) return;
 
     // Only allow a mouse button to paint if the mouse is not hovering over a
     // widget. It's not perfect but it gets the job done.
