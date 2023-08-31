@@ -55,17 +55,15 @@ class ScriptsWindow {
             ScrollbarPolicy::Automatic);
         setWidgetDirectionalFlowStart(test + ".TextArea");
 
-        // statusBar.setUp(window, formatFloat(getWidgetFullSize(menu).y));
+        statusBar.setUp(window, formatFloat(getWidgetFullSize(menu).y));
+        statusBar.setCompilerResult("Success");
+        statusBar.setCaretPosition(1, 1);
     }
 
     /// Opens and/or restores the scripts window to a known location.
     void restore() {
-        if (isChildWindowOpen(window)) {
-            setWidgetPosition(window, "25px", "25px");
-        } else {
-            openChildWindow(window, "25px", "25px");
-            refresh();
-        }
+        openChildWindow(window, "25px", "25px");
+        refresh();
     }
 
     /// If the window is open, refresh it with up-to-date data.
@@ -86,5 +84,5 @@ class ScriptsWindow {
     private string tabContainer;
 
     /// The status bar.
-    StatusBarWidget statusBar;
+    ScriptsStatusBar statusBar;
 }

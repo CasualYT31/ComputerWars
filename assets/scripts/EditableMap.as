@@ -65,14 +65,14 @@ class EditableMap {
      *                     \c EditableMap.
      * @param mPropsWindow The \c MapPropertiesWindow to link up with this
      *                     \c EditableMap.
-     * @param sBar         The \c StatusBarWidget to link up with this
+     * @param sBar         The \c MainStatusBar to link up with this
      *                     \c EditableMap.
      * @param sWindow      The \c ScriptsWindow to link up with this
      *                     \c EditableMap.
      */
     EditableMap(Map@ mapToEdit, TilePropertiesWindow@ tPropsWindow,
         ArmyPropertiesWindow@ aPropsWindow, MapPropertiesWindow@ mPropsWindow,
-        StatusBarWidget@ sBar, ScriptsWindow@ sWindow) {
+        MainStatusBar@ sBar, ScriptsWindow@ sWindow) {
         if (mapToEdit is null) {
             error("An invalid Map handle was given to the constructor of "
                 "EditableMap; the game will crash soon!");
@@ -86,8 +86,8 @@ class EditableMap {
             error("An invalid MapPropertiesWindow handle was given to the "
                 "constructor of EditableMap; the game will crash soon!");
         } else if (sBar is null) {
-            error("An invalid StatusBarWidget handle was given to the "
-                "constructor of EditableMap; the game will crash soon!");
+            error("An invalid MainStatusBar handle was given to the constructor "
+                "of EditableMap; the game will crash soon!");
         } else if (sWindow is null) {
             error("An invalid ScriptsWindow handle was given to the constructor "
                 "of EditableMap; the game will crash soon!");
@@ -567,7 +567,7 @@ class EditableMap {
     }
 
     /**
-     * Update the linked \c StatusBarWidget to ensure it is always displaying the
+     * Update the linked \c MainStatusBar to ensure it is always displaying the
      * correct information.
      * Note that the undo and redo action labels must be handled separately as
      * the C++ itself game engine may be respnsible for changing the state of the
@@ -617,9 +617,9 @@ class EditableMap {
     private MapPropertiesWindow@ mapPropsWindow;
 
     /**
-     * The \c StatusBarWidget to link up with this \c EditableMap.
+     * The \c MainStatusBar to link up with this \c EditableMap.
      */
-    private StatusBarWidget@ statusBar;
+    private MainStatusBar@ statusBar;
 
     /**
      * The \c ScriptsWindow to link up with this \c EditableMap.

@@ -11,7 +11,7 @@ EditableMap@ edit;
 const auto BASE_GROUP = "MapMakerMenu.BaseGroup";
 const auto MENU = BASE_GROUP + ".Menu";
 const auto CLIENT_AREA = BASE_GROUP + ".Main";
-StatusBarWidget StatusBar;
+MainStatusBar StatusBar;
 
 const auto MESSAGE_BOX_GROUP = "MessageBoxGroup";
 /// Used with \c MessageBoxes that shouldn't do anything special when a button is

@@ -69,6 +69,7 @@
 	"deleteunit": "Delete Unit",
 	"createarmy": "Create Army",
 	"zoom": "#x Zoom",
+	"caret": "Ln #, Col #",
 
 	"hp": "HP",
 	"fuel": "Fuel",
