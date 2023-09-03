@@ -35,6 +35,12 @@ namespace awe {
 	 */
 	struct spritesheets {
 		/**
+		 * Allocates a \c spritesheets object.
+		 * @return Pointer to the \c spritesheets object.
+		 */
+		static std::shared_ptr<spritesheets> create();
+
+		/**
 		 * Tests all the pointers to ensure they aren't empty.
 		 * @param  errstring The error string within \c _initChecks(). If any
 		 *                   pointers are invalid, their names will be added to
@@ -113,5 +119,10 @@ namespace awe {
 		 * Pointer to the GUI spritesheet.
 		 */
 		std::shared_ptr<sfx::animated_spritesheet> GUI;
+
+		/**
+		 * Pointer to the structure spritesheet.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> structure;
 	};
 }

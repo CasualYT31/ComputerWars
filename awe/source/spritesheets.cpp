@@ -22,6 +22,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "spritesheets.hpp"
 
+std::shared_ptr<awe::spritesheets> awe::spritesheets::create() {
+	const auto sheets = std::make_shared<awe::spritesheets>();
+	sheets->unit = std::make_shared<awe::spritesheets::units>();
+	sheets->tile = std::make_shared<awe::spritesheets::tiles>();
+	sheets->tilePicture = std::make_shared<awe::spritesheets::tile_pictures>();
+	return sheets;
+}
+
 void awe::spritesheets::test(std::string& errstring) const {
 	if (!CO) errstring += "CO spritesheet\n";
 	if (!unit) {
@@ -42,6 +50,7 @@ void awe::spritesheets::test(std::string& errstring) const {
 	}
 	if (!icon) errstring += "icon spritesheet\n";
 	if (!GUI) errstring += "GUI spritesheet\n";
+	if (!structure) errstring += "structure spritesheet\n";
 }
 
 void awe::spritesheets::updateGlobalFrameIDs() {
@@ -58,4 +67,5 @@ void awe::spritesheets::updateGlobalFrameIDs() {
 	}
 	if (icon) icon->updateGlobalFrameIDs();
 	if (GUI) GUI->updateGlobalFrameIDs();
+	if (structure) structure->updateGlobalFrameIDs();
 }

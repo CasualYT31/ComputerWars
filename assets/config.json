@@ -16,7 +16,8 @@
       "normalpictures": "sprites/tile_picture/normal/normal.json"
     },
     "icon": "sprites/icon/spritesicon.json",
-    "gui": "sprites/gui/spritesgui.json"
+    "gui": "sprites/gui/spritesgui.json",
+    "structure": "sprites/structure/spritesstructure.json"
   },
   "countries": "property/country.json",
   "weathers": "property/weather.json",

@@ -368,10 +368,7 @@ bool awe::game_engine::_load(engine::json& j) {
 	j.apply(guiPath, { "gui" });
 	if (!j.inGoodState()) return false;
 	// Allocate spritesheets object.
-	_sprites = std::make_shared<awe::spritesheets>();
-	_sprites->unit = std::make_shared<awe::spritesheets::units>();
-	_sprites->tile = std::make_shared<awe::spritesheets::tiles>();
-	_sprites->tilePicture = std::make_shared<awe::spritesheets::tile_pictures>();
+	_sprites = awe::spritesheets::create();
 	// Load most of the objects.
 	bool ret = _loadObject(_dictionary, j, { "languages" },
 			engine::logger::data{ _logger.getData().sink, "language_dictionary" })
@@ -413,6 +410,8 @@ bool awe::game_engine::_load(engine::json& j) {
 		&& _loadObject(_sprites->icon, j, { "spritesheets", "icon" },
 			engine::logger::data{ _logger.getData().sink, "spritesheet" })
 		&& _loadObject(_sprites->GUI, j, { "spritesheets", "gui" },
+			engine::logger::data{ _logger.getData().sink, "spritesheet" })
+		&& _loadObject(_sprites->structure, j, { "spritesheets", "structure" },
 			engine::logger::data{ _logger.getData().sink, "spritesheet" })
 		&& _loadObject(_countries, j, { "countries" }, _scripts, "Country",
 			engine::logger::data{ _logger.getData().sink, "country_bank" })
@@ -464,6 +463,7 @@ bool awe::game_engine::_load(engine::json& j) {
 	_gui->addSpritesheet("unitPicture", _sprites->unitPicture);
 	_gui->addSpritesheet("tile.normal", _sprites->tile->normal);
 	_gui->addSpritesheet("unit", _sprites->unit->idle);
+	_gui->addSpritesheet("structure", _sprites->structure);
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setFonts(_fonts);
 	_gui->setTarget(*_renderer);
