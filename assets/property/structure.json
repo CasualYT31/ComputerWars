@@ -4,11 +4,31 @@
     "shortname": "HQ_shortname",
     "icon": "",
     "description": "HQ_description",
+    "ownedicons": {
+      "ORANGE": "hqos",
+      "BLUE": "hqbm",
+      "GREEN": "hqge",
+      "YELLOW": "hqyc",
+      "BLACK": "hqbh",
+      "RED": "hqrf",
+      "GREY": "hqgs",
+      "BROWN": "hqbd",
+      "AMBER": "hqab",
+      "JADE": "hqjs",
+      "COBALT": "hqci",
+      "PINK": "hqpc",
+      "TEAL": "hqtg",
+      "PURPLE": "hqpl",
+      "ACID": "hqar",
+      "WHITE": "hqwn"
+    },
     "root": {
       "tile": "06Ahq",
       "destroyed": "064city",
       "deleted": "064city"
-    }
+    },
+    "destroyedlongname": "CITY_longname",
+    "destroyediconname": "city"
   },
   "MISSILESILO": {
     "longname": "MISSILESILO_longname",

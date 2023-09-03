@@ -342,7 +342,8 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Converts a bool into a string.");
 
 	r = engine->RegisterGlobalFunction(
-		"array<string>@ generateTileSpriteArray(const string&in)",
+		"array<string>@ generateTileSpriteArray(const string&in, "
+		"const array<string>@ const)",
 		asMETHOD(awe::game_engine, _script_generateTileSpriteArray),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Generates a list of tile sprites for "
@@ -354,6 +355,14 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Generates a list of unit sprites for "
 		"each unit type, given an owner.");
+
+	r = engine->RegisterGlobalFunction(
+		"array<string>@ generateStructureSpriteArray(const string&in, const bool, "
+		"const array<string>@ const)",
+		asMETHOD(awe::game_engine, _script_generateStructureSpriteArray),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Generates a list of structure sprites "
+		"for each structure, given an owner.");
 }
 
 bool awe::game_engine::_load(engine::json& j) {
@@ -452,7 +461,7 @@ bool awe::game_engine::_load(engine::json& j) {
 		_scripts);
 	awe::updateUnitTypeBank(*_units, *_movements, *_terrains, *_weapons,
 		*_countries, _logger.getData().sink);
-	awe::updateStructureBank(*_structures, *_tiles);
+	awe::updateStructureBank(*_structures, *_tiles, *_countries);
 	// Initialise GUIs and the scripts.
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scriptsPath);
@@ -694,16 +703,20 @@ std::string awe::game_engine::_script_formatBool(const bool b) const {
 }
 
 CScriptArray* awe::game_engine::_script_generateTileSpriteArray(
-	const std::string& owner) const {
+	const std::string& owner, const CScriptArray* const filter) const {
 	CScriptArray* ret = _scripts->createArray("string");
 	// Should access them in order.
 	const auto& scriptNames = _tiles->getScriptNames();
-	for (const auto& name : scriptNames) {
+	for (std::string name : scriptNames) {
+		if (filter && filter->Find(&name) >= 0) continue;
 		std::string temp(owner.empty() ?
 			_tiles->operator[](name)->getNeutralTile() :
 			_tiles->operator[](name)->getOwnedTile(owner));
 		ret->InsertLast(&temp);
 	}
+	// Kinda just realised that if this method throws at all, this is leaked. I've
+	// wrote code like this everywhere...
+	if (filter) filter->Release();
 	return ret;
 }
 
@@ -716,5 +729,28 @@ CScriptArray* awe::game_engine::_script_generateUnitSpriteArray(
 		std::string temp((*_units)[name]->getUnit(owner));
 		ret->InsertLast(&temp);
 	}
+	return ret;
+}
+
+CScriptArray* awe::game_engine::_script_generateStructureSpriteArray(
+	const std::string& owner, const bool destroyed,
+	const CScriptArray* const filter) const {
+	CScriptArray* ret = _scripts->createArray("string");
+	// Should access them in order.
+	const auto& scriptNames = _structures->getScriptNames();
+	for (std::string name : scriptNames) {
+		if (filter && filter->Find(&name) >= 0) continue;
+		std::string temp;
+		const auto structure = (*_structures)[name];
+		if (destroyed) {
+			// Destroyed structures are not supposed to have owners.
+			temp = structure->getDestroyedIconName();
+		} else {
+			temp = owner.empty() ? structure->getIconName() :
+				structure->getOwnedIconName(owner);
+		}
+		ret->InsertLast(&temp);
+	}
+	if (filter) filter->Release();
 	return ret;
 }

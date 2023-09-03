@@ -20,6 +20,14 @@ class ObjectPanelSetUpData {
      */
     funcdef array<string>@ GetSpritesFunc(const string&in);
 
+    /**
+     * Signature of the callback invoked when additional widgets should be added
+     * to an \c ObjectPanel.
+     * @param const ObjectPanelSetUpData@ const Handle to the \c ObjectPanel's
+     *                                          setup data.
+     */
+    funcdef void AdditionalWidgetsFunc(const ObjectPanelSetUpData@ const);
+
     /// The short name to give to the base \c Group widget.
     string group;
 
@@ -48,11 +56,15 @@ class ObjectPanelSetUpData {
 
     /// Pointer to a function which is called when object sprites have to be
     /// refreshed.
-    /// Can be one of \c @generateTileSpriteArray or \c @generateUnitSpriteArray.
     GetSpritesFunc@ generateSpritesArray;
 
     /// A list of script names to generate object buttons for.
     const array<string>@ scriptNames;
+
+    /// Allows an \c ObjectPanel to have custom, additional widgets.
+    AdditionalWidgetsFunc@ additionalWidgets;
+
+    // GENERATED DATA, LEAVE BLANK //
 
     /// Name of the owner icon \c Picture widget.
     /// Set by the \c ObjectDialog class, so you can leave this blank.
@@ -77,6 +89,10 @@ class ObjectPanelSetUpData {
     /// Full name of the \c ComboBox widget.
     /// Set by the \c ObjectDialog class, so you can leave this blank.
     string comboBoxFullname;
+
+    /// Full name of the \c Group widget which contains the owner widgets.
+    /// Set by the \c ObjectDialog class, so you can leave this blank.
+    string ownerGroupFullname;
 }
 
 /**
@@ -187,6 +203,13 @@ class ObjectDialog {
      */
     private ObjectDialogSetUpData@ initData;
 
+    /// Temporary measure for Structure Panel.
+    void regenerateSprites() {
+        const auto data = getCurrentPanelData();
+        applySpritesToWidgetsInContainer(data.wrap, data.spritesheet,
+            data.generateSpritesArray(data.currentlySelectedObject.owner));
+    }
+
     /**
      * Name of the \c Tabs widget.
      */
@@ -250,13 +273,13 @@ class ObjectDialog {
         }
         
         // SelectOwner widgets //
-        const auto selectOwnerGroup = data.groupFullname + ".SelectOwnerGroup";
-        addWidget(Group, selectOwnerGroup);
-        setWidgetSize(selectOwnerGroup, "100%", GROUP_HEIGHT);
-        setWidgetOrigin(selectOwnerGroup, 0.5f, 1.0f);
-        setWidgetPosition(selectOwnerGroup, "50%", "100%");
+        data.ownerGroupFullname = data.groupFullname + ".SelectOwnerGroup";
+        addWidget(Group, data.ownerGroupFullname);
+        setWidgetSize(data.ownerGroupFullname, "100%", GROUP_HEIGHT);
+        setWidgetOrigin(data.ownerGroupFullname, 0.5f, 1.0f);
+        setWidgetPosition(data.ownerGroupFullname, "50%", "100%");
 
-        const auto ownerIconGroup = selectOwnerGroup + ".OwnerIconGroup";
+        const auto ownerIconGroup = data.ownerGroupFullname + ".OwnerIconGroup";
         addWidget(Group, ownerIconGroup);
         setWidgetSize(ownerIconGroup, GROUP_HEIGHT, "100%");
         setGroupPadding(ownerIconGroup, "5px");
@@ -266,7 +289,8 @@ class ObjectDialog {
         setWidgetOrigin(data.ownerIcon, 0.5f, 0.5f);
         setWidgetPosition(data.ownerIcon, "50%", "50%");
 
-        const auto ownerComboboxGroup = selectOwnerGroup + ".OwnerComboboxGroup";
+        const auto ownerComboboxGroup =
+            data.ownerGroupFullname + ".OwnerComboboxGroup";
         addWidget(Group, ownerComboboxGroup);
         setWidgetSize(ownerComboboxGroup, "100%-" + GROUP_HEIGHT, "100%");
         setWidgetPosition(ownerComboboxGroup, GROUP_HEIGHT, "0px");
@@ -282,6 +306,9 @@ class ObjectDialog {
         awe::addCountriesToList(data.comboBoxFullname, data.neutralAvailable);
         setItemsToDisplay(data.comboBoxFullname, data.numberOfOwnerItems);
         setSelectedItem(data.comboBoxFullname, 0);
+
+        // Additional widgets //
+        if (data.additionalWidgets !is null) data.additionalWidgets(data);
     }
 
     /**
@@ -311,8 +338,7 @@ class ObjectDialog {
                     ++i) {
                     const auto groupName = initData.objectPanels[i].groupFullname;
                     if (groupName.length() == 0) continue;
-                    setWidgetVisibility(groupName,
-                        false);
+                    setWidgetVisibility(groupName, false);
                 }
                 setWidgetVisibility(data.groupFullname, true);
                 horizontalWrapSignalHandler(data.wrap, "MouseEntered");
@@ -427,6 +453,30 @@ const int TILE_DIALOG = 0;
 const int UNIT_DIALOG = 1;
 
 /**
+ * Index of the Structures tab.
+ */
+const int STRUCTURE_DIALOG = 2;
+
+/**
+ * Structure panel's \c CheckBox signal handler.
+ * I had to do it this way to gain access to the widgets in \c PaletteWindow. I
+ * will need to rewrite all this once I rewrite the GUI interface anyway so I'll
+ * stick with this ugly code for now.
+ */
+void StructurePanelCheckBoxSignalHandler(const string&in widgetName,
+    const string&in signalName) {
+    if (signalName == "Changed") {
+        CurrentlySelectedStructure.data =
+            CurrentlySelectedStructureData(isWidgetChecked(widgetName));
+        PaletteWindow.regenerateSprites();
+    }
+}
+
+/// The tile types and structures excluded from their respective panels.
+array<string> excludedTiles;
+array<string> excludedStructures;
+
+/**
  * Returns the default setup data for the \c ObjectDialog.
  * @param  parent Parent widget of the \c ObjectDialog.
  * @return Can be passed directly into the \c setUp() method.
@@ -447,8 +497,21 @@ ObjectDialogSetUpData@ DefaultObjectDialogData(const string&in parent) {
     Tiles.numberOfOwnerItems = 6;
     @Tiles.mapNameToObject = function(shortName){return tiletype[shortName];};
     Tiles.spritesheet = "tile.normal";
-    @Tiles.generateSpritesArray = @generateTileSpriteArray;
-    @Tiles.scriptNames = tiletype.scriptNames;
+    @Tiles.generateSpritesArray = function(owner){
+        for (uint i = 0, len = excludedTiles.length(); i < len; ++i) {
+            info(excludedTiles[i]);
+        }
+        return ::generateTileSpriteArray(owner, excludedTiles);
+    };
+    array<string>@ tNames = array<string>();
+    // Filter tiles based on whether they are paintable or not.
+    for (uint i = 0, len = tiletype.scriptNames.length(); i < len; ++i) {
+        const auto name = tiletype.scriptNames[i];
+        if (tiletype[name].alwaysPaintable ||
+            tiletype[name].structures.length() == 0) tNames.insertLast(name);
+        else excludedTiles.insertLast(name);
+    }
+    @Tiles.scriptNames = tNames;
     SetUpData.objectPanels.insertLast(Tiles);
 
     // Unit group.
@@ -462,9 +525,58 @@ ObjectDialogSetUpData@ DefaultObjectDialogData(const string&in parent) {
     Units.numberOfOwnerItems = 5;
     @Units.mapNameToObject = function(shortName){return unittype[shortName];};
     Units.spritesheet = "unit";
-    @Units.generateSpritesArray = @generateUnitSpriteArray;
+    @Units.generateSpritesArray = function(owner){
+        return ::generateUnitSpriteArray(owner);
+    };
     @Units.scriptNames = unittype.scriptNames;
     SetUpData.objectPanels.insertLast(Units);
+
+    // Structure group.
+    ObjectPanelSetUpData Structures;
+    Structures.group = "StructureDialog";
+    Structures.tabText = "structuredialog";
+    @Structures.currentlySelectedObject = CurrentlySelectedStructure;
+    Structures.buttonSize.x = 65.0f;
+    Structures.buttonSize.y = 65.0f;
+    Structures.neutralAvailable = false;
+    Structures.numberOfOwnerItems = 5;
+    @Structures.mapNameToObject =
+        function(shortName){return structure[shortName];};
+    Structures.spritesheet = "structure";
+    @Structures.generateSpritesArray = function(owner){
+        return ::generateStructureSpriteArray(owner,
+            CurrentlySelectedStructure.data is null ? false :
+            cast<CurrentlySelectedStructureData>(
+                CurrentlySelectedStructure.data).destroyed, excludedStructures);
+    };
+    array<string>@ names = array<string>();
+    // Filter structures based on whether they are paintable or not.
+    for (uint i = 0, len = structure.scriptNames.length(); i < len; ++i) {
+        const auto name = structure.scriptNames[i];
+        if (structure[name].isPaintable) names.insertLast(name);
+        else excludedStructures.insertLast(name);
+    }
+    @Structures.scriptNames = names;
+    @Structures.additionalWidgets = function(data){
+        const auto destroyedPanel = data.groupFullname + ".DestroyedPanel";
+        addWidget(Panel, destroyedPanel);
+        const auto GROUP_HEIGHT = formatFloat(getWidgetFullSize(
+            data.ownerGroupFullname).y);
+        setWidgetSize(destroyedPanel, "100%", GROUP_HEIGHT);
+        setWidgetOrigin(destroyedPanel, 0.f, 1.f);
+        setWidgetPosition(destroyedPanel, "0%", data.ownerGroupFullname + ".y-" +
+            data.ownerGroupFullname + ".h");
+        setWidgetSize(data.scrollablePanel, "100%", "100%-" + GROUP_HEIGHT + "-" +
+            GROUP_HEIGHT + "-" + GROUP_HEIGHT);
+
+        const auto destroyed = destroyedPanel + ".Destroyed";
+        addWidget(CheckBox, destroyed);
+        setWidgetText(destroyed, "destroyed");
+        setWidgetOrigin(destroyed, 0.5f, 0.5f);
+        setWidgetPosition(destroyed, "50%", "50%");
+        connectSignalHandler(destroyed, @StructurePanelCheckBoxSignalHandler);
+    };
+    SetUpData.objectPanels.insertLast(Structures);
 
     return SetUpData;
 }

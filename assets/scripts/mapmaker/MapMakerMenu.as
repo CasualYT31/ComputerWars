@@ -315,14 +315,14 @@ void MapMakerMenuHandleInput(const dictionary controls,
         if (currentPaletteWindowTab == TILE_DIALOG) {
             CurrentlySelectedTileType.object = edit.map.getTileType(curTile);
             PaletteWindow.setSelectedOwner(edit.map.getTileOwner(curTile));
-        } else if (currentPaletteWindowTab == UNIT_DIALOG && curUnit != 0) {
+        } else if (currentPaletteWindowTab == UNIT_DIALOG && curUnit != NO_UNIT) {
             CurrentlySelectedUnitType.object = edit.map.getUnitType(curUnit);
             PaletteWindow.setSelectedOwner(edit.map.getArmyOfUnit(curUnit));
         }
 
     } else if (action && TOOLBAR.tool == DELETE_TOOL.shortName) {
         edit.deleteUnit(curUnit);
-        if (mementoName.isEmpty() && curUnit != 0)
+        if (mementoName.isEmpty() && curUnit != NO_UNIT)
             mementoName = OPERATION[Operation::DELETE_UNIT_TOOL];
     
     } else if (TOOLBAR.tool == RECT_TOOL.shortName) {

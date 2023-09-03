@@ -1921,8 +1921,12 @@ namespace awe {
 		 * following keys are are to be/can be defined:
 		 * <ul><li>\c "root", <b>mandatory</b>, <tt>(object)</tt></li>
 		 *     <li>\c "dependent", <em>optional</em>, <tt>([object, ...])</tt></li>
+		 *     <li>\c "ownedicons", <em>optional</em>, <tt>{COUNTRY_SCRIPT_NAME:
+		 *         string SPRITE_NAME[, etc.]}</tt></li>
 		 *     <li>\c "paintable" = \c _paintable, <em>optional</em>,
 		 *         <tt>(bool)</tt></li>
+		 *     <li>\c "destroyedlongname" = \c _destroyedLongName,
+		 *         <em>optional</em>, <tt>(string)</tt></li>
 		 *     <li>\c "destroyediconname" = \c _destroyedIconName,
 		 *         <em>optional</em>, <tt>(string)</tt></li></ul>
 		 *
@@ -1970,6 +1974,40 @@ namespace awe {
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document);
+
+		/**
+		 * Finds out if this structure has owned icon sprites.
+		 * @return \c TRUE if this structure has at least one owned icon sprite.
+		 *         \c FALSE if it has none.
+		 */
+		inline bool hasOwnedIcons() const {
+			return !_ownedIcons.empty();
+		}
+
+		/**
+		 * Retrieves the name of the sprite that is shown for a given country.
+		 * @param  countryName The script name of the country.
+		 * @return The name of the structure's icon sprite, or \c _iconName if the
+		 *         given country name didn't identify a sprite name.
+		 */
+		inline const std::string& getOwnedIconName(
+			const std::string& countryName) const {
+			return ((_ownedIcons.find(countryName) == _ownedIcons.end()) ?
+				(getIconName()) : (_ownedIcons.at(countryName)));
+		}
+
+		/**
+		 * Retrieves the name of the sprite that is shown for a given country.
+		 * @param  countryID The turn order ID of the country.
+		 * @return The name of the structure's icon sprite, or \c _iconName if the
+		 *         given country name didn't identify a sprite name.
+		 */
+		inline const std::string& getOwnedIconName(
+			const awe::ArmyID countryID) const {
+			return ((_ownedIconsTurnOrder.find(countryID) ==
+				_ownedIconsTurnOrder.end()) ?
+				(getIconName()) : (_ownedIconsTurnOrder.at(countryID)));
+		}
 
 		/**
 		 * The tile type to be assigned to the root tile of the structure.
@@ -2138,7 +2176,7 @@ namespace awe {
 					hasDependentDestroyedTileType(index) ?
 					_dependents[index].destroyedTile :
 					getDependentTileTypeScriptName(index)
-				);
+					);
 		}
 
 		/**
@@ -2159,7 +2197,7 @@ namespace awe {
 					hasDependentDestroyedTileType(index) ?
 					_dependents[index].destroyedTileType :
 					getDependentTileType(index)
-				);
+					);
 		}
 
 		/**
@@ -2191,7 +2229,7 @@ namespace awe {
 					hasDependentDeletedTileType(index) ?
 					_dependents[index].deletedTile :
 					getDependentTileTypeScriptName(index)
-				);
+					);
 		}
 
 		/**
@@ -2213,7 +2251,7 @@ namespace awe {
 					hasDependentDeletedTileType(index) ?
 					_dependents[index].deletedTileType :
 					getDependentTileType(index)
-				);
+					);
 		}
 
 		/**
@@ -2226,12 +2264,22 @@ namespace awe {
 		}
 
 		/**
+		 * The translation key of the long name of this structure when it is
+		 * destroyed.
+		 * If it was not assigned, returns the normal long name instead.
+		 * @return The long name.
+		 */
+		inline const std::string& getDestroyedName() const noexcept {
+			return _destroyedLongName.empty() ? getName() : _destroyedLongName;
+		}
+
+		/**
 		 * The sprite key of the icon representing a destroyed version of this
 		 * structure.
 		 * @return The key of the sprite used to represented this structure when
 		 *         it's destroyed.
 		 */
-		inline const std::string& destroyedIconName() const noexcept {
+		inline const std::string& getDestroyedIconName() const noexcept {
 			return _destroyedIconName;
 		}
 
@@ -2252,7 +2300,26 @@ namespace awe {
 		 *                 from.
 		 */
 		void updateTileTypes(const awe::bank<awe::tile_type>& tileBank) const;
+
+		/**
+		 * Updates \c _ownedIconsTurnOrder by copying over the contents of
+		 * \c _ownedIcons and supplying the respective turn order IDs as keys.
+		 * @param  countries Pointer to the country bank to pull the turn order IDs
+		 *                   from.
+		 * @safety Basic guarantee.
+		 */
+		void updateOwnedIconsMap(const awe::bank<awe::country>& countries) const;
 	private:
+		/**
+		 * The sprite names of the icons corresponding to each country.
+		 */
+		std::unordered_map<std::string, std::string> _ownedIcons;
+
+		/**
+		 * \c _ownedIcons keyed by turn order ID.
+		 */
+		mutable std::unordered_map<awe::ArmyID, std::string> _ownedIconsTurnOrder;
+
 		/**
 		 * The type of tile that is used to represent the root of the structure.
 		 */
@@ -2375,6 +2442,11 @@ namespace awe {
 		bool _paintable = true;
 
 		/**
+		 * The long name of the structure when it is destroyed.
+		 */
+		std::string _destroyedLongName;
+
+		/**
 		 * The sprite key of the GUI icon that is to be displayed when representing
 		 * a destroyed version of this structure.
 		 */
@@ -2428,13 +2500,16 @@ namespace awe {
 		const std::shared_ptr<engine::sink>& sink);
 
 	/**
-	 * Calls \c structure::updateTileTypes() on an entire bank of \c structure
+	 * Calls \c structure::updateTileTypes() and
+	 * \c structure::updateOwnedIconsMap() on an entire bank of \c structure
 	 * objects.
 	 * @param structureBank The \c structure bank to update.
 	 * @param tileBank      The \c tile_type bank to pull the pointers from.
+	 * @param countryBank   The \c country bank to pull turn order IDs from.
 	 */
 	void updateStructureBank(awe::bank<awe::structure>& structureBank,
-		const awe::bank<awe::tile_type>& tileBank);
+		const awe::bank<awe::tile_type>& tileBank,
+		const awe::bank<awe::country>& countryBank);
 
 	/**
 	 * Checks an entire bank of countries to ensure each country's turn order ID is

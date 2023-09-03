@@ -131,7 +131,8 @@
 			"PURPLE": "citypl",
 			"ACID": "cityar",
 			"WHITE": "citywn"
-		}
+		},
+		"alwayspaintable": true
 	},
 
 	"065base": {

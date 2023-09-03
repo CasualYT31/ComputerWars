@@ -347,6 +347,11 @@ void awe::unit_type::updateSpriteMaps(
 //***********
 awe::structure::structure(const std::string& scriptName, engine::json& j) :
 	common_properties(scriptName, j) {
+	// Really need to find some way to log errors.
+	if (j.keysExist({ "ownedicons" })) {
+		j.applyMap(_ownedIcons, { "ownedicons" });
+		j.resetState();
+	}
 	j.apply(_rootTile, { "root", "tile" }, true);
 	if (j.keysExist({ "root", "destroyed" }))
 		j.apply(_rootDestroyedTile, { "root", "destroyed" }, true);
@@ -354,6 +359,8 @@ awe::structure::structure(const std::string& scriptName, engine::json& j) :
 		j.apply(_rootDeletedTile, { "root", "deleted" }, true);
 	if (j.keysExist({ "paintable" }))
 		j.apply(_paintable, { "paintable" }, true);
+	if (j.keysExist({ "destroyedlongname" }))
+		j.apply(_destroyedLongName, { "destroyedlongname" }, true);
 	if (j.keysExist({ "destroyediconname" }))
 		j.apply(_destroyedIconName, { "destroyediconname" }, true);
 	if (j.keysExist({ "dependent" })) {
@@ -405,6 +412,10 @@ void awe::structure::updateTileTypes(
 			dependent.deletedTileType = tileBank[dependent.deletedTile];
 	}
 }
+void awe::structure::updateOwnedIconsMap(
+	const awe::bank<awe::country>& countries) const {
+	updateTurnOrderMap(_ownedIcons, _ownedIconsTurnOrder, countries);
+}
 awe::structure::dependent_tile::dependent_tile(const sf::Vector2u& o,
 	const std::string& t) : offset(o), tile(t) {}
 
@@ -447,9 +458,12 @@ void awe::updateUnitTypeBank(awe::bank<awe::unit_type>& unitBank,
 }
 
 void awe::updateStructureBank(awe::bank<awe::structure>& structureBank,
-	const awe::bank<awe::tile_type>& tileBank) {
-	for (const auto& structure : structureBank)
+	const awe::bank<awe::tile_type>& tileBank,
+	const awe::bank<awe::country>& countryBank) {
+	for (const auto& structure : structureBank) {
 		structure.second->updateTileTypes(tileBank);
+		structure.second->updateOwnedIconsMap(countryBank);
+	}
 }
 
 bool awe::checkCountryTurnOrderIDs(const awe::bank<awe::country>& countries) {

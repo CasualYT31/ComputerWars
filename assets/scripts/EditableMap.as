@@ -472,12 +472,13 @@ class EditableMap {
     void createUnit(const Vector2&in unitPosition, const UnitType@ const unitType,
         const string&in army) {
         const auto oldUnit = map.getUnitOnTile(unitPosition);
-        const auto oldUnitType = oldUnit == 0 ? null : map.getUnitType(oldUnit);
+        const auto oldUnitType =
+            oldUnit == NO_UNIT ? null : map.getUnitType(oldUnit);
         const auto oldUnitArmyID =
-            oldUnit == 0 ? NO_ARMY : map.getArmyOfUnit(oldUnit);
+            oldUnit == NO_UNIT ? NO_ARMY : map.getArmyOfUnit(oldUnit);
         const auto armyID = country[army].turnOrder;
 
-        if (oldUnit == 0 || oldUnitType.scriptName != unitType.scriptName ||
+        if (oldUnit == NO_UNIT || oldUnitType.scriptName != unitType.scriptName ||
             oldUnitArmyID != armyID) {
             DisableMementos token(map, OPERATION[Operation::CREATE_UNIT_SCRIPT]);
             // Delete existing unit, and its army if appropriate.
@@ -515,7 +516,7 @@ class EditableMap {
 
     /**
      * Deletes a given unit.
-     * If \c 0 is given, don't do anything.
+     * If \c NO_UNIT is given, don't do anything.
      * @param unit ID of the unit to delete.
      */
     void deleteUnit(const UnitID unit) {

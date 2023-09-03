@@ -46,6 +46,8 @@
 	"armyprops": "Army Properties",
 	"tiledialog": "Tiles",
 	"unitdialog": "Units",
+	"structuredialog": "Structures",
+	"destroyed": "Destroyed?",
 	"unitsheader": "Units",
 	"objectdialog": "Palette Window",
 	"enterscriptname": "Enter Script Name",

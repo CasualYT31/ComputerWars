@@ -462,8 +462,25 @@ void awe::structure::Register(const std::string& type,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document,
 		"For structures, this holds the sprite ID of the pictorial representation "
-		"of the structure, for use in GUIs.");
+		"of the structure, for use in GUIs, when the owner of the structure "
+		"doesn't matter.");
 	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasOwnedIcons() const property",
+		asMETHOD(T, hasOwnedIcons), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Does this structure have owned icons?");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& ownedIconName(const string&in) const",
+		asMETHODPR(T, getOwnedIconName, (const std::string&) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this structure's "
+		"owned icon that is displayed on the GUI, given a country script name.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& ownedIconName(const ArmyID) const",
+		asMETHODPR(T, getOwnedIconName, (const awe::ArmyID) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this structure's "
+		"owned icon that is displayed on the GUI, given a country turn order ID.");
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_rootTileType() const property",
 		asMETHOD(T, getRootTileTypeScriptName), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the tile type that the root tile of "
@@ -530,8 +547,14 @@ void awe::structure::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Can this structure be painted all at once, "
 		"as a set of tiles, in the map maker?");
 	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_destroyedName() const property",
+		asMETHOD(T, getDestroyedName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the translation key of the long name "
+		"of this structure when it is destroyed. If it was not assigned one, the "
+		"normal long name is returned instead.");
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_destroyedIconName() const property",
-		asMETHOD(T, destroyedIconName), asCALL_THISCALL);
+		asMETHOD(T, getDestroyedIconName), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "The key of the sprite representing a "
 		"destroyed version of this structure.");
 	r = engine->RegisterObjectMethod(type.c_str(),
