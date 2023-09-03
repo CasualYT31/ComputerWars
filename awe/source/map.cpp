@@ -1804,19 +1804,19 @@ bool awe::map::isUnitVisible(const awe::UnitID unit,
 		return false;
 	}
 	// A unit is visible if...
-	// 0. It is on the map.
+	// 1. It is on the map.
 	if (!isUnitOnMap(unit)) return false;
-	// 1. It isn't hiding.
+	// 2. It isn't hiding.
 	if (!isUnitHiding(unit)) return true;
-	// 2. It is hiding, but it belongs to the same team as the given army.
+	// 3. It is hiding, but it belongs to the same team as the given army.
 	const auto armyTeam = getArmyTeam(army);
 	if (getTeamOfUnit(unit) == armyTeam) return true;
-	// 3. It is hiding, but it is located on a tile that belongs to `army`'s team.
+	// 4. It is hiding, but it is located on a tile that belongs to `army`'s team.
 	const auto unitPos = getUnitPosition(unit);
 	const auto tileOwner = getTileOwner(unitPos);
 	if (tileOwner != awe::NO_ARMY && getArmyTeam(tileOwner) == armyTeam)
 		return true;
-	// 4. It is hiding, but it is adjacent to a unit that belongs to the same team
+	// 5. It is hiding, but it is adjacent to a unit that belongs to the same team
 	//    as `army`.
 	const auto adjacentTiles = getAvailableTiles(unitPos, 1, 1);
 	for (const auto tile : adjacentTiles) {
@@ -2087,11 +2087,11 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("getUnitOnTile operation failed: tile at position {} is out "
 			"of bounds with the map's size of {}!", pos, getMapSize());
-		return 0;
+		return awe::NO_UNIT;
 	}
 	auto u = _tiles[pos.x][pos.y].getUnit();
 	if (u != awe::NO_UNIT && _units.at(u).isOnMap()) return u;
-	return 0;
+	return awe::NO_UNIT;
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(
@@ -3127,11 +3127,11 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 }
 
 void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	// Step 0. temporarily apply our view.
+	// Step 1. temporarily apply our view.
 	const auto oldView = target.getView();
 	target.setView(_view);
 
-	// Step 1. the tiles.
+	// Step 2. the tiles.
 	auto mapSize = getMapSize();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
@@ -3161,7 +3161,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		}
 	}
 
-	// Step 2. the selected unit closed list tiles.
+	// Step 3. the selected unit closed list tiles.
 	if (_selectedUnitRenderData.top().selectedUnit != awe::NO_UNIT &&
 		!_selectedUnitRenderData.top().disableRenderingEffects) {
 		for (asUINT i = 0, size = _selectedUnitRenderData.top().closedList->
@@ -3172,7 +3172,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		}
 	}
 
-	// Step 3. the units.
+	// Step 4. the units.
 	// Unfortunately units have to be looped through separately to prevent tiles
 	// taller than the minimum height from drawing over units. If a unit has a
 	// location override, then render it, even if it isn't on the map according to
@@ -3220,18 +3220,18 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	for (const auto& overridden : unitsWithLocationOverrides)
 		target.draw(overridden.first, overridden.second);
 
-	// Step 4. the cursor.
+	// Step 5. the cursor.
 	if (!_cursor.getSprite().empty()) target.draw(_cursor, states);
 
-	// Step 5. the rectangle selection graphic.
+	// Step 6. the rectangle selection graphic.
 	if (_startOfRectSel && _endOfRectSel) target.draw(_rectangle, states);
 
-	// Step 6. restore old view.
+	// Step 7. restore old view.
 	target.setView(oldView);
 }
 
 void awe::map::_updateCapturingUnit(const awe::UnitID id) {
-	if (id > 0 && isUnitCapturing(id)) {
+	if (id != awe::NO_UNIT && isUnitCapturing(id)) {
 		const auto t = getUnitPosition(id);
 		// If unit is out-of-bounds, don't do anything. This case can come about
 		// when a capturing unit is deleted as a map is shrinking.

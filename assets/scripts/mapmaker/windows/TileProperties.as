@@ -595,7 +595,7 @@ class TilePropertiesWindow {
      * Also closes the window.
      */
     void deselect() {
-        currentUnit = 0;
+        currentUnit = NO_UNIT;
         setWidgetVisibility(layout, false);
         setWidgetVisibility(errorMessageLabel, true);
         setWidgetSize(layout, "100%-" + scrollBarWidth, "0px");
@@ -644,7 +644,7 @@ class TilePropertiesWindow {
         tilesUnit = currentUnit = edit.map.getUnitOnTile(tile);
         populateUnitTreeView(currentUnit);
 
-        if (currentUnit == 0) {
+        if (currentUnit == NO_UNIT) {
             setWidgetRatioInLayout(layout, 0, 1.f);
             setWidgetRatioInLayout(layout, 1, 0.f);
             setWidgetSize(layout, "100%-" + scrollBarWidth, "450px");
@@ -833,7 +833,7 @@ class TilePropertiesWindow {
         array<string>@ hierarchy = null) {
         if (hierarchy is null) {
             clearItems(unitTreeView);
-            if (unit == 0) return;
+            if (unit == NO_UNIT) return;
             @hierarchy = array<string>();
         }
 
@@ -869,7 +869,7 @@ class TilePropertiesWindow {
             // If a unit is capturing a property, it will be set to not capture if
             // the owner of the tile is changed. So refresh the unit layout just
             // in case.
-            if (currentUnit != 0) refreshUnit(currentUnit);
+            if (currentUnit != NO_UNIT) refreshUnit(currentUnit);
         }
     }
 
@@ -1046,10 +1046,10 @@ class TilePropertiesWindow {
     private string mbEnableThis;
 
     /// Stores the ID of the unit that is on the currently selected tile.
-    private UnitID tilesUnit = 0;
+    private UnitID tilesUnit = NO_UNIT;
 
     /// Stores the ID of the unit that's been selected in the \c TreeView.
-    private UnitID currentUnit = 0;
+    private UnitID currentUnit = NO_UNIT;
 
     /// Cache of the \c ScrollablePanel's scrollbar width.
     private string scrollBarWidth;

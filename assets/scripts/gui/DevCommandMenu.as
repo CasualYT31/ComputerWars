@@ -48,7 +48,7 @@ void DevCommandMenuOpen() {
 	const auto unit = game.map.getUnitOnTile(tile);
 	string msg = "~Selected Tile: " + tile.toString() + "\n"
 		"Selected Unit ID: " + formatUInt(game.map.getUnitOnTile(tile));
-	if (unit > 0) {
+	if (unit != NO_UNIT) {
 		const auto loadedUnits = game.map.getLoadedUnits(unit);
 		for (uint i = 0, len = loadedUnits.length(); i < len; ++i) {
 			msg += "\nLoaded Unit #" + formatUInt(i + 1) + ": ID " +

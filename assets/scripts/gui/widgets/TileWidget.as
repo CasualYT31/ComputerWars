@@ -99,7 +99,7 @@ class TileWidget {
 		const UnitID unitID = game.map.getUnitOnTile(tilePos);
 		array<UnitID> unitIDs;
 		array<const UnitType@> unitTypes;
-		if (unitID > 0 &&
+		if (unitID != NO_UNIT &&
 			game.map.isUnitVisible(unitID, game.map.getSelectedArmy())) {
 			// Right now, information on a tile's unit/s are not displayed if
 			// `unitID` isn't visible. The hiding status of loaded units is

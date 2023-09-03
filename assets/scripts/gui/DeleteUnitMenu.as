@@ -30,7 +30,7 @@ void DeleteUnitMenuHandleInput(const dictionary controls,
 	HandleCommonGameInput(controls, mouseInputs, previousPosition,
         currentPosition);
 	auto unitID = game.map.getUnitOnTile(game.map.getSelectedTile());
-	if (bool(controls["select"]) && unitID > 0 &&
+	if (bool(controls["select"]) && unitID != NO_UNIT &&
 		game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy()) {
         // If the select control is being made by the mouse, and it is not inside
         // the map's graphic, then drop it.

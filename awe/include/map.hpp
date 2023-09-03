@@ -995,11 +995,11 @@ namespace awe {
 
 		/**
 		 * Gets the ID of the unit that a given unit is loaded on, if any.
-		 * If the given unit doesn't exist, then an error will be logged and \c 0
-		 * will be returned.
+		 * If the given unit doesn't exist, then an error will be logged and
+		 * \c awe::NO_UNIT will be returned.
 		 * @param  unit The ID of the unit which should be loaded onto another.
 		 * @return If \c unit is loaded onto another unit, then the latter's ID
-		 *         will be returned. Otherwise, \c 0 will be returned.
+		 *         will be returned. Otherwise, \c awe::NO_UNIT will be returned.
 		 */
 		awe::UnitID getUnitWhichContainsUnit(const awe::UnitID unit) const;
 
@@ -1008,7 +1008,8 @@ namespace awe {
 		 * indirectly.
 		 * Gets the ID of the unit that has a valid position on the map and that
 		 * either directly or indirectly contains the given unit. If the given unit
-		 * is not loaded onto any other unit, then \c 0 will be returned.
+		 * is not loaded onto any other unit, then \c awe::NO_UNIT will be
+		 * returned.
 		 * @param  unit The ID of the unit which should be loaded onto another.
 		 * @return If the given unit is loaded, this method will find the unit it
 		 *         is loaded on, and if that unit is loaded, it will then find the
@@ -1143,11 +1144,12 @@ namespace awe {
 
 		/**
 		 * Retrieves the unit currently occupying a specified tile.
-		 * This method will return 0 if there is a unit on this tile, but it is not
-		 * physically on the map, such as if the unit is loaded onto another unit.
+		 * This method will return \c awe::NO_UNIT if there is a unit on this tile,
+		 * but it is not physically on the map, such as if the unit is loaded onto
+		 * another unit.
 		 * @param  pos The X and Y coordinate of the tile to inspect.
-		 * @return The ID of the unit occupying this tile. \c 0 if the tile is
-		 *         vacant or out of bounds.
+		 * @return The ID of the unit occupying this tile. \c awe::NO_UNIT if the
+		 *         tile is vacant or out of bounds.
 		 */
 		awe::UnitID getUnitOnTile(const sf::Vector2u& pos) const;
 
@@ -1281,9 +1283,10 @@ namespace awe {
 		 * If an invalid unit ID is given, the call won't have any effect, and it
 		 * will be logged.\n
 		 * Note that no rendering effects for available tiles or a selected unit,
-		 * etc., will be employed if the currently selected unit is \c 0.
-		 * @param  unit The ID of the unit to select. If \c 0 is given, all of the
-		 *              selected unit rendering data will be cleared.
+		 * etc., will be employed if the currently selected unit is
+		 * \c awe::NO_UNIT.
+		 * @param  unit The ID of the unit to select. If \c awe::NO_UNIT is given,
+		 *              all of the selected unit rendering data will be cleared.
 		 * @return \c TRUE if the unit was successfully selected, \c FALSE if not.
 		 */
 		bool setSelectedUnit(const awe::UnitID unit);
@@ -1304,17 +1307,17 @@ namespace awe {
 		 * A call to this method will fail if there is only one element in the
 		 * stack.
 		 * @warning This is \em not used to deselect the current unit! To do that,
-		 *          call <tt>setSelectedUnit(0)</tt>.
+		 *          call <tt>setSelectedUnit(awe::NO_UNIT)</tt>.
 		 * @warning If the newly selected unit is no longer present after the pop,
-		 *          then \c setSelectedUnit(0) will be called and a warning will be
-		 *          logged.
+		 *          then \c setSelectedUnit(awe::NO_UNIT) will be called and a
+		 *          warning will be logged.
 		 */
 		void popSelectedUnit();
 
 		/**
 		 * Gets the currently selected unit.
-		 * @return The ID of the currently selected unit. \c 0 if no unit is
-		 *         selected.
+		 * @return The ID of the currently selected unit. \c awe::NO_UNIT if no
+		 *         unit is selected.
 		 */
 		awe::UnitID getSelectedUnit() const;
 
@@ -2288,8 +2291,8 @@ namespace awe {
 
 			/**
 			 * The ID of the unit that is selected.
-			 * \c 0 represents no selected unit and can be used to disable selected
-			 * unit rendering.
+			 * \c awe::NO_UNIT represents no selected unit and can be used to
+			 * disable selected unit rendering.
 			 */
 			awe::UnitID selectedUnit = awe::NO_UNIT;
 

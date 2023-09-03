@@ -17,7 +17,7 @@ void MoveUnitMenuHandleInput(const dictionary controls,
 	HandleCommonGameInput(controls, mouseInputs, previousPosition,
         currentPosition);
 	if (bool(controls["back"])) {
-		game.selectUnit(0);
+		game.selectUnit(NO_UNIT);
 		setGUI("Map");
 		return;
 	} else if (bool(controls["select"])) {
@@ -33,7 +33,7 @@ void MoveUnitMenuHandleInput(const dictionary controls,
 			if (game.map.closedList[i].tile == selectedTile) {
 				const auto unitID = game.map.getSelectedUnit();
 				const auto otherUnit = game.map.getUnitOnTile(selectedTile);
-				if (otherUnit == 0 || otherUnit == unitID ||
+				if (otherUnit == NO_UNIT || otherUnit == unitID ||
 					game.canJoin(otherUnit, unitID) ||
 					game.canLoad(unitID, otherUnit) ||
 					!game.map.isUnitVisible(otherUnit,

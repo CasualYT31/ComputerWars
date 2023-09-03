@@ -140,7 +140,7 @@ void MapHandleInput(const dictionary controls,
 	// the unit on the currently selected tile and display it. Otherwise, allow a
 	// unit to be selected.
 	const auto unitID = game.map.getUnitOnTile(selectedTile);
-	game.showAttackRangeOfUnit(0);
+	game.showAttackRangeOfUnit(NO_UNIT);
 	if (bool(controls["range"])) {
 		game.enableClosedList(false);
 		game.showAttackRangeOfUnit(unitID);
@@ -151,7 +151,7 @@ void MapHandleInput(const dictionary controls,
             !game.map.getMapBoundingBox().contains(currentPosition)) return;
 
 		const auto currentArmy = game.map.getSelectedArmy();
-		if (unitID == 0) {
+		if (unitID == NO_UNIT) {
             if (!game.map.isOutOfBounds(selectedTile)) {
                 ArmyID owner = game.map.getTileOwner(selectedTile);
                 string type = game.map.getTileType(selectedTile).type.scriptName;

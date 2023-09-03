@@ -277,7 +277,8 @@ namespace awe {
 
 		/**
 		 * Identifies which unit this unit is loaded onto.
-		 * @return The ID of the unit this unit is loaded onto. 0 if none.
+		 * @return The ID of the unit this unit is loaded onto. \c awe::NO_UNIT if
+		 *         none.
 		 */
 		inline awe::UnitID loadedOnto() const noexcept {
 			return _loadedOnto;

@@ -179,7 +179,7 @@ void PreviewMoveUnitMenu_Load_MouseReleased() {
         game.map.closedList[game.map.closedList.length() - 1].g
     );
     // Deselect unit and remove unit previews!
-    game.selectUnit(0);
+    game.selectUnit(NO_UNIT);
     game.map.removeAllPreviewUnits();
     setGUI("Map");
 }

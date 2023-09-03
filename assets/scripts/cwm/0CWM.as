@@ -81,13 +81,14 @@ namespace cwm {
 	 * @param  stream   Handle to the binary stream to read from.
 	 * @param  map      Handle to the map object to update.
 	 * @param  tile     The tile to place the read unit onto.
-	 * @param  loadOnto The ID of the unit to load the read unit onto. If \c 0 is
-	 *                  given, the read unit will not be loaded onto any unit.
+	 * @param  loadOnto The ID of the unit to load the read unit onto. If
+     *                  \c NO_UNIT is given, the read unit will not be loaded onto
+     *                  any unit.
      * @throws You are permitted to throw exceptions to signify unrecoverable
      *         errors.
 	 */
 	bool LoadMapUnit(BinaryIStream@ stream, Map@ map, const Vector2&in tile,
-		const UnitID loadOnto = 0) {
+		const UnitID loadOnto = NO_UNIT) {
 		ArmyID unitOwner;
 		stream.read(unitOwner);
 		if (unitOwner == NO_ARMY) {
@@ -96,8 +97,8 @@ namespace cwm {
 			string unitTypeScriptName;
 			stream.read(unitTypeScriptName);
 			const auto unitID = map.createUnit(unitTypeScriptName, unitOwner);
-			if (unitID > 0) {
-				if (loadOnto > 0) {
+			if (unitID != NO_UNIT) {
+				if (loadOnto != NO_UNIT) {
 					map.loadUnit(unitID, loadOnto);
 				} else {
 					map.setUnitPosition(unitID, tile);
@@ -125,7 +126,7 @@ namespace cwm {
 				stream.read(isHiding);
 				map.unitHiding(unitID, isHiding);
 				while (LoadMapUnit(stream, map, tile,
-					((loadOnto > 0) ? (loadOnto) : (unitID))));
+					((loadOnto != NO_UNIT) ? (loadOnto) : (unitID))));
 			} else {
 				throw("read above");
 			}
@@ -299,7 +300,7 @@ namespace cwm {
 				stream.write(map.getTileHP(tilePos));
 				stream.write(map.getTileOwner(tilePos));
 				const auto unitID = map.getUnitOnTile(tilePos);
-				if (unitID > 0) {
+				if (unitID != NO_UNIT) {
 					SaveMapUnit(stream, map, unitID);
 				} else {
 					stream.write(NO_ARMY);

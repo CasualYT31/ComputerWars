@@ -235,7 +235,7 @@ void UnloadUnitsMenuHandleInput(const dictionary controls,
 					// However! If the selected tile has a hidden unit on it, then
 					// prevent the unload of that unit, but force any unloads in
 					// progress to go ahead, and make the base unit wait.
-					if (game.map.getUnitOnTile(selectedTile) > 0) {
+					if (game.map.getUnitOnTile(selectedTile) != NO_UNIT) {
 						game.map.popSelectedUnit();
 						UnloadUnitsMenu_proceed_MouseReleased();
 						return;

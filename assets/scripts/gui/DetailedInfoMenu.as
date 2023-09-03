@@ -255,7 +255,7 @@ void DetailedInfoMenuOpen() {
 	const string unitPanel =
 		"DetailedInfoMenu.baseLayout.unitPanel.unitLayout.details";
 	const auto unitID = game.map.getUnitOnTile(game.map.getSelectedTile());
-	if (unitID > 0 &&
+	if (unitID != NO_UNIT &&
 		game.map.isUnitVisible(unitID, game.map.getSelectedArmy())) {
 		const auto unitType = game.map.getUnitType(unitID);
 		const auto movementType = unitType.movementType;
