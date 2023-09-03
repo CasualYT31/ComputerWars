@@ -887,7 +887,7 @@ void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
 			std::vector<String> newCaptions;
 			for (std::size_t i = 2, len = buttonCaptions.size(); i < len; ++i)
 				newCaptions.emplace_back(_getTranslatedText(widgetName, i));
-			w->renameButtons(newCaptions);
+			w->changeButtons(newCaptions);
 		} else if (type == type::ProgressBar) { // SingleCaption
 			auto w = _findWidget<ProgressBar>(widgetName);
 			w->setText(_getTranslatedText(widgetName));
