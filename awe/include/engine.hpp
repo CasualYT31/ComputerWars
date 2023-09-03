@@ -373,6 +373,11 @@ namespace awe {
 		std::shared_ptr<awe::bank<awe::commander>> _commanders;
 
 		/**
+		 * Pointer to the static information on all the structures available.
+		 */
+		std::shared_ptr<awe::bank<awe::structure>> _structures;
+
+		/**
 		 * Pointer to the map strings to use with all \c map objects.
 		 */
 		std::shared_ptr<awe::map_strings> _mapStrings;

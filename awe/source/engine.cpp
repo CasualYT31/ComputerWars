@@ -433,6 +433,8 @@ bool awe::game_engine::_load(engine::json& j) {
 			engine::logger::data{ _logger.getData().sink, "unit_bank" })
 		&& _loadObject(_commanders, j, { "commanders" }, _scripts, "Commander",
 			engine::logger::data{ _logger.getData().sink, "commander_bank" })
+		&& _loadObject(_structures, j, { "structures" }, _scripts, "Structure",
+			engine::logger::data{ _logger.getData().sink, "structure_bank" })
 		&& _loadObject(_mapStrings, j, { "mapstrings" },
 			engine::logger::data{ _logger.getData().sink, "map_strings" });
 	if (!ret) return false;
@@ -447,9 +449,11 @@ bool awe::game_engine::_load(engine::json& j) {
 		return false;
 	}
 	awe::updateTerrainBank(*_terrains, *_countries);
-	awe::updateTileTypeBank(*_tiles, *_terrains, *_countries);
+	awe::updateTileTypeBank(*_tiles, *_terrains, *_countries, *_structures,
+		_scripts);
 	awe::updateUnitTypeBank(*_units, *_movements, *_terrains, *_weapons,
 		*_countries, _logger.getData().sink);
+	awe::updateStructureBank(*_structures, *_tiles);
 	// Initialise GUIs and the scripts.
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scriptsPath);
@@ -485,6 +489,7 @@ int awe::game_engine::_initCheck() const {
 	if (!_tiles) errstring += "tiles\n";
 	if (!_units) errstring += "units\n";
 	if (!_commanders) errstring += "commanders\n";
+	if (!_structures) errstring += "structures\n";
 	if (!_mapStrings) errstring += "map strings\n";
 	if (!_dictionary) errstring += "dictionary\n";
 	if (!_fonts) errstring += "fonts\n";

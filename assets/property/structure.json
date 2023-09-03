@@ -1,0 +1,46 @@
+{
+  "HQ": {
+    "longname": "HQ_longname",
+    "shortname": "HQ_shortname",
+    "icon": "",
+    "description": "HQ_description",
+    "root": {
+      "tile": "06Ahq",
+      "destroyed": "064city",
+      "deleted": "064city"
+    }
+  },
+  "MISSILESILO": {
+    "longname": "MISSILESILO_longname",
+    "shortname": "MISSILESILO_shortname",
+    "icon": "",
+    "description": "MISSILESILO_description",
+    "root": {
+      "tile": "062missilesilo",
+      "destroyed": "063missilesiloempty"
+    },
+    "paintable": false
+  },
+  "HORIPIPESEAM": {
+    "longname": "PIPESEAM_longname",
+    "shortname": "PIPESEAM_shortname",
+    "icon": "",
+    "description": "PIPESEAM_description",
+    "root": {
+      "tile": "05Epipeseamhori",
+      "destroyed": "060plainseamhori"
+    },
+    "paintable": false
+  },
+  "VERTPIPESEAM": {
+    "longname": "PIPESEAM_longname",
+    "shortname": "PIPESEAM_shortname",
+    "icon": "",
+    "description": "PIPESEAM_description",
+    "root": {
+      "tile": "05Fpipeseamvert",
+      "destroyed": "061plainseamvert"
+    },
+    "paintable": false
+  }
+}

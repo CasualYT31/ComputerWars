@@ -51,6 +51,7 @@ void updateTurnOrderMap(const std::unordered_map<std::string, T>& src,
 //*BANK ID*
 //*********
 const std::string awe::bank_id::EMPTY_STRING = "";
+const sf::Vector2u awe::bank_id::EMPTY_VECTOR = { 0, 0 };
 
 //*******************
 //*COMMON PROPERTIES*
@@ -121,10 +122,30 @@ awe::tile_type::tile_type(const std::string& scriptName, engine::json& j) :
 		j.applyMap(_ownedTiles, { "tiles" });
 		j.resetState();
 	}
+	if (j.keysExist({ "alwayspaintable" }))
+		j.apply(_alwaysPaintable, { "alwayspaintable" }, true);
+}
+awe::tile_type::~tile_type() noexcept {
+	if (_structureScriptNames) _structureScriptNames->Release();
 }
 void awe::tile_type::updateOwnedTilesMap(
 	const awe::bank<awe::country>& countries) const {
 	updateTurnOrderMap(_ownedTiles, _ownedTilesTurnOrder, countries);
+}
+void awe::tile_type::updateStructures(
+	const awe::bank<awe::structure>& structureBank,
+	const std::shared_ptr<engine::scripts>& scripts) const {
+	_structures.clear();
+	if (!_structureScriptNames)
+		_structureScriptNames = scripts->createArray("string");
+	else _structureScriptNames->Resize(0);
+	for (const auto& structure : structureBank) {
+		if (structure.second->containsTileType(getScriptName())) {
+			_structures.push_back(structure.second);
+			std::string scriptName = structure.first;
+			_structureScriptNames->InsertLast(&scriptName);
+		}
+	}
 }
 
 //********
@@ -321,6 +342,72 @@ void awe::unit_type::updateSpriteMaps(
 //*COMMANDER*
 //***********
 
+//***********
+//*STRUCTURE*
+//***********
+awe::structure::structure(const std::string& scriptName, engine::json& j) :
+	common_properties(scriptName, j) {
+	j.apply(_rootTile, { "root", "tile" }, true);
+	if (j.keysExist({ "root", "destroyed" }))
+		j.apply(_rootDestroyedTile, { "root", "destroyed" }, true);
+	if (j.keysExist({ "root", "deleted" }))
+		j.apply(_rootDeletedTile, { "root", "deleted" }, true);
+	if (j.keysExist({ "paintable" }))
+		j.apply(_paintable, { "paintable" }, true);
+	if (j.keysExist({ "destroyediconname" }))
+		j.apply(_destroyedIconName, { "destroyediconname" }, true);
+	if (j.keysExist({ "dependent" })) {
+		const auto& json = j.nlohmannJSON()["dependent"];
+		if (!json.is_array()) return;
+		// Can't have a dependent tile that offsets to the root tile.
+		std::list<sf::Vector2u> offsets = { { 0, 0 } };
+		for (const auto& obj : json) {
+			if (!obj.is_object() || !obj.contains("offset") ||
+				!obj.contains("tile") || !obj["tile"].is_string()) continue;
+			const auto& offsetObj = obj["offset"];
+			if (!offsetObj.is_array() || offsetObj.size() != 2 ||
+				!offsetObj[0].is_number_integer() || offsetObj[0] < 0 ||
+				!offsetObj[1].is_number_integer() || offsetObj[1] < 0) continue;
+			sf::Vector2u offset = { offsetObj[0], offsetObj[1] };
+			if (std::find(offsets.cbegin(), offsets.cend(), offset) !=
+				offsets.cend()) continue;
+			offsets.push_back(offset);
+
+			_dependents.emplace_back(offset, obj["tile"]);
+			if (obj.contains("destroyed") && obj["destroyed"].is_string())
+				_dependents.back().destroyedTile = obj["destroyed"];
+			if (obj.contains("deleted") && obj["deleted"].is_string())
+				_dependents.back().deletedTile = obj["deleted"];
+		}
+	}
+}
+bool awe::structure::containsTileType(const std::string& tileType) const {
+	if (_rootTile == tileType || _rootDestroyedTile == tileType ||
+		_rootDeletedTile == tileType) return true;
+	for (const auto& dependent : _dependents) {
+		if (dependent.tile == tileType || dependent.destroyedTile == tileType ||
+			dependent.deletedTile == tileType) return true;
+	}
+	return false;
+}
+void awe::structure::updateTileTypes(
+	const awe::bank<awe::tile_type>& tileBank) const {
+	_rootTileType = tileBank[_rootTile];
+	if (hasRootDestroyedTileType())
+		_rootDestroyedTileType = tileBank[_rootDestroyedTile];
+	if (hasRootDeletedTileType())
+		_rootDeletedTileType = tileBank[_rootDeletedTile];
+	for (auto& dependent : _dependents) {
+		dependent.tileType = tileBank[dependent.tile];
+		if (dependent.hasDestroyedTileType())
+			dependent.destroyedTileType = tileBank[dependent.destroyedTile];
+		if (dependent.hasDeletedTileType())
+			dependent.deletedTileType = tileBank[dependent.deletedTile];
+	}
+}
+awe::structure::dependent_tile::dependent_tile(const sf::Vector2u& o,
+	const std::string& t) : offset(o), tile(t) {}
+
 //******************
 //*HELPER FUNCTIONS*
 //******************
@@ -334,10 +421,13 @@ void awe::updateTerrainBank(awe::bank<awe::terrain>& terrainBank,
 
 void awe::updateTileTypeBank(awe::bank<awe::tile_type>& tileBank,
 	const awe::bank<awe::terrain>& terrainBank,
-	const awe::bank<awe::country>& countryBank) {
+	const awe::bank<awe::country>& countryBank,
+	const awe::bank<awe::structure>& structureBank,
+	const std::shared_ptr<engine::scripts>& scripts) {
 	for (const auto& tile : tileBank) {
 		tile.second->updateTerrain(terrainBank);
 		tile.second->updateOwnedTilesMap(countryBank);
+		tile.second->updateStructures(structureBank, scripts);
 	}
 }
 
@@ -354,6 +444,12 @@ void awe::updateUnitTypeBank(awe::bank<awe::unit_type>& unitBank,
 		unit.second->updateWeapons(weaponBank, sink);
 		unit.second->updateSpriteMaps(countryBank);
 	}
+}
+
+void awe::updateStructureBank(awe::bank<awe::structure>& structureBank,
+	const awe::bank<awe::tile_type>& tileBank) {
+	for (const auto& structure : structureBank)
+		structure.second->updateTileTypes(tileBank);
 }
 
 bool awe::checkCountryTurnOrderIDs(const awe::bank<awe::country>& countries) {

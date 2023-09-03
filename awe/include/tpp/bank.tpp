@@ -246,6 +246,17 @@ void awe::tile_type::Register(const std::string& type,
 		asMETHOD(T, getNeutralTile), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's tile "
 		"graphic that is displayed on the map.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_alwaysPaintable() const property",
+		asMETHOD(T, alwaysPaintable), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Is this tile type always paintable "
+		"individually in the map maker, even when it forms part of at least one "
+		"structure?");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const array<string>@ const get_structures() const property",
+		asMETHOD(T, structureScriptNames), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns a handle to an array that holds "
+		"script names of structures that this tile type belongs to.");
 }
 
 template<typename T>
@@ -443,4 +454,89 @@ void awe::commander::Register(const std::string& type,
 		asMETHOD(T, getPortrait), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of the portrait of "
 		"this CO.");
+}
+
+template<typename T>
+void awe::structure::Register(const std::string& type,
+	asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) {
+	awe::common_properties::Register<T>(type, engine, document,
+		"For structures, this holds the sprite ID of the pictorial representation "
+		"of the structure, for use in GUIs.");
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_rootTileType() const property",
+		asMETHOD(T, getRootTileTypeScriptName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the tile type that the root tile of "
+		"the structure should be when in a normal state.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasRootDestroyedTileType() const property",
+		asMETHOD(T, hasRootDestroyedTileType), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Does this structure's root tile turn into "
+		"a different type when the structure is destroyed?");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_rootDestroyedTileType() const property",
+		asMETHOD(T, getRootDestroyedTileTypeScriptName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the tile type that the root tile of "
+		"the structure should be when in a destroyed state.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasRootDeletedTileType() const property",
+		asMETHOD(T, hasRootDeletedTileType), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Does this structure's root tile turn into "
+		"a different type when the structure is deleted?");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_rootDeletedTileType() const property",
+		asMETHOD(T, getRootDeletedTileTypeScriptName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the tile type that the root tile of "
+		"the structure should turn into when the structure is deleted.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"uint64 get_dependentTileCount() const property",
+		asMETHOD(T, getDependentTileCount), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the number of dependent tiles this "
+		"structure has.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const Vector2& get_dependentTileOffset() const property",
+		asMETHOD(T, getDependentTileOffset), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the offset from the root tile that "
+		"this dependent tile has.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_dependentTileType(const uint64) const property",
+		asMETHOD(T, getDependentTileTypeScriptName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the tile type that the specified "
+		"dependent tile of the structure should be when in a normal state.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasRootDestroyedTileType(const uint64) const property",
+		asMETHOD(T, hasDependentDestroyedTileType), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Does this structure's specified dependent "
+		"tile turn into a different type when the structure is destroyed?");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_rootDestroyedTileType(const uint64) const property",
+		asMETHOD(T, getDependentDestroyedTileTypeScriptName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the tile type that the specified "
+		"dependent tile of the structure should be when in a destroyed state.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasRootDeletedTileType(const uint64) const property",
+		asMETHOD(T, hasDependentDeletedTileType), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Does this structure's specified dependent "
+		"tile turn into a different type when the structure is deleted?");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_rootDeletedTileType(const uint64) const property",
+		asMETHOD(T, getDependentDeletedTileTypeScriptName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the tile type that the specified "
+		"dependent tile of the structure should turn into when the structure is "
+		"deleted.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_isPaintable() const property",
+		asMETHOD(T, isPaintable), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Can this structure be painted all at once, "
+		"as a set of tiles, in the map maker?");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_destroyedIconName() const property",
+		asMETHOD(T, destroyedIconName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "The key of the sprite representing a "
+		"destroyed version of this structure.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool containsTileType(const string&in) const",
+		asMETHOD(T, containsTileType), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Does the given tile type appear at least "
+		"once in this structure?");
 }

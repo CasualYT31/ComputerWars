@@ -102,13 +102,14 @@
 	"05Bpipecornerdownleft": {"type": "PIPE", "neutral": "pipecornerdownleft"},
 	"05Cpipecornerupleft": {"type": "PIPE", "neutral": "pipecornerupleft"},
 	"05Dpipecornerupright": {"type": "PIPE", "neutral": "pipecornerupright"},
-	"05Epipeseamhori": {"type": "PIPESEAM", "neutral": "pipeseamhori"},
-	"05Fpipeseamvert": {"type": "PIPESEAM", "neutral": "pipeseamvert"},
-	"060plainseamhori": {"type": "PLAINS", "neutral": "plainseamhori"},
-	"061plainseamvert": {"type": "PLAINS", "neutral": "plainseamvert"},
 	
-	"062missilesilo": {"type": "MISSILESILO", "neutral": "missilesilo"},
-	"063missilesiloempty": {"type": "MISSILESILO", "neutral": "missilesiloempty"},
+	"05Epipeseamhori": {"type": "PIPESEAM", "neutral": "pipeseamhori", "alwayspaintable": true},
+	"05Fpipeseamvert": {"type": "PIPESEAM", "neutral": "pipeseamvert", "alwayspaintable": true},
+	"060plainseamhori": {"type": "PLAINS", "neutral": "plainseamhori", "alwayspaintable": true},
+	"061plainseamvert": {"type": "PLAINS", "neutral": "plainseamvert", "alwayspaintable": true},
+	
+	"062missilesilo": {"type": "MISSILESILO", "neutral": "missilesilo", "alwayspaintable": true},
+	"063missilesiloempty": {"type": "MISSILESILO", "neutral": "missilesiloempty", "alwayspaintable": true},
 
 	"064city": {
 		"type": "CITY",

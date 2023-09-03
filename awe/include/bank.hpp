@@ -329,6 +329,14 @@ namespace awe {
 		 * but honestly none of my code has been up to this point so I don't care.
 		 */
 		static const std::string EMPTY_STRING;
+
+		/**
+		 * Used by subclasses to return an empty Vector2 when attempting to
+		 * retrieve a Vector2 property that doesn't exist.
+		 * Should be initialised to <tt>(0, 0)</tt>.
+		 * @sa \c EMPTY_STRING.
+		 */
+		static const sf::Vector2u EMPTY_VECTOR;
 	private:
 		/**
 		 * The script name/identifier of this bank entry.
@@ -783,6 +791,8 @@ namespace awe {
 		mutable std::unordered_map<awe::ArmyID, std::string> _picturesTurnOrder;
 	};
 
+	class structure;
+
 	/**
 	 * A game property class which stores the information associated with a single
 	 * type of tile.
@@ -812,6 +822,11 @@ namespace awe {
 		 *                   properties.
 		 */
 		tile_type(const std::string& scriptName, engine::json& j);
+
+		/**
+		 * Releases the structure script name array held by \c tile_type.
+		 */
+		~tile_type() noexcept;
 
 		/**
 		 * Registers \c tile_type with a given type.
@@ -891,6 +906,36 @@ namespace awe {
 		}
 
 		/**
+		 * Is this tile type always paintable via the Tiles tab in the map maker,
+		 * even if it is a tile used in a structure?
+		 * @return \c TRUE if the tile type is always paintable individually,
+		 *         \c FALSE if not (default).
+		 */
+		inline bool alwaysPaintable() const noexcept {
+			return _alwaysPaintable;
+		}
+
+		/**
+		 * Which structures is this tile type a member of?
+		 * @return List of structures this tile type is a member of, either as the
+		 *         root or as a dependent.
+		 */
+		inline const std::vector<std::shared_ptr<const awe::structure>>&
+			structures() const noexcept {
+			return _structures;
+		}
+
+		/**
+		 * Which structures is this tile type a member of?
+		 * @return Array of script names of structures this tile type is a member
+		 *         of.
+		 */
+		inline const CScriptArray* const structureScriptNames() const noexcept {
+			if (_structureScriptNames) _structureScriptNames->AddRef();
+			return _structureScriptNames;
+		}
+
+		/**
 		 * Updates the stored terrain type properties pointer.
 		 * @param  terrainBank A reference to the terrain bank to pull the pointer
 		 *         from.
@@ -909,6 +954,18 @@ namespace awe {
 		 * @safety Basic guarantee.
 		 */
 		void updateOwnedTilesMap(const awe::bank<awe::country>& countries) const;
+
+		/**
+		 * Updates \c _structures with a list of structures that this type type is
+		 * included in.
+		 * @param structureBank Pointer to the structure bank to pull information
+		 *                      from.
+		 * @param scripts       The scripts engine used to allocate the script name
+		 *                      array.
+		 */
+		void updateStructures(
+			const awe::bank<awe::structure>& structureBank,
+			const std::shared_ptr<engine::scripts>& scripts) const;
 	private:
 		/**
 		 * Script interface version of \c getType().
@@ -945,6 +1002,22 @@ namespace awe {
 		 * The sprite name of the tile with no owner.
 		 */
 		std::string _neutralTile;
+
+		/**
+		 * If \c TRUE, the tile is always paintable individually, even if it forms
+		 * part of at least one structure.
+		 */
+		bool _alwaysPaintable = false;
+
+		/**
+		 * List of structures this tile is a member of.
+		 */
+		mutable std::vector<std::shared_ptr<const awe::structure>> _structures;
+
+		/**
+		 * List of script names of structures this tile is a member of.
+		 */
+		mutable CScriptArray* _structureScriptNames = nullptr;
 	};
 
 	class unit_type;
@@ -1807,6 +1880,508 @@ namespace awe {
 	};
 
 	/**
+	 * A game property class which stores the information associated with a single
+	 * structure.
+	 * A structure is made up of a single root tile and several optional dependent
+	 * tiles. The root tile represents the structure as far as the game engine is
+	 * concerned. The root tile is assigned an owner, and a structure can perform
+	 * different tasks at the beginning of its owner's turn, like properties (but
+	 * before properties). For example, a Black Cannon's root tile would be
+	 * assigned to the Black Hole army on the map, so that at the beginning of
+	 * Black Hole's turn, the cannon can fire. A volcano's root tile could be
+	 * assigned to Orange Star, so that at the beginning of every turn (except the
+	 * first one), it will erupt. A HQ, which has no dependent tiles, can be
+	 * assigned to each army, and will heal units and award funds like a city. For
+	 * some structures, assigning the root to the correct tile is important. For
+	 * example, a Big Cannon structure might fire at units within a certain range
+	 * of its root tile, which is assigned to be the weak point of the cannon. For
+	 * other structures, the root tile can be any tile of the structure and it
+	 * would make no functional difference. For example, the volcano's root tile
+	 * could be any of its tiles, but it will still need a root tile in order to
+	 * know when to erupt.\n
+	 * Destroying a structure will mean transforming all of its tiles into
+	 * different types, and removing ownership of the root tile, to prevent
+	 * carrying out the structure's tasks every turn. Deleting a structure only
+	 * occurs in the map maker, when one of the structure's tiles is painted on,
+	 * the whole structure should transform to the deleted tile types (which can be
+	 * plains, for example) so as not to leave a structure partially constructed.
+	 * There is no technical reason why a structure should have all of its
+	 * dependent tiles in the correct state: dependent tiles are only useful in the
+	 * map maker, so that it knows what tiles to paint where when placing a
+	 * structure. Dependent tiles are only useful gameplay-wise when destroying a
+	 * structure, and even then they do not provide any game logic, they are only
+	 * there for the graphics).\n
+	 */
+	class structure : public awe::common_properties {
+	public:
+		/**
+		 * Constructor which scans a JSON object for the structure's properties.
+		 * It also passes on the JSON object to the \c common_properties
+		 * constructor. In addition to the keys defined in the superclass, the
+		 * following keys are are to be/can be defined:
+		 * <ul><li>\c "root", <b>mandatory</b>, <tt>(object)</tt></li>
+		 *     <li>\c "dependent", <em>optional</em>, <tt>([object, ...])</tt></li>
+		 *     <li>\c "paintable" = \c _paintable, <em>optional</em>,
+		 *         <tt>(bool)</tt></li>
+		 *     <li>\c "destroyediconname" = \c _destroyedIconName,
+		 *         <em>optional</em>, <tt>(string)</tt></li></ul>
+		 *
+		 * The \c "root" object is made up of the following keys:
+		 * <ul><li>\c "tile" = \c _rootTile, <em>mandatory</em>, <tt>
+		 *         (TILE_TYPE_SCRIPT_NAME: string)</tt></li>
+		 *     <li>\c "destroyed" = \c _rootDestroyedTile, <em>optional</em>, <tt>
+		 *         (TILE_TYPE_SCRIPT_NAME: string)</tt></li>
+		 *         \c "deleted" = \c _rootDeletedTile, <em>optional</em>, <tt>
+		 *         (TILE_TYPE_SCRIPT_NAME: string)</tt></li></ul>
+		 *
+		 * Each \c "dependent" object is made up of the following keys:
+		 * <ul><li>\c "tile" = \c dependent_tile::tile, <em>mandatory</em>, <tt>
+		 *         (TILE_TYPE_SCRIPT_NAME: string)</tt></li>
+		 *     <li>\c "offset" = \c dependent_tile::offset, <em>mandatory</em>,
+		 *         <tt>([unsigned 32-bit int, unsigned 32-bit int])</tt>)
+		 *     <li>\c "destroyed" = \c dependent_tile::destroyedTile, <em>optional
+		 *         </em>, <tt>(TILE_TYPE_SCRIPT_NAME: string)</tt></li>
+		 *         \c "deleted" = \c dependent_tile::deletedTile, <em>optional
+		 *         </em>, <tt>(TILE_TYPE_SCRIPT_NAME: string)</tt></li></ul>
+		 *
+		 * Each dependent tile must have a unique offset! If a second dependent
+		 * tile is given with the same offset as one previous, the second tile will
+		 * be dropped! That offset must also not be <tt>[0, 0]</tt>, since that
+		 * represents the root tile.
+		 * @param scriptName The identifier of this bank entry that is to be used
+		 *                   within game scripts.
+		 * @param j          The object value containing the structure's
+		 *                   properties.
+		 */
+		structure(const std::string& scriptName, engine::json& j);
+
+		/**
+		 * Registers \c structure with a given type.
+		 * @tparam T        The type that is being registered, that inherits from
+		 *                  \c structure in some way.
+		 * @param  type     Name of the type to add the properties to.
+		 * @param  engine   Pointer to the AngelScript script engine to register
+		 *                  with.
+		 * @param  document Pointer to the AngelScript documentation generator to
+		 *                  register script interface documentation with.
+		 * @safety No guarantee.
+		 */
+		template<typename T>
+		static void Register(const std::string& type,
+			asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		/**
+		 * The tile type to be assigned to the root tile of the structure.
+		 * @return The script name of the root tile's type.
+		 */
+		inline const std::string& getRootTileTypeScriptName() const noexcept {
+			return _rootTile;
+		}
+
+		/**
+		 * The tile type to be assigned to the root tile of the structure.
+		 * @return Pointer to the root tile's type.
+		 * @sa     \c updateTileTypes().
+		 */
+		inline std::shared_ptr<const awe::tile_type>
+			getRootTileType() const noexcept {
+			return _rootTileType;
+		}
+
+		/**
+		 * Does the root tile have a destroyed tile type?
+		 * @return \c TRUE if yes, \c FALSE if not.
+		 */
+		inline bool hasRootDestroyedTileType() const noexcept {
+			return !_rootDestroyedTile.empty();
+		}
+
+		/**
+		 * The tile type to be assigned to the root tile of the structure when the
+		 * structure is destroyed.
+		 * If one was not given for this structure, the script name of the normal
+		 * root tile type is returned.
+		 * @return The script name of the destroyed root tile's type.
+		 */
+		inline const std::string&
+			getRootDestroyedTileTypeScriptName() const noexcept {
+			return hasRootDestroyedTileType() ? _rootDestroyedTile :
+				getRootTileTypeScriptName();
+		}
+
+		/**
+		 * The tile type to be assigned to the root tile of the structure when the
+		 * structure is destroyed.
+		 * If one was not given for this structure, the pointer to the normal root
+		 * tile type is returned.
+		 * @return Pointer to the destroyed root tile's type.
+		 * @sa     \c updateTileTypes().
+		 */
+		inline std::shared_ptr<const awe::tile_type>
+			getRootDestroyedTileType() const {
+			return hasRootDestroyedTileType() ? _rootDestroyedTileType :
+				getRootTileType();
+		}
+
+		/**
+		 * Does the root tile have a deleted tile type?
+		 * @return \c TRUE if yes, \c FALSE if not.
+		 */
+		inline bool hasRootDeletedTileType() const noexcept {
+			return !_rootDeletedTile.empty();
+		}
+
+		/**
+		 * The tile type to be assigned to the root tile of the structure when the
+		 * structure is deleted.
+		 * If one was not given for this structure, the script name of the normal
+		 * root tile type is returned.
+		 * @return The script name of the root tile's type when the root tile is
+		 *         deleted.
+		 */
+		inline const std::string&
+			getRootDeletedTileTypeScriptName() const noexcept {
+			return hasRootDeletedTileType() ? _rootDeletedTile :
+				getRootTileTypeScriptName();
+		}
+
+		/**
+		 * The tile type to be assigned to the root tile of the structure when the
+		 * structure is deleted.
+		 * If one was not given for this structure, the pointer to the normal root
+		 * tile type is returned.
+		 * @return Pointer to the root tile's type when the root tile is deleted.
+		 * @sa     \c updateTileTypes().
+		 */
+		inline std::shared_ptr<const awe::tile_type>
+			getRootDeletedTileType() const {
+			return hasRootDeletedTileType() ? _rootDeletedTileType :
+				getRootTileType();
+		}
+
+		/**
+		 * Retrieves the number of dependent tiles this structure is to have.
+		 * @return The number of dependent tiles.
+		 */
+		inline std::size_t getDependentTileCount() const noexcept {
+			return _dependents.size();
+		}
+
+		/**
+		 * Retrieves the offset to be applied to the specified dependent tile.
+		 * @param  index The 0-based index of the dependent tile.
+		 * @return The offset in tiles. <tt>(0, 0)</tt> if the given index was out
+		 *         of bounds.
+		 */
+		inline const sf::Vector2u& getDependentTileOffset(
+			const std::size_t index) const noexcept {
+			return index >= getDependentTileCount() ? EMPTY_VECTOR :
+				_dependents[index].offset;
+		}
+
+		/**
+		 * The tile type to be assigned to the specified dependent tile of the
+		 * structure.
+		 * @warning Returns the equivalent root tile type if an out-of-bounds
+		 *          index is given!
+		 * @param   index The 0-based index of the dependent tile.
+		 * @return  The script name of the root tile's type.
+		 */
+		inline const std::string& getDependentTileTypeScriptName(
+			const std::size_t index) const noexcept {
+			return index >= getDependentTileCount() ? getRootTileTypeScriptName() :
+				_dependents[index].tile;
+		}
+
+		/**
+		 * The tile type to be assigned to the specified dependent tile of the
+		 * structure.
+		 * @warning Returns the equivalent root tile type if an out-of-bounds
+		 *          index is given!
+		 * @param   index The 0-based index of the dependent tile.
+		 * @return  Pointer to the root tile's type.
+		 * @sa      \c updateTileTypes().
+		 */
+		inline std::shared_ptr<const awe::tile_type> getDependentTileType(
+			const std::size_t index) const {
+			return index >= getDependentTileCount() ? getRootTileType() :
+				_dependents[index].tileType;
+		}
+
+		/**
+		 * Does the specified dependent tile have a destroyed tile type?
+		 * @param  index The 0-based index of the dependent tile.
+		 * @return \c TRUE if yes, \c FALSE if not.
+		 */
+		inline bool hasDependentDestroyedTileType(
+			const std::size_t index) const noexcept {
+			return index >= getDependentTileCount() ? false :
+				_dependents[index].hasDestroyedTileType();
+		}
+
+		/**
+		 * The tile type to be assigned to the specified dependent tile of the
+		 * structure when the structure is destroyed.
+		 * If one was not given for this structure, the script name of the normal
+		 * specified dependent tile type is returned.
+		 * @warning Returns the equivalent root tile type if an out-of-bounds
+		 *          index is given!
+		 * @param   index The 0-based index of the dependent tile.
+		 * @return  The script name of the destroyed specified dependent tile's
+		 *          type.
+		 */
+		inline const std::string& getDependentDestroyedTileTypeScriptName(
+			const std::size_t index) const noexcept {
+			return index >= getDependentTileCount() ?
+				getRootDestroyedTileTypeScriptName() : (
+					hasDependentDestroyedTileType(index) ?
+					_dependents[index].destroyedTile :
+					getDependentTileTypeScriptName(index)
+				);
+		}
+
+		/**
+		 * The tile type to be assigned to the specified dependent tile of the
+		 * structure when the structure is destroyed.
+		 * If one was not given for this structure, the pointer to the normal
+		 * specified dependent tile type is returned.
+		 * @warning Returns the equivalent root tile type if an out-of-bounds
+		 *          index is given!
+		 * @param   index The 0-based index of the dependent tile.
+		 * @return  Pointer to the destroyed specified dependent tile's type.
+		 * @sa      \c updateTileTypes().
+		 */
+		inline std::shared_ptr<const awe::tile_type> getDependentDestroyedTileType(
+			const std::size_t index) const {
+			return index >= getDependentTileCount() ?
+				getRootDestroyedTileType() : (
+					hasDependentDestroyedTileType(index) ?
+					_dependents[index].destroyedTileType :
+					getDependentTileType(index)
+				);
+		}
+
+		/**
+		 * Does the specified dependent tile have a deleted tile type?
+		 * @param  index The 0-based index of the dependent tile.
+		 * @return \c TRUE if yes, \c FALSE if not.
+		 */
+		inline bool hasDependentDeletedTileType(
+			const std::size_t index) const noexcept {
+			return index >= getDependentTileCount() ? false :
+				_dependents[index].hasDeletedTileType();
+		}
+
+		/**
+		 * The tile type to be assigned to the specified dependent tile of the
+		 * structure when the structure is deleted.
+		 * If one was not given for this structure, the script name of the normal
+		 * specified dependent tile type is returned.
+		 * @warning Returns the equivalent root tile type if an out-of-bounds
+		 *          index is given!
+		 * @param   index The 0-based index of the dependent tile.
+		 * @return  The script name of the dependent tile's type when the specified
+		 *          dependent tile is deleted.
+		 */
+		inline const std::string& getDependentDeletedTileTypeScriptName(
+			const std::size_t index) const noexcept {
+			return index >= getDependentTileCount() ?
+				getRootDeletedTileTypeScriptName() : (
+					hasDependentDeletedTileType(index) ?
+					_dependents[index].deletedTile :
+					getDependentTileTypeScriptName(index)
+				);
+		}
+
+		/**
+		 * The tile type to be assigned to the specified dependent tile of the
+		 * structure when the structure is deleted.
+		 * If one was not given for this structure, the pointer to the normal
+		 * specified dependent tile type is returned.
+		 * @warning Returns the equivalent root tile type if an out-of-bounds
+		 *          index is given!
+		 * @param   index The 0-based index of the dependent tile.
+		 * @return  Pointer to the dependent tile's type when the specified
+		 *          dependent tile is deleted.
+		 * @sa      \c updateTileTypes().
+		 */
+		inline std::shared_ptr<const awe::tile_type> getDependentDeletedTileType(
+			const std::size_t index) const {
+			return index >= getDependentTileCount() ?
+				getRootDeletedTileType() : (
+					hasDependentDeletedTileType(index) ?
+					_dependents[index].deletedTileType :
+					getDependentTileType(index)
+				);
+		}
+
+		/**
+		 * Is this structure paintable as an entire structure?
+		 * @return \c TRUE if all of a structure's tiles can be painted at once in
+		 *         the map maker, \c FALSE if not.
+		 */
+		inline bool isPaintable() const noexcept {
+			return _paintable;
+		}
+
+		/**
+		 * The sprite key of the icon representing a destroyed version of this
+		 * structure.
+		 * @return The key of the sprite used to represented this structure when
+		 *         it's destroyed.
+		 */
+		inline const std::string& destroyedIconName() const noexcept {
+			return _destroyedIconName;
+		}
+
+		/**
+		 * Founds out if a given tile type is within this structure.
+		 * @param  tileType Script name of the tile type to search for.
+		 * @return \c TRUE if the tile type was found at least once, as the root
+		 *         tile, and/or as a dependent tile.
+		 */
+		bool containsTileType(const std::string& tileType) const;
+
+		/**
+		 * Retrieves pointers to all the tile types from a given bank, referenced
+		 * in this object.
+		 * If any destroyed or deleted tile type script names aren't set (since
+		 * they are optional), then the pointers will not be assigned.
+		 * @param tileBank A reference to the tile types bank to pull information
+		 *                 from.
+		 */
+		void updateTileTypes(const awe::bank<awe::tile_type>& tileBank) const;
+	private:
+		/**
+		 * The type of tile that is used to represent the root of the structure.
+		 */
+		std::string _rootTile;
+
+		/**
+		 * \c _rootTile but it holds a pointer to the \c tile_type object.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateTileTypes().
+		 */
+		mutable std::shared_ptr<const awe::tile_type> _rootTileType;
+
+		/**
+		 * The type of tile that is used to represent the root of the structure
+		 * when the structure is destroyed.
+		 */
+		std::string _rootDestroyedTile;
+
+		/**
+		 * \c _rootDestroyedTile but it holds a pointer to the \c tile_type object.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateTileTypes().
+		 */
+		mutable std::shared_ptr<const awe::tile_type> _rootDestroyedTileType;
+
+		/**
+		 * The type of tile that replaces the root tile's type when the root tile
+		 * is deleted in the map maker.
+		 */
+		std::string _rootDeletedTile;
+
+		/**
+		 * \c _rootDeletedTile but it holds a pointer to the \c tile_type object.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateTileTypes().
+		 */
+		mutable std::shared_ptr<const awe::tile_type> _rootDeletedTileType;
+
+		/**
+		 * Holds information on a dependent tile.
+		 */
+		struct dependent_tile {
+			/**
+			 * Initialises this \c dependent_tile with mandatory information.
+			 * @param o The offset.
+			 * @param t The script name of the normal tile type.
+			 */
+			dependent_tile(const sf::Vector2u& o, const std::string& t);
+
+			/**
+			 * Does this dependent tile have a destroyed tile type?
+			 * @return \c TRUE if yes, \c FALSE otherwise.
+			 */
+			inline bool hasDestroyedTileType() const noexcept {
+				return !destroyedTile.empty();
+			}
+
+			/**
+			 * Does this dependent tile have a deleted tile type?
+			 * @return \c TRUE if yes, \c FALSE otherwise.
+			 */
+			inline bool hasDeletedTileType() const noexcept {
+				return !deletedTile.empty();
+			}
+
+			/**
+			 * Defines where the dependent tile should be on the map in relation to
+			 * the root tile.
+			 * Must be unique on a per structure basis!
+			 */
+			sf::Vector2u offset;
+
+			/**
+			 * The type of tile that is used to represent this dependent tile of
+			 * the structure.
+			 */
+			std::string tile;
+
+			/**
+			 * \c tile but it holds a pointer to the \c tile_type object.
+			 */
+			std::shared_ptr<const awe::tile_type> tileType;
+
+			/**
+			 * The type of tile that is used to represent this dependent tile of a
+			 * destroyed structure.
+			 */
+			std::string destroyedTile;
+
+			/**
+			 * \c destroyedTile but it holds a pointer to the \c tile_type object.
+			 */
+			std::shared_ptr<const awe::tile_type> destroyedTileType;
+
+			/**
+			 * When the structure is deleted in the map maker, replace this
+			 * dependent tile's type with this tile type.
+			 */
+			std::string deletedTile;
+
+			/**
+			 * \c deletedTile but it holds a pointer to the \c tile_type object.
+			 */
+			std::shared_ptr<const awe::tile_type> deletedTileType;
+		};
+
+		/**
+		 * Stores information on each dependent tile, keyed on its offset.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateTileTypes().
+		 */
+		mutable std::vector<dependent_tile> _dependents;
+
+		/**
+		 * Can this structure be painted as a whole in the map maker?
+		 * If this is set to \c FALSE, the structure can still technically be
+		 * painted, but it will have to be painted a tile at a time, and it won't
+		 * show up in the Structures tab of the palette.
+		 */
+		bool _paintable = true;
+
+		/**
+		 * The sprite key of the GUI icon that is to be displayed when representing
+		 * a destroyed version of this structure.
+		 */
+		std::string _destroyedIconName;
+	};
+
+	/**
 	 * Calls \c terrain::updatePictureMap() on an entire bank of \c terrain
 	 * objects.
 	 * @param  terrainBank The \c terrain bank to update.
@@ -1819,14 +2394,17 @@ namespace awe {
 	/**
 	 * Calls \c tile_type::updateTerrain() and \c tile_type::updateOwnedTilesMap()
 	 * on an entire bank of \c tile_type objects.
-	 * @param  tileBank    The \c tile_type bank to update.
-	 * @param  terrainBank The \c terrian bank to pull the pointers from.
-	 * @param  countryBank The \c country bank to pull the turn order IDs from.
-	 * @safety Basic guarantee.
+	 * @param tileBank      The \c tile_type bank to update.
+	 * @param terrainBank   The \c terrian bank to pull the pointers from.
+	 * @param countryBank   The \c country bank to pull the turn order IDs from.
+	 * @param structureBank The \c structure bank to search through.
+	 * @param scripts       The \c scripts engine used to create script arrays.
 	 */
 	void updateTileTypeBank(awe::bank<awe::tile_type>& tileBank,
 		const awe::bank<awe::terrain>& terrainBank,
-		const awe::bank<awe::country>& countryBank);
+		const awe::bank<awe::country>& countryBank,
+		const awe::bank<awe::structure>& structureBank,
+		const std::shared_ptr<engine::scripts>& scripts);
 
 	/**
 	 * Calls \c unit_type::updateMovementType(), \c unit_type::updateUnitTypes(),
@@ -1848,6 +2426,15 @@ namespace awe {
 		const awe::bank<awe::weapon>& weaponBank,
 		const awe::bank<awe::country>& countryBank,
 		const std::shared_ptr<engine::sink>& sink);
+
+	/**
+	 * Calls \c structure::updateTileTypes() on an entire bank of \c structure
+	 * objects.
+	 * @param structureBank The \c structure bank to update.
+	 * @param tileBank      The \c tile_type bank to pull the pointers from.
+	 */
+	void updateStructureBank(awe::bank<awe::structure>& structureBank,
+		const awe::bank<awe::tile_type>& tileBank);
 
 	/**
 	 * Checks an entire bank of countries to ensure each country's turn order ID is
