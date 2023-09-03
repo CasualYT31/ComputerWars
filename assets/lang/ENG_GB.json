@@ -32,7 +32,12 @@
 	"undo": "Undo",
 	"redo": "Redo",
 	"file": "File",
+	"code": "Code",
+	"build": "Build",
+	"test": "Build and Test (TBD)",
 	"new": "New",
+	"rename": "Rename",
+	"setfontsize": "Set Font Size",
 	"map": "Map",
 	"fill": "Fill",
 	"scripts": "Scripts",
@@ -43,6 +48,8 @@
 	"unitdialog": "Units",
 	"unitsheader": "Units",
 	"objectdialog": "Palette Window",
+	"enterscriptname": "Enter Script Name",
+	"enterscriptnameex": "Please enter a non-blank, unique name for the script.\nIt cannot contain dots or spaces!",
 	"ok": "OK",
 	"owner": "Owner",
 	"view": "View",
@@ -70,6 +77,7 @@
 	"createarmy": "Create Army",
 	"zoom": "#x Zoom",
 	"caret": "Ln #, Col #",
+	"success": "Success",
 
 	"hp": "HP",
 	"fuel": "Fuel",
@@ -115,6 +123,8 @@
 
 	"mementowindow": "Undo/Redo Window",
 
+	"deletescriptconfirmation": "Are you sure you want to delete the script \"#\"?",
+
 	"OPERATION_loadmap": "Load Map",
 	"OPERATION_mapname": "Set Map Name",
 	"OPERATION_mapsize": "Set Map Size",
@@ -147,6 +157,7 @@
 	"OPERATION_addscript": "Add Script",
 	"OPERATION_updatescript": "Update Script",
 	"OPERATION_removescript": "Remove Script",
+	"OPERATION_renamescript": "Rename Script",
 
 	"OPERATION_mapprops": "Update Map's Name and/or Day",
 	"OPERATION_tiletypeandowner": "Set Tile's Type and/or Owner",

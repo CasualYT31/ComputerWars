@@ -279,6 +279,32 @@ void sfx::gui::_registerConstants(asIScriptEngine* const engine,
 		"Used with directional flow functions to represent \"going to the widget "
 		"that was previously selected using directional flow.\"");
 
+	r = engine->RegisterGlobalProperty("const string VALIDATOR_ALL",
+		&VALIDATOR_ALL);
+	document->DocumentExpectedFunction("const string VALIDATOR_ALL",
+		"<tt>EditBox</tt> validator that accepts any character.");
+
+	r = engine->RegisterGlobalProperty("const string VALIDATOR_INT",
+		&VALIDATOR_INT);
+	document->DocumentExpectedFunction("const string VALIDATOR_INT",
+		"<tt>EditBox</tt> validator that accepts signed or unsigned integers.");
+
+	r = engine->RegisterGlobalProperty("const string VALIDATOR_UINT",
+		&VALIDATOR_UINT);
+	document->DocumentExpectedFunction("const string VALIDATOR_UINT",
+		"<tt>EditBox</tt> validator that accepts only unsigned integers.");
+
+	r = engine->RegisterGlobalProperty("const string VALIDATOR_FLOAT",
+		&VALIDATOR_FLOAT);
+	document->DocumentExpectedFunction("const string VALIDATOR_FLOAT",
+		"<tt>EditBox</tt> validator that accepts floating point numbers.");
+
+	r = engine->RegisterGlobalProperty("const string VALIDATOR_TAB_NAME",
+		&VALIDATOR_TAB_NAME);
+	document->DocumentExpectedFunction("const string VALIDATOR_TAB_NAME",
+		"<tt>EditBox</tt> validator that excludes illegal characters from strings "
+		"that are intended to be used to label a <tt>TabContainer</tt>'s tab.");
+
 	REGISTER_WIDGET_TYPE_NAME(engine, document, BitmapButton);
 	REGISTER_WIDGET_TYPE_NAME(engine, document, ListBox);
 	REGISTER_WIDGET_TYPE_NAME(engine, document, VerticalLayout);
@@ -303,6 +329,7 @@ void sfx::gui::_registerConstants(asIScriptEngine* const engine,
 	REGISTER_WIDGET_TYPE_NAME(engine, document, RadioButton);
 	REGISTER_WIDGET_TYPE_NAME(engine, document, TabContainer);
 	REGISTER_WIDGET_TYPE_NAME(engine, document, TextArea);
+	REGISTER_WIDGET_TYPE_NAME(engine, document, SpinControl);
 }
 
 void sfx::gui::_registerNonWidgetGlobalFunctions(asIScriptEngine* const engine,
@@ -649,11 +676,12 @@ void sfx::gui::_registerEditBoxGlobalFunctions(asIScriptEngine* const engine,
 		"<tt>TextArea</tt>'s text.");
 
 	r = engine->RegisterGlobalFunction(
-		"void onlyAcceptUIntsInEditBox(const string&in)",
-		asMETHOD(sfx::gui, _onlyAcceptUIntsInEditBox),
+		"void setEditBoxRegexValidator(const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setEditBoxRegexValidator),
 		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Configures an <tt>EditBox</tt> to only "
-		"accept unsigned integers.");
+	document->DocumentGlobalFunction(r, "Configures an <tt>EditBox</tt> to "
+		"validate its input using a regex expression. If the text within an "
+		"<tt>EditBox</tt> does not match the regex, it will be rejected.");
 
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetDefaultText(const string&in, const string&in, "
@@ -681,6 +709,15 @@ void sfx::gui::_registerEditBoxGlobalFunctions(asIScriptEngine* const engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Enables or disables monospace font "
 		"optimisations for a given <tt>TextArea</tt>. By default it is off.");
+
+	r = engine->RegisterGlobalFunction(
+		"void getCaretLineAndColumn(const string&in, uint64&out, uint64&out)",
+		asMETHOD(sfx::gui, _getCaretLineAndColumn),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Retrieves the caret's 1-based position "
+		"within a <tt>TextArea</tt> or <tt>EditBox</tt>. <tt>EditBox</tt> will "
+		"always have a line number of <tt>1</tt>. If an error occurred, neither "
+		"of the given parameters are changed.");
 }
 
 void sfx::gui::_registerRadioButtonAndCheckBoxGlobalFunctions(
@@ -779,10 +816,15 @@ void sfx::gui::_registerTabsGlobalFunctions(asIScriptEngine* const engine,
 			(const std::string&, const std::size_t), void),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Selects a tab from a widget. The name of "
-		"the widget is given, then the 0-based index of the tab to select. If the "
-		"tab is invisible or disabled, the selection operation will fail. If the "
-		"operation fails for any reason, an attempt will be made to select the "
-		"previously selected tab, if there was one.");
+		"the widget is given, then the 0-based index of the tab to select.\n"
+		"For <tt>Tabs</tt> widgets: if the tab is invisible or disabled, the "
+		"selection operation will fail. If the operation fails for any reason, an "
+		"attempt will be made to select the previously selected tab, if there was "
+		"one.\n"
+		"For <tt>TabContainer</tt> widgets: the SelectionChanging signal will "
+		"emit if the given index is valid and not the same as the index of the "
+		"tab that is currently selected. This signal has the opportunity to veto "
+		"the tab selection.");
 
 	r = engine->RegisterGlobalFunction("int getSelectedTab(const string&in)",
 		asMETHOD(sfx::gui, _getSelectedTab), asCALL_THISCALL_ASGLOBAL, this);
@@ -793,6 +835,12 @@ void sfx::gui::_registerTabsGlobalFunctions(asIScriptEngine* const engine,
 	r = engine->RegisterGlobalFunction("uint64 getTabCount(const string&in)",
 		asMETHOD(sfx::gui, _getTabCount), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's tab count.");
+
+	r = engine->RegisterGlobalFunction(
+		"string getTabText(const string&in, const uint64)",
+		asMETHOD(sfx::gui, _getTabText), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's tab's translated text. "
+		"Returns an empty string on error.");
 }
 
 void sfx::gui::_registerContainerGlobalFunctions(asIScriptEngine* const engine,
@@ -1047,6 +1095,14 @@ void sfx::gui::_registerChildWindowGlobalFunctions(asIScriptEngine* const engine
 		"be resized by the user, if the widget supports it. If <tt>FALSE</tt>, "
 		"only the engine or scripts can resize the given widget.");
 
+	r = engine->RegisterGlobalFunction("void setWidgetPositionLocked("
+		"const string&in, const bool)",
+		asMETHOD(sfx::gui, _setWidgetPositionLocked),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "If <tt>TRUE</tt>, the given widget can't "
+		"be moved by the user, if the widget supports it. If <tt>FALSE</tt>, the "
+		"user can freely move the widget.");
+
 	r = engine->RegisterGlobalFunction("float getTitleBarHeight(const string&in)",
 		asMETHOD(sfx::gui, _getTitleBarHeight),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -1072,7 +1128,17 @@ void sfx::gui::_registerChildWindowGlobalFunctions(asIScriptEngine* const engine
 	r = engine->RegisterGlobalFunction("void closeChildWindow(const string&in)",
 		asMETHOD(sfx::gui, _closeChildWindow), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Closes a <tt>ChildWindow</tt> by making "
-		"it invisible.");
+		"it invisible. Note that this will force a window to close, and will not "
+		"invoke the onClosing signal handler!");
+
+	r = engine->RegisterGlobalFunction(
+		"void closeChildWindowAndEmitSignal(const string&in)",
+		asMETHOD(sfx::gui, _closeChildWindowAndEmitSignal),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Closes a <tt>ChildWindow</tt> by "
+		"invoking the onClosing/Closing signal. This gives the scripts a chance "
+		"to accept the signal and cancel the close attempt. Otherwise, the window "
+		"will be closed via setting its visibility to <tt>FALSE</tt>.");
 
 	r = engine->RegisterGlobalFunction("void restoreChildWindow(const string&in)",
 		asMETHOD(sfx::gui, _restoreChildWindow), asCALL_THISCALL_ASGLOBAL, this);
@@ -1191,7 +1257,47 @@ void sfx::gui::_registerTabContainerGlobalFunctions(asIScriptEngine* const engin
 	document->DocumentGlobalFunction(r, "Adds a tab to a <tt>TabContainer</tt>. "
 		"Returns the name of the <tt>Panel</tt> associated with the tab, or an "
 		"empty string if the tab and panel could not be added. The new tab will "
-		"be selected.");
+		"not be selected. <b>Be aware that the panel's short name will be the "
+		"same as the tab's given untranslated text, <u>without</u> spaces or "
+		"dots!</b>");
+
+	r = engine->RegisterGlobalFunction(
+		"void removeTabAndPanel(const string&in)",
+		asMETHOD(sfx::gui, _removeTabAndPanel),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Removes a tab from a "
+		"<tt>TabContainer</tt>, given the tab's panel's name. If there are "
+		"multiple panels with the same name, the first one found from the left "
+		"will be removed. If the given panel's parent is not a "
+		"<tt>TabContainer</tt>, then an error will be logged and no widget will "
+		"be removed.");
+}
+
+void sfx::gui::_registerSpinControlGlobalFunctions(asIScriptEngine* const engine,
+	const std::shared_ptr<DocumentationGenerator>& document) {
+	auto r = engine->RegisterGlobalFunction(
+		"void setWidgetMinMaxValues(const string&in, const float, const float)",
+		asMETHOD(sfx::gui, _setWidgetMinMaxValues),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the minimum and maximum values that "
+		"can be selected by this widget. If <tt>min > max</tt>, they will be "
+		"adjusted automatically.");
+
+	r = engine->RegisterGlobalFunction(
+		"bool setWidgetValue(const string&in, float)",
+		asMETHOD(sfx::gui, _setWidgetValue),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the value assigned to this widget. "
+		"If it is outside of the configured range, it will be adjusted, and "
+		"<tt>FALSE</tt> will be returned. Returns <tt>TRUE</tt> if the value "
+		"could be assigned without adjustments or errors.");
+
+	r = engine->RegisterGlobalFunction(
+		"float getWidgetValue(const string&in)",
+		asMETHOD(sfx::gui, _getWidgetValue),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns the value currently set in the "
+		"given widget, or <tt>0.0f</tt> if there was an error.");
 }
 
 void sfx::gui::registerInterface(asIScriptEngine* engine,
@@ -1218,4 +1324,5 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	_registerFileDialogGlobalFunctions(engine, document);
 	_registerMessageBoxGlobalFunctions(engine, document);
 	_registerTabContainerGlobalFunctions(engine, document);
+	_registerSpinControlGlobalFunctions(engine, document);
 }

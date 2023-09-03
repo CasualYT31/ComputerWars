@@ -79,11 +79,11 @@ int awe::game_engine::run() {
 
 			// This will not be the way I handle win conditions in the final
 			// version of the engine.
-			/*if (_map && _map->periodic()) {
+			if (_map && _map->periodic()) {
 				boxer::show("The game has ended!", "Thanks for Playing!",
 					boxer::Style::Info);
 				_script_quitMap();
-			}*/
+			}
 		}
 	} catch (const std::exception& e) {
 		_logger.error("Exception: {}", e);

@@ -858,6 +858,15 @@ namespace sfx {
 		static void _sanitiseWidgetName(const tgui::Widget::Ptr& w);
 
 		/**
+		 * Invokes \c _sanitiseWidgetName() on every child within a given
+		 * container.
+		 * @warning Don't forget to set long name of the container before passing
+		 *          it in!
+		 * @param   c The container to iterate through.
+		 */
+		static void _sanitiseChildWidgetNames(const tgui::Container::Ptr& c);
+
+		/**
 		 * Creates a widget of a given type and returns it.
 		 * Logs an error if the given type isn't supported. In this case, no widget
 		 * will be created.
@@ -1125,12 +1134,15 @@ namespace sfx {
 			const std::shared_ptr<DocumentationGenerator>& document);
 
 		std::string _getWidgetText(const std::string& name);
-		void _onlyAcceptUIntsInEditBox(const std::string& name);
+		void _setEditBoxRegexValidator(const std::string& name,
+			const std::string& regex);
 		void _setWidgetDefaultText(const std::string& name,
 			const std::string& text, CScriptArray* variables);
 		bool _editBoxOrTextAreaHasFocus() const;
 		void _optimiseTextAreaForMonospaceFont(const std::string& name,
 			const bool optimise);
+		void _getCaretLineAndColumn(const std::string& name,
+			std::size_t& line, std::size_t& column);
 
 		// RADIOBUTTON & CHECKBOX //
 
@@ -1192,8 +1204,10 @@ namespace sfx {
 		void _addTab(const std::string& name, const std::string& text,
 			CScriptArray* const variables);
 		void _setSelectedTab(const std::string& name, const std::size_t index);
-		int _getSelectedTab(const std::string& name);
-		std::size_t _getTabCount(const std::string& name);
+		int _getSelectedTab(const std::string& name) const;
+		std::size_t _getTabCount(const std::string& name) const;
+		std::string _getTabText(const std::string& name,
+			const std::size_t index) const;
 
 		// CONTAINER //
 
@@ -1307,11 +1321,13 @@ namespace sfx {
 		void _setChildWindowTitleButtons(const std::string& name,
 			const unsigned int buttons);
 		void _setWidgetResizable(const std::string& name, const bool resizable);
+		void _setWidgetPositionLocked(const std::string& name, const bool locked);
 		float _getTitleBarHeight(const std::string& name);
 		CScriptArray* _getBorderWidths(const std::string& name);
 		void _openChildWindow(const std::string& name, const std::string& x,
 			const std::string& y);
 		void _closeChildWindow(const std::string& name);
+		void _closeChildWindowAndEmitSignal(const std::string& name);
 		void _restoreChildWindow(const std::string& name);
 		void _restoreChildWindowImpl(const tgui::ChildWindow::Ptr& window,
 			child_window_properties& data);
@@ -1376,6 +1392,22 @@ namespace sfx {
 
 		std::string _addTabAndPanel(const std::string& name,
 			const std::string& text, CScriptArray* const vars = nullptr);
+		void _removeTabAndPanel(const std::string& panelName);
+
+		// SPINCONTROL //
+
+		/**
+		 * Registers \c SpinControl global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
+		 */
+		void _registerSpinControlGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		void _setWidgetMinMaxValues(const std::string& name, const float min,
+			const float max);
+		bool _setWidgetValue(const std::string& name, float val);
+		float _getWidgetValue(const std::string& name) const;
 
 		//////////
 		// DATA //

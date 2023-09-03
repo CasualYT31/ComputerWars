@@ -81,7 +81,7 @@ class ArmyLayout {
 
         team = teamGroup + ".Team";
         addWidget(EditBox, team);
-        onlyAcceptUIntsInEditBox(team);
+        setEditBoxRegexValidator(team, VALIDATOR_UINT);
         setWidgetSize(team, "100%", "20px");
         setWidgetOrigin(team, 0.0f, 0.5f);
         setWidgetPosition(team, "0%", "50%");
@@ -101,7 +101,7 @@ class ArmyLayout {
 
         funds = fundsGroup + ".Funds";
         addWidget(EditBox, funds);
-        onlyAcceptUIntsInEditBox(funds);
+        setEditBoxRegexValidator(funds, VALIDATOR_UINT);
         setWidgetSize(funds, "100%", "20px");
         setWidgetOrigin(funds, 0.0f, 0.5f);
         setWidgetPosition(funds, "0%", "50%");

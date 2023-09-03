@@ -30,5 +30,6 @@
   "selectarmy": "OPERATION_selectarmy",
   "addscript": "OPERATION_addscript",
   "updatescript": "OPERATION_updatescript",
-  "removescript": "OPERATION_removescript"
+  "removescript": "OPERATION_removescript",
+  "renamescript": "OPERATION_renamescript"
 }

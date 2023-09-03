@@ -181,6 +181,11 @@ class ScriptsStatusBar {
         statusBar.setLabel(caretLabel, "caret", { any(line), any(col) });
     }
 
+    /// Clears the caret position label.
+    void clearCaretPosition() {
+        statusBar.setLabel(caretLabel, "~");
+    }
+
     /// The Status Bar.
     private StatusBarWidget statusBar;
 

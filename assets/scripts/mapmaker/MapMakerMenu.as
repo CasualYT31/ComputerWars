@@ -13,7 +13,7 @@ const auto MENU = BASE_GROUP + ".Menu";
 const auto CLIENT_AREA = BASE_GROUP + ".Main";
 MainStatusBar StatusBar;
 
-const auto MESSAGE_BOX_GROUP = "MessageBoxGroup";
+const auto MESSAGE_BOX_GROUP = "MapMakerMenu.MessageBoxGroup";
 /// Used with \c MessageBoxes that shouldn't do anything special when a button is
 /// pressed beyond closing the \c MessageBox.
 const auto SIMPLE_MESSAGE_BOX = MESSAGE_BOX_GROUP + ".SimpleMessageBox";
@@ -144,7 +144,7 @@ void MapMakerMenuSetUp() {
         }
     );
     UndoRedoWindow.setUp(CLIENT_AREA);
-    ScriptsDialog.setUp(CLIENT_AREA);
+    ScriptsDialog.setUp(CLIENT_AREA, BASE_GROUP, MESSAGE_BOX_GROUP);
 }
 
 /**
@@ -567,17 +567,17 @@ void MapMakerMenu_NewMap_Closing(bool&out abort) {
 /**
  * Open an existing map for editting.
  */
-void MapMakerMenu_OpenMap_FileSelected() {
-    FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
-    quitEditMap(function() {
-        TilePropertiesDialog.deselect();
-        @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
-        edit.map.setMementoStateChangedCallback(MementosHaveChanged);
-        ArmyPropertiesDialog.refresh();
-        MementosHaveChanged();
-    });
-}
+// void MapMakerMenu_OpenMap_FileSelected() {
+//     FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
+//     quitEditMap(function() {
+//         TilePropertiesDialog.deselect();
+//         @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
+//             ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
+//         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
+//         ArmyPropertiesDialog.refresh();
+//         MementosHaveChanged();
+//     });
+// }
 
 // Debugging.
 void MapMakerMenuOpen() {

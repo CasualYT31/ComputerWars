@@ -105,7 +105,7 @@ std::string sfx::gui::_getWidgetFocused(const std::string& parent) const {
 void sfx::gui::_addWidget(const std::string& newWidgetType,
 	const std::string& name, const std::string& signalHandler) {
 	START_WITH_NONEXISTENT_WIDGET(name)
-	if (widget = _createWidget(newWidgetType, name, fullname[0])) {
+	if (widget = _createWidget(newWidgetType, fullnameAsString, fullname[0])) {
 		container->add(widget, fullnameAsString);
 		_connectSignals(widget, signalHandler);
 		// If the widget is a ChildWindow, don't forget to turn on automatic
@@ -157,7 +157,7 @@ std::string sfx::gui::_getParent(const std::string& name) {
 	START_WITH_WIDGET(name)
 		if (fullname.size() < 2)
 			ERROR("This operation is not supported on menus themselves.")
-		return widget->getParent()->getWidgetName().toStdString();
+		return _findParent(widget.get())->getWidgetName().toStdString();
 	END("Attempted to get the name of a widget \"{}\"'s parent, in menu \"{}\".",
 		name, fullname[0])
 	return "";
@@ -474,6 +474,7 @@ void sfx::gui::_setWidgetTextSize(const std::string& name,
 		ELSE_IF_WIDGET_IS(TextArea, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(MenuBar, castWidget->setTextSize(size);)
 		ELSE_IF_WIDGET_IS(Tabs, castWidget->setTextSize(size);)
+		ELSE_IF_WIDGET_IS(TextArea, castWidget->setTextSize(size);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the character size {} to widget \"{}\", which is of "
 		"type \"{}\", within menu \"{}\".", size, name, widgetType, fullname[0])
@@ -553,14 +554,16 @@ std::string sfx::gui::_getWidgetText(const std::string& name) {
 	return "";
 }
 
-void sfx::gui::_onlyAcceptUIntsInEditBox(const std::string& name) {
+void sfx::gui::_setEditBoxRegexValidator(const std::string& name,
+	const std::string& regex) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(EditBox,
-			castWidget->setInputValidator(EditBox::Validator::UInt);)
+			if (!castWidget->setInputValidator(regex)) ERROR("Invalid regex!");
+		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the widget \"{}\", which is of type \"{}\", "
-		"within menu \"{}\", to only accept unsigned integers.", name, widgetType,
-		fullname[0]);
+		"within menu \"{}\", to validate its input with the regex:  {}  .", name,
+		widgetType, fullname[0], regex);
 }
 
 void sfx::gui::_setWidgetDefaultText(const std::string& name,
@@ -588,6 +591,22 @@ void sfx::gui::_optimiseTextAreaForMonospaceFont(const std::string& name,
 	END("Attempted to turn optimisation for monospace fonts {} for widget \"{}\", "
 		"which is of type \"{}\", within menu \"{}\".", optimise ? "on" : "off",
 		name, widgetType, fullname[0])
+}
+
+void sfx::gui::_getCaretLineAndColumn(const std::string& name,
+	std::size_t& line, std::size_t& column) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(TextArea,
+			line = castWidget->getCaretLine();
+			column = castWidget->getCaretColumn();
+			)
+		ELSE_IF_WIDGET_IS(EditBox,
+			line = 1;
+			column = castWidget->getCaretPosition() + 1;
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to retrieve the caret line and column of widget \"{}\", which "
+		"is of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 }
 
 // RADIOBUTTON & CHECKBOX //
@@ -802,27 +821,49 @@ void sfx::gui::_setSelectedTab(const std::string& name, const std::size_t index)
 				}
 			}
 		)
+		ELSE_IF_WIDGET_IS(TabContainer,
+			const auto panelCount = castWidget->getPanelCount();
+			if (panelCount <= index) ERROR("Given tab index was too high! Max is "
+				+ std::to_string(panelCount) + "!")
+			castWidget->select(index);
+		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to select tab {} from widget \"{}\", which is of type \"{}\", "
 		"within menu \"{}\".", index, name, widgetType, fullname[0])
 }
 
-int sfx::gui::_getSelectedTab(const std::string& name) {
+int sfx::gui::_getSelectedTab(const std::string& name) const {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(Tabs, return castWidget->getSelectedIndex();)
+		ELSE_IF_WIDGET_IS(TabContainer, return castWidget->getSelectedIndex();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the index of the selected tab of a widget \"{}\", which "
 		"is of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 	return -1;
 }
 
-std::size_t sfx::gui::_getTabCount(const std::string& name) {
+std::size_t sfx::gui::_getTabCount(const std::string& name) const {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(Tabs, return castWidget->getTabsCount();)
+		ELSE_IF_WIDGET_IS(TabContainer,
+			return castWidget->getTabs()->getTabsCount();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the tab count of a widget \"{}\", which is of type "
 		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
 	return 0;
+}
+
+std::string sfx::gui::_getTabText(const std::string& name,
+	const std::size_t index) const {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(Tabs, return castWidget->getText(index).toStdString();)
+		ELSE_IF_WIDGET_IS(TabContainer,
+			return castWidget->getTabText(index).toStdString();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the translated text of tab number {} of a widget "
+		"\"{}\", which is of type \"{}\", within menu \"{}\".", index, name,
+		widgetType, fullname[0])
+	return "";
 }
 
 // CONTAINER //
@@ -1040,12 +1081,10 @@ void sfx::gui::_setVerticalScrollbarValue(const std::string& name,
 	const unsigned int value) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ScrollablePanel,
-			if (value > castWidget->getVerticalScrollbarMaximum()) {
-				castWidget->setVerticalScrollbarValue(
-					castWidget->getVerticalScrollbarMaximum());
-			} else {
-				castWidget->setVerticalScrollbarValue(value);
-			}
+			const auto max =
+				static_cast<unsigned int>(castWidget->getContentSize().y);
+			if (value > max) castWidget->setVerticalScrollbarValue(max);
+			else castWidget->setVerticalScrollbarValue(value);
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the vertical scrollbar value {} to widget \"{}\", which "
@@ -1098,7 +1137,7 @@ void sfx::gui::_addWidgetToGrid(const std::string& newWidgetType,
 	const std::string& name, const std::size_t row, const std::size_t col,
 	const std::string& signalHandler) {
 	START_WITH_NONEXISTENT_WIDGET(name)
-		if (widget = _createWidget(newWidgetType, name, fullname[0])) {
+		if (widget = _createWidget(newWidgetType, fullnameAsString, fullname[0])) {
 			if (container->getWidgetType() != type::Grid) {
 				ERROR(std::string("The widget \"").append(containerName).append(
 					"\" is of type \"").append(container->getWidgetType().
@@ -1334,6 +1373,16 @@ void sfx::gui::_setWidgetResizable(const std::string& name, const bool resizable
 		resizable);
 }
 
+void sfx::gui::_setWidgetPositionLocked(const std::string& name,
+	const bool locked) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow, castWidget->setPositionLocked(locked);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the position locked property of widget \"{}\", which is "
+		"of type \"{}\", within menu \"{}\", to {}.", name, widgetType,
+		fullname[0], locked);
+}
+
 float sfx::gui::_getTitleBarHeight(const std::string& name) {
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(ChildWindow,
@@ -1390,12 +1439,19 @@ void sfx::gui::_openChildWindow(const std::string& name, const std::string& x,
 
 void sfx::gui::_closeChildWindow(const std::string& name) {
 	START_WITH_WIDGET(name)
-		IF_WIDGET_IS(ChildWindow,
-			castWidget->setVisible(false);
-		)
+		IF_WIDGET_IS(ChildWindow, castWidget->setVisible(false);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to close the widget \"{}\", which is of type \"{}\", within "
 		"menu \"{}\".", name, widgetType, fullname[0]);
+}
+
+void sfx::gui::_closeChildWindowAndEmitSignal(const std::string& name) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(ChildWindow, castWidget->close();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to close the widget \"{}\", which is of type \"{}\", within "
+		"menu \"{}\", and emit the onClosing signal.", name, widgetType,
+		fullname[0]);
 }
 
 void sfx::gui::_restoreChildWindow(const std::string& name) {
@@ -1599,18 +1655,88 @@ std::string sfx::gui::_addTabAndPanel(const std::string& name,
 	std::string panelName = "";
 	START_WITH_WIDGET(name)
 		IF_WIDGET_IS(TabContainer,
-			const auto panel = castWidget->addTab(text, true);
+			const auto panel = castWidget->addTab(text, false);
 			if (!panel) ERROR("Could not create panel!");
-			_setTranslatedString(fullnameAsString, text, vars,
-				static_cast<std::size_t>(castWidget->getIndex(panel)));
-			_translateWidget(widget);
 			// Fix Panel's name so that it can be accessed by the scripts/engine.
 			_sanitiseWidgetName(panel);
 			panelName = panel->getWidgetName().toStdString();
+			_setTranslatedString(fullnameAsString, text, vars,
+				static_cast<std::size_t>(castWidget->getIndex(panel)));
+			_translateWidget(widget);
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to add a tab \"{}\" to widget \"{}\", which is of type \"{}\", "
 		"within menu \"{}\".", text, name, widgetType, fullname[0])
 	if (vars) vars->Release();
 	return panelName;
+}
+
+void sfx::gui::_removeTabAndPanel(const std::string& panelName) {
+	std::size_t i = 0;
+	START_WITH_WIDGET(panelName)
+		IF_WIDGET_IS(Panel,
+			if (const auto tabContainer = _findWidget<TabContainer>(
+				container->getWidgetName().toStdString())) {
+				i = tabContainer->getIndex(castWidget);
+				if (i < 0)
+					ERROR("Could not find given panel in the tab container!");
+				_removeWidgets(castWidget, container, false);
+				tabContainer->removeTab(i);
+				// Remove tab's caption from the translation map.
+				auto& captions = std::get<sfx::gui::ListOfCaptions>(
+					_originalCaptions[tabContainer->getWidgetName().toStdString()]
+				);
+				captions.erase(captions.begin() + i);
+			} else ERROR("The parent of the given panel is of type \"" +
+				container->getWidgetType() + "\", not \"TabContainer\"!");
+		)
+	END("Attempted to add a tab and panel, the latter with name \"{}\", which is "
+		"of type \"{}\", within menu \"{}\".", panelName, widgetType, fullname[0])
+}
+
+// SPINCONTROL //
+
+void sfx::gui::_setWidgetMinMaxValues(const std::string& name, const float min,
+	const float max) {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(SpinControl,
+			castWidget->setMinimum(min);
+			castWidget->setMaximum(max);
+		)
+	END("Attempted to set the minimum value ({}) and maximum value ({}) of a "
+		"widget \"{}\", which is of type \"{}\", within menu \"{}\".", min, max,
+		name, widgetType, fullname[0])
+}
+
+bool sfx::gui::_setWidgetValue(const std::string& name, float val) {
+	static const std::string errorString = "Attempted to set the value {} to a "
+		"widget \"{}\", which is of type \"{}\", within menu \"{}\".";
+	bool ret = false;
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(SpinControl,
+			const auto min = castWidget->getMinimum();
+			const auto max = castWidget->getMaximum();
+			if (val < min) {
+				_logger.warning(errorString + " Value is smaller than the "
+					"minimum, which is {}. The minimum value will be applied.",
+					val, name, widgetType, fullname[0], min);
+				val = min;
+			} else if (val > max) {
+				_logger.warning(errorString + " Value is greater than the "
+					"maximum, which is {}. The maximum value will be applied.",
+					val, name, widgetType, fullname[0], max);
+				val = max;
+			} else ret = true;
+			ret = castWidget->setValue(val);
+		)
+	END(errorString, val, name, widgetType, fullname[0])
+	return ret;
+}
+
+float sfx::gui::_getWidgetValue(const std::string& name) const {
+	START_WITH_WIDGET(name)
+		IF_WIDGET_IS(SpinControl, return castWidget->getValue();)
+	END("Attempted to get the value of a widget \"{}\", which is of type \"{}\", "
+		"within menu \"{}\".", name, widgetType, fullname[0])
+	return 0.f;
 }

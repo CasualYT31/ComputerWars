@@ -98,6 +98,7 @@ class EditableMap {
             @mapPropsWindow = mPropsWindow;
             @statusBar = sBar;
             @scriptsWindow = sWindow;
+            map.enablePeriodic(false);
             map.alwaysShowHiddenUnits(true);
             map.setMapScalingFactor(_mapScalingFactor);
             setNormalCursorSprites();
@@ -134,6 +135,77 @@ class EditableMap {
         _updateMapProps();
         _updateStatusBar();
         _updateScriptsWindow();
+    }
+
+    //////////////////////////
+    // SCRIPTING OPERATIONS //
+    //////////////////////////
+    /**
+     * Adds a new script to the map file, or updates an existing one.
+     * @param name The name of the script file.
+     * @param code The code of the script file.
+     */
+    void addScriptFile(const string&in name, const string&in code) {
+        map.addScriptFile(name, code);
+        _updateScriptsWindow();
+    }
+
+    /**
+     * Same as \c addScriptFile(), except the scripts window will not be
+     * refreshed, and a memento will not be created.
+     * If a non-existent script is given, an error will be logged and no new
+     * script will be added.
+     */
+    void updateScriptFile(const string&in name, const string&in code) {
+        if (!map.doesScriptExist(name)) {
+            error("Attempted to update non-existent script file \"" + name +
+                "\"!");
+            return;
+        }
+        map.disableMementos();
+        map.addScriptFile(name, code);
+        map.enableMementos("");
+    }
+    
+    /**
+     * Renames an existing script.
+     * @param oldName The name of the existing script file.
+     * @param newName The new name to assign to it.
+     */
+    void renameScriptFile(const string&in oldName, const string&in newName) {
+        map.renameScriptFile(oldName, newName);
+        _updateScriptsWindow();
+    }
+
+    /**
+     * Removes a script from the map file.
+     * @param name The name of the script file.
+     */
+    void removeScriptFile(const string&in name) {
+        map.removeScriptFile(name);
+        _updateScriptsWindow();
+    }
+
+    /**
+     * Builds the scripts and caches the last known result message.
+     * The result message won't update with mementos but I don't really care and I
+     * think it's intuitive enough.
+     * @return \c TRUE if the build was successful, \c FALSE if not.
+     */
+    bool buildScriptFiles() {
+        const bool success = map.buildScriptFiles().isEmpty();
+        _updateScriptsWindow();
+        return success;
+    }
+
+    /// @return The last known build result, an empty string if there hasn't been
+    ///         a build yet.
+    string getLastKnownBuildResult() const {
+        const auto lastResult = map.getLastKnownBuildResult();
+        if (lastResult.isEmpty())
+            return translate("success");
+        else
+            return lastResult;
     }
 
     ////////////////////////

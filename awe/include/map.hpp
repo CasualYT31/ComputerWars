@@ -302,6 +302,14 @@ namespace awe {
 		 */
 		bool periodic();
 
+		/**
+		 * Enables or disables the periodic checks.
+		 * They are enabled by default.
+		 * @param enabled Pass \c FALSE to disable the periodic method, and \c TRUE
+		 *                to enable it.
+		 */
+		void enablePeriodic(const bool enabled);
+
 		////////////////////
 		// MAP OPERATIONS //
 		////////////////////
@@ -1585,6 +1593,17 @@ namespace awe {
 		void addScriptFile(const std::string& name, const std::string& code);
 
 		/**
+		 * Renames an existing script file.
+		 * This operation will fail if \c oldName didn't refer to an existing
+		 * script, \c newName was already taken by an existing script, or both
+		 * names were identical.
+		 * @param oldName The old name of the script.
+		 * @param newName The new name of the script.
+		 */
+		void renameScriptFile(const std::string& oldName,
+			const std::string& newName);
+
+		/**
 		 * Removes a script file.
 		 * An error will be logged if the given script does not exist.
 		 * @param name The name of the script to remove.
@@ -1601,6 +1620,13 @@ namespace awe {
 		 *         time of calling.
 		 */
 		std::string buildScriptFiles();
+
+		/**
+		 * Retrieves the last known build result.
+		 * @return If the last build was successful, an empty string will be
+		 *         returned. Otherwise, the error message will be returned.
+		 */
+		std::string getLastKnownBuildResult() const;
 
 		/**
 		 * Does a script with the given name exist?
@@ -2213,6 +2239,12 @@ namespace awe {
 		 * The name of the module associated with this map.
 		 */
 		std::string _moduleName;
+
+		/// If \c FALSE, \c periodic() will always return \c FALSE immediately.
+		bool _periodicEnabled = true;
+
+		/// The last known build result.
+		std::string _lastKnownBuildResult;
 
 		/////////////
 		// DRAWING //

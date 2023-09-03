@@ -93,7 +93,7 @@ class MapPropertiesWindow {
         day = dayEditGroup + ".DayEdit";
         addWidget(EditBox, day);
         setWidgetSize(day, "100%", "100%");
-        onlyAcceptUIntsInEditBox(day);
+        setEditBoxRegexValidator(day, VALIDATOR_UINT);
 
         const auto sizeLayout = editLayout + ".SizeLayout";
         addWidget(HorizontalLayout, sizeLayout);
@@ -105,7 +105,7 @@ class MapPropertiesWindow {
         width = widthEditGroup + ".WidthEdit";
         addWidget(EditBox, width);
         setWidgetSize(width, "100%", "100%");
-        onlyAcceptUIntsInEditBox(width);
+        setEditBoxRegexValidator(width, VALIDATOR_UINT);
 
         const auto xLabelGroup = sizeLayout + ".XGroup";
         addWidget(Group, xLabelGroup);
@@ -124,7 +124,7 @@ class MapPropertiesWindow {
         height = heightEditGroup + ".HeightEdit";
         addWidget(EditBox, height);
         setWidgetSize(height, "100%", "100%");
-        onlyAcceptUIntsInEditBox(height);
+        setEditBoxRegexValidator(height, VALIDATOR_UINT);
 
         awe::addButtonsToParent(window, {
             awe::ParentButton("MapPropertiesOK", "ok",

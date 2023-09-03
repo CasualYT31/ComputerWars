@@ -691,12 +691,20 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, addScriptFile), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void renameScriptFile(const string&in, const string&in)",
+			asMETHOD(awe::map, renameScriptFile), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void removeScriptFile(const string&in)",
 			asMETHOD(awe::map, removeScriptFile), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"string buildScriptFiles()",
 			asMETHOD(awe::map, buildScriptFiles), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"string getLastKnownBuildResult() const",
+			asMETHOD(awe::map, getLastKnownBuildResult), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool doesScriptExist(const string&in) const",
@@ -709,6 +717,10 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"array<string>@ getScriptNames() const",
 			asMETHOD(awe::map, getScriptNamesAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void enablePeriodic(const bool)",
+			asMETHOD(awe::map, enablePeriodic), asCALL_THISCALL);
 
 		////////////////////////
 		// DRAWING OPERATIONS //
@@ -905,6 +917,7 @@ bool awe::map::hasChanged() const {
 }
 
 bool awe::map::periodic() {
+	if (!_periodicEnabled) return false;
 	if (_scripts && _scripts->functionDeclExists(_moduleName,
 		"void periodic(Map@ const, bool&out)")) {
 		bool winConditionMet = false;
@@ -913,6 +926,10 @@ bool awe::map::periodic() {
 	} else {
 		return defaultWinCondition();
 	}
+}
+
+void awe::map::enablePeriodic(const bool enabled) {
+	_periodicEnabled = enabled;
 }
 
 void awe::map::setMapName(std::string name) {
@@ -2594,6 +2611,32 @@ void awe::map::addScriptFile(const std::string& name, const std::string& code) {
 	_scriptFiles[name] = code;
 }
 
+void awe::map::renameScriptFile(const std::string& oldName,
+	const std::string& newName) {
+	if (oldName == newName) {
+		_logger.error("renameScriptFile operation failed: new name \"{}\" given "
+			"to replace old name \"{}\" are identical!", newName, oldName);
+		return;
+	}
+	if (!doesScriptExist(oldName)) {
+		_logger.error("renameScriptFile operation failed: could not locate script "
+			"with old name \"{}\".", oldName);
+		return;
+	}
+	if (doesScriptExist(newName)) {
+		_logger.error("renameScriptFile operation failed: could not rename script "
+			"with old name \"{}\" to new name \"{}\" as the new name is already "
+			"taken!", oldName, newName);
+		return;
+	}
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::RENAME_SCRIPT));
+	// https://stackoverflow.com/a/44883472.
+	auto node = _scriptFiles.extract(oldName);
+	node.key() = newName;
+	_scriptFiles.insert(std::move(node));
+}
+
 void awe::map::removeScriptFile(const std::string& name) {
 	if (!doesScriptExist(name)) {
 		_logger.error("removeScriptFile operation failed: could not locate script "
@@ -2608,16 +2651,22 @@ void awe::map::removeScriptFile(const std::string& name) {
 std::string awe::map::buildScriptFiles() {
 	if (!_scripts) throw NO_SCRIPTS;
 	std::string newModuleName = getMapName() + ":map";
-	std::string reason;
 	const bool success =
-		_scripts->createModule(newModuleName, _scriptFiles, reason);
+		_scripts->createModule(newModuleName, _scriptFiles, _lastKnownBuildResult);
 	if (success && !_moduleName.empty() && newModuleName != _moduleName) {
 		// The map was renamed since the last build, so the old module still
 		// exists. Delete it!
 		_scripts->deleteModule(_moduleName);
 	}
-	if (success) _moduleName = newModuleName;
-	return reason;
+	if (success) {
+		_moduleName = newModuleName;
+		_lastKnownBuildResult.clear();
+	}
+	return _lastKnownBuildResult;
+}
+
+std::string awe::map::getLastKnownBuildResult() const {
+	return _lastKnownBuildResult;
 }
 
 std::string awe::map::getScript(const std::string& name) const {

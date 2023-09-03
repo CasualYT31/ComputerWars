@@ -74,6 +74,7 @@ namespace awe {
 			ADD_SCRIPT,
 			UPDATE_SCRIPT,
 			REMOVE_SCRIPT,
+			RENAME_SCRIPT,
 			count
 		};
 
@@ -112,7 +113,8 @@ namespace awe {
 			"selectarmy",
 			"addscript",
 			"updatescript",
-			"removescript"
+			"removescript",
+			"renamescript",
 		};
 
 		/**

@@ -227,6 +227,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		_customSignalHandlers[widget->getWidgetName().toStdString()] =
 			customSignalHandler;
 	}
+
 	// Connect common widget signals.
 	widget->getSignal("PositionChanged").
 		connectEx(&sfx::gui::signalHandler, this);
@@ -242,6 +243,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		connectEx(&sfx::gui::signalHandler, this);
 	widget->getSignal("AnimationFinished").
 		connectEx(&sfx::gui::signalHandler, this);
+
 	// Connect clickable widget signals.
 	tgui::String type = widget->getWidgetType();
 	if (type == type::Button || type == type::EditBox || type == type::Label ||
@@ -262,9 +264,11 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		widget->getSignal("RightClicked").
 			connectEx(&sfx::gui::signalHandler, this);
 	}
+
 	// Connect bespoke signals.
 	if (type == type::Button || type == type::BitmapButton) {
 		widget->getSignal("Pressed").connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::ChildWindow) {
 		auto childWindow = std::dynamic_pointer_cast<ChildWindow>(widget);
 		widget->getSignal("MousePressed").
@@ -281,24 +285,30 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		childWindow->onMaximize(&sfx::gui::maximizedSignalHandler, this,
 			childWindow);
 		childWindow->onClosing(&sfx::gui::closingSignalHandler, this, childWindow);
+
 	} else if (type == type::ColourPicker) {
 		widget->getSignal("ColorChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("OkPress").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::ComboBox) {
 		widget->getSignal("ItemSelected").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::EditBox) {
 		widget->getSignal("TextChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("ReturnKeyPressed").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("CaretPositionChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 		// Replace focus and unfocus signal handlers.
 		widget->getSignal("Focused").connect(
 			&sfx::gui::textBoxFocusedSignalHandler, this, widget);
 		widget->getSignal("Unfocused").connect(
 			&sfx::gui::textBoxUnfocusedSignalHandler, this, widget);
+
 	} else if (type == type::FileDialog) {
 		widget->getSignal("FileSelected").
 			connectEx(&sfx::gui::signalHandler, this);
@@ -308,14 +318,17 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 			widget->getWidgetName().toStdString());
 		// Allow the scripts to handle FileDialog closing.
 		fd->onClosing(&sfx::gui::fileDialogClosingSignalHandler, this, fd);
+
 	} else if (type == type::Knob || type == type::Scrollbar ||
 		type == type::Slider || type == type::SpinButton ||
 		type == type::SpinControl) {
 		widget->getSignal("ValueChanged").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::Label || type == type::Picture) {
 		widget->getSignal("DoubleClicked").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::ListBox) {
 		widget->getSignal("ItemSelected").
 			connectEx(&sfx::gui::signalHandler, this);
@@ -325,6 +338,7 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("DoubleClicked").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::ListView) {
 		widget->getSignal("ItemSelected").
 			connectEx(&sfx::gui::signalHandler, this);
@@ -334,10 +348,12 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("DoubleClicked").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::MenuBar) {
 		// Each item is connected individually, when created and when translated.
 		/*widget->getSignal("MenuItemClicked").
 			connectEx(&sfx::gui::signalHandler, this);*/
+
 	} else if (type == type::MessageBox) {
 		const auto mb = std::dynamic_pointer_cast<MessageBox>(widget);
 		mb->onButtonPress(&sfx::gui::messageBoxButtonPressedSignalHandler, this,
@@ -345,14 +361,17 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 		// MessageBoxes must be cleaned up correctly when closed!
 		mb->onClose(&sfx::gui::_removeWidget, this,
 			widget->getWidgetName().toStdString());
+
 	} else if (type == type::Panel) {
 		widget->getSignal("DoubleClicked").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::ProgressBar) {
 		widget->getSignal("ValueChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("Full").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::RadioButton || type == type::CheckBox) {
 		widget->getSignal("Checked").
 			connectEx(&sfx::gui::signalHandler, this);
@@ -360,30 +379,38 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("Changed").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::RangeSlider) {
 		widget->getSignal("RangeChanged").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::TabContainer) {
 		widget->getSignal("SelectionChanging").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("SelectionChanged").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::Tabs) {
 		widget->getSignal("TabSelected").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::TextArea) {
 		widget->getSignal("TextChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 		widget->getSignal("SelectionChanged").
+			connectEx(&sfx::gui::signalHandler, this);
+		widget->getSignal("CaretPositionChanged").
 			connectEx(&sfx::gui::signalHandler, this);
 		// Replace focus and unfocus signal handlers.
 		widget->getSignal("Focused").connect(
 			&sfx::gui::textBoxFocusedSignalHandler, this, widget);
 		widget->getSignal("Unfocused").connect(
 			&sfx::gui::textBoxUnfocusedSignalHandler, this, widget);
+
 	} else if (type == type::ToggleButton) {
 		widget->getSignal("Checked").
 			connectEx(&sfx::gui::signalHandler, this);
+
 	} else if (type == type::TreeView) {
 		widget->getSignal("ItemSelected").
 			connectEx(&sfx::gui::signalHandler, this);

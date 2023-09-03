@@ -181,7 +181,7 @@ class TilePropertiesWindow {
         setWidgetSize(tileHPEditBox, "100%", "30px");
         setWidgetOrigin(tileHPEditBox, 0.5f, 0.5f);
         setWidgetPosition(tileHPEditBox, "50%", "50%");
-        onlyAcceptUIntsInEditBox(tileHPEditBox);
+        setEditBoxRegexValidator(tileHPEditBox, VALIDATOR_UINT);
 
         const auto slashLabelGroup = hpLayout + ".SlashLabelGroup";
         addWidget(Group, slashLabelGroup);
@@ -335,7 +335,7 @@ class TilePropertiesWindow {
         setWidgetSize(unitHPEditBox, "100%", "30px");
         setWidgetOrigin(unitHPEditBox, 0.5f, 0.5f);
         setWidgetPosition(unitHPEditBox, "50%", "50%");
-        onlyAcceptUIntsInEditBox(unitHPEditBox);
+        setEditBoxRegexValidator(unitHPEditBox, VALIDATOR_UINT);
 
         const auto slashLabelGroup2 = unitHPLayout + ".SlashLabelGroup";
         addWidget(Group, slashLabelGroup2);
@@ -375,7 +375,7 @@ class TilePropertiesWindow {
         setWidgetSize(unitFuelEditBox, "100%", "30px");
         setWidgetOrigin(unitFuelEditBox, 0.5f, 0.5f);
         setWidgetPosition(unitFuelEditBox, "50%", "50%");
-        onlyAcceptUIntsInEditBox(unitFuelEditBox);
+        setEditBoxRegexValidator(unitFuelEditBox, VALIDATOR_UINT);
 
         const auto slashLabelGroup3 = unitFuelLayout + ".SlashLabelGroup";
         addWidget(Group, slashLabelGroup3);
@@ -754,7 +754,7 @@ class TilePropertiesWindow {
             setWidgetSize(unitAmmo, "100%", "30px");
             setWidgetOrigin(unitAmmo, 0.5f, 0.5f);
             setWidgetPosition(unitAmmo, "50%", "50%");
-            onlyAcceptUIntsInEditBox(unitAmmo);
+            setEditBoxRegexValidator(unitAmmo, VALIDATOR_UINT);
             if (weapon.hasInfiniteAmmo) {
                 setWidgetEnabled(unitAmmo, false);
             } else {

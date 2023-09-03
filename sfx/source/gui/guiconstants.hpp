@@ -48,6 +48,15 @@ static sfx::gui::MenuItemID NO_MENU_ITEM_ID =
 	std::numeric_limits<sfx::gui::MenuItemID>::max();
 static std::string GOTO_PREVIOUS_WIDGET = "~";
 
+// Regex validators. Mostly copied from TGUI EditBox directly.
+
+static std::string VALIDATOR_ALL = ".*";
+static std::string VALIDATOR_INT = "[+-]?[0-9]*";
+static std::string VALIDATOR_UINT = "[0-9]*";
+static std::string VALIDATOR_FLOAT = "[+-]?[0-9]*\\.?[0-9]*";
+// YOU MUST KEEP THIS UP-TO-DATE WITH _sanitiseWidgetName()!
+static std::string VALIDATOR_TAB_NAME = "[^. ]*";
+
 /// Supported widget types.
 namespace type {
 	// Widgets with full or partial support in the engine.
@@ -75,6 +84,7 @@ namespace type {
 	WIDGET_TYPE(RadioButton);
 	WIDGET_TYPE(TabContainer);
 	WIDGET_TYPE(TextArea);
+	WIDGET_TYPE(SpinControl);
 
 	// Widgets that can't be created by the scripts yet.
 	WIDGET_TYPE(ProgressBar);
@@ -83,7 +93,6 @@ namespace type {
 	WIDGET_TYPE(Knob);
 	WIDGET_TYPE(Scrollbar);
 	WIDGET_TYPE(Slider);
-	WIDGET_TYPE(SpinControl);
 	WIDGET_TYPE(ListView);
 	WIDGET_TYPE(RangeSlider);
 	WIDGET_TYPE(ToggleButton);
@@ -100,4 +109,7 @@ namespace type {
 	// "Menu.TabContainer.Panel1", or at least "TabContainer.Panel1". Be careful
 	// not to leave any '.' characters in the short name of any of the
 	// SubwidgetContainer's widgets!
+	// Since writing this, TabContainer has itself been made a Container now, but
+	// the same still applies to that widget, as well as SubwidgetContainers in
+	// general, even if it goes against the principle of SubwidgetContainers.
 }

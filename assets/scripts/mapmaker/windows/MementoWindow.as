@@ -54,7 +54,7 @@ class MementoWindow {
     private void listboxSignalHandler(const string&in widgetName,
         const string&in signalName) {
         if (edit is null) return;
-        if (signalName == "ItemSelected") {
+        if (signalName == "MouseReleased") {
             int item = getSelectedItem(widgetName);
             uint64 itemCast = item;
             if (item >= 0 && selected != itemCast) {

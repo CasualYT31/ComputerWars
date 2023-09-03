@@ -711,9 +711,9 @@ std::string sfx::gui::_moveDirectionalFlow(
 			// set the scroll value. Otherwise the input will be swallowed!
 			if (panel->getVerticalScrollAmount() > 0 &&
 				panel->isVerticalScrollbarShown() &&
-				value < panel->getVerticalScrollbarMaximum() -
-					static_cast<unsigned int>(panel->getSize().y) +
-					static_cast<unsigned int>(panel->getScrollbarWidth())) {
+				value < static_cast<unsigned int>(panel->getContentSize().y) -
+					(static_cast<unsigned int>(panel->getSize().y) +
+					static_cast<unsigned int>(panel->getScrollbarWidth()))) {
 				panel->setVerticalScrollbarValue(
 					value + panel->getVerticalScrollAmount());
 			} else {
@@ -765,9 +765,9 @@ std::string sfx::gui::_moveDirectionalFlow(
 			// set the scroll value. Otherwise the input will be swallowed!
 			if (panel->getHorizontalScrollAmount() > 0 &&
 				panel->isHorizontalScrollbarShown() &&
-				value < panel->getHorizontalScrollbarMaximum() -
-					static_cast<unsigned int>(panel->getSize().x) +
-					static_cast<unsigned int>(panel->getScrollbarWidth())) {
+				value < static_cast<unsigned int>(panel->getContentSize().x) -
+					(static_cast<unsigned int>(panel->getSize().x) +
+					static_cast<unsigned int>(panel->getScrollbarWidth()))) {
 				panel->setHorizontalScrollbarValue(
 					value + panel->getHorizontalScrollAmount());
 			} else {
@@ -1092,24 +1092,26 @@ std::string sfx::gui::_extractWidgetName(const std::string& fullname) {
 
 Container::Ptr sfx::gui::_getSubwidgetContainer(
 	const tgui::Widget::Ptr& widget) {
-	if (widget->getWidgetType() == type::TabContainer ||
-		widget->getWidgetType() == type::SpinControl)
+	if (widget->getWidgetType() == type::SpinControl)
 		return std::dynamic_pointer_cast<SubwidgetContainer>(
 			widget)->getContainerSharedPtr();
 	else return nullptr;
 }
 
 Container* sfx::gui::_getSubwidgetContainer(Widget* const widget) {
-	if (widget->getWidgetType() == type::TabContainer ||
-		widget->getWidgetType() == type::SpinControl)
+	if (widget->getWidgetType() == type::SpinControl)
 		return reinterpret_cast<SubwidgetContainer* const>(widget)->getContainer();
 	else return nullptr;
 }
 
-
+// YOU MUST KEEP VALIDATOR_TABCONTAINER_TAB_NAME UP-TO-DATE!
 void sfx::gui::_sanitiseWidgetName(const tgui::Widget::Ptr& w) {
 	w->setWidgetName(w->getParent()->getWidgetName() + "." +
 		w->getWidgetName().replace(".", "").replace(" ", ""));
+}
+
+void sfx::gui::_sanitiseChildWidgetNames(const tgui::Container::Ptr& c) {
+	for (auto& w : c->getWidgets()) _sanitiseWidgetName(w);
 }
 
 Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
@@ -1174,17 +1176,18 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 		return tgui::RadioButton::create();
 	} else if (type == type::TabContainer) {
 		auto tabContainer = tgui::TabContainer::create();
-		// Fix the name of the Container within the TabContainer so that we can
-		// get the parent of the container when we need to: see _findParent().
-		auto const internalContainer = tabContainer->getContainer();
-		internalContainer->setWidgetName(name);
-		// Fix the name of the Tabs widget within the TabContainer so that it can
-		// be accessed by the engine.
-		const auto& widgetList = internalContainer->getWidgets();
-		for (auto& w : widgetList) _sanitiseWidgetName(w);
+		tabContainer->setWidgetName(name);
+		_sanitiseChildWidgetNames(tabContainer);
 		return tabContainer;
 	} else if (type == type::TextArea) {
-		return tgui::TextArea::create();
+		const auto textArea = tgui::TextArea::create();
+		textArea->setHorizontalScrollbarPolicy(Scrollbar::Policy::Automatic);
+		return textArea;
+	} else if (type == type::SpinControl) {
+		const auto spinControl = tgui::SpinControl::create();
+		spinControl->setWidgetName(name);
+		_sanitiseChildWidgetNames(spinControl->getContainerSharedPtr());
+		return spinControl;
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\" with name "
 			"\"{}\" for menu \"{}\": that widget type is not supported.", wType,
