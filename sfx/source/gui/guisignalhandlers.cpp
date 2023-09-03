@@ -211,11 +211,15 @@ void sfx::gui::maximizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
 
 void sfx::gui::textBoxFocusedSignalHandler(const tgui::Widget::Ptr& widget) {
 	_editBoxOrTextAreaHasSetFocus = true;
+	if (widget->getWidgetType() == type::TextArea)
+		_gui.setTabKeyUsageEnabled(false);
 	signalHandler(widget, "Focused");
 }
 
 void sfx::gui::textBoxUnfocusedSignalHandler(const tgui::Widget::Ptr& widget) {
 	_editBoxOrTextAreaHasSetFocus = false;
+	if (widget->getWidgetType() == type::TextArea)
+		_gui.setTabKeyUsageEnabled(true);
 	signalHandler(widget, "Unfocused");
 }
 

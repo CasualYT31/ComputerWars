@@ -1182,6 +1182,7 @@ Widget::Ptr sfx::gui::_createWidget(const std::string& wType,
 	} else if (type == type::TextArea) {
 		const auto textArea = tgui::TextArea::create();
 		textArea->setHorizontalScrollbarPolicy(Scrollbar::Policy::Automatic);
+		textArea->setTabString("    ");
 		return textArea;
 	} else if (type == type::SpinControl) {
 		const auto spinControl = tgui::SpinControl::create();
