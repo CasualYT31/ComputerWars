@@ -212,14 +212,11 @@ namespace awe {
 		/**
 		 * Initialises this object with \c bank pointers.
 		 * Also initialises the internal logger object.\n
-		 * @param countries  Information on the countries to search through when
-		 *                   reading country IDs from map files.
-		 * @param tiles      Information on the tile types to search through when
-		 *                   reading tile type IDs from map files.
-		 * @param units      Information on the unit types to search through when
-		 *                   reading unit type IDs from map files.
-		 * @param commanders Information on the commanders to search through when
-		 *                   reading CO IDs from map files.
+		 * @param countries  Information on the countries available to the map.
+		 * @param tiles      Information on the tile types available to the map.
+		 * @param units      Information on the unit types available to the map.
+		 * @param commanders Information on the COs available to the map.
+		 * @param structures Information on the structures available to the map.
 		 * @param data       The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
@@ -227,6 +224,7 @@ namespace awe {
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
+			const std::shared_ptr<awe::bank<awe::structure>>& structures,
 			const engine::logger::data& data);
 
 		/**
@@ -1274,6 +1272,23 @@ namespace awe {
 		void convertTiles(const CScriptArray* const tiles,
 			const std::string& fromTileType, const std::string& toTileType,
 			const awe::ArmyID transferOwnership);
+
+		//////////////////////////
+		// STRUCTURE OPERATIONS //
+		//////////////////////////
+		/**
+		 * Can the given structure fit when placed from the given tile?
+		 * @param  fromTile  The root tile of the structure will be placed here.
+		 * @param  structure The structure to place.
+		 * @return \c TRUE if the root and dependent tiles can all fit within the
+		 *         map, \c FALSE if not.
+		 */
+		bool canStructureFit(const sf::Vector2u& fromTile,
+			const std::shared_ptr<const awe::structure>& structure) const;
+
+		/// Script interface version of \c canStructureFit().
+		bool canStructureFit(const sf::Vector2u& fromTile,
+			const std::string& structure) const;
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
@@ -2575,23 +2590,28 @@ namespace awe {
 		// BANKS //
 		///////////
 		/**
-		 * The country data to read from when reading map files.
+		 * Data pertaining to countries.
 		 */
 		std::shared_ptr<awe::bank<awe::country>> _countries = nullptr;
 
 		/**
-		 * The tile type data to read from when reading map files.
+		 * Data pertaining to tile types.
 		 */
 		std::shared_ptr<awe::bank<awe::tile_type>> _tileTypes = nullptr;
 
 		/**
-		 * The unit type data to read from when reading map files.
+		 * Data pertaining to unit types.
 		 */
 		std::shared_ptr<awe::bank<awe::unit_type>> _unitTypes = nullptr;
 
 		/**
-		 * The CO data to read from when reading map files.
+		 * Data pertaining to COs.
 		 */
 		std::shared_ptr<awe::bank<awe::commander>> _commanders = nullptr;
+
+		/**
+		 * Data pertaining to structures.
+		 */
+		std::shared_ptr<awe::bank<awe::structure>> _structures = nullptr;
 	};
 }

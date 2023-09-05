@@ -563,6 +563,14 @@ void awe::map::Register(asIScriptEngine* engine,
 				const std::string&, const std::string&, const awe::ArmyID), void),
 			asCALL_THISCALL);
 
+		//////////////////////////
+		// STRUCTURE OPERATIONS //
+		//////////////////////////
+		r = engine->RegisterObjectMethod("Map",
+			"bool canStructureFit(const Vector2&in, const string&in) const",
+			asMETHODPR(awe::map, canStructureFit, (const sf::Vector2u&,
+				const std::string&) const, bool), asCALL_THISCALL);
+
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
 		//////////////////////////////////////
@@ -872,6 +880,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
+	const std::shared_ptr<awe::bank<awe::structure>>& structures,
 	const engine::logger::data& data) : _logger(data),
 	_cursor({data.sink, data.name + "_cursor_sprite"}),
 	_additionallySelectedTileCursorUL({ data.sink,
@@ -886,6 +895,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	_tileTypes = tiles;
 	_unitTypes = units;
 	_commanders = commanders;
+	_structures = structures;
 	_initShaders();
 }
 
@@ -2368,6 +2378,23 @@ void awe::map::convertTiles(const CScriptArray* const tiles,
 	convertTiles(engine::ConvertCScriptArray<std::vector<sf::Vector2u>,
 		sf::Vector2u>(tiles), (*_tileTypes)[fromTileType],
 		(*_tileTypes)[toTileType], transferOwnership);
+}
+
+bool awe::map::canStructureFit(const sf::Vector2u& fromTile,
+	const std::shared_ptr<const awe::structure>& structure) const {
+	if (_isOutOfBounds(fromTile)) return false;
+	for (std::size_t i = 0, e = structure->getDependentTileCount(); i < e; ++i) {
+		// Cba dealing with integer overflow.
+		const auto& offset = structure->getDependentTileOffset(i);
+		if (_isOutOfBounds({ fromTile.x + offset.x, fromTile.y + offset.y }))
+			return true;
+	}
+	return true;
+}
+
+bool awe::map::canStructureFit(const sf::Vector2u& fromTile,
+	const std::string& structure) const {
+	return canStructureFit(fromTile, (*_structures)[structure]);
 }
 
 bool awe::map::setSelectedUnit(const awe::UnitID unit) {

@@ -599,7 +599,7 @@ class EditableMap {
         map.addAvailableTile(rootTile);
         AvailableTileShader shader = AvailableTileShader::Yellow;
         const auto mapSize = map.getMapSize();
-        for (uint i = 0, len = structure.dependentTileCount; i < len; ++i) {
+        for (uint64 i = 0, len = structure.dependentTileCount; i < len; ++i) {
             // Integer overflow will handle tiles going above the map or to the
             // left of the map. A map should never be over 4 billion tiles in
             // either axis anyway.
