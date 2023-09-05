@@ -285,7 +285,14 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const auto tileOwnerSel = CurrentlySelectedTileType.owner;
     const auto unitTypeSel = cast<UnitType>(CurrentlySelectedUnitType.object);
     const auto unitArmySel = CurrentlySelectedUnitType.owner;
+    const auto structureSel = cast<Structure>(CurrentlySelectedStructure.object);
+    const auto structureOwnerSel = CurrentlySelectedStructure.owner;
     const auto currentPaletteWindowTab = PaletteWindow.getSelectedTab();
+
+    // Highlight the selected structure's tiles on the map if one is selected.
+    if (currentPaletteWindowTab == STRUCTURE_DIALOG)
+        edit.setStructurePaintedTiles(structureSel);
+    else edit.setStructurePaintedTiles(null);
     
     // If the paint tool has just been triggered, disable mementos.
     // This is so that an entire paint stroke can be saved in one memento.

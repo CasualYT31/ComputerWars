@@ -51,7 +51,7 @@ void updateTurnOrderMap(const std::unordered_map<std::string, T>& src,
 //*BANK ID*
 //*********
 const std::string awe::bank_id::EMPTY_STRING = "";
-const sf::Vector2u awe::bank_id::EMPTY_VECTOR = { 0, 0 };
+const sf::Vector2i awe::bank_id::EMPTY_VECTOR_I = { 0, 0 };
 
 //*******************
 //*COMMON PROPERTIES*
@@ -364,18 +364,18 @@ awe::structure::structure(const std::string& scriptName, engine::json& j) :
 	if (j.keysExist({ "destroyediconname" }))
 		j.apply(_destroyedIconName, { "destroyediconname" }, true);
 	if (j.keysExist({ "dependent" })) {
-		const auto& json = j.nlohmannJSON()["dependent"];
+		const auto json = j.nlohmannJSON()["dependent"];
 		if (!json.is_array()) return;
 		// Can't have a dependent tile that offsets to the root tile.
-		std::list<sf::Vector2u> offsets = { { 0, 0 } };
+		std::list<sf::Vector2i> offsets = { { 0, 0 } };
 		for (const auto& obj : json) {
 			if (!obj.is_object() || !obj.contains("offset") ||
 				!obj.contains("tile") || !obj["tile"].is_string()) continue;
 			const auto& offsetObj = obj["offset"];
 			if (!offsetObj.is_array() || offsetObj.size() != 2 ||
-				!offsetObj[0].is_number_integer() || offsetObj[0] < 0 ||
-				!offsetObj[1].is_number_integer() || offsetObj[1] < 0) continue;
-			sf::Vector2u offset = { offsetObj[0], offsetObj[1] };
+				!offsetObj[0].is_number_integer() ||
+				!offsetObj[1].is_number_integer()) continue;
+			sf::Vector2i offset = { offsetObj[0], offsetObj[1] };
 			if (std::find(offsets.cbegin(), offsets.cend(), offset) !=
 				offsets.cend()) continue;
 			offsets.push_back(offset);
@@ -416,7 +416,7 @@ void awe::structure::updateOwnedIconsMap(
 	const awe::bank<awe::country>& countries) const {
 	updateTurnOrderMap(_ownedIcons, _ownedIconsTurnOrder, countries);
 }
-awe::structure::dependent_tile::dependent_tile(const sf::Vector2u& o,
+awe::structure::dependent_tile::dependent_tile(const sf::Vector2i& o,
 	const std::string& t) : offset(o), tile(t) {}
 
 //******************

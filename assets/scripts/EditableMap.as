@@ -580,6 +580,37 @@ class EditableMap {
         return newAmmo;
     }
 
+    ////////////////////////
+    // STRUCTURE HANDLING //
+    ////////////////////////
+    /**
+     * Clears the available tiles and adds new ones based on the tile offsets of a
+     * given structure, and the currently selected tile in the map.
+     * Not based on the selected tile in this \c EditableMap.\n
+     * If any tiles lie outside of the map's size, the red shader will be used.
+     * Otherwise, the yellow shader is used.
+     * @param structure The structure to pull the tiles from. \c null can be used
+     *                  to clear the available tiles only.
+     */
+    void setStructurePaintedTiles(const Structure@ const structure) {
+        map.clearAvailableTiles();
+        if (structure is null) return;
+        const auto rootTile = map.getSelectedTile();
+        map.addAvailableTile(rootTile);
+        AvailableTileShader shader = AvailableTileShader::Yellow;
+        const auto mapSize = map.getMapSize();
+        for (uint i = 0, len = structure.dependentTileCount; i < len; ++i) {
+            // Integer overflow will handle tiles going above the map or to the
+            // left of the map. A map should never be over 4 billion tiles in
+            // either axis anyway.
+            const auto tile = rootTile + structure.dependentTileOffset[i];
+            if (tile.x >= mapSize.x || tile.y >= mapSize.y)
+                shader = AvailableTileShader::Red;
+            map.addAvailableTile(tile);
+        }
+        map.setAvailableTileShader(shader);
+    }
+
     ///////////////////////////////////////////////
     // TILE AND ARMY PROPERTIES WINDOWS HANDLING //
     ///////////////////////////////////////////////

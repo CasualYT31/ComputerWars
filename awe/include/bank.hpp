@@ -331,12 +331,12 @@ namespace awe {
 		static const std::string EMPTY_STRING;
 
 		/**
-		 * Used by subclasses to return an empty Vector2 when attempting to
-		 * retrieve a Vector2 property that doesn't exist.
+		 * Used by subclasses to return an empty Vector2i when attempting to
+		 * retrieve a Vector2i property that doesn't exist.
 		 * Should be initialised to <tt>(0, 0)</tt>.
 		 * @sa \c EMPTY_STRING.
 		 */
-		static const sf::Vector2u EMPTY_VECTOR;
+		static const sf::Vector2i EMPTY_VECTOR_I;
 	private:
 		/**
 		 * The script name/identifier of this bank entry.
@@ -1942,7 +1942,7 @@ namespace awe {
 		 * <ul><li>\c "tile" = \c dependent_tile::tile, <em>mandatory</em>, <tt>
 		 *         (TILE_TYPE_SCRIPT_NAME: string)</tt></li>
 		 *     <li>\c "offset" = \c dependent_tile::offset, <em>mandatory</em>,
-		 *         <tt>([unsigned 32-bit int, unsigned 32-bit int])</tt>)
+		 *         <tt>([signed 32-bit int, signed 32-bit int])</tt>)
 		 *     <li>\c "destroyed" = \c dependent_tile::destroyedTile, <em>optional
 		 *         </em>, <tt>(TILE_TYPE_SCRIPT_NAME: string)</tt></li>
 		 *         \c "deleted" = \c dependent_tile::deletedTile, <em>optional
@@ -2112,9 +2112,9 @@ namespace awe {
 		 * @return The offset in tiles. <tt>(0, 0)</tt> if the given index was out
 		 *         of bounds.
 		 */
-		inline const sf::Vector2u& getDependentTileOffset(
+		inline const sf::Vector2i& getDependentTileOffset(
 			const std::size_t index) const noexcept {
-			return index >= getDependentTileCount() ? EMPTY_VECTOR :
+			return index >= getDependentTileCount() ? EMPTY_VECTOR_I :
 				_dependents[index].offset;
 		}
 
@@ -2367,7 +2367,7 @@ namespace awe {
 			 * @param o The offset.
 			 * @param t The script name of the normal tile type.
 			 */
-			dependent_tile(const sf::Vector2u& o, const std::string& t);
+			dependent_tile(const sf::Vector2i& o, const std::string& t);
 
 			/**
 			 * Does this dependent tile have a destroyed tile type?
@@ -2390,7 +2390,7 @@ namespace awe {
 			 * the root tile.
 			 * Must be unique on a per structure basis!
 			 */
-			sf::Vector2u offset;
+			sf::Vector2i offset;
 
 			/**
 			 * The type of tile that is used to represent this dependent tile of

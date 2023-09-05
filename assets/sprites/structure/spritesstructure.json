@@ -68,6 +68,14 @@
     "city": {
       "frames": [ [ 736, 0, 46, 46 ] ],
       "durations": [ 0 ]
+    },
+    "blackcannondown": {
+      "frames": [ [ 0, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "dblackcannondown": {
+      "frames": [ [ 46, 46, 46, 46 ] ],
+      "durations": [ 0 ]
     }
   }
 }

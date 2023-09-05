@@ -152,6 +152,14 @@ bool uEqU(void* pLhs, const sf::Vector2u& rhs) {
     return lhs->x == rhs.x && lhs->y == rhs.y;
 }
 
+// Wrapper for sf::Vector2<> operator+s.
+
+// Don't bother handling integer overflow.
+sf::Vector2u uAddI(void* pLhs, const sf::Vector2i& rhs) {
+    auto lhs = (const sf::Vector2u*)pLhs;
+    return sf::Vector2u(lhs->x + rhs.x, lhs->y + rhs.y);
+}
+
 // DON'T FORGET TO KEEP sfx::INVALID_MOUSE UP TO DATE!
 sf::Vector2i INVALID_MOUSE_SCRIPT = sf::Vector2i(INT_MIN, INT_MIN);
 
@@ -202,6 +210,11 @@ void engine::RegisterVectorTypes(asIScriptEngine* engine,
         r = engine->RegisterObjectMethod("Vector2",
             "bool opEquals(const MousePosition&in) const",
             asFUNCTION(uEqI), asCALL_CDECL_OBJFIRST);
+
+        // Vector2 opAdd
+        r = engine->RegisterObjectMethod("Vector2",
+            "Vector2 opAdd(const MousePosition&in) const",
+            asFUNCTION(uAddI), asCALL_CDECL_OBJFIRST);
 
         r = engine->RegisterObjectType("Vector2f", sizeof(sf::Vector2f),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2f>());

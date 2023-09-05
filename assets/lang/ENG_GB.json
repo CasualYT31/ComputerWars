@@ -349,6 +349,10 @@
 	"VOLCANO_shortname": "Vlcn",
 	"VOLCANO_description": "A dangerous volcano that spews out molten magma on a daily basis.",
 
+	"BLACKCANNON_longname": "Black Cannon",
+	"BLACKCANNON_shortname": "BlkCn",
+	"BLACKCANNON_description": "Lash designed this powerful cannon to fire at great range.",
+
 	"HQ_longname": "Headquarters",
 	"HQ_shortname": "HQ",
 	"HQ_description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",

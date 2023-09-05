@@ -510,11 +510,11 @@ void awe::structure::Register(const std::string& type,
 		asMETHOD(T, getDependentTileCount), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the number of dependent tiles this "
 		"structure has.");
-	r = engine->RegisterObjectMethod(type.c_str(),
-		"const Vector2& get_dependentTileOffset() const property",
+	r = engine->RegisterObjectMethod(type.c_str(), "const MousePosition& "
+		"get_dependentTileOffset(const uint64) const property",
 		asMETHOD(T, getDependentTileOffset), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the offset from the root tile that "
-		"this dependent tile has.");
+		"the specified dependent tile has.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_dependentTileType(const uint64) const property",
 		asMETHOD(T, getDependentTileTypeScriptName), asCALL_THISCALL);

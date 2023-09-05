@@ -288,5 +288,24 @@
 	"077volcano0,3": {"type": "VOLCANO", "neutral": "volcano0,3"},
 	"078volcano1,3": {"type": "VOLCANO", "neutral": "volcano1,3"},
 	"079volcano2,3": {"type": "VOLCANO", "neutral": "volcano2,3"},
-	"07Avolcano3,3": {"type": "VOLCANO", "neutral": "volcano3,3"}
+	"07Avolcano3,3": {"type": "VOLCANO", "neutral": "volcano3,3"},
+
+	"blackcannondown0,0": {"type": "BLACKCANNON", "neutral": "blackcannondown0,0"},
+	"blackcannondown1,0": {"type": "BLACKCANNON", "neutral": "blackcannondown1,0"},
+	"blackcannondown2,0": {"type": "BLACKCANNON", "neutral": "blackcannondown2,0"},
+	"blackcannondown0,1": {"type": "BLACKCANNON", "neutral": "blackcannondown0,1"},
+	"blackcannondown1,1": {"type": "BLACKCANNON", "neutral": "blackcannondown1,1"},
+	"blackcannondown2,1": {"type": "BLACKCANNON", "neutral": "blackcannondown2,1"},
+	"blackcannondown0,2": {"type": "BLACKCANNON", "neutral": "blackcannondown0,2"},
+	"blackcannondown1,2": {"type": "BLACKCANNON", "neutral": "blackcannondown1,2"},
+	"blackcannondown2,2": {"type": "BLACKCANNON", "neutral": "blackcannondown2,2"},
+	"dblackcannondown0,0": {"type": "BLACKCANNON", "neutral": "dblackcannondown0,0"},
+	"dblackcannondown1,0": {"type": "BLACKCANNON", "neutral": "dblackcannondown1,0"},
+	"dblackcannondown2,0": {"type": "BLACKCANNON", "neutral": "dblackcannondown2,0"},
+	"dblackcannondown0,1": {"type": "BLACKCANNON", "neutral": "dblackcannondown0,1"},
+	"dblackcannondown1,1": {"type": "BLACKCANNON", "neutral": "dblackcannondown1,1"},
+	"dblackcannondown2,1": {"type": "BLACKCANNON", "neutral": "dblackcannondown2,1"},
+	"dblackcannondown0,2": {"type": "BLACKCANNON", "neutral": "dblackcannondown0,2"},
+	"dblackcannondown1,2": {"type": "BLACKCANNON", "neutral": "dblackcannondown1,2"},
+	"dblackcannondown2,2": {"type": "BLACKCANNON", "neutral": "dblackcannondown2,2"}
 }

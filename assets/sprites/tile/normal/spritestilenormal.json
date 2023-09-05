@@ -1320,6 +1320,114 @@
 				[ 128, 67, 16, 16 ]
 			],
 			"durations": [ 0 ]
+		},
+		"blackcannondown0,0": {
+			"frames": [
+				[ 416, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannondown1,0": {
+			"frames": [
+				[ 432, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannondown2,0": {
+			"frames": [
+				[ 448, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannondown0,1": {
+			"frames": [
+				[ 416, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannondown1,1": {
+			"frames": [
+				[ 432, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannondown2,1": {
+			"frames": [
+				[ 448, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannondown0,2": {
+			"frames": [
+				[ 416, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannondown1,2": {
+			"frames": [
+				[ 432, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannondown2,2": {
+			"frames": [
+				[ 448, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"dblackcannondown0,0": {
+			"frames": [
+				[ 416, 48, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"dblackcannondown1,0": {
+			"frames": [
+				[ 432, 48, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"dblackcannondown2,0": {
+			"frames": [
+				[ 448, 48, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"dblackcannondown0,1": {
+			"frames": [
+				[ 416, 64, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"dblackcannondown1,1": {
+			"frames": [
+				[ 432, 64, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"dblackcannondown2,1": {
+			"frames": [
+				[ 448, 64, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"dblackcannondown0,2": {
+			"frames": [
+				[ 416, 80, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"dblackcannondown1,2": {
+			"frames": [
+				[ 432, 80, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"dblackcannondown2,2": {
+			"frames": [
+				[ 448, 80, 16, 16 ]
+			],
+			"durations": [ 0 ]
 		}
 	}
 }

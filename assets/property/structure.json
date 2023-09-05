@@ -62,5 +62,68 @@
       "destroyed": "061plainseamvert"
     },
     "paintable": false
+  },
+  "BLACKCANNONDOWN": {
+    "longname": "BLACKCANNON_longname",
+    "shortname": "BLACKCANNON_shortname",
+    "icon": "blackcannondown",
+    "description": "BLACKCANNON_description",
+    "root": {
+      "tile": "blackcannondown1,2",
+      "destroyed": "dblackcannondown1,2",
+      "deleted": "000plain"
+    },
+    "dependent": [
+      {
+        "offset": [ -1, -2 ],
+        "tile": "blackcannondown0,0",
+        "destroyed": "dblackcannondown0,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -2 ],
+        "tile": "blackcannondown1,0",
+        "destroyed": "dblackcannondown1,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -2 ],
+        "tile": "blackcannondown2,0",
+        "destroyed": "dblackcannondown2,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -1 ],
+        "tile": "blackcannondown0,1",
+        "destroyed": "dblackcannondown0,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -1 ],
+        "tile": "blackcannondown1,1",
+        "destroyed": "dblackcannondown1,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -1 ],
+        "tile": "blackcannondown2,1",
+        "destroyed": "dblackcannondown2,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, 0 ],
+        "tile": "blackcannondown0,2",
+        "destroyed": "dblackcannondown0,2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 0 ],
+        "tile": "blackcannondown2,2",
+        "destroyed": "dblackcannondown2,2",
+        "deleted": "000plain"
+      }
+    ],
+    "destroyedlongname": "BLACKCANNON_longname",
+    "destroyediconname": "dblackcannondown"
   }
 }
