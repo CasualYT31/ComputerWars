@@ -1730,6 +1730,70 @@ namespace awe {
 		}
 
 		/**
+		 * Selects an additional tile on the map.
+		 * You can use this mechanism to selected two tiles at once. You should
+		 * primarily use \c setSelectedTile() as this additional cursor is for
+		 * visual effect only.
+		 * @param pos The X and Y location of the tile which is additionally
+		 *            selected.
+		 */
+		void setAdditionallySelectedTile(const sf::Vector2u& pos);
+
+		/**
+		 * Removes the additionally selected tile cursor.
+		 * Also resets the animation of the additional cursor.
+		 */
+		void clearAdditionallySelectedTile();
+
+		/**
+		 * Sets which sprite from the icon spritesheet to use as the UL corner of
+		 * the additionally selected tile cursor.
+		 * If \c _sheet_icon isn't \c nullptr, and the given sprite doesn't exist
+		 * in that sheet, then a warning will be logged, but the assignment will
+		 * still go ahead.
+		 * @warning Must be called, or else the UL corner of the cursor will not
+		 *          show up!
+		 * @param   sprite The animated sprite to use as the UL corner.
+		 */
+		void setULAdditionalCursorSprite(const std::string& sprite);
+
+		/**
+		 * Sets which sprite from the icon spritesheet to use as the UR corner of
+		 * the additionally selected tile cursor.
+		 * If \c _sheet_icon isn't \c nullptr, and the given sprite doesn't exist
+		 * in that sheet, then a warning will be logged, but the assignment will
+		 * still go ahead.
+		 * @warning Must be called, or else the UR corner of the cursor will not
+		 *          show up!
+		 * @param   sprite The animated sprite to use as the UR corner.
+		 */
+		void setURAdditionalCursorSprite(const std::string& sprite);
+
+		/**
+		 * Sets which sprite from the icon spritesheet to use as the LL corner of
+		 * the additionally selected tile cursor.
+		 * If \c _sheet_icon isn't \c nullptr, and the given sprite doesn't exist
+		 * in that sheet, then a warning will be logged, but the assignment will
+		 * still go ahead.
+		 * @warning Must be called, or else the LL corner of the cursor will not
+		 *          show up!
+		 * @param   sprite The animated sprite to use as the LL corner.
+		 */
+		void setLLAdditionalCursorSprite(const std::string& sprite);
+
+		/**
+		 * Sets which sprite from the icon spritesheet to use as the LR corner of
+		 * the additionally selected tile cursor.
+		 * If \c _sheet_icon isn't \c nullptr, and the given sprite doesn't exist
+		 * in that sheet, then a warning will be logged, but the assignment will
+		 * still go ahead.
+		 * @warning Must be called, or else the LR corner of the cursor will not
+		 *          show up!
+		 * @param   sprite The animated sprite to use as the LR corner.
+		 */
+		void setLRAdditionalCursorSprite(const std::string& sprite);
+
+		/**
 		 * Selects an army from the map.
 		 * If the given army didn't exist, the call will be cancelled and logged.
 		 * @param army The ID of the army which should be having their turn at the
@@ -2380,6 +2444,11 @@ namespace awe {
 		sf::Vector2u _sel;
 
 		/**
+		 * The additionally selected tile.
+		 */
+		std::optional<sf::Vector2u> _additionalSel;
+
+		/**
 		 * The start of the rectangle tile selection.
 		 */
 		std::optional<sf::Vector2u> _startOfRectSel;
@@ -2431,6 +2500,26 @@ namespace awe {
 		 * of the screen.
 		 */
 		std::string _lrCursorSprite;
+
+		/**
+		 * The UL corner of the additionally selected tile cursor.
+		 */
+		sfx::animated_sprite _additionallySelectedTileCursorUL;
+
+		/**
+		 * The UR corner of the additionally selected tile cursor.
+		 */
+		sfx::animated_sprite _additionallySelectedTileCursorUR;
+
+		/**
+		 * The LL corner of the additionally selected tile cursor.
+		 */
+		sfx::animated_sprite _additionallySelectedTileCursorLL;
+
+		/**
+		 * The LR corner of the additionally selected tile cursor.
+		 */
+		sfx::animated_sprite _additionallySelectedTileCursorLR;
 
 		// MOVE MODE DRAWING //
 

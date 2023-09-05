@@ -567,17 +567,17 @@ void MapMakerMenu_NewMap_Closing(bool&out abort) {
 /**
  * Open an existing map for editting.
  */
-// void MapMakerMenu_OpenMap_FileSelected() {
-//     FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
-//     quitEditMap(function() {
-//         TilePropertiesDialog.deselect();
-//         @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
-//             ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
-//         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
-//         ArmyPropertiesDialog.refresh();
-//         MementosHaveChanged();
-//     });
-// }
+void MapMakerMenu_OpenMap_FileSelected() {
+    FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
+    quitEditMap(function() {
+        TilePropertiesDialog.deselect();
+        @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
+            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
+        edit.map.setMementoStateChangedCallback(MementosHaveChanged);
+        ArmyPropertiesDialog.refresh();
+        MementosHaveChanged();
+    });
+}
 
 // Debugging.
 void MapMakerMenuOpen() {

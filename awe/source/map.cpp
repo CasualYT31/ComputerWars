@@ -758,6 +758,30 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getSelectedTile), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void setAdditionallySelectedTile(const Vector2&in)",
+			asMETHOD(awe::map, setAdditionallySelectedTile), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void clearAdditionallySelectedTile()",
+			asMETHOD(awe::map, clearAdditionallySelectedTile), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setULAdditionalCursorSprite(const string&in)",
+			asMETHOD(awe::map, setULAdditionalCursorSprite), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setURAdditionalCursorSprite(const string&in)",
+			asMETHOD(awe::map, setURAdditionalCursorSprite), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setLLAdditionalCursorSprite(const string&in)",
+			asMETHOD(awe::map, setLLAdditionalCursorSprite), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void setLRAdditionalCursorSprite(const string&in)",
+			asMETHOD(awe::map, setLRAdditionalCursorSprite), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void setSelectedArmy(const ArmyID)",
 			asMETHOD(awe::map, setSelectedArmy), asCALL_THISCALL);
 
@@ -832,7 +856,15 @@ void awe::map::Register(asIScriptEngine* engine,
 }
 
 awe::map::map(const engine::logger::data& data) : _logger(data),
-	_cursor({ data.sink, data.name + "_cursor_sprite" }) {
+	_cursor({ data.sink, data.name + "_cursor_sprite" }),
+	_additionallySelectedTileCursorUL({ data.sink,
+		data.name + "_addcursorul_sprite" }),
+	_additionallySelectedTileCursorUR({ data.sink,
+		data.name + "_addcursorur_sprite" }),
+	_additionallySelectedTileCursorLL({ data.sink,
+		data.name + "_addcursorll_sprite" }),
+	_additionallySelectedTileCursorLR({ data.sink,
+		data.name + "_addcursorlr_sprite" }) {
 	_initShaders();
 }
 
@@ -841,7 +873,15 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 	const engine::logger::data& data) : _logger(data),
-	_cursor({data.sink, data.name + "_cursor_sprite"}) {
+	_cursor({data.sink, data.name + "_cursor_sprite"}),
+	_additionallySelectedTileCursorUL({ data.sink,
+		data.name + "_addcursorul_sprite" }),
+	_additionallySelectedTileCursorUR({ data.sink,
+		data.name + "_addcursorur_sprite" }),
+	_additionallySelectedTileCursorLL({ data.sink,
+		data.name + "_addcursorll_sprite" }),
+	_additionallySelectedTileCursorLR({ data.sink,
+		data.name + "_addcursorlr_sprite" }) {
 	_countries = countries;
 	_tileTypes = tiles;
 	_unitTypes = units;
@@ -2749,6 +2789,50 @@ void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
 	setSelectedTile(sel);
 }
 
+void awe::map::setAdditionallySelectedTile(const sf::Vector2u& pos) {
+	_additionalSel = pos;
+}
+
+void awe::map::clearAdditionallySelectedTile() {
+	_additionalSel.reset();
+	_additionallySelectedTileCursorUL.setCurrentFrame(0);
+	_additionallySelectedTileCursorUR.setCurrentFrame(0);
+	_additionallySelectedTileCursorLL.setCurrentFrame(0);
+	_additionallySelectedTileCursorLR.setCurrentFrame(0);
+}
+
+void awe::map::setULAdditionalCursorSprite(const std::string& sprite) {
+	_additionallySelectedTileCursorUL.setSprite(sprite);
+	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
+		_logger.warning("setULAdditionalCursorSprite was just given sprite with "
+			"ID \"{}\", which doesn't exist in the spritesheet!", sprite);
+	}
+}
+
+void awe::map::setURAdditionalCursorSprite(const std::string& sprite) {
+	_additionallySelectedTileCursorUR.setSprite(sprite);
+	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
+		_logger.warning("setURAdditionalCursorSprite was just given sprite with "
+			"ID \"{}\", which doesn't exist in the spritesheet!", sprite);
+	}
+}
+
+void awe::map::setLLAdditionalCursorSprite(const std::string& sprite) {
+	_additionallySelectedTileCursorLL.setSprite(sprite);
+	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
+		_logger.warning("setLLAdditionalCursorSprite was just given sprite with "
+			"ID \"{}\", which doesn't exist in the spritesheet!", sprite);
+	}
+}
+
+void awe::map::setLRAdditionalCursorSprite(const std::string& sprite) {
+	_additionallySelectedTileCursorLR.setSprite(sprite);
+	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
+		_logger.warning("setLRAdditionalCursorSprite was just given sprite with "
+			"ID \"{}\", which doesn't exist in the spritesheet!", sprite);
+	}
+}
+
 void awe::map::setSelectedArmy(const awe::ArmyID army) {
 	if (army == awe::NO_ARMY || _isArmyPresent(army)) {
 		awe::disable_mementos token(this,
@@ -2897,6 +2981,10 @@ void awe::map::setIconSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sheet_icon = sheet;
 	_cursor.setSpritesheet(sheet);
+	_additionallySelectedTileCursorUL.setSpritesheet(sheet);
+	_additionallySelectedTileCursorUR.setSpritesheet(sheet);
+	_additionallySelectedTileCursorLL.setSpritesheet(sheet);
+	_additionallySelectedTileCursorLR.setSpritesheet(sheet);
 	// Go through all of the units and set the new spritesheet to each one.
 	for (auto& unit : _units) unit.second.setIconSpritesheet(sheet);
 }
@@ -2972,6 +3060,7 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 			}
 			if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;
 			if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
+			const auto fTileWidth = static_cast<float>(tileWidth);
 			tile.setPixelPosition(tilex, tiley -
 				static_cast<float>((tileHeight - tile.MIN_HEIGHT)));
 
@@ -2992,10 +3081,25 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 			}
 
 			// Update cursor position.
-			if (selectedTile == tilePos)
-				_cursor.setPosition(sf::Vector2f(tilex, tiley));
+			const auto cursorPosition = sf::Vector2f(tilex, tiley);
+			if (selectedTile == tilePos) _cursor.setPosition(cursorPosition);
 
-			tilex += static_cast<float>(tileWidth);
+			// Update additional cursor position.
+			if (_additionalSel && *_additionalSel == tilePos) {
+				_additionallySelectedTileCursorUL.setPosition(cursorPosition);
+				_additionallySelectedTileCursorUR.setPosition(cursorPosition +
+					sf::Vector2f(fTileWidth -
+						_additionallySelectedTileCursorUR.getSize().x, 0.f));
+				_additionallySelectedTileCursorLL.setPosition(cursorPosition +
+					sf::Vector2f(0.f, static_cast<float>(awe::tile::MIN_HEIGHT) -
+						_additionallySelectedTileCursorLL.getSize().y));
+				_additionallySelectedTileCursorLR.setPosition(cursorPosition +
+					sf::Vector2f(fTileWidth,
+						static_cast<float>(awe::tile::MIN_HEIGHT)) -
+					_additionallySelectedTileCursorLR.getSize());
+			}
+
+			tilex += fTileWidth;
 		}
 		tiley += static_cast<float>(awe::tile::MIN_HEIGHT);
 	}
@@ -3020,7 +3124,15 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	// Note that unit positioning was carried out in step 1.
 	for (auto& unit : _units) unit.second.animate(target);
 
-	// Step 4. the cursor.
+	// Step 4. the additional cursor.
+	if (_additionalSel) {
+		_additionallySelectedTileCursorUL.animate(target);
+		_additionallySelectedTileCursorUR.animate(target);
+		_additionallySelectedTileCursorLL.animate(target);
+		_additionallySelectedTileCursorLR.animate(target);
+	}
+
+	// Step 5. the cursor.
 	const auto quadrant = getCursorQuadrant();
 	switch (quadrant) {
 	case awe::quadrant::LowerLeft:
@@ -3037,7 +3149,7 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	}
 	_cursor.animate(target);
 
-	// Step 5. the rectangle selection graphic. Doesn't take crazy tile widths into
+	// Step 6. the rectangle selection graphic. Doesn't take crazy tile widths into
 	// account.
 	if (_startOfRectSel && _endOfRectSel) {
 		const sf::Vector2f rectSelStart(
@@ -3063,7 +3175,7 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 		_rectangle.setOutlineThickness(_scaling);
 	}
 
-	// Step 6. update the view to match the target's size, and apply the scaling.
+	// Step 7. update the view to match the target's size, and apply the scaling.
 	// Additionally, update the view offset.
 	auto mapPixelSize = mapSize; // Ignore fancy tile heights and widths.
 	mapPixelSize.x *= awe::tile::MIN_WIDTH;
@@ -3220,13 +3332,24 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	for (const auto& overridden : unitsWithLocationOverrides)
 		target.draw(overridden.first, overridden.second);
 
-	// Step 5. the cursor.
+	// Step 5. the additional cursor.
+	if (_additionalSel && !_additionallySelectedTileCursorUL.getSprite().empty() &&
+		!_additionallySelectedTileCursorUR.getSprite().empty() &&
+		!_additionallySelectedTileCursorLL.getSprite().empty() &&
+		!_additionallySelectedTileCursorLR.getSprite().empty()) {
+		target.draw(_additionallySelectedTileCursorUL, states);
+		target.draw(_additionallySelectedTileCursorUR, states);
+		target.draw(_additionallySelectedTileCursorLL, states);
+		target.draw(_additionallySelectedTileCursorLR, states);
+	}
+
+	// Step 6. the cursor. Always rendered over the additional cursor.
 	if (!_cursor.getSprite().empty()) target.draw(_cursor, states);
 
-	// Step 6. the rectangle selection graphic.
+	// Step 7. the rectangle selection graphic.
 	if (_startOfRectSel && _endOfRectSel) target.draw(_rectangle, states);
 
-	// Step 7. restore old view.
+	// Step 8. restore old view.
 	target.setView(oldView);
 }
 

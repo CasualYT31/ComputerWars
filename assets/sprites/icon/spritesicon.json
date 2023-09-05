@@ -14,7 +14,8 @@
 				90,
 				60
 			],
-			"offset": [ -3, -3 ]
+			"offset": [ -3, -3 ],
+			"globalframeid": true
 		},
 		"urcursor": {
 			"frames": [
@@ -29,7 +30,8 @@
 				90,
 				60
 			],
-			"offset": [ -9, -3 ]
+			"offset": [ -9, -3 ],
+			"globalframeid": true
 		},
 		"llcursor": {
 			"frames": [
@@ -44,7 +46,8 @@
 				90,
 				60
 			],
-			"offset": [ -3, -12 ]
+			"offset": [ -3, -12 ],
+			"globalframeid": true
 		},
 		"lrcursor": {
 			"frames": [
@@ -59,7 +62,8 @@
 				90,
 				60
 			],
-			"offset": [ -9, -12 ]
+			"offset": [ -9, -12 ],
+			"globalframeid": true
 		},
 		"ulanglebracket": {
 			"frames": [
@@ -74,7 +78,8 @@
 				90,
 				60
 			],
-			"offset": [ -3, -3 ]
+			"offset": [ -3, -3 ],
+			"globalframeid": true
 		},
 		"uranglebracket": {
 			"frames": [
@@ -89,7 +94,8 @@
 				90,
 				60
 			],
-			"offset": [ 3, -3 ]
+			"offset": [ 3, -3 ],
+			"globalframeid": true
 		},
 		"llanglebracket": {
 			"frames": [
@@ -104,7 +110,8 @@
 				90,
 				60
 			],
-			"offset": [ -3, 3 ]
+			"offset": [ -3, 3 ],
+			"globalframeid": true
 		},
 		"lranglebracket": {
 			"frames": [
@@ -119,7 +126,8 @@
 				90,
 				60
 			],
-			"offset": [ 3, 3 ]
+			"offset": [ 3, 3 ],
+			"globalframeid": true
 		},
 		"ulattackcursor": {
 			"frames": [ [ 139, 93, 30, 29 ] ],

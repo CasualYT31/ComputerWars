@@ -101,6 +101,10 @@ class EditableMap {
             map.enablePeriodic(false);
             map.alwaysShowHiddenUnits(true);
             map.setMapScalingFactor(_mapScalingFactor);
+            map.setULAdditionalCursorSprite("ulanglebracket");
+            map.setURAdditionalCursorSprite("uranglebracket");
+            map.setLLAdditionalCursorSprite("llanglebracket");
+            map.setLRAdditionalCursorSprite("lranglebracket");
             setNormalCursorSprites();
             _updateStatusBar();
         }
@@ -586,8 +590,7 @@ class EditableMap {
     void selectTile(const Vector2&in tile) {
         tilePropsTile = tile;
         tilePropsTileSet = true;
-        map.clearAvailableTiles();
-        map.addAvailableTile(tile);
+        map.setAdditionallySelectedTile(tile);
         _updateTileProps(tile);
     }
 
@@ -597,7 +600,7 @@ class EditableMap {
     void deselectTile() {
         if (!tilePropsTileSet) return;
         tilePropsTileSet = false;
-        map.clearAvailableTiles();
+        map.clearAdditionallySelectedTile();
         if (tilePropsWindow !is null) tilePropsWindow.deselect();
     }
 

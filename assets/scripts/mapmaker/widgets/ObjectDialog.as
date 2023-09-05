@@ -498,9 +498,6 @@ ObjectDialogSetUpData@ DefaultObjectDialogData(const string&in parent) {
     @Tiles.mapNameToObject = function(shortName){return tiletype[shortName];};
     Tiles.spritesheet = "tile.normal";
     @Tiles.generateSpritesArray = function(owner){
-        for (uint i = 0, len = excludedTiles.length(); i < len; ++i) {
-            info(excludedTiles[i]);
-        }
         return ::generateTileSpriteArray(owner, excludedTiles);
     };
     array<string>@ tNames = array<string>();
