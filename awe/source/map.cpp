@@ -582,6 +582,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"const",
 			asMETHOD(awe::map, getTilesInConeAsArray), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"array<Vector2>@ getTilesInCrosshair(const Vector2&in) const",
+			asMETHOD(awe::map, getTilesInCrosshairAsArray), asCALL_THISCALL);
+
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPath(const Vector2&in origin, const Vector2&in dest, "
 			"const Movement&in moveType, const uint movePoints, const Fuel fuel, "
@@ -2490,6 +2494,27 @@ CScriptArray* awe::map::getTilesInConeAsArray(sf::Vector2u tile,
 	if (!_scripts) throw NO_SCRIPTS;
 	return _scripts->createArrayFromContainer("Vector2",
 		getTilesInCone(tile, dir, startFrom, endAt));
+}
+
+std::unordered_set<sf::Vector2u> awe::map::getTilesInCrosshair(
+	const sf::Vector2u& tile) const {
+	const sf::Vector2u mapSize = getMapSize();
+	if (_isOutOfBounds(tile)) {
+		_logger.error("getTilesInCrosshair operation failed: tile at position {} "
+			"is out-of-bounds with the map's size of {}!", tile, mapSize);
+		return {};
+	}
+	std::unordered_set<sf::Vector2u> tiles = { tile };
+	for (unsigned int x = 0; x < mapSize.x; ++x) tiles.insert({ x, tile.y });
+	for (unsigned int y = 0; y < mapSize.y; ++y) tiles.insert({ tile.x, y });
+	return tiles;
+}
+
+CScriptArray* awe::map::getTilesInCrosshairAsArray(
+	const sf::Vector2u& tile) const {
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("Vector2",
+		getTilesInCrosshair(tile));
 }
 
 std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin,

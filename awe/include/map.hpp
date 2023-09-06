@@ -1321,6 +1321,7 @@ namespace awe {
 		 *                   removed from the result.
 		 * @param  endAt     The number of rows/columns to draw the cone from the
 		 *                   origin tile.
+		 * @return A list of tiles within the cone.
 		 */
 		std::unordered_set<sf::Vector2u> getTilesInCone(sf::Vector2u tile,
 			const direction dir, unsigned int startFrom,
@@ -1335,6 +1336,25 @@ namespace awe {
 		CScriptArray* getTilesInConeAsArray(sf::Vector2u tile,
 			const direction dir, unsigned int startFrom,
 			const unsigned int endAt) const;
+
+		/**
+		 * Returns a list of tiles that share either an X or Y coordinate with a
+		 * given tile.
+		 * @param  tile The tile to measure from.
+		 * @return A list of tiles that form a crosshair, centred on the given
+		 *         tile.
+		 */
+		std::unordered_set<sf::Vector2u> getTilesInCrosshair(
+			const sf::Vector2u& tile) const;
+
+		/**
+		 * Version of \c getTilesInCrosshair() that converts the result into a
+		 * \c CScriptArray.
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c getTilesInCrosshair().
+		 */
+		CScriptArray* getTilesInCrosshairAsArray(
+			const sf::Vector2u& tile) const;
 
 		/**
 		 * Finds the shortest path from the origin to the destination.

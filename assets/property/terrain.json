@@ -321,6 +321,14 @@
 		"hp": 99,
 		"defence": 0
 	},
+	"BLACKLASER": {
+		"longname": "BLACKLASER_longname",
+		"shortname": "BLACKLASER_shortname",
+		"icon": "noentry",
+		"description": "BLACKLASER_description",
+		"hp": 99,
+		"defence": 0
+	},
 	"HQ": {
 		"longname": "HQ_longname",
 		"shortname": "HQ_shortname",

@@ -361,6 +361,10 @@
 	"MINICANNON_shortname": "MnCn",
 	"MINICANNON_description": "Lash designed this weaker cousin to the cannon.",
 
+	"BLACKLASER_longname": "Laser Cannon",
+	"BLACKLASER_shortname": "LsrCn",
+	"BLACKLASER_description": "A Lash invention. Whether friend or foe, this laser will slice through any that stand in its path.",
+
 	"HQ_longname": "Headquarters",
 	"HQ_shortname": "HQ",
 	"HQ_description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",

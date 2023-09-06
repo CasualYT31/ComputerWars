@@ -237,5 +237,17 @@
     },
     "destroyedlongname": "PLAINS_longname",
     "destroyediconname": "dminicannon"
+  },
+  "BLACKLASER": {
+    "longname": "BLACKLASER_longname",
+    "shortname": "BLACKLASER_shortname",
+    "icon": "blacklaser",
+    "description": "BLACKLASER_description",
+    "root": {
+      "tile": "blacklaser",
+      "destroyed": "001plainruin"
+    },
+    "destroyedlongname": "PLAINS_longname",
+    "destroyediconname": "dminicannon"
   }
 }

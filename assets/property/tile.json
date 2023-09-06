@@ -321,5 +321,7 @@
 	"minicannonup": {"type": "MINICANNON", "neutral": "minicannonup"},
 	"minicannonright": {"type": "MINICANNON", "neutral": "minicannonright"},
 	"minicannonleft": {"type": "MINICANNON", "neutral": "minicannonleft"},
-	"minicannondown": {"type": "MINICANNON", "neutral": "minicannondown"}
+	"minicannondown": {"type": "MINICANNON", "neutral": "minicannondown"},
+	
+	"blacklaser": {"type": "BLACKLASER", "neutral": "blacklaser"}
 }

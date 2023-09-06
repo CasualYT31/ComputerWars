@@ -234,6 +234,8 @@ class PlayableMap {
         } else if (structType == "MINICANNONDOWN") {
             return map.getTilesInCone(Vector2(tile.x, tile.y + 1),
                 Direction::Down, 0, 3);
+        } else if (structType == "BLACKLASER") {
+            return map.getTilesInCrosshair(tile);
         } else return {};
     }
 
@@ -1591,6 +1593,17 @@ class PlayableMap {
             if (targetUnit != NO_UNIT) {
                 damageUnitsInRange(tilesInRange[unitTile], 0, 0,
                     terrainName == "BLACKCANNONROOT" ? 5 : 3);
+            }
+
+        } else if (terrainName == "BLACKLASER") {
+            const auto tilesInRange = getStructureAttackRange(tile);
+            for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
+                // Ooziums are the only units that will be impervious to the
+                // laser.
+                const auto unitID = map.getUnitOnTile(tilesInRange[i]);
+                if (unitID == NO_UNIT ||
+                    map.getUnitType(unitID).scriptName == "OOZIUM") continue;
+                damageUnitsInRange(tilesInRange[i], 0, 0, 5);
             }
         }
     }
