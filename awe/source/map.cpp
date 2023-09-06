@@ -155,6 +155,20 @@ void awe::map::Register(asIScriptEngine* engine,
 		document->DocumentObjectEnum(r, "The different quadrants of a rectangle, "
 			"such as a render target.");
 
+		////////////////////
+		// DIRECTION ENUM //
+		////////////////////
+		r = engine->RegisterEnum("Direction");
+		engine->RegisterEnumValue("Direction", "Up",
+			static_cast<int>(awe::direction::Up));
+		engine->RegisterEnumValue("Direction", "Down",
+			static_cast<int>(awe::direction::Down));
+		engine->RegisterEnumValue("Direction", "Left",
+			static_cast<int>(awe::direction::Left));
+		engine->RegisterEnumValue("Direction", "Right",
+			static_cast<int>(awe::direction::Right));
+		document->DocumentObjectEnum(r, "Represents an orthogonal direction.");
+
 		//////////////////////
 		// GLOBAL FUNCTIONS //
 		//////////////////////
@@ -560,8 +574,13 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getTileStructureOffset), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "array<Vector2>@ "
-			"getAvailableTiles(const Vector2&in, uint, uint) const",
+			"getAvailableTiles(const Vector2&in, const uint, const uint) const",
 			asMETHOD(awe::map, getAvailableTilesAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "array<Vector2>@ "
+			"getTilesInCone(Vector2, const Direction, const uint, const uint) "
+			"const",
+			asMETHOD(awe::map, getTilesInConeAsArray), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPath(const Vector2&in origin, const Vector2&in dest, "
@@ -2426,6 +2445,51 @@ CScriptArray* awe::map::getAvailableTilesAsArray(
 	if (!_scripts) throw NO_SCRIPTS;
 	return _scripts->createArrayFromContainer("Vector2",
 		getAvailableTiles(tile, startFrom, endAt));
+}
+
+std::unordered_set<sf::Vector2u> awe::map::getTilesInCone(sf::Vector2u tile,
+	awe::direction dir, unsigned int startFrom, const unsigned int endAt) const {
+	const sf::Vector2u mapSize = getMapSize();
+	if (_isOutOfBounds(tile)) {
+		_logger.error("getTilesInCone operation failed: tile at position {} is "
+			"out-of-bounds with the map's size of {}!", tile, mapSize);
+		return {};
+	}
+	if (startFrom > endAt) return {};
+	std::unordered_set<sf::Vector2u> tiles;
+	int iterateX = -1, iterateY = -1;
+	switch (dir) {
+	case awe::direction::Down:
+		iterateY = 1;
+		break;
+	case awe::direction::Right:
+		iterateX = 1;
+		break;
+	}
+	tile.x += startFrom * iterateX;
+	tile.y += startFrom * iterateY;
+	for (unsigned int coneStrip = startFrom; coneStrip <= endAt; ++coneStrip) {
+		const auto oldSize = tiles.size();
+		for (unsigned int rowOrCol = 0; rowOrCol <= 2 * coneStrip; ++rowOrCol) {
+			sf::Vector2u tileToAdd;
+			if (dir == awe::direction::Up || dir == awe::direction::Down)
+				tileToAdd = { tile.x + rowOrCol, tile.y };
+			else
+				tileToAdd = { tile.x, tile.y + rowOrCol };
+			if (!_isOutOfBounds(tileToAdd)) tiles.insert(tileToAdd);
+		}
+		if (oldSize == tiles.size()) break;
+		tile.x += iterateX;
+		tile.y += iterateY;
+	}
+	return tiles;
+}
+
+CScriptArray* awe::map::getTilesInConeAsArray(sf::Vector2u tile,
+	const direction dir, unsigned int startFrom, const unsigned int endAt) const {
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("Vector2",
+		getTilesInCone(tile, dir, startFrom, endAt));
 }
 
 std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin,

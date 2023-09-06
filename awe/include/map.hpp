@@ -184,6 +184,16 @@ namespace awe {
 	};
 
 	/**
+	 * Represents orthogonal directions.
+	 */
+	enum class direction {
+		Up,
+		Down,
+		Left,
+		Right
+	};
+
+	/**
 	 * Class which represents a map, and the armies and units that play on it.
 	 * Only basic checks are carried out in this class; all game logic is separate.
 	 * If any of these basic checks fail, they will be logged.
@@ -1273,6 +1283,57 @@ namespace awe {
 		 */
 		CScriptArray* getAvailableTilesAsArray(
 			const sf::Vector2u& tile, unsigned int startFrom,
+			const unsigned int endAt) const;
+
+		/**
+		 * Returns a list of tiles that are within a cone-shape from the given
+		 * tile.
+		 * Using the \ Up direction to illustrate; a cone starts at the given tile.
+		 * The next row of the cone will then be one tile above the given tile, and
+		 * will be three tiles in width, centring on the origin tile. The row above
+		 * that will be five tiles in width, again centring on the origin tile, and
+		 * so on. A cone that starts from 0 and ends at 3 will look like this:
+		 * <code>
+		 * ---------
+		 * -XXXXXXX-
+		 * --XXXXX--
+		 * ---XXX---
+		 * ----O----
+		 * ---------
+		 * </code>
+		 * Where \c O represents the origin tile, and \c X represents tiles within
+		 * the cone. In this case, the origin tile is included in the cone. A cone
+		 * that ends at 3 but starts at 2 will look like this:
+		 * <code>
+		 * ---------
+		 * -XXXXXXX-
+		 * --XXXXX--
+		 * ---------
+		 * ----O----
+		 * ---------
+		 * </code>
+		 * And in this case, the origin tile is not included in the cone.
+		 * @param  tile      The first tile of the cone.
+		 * @param  dir       The direction the tiles will be 'drawn' towards.
+		 * @param  startFrom The number of tiles away from the given tile to begin
+		 *                   the cone. Essentially, the cone is 'drawn' as normal,
+		 *                   then the first \c startFrom rows/columns will be
+		 *                   removed from the result.
+		 * @param  endAt     The number of rows/columns to draw the cone from the
+		 *                   origin tile.
+		 */
+		std::unordered_set<sf::Vector2u> getTilesInCone(sf::Vector2u tile,
+			const direction dir, unsigned int startFrom,
+			const unsigned int endAt) const;
+
+		/**
+		 * Version of \c getTilesInCone() that converts the result into a
+		 * \c CScriptArray.
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c getTilesInCone().
+		 */
+		CScriptArray* getTilesInConeAsArray(sf::Vector2u tile,
+			const direction dir, unsigned int startFrom,
 			const unsigned int endAt) const;
 
 		/**
