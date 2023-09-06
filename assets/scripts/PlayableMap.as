@@ -1217,6 +1217,7 @@ class PlayableMap {
                     // selected weapon if it deals more damage, or if it deals the
                     // same damage, but has infinite ammo, and the stored weapon
                     // has finite ammo.
+                    const auto tileOwner = map.getTileOwner(tile);
                     if (defendingUnit == NO_UNIT ||
                         defendingUnit == attackingUnit) {
                         if (result.exists(tileStr)) {
@@ -1240,8 +1241,8 @@ class PlayableMap {
                                 baseDamageStoredWeapon) {
                                 result.set(tileStr, weaponType.scriptName);
                             }
-                        } else if (attackingUnitTeam !=
-                            map.getArmyTeam(map.getTileOwner(tile))) {
+                        } else if (tileOwner == NO_ARMY || attackingUnitTeam !=
+                            map.getArmyTeam(tileOwner)) {
                             result.set(tileStr, weaponType.scriptName);
                         }
                     }
