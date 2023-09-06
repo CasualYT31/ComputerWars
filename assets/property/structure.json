@@ -126,5 +126,68 @@
     ],
     "destroyedlongname": "BLACKCANNON_longname",
     "destroyediconname": "dblackcannondown"
+  },
+  "BLACKCANNONUP": {
+    "longname": "BLACKCANNON_longname",
+    "shortname": "BLACKCANNON_shortname",
+    "icon": "blackcannonup",
+    "description": "BLACKCANNON_description",
+    "root": {
+      "tile": "blackcannonup1,2",
+      "destroyed": "dblackcannondown1,2",
+      "deleted": "000plain"
+    },
+    "dependent": [
+      {
+        "offset": [ -1, -2 ],
+        "tile": "blackcannonup0,0",
+        "destroyed": "dblackcannondown0,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -2 ],
+        "tile": "blackcannonup1,0",
+        "destroyed": "dblackcannondown1,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -2 ],
+        "tile": "blackcannonup2,0",
+        "destroyed": "dblackcannondown2,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -1 ],
+        "tile": "blackcannonup0,1",
+        "destroyed": "dblackcannondown0,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -1 ],
+        "tile": "blackcannonup1,1",
+        "destroyed": "dblackcannondown1,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -1 ],
+        "tile": "blackcannonup2,1",
+        "destroyed": "dblackcannondown2,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, 0 ],
+        "tile": "blackcannonup0,2",
+        "destroyed": "dblackcannondown0,2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 0 ],
+        "tile": "blackcannonup2,2",
+        "destroyed": "dblackcannondown2,2",
+        "deleted": "000plain"
+      }
+    ],
+    "destroyedlongname": "BLACKCANNON_longname",
+    "destroyediconname": "dblackcannondown"
   }
 }

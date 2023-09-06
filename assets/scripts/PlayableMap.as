@@ -219,6 +219,9 @@ class PlayableMap {
         const auto structType = map.getTileStructure(tile).scriptName;
         if (structType == "BLACKCANNONDOWN") {
             return map.getTilesInCone(tile, Direction::Down, 0, 9);
+        } else if (structType == "BLACKCANNONUP") {
+            return map.getTilesInCone(Vector2(tile.x, tile.y - 3), Direction::Up,
+                0, 9);
         } else return {};
     }
 

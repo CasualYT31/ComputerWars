@@ -1428,6 +1428,60 @@
 				[ 448, 80, 16, 16 ]
 			],
 			"durations": [ 0 ]
+		},
+		"blackcannonup0,0": {
+			"frames": [
+				[ 416, 96, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannonup1,0": {
+			"frames": [
+				[ 432, 96, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannonup2,0": {
+			"frames": [
+				[ 448, 96, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannonup0,1": {
+			"frames": [
+				[ 416, 112, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannonup1,1": {
+			"frames": [
+				[ 432, 112, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannonup2,1": {
+			"frames": [
+				[ 448, 112, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannonup0,2": {
+			"frames": [
+				[ 416, 128, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannonup1,2": {
+			"frames": [
+				[ 432, 128, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackcannonup2,2": {
+			"frames": [
+				[ 448, 128, 16, 16 ]
+			],
+			"durations": [ 0 ]
 		}
 	}
 }

@@ -76,6 +76,10 @@
     "dblackcannondown": {
       "frames": [ [ 46, 46, 46, 46 ] ],
       "durations": [ 0 ]
+    },
+    "blackcannonup": {
+      "frames": [ [ 92, 46, 46, 46 ] ],
+      "durations": [ 0 ]
     }
   }
 }
