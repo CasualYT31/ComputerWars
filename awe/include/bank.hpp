@@ -1925,6 +1925,8 @@ namespace awe {
 		 *         string SPRITE_NAME[, etc.]}</tt></li>
 		 *     <li>\c "paintable" = \c _paintable, <em>optional</em>,
 		 *         <tt>(bool)</tt></li>
+		 *     <li>\c "keepunits" = \c _keepUnits, <em>optional</em>,
+		 *         <tt>(bool)</tt></li>
 		 *     <li>\c "destroyedlongname" = \c _destroyedLongName,
 		 *         <em>optional</em>, <tt>(string)</tt></li>
 		 *     <li>\c "destroyediconname" = \c _destroyedIconName,
@@ -1951,11 +1953,19 @@ namespace awe {
 		 * Each dependent tile must have a unique offset! If a second dependent
 		 * tile is given with the same offset as one previous, the second tile will
 		 * be dropped! That offset must also not be <tt>[0, 0]</tt>, since that
-		 * represents the root tile.
-		 * @param scriptName The identifier of this bank entry that is to be used
-		 *                   within game scripts.
-		 * @param j          The object value containing the structure's
-		 *                   properties.
+		 * represents the root tile.\n\n
+		 *
+		 * @warning If a structure is not paintable, all of its dependent tiles
+		 *          will be removed, and its root tile type \b must be unique
+		 *          across non-paintable structures! Code that searches through
+		 *          structures to find a non-paintable structure that has a given
+		 *          root tile type should always select the structure found first
+		 *          to at least try and maintain consistency if this constraint is
+		 *          not followed.
+		 * @param   scriptName The identifier of this bank entry that is to be used
+		 *                     within game scripts.
+		 * @param   j          The object value containing the structure's
+		 *                     properties.
 		 */
 		structure(const std::string& scriptName, engine::json& j);
 
@@ -2264,6 +2274,17 @@ namespace awe {
 		}
 
 		/**
+		 * If this structure is painted, will units on its tiles be deleted or
+		 * kept on the map?
+		 * @return \c TRUE if all the tiles of the structure should keep any units
+		 *         that are on them when the structure is painted, \c FALSE if not
+		 *         (which is the default).
+		 */
+		inline bool keepUnitsWhenPainted() const noexcept {
+			return _keepUnits;
+		}
+
+		/**
 		 * The translation key of the long name of this structure when it is
 		 * destroyed.
 		 * If it was not assigned, returns the normal long name instead.
@@ -2440,6 +2461,13 @@ namespace awe {
 		 * show up in the Structures tab of the palette.
 		 */
 		bool _paintable = true;
+
+		/**
+		 * If a structure is painted in the map maker, usually all of the units
+		 * previously occupying the structure's tiles will be deleted.
+		 * If this is set to \c TRUE, the units will be preserved.
+		 */
+		bool _keepUnits = false;
 
 		/**
 		 * The long name of the structure when it is destroyed.

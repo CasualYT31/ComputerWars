@@ -151,6 +151,18 @@
 		],
 		"type": 0
 	},
+	"structaction": {
+		"keys": [
+			25
+		],
+		"mouse": [
+			0
+		],
+		"buttons": [
+			0
+		],
+		"type": 1
+	},
 	"pick": {
 		"keys": [
 			2

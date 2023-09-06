@@ -1,5 +1,5 @@
 {
-	"000plain": {"type": "PLAINS", "neutral": "plain"},
+	"000plain": {"type": "PLAINS", "neutral": "plain", "alwayspaintable": true},
 	"001plainruin": {"type": "PLAINS", "neutral": "plainruin"},
 	"002plainshadow": {"type": "PLAINS", "neutral": "plainshadow"},
 	
@@ -297,7 +297,7 @@
 	"blackcannondown1,1": {"type": "BLACKCANNON", "neutral": "blackcannondown1,1"},
 	"blackcannondown2,1": {"type": "BLACKCANNON", "neutral": "blackcannondown2,1"},
 	"blackcannondown0,2": {"type": "BLACKCANNON", "neutral": "blackcannondown0,2"},
-	"blackcannondown1,2": {"type": "BLACKCANNON", "neutral": "blackcannondown1,2"},
+	"blackcannondown1,2": {"type": "BLACKCANNONROOT", "neutral": "blackcannondown1,2"},
 	"blackcannondown2,2": {"type": "BLACKCANNON", "neutral": "blackcannondown2,2"},
 	"dblackcannondown0,0": {"type": "BLACKCANNON", "neutral": "dblackcannondown0,0"},
 	"dblackcannondown1,0": {"type": "BLACKCANNON", "neutral": "dblackcannondown1,0"},

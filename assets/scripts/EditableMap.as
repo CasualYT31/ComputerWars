@@ -15,6 +15,7 @@ enum Operation {
     TILE_TYPE_AND_OWNER,
     CREATE_UNIT_SCRIPT,
     CREATE_LOAD_UNIT,
+    PAINT_STRUCTURE,
     
     // External.
     PAINT_TILE_TOOL,
@@ -37,6 +38,7 @@ const array<string> OPERATION = {
     "OPERATION_tiletypeandowner",
     "OPERATION_createunit",
     "OPERATION_createloadunit",
+    "OPERATION_paintstructure",
 
     // External.
     "OPERATION_painttiletool",
@@ -378,8 +380,11 @@ class EditableMap {
      */
     void deleteArmy(const ArmyID army) {
         DisableMementos token(map, OPERATION[Operation::DELETE_ARMY_SCRIPT]);
-        // Find all HQs belonging to the army and convert them to neutral cities.
-        map.convertTiles(map.getTilesOfArmy(army), "06Ahq", "064city", NO_ARMY);
+        // Delete all HQ structures, but leave other structures intact. They will
+        // be disowned automatically later.
+        const auto hqTiles = map.getTilesOfArmy(army, { "HQ" });
+        for (uint64 i = 0, len = hqTiles.length(); i < len; ++i)
+            map.deleteStructure(hqTiles[i]);
         // If we are deleting the current army, select the next one.
         const auto getNextArmy = map.getSelectedArmy() == army;
         const auto nextArmy =
@@ -427,16 +432,26 @@ class EditableMap {
         const auto newOwnerID =
             newOwner.isEmpty() ? NO_ARMY : country[newOwner].turnOrder;
 
+        array<Vector2>@ changingTiles;
         if (fromType.scriptName != toType.scriptName) {
             DisableMementos token(map, OPERATION[Operation::TILE_TYPE_AND_OWNER]);
+            @changingTiles = map.querySetTileTypeChangedTiles(tileToChange);
             map.setTileType(tileToChange, toType.scriptName);
             map.setTileOwner(tileToChange, newOwnerID);
+            // If this tile is a non-paintable structure, setup its data now.
+            const auto structureName =
+                map.getTileTypeStructure(toType.scriptName);
+            if (!structureName.isEmpty()) {
+                map.setTileStructureData(tileToChange, structureName,
+                    MousePosition(0, 0));
+            }
         } else if (oldOwnerID != newOwnerID) {
             DisableMementos token(map, OPERATION[Operation::TILE_TYPE_AND_OWNER]);
+            @changingTiles = array<Vector2>();
+            changingTiles.insertLast(tileToChange);
             map.setTileOwner(tileToChange, newOwnerID);
         }
-        
-        _updateTileProps(tileToChange);
+        _updateTileProps(changingTiles);
     }
 
     /**
@@ -606,9 +621,56 @@ class EditableMap {
             const auto tile = rootTile + structure.dependentTileOffset[i];
             if (tile.x >= mapSize.x || tile.y >= mapSize.y)
                 shader = AvailableTileShader::Red;
-            map.addAvailableTile(tile);
+            else
+                map.addAvailableTile(tile);
         }
         map.setAvailableTileShader(shader);
+    }
+
+    /**
+     * Paints a structure from a given tile.
+     * If the structure can't fit when painted from the given tile, no changes
+     * will be made.
+     * @param fromTile      The location of the root tile of the structure.
+     * @param structureType The structure to build.
+     * @param owner         The script name of the army that's owning the
+     *                      structure if it's not destroyed.
+     * @param destroyed     \c TRUE if this structure is to be destroyed, \c FALSE
+     *                      if this structure is to be normal/functional.
+     */
+    void paintStructure(const Vector2&in fromTile,
+        const Structure@ const structureType, const string&in owner,
+        const bool destroyed) {
+        if (!map.canStructureFit(fromTile, structureType.scriptName)) return;
+        DisableMementos token(map, OPERATION[Operation::PAINT_STRUCTURE]);
+        // Set each tile's type. Delete all units occupying structure tiles unless
+        // the structure says otherwise.
+        const auto name = structureType.scriptName;
+        const bool keepUnits = structureType.keepUnitsWhenPainted;
+        array<Vector2>@ changingTiles =
+            map.querySetTileTypeChangedTiles(fromTile);
+        map.setTileType(fromTile, destroyed ?
+            structureType.rootDestroyedTileType : structureType.rootTileType);
+        if (!keepUnits) deleteUnit(map.getUnitOnTile(fromTile));
+        map.setTileStructureData(fromTile, name, MousePosition(0, 0));
+        for (uint64 i = 0, len = structureType.dependentTileCount; i < len; ++i) {
+            const auto offset = structureType.dependentTileOffset[i];
+            const Vector2 tile = fromTile + offset;
+            auto depChangingTiles = map.querySetTileTypeChangedTiles(tile);
+            for (uint64 j = 0, lenj = depChangingTiles.length(); j < lenj; ++j)
+                changingTiles.insertLast(depChangingTiles[j]);
+            map.setTileType(tile, destroyed ?
+                structureType.dependentDestroyedTileType[i] :
+                structureType.dependentTileType[i]);
+            if (!keepUnits) deleteUnit(map.getUnitOnTile(tile));
+            map.setTileStructureData(tile, name, offset);
+        }
+        // Set the owner of the root tile if not destroyed.
+        if (!destroyed) {
+            map.setTileOwner(fromTile, owner.isEmpty() ? NO_ARMY :
+                country[owner].turnOrder);
+        }
+        _updateTileProps(changingTiles);
     }
 
     ///////////////////////////////////////////////
@@ -644,15 +706,24 @@ class EditableMap {
     }
 
     /**
+     * Passes one tile to <tt>_updateTileProps(const array<Vector2>@ const)</tt>.
+     */
+    private void _updateTileProps(const Vector2&in tileThatIsChanging) {
+        _updateTileProps({ tileThatIsChanging });
+    }
+
+    /**
      * Updates the linked \c TilePropertiesWindow to ensure it is always
      * displaying the correct information.
      * Ensures to disable future calls to this method if \c tilePropsTile becomes
      * out-of-bounds, until a new tile is selected via \c selectTile().
-     * @param tileThatIsChanging The tile that is changing.
+     * @param tilesThatAreChanging The tiles that are changing.
      */
-    private void _updateTileProps(const Vector2&in tileThatIsChanging) {
+    private void _updateTileProps(
+        const array<Vector2>@ const tilesThatAreChanging) {
         if (!tilePropsTileSet) return;
-        if (tileThatIsChanging == tilePropsTile)
+        if (tilesThatAreChanging !is null &&
+            tilesThatAreChanging.find(tilePropsTile) >= 0)
             tilePropsWindow.refresh(tilePropsTile);
         if (map.isOutOfBounds(tilePropsTile)) deselectTile();
     }

@@ -27,6 +27,7 @@
       "destroyed": "064city",
       "deleted": "064city"
     },
+    "keepunits": true,
     "destroyedlongname": "CITY_longname",
     "destroyediconname": "city"
   },

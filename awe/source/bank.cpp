@@ -359,11 +359,13 @@ awe::structure::structure(const std::string& scriptName, engine::json& j) :
 		j.apply(_rootDeletedTile, { "root", "deleted" }, true);
 	if (j.keysExist({ "paintable" }))
 		j.apply(_paintable, { "paintable" }, true);
+	if (j.keysExist({ "keepunits" }))
+		j.apply(_keepUnits, { "keepunits" }, true);
 	if (j.keysExist({ "destroyedlongname" }))
 		j.apply(_destroyedLongName, { "destroyedlongname" }, true);
 	if (j.keysExist({ "destroyediconname" }))
 		j.apply(_destroyedIconName, { "destroyediconname" }, true);
-	if (j.keysExist({ "dependent" })) {
+	if (_paintable && j.keysExist({ "dependent" })) {
 		const auto json = j.nlohmannJSON()["dependent"];
 		if (!json.is_array()) return;
 		// Can't have a dependent tile that offsets to the root tile.

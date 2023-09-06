@@ -521,22 +521,22 @@ void awe::structure::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets the tile type that the specified "
 		"dependent tile of the structure should be when in a normal state.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool get_hasRootDestroyedTileType(const uint64) const property",
+		"bool get_hasDependentDestroyedTileType(const uint64) const property",
 		asMETHOD(T, hasDependentDestroyedTileType), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Does this structure's specified dependent "
 		"tile turn into a different type when the structure is destroyed?");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_rootDestroyedTileType(const uint64) const property",
+		"const string& get_dependentDestroyedTileType(const uint64) const property",
 		asMETHOD(T, getDependentDestroyedTileTypeScriptName), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the tile type that the specified "
 		"dependent tile of the structure should be when in a destroyed state.");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"bool get_hasRootDeletedTileType(const uint64) const property",
+		"bool get_hasDependentDeletedTileType(const uint64) const property",
 		asMETHOD(T, hasDependentDeletedTileType), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Does this structure's specified dependent "
 		"tile turn into a different type when the structure is deleted?");
 	r = engine->RegisterObjectMethod(type.c_str(),
-		"const string& get_rootDeletedTileType(const uint64) const property",
+		"const string& get_dependentDeletedTileType(const uint64) const property",
 		asMETHOD(T, getDependentDeletedTileTypeScriptName), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the tile type that the specified "
 		"dependent tile of the structure should turn into when the structure is "
@@ -546,6 +546,12 @@ void awe::structure::Register(const std::string& type,
 		asMETHOD(T, isPaintable), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Can this structure be painted all at once, "
 		"as a set of tiles, in the map maker?");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_keepUnitsWhenPainted() const property",
+		asMETHOD(T, keepUnitsWhenPainted), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "If this structure is painted in the map "
+		"maker, will it delete the units that are on the tiles it is being "
+		"painted on, or will they stay alive?");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& get_destroyedName() const property",
 		asMETHOD(T, getDestroyedName), asCALL_THISCALL);

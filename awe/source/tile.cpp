@@ -69,6 +69,23 @@ awe::UnitID awe::tile::getUnit() const noexcept {
 	return _unit;
 }
 
+void awe::tile::setStructureType(
+	const std::shared_ptr<const awe::structure>& structure) {
+	_structure = structure;
+}
+
+std::shared_ptr<const awe::structure> awe::tile::getStructureType() const {
+	return _structure;
+}
+
+void awe::tile::setStructureTile(const sf::Vector2i offset) {
+	_offset = offset;
+}
+
+sf::Vector2i awe::tile::getStructureTile() const {
+	return _offset;
+}
+
 void awe::tile::setSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sprite.setSpritesheet(sheet);

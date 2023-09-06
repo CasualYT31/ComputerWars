@@ -155,6 +155,9 @@
 	"OPERATION_tiletype": "Set Tile's Type",
 	"OPERATION_tilehp": "Set Tile's HP",
 	"OPERATION_tileowner": "Set Tile's Owner",
+	"OPERATION_tilestructuredata": "Set Tile's Structure Data",
+	"OPERATION_destroystructure": "Destroy Structure",
+	"OPERATION_deletestructure": "Delete Structure",
 	"OPERATION_selectarmy": "Select Current Army",
 	"OPERATION_addscript": "Add Script",
 	"OPERATION_updatescript": "Update Script",
@@ -164,6 +167,7 @@
 	"OPERATION_mapprops": "Update Map's Name and/or Day",
 	"OPERATION_tiletypeandowner": "Set Tile's Type and/or Owner",
 	"OPERATION_createloadunit": "Create and Load Unit",
+	"OPERATION_paintstructure": "Paint Structure",
 
 	"OPERATION_painttiletool": "Paint Tile/s",
 	"OPERATION_paintunittool": "Paint Unit/s",

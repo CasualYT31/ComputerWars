@@ -33,6 +33,10 @@ foreach tile {
 	string tileTypeScriptName;
 	HP; // E.g. either city's capture points or cannon's HP.
 	ArmyID tileOwner;
+    string structureScriptName; // An empty string if this tile does not form part
+                                // of a structure.
+    int32 structureTileOffsetX;
+    int32 structureTileOffsetY;
 	ArmyID unitOwner;
 	if (unitOwner != NO_ARMY) {
 		string unitTypeScriptName;
@@ -217,6 +221,15 @@ namespace cwm {
 					ArmyID tileOwner;
 					stream.read(tileOwner);
 					map.setTileOwner(tilePos, tileOwner);
+                    string structureScriptName;
+                    stream.read(structureScriptName);
+                    int32 offsetX, offsetY;
+                    stream.read(offsetX);
+                    stream.read(offsetY);
+                    if (!structureScriptName.isEmpty()) {
+                        map.setTileStructureData(tilePos, structureScriptName,
+                            MousePosition(offsetX, offsetY));
+                    }
 					LoadMapUnit(stream, map, tilePos);
 				} else {
 					throw("read above");
@@ -299,6 +312,16 @@ namespace cwm {
 				stream.write(map.getTileType(tilePos).scriptName);
 				stream.write(map.getTileHP(tilePos));
 				stream.write(map.getTileOwner(tilePos));
+                if (map.isTileAStructureTile(tilePos)) {
+                    stream.write(map.getTileStructure(tilePos).scriptName);
+                    const auto offset = map.getTileStructureOffset(tilePos);
+                    stream.write(offset.x);
+                    stream.write(offset.y);
+                } else {
+                    stream.write("");
+                    stream.write(int32(0));
+                    stream.write(int32(0));
+                }
 				const auto unitID = map.getUnitOnTile(tilePos);
 				if (unitID != NO_UNIT) {
 					SaveMapUnit(stream, map, unitID);

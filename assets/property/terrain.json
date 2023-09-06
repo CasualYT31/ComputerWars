@@ -297,12 +297,20 @@
 		"hp": 0,
 		"defence": 0
 	},
-	"BLACKCANNON": {
+	"BLACKCANNONROOT": {
 		"longname": "BLACKCANNON_longname",
 		"shortname": "BLACKCANNON_shortname",
 		"icon": "noentry",
 		"description": "BLACKCANNON_description",
 		"hp": 99,
+		"defence": 0
+	},
+	"BLACKCANNON": {
+		"longname": "BLACKCANNON_longname",
+		"shortname": "BLACKCANNON_shortname",
+		"icon": "noentry",
+		"description": "BLACKCANNON_description",
+		"hp": 0,
 		"defence": 0
 	},
 	"HQ": {

@@ -25,6 +25,8 @@ void PreviewMoveUnitMenuOpen() {
     const auto unitType = game.map.getUnitType(unit);
     const auto tile = game.map.getSelectedTile();
     const auto tileType = game.map.getTileType(tile);
+    const auto tileStructure = game.map.isTileAStructureTile(tile) ?
+        game.map.getTileStructure(tile) : null;
     const auto unitOnTile = game.map.getUnitOnTile(tile);
 
     // Add commands here.
@@ -41,7 +43,8 @@ void PreviewMoveUnitMenuOpen() {
                 PreviewCommands.addCommand("Capture", "capture", "captureicon");
             }
             // Launch Missile Silo.
-            if (tileType.scriptName == "062missilesilo" &&
+            if (tileStructure !is null &&
+                tileStructure.scriptName == "MISSILESILO" &&
                 (unitType.scriptName == "INFANTRY" ||
                 unitType.scriptName == "MECH")) {
                 PreviewCommands.addCommand("Launch", "launch", "attackicon");
@@ -257,9 +260,8 @@ void PreviewMoveUnitMenu_Launch_MouseReleased() {
     EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE = true;
     @EXPLODE_PREVIEW_MENU_CALLBACK = function(){
         // If the launch is going ahead, then we need to make the Missile Silo
-        // empty.
-        game.map.setTileType(EXPLODE_PREVIEW_MENU_SELECTED_TILE,
-            "063missilesiloempty");
+        // empty. Since it's a structure, we can destroy it to achieve this.
+        game.map.destroyStructure(EXPLODE_PREVIEW_MENU_SELECTED_TILE);
         // Move the unit that is launching the silo.
         game.moveUnit();
     };

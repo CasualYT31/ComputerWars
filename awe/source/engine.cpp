@@ -581,8 +581,8 @@ awe::map* awe::game_engine::_script_createMap(const std::string& file) {
 	}
 	// Create a blank map, save it, then load it using _script_loadMap().
 	try {
-		_map = std::make_unique<awe::map>(_countries, _tiles, _units,
-			_commanders, _structures,
+		_map = std::make_unique<awe::map>(_countries, _tiles, _terrains,
+			_units, _commanders, _structures,
 			engine::logger::data{ _logger.getData().sink, "map" });
 	} catch (const std::bad_alloc& e) {
 		_logger.error("Couldn't allocate the map object for creation: {}", e);
@@ -607,8 +607,8 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 		return nullptr;
 	} else {
 		try {
-			_map = std::make_unique<awe::map>( _countries, _tiles, _units,
-				_commanders, _structures,
+			_map = std::make_unique<awe::map>( _countries, _tiles, _terrains,
+				_units, _commanders, _structures,
 				engine::logger::data{_logger.getData().sink, "map"});
 		} catch (const std::bad_alloc& e) {
 			_logger.error("Couldn't allocate the map object for loading: {}", e);

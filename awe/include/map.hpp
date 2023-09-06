@@ -214,6 +214,7 @@ namespace awe {
 		 * Also initialises the internal logger object.\n
 		 * @param countries  Information on the countries available to the map.
 		 * @param tiles      Information on the tile types available to the map.
+		 * @param terrains   Information on the terrains available to the map.
 		 * @param units      Information on the unit types available to the map.
 		 * @param commanders Information on the COs available to the map.
 		 * @param structures Information on the structures available to the map.
@@ -222,6 +223,7 @@ namespace awe {
 		 */
 		map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
+			const std::shared_ptr<awe::bank<awe::terrain>>& terrains,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
 			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
 			const std::shared_ptr<awe::bank<awe::structure>>& structures,
@@ -497,7 +499,14 @@ namespace awe {
 		 * units belonging to the army, and disowns all owned tiles.\n
 		 * If at least one of the army IDs given was invalid, the operation will be
 		 * cancelled and logged (\c NO_ARMY cannot be given as the first
-		 * parameter).
+		 * parameter).\n
+		 * Note that this will also transfer structures to the given army! Each
+		 * structure will have its own needs, either generally (such as HQ: we want
+		 * to destroy it to a city and assign the owner to \c transferOwnership),
+		 * or on a per-map basis (it would probably be strange to have the Volcano
+		 * erupt later in the day, so it would really need to transfer to the next
+		 * first army if the first army is deleted). These needs must be addressed
+		 * separately prior to deleting the army!
 		 * @param army              The ID of the army to delete.
 		 * @param transferOwnership The ID of the army who will assume ownership of
 		 *                          all the deleted army's tiles. By default,
@@ -698,19 +707,26 @@ namespace awe {
 		/**
 		 * Retrieves a list of tiles that belong to a specified army.
 		 * If the specified army doesn't exist, an empty set will be returned.
-		 * @param  army The ID of the army to retrieve the owned tiles of.
+		 * @param  army   The ID of the army to retrieve the owned tiles of.
+		 * @param  filter A selection of terrains that a tile must match one of if
+		 *                they are to be included in the result. An empty filter
+		 *                means that all tiles that belong to an army are included
+		 *                in the result.
 		 * @return A list of locations of tiles that belong to the given army.
 		 */
-		std::unordered_set<sf::Vector2u> getTilesOfArmy(
-			const awe::ArmyID army) const;
+		std::unordered_set<sf::Vector2u> getTilesOfArmy(const awe::ArmyID army,
+			const std::unordered_set<std::shared_ptr<const awe::terrain>>&
+			filter = {}) const;
 
 		/**
 		 * Converts the result of a \c getTilesOfArmy() call into a
 		 * \c CScriptArray.
+		 * @param  filter Array of terrain script names to act as a filter.
 		 * @throws std::runtime_error if \c _scripts was \c nullptr.
 		 * @sa     @c getTilesOfArmy().
 		 */
-		CScriptArray* getTilesOfArmyAsArray(const awe::ArmyID army) const;
+		CScriptArray* getTilesOfArmyAsArray(const awe::ArmyID army,
+			const CScriptArray* const filter = nullptr) const;
 
 		/**
 		 * Retrieves a list of units that belong to a specified army.
@@ -1091,9 +1107,29 @@ namespace awe {
 		bool setTileType(const sf::Vector2u& pos, const std::string& type);
 
 		/**
+		 * Without setting a tile type, query which tiles will be changed from the
+		 * operation.
+		 * @param  pos The X and Y coordinate of the tile that will be changing.
+		 * @return A set of the tiles that will be changing. If the given tile
+		 *         doesn't form part of a structure the result will always be a set
+		 *         with \c pos and no other members.
+		 */
+		std::unordered_set<sf::Vector2u> querySetTileTypeChangedTiles(
+			const sf::Vector2u& pos) const;
+
+		/**
+		 * Version of \c querySetTileTypeChangedTiles() that converts the result
+		 * into a \c CScriptArray.
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c querySetTileTypeChangedTiles().
+		 */
+		CScriptArray* querySetTileTypeChangedTilesAsArray(
+			const sf::Vector2u& pos) const;
+
+		/**
 		 * Retrieves the specified tile's type.
 		 * If an out of bounds coordinate is given, \c nullptr is returned.
-		 * @param  pos The X and Y coordinate of the tile to change.
+		 * @param  pos The X and Y coordinate of the tile to query.
 		 * @return The type of the tile and its information.
 		 */
 		std::shared_ptr<const awe::tile_type> getTileType(
@@ -1150,6 +1186,68 @@ namespace awe {
 		 *         tile is vacant or out of bounds.
 		 */
 		awe::UnitID getUnitOnTile(const sf::Vector2u& pos) const;
+
+		/**
+		 * Sets a tile's structure information.
+		 * If a tile forms part of a structure, that structure's type and the tile
+		 * offset should be stored with that tile. This is to ensure structure
+		 * deletion works correctly in \c setTileType().\n
+		 * Will log errors (and not make any changes to the map) if the given tile
+		 * is out-of-bounds, or if <tt>tile + offset</tt> is out-of-bounds.\n
+		 * Will log warnings (but still permit changes) if the given tile's type
+		 * doesn't match with what the structure expects, or if the given offset
+		 * did not describe a tile in the structure.
+		 * @param pos       The X and Y coordinate of the tile that's part of a
+		 *                  structure.
+		 * @param structure The type of structure this tile's a part of. \c nullptr
+		 *                  to set no structure.
+		 * @param offset    Which tile from the structure this tile's a part of,
+		 *                  defined as the offset from the root tile.
+		 */
+		void setTileStructureData(const sf::Vector2u& pos,
+			const std::shared_ptr<const awe::structure>& structure,
+			const sf::Vector2i& offset);
+
+		/// Script interface version of \c setTileStructureData().
+		/// Provide an empty string to set no structure.
+		void setTileStructureData(const sf::Vector2u& pos,
+			const std::string& structure, const sf::Vector2i& offset);
+
+		/**
+		 * Retrieves the specified tile's registered structure type.
+		 * If an out of bounds coordinate is given, \c nullptr is returned.
+		 * @param  pos The X and Y coordinate of the tile to query.
+		 * @return The type of structure this tile is a part of. If this tile is
+		 *         not part of a structure, will return \c nullptr.
+		 */
+		std::shared_ptr<const awe::structure> getTileStructure(
+			const sf::Vector2u& pos) const;
+
+		/**
+		 * Script version of \c getTileStructure().
+		 * @throws std::out_of_range if the given tile was out of bounds or if the
+		 *                           tile wasn't part of a structure.
+		 * @sa     @c getTileStructure().
+		 */
+		const awe::structure* getTileStructureObject(
+			const sf::Vector2u& pos) const;
+		
+		/**
+		 * Does the given tile form part of a structure?
+		 * @param  pos The tile to query.
+		 * @return \c TRUE if the given tile forms part of a structure, \c FALSE
+		 *         otherwise.
+		 */
+		bool isTileAStructureTile(const sf::Vector2u& pos) const;
+
+		/**
+		 * Finds out which tile the specified tile is in its structure.
+		 * If an out of bounds coordinate is given, <tt>(0, 0)</tt> is returned.
+		 * @param  pos The X and Y coordinate of the tile to query.
+		 * @return The offset, in tiles, that this tile is from its structure's
+		 *         root tile.
+		 */
+		sf::Vector2i getTileStructureOffset(const sf::Vector2u& pos) const;
 
 		/**
 		 * Calculates the tiles available from a specified tile.
@@ -1273,9 +1371,6 @@ namespace awe {
 			const std::string& fromTileType, const std::string& toTileType,
 			const awe::ArmyID transferOwnership);
 
-		//////////////////////////
-		// STRUCTURE OPERATIONS //
-		//////////////////////////
 		/**
 		 * Can the given structure fit when placed from the given tile?
 		 * @param  fromTile  The root tile of the structure will be placed here.
@@ -1289,6 +1384,47 @@ namespace awe {
 		/// Script interface version of \c canStructureFit().
 		bool canStructureFit(const sf::Vector2u& fromTile,
 			const std::string& structure) const;
+
+		/**
+		 * Destroy a structure attached to a given tile.
+		 * Destroying a structure will convert all of its tiles into its
+		 * configured destroyed tile types, and all tiles pertaining to the
+		 * structure will be disowned. However, the tiles will still be registered
+		 * as being part of a structure internally. This is to ensure that the
+		 * deletion of a structure within \c setTileType() is handled correctly.
+		 * @param tile The tile that is attached to a structure.
+		 */
+		void destroyStructure(sf::Vector2u tile);
+
+		/**
+		 * Delete a structure attached to a given tile.
+		 * Deleting a structure will convert all of its tiles into its
+		 * configured deleted tile types, and all tiles pertaining to the structure
+		 * will be disowned. Additionally, each tile in the structure will have its
+		 * structure data removed.\n
+		 * Calling \c setTileType() will automatically delete the structure before
+		 * updating the tile type. Use this method when you don't wish to update
+		 * the type of the given tile beyond what's changed when deleting the
+		 * structure.
+		 * @param tile The tile that is attached to a structure.
+		 */
+		void deleteStructure(sf::Vector2u tile);
+
+		/**
+		 * Is the given tile type the root tile of a non-paintable structure?
+		 * @param  type The type of tile to test.
+		 * @return If there is a structure that is not paintable, and whose root
+		 *         tile is the given tile type, return a pointer to its properties.
+		 *         \c nullptr is returned if no structure could be found that
+		 *         matches the criteria.
+		 */
+		std::shared_ptr<const awe::structure> getTileTypeStructure(
+			const std::shared_ptr<const awe::tile_type>& type) const;
+
+		/// Version of \c getTileTypeStructure() that accepts a script name to a
+		/// tile type, and returns either the script name of the found structure,
+		/// or an empty string if no structure was found.
+		std::string getTileTypeStructure(const std::string& type) const;
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
@@ -1829,6 +1965,12 @@ namespace awe {
 		 *         \c NO_ARMY if \c _currentArmy is \c NO_ARMY.
 		 */
 		awe::ArmyID getNextArmy() const;
+
+		/**
+		 * Returns the ID of the army that should have their turn first.
+		 * @return The ID of the first army, or \c NO_ARMY if there are no armies.
+		 */
+		awe::ArmyID getFirstArmy() const;
 
 		/**
 		 * Sets the amount by which the map is scaled.
@@ -2598,6 +2740,11 @@ namespace awe {
 		 * Data pertaining to tile types.
 		 */
 		std::shared_ptr<awe::bank<awe::tile_type>> _tileTypes = nullptr;
+
+		/**
+		 * Data pertaining to terrains.
+		 */
+		std::shared_ptr<awe::bank<awe::terrain>> _terrains = nullptr;
 
 		/**
 		 * Data pertaining to unit types.

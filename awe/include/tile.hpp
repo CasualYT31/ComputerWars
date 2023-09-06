@@ -116,6 +116,38 @@ namespace awe {
 		awe::UnitID getUnit() const noexcept;
 
 		/**
+		 * Define if this tile forms part of a structure or not.
+		 * @param structure Pointer to the type of structure that this tile helps
+		 *                  form. If \c nullptr, this tile is not a member of a
+		 *                  structure.
+		 */
+		void setStructureType(
+			const std::shared_ptr<const awe::structure>& structure);
+
+		/**
+		 * Gets the type of structure that this tile helps form, if any.
+		 * @return If this tile forms part of a structure, the type of structure is
+		 *         returned. Otherwise, \c nullptr.
+		 */
+		std::shared_ptr<const awe::structure> getStructureType() const;
+
+		/**
+		 * Stores which tile from a structure this tile is.
+		 * @param offset The offset from the root tile of the structure. Can be
+		 *               <tt>(0, 0)</tt> to represent the root tile.
+		 */
+		void setStructureTile(const sf::Vector2i offset);
+
+		/**
+		 * Gets this tile's offset from the root tile of the structure it's a part
+		 * of.
+		 * Should be ignored if this tile doesn't form part of a structure.
+		 * @return If this tile is the root tile, returns <tt>(0, 0)</tt>,
+		 *         otherwise, returns the offset from the root tile, in tiles.
+		 */
+		sf::Vector2i getStructureTile() const;
+
+		/**
 		 * Sets the spritesheet to use with this tile.
 		 * @param  sheet Pointer to the spritesheet to use with this tile.
 		 * @safety No guarantee.
@@ -202,6 +234,17 @@ namespace awe {
 		 * \c NO_UNIT indicates vacancy.
 		 */
 		awe::UnitID _unit = awe::NO_UNIT;
+
+		/**
+		 * If this tile forms part of a structure, this points to the type of
+		 * structure.
+		 */
+		std::shared_ptr<const awe::structure> _structure;
+
+		/**
+		 * This tile's offset from the root tile of the structure, in tiles.
+		 */
+		sf::Vector2i _offset;
 
 		/**
 		 * This tile's animated sprite object.

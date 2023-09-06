@@ -239,6 +239,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const bool action = (bool(controls["action"]) && !modifier) && (
         !bool(mouseInputs["action"]) || (mouseNotUnderWidget && mouseInMap)
     );
+    const bool structAction = (bool(controls["structaction"]) && !modifier) && (
+        !bool(mouseInputs["structaction"]) || (mouseNotUnderWidget && mouseInMap)
+    );
     const bool pick = (bool(controls["pick"]) && !modifier) && (
         !bool(mouseInputs["pick"]) || (mouseNotUnderWidget && mouseInMap)
     );
@@ -287,6 +290,9 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const auto unitArmySel = CurrentlySelectedUnitType.owner;
     const auto structureSel = cast<Structure>(CurrentlySelectedStructure.object);
     const auto structureOwnerSel = CurrentlySelectedStructure.owner;
+    const auto structureDestroyed = CurrentlySelectedStructure.data is null ?
+        false : cast<CurrentlySelectedStructureData>(
+            CurrentlySelectedStructure.data).destroyed;
     const auto currentPaletteWindowTab = PaletteWindow.getSelectedTab();
 
     // Highlight the selected structure's tiles on the map if one is selected.
@@ -298,7 +304,7 @@ void MapMakerMenuHandleInput(const dictionary controls,
     // This is so that an entire paint stroke can be saved in one memento.
     // It's not strickly needed for the rectangle tools but it's a lot easier to
     // handle it this way.
-    if (!prevAction && action) {
+    if (!prevAction && action && currentPaletteWindowTab != STRUCTURE_DIALOG) {
         edit.map.disableMementos();
         mementoName = "";
     }
@@ -316,6 +322,13 @@ void MapMakerMenuHandleInput(const dictionary controls,
         if (currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null) {
             edit.createUnit(curTile, unitTypeSel, unitArmySel);
             mementoName = OPERATION[Operation::PAINT_UNIT_TOOL];
+        }
+    
+    } else if (structAction && TOOLBAR.tool == PAINT_TOOL.shortName) {
+        if (currentPaletteWindowTab == STRUCTURE_DIALOG &&
+            structureSel !is null) {
+            edit.paintStructure(curTile, structureSel, structureOwnerSel,
+                structureDestroyed);
         }
 
     } else if (pick) {
@@ -357,7 +370,8 @@ void MapMakerMenuHandleInput(const dictionary controls,
     }
         
     // If the paint tool is finished with, re-enable mementos.
-    if (prevAction && !action) edit.map.enableMementos(mementoName);
+    if (prevAction && !action && currentPaletteWindowTab != STRUCTURE_DIALOG)
+        edit.map.enableMementos(mementoName);
 
     prevAction = action;
 

@@ -332,8 +332,11 @@ class PlayableMap {
         {
         // Find all HQs belonging to the army and convert them to cities. Transfer
         // ownership of them, too.
-        map.convertTiles(map.getTilesOfArmy(armyID), "06Ahq", "064city",
-            transferOwnership);
+        const auto hqTiles = map.getTilesOfArmy(armyID, { "HQ" });
+        for (uint64 i = 0, len = hqTiles.length(); i < len; ++i) {
+            map.destroyStructure(hqTiles[i]);
+            map.setTileOwner(hqTiles[i], transferOwnership);
+        }
         if (map.getSelectedArmy() == armyID) endTurn(true);
         else map.deleteArmy(armyID, transferOwnership);
     }
@@ -1396,10 +1399,10 @@ class PlayableMap {
                 true);
             const auto newTileHP = map.getTileHP(defender) - damage;
             map.setTileHP(defender, newTileHP);
-            // If the tile's HP has reached zero, invoke the helper method.
-            if (newTileHP <= 0) {
-                _tileHasBeenDestroyed(defender, map.getTileType(defender));
-            }
+            // If the tile's HP has reached zero, and the tile is part of a
+            // structure, destroy the structure.
+            if (newTileHP <= 0 && map.isTileAStructureTile(defender))
+                map.destroyStructure(defender);
         }
         // If the weapon used has finite ammo, and it is still alive, then remove
         // one from its ammo count.
@@ -1717,25 +1720,6 @@ class PlayableMap {
         }
         arr[uint(index)].tile = tile;
         arr[uint(index)].g = g;
-    }
-
-    //////////////////////////
-    // MISC. HELPER METHODS //
-    //////////////////////////
-    /**
-     * When a tile's HP reaches 0 after it has been attacked, this method will be
-     * invoked.
-     * @param tile The position of the tile that has ran out of HP.
-     * @param type The tile type of the tile.
-     */
-    private void _tileHasBeenDestroyed(const Vector2&in tile,
-        const TileType@ type) {
-        // Pipe seams need to transform into plains.
-        if (type.scriptName == "05Epipeseamhori") {
-            map.setTileType(tile, "060plainseamhori");
-        } else if (type.scriptName == "05Fpipeseamvert") {
-            map.setTileType(tile, "061plainseamvert");
-        }
     }
 
     /////////
