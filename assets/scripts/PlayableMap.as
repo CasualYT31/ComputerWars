@@ -201,6 +201,8 @@ class PlayableMap {
         const auto offset = map.getTileStructureOffset(tile);
         tile.x -= offset.x;
         tile.y -= offset.y;
+        // If the root tile is neutral, assume this structure can't attack.
+        if (map.getTileOwner(tile) == NO_ARMY) return;
         const auto tiles = getStructureAttackRange(tile);
         for (uint64 i = 0, len = tiles.length(); i < len; ++i)
             map.addAvailableTile(tiles[i]);
@@ -338,8 +340,8 @@ class PlayableMap {
 
         // 6. Finally, perform extra operations on the army's units and tiles that
         //    need to be executed after the others. We shall get the lists again.
-        //    This allows steps 3 and 4 to add or remove units or tiles if it so
-        //    chooses.
+        //    This allows the previous steps to add or remove units or tiles if it
+        //    so chooses.
         const auto finalUnits = map.getUnitsOfArmy(currentArmy);
         const auto finalTiles = map.getTilesOfArmy(currentArmy);
         _beginTurnForArmy(currentArmy, finalUnits, finalTiles);
@@ -1467,7 +1469,7 @@ class PlayableMap {
      */
     void damageUnitsInRange(const Vector2&in fromTile, const uint lowRange,
         const uint highRange, const HP displayedHP,
-        const array<string>@ unitTypesToIgnore) {
+        const array<string>@ unitTypesToIgnore = {}) {
         const auto units = _findUnits(fromTile, lowRange, highRange);
         for (uint i = 0, len = units.length(); i < len; ++i) {
             const auto unitID = units[i];
@@ -1537,12 +1539,41 @@ class PlayableMap {
      */
     private void _beginTurnForTile(const Vector2&in tile,
         const Terrain@ terrain, const ArmyID currentArmy) {
-        string terrainName = terrain.scriptName;
+        const string terrainName = terrain.scriptName;
+        const auto currentTeam = map.getArmyTeam(currentArmy);
 
         if (terrainName == "CITY" || terrainName == "BASE" ||
             terrainName == "AIRPORT" || terrainName == "PORT" ||
             terrainName == "HQ") {
             map.offsetArmyFunds(currentArmy, 1000);
+
+        } else if (terrainName == "BLACKCANNONROOT") {
+            const auto tilesInRange = getStructureAttackRange(tile);
+            // Go through each tile, and find the most expensive unit, factoring
+            // in unit HP as well as cost. If there is a unit, deal damage.
+            // Exclude units that are on the same team as the cannon owner.
+            UnitID targetUnit = NO_UNIT;
+            uint64 unitTile = 0;
+            Funds highestCost = 0;
+            for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
+                const auto unit = map.getUnitOnTile(tilesInRange[i]);
+                if (unit != NO_UNIT && currentTeam != map.getTeamOfUnit(unit)) {
+                    // Explicitly exclude Ooziums, though with a price of 0,
+                    // they'd never be selected anyway.
+                    if (map.getUnitType(unit).scriptName == "OOZIUM") continue;
+                    const auto unitType = map.getUnitType(unit);
+                    const auto value = Funds(ceil(unitType.cost *
+                        (map.getUnitHP(unit) / double(unitType.maxHP))));
+                    if (value > highestCost) {
+                        highestCost = value;
+                        targetUnit = unit;
+                        unitTile = i;
+                    }
+                }
+            }
+            // Deal damage if there was a unit.
+            if (targetUnit != NO_UNIT)
+                damageUnitsInRange(tilesInRange[unitTile], 0, 0, 5);
         }
     }
 
