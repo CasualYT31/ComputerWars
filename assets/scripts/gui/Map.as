@@ -143,7 +143,8 @@ void MapHandleInput(const dictionary controls,
 	game.showAttackRangeOfUnit(NO_UNIT);
 	if (bool(controls["range"])) {
 		game.enableClosedList(false);
-		game.showAttackRangeOfUnit(unitID);
+        if (unitID != NO_UNIT) game.showAttackRangeOfUnit(unitID);
+        else game.showAttackRangeOfTile(selectedTile);
 	} else if (bool(controls["select"])) {
         // If the select control is being made by the mouse, and it is not inside
         // the map's graphic, then drop it.

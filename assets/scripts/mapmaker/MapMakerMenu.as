@@ -601,17 +601,17 @@ void MapMakerMenu_OpenMap_FileSelected() {
 }
 
 // Debugging.
-void MapMakerMenuOpen() {
-    FileDialogFile = "map/islandx.cwm";
-    quitEditMap(function() {
-        TilePropertiesDialog.deselect();
-        @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
-        edit.map.setMementoStateChangedCallback(MementosHaveChanged);
-        ArmyPropertiesDialog.refresh();
-        MementosHaveChanged();
-    });
-}
+// void MapMakerMenuOpen() {
+//     FileDialogFile = "map/islandx.cwm";
+//     quitEditMap(function() {
+//         TilePropertiesDialog.deselect();
+//         @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
+//             ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
+//         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
+//         ArmyPropertiesDialog.refresh();
+//         MementosHaveChanged();
+//     });
+// }
 
 /**
  * Always make sure the map maker is re-enabled when the file dialog closes.

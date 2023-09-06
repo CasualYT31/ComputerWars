@@ -185,6 +185,41 @@ class PlayableMap {
         }
     }
 
+    //////////////////////////
+    // STRUCTURE OPERATIONS //
+    //////////////////////////
+    /**
+     * Calculate and show a given structure's attack range, given its root tile.
+     * If the given tile is not a structure tile, this method won't make any
+     * changes. Otherwise, the structure's attack range will be added to the map's
+     * available tiles. If the attack range is not empty, then the available tile
+     * shader will be set to \c Red.
+     * @param tile The tile to show the attack range of.
+     */
+    void showAttackRangeOfTile(Vector2 tile) {
+        if (!map.isTileAStructureTile(tile)) return;
+        const auto offset = map.getTileStructureOffset(tile);
+        tile.x -= offset.x;
+        tile.y -= offset.y;
+        const auto tiles = getStructureAttackRange(tile);
+        for (uint64 i = 0, len = tiles.length(); i < len; ++i)
+            map.addAvailableTile(tiles[i]);
+        if (!tiles.isEmpty())
+            map.setAvailableTileShader(AvailableTileShader::Red);
+    }
+
+    /**
+     * Given the root tile of a structure, calculate its attack range.
+     * @param  tile The root tile of the structure.
+     * @return An array of tiles that are within the structure's attack range.
+     */
+    array<Vector2>@ getStructureAttackRange(Vector2 tile) {
+        const auto structType = map.getTileStructure(tile).scriptName;
+        if (structType == "BLACKCANNONDOWN") {
+            return map.getTilesInCone(tile, Direction::Down, 0, 9);
+        } else return {};
+    }
+
     ///////////////////////////////
     // TILE SELECTION OPERATIONS //
     ///////////////////////////////
@@ -482,7 +517,7 @@ class PlayableMap {
     /**
      * Selects a unit so that its attack range can be calculated and shown.
      * In the future, this method should list the attack range of every weapon the
-     * unit possesses, not just the first eligible one found.
+     * unit possesses, not just the first eligible one found. TODO-1.
      * @warning The client must ensure the closed list is disabled whilst the unit
      *          is still selected by this method!
      * @param   unitID The ID of the unit to show the attack range of. \c NO_UNIT
@@ -1127,9 +1162,9 @@ class PlayableMap {
                 // aren't visible to the attacking unit, or if they are on the
                 // same team as the attacking unit.
                 const auto defendingUnit = map.getUnitOnTile(tile);
+                const auto attackingUnitTeam = map.getTeamOfUnit(attackingUnit);
                 if (defendingUnit != NO_UNIT &&
-                    map.getTeamOfUnit(attackingUnit) !=
-                    map.getTeamOfUnit(defendingUnit) &&
+                    attackingUnitTeam != map.getTeamOfUnit(defendingUnit) &&
                     map.isUnitVisible(defendingUnit,
                     map.getArmyOfUnit(attackingUnit))) {
                     // There is a unit that could be a target. Check if this
@@ -1175,12 +1210,15 @@ class PlayableMap {
                 if (weaponType.canAttackTerrain(
                     map.getTileType(tile).type.scriptName)) {
                     // Add this tile as a target, but only if it wasn't added
-                    // previously, and if it is vacant.
+                    // previously, if it is vacant (or previously occupied by the
+                    // attacking unit), and it doesn't belong to the attacker's
+                    // team.
                     // If it was added previously, then it can only override the
                     // selected weapon if it deals more damage, or if it deals the
                     // same damage, but has infinite ammo, and the stored weapon
                     // has finite ammo.
-                    if (defendingUnit == NO_UNIT) {
+                    if (defendingUnit == NO_UNIT ||
+                        defendingUnit == attackingUnit) {
                         if (result.exists(tileStr)) {
                             const auto terrainTypeName =
                                 map.getTileType(tile).type.scriptName;
@@ -1202,7 +1240,8 @@ class PlayableMap {
                                 baseDamageStoredWeapon) {
                                 result.set(tileStr, weaponType.scriptName);
                             }
-                        } else {
+                        } else if (attackingUnitTeam !=
+                            map.getArmyTeam(map.getTileOwner(tile))) {
                             result.set(tileStr, weaponType.scriptName);
                         }
                     }
@@ -1245,7 +1284,7 @@ class PlayableMap {
         const auto defenderTerrainType = map.getTileType(defender).type;
         int displayedHPOfDefender = 0;
         uint defenderDefenceRating = 0;
-        if (defenderUnit != NO_UNIT) {
+        if (defenderUnit != NO_UNIT && defenderUnit != attacker) {
             // Unit is the defender.
             baseDamage = attackerWeapon.getBaseDamageUnit(
                 map.getUnitType(defenderUnit).scriptName,
