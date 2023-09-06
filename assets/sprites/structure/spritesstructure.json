@@ -80,6 +80,26 @@
     "blackcannonup": {
       "frames": [ [ 92, 46, 46, 46 ] ],
       "durations": [ 0 ]
+    },
+    "dminicannon": {
+      "frames": [ [ 140, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "minicannonup": {
+      "frames": [ [ 186, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "minicannonright": {
+      "frames": [ [ 232, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "minicannonleft": {
+      "frames": [ [ 278, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "minicannondown": {
+      "frames": [ [ 324, 46, 46, 46 ] ],
+      "durations": [ 0 ]
     }
   }
 }

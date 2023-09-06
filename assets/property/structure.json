@@ -189,5 +189,53 @@
     ],
     "destroyedlongname": "BLACKCANNON_longname",
     "destroyediconname": "dblackcannondown"
+  },
+  "MINICANNONUP": {
+    "longname": "MINICANNON_longname",
+    "shortname": "MINICANNON_shortname",
+    "icon": "minicannonup",
+    "description": "MINICANNON_description",
+    "root": {
+      "tile": "minicannonup",
+      "destroyed": "001plainruin"
+    },
+    "destroyedlongname": "PLAINS_longname",
+    "destroyediconname": "dminicannon"
+  },
+  "MINICANNONRIGHT": {
+    "longname": "MINICANNON_longname",
+    "shortname": "MINICANNON_shortname",
+    "icon": "minicannonright",
+    "description": "MINICANNON_description",
+    "root": {
+      "tile": "minicannonright",
+      "destroyed": "001plainruin"
+    },
+    "destroyedlongname": "PLAINS_longname",
+    "destroyediconname": "dminicannon"
+  },
+  "MINICANNONLEFT": {
+    "longname": "MINICANNON_longname",
+    "shortname": "MINICANNON_shortname",
+    "icon": "minicannonleft",
+    "description": "MINICANNON_description",
+    "root": {
+      "tile": "minicannonleft",
+      "destroyed": "001plainruin"
+    },
+    "destroyedlongname": "PLAINS_longname",
+    "destroyediconname": "dminicannon"
+  },
+  "MINICANNONDOWN": {
+    "longname": "MINICANNON_longname",
+    "shortname": "MINICANNON_shortname",
+    "icon": "minicannondown",
+    "description": "MINICANNON_description",
+    "root": {
+      "tile": "minicannondown",
+      "destroyed": "001plainruin"
+    },
+    "destroyedlongname": "PLAINS_longname",
+    "destroyediconname": "dminicannon"
   }
 }

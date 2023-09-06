@@ -1482,6 +1482,30 @@
 				[ 448, 128, 16, 16 ]
 			],
 			"durations": [ 0 ]
+		},
+		"minicannonup": {
+			"frames": [
+				[ 384, 102, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"minicannonright": {
+			"frames": [
+				[ 400, 102, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"minicannonleft": {
+			"frames": [
+				[ 384, 118, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"minicannondown": {
+			"frames": [
+				[ 400, 118, 16, 16 ]
+			],
+			"durations": [ 0 ]
 		}
 	}
 }

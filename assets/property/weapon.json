@@ -25,7 +25,8 @@
     },
     "terrains": {
       "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1
+      "BLACKCANNONROOT": 1,
+      "MINICANNON": 1
     }
   },
   "MECH_PRIMARY": {
@@ -50,7 +51,8 @@
     },
     "terrains": {
       "PIPESEAM": 15,
-      "BLACKCANNONROOT": 15
+      "BLACKCANNONROOT": 15,
+      "MINICANNON": 15
     }
   },
   "MECH_SECONDARY": {
@@ -79,7 +81,8 @@
     },
     "terrains": {
       "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1
+      "BLACKCANNONROOT": 1,
+      "MINICANNON": 1
     }
   },
   "RECON_SECONDARY": {
@@ -108,7 +111,8 @@
     },
     "terrains": {
       "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1
+      "BLACKCANNONROOT": 1,
+      "MINICANNON": 1
     }
   },
   "TANK_PRIMARY": {
@@ -139,7 +143,8 @@
     },
     "terrains": {
       "PIPESEAM": 15,
-      "BLACKCANNONROOT": 15
+      "BLACKCANNONROOT": 15,
+      "MINICANNON": 15
     }
   },
   "TANK_SECONDARY": {
@@ -168,7 +173,8 @@
     },
     "terrains": {
       "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1
+      "BLACKCANNONROOT": 1,
+      "MINICANNON": 1
     }
   },
   "MDTANK_PRIMARY": {
@@ -199,7 +205,8 @@
     },
     "terrains": {
       "PIPESEAM": 55,
-      "BLACKCANNONROOT": 55
+      "BLACKCANNONROOT": 55,
+      "MINICANNON": 55
     }
   },
   "MDTANK_SECONDARY": {
@@ -228,7 +235,8 @@
     },
     "terrains": {
       "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1
+      "BLACKCANNONROOT": 1,
+      "MINICANNON": 1
     }
   },
   "NEOTANK_PRIMARY": {
@@ -259,7 +267,8 @@
     },
     "terrains": {
       "PIPESEAM": 75,
-      "BLACKCANNONROOT": 75
+      "BLACKCANNONROOT": 75,
+      "MINICANNON": 75
     }
   },
   "NEOTANK_SECONDARY": {
@@ -288,7 +297,8 @@
     },
     "terrains": {
       "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1
+      "BLACKCANNONROOT": 1,
+      "MINICANNON": 1
     }
   },
   "MEGATANK_PRIMARY": {
@@ -319,7 +329,8 @@
     },
     "terrains": {
       "PIPESEAM": 125,
-      "BLACKCANNONROOT": 125
+      "BLACKCANNONROOT": 125,
+      "MINICANNON": 125
     }
   },
   "MEGATANK_SECONDARY": {
@@ -348,7 +359,8 @@
     },
     "terrains": {
       "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1
+      "BLACKCANNONROOT": 1,
+      "MINICANNON": 1
     }
   },
   "ANTIAIR_PRIMARY": {
@@ -381,7 +393,8 @@
     },
     "terrains": {
       "PIPESEAM": 10,
-      "BLACKCANNONROOT": 10
+      "BLACKCANNONROOT": 10,
+      "MINICANNON": 10
     }
   },
   "ARTILLERY_PRIMARY": {
@@ -417,7 +430,8 @@
     },
     "terrains": {
       "PIPESEAM": 45,
-      "BLACKCANNONROOT": 45
+      "BLACKCANNONROOT": 45,
+      "MINICANNON": 45
     }
   },
   "ROCKETS_PRIMARY": {
@@ -453,7 +467,8 @@
     },
     "terrains": {
       "PIPESEAM": 55,
-      "BLACKCANNONROOT": 55
+      "BLACKCANNONROOT": 55,
+      "MINICANNON": 55
     },
     "these units override this weapon (just documentation)": [
       "PIPERUNNER",
@@ -529,7 +544,8 @@
     },
     "terrains": {
       "PIPESEAM": 95,
-      "BLACKCANNONROOT": 95
+      "BLACKCANNONROOT": 95,
+      "MINICANNON": 95
     }
   },
   "STEALTH_PRIMARY": {
@@ -568,7 +584,8 @@
     },
     "terrains": {
       "PIPESEAM": 70,
-      "BLACKCANNONROOT": 70
+      "BLACKCANNONROOT": 70,
+      "MINICANNON": 70
     },
     "hiddenunits": {
       "STEALTH": true
@@ -602,7 +619,8 @@
     },
     "terrains": {
       "PIPESEAM": 25,
-      "BLACKCANNONROOT": 25
+      "BLACKCANNONROOT": 25,
+      "MINICANNON": 25
     }
   },
   "BCOPTER_SECONDARY": {
@@ -631,7 +649,8 @@
     },
     "terrains": {
       "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1
+      "BLACKCANNONROOT": 1,
+      "MINICANNON": 1
     }
   },
   "CRUISER_PRIMARY": {

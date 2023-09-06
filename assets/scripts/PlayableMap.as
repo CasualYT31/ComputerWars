@@ -222,6 +222,18 @@ class PlayableMap {
         } else if (structType == "BLACKCANNONUP") {
             return map.getTilesInCone(Vector2(tile.x, tile.y - 3), Direction::Up,
                 0, 9);
+        } else if (structType == "MINICANNONUP") {
+            return map.getTilesInCone(Vector2(tile.x, tile.y - 1),
+                Direction::Up, 0, 3);
+        } else if (structType == "MINICANNONRIGHT") {
+            return map.getTilesInCone(Vector2(tile.x + 1, tile.y),
+                Direction::Right, 0, 3);
+        } else if (structType == "MINICANNONLEFT") {
+            return map.getTilesInCone(Vector2(tile.x - 1, tile.y),
+                Direction::Left, 0, 3);
+        } else if (structType == "MINICANNONDOWN") {
+            return map.getTilesInCone(Vector2(tile.x, tile.y + 1),
+                Direction::Down, 0, 3);
         } else return {};
     }
 
@@ -1550,7 +1562,8 @@ class PlayableMap {
             terrainName == "HQ") {
             map.offsetArmyFunds(currentArmy, 1000);
 
-        } else if (terrainName == "BLACKCANNONROOT") {
+        } else if (terrainName == "BLACKCANNONROOT" ||
+            terrainName == "MINICANNON") {
             const auto tilesInRange = getStructureAttackRange(tile);
             // Go through each tile, and find the most expensive unit, factoring
             // in unit HP as well as cost. If there is a unit, deal damage.
@@ -1575,8 +1588,10 @@ class PlayableMap {
                 }
             }
             // Deal damage if there was a unit.
-            if (targetUnit != NO_UNIT)
-                damageUnitsInRange(tilesInRange[unitTile], 0, 0, 5);
+            if (targetUnit != NO_UNIT) {
+                damageUnitsInRange(tilesInRange[unitTile], 0, 0,
+                    terrainName == "BLACKCANNONROOT" ? 5 : 3);
+            }
         }
     }
 

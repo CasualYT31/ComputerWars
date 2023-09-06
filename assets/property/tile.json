@@ -1,6 +1,6 @@
 {
 	"000plain": {"type": "PLAINS", "neutral": "plain", "alwayspaintable": true},
-	"001plainruin": {"type": "PLAINS", "neutral": "plainruin"},
+	"001plainruin": {"type": "PLAINS", "neutral": "plainruin", "alwayspaintable": true},
 	"002plainshadow": {"type": "PLAINS", "neutral": "plainshadow"},
 	
 	"003sea": {"type": "SEA", "neutral": "sea"},
@@ -316,5 +316,10 @@
 	"blackcannonup2,1": {"type": "BLACKCANNON", "neutral": "blackcannonup2,1"},
 	"blackcannonup0,2": {"type": "BLACKCANNON", "neutral": "blackcannonup0,2"},
 	"blackcannonup1,2": {"type": "BLACKCANNONROOT", "neutral": "blackcannonup1,2"},
-	"blackcannonup2,2": {"type": "BLACKCANNON", "neutral": "blackcannonup2,2"}
+	"blackcannonup2,2": {"type": "BLACKCANNON", "neutral": "blackcannonup2,2"},
+
+	"minicannonup": {"type": "MINICANNON", "neutral": "minicannonup"},
+	"minicannonright": {"type": "MINICANNON", "neutral": "minicannonright"},
+	"minicannonleft": {"type": "MINICANNON", "neutral": "minicannonleft"},
+	"minicannondown": {"type": "MINICANNON", "neutral": "minicannondown"}
 }
