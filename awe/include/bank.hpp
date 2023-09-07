@@ -2301,7 +2301,7 @@ namespace awe {
 		 *         it's destroyed.
 		 */
 		inline const std::string& getDestroyedIconName() const noexcept {
-			return _destroyedIconName;
+			return _destroyedIconName.empty() ? getIconName() : _destroyedIconName;
 		}
 
 		/**
