@@ -66,7 +66,7 @@ PlayableMap game;
  *         was unsuccessful, an empty string will be returned.
  */
 string PlayMap(const string&in file) {
-	game = PlayableMap(loadMap(file));
+	game = PlayableMap(loadMap(file, PLAYABLE_MAP_TYPENAME));
 	if (game.map is null) {
 		error("Failed to load map, will not switch menus.");
 		return "";

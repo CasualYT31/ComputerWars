@@ -55,6 +55,33 @@ class DamageWidget {
     }
 
     /**
+     * Updates the damage label's position based on the current \c PlayableMap's
+     * state, if there is a \c PlayableMap loaded.
+     * Specifically, the map's current cursor position is used.
+     */
+    void updatePosition() {
+        if (game is null) return;
+        const auto rect = game.map.getCursorBoundingBox();
+        const auto quadrant = game.map.getCursorQuadrant();
+        switch (quadrant) {
+        case Quadrant::LowerLeft:
+            updatePosition(MousePosition(rect.left + rect.width, rect.top),
+                quadrant);
+            break;
+        case Quadrant::LowerRight:
+            updatePosition(MousePosition(rect.left, rect.top), quadrant);
+            break;
+        case Quadrant::UpperRight:
+            updatePosition(MousePosition(rect.left, rect.top + rect.height),
+                quadrant);
+            break;
+        default: // UpperLeft:
+            updatePosition(MousePosition(rect.left + rect.width,
+                rect.top + rect.height), quadrant);
+        }
+    }
+
+    /**
      * Updates the damage label's position based on a given pixel location, and
      * quadrant.
      * @param pos  The pixel location to draw with.

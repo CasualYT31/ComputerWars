@@ -256,23 +256,29 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Saves the UI configuration (i.e. the "
 		"joystick ID and axis threashold).");
 
-	r = engine->RegisterGlobalFunction("Map@ createMap(const string&in)",
+	r = engine->RegisterGlobalFunction("Map@ createMap(const string&in, "
+		"const string&in)",
 		asMETHOD(awe::game_engine, _script_createMap),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Saves a blank map (its file path being "
 		"the first parameter), then loads it, and returns a handle to it, if "
 		"successful. If there is already a map open at the time of the call, then "
 		"an error will be logged and no changes will occur. A null handle will be "
-		"returned if the map couldn't be created!");
+		"returned if the map couldn't be created!\n"
+		"The second string parameter must be the name of the class defined by the "
+		"scripts that represents a playable map.");
 
-	r = engine->RegisterGlobalFunction("Map@ loadMap(const string&in)",
+	r = engine->RegisterGlobalFunction("Map@ loadMap(const string&in, "
+		"const string&in)",
 		asMETHOD(awe::game_engine, _script_loadMap),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Opens a map (its file path being the "
 		"first parameter), and returns a handle to it if it could be loaded. If "
 		"there is already a map open at the time of the call, then an error will "
 		"be logged and no changes will occur. A null handle will be returned if "
-		"the map couldn't be loaded!");
+		"the map couldn't be loaded!\n"
+		"The second string parameter must be the name of the class defined by the "
+		"scripts that represents a playable map.");
 
 	r = engine->RegisterGlobalFunction("void quitMap()",
 		asMETHOD(awe::game_engine, _script_quitMap),
@@ -573,7 +579,8 @@ void awe::game_engine::_script_saveUIConfig() {
 	_userinput->save();
 }
 
-awe::map* awe::game_engine::_script_createMap(const std::string& file) {
+awe::map* awe::game_engine::_script_createMap(const std::string& file,
+	const std::string& playableMapTypeName) {
 	if (_map) {
 		_logger.error("Attempted to create a map file \"{}\" whilst map \"{}\" "
 			"was still loaded!", file, _map->getMapName());
@@ -591,7 +598,7 @@ awe::map* awe::game_engine::_script_createMap(const std::string& file) {
 	_map->setScripts(_scripts);
 	if (_map->save(file)) {
 		_map = nullptr;
-		return _script_loadMap(file);
+		return _script_loadMap(file, playableMapTypeName);
 	} else {
 		_map = nullptr;
 		_logger.error("Couldn't create map file \"{}\".", file);
@@ -599,7 +606,8 @@ awe::map* awe::game_engine::_script_createMap(const std::string& file) {
 	}
 }
 
-awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
+awe::map* awe::game_engine::_script_loadMap(const std::string& file,
+	const std::string& playableMapTypeName) {
 	// Create the game.
 	if (_map) {
 		_logger.error("Attempted to load map file \"{}\" whilst map \"{}\" was "
@@ -614,6 +622,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file) {
 			_logger.error("Couldn't allocate the map object for loading: {}", e);
 			return nullptr;
 		}
+		_map->setMapObjectType(playableMapTypeName);
 		_map->setTarget(_renderer);
 		_map->setTileSpritesheet(_sprites->tile->normal);
 		_map->setUnitSpritesheet(_sprites->unit->idle);

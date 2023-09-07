@@ -242,21 +242,29 @@ namespace awe {
 		 * won't be unloaded, and no new map will be loaded.
 		 * @warning If the given path points to an existing map, it will be
 		 *          replaced!
-		 * @param   file The filepath of the new map.
+		 * @param   file                The filepath of the new map.
+		 * @param   playableMapTypeName The name of the type of the map object that
+		 *                              is used by the scripts when playing the
+		 *                              map.
 		 * @return  Pointer to the \c map object to give to the scripts. Returns
 		 *          \c nullptr if the map couldn't be loaded.
 		 */
-		awe::map* _script_createMap(const std::string& file);
+		awe::map* _script_createMap(const std::string& file,
+			const std::string& playableMapTypeName);
 
 		/**
 		 * Loads a map.
 		 * If a map was already loaded, then an error will be logged, that map
 		 * won't be unloaded, and no new map will be loaded.
-		 * @param  file The map file to load.
+		 * @param  file                The map file to load.
+		 * @param  playableMapTypeName The name of the type of the map object that
+		 *                             is used by the scripts when playing the
+		 *                             map.
 		 * @return Pointer to the \c map object to give to the scripts. Returns
 		 *         \c nullptr if the map couldn't be loaded.
 		 */
-		awe::map* _script_loadMap(const std::string& file);
+		awe::map* _script_loadMap(const std::string& file,
+			const std::string& playableMapTypeName);
 
 		/**
 		 * Quits the current map and goes back to the menu that was open when

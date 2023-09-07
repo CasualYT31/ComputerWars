@@ -71,7 +71,7 @@ void SelectTargetMenuHandleInput(const dictionary controls,
     const MousePosition&in currentPosition) {
 	HandleCommonGameInput(controls, mouseInputs, previousPosition,
         currentPosition);
-    game.updateDamageWidgetPosition(damageWidget);
+    damageWidget.updatePosition();
 
 	// If the currently selected tile is hovering over a target, find the base
 	// damage the selected weapon deals to the target and update the damage label.

@@ -222,6 +222,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void setMapObject(ref@ const)",
+			asMETHOD(awe::map, setMapObject), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"bool hasChanged()",
 			asMETHOD(awe::map, hasChanged), asCALL_THISCALL);
 
@@ -795,6 +799,11 @@ void awe::map::Register(asIScriptEngine* engine,
 			"void enablePeriodic(const bool)",
 			asMETHOD(awe::map, enablePeriodic), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"bool beginTurnForOwnedTile(Vector2, const Terrain@ const, "
+			"const ArmyID)",
+			asMETHOD(awe::map, beginTurnForOwnedTile), asCALL_THISCALL);
+
 		////////////////////////
 		// DRAWING OPERATIONS //
 		////////////////////////
@@ -1033,16 +1042,26 @@ void awe::map::setScripts(const std::shared_ptr<engine::scripts>& scripts) {
 	_scripts = scripts;
 }
 
+void awe::map::setMapObject(CScriptHandle mapObject) {
+	_mapObject = mapObject;
+}
+
+void awe::map::setMapObjectType(const std::string& typeName) {
+	_mapObjectTypeName = typeName;
+}
+
 bool awe::map::hasChanged() const {
 	return _changed;
 }
 
 bool awe::map::periodic() {
 	if (!_periodicEnabled) return false;
-	if (_scripts && _scripts->functionDeclExists(_moduleName,
-		"void periodic(Map@ const, bool&out)")) {
+	if (_mapObject.GetRef() && !_mapObjectTypeName.empty() && _scripts &&
+		_scripts->functionDeclExists(_moduleName,
+			"void periodic(" + _mapObjectTypeName + "@ const, bool&out)")) {
 		bool winConditionMet = false;
-		_scripts->callFunction(_moduleName, "periodic", this, &winConditionMet);
+		_scripts->callFunction(_moduleName, "periodic", _mapObject.GetRef(),
+			&winConditionMet);
 		return winConditionMet;
 	} else {
 		return defaultWinCondition();
@@ -1051,6 +1070,20 @@ bool awe::map::periodic() {
 
 void awe::map::enablePeriodic(const bool enabled) {
 	_periodicEnabled = enabled;
+}
+
+bool awe::map::beginTurnForOwnedTile(sf::Vector2u tile,
+	awe::terrain* const terrain, const awe::ArmyID currentArmy) {
+	if (!_mapObject.GetRef() || _mapObjectTypeName.empty() || !_scripts ||
+		!_scripts->functionDeclExists(_moduleName,
+			"void beginTurnForOwnedTile(" + _mapObjectTypeName + "@ const, "
+			"Vector2, const Terrain@ const, ArmyID, bool&out)"))
+		return false;
+	bool overrideDefaultBehaviour = false;
+	_scripts->callFunction(_moduleName, "beginTurnForOwnedTile",
+		_mapObject.GetRef(), &tile, terrain, currentArmy,
+		&overrideDefaultBehaviour);
+	return overrideDefaultBehaviour;
 }
 
 void awe::map::setMapName(std::string name) {
@@ -3214,8 +3247,15 @@ void awe::map::removeScriptFile(const std::string& name) {
 std::string awe::map::buildScriptFiles() {
 	if (!_scripts) throw NO_SCRIPTS;
 	std::string newModuleName = getMapName() + ":map";
+	// Make a copy so that the class declaration is not inserted multiple times. It
+	// will also stay hidden from the user.
+	engine::scripts::files scriptFiles = _scriptFiles;
+	if (!scriptFiles.empty() && !_mapObjectTypeName.empty()) {
+		scriptFiles.begin()->second.insert(0,
+			"external shared class " + _mapObjectTypeName + ";");
+	}
 	const bool success =
-		_scripts->createModule(newModuleName, _scriptFiles, _lastKnownBuildResult);
+		_scripts->createModule(newModuleName, scriptFiles, _lastKnownBuildResult);
 	if (success && !_moduleName.empty() && newModuleName != _moduleName) {
 		// The map was renamed since the last build, so the old module still
 		// exists. Delete it!

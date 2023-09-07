@@ -298,6 +298,21 @@ namespace awe {
 		void setScripts(const std::shared_ptr<engine::scripts>& scripts);
 
 		/**
+		 * Allows the scripts to pass a pointer to an object that represents the
+		 * map, in the current case, a \c PlayableMap object.
+		 * @param mapObject Pointer to the map object.
+		 */
+		void setMapObject(CScriptHandle mapObject);
+
+		/**
+		 * Provide the name of the type of the script's map object.
+		 * @warning This must be given before loading any map file! This is because
+		 *          the scripts within the map rely on the map object's type name!
+		 * @param   typeName The name of the type of the map object.
+		 */
+		void setMapObjectType(const std::string& typeName);
+
+		/**
 		 * Has the map been changed since it was last saved successfully?
 		 * Only tests relevant map data, not if spritesheets were changed, or the
 		 * scripts object was changed, etc.
@@ -319,6 +334,22 @@ namespace awe {
 		 *                to enable it.
 		 */
 		void enablePeriodic(const bool enabled);
+
+		/**
+		 * If this map defines a \c beginTurnForOwnedTile() function, invoke it.
+		 * This script function is invoked at the beginning of every army's turn.
+		 * Each of their owned tiles will be passed to it. This function will be
+		 * invoked \em before healing handled by properties, and plane crashes and
+		 * ship sinkings, etc., but after planes and ships have burned their fuel.
+		 * @param  tile        The tile that needs to be handled.
+		 * @param  terrain     The terrain of the tile.
+		 * @param  currentArmy The owner of the tile.
+		 * @return \c TRUE if the script function was invoked, and it should
+		 *         prevent/override the default behaviour of that tile. \c FALSE
+		 *         otherwise.
+		 */
+		bool beginTurnForOwnedTile(sf::Vector2u tile, awe::terrain* const terrain,
+			const awe::ArmyID currentArmy);
 
 		////////////////////
 		// MAP OPERATIONS //
@@ -2590,6 +2621,12 @@ namespace awe {
 
 		/// The last known build result.
 		std::string _lastKnownBuildResult;
+
+		/// The script's map object that contains this \c awe::map object.
+		CScriptHandle _mapObject;
+
+		/// The name of the type of the script's map object.
+		std::string _mapObjectTypeName;
 
 		/////////////
 		// DRAWING //

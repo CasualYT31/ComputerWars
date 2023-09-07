@@ -552,8 +552,9 @@ awe::EmptyCallback@ FileDialogOverwrite;
 void createNewMap() {
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
-        @edit = EditableMap(createMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
+        @edit = EditableMap(createMap(FileDialogFile, PLAYABLE_MAP_TYPENAME),
+            TilePropertiesDialog, ArmyPropertiesDialog, MapPropertiesDialog,
+            StatusBar, ScriptsDialog);
         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
         ArmyPropertiesDialog.refresh();
         MapPropertiesDialog.restore();
@@ -592,8 +593,9 @@ void MapMakerMenu_OpenMap_FileSelected() {
     FileDialogFile = getFileDialogSelectedPaths(OPEN_MAP)[0];
     quitEditMap(function() {
         TilePropertiesDialog.deselect();
-        @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
-            ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
+        @edit = EditableMap(loadMap(FileDialogFile, PLAYABLE_MAP_TYPENAME),
+            TilePropertiesDialog, ArmyPropertiesDialog, MapPropertiesDialog,
+            StatusBar, ScriptsDialog);
         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
         ArmyPropertiesDialog.refresh();
         MementosHaveChanged();
@@ -605,8 +607,9 @@ void MapMakerMenu_OpenMap_FileSelected() {
 //     FileDialogFile = "map/islandx.cwm";
 //     quitEditMap(function() {
 //         TilePropertiesDialog.deselect();
-//         @edit = EditableMap(loadMap(FileDialogFile), TilePropertiesDialog,
-//             ArmyPropertiesDialog, MapPropertiesDialog, StatusBar, ScriptsDialog);
+//         @edit = EditableMap(loadMap(FileDialogFile, PLAYABLE_MAP_TYPENAME),
+//             TilePropertiesDialog, ArmyPropertiesDialog, MapPropertiesDialog,
+//             StatusBar, ScriptsDialog);
 //         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
 //         ArmyPropertiesDialog.refresh();
 //         MementosHaveChanged();

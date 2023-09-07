@@ -11,7 +11,7 @@
  * an army ID is used as a key, then whatever is stored in the map file will be
  * overridden by the value after the map has loaded.
  */
-class GameOptions {
+shared class GameOptions {
     /**
      * Stores current/primary CO overrides.
      * The key is the \c ArmyID of the army whose current CO is to be overridden,
@@ -37,12 +37,15 @@ class GameOptions {
     dictionary teams;
 }
 
+/// The name of the \c PlayableMap class.
+const string PLAYABLE_MAP_TYPENAME = "PlayableMap";
+
 /**
  * Represents a map with game logic attached.
  * <b>Note that all the HP values that are <em>given</em> to and <em>received</em>
  * from this class are user-friendly.</b>
  */
-class PlayableMap {
+shared class PlayableMap {
     //////////////////
     // CONSTRUCTION //
     //////////////////
@@ -61,6 +64,7 @@ class PlayableMap {
                 "PlayableMap; the game will crash soon!");
         } else {
             @map = mapToPlayOn;
+            map.setMapObject(this);
             map.disableMementos();
             map.setMapScalingFactor(_mapScalingFactor);
             setNormalCursorSprites();
@@ -157,32 +161,6 @@ class PlayableMap {
         map.setURCursorSprite("deletecursor");
         map.setLLCursorSprite("deletecursor");
         map.setLRCursorSprite("deletecursor");
-    }
-
-    /**
-     * Updates a given damage label widget's position based on this map's current
-     * cursor position.
-     * @param widget The damage label widget to update.
-     */
-    void updateDamageWidgetPosition(DamageWidget@ widget) const {
-        const auto rect = map.getCursorBoundingBox();
-        const auto quadrant = map.getCursorQuadrant();
-        switch (quadrant) {
-        case Quadrant::LowerLeft:
-            widget.updatePosition(MousePosition(rect.left + rect.width,
-                rect.top), quadrant);
-            break;
-        case Quadrant::LowerRight:
-            widget.updatePosition(MousePosition(rect.left, rect.top), quadrant);
-            break;
-        case Quadrant::UpperRight:
-            widget.updatePosition(MousePosition(rect.left,
-                rect.top + rect.height), quadrant);
-            break;
-        default: // UpperLeft:
-            widget.updatePosition(MousePosition(rect.left + rect.width,
-                rect.top + rect.height), quadrant);
-        }
     }
 
     //////////////////////////
@@ -1609,6 +1587,8 @@ class PlayableMap {
      */
     private void _beginTurnForTile(const Vector2&in tile,
         const Terrain@ terrain, const ArmyID currentArmy) {
+        if (map.beginTurnForOwnedTile(tile, terrain, currentArmy)) return;
+
         const string terrainName = terrain.scriptName;
         const auto currentTeam = map.getArmyTeam(currentArmy);
 
