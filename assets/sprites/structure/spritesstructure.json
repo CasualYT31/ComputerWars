@@ -116,6 +116,30 @@
     "blackobelisk": {
       "frames": [ [ 508, 46, 46, 46 ] ],
       "durations": [ 0 ]
+    },
+    "grandboltleft": {
+      "frames": [ [ 554, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "dgrandboltleft": {
+      "frames": [ [ 600, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "grandboltcentre": {
+      "frames": [ [ 646, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "dgrandboltcentre": {
+      "frames": [ [ 692, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "grandboltright": {
+      "frames": [ [ 738, 46, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "dgrandboltright": {
+      "frames": [ [ 784, 46, 46, 46 ] ],
+      "durations": [ 0 ]
     }
   }
 }

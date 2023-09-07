@@ -30,7 +30,8 @@
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1
+      "BLACKOBELISKROOT": 1,
+      "GRANDBOLTROOT": 1
     }
   },
   "MECH_PRIMARY": {
@@ -60,7 +61,8 @@
       "BLACKLASER": 15,
       "DEATHRAYROOT": 15,
       "BLACKCRYSTAL": 15,
-      "BLACKOBELISKROOT": 15
+      "BLACKOBELISKROOT": 15,
+      "GRANDBOLTROOT": 15
     }
   },
   "MECH_SECONDARY": {
@@ -94,7 +96,8 @@
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1
+      "BLACKOBELISKROOT": 1,
+      "GRANDBOLTROOT": 1
     }
   },
   "RECON_SECONDARY": {
@@ -128,7 +131,8 @@
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1
+      "BLACKOBELISKROOT": 1,
+      "GRANDBOLTROOT": 1
     }
   },
   "TANK_PRIMARY": {
@@ -164,7 +168,8 @@
       "BLACKLASER": 15,
       "DEATHRAYROOT": 15,
       "BLACKCRYSTAL": 15,
-      "BLACKOBELISKROOT": 15
+      "BLACKOBELISKROOT": 15,
+      "GRANDBOLTROOT": 15
     }
   },
   "TANK_SECONDARY": {
@@ -198,7 +203,8 @@
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1
+      "BLACKOBELISKROOT": 1,
+      "GRANDBOLTROOT": 1
     }
   },
   "MDTANK_PRIMARY": {
@@ -234,7 +240,8 @@
       "BLACKLASER": 55,
       "DEATHRAYROOT": 55,
       "BLACKCRYSTAL": 55,
-      "BLACKOBELISKROOT": 55
+      "BLACKOBELISKROOT": 55,
+      "GRANDBOLTROOT": 55
     }
   },
   "MDTANK_SECONDARY": {
@@ -268,7 +275,8 @@
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1
+      "BLACKOBELISKROOT": 1,
+      "GRANDBOLTROOT": 1
     }
   },
   "NEOTANK_PRIMARY": {
@@ -304,7 +312,8 @@
       "BLACKLASER": 75,
       "DEATHRAYROOT": 75,
       "BLACKCRYSTAL": 75,
-      "BLACKOBELISKROOT": 75
+      "BLACKOBELISKROOT": 75,
+      "GRANDBOLTROOT": 75
     }
   },
   "NEOTANK_SECONDARY": {
@@ -338,7 +347,8 @@
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1
+      "BLACKOBELISKROOT": 1,
+      "GRANDBOLTROOT": 1
     }
   },
   "MEGATANK_PRIMARY": {
@@ -374,7 +384,8 @@
       "BLACKLASER": 125,
       "DEATHRAYROOT": 125,
       "BLACKCRYSTAL": 125,
-      "BLACKOBELISKROOT": 125
+      "BLACKOBELISKROOT": 125,
+      "GRANDBOLTROOT": 125
     }
   },
   "MEGATANK_SECONDARY": {
@@ -408,7 +419,8 @@
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1
+      "BLACKOBELISKROOT": 1,
+      "GRANDBOLTROOT": 1
     }
   },
   "ANTIAIR_PRIMARY": {
@@ -446,7 +458,8 @@
       "BLACKLASER": 10,
       "DEATHRAYROOT": 10,
       "BLACKCRYSTAL": 10,
-      "BLACKOBELISKROOT": 10
+      "BLACKOBELISKROOT": 10,
+      "GRANDBOLTROOT": 10
     }
   },
   "ARTILLERY_PRIMARY": {
@@ -487,7 +500,8 @@
       "BLACKLASER": 45,
       "DEATHRAYROOT": 45,
       "BLACKCRYSTAL": 45,
-      "BLACKOBELISKROOT": 45
+      "BLACKOBELISKROOT": 45,
+      "GRANDBOLTROOT": 45
     }
   },
   "ROCKETS_PRIMARY": {
@@ -528,7 +542,8 @@
       "BLACKLASER": 55,
       "DEATHRAYROOT": 55,
       "BLACKCRYSTAL": 55,
-      "BLACKOBELISKROOT": 55
+      "BLACKOBELISKROOT": 55,
+      "GRANDBOLTROOT": 55
     },
     "these units override this weapon (just documentation)": [
       "PIPERUNNER",
@@ -609,7 +624,8 @@
       "BLACKLASER": 95,
       "DEATHRAYROOT": 95,
       "BLACKCRYSTAL": 95,
-      "BLACKOBELISKROOT": 95
+      "BLACKOBELISKROOT": 95,
+      "GRANDBOLTROOT": 95
     }
   },
   "STEALTH_PRIMARY": {
@@ -653,7 +669,8 @@
       "BLACKLASER": 70,
       "DEATHRAYROOT": 70,
       "BLACKCRYSTAL": 70,
-      "BLACKOBELISKROOT": 70
+      "BLACKOBELISKROOT": 70,
+      "GRANDBOLTROOT": 70
     },
     "hiddenunits": {
       "STEALTH": true
@@ -692,7 +709,8 @@
       "BLACKLASER": 25,
       "DEATHRAYROOT": 25,
       "BLACKCRYSTAL": 25,
-      "BLACKOBELISKROOT": 25
+      "BLACKOBELISKROOT": 25,
+      "GRANDBOLTROOT": 25
     }
   },
   "BCOPTER_SECONDARY": {
@@ -726,7 +744,8 @@
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1
+      "BLACKOBELISKROOT": 1,
+      "GRANDBOLTROOT": 1
     }
   },
   "CRUISER_PRIMARY": {

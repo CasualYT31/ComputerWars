@@ -261,6 +261,11 @@ class PlayableMap {
             // though that's what's stated in Dual Strike.
             return map.getAvailableTiles(Vector2(tile.x, tile.y - 1), 2, 4);
 
+        } else if (structType == "GRANDBOLTLEFT" ||
+            structType == "GRANDBOLTCENTRE" || structType == "GRANDBOLTRIGHT") {
+            if (tile.y == map.getMapSize().y - 1) return {};
+            else return { Vector2(tile.x, tile.y + 1) };
+
         } else return {};
     }
 
@@ -454,6 +459,29 @@ class PlayableMap {
         map.setArmyFunds(army, newFunds);
         map.replenishUnit(unitID, true);
         return true;
+    }
+
+    /**
+     * Creates a unit without charging the army for it.
+     * @return The ID of the created unit.
+     * @sa     \c buyUnit().
+     */
+    UnitID createUnit(const UnitType@ type, const ArmyID army,
+        const Vector2&in position) {
+        if (map.getUnitOnTile(position) != NO_UNIT) {
+            throw("Could not create unit of type \"" + type.scriptName + "\" for "
+                "army " + formatUInt(army) + " on tile " + position.toString() +
+                ": this tile is occupied!");
+        }
+        const auto unitID = map.createUnit(type.scriptName, army);
+        if (unitID == NO_UNIT) {
+            throw("Could not create unit of type \"" + type.scriptName + "\" for "
+                "army " + formatUInt(army) + " on tile " + position.toString() +
+                ": this army ID is invalid!");
+        }
+        map.setUnitPosition(unitID, position);
+        map.replenishUnit(unitID, true);
+        return unitID;
     }
 
     /**
@@ -1657,6 +1685,31 @@ class PlayableMap {
                     map.getTeamOfUnit(unitID) != currentTeam) continue;
                 healUnit(unitID, 2, NO_ARMY);
                 map.replenishUnit(unitID);
+            }
+
+        } else if (terrainName == "GRANDBOLTROOT") {
+            // Ooziums only spawn every six days.
+            if (map.getDay() % 6 == 0) {
+                const auto tilesInRange = getStructureAttackRange(tile);
+                for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
+                    // If there is a unit on the tile, and it's on the same team
+                    // as the owner of the structure, do not spawn an Oozium. If
+                    // a unit of an opposing team is occupying the tile, however,
+                    // delete the unit before spawning the Oozium in.
+                    const auto unitID = map.getUnitOnTile(tilesInRange[i]);
+                    if (unitID != NO_UNIT) {
+                        if (map.getTeamOfUnit(unitID) == currentTeam) continue;
+                        deleteUnit(unitID);
+                    }
+                    // Don't spawn an Oozium if it can't move onto the tile.
+                    const auto ooziumType = unittype["OOZIUM"];
+                    if (map.getTileType(tilesInRange[i]).type.moveCost[
+                        ooziumType.movementTypeScriptName] < 0) continue;
+                    // Spawn Oozium.
+                    const auto oozium = createUnit(ooziumType, currentArmy,
+                        tilesInRange[i]);
+                    map.waitUnit(oozium, false);
+                }
             }
         }
     }

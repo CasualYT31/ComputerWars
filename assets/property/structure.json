@@ -387,5 +387,935 @@
     ],
     "destroyedlongname": "BLACKOBELISK_longname",
     "destroyediconname": "dblackcannondown"
+  },
+  "GRANDBOLTLEFT": {
+    "longname": "GRANDBOLT_longname",
+    "shortname": "GRANDBOLT_shortname",
+    "icon": "grandboltleft",
+    "description": "GRANDBOLT_description",
+    "root": {
+      "tile": "grandbolt1-44",
+      "destroyed": "dgrandbolt",
+      "deleted": "000plain"
+    },
+    "dependent": [
+      {
+        "offset": [ 1, -8 ],
+        "tile": "grandbolt1-1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -8 ],
+        "tile": "grandbolt1-2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -7 ],
+        "tile": "grandbolt1-3",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -7 ],
+        "tile": "grandbolt1-4",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -7 ],
+        "tile": "grandbolt1-5",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -7 ],
+        "tile": "grandbolt1-6",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -6 ],
+        "tile": "grandbolt1-7",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -6 ],
+        "tile": "grandbolt1-8",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -6 ],
+        "tile": "grandbolt1-9",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -6 ],
+        "tile": "grandbolt1-10",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -6 ],
+        "tile": "grandbolt1-11",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -6 ],
+        "tile": "grandbolt1-12",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -5 ],
+        "tile": "grandbolt1-13",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -5 ],
+        "tile": "grandbolt1-14",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -5 ],
+        "tile": "grandbolt1-15",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -5 ],
+        "tile": "grandbolt1-16",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -5 ],
+        "tile": "grandbolt1-17",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -5 ],
+        "tile": "grandbolt1-18",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -4 ],
+        "tile": "grandbolt1-19",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -4 ],
+        "tile": "grandbolt1-20",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -4 ],
+        "tile": "grandbolt1-21",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -4 ],
+        "tile": "grandbolt1-22",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -4 ],
+        "tile": "grandbolt1-23",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -4 ],
+        "tile": "grandbolt1-24",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -3 ],
+        "tile": "grandbolt1-25",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -3 ],
+        "tile": "grandbolt1-26",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -3 ],
+        "tile": "grandbolt1-27",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -3 ],
+        "tile": "grandbolt1-28",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -3 ],
+        "tile": "grandbolt1-29",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -3 ],
+        "tile": "grandbolt1-30",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -2 ],
+        "tile": "grandbolt1-31",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -2 ],
+        "tile": "grandbolt1-32",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -2 ],
+        "tile": "grandbolt1-33",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -2 ],
+        "tile": "grandbolt1-34",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -2 ],
+        "tile": "grandbolt1-35",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -2 ],
+        "tile": "grandbolt1-36",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -1 ],
+        "tile": "grandbolt1-37",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -1 ],
+        "tile": "grandbolt1-38",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -1 ],
+        "tile": "grandbolt1-39",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -1 ],
+        "tile": "grandbolt1-40",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -1 ],
+        "tile": "grandbolt1-41",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -1 ],
+        "tile": "grandbolt1-42",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, 0 ],
+        "tile": "grandbolt1-43",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 0 ],
+        "tile": "grandbolt1-45",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, 0 ],
+        "tile": "grandbolt1-46",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 1 ],
+        "tile": "grandbolt1-47",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, 1 ],
+        "tile": "grandbolt1-48",
+        "deleted": "000plain"
+      }
+    ],
+    "destroyedlongname": "GRANDBOLT_longname",
+    "destroyediconname": "dgrandboltleft"
+  },
+  "GRANDBOLTCENTRE": {
+    "longname": "GRANDBOLT_longname",
+    "shortname": "GRANDBOLT_shortname",
+    "icon": "grandboltcentre",
+    "description": "GRANDBOLT_description",
+    "root": {
+      "tile": "grandbolt2-70",
+      "destroyed": "dgrandbolt",
+      "deleted": "000plain"
+    },
+    "dependent": [
+      {
+        "offset": [ -3, -11 ],
+        "tile": "grandbolt2-1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -11 ],
+        "tile": "grandbolt2-2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -11 ],
+        "tile": "grandbolt2-3",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -11 ],
+        "tile": "grandbolt2-4",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -11 ],
+        "tile": "grandbolt2-5",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -11 ],
+        "tile": "grandbolt2-6",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -11 ],
+        "tile": "grandbolt2-73",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -10 ],
+        "tile": "grandbolt2-7",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -10 ],
+        "tile": "grandbolt2-8",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -10 ],
+        "tile": "grandbolt2-9",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -10 ],
+        "tile": "grandbolt2-10",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -10 ],
+        "tile": "grandbolt2-11",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -10 ],
+        "tile": "grandbolt2-12",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -10 ],
+        "tile": "grandbolt2-74",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -9 ],
+        "tile": "grandbolt2-13",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -9 ],
+        "tile": "grandbolt2-14",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -9 ],
+        "tile": "grandbolt2-15",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -9 ],
+        "tile": "grandbolt2-16",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -9 ],
+        "tile": "grandbolt2-17",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -9 ],
+        "tile": "grandbolt2-18",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -9 ],
+        "tile": "grandbolt2-75",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -8 ],
+        "tile": "grandbolt2-19",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -8 ],
+        "tile": "grandbolt2-20",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -8 ],
+        "tile": "grandbolt2-21",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -8 ],
+        "tile": "grandbolt2-22",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -8 ],
+        "tile": "grandbolt2-23",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -8 ],
+        "tile": "grandbolt2-24",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -8 ],
+        "tile": "grandbolt2-76",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -7 ],
+        "tile": "grandbolt2-25",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -7 ],
+        "tile": "grandbolt2-26",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -7 ],
+        "tile": "grandbolt2-27",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -7 ],
+        "tile": "grandbolt2-28",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -7 ],
+        "tile": "grandbolt2-29",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -7 ],
+        "tile": "grandbolt2-30",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -7 ],
+        "tile": "grandbolt2-77",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -6 ],
+        "tile": "grandbolt2-31",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -6 ],
+        "tile": "grandbolt2-32",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -6 ],
+        "tile": "grandbolt2-33",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -6 ],
+        "tile": "grandbolt2-34",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -6 ],
+        "tile": "grandbolt2-35",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -6 ],
+        "tile": "grandbolt2-36",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -6 ],
+        "tile": "grandbolt2-78",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -5 ],
+        "tile": "grandbolt2-37",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -5 ],
+        "tile": "grandbolt2-38",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -5 ],
+        "tile": "grandbolt2-39",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -5 ],
+        "tile": "grandbolt2-40",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -5 ],
+        "tile": "grandbolt2-41",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -5 ],
+        "tile": "grandbolt2-42",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -5 ],
+        "tile": "grandbolt2-79",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -4 ],
+        "tile": "grandbolt2-43",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -4 ],
+        "tile": "grandbolt2-44",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -4 ],
+        "tile": "grandbolt2-45",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -4 ],
+        "tile": "grandbolt2-46",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -4 ],
+        "tile": "grandbolt2-47",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -4 ],
+        "tile": "grandbolt2-48",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -4 ],
+        "tile": "grandbolt2-80",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -3 ],
+        "tile": "grandbolt2-49",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -3 ],
+        "tile": "grandbolt2-50",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -3 ],
+        "tile": "grandbolt2-51",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -3 ],
+        "tile": "grandbolt2-52",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -3 ],
+        "tile": "grandbolt2-53",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -3 ],
+        "tile": "grandbolt2-54",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -3 ],
+        "tile": "grandbolt2-81",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -2 ],
+        "tile": "grandbolt2-55",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -2 ],
+        "tile": "grandbolt2-56",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -2 ],
+        "tile": "grandbolt2-57",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -2 ],
+        "tile": "grandbolt2-58",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -2 ],
+        "tile": "grandbolt2-59",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -2 ],
+        "tile": "grandbolt2-60",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -2 ],
+        "tile": "grandbolt2-82",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, -1 ],
+        "tile": "grandbolt2-61",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -1 ],
+        "tile": "grandbolt2-62",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -1 ],
+        "tile": "grandbolt2-63",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -1 ],
+        "tile": "grandbolt2-64",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -1 ],
+        "tile": "grandbolt2-65",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -1 ],
+        "tile": "grandbolt2-66",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -1 ],
+        "tile": "grandbolt2-83",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -3, 0 ],
+        "tile": "grandbolt2-67",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, 0 ],
+        "tile": "grandbolt2-68",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, 0 ],
+        "tile": "grandbolt2-69",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 0 ],
+        "tile": "grandbolt2-71",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, 0 ],
+        "tile": "grandbolt2-72",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, 0 ],
+        "tile": "grandbolt2-84",
+        "deleted": "000plain"
+      }
+    ],
+    "destroyedlongname": "GRANDBOLT_longname",
+    "destroyediconname": "dgrandboltcentre"
+  },
+  "GRANDBOLTRIGHT": {
+    "longname": "GRANDBOLT_longname",
+    "shortname": "GRANDBOLT_shortname",
+    "icon": "grandboltright",
+    "description": "GRANDBOLT_description",
+    "root": {
+      "tile": "grandbolt3-45",
+      "destroyed": "dgrandbolt",
+      "deleted": "000plain"
+    },
+    "dependent": [
+      {
+        "offset": [ -2, -8 ],
+        "tile": "grandbolt3-1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -8 ],
+        "tile": "grandbolt3-2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -7 ],
+        "tile": "grandbolt3-3",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -7 ],
+        "tile": "grandbolt3-4",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -7 ],
+        "tile": "grandbolt3-5",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -7 ],
+        "tile": "grandbolt3-6",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -6 ],
+        "tile": "grandbolt3-7",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -6 ],
+        "tile": "grandbolt3-8",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -6 ],
+        "tile": "grandbolt3-9",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -6 ],
+        "tile": "grandbolt3-10",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -6 ],
+        "tile": "grandbolt3-11",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -6 ],
+        "tile": "grandbolt3-12",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -5 ],
+        "tile": "grandbolt3-13",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -5 ],
+        "tile": "grandbolt3-14",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -5 ],
+        "tile": "grandbolt3-15",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -5 ],
+        "tile": "grandbolt3-16",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -5 ],
+        "tile": "grandbolt3-17",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -5 ],
+        "tile": "grandbolt3-18",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -4 ],
+        "tile": "grandbolt3-19",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -4 ],
+        "tile": "grandbolt3-20",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -4 ],
+        "tile": "grandbolt3-21",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -4 ],
+        "tile": "grandbolt3-22",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -4 ],
+        "tile": "grandbolt3-23",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -4 ],
+        "tile": "grandbolt3-24",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -3 ],
+        "tile": "grandbolt3-25",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -3 ],
+        "tile": "grandbolt3-26",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -3 ],
+        "tile": "grandbolt3-27",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -3 ],
+        "tile": "grandbolt3-28",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -3 ],
+        "tile": "grandbolt3-29",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -3 ],
+        "tile": "grandbolt3-30",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -2 ],
+        "tile": "grandbolt3-31",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -2 ],
+        "tile": "grandbolt3-32",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -2 ],
+        "tile": "grandbolt3-33",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -2 ],
+        "tile": "grandbolt3-34",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -2 ],
+        "tile": "grandbolt3-35",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -2 ],
+        "tile": "grandbolt3-36",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, -1 ],
+        "tile": "grandbolt3-37",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -1 ],
+        "tile": "grandbolt3-38",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -1 ],
+        "tile": "grandbolt3-39",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -1 ],
+        "tile": "grandbolt3-40",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, -1 ],
+        "tile": "grandbolt3-41",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, -1 ],
+        "tile": "grandbolt3-42",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, 0 ],
+        "tile": "grandbolt3-43",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, 0 ],
+        "tile": "grandbolt3-44",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 0 ],
+        "tile": "grandbolt3-46",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -2, 1 ],
+        "tile": "grandbolt3-47",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, 1 ],
+        "tile": "grandbolt3-48",
+        "deleted": "000plain"
+      }
+    ],
+    "destroyedlongname": "GRANDBOLT_longname",
+    "destroyediconname": "dgrandboltright"
   }
 }

@@ -377,6 +377,10 @@
 	"BLACKOBELISK_shortname": "Oblsk",
 	"BLACKOBELISK_description": "Black Hole units within 4 spaces regain fuel and 2 HP each day.",
 
+	"GRANDBOLT_longname": "Grand Bolt",
+	"GRANDBOLT_shortname": "GBolt",
+	"GRANDBOLT_description": "This icky weapon's attack powers remain largely unknown.",
+
 	"HQ_longname": "Headquarters",
 	"HQ_shortname": "HQ",
 	"HQ_description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",
