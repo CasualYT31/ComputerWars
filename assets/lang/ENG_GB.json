@@ -369,6 +369,10 @@
 	"DEATHRAY_shortname": "DRay",
 	"DEATHRAY_description": "The pride and joy of Black Hole. It spends all week charging and fires a mighty laser every seventh day.",
 
+	"BLACKCRYSTAL_longname": "Black Crystal",
+	"BLACKCRYSTAL_shortname": "Cryst",
+	"BLACKCRYSTAL_description": "Black Hole units within 2 spaces regain fuel and 2 HP each day.",
+
 	"HQ_longname": "Headquarters",
 	"HQ_shortname": "HQ",
 	"HQ_description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",

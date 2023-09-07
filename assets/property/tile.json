@@ -342,5 +342,7 @@
 	"ddeathray2,1": {"type": "DEATHRAY", "neutral": "dblackcannondown2,1"},
 	"ddeathray0,2": {"type": "DEATHRAY", "neutral": "dblackcannondown0,2"},
 	"ddeathray1,2": {"type": "DEATHRAY", "neutral": "dblackcannondown1,2"},
-	"ddeathray2,2": {"type": "DEATHRAY", "neutral": "dblackcannondown2,2"}
+	"ddeathray2,2": {"type": "DEATHRAY", "neutral": "dblackcannondown2,2"},
+	
+	"blackcrystal": {"type": "BLACKCRYSTAL", "neutral": "blackcrystal"}
 }

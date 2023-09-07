@@ -251,6 +251,9 @@ class PlayableMap {
             tiles.insertLast(tile);
             return tiles;
 
+        } else if (structType == "BLACKCRYSTAL") {
+            return map.getAvailableTiles(tile, 1, 2);
+
         } else return {};
     }
 
@@ -485,7 +488,7 @@ class PlayableMap {
         HP newHP = map.getUnitHP(unit) + GetInternalHP(hp);
         if (uint(newHP) > type.maxHP) {
             hp -= GetDisplayedHP(newHP - type.maxHP);
-            newHP - HP(type.maxHP);
+            newHP = HP(type.maxHP);
         }
         if (army == NO_ARMY) {
             map.setUnitHP(unit, newHP);
@@ -1634,6 +1637,18 @@ class PlayableMap {
                         map.getUnitType(unitID).scriptName == "OOZIUM") continue;
                     damageUnitsInRange(tilesInRange[i], 0, 0, 8);
                 }
+            }
+
+        } else if (terrainName == "BLACKCRYSTAL") {
+            const auto tilesInRange = getStructureAttackRange(tile);
+            for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
+                // All units on the same team as the owner are healed 2HP, and
+                // replenished, for free, including Oozium units.
+                const auto unitID = map.getUnitOnTile(tilesInRange[i]);
+                if (unitID == NO_UNIT ||
+                    map.getTeamOfUnit(unitID) != currentTeam) continue;
+                healUnit(unitID, 2, NO_ARMY);
+                map.replenishUnit(unitID);
             }
         }
     }

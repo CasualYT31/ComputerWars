@@ -312,5 +312,17 @@
     ],
     "destroyedlongname": "DEATHRAY_longname",
     "destroyediconname": "dblackcannondown"
+  },
+  "BLACKCRYSTAL": {
+    "longname": "BLACKCRYSTAL_longname",
+    "shortname": "BLACKCRYSTAL_shortname",
+    "icon": "blackcrystal",
+    "description": "BLACKCRYSTAL_description",
+    "root": {
+      "tile": "blackcrystal",
+      "destroyed": "001plainruin"
+    },
+    "destroyedlongname": "PLAINS_longname",
+    "destroyediconname": "dminicannon"
   }
 }
