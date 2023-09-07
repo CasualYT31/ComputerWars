@@ -104,6 +104,10 @@
     "blacklaser": {
       "frames": [ [ 370, 46, 46, 46 ] ],
       "durations": [ 0 ]
+    },
+    "deathray": {
+      "frames": [ [ 416, 46, 46, 46 ] ],
+      "durations": [ 0 ]
     }
   }
 }

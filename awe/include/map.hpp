@@ -1281,9 +1281,8 @@ namespace awe {
 		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
 		 * @sa     @c getAvailableTiles().
 		 */
-		CScriptArray* getAvailableTilesAsArray(
-			const sf::Vector2u& tile, unsigned int startFrom,
-			const unsigned int endAt) const;
+		CScriptArray* getAvailableTilesAsArray(const sf::Vector2u& tile,
+			const unsigned int startFrom, const unsigned int endAt) const;
 
 		/**
 		 * Returns a list of tiles that are within a cone-shape from the given
@@ -1324,7 +1323,7 @@ namespace awe {
 		 * @return A list of tiles within the cone.
 		 */
 		std::unordered_set<sf::Vector2u> getTilesInCone(sf::Vector2u tile,
-			const direction dir, unsigned int startFrom,
+			const direction dir, const unsigned int startFrom,
 			const unsigned int endAt) const;
 
 		/**
@@ -1333,8 +1332,8 @@ namespace awe {
 		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
 		 * @sa     @c getTilesInCone().
 		 */
-		CScriptArray* getTilesInConeAsArray(sf::Vector2u tile,
-			const direction dir, unsigned int startFrom,
+		CScriptArray* getTilesInConeAsArray(const sf::Vector2u& tile,
+			const direction dir, const unsigned int startFrom,
 			const unsigned int endAt) const;
 
 		/**
@@ -1353,8 +1352,49 @@ namespace awe {
 		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
 		 * @sa     @c getTilesInCrosshair().
 		 */
-		CScriptArray* getTilesInCrosshairAsArray(
-			const sf::Vector2u& tile) const;
+		CScriptArray* getTilesInCrosshairAsArray(const sf::Vector2u& tile) const;
+
+		/**
+		 * Returns a list of tiles that are on the same X or Y axis as the given
+		 * tile, in the given direction.
+		 * @param  tile     The tile to traverse from. This tile will be included
+		 *                  in the result.
+		 * @param  dir      The direction to traverse in, from the given tile.
+		 * @param  distance The number of tiles to traverse. Default (0) means that
+		 *                  the method will travel to the end of the map.
+		 * @return Returns the line of tiles.
+		 */
+		std::unordered_set<sf::Vector2u> getTilesInLine(sf::Vector2u tile,
+			const direction dir, unsigned int distance = 0) const;
+
+		/**
+		 * Version of \c getTilesInLine() that converts the result into a
+		 * \c CScriptArray.
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c getTilesInLine().
+		 */
+		CScriptArray* getTilesInLineAsArray(const sf::Vector2u& tile,
+			const direction dir, const unsigned int distance = 0) const;
+
+		/**
+		 * Returns a rectangle of tiles that are within two given tiles.
+		 * If the given tiles are out-of-bounds, they will be adjusted to be within
+		 * bounds.
+		 * @param  tile1 One of the corners of the rectangle.
+		 * @param  tile2 The opposite corner of \c tile1.
+		 * @return Returns a selection of tiles that will include the corner tiles.
+		 */
+		std::unordered_set<sf::Vector2u> getTilesInArea(sf::Vector2u tile1,
+			sf::Vector2u tile2) const;
+
+		/**
+		 * Version of \c getTilesInArea() that converts the result into a
+		 * \c CScriptArray.
+		 * @throws @c std::runtime_error if \c _scripts was \c nullptr.
+		 * @sa     @c getTilesInArea().
+		 */
+		CScriptArray* getTilesInAreaAsArray(const sf::Vector2u& tile1,
+			const sf::Vector2u& tile2) const;
 
 		/**
 		 * Finds the shortest path from the origin to the destination.

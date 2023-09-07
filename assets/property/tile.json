@@ -323,5 +323,24 @@
 	"minicannonleft": {"type": "MINICANNON", "neutral": "minicannonleft"},
 	"minicannondown": {"type": "MINICANNON", "neutral": "minicannondown"},
 	
-	"blacklaser": {"type": "BLACKLASER", "neutral": "blacklaser"}
+	"blacklaser": {"type": "BLACKLASER", "neutral": "blacklaser"},
+
+	"deathray0,0": {"type": "DEATHRAY", "neutral": "deathray0,0"},
+	"deathray1,0": {"type": "DEATHRAY", "neutral": "deathray1,0"},
+	"deathray2,0": {"type": "DEATHRAY", "neutral": "deathray2,0"},
+	"deathray0,1": {"type": "DEATHRAY", "neutral": "deathray0,1"},
+	"deathray1,1": {"type": "DEATHRAY", "neutral": "deathray1,1"},
+	"deathray2,1": {"type": "DEATHRAY", "neutral": "deathray2,1"},
+	"deathray0,2": {"type": "DEATHRAY", "neutral": "deathray0,2"},
+	"deathray1,2": {"type": "DEATHRAYROOT", "neutral": "deathray1,2"},
+	"deathray2,2": {"type": "DEATHRAY", "neutral": "deathray2,2"},
+	"ddeathray0,0": {"type": "DEATHRAY", "neutral": "dblackcannondown0,0"},
+	"ddeathray1,0": {"type": "DEATHRAY", "neutral": "dblackcannondown1,0"},
+	"ddeathray2,0": {"type": "DEATHRAY", "neutral": "dblackcannondown2,0"},
+	"ddeathray0,1": {"type": "DEATHRAY", "neutral": "dblackcannondown0,1"},
+	"ddeathray1,1": {"type": "DEATHRAY", "neutral": "dblackcannondown1,1"},
+	"ddeathray2,1": {"type": "DEATHRAY", "neutral": "dblackcannondown2,1"},
+	"ddeathray0,2": {"type": "DEATHRAY", "neutral": "dblackcannondown0,2"},
+	"ddeathray1,2": {"type": "DEATHRAY", "neutral": "dblackcannondown1,2"},
+	"ddeathray2,2": {"type": "DEATHRAY", "neutral": "dblackcannondown2,2"}
 }

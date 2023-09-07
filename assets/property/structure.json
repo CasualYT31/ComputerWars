@@ -249,5 +249,68 @@
     },
     "destroyedlongname": "PLAINS_longname",
     "destroyediconname": "dminicannon"
+  },
+  "DEATHRAY": {
+    "longname": "DEATHRAY_longname",
+    "shortname": "DEATHRAY_shortname",
+    "icon": "deathray",
+    "description": "DEATHRAY_description",
+    "root": {
+      "tile": "deathray1,2",
+      "destroyed": "ddeathray1,2",
+      "deleted": "000plain"
+    },
+    "dependent": [
+      {
+        "offset": [ -1, -2 ],
+        "tile": "deathray0,0",
+        "destroyed": "ddeathray0,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -2 ],
+        "tile": "deathray1,0",
+        "destroyed": "ddeathray1,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -2 ],
+        "tile": "deathray2,0",
+        "destroyed": "ddeathray2,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -1 ],
+        "tile": "deathray0,1",
+        "destroyed": "ddeathray0,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -1 ],
+        "tile": "deathray1,1",
+        "destroyed": "ddeathray1,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -1 ],
+        "tile": "deathray2,1",
+        "destroyed": "ddeathray2,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, 0 ],
+        "tile": "deathray0,2",
+        "destroyed": "ddeathray0,2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 0 ],
+        "tile": "deathray2,2",
+        "destroyed": "ddeathray2,2",
+        "deleted": "000plain"
+      }
+    ],
+    "destroyedlongname": "DEATHRAY_longname",
+    "destroyediconname": "dblackcannondown"
   }
 }

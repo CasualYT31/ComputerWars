@@ -219,23 +219,38 @@ class PlayableMap {
         const auto structType = map.getTileStructure(tile).scriptName;
         if (structType == "BLACKCANNONDOWN") {
             return map.getTilesInCone(tile, Direction::Down, 0, 9);
+
         } else if (structType == "BLACKCANNONUP") {
             return map.getTilesInCone(Vector2(tile.x, tile.y - 3), Direction::Up,
                 0, 9);
+
         } else if (structType == "MINICANNONUP") {
             return map.getTilesInCone(Vector2(tile.x, tile.y - 1),
                 Direction::Up, 0, 3);
+
         } else if (structType == "MINICANNONRIGHT") {
             return map.getTilesInCone(Vector2(tile.x + 1, tile.y),
                 Direction::Right, 0, 3);
+
         } else if (structType == "MINICANNONLEFT") {
             return map.getTilesInCone(Vector2(tile.x - 1, tile.y),
                 Direction::Left, 0, 3);
+
         } else if (structType == "MINICANNONDOWN") {
             return map.getTilesInCone(Vector2(tile.x, tile.y + 1),
                 Direction::Down, 0, 3);
+
         } else if (structType == "BLACKLASER") {
             return map.getTilesInCrosshair(tile);
+
+        } else if (structType == "DEATHRAY") {
+            const auto startCorner = int(tile.x) - 1 < 0 ?
+                Vector2(0, tile.y + 1) : Vector2(tile.x - 1, tile.y + 1),
+                endCorner = Vector2(tile.x + 1, map.getMapSize().y - 1);
+            const auto tiles = map.getTilesInArea(startCorner, endCorner);
+            tiles.insertLast(tile);
+            return tiles;
+
         } else return {};
     }
 
@@ -1604,6 +1619,21 @@ class PlayableMap {
                 if (unitID == NO_UNIT ||
                     map.getUnitType(unitID).scriptName == "OOZIUM") continue;
                 damageUnitsInRange(tilesInRange[i], 0, 0, 5);
+            }
+
+        } else if (terrainName == "DEATHRAYROOT") {
+            // The deathray only attacks every week.
+            if (map.getDay() % 7 == 0) {
+                const auto tilesInRange = getStructureAttackRange(tile);
+                for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
+                    // Units on the same team as the owner will not be affected.
+                    // Ooziums are also immune to the laser regardless of team.
+                    const auto unitID = map.getUnitOnTile(tilesInRange[i]);
+                    if (unitID == NO_UNIT ||
+                        map.getTeamOfUnit(unitID) == currentTeam ||
+                        map.getUnitType(unitID).scriptName == "OOZIUM") continue;
+                    damageUnitsInRange(tilesInRange[i], 0, 0, 8);
+                }
             }
         }
     }

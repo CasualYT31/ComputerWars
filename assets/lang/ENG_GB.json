@@ -365,6 +365,10 @@
 	"BLACKLASER_shortname": "LsrCn",
 	"BLACKLASER_description": "A Lash invention. Whether friend or foe, this laser will slice through any that stand in its path.",
 
+	"DEATHRAY_longname": "Deathray",
+	"DEATHRAY_shortname": "DRay",
+	"DEATHRAY_description": "The pride and joy of Black Hole. It spends all week charging and fires a mighty laser every seventh day.",
+
 	"HQ_longname": "Headquarters",
 	"HQ_shortname": "HQ",
 	"HQ_description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",

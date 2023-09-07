@@ -1512,6 +1512,60 @@
 				[ 368, 104, 16, 16 ]
 			],
 			"durations": [ 0 ]
+		},
+		"deathray0,0": {
+			"frames": [
+				[ 416, 144, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"deathray1,0": {
+			"frames": [
+				[ 432, 144, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"deathray2,0": {
+			"frames": [
+				[ 448, 144, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"deathray0,1": {
+			"frames": [
+				[ 416, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"deathray1,1": {
+			"frames": [
+				[ 432, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"deathray2,1": {
+			"frames": [
+				[ 448, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"deathray0,2": {
+			"frames": [
+				[ 416, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"deathray1,2": {
+			"frames": [
+				[ 432, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"deathray2,2": {
+			"frames": [
+				[ 448, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
 		}
 	}
 }

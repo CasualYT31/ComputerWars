@@ -578,13 +578,22 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getAvailableTilesAsArray), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "array<Vector2>@ "
-			"getTilesInCone(Vector2, const Direction, const uint, const uint) "
-			"const",
+			"getTilesInCone(const Vector2&in, const Direction, const uint, "
+			"const uint) const",
 			asMETHOD(awe::map, getTilesInConeAsArray), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"array<Vector2>@ getTilesInCrosshair(const Vector2&in) const",
 			asMETHOD(awe::map, getTilesInCrosshairAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"array<Vector2>@ getTilesInLine(const Vector2&in, const Direction, "
+			"const uint = 0) const",
+			asMETHOD(awe::map, getTilesInLineAsArray), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "array<Vector2>@ "
+			"getTilesInArea(const Vector2&in, const Vector2&in) const",
+			asMETHOD(awe::map, getTilesInAreaAsArray), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPath(const Vector2&in origin, const Vector2&in dest, "
@@ -2444,7 +2453,7 @@ std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(
 }
 
 CScriptArray* awe::map::getAvailableTilesAsArray(
-	const sf::Vector2u& tile, unsigned int startFrom,
+	const sf::Vector2u& tile, const unsigned int startFrom,
 	const unsigned int endAt) const {
 	if (!_scripts) throw NO_SCRIPTS;
 	return _scripts->createArrayFromContainer("Vector2",
@@ -2452,7 +2461,8 @@ CScriptArray* awe::map::getAvailableTilesAsArray(
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getTilesInCone(sf::Vector2u tile,
-	awe::direction dir, unsigned int startFrom, const unsigned int endAt) const {
+	awe::direction dir, const unsigned int startFrom,
+	const unsigned int endAt) const {
 	const sf::Vector2u mapSize = getMapSize();
 	if (_isOutOfBounds(tile)) {
 		_logger.error("getTilesInCone operation failed: tile at position {} is "
@@ -2489,8 +2499,9 @@ std::unordered_set<sf::Vector2u> awe::map::getTilesInCone(sf::Vector2u tile,
 	return tiles;
 }
 
-CScriptArray* awe::map::getTilesInConeAsArray(sf::Vector2u tile,
-	const direction dir, unsigned int startFrom, const unsigned int endAt) const {
+CScriptArray* awe::map::getTilesInConeAsArray(const sf::Vector2u& tile,
+	const direction dir, const unsigned int startFrom,
+	const unsigned int endAt) const {
 	if (!_scripts) throw NO_SCRIPTS;
 	return _scripts->createArrayFromContainer("Vector2",
 		getTilesInCone(tile, dir, startFrom, endAt));
@@ -2515,6 +2526,90 @@ CScriptArray* awe::map::getTilesInCrosshairAsArray(
 	if (!_scripts) throw NO_SCRIPTS;
 	return _scripts->createArrayFromContainer("Vector2",
 		getTilesInCrosshair(tile));
+}
+
+std::unordered_set<sf::Vector2u> awe::map::getTilesInLine(sf::Vector2u tile,
+	const direction dir, unsigned int distance) const {
+	const sf::Vector2u mapSize = getMapSize();
+	if (_isOutOfBounds(tile)) {
+		_logger.error("getTilesInLine operation failed: tile at position {} is "
+			"out-of-bounds with the map's size of {}!", tile, mapSize);
+		return {};
+	}
+	if (distance == 0) {
+		switch (dir) {
+		case awe::direction::Up:
+			distance = tile.y;
+			break;
+		case awe::direction::Down:
+			distance = mapSize.y - tile.y - 1;
+			break;
+		case awe::direction::Left:
+			distance = tile.x;
+			break;
+		case awe::direction::Right:
+			distance = mapSize.x - tile.x - 1;
+			break;
+		}
+	}
+	std::unordered_set<sf::Vector2u> tiles = { tile };
+	for (unsigned int tileNumber = 0; tileNumber < distance; ++tileNumber) {
+		switch (dir) {
+		case awe::direction::Up:
+			--tile.y;
+			break;
+		case awe::direction::Down:
+			++tile.y;
+			break;
+		case awe::direction::Left:
+			--tile.x;
+			break;
+		case awe::direction::Right:
+			++tile.x;
+			break;
+		}
+		if (_isOutOfBounds(tile)) {
+			_logger.warning("getTilesInLine operation warning: a distance of {} "
+				"was specified, from tile at position {}, which would've resulted "
+				"in out-of-bounds tiles being returned (with map size of {}). "
+				"Breaking from operation early.", distance, tile, mapSize);
+			break;
+		}
+		tiles.insert(tile);
+	}
+	return tiles;
+}
+
+CScriptArray* awe::map::getTilesInLineAsArray(const sf::Vector2u& tile,
+	const direction dir, const unsigned int distance) const {
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("Vector2",
+		getTilesInLine(tile, dir, distance));
+}
+
+std::unordered_set<sf::Vector2u> awe::map::getTilesInArea(sf::Vector2u tile1,
+	sf::Vector2u tile2) const {
+	const sf::Vector2u mapSize = getMapSize();
+	if (mapSize.x == 0 || mapSize.y == 0) return {};
+	if (tile1.x >= mapSize.x) tile1.x = mapSize.x - 1;
+	if (tile1.y >= mapSize.y) tile1.y = mapSize.y - 1;
+	if (tile2.x >= mapSize.x) tile2.x = mapSize.x - 1;
+	if (tile2.y >= mapSize.y) tile2.y = mapSize.y - 1;
+	std::unordered_set<sf::Vector2u> tiles;
+	const unsigned int startX = std::min(tile1.x, tile2.x),
+		endX = std::max(tile1.x, tile2.x), startY = std::min(tile1.y, tile2.y),
+		endY = std::max(tile1.y, tile2.y);
+	for (unsigned int x = startX; x <= endX; ++x)
+		for (unsigned int y = startY; y <= endY; ++y)
+			tiles.insert({ x, y });
+	return tiles;
+}
+
+CScriptArray* awe::map::getTilesInAreaAsArray(const sf::Vector2u& tile1,
+	const sf::Vector2u& tile2) const {
+	if (!_scripts) throw NO_SCRIPTS;
+	return _scripts->createArrayFromContainer("Vector2",
+		getTilesInArea(tile1, tile2));
 }
 
 std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin,
