@@ -112,6 +112,10 @@
     "blackcrystal": {
       "frames": [ [ 462, 46, 46, 46 ] ],
       "durations": [ 0 ]
+    },
+    "blackobelisk": {
+      "frames": [ [ 508, 46, 46, 46 ] ],
+      "durations": [ 0 ]
     }
   }
 }

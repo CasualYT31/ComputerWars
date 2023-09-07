@@ -344,5 +344,24 @@
 	"ddeathray1,2": {"type": "DEATHRAY", "neutral": "dblackcannondown1,2"},
 	"ddeathray2,2": {"type": "DEATHRAY", "neutral": "dblackcannondown2,2"},
 	
-	"blackcrystal": {"type": "BLACKCRYSTAL", "neutral": "blackcrystal"}
+	"blackcrystal": {"type": "BLACKCRYSTAL", "neutral": "blackcrystal"},
+
+	"blackobelisk0,0": {"type": "BLACKOBELISK", "neutral": "blackobelisk0,0"},
+	"blackobelisk1,0": {"type": "BLACKOBELISK", "neutral": "blackobelisk1,0"},
+	"blackobelisk2,0": {"type": "BLACKOBELISK", "neutral": "blackobelisk2,0"},
+	"blackobelisk0,1": {"type": "BLACKOBELISK", "neutral": "blackobelisk0,1"},
+	"blackobelisk1,1": {"type": "BLACKOBELISK", "neutral": "blackobelisk1,1"},
+	"blackobelisk2,1": {"type": "BLACKOBELISK", "neutral": "blackobelisk2,1"},
+	"blackobelisk0,2": {"type": "BLACKOBELISK", "neutral": "blackobelisk0,2"},
+	"blackobelisk1,2": {"type": "BLACKOBELISKROOT", "neutral": "blackobelisk1,2"},
+	"blackobelisk2,2": {"type": "BLACKOBELISK", "neutral": "blackobelisk2,2"},
+	"dblackobelisk0,0": {"type": "BLACKOBELISK", "neutral": "dblackcannondown0,0"},
+	"dblackobelisk1,0": {"type": "BLACKOBELISK", "neutral": "dblackcannondown1,0"},
+	"dblackobelisk2,0": {"type": "BLACKOBELISK", "neutral": "dblackcannondown2,0"},
+	"dblackobelisk0,1": {"type": "BLACKOBELISK", "neutral": "dblackcannondown0,1"},
+	"dblackobelisk1,1": {"type": "BLACKOBELISK", "neutral": "dblackcannondown1,1"},
+	"dblackobelisk2,1": {"type": "BLACKOBELISK", "neutral": "dblackcannondown2,1"},
+	"dblackobelisk0,2": {"type": "BLACKOBELISK", "neutral": "dblackcannondown0,2"},
+	"dblackobelisk1,2": {"type": "BLACKOBELISK", "neutral": "dblackcannondown1,2"},
+	"dblackobelisk2,2": {"type": "BLACKOBELISK", "neutral": "dblackcannondown2,2"}
 }

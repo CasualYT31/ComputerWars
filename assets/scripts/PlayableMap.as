@@ -254,6 +254,13 @@ class PlayableMap {
         } else if (structType == "BLACKCRYSTAL") {
             return map.getAvailableTiles(tile, 1, 2);
 
+        } else if (structType == "BLACKOBELISK") {
+            // The Black Obelisk will not work if its root tile is at Y 0, but
+            // that should never happen with its current configuration (3x3 tiles
+            // in size). Also, I'm not so sure it has a four tile radius even
+            // though that's what's stated in Dual Strike.
+            return map.getAvailableTiles(Vector2(tile.x, tile.y - 1), 2, 4);
+
         } else return {};
     }
 
@@ -1639,7 +1646,8 @@ class PlayableMap {
                 }
             }
 
-        } else if (terrainName == "BLACKCRYSTAL") {
+        } else if (terrainName == "BLACKCRYSTAL" ||
+            terrainName == "BLACKOBELISKROOT") {
             const auto tilesInRange = getStructureAttackRange(tile);
             for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
                 // All units on the same team as the owner are healed 2HP, and

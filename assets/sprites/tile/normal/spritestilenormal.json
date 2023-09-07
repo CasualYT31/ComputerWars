@@ -1572,6 +1572,60 @@
 				[ 400, 166, 16, 26 ]
 			],
 			"durations": [ 0 ]
+		},
+		"blackobelisk0,0": {
+			"frames": [
+				[ 464, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackobelisk1,0": {
+			"frames": [
+				[ 480, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackobelisk2,0": {
+			"frames": [
+				[ 496, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackobelisk0,1": {
+			"frames": [
+				[ 464, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackobelisk1,1": {
+			"frames": [
+				[ 480, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackobelisk2,1": {
+			"frames": [
+				[ 496, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackobelisk0,2": {
+			"frames": [
+				[ 464, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackobelisk1,2": {
+			"frames": [
+				[ 480, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"blackobelisk2,2": {
+			"frames": [
+				[ 496, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
 		}
 	}
 }

@@ -324,5 +324,68 @@
     },
     "destroyedlongname": "PLAINS_longname",
     "destroyediconname": "dminicannon"
+  },
+  "BLACKOBELISK": {
+    "longname": "BLACKOBELISK_longname",
+    "shortname": "BLACKOBELISK_shortname",
+    "icon": "blackobelisk",
+    "description": "BLACKOBELISK_description",
+    "root": {
+      "tile": "blackobelisk1,2",
+      "destroyed": "dblackobelisk1,2",
+      "deleted": "000plain"
+    },
+    "dependent": [
+      {
+        "offset": [ -1, -2 ],
+        "tile": "blackobelisk0,0",
+        "destroyed": "dblackobelisk0,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -2 ],
+        "tile": "blackobelisk1,0",
+        "destroyed": "dblackobelisk1,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -2 ],
+        "tile": "blackobelisk2,0",
+        "destroyed": "dblackobelisk2,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, -1 ],
+        "tile": "blackobelisk0,1",
+        "destroyed": "dblackobelisk0,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, -1 ],
+        "tile": "blackobelisk1,1",
+        "destroyed": "dblackobelisk1,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, -1 ],
+        "tile": "blackobelisk2,1",
+        "destroyed": "dblackobelisk2,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ -1, 0 ],
+        "tile": "blackobelisk0,2",
+        "destroyed": "dblackobelisk0,2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 0 ],
+        "tile": "blackobelisk2,2",
+        "destroyed": "dblackobelisk2,2",
+        "deleted": "000plain"
+      }
+    ],
+    "destroyedlongname": "BLACKOBELISK_longname",
+    "destroyediconname": "dblackcannondown"
   }
 }

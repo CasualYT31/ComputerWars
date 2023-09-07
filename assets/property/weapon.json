@@ -29,7 +29,8 @@
       "MINICANNON": 1,
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1
+      "BLACKCRYSTAL": 1,
+      "BLACKOBELISKROOT": 1
     }
   },
   "MECH_PRIMARY": {
@@ -58,7 +59,8 @@
       "MINICANNON": 15,
       "BLACKLASER": 15,
       "DEATHRAYROOT": 15,
-      "BLACKCRYSTAL": 15
+      "BLACKCRYSTAL": 15,
+      "BLACKOBELISKROOT": 15
     }
   },
   "MECH_SECONDARY": {
@@ -91,7 +93,8 @@
       "MINICANNON": 1,
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1
+      "BLACKCRYSTAL": 1,
+      "BLACKOBELISKROOT": 1
     }
   },
   "RECON_SECONDARY": {
@@ -124,7 +127,8 @@
       "MINICANNON": 1,
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1
+      "BLACKCRYSTAL": 1,
+      "BLACKOBELISKROOT": 1
     }
   },
   "TANK_PRIMARY": {
@@ -159,7 +163,8 @@
       "MINICANNON": 15,
       "BLACKLASER": 15,
       "DEATHRAYROOT": 15,
-      "BLACKCRYSTAL": 15
+      "BLACKCRYSTAL": 15,
+      "BLACKOBELISKROOT": 15
     }
   },
   "TANK_SECONDARY": {
@@ -192,7 +197,8 @@
       "MINICANNON": 1,
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1
+      "BLACKCRYSTAL": 1,
+      "BLACKOBELISKROOT": 1
     }
   },
   "MDTANK_PRIMARY": {
@@ -227,7 +233,8 @@
       "MINICANNON": 55,
       "BLACKLASER": 55,
       "DEATHRAYROOT": 55,
-      "BLACKCRYSTAL": 55
+      "BLACKCRYSTAL": 55,
+      "BLACKOBELISKROOT": 55
     }
   },
   "MDTANK_SECONDARY": {
@@ -260,7 +267,8 @@
       "MINICANNON": 1,
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1
+      "BLACKCRYSTAL": 1,
+      "BLACKOBELISKROOT": 1
     }
   },
   "NEOTANK_PRIMARY": {
@@ -295,7 +303,8 @@
       "MINICANNON": 75,
       "BLACKLASER": 75,
       "DEATHRAYROOT": 75,
-      "BLACKCRYSTAL": 75
+      "BLACKCRYSTAL": 75,
+      "BLACKOBELISKROOT": 75
     }
   },
   "NEOTANK_SECONDARY": {
@@ -328,7 +337,8 @@
       "MINICANNON": 1,
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1
+      "BLACKCRYSTAL": 1,
+      "BLACKOBELISKROOT": 1
     }
   },
   "MEGATANK_PRIMARY": {
@@ -363,7 +373,8 @@
       "MINICANNON": 125,
       "BLACKLASER": 125,
       "DEATHRAYROOT": 125,
-      "BLACKCRYSTAL": 125
+      "BLACKCRYSTAL": 125,
+      "BLACKOBELISKROOT": 125
     }
   },
   "MEGATANK_SECONDARY": {
@@ -396,7 +407,8 @@
       "MINICANNON": 1,
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1
+      "BLACKCRYSTAL": 1,
+      "BLACKOBELISKROOT": 1
     }
   },
   "ANTIAIR_PRIMARY": {
@@ -433,7 +445,8 @@
       "MINICANNON": 10,
       "BLACKLASER": 10,
       "DEATHRAYROOT": 10,
-      "BLACKCRYSTAL": 10
+      "BLACKCRYSTAL": 10,
+      "BLACKOBELISKROOT": 10
     }
   },
   "ARTILLERY_PRIMARY": {
@@ -473,7 +486,8 @@
       "MINICANNON": 45,
       "BLACKLASER": 45,
       "DEATHRAYROOT": 45,
-      "BLACKCRYSTAL": 45
+      "BLACKCRYSTAL": 45,
+      "BLACKOBELISKROOT": 45
     }
   },
   "ROCKETS_PRIMARY": {
@@ -513,7 +527,8 @@
       "MINICANNON": 55,
       "BLACKLASER": 55,
       "DEATHRAYROOT": 55,
-      "BLACKCRYSTAL": 55
+      "BLACKCRYSTAL": 55,
+      "BLACKOBELISKROOT": 55
     },
     "these units override this weapon (just documentation)": [
       "PIPERUNNER",
@@ -593,7 +608,8 @@
       "MINICANNON": 95,
       "BLACKLASER": 95,
       "DEATHRAYROOT": 95,
-      "BLACKCRYSTAL": 95
+      "BLACKCRYSTAL": 95,
+      "BLACKOBELISKROOT": 95
     }
   },
   "STEALTH_PRIMARY": {
@@ -636,7 +652,8 @@
       "MINICANNON": 70,
       "BLACKLASER": 70,
       "DEATHRAYROOT": 70,
-      "BLACKCRYSTAL": 70
+      "BLACKCRYSTAL": 70,
+      "BLACKOBELISKROOT": 70
     },
     "hiddenunits": {
       "STEALTH": true
@@ -674,7 +691,8 @@
       "MINICANNON": 25,
       "BLACKLASER": 25,
       "DEATHRAYROOT": 25,
-      "BLACKCRYSTAL": 25
+      "BLACKCRYSTAL": 25,
+      "BLACKOBELISKROOT": 25
     }
   },
   "BCOPTER_SECONDARY": {
@@ -707,7 +725,8 @@
       "MINICANNON": 1,
       "BLACKLASER": 1,
       "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1
+      "BLACKCRYSTAL": 1,
+      "BLACKOBELISKROOT": 1
     }
   },
   "CRUISER_PRIMARY": {
