@@ -547,5 +547,18 @@
 	"grandbolt3-45": {"type": "GRANDBOLTROOT", "neutral": "grandbolt3-45"},
 	"grandbolt3-46": {"type": "GRANDBOLT", "neutral": "grandbolt3-46"},
 	"grandbolt3-47": {"type": "GRANDBOLT", "neutral": "grandbolt3-47"},
-	"grandbolt3-48": {"type": "GRANDBOLT", "neutral": "grandbolt3-48"}
+	"grandbolt3-48": {"type": "GRANDBOLT", "neutral": "grandbolt3-48"},
+
+	"factory0,0": {"type": "FACTORY", "neutral": "factory0,0"},
+	"factory1,0": {"type": "FACTORY", "neutral": "factory1,0"},
+	"factory2,0": {"type": "FACTORY", "neutral": "factory2,0"},
+	"factory0,1": {"type": "FACTORY", "neutral": "factory0,1"},
+	"factory1,1": {"type": "FACTORY", "neutral": "factory1,1"},
+	"factory2,1": {"type": "FACTORY", "neutral": "factory2,1"},
+	"factory0,2": {"type": "FACTORY", "neutral": "factory0,2"},
+	"factory1,2": {"type": "FACTORY", "neutral": "factory1,2"},
+	"factory2,2": {"type": "FACTORY", "neutral": "factory2,2"},
+	"factory0,3": {"type": "FACTORY", "neutral": "factory0,3"},
+	"factory1,3": {"type": "FACTORYROOT", "neutral": "factory1,3"},
+	"factory2,3": {"type": "FACTORY", "neutral": "factory2,3"}
 }

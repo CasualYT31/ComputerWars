@@ -2712,6 +2712,78 @@
 				[ 704, 160, 16, 16 ]
 			],
 			"durations": [ 0 ]
+		},
+		"factory0,0": {
+			"frames": [
+				[ 784, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory1,0": {
+			"frames": [
+				[ 800, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory2,0": {
+			"frames": [
+				[ 816, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory0,1": {
+			"frames": [
+				[ 784, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory1,1": {
+			"frames": [
+				[ 800, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory2,1": {
+			"frames": [
+				[ 816, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory0,2": {
+			"frames": [
+				[ 784, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory1,2": {
+			"frames": [
+				[ 800, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory2,2": {
+			"frames": [
+				[ 816, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory0,3": {
+			"frames": [
+				[ 784, 48, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory1,3": {
+			"frames": [
+				[ 800, 48, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"factory2,3": {
+			"frames": [
+				[ 816, 48, 16, 16 ]
+			],
+			"durations": [ 0 ]
 		}
 	}
 }

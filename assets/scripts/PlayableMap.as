@@ -244,6 +244,16 @@ shared class PlayableMap {
             if (tile.y == map.getMapSize().y - 1) return {};
             else return { Vector2(tile.x, tile.y + 1) };
 
+        } else if (structType == "FACTORY") {
+            if (tile.y == map.getMapSize().y - 1) return {};
+            else {
+                return {
+                    Vector2(tile.x - 1, tile.y + 1),
+                    Vector2(tile.x, tile.y + 1),
+                    Vector2(tile.x + 1, tile.y + 1)
+                };
+            }
+
         } else return {};
     }
 
@@ -445,7 +455,7 @@ shared class PlayableMap {
      * @sa     \c buyUnit().
      */
     UnitID createUnit(const UnitType@ type, const ArmyID army,
-        const Vector2&in position) {
+        const Vector2&in position, const bool waiting = false) {
         if (map.getUnitOnTile(position) != NO_UNIT) {
             throw("Could not create unit of type \"" + type.scriptName + "\" for "
                 "army " + formatUInt(army) + " on tile " + position.toString() +
@@ -459,6 +469,7 @@ shared class PlayableMap {
         }
         map.setUnitPosition(unitID, position);
         map.replenishUnit(unitID, true);
+        map.waitUnit(unitID, waiting);
         return unitID;
     }
 
@@ -1688,7 +1699,6 @@ shared class PlayableMap {
                     // Spawn Oozium.
                     const auto oozium = createUnit(ooziumType, currentArmy,
                         tilesInRange[i]);
-                    map.waitUnit(oozium, false);
                 }
             }
         }

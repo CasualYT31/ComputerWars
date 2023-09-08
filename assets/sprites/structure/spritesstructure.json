@@ -73,6 +73,10 @@
       "frames": [ [ 784, 0, 46, 46 ] ],
       "durations": [ 0 ]
     },
+    "factory": {
+      "frames": [ [ 830, 0, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
     "blackcannondown": {
       "frames": [ [ 0, 46, 46, 46 ] ],
       "durations": [ 0 ]

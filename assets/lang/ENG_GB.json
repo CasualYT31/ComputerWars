@@ -381,6 +381,10 @@
 	"GRANDBOLT_shortname": "GBolt",
 	"GRANDBOLT_description": "This icky weapon's attack powers remain largely unknown.",
 
+	"FACTORY_longname": "Factory",
+	"FACTORY_shortname": "Factr",
+	"FACTORY_description": "A Black Hole factory. It can deploy any and all types of units.",
+
 	"HQ_longname": "Headquarters",
 	"HQ_shortname": "HQ",
 	"HQ_description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",

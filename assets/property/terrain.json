@@ -385,6 +385,22 @@
 		"hp": 0,
 		"defence": 0
 	},
+	"FACTORYROOT": {
+		"longname": "FACTORY_longname",
+		"shortname": "FACTORY_shortname",
+		"icon": "noentry",
+		"description": "FACTORY_description",
+		"hp": 0,
+		"defence": 0
+	},
+	"FACTORY": {
+		"longname": "FACTORY_longname",
+		"shortname": "FACTORY_shortname",
+		"icon": "noentry",
+		"description": "FACTORY_description",
+		"hp": 0,
+		"defence": 0
+	},
 	"HQ": {
 		"longname": "HQ_longname",
 		"shortname": "HQ_shortname",
