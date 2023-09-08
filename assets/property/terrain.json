@@ -401,6 +401,14 @@
 		"hp": 0,
 		"defence": 0
 	},
+	"BLACKHOLE_DECORATION": {
+		"longname": "BLACKHOLE_DECORATION_longname",
+		"shortname": "BLACKHOLE_DECORATION_shortname",
+		"icon": "noentry",
+		"description": "BLACKHOLE_DECORATION_description",
+		"hp": 0,
+		"defence": 0
+	},
 	"HQ": {
 		"longname": "HQ_longname",
 		"shortname": "HQ_shortname",

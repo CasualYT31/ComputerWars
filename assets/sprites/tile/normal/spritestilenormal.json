@@ -2784,6 +2784,198 @@
 				[ 816, 48, 16, 16 ]
 			],
 			"durations": [ 0 ]
+		},
+		"bhdbuilding0,0": {
+			"frames": [
+				[ 784, 64, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding1,0": {
+			"frames": [
+				[ 800, 64, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding2,0": {
+			"frames": [
+				[ 816, 64, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding3,0": {
+			"frames": [
+				[ 832, 64, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding0,1": {
+			"frames": [
+				[ 784, 80, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding1,1": {
+			"frames": [
+				[ 800, 80, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding2,1": {
+			"frames": [
+				[ 816, 80, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding3,1": {
+			"frames": [
+				[ 832, 80, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding0,2": {
+			"frames": [
+				[ 784, 96, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding1,2": {
+			"frames": [
+				[ 800, 96, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding2,2": {
+			"frames": [
+				[ 816, 96, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding3,2": {
+			"frames": [
+				[ 832, 96, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding0,3": {
+			"frames": [
+				[ 784, 112, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding1,3": {
+			"frames": [
+				[ 800, 112, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding2,3": {
+			"frames": [
+				[ 816, 112, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdbuilding3,3": {
+			"frames": [
+				[ 832, 112, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile0,0": {
+			"frames": [
+				[ 784, 128, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile1,0": {
+			"frames": [
+				[ 800, 128, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile2,0": {
+			"frames": [
+				[ 816, 128, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile3,0": {
+			"frames": [
+				[ 832, 128, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile0,1": {
+			"frames": [
+				[ 784, 144, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile1,1": {
+			"frames": [
+				[ 800, 144, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile2,1": {
+			"frames": [
+				[ 816, 144, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile3,1": {
+			"frames": [
+				[ 832, 144, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile0,2": {
+			"frames": [
+				[ 784, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile1,2": {
+			"frames": [
+				[ 800, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile2,2": {
+			"frames": [
+				[ 816, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile3,2": {
+			"frames": [
+				[ 832, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile0,3": {
+			"frames": [
+				[ 784, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile1,3": {
+			"frames": [
+				[ 800, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile2,3": {
+			"frames": [
+				[ 816, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"bhdmissile3,3": {
+			"frames": [
+				[ 832, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
 		}
 	}
 }

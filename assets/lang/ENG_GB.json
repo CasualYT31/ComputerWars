@@ -385,6 +385,10 @@
 	"FACTORY_shortname": "Factr",
 	"FACTORY_description": "A Black Hole factory. It can deploy any and all types of units.",
 
+	"BLACKHOLE_DECORATION_longname": "Blocked",
+	"BLACKHOLE_DECORATION_shortname": "Blckd",
+	"BLACKHOLE_DECORATION_description": "Black Hole property. No trespassing!",
+
 	"HQ_longname": "Headquarters",
 	"HQ_shortname": "HQ",
 	"HQ_description": "Ground units can be supplied and replenished here. If an army's HQ is captured, they have lost the battle!",

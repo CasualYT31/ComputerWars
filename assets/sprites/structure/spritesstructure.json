@@ -148,6 +148,14 @@
     "dgrandboltright": {
       "frames": [ [ 784, 46, 46, 46 ] ],
       "durations": [ 0 ]
+    },
+    "bhdbuilding": {
+      "frames": [ [ 0, 92, 46, 46 ] ],
+      "durations": [ 0 ]
+    },
+    "bhdmissile": {
+      "frames": [ [ 46, 92, 46, 46 ] ],
+      "durations": [ 0 ]
     }
   }
 }
