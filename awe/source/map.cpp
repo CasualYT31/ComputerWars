@@ -1057,15 +1057,15 @@ bool awe::map::hasChanged() const {
 bool awe::map::periodic() {
 	if (!_periodicEnabled) return false;
 	if (_mapObject.GetRef() && !_mapObjectTypeName.empty() && _scripts &&
-		_scripts->functionDeclExists(_moduleName,
-			"void periodic(" + _mapObjectTypeName + "@ const, bool&out)")) {
-		bool winConditionMet = false;
+		_scripts->functionDeclExists(_moduleName, "void periodic(" +
+			_mapObjectTypeName + "@ const, bool&out, bool&out)")) {
+		bool winConditionMet = false, carryOutDefaultWinConditionChecking = true;
 		_scripts->callFunction(_moduleName, "periodic", _mapObject.GetRef(),
-			&winConditionMet);
-		return winConditionMet;
-	} else {
-		return defaultWinCondition();
+			&winConditionMet, &carryOutDefaultWinConditionChecking);
+		if (!carryOutDefaultWinConditionChecking) return winConditionMet;
+		if (winConditionMet) return winConditionMet;
 	}
+	return defaultWinCondition();
 }
 
 void awe::map::enablePeriodic(const bool enabled) {
