@@ -253,6 +253,11 @@ void awe::tile_type::Register(const std::string& type,
 		"individually in the map maker, even when it forms part of at least one "
 		"structure?");
 	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_isPaintable() const property",
+		asMETHOD(T, isPaintable), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Is this tile type paintable individually "
+		"in the map maker?");
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"const array<string>@ const get_structures() const property",
 		asMETHOD(T, structureScriptNames), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns a handle to an array that holds "

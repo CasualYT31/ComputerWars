@@ -916,6 +916,16 @@ namespace awe {
 		}
 
 		/**
+		 * Is this tile type paintable via the Tiles tab in the map maker?
+		 * @return \c TRUE if the tile type is either always paintable, or is part
+		 *         of no structure (as a normal, destroyed, or deleted tile),
+		 *         \c FALSE otherwise.
+		 */
+		inline bool isPaintable() const noexcept {
+			return _structures.empty() || _alwaysPaintable;
+		}
+
+		/**
 		 * Which structures is this tile type a member of?
 		 * @return List of structures this tile type is a member of, either as the
 		 *         root or as a dependent.

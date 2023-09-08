@@ -333,11 +333,26 @@ void MapMakerMenuHandleInput(const dictionary controls,
 
     } else if (pick) {
         if (currentPaletteWindowTab == TILE_DIALOG) {
-            CurrentlySelectedTileType.object = edit.map.getTileType(curTile);
-            PaletteWindow.setSelectedOwner(edit.map.getTileOwner(curTile));
+            const auto tileType = edit.map.getTileType(curTile);
+            // Do not pick a non-paintable tile.
+            if (tileType.isPaintable) {
+                CurrentlySelectedTileType.object = tileType;
+                PaletteWindow.setSelectedOwner(edit.map.getTileOwner(curTile));
+            }
         } else if (currentPaletteWindowTab == UNIT_DIALOG && curUnit != NO_UNIT) {
             CurrentlySelectedUnitType.object = edit.map.getUnitType(curUnit);
             PaletteWindow.setSelectedOwner(edit.map.getArmyOfUnit(curUnit));
+        } else if (currentPaletteWindowTab == STRUCTURE_DIALOG &&
+            edit.map.isTileAStructureTile(curTile)) {
+            const auto structureObject = edit.map.getTileStructure(curTile);
+            // Do not pick a non-paintable structure.
+            if (structureObject.isPaintable) {
+                CurrentlySelectedStructure.object = structureObject;
+                const auto offset = edit.map.getTileStructureOffset(curTile);
+                const Vector2 rootTile(curTile.x - offset.x,
+                    curTile.y - offset.y);
+                PaletteWindow.setSelectedOwner(edit.map.getTileOwner(rootTile));
+            }
         }
 
     } else if (action && TOOLBAR.tool == DELETE_TOOL.shortName) {

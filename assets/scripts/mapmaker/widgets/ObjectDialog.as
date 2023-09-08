@@ -504,8 +504,7 @@ ObjectDialogSetUpData@ DefaultObjectDialogData(const string&in parent) {
     // Filter tiles based on whether they are paintable or not.
     for (uint i = 0, len = tiletype.scriptNames.length(); i < len; ++i) {
         const auto name = tiletype.scriptNames[i];
-        if (tiletype[name].alwaysPaintable ||
-            tiletype[name].structures.length() == 0) tNames.insertLast(name);
+        if (tiletype[name].isPaintable) tNames.insertLast(name);
         else excludedTiles.insertLast(name);
     }
     @Tiles.scriptNames = tNames;
