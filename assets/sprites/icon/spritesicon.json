@@ -374,6 +374,10 @@
 			"frames": [ [ 111, 113, 13, 13 ] ],
 			"durations": [ 0 ]
 		},
+		"yieldicon": {
+			"frames": [ [ 111, 126, 12, 14 ] ],
+			"durations": [ 0 ]
+		},
 		"painttool": {
 			"frames": [ [ 64, 191, 30, 30 ] ],
 			"durations": [ 0 ]

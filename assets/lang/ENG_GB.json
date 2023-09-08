@@ -10,6 +10,7 @@
 	"wait": "Wait",
 	"tag": "Change",
 	"delete": "Delete",
+	"yield": "Yield",
 	"join": "Join",
 	"capture": "Capture",
 	"back": "Back",

@@ -22,6 +22,7 @@ void MapMenuSetUp() {
 void MapMenuOpen() {
 	MapMenuCommands.addCommand("Save", "save", "saveicon");
 	MapMenuCommands.addCommand("Delete", "delete", "deleteicon");
+	MapMenuCommands.addCommand("Yield", "yield", "yieldicon");
 	if (game.map.tagCOIsPresent(game.map.getSelectedArmy())) {
 		MapMenuCommands.addCommand("Tag", "tag", "tagicon");
 	}
@@ -62,6 +63,14 @@ void MapMenu_Save_MouseReleased() {
  */
 void MapMenu_Delete_MouseReleased() {
 	setGUI("DeleteUnitMenu");
+}
+
+/**
+ * Allows the user to yield.
+ */
+void MapMenu_Yield_MouseReleased() {
+	game.endTurn(true);
+	setGUI("Map");
 }
 
 /**
