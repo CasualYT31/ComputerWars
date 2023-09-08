@@ -564,6 +564,8 @@ ObjectDialogSetUpData@ DefaultObjectDialogData(const string&in parent) {
             data.ownerGroupFullname + ".h");
         setWidgetSize(data.scrollablePanel, "100%", "100%-" + GROUP_HEIGHT + "-" +
             GROUP_HEIGHT + "-" + GROUP_HEIGHT);
+        setWidgetPosition(data.scrollablePanel, "50%", "50%-" + GROUP_HEIGHT +
+            "/2");
 
         const auto destroyed = destroyedPanel + ".Destroyed";
         addWidget(CheckBox, destroyed);
