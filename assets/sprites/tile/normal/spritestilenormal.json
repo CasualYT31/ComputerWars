@@ -553,6 +553,18 @@
 			],
 			"durations": [ 0 ]
 		},
+		"cityar": {
+			"frames": [
+				[ 464, 64, 16, 20 ]
+			],
+			"durations": [ 0 ]
+		},
+		"citywn": {
+			"frames": [
+				[ 464, 84, 16, 20 ]
+			],
+			"durations": [ 0 ]
+		},
 		"base": {
 			"frames": [
 				[ 32, 91, 16, 16 ]
@@ -640,6 +652,18 @@
 		"basepl": {
 			"frames": [
 				[ 128, 132, 16, 27 ]
+			],
+			"durations": [ 0 ]
+		},
+		"basear": {
+			"frames": [
+				[ 464, 104, 16, 27 ]
+			],
+			"durations": [ 0 ]
+		},
+		"basewn": {
+			"frames": [
+				[ 464, 131, 16, 27 ]
 			],
 			"durations": [ 0 ]
 		},
@@ -733,6 +757,18 @@
 			],
 			"durations": [ 0 ]
 		},
+		"airportar": {
+			"frames": [
+				[ 336, 96, 16, 18 ]
+			],
+			"durations": [ 0 ]
+		},
+		"airportwn": {
+			"frames": [
+				[ 464, 158, 16, 18 ]
+			],
+			"durations": [ 0 ]
+		},
 		"port": {
 			"frames": [
 				[ 64, 85, 16, 22 ]
@@ -820,6 +856,18 @@
 		"portpl": {
 			"frames": [
 				[ 80, 85, 16, 22 ]
+			],
+			"durations": [ 0 ]
+		},
+		"portar": {
+			"frames": [
+				[ 480, 144, 16, 22 ]
+			],
+			"durations": [ 0 ]
+		},
+		"portwn": {
+			"frames": [
+				[ 496, 144, 16, 22 ]
 			],
 			"durations": [ 0 ]
 		},
@@ -913,6 +961,18 @@
 			],
 			"durations": [ 0 ]
 		},
+		"comar": {
+			"frames": [
+				[ 480, 166, 16, 25 ]
+			],
+			"durations": [ 0 ]
+		},
+		"comwn": {
+			"frames": [
+				[ 496, 166, 16, 25 ]
+			],
+			"durations": [ 0 ]
+		},
 		"lab": {
 			"frames": [
 				[ 96, 84, 16, 23 ]
@@ -1000,6 +1060,18 @@
 		"labpl": {
 			"frames": [
 				[ 352, 166, 16, 24 ]
+			],
+			"durations": [ 0 ]
+		},
+		"labar": {
+			"frames": [
+				[ 368, 166, 16, 24 ]
+			],
+			"durations": [ 0 ]
+		},
+		"labwn": {
+			"frames": [
+				[ 384, 166, 16, 24 ]
 			],
 			"durations": [ 0 ]
 		},
@@ -1180,6 +1252,18 @@
 		"hqpl": {
 			"frames": [
 				[ 128, 159, 16, 31 ]
+			],
+			"durations": [ 0 ]
+		},
+		"hqar": {
+			"frames": [
+				[ 512, 160, 16, 31 ]
+			],
+			"durations": [ 0 ]
+		},
+		"hqwn": {
+			"frames": [
+				[ 528, 160, 16, 30 ]
 			],
 			"durations": [ 0 ]
 		},

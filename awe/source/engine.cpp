@@ -77,8 +77,6 @@ int awe::game_engine::run() {
 			_renderer->draw(*_gui);
 			_renderer->display();
 
-			// This will not be the way I handle win conditions in the final
-			// version of the engine.
 			if (_map && _map->periodic()) {
 				boxer::show("The game has ended!", "Thanks for Playing!",
 					boxer::Style::Info);
