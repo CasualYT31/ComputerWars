@@ -492,7 +492,7 @@ class EditableMap {
         if (!forceTileUpdate &&
             map.getTileType(tileToChange).type.scriptName == toType.scriptName)
             return;
-        const TileType@ const newTileType = awe::DetermineTileType(
+        const auto newTileType = awe::DetermineTileType(
             _getTileTypeOfTile(tileToChange.x - 1, tileToChange.y - 1),
             _getTileTypeOfTile(tileToChange.x, tileToChange.y - 1),
             _getTileTypeOfTile(tileToChange.x + 1, tileToChange.y - 1),
@@ -503,10 +503,10 @@ class EditableMap {
             _getTileTypeOfTile(tileToChange.x, tileToChange.y + 1),
             _getTileTypeOfTile(tileToChange.x + 1, tileToChange.y + 1)
         );
-        if (newTileType is null) {
+        if (newTileType.isEmpty()) {
             if (toType.primaryTileType !is null)
                 setTile(tileToChange, toType.primaryTileType, newOwner);
-        } else setTile(tileToChange, newTileType, newOwner);
+        } else setTile(tileToChange, tiletype[newTileType], newOwner);
         if (!updateSurroundingTiles) return;
         // Now go through each of the surrounding tiles and update their types.
         --tileToChange.x;
@@ -517,8 +517,7 @@ class EditableMap {
                     const auto tileOwner = map.getTileOwner(tileToChange);
                     setTerrain(tileToChange, map.getTileType(tileToChange).type,
                         tileOwner == NO_ARMY ? "" :
-                            map.getArmyCountry(tileOwner).scriptName,
-                        false, true);
+                            country.scriptNames[tileOwner], false, true);
                 }
                 ++tileToChange.x;
             }
@@ -757,6 +756,14 @@ class EditableMap {
         if (!destroyed) {
             map.setTileOwner(fromTile, owner.isEmpty() ? NO_ARMY :
                 country[owner].turnOrder);
+        }
+        // Structure tiles could influence the types of tiles surrounding them, so
+        // feed them all through setTerrain().
+        for (uint i = 0, len = changingTiles.length(); i < len; ++i) {
+            const auto tile = changingTiles[i];
+            const auto tileOwner = map.getTileOwner(tile);
+            setTerrain(tile, map.getTileType(tile).type, tileOwner == NO_ARMY ?
+                "" : country.scriptNames[tileOwner], true, true);
         }
         _updateTileProps(changingTiles);
     }

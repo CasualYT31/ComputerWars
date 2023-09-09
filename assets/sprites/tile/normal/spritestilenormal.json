@@ -277,6 +277,12 @@
 			],
 			"durations": [ 0 ]
 		},
+		"shoalsingle": {
+			"frames": [
+				[ 688, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
 		"seasingle": {
 			"frames": [
 				[ 192, 35, 16, 16 ]
@@ -1275,31 +1281,145 @@
 		},
 		"seaedgeleftright": {
 			"frames": [
-				[ 320, 22, 16, 16 ]
+				[ 320, 23, 16, 16 ]
 			],
 			"durations": [ 0 ]
 		},
 		"seavertexupleftright": {
 			"frames": [
-				[ 320, 37, 16, 16 ]
+				[ 320, 39, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexrightupdownleft": {
+			"frames": [
+				[ 560, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexleftupdownright": {
+			"frames": [
+				[ 688, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexupleftrightnoedge": {
+			"frames": [
+				[ 704, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexall": {
+			"frames": [
+				[ 720, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexnodownright": {
+			"frames": [
+				[ 720, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexnodownleft": {
+			"frames": [
+				[ 736, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexnoupright": {
+			"frames": [
+				[ 752, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexnoupleft": {
+			"frames": [
+				[ 768, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seacornerupleftvertex": {
+			"frames": [
+				[ 752, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seacorneruprightvertex": {
+			"frames": [
+				[ 768, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seacornerdownleftvertex": {
+			"frames": [
+				[ 752, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seacornerdownrightvertex": {
+			"frames": [
+				[ 768, 32, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexupleftedgedown": {
+			"frames": [
+				[ 736, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexleftupdownedgeright": {
+			"frames": [
+				[ 752, 144, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexrightupdownedgeleft": {
+			"frames": [
+				[ 768, 144, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexupleftedgeright": {
+			"frames": [
+				[ 720, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexuprightedgeleft": {
+			"frames": [
+				[ 736, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexdownleftedgeright": {
+			"frames": [
+				[ 752, 160, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"seavertexdownrightedgeleft": {
+			"frames": [
+				[ 768, 160, 16, 16 ]
 			],
 			"durations": [ 0 ]
 		},
 		"seavertexdownrightedgetop": {
 			"frames": [
-				[ 320, 53, 16, 16 ]
+				[ 320, 54, 16, 16 ]
 			],
 			"durations": [ 0 ]
 		},
 		"seaedgetopdown": {
 			"frames": [
-				[ 320, 69, 16, 16 ]
+				[ 320, 70, 16, 16 ]
 			],
 			"durations": [ 0 ]
 		},
 		"seavertexleftupdown": {
 			"frames": [
-				[ 320, 85, 16, 16 ]
+				[ 320, 86, 16, 16 ]
 			],
 			"durations": [ 0 ]
 		},
@@ -1363,6 +1483,12 @@
 			],
 			"durations": [ 0 ]
 		},
+		"seavertexdownleftrightedgetop": {
+			"frames": [
+				[ 544, 176, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
 		"seavertexrightupdown": {
 			"frames": [
 				[ 352, 64, 16, 16 ]
@@ -1390,6 +1516,54 @@
 		"roaddownrightshadow": {
 			"frames": [
 				[ 368, 88, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"roadcrossshadow": {
+			"frames": [
+				[ 368, 120, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"roadleftdownrightshadow": {
+			"frames": [
+				[ 512, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"roaddownleftshadow": {
+			"frames": [
+				[ 528, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"roaduprightdownshadow": {
+			"frames": [
+				[ 544, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"roadupleftdownshadow": {
+			"frames": [
+				[ 560, 0, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"roaduprightshadow": {
+			"frames": [
+				[ 512, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"roadleftuprightshadow": {
+			"frames": [
+				[ 528, 16, 16, 16 ]
+			],
+			"durations": [ 0 ]
+		},
+		"roadupleftshadow": {
+			"frames": [
+				[ 464, 176, 16, 16 ]
 			],
 			"durations": [ 0 ]
 		},
