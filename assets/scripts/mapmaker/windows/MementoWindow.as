@@ -32,10 +32,15 @@ class MementoWindow {
         openChildWindow(window, "100px", "50px");
     }
 
+    /// Closes the window.
+    void close() {
+        closeChildWindow(window);
+    }
+
     /// Refreshes the window.
     void refresh() {
+        clearItems(listbox);
         if (edit !is null) {
-            clearItems(listbox);
             const auto mementos = edit.map.getMementos(selected);
             for (uint i = 0, len = mementos.length(); i < len; ++i)
                 addItem(listbox, mementos[i]);

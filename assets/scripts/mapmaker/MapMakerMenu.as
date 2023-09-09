@@ -417,6 +417,7 @@ awe::EmptyCallback@ QuitMapAuthorised = function() {
     MapPropertiesDialog.close();
     FillWindow.close();
     ScriptsDialog.close();
+    UndoRedoWindow.close();
     @edit = null;
     TilePropertiesDialog.refresh(Vector2(0,0));
     ArmyPropertiesDialog.refresh();

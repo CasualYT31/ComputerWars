@@ -1846,6 +1846,16 @@ namespace awe {
 		}
 
 		/**
+		 * Allows the scripts to tell the map that its state has changed.
+		 * This flag is automatically managed by the \c map class when mementos are
+		 * created and when the map is saved/loaded. However, there can be cases
+		 * where you want to change the map's state without creating a memento. In
+		 * such cases, it is still usually beneficial to mark the fact that the
+		 * state has changed. This method can be used to achieve this.
+		 */
+		void markChanged();
+
+		/**
 		 * Gets the names of every memento currently in the undo and redo deque.
 		 * @param  lastKnownMemento The 0-based index of the memento that is at the
 		 *                          front of the undo deque is set to this

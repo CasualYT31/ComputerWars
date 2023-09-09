@@ -158,7 +158,8 @@ class EditableMap {
 
     /**
      * Same as \c addScriptFile(), except the scripts window will not be
-     * refreshed, and a memento will not be created.
+     * refreshed, and a memento will not be created (but the state will still be
+     * marked as changed).
      * If a non-existent script is given, an error will be logged and no new
      * script will be added.
      */
@@ -171,6 +172,7 @@ class EditableMap {
         map.disableMementos();
         map.addScriptFile(name, code);
         map.enableMementos("");
+        map.markChanged();
     }
     
     /**

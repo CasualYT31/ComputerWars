@@ -745,6 +745,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, enableMementos), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void markChanged()",
+			asMETHOD(awe::map, markChanged), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"array<string>@ getMementos(uint64&out) const",
 			asMETHOD(awe::map, getMementosAsArray), asCALL_THISCALL);
 
@@ -3166,6 +3170,11 @@ void awe::map::redo(std::size_t additionalRedos) {
 	_mementosHaveChanged();
 }
 
+
+void awe::map::markChanged() {
+	_changed = true;
+}
+
 std::vector<std::string> awe::map::getMementos(
 	std::size_t& lastKnownMemento) const {
 	std::vector<std::string> ret;
@@ -4003,7 +4012,7 @@ void awe::map::_createMemento(const std::string& name) {
 		_saveMapIntoOutputStream(0)), name });
 	_redoDeque.clear();
 	if (_undoDeque.size() > _MEMENTO_LIMIT) _undoDeque.pop_back();
-	_changed = true;
+	markChanged();
 	_mementosHaveChanged();
 }
 
