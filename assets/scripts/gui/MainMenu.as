@@ -50,7 +50,7 @@ void MainMenuOpen() {
 			}
 		}
 	}
-    // setGUI("MapMakerMenu");
+    setGUI("MapMakerMenu");
 }
 
 /**

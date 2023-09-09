@@ -207,6 +207,26 @@ void awe::terrain::Register(const std::string& type,
 		asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this terrain type's "
 		"picture, given a country turn order ID.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_isPaintable() const property",
+		asMETHOD(T, isPaintable), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Is this terrain paintable in the map "
+		"maker?");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_primaryTileTypeScriptName() const property",
+		asMETHOD(T, getPrimaryTileTypeScriptName), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets this terrain's primary tile type "
+		"script name that was given to it at construction. Will only be valid if "
+		"<tt>isPaintable</tt> returns <tt>TRUE</tt>.");
+	// Forward declare TileType. Not the most clean, but at least when TileType is
+	// registered for real, RegisterObjectType() will only fail silently.
+	r = engine->RegisterObjectType("TileType", 0, asOBJ_REF | asOBJ_NOCOUNT);
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const TileType@ get_primaryTileType() const property",
+		asMETHOD(T, _getPrimaryTileTypeObj), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns details on this terrain's primary "
+		"tile type. Do not call this method if <tt>isPaintable</tt> returns "
+		"<tt>FALSE</tt>.");
 }
 
 template<typename T>

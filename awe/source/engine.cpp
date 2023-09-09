@@ -460,9 +460,9 @@ bool awe::game_engine::_load(engine::json& j) {
 		}
 		return false;
 	}
-	awe::updateTerrainBank(*_terrains, *_countries);
 	awe::updateTileTypeBank(*_tiles, *_terrains, *_countries, *_structures,
 		_scripts);
+	awe::updateTerrainBank(*_terrains, *_countries, *_tiles);
 	awe::updateUnitTypeBank(*_units, *_movements, *_terrains, *_weapons,
 		*_countries, _logger.getData().sink);
 	awe::updateStructureBank(*_structures, *_tiles, *_countries);

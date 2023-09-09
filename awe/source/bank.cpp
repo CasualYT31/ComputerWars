@@ -105,10 +105,21 @@ awe::terrain::terrain(const std::string& scriptName, engine::json& j) :
 		j.applyMap(_pictures, { "pictures" });
 		j.resetState();
 	}
+	if (j.keysExist({ "primarytiletype" }))
+		j.apply(_primaryTileTypeScriptName, { "primarytiletype" });
 }
 void awe::terrain::updatePictureMap(
 	const awe::bank<awe::country>& countries) const {
 	updateTurnOrderMap(_pictures, _picturesTurnOrder, countries);
+}
+void awe::terrain::updateTileType(
+	const awe::bank<awe::tile_type>& tileBank) const {
+	if (_primaryTileTypeScriptName.empty() ||
+		!tileBank.contains(_primaryTileTypeScriptName)) return;
+	if (tileBank[_primaryTileTypeScriptName]->getTypeScriptName() !=
+		getScriptName()) return;
+	if (!tileBank[_primaryTileTypeScriptName]->isPaintable()) return;
+	_primaryTileType = tileBank[_primaryTileTypeScriptName];
 }
 
 //******
@@ -426,9 +437,11 @@ awe::structure::dependent_tile::dependent_tile(const sf::Vector2i& o,
 //******************
 
 void awe::updateTerrainBank(awe::bank<awe::terrain>& terrainBank,
-	const awe::bank<awe::country>& countryBank) {
+	const awe::bank<awe::country>& countryBank,
+	const awe::bank<awe::tile_type>& tileBank) {
 	for (const auto& terrain : terrainBank) {
 		terrain.second->updatePictureMap(countryBank);
+		terrain.second->updateTileType(tileBank);
 	}
 }
 

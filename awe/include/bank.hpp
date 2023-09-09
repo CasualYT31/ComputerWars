@@ -646,6 +646,8 @@ namespace awe {
 			const std::shared_ptr<DocumentationGenerator>& document);
 	};
 
+	class tile_type;
+
 	/**
 	 * A game property class which stores the information associated with a single
 	 * terrain type.
@@ -666,7 +668,9 @@ namespace awe {
 		 *         <tt>({"MOVEMENT_TYPE_SCRIPT_NAME": signed 32-bit int[, etc.]})
 		 *         </tt></li>
 		 *     <li>\c "pictures" = \c _pictures, <tt>({"COUNTRY_SCRIPT_NAME":
-		 *         string[, etc.]})</tt></li></ul>
+		 *         string[, etc.]})</tt></li>
+		 *     <li>\c "primarytiletype" = \c _primaryTileTypeScriptName, <tt>
+		 *         (string, TILE_TYPE_SCRIPT_NAME)</tt></li></ul>
 		 * 
 		 * The \c movecosts object stores a list of movement points associated with
 		 * each movement type. A negative value indicates that a unit of the
@@ -679,7 +683,16 @@ namespace awe {
 		 * with each country. Not all countries have to be accounted for if the
 		 * tile cannot be "owned," i.e. captured. If a country doesn't have a
 		 * assigned picture sprite, then the neutral picture sprite will be
-		 * returned, i.e. whatever was assigned to \c "icon".
+		 * returned, i.e. whatever was assigned to \c "icon".\n
+		 *
+		 * The \c primarytiletype object is used to define the tile type that
+		 * represents this terrain. It can be left undefined. If the given tile
+		 * type:
+		 * <ol><li>Has a terrain that matches this one.</li>
+		 *     <li>Is itself paintable.</li>
+		 *     <li>Exists.<li></ol>
+		 * Then a pointer to the tile type will be stored internally, and the
+		 * terrain is considered \b paintable.
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
 		 * @param j          The object value containing the terrain type's
@@ -757,6 +770,33 @@ namespace awe {
 		}
 
 		/**
+		 * The script name of the primary tile type for this terrain.
+		 * @return The script name, if one was given.
+		 */
+		inline const std::string& getPrimaryTileTypeScriptName() const {
+			return _primaryTileTypeScriptName;
+		}
+
+		/**
+		 * Returns the primary tile type for this terrain, if this terrain is
+		 * paintable.
+		 * @return Pointer to the primary tile type. Will return \c nullptr if this
+		 *         terrain is not paintable.
+		 */
+		inline std::shared_ptr<const awe::tile_type> getPrimaryTileType() const {
+			return _primaryTileType;
+		}
+
+		/**
+		 * Is this terrain paintable in the map maker?
+		 * @return \c TRUE if this terrain has a primary tile type that is
+		 *         paintable, and is thus itself paintable. \c FALSE otherwise.
+		 */
+		inline bool isPaintable() const {
+			return _primaryTileType.operator bool();
+		}
+
+		/**
 		 * Updates \c _picturesTurnOrder by copying over the contents of
 		 * \c _pictures and supplying the respective turn order IDs as keys.
 		 * @param  countries Pointer to the country bank to pull the turn order IDs
@@ -764,7 +804,26 @@ namespace awe {
 		 * @safety Basic guarantee.
 		 */
 		void updatePictureMap(const awe::bank<awe::country>& countries) const;
+
+		/**
+		 * Retrieves a pointer to the primary tile type from a given bank.
+		 * If a primary tile type wasn't given, it didn't exist in the bank, it
+		 * doesn't have a matching terrain, or it isn't paintable, then the pointer
+		 * will not be assigned.
+		 * @param tileBank A reference to the tile types bank to pull information
+		 *                 from.
+		 */
+		void updateTileType(const awe::bank<awe::tile_type>& tileBank) const;
 	private:
+		/**
+		 * Script interface version of \c getPrimaryTileType().
+		 * @return The primary tile type's properties.
+		 * @sa     @c getPrimaryTileType()
+		 */
+		inline const awe::tile_type* _getPrimaryTileTypeObj() const {
+			return getPrimaryTileType().get();
+		}
+
 		/**
 		 * Maximum health points property.
 		 */
@@ -789,6 +848,18 @@ namespace awe {
 		 * Picture properties keyed by turn order ID.
 		 */
 		mutable std::unordered_map<awe::ArmyID, std::string> _picturesTurnOrder;
+
+		/**
+		 * The primary tile type's script name.
+		 */
+		std::string _primaryTileTypeScriptName;
+
+		/**
+		 * Pointer to this terrain's primary tile type, if it has one.
+		 * It was made mutable so that it can be updated after construction in the
+		 * \c bank constructor, via \c updateTileType().
+		 */
+		mutable std::shared_ptr<const awe::tile_type> _primaryTileType;
 	};
 
 	class structure;
@@ -1711,7 +1782,7 @@ namespace awe {
 		std::string _movementTypeScriptName;
 
 		/**
-		 * Pointer to this unit's movement typre details.
+		 * Pointer to this unit's movement type details.
 		 * It was made mutable so that it can be updated after construction in the
 		 * \c bank constructor, via \c updateMovementType().
 		 */
@@ -2496,10 +2567,12 @@ namespace awe {
 	 * objects.
 	 * @param  terrainBank The \c terrain bank to update.
 	 * @param  countryBank The \c country bank to pull turn order IDs from.
+	 * @param  tileBank    The \c tile_type bank to pull the pointers from.
 	 * @safety Basic guarantee.
 	 */
 	void updateTerrainBank(awe::bank<awe::terrain>& terrainBank,
-		const awe::bank<awe::country>& countryBank);
+		const awe::bank<awe::country>& countryBank,
+		const awe::bank<awe::tile_type>& tileBank);
 
 	/**
 	 * Calls \c tile_type::updateTerrain() and \c tile_type::updateOwnedTilesMap()

@@ -13,7 +13,8 @@
 			"TREAD": 1,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "000plain"
 	},
 	"SEA": {
 		"longname": "SEA_longname",
@@ -26,7 +27,8 @@
 			"AIR": 1,
 			"SHIPS": 1,
 			"TRANSPORT": 1
-		}
+		},
+		"primarytiletype": "003sea"
 	},
 	"ROAD": {
 		"longname": "ROAD_longname",
@@ -42,7 +44,8 @@
 			"TREAD": 1,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "022roadvert"
 	},
 	"BRIDGE": {
 		"longname": "BRIDGE_longname",
@@ -58,7 +61,8 @@
 			"TREAD": 1,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "030bridgevert"
 	},
 	"MOUNTAIN": {
 		"longname": "MOUNTAIN_longname",
@@ -72,7 +76,8 @@
 			"MECH": 1,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "032mtn"
 	},
 	"WOODS": {
 		"longname": "WOODS_longname",
@@ -88,7 +93,8 @@
 			"TREAD": 2,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "033wood"
 	},
 	"RIVER": {
 		"longname": "RIVER_longname",
@@ -102,7 +108,8 @@
 			"MECH": 1,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "035riververt"
 	},
 	"REEF": {
 		"longname": "REEF_longname",
@@ -115,7 +122,8 @@
 			"AIR": 1,
 			"SHIPS": 2,
 			"TRANSPORT": 2
-		}
+		},
+		"primarytiletype": "03Freef"
 	},
 	"SHOAL": {
 		"longname": "SHOAL_longname",
@@ -132,7 +140,8 @@
 			"AIR": 1,
 			"TRANSPORT": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "042shoaldown"
 	},
 	"PIPE": {
 		"longname": "PIPE_longname",
@@ -143,7 +152,8 @@
 		"defence": 0,
 		"movecosts": {
 			"PIPELINE": 1
-		}
+		},
+		"primarytiletype": "057pipevert"
 	},
 	"PIPESEAM": {
 		"longname": "PIPESEAM_longname",
@@ -154,7 +164,8 @@
 		"defence": 0,
 		"movecosts": {
 			"PIPELINE": 1
-		}
+		},
+		"primarytiletype": "05Fpipeseamvert"
 	},
 	"MISSILESILO": {
 		"longname": "MISSILESILO_longname",
@@ -170,7 +181,8 @@
 			"TREAD": 1,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "062missilesilo"
 	},
 	"CITY": {
 		"longname": "CITY_longname",
@@ -186,7 +198,8 @@
 			"TREAD": 1,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "064city"
 	},
 	"BASE": {
 		"longname": "BASE_longname",
@@ -203,7 +216,8 @@
 			"AIR": 1,
 			"PIPELINE": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "065base"
 	},
 	"AIRPORT": {
 		"longname": "AIRPORT_longname",
@@ -219,7 +233,8 @@
 			"TREAD": 1,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "066airport"
 	},
 	"PORT": {
 		"longname": "PORT_longname",
@@ -237,7 +252,8 @@
 			"SHIPS": 1,
 			"TRANSPORT": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "067port"
 	},
 	"COMTOWER": {
 		"longname": "COMTOWER_longname",
@@ -253,7 +269,8 @@
 			"TREAD": 1,
 			"AIR": 1,
 			"SLIME": 1
-		}
+		},
+		"primarytiletype": "068comtower"
 	},
 	"LAB": {
 		"longname": "LAB_longname",
@@ -287,7 +304,8 @@
 			"PURPLE": "plhq",
 			"ACID": "arhq",
 			"WHITE": "wnhq"
-		}
+		},
+		"primarytiletype": "069lab"
 	},
 	"VOLCANO": {
 		"longname": "VOLCANO_longname",

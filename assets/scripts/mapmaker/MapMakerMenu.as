@@ -367,12 +367,12 @@ void MapMakerMenuHandleInput(const dictionary controls,
                 edit.rectangleFillTiles(start, end, tileTypeSel.scriptName,
                     tileOwnerSel.isEmpty() ? NO_ARMY :
                         country[tileOwnerSel].turnOrder);
-            mementoName = OPERATION[Operation::RECT_PAINT_TILE_TOOL];
+                mementoName = OPERATION[Operation::RECT_PAINT_TILE_TOOL];
             }
             if (currentPaletteWindowTab == UNIT_DIALOG && unitTypeSel !is null) {
                 edit.rectangleFillUnits(start, end, unitTypeSel.scriptName,
                     country[unitArmySel].turnOrder);
-            mementoName = OPERATION[Operation::RECT_PAINT_UNIT_TOOL];
+                mementoName = OPERATION[Operation::RECT_PAINT_UNIT_TOOL];
             }
         }
     
@@ -619,18 +619,18 @@ void MapMakerMenu_OpenMap_FileSelected() {
 }
 
 // Debugging.
-// void MapMakerMenuOpen() {
-//     FileDialogFile = "map/islandx.cwm";
-//     quitEditMap(function() {
-//         TilePropertiesDialog.deselect();
-//         @edit = EditableMap(loadMap(FileDialogFile, PLAYABLE_MAP_TYPENAME),
-//             TilePropertiesDialog, ArmyPropertiesDialog, MapPropertiesDialog,
-//             StatusBar, ScriptsDialog);
-//         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
-//         ArmyPropertiesDialog.refresh();
-//         MementosHaveChanged();
-//     });
-// }
+void MapMakerMenuOpen() {
+    FileDialogFile = "map/islandx.cwm";
+    quitEditMap(function() {
+        TilePropertiesDialog.deselect();
+        @edit = EditableMap(loadMap(FileDialogFile, PLAYABLE_MAP_TYPENAME),
+            TilePropertiesDialog, ArmyPropertiesDialog, MapPropertiesDialog,
+            StatusBar, ScriptsDialog);
+        edit.map.setMementoStateChangedCallback(MementosHaveChanged);
+        ArmyPropertiesDialog.refresh();
+        MementosHaveChanged();
+    });
+}
 
 /**
  * Always make sure the map maker is re-enabled when the file dialog closes.
