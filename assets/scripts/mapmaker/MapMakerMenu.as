@@ -19,6 +19,7 @@ const auto MESSAGE_BOX_GROUP = "MapMakerMenu.MessageBoxGroup";
 const auto SIMPLE_MESSAGE_BOX = MESSAGE_BOX_GROUP + ".SimpleMessageBox";
 const auto FILE_ALREADY_EXISTS = MESSAGE_BOX_GROUP + ".FileAlreadyExists";
 const auto SAVE_BEFORE_QUIT = MESSAGE_BOX_GROUP + ".SaveBeforeQuit";
+const auto CONFIRM_TILE_FIX = MESSAGE_BOX_GROUP + ".ConfirmTileFix";
 
 const auto FILE_DIALOG_GROUP = "FileDialogGroup";
 const auto NEW_MAP = FILE_DIALOG_GROUP + ".NewMap";
@@ -37,6 +38,7 @@ MenuItemID MAP_MAKER_EDIT_MEMENTO_WINDOW;
 
 MenuItemID MAP_MAKER_MAP_SET_PROPS;
 MenuItemID MAP_MAKER_MAP_FILL;
+MenuItemID MAP_MAKER_MAP_FIX_TILES;
 MenuItemID MAP_MAKER_MAP_SCRIPTS;
 
 MenuItemID MAP_MAKER_VIEW_TOOLBAR;
@@ -99,6 +101,7 @@ void MapMakerMenuSetUp() {
     addMenu(MENU, "map");
     MAP_MAKER_MAP_SET_PROPS = addMenuItem(MENU, "mapprops");
     MAP_MAKER_MAP_FILL = addMenuItem(MENU, "fill");
+    MAP_MAKER_MAP_FIX_TILES = addMenuItem(MENU, "fixtiles");
     MAP_MAKER_MAP_SCRIPTS = addMenuItem(MENU, "scripts");
 
     addMenu(MENU, "view");
@@ -537,6 +540,18 @@ void MapMakerMenu_Menu_MenuItemClicked(const MenuItemID id) {
                 BASE_GROUP, MESSAGE_BOX_GROUP);
             addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
         } else FillWindow.restore("fillmapconfirmation");
+
+    } else if (id == MAP_MAKER_MAP_FIX_TILES) {
+        if (edit is null) {
+            awe::OpenMessageBox(SIMPLE_MESSAGE_BOX, "alert", "nomapisopen", null,
+                BASE_GROUP, MESSAGE_BOX_GROUP);
+            addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
+        } else {
+            awe::OpenMessageBox(CONFIRM_TILE_FIX, "alert", "tilefixconfirmation",
+                null, BASE_GROUP, MESSAGE_BOX_GROUP);
+            addMessageBoxButton(CONFIRM_TILE_FIX, "yes");
+            addMessageBoxButton(CONFIRM_TILE_FIX, "no");
+        }
     
     } else if (id == MAP_MAKER_MAP_SCRIPTS) {
         if (edit is null) {
@@ -640,18 +655,18 @@ void MapMakerMenu_OpenMap_FileSelected() {
 }
 
 // Debugging.
-void MapMakerMenuOpen() {
-    FileDialogFile = "map/islandx.cwm";
-    quitEditMap(function() {
-        TilePropertiesDialog.deselect();
-        @edit = EditableMap(loadMap(FileDialogFile, PLAYABLE_MAP_TYPENAME),
-            TilePropertiesDialog, ArmyPropertiesDialog, MapPropertiesDialog,
-            StatusBar, ScriptsDialog);
-        edit.map.setMementoStateChangedCallback(MementosHaveChanged);
-        ArmyPropertiesDialog.refresh();
-        MementosHaveChanged();
-    });
-}
+// void MapMakerMenuOpen() {
+//     FileDialogFile = "map/islandx.cwm";
+//     quitEditMap(function() {
+//         TilePropertiesDialog.deselect();
+//         @edit = EditableMap(loadMap(FileDialogFile, PLAYABLE_MAP_TYPENAME),
+//             TilePropertiesDialog, ArmyPropertiesDialog, MapPropertiesDialog,
+//             StatusBar, ScriptsDialog);
+//         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
+//         ArmyPropertiesDialog.refresh();
+//         MementosHaveChanged();
+//     });
+// }
 
 /**
  * Always make sure the map maker is re-enabled when the file dialog closes.
@@ -703,4 +718,14 @@ void MapMakerMenu_FileAlreadyExists_ButtonPressed(const uint64 btn) {
  */
 void MapMakerMenu_SimpleMessageBox_ButtonPressed(const uint64 btn) {
     awe::CloseMessageBox(SIMPLE_MESSAGE_BOX, MESSAGE_BOX_GROUP, BASE_GROUP);
+}
+
+/**
+ * Close the message box once it has been acknowledged.
+ * If Yes is selected, fix all tiles on the current map.
+ * @param btn The button that was pressed.
+ */
+void MapMakerMenu_ConfirmTileFix_ButtonPressed(const uint64 btn) {
+    awe::CloseMessageBox(CONFIRM_TILE_FIX, MESSAGE_BOX_GROUP, BASE_GROUP);
+    if (btn == 0) edit.fixTiles();
 }

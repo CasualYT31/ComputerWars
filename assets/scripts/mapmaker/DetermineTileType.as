@@ -46,7 +46,7 @@ namespace awe {
 
     /// Returns \c TRUE if the given tile type is a shoal.
     bool isShoal(const TileType@ const t) {
-        if (t is null) return false;
+        if (t is null) return true;
         return t.type.scriptName == "SHOAL";
     }
 

@@ -16,6 +16,7 @@ enum Operation {
     CREATE_UNIT_SCRIPT,
     CREATE_LOAD_UNIT,
     PAINT_STRUCTURE,
+    FIX_TILES,
     
     // External.
     PAINT_TERRAIN_TOOL,
@@ -41,6 +42,7 @@ const array<string> OPERATION = {
     "OPERATION_createunit",
     "OPERATION_createloadunit",
     "OPERATION_paintstructure",
+    "OPERATION_fixtiles",
 
     // External.
     "OPERATION_paintterraintool",
@@ -372,6 +374,19 @@ class EditableMap {
         return count;
     }
 
+    /**
+     * Trawls through every tile on the map and updates their types using
+     * \c setTerrain().
+     */
+    void fixTiles() {
+        DisableMementos token(map, OPERATION[Operation::FIX_TILES]);
+        for (uint y = 0, h = map.getMapSize().y; y < h; ++y) {
+            for (uint x = 0, w = map.getMapSize().x; x < w; ++x) {
+                updateTerrain(Vector2(x, y));
+            }
+        }
+    }
+
     ////////////////////////////////
     // ARMY MANAGEMENT OPERATIONS //
     ////////////////////////////////
@@ -524,6 +539,17 @@ class EditableMap {
             tileToChange.x -= 3;
             ++tileToChange.y;
         }
+    }
+
+    /**
+     * Calls \c setTerrain() on a given tile to update its type, as well as the
+     * tiles that surround it.
+     * @param tile The tile to update.
+     */
+    void updateTerrain(const Vector2&in tile) {
+        const auto tileOwner = map.getTileOwner(tile);
+        setTerrain(tile, map.getTileType(tile).type, tileOwner == NO_ARMY ? "" :
+            country.scriptNames[tileOwner], true, true);
     }
 
     /**
@@ -758,13 +784,9 @@ class EditableMap {
                 country[owner].turnOrder);
         }
         // Structure tiles could influence the types of tiles surrounding them, so
-        // feed them all through setTerrain().
-        for (uint i = 0, len = changingTiles.length(); i < len; ++i) {
-            const auto tile = changingTiles[i];
-            const auto tileOwner = map.getTileOwner(tile);
-            setTerrain(tile, map.getTileType(tile).type, tileOwner == NO_ARMY ?
-                "" : country.scriptNames[tileOwner], true, true);
-        }
+        // feed them all to setTerrain().
+        for (uint i = 0, len = changingTiles.length(); i < len; ++i)
+            updateTerrain(changingTiles[i]);
         _updateTileProps(changingTiles);
     }
 

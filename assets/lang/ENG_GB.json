@@ -41,6 +41,7 @@
 	"setfontsize": "Set Font Size",
 	"map": "Map",
 	"fill": "Fill",
+	"fixtiles": "Fix Tiles",
 	"scripts": "Scripts",
 	"mapprops": "Map Properties",
 	"tileprops": "Tile Properties",
@@ -105,6 +106,7 @@
 	"alert": "Alert!",
 	"mapfilealreadyexists": "The map file \"#\" already exists! Do you wish to overwrite it?",
 	"nomapisopen": "There isn't a map open right now!",
+	"tilefixconfirmation": "Are you sure you want to update all of the tiles on this map?",
 
 	"resizemapconfirmation": "Are you sure you want to resize the map?",
 	"resizemapconfirmationsmaller": "Are you sure you want to resize the map? Some tiles will be lost!",
@@ -170,6 +172,7 @@
 	"OPERATION_tiletypeandowner": "Set Tile's Type and/or Owner",
 	"OPERATION_createloadunit": "Create and Load Unit",
 	"OPERATION_paintstructure": "Paint Structure",
+	"OPERATION_fixtiles": "Fix Tiles",
 
 	"OPERATION_paintterraintool": "Paint Terrain/s",
 	"OPERATION_painttiletool": "Paint Tile/s",
