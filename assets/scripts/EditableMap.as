@@ -18,9 +18,11 @@ enum Operation {
     PAINT_STRUCTURE,
     
     // External.
+    PAINT_TERRAIN_TOOL,
     PAINT_TILE_TOOL,
     PAINT_UNIT_TOOL,
     DELETE_UNIT_TOOL,
+    RECT_PAINT_TERRAIN_TOOL,
     RECT_PAINT_TILE_TOOL,
     RECT_PAINT_UNIT_TOOL,
     RECT_DELETE_UNIT_TOOL
@@ -41,9 +43,11 @@ const array<string> OPERATION = {
     "OPERATION_paintstructure",
 
     // External.
+    "OPERATION_paintterraintool",
     "OPERATION_painttiletool",
     "OPERATION_paintunittool",
     "OPERATION_deleteunittool",
+    "OPERATION_rectpaintterraintool",
     "OPERATION_rectpainttiletool",
     "OPERATION_rectpaintunittool",
     "OPERATION_rectdeleteunittool"
@@ -332,6 +336,18 @@ class EditableMap {
         map.rectangleFillTiles(start, end, type, owner);
         refreshTileProps();
     }
+    
+    /**
+     * Changes the tiles within a given rectangle to a given type of terrain, and
+     * gives them to the specified army.
+     */
+    void rectangleFillTiles(const Vector2&in start, const Vector2&in end,
+        const Terrain@ const type, const string&in owner) {
+        const auto tiles = map.getTilesInArea(start, end);
+        for (uint i = 0, len = tiles.length(); i < len; ++i)
+            setTerrain(tiles[i], type, owner);
+        refreshTileProps();
+    }
 
     /**
      * Creates fully replenished units on the tiles within a given rectangle.
@@ -454,6 +470,76 @@ class EditableMap {
             map.setTileOwner(tileToChange, newOwnerID);
         }
         _updateTileProps(changingTiles);
+    }
+
+    /**
+     * Determines what tile type to set the given tile to based on its surrounding
+     * tiles.
+     * Does nothing if the given tile already is the terrain given.
+     * @param tileToChange           The position of the tile to update.
+     * @param toType                 Handle to the terrain that the tile will
+     *                               have.
+     * @param newOwner               Script name of the new owner. Empty if
+     *                               neutral.
+     * @param updateSurroundingTiles If \c TRUE, the surrounding tiles may also
+     *                               be changed.
+     * @param forceTileUpdate        Force the given tile to update even when its
+     *                               terrain is the same as the one given.
+     */
+    void setTerrain(Vector2 tileToChange, const Terrain@ const toType,
+        const string&in newOwner, const bool updateSurroundingTiles = true,
+        const bool forceTileUpdate = false) {
+        if (!forceTileUpdate &&
+            map.getTileType(tileToChange).type.scriptName == toType.scriptName)
+            return;
+        const TileType@ const newTileType = awe::DetermineTileType(
+            _getTileTypeOfTile(tileToChange.x - 1, tileToChange.y - 1),
+            _getTileTypeOfTile(tileToChange.x, tileToChange.y - 1),
+            _getTileTypeOfTile(tileToChange.x + 1, tileToChange.y - 1),
+            _getTileTypeOfTile(tileToChange.x - 1, tileToChange.y),
+            toType,
+            _getTileTypeOfTile(tileToChange.x + 1, tileToChange.y),
+            _getTileTypeOfTile(tileToChange.x - 1, tileToChange.y + 1),
+            _getTileTypeOfTile(tileToChange.x, tileToChange.y + 1),
+            _getTileTypeOfTile(tileToChange.x + 1, tileToChange.y + 1)
+        );
+        if (newTileType is null) {
+            if (toType.primaryTileType !is null)
+                setTile(tileToChange, toType.primaryTileType, newOwner);
+        } else setTile(tileToChange, newTileType, newOwner);
+        if (!updateSurroundingTiles) return;
+        // Now go through each of the surrounding tiles and update their types.
+        --tileToChange.x;
+        --tileToChange.y;
+        for (uint y = 0; y < 3; ++y) {
+            for (uint x = 0; x < 3; ++x) {
+                if (!map.isOutOfBounds(tileToChange)) {
+                    const auto tileOwner = map.getTileOwner(tileToChange);
+                    setTerrain(tileToChange, map.getTileType(tileToChange).type,
+                        tileOwner == NO_ARMY ? "" :
+                            map.getArmyCountry(tileOwner).scriptName,
+                        false, true);
+                }
+                ++tileToChange.x;
+            }
+            tileToChange.x -= 3;
+            ++tileToChange.y;
+        }
+    }
+
+    /**
+     * Get the tile type of a tile without logging an error if the operation
+     * fails.
+     * @param  x The X coordinate of the tile.
+     * @param  y The Y coordinate of the tile.
+     * @return If the tile is in bounds, a handle to its tile type. \c null if the
+     *         tile is out-of-bounds.
+     */
+    private const TileType@ const _getTileTypeOfTile(const uint x,
+        const uint y) const {
+        const auto tile = Vector2(x, y);
+        if (map.isOutOfBounds(tile)) return null;
+        return map.getTileType(tile);
     }
 
     /**

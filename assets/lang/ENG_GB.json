@@ -171,9 +171,11 @@
 	"OPERATION_createloadunit": "Create and Load Unit",
 	"OPERATION_paintstructure": "Paint Structure",
 
+	"OPERATION_paintterraintool": "Paint Terrain/s",
 	"OPERATION_painttiletool": "Paint Tile/s",
 	"OPERATION_paintunittool": "Paint Unit/s",
 	"OPERATION_deleteunittool": "Delete Unit/s",
+	"OPERATION_rectpaintterraintool": "Rectangle Paint Terrain/s",
 	"OPERATION_rectpainttiletool": "Rectangle Paint Tile/s",
 	"OPERATION_rectpaintunittool": "Rectangle Paint Unit/s",
 	"OPERATION_rectdeleteunittool": "Rectangle Delete Unit/s",

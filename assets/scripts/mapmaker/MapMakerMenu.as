@@ -284,6 +284,8 @@ void MapMakerMenuHandleInput(const dictionary controls,
     const auto curUnit = edit.map.getUnitOnTile(curTile);
 
     // Get the currently selected tile and unit types.
+    const auto terrainSel = cast<Terrain>(CurrentlySelectedTerrain.object);
+    const auto terrainOwnerSel = CurrentlySelectedTerrain.owner;
     const auto tileTypeSel = cast<TileType>(CurrentlySelectedTileType.object);
     const auto tileOwnerSel = CurrentlySelectedTileType.owner;
     const auto unitTypeSel = cast<UnitType>(CurrentlySelectedUnitType.object);
@@ -310,6 +312,11 @@ void MapMakerMenuHandleInput(const dictionary controls,
     }
     
     if (action && TOOLBAR.tool == PAINT_TOOL.shortName) {
+        if (currentPaletteWindowTab == TERRAIN_DIALOG && terrainSel !is null) {
+            edit.setTerrain(curTile, terrainSel, terrainOwnerSel);
+            mementoName = OPERATION[Operation::PAINT_TERRAIN_TOOL];
+        }
+
         // If there isn't a currently selected tile type, do not try to paint with
         // it.
         if (currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null) {
@@ -372,6 +379,11 @@ void MapMakerMenuHandleInput(const dictionary controls,
     } else if (TOOLBAR.tool == RECT_TOOL.shortName) {
         Vector2 start, end;
         if (drawRectangle(prevAction, action, curTile, start, end)) {
+            if (currentPaletteWindowTab == TERRAIN_DIALOG &&
+                terrainSel !is null) {
+                edit.rectangleFillTiles(start, end, terrainSel, terrainOwnerSel);
+                mementoName = OPERATION[Operation::RECT_PAINT_TERRAIN_TOOL];
+            }
             if (currentPaletteWindowTab == TILE_DIALOG && tileTypeSel !is null) {
                 edit.rectangleFillTiles(start, end, tileTypeSel.scriptName,
                     tileOwnerSel.isEmpty() ? NO_ARMY :
