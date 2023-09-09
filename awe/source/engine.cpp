@@ -346,6 +346,13 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Converts a bool into a string.");
 
 	r = engine->RegisterGlobalFunction(
+		"array<string>@ generatePaintableTerrainSpriteArray(const string&in)",
+		asMETHOD(awe::game_engine, _script_generatePaintableTerrainSpriteArray),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Generates a list of tile sprites for "
+		"each paintable terrain, given an owner.");
+
+	r = engine->RegisterGlobalFunction(
 		"array<string>@ generateTileSpriteArray(const string&in, "
 		"const array<string>@ const)",
 		asMETHOD(awe::game_engine, _script_generateTileSpriteArray),
@@ -709,6 +716,21 @@ std::string awe::game_engine::_script_getLatestLogEntry() const {
 
 std::string awe::game_engine::_script_formatBool(const bool b) const {
 	return b ? "true" : "false";
+}
+
+CScriptArray* awe::game_engine::_script_generatePaintableTerrainSpriteArray(
+	const std::string& owner) const {
+	CScriptArray* ret = _scripts->createArray("string");
+	// Should access them in order.
+	const auto& scriptNames = _terrains->getScriptNames();
+	for (std::string name : scriptNames) {
+		if (!(*_terrains)[name]->isPaintable()) continue;
+		std::string temp(owner.empty() ?
+			(*_terrains)[name]->getPrimaryTileType()->getNeutralTile() :
+			(*_terrains)[name]->getPrimaryTileType()->getOwnedTile(owner));
+		ret->InsertLast(&temp);
+	}
+	return ret;
 }
 
 CScriptArray* awe::game_engine::_script_generateTileSpriteArray(

@@ -141,7 +141,7 @@ class ObjectDialog {
      * @param onRight If \c TRUE, dock to the right of the screen. If \c FALSE,
      *                dock to the left.
      */
-    void dock(const bool onRight = true, const float defaultColumnCount = 5.0f) {
+    void dock(const bool onRight = true, const float defaultColumnCount = 6.0f) {
         const auto data = getCurrentPanelData();
         if (data !is null) {
             const auto defaultWidth = formatFloat(
@@ -155,6 +155,7 @@ class ObjectDialog {
                 openChildWindow(initData.window, "0", "0");
                 setWidgetSize(initData.window, defaultWidth, "100%");
             }
+            horizontalWrapSignalHandler(data.wrap, "MouseEntered");
         }
     }
 
@@ -443,19 +444,24 @@ class ObjectDialog {
 ObjectDialog PaletteWindow;
 
 /**
+ * Index of the Terrains tab.
+ */
+const int TERRAIN_DIALOG = 0;
+
+/**
  * Index of the Tiles tab.
  */
-const int TILE_DIALOG = 0;
+const int TILE_DIALOG = 1;
 
 /**
  * Index of the Units tab.
  */
-const int UNIT_DIALOG = 1;
+const int UNIT_DIALOG = 2;
 
 /**
  * Index of the Structures tab.
  */
-const int STRUCTURE_DIALOG = 2;
+const int STRUCTURE_DIALOG = 3;
 
 /**
  * Structure panel's \c CheckBox signal handler.
@@ -485,6 +491,29 @@ ObjectDialogSetUpData@ DefaultObjectDialogData(const string&in parent) {
     ObjectDialogSetUpData SetUpData;
     SetUpData.window = parent + ".ObjectDialog";
     SetUpData.windowText = "objectdialog";
+
+    // Terrain group.
+    ObjectPanelSetUpData Terrains;
+    Terrains.group = "TerrainDialog";
+    Terrains.tabText = "terraindialog";
+    @Terrains.currentlySelectedObject = CurrentlySelectedTerrain;
+    Terrains.buttonSize.x = 35.0f;
+    Terrains.buttonSize.y = 35.0f;
+    Terrains.neutralAvailable = true;
+    Terrains.numberOfOwnerItems = 6;
+    @Terrains.mapNameToObject = function(shortName){return terrain[shortName];};
+    Terrains.spritesheet = "tile.normal";
+    @Terrains.generateSpritesArray = function(owner){
+        return ::generatePaintableTerrainSpriteArray(owner);
+    };
+    array<string>@ terrainNames = array<string>();
+    // Filter terrains based on whether they are paintable or not.
+    for (uint i = 0, len = terrain.scriptNames.length(); i < len; ++i) {
+        const auto name = terrain.scriptNames[i];
+        if (terrain[name].isPaintable) terrainNames.insertLast(name);
+    }
+    @Terrains.scriptNames = terrainNames;
+    SetUpData.objectPanels.insertLast(Terrains);
 
     // Tile group.
     ObjectPanelSetUpData Tiles;

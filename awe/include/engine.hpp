@@ -313,6 +313,15 @@ namespace awe {
 		std::string _script_formatBool(const bool b) const;
 
 		/**
+		 * Generates an array of paintable terrain sprites, given an owner.
+		 * @param  owner  Get a specific country's sprites by giving its script
+		 *                name here. Give an empty string to grab neutral tiles.
+		 * @return String array, one sprite per paintable terrain.
+		 */
+		CScriptArray* _script_generatePaintableTerrainSpriteArray(
+			const std::string& owner) const;
+
+		/**
 		 * Generates an array of tile type sprites, given an owner.
 		 * @param  owner  Get a specific country's sprites by giving its script
 		 *                name here. Give an empty string to grab neutral tiles.

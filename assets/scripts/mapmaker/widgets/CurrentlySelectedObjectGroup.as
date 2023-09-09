@@ -147,6 +147,23 @@ class CurrentlySelectedObject {
 }
 
 /**
+ * Manages the currently selected terrain and owner.
+ */
+CurrentlySelectedObject CurrentlySelectedTerrain(
+    function(object, owner, data) {
+        const auto@ type = cast<Terrain>(object);
+        if (!type.isPaintable) return { "", "", "" };
+        if (owner.isEmpty()) {
+            return {"tile.normal", type.primaryTileType.neutralTileSprite,
+                type.name };
+        } else {
+            return {"tile.normal", type.primaryTileType.ownedTileSprite(owner),
+                type.name };
+        }
+    }
+);
+
+/**
  * Manages the currently selected tile type and owner.
  */
 CurrentlySelectedObject CurrentlySelectedTileType(
