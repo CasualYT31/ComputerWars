@@ -332,16 +332,25 @@ void MapMakerMenuHandleInput(const dictionary controls,
         }
 
     } else if (pick) {
-        if (currentPaletteWindowTab == TILE_DIALOG) {
+        if (currentPaletteWindowTab == TERRAIN_DIALOG) {
+            const auto terrainType = edit.map.getTileType(curTile).type;
+            if (terrainType.isPaintable) {
+                CurrentlySelectedTerrain.object = terrainType;
+                PaletteWindow.setSelectedOwner(edit.map.getTileOwner(curTile));
+            }
+
+        } else if (currentPaletteWindowTab == TILE_DIALOG) {
             const auto tileType = edit.map.getTileType(curTile);
             // Do not pick a non-paintable tile.
             if (tileType.isPaintable) {
                 CurrentlySelectedTileType.object = tileType;
                 PaletteWindow.setSelectedOwner(edit.map.getTileOwner(curTile));
             }
+
         } else if (currentPaletteWindowTab == UNIT_DIALOG && curUnit != NO_UNIT) {
             CurrentlySelectedUnitType.object = edit.map.getUnitType(curUnit);
             PaletteWindow.setSelectedOwner(edit.map.getArmyOfUnit(curUnit));
+
         } else if (currentPaletteWindowTab == STRUCTURE_DIALOG &&
             edit.map.isTileAStructureTile(curTile)) {
             const auto structureObject = edit.map.getTileStructure(curTile);
