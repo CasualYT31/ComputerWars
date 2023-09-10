@@ -597,6 +597,26 @@ shared class PlayableMap {
             map.clearAvailableTiles();
             const Weapon@ weaponType = null;
             const auto unitType = map.getUnitType(unitID);
+            // Special case of Ooziums, since they don't have a conventional
+            // weapon. I really need to get rid of this duplicate code (see
+            // selectUnit()).
+            if (unitType.scriptName == "OOZIUM") {
+                // Filter the available tiles down based on the unit's movement
+                // type, movement points, and fuel.
+                const auto tile = map.getUnitPosition(unitID);
+                const auto allTiles = map.getAvailableTiles(tile, 1,
+                    unitType.movementPoints);
+                for (uint i = 0, length = allTiles.length(); i < length; ++i) {
+                    if (map.findPath(tile, allTiles[i], unitType.movementType,
+                        unitType.movementPoints, map.getUnitFuel(unitID),
+                        map.getTeamOfUnit(unitID), map.getArmyOfUnit(unitID),
+                        unitType.hasInfiniteFuel,
+                        unitType.scriptName == "OOZIUM").length() > 0) {
+                        map.addAvailableTile(allTiles[i]);
+                    }
+                }
+                return;
+            }
             for (uint i = 0, len = unitType.weaponCount; i < len; ++i) {
                 const auto weaponTypeTemp = unitType.weapon(i);
                 if (weaponTypeTemp.hasInfiniteAmmo) {

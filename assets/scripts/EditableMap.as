@@ -498,15 +498,9 @@ class EditableMap {
      *                               neutral.
      * @param updateSurroundingTiles If \c TRUE, the surrounding tiles may also
      *                               be changed.
-     * @param forceTileUpdate        Force the given tile to update even when its
-     *                               terrain is the same as the one given.
      */
     void setTerrain(Vector2 tileToChange, const Terrain@ const toType,
-        const string&in newOwner, const bool updateSurroundingTiles = true,
-        const bool forceTileUpdate = false) {
-        if (!forceTileUpdate &&
-            map.getTileType(tileToChange).type.scriptName == toType.scriptName)
-            return;
+        const string&in newOwner, const bool updateSurroundingTiles = true) {
         const auto newTileType = awe::DetermineTileType(
             _getTileTypeOfTile(tileToChange.x - 1, tileToChange.y - 1),
             _getTileTypeOfTile(tileToChange.x, tileToChange.y - 1),
@@ -532,7 +526,7 @@ class EditableMap {
                     const auto tileOwner = map.getTileOwner(tileToChange);
                     setTerrain(tileToChange, map.getTileType(tileToChange).type,
                         tileOwner == NO_ARMY ? "" :
-                            country.scriptNames[tileOwner], false, true);
+                            country.scriptNames[tileOwner], false);
                 }
                 ++tileToChange.x;
             }
@@ -549,7 +543,7 @@ class EditableMap {
     void updateTerrain(const Vector2&in tile) {
         const auto tileOwner = map.getTileOwner(tile);
         setTerrain(tile, map.getTileType(tile).type, tileOwner == NO_ARMY ? "" :
-            country.scriptNames[tileOwner], true, true);
+            country.scriptNames[tileOwner], true);
     }
 
     /**

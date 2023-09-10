@@ -17,6 +17,11 @@ class ScriptsWindow {
     /**
      * Sets up the scripts window.
      * @param parent                 The container to add the scripts window to.
+     * @param simpleMsgBox           The name of the simple message box to bring
+     *                               up when the user queries the result of the
+     *                               last build. The next two parameters will also
+     *                               be used to enable and disable widgets when
+     *                               opening this \c MessageBox.
      * @param disableThis            When the Scripts Window queries the user for
      *                               a script file name, this widget should be
      *                               disabled. It will be re-enabled once the
@@ -26,9 +31,10 @@ class ScriptsWindow {
      *                               window is opened and disable when the window
      *                               is closed.
      */
-    void setUp(const string&in parent, const string&in disableThis,
-        const string&in baseGroupOfQueryWindow) {
+    void setUp(const string&in parent, const string&in simpleMsgBox,
+        const string&in disableThis, const string&in baseGroupOfQueryWindow) {
         baseGroup = disableThis;
+        buildResultMsgBox = simpleMsgBox;
         queryWindowBaseGroup = baseGroupOfQueryWindow;
         deleteFileConfirmationMsgBox =
             queryWindowBaseGroup + ".DeleteScriptFileMsgBox";
@@ -146,6 +152,7 @@ class ScriptsWindow {
         addMenu(menu, "code");
         code_build = addMenuItem(menu, "build");
         code_test = addMenuItem(menu, "test");
+        code_lastResult = addMenuItem(menu, "lastresult");
 
         return formatFloat(getWidgetFullSize(menu).y);
     }
@@ -301,7 +308,9 @@ class ScriptsWindow {
      */
     bool build() {
         if (currentScript.isEmpty()) return false;
-        return edit.buildScriptFiles();
+        const bool result = edit.buildScriptFiles();
+        if (!result) showLastBuildResult();
+        return result;
     }
 
     /**
@@ -311,6 +320,21 @@ class ScriptsWindow {
     void test() {
         if (build()) {
         }
+    }
+
+    /**
+     * Show the last known build result in a \c MessageBox.
+     */
+    void showLastBuildResult() {
+        string result = "~" + edit.getLastKnownBuildResult();
+        if (result.findFirst(")") >= 0) {
+            // Insert some newlines so that the message sits more comfortably in
+            // the MessageBox.
+            result = awe::join(awe::split(result, "), "), "),\n") + ")";
+        }
+        awe::OpenMessageBox(buildResultMsgBox, "alert", result, null, baseGroup,
+            queryWindowBaseGroup);
+        addMessageBoxButton(SIMPLE_MESSAGE_BOX, "ok");
     }
 
     /**
@@ -480,6 +504,10 @@ class ScriptsWindow {
     /// The name given to the script delete confirmation message box.
     private string deleteFileConfirmationMsgBox;
 
+    /// The name of the \c MessageBox that is opened when the last build result is
+    /// queried.
+    private string buildResultMsgBox;
+
     /// Disable this widget when the query window is opened.
     private string baseGroup;
 
@@ -538,6 +566,8 @@ class ScriptsWindow {
     MenuItemID CODE_BUILD { get const { return code_build; } }
     private MenuItemID code_test;
     MenuItemID CODE_TEST { get const { return code_test; } }
+    private MenuItemID code_lastResult;
+    MenuItemID CODE_LAST_RESULT { get const { return code_lastResult; } }
 }
 
 /**
@@ -565,6 +595,9 @@ void MapMakerMenu_ScriptsWindowMenu_MenuItemClicked(const MenuItemID id) {
 
     } else if (id == ScriptsDialog.CODE_TEST) {
         ScriptsDialog.test();
+
+    } else if (id == ScriptsDialog.CODE_LAST_RESULT) {
+        ScriptsDialog.showLastBuildResult();
 
     } else {
         error("Unrecognised menu item ID " + formatMenuItemID(id) + " received "

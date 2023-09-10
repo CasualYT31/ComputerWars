@@ -147,7 +147,8 @@ void MapMakerMenuSetUp() {
         }
     );
     UndoRedoWindow.setUp(CLIENT_AREA);
-    ScriptsDialog.setUp(CLIENT_AREA, BASE_GROUP, MESSAGE_BOX_GROUP);
+    ScriptsDialog.setUp(CLIENT_AREA, SIMPLE_MESSAGE_BOX, BASE_GROUP,
+        MESSAGE_BOX_GROUP);
 }
 
 /**

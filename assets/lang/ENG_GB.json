@@ -36,6 +36,7 @@
 	"code": "Code",
 	"build": "Build",
 	"test": "Build and Test (TBD)",
+	"lastresult": "Last Known Build Result",
 	"new": "New",
 	"rename": "Rename",
 	"setfontsize": "Set Font Size",
