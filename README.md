@@ -13,6 +13,9 @@ If you've somehow stumbled across this project, then please stick around. This i
 - Ability to easily add in Artificial Intelligence after-the-fact (actually implementing the AI is not a main goal, but it will be invaluable for the campaign side of the engine).
 - In-depth documentation, along with tutorials and examples once the project is ready for release.
 
+### September 14th 2023 ~ Version 0.0.4
+The map maker has now been added! For a full rundown of the features that have been added, please see the 0.0.4 release tag.
+
 ### December 25th 2022 ~ Version 0.0.3
 The basics of the game have now been written up! You can currently play full games on three maps: Island X, Moon Isle, and Keyhole Cove. There are a few minor bugs, but otherwise the engine is in a good playable state! Notable features I haven't coded yet include: weather, FoW, CO powers, and day-to-day abilities. My next goals are to complete a map maker for version 0.0.4, before including the aforementioned features—and more—in 0.0.5. It's best to operate the game with the mouse only for now: full keyboard and gamepad support hasn't been implemented yet w.r.t. navigating GUIs.
 
