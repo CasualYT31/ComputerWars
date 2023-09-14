@@ -71,6 +71,21 @@ class ToolBar {
         setWidgetOrigin(window, 0.5f, 0.0f);
         openChildWindow(window, "50%", "0%");
     }
+
+    /**
+     * Select a tool.
+     * If the given tool doesn't exist, a warning will be logged.
+     * @param shortName The short name (given in \c setUp()) of the tool to
+     *                  select.
+     */
+    void selectTool(const string&in shortName) {
+        const auto widgetName = window + "." + shortName;
+        if (!::widgetExists(widgetName)) {
+            warn("Tool with name \"" + shortName + "\" (\"" + widgetName + "\") "
+                "doesn't exist!");
+        }
+        _selectTool(widgetName);
+    }
     
     /**
      * Updates the currently selected tool when a button is pressed.
@@ -79,15 +94,22 @@ class ToolBar {
      */
     private void buttonHandler(const string&in widgetName,
         const string&in signalName) {
-        if (signalName == "Pressed" && widgetName != previousButton) {
-            buttonName = widgetName.substr(widgetName.findLast(".") + 1);
-            setWidgetBackgroundColour(widgetName, Colour(200, 200, 200, 255));
-            if (!previousButton.isEmpty()) {
-                setWidgetBackgroundColour(previousButton,
-                    Colour(245, 245, 245, 255));
-            }
-            previousButton = widgetName;
+        if (signalName == "Pressed")  _selectTool(widgetName);
+    }
+
+    /**
+     * Common tool selection logic.
+     * @param widgetName Full name of the button representing the tool.
+     */
+    private void _selectTool(const string&in widgetName) {
+        if (widgetName == previousButton) return;
+        buttonName = widgetName.substr(widgetName.findLast(".") + 1);
+        setWidgetBackgroundColour(widgetName, Colour(200, 200, 200, 255));
+        if (!previousButton.isEmpty()) {
+            setWidgetBackgroundColour(previousButton,
+                Colour(245, 245, 245, 255));
         }
+        previousButton = widgetName;
     }
 
     /// The short name of the last pressed button.

@@ -105,6 +105,9 @@ class ObjectDialogSetUpData {
     /// The text/title to assign to the \c ChildWindow.
     string windowText;
 
+    /// Reference to the \c ToolBar widget.
+    ToolBar@ toolbar;
+
     /// The \c ObjectPanel widgets to create in this \c ChildWindow.
     array<ObjectPanelSetUpData@> objectPanels;
 }
@@ -243,7 +246,8 @@ class ObjectDialog {
         setWidgetSize(csoGroup, "100%", GROUP_HEIGHT);
         setWidgetOrigin(csoGroup, 0.5f, 0.0f);
         setWidgetPosition(csoGroup, "50%", "0%");
-        data.currentlySelectedObject.addWidget(csoGroup + ".CurSelObjectLayout");
+        data.currentlySelectedObject.addWidget(csoGroup + ".CurSelObjectLayout",
+            CurrentlySelectedObject::Callback(this.newObjectSelected));
 
         // Scrollable panel.
         data.scrollablePanel = data.groupFullname + ".ScrollablePanel";
@@ -343,6 +347,8 @@ class ObjectDialog {
                 }
                 setWidgetVisibility(data.groupFullname, true);
                 horizontalWrapSignalHandler(data.wrap, "MouseEntered");
+                // Select the paint tool automatically if a new tab is selected.
+                newObjectSelected();
             }
         }
     }
@@ -436,6 +442,15 @@ class ObjectDialog {
             }
         }
     }
+
+    /**
+     * When a new object is selected in the Palette Window, the paint tool should
+     * be automatically selected.
+     */
+    private void newObjectSelected() {
+        if (initData.toolbar is null) return;
+        initData.toolbar.selectTool(PAINT_TOOL.shortName);
+    }
 }
 
 /**
@@ -491,6 +506,7 @@ ObjectDialogSetUpData@ DefaultObjectDialogData(const string&in parent) {
     ObjectDialogSetUpData SetUpData;
     SetUpData.window = parent + ".ObjectDialog";
     SetUpData.windowText = "objectdialog";
+    @SetUpData.toolbar = TOOLBAR;
 
     // Terrain group.
     ObjectPanelSetUpData Terrains;
