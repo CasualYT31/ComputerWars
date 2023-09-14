@@ -152,6 +152,26 @@ void MapMakerMenuSetUp() {
 }
 
 /**
+ * Always makes sure that some windows are open and docked when the map maker is
+ * opened.
+ */
+void MapMakerMenuOpen() {
+    TOOLBAR.dock();
+    PaletteWindow.dock();
+    // Debugging.
+    // FileDialogFile = "map/islandx.cwm";
+    // quitEditMap(function() {
+    //     TilePropertiesDialog.deselect();
+    //     @edit = EditableMap(loadMap(FileDialogFile, PLAYABLE_MAP_TYPENAME),
+    //         TilePropertiesDialog, ArmyPropertiesDialog, MapPropertiesDialog,
+    //         StatusBar, ScriptsDialog);
+    //     edit.map.setMementoStateChangedCallback(MementosHaveChanged);
+    //     ArmyPropertiesDialog.refresh();
+    //     MementosHaveChanged();
+    // });
+}
+
+/**
  * Continuously draw a rectangle on the map.
  * @param  prevAction \c TRUE if the action control was being triggered during the
  *                    previous iteration of the game loop.
@@ -654,20 +674,6 @@ void MapMakerMenu_OpenMap_FileSelected() {
         MementosHaveChanged();
     });
 }
-
-// Debugging.
-// void MapMakerMenuOpen() {
-//     FileDialogFile = "map/islandx.cwm";
-//     quitEditMap(function() {
-//         TilePropertiesDialog.deselect();
-//         @edit = EditableMap(loadMap(FileDialogFile, PLAYABLE_MAP_TYPENAME),
-//             TilePropertiesDialog, ArmyPropertiesDialog, MapPropertiesDialog,
-//             StatusBar, ScriptsDialog);
-//         edit.map.setMementoStateChangedCallback(MementosHaveChanged);
-//         ArmyPropertiesDialog.refresh();
-//         MementosHaveChanged();
-//     });
-// }
 
 /**
  * Always make sure the map maker is re-enabled when the file dialog closes.
