@@ -17,6 +17,9 @@ enum Operation {
     CREATE_LOAD_UNIT,
     PAINT_STRUCTURE,
     FIX_TILES,
+    MAP_SIZE,
+    RECT_FILL_TILES,
+    TILE_OWNER,
     
     // External.
     PAINT_TERRAIN_TOOL,
@@ -43,6 +46,9 @@ const array<string> OPERATION = {
     "OPERATION_createloadunit",
     "OPERATION_paintstructure",
     "OPERATION_fixtiles",
+    "OPERATION_mapsize",
+    "OPERATION_rectfilltiles",
+    "OPERATION_tileowner",
 
     // External.
     "OPERATION_paintterraintool",
@@ -323,6 +329,8 @@ class EditableMap {
      */
     void setMapSize(const Vector2&in mapSize, const string&in tileType,
         const ArmyID army = NO_ARMY) {
+        DisableMementos token(map, OPERATION[Operation::MAP_SIZE]);
+        _createArmyIfNonExistent(army);
         map.setMapSize(mapSize, tileType, army);
         refreshTileProps();
         _updateStatusBar();
@@ -335,6 +343,8 @@ class EditableMap {
      */
     void rectangleFillTiles(const Vector2&in start, const Vector2&in end,
         const string&in type, const ArmyID owner = NO_ARMY) {
+        DisableMementos token(map, OPERATION[Operation::RECT_FILL_TILES]);
+        _createArmyIfNonExistent(owner);
         map.rectangleFillTiles(start, end, type, owner);
         refreshTileProps();
     }
@@ -470,6 +480,7 @@ class EditableMap {
             DisableMementos token(map, OPERATION[Operation::TILE_TYPE_AND_OWNER]);
             @changingTiles = map.querySetTileTypeChangedTiles(tileToChange);
             map.setTileType(tileToChange, toType.scriptName);
+            _createArmyIfNonExistent(newOwnerID);
             map.setTileOwner(tileToChange, newOwnerID);
             // If this tile is a non-paintable structure, setup its data now.
             const auto structureName =
@@ -482,6 +493,7 @@ class EditableMap {
             DisableMementos token(map, OPERATION[Operation::TILE_TYPE_AND_OWNER]);
             @changingTiles = array<Vector2>();
             changingTiles.insertLast(tileToChange);
+            _createArmyIfNonExistent(newOwnerID);
             map.setTileOwner(tileToChange, newOwnerID);
         }
         _updateTileProps(changingTiles);
@@ -579,6 +591,8 @@ class EditableMap {
      * @param newOwner The ID of the new owner.
      */
     void setSelectedTileOwner(const ArmyID newOwner) {
+        DisableMementos token(map, OPERATION[Operation::TILE_OWNER]);
+        _createArmyIfNonExistent(newOwner);
         map.setTileOwner(tilePropsTile, newOwner);
     }
 
@@ -774,8 +788,10 @@ class EditableMap {
         }
         // Set the owner of the root tile if not destroyed.
         if (!destroyed) {
-            map.setTileOwner(fromTile, owner.isEmpty() ? NO_ARMY :
-                country[owner].turnOrder);
+            const auto ownerID = owner.isEmpty() ? NO_ARMY :
+                country[owner].turnOrder;
+            _createArmyIfNonExistent(ownerID);
+            map.setTileOwner(fromTile, ownerID);
         }
         // Structure tiles could influence the types of tiles surrounding them, so
         // feed them all to setTerrain().
@@ -873,6 +889,15 @@ class EditableMap {
      */
     private void _updateScriptsWindow() {
         scriptsWindow.refresh();
+    }
+
+    /**
+     * Create the given army if it doesn't exist already, and update the army
+     * properties window.
+     * @param army The ID of the army to add. If \c NO_ARMY, nothing will change.
+     */
+    private void _createArmyIfNonExistent(const ArmyID army) {
+        if (army != NO_ARMY && !map.isArmyPresent(army)) createArmy(army);
     }
 
     /////////
