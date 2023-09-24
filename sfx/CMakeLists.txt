@@ -22,7 +22,8 @@ add_library(${PROJECT_NAME} STATIC
 	"source/gui/gui.cpp"
 	"source/gui/guiregisterinterface.cpp"
 	"source/gui/guiscriptinterface.cpp"
-	"source/gui/guisignalhandlers.cpp")
+	"source/gui/guisignalhandlers.cpp"
+	"source/gui/menu.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsSFX_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

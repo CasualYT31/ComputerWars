@@ -37,6 +37,49 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace sfx {
 	/**
+	 * Represents a menu.
+	 */
+	class menu : public sfx::animated_drawable, public engine::script_registrant,
+		public engine::script_reference_type<sfx::menu> {
+	public:
+		/**
+		 * Callback given to \c engine::scripts::registerInterface() to register
+		 * the \c Menu type with a \c scripts object.
+		 * @sa \c engine::scripts::registerInterface()
+		 */
+		void registerInterface(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		/**
+		 * Creates a \c Menu.
+		 * @return Pointer to the \c Menu.
+		 */
+		static sfx::menu* Create();
+
+		/**
+		 * Animates the menu.
+		 * Any sprites are animated, and the colour background (if there is one) is
+		 * resized to match the size of the target. In addition, if a langauge
+		 * dictionary has been given, all captions will be translated.
+		 * @return Always returns \c FALSE.
+		 * @sa     sfx::gui::setLanguageDictionary()
+		 */
+		bool animate(const sf::RenderTarget& target) final;
+	private:
+		/**
+		 * Draws the current GUI menu.
+		 * @todo    Below warning may not apply.
+		 * @warning It is to be noted that this implementation of \c draw()
+		 *          \b ignores any given render states. This was done to remain
+		 *          consistent with TGUI (which does not seem to allow
+		 *          \c sf::RenderStates). The internal \c tgui::Gui object also
+		 *          ignores the given \c target when drawing: it must be previously
+		 *          set with \c setTarget().
+		 */
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
+	};
+
+	/**
 	 * Represents a collection of GUI menus.
 	 * This class can only display one menu at a time, however it loads all menus
 	 * it is given via \c load() so that they can be switched quickly. Each menu is
