@@ -29,13 +29,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *            Computer Wars.
  * @details   Code within this namespace utilises dependencies defined within
  *            non-<tt>awe</tt> namespaces to define game-based classes that aren't
- *            specific to Computer Wars. These could include script, GUI, and
- *            dialogue management classes.
+ *            specific to Computer Wars.
  */
 
 /**@namespace sfx
  * @brief     The \c sfx namespace contains components which build upon existing
  *            SFML classes.
+ */
+
+/**@namespace gui
+ * @brief     The \c gui namespace contains GUI code.
  */
 
 /**@namespace awe

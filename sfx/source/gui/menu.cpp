@@ -20,21 +20,21 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "gui.hpp"
+#include "gui/menu.hpp"
 
-void sfx::menu::registerInterface(asIScriptEngine* engine,
+void sfx::gui::menu::registerInterface(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	if ((!engine->GetTypeInfoByName("Menu"))) {
 		auto r = RegisterType(engine, "Menu",
 			[](asIScriptEngine* engine, const std::string& type) {
 			engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
 				std::string(type + "@ f()").c_str(),
-				asFUNCTION(sfx::menu::Create), asCALL_CDECL);
+				asFUNCTION(sfx::gui::menu::Create), asCALL_CDECL);
 		});
 		document->DocumentObjectType(r, "Represents a menu.");
 	}
 }
 
-sfx::menu* sfx::menu::Create() {
-	return new sfx::menu();
+sfx::gui::menu* sfx::gui::menu::Create() {
+	return new sfx::gui::menu();
 }
