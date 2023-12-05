@@ -21,20 +21,30 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "gui/menu.hpp"
+#include "TGUI/TGUI.hpp"
 
-void sfx::gui::menu::registerInterface(asIScriptEngine* engine,
+void sfx::gui::menu::Register(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	if ((!engine->GetTypeInfoByName("Menu"))) {
 		auto r = RegisterType(engine, "Menu",
 			[](asIScriptEngine* engine, const std::string& type) {
-			engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
-				std::string(type + "@ f()").c_str(),
-				asFUNCTION(sfx::gui::menu::Create), asCALL_CDECL);
-		});
+				engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
+					std::string(type + "@ f()").c_str(),
+					asFUNCTION(sfx::gui::menu::Create), asCALL_CDECL);
+			});
 		document->DocumentObjectType(r, "Represents a menu.");
 	}
 }
 
 sfx::gui::menu* sfx::gui::menu::Create() {
 	return new sfx::gui::menu();
+}
+
+bool sfx::gui::menu::animate(const sf::RenderTarget& target) {
+	return false;
+}
+
+void sfx::gui::menu::draw(sf::RenderTarget& target,
+	sf::RenderStates states) const {
+
 }

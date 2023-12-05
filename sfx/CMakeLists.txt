@@ -19,7 +19,9 @@ add_library(${PROJECT_NAME} STATIC
 	"source/texture.cpp"
 	"source/userinput.cpp"
 	"source/audio.cpp"
-	"source/gui/menu.cpp")
+	"source/gui/menu.cpp"
+	"source/gui/menumanager.cpp"
+	"source/gui/registerinterface.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsSFX_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

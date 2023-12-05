@@ -479,9 +479,9 @@ namespace awe {
 		std::shared_ptr<engine::scripts> _scripts;
 		
 		/**
-		 * Pointer to the GUI object containing all the menus.
+		 * Pointer to the menu manager.
 		 */
-		std::shared_ptr<sfx::gui> _gui;
+		std::shared_ptr<sfx::gui::menu_manager> _menuManager;
 
 		//================================
 		//==========ENGINE DATA===========

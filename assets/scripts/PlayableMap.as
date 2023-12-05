@@ -1548,7 +1548,7 @@ shared class PlayableMap {
      */
     void damageUnitsInRange(const Vector2&in fromTile, const uint lowRange,
         const uint highRange, const HP displayedHP,
-        const array<string>@ unitTypesToIgnore = {}) {
+        const array<string>@ unitTypesToIgnore = {}) { // TODO-6???
         const auto units = _findUnits(fromTile, lowRange, highRange);
         for (uint i = 0, len = units.length(); i < len; ++i) {
             const auto unitID = units[i];

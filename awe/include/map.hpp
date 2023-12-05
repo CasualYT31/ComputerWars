@@ -32,7 +32,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "army.hpp"
 #include "script.hpp"
 #include "language.hpp"
-#include "gui.hpp"
 #include "binary.hpp"
 #include "mapstrings.hpp"
 #include <cmath>
@@ -2307,7 +2306,8 @@ namespace awe {
 		 * Sets the GUI engine to pull the GUI scaling factor from.
 		 * @param gui Pointer to the GUI engine to use with this map.
 		 */
-		void setGUI(const std::shared_ptr<sfx::gui>& gui);
+		// TODO-5
+		//void setGUI(const std::shared_ptr<sfx::gui>& gui);
 
 		/**
 		 * Sets the language dictionary to use with this object.
@@ -2894,7 +2894,8 @@ namespace awe {
 		/**
 		 * GUI engine.
 		 */
-		std::shared_ptr<sfx::gui> _gui = nullptr;
+		// TODO-5
+		//std::shared_ptr<sfx::gui> _gui = nullptr;
 
 		///////////
 		// BANKS //

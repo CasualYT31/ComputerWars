@@ -3524,7 +3524,9 @@ void awe::map::setLRCursorSprite(const std::string& sprite) {
 sf::IntRect awe::map::getCursorBoundingBox() const {
 	const auto pos = _cursor.getPosition(), size = _cursor.getSize();
 	const auto ul = _target->mapCoordsToPixel(pos, _view);
-	const auto guiScaling = _gui ? static_cast<int>(_gui->getScalingFactor()) : 1;
+	// TODO-5
+	//const auto guiScaling = _gui ? static_cast<int>(_gui->getScalingFactor()) : 1;
+	const auto guiScaling = 1;
 	return { ul / guiScaling,
 		(_target->mapCoordsToPixel(pos + size, _view) - ul) / guiScaling };
 }
@@ -3578,13 +3580,14 @@ void awe::map::setFont(const std::shared_ptr<sf::Font>& font) {
 	}
 }
 
-void awe::map::setGUI(const std::shared_ptr<sfx::gui>& gui) {
-	if (!gui) {
-		_logger.error("setGUI operation failed: nullptr was given!");
-		return;
-	}
-	_gui = gui;
-}
+// TODO-5
+//void awe::map::setGUI(const std::shared_ptr<sfx::gui>& gui) {
+//	if (!gui) {
+//		_logger.error("setGUI operation failed: nullptr was given!");
+//		return;
+//	}
+//	_gui = gui;
+//}
 
 void awe::map::setLanguageDictionary(
 	const std::shared_ptr<engine::language_dictionary>& dict) {

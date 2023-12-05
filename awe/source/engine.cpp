@@ -47,7 +47,8 @@ int awe::game_engine::run() {
 	if (r) return r;
 
 	try {
-		_gui->setScalingFactor(_scaling);
+		// TODO-5
+		//_gui->setScalingFactor(_scaling);
 		while (_renderer->isOpen()) {
 			// Handle menu user input first before handling the events.
 			// Use case: Map menu and MapMenu menu. Selecting a vacant tile in Map
@@ -57,24 +58,28 @@ int awe::game_engine::run() {
 			// after and triggers MapMenu again, ensuring the MapMenu never goes
 			// away. By handling the click in MapMenu last, Map doesn't get to see
 			// the click and so safely ignores it for that iteration.
-			_gui->handleInput(_userinput);
+			// TODO-5
+			//_gui->handleInput(_userinput);
 			_userinput->update();
 
 			// Now handle the events.
 			sf::Event event;
 			while (_renderer->pollEvent(event)) {
 				if (event.type == sf::Event::Closed) _renderer->close();
-				_gui->handleEvent(event);
+				// TODO-5
+				//_gui->handleEvent(event);
 			}
 
 			_renderer->clear();
 			_sprites->updateGlobalFrameIDs();
-			_renderer->animate(*_gui);
+			// TODO-5
+			//_renderer->animate(*_gui);
 			if (_map) {
 				_renderer->animate(*_map);
 				_renderer->draw(*_map);
 			}
-			_renderer->draw(*_gui);
+			// TODO-5
+			//_renderer->draw(*_gui);
 			_renderer->display();
 
 			if (_map && _map->periodic()) {
@@ -408,8 +413,8 @@ bool awe::game_engine::_load(engine::json& j) {
 	// Allocate GUI and scripts objects, but don't initialise yet.
 	_scripts = std::make_shared<engine::scripts>(
 		engine::logger::data{ _logger.getData().sink, "scripts" });
-	_gui = std::make_shared<sfx::gui>(_scripts,
-		engine::logger::data{_logger.getData().sink, "gui"});
+	_menuManager = std::make_shared<sfx::gui::menu_manager>(_scripts,
+		engine::logger::data{_logger.getData().sink, "menu_manager"});
 	// Continue loading most of the objects.
 	ret =  _loadObject(_userinput, j, { "userinput" },
 			engine::logger::data{ _logger.getData().sink, "user_input" })
@@ -477,21 +482,23 @@ bool awe::game_engine::_load(engine::json& j) {
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scriptsPath);
 	_scripts->generateDocumentation();
-	_gui->addSpritesheet("icon", _sprites->icon);
-	_gui->addSpritesheet("co", _sprites->CO);
-	_gui->addSpritesheet("tilePicture.normal", _sprites->tilePicture->normal);
-	_gui->addSpritesheet("unitPicture", _sprites->unitPicture);
-	_gui->addSpritesheet("tile.normal", _sprites->tile->normal);
-	_gui->addSpritesheet("unit", _sprites->unit->idle);
-	_gui->addSpritesheet("structure", _sprites->structure);
-	_gui->setLanguageDictionary(_dictionary);
-	_gui->setFonts(_fonts);
-	_gui->setTarget(*_renderer);
-	_gui->load(guiPath);
-	if (!_gui->inGoodState()) return false;
+	// TODO-5
+	//_gui->addSpritesheet("icon", _sprites->icon);
+	//_gui->addSpritesheet("co", _sprites->CO);
+	//_gui->addSpritesheet("tilePicture.normal", _sprites->tilePicture->normal);
+	//_gui->addSpritesheet("unitPicture", _sprites->unitPicture);
+	//_gui->addSpritesheet("tile.normal", _sprites->tile->normal);
+	//_gui->addSpritesheet("unit", _sprites->unit->idle);
+	//_gui->addSpritesheet("structure", _sprites->structure);
+	//_gui->setLanguageDictionary(_dictionary);
+	//_gui->setFonts(_fonts);
+	//_gui->setTarget(*_renderer);
+	_menuManager->load(guiPath);
+	if (!_menuManager->inGoodState()) return false;
 	// If one of the objects failed to initialise properly, return FALSE.
 	_userinput->tieWindow(_renderer);
-	_userinput->setGUI(_gui);
+	// TODO-5
+	//_userinput->setGUI(_gui);
 	return true;
 }
 
@@ -523,7 +530,7 @@ int awe::game_engine::_initCheck() const {
 		_sprites->test(errstring);
 	}
 	if (!_scripts) errstring += "scripts\n";
-	if (!_gui) errstring += "gui\n";
+	if (!_menuManager) errstring += "menu manager\n";
 	if (errstring.length()) {
 		_logger.critical("Fatal error: could not run the game engine due to the "
 			"following objects not being allocated correctly:\n{}Game will now "
@@ -637,10 +644,12 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 		_map->setLanguageDictionary(_dictionary);
 		_map->setMapStrings(_mapStrings);
 		_map->setScripts(_scripts);
-		_map->setGUI(_gui);
+		// TODO-5
+		//_map->setGUI(_gui);
 		auto r = _map->load(file);
 		if (r) {
-			_menuBeforeMapLoad = _gui->getGUI();
+			// TODO-5
+			//_menuBeforeMapLoad = _gui->getGUI();
 			return _map.get();
 		} else {
 			_map = nullptr;
@@ -652,7 +661,8 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 
 void awe::game_engine::_script_quitMap() {
 	_map = nullptr;
-	_gui->setGUI(_menuBeforeMapLoad);
+	// TODO-5
+	//_gui->setGUI(_menuBeforeMapLoad);
 }
 
 std::string awe::game_engine::_script_translate(const std::string& nativeString,

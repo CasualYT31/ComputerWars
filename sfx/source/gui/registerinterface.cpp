@@ -20,12 +20,13 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file gui.hpp
- * Includes all the code necessary to manage GUIs.
- * The GUI backend used is TGUI.
- */
-
-#pragma once
-
-#include "gui/menu.hpp"
 #include "gui/menumanager.hpp"
+
+void sfx::gui::menu_manager::registerInterface(asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) {
+	////////////////////
+	// MENU INTERFACE //
+	////////////////////
+	auto r = engine->RegisterInterface("Menu");
+	document->DocumentInterface(r, "Represents a menu in a GUI.");
+}

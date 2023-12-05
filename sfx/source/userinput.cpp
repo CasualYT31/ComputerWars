@@ -22,7 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "userinput.hpp"
 #include "fmtengine.hpp"
-#include "gui.hpp"
 
 void sfx::joystick::Register(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
@@ -279,10 +278,10 @@ sfx::JoystickAxisList sfx::user_input::joystickAxesBeingPressed() const {
 	return ret;
 }
 
-
-void sfx::user_input::setGUI(const std::shared_ptr<const sfx::gui>& gui) {
-	_gui = gui;
-}
+// TODO-5
+//void sfx::user_input::setGUI(const std::shared_ptr<const sfx::gui>& gui) {
+//	_gui = gui;
+//}
 
 bool sfx::user_input::_load(engine::json& j) {
 	std::unordered_map<std::string, sfx::user_control> control;
@@ -452,9 +451,10 @@ void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
 	}
 
 	// Is a control being triggered by a mouse whilst it is over a widget?
-	if (_gui && !_gui->getWidgetUnderMouse().empty() &&
-		signal.currentTriggeredByMouse && !signal.previousTriggeredByMouse)
-			signal.startedWhenMouseOverWidget = true;
+	// TODO-5
+	//if (_gui && !_gui->getWidgetUnderMouse().empty() &&
+	//	signal.currentTriggeredByMouse && !signal.previousTriggeredByMouse)
+	//		signal.startedWhenMouseOverWidget = true;
 
 	switch (signal.type) {
 	case sfx::control_signal::FreeForm:

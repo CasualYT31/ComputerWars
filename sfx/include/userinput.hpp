@@ -39,7 +39,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace sfx {
 	// Needed to block held mouse button inputs when they start over a widget.
-	class gui;
+	// TODO-5
+	//class gui;
 
 	/**
 	 * Value representing an invalid mouse position.
@@ -523,7 +524,8 @@ namespace sfx {
 		 * @param gui Pointer to the object to use, which should already have been
 		 *            configured with the \c user_input object.
 		 */
-		void setGUI(const std::shared_ptr<const sfx::gui>& gui);
+		// TODO-5
+		//void setGUI(const std::shared_ptr<const sfx::gui>& gui);
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -668,7 +670,8 @@ namespace sfx {
 		/**
 		 * A pointer to the GUI object that this \c user_input object was given to.
 		 */
-		std::shared_ptr<const sfx::gui> _gui;
+		// TODO-5
+		//std::shared_ptr<const sfx::gui> _gui;
 	};
 }
 

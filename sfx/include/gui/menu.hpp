@@ -33,15 +33,14 @@ namespace sfx { namespace gui {
 	/**
 	 * Represents a menu.
 	 */
-	class menu : public sfx::animated_drawable, public engine::script_registrant,
+	class menu : public sfx::animated_drawable,
 		public engine::script_reference_type<sfx::gui::menu> {
 	public:
 		/**
-		 * Callback given to \c engine::scripts::registerInterface() to register
-		 * the \c Menu type with a \c scripts object.
-		 * @sa \c engine::scripts::registerInterface()
+		 * Registers and documents this class with the script interface, if it
+		 * hasn't already been registered.
 		 */
-		void registerInterface(asIScriptEngine* engine,
+		static void Register(asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**

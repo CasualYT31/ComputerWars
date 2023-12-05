@@ -660,7 +660,7 @@ bool engine::scripts::callFunction(asIScriptFunction* const func) {
         if (!_setupContext(func)) return false;
     }
     // First check that all parameters have been accounted for. Passing too few
-    // arguments is dangerous when object pointer paramters haven't been given as
+    // arguments is dangerous when object pointer parameters haven't been given as
     // this will cause the program to crash. _setupContext() ensures that the
     // function exists.
     auto expected = func->GetParamCount();
@@ -765,6 +765,55 @@ CScriptAny* engine::scripts::createAny() const {
     return new CScriptAny(_engine);
 }
 
+asIScriptObject* engine::scripts::createObject(const std::string& type) const {
+    auto m = _engine->GetModule(MAIN_MODULE);
+    if (!m) {
+        _logger.error("Could not create object of type \"{}\" as the module "
+            "\"{}\" does not exist.", type, MAIN_MODULE);
+        return nullptr;
+    }
+    const auto typeInfo = m->GetTypeInfoByDecl(type.c_str());
+    if (!typeInfo) {
+        _logger.error("Could not create object of non-existent type \"{}\".",
+            type);
+        return nullptr;
+    }
+    const auto defaultFactoryFuncSig = type + " @" + type + "()";
+    const auto defaultFactoryFunc = typeInfo->GetFactoryByDecl(
+        defaultFactoryFuncSig.c_str());
+    if (!defaultFactoryFunc) {
+        _logger.error("Could not create object of type \"{}\" as it does not have "
+            "a factory function of signature \"{}\".", type,
+            defaultFactoryFuncSig);
+        return nullptr;
+    }
+    auto ctx = _engine->CreateContext();
+    if (!ctx) {
+        _logger.error("Could not create object of type \"{}\" as the factory "
+            "function context could not be initialised.", type);
+        return nullptr;
+    }
+    auto r = ctx->Prepare(defaultFactoryFunc);
+    if (r < 0) {
+        _logger.error("Could not create object of type \"{}\" as the factory "
+            "function context could not be prepared. Error code {}.", type, r);
+        ctx->Release();
+        return nullptr;
+    }
+    r = ctx->Execute();
+    if (r != asEXECUTION_FINISHED) {
+        _logger.error("Could not create object of type \"{}\" as the factory "
+            "function context could not be executed. Error code {}.", type, r);
+        ctx->Release();
+        return nullptr;
+    }
+    auto obj = *static_cast<asIScriptObject**>(ctx->GetAddressOfReturnValue());
+    // Must add ref before releasing the context!
+    obj->AddRef();
+    ctx->Release();
+    return obj;
+}
+
 int engine::scripts::getTypeID(const std::string& type) const {
     // Handle primitive types separately as they don't seem to work with TypeInfo.
     if (type == "void") {
@@ -831,6 +880,32 @@ std::string engine::scripts::getTypeName(const int id) const {
     auto typeInfo = _engine->GetTypeInfoById(id);
     if (typeInfo) return typeInfo->GetName();
     else return "";
+}
+
+std::vector<std::string> engine::scripts::getConcreteClassNames(
+    const std::string& interfaceName) const {
+    auto m = _engine->GetModule(MAIN_MODULE);
+    if (!m) {
+        _logger.error("Cannot get concrete classes that implement interface "
+            "\"{}\" as the \"{}\" module does not exist.", interfaceName,
+            MAIN_MODULE);
+        return {};
+    }
+    const auto interfaceTypeInfo = m->GetTypeInfoByDecl(interfaceName.c_str());
+    if (!interfaceTypeInfo) {
+        _logger.error("Cannot get concrete classes that implement interface "
+            "\"{}\" as it does not exist.", interfaceName);
+        return {};
+    }
+    std::vector<std::string> list;
+    for (asUINT i = 0, count = m->GetObjectTypeCount(); i < count; ++i) {
+        const auto typeInfo = m->GetObjectTypeByIndex(i);
+        _logger.write(typeInfo->GetName());
+        if (typeInfo->Implements(interfaceTypeInfo)) {
+            list.emplace_back(typeInfo->GetName());
+        }
+    }
+    return list;
 }
 
 bool engine::scripts::createModule(const std::string& name,

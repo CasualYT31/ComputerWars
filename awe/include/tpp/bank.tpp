@@ -288,6 +288,7 @@ template<typename T>
 void awe::weapon::Register(const std::string& type,
 	asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
+	engine::RegisterVectorTypes(engine, document);
 	awe::common_properties::Register<T>(type, engine, document,
 		"For weapon types, this property holds the sprite ID of the small ammo "
 		"icon that is used with this weapon.");
@@ -485,6 +486,7 @@ template<typename T>
 void awe::structure::Register(const std::string& type,
 	asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
+	engine::RegisterVectorTypes(engine, document);
 	awe::common_properties::Register<T>(type, engine, document,
 		"For structures, this holds the sprite ID of the pictorial representation "
 		"of the structure, for use in GUIs, when the owner of the structure "
