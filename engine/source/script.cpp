@@ -1025,6 +1025,12 @@ void engine::scripts::_resetCallFunctionVariables() noexcept {
 }
 
 std::string engine::scripts::_constructMessage(const std::string& msg) const {
+    // There are rare cases where something may be written to the log from the
+    // script code without the C++ engine having directly invoked an AngelScript
+    // function. An example of this is within the constructor of a class defined
+    // within the scripts but instantiated by the C++ engine using createObject().
+    // In such cases, just write the message given.
+    if (_context.empty()) return msg;
     asIScriptContext* context = _context.back();
     const char* sectionName = nullptr;
     asIScriptFunction* function = context->GetFunction(0);
