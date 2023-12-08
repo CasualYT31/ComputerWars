@@ -553,9 +553,21 @@ namespace engine {
 		 *          pointer!
 		 * @return  Pointer to a new AngelScript @c any object that's been
 		 *          registered with this engine.
-		 * @safety No guarantee.
+		 * @safety  No guarantee.
 		 */
 		CScriptAny* createAny() const;
+
+		/**
+		 * Creates a script object.
+		 * Currently this method can only be used with classes defined in the main
+		 * module that have a factory function that accepts no parameters.
+		 * @param  type The name of the type of script object to instantiate. This
+		 *              type is defined by the scripts themselves.
+		 * @return Pointer to the new AngelScript object, with its refcount already
+		 *         initialised appropriately. \c nullptr if the object could not be
+		 *         created (the reason why will be logged).
+		 */
+		asIScriptObject* createObject(const std::string& type) const;
 
 		/**
 		 * Returns the type ID of a given type.
@@ -572,6 +584,19 @@ namespace engine {
 		 * @safety No guarantee.
 		 */
 		std::string getTypeName(const int id) const;
+
+		/**
+		 * Returns a list of names of types in the main module that implement a
+		 * given interface.
+		 * @param  interfaceName The name of the interface that is used when
+		 *                       searching through all of the registered and
+		 *                       declared types.
+		 * @return A list of names of types that implement a given interface. If
+		 *         there are none, or if the interface does not exist, then the
+		 *         returned list will be empty.
+		 */
+		std::vector<std::string> getConcreteClassNames(
+			const std::string& interfaceName) const;
 
 		/**
 		 * Creates a new module, or replaces an existing one.
