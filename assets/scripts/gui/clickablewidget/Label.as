@@ -41,4 +41,9 @@ shared class Label : ClickableWidget {
     void setTextOutlineThickness(const float s) {
         setWidgetTextOutlineThickness(this, s);
     }
+
+    void setTextAlignment(const HorizontalAlignment h,
+        const VerticalAlignment v) {
+        setWidgetTextAlignment(this, h, v);
+    }
 }

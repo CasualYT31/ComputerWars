@@ -26,6 +26,10 @@ shared abstract class Widget {
         ::connectSignal(this, signal, f);
     }
 
+    void connect(MultiSignalHandler@ const f) {
+        ::connectSignal(this, f);
+    }
+
     void setPosition(const string&in x, const string&in y) {
         setWidgetPosition(this, x, y);
     }
@@ -56,6 +60,10 @@ shared abstract class Widget {
 
     void setName(const string&in n) {
         setWidgetName(this, n);
+    }
+
+    string getName() const {
+        return getWidgetName(this);
     }
 
     void setIndex(const uint64 i) {
