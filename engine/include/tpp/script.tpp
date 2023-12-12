@@ -164,17 +164,17 @@ bool engine::scripts::callFunction(asIScriptFunction* const func, T value,
 			r = _context[_contextId]->SetArgDouble(_argumentID, (double)value);
 		}
 	} else if constexpr (std::is_pointer<T>::value) {
-		if (!value) {
-			_logger.error("Attempted to assign a null pointer to argument {} of "
-				"function \"{}\": function call aborted.", _argumentID,
-				func->GetName());
-			_resetCallFunctionVariables();
-			return false;
-		}
-		// If value points to a primitive type, pass it using Address(). Otherwise,
-		// assume it's an object.
+		// If value points to a primitive type or an address, pass it using
+		// Address(). Otherwise, assume it's an object.
 		if constexpr (std::is_integral<std::remove_pointer<T>::type>::value ||
 			std::is_floating_point<std::remove_pointer<T>::type>::value) {
+			if (!value) {
+				_logger.error("Attempted to assign a null pointer to argument {} "
+					"of function \"{}\", which should point to a primitive type: "
+					"function call aborted.", _argumentID, func->GetName());
+				_resetCallFunctionVariables();
+				return false;
+			}
 			r = _context[_contextId]->SetArgAddress(_argumentID, value);
 		} else {
 			r = _context[_contextId]->SetArgObject(_argumentID, value);
@@ -203,6 +203,26 @@ bool engine::scripts::callFunction(asIScriptFunction* const func, T value,
 	}
 	++_argumentID;
 	return callFunction(func, values...);
+}
+
+template<typename... Ts>
+bool engine::scripts::callMethod(asIScriptObject* const obj,
+	const std::string& methodDecl, Ts... values) {
+	if (!obj) {
+		_logger.error("Attempted to invoke a method \"{}\" on a null object!",
+			methodDecl);
+		return false;
+	}
+	const auto objType = obj->GetObjectType();
+	const auto funcPtr = objType->GetMethodByDecl(methodDecl.c_str());
+	if (!funcPtr) {
+		_logger.error("Attempted to invoke a method \"{}\" on an object of type "
+			"\"{}\". The method could not be found.", methodDecl,
+			objType->GetName());
+		return false;
+	}
+	_functionObject = obj;
+	return callFunction(funcPtr, values...);
 }
 
 template<typename T>

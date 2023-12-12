@@ -659,10 +659,10 @@ bool engine::scripts::callFunction(asIScriptFunction* const func) {
         // version then we must set up the context.
         if (!_setupContext(func)) return false;
     }
-    // First check that all parameters have been accounted for. Passing too few
-    // arguments is dangerous when object pointer parameters haven't been given as
-    // this will cause the program to crash. _setupContext() ensures that the
-    // function exists.
+    // Check that all parameters have been accounted for. Passing too few arguments
+    // is dangerous when object pointer parameters haven't been given as this will
+    // cause the program to crash. _setupContext() ensures that the function
+    // exists.
     auto expected = func->GetParamCount();
     if (expected != _argumentID) {
         // Passing in too many arguments would have caused an error earlier.
@@ -673,6 +673,17 @@ bool engine::scripts::callFunction(asIScriptFunction* const func) {
             ((expected == 1) ? ("was") : ("were")));
         _resetCallFunctionVariables();
         return false;
+    }
+    // If this is a method call, set the context's object now.
+    if (_functionObject) {
+        int r = _context[_contextId]->SetObject(_functionObject);
+        if (r < 0) {
+            _logger.error("Could not set object of type \"{}\" to context when "
+                "invoking method \"{}\": code {}.",
+                _functionObject->GetObjectType()->GetName(), func->GetName(), r);
+            _resetCallFunctionVariables();
+            return false;
+        }
     }
     _resetCallFunctionVariables();
     // Increment the context ID now so that future calls will recognise that this
@@ -900,10 +911,8 @@ std::vector<std::string> engine::scripts::getConcreteClassNames(
     std::vector<std::string> list;
     for (asUINT i = 0, count = m->GetObjectTypeCount(); i < count; ++i) {
         const auto typeInfo = m->GetObjectTypeByIndex(i);
-        _logger.write(typeInfo->GetName());
-        if (typeInfo->Implements(interfaceTypeInfo)) {
+        if (typeInfo->Implements(interfaceTypeInfo))
             list.emplace_back(typeInfo->GetName());
-        }
     }
     return list;
 }
@@ -1022,6 +1031,7 @@ bool engine::scripts::_setupContext(asIScriptFunction* const func) {
 void engine::scripts::_resetCallFunctionVariables() noexcept {
     _callFunction_TemplateCall = false;
     _argumentID = 0;
+    _functionObject = nullptr;
 }
 
 std::string engine::scripts::_constructMessage(const std::string& msg) const {

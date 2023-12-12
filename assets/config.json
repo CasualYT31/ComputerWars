@@ -30,6 +30,6 @@
   "commanders": "property/co.json",
   "structures": "property/structure.json",
   "mapstrings": "lang/mapstrings.json",
-  "gui": "gui/menus.json",
+  "gui": "gui/gui.json",
   "scripts": "scripts"
 }

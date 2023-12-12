@@ -1,0 +1,9 @@
+{
+	"main": "MainMenu",
+	"reserve": 300,
+	"up": "up",
+	"down": "down",
+	"left": "left",
+	"right": "right",
+	"select": "select"
+}

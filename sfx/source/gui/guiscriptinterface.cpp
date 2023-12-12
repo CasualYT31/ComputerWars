@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui.hpp"
 #include "guiconstants.hpp"
 #include "fmtsfx.hpp"
+#include <algorithm>
 
 using namespace tgui;
 
@@ -33,369 +34,332 @@ void sfx::gui::_setGUI(const std::string& name) {
 }
 
 bool sfx::gui::_menuExists(const std::string& menu) {
-	// More efficient implementation would just cache the menu list, as menus can
-	// only be added or removed via load().
-	const auto& menus = _gui.getWidgets();
-	for (const auto& widget : menus)
-		if (widget->getWidgetName() == menu) return true;
-	return false;
+	return _menus.find(menu) != _menus.end();
 }
 
-void sfx::gui::_noBackground(std::string menu) {
-	if (menu == "") menu = getGUI();
-	_guiBackground.erase(menu);
+// WIDGETS //
+
+bool sfx::gui::_widgetExists(const sfx::WidgetIDRef id) const {
+	if (id == sfx::NO_WIDGET) return false;
+	// If it's at or above the counter, then we know it can't exist yet.
+	if (id >= _widgetCounter) return false;
+	// If this widget has been marked for replacement, it doesn't exist.
+	if (_availableCells.find(id) != _availableCells.end()) return false;
+	// Otherwise, it exists.
+	return true;
 }
 
-void sfx::gui::_spriteBackground(std::string menu, const std::string& sheet,
-	const std::string& sprite) {
-	START();
-		if (menu == "") menu = getGUI();
-		try {
-			_guiBackground[menu].set(_sheet.at(sheet), sprite);
-		} catch (const std::out_of_range&) {
-			ERROR("This sheet does not exist!");
-		}
-	END("Attempted to set sprite \"{}\" from sheet \"{}\" to the background of "
-		"menu \"{}\".", sprite, sheet, menu);
+sfx::WidgetID sfx::gui::_getWidgetFocused(const sfx::WidgetIDRef parent) const {
+	if (parent == sfx::NO_WIDGET && _gui.getFocusedChild()) {
+		return _gui.getFocusedChild()->getUserData<sfx::WidgetID>();
+	} else {
+		START_WITH_WIDGET(parent)
+			if (!widget->ptr->isContainer()) UNSUPPORTED_WIDGET_TYPE()
+			auto c = widget->castPtr<Container>()->getFocusedChild();
+			if (c) return c->getUserData<sfx::WidgetID>();
+		END("Attempted to find the widget with setfocus that is within widget "
+			"\"{}\".", parent)
+	}
+	return sfx::NO_WIDGET;
 }
 
-void sfx::gui::_colourBackground(std::string menu, const sf::Color& colour) {
-	if (menu == "") menu = getGUI();
-	_guiBackground[menu].set(colour);
-}
-
-void sfx::gui::_setGlobalFont(const std::string& fontName) {
+sfx::WidgetID sfx::gui::_createWidgetScriptInterface(
+	const std::string& newWidgetType) {
+	const auto id = _createWidget(newWidgetType);
 	START()
+		if (id == sfx::NO_WIDGET) ERROR("Could not create the new widget.")
+	END("Attempted to create a new \"{}\" widget.", newWidgetType)
+	return id;
+}
+
+void sfx::gui::_connectSignal(const sfx::WidgetIDRef id, const std::string& signal,
+	asIScriptFunction* const handler) {
+	START_WITH_WIDGET(id)
+		if (!SIGNALS.count(signal)) ERROR("This is not a signal!")
+		const auto supportedTypes = SIGNALS.equal_range(signal);
+		bool supported = false;
+		std::for_each(supportedTypes.first, supportedTypes.second,
+			[&supported, &widgetType](auto& types) {
+			if (supported) return;
+			supported = types.second.count(widgetType.toStdString());
+		});
+		if (!supported)
+			ERROR("This signal is not supported for this type of widget!");
+		if (widget->singleSignalHandlers.count(signal))
+			widget->singleSignalHandlers.erase(signal);
+		if (handler) widget->singleSignalHandlers.emplace(signal, handler);
+	END("Attempted to connect a handler to the \"{}\" signal for widget with ID "
+		"\"{}\".", signal, id)
+	if (handler) handler->Release();
+}
+
+void sfx::gui::_connectSignal(const sfx::WidgetIDRef id,
+	asIScriptFunction* const handler) {
+	START_WITH_WIDGET(id)
+		widget->multiSignalHandler = nullptr;
+		if (handler) widget->multiSignalHandler =
+			std::make_unique<engine::CScriptWrapper<asIScriptFunction>>(handler);
+	END("Attempted to connect a multi signal handler to widget with ID \"{}\".",
+		id)
+	if (handler) handler->Release();
+}
+
+void sfx::gui::_disconnectSignals(const CScriptArray* const ids) {
+	if (!ids) {
+		_logger.warning("Null array given to disconnectSignals(): doing "
+			"nothing.");
+		return;
+	}
+	for (asUINT i = 0, len = ids->GetSize(); i < len; ++i) {
+		const WidgetID id = *static_cast<const WidgetID* const>(ids->At(i));
+		START_WITH_WIDGET(id)
+			widget->singleSignalHandlers.clear();
+			widget->multiSignalHandler = nullptr;
+			widget->childWindowClosingHandler = nullptr;
+		END("Attempted to disconnect signal handlers from a widget with ID "
+			"\"{}\".", id)
+	}
+	ids->Release();
+}
+
+sfx::WidgetID sfx::gui::_getParent(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		return containerID;
+	END("Attempted to get the ID of a widget \"{}\"'s parent.", id)
+	return sfx::NO_WIDGET;
+}
+
+void sfx::gui::_deleteWidget(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		if (id == sfx::ROOT_WIDGET) ERROR("You cannot delete the root widget!");
+		_removeWidgets(id, true);
+	END("Attempted to remove the widget \"{}\".", id)
+}
+
+void sfx::gui::_setWidgetName(const sfx::WidgetIDRef id, const std::string& name) {
+	START_WITH_WIDGET(id)
+		return widget->ptr->setWidgetName(name);
+	END("Attempted to set widget \"{}\"'s name to \"{}\". The widget is of type "
+		"\"{}\".", id, name, widgetType);
+}
+
+std::string sfx::gui::_getWidgetName(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		return widget->ptr->getWidgetName().toStdString();
+	END("Attempted to get widget \"{}\"'s name. The widget is of type \"{}\".", id,
+		widgetType);
+	return {};
+}
+
+void sfx::gui::_setWidgetFocus(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		widget->ptr->setFocused(true);
+	END("Attempted to set the focus to a widget \"{}\".", id)
+}
+
+void sfx::gui::_setWidgetFont(const sfx::WidgetIDRef id,
+	const std::string& fontName) {
+	START_WITH_WIDGET(id)
 		if (!_fonts) ERROR("No fonts object has been given to this gui object.")
 		auto fontPath = _fonts->getFontPath(fontName);
 		// Invalid font name will be logged by fonts class.
 		if (!fontPath.empty()) {
 			auto font = tgui::Font(fontPath);
 			font.setSmooth(false);
-			_gui.setFont(font);
+			widget->ptr->getRenderer()->setFont(font);
 		}
-	END("Attempted to set the font \"{}\" as the global font.", fontName)
+	END("Attempted to set the font \"{}\" to a widget \"{}\".", fontName, id)
 }
 
-// WIDGETS //
-
-bool sfx::gui::_widgetExists(const std::string& name) const {
-	return _findWidget<Widget>(name).operator bool();
-}
-
-std::string sfx::gui::_getWidgetFocused(const std::string& parent) const {
-	if (parent.empty() && _gui.getFocusedChild()) {
-		return _gui.getFocusedChild()->getWidgetName().toStdString();
-	} else {
-		START_WITH_WIDGET(parent)
-			Container::ConstPtr c = nullptr;
-			if (widget->isContainer()) {
-				c = std::dynamic_pointer_cast<Container>(widget);
-			} else if (auto subwidgetContainer = _getSubwidgetContainer(widget)) {
-				c = subwidgetContainer;
-			} else UNSUPPORTED_WIDGET_TYPE()
-			if (c->getFocusedChild())
-				return c->getFocusedChild()->getWidgetName().toStdString();
-		END("Attempted to find the widget with setfocus that is within widget "
-			"\"{}\".", parent)
-	}
-	return "";
-}
-
-void sfx::gui::_addWidget(const std::string& newWidgetType,
-	const std::string& name, const std::string& signalHandler) {
-	START_WITH_NONEXISTENT_WIDGET(name)
-	if (widget = _createWidget(newWidgetType, fullnameAsString, fullname[0])) {
-		container->add(widget, fullnameAsString);
-		_connectSignals(widget, signalHandler);
-		// If the widget is a ChildWindow, don't forget to turn on automatic
-		// handling of minimise and maximise, apply all titlebar buttons by
-		// default, and make it resizable.
-		if (widget->getWidgetType() == type::ChildWindow) {
-			_childWindowData[fullnameAsString];
-			const auto win = std::dynamic_pointer_cast<ChildWindow>(widget);
-			win->setTitleButtons(ChildWindow::TitleButton::Close |
-				ChildWindow::TitleButton::Minimize |
-				ChildWindow::TitleButton::Maximize);
-			win->setResizable();
+void sfx::gui::_setWidgetInheritedFont(const WidgetIDRef id,
+	const std::string& font) {
+	START_WITH_WIDGET(id)
+		if (!_fonts) ERROR("No fonts object has been given to this gui object.")
+		// Invalid font name will be logged by fonts class.
+		const auto fontPath = _fonts->getFontPath(font);
+		if (!fontPath.empty()) {
+			auto fontObject = tgui::Font(fontPath);
+			fontObject.setSmooth(false);
+			widget->ptr->setInheritedFont(fontObject);
 		}
-	} else {
-		ERROR("Could not create the new widget.")
-	}
-	END("Attempted to create a new \"{}\" widget with name \"{}\".", newWidgetType,
-		name)
+	END("Attempted to set the inherited font of widget \"{}\", which is of type "
+		"\"{}\", to \"{}\".", id, widgetType, font)
 }
 
-void sfx::gui::_connectSignalHandler(const std::string& name,
-	asIScriptFunction* const handler) {
-	START_WITH_WIDGET(name)
-		_additionalSignalHandlers.erase(fullnameAsString);
-		if (handler) _additionalSignalHandlers.emplace(fullnameAsString, handler);
-	END("Attempted to connect a signal handler to a widget with name \"{}\", in "
-		"menu \"{}\".", name, fullname[0])
-	if (handler) handler->Release();
-}
-
-void sfx::gui::_disconnectSignalHandlers(const CScriptArray* const names) {
-	if (!names) {
-		_logger.warning("Null array given to disconnectSignalHandlers(): doing "
-			"nothing.");
-		return;
-	}
-	for (asUINT i = 0, len = names->GetSize(); i < len; ++i) {
-		const std::string name =
-			*static_cast<const std::string* const>(names->At(i));
-		START_WITH_WIDGET(name)
-			_additionalSignalHandlers.erase(fullnameAsString);
-		END("Attempted to disconnect signal handler from a widget with name "
-			"\"{}\", in menu \"{}\".", name, fullname[0])
-	}
-	names->Release();
-}
-
-std::string sfx::gui::_getParent(const std::string& name) {
-	START_WITH_WIDGET(name)
-		if (fullname.size() < 2)
-			ERROR("This operation is not supported on menus themselves.")
-		return _findParent(widget.get())->getWidgetName().toStdString();
-	END("Attempted to get the name of a widget \"{}\"'s parent, in menu \"{}\".",
-		name, fullname[0])
-	return "";
-}
-
-void sfx::gui::_removeWidget(const std::string& name) {
-	START_WITH_WIDGET(name)
-	if (fullname.size() < 2) ERROR("Removing entire menus is not supported.")
-	_removeWidgets(widget, container, true);
-	END("Attempted to remove the widget \"{}\" within menu \"{}\".", name,
-		fullname[0])
-}
-
-void sfx::gui::_setWidgetFocus(const std::string& name) {
-	START_WITH_WIDGET(name)
-	widget->setFocused(true);
-	END("Attempted to set the focus to a widget \"{}\" within menu \"{}\".", name,
-		fullname[0])
-}
-
-void sfx::gui::_setWidgetFont(const std::string& name,
-	const std::string& fontName) {
-	START_WITH_WIDGET(name)
-	if (!_fonts) ERROR("No fonts object has been given to this gui object.")
-	auto fontPath = _fonts->getFontPath(fontName);
-	// Invalid font name will be logged by fonts class.
-	if (!fontPath.empty()) {
-		auto font = tgui::Font(fontPath);
-		font.setSmooth(false);
-		widget->getRenderer()->setFont(font);
-	}
-	END("Attempted to set the font \"{}\" to a widget \"{}\" within menu \"{}\".",
-		fontName, name, fullname[0])
-}
-
-void sfx::gui::_setWidgetPosition(const std::string& name, const std::string& x,
+void sfx::gui::_setWidgetPosition(const sfx::WidgetIDRef id, const std::string& x,
 	const std::string& y) {
-	START_WITH_WIDGET(name)
-	widget->setPosition(x.c_str(), y.c_str());
-	END("Attempted to set the position (\"{}\",\"{}\") to a widget \"{}\" within "
-		"menu \"{}\".", x, y, name, fullname[0])
+	START_WITH_WIDGET(id)
+		widget->ptr->setPosition(x.c_str(), y.c_str());
+	END("Attempted to set the position (\"{}\",\"{}\") to a widget \"{}\".", x, y,
+		id)
 }
 
-sf::Vector2f sfx::gui::_getWidgetAbsolutePosition(const std::string& name) {
-	START_WITH_WIDGET(name)
-	return _findWidgetAbsolutePosition(widget.get());
-	END("Attempted to get the absolute position of a widget \"{}\" within menu "
-		"\"{}\".", name, fullname[0])
+sf::Vector2f sfx::gui::_getWidgetAbsolutePosition(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		return widget->ptr->getAbsolutePosition();
+	END("Attempted to get the absolute position of a widget \"{}\".", id)
 	return {};
 }
 
-void sfx::gui::_setWidgetOrigin(const std::string& name, const float x,
+void sfx::gui::_setWidgetOrigin(const sfx::WidgetIDRef id, const float x,
 	const float y) {
-	START_WITH_WIDGET(name)
-	widget->setOrigin(x, y);
-	END("Attempted to set the origin ({},{}) to a widget \"{}\" within menu "
-		"\"{}\".", x, y, name, fullname[0])
+	START_WITH_WIDGET(id)
+		widget->ptr->setOrigin(x, y);
+	END("Attempted to set the origin ({},{}) to a widget \"{}\".", x, y, id)
 }
 
-void sfx::gui::_setWidgetSize(const std::string& name, const std::string& w,
+void sfx::gui::_setWidgetSize(const sfx::WidgetIDRef id, const std::string& w,
 	const std::string& h) {
-	START_WITH_WIDGET(name)
-	if (w.empty() && h.empty())
-		ERROR("Did you mean to provide an empty width and height?");
-	if (w.empty()) widget->setHeight(h.c_str());
-	else if (h.empty()) widget->setWidth(w.c_str());
-	else widget->setSize(w.c_str(), h.c_str());
-	END("Attempted to set the size (\"{}\",\"{}\") to a widget \"{}\" within menu "
-		"\"{}\".", w, h, name, fullname[0])
+	START_WITH_WIDGET(id)
+		if (w.empty() && h.empty())
+			ERROR("Did you mean to provide an empty width and height?");
+		if (w.empty()) widget->ptr->setHeight(h.c_str());
+		else if (h.empty()) widget->ptr->setWidth(w.c_str());
+		else widget->ptr->setSize(w.c_str(), h.c_str());
+	END("Attempted to set the size (\"{}\",\"{}\") to a widget \"{}\".", w, h, id)
 }
 
-sf::Vector2f sfx::gui::_getWidgetFullSize(const std::string& name) {
-	START_WITH_WIDGET(name)
-	return widget->getFullSize();
-	END("Attempted to get the full size of a widget \"{}\" within menu \"{}\".",
-		name, fullname[0])
+sf::Vector2f sfx::gui::_getWidgetFullSize(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		return widget->ptr->getFullSize();
+	END("Attempted to get the full size of a widget \"{}\".", id)
 	return {};
 }
 
-void sfx::gui::_setWidgetEnabled(const std::string& name, const bool enable) {
-	START_WITH_WIDGET(name)
-	widget->setEnabled(enable);
-	END("Attempted to update widget \"{}\"'s enabled state, within menu \"{}\"",
-		name, fullname[0])
+void sfx::gui::_setWidgetEnabled(const sfx::WidgetIDRef id, const bool enable) {
+	START_WITH_WIDGET(id)
+		widget->ptr->setEnabled(enable);
+	END("Attempted to update widget \"{}\"'s enabled state.", id)
 }
 
-bool sfx::gui::_getWidgetEnabled(const std::string& name) const {
-	START_WITH_WIDGET(name)
-	return widget->isEnabled();
-	END("Attempted to get the enabled property of a widget \"{}\" within menu "
-		"\"{}\".", name, fullname[0])
+bool sfx::gui::_getWidgetEnabled(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		return widget->ptr->isEnabled();
+	END("Attempted to get the enabled property of a widget \"{}\".", id)
 	return false;
 }
 
-void sfx::gui::_setWidgetVisibility(const std::string& name, const bool visible) {
-	START_WITH_WIDGET(name)
-	widget->setVisible(visible);
-	END("Attempted to update widget \"{}\"'s visibility, within menu \"{}\".",
-		name, fullname[0])
+void sfx::gui::_setWidgetVisibility(const sfx::WidgetIDRef id, const bool visible) {
+	START_WITH_WIDGET(id)
+		widget->ptr->setVisible(visible);
+	END("Attempted to update widget \"{}\"'s visibility.", id)
 }
 
-bool sfx::gui::_getWidgetVisibility(const std::string& name) const {
-	START_WITH_WIDGET(name)
-	return widget->isVisible();
-	END("Attempted to get the visibility property of a widget \"{}\" within menu "
-		"\"{}\".", name, fullname[0])
+bool sfx::gui::_getWidgetVisibility(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		return widget->ptr->isVisible();
+	END("Attempted to get the visibility property of a widget \"{}\".", id)
 	return false;
 }
 
-void sfx::gui::_moveWidgetToFront(const std::string& name) {
-	START_WITH_WIDGET(name)
-	widget->moveToFront();
-	END("Attempted to move the widget \"{}\" within menu \"{}\" to the front.",
-		name, fullname[0])
+void sfx::gui::_moveWidgetToFront(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		widget->ptr->moveToFront();
+	END("Attempted to move the widget \"{}\" to the front.", id)
 }
 
-void sfx::gui::_moveWidgetToBack(const std::string& name) {
-	START_WITH_WIDGET(name)
-	widget->moveToBack();
-	END("Attempted to move the widget \"{}\" within menu \"{}\" to the back.",
-		name, fullname[0])
+void sfx::gui::_moveWidgetToBack(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		widget->ptr->moveToBack();
+	END("Attempted to move the widget \"{}\" to the back.", id)
 }
 
-void sfx::gui::_setWidgetText(const std::string& name, const std::string& text,
+void sfx::gui::_setWidgetText(const sfx::WidgetIDRef id, const std::string& text,
 	CScriptArray* const variables) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		// For EditBoxes and TextAreas, don't translate the text, as this is text
 		// that the user can edit.
 		if (widgetType == type::EditBox) {
-			std::dynamic_pointer_cast<EditBox>(widget)->setText(text);
+			widget->castPtr<EditBox>()->setText(text);
 		} else if (widgetType == type::TextArea) {
-			std::dynamic_pointer_cast<TextArea>(widget)->setText(text);
+			widget->castPtr<TextArea>()->setText(text);
 		} else {
 			if (widgetType != type::BitmapButton && widgetType != type::Label &&
 				widgetType != type::Button && widgetType != type::ChildWindow &&
-				widgetType != type::CheckBox && widgetType != type::RadioButton)
+				widgetType != type::CheckBox && widgetType != type::RadioButton &&
+				widgetType != type::ButtonBase)
 					UNSUPPORTED_WIDGET_TYPE()
-			_setTranslatedString(fullnameAsString, text, variables);
-			_translateWidget(widget);
+			_setTranslatedString(*widget, text, variables);
+			_translateWidget(widget->ptr);
 		}
-	END("Attempted to set the caption \"{}\" to a widget \"{}\" of type \"{}\" "
-		"within menu \"{}\".", text, name, widgetType, fullname[0])
+	END("Attempted to set the caption \"{}\" to a widget \"{}\" of type \"{}\".",
+		text, id, widgetType)
 	if (variables) variables->Release();
 }
 
-void sfx::gui::_setWidgetIndex(const std::string& name, const std::size_t index) {
-	START_WITH_WIDGET(name)
-	if (fullname.size() < 2)
-		ERROR("This is operation is unsupported for entire menus.")
-	if (!container->setWidgetIndex(widget, index)) {
-		// The size() should never be 0 here...
-		ERROR(std::string("The index cannot be higher than ").append(
-			std::to_string(container->getWidgets().size() - 1)).append("."))
-	}
-	END("Attempted to set a widget \"{}\"'s index to {}.", name, index)
+void sfx::gui::_setWidgetTextSize(const sfx::WidgetIDRef id,
+	const unsigned int size) {
+	START_WITH_WIDGET(id)
+		widget->ptr->setTextSize(size);
+	END("Attempted to set the character size {} to widget \"{}\", which is of "
+		"type \"{}\".", size, id, widgetType)
+}
+
+void sfx::gui::_setWidgetIndex(const sfx::WidgetIDRef id,
+	const std::size_t index) {
+	START_WITH_WIDGET(id)
+		// If the widget has no parent, assume it's in the root GUI container.
+		const bool result = containerID == sfx::NO_WIDGET ?
+			_gui.setWidgetIndex(widget->ptr, index) :
+			container->castPtr<Container>()->setWidgetIndex(widget->ptr, index);
+		if (!result) ERROR("Either the parent of the widget could not be found or "
+			"the given index was too high!")
+	END("Attempted to set a widget \"{}\"'s index to {}.", id, index)
 }
 
 // DIRECTIONAL FLOW //
 
-void sfx::gui::_setWidgetDirectionalFlow(const std::string& name,
-	const std::string& upName, const std::string& downName,
-	const std::string& leftName, const std::string& rightName) {
-	std::vector<std::string> fullname, fullnameUp, fullnameDown, fullnameLeft,
-		fullnameRight;
-	std::string fullnameAsString, fullnameAsStringUp, fullnameAsStringDown,
-		fullnameAsStringLeft, fullnameAsStringRight;
-	static const auto widgetDoesNotExist = [&](const std::string& doesNotExist) {
+void sfx::gui::_setWidgetDirectionalFlow(const WidgetIDRef id,
+	const WidgetIDRef upID, const WidgetIDRef downID, const WidgetIDRef leftID,
+	const WidgetIDRef rightID) {
+	static const auto widgetDoesNotExist = [&](const WidgetIDRef doesNotExist) {
 		_logger.error("Attempted to set the directional flow of a widget \"{}\", "
-			"within menu \"{}\", to the widgets up=\"{}\", down=\"{}\", "
-			"left=\"{}\", right=\"{}\". The widget \"{}\" does not exist.", name,
-			fullname[0], upName, downName, leftName, rightName, doesNotExist);
+			"to the widgets up=\"{}\", down=\"{}\", left=\"{}\", right=\"{}\". "
+			"The widget \"{}\" does not exist.", id, upID, downID, leftID, rightID,
+			doesNotExist);
 	};
-	if (!_findWidget<Widget>(name, &fullname, &fullnameAsString)) {
-		widgetDoesNotExist(name);
+	const auto END = _widgets.end();
+	const auto widget = _findWidget(id);
+	if (widget == END) {
+		widgetDoesNotExist(id);
 		return;
 	}
-	if (!upName.empty() && upName != GOTO_PREVIOUS_WIDGET &&
-		!_findWidget<Widget>(upName, &fullnameUp, &fullnameAsStringUp)) {
-		widgetDoesNotExist(upName);
-		return;
-	}
-	if (!downName.empty() && downName != GOTO_PREVIOUS_WIDGET &&
-		!_findWidget<Widget>(downName, &fullnameDown, &fullnameAsStringDown)) {
-		widgetDoesNotExist(downName);
-		return;
-	}
-	if (!leftName.empty() && leftName != GOTO_PREVIOUS_WIDGET &&
-		!_findWidget<Widget>(leftName, &fullnameLeft, &fullnameAsStringLeft)) {
-		widgetDoesNotExist(leftName);
-		return;
-	}
-	if (!rightName.empty() && rightName != GOTO_PREVIOUS_WIDGET &&
-		!_findWidget<Widget>(rightName, &fullnameRight, &fullnameAsStringRight)) {
-		widgetDoesNotExist(rightName);
-		return;
-	}
-	if ((fullnameUp.empty() || fullname[0] == fullnameUp[0]) &&
-		(fullnameDown.empty() || fullname[0] == fullnameDown[0]) &&
-		(fullnameLeft.empty() || fullname[0] == fullnameLeft[0]) &&
-		(fullnameRight.empty() || fullname[0] == fullnameRight[0])) {
-		_directionalFlow[fullnameAsString].up =
-			upName == GOTO_PREVIOUS_WIDGET ? upName : fullnameAsStringUp;
-		_directionalFlow[fullnameAsString].down =
-			downName == GOTO_PREVIOUS_WIDGET ? downName : fullnameAsStringDown;
-		_directionalFlow[fullnameAsString].left =
-			leftName == GOTO_PREVIOUS_WIDGET ? leftName : fullnameAsStringLeft;
-		_directionalFlow[fullnameAsString].right =
-			rightName == GOTO_PREVIOUS_WIDGET ? rightName : fullnameAsStringRight;
-	} else {
-		_logger.error("Attempted to set the directional flow of a widget \"{}\", "
-			"within menu \"{}\", to the widgets up=\"{}\", down=\"{}\", "
-			"left=\"{}\", right=\"{}\". Not all of these widgets are in the same "
-			"menu!", name, fullname[0], fullnameAsStringUp, fullnameAsStringDown,
-			fullnameAsStringLeft, fullnameAsStringRight);
-	}
+	static const auto checkWidget = [&](const WidgetIDRef checkID) -> bool {
+		if (checkID != sfx::NO_WIDGET && checkID != GOTO_PREVIOUS_WIDGET &&
+			_findWidget(checkID) == END) {
+			widgetDoesNotExist(checkID);
+			return false;
+		}
+		return true;
+	};
+	if (!checkWidget(upID)) return;
+	if (!checkWidget(downID)) return;
+	if (!checkWidget(leftID)) return;
+	if (!checkWidget(rightID)) return;
+	// Directional flow should not traverse across menus ideally...
+	// But no easy way to check for that after the rewrite.
+	widget->directionalFlow.up = upID;
+	widget->directionalFlow.down = downID;
+	widget->directionalFlow.left = leftID;
+	widget->directionalFlow.right = rightID;
 }
 
-void sfx::gui::_setWidgetDirectionalFlowStart(const std::string& name) {
-	START_WITH_WIDGET(name)
-		_selectThisWidgetFirst[fullname[0]] = fullnameAsString;
+void sfx::gui::_setWidgetDirectionalFlowStart(const std::string& menu,
+	const WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		if (!_menuExists(menu)) ERROR("This menu does not exist!");
+		_menus.at(menu).selectThisWidgetFirst = id;
 	END("Attempted to set the widget \"{}\" as the first to be selected upon "
-		"initial directional input, for the menu \"{}\".", name, fullname[0])
+		"initial directional input, for the menu \"{}\".", id, menu)
 }
 
-void sfx::gui::_clearWidgetDirectionalFlowStart(const std::string& menu) {
-	if (_menuExists(menu)) {
-		_selectThisWidgetFirst.erase(menu);
-	} else {
-		_logger.error("Attempted to disable directional input for the menu "
-			"\"{}\". Menu does not exist.", menu);
-	}
-}
-
-void sfx::gui::_setWidgetDirectionalFlowSelection(const std::string& name) {
-	START_WITH_WIDGET(name)
-		_makeNewDirectionalSelection(fullnameAsString, fullname[0]);
+void sfx::gui::_setWidgetDirectionalFlowSelection(const std::string& menu,
+	const WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		if (!_menuExists(menu)) ERROR("This menu does not exist!");
+		_makeNewDirectionalSelection(id, menu);
 	END("Attempted to manually directionally select the widget \"{}\", in the "
-		"menu \"{}\".", name, fullname[0])
+		"menu \"{}\".", id, menu)
 }
 
 void sfx::gui::_setDirectionalFlowAngleBracketSprite(const std::string& corner,
@@ -429,152 +393,119 @@ void sfx::gui::_setDirectionalFlowAngleBracketSprite(const std::string& corner,
 
 // SPRITES //
 
-void sfx::gui::_setWidgetSprite(const std::string& name, const std::string& sheet,
-	const std::string& key) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_setWidgetSprite(const sfx::WidgetIDRef id,
+	const std::string& sheet, const std::string& key) {
+	START_WITH_WIDGET(id)
 		if (widgetType != type::BitmapButton && widgetType != type::Picture)
 			UNSUPPORTED_WIDGET_TYPE()
-		_applySprite(widget, sheet, key);
+		_applySprite(*widget, sheet, key);
 	END("Attempted to set the sprite \"{}\" from sheet \"{}\" to widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", key, sheet, name,
-		widgetType, fullname[0])
+		"which is of type \"{}\".", key, sheet, id, widgetType)
 }
 
-void sfx::gui::_clearWidgetSprite(const std::string& name) {
-	START_WITH_WIDGET(name)
-		if (widgetType != type::BitmapButton && widgetType != type::Picture)
-			UNSUPPORTED_WIDGET_TYPE()
-		_guiSpriteKeys.erase(fullnameAsString);
-		_widgetSprites.erase(widget);
-	END("Attempted to clear the sprite from widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
-}
-
-void sfx::gui::_matchWidgetSizeToSprite(const std::string& name,
+void sfx::gui::_matchWidgetSizeToSprite(const sfx::WidgetIDRef id,
 	const bool overrideSetSize) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		if (widgetType != type::Picture) UNSUPPORTED_WIDGET_TYPE()
-		if (overrideSetSize)
-			_dontOverridePictureSizeWithSpriteSize.erase(fullnameAsString);
-		else
-			_dontOverridePictureSizeWithSpriteSize.insert(fullnameAsString);
+		widget->doNotOverridePictureSizeWithSpriteSize = overrideSetSize;
 	END("Attempted to match widget \"{}\"'s size to its set sprite. The widget is "
-		"of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"of type \"{}\".", id, widgetType)
 }
 
 // LABEL //
 
-void sfx::gui::_setWidgetTextSize(const std::string& name,
-	const unsigned int size) {
-	START_WITH_WIDGET(name)
-		IF_WIDGET_IS(Label, castWidget->setTextSize(size);)
-		ELSE_IF_WIDGET_IS(BitmapButton, castWidget->setTextSize(size);)
-		ELSE_IF_WIDGET_IS(Button, castWidget->setTextSize(size);)
-		ELSE_IF_WIDGET_IS(EditBox, castWidget->setTextSize(size);)
-		ELSE_IF_WIDGET_IS(TextArea, castWidget->setTextSize(size);)
-		ELSE_IF_WIDGET_IS(MenuBar, castWidget->setTextSize(size);)
-		ELSE_IF_WIDGET_IS(Tabs, castWidget->setTextSize(size);)
-		ELSE_IF_WIDGET_IS(TextArea, castWidget->setTextSize(size);)
-		ELSE_UNSUPPORTED()
-	END("Attempted to set the character size {} to widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", size, name, widgetType, fullname[0])
-}
-
-void sfx::gui::_setWidgetTextStyles(const std::string& name,
+void sfx::gui::_setWidgetTextStyles(const sfx::WidgetIDRef id,
 	const std::string& styles) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Label, castWidget->getRenderer()->setTextStyle({ styles });)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the text styles \"{}\" to widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", styles, name, widgetType, fullname[0])
+		"type \"{}\".", styles, id, widgetType)
 }
 
-void sfx::gui::_setWidgetTextMaximumWidth(const std::string& name, const float w) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_setWidgetTextMaximumWidth(const sfx::WidgetIDRef id,
+	const float w) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Label, castWidget->setMaximumTextWidth(w);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the text max width {} to widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", w, name, widgetType, fullname[0])
+		"type \"{}\".", w, id, widgetType)
 }
 
-void sfx::gui::_setWidgetTextColour(const std::string& name,
+void sfx::gui::_setWidgetTextColour(const sfx::WidgetIDRef id,
 	const sf::Color& colour) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Label, castWidget->getRenderer()->setTextColor(colour);)
 		ELSE_IF_WIDGET_IS(EditBox,
 			castWidget->getRenderer()->setTextColor(colour);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the text colour \"{}\" to widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", colour, name, widgetType, fullname[0])
+		"type \"{}\".", colour, id, widgetType)
 }
 
-void sfx::gui::_setWidgetTextOutlineColour(const std::string& name,
+void sfx::gui::_setWidgetTextOutlineColour(const sfx::WidgetIDRef id,
 	const sf::Color& colour) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Label,
 			castWidget->getRenderer()->setTextOutlineColor(colour);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the text outline colour \"{}\" to widget \"{}\", which "
-		"is of type \"{}\", within menu \"{}\".", colour, name, widgetType,
-		fullname[0])
+		"is of type \"{}\".", colour, id, widgetType)
 }
 
-void sfx::gui::_setWidgetTextOutlineThickness(const std::string& name,
+void sfx::gui::_setWidgetTextOutlineThickness(const sfx::WidgetIDRef id,
 	const float thickness) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Label,
 			castWidget->getRenderer()->setTextOutlineThickness(thickness);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the text outline thickness {} to widget \"{}\", which "
-		"is of type \"{}\", within menu \"{}\".", thickness, name, widgetType,
-		fullname[0])
+		"is of type \"{}\".", thickness, id, widgetType)
 }
 
-void sfx::gui::_setWidgetTextAlignment(const std::string& name,
+void sfx::gui::_setWidgetTextAlignment(const sfx::WidgetIDRef id,
 	const tgui::Label::HorizontalAlignment h,
 	const tgui::Label::VerticalAlignment v) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Label, castWidget->setHorizontalAlignment(h);
 			castWidget->setVerticalAlignment(v);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the text horizontal alignment {} and vertical alignment "
-		"{} to widget \"{}\", which is of type \"{}\", within menu \"{}\".", h, v,
-		name, widgetType, fullname[0])
+		"{} to widget \"{}\", which is of type \"{}\".", h, v, id, widgetType)
 }
 
 // EDITBOX AND TEXTAREA //
 
-std::string sfx::gui::_getWidgetText(const std::string& name) {
-	START_WITH_WIDGET(name)
+std::string sfx::gui::_getWidgetText(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(EditBox, return castWidget->getText().toStdString();)
 		IF_WIDGET_IS(TextArea, return castWidget->getText().toStdString();)
 		ELSE_UNSUPPORTED()
-	END("Attempted to get the text of a widget \"{}\", which is of type \"{}\", "
-		"within menu \"{}\".", name, widgetType, fullname[0])
+	END("Attempted to get the text of a widget \"{}\", which is of type \"{}\".",
+		id, widgetType)
 	return "";
 }
 
-void sfx::gui::_setEditBoxRegexValidator(const std::string& name,
+void sfx::gui::_setEditBoxRegexValidator(const sfx::WidgetIDRef id,
 	const std::string& regex) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(EditBox,
 			if (!castWidget->setInputValidator(regex)) ERROR("Invalid regex!");
 		)
 		ELSE_UNSUPPORTED()
-	END("Attempted to set the widget \"{}\", which is of type \"{}\", "
-		"within menu \"{}\", to validate its input with the regex:  {}  .", name,
-		widgetType, fullname[0], regex);
+	END("Attempted to set the widget \"{}\", which is of type \"{}\", to validate "
+		"its input with the regex:  {}  .", id, widgetType, regex);
 }
 
-void sfx::gui::_setWidgetDefaultText(const std::string& name,
-	const std::string& text, CScriptArray* variables) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_setWidgetDefaultText(const sfx::WidgetIDRef id,
+	const std::string& text, CScriptArray* const variables) {
+	START_WITH_WIDGET(id)
 		if (widgetType != type::EditBox && widgetType != type::TextArea)
 			UNSUPPORTED_WIDGET_TYPE()
-		_setTranslatedString(fullnameAsString, text, variables);
-		_translateWidget(widget);
+		_setTranslatedString(*widget, text, variables);
+		_translateWidget(widget->ptr);
 	END("Attempted to set the default text \"{}\" to widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
+		"type \"{}\".", text, id, widgetType)
 	if (variables) variables->Release();
 }
 
@@ -582,61 +513,59 @@ bool sfx::gui::_editBoxOrTextAreaHasFocus() const {
 	return _editBoxOrTextAreaHasSetFocus;
 }
 
-void sfx::gui::_optimiseTextAreaForMonospaceFont(const std::string& name,
+void sfx::gui::_optimiseTextAreaForMonospaceFont(const sfx::WidgetIDRef id,
 	const bool optimise) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(TextArea,
 			castWidget->enableMonospacedFontOptimization(optimise);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to turn optimisation for monospace fonts {} for widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", optimise ? "on" : "off",
-		name, widgetType, fullname[0])
+		"which is of type \"{}\".", optimise ? "on" : "off", id, widgetType)
 }
 
-void sfx::gui::_getCaretLineAndColumn(const std::string& name,
-	std::size_t& line, std::size_t& column) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_getCaretLineAndColumn(const sfx::WidgetIDRef id,
+	std::size_t& line, std::size_t& column) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(TextArea,
 			line = castWidget->getCaretLine();
 			column = castWidget->getCaretColumn();
-			)
+		)
 		ELSE_IF_WIDGET_IS(EditBox,
 			line = 1;
 			column = castWidget->getCaretPosition() + 1;
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to retrieve the caret line and column of widget \"{}\", which "
-		"is of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"is of type \"{}\".", id, widgetType)
 }
 
 // RADIOBUTTON & CHECKBOX //
 
-void sfx::gui::_setWidgetChecked(const std::string& name, const bool checked) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_setWidgetChecked(const sfx::WidgetIDRef id, const bool checked) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(RadioButton, castWidget->setChecked(checked);)
 		ELSE_IF_WIDGET_IS(CheckBox, castWidget->setChecked(checked);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the check status to {} for widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", checked, name, widgetType,
-		fullname[0]);
+		"type \"{}\".", checked, id, widgetType);
 }
 
-bool sfx::gui::_isWidgetChecked(const std::string& name) {
-	START_WITH_WIDGET(name)
+bool sfx::gui::_isWidgetChecked(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(RadioButton, return castWidget->isChecked();)
 		ELSE_IF_WIDGET_IS(CheckBox, return castWidget->isChecked();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the check status of a widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"\"{}\".", id, widgetType)
 	return false;
 }
 
 // LIST //
 
-void sfx::gui::_addItem(const std::string& name, const std::string& text,
+void sfx::gui::_addItem(const sfx::WidgetIDRef id, const std::string& text,
 	CScriptArray* const variables) {
-	START_WITH_WIDGET(name)
-	std::size_t index = 0;
+	START_WITH_WIDGET(id)
+		std::size_t index = 0;
 		IF_WIDGET_IS(ListBox,
 			const auto limit = castWidget->getMaximumItems();
 			index = castWidget->addItem(text);
@@ -656,26 +585,27 @@ void sfx::gui::_addItem(const std::string& name, const std::string& text,
 			}
 		)
 		ELSE_UNSUPPORTED()
-	_setTranslatedString(fullnameAsString, text, variables, index);
-	_translateWidget(widget);
+		_setTranslatedString(*widget, text, variables, index);
+		_translateWidget(widget->ptr);
 	END("Attempted to add an item \"{}\" to widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
+		"\"{}\".", text, id, widgetType)
 	if (variables) variables->Release();
 }
 
-void sfx::gui::_clearItems(const std::string& name) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_clearItems(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ListBox, castWidget->removeAllItems();)
 		ELSE_IF_WIDGET_IS(ComboBox, castWidget->removeAllItems();)
 		ELSE_IF_WIDGET_IS(TreeView, castWidget->removeAllItems();)
 		ELSE_UNSUPPORTED()
-	_originalCaptions.erase(fullnameAsString);
+		widget->originalCaption = {};
 	END("Attempted to clear all items from widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"\"{}\".", id, widgetType)
 }
 
-void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_setSelectedItem(const sfx::WidgetIDRef id,
+	const std::size_t index) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ListBox,
 			if (!castWidget->setSelectedItemByIndex(index)) {
 				const auto count = castWidget->getItemCount();
@@ -699,57 +629,56 @@ void sfx::gui::_setSelectedItem(const std::string& name, const std::size_t index
 			}
 		)
 		ELSE_UNSUPPORTED()
-	END("Attempted to select item {} from widget \"{}\", which is of type \"{}\", "
-		"within menu \"{}\".", index, name, widgetType, fullname[0])
+	END("Attempted to select item {} from widget \"{}\", which is of type \"{}\".",
+		index, id, widgetType)
 }
 
-void sfx::gui::_deselectItem(const std::string& name) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_deselectItem(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ListBox, castWidget->deselectItem();)
 		ELSE_IF_WIDGET_IS(ComboBox, castWidget->deselectItem();)
 		ELSE_IF_WIDGET_IS(TreeView, castWidget->deselectItem();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to deselect the selected item of a widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"type \"{}\".", id, widgetType)
 }
 
-int sfx::gui::_getSelectedItem(const std::string& name) {
-	START_WITH_WIDGET(name)
+int sfx::gui::_getSelectedItem(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ListBox, return castWidget->getSelectedItemIndex();)
 		ELSE_IF_WIDGET_IS(ComboBox, return castWidget->getSelectedItemIndex();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the index of the selected item of a widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", name, widgetType,
-		fullname[0])
+		"which is of type \"{}\".", id, widgetType)
 	return -1;
 }
 
-std::string sfx::gui::_getSelectedItemText(const std::string& name) {
-	START_WITH_WIDGET(name)
+std::string sfx::gui::_getSelectedItemText(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ListBox, return castWidget->getSelectedItem().toStdString();)
 		ELSE_IF_WIDGET_IS(ComboBox,
 			return castWidget->getSelectedItem().toStdString();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the text of the selected item of a widget \"{}\", which "
-		"is of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"is of type \"{}\".", id, widgetType)
 	return "";
 }
 
-void sfx::gui::_setItemsToDisplay(const std::string& name,
+void sfx::gui::_setItemsToDisplay(const sfx::WidgetIDRef id,
 	const std::size_t items) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ComboBox, castWidget->setItemsToDisplay(items);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the number of items to display to {} for widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", items, name, widgetType,
-		fullname[0])
+		"which is of type \"{}\".", items, id, widgetType)
 }
 
 // TREEVIEW //
 
-CScriptArray* sfx::gui::_getSelectedItemTextHierarchy(const std::string& name) {
+CScriptArray* sfx::gui::_getSelectedItemTextHierarchy(
+	const sfx::WidgetIDRef id) const {
 	auto const arr = _scripts->createArray("string");
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(TreeView,
 			const auto item = castWidget->getSelectedItem();
 			arr->Resize(static_cast<asUINT>(item.size()));
@@ -759,14 +688,13 @@ CScriptArray* sfx::gui::_getSelectedItemTextHierarchy(const std::string& name) {
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the hierarchy of the selected item of a widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", name, widgetType,
-		fullname[0])
+		"which is of type \"{}\".", id, widgetType)
 	return arr;
 }
 
-void sfx::gui::_addTreeViewItem(const std::string& name,
+void sfx::gui::_addTreeViewItem(const sfx::WidgetIDRef id,
 	const CScriptArray* const hierarchy) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		if (!hierarchy) ERROR("No item hierarchy was given!")
 		IF_WIDGET_IS(TreeView,
 			std::vector<String> newItem;
@@ -778,27 +706,28 @@ void sfx::gui::_addTreeViewItem(const std::string& name,
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to add a TreeView item to widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"\"{}\".", id, widgetType)
 	if (hierarchy) hierarchy->Release();
 }
 
 // TABS //
 
-void sfx::gui::_addTab(const std::string& name, const std::string& text,
+void sfx::gui::_addTab(const sfx::WidgetIDRef id, const std::string& text,
 	CScriptArray* const variables) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		std::size_t index = 0;
 		IF_WIDGET_IS(Tabs, index = castWidget->add(text, false);)
 		ELSE_UNSUPPORTED()
-		_setTranslatedString(fullnameAsString, text, variables, index);
-		_translateWidget(widget);
-	END("Attempted to add a tab \"{}\" to widget \"{}\", which is of type \"{}\", "
-		"within menu \"{}\".", text, name, widgetType, fullname[0])
+		_setTranslatedString(*widget, text, variables, index);
+		_translateWidget(widget->ptr);
+	END("Attempted to add a tab \"{}\" to widget \"{}\", which is of type \"{}\".",
+		text, id, widgetType)
 	if (variables) variables->Release();
 }
 
-void sfx::gui::_setSelectedTab(const std::string& name, const std::size_t index) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_setSelectedTab(const sfx::WidgetIDRef id,
+	const std::size_t index) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Tabs,
 			const auto prevSelected = castWidget->getSelectedIndex();
 			if (!castWidget->select(index)) {
@@ -828,99 +757,137 @@ void sfx::gui::_setSelectedTab(const std::string& name, const std::size_t index)
 			castWidget->select(index);
 		)
 		ELSE_UNSUPPORTED()
-	END("Attempted to select tab {} from widget \"{}\", which is of type \"{}\", "
-		"within menu \"{}\".", index, name, widgetType, fullname[0])
+	END("Attempted to select tab {} from widget \"{}\", which is of type \"{}\".",
+		index, id, widgetType)
 }
 
-int sfx::gui::_getSelectedTab(const std::string& name) const {
-	START_WITH_WIDGET(name)
+int sfx::gui::_getSelectedTab(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Tabs, return castWidget->getSelectedIndex();)
 		ELSE_IF_WIDGET_IS(TabContainer, return castWidget->getSelectedIndex();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the index of the selected tab of a widget \"{}\", which "
-		"is of type \"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"is of type \"{}\".", id, widgetType)
 	return -1;
 }
 
-std::size_t sfx::gui::_getTabCount(const std::string& name) const {
-	START_WITH_WIDGET(name)
+std::size_t sfx::gui::_getTabCount(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Tabs, return castWidget->getTabsCount();)
 		ELSE_IF_WIDGET_IS(TabContainer,
 			return castWidget->getTabs()->getTabsCount();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the tab count of a widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"\"{}\".", id, widgetType)
 	return 0;
 }
 
-std::string sfx::gui::_getTabText(const std::string& name,
+std::string sfx::gui::_getTabText(const sfx::WidgetIDRef id,
 	const std::size_t index) const {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Tabs, return castWidget->getText(index).toStdString();)
 		ELSE_IF_WIDGET_IS(TabContainer,
 			return castWidget->getTabText(index).toStdString();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the translated text of tab number {} of a widget "
-		"\"{}\", which is of type \"{}\", within menu \"{}\".", index, name,
-		widgetType, fullname[0])
+		"\"{}\", which is of type \"{}\".", index, id, widgetType)
 	return "";
 }
 
 // CONTAINER //
 
-void sfx::gui::_removeWidgetsFromContainer(const std::string& name) {
-	START_WITH_WIDGET(name)
-		if (fullname.size() < 2) {
-			_removeWidgets(widget, nullptr, false);
-		} else {
-			// Using isContainer() conveniently prevents deleting all of a
-			// SubwidgetContainer's widgets without removing the SubwidgetContainer
-			// itself.
-			if (widget->isContainer()) _removeWidgets(widget, container, false);
-			else UNSUPPORTED_WIDGET_TYPE()
-		}
-	END("Attempted to remove the widgets from a widget \"{}\", of type \"{}\", "
-		"within menu \"{}\".", name, widgetType, fullname[0])
+void sfx::gui::_add(const sfx::WidgetIDRef p, const sfx::WidgetIDRef c) {
+	START_WITH_WIDGET(c)
+		if (widget->ptr->getUserData<sfx::WidgetID>() == sfx::ROOT_WIDGET)
+			ERROR("You cannot add the root widget to a container!");
+		const auto containerData = _findWidget(p);
+		if (containerData == _widgets.end())
+			ERROR("The given container does not exist!")
+		if (!containerData->ptr->isContainer())
+			ERROR("The given container widget is not a container!");
+		// If the given widget is already attached to a parent, remove it
+		// explicitly first.
+		if (containerID != sfx::NO_WIDGET)
+			_removeWidgetFromParent(*container, *widget);
+		_addWidgetToParent(*containerData, *widget);
+		// If the widget was added to the root container directly, make it
+		// invisible.
+		if (containerData->ptr->getUserData<sfx::WidgetID>() == sfx::ROOT_WIDGET)
+			widget->ptr->setVisible(false);
+	END("Attempted to add widget \"{}\", which is of type \"{}\", to container "
+		"\"{}\".", c, widgetType, p);
 }
 
-void sfx::gui::_setWidgetIndexInContainer(const std::string& name,
+void sfx::gui::_remove(const sfx::WidgetIDRef c) {
+	START_WITH_WIDGET(c)
+		if (containerID == sfx::NO_WIDGET)
+			ERROR("This widget does not have a parent!");
+		const auto containerData =
+			_findWidget(container->ptr->getUserData<sfx::WidgetID>());
+		if (containerData == _widgets.end())
+			// This should never happen...
+			ERROR("The given container does not exist!")
+		_removeWidgetFromParent(*containerData, *widget);
+	END("Attempted to remove widget \"{}\", which is of type \"{}\", from its "
+		"parent.", c, widgetType);
+}
+
+void sfx::gui::_removeAll(const sfx::WidgetIDRef p) {
+	START_WITH_WIDGET(p)
+		if (!widget->ptr->isContainer()) UNSUPPORTED_WIDGET_TYPE()
+		const std::vector<Widget::Ptr> children =
+			widget->castPtr<Container>()->getWidgets();
+		for (const auto& child : children) _removeWidgetFromParent(*widget,
+			*_findWidget(child->getUserData<sfx::WidgetID>()));
+	END("Attempted to remove all widgets from the container \"{}\", which is of "
+		"type \"{}\".", p, widgetType);
+}
+
+void sfx::gui::_deleteWidgetsFromContainer(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		if (widget->ptr->isContainer()) _removeWidgets(id, false);
+		else UNSUPPORTED_WIDGET_TYPE()
+	END("Attempted to remove the widgets from a widget \"{}\", of type \"{}\".",
+		id, widgetType)
+}
+
+void sfx::gui::_setWidgetIndexInContainer(const sfx::WidgetIDRef id,
 	const std::size_t oldIndex, const std::size_t newIndex) {
-	START_WITH_WIDGET(name)
-	if (!widget->isContainer()) UNSUPPORTED_WIDGET_TYPE()
-		container = std::dynamic_pointer_cast<Container>(widget);
-	try {
-		widget = container->getWidgets().at(oldIndex);
-	} catch (const std::out_of_range&) {
-		ERROR("This container does not have a widget with that number.")
-	}
-	if (!container->setWidgetIndex(widget, newIndex)) {
-		const auto count = container->getWidgets().size();
-		if (count) {
-			ERROR(std::string("The new index cannot be higher than ").append(
-				std::to_string(count - 1)).append("."))
-		} else {
-			ERROR("This container has no widgets.")
+	START_WITH_WIDGET(id)
+		if (!widget->ptr->isContainer()) UNSUPPORTED_WIDGET_TYPE()
+		Widget::Ptr w;
+		const auto containerPtr = widget->castPtr<Container>();
+		try {
+			w = containerPtr->getWidgets().at(oldIndex);
+		} catch (const std::out_of_range&) {
+			ERROR("This container does not have a widget with that number.")
 		}
-	}
-	END("Attempted to set the widget \"{}\"'s number {} widget to an index of {}, "
-		"within menu \"{}\". The widget is of type \"{}\".", name, oldIndex,
-		newIndex, fullname[0], widgetType)
+		if (!containerPtr->setWidgetIndex(w, newIndex)) {
+			const auto count = containerPtr->getWidgets().size();
+			if (count) {
+				ERROR(std::string("The new index cannot be higher than ").append(
+					std::to_string(count - 1)).append("."))
+			} else {
+				ERROR("This container has no widgets.")
+			}
+		}
+	END("Attempted to set the widget \"{}\"'s number {} widget to an index of {}. "
+		"The widget is of type \"{}\".", id, oldIndex, newIndex, widgetType)
 }
 
-std::size_t sfx::gui::_getWidgetCount(const std::string& name) {
-	START_WITH_WIDGET(name)
-		if (widget->isContainer()) {
-			return std::dynamic_pointer_cast<Container>(
-				widget)->getWidgets().size();
+std::size_t sfx::gui::_getWidgetCount(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		if (widget->ptr->isContainer()) {
+			return widget->castPtr<Container>()->getWidgets().size();
 		} else UNSUPPORTED_WIDGET_TYPE()
 	END("Attempted to get the widget count of a widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"\"{}\".", id, widgetType)
 	return 0;
 }
 
-void sfx::gui::_setGroupPadding(const std::string& name,
+void sfx::gui::_setGroupPadding(const sfx::WidgetIDRef id,
 	const std::string& padding) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ScrollablePanel, castWidget->getRenderer()->setPadding(
 			AbsoluteOrRelativeValue(padding));)
 		ELSE_IF_WIDGET_IS(Panel, castWidget->getRenderer()->setPadding(
@@ -941,16 +908,16 @@ void sfx::gui::_setGroupPadding(const std::string& name,
 			}
 		)
 		ELSE_UNSUPPORTED()
-	END("Attempted to set a padding {} to widget \"{}\", which is of type \"{}\", "
-		"within menu \"{}\".", padding, name, widgetType, fullname[0])
+	END("Attempted to set a padding {} to widget \"{}\", which is of type \"{}\".",
+		padding, id, widgetType)
 }
 
-void sfx::gui::_setGroupPadding(const std::string& name, const std::string& left,
+void sfx::gui::_setGroupPadding(const sfx::WidgetIDRef id, const std::string& left,
 	const std::string& top, const std::string& right, const std::string& bottom) {
 	const auto padding = Padding(AbsoluteOrRelativeValue(left),
 		AbsoluteOrRelativeValue(top), AbsoluteOrRelativeValue(right),
 		AbsoluteOrRelativeValue(bottom));
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ScrollablePanel,
 			castWidget->getRenderer()->setPadding(padding);)
 		ELSE_IF_WIDGET_IS(Panel,
@@ -970,39 +937,38 @@ void sfx::gui::_setGroupPadding(const std::string& name, const std::string& left
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set padding left:{}, top:{}, right:{}, bottom:{}, to widget "
-		"\"{}\", which is of type \"{}\", within menu \"{}\".", left, top, right,
-		bottom, name, widgetType, fullname[0])
+		"\"{}\", which is of type \"{}\".", left, top, right, bottom, id,
+		widgetType)
 }
 
-void sfx::gui::_applySpritesToWidgetsInContainer(const std::string& name,
+void sfx::gui::_applySpritesToWidgetsInContainer(const sfx::WidgetIDRef id,
 	const std::string& spritesheet, const CScriptArray* const sprites) {
 	std::size_t spritesCount = 0;
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		if (!sprites) ERROR("No sprites given!")
-		if (!widget->isContainer()) UNSUPPORTED_WIDGET_TYPE()
-		const auto& widgets =
-			std::dynamic_pointer_cast<Container>(widget)->getWidgets();
+		if (!widget->ptr->isContainer()) UNSUPPORTED_WIDGET_TYPE()
+		const auto& widgets = widget->castPtr<Container>()->getWidgets();
 		spritesCount = sprites->GetSize();
 		asUINT counter = 0;
-		for (const auto& widget : widgets) {
-			if (widget->getWidgetType() == type::BitmapButton ||
-				widget->getWidgetType() == type::Picture) {
-				_applySprite(widget, spritesheet,
+		for (const auto& w : widgets) {
+			if (w->getWidgetType() == type::BitmapButton ||
+				w->getWidgetType() == type::Picture) {
+				_applySprite(*_findWidget(w->getUserData<sfx::WidgetID>()),
+					spritesheet,
 					*static_cast<const std::string*>(sprites->At(counter++)));
 				if (counter >= spritesCount) break;
 			}
 		}
 	END("Attempted to apply {} sprites from spritesheet \"{}\", to widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", spritesCount, spritesheet,
-		name, widgetType, fullname[0])
+		"which is of type \"{}\".", spritesCount, spritesheet, id, widgetType)
 	if (sprites) sprites->Release();
 }
 
 // PANEL //
 
-void sfx::gui::_setWidgetBgColour(const std::string& name,
+void sfx::gui::_setWidgetBgColour(const sfx::WidgetIDRef id,
 	const sf::Color& colour) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Panel, castWidget->getRenderer()->setBackgroundColor(colour);)
 		ELSE_IF_WIDGET_IS(ScrollablePanel,
 			castWidget->getRenderer()->setBackgroundColor(colour);)
@@ -1010,76 +976,72 @@ void sfx::gui::_setWidgetBgColour(const std::string& name,
 			castWidget->getRenderer()->setBackgroundColor(colour);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the background colour \"{}\" to widget \"{}\", which is "
-		"of type \"{}\", within menu \"{}\".", colour, name, widgetType,
-		fullname[0])
+		"of type \"{}\".", colour, id, widgetType)
 }
 
-void sfx::gui::_setWidgetBorderSize(const std::string& name, const float size) {
-	START_WITH_WIDGET(name);
+void sfx::gui::_setWidgetBorderSize(const sfx::WidgetIDRef id, const float size) {
+	START_WITH_WIDGET(id);
 		IF_WIDGET_IS(Panel, castWidget->getRenderer()->setBorders(size);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set a border size of {} to widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", size, name, widgetType, fullname[0])
+		"\"{}\".", size, id, widgetType)
 }
 
-void sfx::gui::_setWidgetBorderColour(const std::string& name,
+void sfx::gui::_setWidgetBorderColour(const sfx::WidgetIDRef id,
 	const sf::Color& colour) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Panel,
 			castWidget->getRenderer()->setBorderColor(colour);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set a border colour of {} to widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", colour, name, widgetType, fullname[0])
+		"type \"{}\".", colour, id, widgetType)
 }
 
-void sfx::gui::_setWidgetBorderRadius(const std::string& name,
+void sfx::gui::_setWidgetBorderRadius(const sfx::WidgetIDRef id,
 	const float radius) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Panel,
 			castWidget->getRenderer()->setRoundedBorderRadius(radius);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the border radius {} to widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", radius, name, widgetType, fullname[0])
+		"\"{}\".", radius, id, widgetType)
 }
 
-void sfx::gui::_setHorizontalScrollbarPolicy(const std::string& name,
+void sfx::gui::_setHorizontalScrollbarPolicy(const sfx::WidgetIDRef id,
 	const tgui::Scrollbar::Policy policy) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ScrollablePanel,
 			castWidget->setHorizontalScrollbarPolicy(policy);)
 		ELSE_IF_WIDGET_IS(TextArea,
 			castWidget->setHorizontalScrollbarPolicy(policy);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the horizontal scrollbar policy {} to widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", policy, name, widgetType,
-		fullname[0])
+		"which is of type \"{}\".", policy, id, widgetType)
 }
 
-void sfx::gui::_setHorizontalScrollbarAmount(const std::string& name,
+void sfx::gui::_setHorizontalScrollbarAmount(const sfx::WidgetIDRef id,
 	const unsigned int amount) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ScrollablePanel,
 			castWidget->setHorizontalScrollAmount(amount);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the horizontal scrollbar amount {} to widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", amount, name, widgetType,
-		fullname[0])
+		"which is of type \"{}\".", amount, id, widgetType)
 }
 
-void sfx::gui::_setVerticalScrollbarAmount(const std::string& name,
+void sfx::gui::_setVerticalScrollbarAmount(const sfx::WidgetIDRef id,
 	const unsigned int amount) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ScrollablePanel,
 			castWidget->setVerticalScrollAmount(amount);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the vertical scrollbar amount {} to widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", amount, name, widgetType,
-		fullname[0])
+		"which is of type \"{}\".", amount, id, widgetType)
 }
 
-void sfx::gui::_setVerticalScrollbarValue(const std::string& name,
+void sfx::gui::_setVerticalScrollbarValue(const sfx::WidgetIDRef id,
 	const unsigned int value) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ScrollablePanel,
 			const auto max =
 				static_cast<unsigned int>(castWidget->getContentSize().y);
@@ -1088,37 +1050,35 @@ void sfx::gui::_setVerticalScrollbarValue(const std::string& name,
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the vertical scrollbar value {} to widget \"{}\", which "
-		"is of type \"{}\", within menu \"{}\".", value, name, widgetType,
-		fullname[0])
+		"is of type \"{}\".", value, id, widgetType)
 }
 
-float sfx::gui::_getScrollbarWidth(const std::string& name) {
-	START_WITH_WIDGET(name)
+float sfx::gui::_getScrollbarWidth(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ScrollablePanel, return castWidget->getScrollbarWidth();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the scrollbar width of widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"\"{}\".", id, widgetType)
 	return 0.0f;
 }
 
 // LAYOUT //
 
-void sfx::gui::_setWidgetRatioInLayout(const std::string& name,
+void sfx::gui::_setWidgetRatioInLayout(const sfx::WidgetIDRef id,
 	const std::size_t index, const float ratio) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(HorizontalLayout, if (!castWidget->setRatio(index, ratio))
 			ERROR("The widget index was too high.");)
 		ELSE_IF_WIDGET_IS(VerticalLayout, if (!castWidget->setRatio(index, ratio))
 			ERROR("The widget index was too high.");)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the widget ratio {} to widget {} in widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", ratio, index, name,
-		widgetType, fullname[0])
+		"which is of type \"{}\".", ratio, index, id, widgetType)
 }
 
-void sfx::gui::_setSpaceBetweenWidgets(const std::string& name,
+void sfx::gui::_setSpaceBetweenWidgets(const sfx::WidgetIDRef id,
 	const float space) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(HorizontalLayout, castWidget->getRenderer()->
 			setSpaceBetweenWidgets(space);)
 		ELSE_IF_WIDGET_IS(VerticalLayout, castWidget->getRenderer()->
@@ -1127,118 +1087,92 @@ void sfx::gui::_setSpaceBetweenWidgets(const std::string& name,
 			setSpaceBetweenWidgets(space);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set {} to a widget \"{}\"'s space between widgets property. "
-		"The widget is of type \"{}\", within menu \"{}\".", space, name,
-		widgetType, fullname[0])
+		"The widget is of type \"{}\".", space, id, widgetType)
 }
 
 // GRID //
 
-void sfx::gui::_addWidgetToGrid(const std::string& newWidgetType,
-	const std::string& name, const std::size_t row, const std::size_t col,
-	const std::string& signalHandler) {
-	START_WITH_NONEXISTENT_WIDGET(name)
-		if (widget = _createWidget(newWidgetType, fullnameAsString, fullname[0])) {
-			if (container->getWidgetType() != type::Grid) {
-				ERROR(std::string("The widget \"").append(containerName).append(
-					"\" is of type \"").append(container->getWidgetType().
-						toStdString()).append("\", not type \"").
-					append(type::Grid).append("\"."))
-			} else {
-				widget->setWidgetName(fullnameAsString);
-				_connectSignals(widget, signalHandler);
-				std::dynamic_pointer_cast<Grid>(container)->addWidget(widget, row,
-					col);
-			}
-		}
-	END("Attempted to create a new \"{}\" widget with name \"{}\" and add it to a "
-		"grid at row {}, column {}.", newWidgetType, name, row, col)
+sfx::WidgetID sfx::gui::_createWidgetAndAddToGrid(const sfx::WidgetIDRef id,
+	const std::string& newWidgetType, const std::size_t row,
+	const std::size_t col) {
+	START_WITH_WIDGET(id)
+		if (widgetType != type::Grid) UNSUPPORTED_WIDGET_TYPE()
+		const auto newID = _createWidget(newWidgetType);
+		if (newID == sfx::NO_WIDGET) ERROR("Could not create the new widget.");
+		widget->castPtr<Grid>()->addWidget(_findWidget(newID)->ptr, row, col);
+		return newID;
+	END("Attempted to create a new \"{}\" widget and add it to a widget \"{}\", "
+		"of type \"{}\", at row {}, column {}.", newWidgetType, id, widgetType,
+		row, col)
+	return sfx::NO_WIDGET;
 }
 
-void sfx::gui::_setWidgetAlignmentInGrid(const std::string& name,
+void sfx::gui::_setWidgetAlignmentInGrid(const sfx::WidgetIDRef id,
 	const std::size_t row, const std::size_t col,
 	const tgui::Grid::Alignment alignment) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Grid,
 			auto& table = castWidget->getGridWidgets();
 			if (row < table.size()) {
-				if (col < table[row].size()) {
+				if (col < table[row].size())
 					castWidget->setWidgetAlignment(row, col, alignment);
-				} else {
-					ERROR("The column index is out of range.")
-				}
-			} else {
-				ERROR("The row index is out of range.")
-			}
+				else ERROR("The column index is out of range.")
+			} else ERROR("The row index is out of range.")
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set an alignment {} to a widget \"{}\", which is of type "
-		"\"{}\", @ ({}, {}), within menu \"{}\".", alignment, name, widgetType,
-		row, col, fullname[0])
+		"\"{}\", @ ({}, {}).", alignment, id, widgetType, row, col)
 }
 
-void sfx::gui::_setWidgetPaddingInGrid(const std::string& name,
+void sfx::gui::_setWidgetPaddingInGrid(const sfx::WidgetIDRef id,
 	const std::size_t row, const std::size_t col, const std::string& padding) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Grid,
 			auto& table = castWidget->getGridWidgets();
 			if (row < table.size()) {
-				if (col < table[row].size()) {
-					castWidget->setWidgetPadding(row, col,
-						AbsoluteOrRelativeValue(padding));
-				} else {
-					ERROR("The column index is out of range.")
-				}
-			} else {
-				ERROR("The row index is out of range.")
-			}
-			)
+				if (col < table[row].size()) castWidget->setWidgetPadding(row, col,
+					AbsoluteOrRelativeValue(padding));
+				else ERROR("The column index is out of range.")
+			} else ERROR("The row index is out of range.")
+		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set a padding {} to a widget \"{}\", which is of type "
-		"\"{}\", @ ({}, {}), within menu \"{}\".", padding, name, widgetType,
-		row, col, fullname[0])
+		"\"{}\", @ ({}, {}).", padding, id, widgetType, row, col)
 }
 
 // MENUS //
 
-sfx::gui::MenuItemID sfx::gui::_addMenu(const std::string& name,
+sfx::MenuItemID sfx::gui::_addMenu(const sfx::WidgetIDRef id,
 	const std::string& text, CScriptArray* const variables) {
 	auto ret = NO_MENU_ITEM_ID;
-	START_WITH_WIDGET(name)
-		if (!_isLoading) {
-			ERROR("This function cannot be called outside of a menu's SetUp() "
-				"function!");
-		}
+	START_WITH_WIDGET(id)
+		if (!_isLoading) ERROR("This function cannot be called outside of a "
+			"Menu's constructor!");
 		IF_WIDGET_IS(MenuBar,
-			if (_hierarchyOfLastMenuItem[fullnameAsString].size() == 1) {
+			if (widget->hierarchyOfLastMenuItem.size() == 1) {
 				_logger.warning("Menu \"{}\" in MenuBar \"{}\" is empty!",
-					_hierarchyOfLastMenuItem[fullnameAsString][0],
-						fullnameAsString);
+					widget->hierarchyOfLastMenuItem[0], id);
 			}
 			castWidget->addMenu(text);
-			_hierarchyOfLastMenuItem[fullnameAsString] = { text };
-			if (_menuCounter.find(fullnameAsString) == _menuCounter.end())
-				_menuCounter.emplace(fullnameAsString, 0);
-			_setTranslatedString(fullnameAsString, text, variables,
-				_menuCounter[fullnameAsString]);
-			ret = _menuCounter[fullnameAsString]++;
+			widget->hierarchyOfLastMenuItem = { text };
+			_setTranslatedString(*widget, text, variables, widget->menuCounter);
+			ret = widget->menuCounter++;
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to add a new menu \"{}\" to a widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
+		"\"{}\".", text, id, widgetType)
 	if (variables) variables->Release();
 	return ret;
 }
 
-sfx::gui::MenuItemID sfx::gui::_addMenuItem(const std::string& name,
+sfx::MenuItemID sfx::gui::_addMenuItem(const sfx::WidgetIDRef id,
 	const std::string& text, CScriptArray* const variables) {
 	auto ret = NO_MENU_ITEM_ID;
-	START_WITH_WIDGET(name)
-		if (!_isLoading) {
-			ERROR("This function cannot be called outside of a menu's SetUp() "
-				"function!");
-		}
+	START_WITH_WIDGET(id)
+		if (!_isLoading) ERROR("This function cannot be called outside of a "
+			"Menu's constructor!");
 		IF_WIDGET_IS(MenuBar,
-			auto& hierarchy = _hierarchyOfLastMenuItem[fullnameAsString];
+			auto& hierarchy = widget->hierarchyOfLastMenuItem;
 			auto copy(hierarchy);
 			if (hierarchy.size() == 0) {
 				ERROR("No menu has been added yet!");
@@ -1249,40 +1183,36 @@ sfx::gui::MenuItemID sfx::gui::_addMenuItem(const std::string& name,
 			}
 			if (!castWidget->addMenuItem(hierarchy)) {
 				std::string error = "Could not add item with hierarchy: ";
-				for (sfx::gui::MenuItemID i = 0, len = hierarchy.size(); i < len;
-					++i) {
+				for (sfx::MenuItemID i = 0, len = hierarchy.size(); i < len; ++i) {
 					error += hierarchy[i].toStdString() +
 						(i < len - 1 ? ", " : ". ");
 				}
 				hierarchy = copy;
 				ERROR(error);
 			}
-			_setTranslatedString(fullnameAsString, text, variables,
-				_menuCounter[fullnameAsString]);
+			_setTranslatedString(*widget, text, variables, widget->menuCounter);
 			// NOTE: we also must reconnect the signal handler after translating
 			// the menu item!
 			castWidget->connectMenuItem(hierarchy,
-				&sfx::gui::menuItemClickedSignalHandler, this, name,
-				_menuCounter[fullnameAsString]);
-			ret = _menuCounter[fullnameAsString]++;
+				&sfx::gui::menuItemClickedSignalHandler, this, id,
+				widget->menuCounter);
+			ret = widget->menuCounter++;
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to add a new menu item \"{}\" to a widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
+		"type \"{}\".", text, id, widgetType)
 	if (variables) variables->Release();
 	return ret;
 }
 
-sfx::gui::MenuItemID sfx::gui::_addMenuItemIntoLastItem(const std::string& name,
+sfx::MenuItemID sfx::gui::_addMenuItemIntoLastItem(const sfx::WidgetIDRef id,
 	const std::string& text, CScriptArray* const variables) {
 	auto ret = NO_MENU_ITEM_ID;
-	START_WITH_WIDGET(name)
-		if (!_isLoading) {
-			ERROR("This function cannot be called outside of a menu's SetUp() "
-				"function!");
-		}
+	START_WITH_WIDGET(id)
+		if (!_isLoading) ERROR("This function cannot be called outside of a "
+			"Menu's constructor!");
 		IF_WIDGET_IS(MenuBar,
-			auto& hierarchy = _hierarchyOfLastMenuItem[fullnameAsString];
+			auto& hierarchy = widget->hierarchyOfLastMenuItem;
 			if (hierarchy.size() == 0) {
 				ERROR("No menu has been added yet!");
 			} else if (hierarchy.size() == 1) {
@@ -1292,39 +1222,34 @@ sfx::gui::MenuItemID sfx::gui::_addMenuItemIntoLastItem(const std::string& name,
 			hierarchy.push_back(text);
 			if (!castWidget->addMenuItem(hierarchy)) {
 				std::string error = "Could not add item with hierarchy: ";
-				for (sfx::gui::MenuItemID i = 0, len = hierarchy.size(); i < len;
-					++i) {
+				for (sfx::MenuItemID i = 0, len = hierarchy.size(); i < len; ++i) {
 					error += hierarchy[i].toStdString() +
 						(i < len - 1 ? ", " : ". ");
 				}
 				hierarchy.pop_back();
 				ERROR(error);
 			}
-			_setTranslatedString(fullnameAsString, text, variables,
-				_menuCounter[fullnameAsString]);
+			_setTranslatedString(*widget, text, variables, widget->menuCounter);
 			// NOTE: we also must reconnect the signal handler after translating
 			// the menu item!
 			castWidget->connectMenuItem(hierarchy,
-				&sfx::gui::menuItemClickedSignalHandler, this, name,
-				_menuCounter[fullnameAsString]);
-			ret = _menuCounter[fullnameAsString]++;
+				&sfx::gui::menuItemClickedSignalHandler, this, id,
+				widget->menuCounter);
+			ret = widget->menuCounter++;
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to create a new submenu with item \"{}\" in a widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", text, name, widgetType,
-		fullname[0])
+		"which is of type \"{}\".", text, id, widgetType)
 	if (variables) variables->Release();
 	return ret;
 }
 
-void sfx::gui::_exitSubmenu(const std::string& name) {
-	START_WITH_WIDGET(name)
-		if (!_isLoading) {
-			ERROR("This function cannot be called outside of a menu's SetUp() "
-				"function!");
-		}
+void sfx::gui::_exitSubmenu(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		if (!_isLoading) ERROR("This function cannot be called outside of a "
+			"Menu's constructor!");
 		IF_WIDGET_IS(MenuBar,
-			auto& hierarchy = _hierarchyOfLastMenuItem[fullnameAsString];
+			auto& hierarchy = widget->hierarchyOfLastMenuItem;
 			if (hierarchy.size() == 0) {
 				ERROR("No menu has been added yet!");
 			} else if (hierarchy.size() < 3) {
@@ -1334,57 +1259,63 @@ void sfx::gui::_exitSubmenu(const std::string& name) {
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to exit the current submenu of widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0])
+		"\"{}\".", id, widgetType)
+}
+
+sfx::MenuItemID sfx::gui::_getLastSelectedMenuItem(
+	const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(MenuBar, return widget->lastMenuItemClicked;)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the ID of the last selected menu item of widget \"{}\", "
+		"which is of type \"{}\".", id, widgetType)
+	return sfx::NO_MENU_ITEM_ID;
 }
 
 // CHILDWINDOW //
 
-void sfx::gui::_autoHandleMinMax(const std::string& name, const bool handle) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_autoHandleMinMax(const sfx::WidgetIDRef id, const bool handle) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow,
-			if (handle)
-				_childWindowData.erase(fullnameAsString);
-			else
-				_childWindowData[fullnameAsString];
+			if (handle) widget->childWindowData =
+				sfx::gui::child_window_properties{};
+			else widget->childWindowData = std::nullopt;
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the autoHandleMinMax property to {}, for the widget "
-		"\"{}\", which is of type \"{}\", within menu \"{}\".", handle, name,
-		widgetType, fullname[0]);
+		"\"{}\", which is of type \"{}\".", handle, id, widgetType);
 }
 
-void sfx::gui::_setChildWindowTitleButtons(const std::string& name,
+void sfx::gui::_setChildWindowTitleButtons(const sfx::WidgetIDRef id,
 	const unsigned int buttons) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow, castWidget->setTitleButtons(buttons);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the titlebar button mask {} to the widget \"{}\", which "
-		"is of type \"{}\", within menu \"{}\".", buttons, name, widgetType,
-		fullname[0])
+		"is of type \"{}\".", buttons, id, widgetType)
 }
 
-void sfx::gui::_setWidgetResizable(const std::string& name, const bool resizable) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_setWidgetResizable(const sfx::WidgetIDRef id,
+	const bool resizable) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow, castWidget->setResizable(resizable);)
 		ELSE_IF_WIDGET_IS(FileDialog, castWidget->setResizable(resizable);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the resizability property of widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\", to {}.", name, widgetType, fullname[0],
-		resizable);
+		"type \"{}\", to {}.", id, widgetType, resizable);
 }
 
-void sfx::gui::_setWidgetPositionLocked(const std::string& name,
+void sfx::gui::_setWidgetPositionLocked(const sfx::WidgetIDRef id,
 	const bool locked) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow, castWidget->setPositionLocked(locked);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the position locked property of widget \"{}\", which is "
-		"of type \"{}\", within menu \"{}\", to {}.", name, widgetType,
-		fullname[0], locked);
+		"of type \"{}\", to {}.", id, widgetType, locked);
 }
 
-float sfx::gui::_getTitleBarHeight(const std::string& name) {
-	START_WITH_WIDGET(name)
+float sfx::gui::_getTitleBarHeight(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow,
 			return castWidget->getRenderer()->getTitleBarHeight();)
 		ELSE_IF_WIDGET_IS(FileDialog,
@@ -1393,11 +1324,11 @@ float sfx::gui::_getTitleBarHeight(const std::string& name) {
 			return castWidget->getRenderer()->getTitleBarHeight();)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the titlebar height of a widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+		"type \"{}\".", id, widgetType);
 	return 0.0f;
 }
 
-CScriptArray* sfx::gui::_getBorderWidths(const std::string& name) {
+CScriptArray* sfx::gui::_getBorderWidths(const sfx::WidgetIDRef id) const {
 	auto arr = _scripts->createArray("float");
 	arr->Resize(4);
 	static const auto fromBorders = [arr](const Borders& borders) {
@@ -1406,7 +1337,7 @@ CScriptArray* sfx::gui::_getBorderWidths(const std::string& name) {
 		    temp = borders.getRight(); arr->SetValue(2, &temp);
 		   temp = borders.getBottom(); arr->SetValue(3, &temp);
 	};
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow,
 			fromBorders(castWidget->getRenderer()->getBorders());)
 		ELSE_IF_WIDGET_IS(FileDialog,
@@ -1415,110 +1346,103 @@ CScriptArray* sfx::gui::_getBorderWidths(const std::string& name) {
 			fromBorders(castWidget->getRenderer()->getBorders());)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the border widths of a widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+		"\"{}\".", id, widgetType);
 	return arr;
 }
 
-void sfx::gui::_openChildWindow(const std::string& name, const std::string& x,
+void sfx::gui::_openChildWindow(const sfx::WidgetIDRef id, const std::string& x,
 	const std::string& y) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow,
-			if (_childWindowData.find(fullnameAsString) !=
-				_childWindowData.end()) {
-				_restoreChildWindowImpl(castWidget,
-					_childWindowData[fullnameAsString]);
-			}
+			if (widget->childWindowData) _restoreChildWindowImpl(id, *widget);
 			castWidget->setPosition(x.c_str(), y.c_str());
 			castWidget->moveToFront();
 			castWidget->setVisible(true);
 		)
 		ELSE_UNSUPPORTED()
-	END("Attempted to open the widget \"{}\", which is of type \"{}\", within "
-		"menu \"{}\".", name, widgetType, fullname[0]);
+	END("Attempted to open the widget \"{}\", which is of type \"{}\".", id,
+		widgetType);
 }
 
-void sfx::gui::_closeChildWindow(const std::string& name) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_closeChildWindow(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow, castWidget->setVisible(false);)
 		ELSE_UNSUPPORTED()
-	END("Attempted to close the widget \"{}\", which is of type \"{}\", within "
-		"menu \"{}\".", name, widgetType, fullname[0]);
+	END("Attempted to close the widget \"{}\", which is of type \"{}\".", id,
+		widgetType);
 }
 
-void sfx::gui::_closeChildWindowAndEmitSignal(const std::string& name) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_closeChildWindowAndEmitSignal(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow, castWidget->close();)
 		ELSE_UNSUPPORTED()
-	END("Attempted to close the widget \"{}\", which is of type \"{}\", within "
-		"menu \"{}\", and emit the onClosing signal.", name, widgetType,
-		fullname[0]);
+	END("Attempted to close the widget \"{}\", which is of type \"{}\", and emit "
+		"the onClosing signal.", id, widgetType);
 }
 
-void sfx::gui::_restoreChildWindow(const std::string& name) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_restoreChildWindow(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ChildWindow,
-			if (_childWindowData.find(fullnameAsString) !=
-				_childWindowData.end()) {
-				_restoreChildWindowImpl(castWidget,
-					_childWindowData[fullnameAsString]);
-			}
+			if (widget->childWindowData) _restoreChildWindowImpl(id, *widget);
 		)
 		ELSE_UNSUPPORTED()
-	END("Attempted to restore the widget \"{}\", which is of type \"{}\", within "
-		"menu \"{}\".", name, widgetType, fullname[0]);
+	END("Attempted to restore the widget \"{}\", which is of type \"{}\".", id,
+		widgetType);
 }
 
-void sfx::gui::_restoreChildWindowImpl(const tgui::ChildWindow::Ptr& window,
-	child_window_properties& data) {
+void sfx::gui::_restoreChildWindowImpl(const WidgetIDRef widgetID,
+	sfx::gui::widget_data& widgetData) {
+	auto& data = *widgetData.childWindowData;
+	const sfx::gui::WidgetCollection::iterator parentData =
+		(widgetData.ptr->getParent() ?
+		_findWidget(widgetData.ptr->getParent()->getUserData<sfx::WidgetID>()) :
+		_widgets.end());
 	if (data.isMinimised || data.isMaximised) {
-		if (data.isMinimised) {
-			_minimisedChildWindowList[
-				window->getParent()->getWidgetName().toStdString()].
-				restore(window->getWidgetName().toStdString());
-		}
-		data.restore(window);
+		if (data.isMinimised && parentData != _widgets.end())
+			parentData->minimisedChildWindowList.restore(widgetID);
+		data.restore(widgetData.castPtr<ChildWindow>());
 		data.isMinimised = false;
 		data.isMaximised = false;
 	}
 }
 
-bool sfx::gui::_isChildWindowOpen(const std::string& name) {
-	START_WITH_WIDGET(name)
-		IF_WIDGET_IS(ChildWindow,
-			return castWidget->isVisible();)
+bool sfx::gui::_isChildWindowOpen(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(ChildWindow, return castWidget->isVisible();)
 		ELSE_UNSUPPORTED()
-	END("Attempted to query if a widget \"{}\", which is of type \"{}\", within "
-		"menu \"{}\", is open.", name, widgetType, fullname[0]);
+	END("Attempted to query if a widget \"{}\", which is of type \"{}\", is open.",
+		id, widgetType);
 	return false;
 }
 
 // FILEDIALOG //
 
-void sfx::gui::_setFileDialogStrings(const std::string& name,
-	const std::string& title, CScriptArray* const v0, const std::string& confirm,
-	CScriptArray* const v1, const std::string& cancel, CScriptArray* const v2,
+void sfx::gui::_setFileDialogStrings(const sfx::WidgetIDRef id,
+	const std::string& title, CScriptArray* const v0,
+	const std::string& confirm, CScriptArray* const v1,
+	const std::string& cancel, CScriptArray* const v2,
 	const std::string& createFolder, CScriptArray* const v3,
 	const std::string& filenameLabel, CScriptArray* const v4,
 	const std::string& nameColumn, CScriptArray* const v5,
 	const std::string& sizeColumn, CScriptArray* const v6,
 	const std::string& modifyColumn, CScriptArray* const v7,
 	const std::string& allFiles, CScriptArray* const v8) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(FileDialog,
-			_setTranslatedString(fullnameAsString, title, v0, 0);
-			_setTranslatedString(fullnameAsString, confirm, v1, 1);
-			_setTranslatedString(fullnameAsString, cancel, v2, 2);
-			_setTranslatedString(fullnameAsString, createFolder, v3, 3);
-			_setTranslatedString(fullnameAsString, filenameLabel, v4, 4);
-			_setTranslatedString(fullnameAsString, nameColumn, v5, 5);
-			_setTranslatedString(fullnameAsString, sizeColumn, v6, 6);
-			_setTranslatedString(fullnameAsString, modifyColumn, v7, 7);
-			_setTranslatedString(fullnameAsString, allFiles, v8, 8);
-			_translateWidget(widget);
+			_setTranslatedString(*widget, title, v0, 0);
+			_setTranslatedString(*widget, confirm, v1, 1);
+			_setTranslatedString(*widget, cancel, v2, 2);
+			_setTranslatedString(*widget, createFolder, v3, 3);
+			_setTranslatedString(*widget, filenameLabel, v4, 4);
+			_setTranslatedString(*widget, nameColumn, v5, 5);
+			_setTranslatedString(*widget, sizeColumn, v6, 6);
+			_setTranslatedString(*widget, modifyColumn, v7, 7);
+			_setTranslatedString(*widget, allFiles, v8, 8);
+			_translateWidget(widget->ptr);
 		)
 		ELSE_UNSUPPORTED()
-	END("Attempted to restore the widget \"{}\", which is of type \"{}\", within "
-		"menu \"{}\".", name, widgetType, fullname[0]);
+	END("Attempted to set the file dialog strings for widget \"{}\", which is of "
+		"type \"{}\".", id, widgetType);
 	if (v0) v0->Release();
 	if (v1) v1->Release();
 	if (v2) v2->Release();
@@ -1530,9 +1454,10 @@ void sfx::gui::_setFileDialogStrings(const std::string& name,
 	if (v8) v8->Release();
 }
 
-CScriptArray* sfx::gui::_getFileDialogSelectedPaths(const std::string& name) {
+CScriptArray* sfx::gui::_getFileDialogSelectedPaths(
+	const sfx::WidgetIDRef id) const {
 	auto ret = _scripts->createArray("string");
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(FileDialog,
 			const auto& paths = castWidget->getSelectedPaths();
 			for (const auto& path : paths)
@@ -1540,11 +1465,11 @@ CScriptArray* sfx::gui::_getFileDialogSelectedPaths(const std::string& name) {
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the selected paths from widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+		"\"{}\".", id, widgetType);
 	return ret;
 }
 
-void sfx::gui::_addFileDialogFileTypeFilter(const std::string& name,
+void sfx::gui::_addFileDialogFileTypeFilter(const sfx::WidgetIDRef id,
 	const std::string& caption, CScriptArray* const variables,
 	CScriptArray* const filters) {
 	std::vector<String> expressions;
@@ -1554,189 +1479,188 @@ void sfx::gui::_addFileDialogFileTypeFilter(const std::string& name,
 		filters->Release();
 	}
 	std::vector<std::pair<String, std::vector<String>>> f;
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(FileDialog,
 			f = castWidget->getFileTypeFilters();
 			f.emplace_back(caption, expressions);
 			castWidget->setFileTypeFilters(f);
-			_setTranslatedString(fullnameAsString, caption, variables,
-				f.size() + 7);
-			_translateWidget(widget);
+			_setTranslatedString(*widget, caption, variables, f.size() + 7);
+			_translateWidget(widget->ptr);
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the file type filters of widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+		"type \"{}\".", id, widgetType);
 	if (variables) variables->Release();
 }
 
-void sfx::gui::_clearFileDialogFileTypeFilters(const std::string& name) {
-	START_WITH_WIDGET(name)
+void sfx::gui::_clearFileDialogFileTypeFilters(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(FileDialog,
 			castWidget->setFileTypeFilters({});
-			std::get<sfx::gui::ListOfCaptions>(
-				_originalCaptions[fullnameAsString]).resize(9);
-			_translateWidget(widget);
+			std::get<sfx::gui::ListOfCaptions>(widget->originalCaption).resize(9);
+			_translateWidget(widget->ptr);
 		)
 		ELSE_UNSUPPORTED()
-	END("Attempted to set the file type filters of widget \"{}\", which is of "
-		"type \"{}\", within menu \"{}\".", name, widgetType, fullname[0]);
+	END("Attempted to clear the file type filters of widget \"{}\", which is of "
+		"type \"{}\".", id, widgetType);
 }
 
-void sfx::gui::_setFileDialogFileMustExist(const std::string& name,
+void sfx::gui::_setFileDialogFileMustExist(const sfx::WidgetIDRef id,
 	const bool mustExist) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(FileDialog, castWidget->setFileMustExist(mustExist);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the file must exist property to {}, for widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", mustExist, name,
-		widgetType, fullname[0]);
+		"which is of type \"{}\".", mustExist, id, widgetType);
 }
 
-void sfx::gui::_setFileDialogDefaultFileFilter(const std::string& name,
+void sfx::gui::_setFileDialogDefaultFileFilter(const sfx::WidgetIDRef id,
 	const std::size_t index) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(FileDialog,
 			const auto copy = castWidget->getFileTypeFilters();
 			castWidget->setFileTypeFilters(copy, index);
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the default file filter to {}, for widget \"{}\", which "
-		"is of type \"{}\", within menu \"{}\".", index, name, widgetType,
-		fullname[0]);
+		"is of type \"{}\".", index, id, widgetType);
 }
 
-void sfx::gui::_setFileDialogPath(const std::string& name,
+void sfx::gui::_setFileDialogPath(const sfx::WidgetIDRef id,
 	const std::string& path) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(FileDialog, castWidget->setPath(path);)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the current path of \"{}\", to widget \"{}\", which "
-		"is of type \"{}\", within menu \"{}\".", path, name, widgetType,
-		fullname[0]);
+		"is of type \"{}\".", path, id, widgetType);
 }
 
 // MESSAGEBOX //
 
-void sfx::gui::_setMessageBoxStrings(const std::string& name,
+void sfx::gui::_setMessageBoxStrings(const sfx::WidgetIDRef id,
 	const std::string& title, CScriptArray* const titleVars,
 	const std::string& text, CScriptArray* const textVars) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(MessageBox,
-			_setTranslatedString(fullnameAsString, title, titleVars, 0);
-			_setTranslatedString(fullnameAsString, text, textVars, 1);
-			_translateWidget(widget);
+			_setTranslatedString(*widget, title, titleVars, 0);
+			_setTranslatedString(*widget, text, textVars, 1);
+			_translateWidget(widget->ptr);
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the title \"{}\" and text \"{}\" to widget \"{}\", "
-		"which is of type \"{}\", within menu \"{}\".", title, text, name,
-		widgetType, fullname[0])
+		"which is of type \"{}\".", title, text, id, widgetType)
 	if (titleVars) titleVars->Release();
 	if (textVars) textVars->Release();
 }
 
-void sfx::gui::_addMessageBoxButton(const std::string& name,
+void sfx::gui::_addMessageBoxButton(const sfx::WidgetIDRef id,
 	const std::string& text, CScriptArray* const variables) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(MessageBox,
-			_setTranslatedString(fullnameAsString, text, variables,
+			_setTranslatedString(*widget, text, variables,
 				castWidget->getButtons().size() + 2);
-			_translateWidget(widget);
+			_translateWidget(widget->ptr);
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to add a button \"{}\" to widget \"{}\", which is of type "
-		"\"{}\", within menu \"{}\".", text, name, widgetType, fullname[0])
+		"\"{}\".", text, id, widgetType)
 	if (variables) variables->Release();
+}
+
+std::size_t sfx::gui::_getLastSelectedButton(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(MessageBox, return widget->lastMessageBoxButtonClicked;)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the ID of the last selected button of widget \"{}\", "
+		"which is of type \"{}\".", id, widgetType)
+	return sfx::NO_MENU_ITEM_ID;
 }
 
 // TABCONTAINER //
 
-std::string sfx::gui::_addTabAndPanel(const std::string& name,
+sfx::WidgetID sfx::gui::_addTabAndPanel(const sfx::WidgetIDRef id,
 	const std::string& text, CScriptArray* const vars) {
-	std::string panelName = "";
-	START_WITH_WIDGET(name)
+	auto panelID = sfx::NO_WIDGET;
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(TabContainer,
 			const auto panel = castWidget->addTab(text, false);
 			if (!panel) ERROR("Could not create panel!");
-			// Fix Panel's name so that it can be accessed by the scripts/engine.
-			_sanitiseWidgetName(panel);
-			panelName = panel->getWidgetName().toStdString();
-			_setTranslatedString(fullnameAsString, text, vars,
+			panelID = _storeWidget(panel);
+			_setTranslatedString(*_findWidget(panelID), text, vars,
 				static_cast<std::size_t>(castWidget->getIndex(panel)));
-			_translateWidget(widget);
+			_translateWidget(widget->ptr);
 		)
 		ELSE_UNSUPPORTED()
-	END("Attempted to add a tab \"{}\" to widget \"{}\", which is of type \"{}\", "
-		"within menu \"{}\".", text, name, widgetType, fullname[0])
+	END("Attempted to add a tab \"{}\" to widget \"{}\", which is of type \"{}\".",
+		text, id, widgetType)
 	if (vars) vars->Release();
-	return panelName;
+	return panelID;
 }
 
-void sfx::gui::_removeTabAndPanel(const std::string& panelName) {
+void sfx::gui::_removeTabAndPanel(const sfx::WidgetIDRef id) {
 	std::size_t i = 0;
-	START_WITH_WIDGET(panelName)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Panel,
-			if (const auto tabContainer = _findWidget<TabContainer>(
-				container->getWidgetName().toStdString())) {
-				i = tabContainer->getIndex(castWidget);
-				if (i < 0)
-					ERROR("Could not find given panel in the tab container!");
-				_removeWidgets(castWidget, container, false);
-				tabContainer->removeTab(i);
-				// Remove tab's caption from the translation map.
-				auto& captions = std::get<sfx::gui::ListOfCaptions>(
-					_originalCaptions[tabContainer->getWidgetName().toStdString()]
-				);
-				captions.erase(captions.begin() + i);
-			} else ERROR("The parent of the given panel is of type \"" +
-				container->getWidgetType() + "\", not \"TabContainer\"!");
+			if (container->ptr->getWidgetType() != type::TabContainer)
+				ERROR("The parent of the given panel is of type \"" +
+					container->ptr->getWidgetType() + "\", not \"" +
+					type::TabContainer + "\"!");
+			const auto tabContainer = container->castPtr<TabContainer>();
+			i = tabContainer->getIndex(castWidget);
+			if (i < 0) ERROR("Could not find given panel in the tab container!");
+			_removeWidgets(id, false);
+			tabContainer->removeTab(i);
+			// Remove tab's caption from the translation map.
+			auto& captions = std::get<sfx::gui::ListOfCaptions>(
+				container->originalCaption);
+			captions.erase(captions.begin() + i);
 		)
 	END("Attempted to add a tab and panel, the latter with name \"{}\", which is "
-		"of type \"{}\", within menu \"{}\".", panelName, widgetType, fullname[0])
+		"of type \"{}\".", id, widgetType)
 }
 
 // SPINCONTROL //
 
-void sfx::gui::_setWidgetMinMaxValues(const std::string& name, const float min,
+void sfx::gui::_setWidgetMinMaxValues(const sfx::WidgetIDRef id, const float min,
 	const float max) {
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(SpinControl,
 			castWidget->setMinimum(min);
 			castWidget->setMaximum(max);
 		)
 	END("Attempted to set the minimum value ({}) and maximum value ({}) of a "
-		"widget \"{}\", which is of type \"{}\", within menu \"{}\".", min, max,
-		name, widgetType, fullname[0])
+		"widget \"{}\", which is of type \"{}\".", min, max, id, widgetType)
 }
 
-bool sfx::gui::_setWidgetValue(const std::string& name, float val) {
+bool sfx::gui::_setWidgetValue(const sfx::WidgetIDRef id, float val) {
 	static const std::string errorString = "Attempted to set the value {} to a "
-		"widget \"{}\", which is of type \"{}\", within menu \"{}\".";
+		"widget \"{}\", which is of type \"{}\".";
 	bool ret = false;
-	START_WITH_WIDGET(name)
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(SpinControl,
 			const auto min = castWidget->getMinimum();
 			const auto max = castWidget->getMaximum();
 			if (val < min) {
 				_logger.warning(errorString + " Value is smaller than the "
 					"minimum, which is {}. The minimum value will be applied.",
-					val, name, widgetType, fullname[0], min);
+					val, id, widgetType, min);
 				val = min;
 			} else if (val > max) {
 				_logger.warning(errorString + " Value is greater than the "
 					"maximum, which is {}. The maximum value will be applied.",
-					val, name, widgetType, fullname[0], max);
+					val, id, widgetType, max);
 				val = max;
 			} else ret = true;
 			ret = castWidget->setValue(val);
 		)
-	END(errorString, val, name, widgetType, fullname[0])
+	END(errorString, val, id, widgetType)
 	return ret;
 }
 
-float sfx::gui::_getWidgetValue(const std::string& name) const {
-	START_WITH_WIDGET(name)
+float sfx::gui::_getWidgetValue(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(SpinControl, return castWidget->getValue();)
-	END("Attempted to get the value of a widget \"{}\", which is of type \"{}\", "
-		"within menu \"{}\".", name, widgetType, fullname[0])
+	END("Attempted to get the value of a widget \"{}\", which is of type \"{}\".",
+		id, widgetType)
 	return 0.f;
 }

@@ -28,67 +28,43 @@ using namespace tgui;
 
 bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const tgui::String& signalName) {
-	if (_scripts && getGUI() != "") {
-		std::string fullname = widget->getWidgetName().toStdString();
-		std::string signalNameStd = signalName.toStdString();
-		// Call additional signal handler before the main one.
-		if (_additionalSignalHandlers.find(fullname) !=
-			_additionalSignalHandlers.end()) {
-			_scripts->callFunction(
-				_additionalSignalHandlers[fullname].operator->(), &fullname,
-				&signalNameStd);
-		}
-		// Call basic or extended signal handler.
-		auto customHandler = _customSignalHandlers.find(fullname);
-		if (customHandler != _customSignalHandlers.end()) {
-			std::string decl = "void " + customHandler->second +
-				"(const string&in, const string&in)";
-			if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, decl)) {
-				return _scripts->callFunction(_scripts->MAIN_MODULE,
-					customHandler->second, &fullname, &signalNameStd);
-			} else {
-				_logger.warning("Widget \"{}\" was configured with a custom "
-					"signal handler \"{}\", but a function of declaration \"{}\" "
-					"does not exist. Falling back on the default signal handler.",
-					fullname, customHandler->second, decl);
-			}
-		}
-		std::string functionName = getGUI() + "_" + _extractWidgetName(fullname) +
-			"_" + signalNameStd;
-		if (_scripts->functionExists(_scripts->MAIN_MODULE, functionName)) {
-			return _scripts->callFunction(_scripts->MAIN_MODULE, functionName);
-		}
+	if (!_scripts) return false;
+	const auto id = widget->getUserData<sfx::WidgetID>();
+	const auto& data = *_findWidget(id);
+	std::string signalNameStd = signalName.toStdString();
+	bool calledAny = false, allSuccessful = true;
+	// Invoke the single signal handler first.
+	if (data.singleSignalHandlers.find(signalNameStd) !=
+		data.singleSignalHandlers.end()) {
+		calledAny = true;
+		allSuccessful &= _scripts->callFunction(
+			data.singleSignalHandlers.at(signalNameStd).operator->());
 	}
-	return false;
+	// Then invoke the multi signal handler.
+	if (data.multiSignalHandler) {
+		calledAny = true;
+		allSuccessful &= _scripts->callFunction(
+			data.multiSignalHandler->operator->(), id, &signalNameStd);
+	}
+	return calledAny && allSuccessful;
 }
 
-void sfx::gui::menuItemClickedSignalHandler(const std::string& menuBarName,
-	const sfx::gui::MenuItemID index) {
-	const auto funcName = getGUI() + "_" + menuBarName +
-		"_MenuItemClicked";
-	const auto funcDecl = "void " + funcName + "(const MenuItemID)";
-	if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, funcDecl)) {
-		_scripts->callFunction(_scripts->MAIN_MODULE, funcName, index);
-	}
+void sfx::gui::menuItemClickedSignalHandler(const sfx::WidgetID menuBarID,
+	const sfx::MenuItemID index) {
+	auto& data = *_findWidget(menuBarID);
+	data.lastMenuItemClicked = index;
+	signalHandler(data.ptr, signal::MenuItemClicked);
 }
 
-void sfx::gui::messageBoxButtonPressedSignalHandler(
-	const std::string& messageBoxName, const tgui::MessageBox::Ptr& widget,
+void sfx::gui::messageBoxButtonPressedSignalHandler(const sfx::WidgetID id,
 	const tgui::String& caption) {
-	const auto funcName = getGUI() + "_" + messageBoxName + "_ButtonPressed";
-	const auto funcDecl = "void " + funcName + "(const uint64)";
-	const auto btns = widget->getButtons();
-	std::size_t index = 0;
-	for (const auto len = btns.size(); index < len; ++index)
-		if (btns[index] == caption) break;
-	if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, funcDecl)) {
-		_scripts->callFunction(_scripts->MAIN_MODULE, funcName, index);
-	} else {
-		_logger.critical("A message box button \"{}\" was pressed, but no signal "
-			"handler for the MessageBox \"{}\" was defined! The signal handler "
-			"must have the following declaration: \"{}\".", caption,
-			messageBoxName, funcDecl);
-	}
+	auto& data = *_findWidget(id);
+	const auto btns = data.castPtr<MessageBox>()->getButtons();
+	data.lastMessageBoxButtonClicked = 0;
+	for (const auto len = btns.size(); data.lastMessageBoxButtonClicked < len;
+		++data.lastMessageBoxButtonClicked)
+		if (btns[data.lastMessageBoxButtonClicked] == caption) break;
+	signalHandler(data.ptr, signal::ButtonPressed);
 }
 
 void sfx::gui::child_window_properties::cache(
@@ -110,42 +86,40 @@ void sfx::gui::child_window_properties::restore(
 }
 
 tgui::String sfx::gui::minimised_child_window_list::minimise(
-	const std::string& name) {
+	const sfx::WidgetIDRef id) {
 	std::size_t x = MINIMISED_CHILD_WINDOW_PADDING;
 	for (auto& window : _windows) {
-		if (window.empty()) {
-			window = name;
+		if (window == sfx::NO_WIDGET) {
+			window = id;
 			return std::to_string(x).append("px");
 		}
 		x += MINIMISED_CHILD_WINDOW_WIDTH + MINIMISED_CHILD_WINDOW_PADDING;
 	}
-	_windows.push_back(name);
+	_windows.push_back(id);
 	return std::to_string(x).append("px");
 }
 
-void sfx::gui::minimised_child_window_list::restore(const std::string& name) {
-	for (auto& window : _windows) if (window == name) window = "";
-	while (_windows.size() > 0 && _windows.back().empty()) _windows.pop_back();
+void sfx::gui::minimised_child_window_list::restore(const WidgetIDRef id) {
+	for (auto& window : _windows) if (window == id) window = sfx::NO_WIDGET;
+	while (_windows.size() > 0 && _windows.back() == sfx::NO_WIDGET)
+		_windows.pop_back();
 }
 
 void sfx::gui::closingSignalHandler(const tgui::ChildWindow::Ptr& window,
 	bool* abort) {
-	const auto widgetName = window->getWidgetName().toStdString();
+	const auto id = window->getUserData<sfx::WidgetID>();
+	auto& data = *_findWidget(id);
 	// Firstly, invoke the signal handler, if it exists. If it doesn't, always
 	// "close" the window.
-	const auto funcName = getGUI() + "_" + _extractWidgetName(widgetName) +
-		"_Closing";
-	const auto funcDecl = "void " + funcName + "(bool&out)";
 	bool close = true;
-	if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, funcDecl)) {
-		_scripts->callFunction(_scripts->MAIN_MODULE, funcName, &close);
+	if (data.childWindowClosingHandler) {
+		_scripts->callFunction(data.childWindowClosingHandler->operator->(), id,
+			&close);
 	}
 	if (close) {
 		// If the window was minimised when it was closed, we need to restore it.
-		if (_childWindowData.find(widgetName) != _childWindowData.end()) {
-			auto& data = _childWindowData[widgetName];
-			if (data.isMinimised) _restoreChildWindowImpl(window, data);
-		}
+		if (data.childWindowData && data.childWindowData->isMinimised)
+			_restoreChildWindowImpl(id, data);
 		// Instead of removing the window from its parent, we make it go invisible
 		// instead.
 		window->setVisible(false);
@@ -157,47 +131,48 @@ void sfx::gui::closingSignalHandler(const tgui::ChildWindow::Ptr& window,
 
 void sfx::gui::fileDialogClosingSignalHandler(const tgui::FileDialog::Ptr& window,
 	bool* abort) {
-	const auto widgetName = window->getWidgetName().toStdString();
-	const auto funcName = getGUI() + "_" + _extractWidgetName(widgetName) +
-		"_Closing";
-	const auto funcDecl = "void " + funcName + "(bool&out)";
-	if (_scripts->functionDeclExists(_scripts->MAIN_MODULE, funcDecl))
-		_scripts->callFunction(_scripts->MAIN_MODULE, funcName, abort);
+	const auto id = window->getUserData<sfx::WidgetID>();
+	const auto& data = *_findWidget(id);
+	if (data.childWindowClosingHandler) _scripts->callFunction(
+		data.childWindowClosingHandler->operator->(), id, abort);
 }
 
 void sfx::gui::minimizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
-	const auto widgetName = window->getWidgetName().toStdString();
-	if (_childWindowData.find(widgetName) != _childWindowData.end()) {
-		auto& data = _childWindowData[widgetName];
-		if (!data.isMinimised) {
-			if (!data.isMaximised) data.cache(window);
-			data.isMinimised = true;
-			data.isMaximised = false;
-			const auto x = _minimisedChildWindowList[
-				window->getParent()->getWidgetName().toStdString()].
-				minimise(widgetName);
-				window->setSize(MINIMISED_CHILD_WINDOW_WIDTH, tgui::String(
-					std::to_string(window->getRenderer()->getTitleBarHeight())));
-				window->setPosition(x, "99%");
-				window->setOrigin(0.0f, 1.0f);
-				window->setResizable(false);
-				window->setPositionLocked(true);
-				window->moveToFront();
+	const auto id = window->getUserData<sfx::WidgetID>();
+	auto& data = *_findWidget(id);
+	if (data.childWindowData) {
+		if (!data.childWindowData->isMinimised) {
+			if (!data.childWindowData->isMaximised)
+				data.childWindowData->cache(window);
+			data.childWindowData->isMinimised = true;
+			data.childWindowData->isMaximised = false;
+			tgui::String x("0");
+			if (window->getParent()) x = _findWidget(
+				window->getParent()->getUserData<sfx::WidgetID>())->
+				minimisedChildWindowList.minimise(id);
+			window->setSize(MINIMISED_CHILD_WINDOW_WIDTH, tgui::String(
+				std::to_string(window->getRenderer()->getTitleBarHeight())));
+			window->setPosition(x, "99%");
+			window->setOrigin(0.0f, 1.0f);
+			window->setResizable(false);
+			window->setPositionLocked(true);
+			window->moveToFront();
 		}
 	}
-	signalHandler(window, "Minimized");
+	signalHandler(window, signal::Minimized);
 }
 
 void sfx::gui::maximizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
-	const auto widgetName = window->getWidgetName().toStdString();
-	if (_childWindowData.find(widgetName) != _childWindowData.end()) {
-		auto& data = _childWindowData[widgetName];
-		if (data.isMinimised || data.isMaximised) {
-			_restoreChildWindowImpl(window, data);
+	const auto id = window->getUserData<sfx::WidgetID>();
+	auto& data = *_findWidget(id);
+	if (data.childWindowData) {
+		if (data.childWindowData->isMinimised ||
+			data.childWindowData->isMaximised) {
+			_restoreChildWindowImpl(id, data);
 		} else {
-			data.cache(window);
-			data.isMinimised = false;
-			data.isMaximised = true;
+			data.childWindowData->cache(window);
+			data.childWindowData->isMinimised = false;
+			data.childWindowData->isMaximised = true;
 			window->setSize("100%", "100%");
 			window->setPosition("50%", "50%");
 			window->setOrigin(0.5f, 0.5f);
@@ -206,223 +181,82 @@ void sfx::gui::maximizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
 		}
 		window->moveToFront();
 	}
-	signalHandler(window, "Maximized");
+	signalHandler(window, signal::Maximized);
 }
 
 void sfx::gui::textBoxFocusedSignalHandler(const tgui::Widget::Ptr& widget) {
 	_editBoxOrTextAreaHasSetFocus = true;
 	if (widget->getWidgetType() == type::TextArea)
 		_gui.setTabKeyUsageEnabled(false);
-	signalHandler(widget, "Focused");
+	signalHandler(widget, signal::Focused);
 }
 
 void sfx::gui::textBoxUnfocusedSignalHandler(const tgui::Widget::Ptr& widget) {
 	_editBoxOrTextAreaHasSetFocus = false;
 	if (widget->getWidgetType() == type::TextArea)
 		_gui.setTabKeyUsageEnabled(true);
-	signalHandler(widget, "Unfocused");
+	signalHandler(widget, signal::Unfocused);
 }
 
-// ALL SIGNALS NEED TO BE TESTED IDEALLY
-void sfx::gui::_connectSignals(tgui::Widget::Ptr widget,
-	const std::string& customSignalHandler) {
-	// Register the custom signal handler, if one is provided.
-	if (!customSignalHandler.empty()) {
-		_customSignalHandlers[widget->getWidgetName().toStdString()] =
-			customSignalHandler;
-	}
-
-	// Connect common widget signals.
-	widget->getSignal("PositionChanged").
-		connectEx(&sfx::gui::signalHandler, this);
-	widget->getSignal("SizeChanged").
-		connectEx(&sfx::gui::signalHandler, this);
-	widget->getSignal("Focused").
-		connectEx(&sfx::gui::signalHandler, this);
-	widget->getSignal("Unfocused").
-		connectEx(&sfx::gui::signalHandler, this);
-	widget->getSignal("MouseEntered").
-		connectEx(&sfx::gui::signalHandler, this);
-	widget->getSignal("MouseLeft").
-		connectEx(&sfx::gui::signalHandler, this);
-	widget->getSignal("AnimationFinished").
-		connectEx(&sfx::gui::signalHandler, this);
-
-	// Connect clickable widget signals.
-	tgui::String type = widget->getWidgetType();
-	if (type == type::Button || type == type::EditBox || type == type::Label ||
-		type == type::Picture || type == type::ProgressBar ||
-		type == type::RadioButton || type == type::SpinButton ||
-		type == type::Panel || type == type::BitmapButton ||
-		type == type::CheckBox) {
-		widget->getSignal("MousePressed").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("MouseReleased").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Clicked").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("RightMousePressed").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("RightMouseReleased").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("RightClicked").
-			connectEx(&sfx::gui::signalHandler, this);
-	}
-
-	// Connect bespoke signals.
-	if (type == type::Button || type == type::BitmapButton) {
-		widget->getSignal("Pressed").connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::ChildWindow) {
-		auto childWindow = std::dynamic_pointer_cast<ChildWindow>(widget);
-		widget->getSignal("MousePressed").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Closed").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("EscapeKeyPressed").
-			connectEx(&sfx::gui::signalHandler, this);
-		// The engine can perform additional tasks upon receiving the Minimized,
-		// Maximized, and Closing signals. Eventually the signalHandler is called,
-		// though.
-		childWindow->onMinimize(&sfx::gui::minimizedSignalHandler, this,
-			childWindow);
-		childWindow->onMaximize(&sfx::gui::maximizedSignalHandler, this,
-			childWindow);
-		childWindow->onClosing(&sfx::gui::closingSignalHandler, this, childWindow);
-
-	} else if (type == type::ColourPicker) {
-		widget->getSignal("ColorChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("OkPress").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::ComboBox) {
-		widget->getSignal("ItemSelected").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::EditBox) {
-		widget->getSignal("TextChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("ReturnKeyPressed").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("CaretPositionChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-		// Replace focus and unfocus signal handlers.
-		widget->getSignal("Focused").connect(
-			&sfx::gui::textBoxFocusedSignalHandler, this, widget);
-		widget->getSignal("Unfocused").connect(
-			&sfx::gui::textBoxUnfocusedSignalHandler, this, widget);
-
-	} else if (type == type::FileDialog) {
-		widget->getSignal("FileSelected").
-			connectEx(&sfx::gui::signalHandler, this);
-		const auto fd = std::dynamic_pointer_cast<FileDialog>(widget);
-		// FileDialogs must be cleaned up correctly when closed!
-		fd->onClose(&sfx::gui::_removeWidget, this,
-			widget->getWidgetName().toStdString());
-		// Allow the scripts to handle FileDialog closing.
-		fd->onClosing(&sfx::gui::fileDialogClosingSignalHandler, this, fd);
-
-	} else if (type == type::Knob || type == type::Scrollbar ||
-		type == type::Slider || type == type::SpinButton ||
-		type == type::SpinControl) {
-		widget->getSignal("ValueChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::Label || type == type::Picture) {
-		widget->getSignal("DoubleClicked").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::ListBox) {
-		widget->getSignal("ItemSelected").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("MousePressed").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("MouseReleased").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("DoubleClicked").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::ListView) {
-		widget->getSignal("ItemSelected").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("HeaderClicked").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("RightClicked").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("DoubleClicked").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::MenuBar) {
-		// Each item is connected individually, when created and when translated.
-		/*widget->getSignal("MenuItemClicked").
-			connectEx(&sfx::gui::signalHandler, this);*/
-
-	} else if (type == type::MessageBox) {
-		const auto mb = std::dynamic_pointer_cast<MessageBox>(widget);
-		mb->onButtonPress(&sfx::gui::messageBoxButtonPressedSignalHandler, this,
-			_extractWidgetName(mb->getWidgetName().toStdString()), mb);
-		// MessageBoxes must be cleaned up correctly when closed!
-		mb->onClose(&sfx::gui::_removeWidget, this,
-			widget->getWidgetName().toStdString());
-
-	} else if (type == type::Panel) {
-		widget->getSignal("DoubleClicked").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::ProgressBar) {
-		widget->getSignal("ValueChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Full").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::RadioButton || type == type::CheckBox) {
-		widget->getSignal("Checked").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Unchecked").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Changed").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::RangeSlider) {
-		widget->getSignal("RangeChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::TabContainer) {
-		widget->getSignal("SelectionChanging").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("SelectionChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::Tabs) {
-		widget->getSignal("TabSelected").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::TextArea) {
-		widget->getSignal("TextChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("SelectionChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("CaretPositionChanged").
-			connectEx(&sfx::gui::signalHandler, this);
-		// Replace focus and unfocus signal handlers.
-		widget->getSignal("Focused").connect(
-			&sfx::gui::textBoxFocusedSignalHandler, this, widget);
-		widget->getSignal("Unfocused").connect(
-			&sfx::gui::textBoxUnfocusedSignalHandler, this, widget);
-
-	} else if (type == type::ToggleButton) {
-		widget->getSignal("Checked").
-			connectEx(&sfx::gui::signalHandler, this);
-
-	} else if (type == type::TreeView) {
-		widget->getSignal("ItemSelected").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("DoubleClicked").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Expanded").
-			connectEx(&sfx::gui::signalHandler, this);
-		widget->getSignal("Collapsed").
-			connectEx(&sfx::gui::signalHandler, this);
+void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) {
+	const tgui::String type = widget->getWidgetType();
+	const auto id = widget->getUserData<sfx::WidgetID>();
+	for (const auto& signal : SIGNALS) {
+		// If this widget doesn't support this signal, don't try to connect it.
+		if (!signal.second.count(type.toStdString()) && !signal.second.empty())
+			continue;
+		// Connect special signal handlers...
+		if (type == type::ChildWindow || type == type::ColorPicker) {
+			auto childWindow = std::dynamic_pointer_cast<ChildWindow>(widget);
+			if (signal.first == signal::Minimized) {
+				childWindow->onMinimize(&sfx::gui::minimizedSignalHandler, this,
+					childWindow);
+				continue;
+			} else if (signal.first == signal::Maximized) {
+				childWindow->onMaximize(&sfx::gui::maximizedSignalHandler, this,
+					childWindow);
+				continue;
+			} else if (signal.first == signal::Closing) {
+				childWindow->onClosing(&sfx::gui::closingSignalHandler, this,
+					childWindow);
+				continue;
+			}
+		} else if (type == type::FileDialog) {
+			auto fd = std::dynamic_pointer_cast<FileDialog>(widget);
+			if (signal.first == signal::Closed) {
+				fd->onClose(&sfx::gui::_deleteWidget, this, id);
+				continue;
+			} else if (signal.first == signal::Closing) {
+				fd->onClosing(&sfx::gui::fileDialogClosingSignalHandler, this, fd);
+				continue;
+			}
+		} else if (type == type::MessageBox) {
+			auto mb = std::dynamic_pointer_cast<MessageBox>(widget);
+			if (signal.first == signal::Closed) {
+				mb->onClose(&sfx::gui::_deleteWidget, this, id);
+				continue;
+			} else if (signal.first == signal::ButtonPressed) {
+				mb->onButtonPress(&sfx::gui::messageBoxButtonPressedSignalHandler,
+					this, id);
+				continue;
+			}
+		} else if (type == type::EditBox || type == type::TextArea) {
+			if (signal.first == signal::Focused) {
+				widget->getSignal(signal.first).connect(
+					&sfx::gui::textBoxFocusedSignalHandler, this, widget);
+				continue;
+			} else if (signal.first == signal::Unfocused) {
+				widget->getSignal(signal.first).connect(
+					&sfx::gui::textBoxUnfocusedSignalHandler, this, widget);
+				continue;
+			}
+		} else if (type == type::MenuBar) {
+			// Each item is connected individually, when created and when
+			// translated.
+			if (signal.first == signal::MenuItemClicked) continue;
+		}
+		// ... Otherwise, just connect the base signal handler.
+		// Would connecting Closing here work for MessageBox, etc.?
+		widget->getSignal(signal.first).connectEx(&sfx::gui::signalHandler, this);
 	}
 }

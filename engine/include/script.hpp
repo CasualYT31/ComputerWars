@@ -506,6 +506,20 @@ namespace engine {
 		bool callFunction(asIScriptFunction* const func);
 
 		/**
+		 * Invokes a method on an object.
+		 * @tparam Ts         The types of the parameters to add to the call.
+		 * @param  obj        Pointer to the object whose method is to be called.
+		 * @param  methodDecl The declaration of the method to invoke.
+		 * @param  values     The parameters to add to the call, if any.
+		 * @return See the template version of \c callFunction(). It will also fail
+		 *         if the given object pointer is \c nullptr, or if the given
+		 *         method declaration couldn't identify a method in the object.
+		 */
+		template<typename... Ts>
+		bool callMethod(asIScriptObject* const obj, const std::string& methodDecl,
+			Ts... values);
+
+		/**
 		 * Compiles and executes the given code, which can call any code that is in
 		 * the \c MAIN_MODULE.
 		 * @param  code The code to execute. It is automatically put into a
@@ -704,6 +718,11 @@ namespace engine {
 		 * function.
 		 */
 		asUINT _argumentID = 0;
+
+		/**
+		 * Points to the object to assign to a context when invoking a method.
+		 */
+		asIScriptObject* _functionObject = nullptr;
 
 		/**
 		 * The list of registrants.

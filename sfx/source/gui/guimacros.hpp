@@ -58,56 +58,29 @@ public:
 /**
  * Initialise the function call with widget information.
  * This macro defines the following variables:
- * <ul><li><tt>std::vector<std::string> fullname;</tt> Stores the full name of the
- *     widget, with each element storing the name of each widget in the hierarchy.
- *     This variable is accessible in \c END().</li>
- *     <li><tt>std::string fullnameAsString;</tt> Stores the full name of the
- *     widget as a single string. This variable is accessible in \c END().</tt>
- *     <li><tt>tgui::string widgetType;</tt> Holds the type of the widget.
+ * <ul><li><tt>tgui::String widgetType;</tt> Holds the type of the widget.
  *     "Unknown" if the widget does not exist.</li>
- *     <li><tt>Widget::Ptr widget;</tt> Points to the widget. If it was not found,
- *     points to \c nullptr.</li>
- *     <li><tt>std::string containerName;</tt> The full name of the container which
- *     contains (or which would contain) the given widget. This is deduced using
- *     \c fullnameAsString.</li>
- *     <li><tt>Container::Ptr container;</tt> Will point to the container
- *     identified by \c containerName. If it does not exist, an error will be
- *     invoked.</li></ul>
- * @param n          The name of the widget to search for.
- * @param must_exist \c TRUE if the given widget must exist, \c FALSE if it must
- *                   not exist. If the test does not pass, an error will be
- *                   invoked.
+ *     <li><tt>WidgetCollection::iterator widget;</tt> Points to the widget's data.
+ *     If it was not found, points to <tt>_widgets.end()</tt>.</li>
+ *     <li><tt>const bool widgetExists;</tt> \c TRUE if the widget exists, \c FALSE
+ *     if not.</li>
+ *     <li><tt>WidgetID containerID;</tt> The ID of the container which contains
+ *     (or which would contain) the given widget. If there isn't one, \c NO_WIDGET
+ *     is stored.</li>
+ *     <li><tt>WidgetCollection::iterator container;</tt> Will point to the
+ *     container's (identified by \c containerID) data.</li></ul>
+ * @param n The ID of the widget to search for.
  */
-#define START_WITH_WIDGET_BASE(n, must_exist) std::vector<std::string> fullname; \
-	std::string fullnameAsString; \
-	tgui::String widgetType("Unknown"); \
+#define START_WITH_WIDGET(n) tgui::String widgetType("Unknown"); \
 	try { \
-		Widget::Ptr widget = \
-			_findWidget<Widget>(n, &fullname, &fullnameAsString); \
-		if (widget.operator bool() != must_exist) { \
-			if (must_exist) { \
-				ERROR("This widget does not exist!"); \
-			} else { \
-				ERROR("This widget already exists!"); \
-			} \
-		} \
-		if (widget) widgetType = widget->getWidgetType(); \
-		std::string containerName = \
-				fullnameAsString.substr(0, fullnameAsString.rfind('.')); \
-		Container::Ptr container = _findWidget<Container>(containerName); \
-		if (!container) { \
-			SubwidgetContainer::Ptr subwidget = \
-				_findWidget<SubwidgetContainer>(containerName); \
-			if (subwidget) container = subwidget->getContainerSharedPtr(); \
-			else ERROR(std::string("The container \"").append(containerName). \
-				append("\" does not exist!")); \
-		}
-
-/// <tt>START_WITH_WIDGET_BASE(n, true)</tt>.
-#define START_WITH_WIDGET(n) START_WITH_WIDGET_BASE(n, true)
-
-/// <tt>START_WITH_WIDGET_BASE(n, false)</tt>.
-#define START_WITH_NONEXISTENT_WIDGET(n) START_WITH_WIDGET_BASE(n, false)
+		auto widget = _findWidget(n); \
+		const bool widgetExists = widget != _widgets.end(); \
+		if (!widgetExists) ERROR("This widget does not exist!"); \
+		widgetType = widget->ptr->getWidgetType(); \
+		sfx::WidgetID containerID = widget->ptr->getParent() ? \
+			widget->ptr->getParent()->getUserData<sfx::WidgetID>() : \
+			sfx::NO_WIDGET; \
+		auto container = _findWidget(containerID);
 
 /**
  * Finish initialising the function call.
@@ -127,7 +100,7 @@ public:
  *             code is not executed.
  */
 #define IF_WIDGET_IS(type, code) if (widgetType == #type) { \
-		auto castWidget = std::dynamic_pointer_cast<type>(widget); \
+		auto castWidget = widget->castPtr<type>(); \
 		code \
 	}
 
@@ -136,7 +109,7 @@ public:
  * @sa \c IF_WIDGET_IS()
  */
 #define ELSE_IF_WIDGET_IS(type, code) else if (widgetType == #type) { \
-		auto castWidget = std::dynamic_pointer_cast<type>(widget); \
+		auto castWidget = widget->castPtr<type>(); \
 		code \
 	}
 
@@ -150,11 +123,11 @@ public:
 #define ELSE_UNSUPPORTED() else { UNSUPPORTED_WIDGET_TYPE() }
 
 /**
- * Defines a widget type static variable which holds the string name of a given
- * widget type.
- * @param t The case-sensitive name of the widget type.
+ * Defines a widget/signal type static variable which holds the string name of a
+ * given widget/signal type.
+ * @param t The case-sensitive name of the widget/signal type.
  */
-#define WIDGET_TYPE(t) static std::string t = #t;
+#define STRING_CONSTANT(t) static std::string t = #t;
 
 /**
  * Registers a widget type constant with a script interface and documents it.
@@ -163,7 +136,24 @@ public:
  * @param t The widget type.
  */
 #define REGISTER_WIDGET_TYPE_NAME(e, d, t) \
-	e->RegisterGlobalProperty("const string " #t, &type::t); \
+	e->RegisterGlobalProperty("const string " #t "EngineName", &type::t); \
 	d->DocumentExpectedFunction("const string " #t, "The name of the <tt>" #t \
 		"</tt> widget type, should be given to functions such as " \
 		"<tt>addWidget()</tt>.");
+
+ /**
+  * Registers a signal type constant with a script interface and documents it.
+  * @param e The engine to register the constant with.
+  * @param d The documentation generator to send documentation to.
+  * @param t The signal type.
+  */
+#define REGISTER_SIGNAL_TYPE_NAME(e, d, t) \
+	e->RegisterGlobalProperty("const string " #t, &signal::t); \
+	d->DocumentExpectedFunction("const string " #t, "The name of the <tt>" #t \
+		"</tt> signal type, should be given to functions such as " \
+		"<tt>connectSignal()</tt>.");
+
+/**
+ * The data type used by the interface to accept widget IDs from the scripts.
+ */
+#define WIDGET_ID_PARAM "const WidgetID"
