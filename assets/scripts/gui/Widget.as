@@ -42,6 +42,10 @@ shared abstract class Widget {
         setWidgetSize(this, w, h);
     }
 
+    Vector2f getFullSize() const {
+        return getWidgetFullSize(this);
+    }
+
     void setVisibility(const bool visible) {
         setWidgetVisibility(this, visible);
     }
