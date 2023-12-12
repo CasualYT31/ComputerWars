@@ -43,7 +43,6 @@ static const std::size_t MINIMISED_CHILD_WINDOW_WIDTH = 100;
  // All of these values are intended to be constant.
 
 static float NO_SPACE = -0.001f;
-static sf::Color NO_COLOUR(0, 0, 0, 0);
 static sfx::WidgetID GOTO_PREVIOUS_WIDGET =
 	std::numeric_limits<sfx::WidgetID>::max();
 
@@ -84,6 +83,8 @@ namespace type {
 	STRING_CONSTANT(SpinControl)
 	STRING_CONSTANT(ClickableWidget)
 	STRING_CONSTANT(ButtonBase)
+	STRING_CONSTANT(BoxLayout)
+	STRING_CONSTANT(BoxLayoutRatios)
 
 	// Widgets that can't be created by the scripts yet.
 	STRING_CONSTANT(ProgressBar)

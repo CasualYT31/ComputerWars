@@ -55,6 +55,12 @@ sf::Color AWEColourGradientTo(void* memory, const sf::Color& colourTo,
     );
 }
 
+// Common colours.
+// AngelScript doesn't like const pointers...
+static sf::Color Transparent = sf::Color::Transparent;
+static sf::Color Black = sf::Color::Black;
+static sf::Color White = sf::Color::White;
+
 void engine::RegisterColourType(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) {
     if (!engine->GetTypeInfoByName("Colour")) {
@@ -78,6 +84,12 @@ void engine::RegisterColourType(asIScriptEngine* engine,
         document->DocumentObjectMethod(r, "Calculates the colour that is "
             "<tt>double</tt>% from the current colour, to the given colour. If "
             "the bool is <tt>TRUE</tt>, then the alpha channel will be included.");
+
+        // Define the common colour constants.
+        r = engine->RegisterGlobalProperty("const Colour Transparent",
+            &Transparent);
+        r = engine->RegisterGlobalProperty("const Colour Black", &Black);
+        r = engine->RegisterGlobalProperty("const Colour White", &White);
     }
 }
 
@@ -776,7 +788,7 @@ CScriptAny* engine::scripts::createAny() const {
     return new CScriptAny(_engine);
 }
 
-asIScriptObject* engine::scripts::createObject(const std::string& type) const {
+asIScriptObject* engine::scripts::createObject(const std::string& type) {
     auto m = _engine->GetModule(MAIN_MODULE);
     if (!m) {
         _logger.error("Could not create object of type \"{}\" as the module "
@@ -804,7 +816,14 @@ asIScriptObject* engine::scripts::createObject(const std::string& type) const {
             "function context could not be initialised.", type);
         return nullptr;
     }
-    auto r = ctx->Prepare(defaultFactoryFunc);
+    auto r = ctx->SetExceptionCallback(asMETHOD(engine::scripts,
+        contextExceptionCallback), this, asCALL_THISCALL);
+    if (r < 0) {
+        _logger.error("Failed to assign the exception callback routine for the "
+            "factory function context - this is likely a faulty engine build. "
+            "Code {}.", r);
+    }
+    r = ctx->Prepare(defaultFactoryFunc);
     if (r < 0) {
         _logger.error("Could not create object of type \"{}\" as the factory "
             "function context could not be prepared. Error code {}.", type, r);

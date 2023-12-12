@@ -865,6 +865,16 @@ namespace sfx {
 		void _addWidgetToParent(widget_data& parent, const widget_data& child);
 
 		/**
+		 * Add a child window to a grid.
+		 * @param parent Reference to the grid widget's data.
+		 * @param child  Reference to the child widget's data.
+		 * @param row    The row to add the widget to.
+		 * @param col    The column to add the widget to.
+		 */
+		void _addWidgetToGrid(widget_data& parent, const widget_data& child,
+			const std::size_t row, const std::size_t col);
+
+		/**
 		 * Remove a child window from its parent.
 		 * @param parent Reference to the parent widget's data.
 		 * @param child  Reference to the child widget's data.
@@ -999,6 +1009,7 @@ namespace sfx {
 
 		void _setGUI(const std::string&);
 		bool _menuExists(const std::string&);
+		asIScriptObject* _getMenu(const std::string&);
 
 		// WIDGETS //
 
@@ -1241,7 +1252,7 @@ namespace sfx {
 		void _registerGridGlobalFunctions(asIScriptEngine* const engine,
 			const std::shared_ptr<DocumentationGenerator>& document);
 
-		WidgetID _createWidgetAndAddToGrid(const WidgetIDRef, const std::string&,
+		void _addWidgetToGrid(const WidgetIDRef, const WidgetIDRef,
 			const std::size_t, const std::size_t);
 		void _setWidgetAlignmentInGrid(const WidgetIDRef, const std::size_t,
 			const std::size_t, const tgui::Grid::Alignment);

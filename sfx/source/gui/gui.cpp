@@ -1095,6 +1095,10 @@ Widget::Ptr sfx::gui::_widgetFactory(const std::string& wType) const {
 		return tgui::SpinControl::create();
 	} else if (type == type::ClickableWidget) {
 		return tgui::ClickableWidget::create();
+	} else if (type == type::BoxLayout) {
+		return tgui::BoxLayout::create();
+	} else if (type == type::BoxLayoutRatios) {
+		return tgui::BoxLayoutRatios::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\": that widget "
 			"type is not supported.", wType);
@@ -1137,6 +1141,18 @@ void sfx::gui::_addWidgetToParent(sfx::gui::widget_data& parent,
 			child.ptr->getUserData<sfx::WidgetID>());
 	}
 	parent.castPtr<Container>()->add(child.ptr);
+}
+
+void sfx::gui::_addWidgetToGrid(widget_data& parent, const widget_data& child,
+	const std::size_t row, const std::size_t col) {
+	// If the child is a ChildWindow, we'll need to add it to the parent's
+	// minimisedChildWindowList if the ChildWindow is minimised.
+	if (child.ptr->getWidgetType() == type::ChildWindow && child.childWindowData &&
+		child.childWindowData->isMinimised) {
+		parent.minimisedChildWindowList.minimise(
+			child.ptr->getUserData<sfx::WidgetID>());
+	}
+	parent.castPtr<Grid>()->addWidget(child.ptr, row, col);
 }
 
 void sfx::gui::_removeWidgetFromParent(sfx::gui::widget_data& parent,

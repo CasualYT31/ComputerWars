@@ -29,4 +29,16 @@ shared class Panel : Group {
     void setBackgroundColour(const Colour&in c) {
         setWidgetBackgroundColour(this, c);
     }
+
+    void setBorderSize(const float s) {
+        setWidgetBorderSize(this, s);
+    }
+
+    void setBorderRadius(const float s) {
+        setWidgetBorderRadius(this, s);
+    }
+
+    void setBorderColour(const Colour&in c) {
+        setWidgetBorderColour(this, c);
+    }
 }

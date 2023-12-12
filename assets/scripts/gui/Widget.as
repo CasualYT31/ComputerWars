@@ -15,6 +15,13 @@ shared abstract class Widget {
         _id = createWidget(widgetType);
     }
 
+    /**
+     * When a widget no longer has any references to it, it should be deleted.
+     */
+    ~Widget() {
+        ::deleteWidget(this);
+    }
+
     void connect(const string&in signal, SingleSignalHandler@ const f) {
         ::connectSignal(this, signal, f);
     }
@@ -37,6 +44,14 @@ shared abstract class Widget {
 
     bool getVisibility() const {
         return getWidgetVisibility(this);
+    }
+
+    void setTextSize(const uint size) {
+        setWidgetTextSize(this, size);
+    }
+
+    void setIndex(const uint64 i) {
+        setWidgetIndex(this, i);
     }
 
     void setDirectionalFlow(const Widget@ const up, const Widget@ const down,

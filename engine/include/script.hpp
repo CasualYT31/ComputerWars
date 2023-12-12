@@ -581,7 +581,7 @@ namespace engine {
 		 *         initialised appropriately. \c nullptr if the object could not be
 		 *         created (the reason why will be logged).
 		 */
-		asIScriptObject* createObject(const std::string& type) const;
+		asIScriptObject* createObject(const std::string& type);
 
 		/**
 		 * Returns the type ID of a given type.

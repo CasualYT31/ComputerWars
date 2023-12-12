@@ -188,10 +188,6 @@ void sfx::gui::_registerConstants(asIScriptEngine* const engine,
 		"layout.\" Due to rounding errors, however, this likely won't be "
 		"perfect, especially when scaling is applied.");
 
-	r = engine->RegisterGlobalProperty("const Colour NO_COLOUR", &NO_COLOUR);
-	document->DocumentExpectedFunction("const Colour NO_COLOUR", "Constant which "
-		"holds a colour value of (0, 0, 0, 0).");
-
 	r = engine->RegisterGlobalProperty("const string PREVIOUS_MENU",
 		&_previousGUI);
 	document->DocumentExpectedFunction("const string PREVIOUS_MENU", "Holds the "
@@ -257,6 +253,8 @@ void sfx::gui::_registerConstants(asIScriptEngine* const engine,
 	REGISTER_WIDGET_TYPE_NAME(engine, document, SpinControl)
 	REGISTER_WIDGET_TYPE_NAME(engine, document, ClickableWidget)
 	REGISTER_WIDGET_TYPE_NAME(engine, document, ButtonBase)
+	REGISTER_WIDGET_TYPE_NAME(engine, document, BoxLayout)
+	REGISTER_WIDGET_TYPE_NAME(engine, document, BoxLayoutRatios)
 
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, PositionChanged);
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, SizeChanged)
@@ -359,6 +357,12 @@ void sfx::gui::_registerNonWidgetGlobalFunctions(asIScriptEngine* const engine,
 		asMETHOD(sfx::gui, _menuExists), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if the given "
 		"menu exists, <tt>FALSE</tt> otherwise.");
+
+	r = engine->RegisterGlobalFunction("Menu@ getMenu(const string&in)",
+		asMETHOD(sfx::gui, _getMenu), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns a handle to the <tt>Menu</tt> "
+		"object corresponding to the specified menu. <tt>null</tt> is returned if "
+		"the given menu doesn't exist.");
 }
 
 void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
@@ -1005,18 +1009,16 @@ void sfx::gui::_registerLayoutGlobalFunctions(asIScriptEngine* const engine,
 
 void sfx::gui::_registerGridGlobalFunctions(asIScriptEngine* const engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
-	auto r = engine->RegisterGlobalFunction("WidgetID createWidgetAndAddToGrid("
-		WIDGET_ID_PARAM ", const string&in, const uint, const uint)",
-		asMETHOD(sfx::gui, _createWidgetAndAddToGrid),
+	auto r = engine->RegisterGlobalFunction("WidgetID addWidgetToGrid("
+		WIDGET_ID_PARAM ", " WIDGET_ID_PARAM ", const uint, const uint)",
+		asMETHODPR(sfx::gui, _addWidgetToGrid, (const WidgetIDRef,
+			const WidgetIDRef, const std::size_t, const std::size_t), void),
 		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Creates a new widget and adds it to a "
-		"grid. The ID of the grid widget is given, then the type of the new "
-		"widget. The widget's row and column index are then specified, in that "
-		"order.\n"
-		"An error will be logged if the widget type was invalid, the given widget "
-		"did not identify a <tt>Grid</tt>, and if there was already a widget in "
-		"the specified cell. In such cases <tt>NO_WIDGET</tt> will be returned. "
-		"If the widget was created successfully, its ID will be returned.");
+	document->DocumentGlobalFunction(r, "Adds a widget to a grid. The ID of the "
+		"grid widget is given, then the ID of the widget to add. The widget's row "
+		"and column index are then specified, in that order.\n"
+		"An error will be logged if the second widget was the root widget, or the "
+		"first widget did not identify a <tt>Grid</tt>.");
 
 	r = engine->RegisterGlobalFunction("void setWidgetAlignmentInGrid("
 		WIDGET_ID_PARAM ", const uint, const uint, const WidgetAlignment)",

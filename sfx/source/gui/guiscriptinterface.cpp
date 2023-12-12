@@ -37,6 +37,16 @@ bool sfx::gui::_menuExists(const std::string& menu) {
 	return _menus.find(menu) != _menus.end();
 }
 
+asIScriptObject* sfx::gui::_getMenu(const std::string& menu) {
+	if (!_menuExists(menu)) {
+		_logger.error("Tried to get the object of a non-existent menu \"{}\".",
+			menu);
+		return nullptr;
+	}
+	_menus.at(menu).object->AddRef();
+	return _menus.at(menu).object;
+}
+
 // WIDGETS //
 
 bool sfx::gui::_widgetExists(const sfx::WidgetIDRef id) const {
@@ -1092,19 +1102,24 @@ void sfx::gui::_setSpaceBetweenWidgets(const sfx::WidgetIDRef id,
 
 // GRID //
 
-sfx::WidgetID sfx::gui::_createWidgetAndAddToGrid(const sfx::WidgetIDRef id,
-	const std::string& newWidgetType, const std::size_t row,
+void sfx::gui::_addWidgetToGrid(const sfx::WidgetIDRef id,
+	const sfx::WidgetIDRef childId, const std::size_t row,
 	const std::size_t col) {
-	START_WITH_WIDGET(id)
-		if (widgetType != type::Grid) UNSUPPORTED_WIDGET_TYPE()
-		const auto newID = _createWidget(newWidgetType);
-		if (newID == sfx::NO_WIDGET) ERROR("Could not create the new widget.");
-		widget->castPtr<Grid>()->addWidget(_findWidget(newID)->ptr, row, col);
-		return newID;
-	END("Attempted to create a new \"{}\" widget and add it to a widget \"{}\", "
-		"of type \"{}\", at row {}, column {}.", newWidgetType, id, widgetType,
-		row, col)
-	return sfx::NO_WIDGET;
+	START_WITH_WIDGET(childId)
+		if (widget->ptr->getUserData<sfx::WidgetID>() == sfx::ROOT_WIDGET)
+			ERROR("You cannot add the root widget to a grid!");
+		const auto grid = _findWidget(id);
+		if (grid == _widgets.end()) ERROR("The given grid does not exist!")
+		if (grid->ptr->getWidgetType() != type::Grid)
+			ERROR(std::string("The given grid is of type \"").append(
+				grid->ptr->getWidgetType().toStdString()).append("\"."));
+		// If the given widget is already attached to a parent, remove it
+		// explicitly first.
+		if (containerID != sfx::NO_WIDGET)
+			_removeWidgetFromParent(*container, *widget);
+		_addWidgetToGrid(*grid, *widget, row, col);
+	END("Attempted to add widget \"{}\", which is of type \"{}\", to grid \"{}\".",
+		childId, widgetType, id);
 }
 
 void sfx::gui::_setWidgetAlignmentInGrid(const sfx::WidgetIDRef id,

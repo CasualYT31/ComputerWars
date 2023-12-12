@@ -18,4 +18,8 @@ shared abstract class Container : Widget {
     void add(const Widget@ const child) {
         ::add(this, child);
     }
+
+    void setIndexOfWidget(const uint64 o, const uint64 n) {
+        setWidgetIndexInContainer(this, o, n);
+    }
 }

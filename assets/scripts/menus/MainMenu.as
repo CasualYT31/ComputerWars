@@ -86,14 +86,6 @@ class MainMenu : Menu, Panel {
         const MousePosition&in currentMouse) {}
 
     /**
-     * Retrieve a handle to the map that's currently being played.
-     * @return Handle to \c game.
-     */
-    PlayableMap@ getGameMap() {
-        return @game;
-    }
-
-    /**
      * When the user selects a file, attempt to load it, and if successful, open
      * the game screen.
      */
@@ -113,9 +105,4 @@ class MainMenu : Menu, Panel {
      * Opens the map maker menu.
      */
     private Button openMapMaker;
-
-    /**
-     * The map that's currently being played.
-     */
-    private PlayableMap game;
 }
