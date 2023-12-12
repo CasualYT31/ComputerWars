@@ -30,7 +30,12 @@ bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const tgui::String& signalName) {
 	if (!_scripts) return false;
 	const auto id = widget->getUserData<sfx::WidgetID>();
-	const auto& data = *_findWidget(id);
+	const auto dataItr = _findWidget(id);
+	// If the widget can no longer be found, it means at least two signals for it
+	// fired off, and the first signal deleted the widget from storage before the
+	// second one was handled. In such cases, just silently drop the signal.
+	if (dataItr == _widgets.end()) return false;
+	const auto& data = *dataItr;
 	std::string signalNameStd = signalName.toStdString();
 	bool calledAny = false, allSuccessful = true;
 	// Invoke the single signal handler first.

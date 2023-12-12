@@ -328,15 +328,14 @@ void sfx::gui::_setWidgetDirectionalFlow(const WidgetIDRef id,
 			"The widget \"{}\" does not exist.", id, upID, downID, leftID, rightID,
 			doesNotExist);
 	};
-	const auto END = _widgets.end();
 	const auto widget = _findWidget(id);
-	if (widget == END) {
+	if (widget == _widgets.end()) {
 		widgetDoesNotExist(id);
 		return;
 	}
 	static const auto checkWidget = [&](const WidgetIDRef checkID) -> bool {
 		if (checkID != sfx::NO_WIDGET && checkID != GOTO_PREVIOUS_WIDGET &&
-			_findWidget(checkID) == END) {
+			_findWidget(checkID) == _widgets.end()) {
 			widgetDoesNotExist(checkID);
 			return false;
 		}

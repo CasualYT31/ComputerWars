@@ -56,7 +56,9 @@ shared abstract class Widget {
 
     void setDirectionalFlow(const Widget@ const up, const Widget@ const down,
         const Widget@ const left, const Widget@ const right) {
-        setWidgetDirectionalFlow(this, up, down, left, right);
+        setWidgetDirectionalFlow(this, (up is null ? NO_WIDGET : up),
+            (down is null ? NO_WIDGET : down), (left is null ? NO_WIDGET : left),
+            (right is null ? NO_WIDGET : right));
     }
 
     /**
