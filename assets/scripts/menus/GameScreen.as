@@ -109,7 +109,6 @@ class GameScreen : Menu, Group {
             if (cancelDevInput) {
                 cancelDevInput = false;
             } else {
-                cancelDevInput = true;
                 setGUI("DevCommandMenu");
                 return;
             }
@@ -190,6 +189,14 @@ class GameScreen : Menu, Group {
                 return;
             }
         }
+    }
+
+    /**
+     * Work-around for an issue where pressing enter on code that doesn't throw an
+     * exception causes the DevCommandMenu to reopen immediately.
+     */
+    void cancelNextDevInput() {
+        cancelDevInput = true;
     }
 
     /**

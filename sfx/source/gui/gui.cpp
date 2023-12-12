@@ -1115,7 +1115,7 @@ sfx::WidgetID sfx::gui::_storeWidget(const tgui::Widget::Ptr& w) {
 	// If the widget is a ChildWindow, don't forget to turn on automatic
 	// handling of minimise and maximise.
 	if (w->getWidgetType() == type::ChildWindow)
-		widget->childWindowData = sfx::gui::child_window_properties{};
+		widget->childWindowData = sfx::gui::child_window_properties();
 	return widgetID;
 }
 

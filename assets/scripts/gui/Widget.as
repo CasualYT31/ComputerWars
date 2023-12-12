@@ -46,12 +46,28 @@ shared abstract class Widget {
         return getWidgetVisibility(this);
     }
 
+    void setFocus() {
+        setWidgetFocus(this);
+    }
+
     void setTextSize(const uint size) {
         setWidgetTextSize(this, size);
     }
 
+    void setName(const string&in n) {
+        setWidgetName(this, n);
+    }
+
     void setIndex(const uint64 i) {
         setWidgetIndex(this, i);
+    }
+
+    void moveToFront() {
+        moveWidgetToFront(this);
+    }
+
+    void moveToBack() {
+        moveWidgetToBack(this);
     }
 
     void setDirectionalFlow(const Widget@ const up, const Widget@ const down,
