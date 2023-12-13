@@ -46,6 +46,14 @@ shared abstract class Widget {
         return getWidgetFullSize(this);
     }
 
+    void setEnabled(const bool e) {
+        setWidgetEnabled(this, e);
+    }
+
+    bool getEnabled() const {
+        return getWidgetEnabled(this);
+    }
+
     void setVisibility(const bool visible) {
         setWidgetVisibility(this, visible);
     }

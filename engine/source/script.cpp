@@ -613,6 +613,10 @@ void engine::scripts::errorToLog(const std::string& message) const {
     _logger.error(_constructMessage(message));
 }
 
+void engine::scripts::criticalToLog(const std::string& message) const {
+    _logger.critical(_constructMessage(message));
+}
+
 /**
  * Formats a given AngelScript context as a stacktrace.
  * This function follows the same format as employed by the backend used to

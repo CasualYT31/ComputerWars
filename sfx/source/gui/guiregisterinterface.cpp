@@ -1033,6 +1033,16 @@ void sfx::gui::_registerGridGlobalFunctions(asIScriptEngine* const engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's padding within its grid "
 		"cell.");
+
+	r = engine->RegisterGlobalFunction("uint64 getWidgetColumnCount("
+		WIDGET_ID_PARAM ")", asMETHOD(sfx::gui, _getWidgetColumnCount),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's column count.");
+
+	r = engine->RegisterGlobalFunction("uint64 getWidgetRowCount("
+		WIDGET_ID_PARAM ")", asMETHOD(sfx::gui, _getWidgetRowCount),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's row count.");
 }
 
 void sfx::gui::_registerMenuBarGlobalFunctions(asIScriptEngine* const engine,

@@ -118,6 +118,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Writes to the log using the error "
 		"level.");
 
+	r = engine->RegisterGlobalFunction("void critical(const string&in)",
+		asMETHOD(engine::scripts, criticalToLog),
+		asCALL_THISCALL_ASGLOBAL, _scripts.get());
+	document->DocumentGlobalFunction(r, "Writes to the log using the critical "
+		"level.");
+
 	r = engine->RegisterGlobalFunction("void stacktrace()",
 		asMETHOD(engine::scripts, stacktraceToLog),
 		asCALL_THISCALL_ASGLOBAL, _scripts.get());

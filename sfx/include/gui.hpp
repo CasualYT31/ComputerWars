@@ -1258,6 +1258,8 @@ namespace sfx {
 			const std::size_t, const tgui::Grid::Alignment);
 		void _setWidgetPaddingInGrid(const WidgetIDRef, const std::size_t,
 			const std::size_t, const std::string&);
+		std::size_t _getWidgetColumnCount(const WidgetIDRef) const;
+		std::size_t _getWidgetRowCount(const WidgetIDRef) const;
 
 		// MENUS //
 

@@ -1154,6 +1154,30 @@ void sfx::gui::_setWidgetPaddingInGrid(const sfx::WidgetIDRef id,
 		"\"{}\", @ ({}, {}).", padding, id, widgetType, row, col)
 }
 
+std::size_t sfx::gui::_getWidgetColumnCount(const WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(Grid,
+			// There has to be a fancy ranges implmentation for this.
+			std::size_t maxColumns = 0;
+			for (const auto& row : castWidget->getGridWidgets())
+				if (row.size() > maxColumns) maxColumns = row.size();
+			return maxColumns;
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the column count of a widget \"{}\", which is of type "
+		"\"{}\".", id, widgetType)
+	return 0;
+}
+
+std::size_t sfx::gui::_getWidgetRowCount(const WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(Grid, return castWidget->getGridWidgets().size();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the row count of a widget \"{}\", which is of type "
+		"\"{}\".", id, widgetType)
+	return 0;
+}
+
 // MENUS //
 
 sfx::MenuItemID sfx::gui::_addMenu(const sfx::WidgetIDRef id,

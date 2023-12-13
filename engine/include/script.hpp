@@ -445,6 +445,14 @@ namespace engine {
 		void errorToLog(const std::string& message) const;
 
 		/**
+		 * Will write a critical error to the log, using the current context to
+		 * retrieve extra information.
+		 * @param  message The message to log.
+		 * @safety No guarantee.
+		 */
+		void criticalToLog(const std::string& message) const;
+
+		/**
 		 * Will write a complete C++ and AngelScript stacktrace to the log.
 		 * @safety No guarantee.
 		 */
