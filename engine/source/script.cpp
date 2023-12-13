@@ -30,6 +30,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "boost/stacktrace.hpp"
 #include "fmtengine.hpp"
 
+void AWEColourTypeCopyConstructor(const sf::Color& origin, void* memory) {
+    new(memory) sf::Color(origin);
+}
+
 void AWEColourTypeConstructor(const int r, const int g, const int b,
     const int a, void* memory) {
     new(memory) sf::Color((sf::Uint8)r, (sf::Uint8)g, (sf::Uint8)b, (sf::Uint8)a);
@@ -74,6 +78,9 @@ void engine::RegisterColourType(asIScriptEngine* engine,
             asOFFSET(sf::Color, b));
         engine->RegisterObjectProperty("Colour", "uint8 a",
             asOFFSET(sf::Color, a));
+        engine->RegisterObjectBehaviour("Colour", asBEHAVE_CONSTRUCT,
+            "void Colour(const Colour&in)",
+            asFUNCTION(AWEColourTypeCopyConstructor), asCALL_CDECL_OBJLAST);
         engine->RegisterObjectBehaviour("Colour", asBEHAVE_CONSTRUCT,
             "void Colour(const int, const int, const int, const int)",
             asFUNCTION(AWEColourTypeConstructor), asCALL_CDECL_OBJLAST);
