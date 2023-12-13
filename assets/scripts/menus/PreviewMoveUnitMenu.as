@@ -72,21 +72,16 @@ class PreviewMoveUnitMenu : Menu, Group {
                     (unitType.scriptName == "INFANTRY" ||
                     unitType.scriptName == "MECH")) {
                     previewCommands.addCommand("launch", "attackicon", function(){
-                        // Don't use global variables like this, we can use
-                        // getMenu() and cast it instead.
-                        // EXPLODE_PREVIEW_MENU_DISPLAYED_HP_TO_DEAL = 3;
-                        // EXPLODE_PREVIEW_MENU_RANGE.x = 0;
-                        // EXPLODE_PREVIEW_MENU_RANGE.y = 3;
-                        // EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE = true;
-                        // @EXPLODE_PREVIEW_MENU_CALLBACK = function(){
-                        //     // If the launch is going ahead, then we need to make
-                        //     // the Missile Silo empty. Since it's a structure, we
-                        //     // can destroy it to achieve this.
-                        //     game.map.destroyStructure(
-                        //         EXPLODE_PREVIEW_MENU_SELECTED_TILE);
-                        //     // Move the unit that is launching the silo.
-                        //     game.moveUnit();
-                        // };
+                        cast<ExplodePreviewMenu>(getMenu("ExplodePreviewMenu")).
+                            Initialise(3, Vector2(0, 3), true, function(tile){
+                                // If the launch is going ahead, then we need to
+                                // make the Missile Silo empty. Since it's a
+                                // structure, we can destroy it to achieve this.
+                                game.map.destroyStructure(tile);
+                                // Move the unit that is launching the silo.
+                                game.moveUnit();
+                            }
+                        );
                         setGUI("ExplodePreviewMenu");
                     });
                 }
@@ -150,17 +145,13 @@ class PreviewMoveUnitMenu : Menu, Group {
                 if (unitType.scriptName == "BLACKBOMB") {
                     previewCommands.addCommand("explode", "attackicon",
                         function(){
-                        // Don't use global variables like this, we can use
-                        // getMenu() and cast it instead.
-                        // EXPLODE_PREVIEW_MENU_DISPLAYED_HP_TO_DEAL = 5;
-                        // EXPLODE_PREVIEW_MENU_RANGE.x = 1;
-                        // EXPLODE_PREVIEW_MENU_RANGE.y = 3;
-                        // EXPLODE_PREVIEW_MENU_ALLOW_TILE_SELECTION_CHANGE = false;
-                        // @EXPLODE_PREVIEW_MENU_CALLBACK = function(){
-                        //     // If the explosion is going ahead, then we need to
-                        //     // delete the Black Bomb unit.
-                        //     game.deleteUnit(game.map.getSelectedUnit());
-                        // };
+                        cast<ExplodePreviewMenu>(getMenu("ExplodePreviewMenu")).
+                            Initialise(5, Vector2(1, 3), false, function(tile){
+                                // If the explosion is going ahead, then we need
+                                // to delete the Black Bomb unit.
+                                game.deleteUnit(game.map.getSelectedUnit());
+                            }
+                        );
                         setGUI("ExplodePreviewMenu");
                     });
                 }
