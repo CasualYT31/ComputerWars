@@ -25,4 +25,13 @@ shared class Group : Container {
     Group(const string&in widgetType) {
         super(widgetType);
     }
+
+    void setPadding(const string&in p) {
+        setGroupPadding(this, p);
+    }
+
+    void setPadding(const string&in l, const string&in t, const string&in r,
+        const string&in b) {
+        setGroupPadding(this, l, t, r, b);
+    }
 }
