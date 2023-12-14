@@ -8,7 +8,7 @@
  * This version of the main menu simply lists the map files currently stored in
  * the assets folder.
  */
-class MainMenu : Menu, Panel {
+class MainMenu : Menu, Group {
     /**
      * Set up the menu.
      * Also sets up the root widget and performs other one-time setup tasks.
@@ -36,11 +36,11 @@ class MainMenu : Menu, Panel {
         openMapMaker.setOrigin(1.0, 0.0);
         openMapMaker.setText("~Map Maker");
         openMapMaker.setDirectionalFlow(mapFiles, mapFiles, mapFiles, mapFiles);
+        openMapMaker.connect(MouseReleased, function(){ setGUI("MapMaker"); });
         add(openMapMaker);
 
-        // Setup the root panel.
+        // Setup the root group.
         setWidgetDirectionalFlowStart("MainMenu", mapFiles);
-        setBackgroundColour(Colour(0, 0, 0, 0));
         ::add(ROOT_WIDGET, this);
     }
 
@@ -90,7 +90,7 @@ class MainMenu : Menu, Panel {
      * the game screen.
      */
     private void mapFilesMouseReleased() {
-        game = PlayableMap(loadMap("map/" + mapFiles.getSelectedItemText(),
+        @game = PlayableMap(loadMap("map/" + mapFiles.getSelectedItemText(),
             PLAYABLE_MAP_TYPENAME));
         if (game.map is null) error("Failed to load map, will not switch menus.");
         else setGUI("GameScreen");

@@ -61,12 +61,12 @@ bool sfx::gui::_widgetExists(const sfx::WidgetIDRef id) const {
 
 sfx::WidgetID sfx::gui::_getWidgetFocused(const sfx::WidgetIDRef parent) const {
 	if (parent == sfx::NO_WIDGET && _gui.getFocusedChild()) {
-		return _gui.getFocusedChild()->getUserData<sfx::WidgetID>();
+		return _getWidgetID(_gui.getFocusedChild());
 	} else {
 		START_WITH_WIDGET(parent)
 			if (!widget->ptr->isContainer()) UNSUPPORTED_WIDGET_TYPE()
 			auto c = widget->castPtr<Container>()->getFocusedChild();
-			if (c) return c->getUserData<sfx::WidgetID>();
+			if (c) return _getWidgetID(c);
 		END("Attempted to find the widget with setfocus that is within widget "
 			"\"{}\".", parent)
 	}
@@ -86,12 +86,15 @@ void sfx::gui::_connectSignal(const sfx::WidgetIDRef id, const std::string& sign
 	asIScriptFunction* const handler) {
 	START_WITH_WIDGET(id)
 		if (!SIGNALS.count(signal)) ERROR("This is not a signal!")
+		if (signal == signal::Closing) ERROR("You cannot use this method to "
+			"connect a handler to this signal!");
 		const auto supportedTypes = SIGNALS.equal_range(signal);
 		bool supported = false;
 		std::for_each(supportedTypes.first, supportedTypes.second,
 			[&supported, &widgetType](auto& types) {
 			if (supported) return;
-			supported = types.second.count(widgetType.toStdString());
+			supported = types.second.count(widgetType.toStdString()) ||
+				types.second.empty();
 		});
 		if (!supported)
 			ERROR("This signal is not supported for this type of widget!");
@@ -315,6 +318,14 @@ void sfx::gui::_setWidgetIndex(const sfx::WidgetIDRef id,
 		if (!result) ERROR("Either the parent of the widget could not be found or "
 			"the given index was too high!")
 	END("Attempted to set a widget \"{}\"'s index to {}.", id, index)
+}
+
+void sfx::gui::_setWidgetAutoLayout(const sfx::WidgetIDRef id,
+	const tgui::AutoLayout layout) {
+	START_WITH_WIDGET(id)
+		widget->ptr->setAutoLayout(layout);
+	END("Attempted to set the auto layout value {} to widget \"{}\", which is of "
+		"type \"{}\".", layout, id, widgetType)
 }
 
 // DIRECTIONAL FLOW //
@@ -807,7 +818,7 @@ std::string sfx::gui::_getTabText(const sfx::WidgetIDRef id,
 
 void sfx::gui::_add(const sfx::WidgetIDRef p, const sfx::WidgetIDRef c) {
 	START_WITH_WIDGET(c)
-		if (widget->ptr->getUserData<sfx::WidgetID>() == sfx::ROOT_WIDGET)
+		if (_getWidgetID(widget->ptr) == sfx::ROOT_WIDGET)
 			ERROR("You cannot add the root widget to a container!");
 		const auto containerData = _findWidget(p);
 		if (containerData == _widgets.end())
@@ -821,7 +832,7 @@ void sfx::gui::_add(const sfx::WidgetIDRef p, const sfx::WidgetIDRef c) {
 		_addWidgetToParent(*containerData, *widget);
 		// If the widget was added to the root container directly, make it
 		// invisible.
-		if (containerData->ptr->getUserData<sfx::WidgetID>() == sfx::ROOT_WIDGET)
+		if (_getWidgetID(containerData->ptr) == sfx::ROOT_WIDGET)
 			widget->ptr->setVisible(false);
 	END("Attempted to add widget \"{}\", which is of type \"{}\", to container "
 		"\"{}\".", c, widgetType, p);
@@ -831,8 +842,7 @@ void sfx::gui::_remove(const sfx::WidgetIDRef c) {
 	START_WITH_WIDGET(c)
 		if (containerID == sfx::NO_WIDGET)
 			ERROR("This widget does not have a parent!");
-		const auto containerData =
-			_findWidget(container->ptr->getUserData<sfx::WidgetID>());
+		const auto containerData = _findWidget(_getWidgetID(container->ptr));
 		if (containerData == _widgets.end())
 			// This should never happen...
 			ERROR("The given container does not exist!")
@@ -847,7 +857,7 @@ void sfx::gui::_removeAll(const sfx::WidgetIDRef p) {
 		const std::vector<Widget::Ptr> children =
 			widget->castPtr<Container>()->getWidgets();
 		for (const auto& child : children) _removeWidgetFromParent(*widget,
-			*_findWidget(child->getUserData<sfx::WidgetID>()));
+			*_findWidget(_getWidgetID(child)));
 	END("Attempted to remove all widgets from the container \"{}\", which is of "
 		"type \"{}\".", p, widgetType);
 }
@@ -1105,7 +1115,7 @@ void sfx::gui::_addWidgetToGrid(const sfx::WidgetIDRef id,
 	const sfx::WidgetIDRef childId, const std::size_t row,
 	const std::size_t col) {
 	START_WITH_WIDGET(childId)
-		if (widget->ptr->getUserData<sfx::WidgetID>() == sfx::ROOT_WIDGET)
+		if (_getWidgetID(widget->ptr) == sfx::ROOT_WIDGET)
 			ERROR("You cannot add the root widget to a grid!");
 		const auto grid = _findWidget(id);
 		if (grid == _widgets.end()) ERROR("The given grid does not exist!")
@@ -1433,8 +1443,7 @@ void sfx::gui::_restoreChildWindowImpl(const WidgetIDRef widgetID,
 	auto& data = *widgetData.childWindowData;
 	const sfx::gui::WidgetCollection::iterator parentData =
 		(widgetData.ptr->getParent() ?
-		_findWidget(widgetData.ptr->getParent()->getUserData<sfx::WidgetID>()) :
-		_widgets.end());
+		_findWidget(_getWidgetID(widgetData.ptr->getParent())) : _widgets.end());
 	if (data.isMinimised || data.isMaximised) {
 		if (data.isMinimised && parentData != _widgets.end())
 			parentData->minimisedChildWindowList.restore(widgetID);
@@ -1451,6 +1460,20 @@ bool sfx::gui::_isChildWindowOpen(const sfx::WidgetIDRef id) const {
 	END("Attempted to query if a widget \"{}\", which is of type \"{}\", is open.",
 		id, widgetType);
 	return false;
+}
+
+void sfx::gui::_connectChildWindowClosingSignalHandler(const sfx::WidgetIDRef id,
+	asIScriptFunction* const handler) {
+	START_WITH_WIDGET(id)
+		if (widgetType != type::ChildWindow && widgetType != type::MessageBox &&
+			widgetType != type::FileDialog && widgetType != type::ColorPicker)
+			UNSUPPORTED_WIDGET_TYPE()
+		if (handler) widget->childWindowClosingHandler =
+			std::make_unique<engine::CScriptWrapper<asIScriptFunction>>(handler);
+		else widget->childWindowClosingHandler = nullptr;
+	END("Attempted to connect a handler to the \"{}\" signal for widget with ID "
+		"\"{}\", which is of type \"{}\".", signal::Closing, id, widgetType);
+	if (handler) handler->Release();
 }
 
 // FILEDIALOG //

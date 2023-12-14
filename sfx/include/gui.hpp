@@ -255,11 +255,11 @@ namespace sfx {
 			bool* abort);
 
 		/**
-		 * Handles \c Closing signals for \c FileDialogs.
-		 * @param window Pointer to the \c FileDialog that was closed.
+		 * Handles \c Closing signals for subclasses of \c ChildWindow.
+		 * @param window Pointer to the subclass of \c ChildWindow that was closed.
 		 * @param abort  Will be updated by the script handler, if there is one.
 		 */
-		void fileDialogClosingSignalHandler(const tgui::FileDialog::Ptr& window,
+		void basicClosingSignalHandler(const tgui::Widget::Ptr& window,
 			bool* abort);
 
 		/**
@@ -489,7 +489,7 @@ namespace sfx {
 		struct widget_data {
 			/**
 			 * Pointer to the widget.
-			 * Use \c getUserData() to retrieve the ID of the widget.
+			 * Use \c _getWidgetID() to retrieve the ID of the widget.
 			 */
 			tgui::Widget::Ptr ptr;
 
@@ -553,7 +553,7 @@ namespace sfx {
 			/**
 			 * Invoked when this widget emits specific signals.
 			 * Each signal that is configured to have a handler, will have an entry
-			 * in this map. The function will be given the widget's ID.
+			 * in this map.
 			 */
 			std::unordered_map<std::string,
 				engine::CScriptWrapper<asIScriptFunction>> singleSignalHandlers;
@@ -913,6 +913,32 @@ namespace sfx {
 		WidgetID _findNextWidgetID();
 
 		/**
+		 * Retrieve a widget's ID.
+		 * @param  w Pointer to the widget.
+		 * @return The ID of the widget. In cases where a widget is a TGUI
+		 *         placeholder, \c sfx::NO_WIDGET will be returned.
+		 */
+		static inline WidgetID _getWidgetID(const tgui::Widget::Ptr& w) {
+			try {
+				return w->getUserData<WidgetID>();
+			} catch (const std::bad_cast&) {
+				return NO_WIDGET;
+			}
+		}
+
+		/**
+		 * Retrieve a widget's ID.
+		 * @sa \c _getWidgetID().
+		 */
+		static inline WidgetID _getWidgetID(const tgui::Widget* const w) {
+			try {
+				return w->getUserData<WidgetID>();
+			} catch (const std::bad_cast&) {
+				return NO_WIDGET;
+			}
+		}
+
+		/**
 		 * Checks if a given widget is visible and/or enabled, and that the same
 		 * can be said for all of its parents.
 		 * @warning An assertion is made that at least one of the boolean
@@ -1052,6 +1078,7 @@ namespace sfx {
 			CScriptArray* const);
 		void _setWidgetTextSize(const WidgetIDRef, const unsigned int);
 		void _setWidgetIndex(const WidgetIDRef, const std::size_t);
+		void _setWidgetAutoLayout(const WidgetIDRef, const tgui::AutoLayout);
 
 		// DIRECTIONAL FLOW //
 
@@ -1303,6 +1330,8 @@ namespace sfx {
 		void _restoreChildWindow(const WidgetIDRef);
 		void _restoreChildWindowImpl(const WidgetIDRef, widget_data&);
 		bool _isChildWindowOpen(const WidgetIDRef) const;
+		void _connectChildWindowClosingSignalHandler(const WidgetIDRef,
+			asIScriptFunction* const);
 
 		// FILEDIALOG //
 

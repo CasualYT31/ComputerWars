@@ -78,8 +78,7 @@ public:
 		if (!widgetExists) ERROR("This widget does not exist!"); \
 		widgetType = widget->ptr->getWidgetType(); \
 		sfx::WidgetID containerID = widget->ptr->getParent() ? \
-			widget->ptr->getParent()->getUserData<sfx::WidgetID>() : \
-			sfx::NO_WIDGET; \
+			_getWidgetID(widget->ptr->getParent()) : sfx::NO_WIDGET; \
 		auto container = _findWidget(containerID);
 
 /**

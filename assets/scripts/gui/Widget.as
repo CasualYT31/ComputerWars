@@ -12,7 +12,7 @@ shared abstract class Widget {
      * @param widgetType The name of the type of widget to create.
      */
     protected Widget(const string&in widgetType) {
-        _id = createWidget(widgetType);
+        id = createWidget(widgetType);
     }
 
     /**
@@ -90,6 +90,10 @@ shared abstract class Widget {
         moveWidgetToBack(this);
     }
 
+    void setAutoLayout(const AutoLayout l) {
+        setWidgetAutoLayout(this, l);
+    }
+
     void setDirectionalFlow(const Widget@ const up, const Widget@ const down,
         const Widget@ const left, const Widget@ const right) {
         setWidgetDirectionalFlow(this, (up is null ? NO_WIDGET : up),
@@ -102,15 +106,15 @@ shared abstract class Widget {
      * @return The ID of the widget.
      */
     WidgetID opImplConv() const {
-        return _id;
+        return id;
     }
 
     /// The unique identifier of this widget.
-    private WidgetID _id;
+    private WidgetID id;
     /// Provides read-only access to the unique identifier of this widget.
     WidgetID ID {
         get const {
-            return _id;
+            return id;
         }
     }
 }

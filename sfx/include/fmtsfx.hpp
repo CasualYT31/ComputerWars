@@ -50,6 +50,43 @@ template <> struct fmt::formatter<tgui::String> {
 };
 
 /**
+ * Fmt formatter for the \c tgui::AutoLayout type.
+ */
+template <> struct fmt::formatter<tgui::AutoLayout> {
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		auto it = ctx.begin(), end = ctx.end();
+		if (it != end && *it != '}') throw format_error("invalid format");
+		return it;
+	}
+
+	template <typename FormatContext>
+	auto format(const tgui::AutoLayout a, FormatContext& ctx) const
+		-> decltype(ctx.out()) {
+		const auto aValue = static_cast<int>(a);
+		switch (a) {
+		case tgui::AutoLayout::Manual:
+			return fmt::format_to(ctx.out(), "Manual ({})", aValue);
+		case tgui::AutoLayout::Top:
+			return fmt::format_to(ctx.out(), "Top ({})", aValue);
+		case tgui::AutoLayout::Left:
+			return fmt::format_to(ctx.out(), "Left ({})", aValue);
+		case tgui::AutoLayout::Right:
+			return fmt::format_to(ctx.out(), "Right ({})", aValue);
+		case tgui::AutoLayout::Bottom:
+			return fmt::format_to(ctx.out(), "Bottom ({})", aValue);
+		case tgui::AutoLayout::Leftmost:
+			return fmt::format_to(ctx.out(), "Leftmost ({})", aValue);
+		case tgui::AutoLayout::Rightmost:
+			return fmt::format_to(ctx.out(), "Rightmost ({})", aValue);
+		case tgui::AutoLayout::Fill:
+			return fmt::format_to(ctx.out(), "Fill ({})", aValue);
+		default:
+			return fmt::format_to(ctx.out(), "UNKNOWN ({})", aValue);
+		}
+	}
+};
+
+/**
  * Fmt formatter for the \c tgui::Label::HorizontalAlignment type.
  */
 template <> struct fmt::formatter<tgui::Label::HorizontalAlignment> {

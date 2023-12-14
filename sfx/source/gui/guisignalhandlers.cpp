@@ -29,7 +29,8 @@ using namespace tgui;
 bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const tgui::String& signalName) {
 	if (!_scripts) return false;
-	const auto id = widget->getUserData<sfx::WidgetID>();
+	const auto id = _getWidgetID(widget);
+	// Placeholder widgets will not ever be connected here.
 	const auto dataItr = _findWidget(id);
 	// If the widget can no longer be found, it means at least two signals for it
 	// fired off, and the first signal deleted the widget from storage before the
@@ -112,7 +113,7 @@ void sfx::gui::minimised_child_window_list::restore(const WidgetIDRef id) {
 
 void sfx::gui::closingSignalHandler(const tgui::ChildWindow::Ptr& window,
 	bool* abort) {
-	const auto id = window->getUserData<sfx::WidgetID>();
+	const auto id = _getWidgetID(window);
 	auto& data = *_findWidget(id);
 	// Firstly, invoke the signal handler, if it exists. If it doesn't, always
 	// "close" the window.
@@ -134,16 +135,16 @@ void sfx::gui::closingSignalHandler(const tgui::ChildWindow::Ptr& window,
 	*abort = true;
 }
 
-void sfx::gui::fileDialogClosingSignalHandler(const tgui::FileDialog::Ptr& window,
+void sfx::gui::basicClosingSignalHandler(const tgui::Widget::Ptr& window,
 	bool* abort) {
-	const auto id = window->getUserData<sfx::WidgetID>();
+	const auto id = _getWidgetID(window);
 	const auto& data = *_findWidget(id);
 	if (data.childWindowClosingHandler) _scripts->callFunction(
 		data.childWindowClosingHandler->operator->(), id, abort);
 }
 
 void sfx::gui::minimizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
-	const auto id = window->getUserData<sfx::WidgetID>();
+	const auto id = _getWidgetID(window);
 	auto& data = *_findWidget(id);
 	if (data.childWindowData) {
 		if (!data.childWindowData->isMinimised) {
@@ -153,7 +154,7 @@ void sfx::gui::minimizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
 			data.childWindowData->isMaximised = false;
 			tgui::String x("0");
 			if (window->getParent()) x = _findWidget(
-				window->getParent()->getUserData<sfx::WidgetID>())->
+				_getWidgetID(window->getParent()))->
 				minimisedChildWindowList.minimise(id);
 			window->setSize(MINIMISED_CHILD_WINDOW_WIDTH, tgui::String(
 				std::to_string(window->getRenderer()->getTitleBarHeight())));
@@ -168,7 +169,7 @@ void sfx::gui::minimizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
 }
 
 void sfx::gui::maximizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
-	const auto id = window->getUserData<sfx::WidgetID>();
+	const auto id = _getWidgetID(window);
 	auto& data = *_findWidget(id);
 	if (data.childWindowData) {
 		if (data.childWindowData->isMinimised ||
@@ -205,7 +206,7 @@ void sfx::gui::textBoxUnfocusedSignalHandler(const tgui::Widget::Ptr& widget) {
 
 void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) {
 	const tgui::String type = widget->getWidgetType();
-	const auto id = widget->getUserData<sfx::WidgetID>();
+	const auto id = _getWidgetID(widget);
 	for (const auto& signal : SIGNALS) {
 		// If this widget doesn't support this signal, don't try to connect it.
 		if (!signal.second.count(type.toStdString()) && !signal.second.empty())
@@ -228,21 +229,24 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) {
 			}
 		} else if (type == type::FileDialog) {
 			auto fd = std::dynamic_pointer_cast<FileDialog>(widget);
-			if (signal.first == signal::Closed) {
-				fd->onClose(&sfx::gui::_deleteWidget, this, id);
-				continue;
-			} else if (signal.first == signal::Closing) {
-				fd->onClosing(&sfx::gui::fileDialogClosingSignalHandler, this, fd);
+			if (signal.first == signal::Closing) {
+				fd->onClosing(&sfx::gui::basicClosingSignalHandler, this, fd);
 				continue;
 			}
 		} else if (type == type::MessageBox) {
 			auto mb = std::dynamic_pointer_cast<MessageBox>(widget);
-			if (signal.first == signal::Closed) {
-				mb->onClose(&sfx::gui::_deleteWidget, this, id);
-				continue;
-			} else if (signal.first == signal::ButtonPressed) {
+			if (signal.first == signal::ButtonPressed) {
 				mb->onButtonPress(&sfx::gui::messageBoxButtonPressedSignalHandler,
 					this, id);
+				continue;
+			} else if (signal.first == signal::Closing) {
+				mb->onClosing(&sfx::gui::basicClosingSignalHandler, this, mb);
+				continue;
+			}
+		} else if (type == type::ColorPicker) {
+			auto c = std::dynamic_pointer_cast<ColorPicker>(widget);
+			if (signal.first == signal::Closing) {
+				c->onClosing(&sfx::gui::basicClosingSignalHandler, this, c);
 				continue;
 			}
 		} else if (type == type::EditBox || type == type::TextArea) {

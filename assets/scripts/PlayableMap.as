@@ -50,11 +50,6 @@ shared class PlayableMap {
     // CONSTRUCTION //
     //////////////////
     /**
-     * Default constructor.
-     */
-    PlayableMap() {}
-
-    /**
      * Constructs a playable map from a previously loaded map.
      * @param mapToPlayOn The map to play on.
      */

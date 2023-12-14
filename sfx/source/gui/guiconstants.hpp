@@ -180,10 +180,10 @@ static const std::unordered_set<std::string> CHILDWINDOW_WIDGETS = {
 
 /**
  * Signals, and the widget types that support them.
- * If no widget types are listed for a signal, it means that it's supported on all
- * types.
+ * If no widget types are listed for a signal, even once, it means that it's
+ * supported on all types.
  * @warning MAKE SURE THAT THE SAME WIDGET TYPE IS NOT STORED ACROSS MORE THAN ONE
- *          SET WITH THE SAME KEY!
+ *          SET WITH THE SAME KEY! This container really needs to be changed.
  */
 static std::unordered_multimap<std::string, std::unordered_set<std::string>>
 	SIGNALS = {

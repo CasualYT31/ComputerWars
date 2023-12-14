@@ -327,7 +327,7 @@ float sfx::gui::getScalingFactor() const noexcept {
 sfx::WidgetID sfx::gui::getWidgetUnderMouse() const {
 	if (_ui) {
 		if (const auto w = _gui.getWidgetBelowMouseCursor(_ui->mousePosition()))
-			return w->getUserData<sfx::WidgetID>();
+			return _getWidgetID(w);
 	} else {
 		_logger.error("Called getWidgetUnderMouse() when no user input object has "
 			"been given to this gui object!");
@@ -424,8 +424,9 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 		// Ignore the widget if it is hidden.
 		if (!widget->isVisible()) continue;
 
-		const auto& widgetData =
-			*_findWidget(widget->getUserData<sfx::WidgetID>());
+		const auto widgetID = _getWidgetID(widget);
+		if (widgetID == sfx::NO_WIDGET) continue; // Placeholder widget, ignore.
+		const auto& widgetData = *_findWidget(widgetID);
 		const String type = widget->getWidgetType();
 
 		// Only BitmapButtons and Pictures can have animated sprites.
@@ -706,7 +707,8 @@ void sfx::gui::_makeNewDirectionalSelection(const sfx::WidgetIDRef newsel,
 };
 
 void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
-	const auto widgetID = widget->getUserData<sfx::WidgetID>();
+	const auto widgetID = _getWidgetID(widget);
+	if (widgetID == sfx::NO_WIDGET) return; // Placeholder widget, won't translate.
 	String type = widget->getWidgetType();
 	const auto widgetData = _findWidget(widgetID);
 	if (widgetData->originalCaption.index() != 0) {
@@ -836,8 +838,7 @@ void sfx::gui::_translateMenuItems(const tgui::MenuBar::Ptr& w,
 		hierarchy.back() = translatedCaption;
 		// I know, it's really ugly. Not much choice.
 		w->connectMenuItem(hierarchy, &sfx::gui::menuItemClickedSignalHandler,
-			this, w->getUserData<sfx::WidgetID>(),
-			static_cast<sfx::MenuItemID>(index++));
+			this, _getWidgetID(w), static_cast<sfx::MenuItemID>(index++));
 		_translateMenuItems(w, widgetData, item.menuItems, hierarchy, index);
 		hierarchy.pop_back();
 	}
@@ -895,13 +896,15 @@ bool sfx::gui::_save(nlohmann::ordered_json& j) noexcept {
 
 void sfx::gui::_removeWidgets(const sfx::WidgetIDRef widget, const bool removeIt) {
 	const auto widgetData = _findWidget(widget);
+	// Don't try to remove a placeholder widget!
+	if (widgetData == _widgets.end()) return;
 	const tgui::Widget::Ptr widgetPtr = widgetData->ptr;
 	// Explicitly remove all child widgets if this widget is a container.
 	if (widgetPtr->isContainer()) {
 		auto& widgetsInContainer = widgetData->castPtr<Container>()->getWidgets();
 		for (auto& widgetInContainer : widgetsInContainer) {
 			// Remove each child widget's internal data entries only.
-			_removeWidgets(widgetInContainer->getUserData<sfx::WidgetID>(), false);
+			_removeWidgets(_getWidgetID(widgetInContainer), false);
 		}
 		// Now remove each child widget fr.
 		widgetData->castPtr<Container>()->removeAllWidgets();
@@ -910,7 +913,7 @@ void sfx::gui::_removeWidgets(const sfx::WidgetIDRef widget, const bool removeIt
 	// If this widget is a ChildWindow, remove it from its parent's
 	// ChildWindowList.
 	const auto parentPtr = widgetPtr->getParent();
-	if (parentPtr) _findWidget(parentPtr->getUserData<sfx::WidgetID>())->
+	if (parentPtr) _findWidget(_getWidgetID(parentPtr))->
 		minimisedChildWindowList.restore(widget);
 	// Go through every widget and if the widget to remove is referenced, remove
 	// it. To speed this up we could just leave the references and remove them if
@@ -993,7 +996,7 @@ std::string sfx::gui::_getTranslatedText(const sfx::gui::widget_data& data) cons
 			const std::string& typeName) {
 				logger->warning("Unsupported type \"{}\" given when translating "
 					"widget \"{}\"'s caption: inserting blank string instead.",
-					typeName, data.ptr->getUserData<sfx::WidgetID>());
+					typeName, _getWidgetID(data.ptr));
 		});
 }
 
@@ -1004,7 +1007,7 @@ std::string sfx::gui::_getTranslatedText(const sfx::gui::widget_data& data,
 			[&](engine::logger* const logger, const std::string& typeName) {
 				logger->warning("Unsupported type \"{}\" given when translating "
 					"widget \"{}\"'s #{} caption: inserting blank string instead.",
-					typeName, data.ptr->getUserData<sfx::WidgetID>(), index);
+					typeName, _getWidgetID(data.ptr), index);
 		});
 }
 
@@ -1137,8 +1140,7 @@ void sfx::gui::_addWidgetToParent(sfx::gui::widget_data& parent,
 	// minimisedChildWindowList if the ChildWindow is minimised.
 	if (child.ptr->getWidgetType() == type::ChildWindow && child.childWindowData &&
 		child.childWindowData->isMinimised) {
-		parent.minimisedChildWindowList.minimise(
-			child.ptr->getUserData<sfx::WidgetID>());
+		parent.minimisedChildWindowList.minimise(_getWidgetID(child.ptr));
 	}
 	parent.castPtr<Container>()->add(child.ptr);
 }
@@ -1149,8 +1151,7 @@ void sfx::gui::_addWidgetToGrid(widget_data& parent, const widget_data& child,
 	// minimisedChildWindowList if the ChildWindow is minimised.
 	if (child.ptr->getWidgetType() == type::ChildWindow && child.childWindowData &&
 		child.childWindowData->isMinimised) {
-		parent.minimisedChildWindowList.minimise(
-			child.ptr->getUserData<sfx::WidgetID>());
+		parent.minimisedChildWindowList.minimise(_getWidgetID(child.ptr));
 	}
 	parent.castPtr<Grid>()->addWidget(child.ptr, row, col);
 }
@@ -1160,8 +1161,7 @@ void sfx::gui::_removeWidgetFromParent(sfx::gui::widget_data& parent,
 	// If the child is a ChildWindow, we'll need to remove it from the parent's
 	// minimisedChildWindowList.
 	if (child.ptr->getWidgetType() == type::ChildWindow) {
-		parent.minimisedChildWindowList.restore(
-			child.ptr->getUserData<sfx::WidgetID>());
+		parent.minimisedChildWindowList.restore(_getWidgetID(child.ptr));
 	}
 	parent.castPtr<Container>()->remove(child.ptr);
 }

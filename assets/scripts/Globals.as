@@ -6,4 +6,9 @@
 /**
  * Global point of access to the map that's currently being played.
  */
-PlayableMap game;
+PlayableMap@ game;
+
+/**
+ * Global point of access to the map that's being editted in the map maker.
+ */
+EditableMap@ edit;

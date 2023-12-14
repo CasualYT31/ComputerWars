@@ -136,6 +136,26 @@ void sfx::gui::_registerTypes(asIScriptEngine* const engine,
 			ChildWindow::TitleButton::Maximize |
 			ChildWindow::TitleButton::Minimize));
 
+	r = engine->RegisterEnum("AutoLayout");
+	document->DocumentObjectEnum(r, "Alignments describing how to position a "
+		"widget in its parent.");
+	engine->RegisterEnumValue("AutoLayout", "Manual",
+		static_cast<int>(AutoLayout::Manual));
+	engine->RegisterEnumValue("AutoLayout", "Top",
+		static_cast<int>(AutoLayout::Top));
+	engine->RegisterEnumValue("AutoLayout", "Left",
+		static_cast<int>(AutoLayout::Left));
+	engine->RegisterEnumValue("AutoLayout", "Right",
+		static_cast<int>(AutoLayout::Right));
+	engine->RegisterEnumValue("AutoLayout", "Bottom",
+		static_cast<int>(AutoLayout::Bottom));
+	engine->RegisterEnumValue("AutoLayout", "Leftmost",
+		static_cast<int>(AutoLayout::Leftmost));
+	engine->RegisterEnumValue("AutoLayout", "Rightmost",
+		static_cast<int>(AutoLayout::Rightmost));
+	engine->RegisterEnumValue("AutoLayout", "Fill",
+		static_cast<int>(AutoLayout::Fill));
+
 	engine->RegisterTypedef("MenuItemID", "uint64");
 	document->DocumentExpectedFunction("typedef uint64 MenuItemID",
 		"Index used to identify a menu item in a <tt>MenuBar</tt> widget.");
@@ -559,6 +579,13 @@ void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
 		asMETHOD(sfx::gui, _setWidgetIndex),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's index within a "
+		"container.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setWidgetAutoLayout(" WIDGET_ID_PARAM ", const AutoLayout)",
+		asMETHOD(sfx::gui, _setWidgetAutoLayout),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's auto layout within a "
 		"container.");
 }
 
@@ -1200,6 +1227,15 @@ void sfx::gui::_registerChildWindowGlobalFunctions(asIScriptEngine* const engine
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Returns if a given <tt>ChildWindow</tt> "
 		"is open or closed.");
+
+	r = engine->RegisterGlobalFunction(
+		"void connectChildWindowClosingSignalHandler(" WIDGET_ID_PARAM ", "
+		"ChildWindowClosingSignalHandler@ const)",
+		asMETHOD(sfx::gui, _connectChildWindowClosingSignalHandler),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Connects a <tt>ChildWindow</tt>'s "
+		"<tt>Closing</tt> signal handler. If <tt>null</tt> is given, then the "
+		"handler will be disconnected.");
 }
 
 void sfx::gui::_registerFileDialogGlobalFunctions(asIScriptEngine* const engine,
