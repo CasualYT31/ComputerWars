@@ -26,11 +26,28 @@ shared class ChildWindow : Container {
         super(widgetType);
     }
 
+    void setText(const string&in t, array<any>@ const vars = null) {
+        ::setWidgetText(this, t, vars);
+    }
+
     void connectClosing(ChildWindowClosingSignalHandler@ const h) {
         connectChildWindowClosingSignalHandler(this, h);
     }
 
-    // Don't forget to override minimise, maximise stuff in subclasses such as
-    // MessageBox with empty implementation... Not sure if I can delete them
-    // in those classes altogether?
+    void open(const string&in x, const string&in y) {
+        ::openChildWindow(this, x, y);
+    }
+
+    bool isOpen() const {
+        return ::isChildWindowOpen(this);
+    }
+
+    void close(const bool emitClosingSignal = true) {
+        if (emitClosingSignal) ::closeChildWindowAndEmitSignal(this);
+        else ::closeChildWindow(this);
+    }
+
+    void restore() {
+        ::restoreChildWindow(this);
+    }
 }

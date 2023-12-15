@@ -22,6 +22,14 @@ shared class ListBox : Widget {
         ::clearItems(this);
     }
 
+    void setSelectedItem(const uint64 i) {
+        ::setSelectedItem(this, i);
+    }
+
+    int getSelectedItem() const {
+        return ::getSelectedItem(this);
+    }
+
     string getSelectedItemText() const {
         return ::getSelectedItemText(this);
     }

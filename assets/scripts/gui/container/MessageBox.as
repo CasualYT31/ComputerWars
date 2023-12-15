@@ -22,6 +22,7 @@ shared class MessageBox : ChildWindow {
     void addButton(const string&in t, array<any>@ const v = null) {
         addMessageBoxButton(this, t, v);
     }
+    protected void open(const string&in, const string&in) override {}
 
     uint64 getPressedButton() const {
         return getLastSelectedButton(this);

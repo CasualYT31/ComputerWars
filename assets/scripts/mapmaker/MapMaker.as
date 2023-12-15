@@ -24,6 +24,7 @@ class MapMaker : Menu, Group {
      */
     MapMaker() {
         // Setup the menu.
+        menuBar.setName("MenuBar");
         menuBar.add("file");
         FILE_NEW_MAP = menuBar.addItem("newmap");
         FILE_OPEN_MAP = menuBar.addItem("openmap");
@@ -46,9 +47,12 @@ class MapMaker : Menu, Group {
         VIEW_ARMY_PROPS = menuBar.addItem("armyprops");
         menuBar.connect(MenuItemClicked,
             SingleSignalHandler(this.menuItemClicked));
+        
+        // Setup the client area.
+        clientArea.add(mementoWindow);
 
         // Setup the base group.
-        mainStatusBar.setSize("", formatFloat(menuBar.getFullSize().y));
+        mainStatusBar.setSize("", "MenuBar.height");
         menuBar.setAutoLayout(AutoLayout::Top);
         clientArea.setAutoLayout(AutoLayout::Fill);
         mainStatusBar.setAutoLayout(AutoLayout::Bottom);
@@ -155,6 +159,15 @@ class MapMaker : Menu, Group {
         }
         if (bool(ui["zoomin"])) {
             edit.zoomIn();
+        }
+        // Undo and redo.
+        if (undoControl) {
+            edit.undo();
+            return;
+        }
+        if (redoControl) {
+            edit.redo();
+            return;
         }
     }
     
@@ -274,6 +287,17 @@ class MapMaker : Menu, Group {
     }
 
     /**
+     * Initialise a new edit map.
+     * @param mapToHandle Points to the loaded map.
+     */
+    private void initEditMap(Map@ const mapToHandle) {
+        @edit = EditableMap(mapToHandle);
+        edit.map.setMementoStateChangedCallback(
+            MementoStateChangedCallback(this.mementosHaveChanged));
+        mementosHaveChanged();
+    }
+
+    /**
      * Cache of the selected path from the file dialog.
      */
     string fileDialogFile;
@@ -313,7 +337,7 @@ class MapMaker : Menu, Group {
      * The closure of the old map has been authorised, load new map.
      */
     private void newEditMapAuthorisedWithAuthorisedQuit() {
-        @edit = EditableMap(createMap(fileDialogFile, PLAYABLE_MAP_TYPENAME));
+        initEditMap(createMap(fileDialogFile, PLAYABLE_MAP_TYPENAME));
     }
 
     /////////////
@@ -332,7 +356,7 @@ class MapMaker : Menu, Group {
      * We can now open the map file.
      */
     private void openEditMapAuthorised() {
-        @edit = EditableMap(loadMap(fileDialogFile, PLAYABLE_MAP_TYPENAME));
+        initEditMap(loadMap(fileDialogFile, PLAYABLE_MAP_TYPENAME));
     }
 
     ///////////////
@@ -417,8 +441,24 @@ class MapMaker : Menu, Group {
      */
     private void quitEditMapAuthorised() {
         ::quitMap();
+        mementoWindow.close();
         @edit = null;
+        mementoWindow.refresh();
         if (quitCallback !is null) quitCallback();
+    }
+
+    //////////////
+    // MEMENTOS //
+    //////////////
+
+    /**
+     * When the state of the mementos change, update the MementoWindow and the
+     * status bar.
+     */
+    private void mementosHaveChanged() {
+        mementoWindow.refresh();
+        mainStatusBar.setUndoAction(edit.map.getNextUndoMementoName());
+        mainStatusBar.setRedoAction(edit.map.getNextRedoMementoName());
     }
 
     /////////////
@@ -455,6 +495,11 @@ class MapMaker : Menu, Group {
      * The client area group.
      */
     private Group clientArea;
+
+    /**
+     * The memento window.
+     */
+    private MementoWindow mementoWindow;
 
     /**
      * The status bar.
@@ -505,11 +550,14 @@ class MapMaker : Menu, Group {
         } else if (i == FILE_QUIT) {
             quitEditMap(function(){ setGUI("MainMenu"); });
 
-        } else if (i == EDIT_UNDO) {
+        } else if (i == EDIT_UNDO && edit !is null) {
+            edit.undo();
 
-        } else if (i == EDIT_REDO) {
+        } else if (i == EDIT_REDO && edit !is null) {
+            edit.redo();
 
         } else if (i == EDIT_MEMENTO_WINDOW) {
+            mementoWindow.open();
 
         } else if (i == MAP_SET_PROPS) {
 

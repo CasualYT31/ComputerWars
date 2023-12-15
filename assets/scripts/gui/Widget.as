@@ -30,6 +30,10 @@ shared abstract class Widget {
         ::connectSignal(this, f);
     }
 
+    void disconnectAll() {
+        ::disconnectSignals({ this });
+    }
+
     void setPosition(const string&in x, const string&in y) {
         setWidgetPosition(this, x, y);
     }
