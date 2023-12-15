@@ -4,6 +4,40 @@
  */
 
 /**
+ * An object that observes the state of an \c EditableMap and is notified of
+ * changes.
+ */
+interface Observer {
+    /**
+     * When the map changes state, it should call this method on observers.
+     * @param data Optional data passed to the observer. Left empty unless
+     *             otherwise specified in \c Subject documentation.
+     */
+    void refresh(any&in data = any());
+}
+
+/**
+ * Defines the different types of observers of \c EditableMap.
+ */
+enum Subject {
+    /// Map property changes.
+    Properties,
+    /// Tile changes.
+    /// Passes in a \c Vector2 which describes the tile being updated. Passes in
+    /// an empty \c any object when a tile is being deselected.
+    Tiles,
+    /// Army changes.
+    Armies,
+    /// Script changes.
+    Scripts,
+    /// Misc. changes related to the main status bar.
+    /// Passes in a \c float which stores the map scaling factor.
+    Status,
+    /// The number of subjects.
+    Count
+}
+
+/**
  * Each map operation that can be performed in or on \c EditableMap.
  * @sa \c OPERATION.
  */
@@ -73,45 +107,14 @@ class EditableMap {
     /**
      * Constructs an editable map from a previously loaded map.
      * @param mapToEdit    The map to edit.
-     * @param tPropsWindow The \c TilePropertiesWindow to link up with this
-     *                     \c EditableMap.
-     * @param aPropsWindow The \c ArmyPropertiesWindow to link up with this
-     *                     \c EditableMap.
-     * @param mPropsWindow The \c MapPropertiesWindow to link up with this
-     *                     \c EditableMap.
-     * @param sBar         The \c MainStatusBar to link up with this
-     *                     \c EditableMap.
-     * @param sWindow      The \c ScriptsWindow to link up with this
-     *                     \c EditableMap.
      */
-    EditableMap(Map@ mapToEdit/*, TilePropertiesWindow@ tPropsWindow,
-        ArmyPropertiesWindow@ aPropsWindow, MapPropertiesWindow@ mPropsWindow,
-        MainStatusBar@ sBar, ScriptsWindow@ sWindow*/) {
+    EditableMap(Map@ mapToEdit) {
+        observers.resize(Subject::Count);
         if (mapToEdit is null) {
             error("An invalid Map handle was given to the constructor of "
                 "EditableMap; the game will crash soon!");
-        // } else if (tPropsWindow is null) {
-        //     error("An invalid TilePropertiesWindow handle was given to the "
-        //         "constructor of EditableMap; the game will crash soon!");
-        // } else if (aPropsWindow is null) {
-        //     error("An invalid ArmyPropertiesWindow handle was given to the "
-        //         "constructor of EditableMap; the game will crash soon!");
-        // } else if (mPropsWindow is null) {
-        //     error("An invalid MapPropertiesWindow handle was given to the "
-        //         "constructor of EditableMap; the game will crash soon!");
-        // } else if (sBar is null) {
-        //     error("An invalid MainStatusBar handle was given to the constructor "
-        //         "of EditableMap; the game will crash soon!");
-        // } else if (sWindow is null) {
-        //     error("An invalid ScriptsWindow handle was given to the constructor "
-        //         "of EditableMap; the game will crash soon!");
         } else {
             @map = mapToEdit;
-            // @tilePropsWindow = tPropsWindow;
-            // @armyPropsWindow = aPropsWindow;
-            // @mapPropsWindow = mPropsWindow;
-            // @statusBar = sBar;
-            // @scriptsWindow = sWindow;
             map.enablePeriodic(false);
             map.alwaysShowHiddenUnits(true);
             map.setMapScalingFactor(_mapScalingFactor);
@@ -122,6 +125,15 @@ class EditableMap {
             setNormalCursorSprites();
             _updateStatusBar();
         }
+    }
+
+    /**
+     * Sets an observer.
+     * @param s The type of data to observe.
+     * @param o The observer.
+     */
+    void setObserver(const Subject s, Observer@ const o) {
+        @observers[s] = o;
     }
 
     ////////////////////////
@@ -334,6 +346,17 @@ class EditableMap {
         map.setMapSize(mapSize, tileType, army);
         refreshTileProps();
         _updateStatusBar();
+    }
+
+    /**
+     * Fills a map with a given tile type.
+     * @param type  The type of tile to fill with.
+     * @param owner The owner to assign to each of the tiles.
+     */
+    void fillMap(const TileType@ const type, const string&in owner) {
+        map.fillMap(type.scriptName,
+            owner.isEmpty() ? NO_ARMY : country[owner].turnOrder);
+        refreshTileProps();
     }
 
     /**
@@ -821,7 +844,7 @@ class EditableMap {
         if (!tilePropsTileSet) return;
         tilePropsTileSet = false;
         map.clearAdditionallySelectedTile();
-        // if (tilePropsWindow !is null) tilePropsWindow.deselect();
+        _refresh(Subject::Tiles);
     }
 
     /**
@@ -849,46 +872,47 @@ class EditableMap {
     private void _updateTileProps(
         const array<Vector2>@ const tilesThatAreChanging) {
         if (!tilePropsTileSet) return;
-        // if (tilesThatAreChanging !is null &&
-        //     tilesThatAreChanging.find(tilePropsTile) >= 0)
-        //     tilePropsWindow.refresh(tilePropsTile);
+        if (tilesThatAreChanging !is null &&
+            tilesThatAreChanging.find(tilePropsTile) >= 0)
+                _refresh(Subject::Tiles, any(tilePropsTile));
         if (map.isOutOfBounds(tilePropsTile)) deselectTile();
     }
 
     /**
-     * Updates the linked \c ArmyPropertiesWindow to ensure it is always
-     * displaying the correct information.
+     * Notifies the armies observer of a change.
      */
     private void _updateArmyProps() {
-        // armyPropsWindow.refresh();
+        _refresh(Subject::Armies);
     }
 
     /**
-     * Updates the linked \c MapPropertiesWindow to ensure it is always
-     * displaying the correct information.
+     * Notifies the map properties observer of a change.
      */
     private void _updateMapProps() {
-        // mapPropsWindow.refresh();
+        _refresh(Subject::Properties);
     }
 
     /**
-     * Update the linked \c MainStatusBar to ensure it is always displaying the
-     * correct information.
-     * Note that the undo and redo action labels must be handled separately as
-     * the C++ itself game engine may be respnsible for changing the state of the
-     * mementos.
+     * Notifies the status observer of a change.
      */
     private void _updateStatusBar() {
-        // statusBar.setTileXY(map.getSelectedTile());
-        // statusBar.setZoom(_mapScalingFactor);
+        _refresh(Subject::Status, any(_mapScalingFactor));
     }
 
     /**
-     * Updates the linked \c ScriptsWindow to ensure it is always displaying the
-     * correct information.
+     * Notifies the scripts observer of a change.
      */
     private void _updateScriptsWindow() {
-        // scriptsWindow.refresh();
+        _refresh(Subject::Scripts);
+    }
+
+    /**
+     * Notify an observer of a change.
+     * @param s    The observer to notify.
+     * @param data The data to given to the observer.
+     */
+    private void _refresh(const Subject s, const any&in data = any()) {
+        if (observers[s] !is null) observers[s].refresh(data);
     }
 
     /**
@@ -916,29 +940,9 @@ class EditableMap {
     // DATA //
     //////////
     /**
-     * The \c TilePropertiesWindow to link up with this \c EditableMap.
+     * The observers that monitor map changes.
      */
-    // private TilePropertiesWindow@ tilePropsWindow;
-    
-    /**
-     * The \c ArmyPropertiesWindow to link up with this \c EditableMap.
-     */
-    // private ArmyPropertiesWindow@ armyPropsWindow;
-
-    /**
-     * The \c MapPropertiesWindow to link up with this \c EditableMap.
-     */
-    // private MapPropertiesWindow@ mapPropsWindow;
-
-    /**
-     * The \c MainStatusBar to link up with this \c EditableMap.
-     */
-    // private MainStatusBar@ statusBar;
-
-    /**
-     * The \c ScriptsWindow to link up with this \c EditableMap.
-     */
-    // private ScriptsWindow@ scriptsWindow;
+    private array<Observer@> observers;
 
     /**
      * The currently selected tile used to fill the \c TilePropertiesWindow.

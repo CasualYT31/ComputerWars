@@ -30,6 +30,14 @@ shared class ChildWindow : Container {
         ::setWidgetText(this, t, vars);
     }
 
+    void setResizable(const bool r) {
+        ::setWidgetResizable(this, r);
+    }
+
+    void setTitleButtons(const uint b) {
+        setChildWindowTitleButtons(this, b);
+    }
+
     void connectClosing(ChildWindowClosingSignalHandler@ const h) {
         connectChildWindowClosingSignalHandler(this, h);
     }

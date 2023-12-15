@@ -146,7 +146,7 @@ void sfx::gui::_deleteWidget(const sfx::WidgetIDRef id) {
 	START_WITH_WIDGET(id)
 		if (id == sfx::ROOT_WIDGET) ERROR("You cannot delete the root widget!");
 		_removeWidgets(id, true);
-	END("Attempted to remove the widget \"{}\".", id)
+	END("Attempted to delete the widget \"{}\".", id)
 }
 
 void sfx::gui::_setWidgetName(const sfx::WidgetIDRef id, const std::string& name) {

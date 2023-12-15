@@ -46,4 +46,8 @@ shared class Label : ClickableWidget {
         const VerticalAlignment v) {
         setWidgetTextAlignment(this, h, v);
     }
+
+    void setTextMaximumWidth(const float w) {
+        ::setWidgetTextMaximumWidth(this, w);
+    }
 }

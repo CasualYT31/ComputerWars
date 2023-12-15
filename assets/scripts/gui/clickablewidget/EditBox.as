@@ -14,7 +14,15 @@ shared class EditBox : ClickableWidget {
         super(EditBoxEngineName);
     }
 
+    void setText(const string&in t) {
+        ::setWidgetText(this, t);
+    }
+
     string getText() const {
         return getWidgetText(this);
+    }
+
+    void setValidator(const string&in v) {
+        ::setEditBoxRegexValidator(this, v);
     }
 }

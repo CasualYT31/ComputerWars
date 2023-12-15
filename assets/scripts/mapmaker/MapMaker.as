@@ -50,6 +50,9 @@ class MapMaker : Menu, Group {
         
         // Setup the client area.
         clientArea.add(mementoWindow);
+        clientArea.add(mapPropertiesWindow);
+        clientArea.add(fillWindow);
+        selectedTileType.attach(fillWindow);
 
         // Setup the base group.
         mainStatusBar.setSize("", "MenuBar.height");
@@ -69,10 +72,23 @@ class MapMaker : Menu, Group {
     }
 
     /**
+     * Ensures the confirm fill window is detached from the selected tile type
+     * object to allow for the window to be deleted.
+     */
+    ~MapMaker() {
+        selectedTileType.detach(fillWindow);
+    }
+
+    /**
      * Invoked when the menu is opened.
      * @param oldMenu Handle to the menu that was open before this one.
      */
     void Open(Menu@ const oldMenu) {
+        @mapMaker = this;
+        // Debug {
+        fileDialogFile = "./map/islandx.cwm";
+        openEditMapAuthorised();
+        // }
         setVisibility(true);
     }
 
@@ -233,6 +249,13 @@ class MapMaker : Menu, Group {
         messageBox.setPosition("50%", "50%");
     }
 
+    /**
+     * Opens the "no map is open right now" message box.
+     */
+    private void openNoMapIsOpenMessageBox() {
+        openMessageBox(null, { "ok" }, "nomapisopen");
+    }
+
     /////////////////
     // FILE DIALOG //
     /////////////////
@@ -294,6 +317,8 @@ class MapMaker : Menu, Group {
         @edit = EditableMap(mapToHandle);
         edit.map.setMementoStateChangedCallback(
             MementoStateChangedCallback(this.mementosHaveChanged));
+        edit.setObserver(Subject::Properties, @mapPropertiesWindow);
+        edit.setObserver(Subject::Status, @mainStatusBar);
         mementosHaveChanged();
     }
 
@@ -338,6 +363,7 @@ class MapMaker : Menu, Group {
      */
     private void newEditMapAuthorisedWithAuthorisedQuit() {
         initEditMap(createMap(fileDialogFile, PLAYABLE_MAP_TYPENAME));
+        mapPropertiesWindow.open();
     }
 
     /////////////
@@ -442,6 +468,8 @@ class MapMaker : Menu, Group {
     private void quitEditMapAuthorised() {
         ::quitMap();
         mementoWindow.close();
+        mapPropertiesWindow.close();
+        fillWindow.close();
         @edit = null;
         mementoWindow.refresh();
         if (quitCallback !is null) quitCallback();
@@ -459,6 +487,25 @@ class MapMaker : Menu, Group {
         mementoWindow.refresh();
         mainStatusBar.setUndoAction(edit.map.getNextUndoMementoName());
         mainStatusBar.setRedoAction(edit.map.getNextRedoMementoName());
+    }
+
+    //////////
+    // FILL //
+    //////////
+
+    /**
+     * The user has authorised the fill operation.
+     */
+    private void fillWindowYes() {
+        fillWindow.close();
+        edit.fillMap(selectedTileType.type, selectedTileType.owner);
+    }
+
+    /**
+     * The user has cancelled the fill operation.
+     */
+    private void fillWindowNo() {
+        fillWindow.close();
     }
 
     /////////////
@@ -500,6 +547,18 @@ class MapMaker : Menu, Group {
      * The memento window.
      */
     private MementoWindow mementoWindow;
+
+    /**
+     * The map properties window.
+     */
+    private MapPropertiesWindow mapPropertiesWindow;
+
+    /**
+     * The window displayed when confirming a fill operation.
+     */
+    private ConfirmTileTypeWindow fillWindow("fillmapconfirmationnotile",
+        "fillmapconfirmationtile", SingleSignalHandler(this.fillWindowYes),
+        SingleSignalHandler(this.fillWindowNo));
 
     /**
      * The status bar.
@@ -560,8 +619,12 @@ class MapMaker : Menu, Group {
             mementoWindow.open();
 
         } else if (i == MAP_SET_PROPS) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else mapPropertiesWindow.open();
 
         } else if (i == MAP_FILL) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else fillWindow.open("fillmapconfirmation");
 
         } else if (i == MAP_FIX_TILES) {
 
@@ -585,12 +648,22 @@ class MapMaker : Menu, Group {
 /**
  * The status bar of the map maker menu.
  */
-class MainStatusBar : StatusBar {
+class MainStatusBar : Observer, StatusBar {
     /**
      * Initialises the main status bar with the labels it needs.
      */
     MainStatusBar() {
         super({ 1.0, 1.0, 1.0, 1.0 });
+    }
+
+    /**
+     * Refreshes the status bar.
+     */
+    void refresh(any&in data = any()) override {
+        setTileXY(edit.map.getSelectedTile());
+        float scalingFactor = 0.0;
+        data.retrieve(scalingFactor);
+        setZoom(scalingFactor);
     }
 
     /**
