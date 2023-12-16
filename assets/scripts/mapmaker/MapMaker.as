@@ -15,6 +15,11 @@ funcdef void EmptyCallback();
 funcdef void MessageBoxCallback(const uint64);
 
 /**
+ * When a query window closes, a callback of this signature will be invoked.
+ */
+funcdef void QueryWindowCallback();
+
+/**
  * Represents the map maker.
  */
 class MapMaker : Menu, Group {
@@ -51,6 +56,7 @@ class MapMaker : Menu, Group {
         // Setup the client area.
         clientArea.add(mementoWindow);
         clientArea.add(mapPropertiesWindow);
+        clientArea.add(scriptsWindow);
         clientArea.add(fillWindow);
         selectedTileType.attach(fillWindow);
 
@@ -301,7 +307,7 @@ class MapMaker : Menu, Group {
      * When a file dialog closes, we need to re-enable the map maker, unless a
      * message box was created before the file dialog was closed.
      */
-    private void fileDialogClosing(const WidgetID id, bool&out neverAbort) {
+    private void fileDialogClosing(bool&out neverAbort) {
         @fileDialog = null;
         if (messageBox !is null) return;
         dialogGroup.setEnabled(false);
@@ -318,6 +324,7 @@ class MapMaker : Menu, Group {
         edit.map.setMementoStateChangedCallback(
             MementoStateChangedCallback(this.mementosHaveChanged));
         edit.setObserver(Subject::Properties, @mapPropertiesWindow);
+        edit.setObserver(Subject::Scripts, @scriptsWindow);
         edit.setObserver(Subject::Status, @mainStatusBar);
         mementosHaveChanged();
     }
@@ -326,6 +333,48 @@ class MapMaker : Menu, Group {
      * Cache of the selected path from the file dialog.
      */
     string fileDialogFile;
+
+    //////////////////
+    // QUERY WINDOW //
+    //////////////////
+
+    /**
+     * Opens a query window and disables the rest of the map maker until it
+     * closes.
+     * @param queryWindow The \c QueryWindow setup by the caller. Note that its
+     *                    \c Closing signal handler will be updated by this
+     *                    method!
+     * @param callback    After the query window is closed, invoke this callback.
+     */
+    void openQueryWindow(QueryWindow@ const queryWindow,
+        QueryWindowCallback@ const callback) {
+        @queryWindowCallback = callback;
+        baseGroup.setEnabled(false);
+        dialogGroup.setEnabled(true);
+        dialogGroup.moveToFront();
+        dialogGroup.add(queryWindow);
+        queryWindow.connectClosing(
+            ChildWindowClosingSignalHandler(this.queryWindowClosing));
+    }
+
+    /**
+     * Cache of the callback given to \c openQueryWindow().
+     */
+    private QueryWindowCallback@ queryWindowCallback;
+
+    /**
+     * When the opened query window is closed, re-enable the rest of the map
+     * maker.
+     */
+    private void queryWindowClosing(bool&out neverAbort) {
+        dialogGroup.setEnabled(false);
+        baseGroup.setEnabled(true);
+        baseGroup.moveToFront();
+        if (queryWindowCallback !is null) {
+            queryWindowCallback();
+            @queryWindowCallback = null;
+        }
+    }
 
     //////////////
     // NEW FILE //
@@ -470,6 +519,7 @@ class MapMaker : Menu, Group {
         mementoWindow.close();
         mapPropertiesWindow.close();
         fillWindow.close();
+        scriptsWindow.close();
         @edit = null;
         mementoWindow.refresh();
         if (quitCallback !is null) quitCallback();
@@ -559,6 +609,11 @@ class MapMaker : Menu, Group {
     private ConfirmTileTypeWindow fillWindow("fillmapconfirmationnotile",
         "fillmapconfirmationtile", SingleSignalHandler(this.fillWindowYes),
         SingleSignalHandler(this.fillWindowNo));
+    
+    /**
+     * The scripts window.
+     */
+    private ScriptsWindow scriptsWindow;
 
     /**
      * The status bar.
@@ -599,21 +654,25 @@ class MapMaker : Menu, Group {
             openFileDialog(SingleSignalHandler(this.openEditMap), "openmap",
                 "open", true);
 
-        } else if (i == FILE_SAVE_MAP && edit !is null) {
-            edit.map.save();
+        } else if (i == FILE_SAVE_MAP) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else edit.map.save();
 
-        } else if (i == FILE_SAVE_MAP_AS && edit !is null) {
-            openFileDialog(SingleSignalHandler(this.saveEditMapAs), "savemapas",
-                "save");
+        } else if (i == FILE_SAVE_MAP_AS) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else openFileDialog(SingleSignalHandler(this.saveEditMapAs),
+                "savemapas", "save");
 
         } else if (i == FILE_QUIT) {
             quitEditMap(function(){ setGUI("MainMenu"); });
 
-        } else if (i == EDIT_UNDO && edit !is null) {
-            edit.undo();
+        } else if (i == EDIT_UNDO) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else edit.undo();
 
-        } else if (i == EDIT_REDO && edit !is null) {
-            edit.redo();
+        } else if (i == EDIT_REDO) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else edit.redo();
 
         } else if (i == EDIT_MEMENTO_WINDOW) {
             mementoWindow.open();
@@ -627,8 +686,14 @@ class MapMaker : Menu, Group {
             else fillWindow.open("fillmapconfirmation");
 
         } else if (i == MAP_FIX_TILES) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else openMessageBox(
+                function(const uint64 id){ if (id == 0) edit.fixTiles(); },
+                { "yes", "no" }, "tilefixconfirmation");
 
         } else if (i == MAP_SCRIPTS) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else scriptsWindow.open();
 
         } else if (i == VIEW_TOOLBAR) {
 

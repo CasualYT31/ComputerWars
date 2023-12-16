@@ -192,10 +192,14 @@ namespace sfx {
 		 * methods.
 		 * For a list of available signals, you can view the \c signal namespace in
 		 * in \c guiconstants.hpp.
-		 * @param  widget     The widget sending the signal.
-		 * @param  signalName The name of the signal being sent.
-		 * @return \c TRUE if a signal handler was called, \c FALSE if not.
-		 * @safety No guarantee.
+		 * @warning You must assume that this method will invalidate any iterators,
+		 *          pointers, and references to widget data! This is because a
+		 *          signal handler may indirectly cause a reallocation of the
+		 *          widget data container.
+		 * @param   widget     The widget sending the signal.
+		 * @param   signalName The name of the signal being sent.
+		 * @return  \c TRUE if a signal handler was called, \c FALSE if not.
+		 * @safety  No guarantee.
 		 */
 		bool signalHandler(tgui::Widget::Ptr widget,
 			const tgui::String& signalName);
@@ -620,6 +624,12 @@ namespace sfx {
 			 * widget.
 			 */
 			minimised_child_window_list minimisedChildWindowList;
+
+			/**
+			 * Dump this widget's data to a string.
+			 * @return The widget's data in string form.
+			 */
+			operator std::string() const;
 		};
 
 		/**
@@ -834,26 +844,31 @@ namespace sfx {
 
 		/**
 		 * Stores a given widget in the \c _widgets container.
-		 * @param  w Pointer to the widget to store. Cannot be \c nullptr.
-		 * @return The ID of the widget.
+		 * @warning You must assume that this method will invalidate any iterators,
+		 *          pointers, and references to widget data!
+		 * @param   w Pointer to the widget to store. Cannot be \c nullptr.
+		 * @return  The ID of the widget.
 		 */
 		WidgetID _storeWidget(const tgui::Widget::Ptr& w);
 
 		/**
 		 * Stores a given widget in the \c _widgets container and configures its
 		 * signal handlers.
-		 * @param  w             Pointer to the widget to store. Cannot be
-		 *                       \c nullptr.
-		 * @return The ID of the widget.
+		 * @warning You must assume that this method will invalidate any iterators,
+		 *          pointers, and references to widget data!
+		 * @param   w Pointer to the widget to store. Cannot be \c nullptr.
+		 * @return  The ID of the widget.
 		 */
 		WidgetID _storeWidgetAndConnectSignals(const tgui::Widget::Ptr& w);
 
 		/**
 		 * Creates a widget of a given type, stores it, and connects the signal
 		 * handler/s.
-		 * @param  wType         The type of widget to create.
-		 * @return The ID of the new widget. \c sfx::NO_WIDGET if the widget could
-		 *         not be created.
+		 * @warning You must assume that this method will invalidate any iterators,
+		 *          pointers, and references to widget data!
+		 * @param   wType         The type of widget to create.
+		 * @return  The ID of the new widget. \c sfx::NO_WIDGET if the widget could
+		 *          not be created.
 		 */
 		WidgetID _createWidget(const std::string& wType);
 
@@ -908,7 +923,10 @@ namespace sfx {
 		 * Finds the next available widget ID.
 		 * If the final widget ID has been found, then log a warning and allocate
 		 * x1.5 more cells.
-		 * @return A widget ID that is not currently in use.
+		 * @warning In the case that a reallocation does occur, any existing
+		 *          iterators (as well as pointers or references) to widget data
+		 *          will be invalidated!
+		 * @return  A widget ID that is not currently in use.
 		 */
 		WidgetID _findNextWidgetID();
 
@@ -1036,6 +1054,9 @@ namespace sfx {
 		void _setGUI(const std::string&);
 		bool _menuExists(const std::string&);
 		asIScriptObject* _getMenu(const std::string&);
+		void _dumpWidgetsToString(std::string&, const sfx::gui::widget_data&,
+			const std::size_t = 0) const;
+		void _dumpWidgetsToLog() const;
 
 		// WIDGETS //
 
@@ -1389,7 +1410,7 @@ namespace sfx {
 
 		WidgetID _addTabAndPanel(const WidgetIDRef,
 			const std::string&, CScriptArray* const = nullptr);
-		void _removeTabAndPanel(const WidgetIDRef);
+		bool _removeTabAndPanel(const WidgetIDRef);
 
 		// SPINCONTROL //
 

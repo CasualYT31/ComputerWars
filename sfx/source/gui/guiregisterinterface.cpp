@@ -179,14 +179,13 @@ void sfx::gui::_registerTypes(asIScriptEngine* const engine,
 		"the signal will be passed, as well as the name of the signal being "
 		"emitted.");
 
-	r = engine->RegisterFuncdef("void ChildWindowClosingSignalHandler("
-		WIDGET_ID_PARAM ", bool&out)");
+	r = engine->RegisterFuncdef("void ChildWindowClosingSignalHandler(bool&out)");
 	document->DocumentObjectFuncDef(r, "The signature of a callback that is "
 		"invoked when a <tt>ChildWindow</tt> emits the <tt>Closing</tt> signal. "
-		"The ID of the widget emitting the signal will be passed, as well as a "
-		"reference to a bool that's used to determine if the <tt>ChildWindow</tt> "
-		"should actually close or not. It defaults to <tt>TRUE</tt>, and can be "
-		"set to <tt>FALSE</tt> to prevent the <tt>ChildWindow</tt> from closing.");
+		"A reference to a bool will be given, that's used to determine if the "
+		"<tt>ChildWindow</tt> should actually close or not. It defaults to "
+		"<tt>TRUE</tt>, and can be set to <tt>FALSE</tt> to prevent the "
+		"<tt>ChildWindow</tt> from closing.");
 }
 
 void sfx::gui::_registerConstants(asIScriptEngine* const engine,
@@ -383,6 +382,10 @@ void sfx::gui::_registerNonWidgetGlobalFunctions(asIScriptEngine* const engine,
 	document->DocumentGlobalFunction(r, "Returns a handle to the <tt>Menu</tt> "
 		"object corresponding to the specified menu. <tt>null</tt> is returned if "
 		"the given menu doesn't exist.");
+
+	r = engine->RegisterGlobalFunction("void dumpWidgetsToLog()",
+		asMETHOD(sfx::gui, _dumpWidgetsToLog), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Dumps all widget data to the logs.");
 }
 
 void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
@@ -1353,20 +1356,21 @@ void sfx::gui::_registerTabContainerGlobalFunctions(asIScriptEngine* const engin
 		"will not be selected.");
 
 	r = engine->RegisterGlobalFunction(
-		"void removeTabAndPanel(" WIDGET_ID_PARAM ")",
+		"bool removeTabAndPanel(" WIDGET_ID_PARAM ")",
 		asMETHOD(sfx::gui, _removeTabAndPanel),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Removes a tab from a "
-		"<tt>TabContainer</tt>, given the tab's panel's ID. If there are multiple "
-		"panels with the same name, the first one found from the left will be "
-		"removed. If the given panel's parent is not a <tt>TabContainer</tt>, "
-		"then an error will be logged and no widget will be removed.");
+		"<tt>TabContainer</tt>, given the tab's panel's ID. If the given panel's "
+		"parent is not a <tt>TabContainer</tt>, then an error will be logged and "
+		"no widget will be removed. <tt>TRUE</tt> is returned only if the panel "
+		"was successfully removed.");
 }
 
 void sfx::gui::_registerSpinControlGlobalFunctions(asIScriptEngine* const engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	auto r = engine->RegisterGlobalFunction(
-		"void setWidgetMinMaxValues(const string&in, const float, const float)",
+		"void setWidgetMinMaxValues(" WIDGET_ID_PARAM ", const float, "
+		"const float)",
 		asMETHOD(sfx::gui, _setWidgetMinMaxValues),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets the minimum and maximum values that "
@@ -1374,7 +1378,7 @@ void sfx::gui::_registerSpinControlGlobalFunctions(asIScriptEngine* const engine
 		"adjusted automatically.");
 
 	r = engine->RegisterGlobalFunction(
-		"bool setWidgetValue(const string&in, float)",
+		"bool setWidgetValue(" WIDGET_ID_PARAM ", float)",
 		asMETHOD(sfx::gui, _setWidgetValue),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets the value assigned to this widget. "
@@ -1383,7 +1387,7 @@ void sfx::gui::_registerSpinControlGlobalFunctions(asIScriptEngine* const engine
 		"could be assigned without adjustments or errors.");
 
 	r = engine->RegisterGlobalFunction(
-		"float getWidgetValue(const string&in)",
+		"float getWidgetValue(" WIDGET_ID_PARAM ")",
 		asMETHOD(sfx::gui, _getWidgetValue),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Returns the value currently set in the "

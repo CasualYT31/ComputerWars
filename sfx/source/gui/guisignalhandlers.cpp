@@ -30,27 +30,30 @@ bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	const tgui::String& signalName) {
 	if (!_scripts) return false;
 	const auto id = _getWidgetID(widget);
-	// Placeholder widgets will not ever be connected here.
-	const auto dataItr = _findWidget(id);
+	auto data = _findWidget(id);
 	// If the widget can no longer be found, it means at least two signals for it
 	// fired off, and the first signal deleted the widget from storage before the
 	// second one was handled. In such cases, just silently drop the signal.
-	if (dataItr == _widgets.end()) return false;
-	const auto& data = *dataItr;
+	if (data == _widgets.end()) return false;
 	std::string signalNameStd = signalName.toStdString();
 	bool calledAny = false, allSuccessful = true;
 	// Invoke the single signal handler first.
-	if (data.singleSignalHandlers.find(signalNameStd) !=
-		data.singleSignalHandlers.end()) {
+	if (data->singleSignalHandlers.find(signalNameStd) !=
+		data->singleSignalHandlers.end()) {
 		calledAny = true;
 		allSuccessful &= _scripts->callFunction(
-			data.singleSignalHandlers.at(signalNameStd).operator->());
+			data->singleSignalHandlers.at(signalNameStd).operator->());
+		// The single signal handler may have indirectly caused a _widgets
+		// reallocation, so regenerate the iterator.
+		data = _findWidget(id);
 	}
-	// Then invoke the multi signal handler.
-	if (data.multiSignalHandler) {
+	// Then, invoke the multi signal handler.
+	// If the widget can no longer be found, the single signal handler will have
+	// deleted this widget, so don't bother invoking the multi signal handler.
+	if (data != _widgets.end() && data->multiSignalHandler) {
 		calledAny = true;
 		allSuccessful &= _scripts->callFunction(
-			data.multiSignalHandler->operator->(), id, &signalNameStd);
+			data->multiSignalHandler->operator->(), id, &signalNameStd);
 	}
 	return calledAny && allSuccessful;
 }
@@ -114,18 +117,22 @@ void sfx::gui::minimised_child_window_list::restore(const WidgetIDRef id) {
 void sfx::gui::closingSignalHandler(const tgui::ChildWindow::Ptr& window,
 	bool* abort) {
 	const auto id = _getWidgetID(window);
-	auto& data = *_findWidget(id);
+	auto data = _findWidget(id);
 	// Firstly, invoke the signal handler, if it exists. If it doesn't, always
 	// "close" the window.
 	bool close = true;
-	if (data.childWindowClosingHandler) {
-		_scripts->callFunction(data.childWindowClosingHandler->operator->(), id,
+	if (data->childWindowClosingHandler) {
+		_scripts->callFunction(data->childWindowClosingHandler->operator->(),
 			&close);
+		// The closing signal handler may have indirectly caused a reallocation of
+		// _widgets, invalidating the iterator, so regenerate the iterator. 
+		data = _findWidget(id);
+		// It's possible for data to be _widgets.end() now!
 	}
-	if (close) {
+	if (data != _widgets.end() && close) {
 		// If the window was minimised when it was closed, we need to restore it.
-		if (data.childWindowData && data.childWindowData->isMinimised)
-			_restoreChildWindowImpl(id, data);
+		if (data->childWindowData && data->childWindowData->isMinimised)
+			_restoreChildWindowImpl(id, *data);
 		// Instead of removing the window from its parent, we make it go invisible
 		// instead.
 		window->setVisible(false);
@@ -140,7 +147,7 @@ void sfx::gui::basicClosingSignalHandler(const tgui::Widget::Ptr& window,
 	const auto id = _getWidgetID(window);
 	const auto& data = *_findWidget(id);
 	if (data.childWindowClosingHandler) _scripts->callFunction(
-		data.childWindowClosingHandler->operator->(), id, abort);
+		data.childWindowClosingHandler->operator->(), abort);
 }
 
 void sfx::gui::minimizedSignalHandler(const tgui::ChildWindow::Ptr& window) {

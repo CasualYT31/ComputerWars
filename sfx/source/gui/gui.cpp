@@ -335,6 +335,16 @@ sfx::WidgetID sfx::gui::getWidgetUnderMouse() const {
 	return sfx::NO_WIDGET;
 }
 
+sfx::gui::widget_data::operator std::string() const {
+	static const char* SEP = "\t\t\t";
+	return fmt::format("Widget #{}{}type=\"{}\"{}name=\"{}\"{}enabled={}.",
+		( ptr ? _getWidgetID(ptr) : sfx::NO_WIDGET ), SEP,
+		( ptr ? ptr->getWidgetType() : "Unknown" ), SEP,
+		( ptr ? ptr->getWidgetName() : "" ), SEP,
+		( ptr ? ptr->isEnabled() : "N/A" ), SEP
+	);
+}
+
 bool sfx::gui::animate(const sf::RenderTarget& target) {
 	if (!getGUI().empty()) {
 		if (_langdict && _langdict->getLanguage() != _lastlang) {
@@ -701,7 +711,10 @@ void sfx::gui::_makeNewDirectionalSelection(const sfx::WidgetIDRef newsel,
 			current = newsel;
 		} else return;
 	}
-	const auto& widget = _findWidget(current)->ptr;
+	// Make a copy of the pointer instead of holding a reference to the original.
+	// This is because the signal handler may invalidate the iterator returned by
+	// _findWidget(). See the documentation on signalHandler().
+	const Widget::Ptr widget = _findWidget(current)->ptr;
 	signalHandler(widget, "MouseEntered");
 	_showWidgetInScrollablePanel(widget);
 };
@@ -1115,8 +1128,8 @@ sfx::WidgetID sfx::gui::_storeWidget(const tgui::Widget::Ptr& w) {
 	w->setUserData(widgetID);
 	const auto widget = _findWidget(widgetID);
 	widget->ptr = w;
-	// If the widget is a ChildWindow, don't forget to turn on automatic
-	// handling of minimise and maximise.
+	// If the widget is a ChildWindow, don't forget to turn on automatic handling
+	// of minimise and maximise.
 	if (w->getWidgetType() == type::ChildWindow)
 		widget->childWindowData = sfx::gui::child_window_properties();
 	return widgetID;

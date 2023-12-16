@@ -37,6 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "scriptany.h"
 #include "scriptmath.h"
 #include "scripthandle.h"
+#include "weakref.h"
 #include "logger.hpp"
 #include <type_traits>
 #include "docgen.h"

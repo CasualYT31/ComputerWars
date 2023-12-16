@@ -30,6 +30,10 @@ shared class ChildWindow : Container {
         ::setWidgetText(this, t, vars);
     }
 
+    void setPositionLocked(const bool l) {
+        ::setWidgetPositionLocked(this, l);
+    }
+
     void setResizable(const bool r) {
         ::setWidgetResizable(this, r);
     }

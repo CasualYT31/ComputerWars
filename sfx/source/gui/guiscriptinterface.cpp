@@ -47,6 +47,31 @@ asIScriptObject* sfx::gui::_getMenu(const std::string& menu) {
 	return _menus.at(menu).object;
 }
 
+void sfx::gui::_dumpWidgetsToString(std::string& str,
+	const sfx::gui::widget_data& data, const std::size_t numberOfTabs) const {
+	str.append(std::string(numberOfTabs, '\t')).append(data).append("\n");
+	if (!data.ptr->isContainer()) return;
+	const auto& children = data.castPtr<Container>()->getWidgets();
+	for (const auto& child : children) {
+		const auto id = _getWidgetID(child);
+		if (id == sfx::NO_WIDGET)
+			str.append(std::string(numberOfTabs + 1, '\t')).
+				append("PLACEHOLDER \"").
+				append(child->getWidgetType().toStdString()).
+				append("\": \"").
+				append(child->getWidgetName().toStdString()).
+				append("\"\n");
+		else _dumpWidgetsToString(str, *_findWidget(id), numberOfTabs + 1);
+	}
+}
+
+void sfx::gui::_dumpWidgetsToLog() const {
+	std::string str("\n~~~ WIDGET DATA ~~~\n");
+	_dumpWidgetsToString(str, _widgets.at(sfx::ROOT_WIDGET));
+	str.erase(str.size() - 1);
+	_logger.write(str);
+}
+
 // WIDGETS //
 
 bool sfx::gui::_widgetExists(const sfx::WidgetIDRef id) const {
@@ -1647,7 +1672,7 @@ sfx::WidgetID sfx::gui::_addTabAndPanel(const sfx::WidgetIDRef id,
 			const auto panel = castWidget->addTab(text, false);
 			if (!panel) ERROR("Could not create panel!");
 			panelID = _storeWidget(panel);
-			_setTranslatedString(*_findWidget(panelID), text, vars,
+			_setTranslatedString(*widget, text, vars,
 				static_cast<std::size_t>(castWidget->getIndex(panel)));
 			_translateWidget(widget->ptr);
 		)
@@ -1658,7 +1683,7 @@ sfx::WidgetID sfx::gui::_addTabAndPanel(const sfx::WidgetIDRef id,
 	return panelID;
 }
 
-void sfx::gui::_removeTabAndPanel(const sfx::WidgetIDRef id) {
+bool sfx::gui::_removeTabAndPanel(const sfx::WidgetIDRef id) {
 	std::size_t i = 0;
 	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Panel,
@@ -1675,9 +1700,11 @@ void sfx::gui::_removeTabAndPanel(const sfx::WidgetIDRef id) {
 			auto& captions = std::get<sfx::gui::ListOfCaptions>(
 				container->originalCaption);
 			captions.erase(captions.begin() + i);
+			return true;
 		)
 	END("Attempted to add a tab and panel, the latter with name \"{}\", which is "
 		"of type \"{}\".", id, widgetType)
+	return false;
 }
 
 // SPINCONTROL //
