@@ -1171,6 +1171,18 @@ namespace sfx {
 		void _getCaretLineAndColumn(const WidgetIDRef, std::size_t&,
 			std::size_t&) const;
 
+		// BUTTON //
+
+		/**
+		 * Registers \c ButtonBase global functions.
+		 * See implementation for documentation on all of the methods used to
+		 * implement these functions.
+		 */
+		void _registerButtonGlobalFunctions(asIScriptEngine* const engine,
+			const std::shared_ptr<DocumentationGenerator>& document);
+
+		void _setWidgetDisabledBgColour(const WidgetIDRef, const sf::Color&);
+
 		// RADIOBUTTON & CHECKBOX //
 
 		/**

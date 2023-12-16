@@ -584,6 +584,18 @@ void sfx::gui::_getCaretLineAndColumn(const sfx::WidgetIDRef id,
 		"is of type \"{}\".", id, widgetType)
 }
 
+// BUTTON //
+
+void sfx::gui::_setWidgetDisabledBgColour(const sfx::WidgetIDRef id,
+	const sf::Color& colour) {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(BitmapButton,
+			castWidget->getRenderer()->setBackgroundColorDisabled(colour);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the disabled background colour \"{}\" to widget \"{}\", "
+		"which is of type \"{}\".", colour, id, widgetType)
+}
+
 // RADIOBUTTON & CHECKBOX //
 
 void sfx::gui::_setWidgetChecked(const sfx::WidgetIDRef id, const bool checked) {

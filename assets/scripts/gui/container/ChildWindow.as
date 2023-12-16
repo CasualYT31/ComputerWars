@@ -42,6 +42,10 @@ shared class ChildWindow : Container {
         setChildWindowTitleButtons(this, b);
     }
 
+    float getTitleBarHeight() const {
+        return ::getTitleBarHeight(this);
+    }
+
     void connectClosing(ChildWindowClosingSignalHandler@ const h) {
         connectChildWindowClosingSignalHandler(this, h);
     }

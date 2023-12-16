@@ -29,4 +29,12 @@ shared class ButtonBase : ClickableWidget {
     void setText(const string&in caption) {
         setWidgetText(this, caption);
     }
+
+    void setBackgroundColour(const Colour&in c) {
+        ::setWidgetBackgroundColour(this, c);
+    }
+
+    void setDisabledBackgroundColour(const Colour&in c) {
+        ::setWidgetDisabledBackgroundColour(this, c);
+    }
 }

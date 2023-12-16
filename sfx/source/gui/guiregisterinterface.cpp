@@ -756,6 +756,17 @@ void sfx::gui::_registerEditBoxGlobalFunctions(asIScriptEngine* const engine,
 		"of the given parameters are changed.");
 }
 
+void sfx::gui::_registerButtonGlobalFunctions(asIScriptEngine* const engine,
+	const std::shared_ptr<DocumentationGenerator>& document) {
+	auto r = engine->RegisterGlobalFunction(
+		"void setWidgetDisabledBackgroundColour(" WIDGET_ID_PARAM
+		", const Colour&in)",
+		asMETHOD(sfx::gui, _setWidgetDisabledBgColour),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's background colour when "
+		"it is disabled.");
+}
+
 void sfx::gui::_registerRadioButtonAndCheckBoxGlobalFunctions(
 	asIScriptEngine* const engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
@@ -1406,6 +1417,7 @@ void sfx::gui::registerInterface(asIScriptEngine* engine,
 	_registerSpriteGlobalFunctions(engine, document);
 	_registerLabelGlobalFunctions(engine, document);
 	_registerEditBoxGlobalFunctions(engine, document);
+	_registerButtonGlobalFunctions(engine, document);
 	_registerRadioButtonAndCheckBoxGlobalFunctions(engine, document);
 	_registerListGlobalFunctions(engine, document);
 	_registerTreeViewGlobalFunctions(engine, document);

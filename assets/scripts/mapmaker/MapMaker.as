@@ -57,6 +57,7 @@ class MapMaker : Menu, Group {
         clientArea.add(mementoWindow);
         clientArea.add(mapPropertiesWindow);
         clientArea.add(scriptsWindow);
+        clientArea.add(toolBar);
         clientArea.add(fillWindow);
         selectedTileType.attach(fillWindow);
 
@@ -95,6 +96,7 @@ class MapMaker : Menu, Group {
         fileDialogFile = "./map/islandx.cwm";
         openEditMapAuthorised();
         // }
+        toolBar.dock();
         setVisibility(true);
     }
 
@@ -616,6 +618,11 @@ class MapMaker : Menu, Group {
     private ScriptsWindow scriptsWindow;
 
     /**
+     * The window containing the painting tools available.
+     */
+    private ToolBar toolBar;
+
+    /**
      * The status bar.
      */
     private MainStatusBar mainStatusBar;
@@ -696,6 +703,7 @@ class MapMaker : Menu, Group {
             else scriptsWindow.open();
 
         } else if (i == VIEW_TOOLBAR) {
+            toolBar.dock();
 
         } else if (i == VIEW_OBJECT_DIALOG) {
 
