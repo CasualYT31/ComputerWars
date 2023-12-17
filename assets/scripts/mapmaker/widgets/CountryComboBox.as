@@ -26,9 +26,9 @@ class CountryComboBox : Group {
         iconGroup.add(icon);
 
         // Setup the combobox.
-        @listCallback = callback;
-        resetList(includeNeutral);
         list.connect(ItemSelected, SingleSignalHandler(this.listItemSelected));
+        resetList(includeNeutral);
+        @listCallback = callback;
         list.setItemsToDisplay(itemsToDisplay);
         list.setSize("100%", "100%");
         listGroup.add(list);
