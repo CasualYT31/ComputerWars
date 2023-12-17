@@ -78,6 +78,10 @@ shared abstract class Widget {
         setWidgetTextSize(this, size);
     }
 
+    void setFont(const string&in f) {
+        ::setWidgetFont(this, f);
+    }
+
     void setName(const string&in n) {
         setWidgetName(this, n);
     }

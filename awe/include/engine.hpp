@@ -312,52 +312,6 @@ namespace awe {
 		 */
 		std::string _script_formatBool(const bool b) const;
 
-		/**
-		 * Generates an array of paintable terrain sprites, given an owner.
-		 * @param  owner  Get a specific country's sprites by giving its script
-		 *                name here. Give an empty string to grab neutral tiles.
-		 * @return String array, one sprite per paintable terrain.
-		 */
-		CScriptArray* _script_generatePaintableTerrainSpriteArray(
-			const std::string& owner) const;
-
-		/**
-		 * Generates an array of tile type sprites, given an owner.
-		 * @param  owner  Get a specific country's sprites by giving its script
-		 *                name here. Give an empty string to grab neutral tiles.
-		 * @param  filter If given, contains a list of tile types to not include in
-		 *                the result.
-		 * @return String array, one sprite per tile type.
-		 */
-		CScriptArray* _script_generateTileSpriteArray(const std::string& owner,
-			const CScriptArray* const filter = nullptr) const;
-
-		/**
-		 * Generates an array of unit type sprites, given an owner.
-		 * @param  owner Get a specific country's sprites by giving its script name
-		 *               here.
-		 * @return String array, one sprite per unit type. An array full of blank
-		 *         strings if \c owner is empty.
-		 */
-		CScriptArray* _script_generateUnitSpriteArray(
-			const std::string& owner) const;
-
-		/**
-		 * Generates an array of structure sprites, given an owner and additional
-		 * data.
-		 * @param  owner     Get a specific country's sprites by giving its script
-		 *                   name here.
-		 * @param  destroyed \c TRUE if the destroyed sprites are to be returned,
-		 *                   \c FALSE if the normal sprites are to be returned.
-		 * @param  filter    If given, contains a list of structures to not include
-		 *                   in the result.
-		 * @return String array, one sprite per structure. An array full of blank
-		 *         strings if \c owner is empty.
-		 */
-		CScriptArray* _script_generateStructureSpriteArray(
-			const std::string& owner, const bool destroyed,
-			const CScriptArray* const filter = nullptr) const;
-
 		//=============================
 		//==========GAME DATA==========
 		//=============================

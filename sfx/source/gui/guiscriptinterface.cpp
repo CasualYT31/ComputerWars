@@ -72,6 +72,15 @@ void sfx::gui::_dumpWidgetsToLog() const {
 	_logger.write(str);
 }
 
+std::size_t sfx::gui::_getHeightOfTallestFrame(const std::string& sheet) const {
+	if (_sheet.count(sheet) == 0) {
+		_logger.error("Attempted to find the tallest frame from a spritesheet "
+			"\"{}\": this spritesheet does not exist!", sheet);
+		return 0;
+	}
+	return _sheet.at(sheet)->heightOfTallestFrame();
+}
+
 // WIDGETS //
 
 bool sfx::gui::_widgetExists(const sfx::WidgetIDRef id) const {
@@ -167,10 +176,16 @@ sfx::WidgetID sfx::gui::_getParent(const sfx::WidgetIDRef id) {
 	return sfx::NO_WIDGET;
 }
 
-void sfx::gui::_deleteWidget(const sfx::WidgetIDRef id) {
+void sfx::gui::_deleteWidgetScriptInterface(const sfx::WidgetIDRef id) {
 	START_WITH_WIDGET(id)
 		if (id == sfx::ROOT_WIDGET) ERROR("You cannot delete the root widget!");
-		_removeWidgets(id, true);
+		if (widgetType == type::Panel && containerID != sfx::NO_WIDGET &&
+			container->ptr->getWidgetType() == type::TabContainer) {
+			_logger.warning("The manual deletion of a Panel (\"{}\") from a "
+				"TabContainer (\"{}\") is forbidden! Using removeTabAndPanel() "
+				"instead...", id, containerID);
+			_removeTabAndPanel(id);
+		} else _deleteWidget(id);
 	END("Attempted to delete the widget \"{}\".", id)
 }
 
@@ -700,6 +715,16 @@ void sfx::gui::_deselectItem(const sfx::WidgetIDRef id) {
 		"type \"{}\".", id, widgetType)
 }
 
+std::size_t sfx::gui::_getItemCount(const WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(ListBox, return castWidget->getItemCount();)
+		ELSE_IF_WIDGET_IS(ComboBox, return castWidget->getItemCount();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get the item count of a widget \"{}\", which is of type "
+		"\"{}\".", id, widgetType)
+	return 0;
+}
+
 int sfx::gui::_getSelectedItem(const sfx::WidgetIDRef id) const {
 	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(ListBox, return castWidget->getSelectedItemIndex();)
@@ -862,6 +887,10 @@ void sfx::gui::_add(const sfx::WidgetIDRef p, const sfx::WidgetIDRef c) {
 			ERROR("The given container does not exist!")
 		if (!containerData->ptr->isContainer())
 			ERROR("The given container widget is not a container!");
+		// Do not allow the scripts to add to a TabContainer directly, as this will
+		// play havoc with resource management if a TabContainer is deleted.
+		if (containerData->ptr->getWidgetType() == type::TabContainer)
+			ERROR("Adding a widget to a TabContainer is forbidden!");
 		// If the given widget is already attached to a parent, remove it
 		// explicitly first.
 		if (containerID != sfx::NO_WIDGET)
@@ -879,32 +908,27 @@ void sfx::gui::_remove(const sfx::WidgetIDRef c) {
 	START_WITH_WIDGET(c)
 		if (containerID == sfx::NO_WIDGET)
 			ERROR("This widget does not have a parent!");
-		const auto containerData = _findWidget(_getWidgetID(container->ptr));
-		if (containerData == _widgets.end())
-			// This should never happen...
-			ERROR("The given container does not exist!")
-		_removeWidgetFromParent(*containerData, *widget);
+		if (container->ptr->getWidgetType() == type::TabContainer &&
+			widgetType == type::Panel) {
+			_logger.warning("Panel \"{}\" cannot be directly removed from "
+				"TabContainer \"{}\"! Using removeTabAndPanel() instead...", c,
+				containerID);
+			_removeTabAndPanel(c);
+		} else _removeWidgetFromParent(*container, *widget);
 	END("Attempted to remove widget \"{}\", which is of type \"{}\", from its "
 		"parent.", c, widgetType);
 }
 
 void sfx::gui::_removeAll(const sfx::WidgetIDRef p) {
 	START_WITH_WIDGET(p)
-		if (!widget->ptr->isContainer()) UNSUPPORTED_WIDGET_TYPE()
+		if (!widget->ptr->isContainer() || widgetType == type::TabContainer)
+			UNSUPPORTED_WIDGET_TYPE()
 		const std::vector<Widget::Ptr> children =
 			widget->castPtr<Container>()->getWidgets();
 		for (const auto& child : children) _removeWidgetFromParent(*widget,
 			*_findWidget(_getWidgetID(child)));
 	END("Attempted to remove all widgets from the container \"{}\", which is of "
 		"type \"{}\".", p, widgetType);
-}
-
-void sfx::gui::_deleteWidgetsFromContainer(const sfx::WidgetIDRef id) {
-	START_WITH_WIDGET(id)
-		if (widget->ptr->isContainer()) _removeWidgets(id, false);
-		else UNSUPPORTED_WIDGET_TYPE()
-	END("Attempted to remove the widgets from a widget \"{}\", of type \"{}\".",
-		id, widgetType)
 }
 
 void sfx::gui::_setWidgetIndexInContainer(const sfx::WidgetIDRef id,
@@ -1706,15 +1730,17 @@ bool sfx::gui::_removeTabAndPanel(const sfx::WidgetIDRef id) {
 			const auto tabContainer = container->castPtr<TabContainer>();
 			i = tabContainer->getIndex(castWidget);
 			if (i < 0) ERROR("Could not find given panel in the tab container!");
-			_removeWidgets(id, false);
+			// Since we want to keep this TabContainer around, do not invalidate
+			// its state by invoking _deleteWidget() before removeTab()!
 			tabContainer->removeTab(i);
+			_deleteWidget(id);
 			// Remove tab's caption from the translation map.
 			auto& captions = std::get<sfx::gui::ListOfCaptions>(
 				container->originalCaption);
 			captions.erase(captions.begin() + i);
 			return true;
 		)
-	END("Attempted to add a tab and panel, the latter with name \"{}\", which is "
+	END("Attempted to remove a tab and panel, the latter with ID \"{}\", which is "
 		"of type \"{}\".", id, widgetType)
 	return false;
 }

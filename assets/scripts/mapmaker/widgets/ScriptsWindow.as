@@ -346,9 +346,6 @@ class ScriptsWindow : Observer, ChildWindow {
 
 /**
  * Represents a single panel in the scripts window's tab container.
- * @warning We do not store full \c Widget objects in this class, as the engine is
- *          solely responsible for the lifetimes of the \c Panel widget and every
- *          widget that is within it.
  */
 class ScriptPanel : Observer {
     /**
@@ -364,15 +361,13 @@ class ScriptPanel : Observer {
         scriptName = text;
         @parent = tabContainer;
         panelID = tabContainer.addTabAndPanel("~" + text);
-        textAreaID = ::createWidget("TextArea");
-        ::setWidgetName(textAreaID, "TEXT_AREA:" + text);
-        ::setWidgetSize(textAreaID, "100%", "100%");
-        ::setWidgetFont(textAreaID, "Monospace");
-        ::optimiseTextAreaForMonospaceFont(textAreaID, true);
-        ::add(panelID, textAreaID);
-        ::connectSignal(textAreaID, TextChanged,
+        textArea.setSize("100%", "100%");
+        textArea.setFont("Monospace");
+        textArea.optimiseForMonospaceFont(true);
+        ::add(panelID, textArea);
+        textArea.connect(TextChanged,
             SingleSignalHandler(this.textAreaTextChanged));
-        ::connectSignal(textAreaID, CaretPositionChanged,
+        textArea.connect(CaretPositionChanged,
             SingleSignalHandler(this.textAreaCaretPositionChanged));
     }
 
@@ -391,9 +386,9 @@ class ScriptPanel : Observer {
         uint fontSize = 0;
         string contents;
         if (data.retrieve(contents)) {
-            ::setWidgetText(textAreaID, contents);
+            textArea.setText(contents);
         } else if (data.retrieve(fontSize)) {
-            ::setWidgetTextSize(textAreaID, fontSize);
+            textArea.setTextSize(fontSize);
         }
         currentlyRefreshing = false;
     }
@@ -402,7 +397,7 @@ class ScriptPanel : Observer {
      * Sets the focus to this panel's text area.
      */
     void setFocus() {
-        ::setWidgetFocus(textAreaID);
+        textArea.setFocus();
     }
 
     /**
@@ -411,7 +406,7 @@ class ScriptPanel : Observer {
      */
     Vector2 getCaretPosition() const {
         uint64 line = 0, column = 0;
-        ::getCaretLineAndColumn(textAreaID, line, column);
+        textArea.getCaretLineAndColumn(line, column);
         return Vector2(line, column);
     }
 
@@ -434,7 +429,7 @@ class ScriptPanel : Observer {
         // If the text is being updated due to a refresh, don't bother updating
         // the map file as the contents will be the same anyway.
         if (currentlyRefreshing) return;
-        edit.updateScriptFile(scriptName, ::getWidgetText(textAreaID));
+        edit.updateScriptFile(scriptName, textArea.getText());
     }
 
     /**
@@ -463,9 +458,9 @@ class ScriptPanel : Observer {
     private WidgetID panelID;
 
     /**
-     * Stores the ID of the text area in the panel.
+     * The text area in the panel.
      */
-    private WidgetID textAreaID;
+    private TextArea textArea;
 }
 
 /**

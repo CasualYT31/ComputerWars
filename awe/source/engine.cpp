@@ -350,36 +350,6 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game_engine, _script_formatBool),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Converts a bool into a string.");
-
-	r = engine->RegisterGlobalFunction(
-		"array<string>@ generatePaintableTerrainSpriteArray(const string&in)",
-		asMETHOD(awe::game_engine, _script_generatePaintableTerrainSpriteArray),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Generates a list of tile sprites for "
-		"each paintable terrain, given an owner.");
-
-	r = engine->RegisterGlobalFunction(
-		"array<string>@ generateTileSpriteArray(const string&in, "
-		"const array<string>@ const)",
-		asMETHOD(awe::game_engine, _script_generateTileSpriteArray),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Generates a list of tile sprites for "
-		"each tile type, given an owner.");
-
-	r = engine->RegisterGlobalFunction(
-		"array<string>@ generateUnitSpriteArray(const string&in)",
-		asMETHOD(awe::game_engine, _script_generateUnitSpriteArray),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Generates a list of unit sprites for "
-		"each unit type, given an owner.");
-
-	r = engine->RegisterGlobalFunction(
-		"array<string>@ generateStructureSpriteArray(const string&in, const bool, "
-		"const array<string>@ const)",
-		asMETHOD(awe::game_engine, _script_generateStructureSpriteArray),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Generates a list of structure sprites "
-		"for each structure, given an owner.");
 }
 
 bool awe::game_engine::_load(engine::json& j) {
@@ -722,72 +692,4 @@ std::string awe::game_engine::_script_getLatestLogEntry() const {
 
 std::string awe::game_engine::_script_formatBool(const bool b) const {
 	return b ? "true" : "false";
-}
-
-CScriptArray* awe::game_engine::_script_generatePaintableTerrainSpriteArray(
-	const std::string& owner) const {
-	CScriptArray* ret = _scripts->createArray("string");
-	// Should access them in order.
-	const auto& scriptNames = _terrains->getScriptNames();
-	for (std::string name : scriptNames) {
-		if (!(*_terrains)[name]->isPaintable()) continue;
-		std::string temp(owner.empty() ?
-			(*_terrains)[name]->getPrimaryTileType()->getNeutralTile() :
-			(*_terrains)[name]->getPrimaryTileType()->getOwnedTile(owner));
-		ret->InsertLast(&temp);
-	}
-	return ret;
-}
-
-CScriptArray* awe::game_engine::_script_generateTileSpriteArray(
-	const std::string& owner, const CScriptArray* const filter) const {
-	CScriptArray* ret = _scripts->createArray("string");
-	// Should access them in order.
-	const auto& scriptNames = _tiles->getScriptNames();
-	for (std::string name : scriptNames) {
-		if (filter && filter->Find(&name) >= 0) continue;
-		std::string temp(owner.empty() ?
-			_tiles->operator[](name)->getNeutralTile() :
-			_tiles->operator[](name)->getOwnedTile(owner));
-		ret->InsertLast(&temp);
-	}
-	// Kinda just realised that if this method throws at all, this is leaked. I've
-	// wrote code like this everywhere...
-	if (filter) filter->Release();
-	return ret;
-}
-
-CScriptArray* awe::game_engine::_script_generateUnitSpriteArray(
-	const std::string& owner) const {
-	CScriptArray* ret = _scripts->createArray("string");
-	// Should access them in order.
-	const auto& scriptNames = _units->getScriptNames();
-	for (const auto& name : scriptNames) {
-		std::string temp((*_units)[name]->getUnit(owner));
-		ret->InsertLast(&temp);
-	}
-	return ret;
-}
-
-CScriptArray* awe::game_engine::_script_generateStructureSpriteArray(
-	const std::string& owner, const bool destroyed,
-	const CScriptArray* const filter) const {
-	CScriptArray* ret = _scripts->createArray("string");
-	// Should access them in order.
-	const auto& scriptNames = _structures->getScriptNames();
-	for (std::string name : scriptNames) {
-		if (filter && filter->Find(&name) >= 0) continue;
-		std::string temp;
-		const auto structure = (*_structures)[name];
-		if (destroyed) {
-			// Destroyed structures are not supposed to have owners.
-			temp = structure->getDestroyedIconName();
-		} else {
-			temp = owner.empty() ? structure->getIconName() :
-				structure->getOwnedIconName(owner);
-		}
-		ret->InsertLast(&temp);
-	}
-	if (filter) filter->Release();
-	return ret;
 }

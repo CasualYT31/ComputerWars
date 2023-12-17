@@ -58,6 +58,7 @@ class MapMaker : Menu, Group {
         clientArea.add(mapPropertiesWindow);
         clientArea.add(scriptsWindow);
         clientArea.add(toolBar);
+        clientArea.add(paletteWindow);
         clientArea.add(fillWindow);
         selectedTileType.attach(fillWindow);
 
@@ -97,6 +98,7 @@ class MapMaker : Menu, Group {
         openEditMapAuthorised();
         // }
         toolBar.dock();
+        paletteWindow.dock();
         setVisibility(true);
     }
 
@@ -623,6 +625,11 @@ class MapMaker : Menu, Group {
     private ToolBar toolBar;
 
     /**
+     * The palette window.
+     */
+    private PaletteWindow paletteWindow;
+
+    /**
      * The status bar.
      */
     private MainStatusBar mainStatusBar;
@@ -706,6 +713,7 @@ class MapMaker : Menu, Group {
             toolBar.dock();
 
         } else if (i == VIEW_OBJECT_DIALOG) {
+            paletteWindow.dock();
 
         } else if (i == VIEW_TILE_PROPS) {
 

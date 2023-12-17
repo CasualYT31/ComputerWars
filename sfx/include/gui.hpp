@@ -740,23 +740,27 @@ namespace sfx {
 		void _connectSignals(tgui::Widget::Ptr widget);
 
 		/**
-		 * Removes widgets from \c _gui.
-		 * @warning A grid within a grid may cause the game to crash!
-		 * @param   widget   ID of the widget to delete.
-		 * @param   removeIt For containers: if \c FALSE, this will only remove all
-		 *                   the widgets within a container, but not the container
-		 *                   itself. If \c TRUE, this will ensure that the
-		 *                   container itself is also deleted, as well as all of
-		 *                   its child widgets.\n
-		 *                   For widgets: if \c FALSE, the widget's associated data
-		 *                   will be erased, but the widget itself won't be erased.
-		 *                   If \c TRUE, the widget and its data will be erased.
-		 *                   This is required for \c Grid widgets, who cause the
-		 *                   game to crash if it attempts to remove a grid whose
-		 *                   widgets have already been erased.
+		 * Deletes a widget from the GUI.
+		 * The following happens when a widget is deleted:
+		 * <ol><li>If the widget is a \c TabContainer, all of its \c Panel widgets
+		 *     need to be manually deleted, as these are managed by the engine and
+		 *     not the scripts.</li>
+		 *     <li>If the widget is a \c ChildWindow, remove it from its parent's
+		 *     \c ChildWindowList, if it has a parent.</li>
+		 *     <li>Remove the widget's ID from every other widget's and every
+		 *     menu's directional flow data.</li>
+		 *     <li>Remove the widget's sprite, if it has one.</li>
+		 *     <li>Clear the widget's data, and free up the ID for later use.</li>
+		 *     <li>Actually remove the widget itself from its parent, if it has
+		 *     one.</li></ol>
+		 * This method will \em not delete widgets recursively. This decision was
+		 * made because resource management with the object-oriented interface
+		 * would be a pain otherwise. When a container is deleted, you do not
+		 * necessarily want to delete all of its widgets, too.
+		 * @param   widget ID of the widget to delete.
 		 * @safety  No guarantee.
 		 */
-		void _removeWidgets(const WidgetIDRef widget, const bool removeIt);
+		void _deleteWidget(const WidgetIDRef widget);
 
 		/**
 		 * Adds a translatable caption to a widget, or updates an existing one.
@@ -1057,6 +1061,7 @@ namespace sfx {
 		void _dumpWidgetsToString(std::string&, const sfx::gui::widget_data&,
 			const std::size_t = 0) const;
 		void _dumpWidgetsToLog() const;
+		std::size_t _getHeightOfTallestFrame(const std::string&) const;
 
 		// WIDGETS //
 
@@ -1076,7 +1081,7 @@ namespace sfx {
 		void _connectSignal(const WidgetIDRef, asIScriptFunction* const);
 		void _disconnectSignals(const CScriptArray* const);
 		WidgetID _getParent(const WidgetIDRef);
-		void _deleteWidget(const WidgetIDRef);
+		void sfx::gui::_deleteWidgetScriptInterface(const sfx::WidgetIDRef id);
 		void _setWidgetName(const WidgetIDRef, const std::string&);
 		std::string _getWidgetName(const WidgetIDRef) const;
 		void _setWidgetFocus(const WidgetIDRef);
@@ -1211,6 +1216,7 @@ namespace sfx {
 		void _clearItems(const WidgetIDRef);
 		void _setSelectedItem(const WidgetIDRef, const std::size_t);
 		void _deselectItem(const WidgetIDRef);
+		std::size_t _getItemCount(const WidgetIDRef);
 		int _getSelectedItem(const WidgetIDRef) const;
 		std::string _getSelectedItemText(const WidgetIDRef) const;
 		void _setItemsToDisplay(const WidgetIDRef, const std::size_t);
@@ -1257,7 +1263,6 @@ namespace sfx {
 		void _add(const WidgetIDRef, const WidgetIDRef);
 		void _remove(const WidgetIDRef);
 		void _removeAll(const WidgetIDRef);
-		void _deleteWidgetsFromContainer(const WidgetIDRef);
 		void _setWidgetIndexInContainer(const WidgetIDRef, const std::size_t,
 			const std::size_t);
 		std::size_t _getWidgetCount(const WidgetIDRef) const;

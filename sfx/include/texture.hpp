@@ -131,6 +131,13 @@ namespace sfx {
 		 * increments them based on a static delta timer.
 		 */
 		void updateGlobalFrameIDs();
+
+		/**
+		 * Returns the height of the tallest frame in this spritesheet.
+		 * @return The height, in pixels, of the tallest frame in the entire
+		 *         spritesheet.
+		 */
+		std::size_t heightOfTallestFrame() const;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -220,6 +227,11 @@ namespace sfx {
 
 		/// Stores information on every sprite in this sheet.
 		std::unordered_map<std::string, sprite_data> _data;
+
+		/**
+		 * Caches the height of the tallest sprite/frame in this spritesheet.
+		 */
+		std::size_t _tallestSpriteHeight = 0;
 	};
 
 	/**

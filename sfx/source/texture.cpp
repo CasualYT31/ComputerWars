@@ -158,6 +158,10 @@ void sfx::animated_spritesheet::updateGlobalFrameIDs() {
 	}
 }
 
+std::size_t sfx::animated_spritesheet::heightOfTallestFrame() const {
+	return _tallestSpriteHeight;
+}
+
 bool sfx::animated_spritesheet::_load(engine::json& j) {
 	// Firstly, load the spritesheet.
 	std::string imgpath;
@@ -174,6 +178,7 @@ bool sfx::animated_spritesheet::_load(engine::json& j) {
 	}
 	// Secondly, go through all the sprites and store the info.
 	_data.clear();
+	_tallestSpriteHeight = 0;
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	try {
 		for (auto& i : jj["sprites"].items()) {
@@ -188,6 +193,8 @@ bool sfx::animated_spritesheet::_load(engine::json& j) {
 					rect.width = i.value()["frames"][f][2];
 					rect.height = i.value()["frames"][f][3];
 					data.frames.push_back(rect);
+					if (rect.height > static_cast<int>(_tallestSpriteHeight))
+						_tallestSpriteHeight = rect.height;
 				}
 				// Go through the durations.
 				for (std::size_t f = 0; f < i.value()["durations"].size(); f++) {

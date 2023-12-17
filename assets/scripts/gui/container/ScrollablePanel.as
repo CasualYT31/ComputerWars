@@ -26,6 +26,10 @@ shared class ScrollablePanel : Panel {
         super(widgetType);
     }
 
+    float getScrollbarWidth() const {
+        return ::getScrollbarWidth(this);
+    }
+
     void setVerticalScrollbarAmount(const uint a) {
         ::setVerticalScrollbarAmount(this, a);
     }

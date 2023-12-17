@@ -386,6 +386,13 @@ void sfx::gui::_registerNonWidgetGlobalFunctions(asIScriptEngine* const engine,
 	r = engine->RegisterGlobalFunction("void dumpWidgetsToLog()",
 		asMETHOD(sfx::gui, _dumpWidgetsToLog), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Dumps all widget data to the logs.");
+
+	r = engine->RegisterGlobalFunction(
+		"uint64 getHeightOfTallestFrame(const string&in)",
+		asMETHOD(sfx::gui, _getHeightOfTallestFrame),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets the height of the tallest frame "
+		"from the given spritesheet.");
 }
 
 void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
@@ -449,10 +456,10 @@ void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
 		"of the given widget. <tt>NO_WIDGET</tt> if there is no parent.");
 
 	r = engine->RegisterGlobalFunction("void deleteWidget(" WIDGET_ID_PARAM ")",
-		asMETHOD(sfx::gui, _deleteWidget), asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Removes a given widget. If the given "
-		"widget is a container, then all of its widgets will be removed "
-		"recursively. The <tt>ROOT_WIDGET</tt> cannot be deleted!");
+		asMETHOD(sfx::gui, _deleteWidgetScriptInterface),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Deletes a given widget. The "
+		"<tt>ROOT_WIDGET</tt> cannot be deleted!");
 
 	r = engine->RegisterGlobalFunction("void setWidgetName(" WIDGET_ID_PARAM ", "
 		"const string&in)",
@@ -808,6 +815,11 @@ void sfx::gui::_registerListGlobalFunctions(asIScriptEngine* const engine,
 		asMETHOD(sfx::gui, _deselectItem), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Deselects an item from a widget.");
 
+	r = engine->RegisterGlobalFunction("uint64 getItemCount(" WIDGET_ID_PARAM ")",
+		asMETHOD(sfx::gui, _getItemCount), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's item count. Returns 0 on "
+		"error.");
+
 	r = engine->RegisterGlobalFunction("int getSelectedItem(" WIDGET_ID_PARAM ")",
 		asMETHOD(sfx::gui, _getSelectedItem), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's selected item's index. "
@@ -912,12 +924,6 @@ void sfx::gui::_registerContainerGlobalFunctions(asIScriptEngine* const engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Removes all widgets from a given "
 		"container widget.");
-
-	r = engine->RegisterGlobalFunction("void deleteWidgetsFromContainer("
-		WIDGET_ID_PARAM ")", asMETHOD(sfx::gui, _deleteWidgetsFromContainer),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Deletes all the widgets from a given "
-		"container, but does not delete the container itself.");
 
 	r = engine->RegisterGlobalFunction("void setWidgetIndexInContainer("
 		WIDGET_ID_PARAM ", const uint, const uint)",

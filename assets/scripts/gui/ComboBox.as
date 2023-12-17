@@ -1,17 +1,17 @@
 /**
- * @file ListBox.as
- * Defines the \c ListBox class.
+ * @file ComboBox.as
+ * Defines the \c ComboBox class.
  */
 
 /**
- * Represents a listbox in a GUI.
+ * Represents a combobox in a GUI.
  */
-shared class ListBox : Widget {
+shared class ComboBox : Widget {
     /**
-     * Create the listbox.
+     * Create the combobox.
      */
-    ListBox() {
-        super(ListBoxEngineName);
+    ComboBox() {
+        super(ComboBoxEngineName);
     }
 
     void addItem(const string&in caption, array<any>@ const vars = null) {
@@ -32,6 +32,10 @@ shared class ListBox : Widget {
 
     string getSelectedItemText() const {
         return ::getSelectedItemText(this);
+    }
+
+    void setItemsToDisplay(const uint64 i) {
+        ::setItemsToDisplay(this, i);
     }
 
     uint64 getItemCount() const {

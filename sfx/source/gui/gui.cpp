@@ -907,30 +907,37 @@ bool sfx::gui::_save(nlohmann::ordered_json& j) noexcept {
 	return true;
 }
 
-void sfx::gui::_removeWidgets(const sfx::WidgetIDRef widget, const bool removeIt) {
+void sfx::gui::_deleteWidget(const sfx::WidgetIDRef widget) {
 	const auto widgetData = _findWidget(widget);
-	// Don't try to remove a placeholder widget!
-	if (widgetData == _widgets.end()) return;
 	const tgui::Widget::Ptr widgetPtr = widgetData->ptr;
-	// Explicitly remove all child widgets if this widget is a container.
-	if (widgetPtr->isContainer()) {
-		auto& widgetsInContainer = widgetData->castPtr<Container>()->getWidgets();
-		for (auto& widgetInContainer : widgetsInContainer) {
-			// Remove each child widget's internal data entries only.
-			_removeWidgets(_getWidgetID(widgetInContainer), false);
+	// 1. If this widget is a TabContainer, delete all of its Panels, too. Since
+	//    the TabContainer is being deleted anyway, we don't care that we are
+	//    removing the Panels directly (which is bad).
+	if (widgetPtr->getWidgetType() == type::TabContainer) {
+		std::vector<Widget::Ptr> children =
+			widgetData->castPtr<TabContainer>()->getWidgets();
+		for (const auto& child : children) {
+			const auto childID = _getWidgetID(child);
+			// If we can't find the child's ID, it's not a widget managed by us.
+			if (childID == sfx::NO_WIDGET) continue;
+			_deleteWidget(childID);
 		}
-		// Now remove each child widget fr.
-		widgetData->castPtr<Container>()->removeAllWidgets();
-		if (!removeIt) return;
 	}
-	// If this widget is a ChildWindow, remove it from its parent's
-	// ChildWindowList.
+	// 2 & 6. If this widget is a ChildWindow, remove it from its parent's
+	//        ChildWindowList. Also, remove the widget from its parent.
 	const auto parentPtr = widgetPtr->getParent();
-	if (parentPtr) _findWidget(_getWidgetID(parentPtr))->
-		minimisedChildWindowList.restore(widget);
-	// Go through every widget and if the widget to remove is referenced, remove
-	// it. To speed this up we could just leave the references and remove them if
-	// we come across them later.
+	if (parentPtr) {
+		const auto parentID = _getWidgetID(parentPtr);
+		const auto parentData = _findWidget(parentID);
+		if (parentData == _widgets.end())
+			_logger.warning("Child widget \"{}\" still had pointer to parent "
+				"\"{}\" that has already been deleted!", widget, parentID);
+		else
+			_removeWidgetFromParent(*parentData, *widgetData);
+	}
+	// 3a. Go through every widget and if the widget to remove is referenced,
+	//     remove it. To speed this up we could just leave the references and
+	//     remove them if we come across them later.
 	for (auto& data : _widgets) {
 		if (data.directionalFlow.up == widget)
 			data.directionalFlow.up = sfx::NO_WIDGET;
@@ -941,7 +948,7 @@ void sfx::gui::_removeWidgets(const sfx::WidgetIDRef widget, const bool removeIt
 		if (data.directionalFlow.right == widget)
 			data.directionalFlow.right = sfx::NO_WIDGET;
 	}
-	// Do the same for the menus.
+	// 3b. Do the same for the menus.
 	for (auto& menu : _menus) {
 		auto& menuData = menu.second;
 		if (menuData.selectThisWidgetFirst == widget)
@@ -955,12 +962,11 @@ void sfx::gui::_removeWidgets(const sfx::WidgetIDRef widget, const bool removeIt
 		if (menuData.currentlySelectedWidget == widget)
 			menuData.currentlySelectedWidget = sfx::NO_WIDGET;
 	}
-	// Clear data and free up the ID.
+	// 4. Delete the widget's sprite, if it has one.
 	_widgetSprites.erase(widgetPtr);
+	// 5. Clear data and free up the ID.
 	*widgetData = {};
 	_availableCells.insert(widget);
-	// Remove the widget itself.
-	if (removeIt && parentPtr) parentPtr->remove(widgetPtr);
 }
 
 void sfx::gui::_setTranslatedString(sfx::gui::widget_data& data,
