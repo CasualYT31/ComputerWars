@@ -510,7 +510,7 @@ class EditableMap {
                 map.getTileTypeStructure(toType.scriptName);
             if (!structureName.isEmpty()) {
                 map.setTileStructureData(tileToChange, structureName,
-                    MousePosition(0, 0));
+                    MousePosition(0, 0), false);
             }
         } else if (oldOwnerID != newOwnerID) {
             DisableMementos token(map, OPERATION[Operation::TILE_TYPE_AND_OWNER]);
@@ -796,7 +796,7 @@ class EditableMap {
         map.setTileType(fromTile, destroyed ?
             structureType.rootDestroyedTileType : structureType.rootTileType);
         if (!keepUnits) deleteUnit(map.getUnitOnTile(fromTile));
-        map.setTileStructureData(fromTile, name, MousePosition(0, 0));
+        map.setTileStructureData(fromTile, name, MousePosition(0, 0), destroyed);
         for (uint64 i = 0, len = structureType.dependentTileCount; i < len; ++i) {
             const auto offset = structureType.dependentTileOffset[i];
             const Vector2 tile = fromTile + offset;
@@ -807,7 +807,7 @@ class EditableMap {
                 structureType.dependentDestroyedTileType[i] :
                 structureType.dependentTileType[i]);
             if (!keepUnits) deleteUnit(map.getUnitOnTile(tile));
-            map.setTileStructureData(tile, name, offset);
+            map.setTileStructureData(tile, name, offset, destroyed);
         }
         // Set the owner of the root tile if not destroyed.
         if (!destroyed) {

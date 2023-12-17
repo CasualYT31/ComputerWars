@@ -37,6 +37,7 @@ foreach tile {
                                 // of a structure.
     int32 structureTileOffsetX;
     int32 structureTileOffsetY;
+    bool structureIsDestroyed;
 	ArmyID unitOwner;
 	if (unitOwner != NO_ARMY) {
 		string unitTypeScriptName;
@@ -226,9 +227,11 @@ namespace cwm {
                     int32 offsetX, offsetY;
                     stream.read(offsetX);
                     stream.read(offsetY);
+                    bool destroyed;
+                    stream.read(destroyed);
                     if (!structureScriptName.isEmpty()) {
                         map.setTileStructureData(tilePos, structureScriptName,
-                            MousePosition(offsetX, offsetY));
+                            MousePosition(offsetX, offsetY), destroyed);
                     }
 					LoadMapUnit(stream, map, tilePos);
 				} else {
@@ -315,12 +318,15 @@ namespace cwm {
                 if (map.isTileAStructureTile(tilePos)) {
                     stream.write(map.getTileStructure(tilePos).scriptName);
                     const auto offset = map.getTileStructureOffset(tilePos);
+                    const auto destroyed = map.isTileDestroyed(tilePos);
                     stream.write(offset.x);
                     stream.write(offset.y);
+                    stream.write(destroyed);
                 } else {
                     stream.write("");
                     stream.write(int32(0));
                     stream.write(int32(0));
+                    stream.write(false);
                 }
 				const auto unitID = map.getUnitOnTile(tilePos);
 				if (unitID != NO_UNIT) {

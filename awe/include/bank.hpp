@@ -1991,7 +1991,7 @@ namespace awe {
 	 * map maker, so that it knows what tiles to paint where when placing a
 	 * structure. Dependent tiles are only useful gameplay-wise when destroying a
 	 * structure, and even then they do not provide any game logic, they are only
-	 * there for the graphics).\n
+	 * there for the graphics.
 	 */
 	class structure : public awe::common_properties {
 	public:

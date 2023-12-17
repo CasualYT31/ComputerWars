@@ -28,6 +28,7 @@ class PreviewMoveUnitMenu : Menu, Group {
         const auto tileType = game.map.getTileType(tile);
         const auto tileStructure = game.map.isTileAStructureTile(tile) ?
             game.map.getTileStructure(tile) : null;
+        const auto tileDestroyed = game.map.isTileDestroyed(tile);
         const auto unitOnTile = game.map.getUnitOnTile(tile);
 
         // Add commands here.
@@ -68,7 +69,7 @@ class PreviewMoveUnitMenu : Menu, Group {
                 }
                 // Launch Missile Silo.
                 if (tileStructure !is null &&
-                    tileStructure.scriptName == "MISSILESILO" &&
+                    tileStructure.scriptName == "MISSILESILO" && !tileDestroyed &&
                     (unitType.scriptName == "INFANTRY" ||
                     unitType.scriptName == "MECH")) {
                     previewCommands.addCommand("launch", "attackicon", function(){

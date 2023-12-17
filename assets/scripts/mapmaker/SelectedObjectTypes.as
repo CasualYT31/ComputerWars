@@ -16,8 +16,9 @@ class SelectedTerrain : SelectedObject {
     private const Terrain@ terrainType;
     const Terrain@ type {
         set {
+            const bool changed = terrainType !is value;
             @terrainType = value;
-            update();
+            if (changed) update();
         }
         get const {
             return terrainType;
@@ -31,8 +32,9 @@ class SelectedTerrain : SelectedObject {
     private string terrainOwner;
     string owner {
         set {
+            const auto changed = terrainOwner != value;
             terrainOwner = value;
-            update();
+            if (changed) update();
         }
         get const {
             return terrainOwner;
@@ -61,8 +63,9 @@ class SelectedTileType : SelectedObject {
     private const TileType@ tileType;
     const TileType@ type {
         set {
+            const bool changed = tileType !is value;
             @tileType = value;
-            update();
+            if (changed) update();
         }
         get const {
             return tileType;
@@ -76,8 +79,9 @@ class SelectedTileType : SelectedObject {
     private string tileTypeOwner;
     string owner {
         set {
+            const auto changed = tileTypeOwner != value;
             tileTypeOwner = value;
-            update();
+            if (changed) update();
         }
         get const {
             return tileTypeOwner;
@@ -105,8 +109,9 @@ class SelectedUnitType : SelectedObject {
     private const UnitType@ unitType;
     const UnitType@ type {
         set {
+            const bool changed = unitType !is value;
             @unitType = value;
-            update();
+            if (changed) update();
         }
         get const {
             return unitType;
@@ -119,8 +124,9 @@ class SelectedUnitType : SelectedObject {
     private string unitTypeOwner = country.scriptNames[0];
     string owner {
         set {
+            const auto changed = unitTypeOwner != value;
             unitTypeOwner = value;
-            update();
+            if (changed) update();
         }
         get const {
             return unitTypeOwner;
@@ -146,8 +152,9 @@ class SelectedStructure : SelectedObject {
     private const Structure@ structureType;
     const Structure@ type {
         set {
+            const bool changed = structureType !is value;
             @structureType = value;
-            update();
+            if (changed) update();
         }
         get const {
             return structureType;
@@ -161,8 +168,9 @@ class SelectedStructure : SelectedObject {
     private string structureOwner;
     string owner {
         set {
+            const auto changed = structureOwner != value;
             structureOwner = value;
-            update();
+            if (changed) update();
         }
         get const {
             return structureOwner;
@@ -176,8 +184,9 @@ class SelectedStructure : SelectedObject {
     private bool isDestroyed = false;
     bool destroyed {
         set {
+            const auto changed = isDestroyed != value;
             isDestroyed = value;
-            update();
+            if (changed) update();
         }
         get const {
             return isDestroyed;

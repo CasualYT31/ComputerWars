@@ -560,10 +560,10 @@ void awe::map::Register(asIScriptEngine* engine,
 
 		r = engine->RegisterObjectMethod("Map",
 			"void setTileStructureData(const Vector2&in, const string&in, "
-			"const MousePosition&in)",
+			"const MousePosition&in, const bool)",
 			asMETHODPR(awe::map, setTileStructureData, (const sf::Vector2u& pos,
-				const std::string& structure, const sf::Vector2i& offset), void),
-			asCALL_THISCALL);
+				const std::string& structure, const sf::Vector2i& offset,
+				const bool destroyed), void), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"const Structure@ getTileStructure(const Vector2&in) const",
@@ -576,6 +576,10 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"MousePosition getTileStructureOffset(const Vector2&in) const",
 			asMETHOD(awe::map, getTileStructureOffset), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isTileDestroyed(const Vector2&in) const",
+			asMETHOD(awe::map, isTileDestroyed), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "array<Vector2>@ "
 			"getAvailableTiles(const Vector2&in, const uint, const uint) const",
@@ -2204,7 +2208,7 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 		for (const auto& tile : tiles) {
 			// Remove the tile's configured structure now to prevent calling
 			// setTileType() infinitely.
-			setTileStructureData(tile.first, "", { 0, 0 });
+			setTileStructureData(tile.first, "", { 0, 0 }, false);
 			const auto tileType = tile.first == rootTile ?
 				structure->getRootDeletedTileType() :
 				structure->getDependentDeletedTileType(tile.second);
@@ -2342,7 +2346,7 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u& pos) const {
 
 void awe::map::setTileStructureData(const sf::Vector2u& pos,
 	const std::shared_ptr<const awe::structure>& structure,
-	const sf::Vector2i& offset) {
+	const sf::Vector2i& offset, const bool destroyed) {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("setTileStructureData operation failed: tile at position {} "
 			"is out-of-bounds with the map's size of {}!", pos, getMapSize());
@@ -2403,13 +2407,16 @@ void awe::map::setTileStructureData(const sf::Vector2u& pos,
 	auto& tile = _tiles[pos.x][pos.y];
 	tile.setStructureType(structure);
 	tile.setStructureTile(offset);
+	tile.setStructureDestroyed(destroyed);
 }
 
 void awe::map::setTileStructureData(const sf::Vector2u& pos,
-	const std::string& structure, const sf::Vector2i& offset) {
+	const std::string& structure, const sf::Vector2i& offset,
+	const bool destroyed) {
 	if (structure.empty()) setTileStructureData(pos,
-		static_cast<std::shared_ptr<const awe::structure>>(nullptr), offset);
-	else setTileStructureData(pos, (*_structures)[structure], offset);
+		static_cast<std::shared_ptr<const awe::structure>>(nullptr), offset,
+		destroyed);
+	else setTileStructureData(pos, (*_structures)[structure], offset, destroyed);
 }
 
 std::shared_ptr<const awe::structure> awe::map::getTileStructure(
@@ -2445,6 +2452,15 @@ sf::Vector2i awe::map::getTileStructureOffset(const sf::Vector2u& pos) const {
 		return { 0, 0 };
 	}
 	return _tiles[pos.x][pos.y].getStructureTile();
+}
+
+bool awe::map::isTileDestroyed(const sf::Vector2u& pos) const {
+	if (_isOutOfBounds(pos)) {
+		_logger.error("isTileDestroyed operation failed: tile at position {} is "
+			"out of bounds with the map's size of {}!", pos, getMapSize());
+		return false;
+	}
+	return _tiles[pos.x][pos.y].getStructureDestroyed();
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(
@@ -2876,12 +2892,12 @@ void awe::map::destroyStructure(sf::Vector2u tile) {
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::DESTROY_STRUCTURE));
 	setTileType(tile, structure->getRootDestroyedTileType());
-	setTileStructureData(tile, structure, { 0, 0 });
+	setTileStructureData(tile, structure, { 0, 0 }, true);
 	for (std::size_t i = 0, c = structure->getDependentTileCount(); i < c; ++i) {
 		offset = structure->getDependentTileOffset(i);
 		const auto depTile = sf::Vector2u{ tile.x + offset.x, tile.y + offset.y };
 		setTileType(depTile, structure->getDependentDestroyedTileType(i));
-		setTileStructureData(depTile, structure, offset);
+		setTileStructureData(depTile, structure, offset, true);
 	}
 }
 

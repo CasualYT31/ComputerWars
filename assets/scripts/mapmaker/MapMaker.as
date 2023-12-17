@@ -195,7 +195,183 @@ class MapMaker : Menu, Group {
             edit.redo();
             return;
         }
+        
+        // If there isn't a tile currently selected that is in bounds, return now.
+        const auto curTile = edit.map.getSelectedTile();
+        if (edit.map.isOutOfBounds(curTile)) return;
+        const auto curTileOwner = edit.map.getTileOwner(curTile);
+        const auto curUnit = edit.map.getUnitOnTile(curTile);
+        const auto terrainPaletteIsOpen =
+            paletteWindow.getSelectedPalette() == Palette::Terrain,
+            tileTypePaletteIsOpen =
+                paletteWindow.getSelectedPalette() == Palette::TileType,
+            unitTypePaletteIsOpen =
+                paletteWindow.getSelectedPalette() == Palette::UnitType,
+            structurePaletteIsOpen =
+                paletteWindow.getSelectedPalette() == Palette::Structure;
+
+        // Highlight the selected structure's tiles on the map if one is selected.
+        if (structurePaletteIsOpen)
+            edit.setStructurePaintedTiles(selectedStructure.type);
+        else edit.setStructurePaintedTiles(null);
+
+        // If the paint tool has just been triggered, disable mementos.
+        // This is so that an entire paint stroke can be saved in one memento.
+        // It's not strickly needed for the rectangle tools but it's a lot easier
+        // to handle it this way.
+        if (!prevAction && action && !structurePaletteIsOpen) {
+            edit.map.disableMementos();
+            mementoName = "";
+        }
+
+        // Normal paint tool with non-structures.
+        if (action && toolBar.selected(Tool::Paint)) {
+            if (terrainPaletteIsOpen && selectedTerrain.type !is null) {
+                edit.setTerrain(curTile, selectedTerrain.type,
+                    selectedTerrain.owner);
+                mementoName = OPERATION[Operation::PAINT_TERRAIN_TOOL];
+            } else if (tileTypePaletteIsOpen && selectedTileType.type !is null) {
+                edit.setTile(curTile, selectedTileType.type,
+                    selectedTileType.owner);
+                mementoName = OPERATION[Operation::PAINT_TILE_TOOL];
+            } else if (unitTypePaletteIsOpen && selectedUnitType.type !is null) {
+                edit.createUnit(curTile, selectedUnitType.type,
+                    selectedUnitType.owner);
+                mementoName = OPERATION[Operation::PAINT_UNIT_TOOL];
+            }
+
+        // Normal paint tool with structures.
+        } else if (structAction && toolBar.selected(Tool::Paint)) {
+            if (structurePaletteIsOpen && selectedStructure.type !is null) {
+                edit.paintStructure(curTile, selectedStructure.type,
+                    selectedStructure.owner, selectedStructure.destroyed);
+            }
+
+        // Pick tool.
+        } else if (pick) {
+            if (terrainPaletteIsOpen) {
+                const auto terrainType = edit.map.getTileType(curTile).type;
+                if (terrainType.isPaintable) {
+                    @selectedTerrain.type = terrainType;
+                    selectedTerrain.owner = curTileOwner == NO_ARMY ? "" :
+                        country.scriptNames[curTileOwner];
+                }
+
+            } else if (tileTypePaletteIsOpen) {
+                const auto tileType = edit.map.getTileType(curTile);
+                if (tileType.isPaintable) {
+                    @selectedTileType.type = tileType;
+                    selectedTileType.owner = curTileOwner == NO_ARMY ? "" :
+                        country.scriptNames[curTileOwner];
+                }
+
+            } else if (unitTypePaletteIsOpen && curUnit != NO_UNIT) {
+                @selectedUnitType.type = edit.map.getUnitType(curUnit);
+                selectedUnitType.owner =
+                    country.scriptNames[edit.map.getArmyOfUnit(curUnit)];
+
+            } else if (structurePaletteIsOpen &&
+                edit.map.isTileAStructureTile(curTile)) {
+                const auto structureObject = edit.map.getTileStructure(curTile);
+                if (structureObject.isPaintable) {
+                    @selectedStructure.type = structureObject;
+                    const auto offset = edit.map.getTileStructureOffset(curTile);
+                    const Vector2 rootTile(curTile.x - offset.x,
+                        curTile.y - offset.y);
+                    const auto rootTileOwner = edit.map.getTileOwner(rootTile);
+                    selectedStructure.owner = rootTileOwner == NO_ARMY ? "" :
+                        country.scriptNames[rootTileOwner];
+                }
+            }
+
+        // Delete tool.
+        } else if (action && toolBar.selected(Tool::Delete)) {
+            edit.deleteUnit(curUnit);
+            if (mementoName.isEmpty() && curUnit != NO_UNIT)
+                mementoName = OPERATION[Operation::DELETE_UNIT_TOOL];
+        
+        // Rectangle paint tool.
+        } else if (toolBar.selected(Tool::RectPaint)) {
+            Vector2 start, end;
+            if (drawRectangle(prevAction, action, curTile, start, end)) {
+                if (terrainPaletteIsOpen && selectedTerrain.type !is null) {
+                    edit.rectangleFillTiles(start, end, selectedTerrain.type,
+                        selectedTerrain.owner);
+                    mementoName = OPERATION[Operation::RECT_PAINT_TERRAIN_TOOL];
+                }
+                if (tileTypePaletteIsOpen && selectedTileType.type !is null) {
+                    edit.rectangleFillTiles(start, end,
+                        selectedTileType.type.scriptName,
+                        selectedTileType.owner.isEmpty() ? NO_ARMY :
+                            country[selectedTileType.owner].turnOrder);
+                    mementoName = OPERATION[Operation::RECT_PAINT_TILE_TOOL];
+                }
+                if (unitTypePaletteIsOpen && selectedUnitType.type !is null) {
+                    edit.rectangleFillUnits(start, end,
+                        selectedUnitType.type.scriptName,
+                        country[selectedUnitType.owner].turnOrder);
+                    mementoName = OPERATION[Operation::RECT_PAINT_UNIT_TOOL];
+                }
+            }
+        
+        // Rectangle delete tool.
+        } else if (toolBar.selected(Tool::RectDelete)) {
+            Vector2 start, end;
+            if (drawRectangle(prevAction, action, curTile, start, end)) {
+                if (edit.rectangleDeleteUnits(start, end) > 0)
+                    mementoName = OPERATION[Operation::RECT_DELETE_UNIT_TOOL];
+            }
+        }
+
+        // If the paint tool is finished with, re-enable mementos.
+        if (prevAction && !action && !structurePaletteIsOpen)
+            edit.map.enableMementos(mementoName);
+
+        // If more detail on the current tile is desired, display its information.
+        if (tileinfo) edit.selectTile(curTile);
+
+        prevAction = action;
     }
+
+    /**
+     * Continuously draw a rectangle on the map.
+     * @param  prevAction \c TRUE if the action control was being triggered during
+     *                    the previous iteration of the game loop.
+     * @param  action     \c TRUE if the action control is being triggered during
+     *                    this iteration of the game loop.
+     * @param  curTile    The currently selected tile.
+     * @param  start      If \c TRUE is returned, the start of the rectangle is
+     *                    stored here.
+     * @param  end        If \c TRUE is returned, the end of the rectangle is
+     *                    stored here.
+     * @return \c TRUE if the rectangle is finished, \c FALSE if not.
+     */
+    private bool drawRectangle(const bool prevAction, const bool action,
+        const Vector2&in curTile, Vector2&out start, Vector2&out end) {
+        if (!prevAction && action) {        // Start rectangle.
+            edit.map.setRectangleSelectionStart(curTile);
+        } else if (prevAction && action) {  // Continue rectangle.
+            edit.map.setRectangleSelectionEnd(curTile);
+        } else if (prevAction && !action) { // Finish rectangle.
+            start = edit.map.getRectangleSelectionStart();
+            end = edit.map.getRectangleSelectionEnd();
+            edit.map.removeRectangleSelection();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Stores the action control's signal state from the previous \c Periodic()
+     * call.
+     */
+    private bool prevAction = false;
+
+    /**
+     * After a tool has finished, what should its name be? Assign to an empty
+     * string to discard the memento.
+     */
+    private string mementoName;
     
     /////////////////
     // MESSAGE BOX //

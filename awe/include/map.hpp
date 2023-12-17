@@ -1244,15 +1244,18 @@ namespace awe {
 		 *                  to set no structure.
 		 * @param offset    Which tile from the structure this tile's a part of,
 		 *                  defined as the offset from the root tile.
+		 * @param destroyed \c TRUE if this structure is destroyed, \c FALSE if
+		 *                  not.
 		 */
 		void setTileStructureData(const sf::Vector2u& pos,
 			const std::shared_ptr<const awe::structure>& structure,
-			const sf::Vector2i& offset);
+			const sf::Vector2i& offset, const bool destroyed);
 
 		/// Script interface version of \c setTileStructureData().
 		/// Provide an empty string to set no structure.
 		void setTileStructureData(const sf::Vector2u& pos,
-			const std::string& structure, const sf::Vector2i& offset);
+			const std::string& structure, const sf::Vector2i& offset,
+			const bool destroyed);
 
 		/**
 		 * Retrieves the specified tile's registered structure type.
@@ -1289,6 +1292,17 @@ namespace awe {
 		 *         root tile.
 		 */
 		sf::Vector2i getTileStructureOffset(const sf::Vector2u& pos) const;
+
+		/**
+		 * Finds out if this tile is destroyed or not.
+		 * Note that this method should be used in conjunction with
+		 * \c isTileAStructureTile(), as this method will simply query the
+		 * destroyed flag directly.
+		 * @param  pos The X and Y coordinate of the tile to query.
+		 * @return \c TRUE if this tile's destroyed flag is \c TRUE, \c FALSE if it
+		 *         is \c FALSE.
+		 */
+		bool isTileDestroyed(const sf::Vector2u& pos) const;
 
 		/**
 		 * Calculates the tiles available from a specified tile.

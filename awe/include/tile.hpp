@@ -148,6 +148,19 @@ namespace awe {
 		sf::Vector2i getStructureTile() const;
 
 		/**
+		 * Updates the destroyed flag on this tile.
+		 * @param isDestroyed Set to \c TRUE if this tile forms part of a structure
+		 *                    that's destroyed. \c FALSE otherwise.
+		 */
+		void setStructureDestroyed(const bool isDestroyed);
+
+		/**
+		 * Retrieves the destroyed flag in this tile.
+		 * @return \c TRUE or \c FALSE.
+		 */
+		bool getStructureDestroyed() const;
+
+		/**
 		 * Sets the spritesheet to use with this tile.
 		 * @param  sheet Pointer to the spritesheet to use with this tile.
 		 * @safety No guarantee.
@@ -245,6 +258,11 @@ namespace awe {
 		 * This tile's offset from the root tile of the structure, in tiles.
 		 */
 		sf::Vector2i _offset;
+
+		/**
+		 * Does this tile form part of a destroyed structure?
+		 */
+		bool _destroyed = false;
 
 		/**
 		 * This tile's animated sprite object.

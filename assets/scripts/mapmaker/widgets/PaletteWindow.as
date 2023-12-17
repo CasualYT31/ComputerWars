@@ -4,6 +4,17 @@
  */
 
 /**
+ * The different types of palette.
+ */
+enum Palette {
+    Terrain,
+    TileType,
+    UnitType,
+    Structure,
+    Count
+}
+
+/**
  * Allows the user to select different types of objects for painting.
  */
 class PaletteWindow : ChildWindow {
@@ -18,11 +29,11 @@ class PaletteWindow : ChildWindow {
             SingleSignalHandler(this.tabContainerSelectionChanged));
 
         // Setup each palette.
-        panels.resize(4);
-        @panels[0] = TerrainPalette(@tabContainer);
-        @panels[1] = TileTypePalette(@tabContainer);
-        @panels[2] = UnitTypePalette(@tabContainer);
-        @panels[3] = StructurePalette(@tabContainer);
+        panels.resize(Palette::Count);
+        @panels[Palette::Terrain] = TerrainPalette(@tabContainer);
+        @panels[Palette::TileType] = TileTypePalette(@tabContainer);
+        @panels[Palette::UnitType] = UnitTypePalette(@tabContainer);
+        @panels[Palette::Structure] = StructurePalette(@tabContainer);
         tabContainer.setSelectedTab(0);
     }
 
@@ -35,6 +46,15 @@ class PaletteWindow : ChildWindow {
         setSize(defaultWidth, "100%");
         if (currentTab >= 0) panels[currentTab].paletteWindowSizeChanged();
         open("100%-" + defaultWidth, "0%");
+    }
+
+    /**
+     * Returns the palette that is currently open.
+     * @return The \c Palette ID. \c Palette::Count if no palette is currently
+     *         selected.
+     */
+    Palette getSelectedPalette() const {
+        return currentTab < 0 ? Palette::Count : Palette(currentTab);
     }
 
     /**
@@ -113,6 +133,7 @@ abstract class PalettePanel {
         ::add(panelID, selectedObject);
 
         // Setup the country combobox.
+        neutralIncluded = neutral;
         @ownerList = CountryComboBox(neutral, 5 + (neutral ? 1 : 0),
             CountryComboBoxCallback(this.countryComboboxCallback));
         ownerList.setSize("", PalettePanelConstants::WidgetHeight);
@@ -187,6 +208,17 @@ abstract class PalettePanel {
     protected void countryComboboxCallback(const ArmyID) {}
 
     /**
+     * When the owner of the selected object changes, the country combobox will
+     * need manually updating using this method.
+     * @param newOwner Script name of the new owner.
+     */
+    protected void refreshCountryCombobox(const string&in newOwner) final {
+        if (newOwner.isEmpty()) ownerList.select(0);
+        else ownerList.select(country[newOwner].turnOrder +
+            (neutralIncluded ? 1 : 0));
+    }
+
+    /**
      * The ID of the panel whose resources are managed by the engine.
      */
     private WidgetID panelID;
@@ -210,6 +242,11 @@ abstract class PalettePanel {
      * The size of the object buttons.
      */
     private float objectButtonSize;
+
+    /**
+     * \c TRUE if the neutral option has been included in the country combobox.
+     */
+    private bool neutralIncluded = false;
 
     /**
      * Previews the selected object in this palette.
@@ -282,7 +319,10 @@ class TerrainPalette : Observer, PalettePanel {
      * When the owner changes, update the sprites on the buttons.
      */
     private void refresh(any&in data = any()) override {
-        if (latestOwner != selectedTerrain.owner) regenerateButtonSprites();
+        if (latestOwner != selectedTerrain.owner) {
+            regenerateButtonSprites();
+            refreshCountryCombobox(latestOwner);
+        }
     }
 
     /**
@@ -365,7 +405,10 @@ class TileTypePalette : Observer, PalettePanel {
      * When the owner changes, update the sprites on the buttons.
      */
     private void refresh(any&in data = any()) override {
-        if (latestOwner != selectedTileType.owner) regenerateButtonSprites();
+        if (latestOwner != selectedTileType.owner) {
+            regenerateButtonSprites();
+            refreshCountryCombobox(latestOwner);
+        }
     }
 
     /**
@@ -449,7 +492,10 @@ class UnitTypePalette : Observer, PalettePanel {
      * When the owner changes, update the sprites on the buttons.
      */
     private void refresh(any&in data = any()) override {
-        if (latestOwner != selectedUnitType.owner) regenerateButtonSprites();
+        if (latestOwner != selectedUnitType.owner) {
+            regenerateButtonSprites();
+            refreshCountryCombobox(latestOwner);
+        }
     }
 
     /**
@@ -527,9 +573,13 @@ class StructurePalette : Observer, PalettePanel {
      * Also make sure the destroyed checkbox is up-to-date.
      */
     private void refresh(any&in data = any()) override {
-        if (latestOwner != selectedStructure.owner ||
-            latestDestroyed != selectedStructure.destroyed)
+        const auto ownerChanged = latestOwner != selectedStructure.owner;
+        if (ownerChanged || latestDestroyed != selectedStructure.destroyed) {
             regenerateButtonSprites();
+        }
+        if (ownerChanged) {
+            refreshCountryCombobox(latestOwner);
+        }
         destroyed.setChecked(selectedStructure.destroyed);
     }
 

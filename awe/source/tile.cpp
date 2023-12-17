@@ -86,6 +86,14 @@ sf::Vector2i awe::tile::getStructureTile() const {
 	return _offset;
 }
 
+void awe::tile::setStructureDestroyed(const bool isDestroyed) {
+	_destroyed = isDestroyed;
+}
+
+bool awe::tile::getStructureDestroyed() const {
+	return _destroyed;
+}
+
 void awe::tile::setSpritesheet(
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
 	_sprite.setSpritesheet(sheet);

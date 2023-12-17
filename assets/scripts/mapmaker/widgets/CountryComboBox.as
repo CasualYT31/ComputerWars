@@ -59,7 +59,15 @@ class CountryComboBox : Group {
         for (uint64 c = 0, len = countryScriptNames.length(); c < len; ++c)
             if (filter.find(ArmyID(c)) < 0)
                 list.addItem(country[countryScriptNames[c]].name);
-        if (list.getItemCount() > 0) list.setSelectedItem(0);
+        if (list.getItemCount() > 0) select(0);
+    }
+
+    /**
+     * Select an item from the combobox.
+     * @param i The 0-based index of the item to select.
+     */
+    void select(const uint64 i) {
+        list.setSelectedItem(i);
     }
 
     /**
