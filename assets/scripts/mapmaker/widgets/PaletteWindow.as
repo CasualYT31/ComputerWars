@@ -18,10 +18,11 @@ class PaletteWindow : ChildWindow {
             SingleSignalHandler(this.tabContainerSelectionChanged));
 
         // Setup each palette.
-        panels.resize(3);
+        panels.resize(4);
         @panels[0] = TerrainPalette(@tabContainer);
         @panels[1] = TileTypePalette(@tabContainer);
         @panels[2] = UnitTypePalette(@tabContainer);
+        @panels[3] = StructurePalette(@tabContainer);
         tabContainer.setSelectedTab(0);
     }
 
@@ -484,4 +485,132 @@ class UnitTypePalette : Observer, PalettePanel {
      * When the owner of the selected unit type changes, it is updated here.
      */
     private string latestOwner;
+}
+
+/**
+ * The palette panel for \c selectedStructure.
+ */
+class StructurePalette : Observer, PalettePanel {
+    /**
+     * Sets up the structure palette.
+     * @param tabContainer The tab container to create the tab and panel in.
+     */
+    StructurePalette(TabContainer@ const tabContainer) {
+        super(
+            tabContainer,
+            "structuredialog",
+            // Don't bother detaching, we'll never need to.
+            selectedStructure.widgetFactory(),
+            generateScriptNames(),
+            getHeightOfTallestFrame("structure") + 10,
+            4,
+            true
+        );
+        // Attach this palette to the selectedStructure to receive a refresh
+        // request when the selected owner or destroyed flag change in any way.
+        selectedStructure.attach(this);
+        regenerateButtonSprites();
+        // Setup the destroyed widgets.
+        destroyed.setText("destroyed");
+        destroyed.setOrigin(0.5, 0.5);
+        destroyed.setPosition("50%", "50%");
+        destroyed.connect(Changed, SingleSignalHandler(this.destroyedChanged));
+        destroyedGroup.add(destroyed);
+        destroyedGroup.setSize("", PalettePanelConstants::WidgetHeight);
+        destroyedGroup.setAutoLayout(AutoLayout::Bottom);
+        ::add(panel, destroyedGroup);
+    }
+
+    /**
+     * When the owner or destroyed flag changes, update the sprites on the
+     * buttons.
+     * Also make sure the destroyed checkbox is up-to-date.
+     */
+    private void refresh(any&in data = any()) override {
+        if (latestOwner != selectedStructure.owner ||
+            latestDestroyed != selectedStructure.destroyed)
+            regenerateButtonSprites();
+        destroyed.setChecked(selectedStructure.destroyed);
+    }
+
+    /**
+     * Update the sprites on the buttons according to the selected owner of the
+     * selected structure, as well as its destroyed flag.
+     */
+    private void regenerateButtonSprites() {
+        latestOwner = selectedStructure.owner;
+        latestDestroyed = selectedStructure.destroyed;
+        for (uint64 i = 0, len = buttonCount; i < len; ++i) {
+            const auto scriptName = buttons[i].getName();
+            if (latestDestroyed) {
+                buttons[i].setSprite("structure",
+                    structure[scriptName].destroyedIconName
+                );
+            } else {
+                buttons[i].setSprite("structure", latestOwner.isEmpty() ?
+                    structure[scriptName].iconName :
+                    structure[scriptName].ownedIconName(latestOwner)
+                );
+            }
+        }
+    }
+
+    /**
+     * When a structure button is pressed, select it.
+     */
+    private void objectButtonSignalHandler(const WidgetID button,
+        const string&in signal) override {
+        if (signal != MouseReleased) return;
+        @selectedStructure.type = structure[::getWidgetName(button)];
+    }
+
+    /**
+     * When a new owner is selected, update it in \c selectedStructure.
+     */
+    private void countryComboboxCallback(const ArmyID owner) override {
+        if (owner == NO_ARMY) selectedStructure.owner = "";
+        else selectedStructure.owner = country.scriptNames[owner];
+    }
+
+    /**
+     * When the destroyed checkbox is checked or unchecked, update the flag in
+     * \c selectedStructure.
+     */
+    private void destroyedChanged() {
+        selectedStructure.destroyed = destroyed.getChecked();
+    }
+
+    /**
+     * Filters structures based on whether they are paintable or not.
+     * @return A list of script names for structures that are paintable.
+     */
+    private array<string>@ generateScriptNames() const {
+        array<string>@ names = array<string>();
+        for (uint64 i = 0, len = structure.scriptNames.length(); i < len; ++i) {
+            const auto name = structure.scriptNames[i];
+            if (structure[name].isPaintable) names.insertLast(name);
+        }
+        return names;
+    }
+
+    /**
+     * When the owner of the selected structure changes, it is updated here.
+     */
+    private string latestOwner;
+
+    /**
+     * When the destroyed flag of the selected structure changes, it is updated
+     * here.
+     */
+    private bool latestDestroyed;
+
+    /**
+     * The group containing the destroyed checkbox.
+     */
+    private Group destroyedGroup;
+
+    /**
+     * The destroyed checkbox.
+     */
+    private CheckBox destroyed;
 }

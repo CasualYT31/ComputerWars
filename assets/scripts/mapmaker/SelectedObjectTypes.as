@@ -1,6 +1,9 @@
 /**
  * @file SelectedObjectTypes.as
  * Defines all the different types of selected object.
+ * For an example on how to add a \c SelectedObject type with its own palette
+ * panel, consult https://github.com/CasualYT31/ComputerWars/commit/5e8a7d4c6e2c06e57371c12f52ab763806fe3600
+ * and surrounding commits.
  */
 
 /**
@@ -130,5 +133,65 @@ class SelectedUnitType : SelectedObject {
     private void update() override {
         if (type is null) update("", "", "");
         else update(type.name, "unit", type.unitSprite(owner));
+    }
+}
+
+/**
+ * The currently selected structure.
+ */
+class SelectedStructure : SelectedObject {
+    /**
+     * Points to the structure currently selected.
+     */
+    private const Structure@ structureType;
+    const Structure@ type {
+        set {
+            @structureType = value;
+            update();
+        }
+        get const {
+            return structureType;
+        }
+    }
+
+    /**
+     * The selected owner of the structure.
+     * Set to empty if there is no owner.
+     */
+    private string structureOwner;
+    string owner {
+        set {
+            structureOwner = value;
+            update();
+        }
+        get const {
+            return structureOwner;
+        }
+    }
+
+    /**
+     * \c TRUE if the structure is in the destroyed state, \c FALSE if it's in the
+     * normal state.
+     */
+    private bool isDestroyed = false;
+    bool destroyed {
+        set {
+            isDestroyed = value;
+            update();
+        }
+        get const {
+            return isDestroyed;
+        }
+    }
+
+    /**
+     * Notifies observers when a change is made to the state of this object.
+     */
+    private void update() override {
+        if (type is null) update("", "", "");
+        else if (destroyed)
+            update(type.destroyedName, "structure", type.destroyedIconName);
+        else if (owner.isEmpty()) update(type.name, "structure", type.iconName);
+        else update(type.name, "structure", type.ownedIconName(owner));
     }
 }

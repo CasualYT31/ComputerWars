@@ -33,3 +33,8 @@ SelectedTileType selectedTileType;
  * Global point of access to the currently selected unit type in the map maker.
  */
 SelectedUnitType selectedUnitType;
+
+/**
+ * Global point of access to the currently selected structure in the map maker.
+ */
+SelectedStructure selectedStructure;
