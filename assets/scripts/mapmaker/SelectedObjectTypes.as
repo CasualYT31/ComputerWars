@@ -91,3 +91,44 @@ class SelectedTileType : SelectedObject {
         else update(type.type.name, "tile.normal", type.ownedTileSprite(owner));
     }
 }
+
+/**
+ * The currently selected unit type.
+ */
+class SelectedUnitType : SelectedObject {
+    /**
+     * Points to the unit type currently selected.
+     */
+    private const UnitType@ unitType;
+    const UnitType@ type {
+        set {
+            @unitType = value;
+            update();
+        }
+        get const {
+            return unitType;
+        }
+    }
+
+    /**
+     * The selected owner of the unit type.
+     */
+    private string unitTypeOwner = country.scriptNames[0];
+    string owner {
+        set {
+            unitTypeOwner = value;
+            update();
+        }
+        get const {
+            return unitTypeOwner;
+        }
+    }
+
+    /**
+     * Notifies observers when a change is made to the state of this object.
+     */
+    private void update() override {
+        if (type is null) update("", "", "");
+        else update(type.name, "unit", type.unitSprite(owner));
+    }
+}

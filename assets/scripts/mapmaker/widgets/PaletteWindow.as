@@ -18,9 +18,10 @@ class PaletteWindow : ChildWindow {
             SingleSignalHandler(this.tabContainerSelectionChanged));
 
         // Setup each palette.
-        panels.resize(2);
+        panels.resize(3);
         @panels[0] = TerrainPalette(@tabContainer);
         @panels[1] = TileTypePalette(@tabContainer);
+        @panels[2] = UnitTypePalette(@tabContainer);
         tabContainer.setSelectedTab(0);
     }
 
@@ -329,7 +330,7 @@ class TerrainPalette : Observer, PalettePanel {
     }
 
     /**
-     * When the owner of the selected tile type changes, it is updated here.
+     * When the owner of the selected terrain changes, it is updated here.
      */
     private string latestOwner;
 }
@@ -413,6 +414,74 @@ class TileTypePalette : Observer, PalettePanel {
 
     /**
      * When the owner of the selected tile type changes, it is updated here.
+     */
+    private string latestOwner;
+}
+
+/**
+ * The palette panel for \c selectedUnitType.
+ */
+class UnitTypePalette : Observer, PalettePanel {
+    /**
+     * Sets up the unit type palette.
+     * @param tabContainer The tab container to create the tab and panel in.
+     */
+    UnitTypePalette(TabContainer@ const tabContainer) {
+        super(
+            tabContainer,
+            "unitdialog",
+            // Don't bother detaching, we'll never need to.
+            selectedUnitType.widgetFactory(),
+            unittype.scriptNames,
+            // Left intentionally to tile.normal.
+            getHeightOfTallestFrame("tile.normal") + 10,
+            4,
+            false
+        );
+        // Attach this palette to the selectedUnitType to receive a refresh
+        // request when the selected owner changes in any way.
+        selectedUnitType.attach(this);
+        regenerateButtonSprites();
+    }
+
+    /**
+     * When the owner changes, update the sprites on the buttons.
+     */
+    private void refresh(any&in data = any()) override {
+        if (latestOwner != selectedUnitType.owner) regenerateButtonSprites();
+    }
+
+    /**
+     * Update the sprites on the buttons according to the selected owner of the
+     * selected unit type.
+     */
+    private void regenerateButtonSprites() {
+        latestOwner = selectedUnitType.owner;
+        for (uint64 i = 0, len = buttonCount; i < len; ++i) {
+            const auto scriptName = buttons[i].getName();
+            buttons[i].setSprite("unit",
+                unittype[scriptName].unitSprite(latestOwner));
+        }
+    }
+
+    /**
+     * When a unit type button is pressed, select it.
+     */
+    private void objectButtonSignalHandler(const WidgetID button,
+        const string&in signal) override {
+        if (signal != MouseReleased) return;
+        @selectedUnitType.type = unittype[::getWidgetName(button)];
+    }
+
+    /**
+     * When a new owner is selected, update it in \c selectedUnitType.
+     */
+    private void countryComboboxCallback(const ArmyID owner) override {
+        selectedUnitType.owner = country.scriptNames[owner];
+    }
+
+    /**
+     * When the owner of the selected unit type changes, it is updated here.
      */
     private string latestOwner;
 }

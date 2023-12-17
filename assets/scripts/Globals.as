@@ -28,3 +28,8 @@ SelectedTerrain selectedTerrain;
  * Global point of access to the currently selected tile type in the map maker.
  */
 SelectedTileType selectedTileType;
+
+/**
+ * Global point of access to the currently selected unit type in the map maker.
+ */
+SelectedUnitType selectedUnitType;
