@@ -20,6 +20,11 @@ EditableMap@ edit;
 MapMaker@ mapMaker;
 
 /**
+ * Global point of access to the currently selected terrain in the map maker.
+ */
+SelectedTerrain selectedTerrain;
+
+/**
  * Global point of access to the currently selected tile type in the map maker.
  */
 SelectedTileType selectedTileType;

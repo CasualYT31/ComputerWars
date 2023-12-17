@@ -18,8 +18,9 @@ class PaletteWindow : ChildWindow {
             SingleSignalHandler(this.tabContainerSelectionChanged));
 
         // Setup each palette.
-        panels.resize(1);
-        @panels[0] = TileTypePalette(@tabContainer);
+        panels.resize(2);
+        @panels[0] = TerrainPalette(@tabContainer);
+        @panels[1] = TileTypePalette(@tabContainer);
         tabContainer.setSelectedTab(0);
     }
 
@@ -47,6 +48,7 @@ class PaletteWindow : ChildWindow {
             connect(SizeChanged, handler);
             connect(Minimized, handler);
             connect(Maximized, handler);
+            panels[currentTab].paletteWindowSizeChanged();
         }
     }
 
@@ -250,6 +252,89 @@ abstract class PalettePanel {
 }
 
 /**
+ * The palette panel for \c selectedTerrain.
+ */
+class TerrainPalette : Observer, PalettePanel {
+    /**
+     * Sets up the terrain palette.
+     * @param tabContainer The tab container to create the tab and panel in.
+     */
+    TerrainPalette(TabContainer@ const tabContainer) {
+        super(
+            tabContainer,
+            "terraindialog",
+            // Don't bother detaching, we'll never need to.
+            selectedTerrain.widgetFactory(),
+            generateScriptNames(),
+            getHeightOfTallestFrame("tile.normal") + 10,
+            3,
+            true
+        );
+        // Attach this palette to the selectedTerrain to receive a refresh
+        // request when the selected owner changes in any way.
+        selectedTerrain.attach(this);
+        regenerateButtonSprites();
+    }
+
+    /**
+     * When the owner changes, update the sprites on the buttons.
+     */
+    private void refresh(any&in data = any()) override {
+        if (latestOwner != selectedTerrain.owner) regenerateButtonSprites();
+    }
+
+    /**
+     * Update the sprites on the buttons according to the selected owner of the
+     * selected terrain.
+     */
+    private void regenerateButtonSprites() {
+        latestOwner = selectedTerrain.owner;
+        for (uint64 i = 0, len = buttonCount; i < len; ++i) {
+            const auto scriptName = buttons[i].getName();
+            buttons[i].setSprite("tile.normal", latestOwner.isEmpty() ?
+                terrain[scriptName].primaryTileType.neutralTileSprite :
+                terrain[scriptName].primaryTileType.ownedTileSprite(latestOwner)
+            );
+        }
+    }
+
+    /**
+     * When a terrain button is pressed, select it.
+     */
+    private void objectButtonSignalHandler(const WidgetID button,
+        const string&in signal) override {
+        if (signal != MouseReleased) return;
+        @selectedTerrain.type = terrain[::getWidgetName(button)];
+    }
+
+    /**
+     * When a new owner is selected, update it in \c selectedTerrain.
+     */
+    private void countryComboboxCallback(const ArmyID owner) override {
+        if (owner == NO_ARMY) selectedTerrain.owner = "";
+        else selectedTerrain.owner = country.scriptNames[owner];
+    }
+
+    /**
+     * Filters terrains based on whether they are paintable or not.
+     * @return A list of script names for terrains that are paintable.
+     */
+    private array<string>@ generateScriptNames() const {
+        array<string>@ names = array<string>();
+        for (uint64 i = 0, len = terrain.scriptNames.length(); i < len; ++i) {
+            const auto name = terrain.scriptNames[i];
+            if (terrain[name].isPaintable) names.insertLast(name);
+        }
+        return names;
+    }
+
+    /**
+     * When the owner of the selected tile type changes, it is updated here.
+     */
+    private string latestOwner;
+}
+
+/**
  * The palette panel for \c selectedTileType.
  */
 class TileTypePalette : Observer, PalettePanel {
@@ -275,7 +360,7 @@ class TileTypePalette : Observer, PalettePanel {
     }
 
     /**
-     * When the owner changes, update the sprites in the buttons.
+     * When the owner changes, update the sprites on the buttons.
      */
     private void refresh(any&in data = any()) override {
         if (latestOwner != selectedTileType.owner) regenerateButtonSprites();

@@ -1,6 +1,6 @@
 /**
  * @file SelectedObject.as
- * Defines all the different types of selected object.
+ * Defines base code for selected objects.
  */
 
 /**
@@ -64,50 +64,6 @@ abstract class SelectedObject {
      * Observers that are notified when the selected object changes.
      */
     private array<Observer@> observers;
-}
-
-/**
- * The currently selected tile type.
- */
-class SelectedTileType : SelectedObject {
-    /**
-     * Points to the tile type currently selected.
-     */
-    private const TileType@ tileType;
-    const TileType@ type {
-        set {
-            @tileType = value;
-            update();
-        }
-        get const {
-            return tileType;
-        }
-    }
-
-    /**
-     * The selected owner of the tile type.
-     * Set to empty if there is no owner.
-     */
-    private string tileTypeOwner;
-    string owner {
-        set {
-            tileTypeOwner = value;
-            update();
-        }
-        get const {
-            return tileTypeOwner;
-        }
-    }
-
-    /**
-     * Notifies observers when a change is made to the state of this object.
-     */
-    private void update() override {
-        if (type is null) update("", "", "");
-        else if (owner.isEmpty())
-            update(type.type.name, "tile.normal", type.neutralTileSprite);
-        else update(type.type.name, "tile.normal", type.ownedTileSprite(owner));
-    }
 }
 
 /**
