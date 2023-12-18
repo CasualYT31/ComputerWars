@@ -19,6 +19,10 @@ shared abstract class Container : Widget {
         ::add(this, child);
     }
 
+    void remove(const Widget@ const child) {
+        ::remove(child);
+    }
+
     uint64 widgetCount() const {
         return getWidgetCount(this);
     }

@@ -1119,6 +1119,8 @@ Widget::Ptr sfx::gui::_widgetFactory(const std::string& wType) const {
 		return tgui::BoxLayout::create();
 	} else if (type == type::BoxLayoutRatios) {
 		return tgui::BoxLayoutRatios::create();
+	} else if (type == type::Slider) {
+		return tgui::Slider::create();
 	} else {
 		_logger.error("Attempted to create a widget of type \"{}\": that widget "
 			"type is not supported.", wType);

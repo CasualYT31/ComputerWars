@@ -60,6 +60,7 @@ class MapMaker : Menu, Group {
         clientArea.add(toolBar);
         clientArea.add(paletteWindow);
         clientArea.add(armyPropertiesWindow);
+        clientArea.add(tilePropertiesWindow);
         clientArea.add(fillWindow);
         selectedTileType.attach(fillWindow);
 
@@ -508,6 +509,7 @@ class MapMaker : Menu, Group {
         edit.setObserver(Subject::Scripts, @scriptsWindow);
         edit.setObserver(Subject::Status, @mainStatusBar);
         edit.setObserver(Subject::Armies, @armyPropertiesWindow);
+        edit.setObserver(Subject::Tiles, @tilePropertiesWindow);
         mementosHaveChanged();
     }
 
@@ -703,6 +705,7 @@ class MapMaker : Menu, Group {
         fillWindow.close();
         scriptsWindow.close();
         armyPropertiesWindow.close();
+        tilePropertiesWindow.close();
         @edit = null;
         mementoWindow.refresh();
         if (quitCallback !is null) quitCallback();
@@ -814,6 +817,11 @@ class MapMaker : Menu, Group {
     private ArmyPropertiesWindow armyPropertiesWindow;
 
     /**
+     * The tile properties window.
+     */
+    private TilePropertiesWindow tilePropertiesWindow;
+
+    /**
      * The status bar.
      */
     private MainStatusBar mainStatusBar;
@@ -900,6 +908,8 @@ class MapMaker : Menu, Group {
             paletteWindow.dock();
 
         } else if (i == VIEW_TILE_PROPS) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else tilePropertiesWindow.dock();
 
         } else if (i == VIEW_ARMY_PROPS) {
             if (edit is null) openNoMapIsOpenMessageBox();

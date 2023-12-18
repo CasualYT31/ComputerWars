@@ -27,27 +27,31 @@ shared class Label : ClickableWidget {
     }
 
     void setText(const string&in caption, array<any>@ const vars = null) {
-        setWidgetText(this, caption, vars);
+        ::setWidgetText(this, caption, vars);
     }
 
     void setTextColour(const Colour&in c) {
-        setWidgetTextColour(this, c);
+        ::setWidgetTextColour(this, c);
     }
 
     void setTextOutlineColour(const Colour&in c) {
-        setWidgetTextOutlineColour(this, c);
+        ::setWidgetTextOutlineColour(this, c);
     }
 
     void setTextOutlineThickness(const float s) {
-        setWidgetTextOutlineThickness(this, s);
+        ::setWidgetTextOutlineThickness(this, s);
     }
 
     void setTextAlignment(const HorizontalAlignment h,
         const VerticalAlignment v) {
-        setWidgetTextAlignment(this, h, v);
+        ::setWidgetTextAlignment(this, h, v);
     }
 
     void setTextMaximumWidth(const float w) {
         ::setWidgetTextMaximumWidth(this, w);
+    }
+
+    void setTextStyles(const string&in s) {
+        ::setWidgetTextStyles(this, s);
     }
 }

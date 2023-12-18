@@ -156,6 +156,16 @@ void sfx::gui::_registerTypes(asIScriptEngine* const engine,
 	engine->RegisterEnumValue("AutoLayout", "Fill",
 		static_cast<int>(AutoLayout::Fill));
 
+	r = engine->RegisterEnum("EditBoxAlignment");
+	document->DocumentObjectEnum(r, "Alignments describing how to position text "
+		"within an <tt>EditBox</tt>.");
+	engine->RegisterEnumValue("EditBoxAlignment", "Left",
+		static_cast<int>(EditBox::Alignment::Left));
+	engine->RegisterEnumValue("EditBoxAlignment", "Centre",
+		static_cast<int>(EditBox::Alignment::Center));
+	engine->RegisterEnumValue("EditBoxAlignment", "Right",
+		static_cast<int>(EditBox::Alignment::Right));
+
 	engine->RegisterTypedef("MenuItemID", "uint64");
 	document->DocumentExpectedFunction("typedef uint64 MenuItemID",
 		"Index used to identify a menu item in a <tt>MenuBar</tt> widget.");
@@ -274,6 +284,7 @@ void sfx::gui::_registerConstants(asIScriptEngine* const engine,
 	REGISTER_WIDGET_TYPE_NAME(engine, document, ButtonBase)
 	REGISTER_WIDGET_TYPE_NAME(engine, document, BoxLayout)
 	REGISTER_WIDGET_TYPE_NAME(engine, document, BoxLayoutRatios)
+	REGISTER_WIDGET_TYPE_NAME(engine, document, Slider)
 
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, PositionChanged);
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, SizeChanged)
@@ -762,6 +773,14 @@ void sfx::gui::_registerEditBoxGlobalFunctions(asIScriptEngine* const engine,
 		"within a <tt>TextArea</tt> or <tt>EditBox</tt>. <tt>EditBox</tt> will "
 		"always have a line number of <tt>1</tt>. If an error occurred, neither "
 		"of the given parameters are changed.");
+
+	r = engine->RegisterGlobalFunction(
+		"void setEditBoxTextAlignment(" WIDGET_ID_PARAM ", "
+		"const EditBoxAlignment)",
+		asMETHOD(sfx::gui, _setEditBoxTextAlignment),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets an <tt>EditBox</tt>'s text "
+		"alignment.");
 }
 
 void sfx::gui::_registerButtonGlobalFunctions(asIScriptEngine* const engine,
@@ -843,6 +862,14 @@ void sfx::gui::_registerListGlobalFunctions(asIScriptEngine* const engine,
 void sfx::gui::_registerTreeViewGlobalFunctions(asIScriptEngine* const engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	auto r = engine->RegisterGlobalFunction(
+		"void setSelectedItemTextHierarchy(" WIDGET_ID_PARAM ", "
+		"const array<string>@ const)",
+		asMETHOD(sfx::gui, _setSelectedItemTextHierarchy),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a <tt>TreeView</tt>'s selected "
+		"item.");
+
+	r = engine->RegisterGlobalFunction(
 		"array<string>@ getSelectedItemTextHierarchy(" WIDGET_ID_PARAM ")",
 		asMETHOD(sfx::gui, _getSelectedItemTextHierarchy),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -886,11 +913,28 @@ void sfx::gui::_registerTabsGlobalFunctions(asIScriptEngine* const engine,
 		"tab that is currently selected. This signal has the opportunity to veto "
 		"the tab selection.");
 
+	r = engine->RegisterGlobalFunction("void deselectTab(" WIDGET_ID_PARAM ")",
+		asMETHOD(sfx::gui, _deselectTab), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Deselects the currently selected tab "
+		"from this widget, if one is selected.");
+
 	r = engine->RegisterGlobalFunction("int getSelectedTab(" WIDGET_ID_PARAM ")",
 		asMETHOD(sfx::gui, _getSelectedTab), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets a widget's selected tab's index. If "
 		"and error ocurred, or there wasn't a selected tab, <tt>-1</tt> will be "
 		"returned.");
+
+	r = engine->RegisterGlobalFunction("void setTabEnabled(" WIDGET_ID_PARAM ", "
+		"const uint64, const bool)",
+		asMETHOD(sfx::gui, _setTabEnabled), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Enables or disables a tab within a given "
+		"widget.");
+
+	r = engine->RegisterGlobalFunction("bool getTabEnabled(" WIDGET_ID_PARAM ", "
+		"const uint64)",
+		asMETHOD(sfx::gui, _getTabEnabled), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets the enabled state of a tab within a "
+		"widget.");
 
 	r = engine->RegisterGlobalFunction("uint64 getTabCount(" WIDGET_ID_PARAM ")",
 		asMETHOD(sfx::gui, _getTabCount), asCALL_THISCALL_ASGLOBAL, this);

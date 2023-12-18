@@ -25,4 +25,8 @@ shared class EditBox : ClickableWidget {
     void setValidator(const string&in v) {
         ::setEditBoxRegexValidator(this, v);
     }
+
+    void setAlignment(const EditBoxAlignment a) {
+        ::setEditBoxTextAlignment(this, a);
+    }
 }

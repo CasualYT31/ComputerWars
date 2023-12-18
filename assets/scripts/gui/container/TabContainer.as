@@ -30,8 +30,20 @@ shared class TabContainer : Container {
         ::setSelectedTab(this, t);
     }
 
+    void deselectTab() {
+        ::deselectTab(this);
+    }
+
     int getSelectedTab() const {
         return ::getSelectedTab(this);
+    }
+
+    void setTabEnabled(const uint64 t, const bool e) {
+        ::setTabEnabled(this, t, e);
+    }
+
+    bool getTabEnabled(const uint64 t) const {
+        return ::getTabEnabled(this, t);
     }
 
     uint64 getTabCount() const {

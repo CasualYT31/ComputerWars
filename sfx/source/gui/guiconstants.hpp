@@ -85,6 +85,7 @@ namespace type {
 	STRING_CONSTANT(ButtonBase)
 	STRING_CONSTANT(BoxLayout)
 	STRING_CONSTANT(BoxLayoutRatios)
+	STRING_CONSTANT(Slider)
 
 	// Widgets that can't be created by the scripts yet.
 	STRING_CONSTANT(ProgressBar)
@@ -92,7 +93,6 @@ namespace type {
 	STRING_CONSTANT(ColorPicker)
 	STRING_CONSTANT(Knob)
 	STRING_CONSTANT(Scrollbar)
-	STRING_CONSTANT(Slider)
 	STRING_CONSTANT(ListView)
 	STRING_CONSTANT(RangeSlider)
 	STRING_CONSTANT(ToggleButton)

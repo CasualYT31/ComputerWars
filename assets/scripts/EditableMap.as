@@ -23,8 +23,9 @@ enum Subject {
     /// Map property changes.
     Properties,
     /// Tile changes.
-    /// Passes in a \c Vector2 which describes the tile being updated. Passes in
-    /// an empty \c any object when a tile is being deselected.
+    /// Passes in a \c Vector2 which locates the tile that's been selected using
+    /// the tileinfo control (and whose information has been updated). Passes in
+    /// an empty \c any object when it's being deselected.
     Tiles,
     /// Army changes.
     Armies,
@@ -629,15 +630,14 @@ class EditableMap {
 
     /**
      * Set the HP of the tile that is being displayed in the properties window.
-     * @param  newHP The new HP value to set.
-     * @return The actual HP assigned.
+     * @param newHP The new HP value to set.
      */
-    HP setSelectedTileHP(HP newHP) {
+    void setSelectedTileHP(HP newHP) {
         const auto max = map.getTileType(tilePropsTile).type.maxHP;
         if (newHP < 0) newHP = 0;
         else if (newHP > HP(max)) newHP = HP(max);
         map.setTileHP(tilePropsTile, newHP);
-        return newHP;
+        refreshTileProps();
     }
 
     /**
@@ -648,6 +648,7 @@ class EditableMap {
         DisableMementos token(map, OPERATION[Operation::TILE_OWNER]);
         _createArmyIfNonExistent(newOwner);
         map.setTileOwner(tilePropsTile, newOwner);
+        refreshTileProps();
     }
 
     ////////////////////////////////
@@ -735,6 +736,7 @@ class EditableMap {
         if (newHP < 1) newHP = 1;
         else if (newHP > HP(max)) newHP = HP(max);
         map.setUnitHP(unit, newHP);
+        refreshTileProps();
         return newHP;
     }
 
@@ -750,6 +752,7 @@ class EditableMap {
         if (newFuel < 0) newFuel = 0;
         else if (newFuel > Fuel(max)) newFuel = Fuel(max);
         map.setUnitFuel(unit, newFuel);
+        refreshTileProps();
         return newFuel;
     }
 
@@ -767,7 +770,38 @@ class EditableMap {
         if (newAmmo < 0) newAmmo = 0;
         else if (newAmmo > Ammo(max)) newAmmo = Ammo(max);
         map.setUnitAmmo(unit, weaponType.scriptName, newAmmo);
+        refreshTileProps();
         return newAmmo;
+    }
+
+    /**
+     * Updates the unit's waiting flag.
+     * @param unit The ID of the unit to update.
+     * @param wait \c TRUE if the unit should be waiting, \c FALSE if not.
+     */
+    void waitUnit(const UnitID unit, const bool wait) {
+        map.waitUnit(unit, wait);
+        refreshTileProps();
+    }
+
+    /**
+     * Updates the unit's capturing flag.
+     * @param unit    The ID of the unit to update.
+     * @param capture \c TRUE if the unit should be capturing, \c FALSE if not.
+     */
+    void unitCapturing(const UnitID unit, const bool capture) {
+        map.unitCapturing(unit, capture);
+        refreshTileProps();
+    }
+
+    /**
+     * Updates the unit's hiding flag.
+     * @param unit The ID of the unit to update.
+     * @param hide \c TRUE if the unit should be hiding, \c FALSE if not.
+     */
+    void unitHiding(const UnitID unit, const bool hide) {
+        map.unitHiding(unit, hide);
+        refreshTileProps();
     }
 
     ////////////////////////

@@ -141,6 +141,33 @@ template <> struct fmt::formatter<tgui::Label::VerticalAlignment> {
 };
 
 /**
+ * Fmt formatter for the \c tgui::EditBox::Alignment type.
+ */
+template <> struct fmt::formatter<tgui::EditBox::Alignment> {
+	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+		auto it = ctx.begin(), end = ctx.end();
+		if (it != end && *it != '}') throw format_error("invalid format");
+		return it;
+	}
+
+	template <typename FormatContext>
+	auto format(const tgui::EditBox::Alignment a, FormatContext& ctx) const
+		-> decltype(ctx.out()) {
+		const auto aValue = static_cast<int>(a);
+		switch (a) {
+		case tgui::EditBox::Alignment::Left:
+			return fmt::format_to(ctx.out(), "Left ({})", aValue);
+		case tgui::EditBox::Alignment::Center:
+			return fmt::format_to(ctx.out(), "Center ({})", aValue);
+		case tgui::EditBox::Alignment::Right:
+			return fmt::format_to(ctx.out(), "Right ({})", aValue);
+		default:
+			return fmt::format_to(ctx.out(), "UNKNOWN ({})", aValue);
+		}
+	}
+};
+
+/**
  * Fmt formatter for the \c tgui::Scrollbar::Policy type.
  */
 template <> struct fmt::formatter<tgui::Scrollbar::Policy> {

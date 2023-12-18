@@ -44,6 +44,15 @@ class CountryComboBox : Group {
     }
 
     /**
+     * Updates the callback.
+     * @param cb Points to the callback to use instead of the one currently
+     *           stored.
+     */
+    void setCallback(CountryComboBoxCallback@ const cb) {
+        @listCallback = cb;
+    }
+
+    /**
      * Clears the combobox and refills it with countries.
      * Automatically selects the first item, if there is one.
      * @param neutral \c TRUE if the list should start with "Neutral." \c FALSE if

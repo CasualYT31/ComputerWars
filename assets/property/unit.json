@@ -731,6 +731,9 @@
 		"fuel": 99,
 		"weapons": {
 			"ROCKETS_PRIMARY": {
+				"longname": "PIPERUNNER_PRIMARY_WEAPON_longname",
+				"shortname": "PIPERUNNER_PRIMARY_WEAPON_shortname",
+				"description": "PIPERUNNER_PRIMARY_WEAPON_description",
 				"ammo": 9,
 				"lowrange": 2,
 				"units": {
@@ -1394,6 +1397,9 @@
 		"fuel": 99,
 		"weapons": {
 			"ROCKETS_PRIMARY": {
+				"longname": "BATTLESHIP_PRIMARY_WEAPON_longname",
+				"shortname": "BATTLESHIP_PRIMARY_WEAPON_shortname",
+				"description": "BATTLESHIP_PRIMARY_WEAPON_description",
 				"ammo": 9,
 				"lowrange": 2,
 				"highrange": 6,

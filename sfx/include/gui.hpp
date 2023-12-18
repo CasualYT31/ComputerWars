@@ -34,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "fonts.hpp"
 #include "tgui/tgui.hpp"
 #include "tgui/Backend/SFML-Graphics.hpp"
+#include "tgui/Layout.hpp"
 
 namespace sfx {
 	/**
@@ -1177,6 +1178,8 @@ namespace sfx {
 		void _optimiseTextAreaForMonospaceFont(const WidgetIDRef, const bool);
 		void _getCaretLineAndColumn(const WidgetIDRef, std::size_t&,
 			std::size_t&) const;
+		void _setEditBoxTextAlignment(const WidgetIDRef,
+			const tgui::EditBox::Alignment);
 
 		// BUTTON //
 
@@ -1233,6 +1236,8 @@ namespace sfx {
 		void _registerTreeViewGlobalFunctions(asIScriptEngine* const engine,
 			const std::shared_ptr<DocumentationGenerator>& document);
 
+		void _setSelectedItemTextHierarchy(const WidgetIDRef,
+			const CScriptArray* const);
 		CScriptArray* _getSelectedItemTextHierarchy(const WidgetIDRef) const;
 		void _addTreeViewItem(const WidgetIDRef, const CScriptArray* const);
 
@@ -1248,7 +1253,10 @@ namespace sfx {
 
 		void _addTab(const WidgetIDRef, const std::string&, CScriptArray* const);
 		void _setSelectedTab(const WidgetIDRef, const std::size_t);
+		void _deselectTab(const WidgetIDRef);
 		int _getSelectedTab(const WidgetIDRef) const;
+		void _setTabEnabled(const WidgetIDRef, const std::size_t, const bool);
+		bool _getTabEnabled(const WidgetIDRef, const std::size_t);
 		std::size_t _getTabCount(const WidgetIDRef) const;
 		std::string _getTabText(const WidgetIDRef, const std::size_t) const;
 
@@ -1435,10 +1443,10 @@ namespace sfx {
 			const std::string&, CScriptArray* const = nullptr);
 		bool _removeTabAndPanel(const WidgetIDRef);
 
-		// SPINCONTROL //
+		// SPINCONTROL & SLIDER //
 
 		/**
-		 * Registers \c SpinControl global functions.
+		 * Registers \c SpinControl and \c Slider global functions.
 		 * See implementation for documentation on all of the methods used to
 		 * implement these functions.
 		 */

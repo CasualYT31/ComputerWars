@@ -599,6 +599,15 @@ void sfx::gui::_getCaretLineAndColumn(const sfx::WidgetIDRef id,
 		"is of type \"{}\".", id, widgetType)
 }
 
+void sfx::gui::_setEditBoxTextAlignment(const WidgetIDRef id,
+	const tgui::EditBox::Alignment alignment) {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(EditBox, castWidget->setAlignment(alignment);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set the text alignment to {} within widget \"{}\", which is "
+		"of type \"{}\".", alignment, id, widgetType);
+}
+
 // BUTTON //
 
 void sfx::gui::_setWidgetDisabledBgColour(const sfx::WidgetIDRef id,
@@ -757,6 +766,20 @@ void sfx::gui::_setItemsToDisplay(const sfx::WidgetIDRef id,
 
 // TREEVIEW //
 
+void sfx::gui::_setSelectedItemTextHierarchy(const sfx::WidgetIDRef id,
+	const CScriptArray* const item) {
+	const auto itemStl = // Frees item.
+		engine::ConvertCScriptArray<std::vector<std::string>, std::string>(item);
+	// Then, convert the vector to the correct type.
+	std::vector<String> itemTgui;
+	std::copy(itemStl.begin(), itemStl.end(), std::back_inserter(itemTgui));
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(TreeView, castWidget->selectItem(itemTgui);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to select a TreeView item from widget \"{}\", which is of type "
+		"\"{}\".", id, widgetType)
+}
+
 CScriptArray* sfx::gui::_getSelectedItemTextHierarchy(
 	const sfx::WidgetIDRef id) const {
 	auto const arr = _scripts->createArray("string");
@@ -843,6 +866,15 @@ void sfx::gui::_setSelectedTab(const sfx::WidgetIDRef id,
 		index, id, widgetType)
 }
 
+void sfx::gui::_deselectTab(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(Tabs, castWidget->deselect();)
+		ELSE_IF_WIDGET_IS(TabContainer, castWidget->deselect();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to deselect the selected tab of a widget \"{}\", which is of "
+		"type \"{}\".", id, widgetType)
+}
+
 int sfx::gui::_getSelectedTab(const sfx::WidgetIDRef id) const {
 	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(Tabs, return castWidget->getSelectedIndex();)
@@ -851,6 +883,36 @@ int sfx::gui::_getSelectedTab(const sfx::WidgetIDRef id) const {
 	END("Attempted to get the index of the selected tab of a widget \"{}\", which "
 		"is of type \"{}\".", id, widgetType)
 	return -1;
+}
+
+void sfx::gui::_setTabEnabled(const sfx::WidgetIDRef id, const std::size_t i,
+	const bool enabled) {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(Tabs,
+			if (i >= castWidget->getTabsCount()) ERROR("This tab does not exist!")
+			castWidget->setTabEnabled(i, enabled);)
+		ELSE_IF_WIDGET_IS(TabContainer,
+			if (i >= castWidget->getTabs()->getTabsCount())
+				ERROR("This tab does not exist!")
+			castWidget->getTabs()->setTabEnabled(i, enabled);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set tab {}'s enabled state to {} for a widget \"{}\", which "
+		"is of type \"{}\".", i, enabled, id, widgetType)
+}
+
+bool sfx::gui::_getTabEnabled(const sfx::WidgetIDRef id, const std::size_t i) {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(Tabs,
+			if (i >= castWidget->getTabsCount()) ERROR("This tab does not exist!")
+			return castWidget->getTabEnabled(i);)
+		ELSE_IF_WIDGET_IS(TabContainer,
+			if (i >= castWidget->getTabs()->getTabsCount())
+				ERROR("This tab does not exist!")
+			return castWidget->getTabs()->getTabEnabled(i);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get tab {}'s enabled state for a widget \"{}\", which is of "
+		"type \"{}\".", i, id, widgetType)
+	return false;
 }
 
 std::size_t sfx::gui::_getTabCount(const sfx::WidgetIDRef id) const {
@@ -1783,12 +1845,13 @@ bool sfx::gui::_removeTabAndPanel(const sfx::WidgetIDRef id) {
 			captions.erase(captions.begin() + i);
 			return true;
 		)
+		ELSE_UNSUPPORTED()
 	END("Attempted to remove a tab and panel, the latter with ID \"{}\", which is "
 		"of type \"{}\".", id, widgetType)
 	return false;
 }
 
-// SPINCONTROL //
+// SPINCONTROL & SLIDER //
 
 void sfx::gui::_setWidgetMinMaxValues(const sfx::WidgetIDRef id, const float min,
 	const float max) {
@@ -1797,6 +1860,11 @@ void sfx::gui::_setWidgetMinMaxValues(const sfx::WidgetIDRef id, const float min
 			castWidget->setMinimum(min);
 			castWidget->setMaximum(max);
 		)
+		ELSE_IF_WIDGET_IS(Slider,
+			castWidget->setMinimum(min);
+			castWidget->setMaximum(max);
+		)
+		ELSE_UNSUPPORTED()
 	END("Attempted to set the minimum value ({}) and maximum value ({}) of a "
 		"widget \"{}\", which is of type \"{}\".", min, max, id, widgetType)
 }
@@ -1820,8 +1888,26 @@ bool sfx::gui::_setWidgetValue(const sfx::WidgetIDRef id, float val) {
 					val, id, widgetType, max);
 				val = max;
 			} else ret = true;
-			ret = castWidget->setValue(val);
+			const auto result = castWidget->setValue(val);
+			if (ret && !result) ret = false;
 		)
+		ELSE_IF_WIDGET_IS(Slider,
+			const auto min = castWidget->getMinimum();
+			const auto max = castWidget->getMaximum();
+			if (val < min) {
+				_logger.warning(errorString + " Value is smaller than the "
+					"minimum, which is {}. The minimum value will be applied.",
+					val, id, widgetType, min);
+				val = min;
+			} else if (val > max) {
+				_logger.warning(errorString + " Value is greater than the "
+					"maximum, which is {}. The maximum value will be applied.",
+					val, id, widgetType, max);
+				val = max;
+			} else ret = true;
+			castWidget->setValue(val);
+		)
+		ELSE_UNSUPPORTED()
 	END(errorString, val, id, widgetType)
 	return ret;
 }
@@ -1829,6 +1915,8 @@ bool sfx::gui::_setWidgetValue(const sfx::WidgetIDRef id, float val) {
 float sfx::gui::_getWidgetValue(const sfx::WidgetIDRef id) const {
 	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(SpinControl, return castWidget->getValue();)
+		IF_WIDGET_IS(Slider, return castWidget->getValue();)
+		ELSE_UNSUPPORTED()
 	END("Attempted to get the value of a widget \"{}\", which is of type \"{}\".",
 		id, widgetType)
 	return 0.f;
