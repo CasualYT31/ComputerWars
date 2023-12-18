@@ -550,7 +550,7 @@ class StructurePalette : Observer, PalettePanel {
             generateScriptNames(),
             getHeightOfTallestFrame("structure") + 10,
             4,
-            true
+            false
         );
         // Attach this palette to the selectedStructure to receive a refresh
         // request when the selected owner or destroyed flag change in any way.

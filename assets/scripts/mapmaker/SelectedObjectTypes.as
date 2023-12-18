@@ -165,7 +165,7 @@ class SelectedStructure : SelectedObject {
      * The selected owner of the structure.
      * Set to empty if there is no owner.
      */
-    private string structureOwner;
+    private string structureOwner = country.scriptNames[0];
     string owner {
         set {
             const auto changed = structureOwner != value;
