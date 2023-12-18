@@ -183,14 +183,7 @@ void sfx::gui::maximizedSignalHandler(const tgui::ChildWindow::Ptr& window) {
 			data.childWindowData->isMaximised) {
 			_restoreChildWindowImpl(id, data);
 		} else {
-			data.childWindowData->cache(window);
-			data.childWindowData->isMinimised = false;
-			data.childWindowData->isMaximised = true;
-			window->setSize("100%", "100%");
-			window->setPosition("50%", "50%");
-			window->setOrigin(0.5f, 0.5f);
-			window->setResizable(false);
-			window->setPositionLocked(true);
+			_maximiseChildWindowImpl(window, data);
 		}
 		window->moveToFront();
 	}

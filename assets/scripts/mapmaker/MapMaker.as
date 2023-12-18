@@ -59,6 +59,7 @@ class MapMaker : Menu, Group {
         clientArea.add(scriptsWindow);
         clientArea.add(toolBar);
         clientArea.add(paletteWindow);
+        clientArea.add(armyPropertiesWindow);
         clientArea.add(fillWindow);
         selectedTileType.attach(fillWindow);
 
@@ -153,7 +154,7 @@ class MapMaker : Menu, Group {
         // keyboard buttons, and is issuing the paint mouse button at the same
         // time. Actually, testing it now, that feels intuitive. And no one will
         // be doing it anyway.
-        const bool mouseNotUnderWidget = getWidgetUnderMouse() == NO_WIDGET;
+        const bool mouseNotUnderWidget = !isWidgetUnderMouse();
         const bool modifier = bool(ui["modifier"]);
         const bool action = (bool(ui["action"]) && !modifier) && (
             !bool(mouse["action"]) || (mouseNotUnderWidget && mouseInMap)
@@ -506,6 +507,7 @@ class MapMaker : Menu, Group {
         edit.setObserver(Subject::Properties, @mapPropertiesWindow);
         edit.setObserver(Subject::Scripts, @scriptsWindow);
         edit.setObserver(Subject::Status, @mainStatusBar);
+        edit.setObserver(Subject::Armies, @armyPropertiesWindow);
         mementosHaveChanged();
     }
 
@@ -700,6 +702,7 @@ class MapMaker : Menu, Group {
         mapPropertiesWindow.close();
         fillWindow.close();
         scriptsWindow.close();
+        armyPropertiesWindow.close();
         @edit = null;
         mementoWindow.refresh();
         if (quitCallback !is null) quitCallback();
@@ -806,6 +809,11 @@ class MapMaker : Menu, Group {
     private PaletteWindow paletteWindow;
 
     /**
+     * The army properties window.
+     */
+    private ArmyPropertiesWindow armyPropertiesWindow;
+
+    /**
      * The status bar.
      */
     private MainStatusBar mainStatusBar;
@@ -894,6 +902,8 @@ class MapMaker : Menu, Group {
         } else if (i == VIEW_TILE_PROPS) {
 
         } else if (i == VIEW_ARMY_PROPS) {
+            if (edit is null) openNoMapIsOpenMessageBox();
+            else armyPropertiesWindow.open();
 
         } else {
             critical("Unrecognised menu item ID " + formatMenuItemID(i) + " "

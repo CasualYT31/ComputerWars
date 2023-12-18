@@ -452,7 +452,7 @@ void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
 	}
 
 	// Is a control being triggered by a mouse whilst it is over a widget?
-	if (_gui && _gui->getWidgetUnderMouse() != sfx::NO_WIDGET &&
+	if (_gui && _gui->isWidgetUnderMouse() &&
 		signal.currentTriggeredByMouse && !signal.previousTriggeredByMouse)
 			signal.startedWhenMouseOverWidget = true;
 

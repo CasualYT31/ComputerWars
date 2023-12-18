@@ -26,6 +26,10 @@ shared class ComboBox : Widget {
         ::setSelectedItem(this, i);
     }
 
+    void deselectItem() {
+        ::deselectItem(this);
+    }
+
     int getSelectedItem() const {
         return ::getSelectedItem(this);
     }

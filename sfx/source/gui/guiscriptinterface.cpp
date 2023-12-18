@@ -1067,6 +1067,20 @@ void sfx::gui::_setWidgetBorderSize(const sfx::WidgetIDRef id, const float size)
 		"\"{}\".", size, id, widgetType)
 }
 
+void sfx::gui::_setWidgetBorderSizes(const sfx::WidgetIDRef id,
+	const std::string& left, const std::string& top, const std::string& right,
+	const std::string& bottom) {
+	const auto borders = Borders(AbsoluteOrRelativeValue(left),
+		AbsoluteOrRelativeValue(top), AbsoluteOrRelativeValue(right),
+		AbsoluteOrRelativeValue(bottom));
+	START_WITH_WIDGET(id);
+		IF_WIDGET_IS(Panel, castWidget->getRenderer()->setBorders(borders);)
+		ELSE_UNSUPPORTED()
+	END("Attempted to set border sizes left:{}, top:{}, right:{}, bottom:{}, to "
+		"widget \"{}\", which is of type \"{}\".", left, top, right, bottom, id,
+		widgetType)
+}
+
 void sfx::gui::_setWidgetBorderColour(const sfx::WidgetIDRef id,
 	const sf::Color& colour) {
 	START_WITH_WIDGET(id)
@@ -1512,6 +1526,35 @@ void sfx::gui::_restoreChildWindowImpl(const WidgetIDRef widgetID,
 		data.isMinimised = false;
 		data.isMaximised = false;
 	}
+}
+
+void sfx::gui::_maximiseChildWindow(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(ChildWindow,
+			if (widget->childWindowData) {
+				_restoreChildWindowImpl(id, *widget);
+				_maximiseChildWindowImpl(castWidget, *widget);
+				widget->ptr->moveToFront();
+				widget->ptr->setVisible(true);
+			}
+		)
+		ELSE_UNSUPPORTED()
+	END("Attempted to maximise the widget \"{}\", which is of type \"{}\".", id,
+		widgetType);
+}
+
+void sfx::gui::_maximiseChildWindowImpl(const tgui::ChildWindow::Ptr& window,
+	sfx::gui::widget_data& widgetData) {
+	// NOTE: this assumes a restored child window!
+	auto& data = *widgetData.childWindowData;
+	data.cache(window);
+	data.isMinimised = false;
+	data.isMaximised = true;
+	window->setSize("100%", "100%");
+	window->setPosition("50%", "50%");
+	window->setOrigin(0.5f, 0.5f);
+	window->setResizable(false);
+	window->setPositionLocked(true);
 }
 
 bool sfx::gui::_isChildWindowOpen(const sfx::WidgetIDRef id) const {

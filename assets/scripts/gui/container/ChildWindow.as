@@ -66,4 +66,8 @@ shared class ChildWindow : Container {
     void restore() {
         ::restoreChildWindow(this);
     }
+
+    void maximise() {
+        ::maximiseChildWindow(this);
+    }
 }

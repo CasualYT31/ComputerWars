@@ -1,6 +1,6 @@
 {
 	"main": "MapMaker",
-	"reserve": 600,
+	"reserve": 1200,
 	"up": "up",
 	"down": "down",
 	"left": "left",

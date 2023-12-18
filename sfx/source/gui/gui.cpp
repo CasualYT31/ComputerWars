@@ -324,15 +324,13 @@ float sfx::gui::getScalingFactor() const noexcept {
 	return _scalingFactor;
 }
 
-sfx::WidgetID sfx::gui::getWidgetUnderMouse() const {
-	if (_ui) {
-		if (const auto w = _gui.getWidgetBelowMouseCursor(_ui->mousePosition()))
-			return _getWidgetID(w);
-	} else {
-		_logger.error("Called getWidgetUnderMouse() when no user input object has "
+bool sfx::gui::isWidgetUnderMouse() const {
+	if (!_ui) {
+		_logger.error("Called isWidgetUnderMouse() when no user input object has "
 			"been given to this gui object!");
+		return false;
 	}
-	return sfx::NO_WIDGET;
+	return _gui.getWidgetBelowMouseCursor(_ui->mousePosition()).operator bool();
 }
 
 sfx::gui::widget_data::operator std::string() const {

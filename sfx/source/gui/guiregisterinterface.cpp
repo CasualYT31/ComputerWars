@@ -305,6 +305,7 @@ void sfx::gui::_registerConstants(asIScriptEngine* const engine,
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, OkPressed)
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, TextChanged)
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, ReturnKeyPressed)
+	REGISTER_SIGNAL_TYPE_NAME(engine, document, ReturnOrUnfocused)
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, CaretPositionChanged)
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, FileSelected)
 	REGISTER_SIGNAL_TYPE_NAME(engine, document, ButtonPressed)
@@ -397,11 +398,11 @@ void sfx::gui::_registerNonWidgetGlobalFunctions(asIScriptEngine* const engine,
 
 void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
-	auto r = engine->RegisterGlobalFunction("WidgetID getWidgetUnderMouse()",
-		asMETHOD(sfx::gui, getWidgetUnderMouse), asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Returns the ID of the widget that is "
-		"under the current mouse position. <tt>NO_WIDGET</tt> if there isn't "
-		"one.");
+	auto r = engine->RegisterGlobalFunction("bool isWidgetUnderMouse()",
+		asMETHOD(sfx::gui, isWidgetUnderMouse), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Returns <tt>TRUE</tt> if there is a "
+		"visible widget under the current mouse position. <tt>FALSE</tt> if there "
+		"isn't one.");
 
 	r = engine->RegisterGlobalFunction("bool widgetExists(" WIDGET_ID_PARAM ")",
 		asMETHOD(sfx::gui, _widgetExists), asCALL_THISCALL_ASGLOBAL, this);
@@ -983,10 +984,17 @@ void sfx::gui::_registerPanelGlobalFunctions(asIScriptEngine* const engine,
 
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetBorderSize(" WIDGET_ID_PARAM ", const float)",
-		asMETHOD(sfx::gui, _setWidgetBorderSize),
-		asCALL_THISCALL_ASGLOBAL, this);
+		asMETHOD(sfx::gui, _setWidgetBorderSize), asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a widget's border size. Applies the "
 		"same size to each side of the widget.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetBorderSizes("
+		WIDGET_ID_PARAM ", const string&in, const string&in, const string&in, "
+		"const string&in)",
+		asMETHOD(sfx::gui, _setWidgetBorderSizes), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's border size. The "
+		"widget's ID is given, then the border size applied to the left, top, "
+		"right, then bottom sides.");
 
 	r = engine->RegisterGlobalFunction(
 		"void setWidgetBorderColour(" WIDGET_ID_PARAM ", const Colour&in)",
@@ -1240,6 +1248,15 @@ void sfx::gui::_registerChildWindowGlobalFunctions(asIScriptEngine* const engine
 	document->DocumentGlobalFunction(r, "Restores a <tt>ChildWindow</tt> if it "
 		"was maximised or minimised. If the given <tt>ChildWindow</tt> was "
 		"neither, then this function will have no effect.");
+
+	r = engine->RegisterGlobalFunction("void maximiseChildWindow(" WIDGET_ID_PARAM
+		")",
+		asMETHOD(sfx::gui, _maximiseChildWindow), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Maximises a <tt>ChildWindow</tt>. If the "
+		"child window was minimised, it will first be restored before being "
+		"maximised. If the child window was closed, it will be opened. This will "
+		"only have an effect if the given child window has been set to "
+		"automatically handle minimise and maximise logic!");
 
 	r = engine->RegisterGlobalFunction("bool isChildWindowOpen(" WIDGET_ID_PARAM
 		")",

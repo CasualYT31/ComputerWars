@@ -27,18 +27,23 @@ shared class Panel : Group {
     }
 
     void setBackgroundColour(const Colour&in c) {
-        setWidgetBackgroundColour(this, c);
+        ::setWidgetBackgroundColour(this, c);
     }
 
     void setBorderSize(const float s) {
-        setWidgetBorderSize(this, s);
+        ::setWidgetBorderSize(this, s);
+    }
+
+    void setBorderSizes(const string&in l, const string&in t, const string&in r,
+        const string&in b) {
+        ::setWidgetBorderSizes(this, l, t, r, b);
     }
 
     void setBorderRadius(const float s) {
-        setWidgetBorderRadius(this, s);
+        ::setWidgetBorderRadius(this, s);
     }
 
     void setBorderColour(const Colour&in c) {
-        setWidgetBorderColour(this, c);
+        ::setWidgetBorderColour(this, c);
     }
 }

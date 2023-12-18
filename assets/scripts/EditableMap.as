@@ -462,6 +462,16 @@ class EditableMap {
     }
 
     /**
+     * Updates an army's team.
+     * @param army    The ID of the army to update.
+     * @param newTeam The new team to assign to the army.
+     */
+    void setArmyTeam(const ArmyID army, const TeamID newTeam) {
+        map.setArmyTeam(army, newTeam);
+        _updateArmyProps();
+    }
+
+    /**
      * Updates an army's funds.
      * @param  army     The ID of the army to update.
      * @param  newFunds The new funds to assign to the army.
@@ -470,7 +480,28 @@ class EditableMap {
     Funds setArmyFunds(const ArmyID army, Funds newFunds) {
         if (newFunds < 0) newFunds = 0;
         map.setArmyFunds(army, newFunds);
+        _updateArmyProps();
         return newFunds;
+    }
+
+    /**
+     * Updates an army's current CO.
+     * @param army The ID of the army to update.
+     * @param co   The script name of the current CO to assign to the army.
+     */
+    void setArmyCurrentCO(const ArmyID army, const string&in co) {
+        map.setArmyCurrentCO(army, co);
+        _updateArmyProps();
+    }
+
+    /**
+     * Updates an army's tag CO.
+     * @param army The ID of the army to update.
+     * @param co   The script name of the tag CO to assign to the army.
+     */
+    void setArmyTagCO(const ArmyID army, const string&in co) {
+        map.setArmyTagCO(army, co);
+        _updateArmyProps();
     }
 
     /**

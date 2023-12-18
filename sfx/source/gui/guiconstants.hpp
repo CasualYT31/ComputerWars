@@ -135,6 +135,7 @@ namespace signal {
 
 	STRING_CONSTANT(TextChanged)
 	STRING_CONSTANT(ReturnKeyPressed)
+	STRING_CONSTANT(ReturnOrUnfocused)
 	STRING_CONSTANT(CaretPositionChanged)
 
 	STRING_CONSTANT(FileSelected)
@@ -226,6 +227,7 @@ static std::unordered_multimap<std::string, std::unordered_set<std::string>>
 	// EDITBOX SIGNALS //
 	{ signal::TextChanged, { type::EditBox } },
 	{ signal::ReturnKeyPressed, { type::EditBox } },
+	{ signal::ReturnOrUnfocused, { type::EditBox } },
 	{ signal::CaretPositionChanged, { type::EditBox } },
 
 	// FILEDIALOG SIGNALS //

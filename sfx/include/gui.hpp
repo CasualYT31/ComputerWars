@@ -341,13 +341,15 @@ namespace sfx {
 		float getScalingFactor() const noexcept;
 
 		/**
-		 * Gets the ID of the widget under the current mouse position.
-		 * If a user input object hasn't been given, then \c sfx::NO_WIDGET will be
-		 * returned and an error will be logged.
-		 * @return The ID of the widget under the current mouse position,
-		 *         \c sfx::NO_WIDGET if there isn't a visible one.
+		 * Finds out if a widget is under the current mouse position.
+		 * If a user input object hasn't been given, then \c FALSE will be returned
+		 * and an error will be logged.
+		 * @return \c TRUE if the mouse is over a visible widget, \c FALSE if there
+		 *         isn't a visible one. Widgets that are not themselves rendered
+		 *         count as invisible, e.g. this method will always return \c FALSE
+		 *         if the mouse is only hovering over a \c Group.
 		 */
-		WidgetID getWidgetUnderMouse() const;
+		bool isWidgetUnderMouse() const;
 
 		/**
 		 * Animates the current GUI menu.
@@ -1284,6 +1286,8 @@ namespace sfx {
 
 		void _setWidgetBgColour(const WidgetIDRef, const sf::Color&);
 		void _setWidgetBorderSize(const WidgetIDRef, const float);
+		void _setWidgetBorderSizes(const WidgetIDRef, const std::string&,
+			const std::string&, const std::string&, const std::string&);
 		void _setWidgetBorderColour(const WidgetIDRef, const sf::Color&);
 		void _setWidgetBorderRadius(const WidgetIDRef, const float);
 		void _setHorizontalScrollbarPolicy(const WidgetIDRef,
@@ -1367,6 +1371,8 @@ namespace sfx {
 		void _closeChildWindowAndEmitSignal(const WidgetIDRef);
 		void _restoreChildWindow(const WidgetIDRef);
 		void _restoreChildWindowImpl(const WidgetIDRef, widget_data&);
+		void _maximiseChildWindow(const WidgetIDRef);
+		void _maximiseChildWindowImpl(const tgui::ChildWindow::Ptr&, widget_data&);
 		bool _isChildWindowOpen(const WidgetIDRef) const;
 		void _connectChildWindowClosingSignalHandler(const WidgetIDRef,
 			asIScriptFunction* const);

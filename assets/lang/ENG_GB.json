@@ -82,6 +82,7 @@
 	"createandload": "Create and\nLoad Unit",
 	"deleteunit": "Delete Unit",
 	"createarmy": "Create Army",
+	"deletearmy": "Delete Army",
 	"zoom": "#x Zoom",
 	"caret": "Ln #, Col #",
 	"success": "Success",
