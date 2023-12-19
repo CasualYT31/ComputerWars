@@ -64,8 +64,11 @@ void sfx::gui::setGUI(const std::string& newMenu, const bool callClose,
 		return;
 	}
 	if (callClose && oldMenuItr != _menus.end()) {
+		std::string nameOfMenuType(
+			newMenuItr->second.object->GetObjectType()->GetName());
 		if (!_scripts->callMethod(oldMenuItr->second.object,
-			"void Close(Menu@ const)", newMenuItr->second.object))
+			"void Close(Menu@ const, const string&in)", newMenuItr->second.object,
+			&nameOfMenuType))
 			_logger.error("Failed to call Close() method on current menu \"{}\"!",
 				getGUI());
 	}
@@ -75,8 +78,10 @@ void sfx::gui::setGUI(const std::string& newMenu, const bool callClose,
 	if (callOpen) {
 		asIScriptObject* const oldMenu =
 			(oldMenuItr == _menus.end() ? nullptr : oldMenuItr->second.object);
+		std::string nameOfMenuType;
+		if (oldMenu) nameOfMenuType = oldMenu->GetObjectType()->GetName();
 		if (!_scripts->callMethod(newMenuItr->second.object,
-			"void Open(Menu@ const)", oldMenu))
+			"void Open(Menu@ const, const string&in)", oldMenu, &nameOfMenuType))
 			_logger.error("Failed to call Open() method on new menu \"{}\"!",
 				getGUI());
 	}

@@ -189,7 +189,8 @@ abstract class PalettePanel {
         if (columns < 1.0f) columns = 1.0f;
         const auto rows = ceil(buttonWrap.widgetCount() / floor(columns));
         buttonWrap.setSize(
-            "100%-" + formatFloat(buttonPanel.getScrollbarWidth()),
+            "100%-" + (buttonPanel.isVerticalScrollbarVisible() ?
+                formatFloat(buttonPanel.getScrollbarWidth()) : "0"),
             formatFloat(rows * objectButtonSize)
         );
     }

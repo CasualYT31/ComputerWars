@@ -16,17 +16,19 @@ class MoveUnitMenu : Menu, Group {
 
     /**
      * Invoked when the menu is opened.
-     * @param oldMenu Handle to the menu that was open before this one.
+     * @param oldMenu     Handle to the menu that was open before this one.
+     * @param oldMenuName Name of the type of the \c Menu object.
      */
-    void Open(Menu@ const oldMenu) {
+    void Open(Menu@ const oldMenu, const string&in oldMenuName) {
         setVisibility(true);
     }
 
     /**
      * Invoked when the menu is closed.
-     * @param newMenu Handle to the menu that will be opened after this one.
+     * @param newMenu     Handle to the menu that will be opened after this one.
+     * @param newMenuName Name of the type of the \c Menu object.
      */
-    void Close(Menu@ const newMenu) {
+    void Close(Menu@ const newMenu, const string&in newMenuName) {
         setVisibility(false);
     }
 

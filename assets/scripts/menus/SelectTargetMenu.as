@@ -18,18 +18,18 @@ class SelectTargetMenu : Menu, Group {
 
     /**
      * Invoked when the menu is opened.
-     * @param oldMenu Handle to the menu that was open before this one.
+     * @param oldMenu     Handle to the menu that was open before this one.
+     * @param oldMenuName Name of the type of the \c Menu object.
      */
-    void Open(Menu@ const oldMenu) {
+    void Open(Menu@ const oldMenu, const string&in oldMenuName) {
         // When the menu is opened, the currently selected unit will be push
         // selected again, and its available targets will be added to the
         // available tiles list.
         game.enableClosedList(false);
-        selectedTileCache = game.map.getSelectedTile();
         tilesWithTargets.deleteAll();
         @attackingUnitType = game.map.getUnitType(game.map.getSelectedUnit());
         game.findTilesWithTargets(tilesWithTargets, game.map.getSelectedUnit(),
-            selectedTileCache);
+            game.map.getSelectedTile());
         game.map.pushSelectedUnit(game.map.getSelectedUnit());
         const auto keys = tilesWithTargets.getKeys();
         for (uint i = 0, len = keys.length(); i < len; ++i)
@@ -42,9 +42,10 @@ class SelectTargetMenu : Menu, Group {
 
     /**
      * Invoked when the menu is closed.
-     * @param newMenu Handle to the menu that will be opened after this one.
+     * @param newMenu     Handle to the menu that will be opened after this one.
+     * @param newMenuName Name of the type of the \c Menu object.
      */
-    void Close(Menu@ const newMenu) {
+    void Close(Menu@ const newMenu, const string&in newMenuName) {
         game.enableClosedList(true);
         game.setNormalCursorSprites();
         setVisibility(false);
@@ -118,11 +119,6 @@ class SelectTargetMenu : Menu, Group {
 
         if (bool(ui["back"])) {
             game.map.popSelectedUnit();
-            // Force the selection to go back to the originally selected unit (as
-            // the currently selected tile could be moved whilst in this menu, and
-            // this menu relies on the selected tile being on the original unit as
-            // the menu opens).
-            game.map.setSelectedTile(selectedTileCache);
             setGUI("PreviewMoveUnitMenu");
         } else if (bool(ui["select"])) {
             // If the select control is being made by the mouse, and it is not
@@ -153,11 +149,6 @@ class SelectTargetMenu : Menu, Group {
      * @sa \c PlayableMap::findTilesWithTargets().
      */
     private dictionary tilesWithTargets;
-
-    /**
-     * Cache of the tile that was selected when the menu was opened.
-     */
-    private Vector2 selectedTileCache;
 
     /**
      * Points to the type of the attacking unit.

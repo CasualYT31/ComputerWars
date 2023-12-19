@@ -6,7 +6,7 @@ FetchContent_Declare(tgui
 	# Don't forget to update documentation links in guiregisterinterface.cpp
 	# when updating the version of TGUI.
 	GIT_REPOSITORY https://github.com/CasualYT31/TGUI.git
-	GIT_TAG 1fe53c5f
+	GIT_TAG 15f56ed0
 )
 FetchContent_MakeAvailable(tgui)
 

@@ -287,28 +287,32 @@
 				[ 44, 32, 8, 8 ],
 				[ 52, 32, 8, 8 ]
 			],
-			"durations": [ 750, 750 ]
+			"durations": [ 750, 750 ],
+			"globalframeid": true
 		},
 		"fuellow": {
 			"frames": [
 				[ 68, 32, 8, 8 ],
 				[ 36, 32, 8, 8 ]
 			],
-			"durations": [ 750, 750 ]
+			"durations": [ 750, 750 ],
+			"globalframeid": true
 		},
 		"ammolow": {
 			"frames": [
 				[ 76, 32, 8, 8 ],
 				[ 36, 32, 8, 8 ]
 			],
-			"durations": [ 750, 750 ]
+			"durations": [ 750, 750 ],
+			"globalframeid": true
 		},
 		"fuelammolow": {
 			"frames": [
 				[ 68, 32, 8, 8 ],
 				[ 76, 32, 8, 8 ]
 			],
-			"durations": [ 750, 750 ]
+			"durations": [ 750, 750 ],
+			"globalframeid": true
 		},
 		"nostatusicon": {
 			"frames": [ [ 36, 32, 8, 8 ] ],

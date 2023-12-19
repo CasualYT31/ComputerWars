@@ -341,18 +341,19 @@ void sfx::gui::_registerMenuInterface(asIScriptEngine* const engine,
 		"the entire lifetime of the menu. The order of subclass construction "
 		"cannot be guaranteed.");
 
-	r = engine->RegisterInterfaceMethod(Menu,
-		std::string("void Open(").append(Menu).append("@ const)").c_str());
+	r = engine->RegisterInterfaceMethod(Menu, std::string("void Open(").append(
+		Menu).append("@ const, const string&in)").c_str());
 	document->DocumentInterfaceMethod(r, "When switching to the menu, this method "
 		"will be called. The given handle points to the menu that was open before "
 		"this one. If it's <tt>null</tt>, there was no menu open before this "
-		"one.");
+		"one. The string stores the name of the subclass of the menu object.");
 
-	r = engine->RegisterInterfaceMethod(Menu,
-		std::string("void Close(").append(Menu).append("@ const)").c_str());
+	r = engine->RegisterInterfaceMethod(Menu, std::string("void Close(").append(
+		Menu).append("@ const, const string&in)").c_str());
 	document->DocumentInterfaceMethod(r, "When switching from the menu, this "
 		"method will be called. The given handle points to the menu that will be "
-		"opened next. Will never be <tt>null</tt>.");
+		"opened next. Will never be <tt>null</tt>. The string stores the name of "
+		"the subclass of the menu object.");
 
 	r = engine->RegisterInterfaceMethod(Menu, "void Periodic(const dictionary, "
 		"const dictionary, const MousePosition&in, const MousePosition&in)");
@@ -1066,6 +1067,13 @@ void sfx::gui::_registerPanelGlobalFunctions(asIScriptEngine* const engine,
 	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's horizontal "
 		"scroll amount.");
 
+	r = engine->RegisterGlobalFunction("bool isHorizontalScrollbarVisible("
+		WIDGET_ID_PARAM ")",
+		asMETHOD(sfx::gui, _isHorizontalScrollbarVisible),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Finds out if a ScrollablePanel's "
+		"horizontal scrollbar is visible.");
+
 	r = engine->RegisterGlobalFunction("void setVerticalScrollbarAmount("
 		WIDGET_ID_PARAM ", const uint)",
 		asMETHOD(sfx::gui, _setVerticalScrollbarAmount),
@@ -1079,6 +1087,13 @@ void sfx::gui::_registerPanelGlobalFunctions(asIScriptEngine* const engine,
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Sets a ScrollablePanel's vertical scroll "
 		"value.");
+
+	r = engine->RegisterGlobalFunction("bool isVerticalScrollbarVisible("
+		WIDGET_ID_PARAM ")",
+		asMETHOD(sfx::gui, _isVerticalScrollbarVisible),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Finds out if a ScrollablePanel's "
+		"vertical scrollbar is visible.");
 
 	r = engine->RegisterGlobalFunction("float getScrollbarWidth(" WIDGET_ID_PARAM
 		")", asMETHOD(sfx::gui, _getScrollbarWidth),

@@ -16,20 +16,20 @@ class RepairMenu : Menu, Group {
 
     /**
      * Invoked when the menu is opened.
-     * @param oldMenu Handle to the menu that was open before this one.
+     * @param oldMenu     Handle to the menu that was open before this one.
+     * @param oldMenuName Name of the type of the \c Menu object.
      */
-    void Open(Menu@ const oldMenu) {
+    void Open(Menu@ const oldMenu, const string&in oldMenuName) {
         // When this menu is opened, push select the current unit (Black Boat),
         // and add the available units to the available tile list. Also disable
         // the closed list.
-        selectedTileCache = game.map.getSelectedTile();
         game.enableClosedList(false);
         const auto selectedUnit = game.map.getSelectedUnit();
         game.map.pushSelectedUnit(selectedUnit);
         game.map.setAvailableTileShader(AvailableTileShader::Yellow);
         game.map.disableShaderForAvailableUnits(true);
         const auto availableUnits = game.findDamagedOrDepletedArmyUnitsAdjacentTo(
-            selectedTileCache, game.map.getArmyOfUnit(selectedUnit),
+            game.map.getSelectedTile(), game.map.getArmyOfUnit(selectedUnit),
             { selectedUnit });
         for (uint i = 0, len = availableUnits.length(); i < len; ++i)
             game.map.addAvailableTile(
@@ -39,9 +39,10 @@ class RepairMenu : Menu, Group {
 
     /**
      * Invoked when the menu is closed.
-     * @param newMenu Handle to the menu that will be opened after this one.
+     * @param newMenu     Handle to the menu that will be opened after this one.
+     * @param newMenuName Name of the type of the \c Menu object.
      */
-    void Close(Menu@ const newMenu) {
+    void Close(Menu@ const newMenu, const string&in newMenuName) {
         game.enableClosedList(true);
         setVisibility(false);
     }
@@ -63,11 +64,6 @@ class RepairMenu : Menu, Group {
         HandleCommonGameInput(ui, mouse, previousMouse, currentMouse);
         if (bool(ui["back"])) {
             game.map.popSelectedUnit();
-            // Force the selection to go back to the originally selected unit (as
-            // the currently selected tile could be moved whilst in this menu, and
-            // this menu relies on the selected tile being on the original unit as
-            // the menu opens).
-            game.map.setSelectedTile(selectedTileCache);
             setGUI("PreviewMoveUnitMenu");
         } else if (bool(ui["select"])) {
             // If the select control is being made by the mouse, and it is not
@@ -91,9 +87,4 @@ class RepairMenu : Menu, Group {
             }
         }
     }
-
-    /**
-     * Cache of the tile that was selected when the menu was opened.
-     */
-    private Vector2 selectedTileCache;
 }

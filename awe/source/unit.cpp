@@ -49,6 +49,22 @@ awe::unit::unit(const engine::logger::data& data,
 	}
 }
 
+bool awe::unit::isReplenished(const bool heal) const {
+	// First check fuel.
+	if (!_type->hasInfiniteFuel() && getFuel() != _type->getMaxFuel())
+		return false;
+	// Then check ammos.
+	for (std::size_t i = 0, len = _type->getWeaponCount(); i < len; ++i) {
+		const auto weaponType = _type->getWeaponByIndex(i);
+		if (!weaponType->hasInfiniteAmmo() &&
+			getAmmo(weaponType->getScriptName()) != weaponType->getMaxAmmo())
+			return false;
+	}
+	// Finally, check HP, if configured to do so.
+	if (!heal) return true;
+	return static_cast<unsigned int>(getHP()) == _type->getMaxHP();
+}
+
 void awe::unit::replenish(const bool heal) {
 	if (heal) setHP(_type->getMaxHP());
 	if (!_type->hasInfiniteFuel()) setFuel(_type->getMaxFuel());

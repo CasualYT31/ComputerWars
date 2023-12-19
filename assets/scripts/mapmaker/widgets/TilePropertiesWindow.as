@@ -89,10 +89,9 @@ class TilePropertiesWindow : Observer, ChildWindow {
 
     /**
      * If no tab is selected, this method will select the "best" one available.
-     * This method will always favour the unit tab.
      */
     private void selectBestTabIfNoTabIsSelected() {
-        if (tabs.getSelectedTab() > 0) return;
+        if (tabs.getSelectedTab() >= 0) return;
         if (tabs.getTabEnabled(1)) tabs.setSelectedTab(1);
         else if (tabs.getTabEnabled(0)) tabs.setSelectedTab(0);
     }

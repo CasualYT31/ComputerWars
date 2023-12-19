@@ -179,6 +179,15 @@ namespace awe {
 		}
 
 		/**
+		 * Checks if this unit is fully replenish.
+		 * @param  heal If \c TRUE, also checks if the unit is fully healed.
+		 * @return \c TRUE if the unit's internal HP, fuel, and all of its ammo is
+		 *         at full. \c FALSE otherwise. Infinite fuel or ammo is counted as
+		 *         being "at full."
+		 */
+		bool isReplenished(const bool heal = false) const;
+
+		/**
 		 * Replenishs this unit's fuel and all of its ammo.
 		 * @param heal If \c TRUE, fully heal the unit, too.
 		 */

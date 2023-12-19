@@ -106,7 +106,7 @@ namespace awe {
 	 * you can create a disable token within a scope, perform the operations, then
 	 * let the control flow leave that scope. You can also have multiple disable
 	 * tokens active at one time, across the scripts and the game engine proper.
-	 * Only when the first token is destroyed will a memento will be created.
+	 * Only when the first token is destroyed will a memento be created.
 	 */
 	class disable_mementos :
 		public engine::script_reference_type<awe::disable_mementos> {
@@ -240,7 +240,7 @@ namespace awe {
 			const engine::logger::data& data);
 
 		/**
-		 * Makes sure to release any given script callbacks.
+		 * Makes sure to release any given script callbacks and modules.
 		 */
 		~map() noexcept;
 
@@ -334,6 +334,15 @@ namespace awe {
 		 *                to enable it.
 		 */
 		void enablePeriodic(const bool enabled);
+
+		/**
+		 * The default win condition of a map.
+		 * If there is only one team remaining on the map, then the win condition
+		 * has been met. If there is no team remaining, then \c TRUE will be
+		 * returned.
+		 * @return \c TRUE if the win condition has been met, \c FALSE otherwise.
+		 */
+		bool defaultWinCondition() const;
 
 		/**
 		 * If this map defines a \c beginTurnForOwnedTile() function, invoke it.
@@ -503,15 +512,6 @@ namespace awe {
 		 * @return The current day.
 		 */
 		awe::Day getDay() const noexcept;
-
-		/**
-		 * The default win condition of a map.
-		 * If there is only one team remaining on the map, then the win condition
-		 * has been met. If there is no team remaining, then \c TRUE will be
-		 * returned.
-		 * @return \c TRUE if the win condition has been met, \c FALSE otherwise.
-		 */
-		bool defaultWinCondition() const;
 
 		/////////////////////
 		// ARMY OPERATIONS //
@@ -968,6 +968,17 @@ namespace awe {
 		 * @param heal If \c TRUE, the unit's HP is set to max, too.
 		 */
 		void replenishUnit(const awe::UnitID id, const bool heal = false);
+
+		/**
+		 * Is this unit at max fuel, ammos, and (optionally) HP?
+		 * @param  id The ID of the unit to query.
+		 * @param  hp \c TRUE if this method should also check for HP. \c FALSE if
+		 *            it should just check for fuel and ammos.
+		 * @return \c TRUE if this unit exists and has full (or infinite) fuel and
+		 *         ammos, \em and has full internal HP if \c hp is \c TRUE.
+		 *         \c FALSE otherwise.
+		 */
+		bool isUnitReplenished(const awe::UnitID id, const bool hp = false) const;
 
 		/**
 		 * Sets a unit's waiting state.
@@ -2494,6 +2505,11 @@ namespace awe {
 		 * Internal logger object.
 		 */
 		mutable engine::logger _logger;
+
+		/**
+		 * Exception to throw when \c _scripts is \c nullptr when it shouldn't be.
+		 */
+		static const std::runtime_error NO_SCRIPTS;
 
 		///////////////////////
 		// FILE AND MEMENTOS //

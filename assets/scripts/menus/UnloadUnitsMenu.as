@@ -22,9 +22,10 @@ class UnloadUnitsMenu : Menu, Group {
 
     /**
      * Invoked when the menu is opened.
-     * @param oldMenu Handle to the menu that was open before this one.
+     * @param oldMenu     Handle to the menu that was open before this one.
+     * @param oldMenuName Name of the type of the \c Menu object.
      */
-    void Open(Menu@ const oldMenu) {
+    void Open(Menu@ const oldMenu, const string&in oldMenuName) {
         selectedTileCache = game.map.getSelectedTile();
         selectedUnitCache = game.map.getSelectedUnit();
 
@@ -41,9 +42,10 @@ class UnloadUnitsMenu : Menu, Group {
 
     /**
      * Invoked when the menu is closed.
-     * @param newMenu Handle to the menu that will be opened after this one.
+     * @param newMenu     Handle to the menu that will be opened after this one.
+     * @param newMenuName Name of the type of the \c Menu object.
      */
-    void Close(Menu@ const newMenu) {
+    void Close(Menu@ const newMenu, const string&in newMenuName) {
         setVisibility(false);
         grid.removeUnits();
     }
@@ -149,11 +151,6 @@ class UnloadUnitsMenu : Menu, Group {
             if (game.map.isPreviewUnit(loadedUnit))
                 game.map.removePreviewUnit(loadedUnit);
         }
-        // Force the selection to go back to the originally selected unit (as the
-        // currently selected tile could be moved whilst in this menu, and this
-        // menu relies on the selected tile being on the original unit as the menu
-        // opens).
-        game.map.setSelectedTile(selectedTileCache);
         setGUI("PreviewMoveUnitMenu");
     }
 

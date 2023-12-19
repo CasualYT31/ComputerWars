@@ -329,6 +329,7 @@ class EditableMap {
      * @param day     The current day of the map.
      */
     void setMapProperties(const string&in mapName, const Day day) {
+        if (mapName == map.getMapName() && day == map.getDay()) return;
         DisableMementos token(map, OPERATION[Operation::MAP_PROPS]);
         map.setMapName(mapName);
         map.setDay(day);
@@ -342,6 +343,7 @@ class EditableMap {
      */
     void setMapSize(const Vector2&in mapSize, const string&in tileType,
         const ArmyID army = NO_ARMY) {
+        if (mapSize == map.getMapSize()) return;
         DisableMementos token(map, OPERATION[Operation::MAP_SIZE]);
         _createArmyIfNonExistent(army);
         map.setMapSize(mapSize, tileType, army);
@@ -645,6 +647,7 @@ class EditableMap {
      * @param newOwner The ID of the new owner.
      */
     void setSelectedTileOwner(const ArmyID newOwner) {
+        if (newOwner == map.getTileOwner(tilePropsTile)) return;
         DisableMementos token(map, OPERATION[Operation::TILE_OWNER]);
         _createArmyIfNonExistent(newOwner);
         map.setTileOwner(tilePropsTile, newOwner);

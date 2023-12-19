@@ -18,13 +18,18 @@ class PreviewMoveUnitMenu : Menu, Group {
 
     /**
      * Invoked when the menu is opened.
-     * @param oldMenu Handle to the menu that was open before this one.
+     * @param oldMenu     Handle to the menu that was open before this one.
+     * @param oldMenuName Name of the type of the \c Menu object.
      */
-    void Open(Menu@ const oldMenu) {
+    void Open(Menu@ const oldMenu, const string&in oldMenuName) {
         // Gather data.
         const auto unit = game.map.getSelectedUnit();
         const auto unitType = game.map.getUnitType(unit);
-        const auto tile = game.map.getSelectedTile();
+        if (oldMenuName == "MoveUnitMenu") {
+            tile = game.map.getSelectedTile();
+        } else {
+            game.map.setSelectedTile(tile);
+        }
         const auto tileType = game.map.getTileType(tile);
         const auto tileStructure = game.map.isTileAStructureTile(tile) ?
             game.map.getTileStructure(tile) : null;
@@ -196,9 +201,10 @@ class PreviewMoveUnitMenu : Menu, Group {
 
     /**
      * Invoked when the menu is closed.
-     * @param newMenu Handle to the menu that will be opened after this one.
+     * @param newMenu     Handle to the menu that will be opened after this one.
+     * @param newMenuName Name of the type of the \c Menu object.
      */
-    void Close(Menu@ const newMenu) {
+    void Close(Menu@ const newMenu, const string&in newMenuName) {
         setVisibility(false);
         previewCommands.removeAllCommands();
     }
@@ -229,4 +235,12 @@ class PreviewMoveUnitMenu : Menu, Group {
      * The command menu widget.
      */
     private CommandWidget previewCommands("PreviewMoveUnitMenu", "100");
+
+    /**
+     * When the \c PreviewMoveUnitMenu is opened from the \c MoveUnitMenu, the
+     * currently selected tile will be stored here.
+     * If this menu opens from any other menu, however, it will not be updated.
+     * Instead this tile will be selected.
+     */
+    private Vector2 tile;
 }

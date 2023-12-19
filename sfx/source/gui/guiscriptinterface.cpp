@@ -1185,6 +1185,16 @@ void sfx::gui::_setHorizontalScrollbarAmount(const sfx::WidgetIDRef id,
 		"which is of type \"{}\".", amount, id, widgetType)
 }
 
+bool sfx::gui::_isHorizontalScrollbarVisible(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(ScrollablePanel,
+			return castWidget->isHorizontalScrollbarShown();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get widget \"{}\"'s horizontal scrollbar visibility state. "
+		"The widget is of type \"{}\".", id, widgetType)
+	return false;
+}
+
 void sfx::gui::_setVerticalScrollbarAmount(const sfx::WidgetIDRef id,
 	const unsigned int amount) {
 	START_WITH_WIDGET(id)
@@ -1207,6 +1217,16 @@ void sfx::gui::_setVerticalScrollbarValue(const sfx::WidgetIDRef id,
 		ELSE_UNSUPPORTED()
 	END("Attempted to set the vertical scrollbar value {} to widget \"{}\", which "
 		"is of type \"{}\".", value, id, widgetType)
+}
+
+bool sfx::gui::_isVerticalScrollbarVisible(const sfx::WidgetIDRef id) const {
+	START_WITH_WIDGET(id)
+		IF_WIDGET_IS(ScrollablePanel,
+			return castWidget->isVerticalScrollbarShown();)
+		ELSE_UNSUPPORTED()
+	END("Attempted to get widget \"{}\"'s vertical scrollbar visibility state. "
+		"The widget is of type \"{}\".", id, widgetType)
+	return false;
 }
 
 float sfx::gui::_getScrollbarWidth(const sfx::WidgetIDRef id) const {

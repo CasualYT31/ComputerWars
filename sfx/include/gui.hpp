@@ -1301,8 +1301,10 @@ namespace sfx {
 		void _setHorizontalScrollbarPolicy(const WidgetIDRef,
 			const tgui::Scrollbar::Policy);
 		void _setHorizontalScrollbarAmount(const WidgetIDRef, const unsigned int);
+		bool _isHorizontalScrollbarVisible(const WidgetIDRef) const;
 		void _setVerticalScrollbarAmount(const WidgetIDRef, const unsigned int);
 		void _setVerticalScrollbarValue(const WidgetIDRef, const unsigned int);
+		bool _isVerticalScrollbarVisible(const WidgetIDRef) const;
 		float _getScrollbarWidth(const WidgetIDRef) const;
 
 		// LAYOUT //

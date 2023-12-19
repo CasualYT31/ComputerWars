@@ -33,6 +33,10 @@ shared class ScrollablePanel : Panel {
     void setVerticalScrollbarAmount(const uint a) {
         ::setVerticalScrollbarAmount(this, a);
     }
+    
+    bool isVerticalScrollbarVisible() const {
+        return ::isVerticalScrollbarVisible(this);
+    }
 
     void setHorizontalScrollbarAmount(const uint a) {
         ::setHorizontalScrollbarAmount(this, a);
@@ -40,5 +44,9 @@ shared class ScrollablePanel : Panel {
 
     void setHorizontalScrollbarPolicy(const ScrollbarPolicy p) {
         ::setHorizontalScrollbarPolicy(this, p);
+    }
+    
+    bool isHorizontalScrollbarVisible() const {
+        return ::isHorizontalScrollbarVisible(this);
     }
 }
