@@ -96,10 +96,6 @@ class MapMaker : Menu, Group {
      */
     void Open(Menu@ const oldMenu, const string&in oldMenuName) {
         @mapMaker = this;
-        // Debug {
-        fileDialogFile = "./map/islandx.cwm";
-        openEditMapAuthorised();
-        // }
         toolBar.dock();
         paletteWindow.dock();
         setVisibility(true);
