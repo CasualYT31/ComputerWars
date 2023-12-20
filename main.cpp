@@ -42,8 +42,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @brief     The \c awe namespace contains Computer Wars-specific code.
  */
 
-/**@namespace transition
- * @brief     The \c transition namespace contains all the transition drawables.
+/**@namespace animation
+ * @brief     The \c animation namespace contains Computer Wars-specific animation
+ *            code.
  */
 
 #include <filesystem>

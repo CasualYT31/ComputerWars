@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "renderer.hpp"
 
-namespace transition {
+namespace awe {
 	/**
 	 * Defines the blueprint all transitions should conform to.
 	 * All transitions should be single-use animations that do not repeat.
@@ -89,7 +89,7 @@ namespace transition {
 	 * @sa sfx::animated_drawable
 	 * @sa sfx::base
 	 */
-	class rectangle : public transition::base {
+	class rectangle : public awe::base {
 	public:
 		/**
 		 * Sets the transition up, ready for drawing.

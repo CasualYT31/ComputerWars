@@ -29,9 +29,6 @@ add_subdirectory("engine")
 # sfx namespace/library.
 add_subdirectory("sfx")
 
-# transition namespace/library.
-add_subdirectory("transition")
-
 # awe namespace/library.
 add_subdirectory("awe")
 

@@ -20,20 +20,20 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "transitions.hpp"
+#include "animation/transitions.hpp"
 
-transition::base::base(const bool isFadingIn, const sf::Time& duration) noexcept :
+awe::base::base(const bool isFadingIn, const sf::Time& duration) noexcept :
 	_isFadingIn(isFadingIn), _duration(duration) {}
 
-bool transition::base::isFadingIn() const noexcept {
+bool awe::base::isFadingIn() const noexcept {
 	return _isFadingIn;
 }
 
-sf::Time transition::base::duration() const {
+sf::Time awe::base::duration() const {
 	return _duration;
 }
 
-transition::rectangle::rectangle(const bool isFadingIn, const sf::Color& colour,
+awe::rectangle::rectangle(const bool isFadingIn, const sf::Color& colour,
 	const sf::Time& duration) : base(isFadingIn, duration) {
 	_toprect.setFillColor(colour);
 	_bottomrect.setFillColor(colour);
@@ -43,7 +43,7 @@ transition::rectangle::rectangle(const bool isFadingIn, const sf::Color& colour,
 	_bottomrect.setOutlineColor(sf::Color::Red);
 }
 
-bool transition::rectangle::animate(const sf::RenderTarget& target) {
+bool awe::rectangle::animate(const sf::RenderTarget& target) {
 	if (isFinished())
 		return true;
 	const auto targetSize = sf::Vector2f(target.getSize());
@@ -79,7 +79,7 @@ bool transition::rectangle::animate(const sf::RenderTarget& target) {
 	return isFinished();
 }
 
-void transition::rectangle::draw(sf::RenderTarget& target, sf::RenderStates states)
+void awe::rectangle::draw(sf::RenderTarget& target, sf::RenderStates states)
 	const {
 	target.draw(_toprect, states);
 	target.draw(_bottomrect, states);

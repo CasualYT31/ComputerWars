@@ -24,6 +24,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 #include "engine.hpp"
 #include "army.hpp"
+#include "fmtawe.hpp"
+
+using namespace awe::animation;
 
 awe::game_engine::game_engine(const engine::logger::data& data) :
 	engine::json_script({ data.sink, "json_script" }), _logger(data) {
@@ -49,6 +52,15 @@ int awe::game_engine::run() {
 	try {
 		_gui->setScalingFactor(_scaling);
 		while (_renderer->isOpen()) {
+			// If the active animation has finished, delete it.
+			if (_activeAnimationFinished) {
+				if (_activeAnimationCallback->operator->())
+					_scripts->callFunction(_activeAnimationCallback->operator->());
+				_activeAnimationCallback = nullptr;
+				_activeAnimation = nullptr;
+				_activeAnimationFinished = false;
+			}
+
 			// Handle menu user input first before handling the events.
 			// Use case: Map menu and MapMenu menu. Selecting a vacant tile in Map
 			// will trigger the MapMenu menu. Clicking on the save button will
@@ -57,24 +69,40 @@ int awe::game_engine::run() {
 			// after and triggers MapMenu again, ensuring the MapMenu never goes
 			// away. By handling the click in MapMenu last, Map doesn't get to see
 			// the click and so safely ignores it for that iteration.
-			_gui->handleInput(_userinput);
+			if (!_activeAnimation) _gui->handleInput(_userinput);
 			_userinput->update();
 
 			// Now handle the events.
 			sf::Event event;
 			while (_renderer->pollEvent(event)) {
 				if (event.type == sf::Event::Closed) _renderer->close();
-				_gui->handleEvent(event);
+				if (!_activeAnimation) _gui->handleEvent(event);
 			}
 
 			_renderer->clear();
+
+			// Animate.
 			_sprites->updateGlobalFrameIDs();
+			if (_map) _renderer->animate(*_map);
 			_renderer->animate(*_gui);
-			if (_map) {
-				_renderer->animate(*_map);
-				_renderer->draw(*_map);
-			}
+			if (_activeAnimation && _renderer->animate(*_activeAnimation))
+				_activeAnimationFinished = true;
+			
+			// Draw.
+			if (_map) _renderer->draw(*_map);
 			_renderer->draw(*_gui);
+			if (_activeAnimation) {
+				const auto oldView = _renderer->getView();
+				sf::View newView;
+				newView.reset(sf::FloatRect(0.0f, 0.0f,
+					static_cast<float>(_renderer->getSize().x),
+					static_cast<float>(_renderer->getSize().y)));
+				newView.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+				_renderer->setView(newView);
+				_renderer->draw(*_activeAnimation);
+				_renderer->setView(oldView);
+			}
+
 			_renderer->display();
 
 			if (_map && _map->periodic()) {
@@ -99,6 +127,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	engine::RegisterVectorTypes(engine, document);
 	engine::RegisterTimeTypes(engine, document);
 	awe::map::Register(engine, document);
+	awe::RegisterAnimationTypes(engine, document);
 
 	// Register the global functions.
 	auto r = engine->RegisterGlobalFunction("void info(const string&in)",
@@ -350,6 +379,15 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game_engine, _script_formatBool),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Converts a bool into a string.");
+
+	r = engine->RegisterGlobalFunction("void animate(const Animation, "
+		"array<any>@ const, AnimationCallback@ const)",
+		asMETHOD(awe::game_engine, _script_animate),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Starts an animation, if one isn't "
+		"active. The type of animation is given, then an array of objects to pass "
+		"to the animation's constructor, then a handle to a callback that's "
+		"invoked when either the animation couldn't be played, or has completed.");
 }
 
 bool awe::game_engine::_load(engine::json& j) {
@@ -507,6 +545,23 @@ int awe::game_engine::_initCheck() const {
 		return 1;
 	}
 	return 0;
+}
+
+std::unique_ptr<sfx::animated_drawable> awe::game_engine::_animationFactory(
+	const Animation type, CScriptArray* const params) {
+	switch (type) {
+	case Animation::DayBegin:
+		return std::make_unique<day_begin>(
+			(*_countries)[_countries->getScriptNames()[
+				_getAnyParameter<awe::ArmyID>(params, 0)]],
+			_getAnyParameter<awe::Day>(params, 1),
+			_dictionary, (*_fonts)["Monospace"]
+		);
+		break;
+	default:
+		throw std::invalid_argument(fmt::format("unrecognised animation type: {}",
+			type));
+	}
 }
 
 void awe::game_engine::_script_setFullscreen(const bool in) {
@@ -692,4 +747,38 @@ std::string awe::game_engine::_script_getLatestLogEntry() const {
 
 std::string awe::game_engine::_script_formatBool(const bool b) const {
 	return b ? "true" : "false";
+}
+
+void awe::game_engine::_script_animate(const awe::Animation type,
+	CScriptArray* const params, asIScriptFunction* const callback) {
+	// CScriptWrapper will always make sure to release the objects under any
+	// circumstances.
+	engine::CScriptWrapper<CScriptArray> raiiParams(params);
+	if (params) params->Release();
+	engine::CScriptWrapper<asIScriptFunction> raiiCallback(callback);
+	if (callback) callback->Release();
+
+	// Don't try to start an animation when one is already active.
+	if (_activeAnimation) {
+		_logger.error("Tried to start an animation of type {} whilst an animation "
+			"of type {} was still playing.", type, _activeAnimationType);
+		if (raiiCallback.operator->())
+			_scripts->callFunction(raiiCallback.operator->());
+		return;
+	}
+
+	// Try to allocate the animation.
+	try {
+		_activeAnimation = _animationFactory(type, raiiParams.operator->());
+	} catch (const std::invalid_argument& e) {
+		_logger.error("Could not allocate animation: {}.", e.what());
+		if (raiiCallback.operator->())
+			_scripts->callFunction(raiiCallback.operator->());
+		return;
+	}
+
+	// Animation was successfully allocated, setup the rest of our data.
+	_activeAnimationType = type;
+	_activeAnimationCallback =
+		std::make_unique<engine::CScriptWrapper<asIScriptFunction>>(raiiCallback);
 }

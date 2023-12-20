@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "spritesheets.hpp"
 #include "map.hpp"
 #include "mapstrings.hpp"
+#include "animation.hpp"
 #include <filesystem>
 #include <random>
 
@@ -149,6 +150,79 @@ namespace awe {
 		 * @return \c 0 if all tests passed, \c 1 if not.
 		 */
 		int _initCheck() const;
+
+		/**
+		 * Builds an \c animated_drawable object whose subclass is defined by the
+		 * given type parameter.
+		 * @param  type   The type of animation to allocate.
+		 * @param  params The parameters to give to the animation's constructor.
+		 * @return Pointer to the animation object.
+		 * @throws \c std::invalid_argument If the given \c params were rejected by
+		 *                                  the subclass's constructor, or if
+		 *                                  \c type was invalid. The attached
+		 *                                  message will explain the error in more
+		 *                                  detail.
+		 */
+		std::unique_ptr<sfx::animated_drawable> _animationFactory(
+			const Animation type, CScriptArray* const params);
+
+		/**
+		 * Retrieves a parameter from a scripts array of script any objects if that
+		 * parameter is not a primitive type.
+		 * @tparam T      The type of object to retrieve.
+		 * @param  params The array of \c any objects to retrieve from.
+		 * @param  index  The index of the object to retrieve.
+		 * @param  TID    \c T's equivalent type in the script interface.
+		 */
+		template<typename T>
+		T _getAnyParameter(CScriptArray* const params, const asUINT index,
+			const char* const TID) {
+			if (index >= params->GetSize())
+				throw std::invalid_argument(
+					fmt::format("could not find \"{}\" parameter with index {}",
+						TID, index)
+				);
+			CScriptAny* const p(static_cast<CScriptAny*>(params->At(index)));
+			if (p->GetTypeId() != _scripts->getTypeID(TID))
+				throw std::invalid_argument(
+					fmt::format("parameter at index {} is not \"{}\"", index, TID)
+				);
+			T obj;
+			p->Retrieve(&obj, p->GetTypeId());
+			return obj;
+		}
+
+		/**
+		 * Retrieves a parameter from a scripts array of script any objects if that
+		 * parameter is a primitive type.
+		 * @tparam T      The type of value to retrieve. \c double or \c asINT64.
+		 * @param  params The array of \c any objects to retrieve from.
+		 * @param  index  The index of the object to retrieve.
+		 */
+		template<typename T>
+		T _getAnyParameter(CScriptArray* const params, const asUINT index) {
+			std::string TID = "int64";
+			if constexpr (std::is_floating_point<T>::value) TID = "double";
+			if (index >= params->GetSize())
+				throw std::invalid_argument(
+					fmt::format("could not find \"{}\" parameter with index {}",
+						TID, index)
+				);
+			CScriptAny* const p(static_cast<CScriptAny*>(params->At(index)));
+			if (p->GetTypeId() != _scripts->getTypeID(TID))
+				throw std::invalid_argument(
+					fmt::format("parameter at index {} is not \"{}\"", index, TID)
+				);
+			if constexpr (std::is_floating_point<T>::value) {
+				double obj = 0.0;
+				p->Retrieve(obj);
+				return static_cast<T>(obj);
+			} else {
+				asINT64 obj = 0;
+				p->Retrieve(obj);
+				return static_cast<T>(obj);
+			}
+		}
 
 		//=============================
 		//======SCRIPT INTERFACE=======
@@ -312,6 +386,18 @@ namespace awe {
 		 */
 		std::string _script_formatBool(const bool b) const;
 
+		/**
+		 * Starts an animation, if one is not currently active.
+		 * @param type     The type of animation to start.
+		 * @param params   The parameters to give to the constructor of the
+		 *                 animation.
+		 * @param callback Points to the code to execute when the animation
+		 *                 finishes. Will be executed immediately if the given
+		 *                 animation is disabled in the selected preset.
+		 */
+		void _script_animate(const awe::Animation type, CScriptArray* const params,
+			asIScriptFunction* const callback);
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================
@@ -375,6 +461,28 @@ namespace awe {
 		 * Stores a game's data, including its map and the armies.
 		 */
 		std::unique_ptr<awe::map> _map = nullptr;
+
+		/**
+		 * Points to the animation that's currently playing, if any.
+		 */
+		std::unique_ptr<sfx::animated_drawable> _activeAnimation;
+
+		/**
+		 * Stores the active animation's type.
+		 */
+		awe::Animation _activeAnimationType;
+
+		/**
+		 * The callback to invoke once the active animation has finished.
+		 */
+		std::unique_ptr<engine::CScriptWrapper<asIScriptFunction>>
+			_activeAnimationCallback;
+
+		/**
+		 * Mark the active animation as finished, allowing it to be deleted on the
+		 * next iteration of the game loop.
+		 */
+		bool _activeAnimationFinished = false;
 
 		//================================
 		//==========BACKEND DATA==========

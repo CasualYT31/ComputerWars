@@ -20,34 +20,20 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/**@file fmtawe.hpp
- * Defines fmt formatters for custom types available in the \c awe module.
- */
-
-#pragma once
-
-#include "fmtsfx.hpp"
 #include "animation.hpp"
 
-/**
- * Fmt formatter for the \c awe::Animation type.
- */
-template <> struct fmt::formatter<awe::Animation> {
-	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
-		auto it = ctx.begin(), end = ctx.end();
-		if (it != end && *it != '}') throw format_error("invalid format");
-		return it;
-	}
+void awe::RegisterAnimationTypes(asIScriptEngine* engine,
+	const std::shared_ptr<DocumentationGenerator>& document) {
+	if (!engine->GetTypeInfoByName("Animation")) {
+		auto r = engine->RegisterEnum("Animation");
+		document->DocumentObjectEnum(r, "Stores the animations supported in the "
+			"engine.");
+		engine->RegisterEnumValue("Animation", "DayBegin",
+			static_cast<int>(awe::Animation::DayBegin));
 
-	template <typename FormatContext>
-	auto format(const awe::Animation a, FormatContext& ctx) const
-		-> decltype(ctx.out()) {
-		const auto aValue = static_cast<int>(a);
-		switch (a) {
-		case awe::Animation::DayBegin:
-			return fmt::format_to(ctx.out(), "DayBegin ({})", aValue);
-		default:
-			return fmt::format_to(ctx.out(), "UNKNOWN ({})", aValue);
-		}
+		r = engine->RegisterFuncdef("void AnimationCallback()");
+		document->DocumentObjectFuncDef(r, "Signature of the callback that is "
+			"invoked when an animation either couldn't be played or has "
+			"completed.");
 	}
-};
+}

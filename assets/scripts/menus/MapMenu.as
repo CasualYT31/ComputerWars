@@ -42,7 +42,8 @@ class MapMenu : Menu, Group {
             });
         }
         mapMenuCommands.addCommand("endturn", "endturnicon", function(){
-            game.endTurn();
+            animate(Animation::DayBegin, { any(game.map.getSelectedArmy()),
+                any(game.map.getDay()) }, function(){ game.endTurn(); });
             setGUI("GameScreen");
         });
         mapMenuCommands.addCommand("quit", "quiticon", function(){
