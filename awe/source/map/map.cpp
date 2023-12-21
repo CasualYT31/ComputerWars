@@ -39,9 +39,20 @@ awe::disable_mementos::disable_mementos(awe::map* const map,
 	const std::string& name) : _map(map), _name(name) {
 	if (_map) _map->disableMementos();
 }
+
+awe::disable_mementos::disable_mementos(awe::map* const map,
+	const std::string& name, const awe::map_strings::operation type,
+	const std::any& data) : _map(map),
+	_name(name), _type(static_cast<int>(type)), _data(data) {
+	if (_map) _map->disableMementos();
+}
+
 awe::disable_mementos::~disable_mementos() noexcept {
 	try {
-		if (_map) _map->enableMementos(_name);
+		if (_map) {
+			if (_type) _map->enableMementos(_name, *_type, *_data);
+			else _map->enableMementos(_name);
+		}
 	} catch (...) {} // Swallow them... :/ We can't let destructors throw.
 }
 
@@ -210,6 +221,16 @@ bool awe::map::beginTurnForOwnedTile(sf::Vector2u tile,
 	return overrideDefaultBehaviour;
 }
 
+void awe::map::addObserver(const std::shared_ptr<engine::observer>& o) {
+	addMapObserver(o);
+	addArmyObserver(o);
+	addMementoObserver(o);
+	addMiscellaneousObserver(o);
+	addScriptObserver(o);
+	addTileObserver(o);
+	addUnitObserver(o);
+}
+
 void awe::map::undo(std::size_t additionalUndos) {
 	if (_undoDeque.size() <= 1) return;
 	const auto maxAdditionalUndos = _undoDeque.size() - 2;
@@ -296,9 +317,10 @@ void awe::map::setMementoStateChangedCallback(asIScriptFunction* const callback)
 }
 
 void awe::map::addScriptFile(const std::string& name, const std::string& code) {
-	awe::disable_mementos token(this, doesScriptExist(name) ?
-		_getMementoName(awe::map_strings::operation::UPDATE_SCRIPT) :
-		_getMementoName(awe::map_strings::operation::ADD_SCRIPT));
+	const auto op = doesScriptExist(name) ?
+		awe::map_strings::operation::UPDATE_SCRIPT :
+		awe::map_strings::operation::ADD_SCRIPT;
+	awe::disable_mementos token(this, _getMementoName(op), op, name);
 	_scriptFiles[name] = code;
 }
 
@@ -321,7 +343,9 @@ void awe::map::renameScriptFile(const std::string& oldName,
 		return;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::RENAME_SCRIPT));
+		_getMementoName(awe::map_strings::operation::RENAME_SCRIPT),
+		awe::map_strings::operation::RENAME_SCRIPT,
+		std::pair<std::string, std::string>(oldName, newName));
 	// https://stackoverflow.com/a/44883472.
 	auto node = _scriptFiles.extract(oldName);
 	node.key() = newName;
@@ -335,7 +359,8 @@ void awe::map::removeScriptFile(const std::string& name) {
 		return;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::REMOVE_SCRIPT));
+		_getMementoName(awe::map_strings::operation::REMOVE_SCRIPT),
+		awe::map_strings::operation::REMOVE_SCRIPT, name);
 	_scriptFiles.erase(name);
 }
 
@@ -595,4 +620,51 @@ void awe::map::_initShaders() {
 		"pixel.x = 1.0; pixel.yz -= 0.25;"
 		"gl_FragColor = pixel;}", sf::Shader::Fragment);
 	_attackableTileShader.setUniform("texUnit", sf::Shader::CurrentTexture);
+}
+
+const std::unordered_set<std::shared_ptr<engine::observer>>&
+	awe::map::_findObserverListByType(const int type) {
+	switch (type) {
+	case static_cast<int>(awe::map_strings::operation::MAP_NAME):
+	case static_cast<int>(awe::map_strings::operation::MAP_SIZE):
+	case static_cast<int>(awe::map_strings::operation::DAY):
+		return _mapObservers;
+	case static_cast<int>(awe::map_strings::operation::CREATE_ARMY):
+	case static_cast<int>(awe::map_strings::operation::DELETE_ARMY):
+	case static_cast<int>(awe::map_strings::operation::ARMY_TEAM):
+	case static_cast<int>(awe::map_strings::operation::ARMY_FUNDS):
+	case static_cast<int>(awe::map_strings::operation::ARMY_COS):
+	case static_cast<int>(awe::map_strings::operation::TAG_COS):
+	case static_cast<int>(awe::map_strings::operation::SELECT_ARMY):
+		return _armyObservers;
+	case static_cast<int>(awe::map_strings::operation::RECT_FILL_UNITS):
+	case static_cast<int>(awe::map_strings::operation::RECT_DEL_UNITS):
+	case static_cast<int>(awe::map_strings::operation::CREATE_UNIT):
+	case static_cast<int>(awe::map_strings::operation::DELETE_UNIT):
+	case static_cast<int>(awe::map_strings::operation::UNIT_POSITION):
+	case static_cast<int>(awe::map_strings::operation::UNIT_HP):
+	case static_cast<int>(awe::map_strings::operation::UNIT_FUEL):
+	case static_cast<int>(awe::map_strings::operation::UNIT_AMMO):
+	case static_cast<int>(awe::map_strings::operation::UNIT_REPLENISH):
+	case static_cast<int>(awe::map_strings::operation::UNIT_WAIT):
+	case static_cast<int>(awe::map_strings::operation::UNIT_CAPTURE):
+	case static_cast<int>(awe::map_strings::operation::UNIT_HIDE):
+	case static_cast<int>(awe::map_strings::operation::UNIT_LOAD):
+	case static_cast<int>(awe::map_strings::operation::UNIT_UNLOAD):
+		return _unitObservers;
+	case static_cast<int>(awe::map_strings::operation::RECT_FILL_TILES):
+	case static_cast<int>(awe::map_strings::operation::TILE_TYPE):
+	case static_cast<int>(awe::map_strings::operation::TILE_HP):
+	case static_cast<int>(awe::map_strings::operation::TILE_OWNER):
+	case static_cast<int>(awe::map_strings::operation::TILE_STRUCTURE_DATA):
+	case static_cast<int>(awe::map_strings::operation::DESTROY_STRUCTURE):
+	case static_cast<int>(awe::map_strings::operation::DELETE_STRUCTURE):
+		return _tileObservers;
+	case static_cast<int>(awe::map_strings::operation::ADD_SCRIPT):
+	case static_cast<int>(awe::map_strings::operation::UPDATE_SCRIPT):
+	case static_cast<int>(awe::map_strings::operation::REMOVE_SCRIPT):
+	case static_cast<int>(awe::map_strings::operation::RENAME_SCRIPT):
+	default:
+		return _miscObservers;
+	}
 }

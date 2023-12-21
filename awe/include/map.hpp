@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui.hpp"
 #include "binary.hpp"
 #include "mapstrings.hpp"
+#include "observer.hpp"
 #include <cmath>
 #include <stack>
 #include <optional>
@@ -129,6 +130,18 @@ namespace awe {
 		disable_mementos(awe::map* const map, const std::string& name);
 
 		/**
+		 * Constructs a memento disable token that will also emit notifications.
+		 * If \c nullptr is given, this token won't do anything.
+		 * @param map  Pointer to the map to manage the mementos of.
+		 * @param name The name to give the memento created when this token is
+		 *             destroyed.
+		 * @param type The type of notification to emit.
+		 * @param data The data to attach to the notification.
+		 */
+		disable_mementos(awe::map* const map, const std::string& name,
+			const awe::map_strings::operation type, const std::any& data);
+
+		/**
 		 * When a disable token is deleted, mementos are re-enabled.
 		 */
 		~disable_mementos() noexcept;
@@ -149,7 +162,8 @@ namespace awe {
 		 * Used when a token is created, but an operation failed, and so a memento
 		 * should not be created. Only employ this method when necessary; the
 		 * better alternative is to perform checks before creating the token and
-		 * performing operations so that you can guarantee they will succeed.
+		 * performing operations so that you can guarantee they will succeed.\n
+		 * Note that this will also prevent notifications from being emitted.
 		 */
 		void discard();
 	private:
@@ -162,6 +176,16 @@ namespace awe {
 		 * The name to give the memento created from this token.
 		 */
 		const std::string _name;
+
+		/**
+		 * The type of notification to emit after memento creation, if any.
+		 */
+		const std::optional<int> _type;
+
+		/**
+		 * The data to emit with the notification, if there will be one.
+		 */
+		const std::optional<std::any> _data;
 	};
 
 	/**
@@ -360,9 +384,23 @@ namespace awe {
 		bool beginTurnForOwnedTile(sf::Vector2u tile, awe::terrain* const terrain,
 			const awe::ArmyID currentArmy);
 
+		/**
+		 * This method will attach the given observer to all available groups.
+		 * @param o Points to the observer to register.
+		 */
+		void addObserver(const std::shared_ptr<engine::observer>& o);
+
 		////////////////////
 		// MAP OPERATIONS //
 		////////////////////
+		/**
+		 * Adds an observer that will listen for changes in the map's properties.
+		 * @param o Points to the observer to register.
+		 */
+		inline void addMapObserver(const std::shared_ptr<engine::observer>& o) {
+			_addObserver(_mapObservers, o);
+		}
+
 		/**
 		 * Sets the map's name.
 		 * By default, a map's name is a blank string.\n
@@ -516,6 +554,14 @@ namespace awe {
 		/////////////////////
 		// ARMY OPERATIONS //
 		/////////////////////
+		/**
+		 * Adds an observer that will listen for changes in the army properties.
+		 * @param o Points to the observer to register.
+		 */
+		inline void addArmyObserver(const std::shared_ptr<engine::observer>& o) {
+			_addObserver(_armyObservers, o);
+		}
+
 		/**
 		 * Allocates a new army.
 		 * If the army with the given country already exists, or \c nullptr is
@@ -821,6 +867,14 @@ namespace awe {
 		/////////////////////
 		// UNIT OPERATIONS //
 		/////////////////////
+		/**
+		 * Adds an observer that will listen for changes in the unit properties.
+		 * @param o Points to the observer to register.
+		 */
+		inline void addUnitObserver(const std::shared_ptr<engine::observer>& o) {
+			_addObserver(_unitObservers, o);
+		}
+
 		/**
 		 * Creates a new unit.
 		 * The unit won't be created if the army ID isn't valid.
@@ -1139,6 +1193,14 @@ namespace awe {
 		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////
+		/**
+		 * Adds an observer that will listen for changes in the tile properties.
+		 * @param o Points to the observer to register.
+		 */
+		inline void addTileObserver(const std::shared_ptr<engine::observer>& o) {
+			_addObserver(_tileObservers, o);
+		}
+
 		/**
 		 * Sets a specified tile's type.
 		 * By default, a tile does not have a type, unless it was given in the call
@@ -1607,6 +1669,15 @@ namespace awe {
 		// SELECTED UNIT DRAWING OPERATIONS //
 		//////////////////////////////////////
 		/**
+		 * Adds an observer that will listen for miscellaneous changes.
+		 * @param o Points to the observer to register.
+		 */
+		inline void addMiscellaneousObserver(
+			const std::shared_ptr<engine::observer>& o) {
+			_addObserver(_miscObservers, o);
+		}
+
+		/**
 		 * Selects a unit on the map.
 		 * If an invalid unit ID is given, the call won't have any effect, and it
 		 * will be logged.\n
@@ -1789,6 +1860,15 @@ namespace awe {
 		// MEMENTO OPERATIONS //
 		////////////////////////
 		/**
+		 * Adds an observer that will listen for changes in the mementos.
+		 * @param o Points to the observer to register.
+		 */
+		inline void addMementoObserver(
+			const std::shared_ptr<engine::observer>& o) {
+			_addObserver(_mementoObservers, o);
+		}
+
+		/**
 		 * Captures the current state of the \c map object, stores it in a binary
 		 * output stream, and pushes it to the front of the undo deque.
 		 * Additionally, the redo deque is cleared.\n
@@ -1805,6 +1885,16 @@ namespace awe {
 		 */
 		inline void addMemento(const std::string& name) {
 			if (_mementoDisableCounter == 0) _createMemento(name);
+		}
+
+		/**
+		 * Version of \c addMemento() that also emits a notification.
+		 * The notification is emitted even if the memento was not created.
+		 */
+		inline void addMemento(const std::string& name, const int type,
+			const std::any& data) {
+			addMemento(name);
+			_notify(type, data);
 		}
 
 		/**
@@ -1871,6 +1961,17 @@ namespace awe {
 		}
 
 		/**
+		 * Version of \c enableMementos() that also emits a notification.
+		 * The notification is emitted even if the memento was not created.
+		 */
+		inline bool enableMementos(const std::string& name, const int type,
+			const std::any& data) {
+			const auto result = enableMementos(name);
+			_notify(type, data);
+			return result;
+		}
+
+		/**
 		 * Allows the scripts to tell the map that its state has changed.
 		 * This flag is automatically managed by the \c map class when mementos are
 		 * created and when the map is saved/loaded. However, there can be cases
@@ -1924,6 +2025,14 @@ namespace awe {
 		///////////////////////
 		// SCRIPT OPERATIONS //
 		///////////////////////
+		/**
+		 * Adds an observer that will listen for changes in the script properties.
+		 * @param o Points to the observer to register.
+		 */
+		inline void addScriptObserver(const std::shared_ptr<engine::observer>& o) {
+			_addObserver(_scriptObservers, o);
+		}
+
 		/**
 		 * Adds a new script, or updates an existing one.
 		 * @param name The name of the new script, or the name of the script to
@@ -2494,11 +2603,13 @@ namespace awe {
 		}
 
 		/**
-		 * The state of the mementos has changes, so invoke callback if possible.
+		 * The state of the mementos has changed, so invoke callback if possible.
+		 * Also notify memento observers.
 		 */
 		inline void _mementosHaveChanged() {
 			if (_scripts && _mementosChangedCallback)
 				_scripts->callFunction(_mementosChangedCallback);
+			_notify(_mementoObservers, 0, {});
 		}
 
 		/**
@@ -2958,5 +3069,85 @@ namespace awe {
 		 * Data pertaining to structures.
 		 */
 		std::shared_ptr<awe::bank<awe::structure>> _structures = nullptr;
+
+		///////////////
+		// OBSERVERS //
+		///////////////
+		/**
+		 * Adds an observer to a list.
+		 * @param list References the list to add the observer to.
+		 * @param o    The observer to add.
+		 */
+		inline void _addObserver(
+			std::unordered_set<std::shared_ptr<engine::observer>>& list,
+			const std::shared_ptr<engine::observer>& o) {
+			list.insert(o);
+		}
+
+		/**
+		 * Finds the observer list pertaining to a given type of notification.
+		 * @param  type The type of notification to emit.
+		 * @return Reference to the list of observers to notify when emitting this
+		 *         type of notification.
+		 */
+		const std::unordered_set<std::shared_ptr<engine::observer>>&
+			_findObserverListByType(const int type);
+
+		/**
+		 * Notifies observers that an operation successfully updated the map's
+		 * state.
+		 * @param type The type of notification to publish.
+		 * @param data The data to attach to the notification.
+		 */
+		inline void _notify(const int type, const std::any& data) {
+			_notify(_findObserverListByType(type), type, data);
+		}
+
+		/**
+		 * Invokes \c update() on a list of observers.
+		 * @param list The list of observers to notify.
+		 * @param type The type of notification to publish.
+		 * @param data The data to attach to the notification.
+		 */
+		inline void _notify(
+			const std::unordered_set<std::shared_ptr<engine::observer>>& list,
+			const int type, const std::any& data) {
+			for (const auto& observer : list) observer->update(type, data);
+		}
+
+		/**
+		 * A list of observers listening to map changes.
+		 */
+		std::unordered_set<std::shared_ptr<engine::observer>> _mapObservers;
+
+		/**
+		 * A list of observers listening to army changes.
+		 */
+		std::unordered_set<std::shared_ptr<engine::observer>> _armyObservers;
+
+		/**
+		 * A list of observers listening to unit changes.
+		 */
+		std::unordered_set<std::shared_ptr<engine::observer>> _unitObservers;
+
+		/**
+		 * A list of observers listening to tile changes.
+		 */
+		std::unordered_set<std::shared_ptr<engine::observer>> _tileObservers;
+
+		/**
+		 * A list of observers listening to memento changes.
+		 */
+		std::unordered_set<std::shared_ptr<engine::observer>> _mementoObservers;
+
+		/**
+		 * A list of observers listening to script changes.
+		 */
+		std::unordered_set<std::shared_ptr<engine::observer>> _scriptObservers;
+
+		/**
+		 * A list of observers listening to miscellaneous changes.
+		 */
+		std::unordered_set<std::shared_ptr<engine::observer>> _miscObservers;
 	};
 }

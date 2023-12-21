@@ -42,7 +42,9 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 		return awe::NO_UNIT;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::CREATE_UNIT));
+		_getMementoName(awe::map_strings::operation::CREATE_UNIT),
+		awe::map_strings::operation::CREATE_UNIT,
+		std::pair<std::shared_ptr<const awe::unit_type>, awe::ArmyID>(type, army));
 	_units.insert({ id, awe::unit({_logger.getData().sink, "unit"}, type, army,
 		_sheet_unit, _sheet_icon) });
 	_armies.at(army).addUnit(id);
@@ -60,7 +62,8 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 		return;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::DELETE_UNIT));
+		_getMementoName(awe::map_strings::operation::DELETE_UNIT),
+		awe::map_strings::operation::DELETE_UNIT, id);
 	_updateCapturingUnit(id);
 	// Firstly, remove the unit from the tile, if it was on a tile.
 	// We don't need to check if the unit "is actually on the map or not," since
@@ -139,7 +142,9 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 		return;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::UNIT_POSITION));
+		_getMementoName(awe::map_strings::operation::UNIT_POSITION),
+		awe::map_strings::operation::UNIT_POSITION,
+		std::pair<awe::UnitID, sf::Vector2u>(id, pos));
 	_updateCapturingUnit(id);
 	// Make new tile occupied.
 	if (pos != awe::unit::NO_POSITION) _tiles[pos.x][pos.y].setUnit(id);
@@ -174,7 +179,9 @@ void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) {
 	if (_isUnitPresent(id)) {
 		if (hp == getUnitHP(id)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::UNIT_HP));
+			_getMementoName(awe::map_strings::operation::UNIT_HP),
+			awe::map_strings::operation::UNIT_HP,
+			std::pair<awe::UnitID, awe::HP>(id, hp));
 		_units.at(id).setHP(hp);
 	} else {
 		_logger.error("setUnitHP operation cancelled: attempted to assign HP {} "
@@ -200,7 +207,9 @@ void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 	if (_isUnitPresent(id)) {
 		if (fuel == getUnitFuel(id)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::UNIT_FUEL));
+			_getMementoName(awe::map_strings::operation::UNIT_FUEL),
+			awe::map_strings::operation::UNIT_FUEL,
+			std::pair<awe::UnitID, awe::Fuel>(id, fuel));
 		_units.at(id).setFuel(fuel);
 	} else {
 		_logger.error("setUnitFuel operation cancelled: attempted to assign fuel "
@@ -229,7 +238,9 @@ void awe::map::setUnitAmmo(const awe::UnitID id, const std::string& weapon,
 	if (_isUnitPresent(id)) {
 		if (ammo == getUnitAmmo(id, weapon)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::UNIT_AMMO));
+			_getMementoName(awe::map_strings::operation::UNIT_AMMO),
+			awe::map_strings::operation::UNIT_AMMO,
+			std::tuple<awe::UnitID, std::string, awe::Ammo>(id, weapon, ammo));
 		_units.at(id).setAmmo(weapon, ammo);
 	} else {
 		_logger.error("setUnitAmmo operation cancelled: attempted to assign ammo "
@@ -250,7 +261,9 @@ void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
 	if (_isUnitPresent(id)) {
 		if (isUnitReplenished(id, heal)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::UNIT_REPLENISH));
+			_getMementoName(awe::map_strings::operation::UNIT_REPLENISH),
+			awe::map_strings::operation::UNIT_REPLENISH,
+			std::pair<awe::UnitID, bool>(id, heal));
 		_units.at(id).replenish(heal);
 	} else {
 		_logger.error("replenishUnit operation cancelled: attempted to replenish "
@@ -270,7 +283,9 @@ void awe::map::waitUnit(const awe::UnitID id, const bool waiting) {
 	if (_isUnitPresent(id)) {
 		if (waiting == isUnitWaiting(id)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::UNIT_WAIT));
+			_getMementoName(awe::map_strings::operation::UNIT_WAIT),
+			awe::map_strings::operation::UNIT_WAIT,
+			std::pair<awe::UnitID, bool>(id, waiting));
 		_units.at(id).wait(waiting);
 	} else {
 		_logger.error("waitUnit operation cancelled: attempted to assign waiting "
@@ -289,7 +304,9 @@ void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) {
 	if (_isUnitPresent(id)) {
 		if (capturing == isUnitCapturing(id)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::UNIT_CAPTURE));
+			_getMementoName(awe::map_strings::operation::UNIT_CAPTURE),
+			awe::map_strings::operation::UNIT_CAPTURE,
+			std::pair<awe::UnitID, bool>(id, capturing));
 		_units.at(id).capturing(capturing);
 	} else {
 		_logger.error("unitCapturing operation cancelled: attempted to assign "
@@ -309,7 +326,9 @@ void awe::map::unitHiding(const awe::UnitID id, const bool hiding) {
 	if (_isUnitPresent(id)) {
 		if (hiding == isUnitHiding(id)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::UNIT_HIDE));
+			_getMementoName(awe::map_strings::operation::UNIT_HIDE),
+			awe::map_strings::operation::UNIT_HIDE,
+			std::pair<awe::UnitID, bool>(id, hiding));
 		_units.at(id).hiding(hiding);
 	} else {
 		_logger.error("unitHiding operation cancelled: attempted to assign hiding "
@@ -384,7 +403,9 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 		return;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::UNIT_LOAD));
+		_getMementoName(awe::map_strings::operation::UNIT_LOAD),
+		awe::map_strings::operation::UNIT_LOAD,
+		std::pair<awe::UnitID, awe::UnitID>(load, onto));
 	_updateCapturingUnit(load);
 	// Make the tile that `load` was on vacant, and remove the unit ID from the
 	// tile.
@@ -426,7 +447,10 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 	if (_units.at(from).unloadUnit(unload)) {
 		// Unload successful, continue with operation.
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::UNIT_UNLOAD));
+			_getMementoName(awe::map_strings::operation::UNIT_UNLOAD),
+			awe::map_strings::operation::UNIT_UNLOAD,
+			std::tuple<awe::UnitID, awe::UnitID, sf::Vector2u>(unload, from,
+				onto));
 		_units.at(unload).loadOnto(awe::NO_UNIT);
 		setUnitPosition(unload, onto);
 	} else {

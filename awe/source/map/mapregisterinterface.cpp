@@ -701,7 +701,8 @@ void awe::map::Register(asIScriptEngine* engine,
 		// MEMENTO OPERATIONS //
 		////////////////////////
 		r = engine->RegisterObjectMethod("Map", "void addMemento(const string&in)",
-			asMETHOD(awe::map, addMemento), asCALL_THISCALL);
+			asMETHODPR(awe::map, addMemento, (const std::string&), void),
+			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "void undo(uint64 = 0)",
 			asMETHOD(awe::map, undo), asCALL_THISCALL);
@@ -714,7 +715,8 @@ void awe::map::Register(asIScriptEngine* engine,
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool enableMementos(const string&in)",
-			asMETHOD(awe::map, enableMementos), asCALL_THISCALL);
+			asMETHODPR(awe::map, enableMementos, (const std::string&), bool),
+			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"void markChanged()",

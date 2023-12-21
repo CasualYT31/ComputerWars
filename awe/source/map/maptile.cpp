@@ -37,7 +37,9 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 	// Carry on with operation, even if the type given matches with the type the
 	// tile already has.
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::TILE_TYPE));
+		_getMementoName(awe::map_strings::operation::TILE_TYPE),
+		awe::map_strings::operation::TILE_TYPE,
+		std::pair<sf::Vector2u, std::shared_ptr<const awe::tile_type>>(pos, type));
 	// Firstly, check if this tile forms part of a structure. If it does, we should
 	// delete the structure. This involves the following:
 	// 1. Converting each tile's type in the structure to its configured deleted
@@ -142,7 +144,9 @@ void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {
 	if (!_isOutOfBounds(pos)) {
 		if (hp == getTileHP(pos)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::TILE_HP));
+			_getMementoName(awe::map_strings::operation::TILE_HP),
+			awe::map_strings::operation::TILE_HP,
+			std::pair<sf::Vector2u, awe::HP>(pos, hp));
 		_tiles[pos.x][pos.y].setTileHP(hp);
 	} else {
 		_logger.error("setTileHP operation cancelled: tile at position {} is out "
@@ -168,7 +172,9 @@ void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
 	}
 	if (army == getTileOwner(pos)) return;
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::TILE_OWNER));
+		_getMementoName(awe::map_strings::operation::TILE_OWNER),
+		awe::map_strings::operation::TILE_OWNER,
+		std::pair<sf::Vector2u, awe::ArmyID>(pos, army));
 	_updateCapturingUnit(getUnitOnTile(pos));
 	auto& tile = _tiles[pos.x][pos.y];
 	// First, remove the tile from the army who currently owns it.
@@ -262,7 +268,10 @@ void awe::map::setTileStructureData(const sf::Vector2u& pos,
 		offset == getTileStructureOffset(pos) &&
 		destroyed == isTileDestroyed(pos)) return;
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::TILE_STRUCTURE_DATA));
+		_getMementoName(awe::map_strings::operation::TILE_STRUCTURE_DATA),
+		awe::map_strings::operation::TILE_STRUCTURE_DATA,
+		std::tuple<sf::Vector2u, std::shared_ptr<const awe::structure>,
+			sf::Vector2i, bool>(pos, structure, offset, destroyed));
 	auto& tile = _tiles[pos.x][pos.y];
 	tile.setStructureType(structure);
 	tile.setStructureTile(offset);
@@ -750,7 +759,8 @@ void awe::map::destroyStructure(sf::Vector2u tile) {
 	// for us.
 	// Carry on with operation even if the structure is already destroyed.
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::DESTROY_STRUCTURE));
+		_getMementoName(awe::map_strings::operation::DESTROY_STRUCTURE),
+		awe::map_strings::operation::DESTROY_STRUCTURE, tile);
 	setTileType(tile, structure->getRootDestroyedTileType());
 	setTileStructureData(tile, structure, { 0, 0 }, true);
 	for (std::size_t i = 0, c = structure->getDependentTileCount(); i < c; ++i) {
@@ -782,7 +792,8 @@ void awe::map::deleteStructure(sf::Vector2u tile) {
 	// Delete each tile. setTileType() will carry out disowning each tile and
 	// deleting the structure data for us.
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::DELETE_STRUCTURE));
+		_getMementoName(awe::map_strings::operation::DELETE_STRUCTURE),
+		awe::map_strings::operation::DELETE_STRUCTURE, tile);
 	setTileType(tile, structure->getRootDeletedTileType());
 	for (std::size_t i = 0, c = structure->getDependentTileCount(); i < c; ++i) {
 		offset = structure->getDependentTileOffset(i);

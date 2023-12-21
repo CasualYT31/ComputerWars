@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 #include "engine.hpp"
 #include "army.hpp"
+#include <iostream>
 
 awe::game_engine::game_engine(const engine::logger::data& data) :
 	engine::json_script({ data.sink, "json_script" }), _logger(data) {
@@ -587,6 +588,13 @@ awe::map* awe::game_engine::_script_createMap(const std::string& file,
 	}
 }
 
+class test : public engine::observer {
+public:
+	void update(const int type, const std::any& data) override {
+		//std::cout << fmt::format("type:{} data:{}\n", type, type == 32 ? std::any_cast<std::string>(data) : "");
+	}
+};
+
 awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 	const std::string& playableMapTypeName) {
 	// Create the game.
@@ -603,6 +611,8 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 			_logger.error("Couldn't allocate the map object for loading: {}", e);
 			return nullptr;
 		}
+		const auto listener = std::make_shared<test>();
+		_map->addObserver(listener);
 		_map->setMapObjectType(playableMapTypeName);
 		_map->setTarget(_renderer);
 		_map->setTileSpritesheet(_sprites->tile->normal);

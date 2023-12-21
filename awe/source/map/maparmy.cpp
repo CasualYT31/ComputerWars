@@ -35,7 +35,8 @@ bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
 		return false;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::CREATE_ARMY));
+		_getMementoName(awe::map_strings::operation::CREATE_ARMY),
+		awe::map_strings::operation::CREATE_ARMY, country);
 	// Create the army.
 	_armies.insert(
 		std::pair<awe::ArmyID, awe::army>(country->getTurnOrder(), country)
@@ -66,7 +67,9 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 		return;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::DELETE_ARMY));
+		_getMementoName(awe::map_strings::operation::DELETE_ARMY),
+		awe::map_strings::operation::DELETE_ARMY,
+		std::pair<awe::ArmyID, awe::ArmyID>(army, transferOwnership));
 	// Firstly, delete all units belonging to the army.
 	auto units = _armies.at(army).getUnits();
 	for (auto unit : units) {
@@ -101,7 +104,9 @@ void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team) {
 	if (_isArmyPresent(army)) {
 		if (team == getArmyTeam(army)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::ARMY_TEAM));
+			_getMementoName(awe::map_strings::operation::ARMY_TEAM),
+			awe::map_strings::operation::ARMY_TEAM,
+			std::pair<awe::ArmyID, awe::TeamID>(army, team));
 		_armies.at(army).setTeam(team);
 		// First, stop all of the army's units from capturing.
 		const auto units = getUnitsOfArmy(army);
@@ -126,7 +131,9 @@ void awe::map::setArmyFunds(const awe::ArmyID army, const awe::Funds funds) {
 	if (_isArmyPresent(army)) {
 		if (funds == getArmyFunds(army)) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::ARMY_FUNDS));
+			_getMementoName(awe::map_strings::operation::ARMY_FUNDS),
+			awe::map_strings::operation::ARMY_FUNDS,
+			std::pair<awe::ArmyID, awe::Funds>(army, funds));
 		_armies.at(army).setFunds(funds);
 	} else {
 		_logger.error("setArmyFunds operation cancelled: attempted to set {} "
@@ -178,7 +185,10 @@ void awe::map::setArmyCOs(const awe::ArmyID army,
 			if (current == getArmyCurrentCO(army) && tag == getArmyTagCO(army))
 				return;
 			awe::disable_mementos token(this,
-				_getMementoName(awe::map_strings::operation::ARMY_COS));
+				_getMementoName(awe::map_strings::operation::ARMY_COS),
+				awe::map_strings::operation::ARMY_COS,
+				std::tuple<awe::ArmyID, std::shared_ptr<const awe::commander>,
+					std::shared_ptr<const awe::commander>>(army, current, tag));
 			if (!current && tag) {
 				_logger.warning("setCOs operation: army with ID {} was given a "
 					"tag CO but not current CO! The army will instead be assigned "
@@ -237,7 +247,8 @@ void awe::map::tagArmyCOs(const awe::ArmyID army) {
 	} else {
 		if (_armies.at(army).getTagCO()) {
 			awe::disable_mementos token(this,
-				_getMementoName(awe::map_strings::operation::TAG_COS));
+				_getMementoName(awe::map_strings::operation::TAG_COS),
+				awe::map_strings::operation::TAG_COS, army);
 			_armies.at(army).tagCOs();
 		} else {
 			_logger.error("tagCOs operation failed: army with ID {} didn't have a "

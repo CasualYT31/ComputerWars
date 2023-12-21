@@ -31,7 +31,8 @@ void awe::map::setMapName(std::string name) {
 	}
 	if (name == getMapName()) return;
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::MAP_NAME));
+		_getMementoName(awe::map_strings::operation::MAP_NAME),
+		awe::map_strings::operation::MAP_NAME, name);
 	_mapName = name;
 }
 
@@ -43,7 +44,10 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 	const std::shared_ptr<const awe::tile_type>& tile, const awe::ArmyID owner) {
 	if (dim == getMapSize()) return;
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::MAP_SIZE));
+		_getMementoName(awe::map_strings::operation::MAP_SIZE),
+		awe::map_strings::operation::MAP_SIZE,
+		std::tuple<sf::Vector2u, std::shared_ptr<const awe::tile_type>,
+			awe::ArmyID>(dim, tile, owner));
 	removeRectangleSelection();
 	// First, resize the tiles vectors accordingly.
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
@@ -127,7 +131,11 @@ bool awe::map::rectangleFillTiles(const sf::Vector2u& start,
 		return false;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::RECT_FILL_TILES));
+		_getMementoName(awe::map_strings::operation::RECT_FILL_TILES),
+		awe::map_strings::operation::RECT_FILL_TILES,
+		std::tuple<sf::Vector2u, sf::Vector2u,
+			std::shared_ptr<const awe::tile_type>, awe::ArmyID>(start, end, type,
+				owner));
 	bool ret = true;
 	const unsigned int startX = std::min(start.x, end.x),
 		startY = std::min(start.y, end.y);
@@ -178,7 +186,11 @@ bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 		return false;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::RECT_FILL_UNITS));
+		_getMementoName(awe::map_strings::operation::RECT_FILL_UNITS),
+		awe::map_strings::operation::RECT_FILL_UNITS,
+		std::tuple<sf::Vector2u, sf::Vector2u,
+		std::shared_ptr<const awe::unit_type>, awe::ArmyID>(start, end, type,
+			army));
 	if (!_isArmyPresent(army)) createArmy(_countries->getScriptNames()[army]);
 	bool ret = true;
 	const unsigned int startX = std::min(start.x, end.x),
@@ -222,7 +234,9 @@ std::size_t awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
 		return 0;
 	}
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::RECT_DEL_UNITS));
+		_getMementoName(awe::map_strings::operation::RECT_DEL_UNITS),
+		awe::map_strings::operation::RECT_DEL_UNITS,
+		std::pair<sf::Vector2u, sf::Vector2u>(start, end));
 	const unsigned int startX = std::min(start.x, end.x),
 		startY = std::min(start.y, end.y);
 	std::size_t counter = 0;
@@ -245,7 +259,8 @@ std::size_t awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
 void awe::map::setDay(const awe::Day day) {
 	if (day == getDay()) return;
 	awe::disable_mementos token(this,
-		_getMementoName(awe::map_strings::operation::DAY));
+		_getMementoName(awe::map_strings::operation::DAY),
+		awe::map_strings::operation::DAY, day);
 	_day = day;
 }
 

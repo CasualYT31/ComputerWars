@@ -325,7 +325,8 @@ void awe::map::setSelectedArmy(const awe::ArmyID army) {
 	if (army == awe::NO_ARMY || _isArmyPresent(army)) {
 		if (army == getSelectedArmy()) return;
 		awe::disable_mementos token(this,
-			_getMementoName(awe::map_strings::operation::SELECT_ARMY));
+			_getMementoName(awe::map_strings::operation::SELECT_ARMY),
+			awe::map_strings::operation::SELECT_ARMY, army);
 		_currentArmy = army;
 	} else {
 		_logger.error("setSelectedArmy operation cancelled: army with ID {} does "
