@@ -32,17 +32,29 @@ class MapMenu : Menu, Group {
             setGUI("DeleteUnitMenu");
         });
         mapMenuCommands.addCommand("yield", "yieldicon", function(){
-            game.endTurn(true);
+            auto gameScreen = cast<GameScreen>(getMenu("GameScreen"));
+            gameScreen.hideWidgets();
+            game.deleteArmy(game.map.getSelectedArmy());
+            game.map.queueCode(AnimationCode(gameScreen.showWidgets));
             setGUI("GameScreen");
         });
+        visualIndex = mapMenuCommands.addCommand("", "visualicon",
+            SingleSignalHandler(this.selectNextPreset));
+        updateTextOfVisualCommand(game.map.getSelectedAnimationPreset());
         if (game.map.tagCOIsPresent(game.map.getSelectedArmy())) {
             mapMenuCommands.addCommand("tag", "tagicon", function(){
+                auto gameScreen = cast<GameScreen>(getMenu("GameScreen"));
+                gameScreen.hideWidgets();
                 game.tagCOs();
+                game.map.queueCode(AnimationCode(gameScreen.showWidgets));
                 setGUI("GameScreen");
             });
         }
         mapMenuCommands.addCommand("endturn", "endturnicon", function(){
+            auto gameScreen = cast<GameScreen>(getMenu("GameScreen"));
+            gameScreen.hideWidgets();
             game.endTurn();
+            game.map.queueCode(AnimationCode(gameScreen.showWidgets));
             setGUI("GameScreen");
         });
         mapMenuCommands.addCommand("quit", "quiticon", function(){
@@ -79,7 +91,38 @@ class MapMenu : Menu, Group {
     }
 
     /**
+     * Selects the next animation preset in the internal list.
+     */
+    private void selectNextPreset() {
+        updateTextOfVisualCommand(game.map.selectNextAnimationPreset());
+    }
+
+    /**
+     * Sets the visual command button's text to the given preset's name.
+     * @param preset The preset to display the name of.
+     */
+    private void updateTextOfVisualCommand(const AnimationPreset preset) {
+        mapMenuCommands.setCommandText(visualIndex, presetTexts[uint(preset)]);
+    }
+
+    /**
      * The command menu widget.
      */
     private CommandWidget mapMenuCommands("MapMenu");
+
+    /**
+     * The index of the Visual command.
+     */
+    private uint visualIndex = 0;
+
+    /**
+     * Maps \c AnimationPreset values to their corresponding names.
+     */
+    private array<string> presetTexts = {
+        "visuala",
+        "visualb",
+        "visualc",
+        "visuald",
+        "novisual"
+    };
 }

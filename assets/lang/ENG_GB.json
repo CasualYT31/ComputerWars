@@ -108,6 +108,12 @@
 	"currentco": "Current CO",
 	"tagco": "Tag CO",
 
+	"visuala": "Visual A",
+	"visualb": "Visual B",
+	"visualc": "Visual C",
+	"visuald": "Visual D",
+	"novisual": "No Visual",
+
 	"alert": "Alert!",
 	"mapfilealreadyexists": "The map file \"#\" already exists! Do you wish to overwrite it?",
 	"nomapisopen": "There isn't a map open right now!",

@@ -27,8 +27,8 @@ AngelScript, I unfortunately cannot register a constant with the script interfac
 despite it being a constant as far as the scripts are concerned. */
 static awe::ArmyID NO_ARMY_SCRIPT = awe::NO_ARMY;
 static awe::UnitID NO_UNIT_SCRIPT = awe::NO_UNIT;
-static auto MIN_TILE_WIDTH = awe::tile::MIN_WIDTH;
-static auto MIN_TILE_HEIGHT = awe::tile::MIN_HEIGHT;
+static auto MIN_TILE_WIDTH = awe::animated_tile::MIN_WIDTH;
+static auto MIN_TILE_HEIGHT = awe::animated_tile::MIN_HEIGHT;
 
 void awe::closed_list_node::Register(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
@@ -133,6 +133,22 @@ void awe::map::Register(asIScriptEngine* engine,
 			static_cast<int>(awe::direction::Right));
 		document->DocumentObjectEnum(r, "Represents an orthogonal direction.");
 
+		///////////////////////////
+		// ANIMATION PRESET ENUM //
+		///////////////////////////
+		r = engine->RegisterEnum("AnimationPreset");
+		engine->RegisterEnumValue("AnimationPreset", "VisualA",
+			static_cast<int>(awe::animation_preset::VisualA));
+		engine->RegisterEnumValue("AnimationPreset", "VisualB",
+			static_cast<int>(awe::animation_preset::VisualB));
+		engine->RegisterEnumValue("AnimationPreset", "VisualC",
+			static_cast<int>(awe::animation_preset::VisualC));
+		engine->RegisterEnumValue("AnimationPreset", "VisualD",
+			static_cast<int>(awe::animation_preset::VisualD));
+		engine->RegisterEnumValue("AnimationPreset", "NoVisual",
+			static_cast<int>(awe::animation_preset::NoVisual));
+		document->DocumentObjectEnum(r, "Represents an animation preset.");
+
 		//////////////////////
 		// GLOBAL FUNCTIONS //
 		//////////////////////
@@ -176,6 +192,10 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterFuncdef("void MementoStateChangedCallback()");
 		document->DocumentObjectFuncDef(r, "The signature of the callback that is "
 			"invoked after memento state changes.");
+
+		r = engine->RegisterFuncdef("void AnimationCode()");
+		document->DocumentObjectFuncDef(r, "The signature of functions that are "
+			"added to the animation queue.");
 
 		////////////////////
 		// MAP OPERATIONS //
@@ -914,6 +934,47 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map",
 			"IntRect getMapBoundingBox() const",
 			asMETHOD(awe::map, getMapBoundingBox), asCALL_THISCALL);
+
+		//////////////////////////
+		// ANIMATION OPERATIONS //
+		//////////////////////////
+		r = engine->RegisterObjectMethod("Map",
+			"void setSelectedAnimationPreset(const AnimationPreset)",
+			asMETHOD(awe::map, setSelectedAnimationPreset), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"AnimationPreset getSelectedAnimationPreset() const",
+			asMETHOD(awe::map, getSelectedAnimationPreset), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"AnimationPreset selectNextAnimationPreset()",
+			asMETHOD(awe::map, selectNextAnimationPreset), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void enableAnimations(const bool)",
+			asMETHOD(awe::map, enableAnimations), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void queueCode(AnimationCode@ const)",
+			asMETHOD(awe::map, queueCode), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool animateDayBegin(const ArmyID, const Day, const string&in)",
+			asMETHOD(awe::map, animateDayBegin), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool animateTagCO(const ArmyID, const string&in)",
+			asMETHOD(awe::map, animateTagCO), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool animateParticle(const Vector2&in, const string&in, "
+			"const string&in, const Vector2f&in)",
+			asMETHOD(awe::map, animateParticle), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool animateLabelUnit(const UnitID, const string&in, "
+			"const string&in, const float = 0.7)",
+			asMETHOD(awe::map, animateLabelUnit), asCALL_THISCALL);
 	}
 }
 

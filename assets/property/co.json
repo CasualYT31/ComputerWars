@@ -4,7 +4,7 @@
 		"shortname": "NOCO_shortname",
 		"icon": "noco",
 		"description": "NOCO_description",
-		"portrait": ""
+		"portrait": "noco"
 	},
 	"JAKE": {
 		"longname": "JAKE_longname",

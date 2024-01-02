@@ -96,11 +96,9 @@ void sfx::gui::setGUI(const std::string& newMenu, const bool callClose,
 	_logger.write("Opened menu {} from menu {}.", _currentGUI, _previousGUI);
 }
 
-void sfx::gui::addSpritesheet(const std::string& name,
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
-	if (_sheet.find(name) != _sheet.end())
-		_logger.warning("Updated the spritesheet named \"{}\"!", name);
-	_sheet[name] = sheet;
+void sfx::gui::setSpritesheets(
+	const std::shared_ptr<sfx::animated_spritesheets>& sheets) {
+	_sheets = sheets;
 }
 
 void sfx::gui::setTarget(sf::RenderTarget& newTarget) {
@@ -447,9 +445,9 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 			!widgetData.spritesheetKey.empty() && !widgetData.spriteKey.empty())) {
 			// If the widget doesn't have a sprite, or if it doesn't have a valid
 			// spritesheet, then don't animate the widget's sprite.
-			if (_sheet.find(widgetData.spritesheetKey) != _sheet.end()) {
+			if (_sheets->exists(widgetData.spritesheetKey)) {
 				std::shared_ptr<sfx::animated_spritesheet> sheet =
-					_sheet[widgetData.spritesheetKey];
+					(*_sheets)[widgetData.spritesheetKey];
 				const std::string& sprite = widgetData.spriteKey;
 
 				if (_widgetSprites.find(widget) == _widgetSprites.end()) {
@@ -490,7 +488,7 @@ void sfx::gui::_animate(const sf::RenderTarget& target,
 				}
 			} else if (_widgetSprites.find(widget) != _widgetSprites.end() &&
 				_widgetSprites.at(widget).getSpritesheet() != nullptr &&
-				_sheet.find(widgetData.spritesheetKey) == _sheet.end()) {
+				!_sheets->exists(widgetData.spritesheetKey)) {
 				// Else if the widget DID have a valid spritesheet, then we're
 				// going to have to remove the image from the widget to ensure that
 				// sizing works out.

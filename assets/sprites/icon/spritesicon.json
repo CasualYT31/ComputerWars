@@ -382,6 +382,10 @@
 			"frames": [ [ 111, 126, 12, 14 ] ],
 			"durations": [ 0 ]
 		},
+		"visualicon": {
+			"frames": [ [ 111, 140, 11, 14 ] ],
+			"durations": [ 0 ]
+		},
 		"painttool": {
 			"frames": [ [ 64, 191, 30, 30 ] ],
 			"durations": [ 0 ]
@@ -544,6 +548,30 @@
 		},
 		"wn": {
 			"frames": [ [ 98, 177, 14, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"supplypointtoleft": {
+			"frames": [ [ 112, 163, 55, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"supplypointtoright": {
+			"frames": [ [ 112, 177, 55, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"repairpointtoleft": {
+			"frames": [ [ 167, 163, 55, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"repairpointtoright": {
+			"frames": [ [ 167, 177, 55, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"trappointtoleft": {
+			"frames": [ [ 222, 163, 55, 14 ] ],
+			"durations": [ 0 ]
+		},
+		"trappointtoright": {
+			"frames": [ [ 222, 177, 55, 14 ] ],
 			"durations": [ 0 ]
 		}
 	}

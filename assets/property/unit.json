@@ -21,6 +21,7 @@
 			"ACID": "infar",
 			"WHITE": "infwn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osinfantry",
 			"BLUE": "bminfantry",
@@ -78,6 +79,7 @@
 			"ACID": "mechar",
 			"WHITE": "mechwn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osmech",
 			"BLUE": "bmmech",
@@ -136,6 +138,7 @@
 			"ACID": "reconar",
 			"WHITE": "reconwn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osrecon",
 			"BLUE": "bmrecon",
@@ -193,6 +196,7 @@
 			"ACID": "tankar",
 			"WHITE": "tankwn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "ostank",
 			"BLUE": "bmtank",
@@ -251,6 +255,7 @@
 			"ACID": "mdar",
 			"WHITE": "mdwn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osmdtank",
 			"BLUE": "bmmdtank",
@@ -309,6 +314,7 @@
 			"ACID": "neoar",
 			"WHITE": "neown"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osneotank",
 			"BLUE": "bmneotank",
@@ -367,6 +373,7 @@
 			"ACID": "megaar",
 			"WHITE": "megawn"
 		},
+		"destroyedsprites": "megatankpiperunner",
 		"pictures": {
 			"ORANGE": "osmegatank",
 			"BLUE": "bmmegatank",
@@ -425,6 +432,7 @@
 			"ACID": "apcar",
 			"WHITE": "apcwn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osapc",
 			"BLUE": "bmapc",
@@ -479,6 +487,7 @@
 			"ACID": "antiar",
 			"WHITE": "antiwn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osantiair",
 			"BLUE": "bmantiair",
@@ -536,6 +545,7 @@
 			"ACID": "artar",
 			"WHITE": "artwn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osartillery",
 			"BLUE": "bmartillery",
@@ -593,6 +603,7 @@
 			"ACID": "rocketar",
 			"WHITE": "rocketwn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osrockets",
 			"BLUE": "bmrockets",
@@ -650,6 +661,7 @@
 			"ACID": "missar",
 			"WHITE": "misswn"
 		},
+		"destroyedsprites": "land",
 		"pictures": {
 			"ORANGE": "osmissiles",
 			"BLUE": "bmmissiles",
@@ -707,6 +719,7 @@
 			"ACID": "pipear",
 			"WHITE": "pipewn"
 		},
+		"destroyedsprites": "megatankpiperunner",
 		"pictures": {
 			"ORANGE": "ospiperunner",
 			"BLUE": "bmpiperunner",
@@ -778,6 +791,7 @@
 			"ACID": "tar",
 			"WHITE": "twn"
 		},
+		"destroyedsprites": "air",
 		"pictures": {
 			"ORANGE": "ostcopter",
 			"BLUE": "bmtcopter",
@@ -849,6 +863,7 @@
 			"ACID": "bar",
 			"WHITE": "bwn"
 		},
+		"destroyedsprites": "air",
 		"pictures": {
 			"ORANGE": "osbcopter",
 			"BLUE": "bmbcopter",
@@ -908,6 +923,7 @@
 			"ACID": "fighterar",
 			"WHITE": "fighterwn"
 		},
+		"destroyedsprites": "air",
 		"pictures": {
 			"ORANGE": "osfighter",
 			"BLUE": "bmfighter",
@@ -966,6 +982,7 @@
 			"ACID": "bomberar",
 			"WHITE": "bomberwn"
 		},
+		"destroyedsprites": "air",
 		"pictures": {
 			"ORANGE": "osbomber",
 			"BLUE": "bmbomber",
@@ -1024,6 +1041,7 @@
 			"ACID": "stealthar",
 			"WHITE": "stealthwn"
 		},
+		"destroyedsprites": "air",
 		"pictures": {
 			"ORANGE": "osstealth",
 			"BLUE": "bmstealth",
@@ -1082,6 +1100,7 @@
 			"ACID": "bbombar",
 			"WHITE": "bbombwn"
 		},
+		"destroyedsprites": "air",
 		"pictures": {
 			"ORANGE": "osblackbomb",
 			"BLUE": "bmblackbomb",
@@ -1137,6 +1156,7 @@
 			"ACID": "bboatar",
 			"WHITE": "bboatwn"
 		},
+		"destroyedsprites": "sea",
 		"pictures": {
 			"ORANGE": "osblackboat",
 			"BLUE": "bmblackboat",
@@ -1191,6 +1211,7 @@
 			"ACID": "landerar",
 			"WHITE": "landerwn"
 		},
+		"destroyedsprites": "sea",
 		"pictures": {
 			"ORANGE": "oslander",
 			"BLUE": "bmlander",
@@ -1258,6 +1279,7 @@
 			"ACID": "cruiserar",
 			"WHITE": "cruiserwn"
 		},
+		"destroyedsprites": "sea",
 		"pictures": {
 			"ORANGE": "oscruiser",
 			"BLUE": "bmcruiser",
@@ -1316,6 +1338,7 @@
 			"ACID": "subar",
 			"WHITE": "subwn"
 		},
+		"destroyedsprites": "sea",
 		"pictures": {
 			"ORANGE": "ossub",
 			"BLUE": "bmsub",
@@ -1373,6 +1396,7 @@
 			"ACID": "battlear",
 			"WHITE": "battlewn"
 		},
+		"destroyedsprites": "sea",
 		"pictures": {
 			"ORANGE": "osbattleship",
 			"BLUE": "bmbattleship",
@@ -1445,6 +1469,7 @@
 			"ACID": "carrierar",
 			"WHITE": "carrierwn"
 		},
+		"destroyedsprites": "sea",
 		"pictures": {
 			"ORANGE": "oscarrier",
 			"BLUE": "bmcarrier",
@@ -1495,6 +1520,24 @@
 		"shortname": "OOZIUM_shortname",
 		"icon": "",
 		"sprites": {
+			"ORANGE": "ooziumos",
+			"BLUE": "ooziumbm",
+			"GREEN": "ooziumge",
+			"YELLOW": "ooziumyc",
+			"BLACK": "ooziumbh",
+			"RED": "ooziumrf",
+			"GREY": "ooziumgs",
+			"BROWN": "ooziumbd",
+			"AMBER": "ooziumab",
+			"JADE": "ooziumjs",
+			"COBALT": "ooziumci",
+			"PINK": "ooziumpc",
+			"TEAL": "ooziumtg",
+			"PURPLE": "ooziumpl",
+			"ACID": "ooziumar",
+			"WHITE": "ooziumwn"
+		},
+		"destroyedsprites": {
 			"ORANGE": "ooziumos",
 			"BLUE": "ooziumbm",
 			"GREEN": "ooziumge",

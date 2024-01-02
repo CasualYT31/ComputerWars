@@ -84,6 +84,19 @@ sf::Time sfx::animated_spritesheet::getFrameDuration(const std::string& sprite,
 	return sf::Time();
 }
 
+std::vector<sf::Time> sfx::animated_spritesheet::getFrameDurations(
+	const std::string& sprite) const {
+	try {
+		return _data.at(sprite).durations;
+	} catch (const std::out_of_range&) {
+		/*
+		_logger.error("Error whilst attempting to retrieve the durations of "
+			"sprite \"{}\": the sprite does not exist!", sprite);
+			*/
+	}
+	return {};
+}
+
 sf::Vector2f sfx::animated_spritesheet::getSpriteOffset(const std::string& sprite)
 	const {
 	try {
@@ -132,28 +145,42 @@ std::size_t sfx::animated_spritesheet::getSpriteGlobalFrameID(
  *                      that the timer is not being reset, so the value of the
  *                      float will be used to offset the accumulated delta, causing
  *                      a reset local to a given sprite.
+ * @return \c TRUE if the frame ID has wrapped at least once, or is about to wrap,
+ *         \c FALSE otherwise.
  */
-static void incrementFrameID(const sf::Time& frameDuration,
+static bool incrementFrameID(const std::vector<sf::Time>& frameDurations,
 	const std::size_t frameCount, sfx::delta_timer& timer, std::size_t& frameID,
 	float* deltaOffset = nullptr) {
-	if (frameDuration.asMilliseconds() > 0) {
+	bool frameWrap = false;
+	if (frameDurations[frameID].asMilliseconds() > 0) {
 		const float accumulatedDelta = timer.accumulatedDelta();
 		const float offset = deltaOffset ? *deltaOffset : 0.f;
 		float delta = accumulatedDelta - offset;
-		while (delta >= frameDuration.asSeconds()) {
-			delta -= frameDuration.asSeconds();
-			if (++frameID >= frameCount) frameID = 0;
+		while (delta >= frameDurations[frameID].asSeconds()) {
+			delta -= frameDurations[frameID].asSeconds();
+			if (++frameID >= frameCount) {
+				frameID = 0;
+				frameWrap = true;
+			}
+		}
+		// If we are at the last frame, and we're almost about to wrap, then
+		// prematurely end the animation to prevent showing the first frame for a
+		// single frame.
+		if (frameID == frameCount - 1 &&
+			frameDurations[frameID].asSeconds() - delta <= 0.05f) {
+			frameWrap = true;
 		}
 		if (deltaOffset) *deltaOffset = accumulatedDelta - delta;
 		else timer.resetDeltaAccumulation(delta);
 	}
+	return frameWrap;
 }
 
 void sfx::animated_spritesheet::updateGlobalFrameIDs() {
 	for (auto& data : _data) {
 		if (!data.second.globalFrameCounter) continue;
-		incrementFrameID(data.second.durations[data.second.globalFrameID],
-			data.second.frames.size(), _globalTimer, data.second.globalFrameID,
+		incrementFrameID(data.second.durations, data.second.frames.size(),
+			_globalTimer, data.second.globalFrameID,
 			&data.second.accumulatedDeltaOffset);
 	}
 }
@@ -237,6 +264,44 @@ bool sfx::animated_spritesheet::_save(nlohmann::ordered_json& j) noexcept {
 	return false;
 }
 
+sfx::animated_spritesheets::animated_spritesheets(const engine::logger::data& data)
+	: json_script({ data.sink, "json_script" }), _logger(data) {}
+
+std::shared_ptr<sfx::animated_spritesheet> sfx::animated_spritesheets::operator[](
+	const std::string& key) const {
+	if (exists(key)) return _sheets.at(key);
+	_logger.error("Attempting to access spritesheet with key \"{}\" which "
+		"does not exist.", key);
+	return nullptr;
+}
+
+bool sfx::animated_spritesheets::exists(const std::string& key) const {
+	return _sheets.find(key) != _sheets.end();
+}
+
+void sfx::animated_spritesheets::updateGlobalFrameIDs() {
+	for (auto& sheet : _sheets) sheet.second->updateGlobalFrameIDs();
+}
+
+bool sfx::animated_spritesheets::_load(engine::json& j) {
+	bool ret = true;
+	nlohmann::ordered_json jj = j.nlohmannJSON();
+	_sheets.clear();
+	for (auto& i : jj.items()) {
+		_sheets[i.key()] = std::make_shared<sfx::animated_spritesheet>(
+			engine::logger::data{ _logger.getData().sink,
+				_logger.getData().name + "_" + i.key() });
+		_sheets[i.key()]->load(i.value());
+		if (!_sheets[i.key()]->inGoodState()) ret = false;
+	}
+	return ret;
+}
+
+bool sfx::animated_spritesheets::_save(nlohmann::ordered_json& j) {
+	for (const auto& pair : _sheets) j[pair.first] = pair.second->getScriptPath();
+	return true;
+}
+
 sfx::animated_sprite::animated_sprite(const engine::logger::data& data) :
 	_logger(data) {}
 
@@ -310,17 +375,18 @@ std::size_t sfx::animated_sprite::operator--(int) noexcept {
 }
 
 bool sfx::animated_sprite::animate(const sf::RenderTarget& target) {
-	if (!_sheet || _spriteID.empty()) return true;
+	if (!_sheet || !_sheet->doesSpriteExist(_spriteID)) return true;
 	try {
+		bool ret = false;
 		if (_sheet->doesSpriteHaveGlobalFrameID(_spriteID)) {
 			_currentFrame = _sheet->getSpriteGlobalFrameID(_spriteID);
 		} else {
-			incrementFrameID(_sheet->getFrameDuration(_spriteID, _currentFrame),
+			ret = incrementFrameID(_sheet->getFrameDurations(_spriteID),
 				_sheet->getFrameCount(_spriteID), *this, _currentFrame);
 		}
 		_sprite.setTexture(_sheet->getTexture());
 		_sprite.setTextureRect(_sheet->getFrameRect(_spriteID, _currentFrame));
-		return getCurrentFrame() == _sheet->getFrameCount(_spriteID) - 1;
+		return ret;
 	} catch (const std::out_of_range& e) {
 		if (!_errored) {
 			_logger.error("Attempted to access non-existent frame {} of sprite {}"

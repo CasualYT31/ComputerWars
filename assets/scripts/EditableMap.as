@@ -116,6 +116,7 @@ class EditableMap {
                 "EditableMap; the game will crash soon!");
         } else {
             @map = mapToEdit;
+            map.enableAnimations(false);
             map.enablePeriodic(false);
             map.alwaysShowHiddenUnits(true);
             map.setMapScalingFactor(_mapScalingFactor);

@@ -139,15 +139,12 @@ namespace sfx {
 		}
 
 		/**
-		 * Adds a spritesheet which can be uses with the GUI menus.
-		 * If a spritesheet with the given name already exists, a warning will be
-		 * logged and the spritesheet will be updated.
-		 * @param name  The name which scripts use to reference the spritesheet.
-		 * @param sheet A pointer to the \c animated_spritesheet to use with these
-		 *              GUI menus.
+		 * Adds spritesheets which can be used with the GUI menus.
+		 * @param sheets A pointer to the \c animated_spritesheets to use with the
+		 *               GUI menus.
 		 */
-		void addSpritesheet(const std::string& name,
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
+		void setSpritesheets(
+			const std::shared_ptr<sfx::animated_spritesheets>& sheets);
 
 		/**
 		 * Sets the target to draw the GUI menus to.
@@ -418,13 +415,13 @@ namespace sfx {
 			/**
 			 * Was the \c ChildWindow resizeable before minimising or maximising?
 			 */
-			bool isResizeable;
+			bool isResizeable = false;
 
 			/**
 			 * Was the \c ChildWindow position locked before minimising or
 			 * maximising?
 			 */
-			bool isPositionLocked;
+			bool isPositionLocked = false;
 
 			/**
 			 * Updates the \c ChildWindow properties, given a \c ChildWidget
@@ -1499,17 +1496,17 @@ namespace sfx {
 		/**
 		 * Pointer to the scripts object containing the signal handler functions.
 		 */
-		std::shared_ptr<engine::scripts> _scripts = nullptr;
+		std::shared_ptr<engine::scripts> _scripts;
 
 		/**
 		 * Cache of the user input object last given to \c handleInput().
 		 */
-		std::shared_ptr<sfx::user_input> _ui = nullptr;
+		std::shared_ptr<sfx::user_input> _ui;
 
 		/**
 		 * Pointer to the language dictionary used to translate all captions.
 		 */
-		std::shared_ptr<engine::language_dictionary> _langdict = nullptr;
+		std::shared_ptr<engine::language_dictionary> _langdict;
 
 		/**
 		 * Pointer to the fonts used with this GUI.
@@ -1517,14 +1514,13 @@ namespace sfx {
 		 * once, then pull it from an internal list rather than constructing it
 		 * again.
 		 */
-		std::shared_ptr<sfx::fonts> _fonts = nullptr;
+		std::shared_ptr<sfx::fonts> _fonts;
 
 		/**
 		 * Pointer to the animated spritesheets that can be used with the GUI
 		 * menus.
 		 */
-		std::unordered_map<std::string, std::shared_ptr<sfx::animated_spritesheet>>
-			_sheet;
+		std::shared_ptr<sfx::animated_spritesheets> _sheets;
 
 		/**
 		 * Stores data associated with a menu.

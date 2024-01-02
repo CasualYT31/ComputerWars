@@ -22,31 +22,34 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "unit.hpp"
 #include <cmath>
+#include <limits>
 
 const sf::Vector2u awe::unit::NO_POSITION(std::numeric_limits<unsigned int>::max(),
 	std::numeric_limits<unsigned int>::max());
 
 sf::Vector2u awe::unit::NO_POSITION_SCRIPT = awe::unit::NO_POSITION;
 
-awe::unit::unit(const engine::logger::data& data,
+awe::unit::unit(const std::shared_ptr<awe::animated_unit>& animatedUnit,
+	const std::function<void(const std::function<void(void)>&)>& spriteCallback,
 	const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet,
-	const std::shared_ptr<sfx::animated_spritesheet>& icons) : _type(type),
-	_army(army),
-	_sprite(sheet, ((type) ? (type->getUnit(army)) : ("")),
-		{data.sink, data.name + "_animated_sprite"}),
-	_hpIcon(icons, "nohpicon", { data.sink, data.name + "_hp_icon" }),
-	_fuelAmmoIcon(icons, "nostatusicon",
-		{ data.sink, data.name + "_fuel_ammo_icon" }),
-	_loadedIcon(icons, "nostatusicon", { data.sink, data.name + "_loaded_icon" }),
-	_capturingHidingIcon(icons, "nostatusicon",
-		{ data.sink, data.name + "_status_icon" }) {
+	const std::shared_ptr<sfx::animated_spritesheet>& icons) :
+	_type(type), _army(army), _unitSprite(animatedUnit),
+	_updateSprite(spriteCallback) {
 	// Initialise all ammos.
 	for (std::size_t i = 0, weaponCount = type->getWeaponCount();
 		i < weaponCount; ++i) {
 		const auto weapon = type->getWeaponByIndex(i);
 		_ammos[weapon->getScriptName()] = 0;
 	}
+	// Initialise the sprite.
+	animatedUnit->setSpritesheet(sheet);
+	animatedUnit->setIconSpritesheet(icons);
+	animatedUnit->setSprite((type) ? (type->getUnit(army)) : (""));
+	animatedUnit->setHPIconSprite("nohpicon");
+	animatedUnit->setFuelAmmoIconSprite("nostatusicon");
+	animatedUnit->setLoadedIconSprite("nostatusicon");
+	animatedUnit->setCapturingHidingIconSprite("nostatusicon");
 }
 
 bool awe::unit::isReplenished(const bool heal) const {
@@ -75,79 +78,79 @@ void awe::unit::replenish(const bool heal) {
 	}
 }
 
-void awe::unit::setIconSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
-	_hpIcon.setSpritesheet(sheet);
-	_fuelAmmoIcon.setSpritesheet(sheet);
-	_loadedIcon.setSpritesheet(sheet);
-	_capturingHidingIcon.setSpritesheet(sheet);
-}
-
-bool awe::unit::animate(const sf::RenderTarget& target) {
-	// Determine which icons to set.
-	if (getDisplayedHP() == 0 || getDisplayedHP() > 9) {
-		_hpIcon.setSprite("nohpicon");
-	} else {
-		_hpIcon.setSprite(std::to_string(getDisplayedHP()));
-	}
-	if (_loaded.size()) {
-		_loadedIcon.setSprite("loaded");
-	} else {
-		_loadedIcon.setSprite("nostatusicon");
-	}
-	if (isCapturing() && isHiding()) {
-		_capturingHidingIcon.setSprite("capturinghiding");
-	} else if (isCapturing()) {
-		_capturingHidingIcon.setSprite("capturing");
-	} else if (isHiding()) {
-		_capturingHidingIcon.setSprite("hiding");
-	} else {
-		_capturingHidingIcon.setSprite("nostatusicon");
-	}
-	const bool lowFuel =
-		(!_type->hasInfiniteFuel() && getFuel() <= _type->getMaxFuel() / 2);
-	const bool lowAmmo = _isLowOnAmmo();
-	if (lowFuel && lowAmmo) {
-		_fuelAmmoIcon.setSprite("fuelammolow");
-	} else if (lowFuel) {
-		_fuelAmmoIcon.setSprite("fuellow");
-	} else if (lowAmmo) {
-		_fuelAmmoIcon.setSprite("ammolow");
-	} else {
-		_fuelAmmoIcon.setSprite("nostatusicon");
-	}
-	// Animate sprites.
-	_hpIcon.animate(target);
-	_fuelAmmoIcon.animate(target);
-	_loadedIcon.animate(target);
-	_capturingHidingIcon.animate(target);
-	bool ret = _sprite.animate(target);
-	// Calculate icon positions.
-	sf::Vector2f pos = _sprite.getPosition();
-	sf::Vector2f size = _sprite.getSize();
-	_hpIcon.setPosition(sf::Vector2f(pos.x + size.x - _hpIcon.getSize().x,
-		pos.y + size.y - _hpIcon.getSize().y));
-	_fuelAmmoIcon.setPosition(sf::Vector2f(pos.x, pos.y + size.y -
-		_fuelAmmoIcon.getSize().y));
-	_loadedIcon.setPosition(pos);
-	_capturingHidingIcon.setPosition(sf::Vector2f(
-		pos.x + size.x - _capturingHidingIcon.getSize().x, pos.y));
-	// Return main unit graphic animation result.
-	return ret;
-}
-
-void awe::unit::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	target.draw(_sprite, states);
-	target.draw(_loadedIcon, states);
-	target.draw(_capturingHidingIcon, states);
-	target.draw(_fuelAmmoIcon, states);
-	target.draw(_hpIcon, states);
-}
-
 bool awe::unit::_isLowOnAmmo() const {
 	// TODO-1: determine when we should show the low ammo icon. What we have now
 	// might be fine.
 	const auto weapon = _type->getFirstWeaponWithFiniteAmmo();
 	if (!weapon) return false;
 	return getAmmo(weapon->getScriptName()) <= weapon->getMaxAmmo() / 2;
+}
+
+void awe::unit::_updateHPIcon() {
+	_updateSprite(std::bind([](
+		const std::weak_ptr<awe::animated_unit>& _unitSprite,
+		const awe::HP displayedHP) {
+			if (_unitSprite.expired()) return;
+			const auto unitSprite = _unitSprite.lock();
+			if (displayedHP == 0 || displayedHP > 9) {
+				unitSprite->setHPIconSprite("nohpicon");
+			} else {
+				unitSprite->setHPIconSprite(std::to_string(displayedHP));
+			}
+		}, _unitSprite, getDisplayedHP())
+	);
+}
+
+void awe::unit::_updateFuelAmmoIcon() {
+	_updateSprite(std::bind([](
+		const std::weak_ptr<awe::animated_unit>& _unitSprite,
+		const std::shared_ptr<const awe::unit_type>& _type,
+		const awe::Fuel fuel, const bool lowAmmo) {
+			if (_unitSprite.expired()) return;
+			const auto unitSprite = _unitSprite.lock();
+			const bool lowFuel =
+				(!_type->hasInfiniteFuel() && fuel <= _type->getMaxFuel() / 2);
+			if (lowFuel && lowAmmo) {
+				unitSprite->setFuelAmmoIconSprite("fuelammolow");
+			} else if (lowFuel) {
+				unitSprite->setFuelAmmoIconSprite("fuellow");
+			} else if (lowAmmo) {
+				unitSprite->setFuelAmmoIconSprite("ammolow");
+			} else {
+				unitSprite->setFuelAmmoIconSprite("nostatusicon");
+			}
+		}, _unitSprite, _type, getFuel(), _isLowOnAmmo())
+	);
+}
+
+void awe::unit::_updateLoadedIcon() {
+	_updateSprite(std::bind([](
+		const std::weak_ptr<awe::animated_unit>& _unitSprite, const bool empty) {
+			if (_unitSprite.expired()) return;
+			const auto unitSprite = _unitSprite.lock();
+			if (empty) {
+				unitSprite->setLoadedIconSprite("nostatusicon");
+			} else {
+				unitSprite->setLoadedIconSprite("loaded");
+			}
+	}, _unitSprite, _loaded.empty()));
+}
+
+void awe::unit::_updateCapturingHidingIcon() {
+	_updateSprite(std::bind([](
+		const std::weak_ptr<awe::animated_unit>& _unitSprite,
+		const bool isCapturing, const bool isHiding) {
+			if (_unitSprite.expired()) return;
+			const auto unitSprite = _unitSprite.lock();
+			if (isCapturing && isHiding) {
+				unitSprite->setCapturingHidingIconSprite("capturinghiding");
+			} else if (isCapturing) {
+				unitSprite->setCapturingHidingIconSprite("capturing");
+			} else if (isHiding) {
+				unitSprite->setCapturingHidingIconSprite("hiding");
+			} else {
+				unitSprite->setCapturingHidingIconSprite("nostatusicon");
+			}
+		}, _unitSprite, isCapturing(), isHiding())
+	);
 }

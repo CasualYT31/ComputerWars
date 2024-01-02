@@ -37,6 +37,12 @@ float sfx::delta_timer::accumulatedDelta(const sf::Time& timeout) {
 	return _delta;
 }
 
+float sfx::delta_timer::accumulatedDelta(float& delta, const sf::Time& timeout) {
+	delta = calculateDelta(timeout);
+	_delta += delta;
+	return _delta;
+}
+
 void sfx::delta_timer::resetDeltaAccumulation(const float to) noexcept {
 	_delta = to;
 }

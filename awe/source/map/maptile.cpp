@@ -80,9 +80,9 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 		// Now, allow the caller to set the originally given tile's type.
 	}
 	_updateCapturingUnit(getUnitOnTile(pos));
-	_tiles[pos.x][pos.y].setTileType(type);
+	_tiles[pos.x][pos.y].data.setTileType(type);
 	// Set the tile's HP to the max.
-	_tiles[pos.x][pos.y].setTileHP(
+	_tiles[pos.x][pos.y].data.setTileHP(
 		static_cast<awe::HP>(type->getType()->getMaxHP()));
 	// Remove ownership of the tile from the army who owns it, if any army does.
 	setTileOwner(pos, awe::NO_ARMY);
@@ -126,7 +126,7 @@ std::shared_ptr<const awe::tile_type> awe::map::getTileType(
 			"of bounds with the map's size of {}!", pos, getMapSize());
 		return nullptr;
 	}
-	return _tiles[pos.x][pos.y].getTileType();
+	return _tiles[pos.x][pos.y].data.getTileType();
 }
 
 const awe::tile_type* awe::map::getTileTypeObject(const sf::Vector2u& pos) const {
@@ -143,7 +143,7 @@ void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {
 		if (hp == getTileHP(pos)) return;
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::TILE_HP));
-		_tiles[pos.x][pos.y].setTileHP(hp);
+		_tiles[pos.x][pos.y].data.setTileHP(hp);
 	} else {
 		_logger.error("setTileHP operation cancelled: tile at position {} is out "
 			"of bounds with the map's size of {}!", pos, getMapSize());
@@ -156,7 +156,7 @@ awe::HP awe::map::getTileHP(const sf::Vector2u& pos) const {
 			"bounds with the map's size of {}!", pos, getMapSize());
 		return 0;
 	}
-	return _tiles[pos.x][pos.y].getTileHP();
+	return _tiles[pos.x][pos.y].data.getTileHP();
 }
 
 void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
@@ -172,12 +172,12 @@ void awe::map::setTileOwner(const sf::Vector2u& pos, awe::ArmyID army) {
 	_updateCapturingUnit(getUnitOnTile(pos));
 	auto& tile = _tiles[pos.x][pos.y];
 	// First, remove the tile from the army who currently owns it.
-	if (_isArmyPresent(tile.getTileOwner()))
-		_armies.at(tile.getTileOwner()).removeTile(pos);
+	if (_isArmyPresent(tile.data.getTileOwner()))
+		_armies.at(tile.data.getTileOwner()).removeTile(pos);
 	// Now assign it to the real owner, if any.
 	if (_isArmyPresent(army)) _armies.at(army).addTile(pos);
 	// Update the actual tile now.
-	tile.setTileOwner(army);
+	tile.data.setTileOwner(army);
 }
 
 awe::ArmyID awe::map::getTileOwner(const sf::Vector2u& pos) const {
@@ -186,7 +186,7 @@ awe::ArmyID awe::map::getTileOwner(const sf::Vector2u& pos) const {
 			"of bounds with the map's size of {}!", pos, getMapSize());
 		return awe::NO_ARMY;
 	}
-	return _tiles[pos.x][pos.y].getTileOwner();
+	return _tiles[pos.x][pos.y].data.getTileOwner();
 }
 
 awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u& pos) const {
@@ -195,8 +195,8 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u& pos) const {
 			"of bounds with the map's size of {}!", pos, getMapSize());
 		return awe::NO_UNIT;
 	}
-	auto u = _tiles[pos.x][pos.y].getUnit();
-	if (u != awe::NO_UNIT && _units.at(u).isOnMap()) return u;
+	auto u = _tiles[pos.x][pos.y].data.getUnit();
+	if (u != awe::NO_UNIT && _units.at(u).data.isOnMap()) return u;
 	return awe::NO_UNIT;
 }
 
@@ -264,9 +264,9 @@ void awe::map::setTileStructureData(const sf::Vector2u& pos,
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::TILE_STRUCTURE_DATA));
 	auto& tile = _tiles[pos.x][pos.y];
-	tile.setStructureType(structure);
-	tile.setStructureTile(offset);
-	tile.setStructureDestroyed(destroyed);
+	tile.data.setStructureType(structure);
+	tile.data.setStructureTile(offset);
+	tile.data.setStructureDestroyed(destroyed);
 }
 
 void awe::map::setTileStructureData(const sf::Vector2u& pos,
@@ -285,7 +285,7 @@ std::shared_ptr<const awe::structure> awe::map::getTileStructure(
 			"out of bounds with the map's size of {}!", pos, getMapSize());
 		return nullptr;
 	}
-	return _tiles[pos.x][pos.y].getStructureType();
+	return _tiles[pos.x][pos.y].data.getStructureType();
 }
 
 const awe::structure* awe::map::getTileStructureObject(
@@ -301,7 +301,7 @@ bool awe::map::isTileAStructureTile(const sf::Vector2u& pos) const {
 			"is out of bounds with the map's size of {}!", pos, getMapSize());
 		return false;
 	}
-	return _tiles[pos.x][pos.y].getStructureType().operator bool();
+	return _tiles[pos.x][pos.y].data.getStructureType().operator bool();
 }
 
 sf::Vector2i awe::map::getTileStructureOffset(const sf::Vector2u& pos) const {
@@ -310,7 +310,7 @@ sf::Vector2i awe::map::getTileStructureOffset(const sf::Vector2u& pos) const {
 			"{} is out of bounds with the map's size of {}!", pos, getMapSize());
 		return { 0, 0 };
 	}
-	return _tiles[pos.x][pos.y].getStructureTile();
+	return _tiles[pos.x][pos.y].data.getStructureTile();
 }
 
 bool awe::map::isTileDestroyed(const sf::Vector2u& pos) const {
@@ -319,7 +319,7 @@ bool awe::map::isTileDestroyed(const sf::Vector2u& pos) const {
 			"out of bounds with the map's size of {}!", pos, getMapSize());
 		return false;
 	}
-	return _tiles[pos.x][pos.y].getStructureDestroyed();
+	return _tiles[pos.x][pos.y].data.getStructureDestroyed();
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(
@@ -733,14 +733,14 @@ void awe::map::destroyStructure(sf::Vector2u tile) {
 			"out-of-bounds with the map's size of {}!", tile, getMapSize());
 		return;
 	}
-	const auto& structure = _tiles[tile.x][tile.y].getStructureType();
+	const auto& structure = _tiles[tile.x][tile.y].data.getStructureType();
 	if (!structure) {
 		_logger.error("destroyStructure operation failed: tile at position {} is "
 			"not attached to any structure!", tile);
 		return;
 	}
 	// If the given tile was a dependent tile, find the root tile first.
-	auto offset = _tiles[tile.x][tile.y].getStructureTile();
+	auto offset = _tiles[tile.x][tile.y].data.getStructureTile();
 	if (offset != sf::Vector2i{ 0, 0 }) {
 		tile.x -= offset.x;
 		tile.y -= offset.y;
@@ -767,14 +767,14 @@ void awe::map::deleteStructure(sf::Vector2u tile) {
 			"out-of-bounds with the map's size of {}!", tile, getMapSize());
 		return;
 	}
-	const auto& structure = _tiles[tile.x][tile.y].getStructureType();
+	const auto& structure = _tiles[tile.x][tile.y].data.getStructureType();
 	if (!structure) {
 		_logger.error("deleteStructure operation failed: tile at position {} is "
 			"not attached to any structure!", tile);
 		return;
 	}
 	// If the given tile was a dependent tile, find the root tile first.
-	auto offset = _tiles[tile.x][tile.y].getStructureTile();
+	auto offset = _tiles[tile.x][tile.y].data.getStructureTile();
 	if (offset != sf::Vector2i{ 0, 0 }) {
 		tile.x -= offset.x;
 		tile.y -= offset.y;

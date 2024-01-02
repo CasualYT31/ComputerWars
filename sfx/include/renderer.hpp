@@ -76,7 +76,7 @@ namespace sfx {
 		 *          seconds.
 		 * @safety  No guarantee.
 		 */
-		virtual float calculateDelta(const sf::Time& timeout = sf::seconds(1.0f));
+		virtual float calculateDelta(const sf::Time& timeout = sf::seconds(0.1f));
 
 		/**
 		 * Retrieves the delta accumulated overtime.
@@ -94,7 +94,19 @@ namespace sfx {
 		 * @sa      \c calculateDelta()
 		 * @sa      \c resetDeltaAccumulation()
 		 */
-		float accumulatedDelta(const sf::Time& timeout = sf::seconds(1.0f));
+		float accumulatedDelta(const sf::Time& timeout = sf::seconds(0.1f));
+
+		/**
+		 * Version of \c accumulatedDelta() that allows the caller to retrieve the
+		 * raw delta value, too.
+		 * @param  delta   The time elapsed since the last call to
+		 *                 \c calculateDelta(), in seconds, will be written to this
+		 *                 parameter.
+		 * @param  timeout See \c calculateDelta().
+		 * @return See \c accumulatedDelta().
+		 */
+		float accumulatedDelta(float& delta,
+			const sf::Time& timeout = sf::seconds(0.1f));
 
 		/**
 		 * Resets delta accumulation.
@@ -164,7 +176,7 @@ namespace sfx {
 		 * \c false before invoking the base method.
 		 * @sa      sfx::animated_drawable::_timeout
 		 */
-		float calculateDelta(const sf::Time& timeout = sf::seconds(1.0f)) override;
+		float calculateDelta(const sf::Time& timeout = sf::seconds(0.1f)) override;
 
 		/**
 		 * Can be used to designate an animation finished.

@@ -61,7 +61,9 @@ shared class PlayableMap {
             @map = mapToPlayOn;
             map.setMapObject(this);
             map.disableMementos();
+            map.enableAnimations(false);
             map.setMapScalingFactor(_mapScalingFactor);
+            map.enableAnimations(true);
             setNormalCursorSprites();
         }
     }
@@ -344,7 +346,10 @@ shared class PlayableMap {
         }
         currentArmy = nextArmy;
 
-        // 4. Go through each of the current army's units and perform start of
+        // 4. Queue Day Begin animation.
+        map.animateDayBegin(currentArmy, map.getDay(), "Monospace");
+
+        // 5. Go through each of the current army's units and perform start of
         //    turn operations. Order each unit by their priority. Only do this if
         //    it's not the first day.
         if (map.getDay() > 1) {
@@ -361,14 +366,14 @@ shared class PlayableMap {
             }
         }
 
-        // 5. Then, go through each of the current army's owned tiles.
+        // 6. Then, go through each of the current army's owned tiles.
         const auto armyTiles = map.getTilesOfArmy(currentArmy);
         for (uint i = 0, tileCount = armyTiles.length(); i < tileCount; ++i) {
             const Vector2 tile = armyTiles[i];
             _beginTurnForTile(tile, map.getTileType(tile).type, currentArmy);
         }
 
-        // 6. Finally, perform extra operations on the army's units and tiles that
+        // 7. Finally, perform extra operations on the army's units and tiles that
         //    need to be executed after the others. We shall get the lists again.
         //    This allows the previous steps to add or remove units or tiles if it
         //    so chooses.
@@ -381,7 +386,9 @@ shared class PlayableMap {
      * Tags the current army's COs before ending the turn.
      */
     void tagCOs() {
-        map.tagArmyCOs(map.getSelectedArmy());
+        const auto army = map.getSelectedArmy();
+        map.animateTagCO(army, "Monospace");
+        map.tagArmyCOs(army);
         endTurn();
     }
 
@@ -733,6 +740,11 @@ shared class PlayableMap {
         const auto id = map.getSelectedUnit();
         moveUnit();
         map.unitHiding(id, hide);
+        string particle = "stealthhideshow";
+        if (map.getUnitType(id).scriptName == "SUB")
+            particle = hide ? "subhide" : "subshow";
+        map.animateParticle(map.getUnitPosition(id), "particle", particle,
+            Vector2f(0.5, 0.5));
     }
 
     /**
@@ -999,8 +1011,10 @@ shared class PlayableMap {
         array<UnitID> units = _findUnits(map.getUnitPosition(unit), 1, 1);
         auto apcArmy = map.getArmyOfUnit(unit);
         for (uint i = 0; i < units.length(); ++i) {
-            if (apcArmy == map.getArmyOfUnit(units[i]))
+            if (apcArmy == map.getArmyOfUnit(units[i])) {
+                animateReplenish(units[i]);
                 map.replenishUnit(units[i]);
+            }
         }
     }
 
@@ -1556,6 +1570,33 @@ shared class PlayableMap {
         }
     }
 
+    //////////////////////////////
+    // ANIMATION HELPER METHODS //
+    //////////////////////////////
+    /**
+     * Animates the Supply Label on a given unit.
+     * @param unit The ID of the unit to point the label to.
+     */
+    void animateReplenish(const UnitID unit) {
+        map.animateLabelUnit(unit, "supplypointtoright", "supplypointtoleft");
+    }
+    
+    /**
+     * Animates the Repair Label on a given unit.
+     * @param unit The ID of the unit to point the label to.
+     */
+    void animateRepair(const UnitID unit) {
+        map.animateLabelUnit(unit, "repairpointtoright", "repairpointtoleft");
+    }
+    
+    /**
+     * Animates the Trap Label on a given unit.
+     * @param unit The ID of the unit to point the label to.
+     */
+    void animateTrap(const UnitID unit) {
+        map.animateLabelUnit(unit, "trappointtoright", "trappointtoleft", 1.3);
+    }
+
     /////////////////////////////
     // END TURN HELPER METHODS //
     /////////////////////////////
@@ -1714,9 +1755,24 @@ shared class PlayableMap {
                     // Spawn Oozium.
                     const auto oozium = createUnit(ooziumType, currentArmy,
                         tilesInRange[i]);
+                    // Only make Oozium visible after deleting the unit that's
+                    // currently occupying its tile.
+                    map.addPreviewUnit(oozium, NO_POSITION);
+                    _newOoziums.insertLast(oozium);
+                    map.queueCode(AnimationCode(
+                        this._removeFirstOoziumFromGrandBoltList));
                 }
             }
         }
+    }
+
+    /**
+     * Makes the first Oozium in the list visible.
+     */
+    private void _removeFirstOoziumFromGrandBoltList() {
+        const auto oozium = _newOoziums[0];
+        map.removePreviewUnit(oozium);
+        _newOoziums.removeAt(0);
     }
 
     /**
@@ -1745,16 +1801,19 @@ shared class PlayableMap {
                         if (unitType == "TREAD" || unitType == "TIRES" ||
                             unitType == "INFANTRY" || unitType == "MECH" ||
                             unitType == "PIPELINE") {
+                            animateReplenish(unitOnTile);
                             healUnit(unitOnTile, 2, currentArmy);
                             map.replenishUnit(unitOnTile);
                         }
                     } else if (terrainType == "AIRPORT") {
                         if (unitType == "AIR") {
+                            animateReplenish(unitOnTile);
                             healUnit(unitOnTile, 2, currentArmy);
                             map.replenishUnit(unitOnTile);
                         }
                     } else if (terrainType == "PORT") {
                         if (unitType == "SHIPS" || unitType == "TRANSPORT") {
+                            animateReplenish(unitOnTile);
                             healUnit(unitOnTile, 2, currentArmy);
                             map.replenishUnit(unitOnTile);
                         }
@@ -1960,4 +2019,9 @@ shared class PlayableMap {
      * be called.
      */
     private bool _closedListEnabled = true;
+
+    /**
+     * The IDs of Oozium units created by the Grand Bolt.
+     */
+    private array<UnitID> _newOoziums;
 }

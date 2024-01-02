@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "army.hpp"
+#include "animated_tile.hpp"
 
 #pragma once
 
@@ -32,28 +33,24 @@ namespace awe {
 	/**
 	 * Class which represents a single tile on a map.
 	 */
-	class tile : public sfx::animated_drawable {
+	class tile {
 	public:
 		/**
-		 * The minimum width a rendered tile can be, in pixels.
-		 */
-		static const sf::Uint32 MIN_WIDTH = 16;
-
-		/**
-		 * The minimum height a rendered tile can be, in pixels.
-		 */
-		static const sf::Uint32 MIN_HEIGHT = 16;
-
-		/**
 		 * Construct a new tile with a given type.
-		 * @param data  Data used to initialise the sprite's logger object.
-		 * @param type  The type of tile to create.
-		 *              \c nullptr if you don't wish to provide a type at this
-		 *              time.
-		 * @param owner The owner of the tile. \c NO_ARMY represents no owner.
-		 * @param sheet Pointer to the spritesheet to use with this tile.
+		 * @param animatedUnit   Pointer to this tile's animated sprite.
+		 * @param spriteCallback When an update to the tile's sprite is required,
+		 *                       this callback is to be invoked. The function that
+		 *                       will perform operations on the animated tile must
+		 *                       be given.
+		 * @param type           The type of tile to create. \c nullptr if you
+		 *                       don't wish to provide a type at this time.
+		 * @param owner          The owner of the tile. \c NO_ARMY represents no
+		 *                       owner.
+		 * @param sheet          Pointer to the spritesheet to use with this tile.
 		 */
-		tile(const engine::logger::data& data,
+		tile(const std::shared_ptr<awe::animated_tile>& animatedTile,
+			const std::function<void(const std::function<void(void)>&)>&
+				spriteCallback,
 			const std::shared_ptr<const awe::tile_type>& type = nullptr,
 			const awe::ArmyID owner = awe::NO_ARMY,
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr);
@@ -161,72 +158,10 @@ namespace awe {
 		bool getStructureDestroyed() const;
 
 		/**
-		 * Sets the spritesheet to use with this tile.
-		 * @param  sheet Pointer to the spritesheet to use with this tile.
-		 * @safety No guarantee.
+		 * Updates the sprite ID to use with this tile based on its type and owner.
 		 */
-		void setSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
-
-		/**
-		 * Gets the spritesheet used with this tile.
-		 * @return Pointer to the spritesheet used with this tile.
-		 */
-		std::shared_ptr<const sfx::animated_spritesheet> getSpritesheet() const;
-
-		/**
-		 * Finds out the sprite name used with this tile's internal sprite.
-		 * @return The name of the sprite from the spritesheet used with this tile.
-		 */
-		std::string getSprite() const;
-
-		/**
-		 * Sets the tile's pixel position to the internal sprite.
-		 * @param  x The X position of the tile.
-		 * @param  y The Y position of the tile.
-		 * @safety No guarantee.
-		 */
-		void setPixelPosition(float x, float y);
-
-		/**
-		 * Gets the tile's current pixel position.
-		 * @return The tile's pixel position.
-		 */
-		sf::Vector2f getPixelPosition() const;
-
-		/**
-		 * Gets the tile's current pixel size.
-		 * @return The tile's pixel size.
-		 */
-		sf::Vector2f getPixelSize() const;
-
-		/**
-		 * This drawable's \c animate() method.
-		 * Simply calls the internal sprite's \c animate() method.
-		 * @return The return value of <tt>animated_sprite</tt>'s \c animate()
-		 *         call.
-		 */
-		bool animate(const sf::RenderTarget& target) final;
+		void updateSpriteID();
 	private:
-		/**
-		 * This drawable's \c draw() method.
-		 * Simply draws \c _sprite to the screen.
-		 * @param target The target to render the tile to.
-		 * @param states The render states to apply to the tile. Applying
-		 *               transforms is perfectly valid and will not alter the
-		 *               internal workings of the drawable.
-		 */
-		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
-
-		/**
-		 * Updates the sprite ID to use with this tile.
-		 * This can change in a variety of different circumstances, and there are
-		 * quite a few conditions to check for, so it's best to keep it all in one
-		 * method and call it where necessary.
-		 * @safety No guarantee.
-		 */
-		void _updateSpriteID();
-
 		/**
 		 * The type of this tile.
 		 */
@@ -265,8 +200,13 @@ namespace awe {
 		bool _destroyed = false;
 
 		/**
-		 * This tile's animated sprite object.
+		 * Weak pointer to this tile's animated sprite.
 		 */
-		sfx::animated_sprite _sprite;
+		std::weak_ptr<awe::animated_tile> _tileSprite;
+
+		/**
+		 * Callback to be invoked when a change is to be made to \c _tileSprite.
+		 */
+		std::function<void(std::function<void(void)>)> _updateSprite;
 	};
 }

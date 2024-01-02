@@ -225,6 +225,14 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) :
 	}
 	j.applyMap(_units, { "sprites" });
 	j.resetState();
+	if (j.keysExist({ "destroyedsprites" })) {
+		if (j.nlohmannJSON()["destroyedsprites"].is_string()) {
+			j.apply(_destroyedUnitForAll, { "destroyedsprites" }, true);
+		} else {
+			j.applyMap(_destroyedUnits, { "destroyedsprites" });
+			j.resetState();
+		}
+	}
 	if (j.keysExist({ "canload" })) {
 		j.applyVector(_canLoadThese, { "canload" });
 		j.resetState();
@@ -347,6 +355,7 @@ void awe::unit_type::updateSpriteMaps(
 	const awe::bank<awe::country>& countries) const {
 	updateTurnOrderMap(_pictures, _picturesTurnOrder, countries);
 	updateTurnOrderMap(_units, _unitsTurnOrder, countries);
+	updateTurnOrderMap(_destroyedUnits, _destroyedUnitsTurnOrder, countries);
 }
 
 //***********

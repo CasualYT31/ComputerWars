@@ -8,6 +8,8 @@ add_library(${PROJECT_NAME} STATIC
 	"source/bank.cpp"
 	"source/tile.cpp"
 	"source/unit.cpp"
+	"source/animated_tile.cpp"
+	"source/animated_unit.cpp"
 	"source/army.cpp"
 	"source/map/map.cpp"
 	"source/map/mapregisterinterface.cpp"
@@ -16,12 +18,15 @@ add_library(${PROJECT_NAME} STATIC
 	"source/map/mapunit.cpp"
 	"source/map/maptile.cpp"
 	"source/map/mapgraphics.cpp"
-	"source/spritesheets.cpp"
 	"source/engine.cpp"
 	"source/typedef.cpp"
 	"source/mapstrings.cpp"
 	
-	"source/map/animations/source/daybegin.cpp")
+	"source/map/animations/source/daybegin.cpp"
+	"source/map/animations/source/tagcos.cpp"
+	"source/map/animations/source/tileparticle.cpp"
+	"source/map/animations/source/zoom.cpp"
+	"source/map/animations/source/labelunit.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsAWE_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

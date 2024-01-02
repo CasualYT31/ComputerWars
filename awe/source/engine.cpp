@@ -49,6 +49,8 @@ int awe::game_engine::run() {
 	try {
 		_gui->setScalingFactor(_scaling);
 		while (_renderer->isOpen()) {
+			const bool acceptInput = !_map || !_map->animationInProgress();
+
 			// Handle menu user input first before handling the events.
 			// Use case: Map menu and MapMenu menu. Selecting a vacant tile in Map
 			// will trigger the MapMenu menu. Clicking on the save button will
@@ -57,14 +59,14 @@ int awe::game_engine::run() {
 			// after and triggers MapMenu again, ensuring the MapMenu never goes
 			// away. By handling the click in MapMenu last, Map doesn't get to see
 			// the click and so safely ignores it for that iteration.
-			_gui->handleInput(_userinput);
+			if (acceptInput) _gui->handleInput(_userinput);
 			_userinput->update();
 
 			// Now handle the events.
 			sf::Event event;
 			while (_renderer->pollEvent(event)) {
 				if (event.type == sf::Event::Closed) _renderer->close();
-				_gui->handleEvent(event);
+				if (acceptInput) _gui->handleEvent(event);
 			}
 
 			_renderer->clear();
@@ -363,8 +365,6 @@ bool awe::game_engine::_load(engine::json& j) {
 	j.apply(scriptsPath, { "scripts" });
 	j.apply(guiPath, { "gui" });
 	if (!j.inGoodState()) return false;
-	// Allocate spritesheets object.
-	_sprites = awe::spritesheets::create();
 	// Load most of the objects.
 	bool ret = _loadObject(_dictionary, j, { "languages" },
 			engine::logger::data{ _logger.getData().sink, "language_dictionary" })
@@ -389,25 +389,7 @@ bool awe::game_engine::_load(engine::json& j) {
 	// Continue loading most of the objects.
 	ret =  _loadObject(_userinput, j, { "userinput" },
 			engine::logger::data{ _logger.getData().sink, "user_input" })
-		&& _loadObject(_sprites->CO, j, { "spritesheets", "co" },
-			engine::logger::data{ _logger.getData().sink, "spritesheet" })
-		&& _loadObject(_sprites->unit->idle, j,
-			{ "spritesheets", "unit", "idle" },
-			engine::logger::data{ _logger.getData().sink, "spritesheet" })
-		&& _loadObject(_sprites->tile->normal, j,
-			{ "spritesheets", "tile", "normal" },
-			engine::logger::data{ _logger.getData().sink, "spritesheet" })
-		&& _loadObject(_sprites->unitPicture, j,
-			{ "spritesheets", "unit", "pictures" },
-			engine::logger::data{ _logger.getData().sink, "spritesheet" })
-		&& _loadObject(_sprites->tilePicture->normal, j,
-			{ "spritesheets", "tile", "normalpictures" },
-			engine::logger::data{ _logger.getData().sink, "spritesheet" })
-		&& _loadObject(_sprites->icon, j, { "spritesheets", "icon" },
-			engine::logger::data{ _logger.getData().sink, "spritesheet" })
-		&& _loadObject(_sprites->GUI, j, { "spritesheets", "gui" },
-			engine::logger::data{ _logger.getData().sink, "spritesheet" })
-		&& _loadObject(_sprites->structure, j, { "spritesheets", "structure" },
+		&& _loadObject(_sprites, j, { "spritesheets" },
 			engine::logger::data{ _logger.getData().sink, "spritesheet" })
 		&& _loadObject(_countries, j, { "countries" }, _scripts, "Country",
 			engine::logger::data{ _logger.getData().sink, "country_bank" })
@@ -453,13 +435,7 @@ bool awe::game_engine::_load(engine::json& j) {
 	_scripts->addRegistrant(this);
 	_scripts->loadScripts(scriptsPath);
 	_scripts->generateDocumentation();
-	_gui->addSpritesheet("icon", _sprites->icon);
-	_gui->addSpritesheet("co", _sprites->CO);
-	_gui->addSpritesheet("tilePicture.normal", _sprites->tilePicture->normal);
-	_gui->addSpritesheet("unitPicture", _sprites->unitPicture);
-	_gui->addSpritesheet("tile.normal", _sprites->tile->normal);
-	_gui->addSpritesheet("unit", _sprites->unit->idle);
-	_gui->addSpritesheet("structure", _sprites->structure);
+	_gui->setSpritesheets(_sprites);
 	_gui->setLanguageDictionary(_dictionary);
 	_gui->setFonts(_fonts);
 	_gui->setTarget(*_renderer);
@@ -493,11 +469,7 @@ int awe::game_engine::_initCheck() const {
 	if (!_music) errstring += "music\n";
 	if (!_renderer) errstring += "renderer\n";
 	if (!_userinput) errstring += "userinput\n";
-	if (!_sprites) {
-		errstring += "spritesheet collection\n";
-	} else {
-		_sprites->test(errstring);
-	}
+	if (!_sprites) errstring += "spritesheets\n";
 	if (!_scripts) errstring += "scripts\n";
 	if (!_gui) errstring += "gui\n";
 	if (errstring.length()) {
@@ -605,11 +577,8 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 		}
 		_map->setMapObjectType(playableMapTypeName);
 		_map->setTarget(_renderer);
-		_map->setTileSpritesheet(_sprites->tile->normal);
-		_map->setUnitSpritesheet(_sprites->unit->idle);
-		_map->setIconSpritesheet(_sprites->icon);
-		_map->setCOSpritesheet(_sprites->CO);
-		_map->setFont((*_fonts)["AW2"]);
+		_map->setSpritesheets(_sprites);
+		_map->setFonts(_fonts);
 		_map->setLanguageDictionary(_dictionary);
 		_map->setMapStrings(_mapStrings);
 		_map->setScripts(_scripts);

@@ -73,12 +73,10 @@ void sfx::gui::_dumpWidgetsToLog() const {
 }
 
 std::size_t sfx::gui::_getHeightOfTallestFrame(const std::string& sheet) const {
-	if (_sheet.count(sheet) == 0) {
-		_logger.error("Attempted to find the tallest frame from a spritesheet "
-			"\"{}\": this spritesheet does not exist!", sheet);
-		return 0;
-	}
-	return _sheet.at(sheet)->heightOfTallestFrame();
+	if (_sheets->exists(sheet)) return (*_sheets)[sheet]->heightOfTallestFrame();
+	_logger.error("Attempted to find the tallest frame from a spritesheet \"{}\": "
+		"this spritesheet does not exist!", sheet);
+	return 0;
 }
 
 // WIDGETS //
@@ -425,22 +423,22 @@ void sfx::gui::_setWidgetDirectionalFlowSelection(const std::string& menu,
 void sfx::gui::_setDirectionalFlowAngleBracketSprite(const std::string& corner,
 	const std::string& sheet, const std::string& key) {
 	START()
-		const auto spritesheet = _sheet.find(sheet);
-		if (spritesheet == _sheet.end()) ERROR("This spritesheet does not exist.")
-		if (!spritesheet->second->doesSpriteExist(key))
+		if (!_sheets->exists(sheet)) ERROR("This spritesheet does not exist.")
+		const auto spritesheet = (*_sheets)[sheet];
+		if (!spritesheet->doesSpriteExist(key))
 			ERROR("This sprite does not exist.")
 		const auto cornerFormatted = tgui::String(corner).trim().toLower();
 		if (cornerFormatted == "ul") {
-			_angleBracketUL.setSpritesheet(spritesheet->second);
+			_angleBracketUL.setSpritesheet(spritesheet);
 			_angleBracketUL.setSprite(key);
 		} else if (cornerFormatted == "ur") {
-			_angleBracketUR.setSpritesheet(spritesheet->second);
+			_angleBracketUR.setSpritesheet(spritesheet);
 			_angleBracketUR.setSprite(key);
 		} else if (cornerFormatted == "ll") {
-			_angleBracketLL.setSpritesheet(spritesheet->second);
+			_angleBracketLL.setSpritesheet(spritesheet);
 			_angleBracketLL.setSprite(key);
 		} else if (cornerFormatted == "lr") {
-			_angleBracketLR.setSpritesheet(spritesheet->second);
+			_angleBracketLR.setSpritesheet(spritesheet);
 			_angleBracketLR.setSprite(key);
 		} else {
 			ERROR("Unrecognised corner, must be \"UL\", \"UR\", \"LL\", or "

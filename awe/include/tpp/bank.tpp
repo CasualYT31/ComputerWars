@@ -389,6 +389,20 @@ void awe::unit_type::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's tile "
 		"graphic that is displayed on the map, given a country turn order ID.");
 	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& destroyedUnitSprite(const string&in) const",
+		asMETHODPR(T, getDestroyedUnit, (const std::string&) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's tile "
+		"graphic that is displayed on the map when it is destroyed, given a "
+		"country script name.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& destroyedUnitSprite(const ArmyID) const",
+		asMETHODPR(T, getDestroyedUnit, (const awe::ArmyID) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's tile "
+		"graphic that is displayed on the map when it is destroyed, given a "
+		"country turn order ID.");
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"uint get_cost() const property",
 		asMETHOD(T, getCost), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets this unit's cost, in funds.");

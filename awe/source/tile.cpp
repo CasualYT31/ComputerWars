@@ -22,18 +22,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tile.hpp"
 
-awe::tile::tile(const engine::logger::data& data,
+awe::tile::tile(const std::shared_ptr<awe::animated_tile>& animatedTile,
+	const std::function<void(const std::function<void(void)>&)>& spriteCallback,
 	const std::shared_ptr<const awe::tile_type>& type,
 	const awe::ArmyID owner,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) :
-	_sprite(sheet, "", {data.sink, data.name + "_sprite"}) {
-	setTileType(type);
-	setTileOwner(owner);
+	_type(type), _owner(owner), _tileSprite(animatedTile),
+	_updateSprite(spriteCallback) {
+	animatedTile->setSpritesheet(sheet);
+	updateSpriteID();
 }
 
 void awe::tile::setTileType(const std::shared_ptr<const awe::tile_type>& type) {
 	_type = type;
-	_updateSpriteID();
+	updateSpriteID();
 }
 
 std::shared_ptr<const awe::tile_type> awe::tile::getTileType() const {
@@ -42,7 +44,7 @@ std::shared_ptr<const awe::tile_type> awe::tile::getTileType() const {
 
 void awe::tile::setTileOwner(const awe::ArmyID owner) {
 	_owner = owner;
-	_updateSpriteID();
+	updateSpriteID();
 }
 
 awe::ArmyID awe::tile::getTileOwner() const noexcept {
@@ -94,47 +96,19 @@ bool awe::tile::getStructureDestroyed() const {
 	return _destroyed;
 }
 
-void awe::tile::setSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
-	_sprite.setSpritesheet(sheet);
-}
-
-std::shared_ptr<const sfx::animated_spritesheet>
-	awe::tile::getSpritesheet() const {
-	return _sprite.getSpritesheet();
-}
-
-std::string awe::tile::getSprite() const {
-	return _sprite.getSprite();
-}
-
-void awe::tile::setPixelPosition(float x, float y) {
-	_sprite.setPosition(sf::Vector2f(x, y));
-}
-
-sf::Vector2f awe::tile::getPixelPosition() const {
-	return _sprite.getPosition();
-}
-
-sf::Vector2f awe::tile::getPixelSize() const {
-	return _sprite.getSize();
-}
-
-bool awe::tile::animate(const sf::RenderTarget& target) {
-	return _sprite.animate(target);
-}
-
-void awe::tile::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	target.draw(_sprite, states);
-}
-
-void awe::tile::_updateSpriteID() {
-	// If this tile has no type, leave the sprite ID alone.
-	if (_type) {
-		if (_owner == awe::NO_ARMY) {
-			_sprite.setSprite(_type->getNeutralTile());
-		} else {
-			_sprite.setSprite(_type->getOwnedTile(_owner));
-		}
-	}
+void awe::tile::updateSpriteID() {
+	if (!_type) return;
+	_updateSprite(std::bind([](
+		const std::weak_ptr<awe::animated_tile>& _tileSprite,
+		const awe::ArmyID owner,
+		const std::shared_ptr<const awe::tile_type>& type) {
+			if (_tileSprite.expired()) return;
+			const auto tileSprite = _tileSprite.lock();
+			if (owner == awe::NO_ARMY) {
+				tileSprite->setSprite(type->getNeutralTile());
+			} else {
+				tileSprite->setSprite(type->getOwnedTile(owner));
+			}
+		}, _tileSprite, _owner, _type)
+	);
 }

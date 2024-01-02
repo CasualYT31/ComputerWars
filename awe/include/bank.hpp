@@ -1351,7 +1351,7 @@ namespace awe {
 		 * value. The higher the granularity, the higher the precision of HP
 		 * calculations.\n
 		 * I chose against using floating point values for HP values to remain as
-		 * precise as possible, at least internally.
+		 * precise as possible.
 		 * @sa awe::unit::getDisplayedHP()
 		 */
 		static const unsigned int HP_GRANULARITY;
@@ -1395,6 +1395,9 @@ namespace awe {
 		 *         SPRITE_NAME[, etc.]}</tt></li>
 		 *     <li>\c "sprites" = \c _units, <tt>{COUNTRY_SCRIPT_NAME: string
 		 *         SPRITE_NAME[, etc.]}</tt></li>
+		 *     <li>\c "destroyedsprites" = \c _destroyedUnits,
+		 *         <tt>{COUNTRY_SCRIPT_NAME: string SPRITE_NAME[, etc.]}</tt> OR
+		 *         <tt>string SPRITE_NAME</tt></li>
 		 *     <li>\c "canload" = \c _canLoadThese, <tt>([UNIT_TYPE_SCRIPT_NAME{,
 		 *         etc.}])</tt></li>
 		 *     <li>\c "loadlimit" = \c _loadLimit, <tt>(unsigned 32-bit int)</tt>
@@ -1411,11 +1414,17 @@ namespace awe {
 		 *     <li>\c "ignoredefence" = \c _ignoreDefence, <tt>(bool, default =
 		 *         false)</tt></li></ul>
 		 *
-		 * Pictures is an array of sprite names corresponding to each country's
+		 * Pictures is a dictionary of sprite names corresponding to each country's
 		 * portrait of the type of unit.\n
 		 *
-		 * Sprites is an array of sprite names corresponding to each country's map
-		 * representation of the type of unit.\n
+		 * Sprites is a dictionary of sprite names corresponding to each country's
+		 * map representation of the type of unit.\n
+		 *
+		 * DestroyedSprites is a dictionary of sprite IDs corresponding to the
+		 * sprite that is momentarily displayed on the map when the unit is
+		 * destroyed, keyed on country script name. If a single string is given
+		 * instead of a dictionary, then that sprite will be used for all
+		 * countries.\n
 		 *
 		 * Upon the start of an army's turn, all of their units go through a script
 		 * function which will affect the unit depending on its type.
@@ -1550,6 +1559,35 @@ namespace awe {
 		inline const std::string& getUnit(const awe::ArmyID countryID) const {
 			return ((_unitsTurnOrder.find(countryID) == _unitsTurnOrder.end()) ?
 				(EMPTY_STRING) : (_unitsTurnOrder.at(countryID)));
+		}
+
+		/**
+		 * Retrieves the sprite name of a given country's map sprite of this unit
+		 * when it is destroyed.
+		 * @param  countryName The script name of the country.
+		 * @return The sprite name, or a blank string if the given country ID
+		 *         didn't map to a sprite name in the internal list.
+		 */
+		inline const std::string& getDestroyedUnit(
+			const std::string& countryName) const {
+			if (_destroyedUnits.empty()) return _destroyedUnitForAll;
+			return ((_destroyedUnits.find(countryName) == _destroyedUnits.end()) ?
+				(EMPTY_STRING) : (_destroyedUnits.at(countryName)));
+		}
+
+		/**
+		 * Retrieves the sprite name of a given country's map sprite of this unit
+		 * when it is destroyed.
+		 * @param  countryID The turn order ID of the country.
+		 * @return The sprite name, or a blank string if the given country ID
+		 *         didn't map to a sprite name in the internal list.
+		 */
+		inline const std::string& getDestroyedUnit(
+			const awe::ArmyID countryID) const {
+			if (_destroyedUnitsTurnOrder.empty()) return _destroyedUnitForAll;
+			return ((_destroyedUnitsTurnOrder.find(countryID) ==
+				_destroyedUnitsTurnOrder.end()) ? (EMPTY_STRING) :
+				(_destroyedUnitsTurnOrder.at(countryID)));
 		}
 
 		/**
@@ -1807,6 +1845,22 @@ namespace awe {
 		 * \c _units keyed by turn order ID.
 		 */
 		mutable std::unordered_map<awe::ArmyID, std::string> _unitsTurnOrder;
+
+		/**
+		 * The ID to use if \c _destroyedUnits is not populated.
+		 */
+		std::string _destroyedUnitForAll;
+
+		/**
+		 * The IDs for sprites that are shown when this unit is destroyed.
+		 */
+		std::unordered_map<std::string, std::string> _destroyedUnits;
+
+		/**
+		 * \c _destroyedUnits keyed by turn order ID.
+		 */
+		mutable std::unordered_map<awe::ArmyID, std::string>
+			_destroyedUnitsTurnOrder;
 
 		/**
 		 * The price property.

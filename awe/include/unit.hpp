@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "bank.hpp"
 #include "army.hpp"
-#include <limits>
+#include "animated_unit.hpp"
 
 #pragma once
 
@@ -37,7 +37,7 @@ namespace awe {
 	 *          it is used with a \c map container, the \c operator[]() method
 	 *          cannot be used with that map. Use \c at() instead.
 	 */
-	class unit : public sfx::animated_drawable {
+	class unit {
 	public:
 		/**
 		 * Reserved value representing no position on the map.
@@ -54,14 +54,22 @@ namespace awe {
 		 * Creates a new unit.
 		 * @warning \c army \b must hold a valid turn order ID: checks must be
 		 *          carried out outside of this class!
-		 * @param   data  The data used to initialise the animated sprite's logger
-		 *                object.
-		 * @param   type  The type of the unit, which can't be changed.
-		 * @param   army  The army the unit belongs to, which can't be changed.
-		 * @param   sheet Pointer to the spritesheet to use with this unit.
-		 * @param   icons Pointer to the icon spritesheet to use with this unit.
+		 * @param   animatedUnit   Pointer to this unit's animated sprite.
+		 * @param   spriteCallback When an update to the unit's sprite is required,
+		 *                         this callback is to be invoked. The function
+		 *                         that will perform operations on the animated
+		 *                         unit must be given.
+		 * @param   type           The type of the unit, which can't be changed.
+		 * @param   army           The army the unit belongs to, which can't be
+		 *                         changed.
+		 * @param   sheet          Pointer to the spritesheet to use with this
+		 *                         unit's sprite.
+		 * @param   icons          Pointer to the icon spritesheet to use with this
+		 *                         unit's sprite.
 		 */
-		unit(const engine::logger::data& data,
+		unit(const std::shared_ptr<awe::animated_unit>& animatedUnit,
+			const std::function<void(const std::function<void(void)>&)>&
+				spriteCallback,
 			const std::shared_ptr<const awe::unit_type>& type,
 			const awe::ArmyID army = 0,
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr,
@@ -119,6 +127,7 @@ namespace awe {
 		 */
 		inline void setHP(const awe::HP hp) noexcept {
 			_hp = ((hp < 0) ? (0) : (hp));
+			_updateHPIcon();
 		}
 
 		/**
@@ -148,6 +157,7 @@ namespace awe {
 		 */
 		inline void setFuel(const awe::Fuel fuel) noexcept {
 			_fuel = ((fuel < 0) ? (0) : (fuel));
+			_updateFuelAmmoIcon();
 		}
 
 		/**
@@ -166,6 +176,7 @@ namespace awe {
 		 */
 		inline void setAmmo(const std::string& weapon, const awe::Ammo ammo) {
 			_ammos[weapon] = ((ammo < 0) ? (0) : (ammo));
+			_updateFuelAmmoIcon();
 		}
 
 		/**
@@ -219,6 +230,7 @@ namespace awe {
 		 */
 		inline void capturing(const bool capturing) noexcept {
 			_capturing = capturing;
+			_updateCapturingHidingIcon();
 		}
 
 		/**
@@ -236,6 +248,7 @@ namespace awe {
 		 */
 		inline void hiding(const bool hiding) noexcept {
 			_hiding = hiding;
+			_updateCapturingHidingIcon();
 		}
 
 		/**
@@ -253,6 +266,7 @@ namespace awe {
 		 */
 		inline void loadUnit(const awe::UnitID id) {
 			_loaded.insert(id);
+			_updateLoadedIcon();
 		}
 
 		/**
@@ -263,7 +277,9 @@ namespace awe {
 		 * @safety Strong guarantee.
 		 */
 		inline bool unloadUnit(const awe::UnitID id) {
-			return _loaded.erase(id);
+			const auto res = _loaded.erase(id);
+			_updateLoadedIcon();
+			return res;
 		}
 
 		/**
@@ -292,78 +308,33 @@ namespace awe {
 		inline awe::UnitID loadedOnto() const noexcept {
 			return _loadedOnto;
 		}
-
-		/**
-		 * Sets the spritesheet to use with this unit.
-		 * @param  sheet Pointer to the spritesheet to use with this unit.
-		 * @safety No guarantee.
-		 */
-		inline void setSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
-			_sprite.setSpritesheet(sheet);
-		}
-
-		/**
-		 * Sets the icon spritesheet to use with this unit.
-		 * @param  sheet Pointer to the icon spritesheet to use with this unit.
-		 * @safety No guarantee.
-		 */
-		void setIconSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
-
-		/**
-		 * Gets the spritesheet used with this unit.
-		 * @return Pointer to the spritesheet used with this unit.
-		 */
-		inline std::shared_ptr<const sfx::animated_spritesheet>
-			getSpritesheet() const {
-			return _sprite.getSpritesheet();
-		}
-
-		/**
-		 * Finds out the sprite name used with this unit's internal sprite.
-		 * @return The name of the sprite from the spritesheet used with this unit.
-		 */
-		inline std::string getSprite() const {
-			return _sprite.getSprite();
-		}
-
-		/**
-		 * Sets the unit's pixel position to the internal sprite.
-		 * @param x The X position of the tile.
-		 * @param y The Y position of the tile.
-		 */
-		inline void setPixelPosition(float x, float y) {
-			_sprite.setPosition(sf::Vector2f(x, y));
-		}
-
-		/**
-		 * This drawable's \c animate() method.
-		 * Calls the internal sprite's \c animate() method. Also determines which
-		 * icons to display and animates them.
-		 * @remark Idea for future optimisation: move \c setSprite() calls to other
-		 *         methods, e.g. move \c _loadedIcon.setSprite() to \c loadUnit().
-		 * @return The return value of <tt>animated_sprite</tt>'s \c animate()
-		 *         call.
-		 */
-		bool animate(const sf::RenderTarget& target) final;
 	private:
-		/**
-		 * This drawable's \c draw() method.
-		 * Draws the unit to the screen along with any icons it should display.
-		 * @param target The target to render the tile to.
-		 * @param states The render states to apply to the tile. Applying
-		 *               transforms is perfectly valid and will not alter the
-		 *               internal workings of the drawable.
-		 */
-		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
-
 		/**
 		 * Finds out if this unit's first finite ammo weapon is low on ammo.
 		 * @return \c TRUE if this unit has at least one weapon with finite ammo
 		 *         that has at most half of its ammo left. \c FALSE otherwise.
 		 */
 		bool _isLowOnAmmo() const;
+
+		/**
+		 * Updates the sprite's HP icon.
+		 */
+		void _updateHPIcon();
+
+		/**
+		 * Updates the sprite's fuel and ammo icon.
+		 */
+		void _updateFuelAmmoIcon();
+
+		/**
+		 * Updates the sprite's loaded icon.
+		 */
+		void _updateLoadedIcon();
+
+		/**
+		 * Updates the sprite's capturing and hiding icon.
+		 */
+		void _updateCapturingHidingIcon();
 
 		/**
 		 * The type of the unit.
@@ -421,28 +392,13 @@ namespace awe {
 		awe::UnitID _loadedOnto = awe::NO_UNIT;
 
 		/**
-		 * The unit's animated sprite object.
+		 * Weak pointer to this unit's animated sprite.
 		 */
-		sfx::animated_sprite _sprite;
+		std::weak_ptr<awe::animated_unit> _unitSprite;
 
 		/**
-		 * The unit's HP icon sprite object.
+		 * Callback to be invoked when a change is to be made to \c _unitSprite.
 		 */
-		sfx::animated_sprite _hpIcon;
-
-		/**
-		 * The unit's fuel and ammo shortage icon sprite object.
-		 */
-		sfx::animated_sprite _fuelAmmoIcon;
-
-		/**
-		 * The unit's loaded icon sprite object.
-		 */
-		sfx::animated_sprite _loadedIcon;
-
-		/**
-		 * The unit's capturing and hiding icon sprite object.
-		 */
-		sfx::animated_sprite _capturingHidingIcon;
+		std::function<void(std::function<void(void)>)> _updateSprite;
 	};
 }

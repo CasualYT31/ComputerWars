@@ -77,6 +77,7 @@ class MoveUnitMenu : Menu, Group {
                             game.map.closedList.removeRange(obstructionIndex,
                                 game.map.closedList.length() - obstructionIndex);
                             game.moveUnit();
+                            game.animateTrap(unitID);
                             setGUI("GameScreen");
                         } else {
                             game.map.disableSelectedUnitRenderingEffects(true);

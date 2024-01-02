@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.hpp"
 #include "fmtawe.hpp"
+#include "animations/animations.hpp"
 
 bool awe::map::setSelectedUnit(const awe::UnitID unit) {
 	if (unit == awe::NO_UNIT) {
@@ -131,7 +132,8 @@ void awe::map::regenerateClosedListSprites() {
 	for (asUINT i = 0, length = list->GetSize(); i < length; ++i) {
 		awe::closed_list_node* const current =
 			(awe::closed_list_node* const)list->At(i);
-		current->sprite.setSpritesheet(_sheet_icon);
+		// TODO-2.
+		current->sprite.setSpritesheet((*_sheets)["icon"]);
 		if (i == 0) {
 			current->sprite.setSpritesheet(nullptr);
 		} else if (i == length - 1) {
@@ -192,7 +194,7 @@ void awe::map::addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos) {
 			"exist.", unit);
 		return;
 	}
-	if (_isOutOfBounds(pos)) {
+	if (_isOutOfBounds(pos) && pos != awe::unit::NO_POSITION) {
 		_logger.error("addPreviewUnit operation failed: tile {} is out of bounds.",
 			pos);
 		return;
@@ -254,11 +256,11 @@ void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
 	// Since each tile MUST be a set height, we can easily calculate the row.
 	if (coord.y < 0.0f) {
 		sel.y = 0;
-	} else if (coord.y >= size.y * awe::tile::MIN_HEIGHT) {
+	} else if (coord.y >= size.y * awe::animated_tile::MIN_HEIGHT) {
 		sel.y = size.y - 1;
 	} else {
 		sel.y = static_cast<sf::Uint32>(static_cast<float>(coord.y) /
-			awe::tile::MIN_HEIGHT);
+			awe::animated_tile::MIN_HEIGHT);
 	}
 
 	// However, since tiles can technically be any width (though they really
@@ -266,9 +268,9 @@ void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
 	sel.x = 0;
 	if (coord.x >= 0.0f) {
 		for (float xCounter = 0.0f; sel.x < size.x; ++sel.x) {
-			auto tileWidth = _tiles[sel.x][sel.y].getPixelSize().x;
-			if (tileWidth < static_cast<float>(awe::tile::MIN_WIDTH))
-				tileWidth = static_cast<float>(awe::tile::MIN_WIDTH);
+			auto tileWidth = _tiles[sel.x][sel.y].sprite->getPixelSize().x;
+			if (tileWidth < static_cast<float>(awe::animated_tile::MIN_WIDTH))
+				tileWidth = static_cast<float>(awe::animated_tile::MIN_WIDTH);
 			if (coord.x < (xCounter += tileWidth)) break;
 		}
 		if (sel.x >= size.x) sel.x = size.x - 1;
@@ -291,34 +293,18 @@ void awe::map::clearAdditionallySelectedTile() {
 
 void awe::map::setULAdditionalCursorSprite(const std::string& sprite) {
 	_additionallySelectedTileCursorUL.setSprite(sprite);
-	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
-		_logger.warning("setULAdditionalCursorSprite was just given sprite with "
-			"ID \"{}\", which doesn't exist in the spritesheet!", sprite);
-	}
 }
 
 void awe::map::setURAdditionalCursorSprite(const std::string& sprite) {
 	_additionallySelectedTileCursorUR.setSprite(sprite);
-	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
-		_logger.warning("setURAdditionalCursorSprite was just given sprite with "
-			"ID \"{}\", which doesn't exist in the spritesheet!", sprite);
-	}
 }
 
 void awe::map::setLLAdditionalCursorSprite(const std::string& sprite) {
 	_additionallySelectedTileCursorLL.setSprite(sprite);
-	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
-		_logger.warning("setLLAdditionalCursorSprite was just given sprite with "
-			"ID \"{}\", which doesn't exist in the spritesheet!", sprite);
-	}
 }
 
 void awe::map::setLRAdditionalCursorSprite(const std::string& sprite) {
 	_additionallySelectedTileCursorLR.setSprite(sprite);
-	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
-		_logger.warning("setLRAdditionalCursorSprite was just given sprite with "
-			"ID \"{}\", which doesn't exist in the spritesheet!", sprite);
-	}
 }
 
 void awe::map::setSelectedArmy(const awe::ArmyID army) {
@@ -354,7 +340,9 @@ void awe::map::setMapScalingFactor(const float factor) {
 		_logger.error("setMapScalingFactor operation failed: attempted to assign "
 			"a map scaling factor {} that was at or below 0.0.", factor);
 	} else {
-		_scaling = factor;
+		if (_canAnimationBeQueued()) {
+			_animationQueue.push(std::make_unique<awe::zoom>(_scaling, factor));
+		} else _scaling = factor;
 	}
 }
 
@@ -408,34 +396,18 @@ sf::Vector2u awe::map::getRectangleSelectionEnd() const {
 
 void awe::map::setULCursorSprite(const std::string& sprite) {
 	_ulCursorSprite = sprite;
-	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
-		_logger.warning("setULCursorSprite was just given sprite with ID \"{}\", "
-			"which doesn't exist in the spritesheet!", sprite);
-	}
 }
 
 void awe::map::setURCursorSprite(const std::string& sprite) {
 	_urCursorSprite = sprite;
-	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
-		_logger.warning("setURCursorSprite was just given sprite with ID \"{}\", "
-			"which doesn't exist in the spritesheet!", sprite);
-	}
 }
 
 void awe::map::setLLCursorSprite(const std::string& sprite) {
 	_llCursorSprite = sprite;
-	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
-		_logger.warning("setLLCursorSprite was just given sprite with ID \"{}\", "
-			"which doesn't exist in the spritesheet!", sprite);
-	}
 }
 
 void awe::map::setLRCursorSprite(const std::string& sprite) {
 	_lrCursorSprite = sprite;
-	if (_sheet_icon && !_sheet_icon->doesSpriteExist(sprite)) {
-		_logger.warning("setLRCursorSprite was just given sprite with ID \"{}\", "
-			"which doesn't exist in the spritesheet!", sprite);
-	}
 }
 
 sf::IntRect awe::map::getCursorBoundingBox() const {
@@ -449,10 +421,99 @@ sf::IntRect awe::map::getCursorBoundingBox() const {
 sf::IntRect awe::map::getMapBoundingBox() const {
 	// Map is always drawn at { 0, 0 } before the view is applied.
 	auto mapSize = sf::Vector2f(getMapSize());
-	mapSize.x *= static_cast<float>(awe::tile::MIN_WIDTH);
-	mapSize.y *= static_cast<float>(awe::tile::MIN_HEIGHT);
+	mapSize.x *= static_cast<float>(awe::animated_tile::MIN_WIDTH);
+	mapSize.y *= static_cast<float>(awe::animated_tile::MIN_HEIGHT);
 	const auto ul = _target->mapCoordsToPixel({ 0.0f, 0.0f }, _view);
 	return { ul, _target->mapCoordsToPixel(mapSize, _view) - ul };
+}
+
+void awe::map::setSelectedAnimationPreset(const awe::animation_preset preset) {
+	_selectedAnimationPreset = preset;
+}
+
+awe::animation_preset awe::map::getSelectedAnimationPreset() const {
+	return _selectedAnimationPreset;
+}
+
+awe::animation_preset awe::map::selectNextAnimationPreset() {
+	return ++_selectedAnimationPreset;
+}
+
+void awe::map::enableAnimations(const bool enabled) {
+	_animationsEnabled = enabled;
+}
+
+void awe::map::queueCode(asIScriptFunction* const func) {
+	if (!func) return;
+	_animationQueue.push(engine::CScriptWrapper(func));
+	func->Release();
+}
+
+bool awe::map::animateDayBegin(const awe::ArmyID armyID, const awe::Day day,
+	const std::string& font) {
+	if (!_canAnimationBeQueued()) return false;
+	_animationQueue.push(std::make_unique<awe::day_begin>(getArmyCountry(armyID),
+		day, _dict, (*_fonts)[font]));
+	return true;
+}
+
+bool awe::map::animateTagCO(const awe::ArmyID armyID, const std::string& font) {
+	if (!_canAnimationBeQueued()) return false;
+	// TODO-2.
+	_animationQueue.push(std::make_unique<awe::tag_cos>(getArmyCountry(armyID),
+		getArmyCurrentCO(armyID), getArmyTagCO(armyID), (*_sheets)["co"], _dict,
+		(*_fonts)[font]));
+	return true;
+}
+
+bool awe::map::animateParticle(const sf::Vector2u& tile, const std::string& sheet,
+	const std::string& particle, const sf::Vector2f& origin) {
+	if (!_canAnimationBeQueued()) return false;
+	if (_isOutOfBounds(tile)) {
+		_logger.error("animateParticle operation cancelled: attempted to animate "
+			"particle \"{}\" from sheet \"{}\" over a tile {} that doesn't exist!",
+			particle, sheet, tile);
+		return false;
+	}
+	if (!_sheets->exists(sheet)) {
+		_logger.error("animateParticle operation cancelled: attempted to animate "
+			"particle \"{}\" from sheet \"{}\" over tile {}. That sheet doesn't "
+			"exist!", particle, sheet, tile);
+		return false;
+	}
+	_animationQueue.push(std::make_unique<awe::tile_particle>(
+		*_tiles[tile.x][tile.y].sprite, (*_sheets)[sheet], particle, origin));
+	return true;
+}
+
+bool awe::map::animateLabelUnit(const awe::UnitID unitID,
+	const std::string& leftLabel, const std::string& rightLabel,
+	const float duration) {
+	if (!_canAnimationBeQueued()) return false;
+	if (!_isUnitPresent(unitID)) {
+		_logger.error("animateLabelUnit operation cancelled: attempted to label "
+			"unit with ID {} that didn't exist!", unitID);
+		return false;
+	}
+	// Figure out which side the label should be on based on the unit's global
+	// position.
+	const bool left = _target->mapCoordsToPixel(
+		_units.at(unitID).sprite->getPixelPosition(), _view).x >
+		_target->getSize().x / 2.0f;
+	// TODO-2.
+	_animationQueue.push(std::make_unique<awe::label_unit>(
+		_units.at(unitID).data, _units.at(unitID).sprite, (*_sheets)["icon"],
+		(left ? leftLabel : rightLabel), left, duration));
+	return true;
+}
+
+bool awe::map::_canAnimationBeQueued(
+	const std::vector<awe::animation_preset>& presets) const {
+	if (!_animationsEnabled) return false;
+	if (presets.empty()) return true;
+	for (const auto preset : presets)
+		if (_selectedAnimationPreset == preset) return true;
+	return false;
 }
 
 bool awe::map::animate(const sf::RenderTarget& target) {
@@ -469,14 +530,14 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 		float tilex = 0.0f;
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			auto& tile = _tiles[x][y];
-			tile.animate(target);
+			tile.sprite->animate(target);
 
 			sf::Vector2u tilePos = sf::Vector2u(x, y);
 			sf::Uint32 tileWidth = 0, tileHeight = 0;
-			auto type = tile.getTileType();
+			auto type = tile.data.getTileType();
 			if (type) {
-				tileWidth = (sf::Uint32)tile.getPixelSize().x;
-				tileHeight = (sf::Uint32)tile.getPixelSize().y;
+				tileWidth = (sf::Uint32)tile.sprite->getPixelSize().x;
+				tileHeight = (sf::Uint32)tile.sprite->getPixelSize().y;
 				/*if (tile.getTileOwner() == awe::NO_ARMY) {
 					tileWidth = (sf::Uint32)_sheet_tile->getFrameRect(
 						type->getNeutralTile()
@@ -493,26 +554,32 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 					).height;
 				}*/
 			}
-			if (tileWidth < tile.MIN_WIDTH) tileWidth = tile.MIN_WIDTH;
-			if (tileHeight < tile.MIN_HEIGHT) tileHeight = tile.MIN_HEIGHT;
+			if (tileWidth < tile.sprite->MIN_WIDTH)
+				tileWidth = tile.sprite->MIN_WIDTH;
+			if (tileHeight < tile.sprite->MIN_HEIGHT)
+				tileHeight = tile.sprite->MIN_HEIGHT;
 			const auto fTileWidth = static_cast<float>(tileWidth);
-			tile.setPixelPosition(tilex, tiley -
-				static_cast<float>((tileHeight - tile.MIN_HEIGHT)));
+			tile.sprite->setPixelPosition(tilex, tiley -
+				static_cast<float>((tileHeight - tile.sprite->MIN_HEIGHT)));
 
 			// Update the tile's unit's pixel position accordingly, if it
 			// doesn't have an override.
-			const auto tilesUnit = tile.getUnit();
+			const auto tilesUnit = tile.data.getUnit();
 			if (tilesUnit && _unitLocationOverrides.find(tilesUnit) ==
 				_unitLocationOverrides.end()) {
-				_units.at(tilesUnit).setPixelPosition(tilex, tiley);
+				_units.at(tilesUnit).sprite->setPixelPosition(tilex, tiley);
 			}
 
 			// Check if this tile has a unit's location overridded onto it.
 			if (unitLocationOverrides.find(tilePos) !=
 				unitLocationOverrides.end()) {
-				_units.at(unitLocationOverrides[tilePos]).setPixelPosition(
-					tilex, tiley
-				);
+				const auto uID = unitLocationOverrides[tilePos];
+				if (_isUnitPresent(uID)) {
+					_units.at(uID).sprite->setPixelPosition(tilex, tiley);
+				} else {
+					// The unit is in the processing of being destroyed.
+					_unitsBeingDestroyed.at(uID)->setPixelPosition(tilex, tiley);
+				}
 			}
 
 			// Update cursor position.
@@ -526,17 +593,18 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 					sf::Vector2f(fTileWidth -
 						_additionallySelectedTileCursorUR.getSize().x, 0.f));
 				_additionallySelectedTileCursorLL.setPosition(cursorPosition +
-					sf::Vector2f(0.f, static_cast<float>(awe::tile::MIN_HEIGHT) -
+					sf::Vector2f(0.f,
+						static_cast<float>(awe::animated_tile::MIN_HEIGHT) -
 						_additionallySelectedTileCursorLL.getSize().y));
 				_additionallySelectedTileCursorLR.setPosition(cursorPosition +
 					sf::Vector2f(fTileWidth,
-						static_cast<float>(awe::tile::MIN_HEIGHT)) -
+						static_cast<float>(awe::animated_tile::MIN_HEIGHT)) -
 					_additionallySelectedTileCursorLR.getSize());
 			}
 
 			tilex += fTileWidth;
 		}
-		tiley += static_cast<float>(awe::tile::MIN_HEIGHT);
+		tiley += static_cast<float>(awe::animated_tile::MIN_HEIGHT);
 	}
 
 	// Step 2. the selected unit closed list tile icons.
@@ -546,18 +614,21 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 			awe::closed_list_node* pathNode = (awe::closed_list_node*)
 				_selectedUnitRenderData.top().closedList->At(i);
 			pathNode->sprite.animate(target);
-			auto pos =
-				_tiles[pathNode->tile.x][pathNode->tile.y].getPixelPosition();
-			const auto h =
-				_tiles[pathNode->tile.x][pathNode->tile.y].getPixelSize().y;
-			if (h > awe::tile::MIN_HEIGHT) pos.y += h - awe::tile::MIN_HEIGHT;
+			auto pos = _tiles[pathNode->tile.x]
+				[pathNode->tile.y].sprite->getPixelPosition();
+			const auto h = _tiles[pathNode->tile.x]
+				[pathNode->tile.y].sprite->getPixelSize().y;
+			if (h > awe::animated_tile::MIN_HEIGHT)
+				pos.y += h - awe::animated_tile::MIN_HEIGHT;
 			pathNode->sprite.setPosition(pos);
 		}
 	}
 
 	// Step 3. the units.
 	// Note that unit positioning was carried out in step 1.
-	for (auto& unit : _units) unit.second.animate(target);
+	for (auto& unit : _units) unit.second.sprite->animate(target);
+	// Don't forget units still waiting to be destroyed.
+	for (auto& unit : _unitsBeingDestroyed) unit.second->animate(target);
 
 	// Step 4. the additional cursor.
 	if (_additionalSel) {
@@ -588,16 +659,16 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	// account.
 	if (_startOfRectSel && _endOfRectSel) {
 		const sf::Vector2f rectSelStart(
-			static_cast<float>(awe::tile::MIN_WIDTH) * _startOfRectSel->x +
-			static_cast<float>(awe::tile::MIN_WIDTH) / 2.0f,
-			static_cast<float>(awe::tile::MIN_HEIGHT) * _startOfRectSel->y +
-			static_cast<float>(awe::tile::MIN_HEIGHT) / 2.0f
+			static_cast<float>(awe::animated_tile::MIN_WIDTH)* _startOfRectSel->x +
+			static_cast<float>(awe::animated_tile::MIN_WIDTH) / 2.0f,
+			static_cast<float>(awe::animated_tile::MIN_HEIGHT)* _startOfRectSel->y+
+			static_cast<float>(awe::animated_tile::MIN_HEIGHT) / 2.0f
 		);
 		const sf::Vector2f rectSelEnd(
-			static_cast<float>(awe::tile::MIN_WIDTH) * _endOfRectSel->x +
-			static_cast<float>(awe::tile::MIN_WIDTH) / 2.0f,
-			static_cast<float>(awe::tile::MIN_HEIGHT) * _endOfRectSel->y +
-			static_cast<float>(awe::tile::MIN_HEIGHT) / 2.0f
+			static_cast<float>(awe::animated_tile::MIN_WIDTH)* _endOfRectSel->x +
+			static_cast<float>(awe::animated_tile::MIN_WIDTH) / 2.0f,
+			static_cast<float>(awe::animated_tile::MIN_HEIGHT)* _endOfRectSel->y +
+			static_cast<float>(awe::animated_tile::MIN_HEIGHT) / 2.0f
 		);
 		_rectangle.setPosition(sf::Vector2f{
 			std::min(rectSelStart.x, rectSelEnd.x),
@@ -610,11 +681,31 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 		_rectangle.setOutlineThickness(_scaling);
 	}
 
-	// Step 7. update the view to match the target's size, and apply the scaling.
+	// Step 7. animations.
+	if (!_drawCursors) _drawCursors = true;
+	if (_destroyAnimation) {
+		_currentAnimation = nullptr;
+		_destroyAnimation = false;
+		_drawCursors = false;
+	}
+	while (!_animationQueue.empty() && !animationInProgress()) {
+		auto next = &_animationQueue.front();
+		if (const code* const pFunc = std::get_if<code>(next))
+			(*pFunc)();
+		else if (animation* const pDrawable = std::get_if<animation>(next))
+			_currentAnimation = std::move(*pDrawable);
+		else if (script_code* const pScriptFunc = std::get_if<script_code>(next))
+			_scripts->callFunction(pScriptFunc->operator->());
+		_animationQueue.pop();
+	}
+	if (animationInProgress())
+		_destroyAnimation = _currentAnimation->animate(target);
+
+	// Step 8. update the view to match the target's size, and apply the scaling.
 	// Additionally, update the view offset.
 	auto mapPixelSize = mapSize; // Ignore fancy tile heights and widths.
-	mapPixelSize.x *= awe::tile::MIN_WIDTH;
-	mapPixelSize.y *= awe::tile::MIN_HEIGHT;
+	mapPixelSize.x *= awe::animated_tile::MIN_WIDTH;
+	mapPixelSize.y *= awe::animated_tile::MIN_HEIGHT;
 	const auto rect = sf::FloatRect(0.0f, 0.0f,
 		static_cast<float>(target.getSize().x) / _scaling,
 		static_cast<float>(target.getSize().y) / _scaling);
@@ -627,45 +718,45 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 		const float mapPixelSize, std::optional<float>& viewOffset,
 		const float cursorPos, const float cursorSize, const float padding,
 		const float screenSize) {
-			if (viewSize > mapPixelSize) {
-				// Map appears smaller than the screen along this axis, so centre it on
-				// that axis. Also, reset the view offset to ensure that when the map
-				// appears larger in the future, the view will centre itself on the
-				// cursor along this axis.
-				viewOffset.reset();
-				return -(viewSize / 2.0f - mapPixelSize / 2.0f);
+		if (viewSize > mapPixelSize) {
+			// Map appears smaller than the screen along this axis, so centre it on
+			// that axis. Also, reset the view offset to ensure that when the map
+			// appears larger in the future, the view will centre itself on the
+			// cursor along this axis.
+			viewOffset.reset();
+			return -(viewSize / 2.0f - mapPixelSize / 2.0f);
+		} else {
+			if (viewOffset) {
+				// If the cursor is too close to either edge of the screen, adjust
+				// the offset to bring the cursor a little further into the centre
+				// of the screen.
+				if (cursorPos <= padding * 2.0f) {
+					*viewOffset -= padding;
+				} else if (cursorPos + cursorSize >= screenSize - padding * 2.0f) {
+					*viewOffset += padding;
+				}
 			} else {
-				if (viewOffset) {
-					// If the cursor is too close to either edge of the screen, adjust
-					// the offset to bring the cursor a little further into the centre
-					// of the screen.
-					if (cursorPos <= padding * 2.0f) {
-						*viewOffset -= padding;
-					} else if (cursorPos + cursorSize >= screenSize - padding * 2.0f) {
-						*viewOffset += padding;
-					}
-				} else {
-					// Map appears larger immediately after appearing smaller. Default
-					// offset to centre on the cursor.
-					viewOffset = (cursorPos + cursorSize / 2.0f) - viewSize / 2.0f;
-				}
-				// Make sure the map fully fills the screen along this axis.
-				if (*viewOffset < 0.0f) {
-					viewOffset = 0.0f;
-				} else if (*viewOffset + viewSize >= mapPixelSize) {
-					viewOffset = mapPixelSize - viewSize;
-				}
-				return *viewOffset;
+				// Map appears larger immediately after appearing smaller. Default
+				// offset to centre on the cursor.
+				viewOffset = (cursorPos + cursorSize / 2.0f) - viewSize / 2.0f;
 			}
+			// Make sure the map fully fills the screen along this axis.
+			if (*viewOffset < 0.0f) {
+				viewOffset = 0.0f;
+			} else if (*viewOffset + viewSize >= mapPixelSize) {
+				viewOffset = mapPixelSize - viewSize;
+			}
+			return *viewOffset;
+		}
 	};
 	_view.move(
 		moveOffsetAxis(rect.width, static_cast<float>(mapPixelSize.x),
 			_viewOffsetX, cursorRect.left, cursorRect.width,
-			static_cast<float>(awe::tile::MIN_WIDTH),
+			static_cast<float>(awe::animated_tile::MIN_WIDTH),
 			static_cast<float>(target.getSize().x)),
 		moveOffsetAxis(rect.height, static_cast<float>(mapPixelSize.y),
 			_viewOffsetY, cursorRect.top, cursorRect.height,
-			static_cast<float>(awe::tile::MIN_HEIGHT),
+			static_cast<float>(awe::animated_tile::MIN_HEIGHT),
 			static_cast<float>(target.getSize().y))
 	);
 
@@ -675,7 +766,7 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 
 void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// Step 1. temporarily apply our view.
-	const auto oldView = target.getView();
+	const sf::View oldView = target.getView();
 	target.setView(_view);
 
 	// Step 2. the tiles.
@@ -701,9 +792,9 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 				} else { // Not an available tile. Grey out.
 					tileStates.shader = &_unavailableTileShader;
 				}
-				target.draw(_tiles[x][y], tileStates);
+				target.draw(*_tiles[x][y].sprite, tileStates);
 			} else {
-				target.draw(_tiles[x][y], states);
+				target.draw(*_tiles[x][y].sprite, states);
 			}
 		}
 	}
@@ -725,13 +816,14 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// location override, then render it, even if it isn't on the map according to
 	// `isUnitOnMap()`. Units with location overrides are also drawn after all
 	// other units to ensure they are as visible as possible.
-	std::list<std::pair<const awe::unit&, sf::RenderStates>>
+	std::list<std::pair<const awe::animated_unit&, sf::RenderStates>>
 		unitsWithLocationOverrides;
 	const auto currentArmy = getSelectedArmy();
 	for (const auto& unitsPair : _units) {
 		const awe::UnitID unitID = unitsPair.first;
 		const auto hasLocationOverride =
-			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end();
+			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end() &&
+			_unitLocationOverrides.at(unitID) != awe::unit::NO_POSITION;
 
 		if (_isUnitPresent(unitID) && ((isUnitOnMap(unitID) &&
 			(_alwaysShowHiddenUnits || isUnitVisible(unitID, currentArmy))) ||
@@ -746,44 +838,73 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 						getUnitPosition(unitID)) ==
 					_selectedUnitRenderData.top().availableTiles.end())) {
 				if (hasLocationOverride) {
-					unitsWithLocationOverrides.emplace_back(_units.at(unitID),
-						unitStates);
-				} else target.draw(_units.at(unitID), unitStates);
+					unitsWithLocationOverrides.emplace_back(
+						*_units.at(unitID).sprite, unitStates);
+				} else drawUnit(target, unitStates, unitID,
+					*_units.at(unitID).sprite);
 			} else {
 				if (isUnitWaiting(unitID)) {
 					if (hasLocationOverride) {
-						unitsWithLocationOverrides.emplace_back(_units.at(unitID),
-							unitStates);
-					} else target.draw(_units.at(unitID), unitStates);
+						unitsWithLocationOverrides.emplace_back(
+							*_units.at(unitID).sprite, unitStates);
+					} else drawUnit(target, unitStates, unitID,
+						*_units.at(unitID).sprite);
 				} else {
 					if (hasLocationOverride) {
-						unitsWithLocationOverrides.emplace_back(_units.at(unitID),
-							states);
-					} else target.draw(_units.at(unitID), states);
+						unitsWithLocationOverrides.emplace_back(
+							*_units.at(unitID).sprite, states);
+					} else drawUnit(target, states, unitID,
+						*_units.at(unitID).sprite);
 				}
 			}
 		}
 	}
+	// Units waiting to be destroyed will always appear without shaders.
+	for (const auto& unitsPair : _unitsBeingDestroyed) {
+		const awe::UnitID unitID = unitsPair.first;
+		const auto hasLocationOverride =
+			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end() &&
+			_unitLocationOverrides.at(unitID) != awe::unit::NO_POSITION;
+		if (hasLocationOverride) {
+			unitsWithLocationOverrides.emplace_back(*unitsPair.second, states);
+		} else {
+			drawUnit(target, states, unitID, *unitsPair.second);
+		}
+	}
+	// Draw unit overrides now.
 	for (const auto& overridden : unitsWithLocationOverrides)
 		target.draw(overridden.first, overridden.second);
 
-	// Step 5. the additional cursor.
-	if (_additionalSel && !_additionallySelectedTileCursorUL.getSprite().empty() &&
-		!_additionallySelectedTileCursorUR.getSprite().empty() &&
-		!_additionallySelectedTileCursorLL.getSprite().empty() &&
-		!_additionallySelectedTileCursorLR.getSprite().empty()) {
-		target.draw(_additionallySelectedTileCursorUL, states);
-		target.draw(_additionallySelectedTileCursorUR, states);
-		target.draw(_additionallySelectedTileCursorLL, states);
-		target.draw(_additionallySelectedTileCursorLR, states);
+	if (animationInProgress()) {
+		// Step 5. the animation.
+		target.draw(*_currentAnimation, states);
+	} else if (_drawCursors) {
+		// Step 5. the additional cursor.
+		if (_additionalSel &&
+			!_additionallySelectedTileCursorUL.getSprite().empty() &&
+			!_additionallySelectedTileCursorUR.getSprite().empty() &&
+			!_additionallySelectedTileCursorLL.getSprite().empty() &&
+			!_additionallySelectedTileCursorLR.getSprite().empty()) {
+			target.draw(_additionallySelectedTileCursorUL, states);
+			target.draw(_additionallySelectedTileCursorUR, states);
+			target.draw(_additionallySelectedTileCursorLL, states);
+			target.draw(_additionallySelectedTileCursorLR, states);
+		}
+
+		// Step 6. the cursor. Always rendered over the additional cursor.
+		if (!_cursor.getSprite().empty()) target.draw(_cursor, states);
+
+		// Step 7. the rectangle selection graphic.
+		if (_startOfRectSel && _endOfRectSel) target.draw(_rectangle, states);
 	}
-
-	// Step 6. the cursor. Always rendered over the additional cursor.
-	if (!_cursor.getSprite().empty()) target.draw(_cursor, states);
-
-	// Step 7. the rectangle selection graphic.
-	if (_startOfRectSel && _endOfRectSel) target.draw(_rectangle, states);
 
 	// Step 8. restore old view.
 	target.setView(oldView);
 }
+
+void awe::map::drawUnit(sf::RenderTarget& target, const sf::RenderStates& states,
+	const awe::UnitID unitID, sf::Drawable& sprite) const {
+	if (_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end() &&
+		_unitLocationOverrides.at(unitID) == awe::unit::NO_POSITION) return;
+	target.draw(sprite, states);
+};

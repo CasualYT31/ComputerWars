@@ -57,6 +57,12 @@ void awe::disable_mementos::discard() {
 	}
 }
 
+awe::animation_preset& awe::operator++(animation_preset& p) noexcept {
+	p = static_cast<animation_preset>(static_cast<unsigned int>(p) + 1);
+	if (p >= animation_preset::Count) p = static_cast<animation_preset>(0);
+	return p;
+}
+
 awe::map::map(const engine::logger::data& data) : _logger(data),
 	_cursor({ data.sink, data.name + "_cursor_sprite" }),
 	_additionallySelectedTileCursorUL({ data.sink,
@@ -109,7 +115,10 @@ bool awe::map::load(std::string file, const unsigned char version) {
 			binaryFile >> binaryData;
 		}
 		_filename = file;
+		const auto wereAnimationsEnabled = _animationsEnabled;
+		enableAnimations(false);
 		_loadMapFromInputStream(binaryData, version);
+		enableAnimations(wereAnimationsEnabled);
 		// Reinitialise memento data.
 		_undoDeque.clear();
 		_redoDeque.clear();
@@ -387,44 +396,31 @@ CScriptArray* awe::map::getScriptNamesAsArray() const {
 	return _scripts->createArrayFromContainer("string", getScriptNames());
 }
 
-void awe::map::setTileSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
-	_sheet_tile = sheet;
-	// Go through all of the tiles and set the new spritesheet to each one.
-	for (auto& column : _tiles) {
-		for (auto& tile : column) tile.setSpritesheet(sheet);
+void awe::map::setSpritesheets(
+	const std::shared_ptr<sfx::animated_spritesheets>& sheets) {
+	_sheets = sheets;
+	// This will need improving in the future, C++ code shouldn't be referencing
+	// spritesheets in this way. TODO-2.
+	_cursor.setSpritesheet((*_sheets)["icon"]);
+	_additionallySelectedTileCursorUL.setSpritesheet((*_sheets)["icon"]);
+	_additionallySelectedTileCursorUR.setSpritesheet((*_sheets)["icon"]);
+	_additionallySelectedTileCursorLL.setSpritesheet((*_sheets)["icon"]);
+	_additionallySelectedTileCursorLR.setSpritesheet((*_sheets)["icon"]);
+	for (auto& unit : _units) {
+		unit.second.sprite->setSpritesheet((*_sheets)["unit"]);
+		unit.second.sprite->setIconSpritesheet((*_sheets)["icon"]);
 	}
+	for (auto& column : _tiles)
+		for (auto& tile : column)
+			tile.sprite->setSpritesheet((*_sheets)["tile.normal"]);
 }
 
-void awe::map::setUnitSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
-	_sheet_unit = sheet;
-	// Go through all of the units and set the new icon spritesheet to each one.
-	for (auto& unit : _units) unit.second.setSpritesheet(sheet);
-}
-
-void awe::map::setIconSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
-	_sheet_icon = sheet;
-	_cursor.setSpritesheet(sheet);
-	_additionallySelectedTileCursorUL.setSpritesheet(sheet);
-	_additionallySelectedTileCursorUR.setSpritesheet(sheet);
-	_additionallySelectedTileCursorLL.setSpritesheet(sheet);
-	_additionallySelectedTileCursorLR.setSpritesheet(sheet);
-	// Go through all of the units and set the new spritesheet to each one.
-	for (auto& unit : _units) unit.second.setIconSpritesheet(sheet);
-}
-
-void awe::map::setCOSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
-	_sheet_co = sheet;
-}
-
-void awe::map::setFont(const std::shared_ptr<sf::Font>& font) {
-	if (!font) {
-		_logger.error("setFont operation failed: nullptr was given!");
+void awe::map::setFonts(const std::shared_ptr<sfx::fonts>& fonts) {
+	if (!fonts) {
+		_logger.error("setFonts operation failed: nullptr was given!");
 		return;
 	}
+	_fonts = fonts;
 }
 
 void awe::map::setGUI(const std::shared_ptr<sfx::gui>& gui) {
@@ -487,6 +483,7 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	_lastUnitID = awe::ID_OF_FIRST_UNIT;
 	_armies.clear();
 	_units.clear();
+	_unitsBeingDestroyed.clear();
 	_tiles.clear();
 	_mapName.clear();
 	_day = 0;

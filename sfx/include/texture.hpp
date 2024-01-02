@@ -96,6 +96,15 @@ namespace sfx {
 			const std::size_t frame) const;
 
 		/**
+		 * Retrieves the configured durations of all frames of a sprite.
+		 * @warning Logging has been disabled in this method.
+		 * @param   sprite The sprite whose durations are to be returned.
+		 * @return  The durations of each frame of this sprite. Empty vector if
+		 *          there was an error.
+		 */
+		std::vector<sf::Time> getFrameDurations(const std::string& sprite) const;
+
+		/**
 		 * Retrieves the offset intended to be applied to a sprite as it is being
 		 * drawn.
 		 * @warning Logging has been disabled in this method.
@@ -232,6 +241,79 @@ namespace sfx {
 		 * Caches the height of the tallest sprite/frame in this spritesheet.
 		 */
 		std::size_t _tallestSpriteHeight = 0;
+	};
+
+	/**
+	 * A collection of \c animated_spritesheet objects.
+	 */
+	class animated_spritesheets : public engine::json_script {
+	public:
+		/**
+		 * Initialises the internal logger object.
+		 * @param data The data to initialise the logger object with.
+		 * @sa    \c engine::logger
+		 */
+		animated_spritesheets(const engine::logger::data& data);
+
+		/**
+		 * Accesses a previously loaded \c sfx::animated_spritesheet object.
+		 * If a non-existent spritesheet name is given, an error will be logged.
+		 * @param  key The string name of the spritesheet which was given in the
+		 *             JSON script.
+		 * @return The pointer to the \c sfx::animated_spritesheet object, or
+		 *         \c nullptr if the spritesheet didn't exist.
+		 * @safety Strong guarantee.
+		 */
+		std::shared_ptr<sfx::animated_spritesheet> operator[](
+			const std::string& key) const;
+
+		/**
+		 * Finds out if there is a spritesheet stored under the given key.
+		 * @param  key The key to test.
+		 * @return \c TRUE if there is a spritesheet with the given name, \c FALSE
+		 *         if not.
+		 */
+		bool exists(const std::string& key) const;
+
+		/**
+		 * Goes through every global frame counter in every spritesheet and
+		 * increments them based on a static delta timer.
+		 */
+		void updateGlobalFrameIDs();
+	private:
+		/**
+		 * The JSON load method for this class.
+		 * Within the root object, there are simply a list of key-string pairs,
+		 * with the keys defining the names of the spritesheets, and the string
+		 * values containing the paths to the JSON scripts to pass to the \c load()
+		 * method of each \c animated_spritesheet.
+		 * @param  j The \c engine::json object representing the contents of the
+		 *           loaded script which this method reads.
+		 * @return \c TRUE if every spritesheet could be loaded successfully,
+		 *         \c FALSE if even one of the \c load() methods returned \c FALSE.
+		 * @safety No guarantee.
+		 */
+		bool _load(engine::json& j);
+
+		/**
+		 * The JSON save method for this class.
+		 * Simply rewrites the spritesheet list.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON
+		 *           script which this method writes to.
+		 * @return Always returns \c TRUE.
+		 */
+		bool _save(nlohmann::ordered_json& j);
+
+		/**
+		 * The internal logger object.
+		 */
+		mutable engine::logger _logger;
+
+		/**
+		 * The spritesheets.
+		 */
+		std::unordered_map<std::string, std::shared_ptr<sfx::animated_spritesheet>>
+			_sheets;
 	};
 
 	/**
@@ -399,6 +481,22 @@ namespace sfx {
 		}
 
 		/**
+		 * Sets the origin of the internal sprite.
+		 * @param newOrigin The new origin of the sprite.
+		 */
+		inline void setOrigin(const sf::Vector2f& newOrigin) {
+			_sprite.setOrigin(newOrigin);
+		}
+
+		/**
+		 * Gets the origin of the internal sprite.
+		 * @return The origin of the sprite.
+		 */
+		inline sf::Vector2f getOrigin() const {
+			return _sprite.getOrigin();
+		}
+
+		/**
 		 * Sets the rotation of the internal sprite.
 		 * @param  newRotation The new rotation, in degrees, of the sprite.
 		 * @safety No guarantee.
@@ -430,7 +528,8 @@ namespace sfx {
 		 * sprite or frame, an error will be logged only once. If the spritesheet
 		 * or sprite ID is changed after this time, another error will be logged if
 		 * any IDs are still invalid.
-		 * @return \c TRUE if the current frame is the last frame, or if \c _sheet
+		 * @return \c TRUE if the last frame has ended (<b>this only happens with
+		 *         sprites that do not have a global frame ID</b>), or if \c _sheet
 		 *         is \c NULL, or if there was an error in retrieving the sprite
 		 *         information, \c FALSE otherwise.
 		 * @safety No guarantee.

@@ -43,8 +43,10 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 	}
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::CREATE_UNIT));
-	_units.insert({ id, awe::unit({_logger.getData().sink, "unit"}, type, army,
-		_sheet_unit, _sheet_icon) });
+	// TODO-2.
+	_units.insert({ id, unit_data({ _logger.getData().sink, "unit" },
+		[&](const std::function<void(void)>& func) { _animationQueue.push(func); },
+		type, army, (*_sheets)["unit"], (*_sheets)["icon"])});
 	_armies.at(army).addUnit(id);
 	return id;
 }
@@ -66,23 +68,23 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	// We don't need to check if the unit "is actually on the map or not," since
 	// the tile will always hold the index to the unit in either case: which is why
 	// we need the "actually" check to begin with.
-	if (!_isOutOfBounds(_units.at(id).getPosition()))
-		_tiles[_units.at(id).getPosition().x]
-		[_units.at(id).getPosition().y].setUnit(awe::NO_UNIT);
+	const auto position = _units.at(id).data.getPosition();
+	if (!_isOutOfBounds(position))
+		_tiles[position.x][position.y].data.setUnit(awe::NO_UNIT);
 	// Secondly, remove the unit from the army's list.
-	if (_isArmyPresent(_units.at(id).getArmy())) {
-		_armies.at(_units.at(id).getArmy()).removeUnit(id);
+	if (_isArmyPresent(_units.at(id).data.getArmy())) {
+		_armies.at(_units.at(id).data.getArmy()).removeUnit(id);
 	} else {
 		_logger.warning("deleteUnit warning: unit with ID {} didn't have a valid "
-			"owning army ID, which was {}.", id, _units.at(id).getArmy());
+			"owning army ID, which was {}.", id, _units.at(id).data.getArmy());
 	}
 	// Thirdly, delete all units that are loaded onto this one.
-	const auto loaded = _units.at(id).loadedUnits();
+	const auto loaded = _units.at(id).data.loadedUnits();
 	for (const auto unit : loaded) deleteUnit(unit);
 	// Fourthly, if this unit was loaded onto another, remove it from that unit's
 	// list.
-	const auto loadedOnto = _units.at(id).loadedOnto();
-	if (loadedOnto != awe::NO_UNIT && !_units.at(loadedOnto).unloadUnit(id)) {
+	const auto loadedOnto = _units.at(id).data.loadedOnto();
+	if (loadedOnto != awe::NO_UNIT && !_units.at(loadedOnto).data.unloadUnit(id)) {
 		_logger.warning("deleteUnit warning: unit with ID {}, that is being "
 			"deleted, was loaded onto unit with ID {}, but the former could not "
 			"be unloaded from the latter!", id, loadedOnto);
@@ -91,15 +93,31 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	// stack. If it is further down the stack, then it will have to be removed
 	// later: see popSelectedUnit().
 	if (getSelectedUnit() == id) setSelectedUnit(awe::NO_UNIT);
-	// Sixthly, if this unit has a location override, remove it from the map.
-	if (isPreviewUnit(id)) removePreviewUnit(id);
+	// Sixthly, animate the destroyed unit now, if it has a position on the map.
+	// Retain the unit's sprite and location override as it may not be destroyed
+	// immediately. However, if there will be no destroy unit animation, remove the
+	// location override immediately.
+	if (loadedOnto == awe::NO_UNIT) {
+		_unitsBeingDestroyed.insert({ id, _units.at(id).sprite });
+		_animationQueue.push(std::bind([&](const awe::UnitID deletingID) {
+			// Remove the sprite now.
+			if (isPreviewUnit(deletingID)) removePreviewUnit(deletingID);
+			_unitsBeingDestroyed.erase(deletingID);
+		}, id));
+		// TODO-2.
+		animateParticle(position, "particle",
+			_units.at(id).data.getType()->getDestroyedUnit(
+				_units.at(id).data.getArmy()), { 0.5f, 1.0f });
+	} else {
+		if (isPreviewUnit(id)) removePreviewUnit(id);
+	}
 	// Finally, delete the unit from the main list.
 	_units.erase(id);
 }
 
 std::shared_ptr<const awe::unit_type> awe::map::getUnitType(
 	const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _units.at(id).getType();
+	if (_isUnitPresent(id)) return _units.at(id).data.getType();
 	_logger.error("getUnitType operation failed: unit with ID {} doesn't exist!",
 		id);
 	return nullptr;
@@ -142,14 +160,14 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 		_getMementoName(awe::map_strings::operation::UNIT_POSITION));
 	_updateCapturingUnit(id);
 	// Make new tile occupied.
-	if (pos != awe::unit::NO_POSITION) _tiles[pos.x][pos.y].setUnit(id);
+	if (pos != awe::unit::NO_POSITION) _tiles[pos.x][pos.y].data.setUnit(id);
 	// Make old tile vacant.
-	if (_units.at(id).isOnMap()) {
-		const auto oldLocation = _units.at(id).getPosition();
-		_tiles[oldLocation.x][oldLocation.y].setUnit(awe::NO_UNIT);
+	if (_units.at(id).data.isOnMap()) {
+		const auto oldLocation = _units.at(id).data.getPosition();
+		_tiles[oldLocation.x][oldLocation.y].data.setUnit(awe::NO_UNIT);
 	}
 	// Assign new location to unit.
-	_units.at(id).setPosition(pos);
+	_units.at(id).data.setPosition(pos);
 }
 
 sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const {
@@ -158,7 +176,7 @@ sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const {
 			"exist!", id);
 		return awe::unit::NO_POSITION;
 	}
-	return _units.at(id).getPosition();
+	return _units.at(id).data.getPosition();
 }
 
 bool awe::map::isUnitOnMap(const awe::UnitID id) const {
@@ -167,7 +185,7 @@ bool awe::map::isUnitOnMap(const awe::UnitID id) const {
 			"exist!", id);
 		return false;
 	}
-	return _units.at(id).isOnMap();
+	return _units.at(id).data.isOnMap();
 }
 
 void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) {
@@ -175,7 +193,7 @@ void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) {
 		if (hp == getUnitHP(id)) return;
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::UNIT_HP));
-		_units.at(id).setHP(hp);
+		_units.at(id).data.setHP(hp);
 	} else {
 		_logger.error("setUnitHP operation cancelled: attempted to assign HP {} "
 			"to unit with ID {}, which doesn't exist!", hp, id);
@@ -183,14 +201,14 @@ void awe::map::setUnitHP(const awe::UnitID id, const awe::HP hp) {
 }
 
 awe::HP awe::map::getUnitHP(const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _units.at(id).getHP();
+	if (_isUnitPresent(id)) return _units.at(id).data.getHP();
 	_logger.error("getUnitHP operation failed: unit with ID {} doesn't exist!",
 		id);
 	return 0;
 }
 
 awe::HP awe::map::getUnitDisplayedHP(const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _units.at(id).getDisplayedHP();
+	if (_isUnitPresent(id)) return _units.at(id).data.getDisplayedHP();
 	_logger.error("getUnitDisplayedHP operation failed: unit with ID {} doesn't "
 		"exist!", id);
 	return 0;
@@ -201,7 +219,7 @@ void awe::map::setUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 		if (fuel == getUnitFuel(id)) return;
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::UNIT_FUEL));
-		_units.at(id).setFuel(fuel);
+		_units.at(id).data.setFuel(fuel);
 	} else {
 		_logger.error("setUnitFuel operation cancelled: attempted to assign fuel "
 			"{} to unit with ID {}, which doesn't exist!", fuel, id);
@@ -218,7 +236,7 @@ void awe::map::burnUnitFuel(const awe::UnitID id, const awe::Fuel fuel) {
 }
 
 awe::Fuel awe::map::getUnitFuel(const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _units.at(id).getFuel();
+	if (_isUnitPresent(id)) return _units.at(id).data.getFuel();
 	_logger.error("getUnitFuel operation failed: unit with ID {} doesn't exist!",
 		id);
 	return 0;
@@ -230,7 +248,7 @@ void awe::map::setUnitAmmo(const awe::UnitID id, const std::string& weapon,
 		if (ammo == getUnitAmmo(id, weapon)) return;
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::UNIT_AMMO));
-		_units.at(id).setAmmo(weapon, ammo);
+		_units.at(id).data.setAmmo(weapon, ammo);
 	} else {
 		_logger.error("setUnitAmmo operation cancelled: attempted to assign ammo "
 			"{} to unit with ID {}'s weapon \"{}\". This unit doesn't exist!",
@@ -240,7 +258,7 @@ void awe::map::setUnitAmmo(const awe::UnitID id, const std::string& weapon,
 
 awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id,
 	const std::string& weapon) const {
-	if (_isUnitPresent(id)) return _units.at(id).getAmmo(weapon);
+	if (_isUnitPresent(id)) return _units.at(id).data.getAmmo(weapon);
 	_logger.error("getUnitAmmo operation with weapon \"{}\" failed: unit with ID "
 		"{} doesn't exist!", weapon, id);
 	return 0;
@@ -251,7 +269,7 @@ void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
 		if (isUnitReplenished(id, heal)) return;
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::UNIT_REPLENISH));
-		_units.at(id).replenish(heal);
+		_units.at(id).data.replenish(heal);
 	} else {
 		_logger.error("replenishUnit operation cancelled: attempted to replenish "
 			"{}unit with ID {}. This unit doesn't exist!", heal ? "and heal " : "",
@@ -260,7 +278,7 @@ void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
 }
 
 bool awe::map::isUnitReplenished(const awe::UnitID id, const bool hp) const {
-	if (_isUnitPresent(id)) return _units.at(id).isReplenished(hp);
+	if (_isUnitPresent(id)) return _units.at(id).data.isReplenished(hp);
 	_logger.error("isUnitReplenished operation failed: unit with ID {} doesn't "
 		"exist!", id);
 	return false;
@@ -271,7 +289,7 @@ void awe::map::waitUnit(const awe::UnitID id, const bool waiting) {
 		if (waiting == isUnitWaiting(id)) return;
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::UNIT_WAIT));
-		_units.at(id).wait(waiting);
+		_units.at(id).data.wait(waiting);
 	} else {
 		_logger.error("waitUnit operation cancelled: attempted to assign waiting "
 			"state {} to unit with ID {}, which doesn't exist!", waiting, id);
@@ -279,7 +297,7 @@ void awe::map::waitUnit(const awe::UnitID id, const bool waiting) {
 }
 
 bool awe::map::isUnitWaiting(const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _units.at(id).isWaiting();
+	if (_isUnitPresent(id)) return _units.at(id).data.isWaiting();
 	_logger.error("isUnitWaiting operation failed: unit with ID {} doesn't exist!",
 		id);
 	return false;
@@ -290,7 +308,7 @@ void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) {
 		if (capturing == isUnitCapturing(id)) return;
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::UNIT_CAPTURE));
-		_units.at(id).capturing(capturing);
+		_units.at(id).data.capturing(capturing);
 	} else {
 		_logger.error("unitCapturing operation cancelled: attempted to assign "
 			"capturing state {} to unit with ID {}, which doesn't exist!",
@@ -299,7 +317,7 @@ void awe::map::unitCapturing(const awe::UnitID id, const bool capturing) {
 }
 
 bool awe::map::isUnitCapturing(const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _units.at(id).isCapturing();
+	if (_isUnitPresent(id)) return _units.at(id).data.isCapturing();
 	_logger.error("isUnitCapturing operation failed: unit with ID {} doesn't "
 		"exist!", id);
 	return false;
@@ -310,7 +328,7 @@ void awe::map::unitHiding(const awe::UnitID id, const bool hiding) {
 		if (hiding == isUnitHiding(id)) return;
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::UNIT_HIDE));
-		_units.at(id).hiding(hiding);
+		_units.at(id).data.hiding(hiding);
 	} else {
 		_logger.error("unitHiding operation cancelled: attempted to assign hiding "
 			"state {} to unit with ID {}, which doesn't exist!", hiding, id);
@@ -318,7 +336,7 @@ void awe::map::unitHiding(const awe::UnitID id, const bool hiding) {
 }
 
 bool awe::map::isUnitHiding(const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _units.at(id).isHiding();
+	if (_isUnitPresent(id)) return _units.at(id).data.isHiding();
 	_logger.error("isUnitHiding operation failed: unit with ID {} doesn't exist!",
 		id);
 	return false;
@@ -378,7 +396,7 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 			"ID {} onto itself.", load);
 		return;
 	}
-	if (_units.at(load).loadedOnto()) {
+	if (_units.at(load).data.loadedOnto()) {
 		_logger.warning("loadUnit warning: unit with ID {} was already loaded "
 			"onto unit with ID {}", load, onto);
 		return;
@@ -388,14 +406,14 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 	_updateCapturingUnit(load);
 	// Make the tile that `load` was on vacant, and remove the unit ID from the
 	// tile.
-	if (_units.at(load).isOnMap()) {
-		const auto location = _units.at(load).getPosition();
-		_tiles[location.x][location.y].setUnit(awe::NO_UNIT);
+	if (_units.at(load).data.isOnMap()) {
+		const auto location = _units.at(load).data.getPosition();
+		_tiles[location.x][location.y].data.setUnit(awe::NO_UNIT);
 	}
-	_units.at(load).setPosition(awe::unit::NO_POSITION);
+	_units.at(load).data.setPosition(awe::unit::NO_POSITION);
 	// Perform loads.
-	_units.at(onto).loadUnit(load);
-	_units.at(load).loadOnto(onto);
+	_units.at(onto).data.loadUnit(load);
+	_units.at(load).data.loadOnto(onto);
 }
 
 void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
@@ -423,11 +441,11 @@ void awe::map::unloadUnit(const awe::UnitID unload, const awe::UnitID from,
 			"with ID {} already occupying it!", unload, from, onto, u);
 		return;
 	}
-	if (_units.at(from).unloadUnit(unload)) {
+	if (_units.at(from).data.unloadUnit(unload)) {
 		// Unload successful, continue with operation.
 		awe::disable_mementos token(this,
 			_getMementoName(awe::map_strings::operation::UNIT_UNLOAD));
-		_units.at(unload).loadOnto(awe::NO_UNIT);
+		_units.at(unload).data.loadOnto(awe::NO_UNIT);
 		setUnitPosition(unload, onto);
 	} else {
 		_logger.error("unloadUnit operation failed: unit with ID {} was not "
@@ -441,7 +459,7 @@ awe::UnitID awe::map::getUnitWhichContainsUnit(const awe::UnitID unit) const {
 			"does not exist!", unit);
 		return awe::NO_UNIT;
 	}
-	return _units.at(unit).loadedOnto();
+	return _units.at(unit).data.loadedOnto();
 }
 
 awe::UnitID awe::map::getUnloadedUnitWhichContainsUnit(
@@ -451,7 +469,7 @@ awe::UnitID awe::map::getUnloadedUnitWhichContainsUnit(
 			"with ID {} does not exist!", unit);
 		return awe::NO_UNIT;
 	}
-	const auto loadedOnto = _units.at(unit).loadedOnto();
+	const auto loadedOnto = _units.at(unit).data.loadedOnto();
 	if (loadedOnto == awe::NO_UNIT) return unit;
 	// Either return NO_UNIT on first call or check if unit given by scripts ==
 	// return.
@@ -470,19 +488,20 @@ bool awe::map::isUnitLoadedOntoUnit(const awe::UnitID unit,
 			"does not exist!", on);
 		return false;
 	}
-	const auto units = _units.at(on).loadedUnits();
+	const auto units = _units.at(on).data.loadedUnits();
 	return units.find(unit) != units.end();
 }
 
 awe::ArmyID awe::map::getArmyOfUnit(const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _units.at(id).getArmy();
+	if (_isUnitPresent(id)) return _units.at(id).data.getArmy();
 	_logger.error("getArmyOfUnit operation failed: unit with ID {} doesn't exist!",
 		id);
 	return awe::NO_ARMY;
 }
 
 awe::TeamID awe::map::getTeamOfUnit(const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _armies.at(_units.at(id).getArmy()).getTeam();
+	if (_isUnitPresent(id))
+		return _armies.at(_units.at(id).data.getArmy()).getTeam();
 	_logger.error("getTeamOfUnit operation failed: unit with ID {} doesn't exist!",
 		id);
 	return 0;
@@ -490,7 +509,7 @@ awe::TeamID awe::map::getTeamOfUnit(const awe::UnitID id) const {
 
 std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(
 	const awe::UnitID id) const {
-	if (_isUnitPresent(id)) return _units.at(id).loadedUnits();
+	if (_isUnitPresent(id)) return _units.at(id).data.loadedUnits();
 	_logger.error("getLoadedUnits operation failed: unit with ID {} doesn't "
 		"exist!", id);
 	return {};

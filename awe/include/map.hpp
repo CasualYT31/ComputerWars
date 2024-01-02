@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cmath>
 #include <stack>
 #include <optional>
+#include <queue>
 
 namespace awe {
 	/**
@@ -192,6 +193,25 @@ namespace awe {
 		Left,
 		Right
 	};
+
+	/**
+	 * The list of available animation presets.
+	 */
+	enum class animation_preset {
+		VisualA,  //!< Battle and capture animations are on.
+		VisualB,  //!< Fast unit speed, all animations.
+		VisualC,  //!< Fast unit speed, battle animations only.
+		VisualD,  //!< Fast unit speed, no CPU battle animations. Redundant atm.
+		NoVisual, //!< Only basic animations.
+		Count     //!< C++-only, used to know when to wrap when cycling.
+	};
+
+	/**
+	 * Cycle the given \c animation_preset forward by one.
+	 * @param  p The enum value to increment.
+	 * @return The given enum value.
+     */
+	animation_preset& operator++(animation_preset& p) noexcept;
 
 	/**
 	 * Class which represents a map, and the armies and units that play on it.
@@ -1722,6 +1742,10 @@ namespace awe {
 		 * If the location is out of range, an error will be logged and the mapping
 		 * won't be added. If the unit ID is out of range, the same thing will
 		 * occur.\n
+		 * If the location is \c awe::unit::NO_POSITION, then the unit will never
+		 * be rendered until that override is removed. This can be used to
+		 * temporarily hide units from the player whilst keeping their data
+		 * intact.\n
 		 * If there is already an override for the given unit, the previous
 		 * override will be replaced only if the new override is valid.
 		 * @warning If a unit is given a location override, it will be rendered
@@ -2293,40 +2317,112 @@ namespace awe {
 		 */
 		sf::IntRect getMapBoundingBox() const;
 
+		//////////////////////////
+		// ANIMATION OPERATIONS //
+		//////////////////////////
 		/**
-		 * Sets the spritesheet used for drawing tiles.
-		 * @param sheet Pointer to the animated spritesheet to use for tiles.
+		 * Is there an animation in progress?
+		 * @return \c TRUE if there is an animation currently playing, \c FALSE if
+		 *         there is no animation playing.
 		 */
-		void setTileSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
+		inline bool animationInProgress() const {
+			return _currentAnimation.operator bool();
+		}
 
 		/**
-		 * Sets the spritesheet used for drawing units.
-		 * @param sheet Pointer to the animated spritesheet to use for units.
+		 * Selects the current animation preset.
+		 * @param preset The preset to select.
 		 */
-		void setUnitSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
+		void setSelectedAnimationPreset(const awe::animation_preset preset);
 
 		/**
-		 * Sets the spritesheet used for drawing map icons.
-		 * @param sheet Pointer to the animated spritesheet to use for icons.
+		 * Retrieves the currently selected animation preset.
+		 * @return The selected animation preset.
 		 */
-		void setIconSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
+		awe::animation_preset getSelectedAnimationPreset() const;
 
 		/**
-		 * Sets the spritesheet used for drawing COs.
-		 * @param sheet Pointer to the animated spritesheet to use for COs.
+		 * Selects the next animation preset in the list.
+		 * @return The newly selected animation preset.
 		 */
-		void setCOSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
+		awe::animation_preset selectNextAnimationPreset();
 
 		/**
-		 * Sets the font used with this map.
+		 * Enables or disables animations.
+		 * Disabling animations will not clear the animation queue.
+		 * @param enabled \c TRUE to enable animations (default), \c FALSE to
+		 *                disable animations.
+		 */
+		void enableAnimations(const bool enabled);
+
+		/**
+		 * Pushes code to the animation queue.
+		 * @param func Pointer to the script function to execute.
+		 */
+		void queueCode(asIScriptFunction* const func);
+
+		/**
+		 * Attempts to queue a "day begin" animation.
+		 * @param  armyID The ID of the army who's having their turn.
+		 * @param  day    The day to display.
+		 * @param  font   The font to apply to the day text.
+		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool animateDayBegin(const awe::ArmyID armyID, const awe::Day day,
+			const std::string& font);
+
+		/**
+		 * Attempts to queue a "tag CO" animation.
+		 * @param  armyID The ID of the army who's having their COs tagged. The COs
+		 *                must \b not have been tagged yet.
+		 * @param  font   The font to apply to the tag CO text.
+		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool animateTagCO(const awe::ArmyID armyID, const std::string& font);
+
+		/**
+		 * Attempts to queue a "tile particle" animation.
+		 * @param  tile     The tile to animate a particle over.
+		 * @param  sheet    The name of the sheet to use.
+		 * @param  particle The ID of the particle sprite.
+		 * @param  origin   The origin and position of the particle sprite relative
+		 *                  to the tile's sprite.
+		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool animateParticle(const sf::Vector2u& tile, const std::string& sheet,
+			const std::string& particle, const sf::Vector2f& origin);
+
+		/**
+		 * Attempts to queue a "label unit" animation.
+		 * @param  unitID     The ID of the unit that's being replenished.
+		 * @param  leftLabel  ID of the label sprite to use when the label is on
+		 *                    the left side of the unit.
+		 * @param  rightLabel ID of the label sprite to use when the label is on
+		 *                    the right side of the unit.
+		 * @param  duration   The number of seconds the label should be visible
+		 *                    for.
+		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool animateLabelUnit(const awe::UnitID unitID,
+			const std::string& leftLabel, const std::string& rightLabel,
+			const float duration = 0.7f);
+
+		//////////
+		// MISC //
+		//////////
+		/**
+		 * Sets the spritesheets used by this map.
+		 * @param sheets Pointer to the animated spritesheets to use with this map.
+		 */
+		void setSpritesheets(
+			const std::shared_ptr<sfx::animated_spritesheets>& sheets);
+
+		/**
+		 * Sets the fonts used with this map.
 		 * If \c nullptr is given, an error will be logged.
-		 * @param font Pointer to the font to use with this map.
+		 * @param fonts Pointer to the fonts to use with this map.
 		 */
-		void setFont(const std::shared_ptr<sf::Font>& font);
+		void setFonts(const std::shared_ptr<sfx::fonts>& fonts);
 
 		/**
 		 * Sets the GUI engine to pull the GUI scaling factor from.
@@ -2378,6 +2474,16 @@ namespace awe {
 		 *               workings of the drawable.
 		 */
 		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
+
+		/**
+		 * Draws a unit if it doesn't have a \c NO_POSITION override.
+		 * @param target The target to render the unit to.
+		 * @param states The render states to apply to the unit.
+		 * @param unitID The ID of the unit being drawn.
+		 * @param sprite The unit sprite to draw.
+		 */
+		void drawUnit(sf::RenderTarget& target, const sf::RenderStates& states,
+			const awe::UnitID unitID, sf::Drawable& sprite) const;
 
 		/////////////
 		// UTILITY //
@@ -2502,6 +2608,16 @@ namespace awe {
 		}
 
 		/**
+		 * Can an animation be queued?
+		 * @param  presets List of presets that are supported.
+		 * @return \c TRUE if animations are enabled, and \c presets is empty or
+		 *         the currently selected preset is within the given list. \c FALSE
+		 *         otherwise.
+		 */
+		bool _canAnimationBeQueued(
+			const std::vector<awe::animation_preset>& presets = {}) const;
+
+		/**
 		 * Internal logger object.
 		 */
 		mutable engine::logger _logger;
@@ -2594,6 +2710,36 @@ namespace awe {
 		std::string _mapName;
 
 		/**
+		 * Contains information pertaining to a single tile on this map.
+		 */
+		struct tile_data {
+			/**
+			 * Constructs a tile.
+			 * @sa \c awe::tile::tile().
+			 */
+			tile_data(const engine::logger::data& logger_data,
+				const std::function<void(const std::function<void(void)>&)>&
+					spriteCallback,
+				const std::shared_ptr<const awe::tile_type>& type = nullptr,
+				const awe::ArmyID owner = awe::NO_ARMY,
+				const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr)
+				: sprite(std::make_shared<awe::animated_tile>(
+					engine::logger::data{ logger_data.sink,
+						logger_data.name + "_sprite" })),
+				data(sprite, spriteCallback, type, owner, sheet) {}
+
+			/**
+			 * The tile's animated sprite.
+			 */
+			std::shared_ptr<awe::animated_tile> sprite;
+
+			/**
+			 * The tile's data.
+			 */
+			awe::tile data;
+		};
+
+		/**
 		 * The tiles in this map.
 		 * The first vector stores each column of tiles, from left to right. The
 		 * second vector stores each tile of each column, from top to bottom. This
@@ -2601,7 +2747,7 @@ namespace awe {
 		 * right, and the second index will be the Y coordinate, moving from top to
 		 * bottom. Counting starts from the top left corner of the map.
 		 */
-		std::vector<std::vector<awe::tile>> _tiles;
+		std::vector<std::vector<tile_data>> _tiles;
 
 		/**
 		 * Cache of the map's size as configured via \c setMapSize().
@@ -2609,9 +2755,47 @@ namespace awe {
 		sf::Vector2u _mapSizeCache;
 
 		/**
+		 * Contains information pertaining to a single unit on this map.
+		 */
+		struct unit_data {
+			/**
+			 * Constructs a unit.
+			 * @sa \c awe::unit::unit().
+			 */
+			unit_data(const engine::logger::data& logger_data,
+				const std::function<void(const std::function<void(void)>&)>&
+					spriteCallback,
+				const std::shared_ptr<const awe::unit_type>& type,
+				const awe::ArmyID army = 0,
+				const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr,
+				const std::shared_ptr<sfx::animated_spritesheet>& icons = nullptr)
+				: sprite(std::make_shared<awe::animated_unit>(
+					engine::logger::data{ logger_data.sink,
+						logger_data.name + "_sprite" })),
+				data(sprite, spriteCallback, type, army, sheet, icons) {}
+
+			/**
+			 * The unit's animated sprite.
+			 */
+			std::shared_ptr<awe::animated_unit> sprite;
+
+			/**
+			 * The unit's data.
+			 */
+			awe::unit data;
+		};
+
+		/**
 		 * The units on this map.
 		 */
-		std::unordered_map<awe::UnitID, awe::unit> _units;
+		std::unordered_map<awe::UnitID, unit_data> _units;
+
+		/**
+		 * A list of units that have been deleted, but are still in the process of
+		 * being destroyed.
+		 */
+		std::unordered_map<awe::UnitID, std::shared_ptr<awe::animated_unit>>
+			_unitsBeingDestroyed;
 
 		/**
 		 * The armies on this map.
@@ -2898,33 +3082,76 @@ namespace awe {
 		 */
 		sf::Shader _unavailableTileShader;
 
-		//////////////////
-		// SPRITESHEETS //
-		//////////////////
-		/**
-		 * Spritesheet used with all tiles.
-		 */
-		std::shared_ptr<sfx::animated_spritesheet> _sheet_tile = nullptr;
+		// ANIMATIONS //
 
 		/**
-		 * Spritesheet used with all units.
+		 * An animated drawable.
 		 */
-		std::shared_ptr<sfx::animated_spritesheet> _sheet_unit = nullptr;
+		typedef std::unique_ptr<sfx::animated_drawable> animation;
 
 		/**
-		 * Spritesheet used with all map icons.
+		 * A piece of code to execute once it has reached the front of the
+		 * animation queue.
 		 */
-		std::shared_ptr<sfx::animated_spritesheet> _sheet_icon = nullptr;
+		typedef std::function<void(void)> code;
 
 		/**
-		 * Spritesheet used with all armies.
+		 * Allows the scripts to push code to the animation queue.
 		 */
-		std::shared_ptr<sfx::animated_spritesheet> _sheet_co = nullptr;
+		typedef engine::CScriptWrapper<asIScriptFunction> script_code;
+
+		/**
+		 * The animation queue.
+		 */
+		std::queue<std::variant<animation, code, script_code>> _animationQueue;
+
+		/**
+		 * The currently playing animation.
+		 */
+		animation _currentAnimation;
+
+		/**
+		 * The currently selected animation preset.
+		 */
+		awe::animation_preset _selectedAnimationPreset =
+			awe::animation_preset::NoVisual;
+
+		/**
+		 * Are animations enabled?
+		 * @warning Please note that \c code must always be queued regardless of
+		 *          the value of this field!
+		 */
+		bool _animationsEnabled = true;
+
+		/**
+		 * Flag allowing \c map to remember to destroy the first animation from the
+		 * queue during the next iteration of the game loop.
+		 */
+		bool _destroyAnimation = false;
+
+		/**
+		 * Used to prevent drawing cursor graphics whilst an animation is on-going,
+		 * and for an additional frame after the animation is destroyed.
+		 */
+		bool _drawCursors = true;
+
+		///////////////
+		// RESOURCES //
+		///////////////
+		/**
+		 * Spritesheets.
+		 */
+		std::shared_ptr<sfx::animated_spritesheets> _sheets;
 		
 		/**
 		 * GUI engine.
 		 */
-		std::shared_ptr<sfx::gui> _gui = nullptr;
+		std::shared_ptr<sfx::gui> _gui;
+
+		/**
+		 * The fonts available to the map.
+		 */
+		std::shared_ptr<sfx::fonts> _fonts;
 
 		///////////
 		// BANKS //

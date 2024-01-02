@@ -72,8 +72,8 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 	for (auto unit : units) {
 		// Ignore loaded units, as they will be handled automatically by
 		// deleteUnit().
-		if (_isUnitPresent(unit) && _units.at(unit).loadedOnto() == awe::NO_UNIT)
-			deleteUnit(unit);
+		if (_isUnitPresent(unit) &&
+			_units.at(unit).data.loadedOnto() == awe::NO_UNIT) deleteUnit(unit);
 	}
 	// Then, disown all tiles.
 	auto tiles = _armies.at(army).getTiles();
@@ -296,7 +296,8 @@ std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army
 			std::vector<sf::Vector2u> converted(result.begin(), result.end());
 			auto begin = converted.begin(), end = converted.end();
 			end = std::remove_if(begin, end, [&](const sf::Vector2u& tile) {
-				return filter.find(_tiles[tile.x][tile.y].getTileType()->getType())
+				return filter.find(
+					_tiles[tile.x][tile.y].data.getTileType()->getType())
 					== filter.end();
 				});
 			return std::unordered_set<sf::Vector2u>(begin, end);
@@ -344,7 +345,7 @@ awe::map::getUnitsOfArmyByPriority(const awe::ArmyID army) const {
 	std::map<unsigned int, std::unordered_set<awe::UnitID>> ret;
 	auto units = getUnitsOfArmy(army);
 	for (auto& unit : units)
-		ret[_units.at(unit).getType()->getTurnStartPriority()].insert(unit);
+		ret[_units.at(unit).data.getType()->getTurnStartPriority()].insert(unit);
 	return ret;
 }
 

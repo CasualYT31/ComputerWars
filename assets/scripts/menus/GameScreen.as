@@ -202,6 +202,22 @@ class GameScreen : Menu, Group {
     }
 
     /**
+     * Shows the army and tile widgets.
+     */
+    void showWidgets() {
+        armyWidget.setVisibility(true);
+        tileWidget.setVisibility(true);
+    }
+
+    /**
+     * Hides the army and tile widgets.
+     */
+    void hideWidgets() {
+        armyWidget.setVisibility(false);
+        tileWidget.setVisibility(false);
+    }
+
+    /**
      * Displays information on the current army.
      */
     private ArmyWidget armyWidget(128);

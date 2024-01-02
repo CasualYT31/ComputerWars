@@ -35,7 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "userinput.hpp"
 #include "gui.hpp"
 #include "bank.hpp"
-#include "spritesheets.hpp"
 #include "map.hpp"
 #include "mapstrings.hpp"
 #include <filesystem>
@@ -425,7 +424,7 @@ namespace awe {
 		/**
 		 * Pointer to the spritesheets.
 		 */
-		std::shared_ptr<awe::spritesheets> _sprites;
+		std::shared_ptr<sfx::animated_spritesheets> _sprites;
 
 		/**
 		 * Pointer to the @c scripts object containing all the scripts.

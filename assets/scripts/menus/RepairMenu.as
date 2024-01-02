@@ -80,6 +80,7 @@ class RepairMenu : Menu, Group {
                 // Perform repair and replenish.
                 const auto unitToRepair =
                     game.map.getUnitOnTile(game.map.getSelectedTile());
+                game.animateRepair(unitToRepair);
                 game.map.replenishUnit(unitToRepair);
                 game.healUnit(unitToRepair, 1, blackBoatsArmy);
                 // Go back to the game screen.

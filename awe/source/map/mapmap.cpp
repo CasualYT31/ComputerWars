@@ -49,8 +49,14 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 	bool mapHasShrunk = (getMapSize().x > dim.x || getMapSize().y > dim.y);
 	_tiles.resize(dim.x);
 	for (std::size_t x = 0; x < dim.x; ++x) {
-		_tiles[x].resize(dim.y, { { _logger.getData().sink, "tile" }, tile, owner,
-			_sheet_tile });
+		_tiles[x].reserve(dim.y);
+		for (std::size_t y = 0; y < dim.y; ++y)
+			// TODO-2.
+			_tiles[x].emplace_back(
+				engine::logger::data{ _logger.getData().sink, "tile" },
+				[&](const std::function<void(void)>& func)
+					{ _animationQueue.push(func); }, tile, owner,
+				(*_sheets)["tile.normal"]);
 	}
 	_mapSizeCache = dim;
 	if (mapHasShrunk) {
@@ -65,7 +71,7 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 		// Then, go through all units and delete those that are out of bounds.
 		std::vector<awe::UnitID> unitsToDelete;
 		for (auto& itr : _units) {
-			if (_isOutOfBounds(itr.second.getPosition()))
+			if (_isOutOfBounds(itr.second.data.getPosition()))
 				unitsToDelete.push_back(itr.first);
 		}
 		// Check if they are still present, as some of those IDs may be for units

@@ -1,0 +1,11 @@
+{
+  "icon": "sprites/icon/spritesicon.json",
+  "co": "sprites/co/spritesco.json",
+  "tile.normal": "sprites/tile/normal/spritestilenormal.json",
+  "tilePicture.normal": "sprites/tile_picture/normal/normal.json",
+  "unit": "sprites/unit/idle/spritesunitidle.json",
+  "unitPicture": "sprites/unit_picture/unitpictures.json",
+  "structure": "sprites/structure/spritesstructure.json",
+  "gui": "sprites/gui/spritesgui.json",
+  "particle": "sprites/particle/spritesparticle.json"
+}

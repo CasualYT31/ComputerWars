@@ -5,20 +5,7 @@
   "music": "audio/music.json",
   "renderer": "renderer/renderer.json",
   "userinput": "userinput/userinput.json",
-  "spritesheets": {
-    "co": "sprites/co/spritesco.json",
-    "unit": {
-      "idle": "sprites/unit/idle/spritesunitidle.json",
-      "pictures": "sprites/unit_picture/unitpictures.json"
-    },
-    "tile": {
-      "normal": "sprites/tile/normal/spritestilenormal.json",
-      "normalpictures": "sprites/tile_picture/normal/normal.json"
-    },
-    "icon": "sprites/icon/spritesicon.json",
-    "gui": "sprites/gui/spritesgui.json",
-    "structure": "sprites/structure/spritesstructure.json"
-  },
+  "spritesheets": "sprites/spritesheets.json",
   "countries": "property/country.json",
   "weathers": "property/weather.json",
   "environments": "property/environment.json",
