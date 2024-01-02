@@ -413,9 +413,9 @@ namespace sfx {
 			tgui::Vector2f origin;
 
 			/**
-			 * Was the \c ChildWindow resizeable before minimising or maximising?
+			 * Was the \c ChildWindow resizable before minimising or maximising?
 			 */
-			bool isResizeable = false;
+			bool isResizable = false;
 
 			/**
 			 * Was the \c ChildWindow position locked before minimising or

@@ -81,7 +81,7 @@ void sfx::gui::child_window_properties::cache(
 	size = window->getSizeLayout();
 	position = window->getPositionLayout();
 	origin = window->getOrigin();
-	isResizeable = window->isResizable();
+	isResizable = window->isResizable();
 	isPositionLocked = window->isPositionLocked();
 }
 
@@ -90,7 +90,7 @@ void sfx::gui::child_window_properties::restore(
 	window->setSize(size);
 	window->setPosition(position);
 	window->setOrigin(origin);
-	window->setResizable(isResizeable);
+	window->setResizable(isResizable);
 	window->setPositionLocked(isPositionLocked);
 }
 
