@@ -330,7 +330,23 @@ namespace awe {
     DetermineTileTypeFunc@ determineForPipe =
         function(UL, U, UR, LE, R, LL, L, LR) {
         string pipe = "";
-        if (pipeDestination(U) && pipeDestination(L))
+        // Special corner cases. If the pipe is adjacent to two null tiles and two
+        // pipe tiles, make this tile a corner by treating the null tiles as
+        // non-destination tiles.
+        if (U is null && LE is null && R !is null && L !is null &&
+            pipeDestination(R) && pipeDestination(L))
+            pipe = "05Apipecornerdownright";
+        else if (U is null && R is null && LE !is null && L !is null &&
+            pipeDestination(LE) && pipeDestination(L))
+            pipe = "05Bpipecornerdownleft";
+        else if (L is null && R is null && LE !is null && U !is null &&
+            pipeDestination(LE) && pipeDestination(U))
+            pipe = "05Cpipecornerupleft";
+        else if (L is null && LE is null && R !is null && U !is null &&
+            pipeDestination(R) && pipeDestination(U))
+            pipe = "05Dpipecornerupright";
+        // Normal cases.
+        else if (pipeDestination(U) && pipeDestination(L))
             pipe = "057pipevert";
         else if (pipeDestination(LE) && pipeDestination(R))
             pipe = "054pipehori";
