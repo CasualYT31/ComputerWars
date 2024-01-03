@@ -162,6 +162,14 @@
 			"ACID": "cityar",
 			"WHITE": "citywn"
 		},
+		"neutralproperty": "city",
+		"properties": {
+			"ORANGE": "oscity",
+			"BLUE": "bmcity",
+			"GREEN": "gecity",
+			"YELLOW": "yccity",
+			"BLACK": "bhcity"
+		},
 		"alwayspaintable": true
 	},
 
@@ -185,6 +193,14 @@
 			"PURPLE": "basepl",
 			"ACID": "basear",
 			"WHITE": "basewn"
+		},
+		"neutralproperty": "base",
+		"properties": {
+			"ORANGE": "osbase",
+			"BLUE": "bmbase",
+			"GREEN": "gebase",
+			"YELLOW": "ycbase",
+			"BLACK": "bhbase"
 		}
 	},
 
@@ -208,6 +224,14 @@
 			"PURPLE": "airportpl",
 			"ACID": "airportar",
 			"WHITE": "airportwn"
+		},
+		"neutralproperty": "airport",
+		"properties": {
+			"ORANGE": "osairport",
+			"BLUE": "bmairport",
+			"GREEN": "geairport",
+			"YELLOW": "ycairport",
+			"BLACK": "bhairport"
 		}
 	},
 
@@ -231,6 +255,14 @@
 			"PURPLE": "portpl",
 			"ACID": "portar",
 			"WHITE": "portwn"
+		},
+		"neutralproperty": "port",
+		"properties": {
+			"ORANGE": "osport",
+			"BLUE": "bmport",
+			"GREEN": "geport",
+			"YELLOW": "ycport",
+			"BLACK": "bhport"
 		}
 	},
 
@@ -254,6 +286,14 @@
 			"PURPLE": "compl",
 			"ACID": "comar",
 			"WHITE": "comwn"
+		},
+		"neutralproperty": "city",
+		"properties": {
+			"ORANGE": "oscity",
+			"BLUE": "bmcity",
+			"GREEN": "gecity",
+			"YELLOW": "yccity",
+			"BLACK": "bhcity"
 		}
 	},
 
@@ -277,6 +317,14 @@
 			"PURPLE": "labpl",
 			"ACID": "labar",
 			"WHITE": "labwn"
+		},
+		"neutralproperty": "lab",
+		"properties": {
+			"ORANGE": "oslab",
+			"BLUE": "bmlab",
+			"GREEN": "gelab",
+			"YELLOW": "yclab",
+			"BLACK": "bhlab"
 		}
 	},
 
@@ -300,6 +348,14 @@
 			"PURPLE": "hqpl",
 			"ACID": "hqar",
 			"WHITE": "hqwn"
+		},
+		"neutralproperty": "city",
+		"properties": {
+			"ORANGE": "oshq",
+			"BLUE": "bmhq",
+			"GREEN": "gehq",
+			"YELLOW": "ychq",
+			"BLACK": "bhhq"
 		}
 	},
 	

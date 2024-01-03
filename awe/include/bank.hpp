@@ -879,14 +879,23 @@ namespace awe {
 		 * The following keys are required:
 		 * <ul><li>\c "type" = \c _terrainType, <tt>(string)</tt></li>
 		 *     <li>\c "neutral" = \c _neutralTile, <tt>(string)</tt></li>
-		 *     <li>\c "tiles" = \c _tiles, <tt>({COUNTRY_SCRIPT_NAME: SPRITE_NAME
-		 *         (string)[, etc.]}  [string{, string, etc.}])</tt></li></ul>
+		 *     <li>\c "tiles" = \c _ownedTiles, <tt>({COUNTRY_SCRIPT_NAME:
+		 *         SPRITE_NAME (string)[, etc.]}  [string{, string, etc.}])</tt>
+		 *         </li>
+		 *     <li>\c "neutralproperty" = \c _neutralProperty,
+		 *         <tt>(string, optional, default = "")</tt></li>
+		 *     <li>\c "properties" = \c _ownedProperties,
+		 *         <tt>({COUNTRY_SCRIPT_NAME: SPRITE_NAME (string)[, etc.]}
+		 *         [string{, string, etc.}], optional, default = {})</tt></li></ul>
 		 * The \c neutral key stores a sprite name shown when the tile is not owned
 		 * by any country. This should be given for all tile types.\n
 		 * The \c tiles object stores a list of animated sprite names associated
 		 * with each country's version of the tile (i.e. when they own the tile).
 		 * This object does not have to be accounted for if the tile cannot be
-		 * owned/captured. In which case, the key and object can be omitted.
+		 * owned/captured. In which case, the key and object can be omitted.\n
+		 * The \c neutralproperty and \c properties keys store the sprites shown in
+		 * the capturing animation when capturing this tile type. They must be
+		 * given if the tile type's terrain is capturable.
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
 		 * @param j          The object value containing the tile type's
@@ -964,6 +973,52 @@ namespace awe {
 		 */
 		inline const std::string& getNeutralTile() const noexcept {
 			return _neutralTile;
+		}
+
+		/**
+		 * Finds out if this tile type has owned property sprites.
+		 * @return \c TRUE if this tile type has at least one owned property
+		 *         sprite. \c FALSE if it has none.
+		 */
+		inline bool hasOwnedProperties() const {
+			return !_ownedProperties.empty();
+		}
+
+		/**
+		 * Retrieves the name of the property sprite that is shown for a given
+		 * country.
+		 * @param  countryName The script name of the country.
+		 * @return The name of the property's sprite, or \c _neutralProperty if the
+		 *         given country name didn't identify a sprite name.
+		 */
+		inline const std::string& getOwnedProperty(
+			const std::string& countryName) const {
+			return ((_ownedProperties.find(countryName) == _ownedProperties.end())
+				? (getNeutralProperty()) : (_ownedProperties.at(countryName)));
+		}
+
+		/**
+		 * Retrieves the name of the property sprite that is shown for a given
+		 * country.
+		 * @param  countryID The turn order ID of the country.
+		 * @return The name of the property's sprite, or \c _neutralProperty if the
+		 *         given country name didn't identify a sprite name.
+		 */
+		inline const std::string& getOwnedProperty(
+			const awe::ArmyID countryID) const {
+			return ((_ownedPropertiesTurnOrder.find(countryID) ==
+				_ownedPropertiesTurnOrder.end()) ?
+				(getNeutralProperty()) :
+				(_ownedPropertiesTurnOrder.at(countryID)));
+		}
+
+		/**
+		 * Retrieves the name of the property sprite that is shown when no country
+		 * owns the tile.
+		 * @return The name of the property's neutral sprite.
+		 */
+		inline const std::string& getNeutralProperty() const noexcept {
+			return _neutralProperty;
 		}
 
 		/**
@@ -1083,6 +1138,24 @@ namespace awe {
 		 * The sprite name of the tile with no owner.
 		 */
 		std::string _neutralTile;
+
+		/**
+		 * The names of the large property sprites corresponding to each country.
+		 * Should be filled in if the terrain type is capturable.
+		 */
+		std::unordered_map<std::string, std::string> _ownedProperties;
+
+		/**
+		 * \c _ownedProperties keyed by turn order ID.
+		 */
+		mutable std::unordered_map<awe::ArmyID, std::string>
+			_ownedPropertiesTurnOrder;
+
+		/**
+		 * The name of the large property sprite with no owner.
+		 * Should be set if the terrain type is capturable.
+		 */
+		std::string _neutralProperty;
 
 		/**
 		 * If \c TRUE, the tile is always paintable individually, even if it forms
@@ -1398,6 +1471,12 @@ namespace awe {
 		 *     <li>\c "destroyedsprites" = \c _destroyedUnits,
 		 *         <tt>{COUNTRY_SCRIPT_NAME: string SPRITE_NAME[, etc.]}</tt> OR
 		 *         <tt>string SPRITE_NAME</tt></li>
+		 *     <li>\c "capturingsprites" = \c _capturingUnits,
+		 *         <tt>({COUNTRY_SCRIPT_NAME: string SPRITE_NAME[, etc.]},
+		 *         optional, default = {})</tt></li>
+		 *     <li>\c "capturedsprites" = \c _capturedUnits,
+		 *         <tt>({COUNTRY_SCRIPT_NAME: string SPRITE_NAME[, etc.]},
+		 *         optional, default = {})</tt></li>
 		 *     <li>\c "canload" = \c _canLoadThese, <tt>([UNIT_TYPE_SCRIPT_NAME{,
 		 *         etc.}])</tt></li>
 		 *     <li>\c "loadlimit" = \c _loadLimit, <tt>(unsigned 32-bit int)</tt>
@@ -1421,10 +1500,16 @@ namespace awe {
 		 * map representation of the type of unit.\n
 		 *
 		 * DestroyedSprites is a dictionary of sprite IDs corresponding to the
-		 * sprite that is momentarily displayed on the map when the unit is
+		 * particle that is momentarily displayed on the map when the unit is
 		 * destroyed, keyed on country script name. If a single string is given
 		 * instead of a dictionary, then that sprite will be used for all
 		 * countries.\n
+		 *
+		 * CapturingSprites and CapturedSprites are the larger graphics that are
+		 * shown during this unit's capturing animation. The former is shown when
+		 * the unit begins a capture, and the latter is shown when the unit
+		 * completes a capture. They should be given if this unit type can
+		 * capture.\n
 		 *
 		 * Upon the start of an army's turn, all of their units go through a script
 		 * function which will affect the unit depending on its type.
@@ -1566,7 +1651,8 @@ namespace awe {
 		 * when it is destroyed.
 		 * @param  countryName The script name of the country.
 		 * @return The sprite name, or a blank string if the given country ID
-		 *         didn't map to a sprite name in the internal list.
+		 *         didn't map to a sprite name in the internal list. If the
+		 *         internal list is empty, \c _destroyedUnitForAll.
 		 */
 		inline const std::string& getDestroyedUnit(
 			const std::string& countryName) const {
@@ -1580,7 +1666,8 @@ namespace awe {
 		 * when it is destroyed.
 		 * @param  countryID The turn order ID of the country.
 		 * @return The sprite name, or a blank string if the given country ID
-		 *         didn't map to a sprite name in the internal list.
+		 *         didn't map to a sprite name in the internal list. If the
+		 *         internal list is empty, \c _destroyedUnitForAll.
 		 */
 		inline const std::string& getDestroyedUnit(
 			const awe::ArmyID countryID) const {
@@ -1588,6 +1675,60 @@ namespace awe {
 			return ((_destroyedUnitsTurnOrder.find(countryID) ==
 				_destroyedUnitsTurnOrder.end()) ? (EMPTY_STRING) :
 				(_destroyedUnitsTurnOrder.at(countryID)));
+		}
+
+		/**
+		 * Retrieves the sprite name of a given country's capturing sprite of this
+		 * unit.
+		 * @param  countryName The script name of the country.
+		 * @return The sprite name, or a blank string if the given country ID
+		 *         didn't map to a sprite name in the internal list.
+		 */
+		inline const std::string& getCapturingUnit(
+			const std::string& countryName) const {
+			return ((_capturingUnits.find(countryName) == _capturingUnits.end()) ?
+				(EMPTY_STRING) : (_capturingUnits.at(countryName)));
+		}
+
+		/**
+		 * Retrieves the sprite name of a given country's capturing sprite of this
+		 * unit.
+		 * @param  countryID The turn order ID of the country.
+		 * @return The sprite name, or a blank string if the given country ID
+		 *         didn't map to a sprite name in the internal list.
+		 */
+		inline const std::string& getCapturingUnit(
+			const awe::ArmyID countryID) const {
+			return ((_capturingUnitsTurnOrder.find(countryID) ==
+				_capturingUnitsTurnOrder.end()) ? (EMPTY_STRING) :
+				(_capturingUnitsTurnOrder.at(countryID)));
+		}
+
+		/**
+		 * Retrieves the sprite name of a given country's captured sprite of this
+		 * unit.
+		 * @param  countryName The script name of the country.
+		 * @return The sprite name, or a blank string if the given country ID
+		 *         didn't map to a sprite name in the internal list.
+		 */
+		inline const std::string& getCapturedUnit(
+			const std::string& countryName) const {
+			return ((_capturedUnits.find(countryName) == _capturedUnits.end()) ?
+				(EMPTY_STRING) : (_capturedUnits.at(countryName)));
+		}
+
+		/**
+		 * Retrieves the sprite name of a given country's captured sprite of this
+		 * unit.
+		 * @param  countryID The turn order ID of the country.
+		 * @return The sprite name, or a blank string if the given country ID
+		 *         didn't map to a sprite name in the internal list.
+		 */
+		inline const std::string& getCapturedUnit(
+			const awe::ArmyID countryID) const {
+			return ((_capturedUnitsTurnOrder.find(countryID) ==
+				_capturedUnitsTurnOrder.end()) ? (EMPTY_STRING) :
+				(_capturedUnitsTurnOrder.at(countryID)));
 		}
 
 		/**
@@ -1861,6 +2002,29 @@ namespace awe {
 		 */
 		mutable std::unordered_map<awe::ArmyID, std::string>
 			_destroyedUnitsTurnOrder;
+
+		/**
+		 * The IDs of sprites that are shown when this unit is capturing.
+		 */
+		std::unordered_map<std::string, std::string> _capturingUnits;
+
+		/**
+		 * \c _capturingUnits keyed by turn order ID.
+		 */
+		mutable std::unordered_map<awe::ArmyID, std::string>
+			_capturingUnitsTurnOrder;
+
+		/**
+		 * The IDs of sprites that are shown when this unit has completed a
+		 * capture.
+		 */
+		std::unordered_map<std::string, std::string> _capturedUnits;
+
+		/**
+		 * \c _capturedUnits keyed by turn order ID.
+		 */
+		mutable std::unordered_map<awe::ArmyID, std::string>
+			_capturedUnitsTurnOrder;
 
 		/**
 		 * The price property.

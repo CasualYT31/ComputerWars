@@ -22,6 +22,20 @@
 			"WHITE": "infwn"
 		},
 		"destroyedsprites": "land",
+		"capturingsprites": {
+			"ORANGE": "osinfcapturing",
+			"BLUE": "bminfcapturing",
+			"GREEN": "geinfcapturing",
+			"YELLOW": "ycinfcapturing",
+			"BLACK": "bhinfcapturing"
+		},
+		"capturedsprites": {
+			"ORANGE": "osinfcaptured",
+			"BLUE": "bminfcaptured",
+			"GREEN": "geinfcaptured",
+			"YELLOW": "ycinfcaptured",
+			"BLACK": "bhinfcaptured"
+		},
 		"pictures": {
 			"ORANGE": "osinfantry",
 			"BLUE": "bminfantry",
@@ -80,6 +94,20 @@
 			"WHITE": "mechwn"
 		},
 		"destroyedsprites": "land",
+		"capturingsprites": {
+			"ORANGE": "osinfcapturing",
+			"BLUE": "bminfcapturing",
+			"GREEN": "geinfcapturing",
+			"YELLOW": "ycinfcapturing",
+			"BLACK": "bhinfcapturing"
+		},
+		"capturedsprites": {
+			"ORANGE": "osinfcaptured",
+			"BLUE": "bminfcaptured",
+			"GREEN": "geinfcaptured",
+			"YELLOW": "ycinfcaptured",
+			"BLACK": "bhinfcaptured"
+		},
 		"pictures": {
 			"ORANGE": "osmech",
 			"BLUE": "bmmech",

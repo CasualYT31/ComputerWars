@@ -975,6 +975,11 @@ void awe::map::Register(asIScriptEngine* engine,
 			"bool animateLabelUnit(const UnitID, const string&in, "
 			"const string&in, const float = 0.7)",
 			asMETHOD(awe::map, animateLabelUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool animateCapture(const Vector2&in, const UnitID, const HP, "
+			"const HP)",
+			asMETHOD(awe::map, animateCapture), asCALL_THISCALL);
 	}
 }
 

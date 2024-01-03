@@ -7,5 +7,6 @@
   "unitPicture": "sprites/unit_picture/unitpictures.json",
   "structure": "sprites/structure/spritesstructure.json",
   "gui": "sprites/gui/spritesgui.json",
-  "particle": "sprites/particle/spritesparticle.json"
+  "particle": "sprites/particle/spritesparticle.json",
+  "capturing": "sprites/capturing/spritescapturing.json"
 }

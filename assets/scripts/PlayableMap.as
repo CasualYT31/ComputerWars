@@ -885,7 +885,9 @@ shared class PlayableMap {
         const auto tile = map.closedList[map.closedList.length() - 1].tile;
         if (canCapture(unit, tile)) {
             moveUnit();
-            const auto newHP = map.getTileHP(tile) - map.getUnitDisplayedHP(unit);
+            const auto oldHP = map.getTileHP(tile);
+            const auto newHP = oldHP - map.getUnitDisplayedHP(unit);
+            map.animateCapture(tile, unit, oldHP, newHP);
             if (newHP <= 0) {
                 if (map.getTileType(tile).type.scriptName == "HQ") {
                     deleteArmy(map.getTileOwner(tile), map.getArmyOfUnit(unit));
@@ -1574,10 +1576,12 @@ shared class PlayableMap {
     // ANIMATION HELPER METHODS //
     //////////////////////////////
     /**
-     * Animates the Supply Label on a given unit.
+     * Animates the Supply Label on a given unit if it's not already fully
+     * replenished and healed.
      * @param unit The ID of the unit to point the label to.
      */
     void animateReplenish(const UnitID unit) {
+        if (map.isUnitReplenished(unit, true)) return;
         map.animateLabelUnit(unit, "supplypointtoright", "supplypointtoleft");
     }
     

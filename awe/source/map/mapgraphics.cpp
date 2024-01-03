@@ -507,6 +507,47 @@ bool awe::map::animateLabelUnit(const awe::UnitID unitID,
 	return true;
 }
 
+bool awe::map::animateCapture(const sf::Vector2u& tile, const awe::UnitID unit,
+	const awe::HP oldHP, const awe::HP newHP) {
+	if (!_canAnimationBeQueued({ awe::animation_preset::VisualA,
+		awe::animation_preset::VisualB })) return false;
+	if (_isOutOfBounds(tile)) {
+		_logger.error("animateCapture operation cancelled: attempted to capture "
+			"tile {} with unit with ID {} (old HP = {}, new HP = {}). This tile "
+			"is out-of-bounds.", tile, unit, oldHP, newHP);
+		return false;
+	}
+	if (!_isUnitPresent(unit)) {
+		_logger.error("animateCapture operation cancelled: attempted to capture "
+			"tile {} with unit with ID {} (old HP = {}, new HP = {}). This unit "
+			"does not exist.", tile, unit, oldHP, newHP);
+		return false;
+	}
+	const auto& t = _tiles[tile.x][tile.y];
+	const auto tOwner = t.data.getTileOwner();
+	const auto& u = _units.at(unit);
+	const auto uArmy = u.data.getArmy();
+	// TODO-2.
+	_animationQueue.push(std::make_unique<awe::capture>(
+		(*_sheets)["capturing"],
+		"bg",
+		(tOwner == awe::NO_ARMY ? t.data.getTileType()->getNeutralProperty() :
+			t.data.getTileType()->getOwnedProperty(tOwner)),
+		t.data.getTileType()->getOwnedProperty(uArmy),
+		u.data.getType()->getCapturingUnit(uArmy),
+		u.data.getType()->getCapturedUnit(uArmy),
+		"captured",
+		_dict,
+		oldHP,
+		newHP,
+		t.data.getTileType()->getType()->getMaxHP(),
+		*t.sprite,
+		(*_fonts)["Monospace"],
+		(*_fonts)["AW2"]
+	));
+	return true;
+}
+
 bool awe::map::_canAnimationBeQueued(
 	const std::vector<awe::animation_preset>& presets) const {
 	if (!_animationsEnabled) return false;

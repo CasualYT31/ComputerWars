@@ -267,6 +267,30 @@ void awe::tile_type::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's tile "
 		"graphic that is displayed on the map.");
 	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_hasOwnedProperties() const property",
+		asMETHOD(T, hasOwnedProperties), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns <tt>TRUE</tt> if this tile type "
+		"has at least one owned property sprite.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& ownedPropertySprite(const string&in) const",
+		asMETHODPR(T, getOwnedProperty, (const std::string&) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's owned "
+		"property that is displayed when it's being captured, given a country "
+		"script name.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& ownedPropertySprite(const ArmyID) const",
+		asMETHODPR(T, getOwnedProperty, (const awe::ArmyID) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's owned "
+		"property that is displayed when it's being captured, given a country "
+		"turn order ID.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_neutralPropertySprite() const property",
+		asMETHOD(T, getNeutralProperty), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this tile's "
+		"property graphic that is displayed when it's being captured.");
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"bool get_alwaysPaintable() const property",
 		asMETHOD(T, alwaysPaintable), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Is this tile type always paintable "
@@ -401,6 +425,20 @@ void awe::unit_type::Register(const std::string& type,
 			const std::string&), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's tile "
 		"graphic that is displayed on the map when it is destroyed, given a "
+		"country turn order ID.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& capturingUnitSprite(const string&in) const",
+		asMETHODPR(T, getCapturingUnit, (const std::string&) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's larger "
+		"graphic that is displayed when it is capturing, given a country script "
+		"name.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& capturingUnitSprite(const ArmyID) const",
+		asMETHODPR(T, getCapturingUnit, (const awe::ArmyID) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's larger "
+		"graphic that is displayed when it is has completed a capture, given a "
 		"country turn order ID.");
 	r = engine->RegisterObjectMethod(type.c_str(),
 		"uint get_cost() const property",

@@ -26,7 +26,8 @@ add_library(${PROJECT_NAME} STATIC
 	"source/map/animations/source/tagcos.cpp"
 	"source/map/animations/source/tileparticle.cpp"
 	"source/map/animations/source/zoom.cpp"
-	"source/map/animations/source/labelunit.cpp")
+	"source/map/animations/source/labelunit.cpp"
+	"source/map/animations/source/capture.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsAWE_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

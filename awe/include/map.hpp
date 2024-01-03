@@ -2407,6 +2407,18 @@ namespace awe {
 			const std::string& leftLabel, const std::string& rightLabel,
 			const float duration = 0.7f);
 
+		/**
+		 * Attempts to queue a "property capture" animation.
+		 * @param  tile  The property tile being captured.
+		 * @param  unit  The ID of the unit capturing the property.
+		 * @param  oldHP The old HP of the tile.
+		 * @param  newHP The new HP of the tile. If this is \c <= \c 0, the tile is
+		 *               considered captured.
+		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool animateCapture(const sf::Vector2u& tile, const awe::UnitID unit,
+			const awe::HP oldHP, const awe::HP newHP);
+
 		//////////
 		// MISC //
 		//////////

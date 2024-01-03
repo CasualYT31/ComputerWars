@@ -444,11 +444,22 @@ namespace sfx {
 		std::size_t operator--(int) noexcept;
 
 		/**
-		 * Gets the current size of the sprite.
+		 * Gets the current size of the sprite with scaling applied.
+		 * @return The size of the internal sprite, specifically, the texture rect
+		 *         width and height, at the time of calling, with scaling applied.
+		 */
+		inline sf::Vector2f getSize() const {
+			const auto size = getUnscaledSize();
+			return sf::Vector2f(size.x * _sprite.getScale().x,
+				size.y * _sprite.getScale().y);
+		}
+
+		/**
+		 * Gets the current size of the sprite without scaling applied.
 		 * @return The size of the internal sprite, specifically, the texture rect
 		 *         width and height, at the time of calling.
 		 */
-		inline sf::Vector2f getSize() const {
+		inline sf::Vector2f getUnscaledSize() const {
 			return sf::Vector2f(static_cast<float>(_sprite.getTextureRect().width),
 				static_cast<float>(_sprite.getTextureRect().height));
 		}
@@ -467,8 +478,7 @@ namespace sfx {
 		 * @return The position of the sprite, in pixels.
 		 */
 		inline sf::Vector2f getPosition() const {
-			return getPositionWithoutOffset() + ((_sheet) ?
-				(_sheet->getSpriteOffset(_spriteID)) : (sf::Vector2f()));
+			return getPositionWithoutOffset() + getOffset();
 		}
 
 		/**
@@ -478,6 +488,15 @@ namespace sfx {
 		 */
 		inline sf::Vector2f getPositionWithoutOffset() const {
 			return _sprite.getPosition();
+		}
+
+		/**
+		 * Gets the offset of the sprite that's currently set to this object.
+		 * @return The offset of the sprite as configured in the spritesheet. If
+		 *         there is no sheet, an empty vector will be returned.
+		 */
+		inline sf::Vector2f getOffset() const {
+			return _sheet ? _sheet->getSpriteOffset(_spriteID) : sf::Vector2f();
 		}
 
 		/**
@@ -511,6 +530,22 @@ namespace sfx {
 		 */
 		inline float getRotation() const {
 			return _sprite.getRotation();
+		}
+
+		/**
+		 * Sets the scaling of the internal sprite.
+		 * @param  factors The new scaling of the sprite.
+		 */
+		inline void setScale(const sf::Vector2f& factors) {
+			_sprite.setScale(factors);
+		}
+
+		/**
+		 * Gets the scaling of the internal sprite.
+		 * @return The scaling factors of the sprite.
+		 */
+		inline sf::Vector2f getScale() const {
+			return _sprite.getScale();
 		}
 
 		/**

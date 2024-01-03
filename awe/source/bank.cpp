@@ -133,6 +133,12 @@ awe::tile_type::tile_type(const std::string& scriptName, engine::json& j) :
 		j.applyMap(_ownedTiles, { "tiles" });
 		j.resetState();
 	}
+	if (j.keysExist({ "neutralproperty" }))
+		j.apply(_neutralProperty, { "neutralproperty" }, true);
+	if (j.keysExist({ "properties" })) {
+		j.applyMap(_ownedProperties, { "properties" });
+		j.resetState();
+	}
 	if (j.keysExist({ "alwayspaintable" }))
 		j.apply(_alwaysPaintable, { "alwayspaintable" }, true);
 }
@@ -142,6 +148,7 @@ awe::tile_type::~tile_type() noexcept {
 void awe::tile_type::updateOwnedTilesMap(
 	const awe::bank<awe::country>& countries) const {
 	updateTurnOrderMap(_ownedTiles, _ownedTilesTurnOrder, countries);
+	updateTurnOrderMap(_ownedProperties, _ownedPropertiesTurnOrder, countries);
 }
 void awe::tile_type::updateStructures(
 	const awe::bank<awe::structure>& structureBank,
@@ -232,6 +239,14 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) :
 			j.applyMap(_destroyedUnits, { "destroyedsprites" });
 			j.resetState();
 		}
+	}
+	if (j.keysExist({ "capturingsprites" })) {
+		j.applyMap(_capturingUnits, { "capturingsprites" });
+		j.resetState();
+	}
+	if (j.keysExist({ "capturedsprites" })) {
+		j.applyMap(_capturedUnits, { "capturedsprites" });
+		j.resetState();
 	}
 	if (j.keysExist({ "canload" })) {
 		j.applyVector(_canLoadThese, { "canload" });
@@ -356,6 +371,8 @@ void awe::unit_type::updateSpriteMaps(
 	updateTurnOrderMap(_pictures, _picturesTurnOrder, countries);
 	updateTurnOrderMap(_units, _unitsTurnOrder, countries);
 	updateTurnOrderMap(_destroyedUnits, _destroyedUnitsTurnOrder, countries);
+	updateTurnOrderMap(_capturingUnits, _capturingUnitsTurnOrder, countries);
+	updateTurnOrderMap(_capturedUnits, _capturedUnitsTurnOrder, countries);
 }
 
 //***********
