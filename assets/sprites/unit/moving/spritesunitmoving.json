@@ -9,6 +9,238 @@
       ],
       "durations": [ 100, 100, 100, 100 ],
       "globalframeid": true
+    },
+    "mechos": {
+      "frames": [
+        [ 32, 0, 32, 32 ],
+        [ 864, 0, 32, 32 ],
+        [ 1696, 0, 32, 32 ],
+        [ 864, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "reconos": {
+      "frames": [
+        [ 64, 0, 32, 32 ],
+        [ 896, 0, 32, 32 ],
+        [ 1728, 0, 32, 32 ],
+        [ 896, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "tankos": {
+      "frames": [
+        [ 96, 0, 32, 32 ],
+        [ 928, 0, 32, 32 ],
+        [ 1760, 0, 32, 32 ],
+        [ 928, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "mdos": {
+      "frames": [
+        [ 128, 0, 32, 32 ],
+        [ 960, 0, 32, 32 ],
+        [ 1792, 0, 32, 32 ],
+        [ 960, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "neoos": {
+      "frames": [
+        [ 160, 0, 32, 32 ],
+        [ 992, 0, 32, 32 ],
+        [ 1824, 0, 32, 32 ],
+        [ 992, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "megaos": {
+      "frames": [
+        [ 192, 0, 32, 32 ],
+        [ 1024, 0, 32, 32 ],
+        [ 1856, 0, 32, 32 ],
+        [ 1024, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "apcos": {
+      "frames": [
+        [ 224, 0, 32, 32 ],
+        [ 1056, 0, 32, 32 ],
+        [ 1888, 0, 32, 32 ],
+        [ 1056, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "antios": {
+      "frames": [
+        [ 256, 0, 32, 32 ],
+        [ 1088, 0, 32, 32 ],
+        [ 1920, 0, 32, 32 ],
+        [ 1088, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "artos": {
+      "frames": [
+        [ 288, 0, 32, 32 ],
+        [ 1120, 0, 32, 32 ],
+        [ 1952, 0, 32, 32 ],
+        [ 1120, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "rocketos": {
+      "frames": [
+        [ 320, 0, 32, 32 ],
+        [ 1152, 0, 32, 32 ],
+        [ 1984, 0, 32, 32 ],
+        [ 1152, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "missos": {
+      "frames": [
+        [ 352, 0, 32, 32 ],
+        [ 1184, 0, 32, 32 ],
+        [ 2016, 0, 32, 32 ],
+        [ 1184, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "pipeos": {
+      "frames": [
+        [ 384, 0, 32, 32 ],
+        [ 1216, 0, 32, 32 ],
+        [ 2048, 0, 32, 32 ],
+        [ 1216, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "tos": {
+      "frames": [
+        [ 416, 0, 32, 32 ],
+        [ 1600, 0, 32, 32 ]
+      ],
+      "durations": [ 30, 30 ],
+      "globalframeid": true
+    },
+    "bos": {
+      "frames": [
+        [ 448, 0, 32, 32 ],
+        [ 1632, 0, 32, 32 ]
+      ],
+      "durations": [ 30, 30 ],
+      "globalframeid": true
+    },
+    "fighteros": {
+      "frames": [
+        [ 480, 0, 32, 32 ],
+        [ 1248, 0, 32, 32 ],
+        [ 2080, 0, 32, 32 ],
+        [ 1248, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "bomberos": {
+      "frames": [
+        [ 512, 0, 32, 32 ],
+        [ 1280, 0, 32, 32 ],
+        [ 2112, 0, 32, 32 ],
+        [ 1280, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "stealthos": {
+      "frames": [
+        [ 544, 0, 32, 32 ],
+        [ 1312, 0, 32, 32 ],
+        [ 2144, 0, 32, 32 ],
+        [ 1312, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "bbombos": {
+      "frames": [
+        [ 576, 0, 32, 32 ],
+        [ 1344, 0, 32, 32 ],
+        [ 2176, 0, 32, 32 ],
+        [ 1344, 0, 32, 32 ]
+      ],
+      "durations": [ 100, 100, 100, 100 ],
+      "globalframeid": true
+    },
+    "bboatos": {
+      "frames": [
+        [ 608, 0, 32, 32 ],
+        [ 1376, 0, 32, 32 ]
+      ],
+      "durations": [ 150, 550 ],
+      "globalframeid": true
+    },
+    "landeros": {
+      "frames": [
+        [ 640, 0, 32, 32 ],
+        [ 1408, 0, 32, 32 ]
+      ],
+      "durations": [ 150, 550 ],
+      "globalframeid": true
+    },
+    "cruiseros": {
+      "frames": [
+        [ 672, 0, 32, 32 ],
+        [ 1440, 0, 32, 32 ]
+      ],
+      "durations": [ 150, 550 ],
+      "globalframeid": true
+    },
+    "subos": {
+      "frames": [
+        [ 704, 0, 32, 32 ],
+        [ 1472, 0, 32, 32 ]
+      ],
+      "durations": [ 150, 550 ],
+      "globalframeid": true
+    },
+    "battleos": {
+      "frames": [
+        [ 736, 0, 32, 32 ],
+        [ 1504, 0, 32, 32 ]
+      ],
+      "durations": [ 150, 550 ],
+      "globalframeid": true
+    },
+    "carrieros": {
+      "frames": [
+        [ 768, 0, 32, 32 ],
+        [ 1536, 0, 32, 32 ]
+      ],
+      "durations": [ 150, 550 ],
+      "globalframeid": true
+    },
+    "ooziumos": {
+      "frames": [
+        [ 800, 0, 32, 32 ],
+        [ 1568, 0, 32, 32 ]
+      ],
+      "durations": [ 550, 150 ],
+      "globalframeid": true
     }
   }
 }
