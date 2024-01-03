@@ -603,12 +603,16 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 			tile.sprite->setPixelPosition(tilex, tiley -
 				static_cast<float>((tileHeight - tile.sprite->MIN_HEIGHT)));
 
+			// The unit's position is set to the bottom of the tile.
+			const float unitx = tilex + fTileWidth * 0.5f,
+				unity = tiley + static_cast<float>(awe::animated_tile::MIN_HEIGHT);
+
 			// Update the tile's unit's pixel position accordingly, if it
 			// doesn't have an override.
 			const auto tilesUnit = tile.data.getUnit();
 			if (tilesUnit && _unitLocationOverrides.find(tilesUnit) ==
 				_unitLocationOverrides.end()) {
-				_units.at(tilesUnit).sprite->setPixelPosition(tilex, tiley);
+				_units.at(tilesUnit).sprite->setPixelPosition(unitx, unity);
 			}
 
 			// Check if this tile has a unit's location overridded onto it.
@@ -616,10 +620,10 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 				unitLocationOverrides.end()) {
 				const auto uID = unitLocationOverrides[tilePos];
 				if (_isUnitPresent(uID)) {
-					_units.at(uID).sprite->setPixelPosition(tilex, tiley);
+					_units.at(uID).sprite->setPixelPosition(unitx, unity);
 				} else {
 					// The unit is in the processing of being destroyed.
-					_unitsBeingDestroyed.at(uID)->setPixelPosition(tilex, tiley);
+					_unitsBeingDestroyed.at(uID)->setPixelPosition(unitx, unity);
 				}
 			}
 

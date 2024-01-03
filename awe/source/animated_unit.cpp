@@ -43,9 +43,13 @@ bool awe::animated_unit::animate(const sf::RenderTarget& target) {
 	_loadedIcon.animate(target);
 	_capturingHidingIcon.animate(target);
 	bool ret = _sprite.animate(target);
-	// Calculate icon positions.
-	sf::Vector2f pos = _sprite.getPosition();
+	// Continusouly update the sprite's origin to be at the centre bottom.
 	sf::Vector2f size = _sprite.getSize();
+	_sprite.setOrigin(sf::Vector2f(size.x * 0.5f, size.y));
+	// Calculate icon positions. pos needs to point to the UL corner of the sprite.
+	sf::Vector2f pos = _sprite.getPosition();
+	pos.x -= size.x * 0.5f;
+	pos.y -= size.y;
 	_hpIcon.setPosition(sf::Vector2f(pos.x + size.x - _hpIcon.getSize().x,
 		pos.y + size.y - _hpIcon.getSize().y));
 	_fuelAmmoIcon.setPosition(sf::Vector2f(pos.x, pos.y + size.y -

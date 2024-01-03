@@ -32,6 +32,9 @@ awe::label_unit::label_unit(const awe::unit& unit,
 bool awe::label_unit::animate(const sf::RenderTarget& target) {
 	if (firstTimeAnimated()) {
 		_finalPosition = _unitSprite->getPixelPosition();
+		// TODO-3.
+		_finalPosition.x -= _unitSprite->getPixelSize().x * 0.5f;
+		_finalPosition.y -= _unitSprite->getPixelSize().y;
 		_finalPosition.y += _unitSprite->getPixelSize().y / 2.0f;
 		if (!_leftSide) _finalPosition.x += _unitSprite->getPixelSize().x;
 		_label.setPosition(_finalPosition);
