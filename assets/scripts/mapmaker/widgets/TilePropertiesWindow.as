@@ -30,6 +30,9 @@ class TilePropertiesWindow : Observer, ChildWindow {
         add(noTileSelectMessage);
         add(tabs);
         refresh(any());
+        // Register Closing signal now so that close() call doesn't try to access
+        // edit indirectly during the game's initialisation.
+        connectClosing(function(alwaysClose){ edit.deselectTile(); });
     }
 
     /**
