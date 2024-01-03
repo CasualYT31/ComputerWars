@@ -551,8 +551,12 @@ shared class PlayableMap {
      *             given if the currently selected unit is to be deselected.
      */
     void selectUnit(const UnitID unit) {
+        const auto currentlySelectedUnit = map.getSelectedUnit();
         map.setSelectedUnit(unit);
         if (unit != NO_UNIT) {
+            const auto armyOfUnit = map.getArmyOfUnit(unit);
+            map.setUnitSpritesheet(unit,
+                map.getUnitType(unit).selectedSpritesheet(armyOfUnit));
             map.setAvailableTileShader(AvailableTileShader::Yellow);
             newClosedListNode(map.closedList, -1, map.getUnitPosition(unit), 0);
             map.disableSelectedUnitRenderingEffects(false);
@@ -567,13 +571,16 @@ shared class PlayableMap {
             for (uint i = 0, length = allTiles.length(); i < length; ++i) {
                 if (map.findPath(tile, allTiles[i], unitType.movementType,
                     unitType.movementPoints, map.getUnitFuel(unit),
-                    map.getTeamOfUnit(unit), map.getArmyOfUnit(unit),
+                    map.getTeamOfUnit(unit), armyOfUnit,
                     unitType.hasInfiniteFuel,
                     unitType.scriptName == "OOZIUM").length() > 0) {
                     map.addAvailableTile(allTiles[i]);
                 }
             }
             map.addAvailableTile(tile);
+        } else if (map.isUnitOnMap(currentlySelectedUnit)) {
+            map.setUnitSpritesheet(currentlySelectedUnit,
+                map.getUnitType(currentlySelectedUnit).idleSpritesheet);
         }
     }
 

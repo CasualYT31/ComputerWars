@@ -509,6 +509,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"uint getUnitDefence(const UnitID) const",
 			asMETHOD(awe::map, getUnitDefence), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"void setUnitSpritesheet(const UnitID, const string&in)",
+			asMETHOD(awe::map, setUnitSpritesheet), asCALL_THISCALL);
+
 		/////////////////////
 		// TILE OPERATIONS //
 		/////////////////////

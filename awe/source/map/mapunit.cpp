@@ -46,7 +46,7 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 	// TODO-2.
 	_units.insert({ id, unit_data({ _logger.getData().sink, "unit" },
 		[&](const std::function<void(void)>& func) { _animationQueue.push(func); },
-		type, army, (*_sheets)["unit"], (*_sheets)["icon"])});
+		type, army, (*_sheets)[type->getIdleSpritesheet()], (*_sheets)["icon"])});
 	_armies.at(army).addUnit(id);
 	return id;
 }
@@ -538,4 +538,18 @@ unsigned int awe::map::getUnitDefence(const awe::UnitID id) const {
 	} else {
 		return getTileType(getUnitPosition(id))->getType()->getDefence();
 	}
+}
+
+void awe::map::setUnitSpritesheet(const awe::UnitID id, const std::string& name) {
+	if (!_isUnitPresent(id)) {
+		_logger.error("setUnitSpritesheet operation failed: unit with ID {} "
+			"doesn't exist!", id);
+		return;
+	}
+	if (!_sheets->exists(name)) {
+		_logger.error("setUnitSpritesheet operation failed: spritesheet with name "
+			"\"{}\" doesn't exist!", name);
+		return;
+	}
+	_units.at(id).sprite->setSpritesheet((*_sheets)[name]);
 }

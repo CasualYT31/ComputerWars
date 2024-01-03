@@ -189,14 +189,23 @@ std::size_t sfx::animated_spritesheet::heightOfTallestFrame() const {
 	return _tallestSpriteHeight;
 }
 
+void sfx::animated_spritesheet::setPathOverride(const std::string& path) {
+	_pathOverride = path;
+}
+
 bool sfx::animated_spritesheet::_load(engine::json& j) {
 	// Firstly, load the spritesheet.
 	std::string imgpath;
-	j.apply(imgpath, { "path" });
-	if (!j.inGoodState()) {
-		_logger.error("No path to a spritesheet graphic has been provided - "
-			"aborting load attempt.");
-		return false;
+	if (_pathOverride) {
+		imgpath = *_pathOverride;
+		_logger.write("Path override has been issued: \"{}\"", imgpath);
+	} else {
+		j.apply(imgpath, { "path" });
+		if (!j.inGoodState()) {
+			_logger.error("No path to a spritesheet graphic has been provided - "
+				"aborting load attempt.");
+			return false;
+		}
 	}
 	if (!_texture.loadFromFile(imgpath)) {
 		_logger.error("Couldn't load image file \"{}\" - aborting load attempt.",
@@ -291,7 +300,32 @@ bool sfx::animated_spritesheets::_load(engine::json& j) {
 		_sheets[i.key()] = std::make_shared<sfx::animated_spritesheet>(
 			engine::logger::data{ _logger.getData().sink,
 				_logger.getData().name + "_" + i.key() });
-		_sheets[i.key()]->load(i.value());
+		if (i.value().is_string()) {
+			_sheets[i.key()]->load(i.value());
+		} else if (i.value().is_object()) {
+			if (i.value().find("json") == i.value().end()) {
+				_logger.error("Could not load spritesheet with name \"{}\" as its "
+					"object value did not contain the \"json\" key.", i.key());
+				_sheets.erase(i.key());
+				ret = false;
+				continue;
+			} else if (i.value().find("path") == i.value().end()) {
+				_logger.error("Could not load spritesheet with name \"{}\" as its "
+					"object value did not contain the \"path\" key.", i.key());
+				_sheets.erase(i.key());
+				ret = false;
+				continue;
+			}
+			_sheets[i.key()]->setPathOverride(i.value()["path"]);
+			_sheets[i.key()]->load(i.value()["json"]);
+		} else {
+			_logger.error("Could not load spritesheet with name \"{}\" as its "
+				"value was of unrecognised type \"{}\".", i.key(),
+				i.value().type_name());
+			_sheets.erase(i.key());
+			ret = false;
+			continue;
+		}
 		if (!_sheets[i.key()]->inGoodState()) ret = false;
 	}
 	return ret;

@@ -1466,6 +1466,17 @@ namespace awe {
 		 *     <li>\c "vision" = \c _vision, <tt>(unsigned 32-bit int)</tt></li>
 		 *     <li>\c "pictures" = \c _pictures, <tt>{COUNTRY_SCRIPT_NAME: string
 		 *         SPRITE_NAME[, etc.]}</tt></li>
+		 *     <li>\c "spritesheets" is an object with the following keys:
+		 *         <ul><li>\c "idle" = \c _idleSpritesheet, <tt>(string)</tt></li>
+		 *             <li>\c "up" = \c _upSpritesheet, <tt>(string)</tt></li>
+		 *             <li>\c "down" = \c _downSpritesheet, <tt>(string)</tt></li>
+		 *             <li>\c "left" = \c _leftSpritesheet, <tt>(string)</tt></li>
+		 *             <li>\c "right" = \c _rightSpritesheet, <tt>(string)</tt>
+		 *                 </li>
+		 *             <li>\c "selected" = \c _selectedSpritesheets,
+		 *                 <tt>{COUNTRY_SCRIPT_NAME: string SHEET_NAME[, etc.]}
+		 *                 </tt></li></ul>
+		 *     </li>
 		 *     <li>\c "sprites" = \c _units, <tt>{COUNTRY_SCRIPT_NAME: string
 		 *         SPRITE_NAME[, etc.]}</tt></li>
 		 *     <li>\c "destroyedsprites" = \c _destroyedUnits,
@@ -1622,6 +1633,72 @@ namespace awe {
 			return
 				((_picturesTurnOrder.find(countryID) == _picturesTurnOrder.end()) ?
 				(EMPTY_STRING) : (_picturesTurnOrder.at(countryID)));
+		}
+
+		/**
+		 * Retrieves the name of the idle spritesheet.
+		 * @return The name of the spritesheet.
+		 */
+		inline const std::string& getIdleSpritesheet() const {
+			return _idleSpritesheet;
+		}
+
+		/**
+		 * Retrieves the name of the moving up spritesheet.
+		 * @return The name of the spritesheet.
+		 */
+		inline const std::string& getUpSpritesheet() const {
+			return _upSpritesheet;
+		}
+
+		/**
+		 * Retrieves the name of the moving down spritesheet.
+		 * @return The name of the spritesheet.
+		 */
+		inline const std::string& getDownSpritesheet() const {
+			return _downSpritesheet;
+		}
+
+		/**
+		 * Retrieves the name of the moving left spritesheet.
+		 * @return The name of the spritesheet.
+		 */
+		inline const std::string& getLeftSpritesheet() const {
+			return _leftSpritesheet;
+		}
+
+		/**
+		 * Retrieves the name of the moving right spritesheet.
+		 * @return The name of the spritesheet.
+		 */
+		inline const std::string& getRightSpritesheet() const {
+			return _rightSpritesheet;
+		}
+
+		/**
+		 * Retrieves the name of a given country's selected unit spritesheet.
+		 * @param  countryName The script name of the country.
+		 * @return The sheet name, or a blank string if the given country ID didn't
+		 *         map to a sheet name in the internal list.
+		 */
+		inline const std::string& getSelectedSpritesheet(
+			const std::string& countryName) const {
+			return ((_selectedSpritesheets.find(countryName) ==
+				_selectedSpritesheets.end()) ? (EMPTY_STRING) :
+				(_selectedSpritesheets.at(countryName)));
+		}
+
+		/**
+		 * Retrieves the name of a given country's selected unit spritesheet.
+		 * @param  countryID The turn order ID of the country.
+		 * @return The sheet name, or a blank string if the given country ID didn't
+		 *         map to a sheet name in the internal list.
+		 */
+		inline const std::string& getSelectedSpritesheet(
+			const awe::ArmyID countryID) const {
+			return ((_selectedSpritesheetsTurnOrder.find(countryID) ==
+				_selectedSpritesheetsTurnOrder.end()) ? (EMPTY_STRING) :
+				(_selectedSpritesheetsTurnOrder.at(countryID)));
 		}
 
 		/**
@@ -1976,6 +2053,46 @@ namespace awe {
 		 * \c _pictures keyed by turn order ID.
 		 */
 		mutable std::unordered_map<awe::ArmyID, std::string> _picturesTurnOrder;
+
+		/**
+		 * The name of the spritesheet containing the idle unit map sprites.
+		 */
+		std::string _idleSpritesheet;
+
+		/**
+		 * The name of the spritesheet containing unit map sprites that are moving
+		 * up.
+		 */
+		std::string _upSpritesheet;
+
+		/**
+		 * The name of the spritesheet containing unit map sprites that are moving
+		 * down.
+		 */
+		std::string _downSpritesheet;
+
+		/**
+		 * The name of the spritesheet containing unit map sprites that are moving
+		 * left.
+		 */
+		std::string _leftSpritesheet;
+
+		/**
+		 * The name of the spritesheet containing unit map sprites that are moving
+		 * right.
+		 */
+		std::string _rightSpritesheet;
+
+		/**
+		 * The names of the spritesheets to use when a unit has been selected.
+		 */
+		std::unordered_map<std::string, std::string> _selectedSpritesheets;
+
+		/**
+		 * \c _selectedSpritesheets keyed by turn order ID.
+		 */
+		mutable std::unordered_map<awe::ArmyID, std::string>
+			_selectedSpritesheetsTurnOrder;
 
 		/**
 		 * The sprite IDs.

@@ -401,6 +401,43 @@ void awe::unit_type::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Gets the sprite key of this unit's "
 		"picture, given a country turn order ID.");
 	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_idleSpritesheet() const property",
+		asMETHOD(T, getIdleSpritesheet), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of this unit's idle "
+		"spritesheet.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_upSpritesheet() const property",
+		asMETHOD(T, getUpSpritesheet), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of this unit's up "
+		"spritesheet.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_downSpritesheet() const property",
+		asMETHOD(T, getDownSpritesheet), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of this unit's down "
+		"spritesheet.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_leftSpritesheet() const property",
+		asMETHOD(T, getLeftSpritesheet), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of this unit's left "
+		"spritesheet.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_rightSpritesheet() const property",
+		asMETHOD(T, getRightSpritesheet), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of this unit's right "
+		"spritesheet.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& selectedSpritesheet(const string&in) const",
+		asMETHODPR(T, getSelectedSpritesheet, (const std::string&) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of the spritesheet used when "
+		"this unit is selected on the map, given a country script name.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& selectedSpritesheet(const ArmyID) const",
+		asMETHODPR(T, getSelectedSpritesheet, (const awe::ArmyID) const,
+			const std::string&), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of the spritesheet used when "
+		"this unit is selected on the map, given a country turn order ID.");
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"const string& unitSprite(const string&in) const",
 		asMETHODPR(T, getUnit, (const std::string&) const, const std::string&),
 		asCALL_THISCALL);

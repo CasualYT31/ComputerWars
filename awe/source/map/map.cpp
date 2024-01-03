@@ -407,7 +407,8 @@ void awe::map::setSpritesheets(
 	_additionallySelectedTileCursorLL.setSpritesheet((*_sheets)["icon"]);
 	_additionallySelectedTileCursorLR.setSpritesheet((*_sheets)["icon"]);
 	for (auto& unit : _units) {
-		unit.second.sprite->setSpritesheet((*_sheets)["unit"]);
+		unit.second.sprite->setSpritesheet((*_sheets)[
+			unit.second.data.getType()->getIdleSpritesheet()]);
 		unit.second.sprite->setIconSpritesheet((*_sheets)["icon"]);
 	}
 	for (auto& column : _tiles)

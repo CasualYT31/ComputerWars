@@ -147,6 +147,13 @@ namespace sfx {
 		 *         spritesheet.
 		 */
 		std::size_t heightOfTallestFrame() const;
+
+		/**
+		 * Sets this spritesheet's path override.
+		 * @param path The path which points to the image to load when calling
+		 *             \c load(). The path in the JSON script will be ignored.
+		 */
+		void setPathOverride(const std::string& path);
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -241,6 +248,12 @@ namespace sfx {
 		 * Caches the height of the tallest sprite/frame in this spritesheet.
 		 */
 		std::size_t _tallestSpriteHeight = 0;
+
+		/**
+		 * If this spritesheet has a path override, it will be used instead of any
+		 * paths that are read when <tt>load()</tt>ing.
+		 */
+		std::optional<std::string> _pathOverride;
 	};
 
 	/**
@@ -286,7 +299,10 @@ namespace sfx {
 		 * Within the root object, there are simply a list of key-string pairs,
 		 * with the keys defining the names of the spritesheets, and the string
 		 * values containing the paths to the JSON scripts to pass to the \c load()
-		 * method of each \c animated_spritesheet.
+		 * method of each \c animated_spritesheet.\n
+		 * The strings can also be objects that contain the \c json and \c path
+		 * keys. If this is the case, \c path is set as the spritesheet's path
+		 * override, and \c json is the path of the JSON file to \c load() with.
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return \c TRUE if every spritesheet could be loaded successfully,

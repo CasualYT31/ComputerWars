@@ -1151,10 +1151,19 @@ namespace awe {
 		 * and current position.
 		 * Loaded units will always give a defence rating of \c 0, as they are not
 		 * internally positioned on any tile.
-		 * @param  id The ID of the unit to getthe defence of.
+		 * @param  id The ID of the unit to get the defence of.
 		 * @return The defence rating that this unit currently obtains.
 		 */
 		unsigned int getUnitDefence(const awe::UnitID id) const;
+
+		/**
+		 * Sets a given unit's main spritesheet.
+		 * Logs an error if the given unit or spritesheet does not exist, and will
+		 * not make any changes if either of these are the case.
+		 * @param id   The ID of the unit to update.
+		 * @param name The name of the spritesheet to assign.
+		 */
+		void setUnitSpritesheet(const awe::UnitID id, const std::string& name);
 
 		/////////////////////
 		// TILE OPERATIONS //

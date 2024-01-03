@@ -230,6 +230,13 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) :
 		j.applyMap(_pictures, { "pictures" });
 		j.resetState();
 	}
+	j.apply(_idleSpritesheet, { "spritesheets", "idle" }, true);
+	j.apply(_upSpritesheet, { "spritesheets", "up" }, true);
+	j.apply(_downSpritesheet, { "spritesheets", "down" }, true);
+	j.apply(_leftSpritesheet, { "spritesheets", "left" }, true);
+	j.apply(_rightSpritesheet, { "spritesheets", "right" }, true);
+	j.applyMap(_selectedSpritesheets, { "spritesheets", "selected" });
+	j.resetState();
 	j.applyMap(_units, { "sprites" });
 	j.resetState();
 	if (j.keysExist({ "destroyedsprites" })) {
@@ -373,6 +380,8 @@ void awe::unit_type::updateSpriteMaps(
 	updateTurnOrderMap(_destroyedUnits, _destroyedUnitsTurnOrder, countries);
 	updateTurnOrderMap(_capturingUnits, _capturingUnitsTurnOrder, countries);
 	updateTurnOrderMap(_capturedUnits, _capturedUnitsTurnOrder, countries);
+	updateTurnOrderMap(_selectedSpritesheets, _selectedSpritesheetsTurnOrder,
+		countries);
 }
 
 //***********
