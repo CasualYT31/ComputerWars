@@ -48,6 +48,11 @@ namespace awe {
 		public engine::json_script {
 	public:
 		/**
+		 * Thrown by \c load() when the user closes the window during loading.
+		 */
+		class load_cancelled : public std::exception {};
+
+		/**
 		 * Initialises the internal logger object.
 		 * Also seeds the psuedo random number sequence generator.
 		 * @param data The data to initialise the logger object with.

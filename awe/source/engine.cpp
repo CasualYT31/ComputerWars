@@ -359,92 +359,185 @@ bool awe::game_engine::_load(engine::json& j) {
 	std::filesystem::path basePath = getScriptPath();
 	basePath = basePath.parent_path();
 	std::filesystem::current_path(basePath);
-	// Retrieve a few of the paths manually instead of via _loadObject().
-	// Don't forget to apply the base path to them.
-	std::string scriptsPath, guiPath;
-	j.apply(scriptsPath, { "scripts" });
-	j.apply(guiPath, { "gui" });
-	if (!j.inGoodState()) return false;
-	// Load most of the objects.
-	bool ret = _loadObject(_dictionary, j, { "languages" },
-			engine::logger::data{ _logger.getData().sink, "language_dictionary" })
-		&& _loadObject(_fonts, j, { "fonts" },
-			engine::logger::data{ _logger.getData().sink, "fonts" })
-		&& _loadObject(_sounds, j, { "sounds" },
-			engine::logger::data{ _logger.getData().sink, "sounds" })
-		&& _loadObject(_music, j, { "music" },
-			engine::logger::data{ _logger.getData().sink, "music" })
-		&& _loadObject(_renderer, j, { "renderer" },
-			engine::logger::data{ _logger.getData().sink, "renderer" });
-	if (!ret) return false;
-	// Opening the renderer now will prevent glFlush() SFML errors from plaguing
-	// standard output when I load images in the animated_spritesheet objects
-	// below.
+	// Load the renderer as soon as possible, so that we can display the logs.
+	// Additionally, opening the renderer now will prevent glFlush() SFML errors
+	// from plaguing standard output when we load images in the
+	// animated_spritesheet objects.
+	if (!_loadObject(_renderer, j, { "renderer" },
+		engine::logger::data{ _logger.getData().sink, "renderer" })) return false;
 	_renderer->openWindow();
-	// Allocate GUI and scripts objects, but don't initialise yet.
-	_scripts = std::make_shared<engine::scripts>(
-		engine::logger::data{ _logger.getData().sink, "scripts" });
-	_gui = std::make_shared<sfx::gui>(_scripts,
-		engine::logger::data{_logger.getData().sink, "gui"});
-	// Continue loading most of the objects.
-	ret =  _loadObject(_userinput, j, { "userinput" },
-			engine::logger::data{ _logger.getData().sink, "user_input" })
-		&& _loadObject(_sprites, j, { "spritesheets" },
-			engine::logger::data{ _logger.getData().sink, "spritesheet" })
-		&& _loadObject(_countries, j, { "countries" }, _scripts, "Country",
-			engine::logger::data{ _logger.getData().sink, "country_bank" })
-		&& _loadObject(_weathers, j, { "weathers" }, _scripts, "Weather",
-			engine::logger::data{ _logger.getData().sink, "weather_bank" })
-		&& _loadObject(_environments, j, { "environments" }, _scripts,
-			"Environment",
-			engine::logger::data{ _logger.getData().sink, "environment_bank" })
-		&& _loadObject(_movements, j, { "movements" }, _scripts, "Movement",
-			engine::logger::data{ _logger.getData().sink, "movement_bank" })
-		&& _loadObject(_terrains, j, { "terrains" }, _scripts, "Terrain",
-			engine::logger::data{ _logger.getData().sink, "terrain_bank" })
-		&& _loadObject(_tiles, j, { "tiles" }, _scripts, "TileType",
-			engine::logger::data{ _logger.getData().sink, "tile_bank" })
-		&& _loadObject(_weapons, j, { "weapons" }, _scripts, "Weapon",
-			engine::logger::data{ _logger.getData().sink, "weapon_bank" })
-		&& _loadObject(_units, j, { "units" }, _scripts, "UnitType",
-			engine::logger::data{ _logger.getData().sink, "unit_bank" })
-		&& _loadObject(_commanders, j, { "commanders" }, _scripts, "Commander",
-			engine::logger::data{ _logger.getData().sink, "commander_bank" })
-		&& _loadObject(_structures, j, { "structures" }, _scripts, "Structure",
-			engine::logger::data{ _logger.getData().sink, "structure_bank" })
-		&& _loadObject(_mapStrings, j, { "mapstrings" },
-			engine::logger::data{ _logger.getData().sink, "map_strings" });
-	if (!ret) return false;
-	// Finish initialisation of banks.
-	if (!awe::checkCountryTurnOrderIDs(*_countries)) {
-		_logger.critical("The turn order IDs assigned to each configured country "
-			"are not valid. See the log for more information.");
-		for (const auto& pCountry : *_countries) {
-			_logger.error("Turn order ID for country {} = {}",
-				pCountry.first, pCountry.second->getTurnOrder());
+	// Load the fonts now so that we can use them when printing the logs.
+	if (!_loadObject(_fonts, j, { "fonts" },
+		engine::logger::data{ _logger.getData().sink, "fonts" })) return false;
+	// Create a list of load operations to carry out. Functions must return FALSE
+	// when the load operation failed, TRUE if it succeeded.
+	std::forward_list<std::function<bool(void)>> loadOperations = {
+		[&]() {
+			return _loadObject(_dictionary, j, { "languages" },
+				engine::logger::data{ _logger.getData().sink,
+					"language_dictionary" });
+		},
+		[&]() {
+			return _loadObject(_sounds, j, { "sounds" },
+				engine::logger::data{ _logger.getData().sink, "sounds" });
+		},
+		[&]() {
+			return _loadObject(_music, j, { "music" },
+				engine::logger::data{ _logger.getData().sink, "music" });
+		},
+		[&]() {
+			// Allocate GUI and scripts objects, but don't initialise yet.
+			_scripts = std::make_shared<engine::scripts>(
+				engine::logger::data{ _logger.getData().sink, "scripts" });
+			_gui = std::make_shared<sfx::gui>(_scripts,
+				engine::logger::data{_logger.getData().sink, "gui"});
+			return _scripts && _gui;
+		},
+		[&]() {
+			return _loadObject(_userinput, j, { "userinput" },
+				engine::logger::data{ _logger.getData().sink, "user_input" });
+		},
+		[&]() {
+			return _loadObject(_userinput, j, { "userinput" },
+				engine::logger::data{ _logger.getData().sink, "user_input" });
+		},
+		[&]() {
+			return _loadObject(_sprites, j, { "spritesheets" },
+				engine::logger::data{ _logger.getData().sink, "spritesheet" });
+		},
+		[&]() {
+			return _loadObject(_countries, j, { "countries" }, _scripts, "Country",
+				engine::logger::data{ _logger.getData().sink, "country_bank" });
+		},
+		[&]() {
+			return _loadObject(_weathers, j, { "weathers" }, _scripts, "Weather",
+				engine::logger::data{ _logger.getData().sink, "weather_bank" });
+		},
+		[&]() {
+			return _loadObject(_environments, j, { "environments" }, _scripts,
+				"Environment", engine::logger::data{ _logger.getData().sink,
+				"environment_bank" });
+		},
+		[&]() {
+			return _loadObject(_movements, j, { "movements" }, _scripts,
+				"Movement", engine::logger::data{ _logger.getData().sink,
+				"movement_bank" });
+		},
+		[&]() {
+			return _loadObject(_terrains, j, { "terrains" }, _scripts, "Terrain",
+				engine::logger::data{ _logger.getData().sink, "terrain_bank" });
+		},
+		[&]() {
+			return _loadObject(_tiles, j, { "tiles" }, _scripts, "TileType",
+				engine::logger::data{ _logger.getData().sink, "tile_bank" });
+		},
+		[&]() {
+			return _loadObject(_weapons, j, { "weapons" }, _scripts, "Weapon",
+				engine::logger::data{ _logger.getData().sink, "weapon_bank" });
+		},
+		[&]() {
+			return _loadObject(_units, j, { "units" }, _scripts, "UnitType",
+				engine::logger::data{ _logger.getData().sink, "unit_bank" });
+		},
+		[&]() {
+			return _loadObject(_commanders, j, { "commanders" }, _scripts,
+				"Commander", engine::logger::data{ _logger.getData().sink,
+				"commander_bank" });
+		},
+		[&]() {
+			return _loadObject(_structures, j, { "structures" }, _scripts,
+				"Structure", engine::logger::data{ _logger.getData().sink,
+				"structure_bank" });
+		},
+		[&]() {
+			return _loadObject(_mapStrings, j, { "mapstrings" },
+				engine::logger::data{ _logger.getData().sink, "map_strings" });
+		},
+		[&]() {
+			// Finish initialisation of banks.
+			if (!awe::checkCountryTurnOrderIDs(*_countries)) {
+				_logger.critical("The turn order IDs assigned to each configured "
+					"country are not valid. See the log for more information.");
+				for (const auto& pCountry : *_countries) {
+					_logger.error("Turn order ID for country {} = {}",
+						pCountry.first, pCountry.second->getTurnOrder());
+				}
+				return false;
+			}
+			return true;
+		},
+		[&]() {
+			awe::updateTileTypeBank(*_tiles, *_terrains, *_countries, *_structures,
+					_scripts);
+			return true;
+		},
+		[&]() {
+			awe::updateTerrainBank(*_terrains, *_countries, *_tiles);
+			return true;
+		},
+		[&]() {
+			awe::updateUnitTypeBank(*_units, *_movements, *_terrains, *_weapons,
+				*_countries, _logger.getData().sink);
+			return true;
+		},
+		[&]() {
+			awe::updateStructureBank(*_structures, *_tiles, *_countries);
+			return true;
+		},
+		[&]() {
+			std::string scriptsPath;
+			j.apply(scriptsPath, { "scripts" });
+			if (!j.inGoodState()) return false;
+			_scripts->addRegistrant(this);
+			return _scripts->loadScripts(scriptsPath);
+		},
+		[&]() {
+			_scripts->generateDocumentation();
+			return true;
+		},
+		[&]() {
+			std::string guiPath;
+			j.apply(guiPath, { "gui" });
+			if (!j.inGoodState()) return false;
+			_gui->setSpritesheets(_sprites);
+			_gui->setLanguageDictionary(_dictionary);
+			_gui->setFonts(_fonts);
+			_gui->setTarget(*_renderer);
+			_gui->load(guiPath);
+			return _gui->inGoodState();
+		},
+		[&]() {
+			_userinput->tieWindow(_renderer);
+			_userinput->setGUI(_gui);
+			return true;
 		}
-		return false;
+	};
+	// Render the logs to the screen in between each load operation.
+	const auto font = (*_fonts)["Monospace"]; // TODO-2.
+	sf::Text logs("", *font, 16);
+	logs.setPosition(5.f, 5.f);
+	const sf::View old = _renderer->getView();
+	bool failed = false; // Lets us display the logs one last time before breaking.
+	for (const auto& loadOperation : loadOperations) {
+		sf::Event event;
+		while (_renderer->pollEvent(event))
+			if (event.type == sf::Event::Closed) throw load_cancelled();
+		_renderer->clear();
+		sf::View v(sf::FloatRect(0.0f, 0.0f,
+			static_cast<float>(_renderer->getSize().x),
+			static_cast<float>(_renderer->getSize().y)));
+		v.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+		_renderer->setView(v);
+		logs.setString(_logger.getData().sink->getLog());
+		_renderer->draw(logs, sf::Transform().translate(0.f,
+			-std::max(0.f, logs.getGlobalBounds().height -
+				(static_cast<float>(_renderer->getSize().y)) + 5.f)));
+		_renderer->display();
+		if (failed) break;
+		if (!loadOperation()) failed = true;
 	}
-	awe::updateTileTypeBank(*_tiles, *_terrains, *_countries, *_structures,
-		_scripts);
-	awe::updateTerrainBank(*_terrains, *_countries, *_tiles);
-	awe::updateUnitTypeBank(*_units, *_movements, *_terrains, *_weapons,
-		*_countries, _logger.getData().sink);
-	awe::updateStructureBank(*_structures, *_tiles, *_countries);
-	// Initialise GUIs and the scripts.
-	_scripts->addRegistrant(this);
-	_scripts->loadScripts(scriptsPath);
-	_scripts->generateDocumentation();
-	_gui->setSpritesheets(_sprites);
-	_gui->setLanguageDictionary(_dictionary);
-	_gui->setFonts(_fonts);
-	_gui->setTarget(*_renderer);
-	_gui->load(guiPath);
-	if (!_gui->inGoodState()) return false;
-	// If one of the objects failed to initialise properly, return FALSE.
-	_userinput->tieWindow(_renderer);
-	_userinput->setGUI(_gui);
-	return true;
+	_renderer->setView(old);
+	return !failed;
 }
 
 bool awe::game_engine::_save(nlohmann::ordered_json& j) noexcept {

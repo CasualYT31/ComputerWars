@@ -97,7 +97,11 @@ int main(int argc, char* argv[]) {
                     "folder \"{}\", aborting.", assetsFolder);
                 return 2;
             } else {
-                engine.load(configPath);
+                try {
+                    engine.load(configPath);
+                } catch (const awe::game_engine::load_cancelled&) {
+                    return 5;
+                }
             }
         }
         if (engine.inGoodState()) {
