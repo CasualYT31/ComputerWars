@@ -51,6 +51,8 @@ class UnloadUnitGrid : Grid {
      * Removes every unit row from the grid.
      */
     void removeUnits() {
+        for (uint i = 0, len = units.length(); i < len; ++i)
+            units[i].cleanUp();
         units.resize(0);
     }
 
@@ -157,6 +159,7 @@ class UnloadUnitRow {
      */
     UnloadUnitRow(UnloadUnitGrid@ const grid, const UnitID unitID,
         MultiSignalHandler@ const unloadHandler) {
+        @pGrid = grid;
         const auto type = game.map.getUnitType(unitID);
 
         // Setup the icon widget.
@@ -189,6 +192,19 @@ class UnloadUnitRow {
         grid.add(fuel, row, 3);
         grid.add(ammo, row, 4);
         if (hidden !is null) grid.add(hidden, row, 5);
+    }
+
+    /**
+     * Removes the row from the grid.
+     * To be called when the row is being released.
+     */
+    void cleanUp() {
+        pGrid.remove(icon);
+        pGrid.remove(unload);
+        pGrid.remove(hp);
+        pGrid.remove(fuel);
+        pGrid.remove(ammo);
+        if (hidden !is null) pGrid.remove(hidden);
     }
 
     /**
@@ -228,6 +244,11 @@ class UnloadUnitRow {
         label.setTextOutlineColour(Black);
         label.setTextOutlineThickness(2.0);
     }
+
+    /**
+     * Points to the grid this row is within.
+     */
+    private Grid@ pGrid;
 
     /**
      * The unit icon.

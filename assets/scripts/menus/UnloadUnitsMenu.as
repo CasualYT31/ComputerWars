@@ -92,11 +92,21 @@ class UnloadUnitsMenu : Menu, Group {
                         // then prevent the unload of that unit, but force any
                         // unloads in progress to go ahead, and make the base unit
                         // wait.
-                        if (game.map.getUnitOnTile(selectedTile) != NO_UNIT) {
+                        const auto unitOnTile =
+                            game.map.getUnitOnTile(selectedTile);
+                        if (unitOnTile != NO_UNIT &&
+                            unitOnTile != selectedUnitCache) {
                             game.map.popSelectedUnit();
+                            game.animateTrap(selectedUnitCache);
                             proceedWithUnload();
                             return;
                         } else {
+                            array<ClosedListNode> path = { ClosedListNode(),
+                                ClosedListNode() };
+                            path[0].tile = selectedTileCache;
+                            path[1].tile = selectedTile;
+                            game.map.animateMoveUnit(currentlyUnloadingUnit,
+                                path);
                             game.map.addPreviewUnit(currentlyUnloadingUnit,
                                 selectedTile);
                             setWidgetText(currentlyUnloadingUnitsUnloadButton,
