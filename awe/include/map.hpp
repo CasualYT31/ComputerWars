@@ -2391,12 +2391,16 @@ namespace awe {
 
 		/**
 		 * Attempts to queue a "tile particle" animation.
-		 * @param  tile     The tile to animate a particle over.
-		 * @param  sheet    The name of the sheet to use.
-		 * @param  particle The ID of the particle sprite.
-		 * @param  origin   The origin and position of the particle sprite relative
-		 *                  to the tile's sprite.
+		 * @param  particles The particles to animate.
+		 * @param  sheet     The name of the sheet to use for particle sprites.
 		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool animateParticles(const CScriptArray* const particles,
+			const std::string& sheet);
+
+		/**
+		 * Version of \c animateParticles() that's used by the C++ code to animate
+		 * a single particle.
 		 */
 		bool animateParticle(const sf::Vector2u& tile, const std::string& sheet,
 			const std::string& particle, const sf::Vector2f& origin);

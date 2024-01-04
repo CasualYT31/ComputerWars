@@ -77,7 +77,8 @@ namespace awe {
 		 *                 use.
 		 */
 		inline void setSprite(const std::string& spriteID) {
-			_sprite.setSprite(spriteID);
+			if (_oldSprite) _oldSprite = spriteID;
+			else _sprite.setSprite(spriteID);
 		}
 
 		/**
@@ -87,6 +88,21 @@ namespace awe {
 		inline std::string getSprite() const {
 			return _sprite.getSprite();
 		}
+
+		/**
+		 * Sets this tile's sprite override.
+		 * @param spriteID ID of the sprite to assign.
+		 * @sa    \c _oldSprite.
+		 * @sa    \c _targetCache.
+		 */
+		void setSpriteOverride(const std::string& spriteID);
+
+		/**
+		 * Clears this tile's sprite override.
+		 * @sa \c _oldSprite.
+		 * @sa    \c _targetCache.
+		 */
+		void clearSpriteOverride();
 
 		/**
 		 * Sets the unit sprite's pixel position.
@@ -132,8 +148,27 @@ namespace awe {
 		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
 
 		/**
+		 * Cache the render target last given to \c animate() so the caller does
+		 * not have to manually animate sprites when setting and clearing the
+		 * sprite override.
+		 */
+		const sf::RenderTarget* _targetCache = nullptr;
+
+		/**
 		 * The tile's animated sprite object.
 		 */
 		sfx::animated_sprite _sprite;
+
+		/**
+		 * The tile's sprite as set via \c setSprite().
+		 * When a tile sprite override is given, its previous sprite will be stored
+		 * here. If \c setSprite() is called whilst the override is still active,
+		 * the ID given will be stored here instead. Then, when the override is
+		 * removed, \c setSprite() will be used to reinstate the last given sprite
+		 * to \c setSprite(). If two sprite overrides are given back-to-back, then
+		 * the second override will not cause the first override to be stored in
+		 * here.
+		 */
+		std::optional<std::string> _oldSprite;
 	};
 }

@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "map.hpp"
+#include "animations/include/tileparticles.hpp"
 
 /* \c NO_ARMY that can be assigned to a script's interface. Due to limitations of
 AngelScript, I unfortunately cannot register a constant with the script interface,
@@ -90,6 +91,7 @@ void awe::map::Register(asIScriptEngine* engine,
 		awe::RegisterGameTypedefs(engine, document);
 		awe::closed_list_node::Register(engine, document);
 		awe::disable_mementos::Register(engine, document);
+		awe::tile_particle_node::Register(engine, document);
 
 		/////////////////
 		// SHADER ENUM //
@@ -971,9 +973,9 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, animateTagCO), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"bool animateParticle(const Vector2&in, const string&in, "
-			"const string&in, const Vector2f&in)",
-			asMETHOD(awe::map, animateParticle), asCALL_THISCALL);
+			"bool animateParticles(const array<TileParticle>@ const, "
+			"const string&in)",
+			asMETHOD(awe::map, animateParticles), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool animateLabelUnit(const UnitID, const string&in, "

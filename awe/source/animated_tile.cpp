@@ -25,7 +25,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 awe::animated_tile::animated_tile(const engine::logger::data& data) :
 	_sprite(data) {}
 
+void awe::animated_tile::setSpriteOverride(const std::string& spriteID) {
+	if (!_oldSprite) _oldSprite = getSprite();
+	_sprite.setSprite(spriteID);
+	if (_targetCache) animate(*_targetCache);
+}
+
+void awe::animated_tile::clearSpriteOverride() {
+	if (!_oldSprite) return;
+	const std::string oldSprite = *_oldSprite;
+	_oldSprite.reset();
+	setSprite(oldSprite);
+	if (_targetCache) animate(*_targetCache);
+}
+
 bool awe::animated_tile::animate(const sf::RenderTarget& target) {
+	_targetCache = &target;
 	return _sprite.animate(target);
 }
 

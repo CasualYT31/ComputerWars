@@ -24,7 +24,7 @@ add_library(${PROJECT_NAME} STATIC
 	
 	"source/map/animations/source/daybegin.cpp"
 	"source/map/animations/source/tagcos.cpp"
-	"source/map/animations/source/tileparticle.cpp"
+	"source/map/animations/source/tileparticles.cpp"
 	"source/map/animations/source/zoom.cpp"
 	"source/map/animations/source/labelunit.cpp"
 	"source/map/animations/source/capture.cpp"

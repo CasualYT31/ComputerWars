@@ -254,6 +254,22 @@ shared class PlayableMap {
         } else return {};
     }
 
+    /**
+     * Destroys a structure, and queues a particle effect afterwards.
+     * @param rootTile The root tile of the structure.
+     */
+    private void destroyStructure(const Vector2&in rootTile) {
+        const auto terrainName = map.getTileType(rootTile).type.scriptName;
+        map.destroyStructure(rootTile);
+        if (terrainName == "MINICANNON") {
+            map.animateParticles({ TileParticle(
+                rootTile,
+                "minicannondestroy",
+                Vector2f(0.5, 1.0)
+            ) }, "particle");
+        }
+    }
+
     ///////////////////////////////
     // TILE SELECTION OPERATIONS //
     ///////////////////////////////
@@ -750,8 +766,11 @@ shared class PlayableMap {
         string particle = "stealthhideshow";
         if (map.getUnitType(id).scriptName == "SUB")
             particle = hide ? "subhide" : "subshow";
-        map.animateParticle(map.getUnitPosition(id), "particle", particle,
-            Vector2f(0.5, 0.5));
+        map.animateParticles({ TileParticle(
+            map.getUnitPosition(id),
+            particle,
+            Vector2f(0.5, 0.5)
+        ) }, "particle");
     }
 
     /**
@@ -1541,7 +1560,7 @@ shared class PlayableMap {
             // If the tile's HP has reached zero, and the tile is part of a
             // structure, destroy the structure.
             if (newTileHP <= 0 && map.isTileAStructureTile(defender))
-                map.destroyStructure(defender);
+                destroyStructure(defender);
         }
         // If the weapon used has finite ammo, and it is still alive, then remove
         // one from its ammo count.
@@ -1608,6 +1627,44 @@ shared class PlayableMap {
         map.animateLabelUnit(unit, "trappointtoright", "trappointtoleft", 1.3);
     }
 
+    /**
+     * Animates a cannon's fire particle.
+     * @param rootTile The root tile of the cannon.
+     * @param type     The script name of the type of the root tile.
+     */
+    private void animateCannonFire(Vector2 rootTile, const string&in type) {
+        if (type == "minicannonup") {
+            auto tileAbove = rootTile;
+            tileAbove.y -= 1;
+            map.animateParticles({ TileParticle(
+                tileAbove,
+                "minicannonshootup",
+                Vector2f(0.5, 1.0)
+            ), TileParticle(
+                rootTile,
+                "minicannonshootupshadow",
+                Vector2f(0.5, 0.5)
+            ) }, "particle");
+        }
+    }
+
+    /**
+     * Animates a damage particle over a unit that's been hit by a cannon.
+     * @param targetTile The tile the unit is on.
+     * @param type       The script name of the type of the root tile of the
+     *                   cannon.
+     */
+    private void animateCannonDamage(const Vector2&in targetTile,
+        const string&in type) {
+        if (type == "minicannonup") {
+            map.animateParticles({ TileParticle(
+                targetTile,
+                "damagefrombelow",
+                Vector2f(0.5, 1.0)
+            ) }, "particle");
+        }
+    }
+
     /////////////////////////////
     // END TURN HELPER METHODS //
     /////////////////////////////
@@ -1667,6 +1724,7 @@ shared class PlayableMap {
         const Terrain@ terrain, const ArmyID currentArmy) {
         if (map.beginTurnForOwnedTile(tile, terrain, currentArmy)) return;
 
+        const string tileTypeName = map.getTileType(tile).scriptName;
         const string terrainName = terrain.scriptName;
         const auto currentTeam = map.getArmyTeam(currentArmy);
 
@@ -1702,8 +1760,10 @@ shared class PlayableMap {
             }
             // Deal damage if there was a unit.
             if (targetUnit != NO_UNIT) {
+                animateCannonFire(tile, tileTypeName);
                 damageUnitsInRange(tilesInRange[unitTile], 0, 0,
                     terrainName == "BLACKCANNONROOT" ? 5 : 3);
+                animateCannonDamage(tilesInRange[unitTile], tileTypeName);
             }
 
         } else if (terrainName == "BLACKLASER") {

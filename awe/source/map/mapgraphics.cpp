@@ -466,23 +466,52 @@ bool awe::map::animateTagCO(const awe::ArmyID armyID, const std::string& font) {
 	return true;
 }
 
+bool awe::map::animateParticles(const CScriptArray* const particles,
+	const std::string& sheet) {
+	engine::CScriptWrapper particlesRAII(particles);
+	particles->Release();
+	if (!_canAnimationBeQueued()) return false;
+	if (!_sheets->exists(sheet)) {
+		_logger.error("animateParticles operation cancelled: the spritesheet "
+			"\"{}\" doesn't exist!", sheet);
+		return false;
+	}
+	std::vector<awe::tile_particle_node> particleNodes;
+	particleNodes.resize(particles->GetSize());
+	for (asUINT i = 0, len = particles->GetSize(); i < len; ++i) {
+		particleNodes[i] =
+			*static_cast<const awe::tile_particle_node*>(particles->At(i));
+		if (_isOutOfBounds(particleNodes[i].tile)) {
+			_logger.error("animateParticles operation cancelled: particle {} was "
+				"assigned to tile {} that is out-of-bounds.", i,
+				particleNodes[i].tile);
+			return false;
+		}
+		particleNodes[i].tileSprite = _tiles[particleNodes[i].tile.x]
+			[particleNodes[i].tile.y].sprite;
+	}
+	_animationQueue.push(std::make_unique<awe::tile_particles>(
+		particleNodes, (*_sheets)[sheet]));
+	return true;
+}
+
 bool awe::map::animateParticle(const sf::Vector2u& tile, const std::string& sheet,
 	const std::string& particle, const sf::Vector2f& origin) {
 	if (!_canAnimationBeQueued()) return false;
-	if (_isOutOfBounds(tile)) {
-		_logger.error("animateParticle operation cancelled: attempted to animate "
-			"particle \"{}\" from sheet \"{}\" over a tile {} that doesn't exist!",
-			particle, sheet, tile);
-		return false;
-	}
 	if (!_sheets->exists(sheet)) {
-		_logger.error("animateParticle operation cancelled: attempted to animate "
-			"particle \"{}\" from sheet \"{}\" over tile {}. That sheet doesn't "
-			"exist!", particle, sheet, tile);
+		_logger.error("animateParticle operation cancelled: the spritesheet "
+			"\"{}\" doesn't exist!", sheet);
 		return false;
 	}
-	_animationQueue.push(std::make_unique<awe::tile_particle>(
-		*_tiles[tile.x][tile.y].sprite, (*_sheets)[sheet], particle, origin));
+	if (_isOutOfBounds(tile)) {
+		_logger.error("animateParticle operation cancelled: tile {} is "
+			"out-of-bounds.", tile);
+		return false;
+	}
+	awe::tile_particle_node node(tile, particle, origin);
+	node.tileSprite = _tiles[tile.x][tile.y].sprite;
+	_animationQueue.push(std::make_unique<awe::tile_particles>(std::vector{ node },
+		(*_sheets)[sheet]));
 	return true;
 }
 
