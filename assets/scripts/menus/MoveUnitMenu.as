@@ -74,15 +74,25 @@ class MoveUnitMenu : Menu, Group {
                             game.map.scanPath(game.map.closedList, unitID);
                         if (obstructionIndex >= 0) {
                             // Trim closed list and move unit.
+                            hideTrapUnit(obstructionIndex);
                             game.map.closedList.removeRange(obstructionIndex,
                                 game.map.closedList.length() - obstructionIndex);
+                            game.map.animateMoveUnit(unitID, game.map.closedList);
                             game.moveUnit();
+                            game.map.queueCode(AnimationCode(this.showTrapUnit));
                             game.animateTrap(unitID);
-                            setGUI("GameScreen");
+                            game.map.queueCode(function() {
+                                setGUI("GameScreen");
+                            });
                         } else {
                             game.map.disableSelectedUnitRenderingEffects(true);
                             game.map.addPreviewUnit(unitID, selectedTile);
-                            setGUI("PreviewMoveUnitMenu");
+                            if (game.map.closedList.length() >= 2)
+                                game.map.animateMoveUnit(unitID,
+                                    game.map.closedList);
+                            game.map.queueCode(function() {
+                                setGUI("PreviewMoveUnitMenu");
+                            });
                         }
                         return;
                     }
@@ -90,4 +100,26 @@ class MoveUnitMenu : Menu, Group {
             }
         }
     }
+
+    /**
+     * Hides the trap unit until the move unit animation has completed.
+     * @param index The \c obstructionIndex result given by \c scanPath().
+     */
+    private void hideTrapUnit(const uint index) {
+        trapUnit = game.map.getUnitOnTile(game.map.closedList[index].tile);
+        game.map.addPreviewUnit(trapUnit, NO_POSITION);
+    }
+
+    /**
+     * Shows the trap unit.
+     */
+    private void showTrapUnit() {
+        game.map.removePreviewUnit(trapUnit);
+        trapUnit = NO_UNIT;
+    }
+
+    /**
+     * Stores the ID of the unit that's trapped the moving unit.
+     */
+    private UnitID trapUnit = NO_UNIT;
 }

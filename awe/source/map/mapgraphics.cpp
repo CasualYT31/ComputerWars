@@ -548,6 +548,54 @@ bool awe::map::animateCapture(const sf::Vector2u& tile, const awe::UnitID unit,
 	return true;
 }
 
+bool awe::map::animateMoveUnit(const awe::UnitID unit,
+	const CScriptArray* const closedList) {
+	engine::CScriptWrapper closedListRAII(closedList);
+	closedList->Release();
+	if (!_canAnimationBeQueued()) return false;
+	if (!_isUnitPresent(unit)) {
+		_logger.error("animateMoveUnit operation cancelled: attempted to move "
+			"unit with ID {} which does not exist.", unit);
+		return false;
+	}
+	if (!closedList || closedList->GetSize() < 2) {
+		_logger.error("animateMoveUnit operation cancelled: attempted to move "
+			"unit with ID {} with a null closed list, or a closed list of less "
+			"than two nodes.", unit);
+		return false;
+	}
+	std::vector<awe::move_unit::node> path;
+	const auto unitType = _units.at(unit).data.getType();
+	std::optional<sf::Vector2u> previousTile;
+	for (asUINT i = 0, len = closedList->GetSize(); i < len; ++i) {
+		const auto nextTile =
+			static_cast<const awe::closed_list_node*>(closedList->At(i))->tile;
+		const auto& nextTileSprite = _tiles[nextTile.x][nextTile.y].sprite;
+		std::shared_ptr<sfx::animated_spritesheet> sheet;
+		if (previousTile) {
+			if (nextTile.x < previousTile->x)
+				sheet = (*_sheets)[unitType->getLeftSpritesheet()];
+			else if (nextTile.x > previousTile->x)
+				sheet = (*_sheets)[unitType->getRightSpritesheet()];
+			else if (nextTile.y < previousTile->y)
+				sheet = (*_sheets)[unitType->getUpSpritesheet()];
+			else
+				sheet = (*_sheets)[unitType->getDownSpritesheet()];
+		}
+		auto pos = nextTileSprite->getPixelPosition();
+		pos.x += nextTileSprite->getPixelSize().x * 0.5f;
+		pos.y += nextTileSprite->getPixelSize().y;
+		path.emplace_back(pos, sheet);
+		previousTile = nextTile;
+	}
+	_animationQueue.push(std::make_unique<awe::move_unit>(
+		_units.at(unit).sprite,
+		path,
+		_selectedAnimationPreset == awe::animation_preset::VisualA ? 125.f : 375.f
+	));
+	return true;
+}
+
 bool awe::map::_canAnimationBeQueued(
 	const std::vector<awe::animation_preset>& presets) const {
 	if (!_animationsEnabled) return false;

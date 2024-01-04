@@ -90,6 +90,7 @@ class GameScreen : Menu, Group {
      */
     void Close(Menu@ const newMenu, const string&in newMenuName) {
         setVisibility(false);
+        hideWidgets();
     }
 
     /**
@@ -106,6 +107,8 @@ class GameScreen : Menu, Group {
     void Periodic(const dictionary ui, const dictionary mouse,
         const MousePosition&in previousMouse,
         const MousePosition&in currentMouse) {
+        showWidgets();
+
         // If the dev key was hit, open the debug menu.
         if (bool(ui["dev"])) {
             if (cancelDevInput) {

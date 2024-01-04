@@ -32,7 +32,6 @@ sf::Vector2u awe::unit::NO_POSITION_SCRIPT = awe::unit::NO_POSITION;
 awe::unit::unit(const std::shared_ptr<awe::animated_unit>& animatedUnit,
 	const std::function<void(const std::function<void(void)>&)>& spriteCallback,
 	const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army,
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet,
 	const std::shared_ptr<sfx::animated_spritesheet>& icons) :
 	_type(type), _army(army), _unitSprite(animatedUnit),
 	_updateSprite(spriteCallback) {
@@ -43,7 +42,6 @@ awe::unit::unit(const std::shared_ptr<awe::animated_unit>& animatedUnit,
 		_ammos[weapon->getScriptName()] = 0;
 	}
 	// Initialise the sprite.
-	animatedUnit->setSpritesheet(sheet);
 	animatedUnit->setIconSpritesheet(icons);
 	animatedUnit->setSprite((type) ? (type->getUnit(army)) : (""));
 	animatedUnit->setHPIconSprite("nohpicon");

@@ -62,8 +62,6 @@ namespace awe {
 		 * @param   type           The type of the unit, which can't be changed.
 		 * @param   army           The army the unit belongs to, which can't be
 		 *                         changed.
-		 * @param   sheet          Pointer to the spritesheet to use with this
-		 *                         unit's sprite.
 		 * @param   icons          Pointer to the icon spritesheet to use with this
 		 *                         unit's sprite.
 		 */
@@ -72,7 +70,6 @@ namespace awe {
 				spriteCallback,
 			const std::shared_ptr<const awe::unit_type>& type,
 			const awe::ArmyID army = 0,
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr,
 			const std::shared_ptr<sfx::animated_spritesheet>& icons = nullptr);
 
 		/**

@@ -37,10 +37,15 @@ namespace awe {
 	public:
 		/**
 		 * Creates a new unit sprite.
-		 * @param data The data used to initialise the animated sprite's logger
-		 *             object.
+		 * @param sheet If the main spritesheet is the same as this one, then icons
+		 *              will appear. Otherwise, icons will remain invisible. This
+		 *              spritesheet is assigned to the unit's sprite, too.
+		 * @param data  The data used to initialise the animated sprite's logger
+		 *              object.
 		 */
-		animated_unit(const engine::logger::data& data);
+		animated_unit(
+			const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
+			const engine::logger::data& data);
 
 		/**
 		 * Sets the spritesheet to use with this unit.
@@ -48,7 +53,7 @@ namespace awe {
 		 * @safety No guarantee.
 		 */
 		inline void setSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
+			const std::shared_ptr<const sfx::animated_spritesheet>& sheet) {
 			_sprite.setSpritesheet(sheet);
 		}
 
@@ -58,7 +63,7 @@ namespace awe {
 		 * @safety No guarantee.
 		 */
 		void setIconSpritesheet(
-			const std::shared_ptr<sfx::animated_spritesheet>& sheet);
+			const std::shared_ptr<const sfx::animated_spritesheet>& sheet);
 
 		/**
 		 * Gets the spritesheet used with this unit.
@@ -67,6 +72,15 @@ namespace awe {
 		inline std::shared_ptr<const sfx::animated_spritesheet>
 			getSpritesheet() const {
 			return _sprite.getSpritesheet();
+		}
+
+		/**
+		 * Gets the icon spritesheet used with this unit.
+		 * @return Pointer to the icon spritesheet used with this unit.
+		 */
+		inline std::shared_ptr<const sfx::animated_spritesheet>
+			getIconSpritesheet() const {
+			return _hpIcon.getSpritesheet();
 		}
 
 		/**
@@ -188,5 +202,12 @@ namespace awe {
 		 * The unit's capturing and hiding icon sprite object.
 		 */
 		sfx::animated_sprite _capturingHidingIcon;
+
+		/**
+		 * If the spritesheet assigned to \c _sprite is the same as this one, the
+		 * icons will be rendered. Else, they will be hidden.
+		 */
+		const std::shared_ptr<const sfx::animated_spritesheet>
+			_onlyShowIconsWhenThisMainSpritesheetIsActive;
 	};
 }

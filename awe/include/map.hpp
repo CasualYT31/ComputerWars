@@ -2428,6 +2428,19 @@ namespace awe {
 		bool animateCapture(const sf::Vector2u& tile, const awe::UnitID unit,
 			const awe::HP oldHP, const awe::HP newHP);
 
+		/**
+		 * Attempts to queue a "unit move" animation.
+		 * @param  unit       The ID of the unit to move.
+		 * @param  closedList The closed list containing the path the unit is to
+		 *                    move along. Must be at least two elements in size.
+		 *                    The first element dictates where the unit starts
+		 *                    from, and subsequent elements dictate the
+		 *                    destinations of the unit, in order.
+		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool animateMoveUnit(const awe::UnitID unit,
+			const CScriptArray* const closedList);
+
 		//////////
 		// MISC //
 		//////////
@@ -2790,10 +2803,10 @@ namespace awe {
 				const awe::ArmyID army = 0,
 				const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr,
 				const std::shared_ptr<sfx::animated_spritesheet>& icons = nullptr)
-				: sprite(std::make_shared<awe::animated_unit>(
+				: sprite(std::make_shared<awe::animated_unit>(sheet,
 					engine::logger::data{ logger_data.sink,
 						logger_data.name + "_sprite" })),
-				data(sprite, spriteCallback, type, army, sheet, icons) {}
+				data(sprite, spriteCallback, type, army, icons) {}
 
 			/**
 			 * The unit's animated sprite.

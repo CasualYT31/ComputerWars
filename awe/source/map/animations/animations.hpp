@@ -28,3 +28,4 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "include/zoom.hpp"
 #include "include/labelunit.hpp"
 #include "include/capture.hpp"
+#include "include/moveunit.hpp"

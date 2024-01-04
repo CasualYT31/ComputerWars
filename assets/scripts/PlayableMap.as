@@ -578,7 +578,7 @@ shared class PlayableMap {
                 }
             }
             map.addAvailableTile(tile);
-        } else if (map.isUnitOnMap(currentlySelectedUnit)) {
+        } else {
             map.setUnitSpritesheet(currentlySelectedUnit,
                 map.getUnitType(currentlySelectedUnit).idleSpritesheet);
         }

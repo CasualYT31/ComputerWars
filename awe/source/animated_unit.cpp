@@ -22,14 +22,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "animated_unit.hpp"
 
-awe::animated_unit::animated_unit(const engine::logger::data& data) :
-	_sprite(data), _hpIcon({ data.sink, data.name + "_hp_icon" }),
+awe::animated_unit::animated_unit(
+	const std::shared_ptr<const sfx::animated_spritesheet>& sheet,
+	const engine::logger::data& data) :
+	_sprite(sheet, "", data), _hpIcon({ data.sink, data.name + "_hp_icon" }),
 	_fuelAmmoIcon({ data.sink, data.name + "_fuel_ammo_icon" }),
 	_loadedIcon({ data.sink, data.name + "_loaded_icon" }),
-	_capturingHidingIcon({ data.sink, data.name + "_status_icon" }) {}
+	_capturingHidingIcon({ data.sink, data.name + "_status_icon" }),
+	_onlyShowIconsWhenThisMainSpritesheetIsActive(sheet) {}
 
 void awe::animated_unit::setIconSpritesheet(
-	const std::shared_ptr<sfx::animated_spritesheet>& sheet) {
+	const std::shared_ptr<const sfx::animated_spritesheet>& sheet) {
 	_hpIcon.setSpritesheet(sheet);
 	_fuelAmmoIcon.setSpritesheet(sheet);
 	_loadedIcon.setSpritesheet(sheet);
@@ -64,6 +67,8 @@ bool awe::animated_unit::animate(const sf::RenderTarget& target) {
 void awe::animated_unit::draw(sf::RenderTarget& target,
 	sf::RenderStates states) const {
 	target.draw(_sprite, states);
+	if (getSpritesheet() != _onlyShowIconsWhenThisMainSpritesheetIsActive)
+		return;
 	target.draw(_loadedIcon, states);
 	target.draw(_capturingHidingIcon, states);
 	target.draw(_fuelAmmoIcon, states);
