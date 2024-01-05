@@ -1645,6 +1645,42 @@ shared class PlayableMap {
                 "minicannonshootupshadow",
                 Vector2f(0.5, 0.5)
             ) }, "particle");
+        } else if (type == "minicannondown") {
+            auto tileBelow = rootTile;
+            tileBelow.y += 1;
+            map.animateParticles({ TileParticle(
+                tileBelow,
+                "minicannonshootdown",
+                Vector2f(0.5, 0.0)
+            ), TileParticle(
+                rootTile,
+                "minicannonshootdownshadow",
+                Vector2f(0.5, 0.5)
+            ) }, "particle");
+        } else if (type == "minicannonleft") {
+            auto tileLeft = rootTile;
+            tileLeft.x -= 1;
+            map.animateParticles({ TileParticle(
+                tileLeft,
+                "minicannonshootleft",
+                Vector2f(1.0, 0.5)
+            ), TileParticle(
+                rootTile,
+                "minicannonshootleftshadow",
+                Vector2f(0.5, 0.5)
+            ) }, "particle");
+        } else if (type == "minicannonright") {
+            auto tileRight = rootTile;
+            tileRight.x += 1;
+            map.animateParticles({ TileParticle(
+                tileRight,
+                "minicannonshootright",
+                Vector2f(0.0, 0.5)
+            ), TileParticle(
+                rootTile,
+                "minicannonshootrightshadow",
+                Vector2f(0.5, 0.5)
+            ) }, "particle");
         }
     }
 
@@ -1661,6 +1697,24 @@ shared class PlayableMap {
                 targetTile,
                 "damagefrombelow",
                 Vector2f(0.5, 1.0)
+            ) }, "particle");
+        } else if (type == "minicannondown") {
+            map.animateParticles({ TileParticle(
+                targetTile,
+                "damagefromabove",
+                Vector2f(0.5, 0.0)
+            ) }, "particle");
+        } else if (type == "minicannonleft") {
+            map.animateParticles({ TileParticle(
+                targetTile,
+                "damagefromright",
+                Vector2f(1.0, 0.5)
+            ) }, "particle");
+        } else if (type == "minicannonright") {
+            map.animateParticles({ TileParticle(
+                targetTile,
+                "damagefromleft",
+                Vector2f(0.0, 0.5)
             ) }, "particle");
         }
     }
