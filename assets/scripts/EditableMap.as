@@ -435,6 +435,8 @@ class EditableMap {
         DisableMementos token(map, OPERATION[Operation::CREATE_ARMY_SCRIPT]);
         const auto successful =
             map.createArmy(::country.scriptNames[uint64(country)]);
+        // Assign the first CO in the commander bank as this army's current CO.
+        if (successful) map.setArmyCurrentCO(country, commander.scriptNames[0]);
         if (successful && map.getArmyCount() == 1) {
             // If the first army has been created, automatically select them.
             map.setSelectedArmy(map.getArmyIDs()[0]);
