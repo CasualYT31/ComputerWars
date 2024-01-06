@@ -54,8 +54,25 @@ namespace awe {
 		 */
 		inline void setSpritesheet(
 			const std::shared_ptr<const sfx::animated_spritesheet>& sheet) {
-			_sprite.setSpritesheet(sheet);
+			if (_oldSheet) _oldSheet = sheet;
+			else _sprite.setSpritesheet(sheet);
 		}
+
+		/**
+		 * Sets this unit's main spritesheet override.
+		 * @param sheet Pointer to the spritesheet to override with.
+		 * @sa    \c _oldSheet.
+		 * @sa    \c _targetCache.
+		 */
+		void setSpritesheetOverride(
+			const std::shared_ptr<const sfx::animated_spritesheet>& sheet);
+
+		/**
+		 * Clears this unit's main spritesheet override.
+		 * @sa \c _oldSheet.
+		 * @sa \c _targetCache.
+		 */
+		void clearSpritesheetOverride();
 
 		/**
 		 * Sets the icon spritesheet to use with this unit.
@@ -64,6 +81,22 @@ namespace awe {
 		 */
 		void setIconSpritesheet(
 			const std::shared_ptr<const sfx::animated_spritesheet>& sheet);
+
+		/**
+		 * Sets this unit's icon spritesheet override.
+		 * @param sheet Pointer to the icon spritesheet to override with.
+		 * @sa    \c _oldIconSheet.
+		 * @sa    \c _targetCache.
+		 */
+		void setIconSpritesheetOverride(
+			const std::shared_ptr<const sfx::animated_spritesheet>& sheet);
+
+		/**
+		 * Clears this unit's main spritesheet override.
+		 * @sa \c _oldIconSheet.
+		 * @sa \c _targetCache.
+		 */
+		void clearIconSpritesheetOverride();
 
 		/**
 		 * Gets the spritesheet used with this unit.
@@ -179,6 +212,13 @@ namespace awe {
 		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
 
 		/**
+		 * Cache the render target last given to \c animate() so the caller does
+		 * not have to manually animate sprites when setting and clearing the
+		 * spritesheet overrides.
+		 */
+		const sf::RenderTarget* _targetCache = nullptr;
+
+		/**
 		 * The unit's animated sprite object.
 		 */
 		sfx::animated_sprite _sprite;
@@ -209,5 +249,24 @@ namespace awe {
 		 */
 		const std::shared_ptr<const sfx::animated_spritesheet>
 			_onlyShowIconsWhenThisMainSpritesheetIsActive;
+
+		/**
+		 * The unit's spritesheet as set via \c setSpritesheet().
+		 * When a spritesheet override is given, its previous sheet will be stored
+		 * here. If \c setSpritesheet() is called whilst the override is still
+		 * active, the sheet given will be stored here instead. Then, when the
+		 * override is removed, \c setSpritesheet() will be used to reinstate the
+		 * last given sheet to \c setSpritesheet(). If two spritesheet overrides
+		 * are given back-to-back, then the second override will not cause the
+		 * first override to be stored in here.
+		 */
+		std::optional<std::shared_ptr<const sfx::animated_spritesheet>> _oldSheet;
+
+		/**
+		 * The unit's icon spritesheet as set via \c setIconSpritesheet().
+		 * @sa \c _oldSheet.
+		 */
+		std::optional<std::shared_ptr<const sfx::animated_spritesheet>>
+			_oldIconSheet;
 	};
 }

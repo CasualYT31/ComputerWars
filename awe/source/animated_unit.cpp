@@ -31,15 +31,54 @@ awe::animated_unit::animated_unit(
 	_capturingHidingIcon({ data.sink, data.name + "_status_icon" }),
 	_onlyShowIconsWhenThisMainSpritesheetIsActive(sheet) {}
 
+void awe::animated_unit::setSpritesheetOverride(
+	const std::shared_ptr<const sfx::animated_spritesheet>& sheet) {
+	if (!_oldSheet) _oldSheet = getSpritesheet();
+	_sprite.setSpritesheet(sheet);
+	if (_targetCache) animate(*_targetCache);
+}
+
+void awe::animated_unit::clearSpritesheetOverride() {
+	if (!_oldSheet) return;
+	const std::shared_ptr<const sfx::animated_spritesheet> oldSheet = *_oldSheet;
+	_oldSheet.reset();
+	setSpritesheet(oldSheet);
+	if (_targetCache) animate(*_targetCache);
+}
+
 void awe::animated_unit::setIconSpritesheet(
 	const std::shared_ptr<const sfx::animated_spritesheet>& sheet) {
+	if (_oldIconSheet) {
+		_oldIconSheet = sheet;
+		return;
+	}
 	_hpIcon.setSpritesheet(sheet);
 	_fuelAmmoIcon.setSpritesheet(sheet);
 	_loadedIcon.setSpritesheet(sheet);
 	_capturingHidingIcon.setSpritesheet(sheet);
 }
 
+void awe::animated_unit::setIconSpritesheetOverride(
+	const std::shared_ptr<const sfx::animated_spritesheet>& sheet) {
+	if (!_oldIconSheet) _oldIconSheet = getIconSpritesheet();
+	_hpIcon.setSpritesheet(sheet);
+	_fuelAmmoIcon.setSpritesheet(sheet);
+	_loadedIcon.setSpritesheet(sheet);
+	_capturingHidingIcon.setSpritesheet(sheet);
+	if (_targetCache) animate(*_targetCache);
+}
+
+void awe::animated_unit::clearIconSpritesheetOverride() {
+	if (!_oldIconSheet) return;
+	const std::shared_ptr<const sfx::animated_spritesheet> oldSheet =
+		*_oldIconSheet;
+	_oldIconSheet.reset();
+	setIconSpritesheet(oldSheet);
+	if (_targetCache) animate(*_targetCache);
+}
+
 bool awe::animated_unit::animate(const sf::RenderTarget& target) {
+	_targetCache = &target;
 	// Animate sprites.
 	_hpIcon.animate(target);
 	_fuelAmmoIcon.animate(target);

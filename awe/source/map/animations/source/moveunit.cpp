@@ -25,24 +25,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 awe::move_unit::move_unit(const std::shared_ptr<awe::animated_unit>& unitSprite,
 	const std::vector<node>& path, const float speed) :
-	_unit(unitSprite), _path(path), _speed(speed),
-	_previousSheet(unitSprite->getSpritesheet()) {
+	_unit(unitSprite), _path(path), _speed(speed) {
 	assert(path.size() >= 2);
 	_setupNextDestination();
 }
 
 bool awe::move_unit::animate(const sf::RenderTarget& target) {
-	// If the game tried to overwrite the spritesheets of this unit, remember what
-	// they were so we can apply them once we're done.
-	const auto unitSheet = _unit->getSpritesheet();
-	if (unitSheet != _previousSheet && unitSheet != _path[_tile].sheet)
-		_previousSheet = unitSheet;
-	const auto iconSheet = _unit->getIconSpritesheet();
-	if (iconSheet && iconSheet != _iconSheet) _iconSheet = iconSheet;
 	// Force icons to disappear. There is a case where if a unit is obstructed by a
 	// hidden unit, the moving unit's icons are displayed for a frame (as the
 	// scripts sets the idle spritesheet whilst this animation is on-going).
-	_unit->setIconSpritesheet(nullptr);
+	_unit->setIconSpritesheetOverride(nullptr);
 
 	const auto delta = accumulatedDelta();
 
@@ -66,8 +58,8 @@ bool awe::move_unit::animate(const sf::RenderTarget& target) {
 		_setupNextDestination();
 
 	if (_tile >= _path.size()) {
-		_unit->setSpritesheet(_previousSheet);
-		_unit->setIconSpritesheet(_iconSheet);
+		_unit->clearSpritesheetOverride();
+		_unit->clearIconSpritesheetOverride();
 		return true;
 	} else return false;
 }
@@ -80,5 +72,5 @@ void awe::move_unit::draw(sf::RenderTarget& target,
 void awe::move_unit::_setupNextDestination() {
 	resetDeltaAccumulation();
 	if (++_tile >= _path.size()) return;
-	_unit->setSpritesheet(_path[_tile].sheet);
+	_unit->setSpritesheetOverride(_path[_tile].sheet);
 }

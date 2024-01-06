@@ -110,20 +110,6 @@ namespace awe {
 		const float _speed;
 
 		/**
-		 * Cache of the spritesheet that the unit sprite had when it was given to
-		 * the constructor.
-		 * Is updated if a change is detected in \c animate() that wasn't made by
-		 * this object.
-		 */
-		std::shared_ptr<const sfx::animated_spritesheet> _previousSheet;
-
-		/**
-		 * Cache of the icon sheet.
-		 * @sa \c _previousSheet.
-		 */
-		std::shared_ptr<const sfx::animated_spritesheet> _iconSheet;
-
-		/**
 		 * The index of the \c _path location the unit is currently moving to.
 		 */
 		std::size_t _tile = 0;

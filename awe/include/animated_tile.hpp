@@ -100,7 +100,7 @@ namespace awe {
 		/**
 		 * Clears this tile's sprite override.
 		 * @sa \c _oldSprite.
-		 * @sa    \c _targetCache.
+		 * @sa \c _targetCache.
 		 */
 		void clearSpriteOverride();
 
