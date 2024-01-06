@@ -474,7 +474,7 @@ shared class PlayableMap {
      */
     UnitID createUnit(const UnitType@ type, const ArmyID army,
         const Vector2&in position, const bool waiting = false) {
-        if (map.getUnitOnTile(position) != NO_UNIT) {
+        if (position != NO_POSITION && map.getUnitOnTile(position) != NO_UNIT) {
             throw("Could not create unit of type \"" + type.scriptName + "\" for "
                 "army " + formatUInt(army) + " on tile " + position.toString() +
                 ": this tile is occupied!");
@@ -485,7 +485,7 @@ shared class PlayableMap {
                 "army " + formatUInt(army) + " on tile " + position.toString() +
                 ": this army ID is invalid!");
         }
-        map.setUnitPosition(unitID, position);
+        if (position != NO_POSITION) map.setUnitPosition(unitID, position);
         map.replenishUnit(unitID, true);
         map.waitUnit(unitID, waiting);
         return unitID;
@@ -1865,39 +1865,67 @@ shared class PlayableMap {
                 const auto tilesInRange = getStructureAttackRange(tile);
                 for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
                     // If there is a unit on the tile, and it's on the same team
-                    // as the owner of the structure, do not spawn an Oozium. If
-                    // a unit of an opposing team is occupying the tile, however,
-                    // delete the unit before spawning the Oozium in.
+                    // as the owner of the structure, do not spawn an Oozium.
                     const auto unitID = map.getUnitOnTile(tilesInRange[i]);
-                    if (unitID != NO_UNIT) {
-                        if (map.getTeamOfUnit(unitID) == currentTeam) continue;
-                        deleteUnit(unitID);
-                    }
+                    if (unitID != NO_UNIT &&
+                        map.getTeamOfUnit(unitID) == currentTeam) continue;
                     // Don't spawn an Oozium if it can't move onto the tile.
                     const auto ooziumType = unittype["OOZIUM"];
                     if (map.getTileType(tilesInRange[i]).type.moveCost[
                         ooziumType.movementTypeScriptName] < 0) continue;
                     // Spawn Oozium.
                     const auto oozium = createUnit(ooziumType, currentArmy,
-                        tilesInRange[i]);
-                    // Only make Oozium visible after deleting the unit that's
-                    // currently occupying its tile.
-                    map.addPreviewUnit(oozium, NO_POSITION);
+                        NO_POSITION);
+                    // Queue the Oozium's preview position assignment.
                     _newOoziums.insertLast(oozium);
+                    _newOoziumPositions.insertLast(tilesInRange[i]);
                     map.queueCode(AnimationCode(
-                        this._removeFirstOoziumFromGrandBoltList));
+                        this._removeFirstOoziumFromNewList));
+                    // If a unit of an opposing team is occupying the tile, delete
+                    // the unit before moving the Oozium onto the tile proper.
+                    if (unitID != NO_UNIT) deleteUnit(unitID);
+                    // Then, queue the Oozium's move.
+                    map.queueCode(AnimationCode(this._setupVisibleOozium));
                 }
             }
         }
     }
 
     /**
-     * Makes the first Oozium in the list visible.
+     * The IDs of Oozium units that have just been created by the Grand Bolt.
      */
-    private void _removeFirstOoziumFromGrandBoltList() {
+    private array<UnitID> _newOoziums;
+
+    /**
+     * The positions of Ooziums within \c _newOoziums.
+     */
+    private array<Vector2> _newOoziumPositions;
+
+    /**
+     * Oozium unit that has most recently been popped from \c _newOoziums.
+     */
+    private UnitID _visibleOozium = NO_UNIT;
+
+    /**
+     * Pops the first Oozium in the new list and sets its preview location.
+     */
+    private void _removeFirstOoziumFromNewList() {
         const auto oozium = _newOoziums[0];
-        map.removePreviewUnit(oozium);
+        const auto destination = _newOoziumPositions[0];
+        map.addPreviewUnit(oozium, destination);
+        _visibleOozium = oozium;
         _newOoziums.removeAt(0);
+        _newOoziumPositions.removeAt(0);
+    }
+
+    /**
+     * Moves the \c _visibleOozium unit onto its preview tile.
+     */
+    private void _setupVisibleOozium() {
+        const auto destination = map.getUnitPreviewPosition(_visibleOozium);
+        map.removePreviewUnit(_visibleOozium);
+        map.setUnitPosition(_visibleOozium, destination);
+        _visibleOozium = NO_UNIT;
     }
 
     /**
@@ -2144,9 +2172,4 @@ shared class PlayableMap {
      * be called.
      */
     private bool _closedListEnabled = true;
-
-    /**
-     * The IDs of Oozium units created by the Grand Bolt.
-     */
-    private array<UnitID> _newOoziums;
 }

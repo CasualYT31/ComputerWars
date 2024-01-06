@@ -200,19 +200,22 @@ void awe::map::addPreviewUnit(const awe::UnitID unit, const sf::Vector2u& pos) {
 		return;
 	}
 	_unitLocationOverrides[unit] = pos;
+	_unitLocationOverrideHasNotYetBeenApplied.insert(unit);
 }
 
 void awe::map::removePreviewUnit(const awe::UnitID unit) {
 	if (_unitLocationOverrides.find(unit) == _unitLocationOverrides.end()) {
 		_logger.error("removePreviewUnit operation failed: unit with ID {} did "
 			"not have a position override at the time of calling.", unit);
-	} else {
-		_unitLocationOverrides.erase(unit);
+		return;
 	}
+	_unitLocationOverrides.erase(unit);
+	_unitLocationOverrideHasNotYetBeenApplied.erase(unit);
 }
 
 void awe::map::removeAllPreviewUnits() {
 	_unitLocationOverrides.clear();
+	_unitLocationOverrideHasNotYetBeenApplied.clear();
 }
 
 std::size_t awe::map::getUnitPreviewsCount() const {
@@ -743,6 +746,7 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 					// The unit is in the processing of being destroyed.
 					_unitsBeingDestroyed.at(uID)->setPixelPosition(unitx, unity);
 				}
+				_unitLocationOverrideHasNotYetBeenApplied.erase(uID);
 			}
 
 			// Update cursor position.
@@ -836,11 +840,11 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 		_rectangle.setPosition(sf::Vector2f{
 			std::min(rectSelStart.x, rectSelEnd.x),
 			std::min(rectSelStart.y, rectSelEnd.y)
-			});
+		});
 		_rectangle.setSize(sf::Vector2f{
 			::abs(rectSelStart.x - rectSelEnd.x),
 			::abs(rectSelStart.y - rectSelEnd.y)
-			});
+		});
 		_rectangle.setOutlineThickness(_scaling);
 	}
 
@@ -972,7 +976,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		const awe::UnitID unitID = unitsPair.first;
 		const auto hasLocationOverride =
 			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end() &&
-			_unitLocationOverrides.at(unitID) != awe::unit::NO_POSITION;
+			_unitLocationOverrides.at(unitID) != awe::unit::NO_POSITION &&
+			_unitLocationOverrideHasNotYetBeenApplied.count(unitID) == 0;
 
 		if (_isUnitPresent(unitID) && ((isUnitOnMap(unitID) &&
 			(_alwaysShowHiddenUnits || isUnitVisible(unitID, currentArmy))) ||
@@ -1013,7 +1018,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		const awe::UnitID unitID = unitsPair.first;
 		const auto hasLocationOverride =
 			_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end() &&
-			_unitLocationOverrides.at(unitID) != awe::unit::NO_POSITION;
+			_unitLocationOverrides.at(unitID) != awe::unit::NO_POSITION &&
+			_unitLocationOverrideHasNotYetBeenApplied.count(unitID) == 0;
 		if (hasLocationOverride) {
 			unitsWithLocationOverrides.emplace_back(*unitsPair.second, states);
 		} else {
@@ -1057,6 +1063,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 void awe::map::drawUnit(sf::RenderTarget& target, const sf::RenderStates& states,
 	const awe::UnitID unitID, sf::Drawable& sprite) const {
 	if (_unitLocationOverrides.find(unitID) != _unitLocationOverrides.end() &&
-		_unitLocationOverrides.at(unitID) == awe::unit::NO_POSITION) return;
+		(_unitLocationOverrides.at(unitID) == awe::unit::NO_POSITION ||
+		_unitLocationOverrideHasNotYetBeenApplied.count(unitID) > 0)) return;
 	target.draw(sprite, states);
 };

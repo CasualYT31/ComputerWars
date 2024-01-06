@@ -3024,6 +3024,17 @@ namespace awe {
 		std::unordered_map<awe::UnitID, sf::Vector2u> _unitLocationOverrides;
 
 		/**
+		 * If a unit's location override has just been given, its ID will be stored
+		 * in this set.
+		 * Then, when \c animate() applies the override to the unit's position, it
+		 * will be removed from this set.\n
+		 * This set was added to handle cases where animation code assigns unit
+		 * location overrides. Since animation code is run after the application of
+		 * location overrides, you would see the unit's old location for a frame.
+		 */
+		std::unordered_set<awe::UnitID> _unitLocationOverrideHasNotYetBeenApplied;
+
+		/**
 		 * If set to \c TRUE, all units are drawn, regardless of whether they are
 		 * hidden to the current army or not.
 		 */

@@ -492,6 +492,7 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	_viewOffsetY.reset();
 	_mapSizeCache = { 0, 0 };
 	_scriptFiles.clear();
+	removeAllPreviewUnits();
 	if (_scripts->doesModuleExist(_moduleName))
 		_scripts->deleteModule(_moduleName);
 	_moduleName.clear();
