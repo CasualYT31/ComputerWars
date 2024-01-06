@@ -993,7 +993,7 @@ void awe::map::Register(asIScriptEngine* engine,
 
 		r = engine->RegisterObjectMethod("Map", "bool animateScroll("
 			"const Vector2&in, const float, const bool = false)",
-			asMETHOD(awe::map, animateViewScrolling), asCALL_THISCALL);
+			asMETHOD(awe::map, animateViewScroll), asCALL_THISCALL);
 	}
 }
 

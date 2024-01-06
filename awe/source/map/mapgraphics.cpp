@@ -231,7 +231,7 @@ void awe::map::alwaysShowHiddenUnits(const bool alwaysShow) noexcept {
 void awe::map::setSelectedTile(const sf::Vector2u& pos) {
 	if (!_isOutOfBounds(pos)) {
 		_sel = pos;
-		animateViewScrolling(_sel, 500.0f, true);
+		animateViewScroll(_sel, 500.0f, true);
 	}
 }
 
@@ -493,9 +493,10 @@ bool awe::map::animateParticles(const CScriptArray* const particles,
 		particleNodes[i].tileSprite = _tiles[particleNodes[i].tile.x]
 			[particleNodes[i].tile.y].sprite;
 	}
+	const auto res = animateViewScroll(particleNodes[0].tile, 500.f);
 	_animationQueue.push(std::make_unique<awe::tile_particles>(
 		particleNodes, (*_sheets)[sheet]));
-	return true;
+	return res;
 }
 
 bool awe::map::animateParticle(const sf::Vector2u& tile, const std::string& sheet,
@@ -513,9 +514,10 @@ bool awe::map::animateParticle(const sf::Vector2u& tile, const std::string& shee
 	}
 	awe::tile_particle_node node(tile, particle, origin);
 	node.tileSprite = _tiles[tile.x][tile.y].sprite;
+	const auto res = animateViewScroll(tile, 500.f);
 	_animationQueue.push(std::make_unique<awe::tile_particles>(std::vector{ node },
 		(*_sheets)[sheet]));
-	return true;
+	return res;
 }
 
 bool awe::map::animateLabelUnit(const awe::UnitID unitID,
@@ -532,11 +534,13 @@ bool awe::map::animateLabelUnit(const awe::UnitID unitID,
 	const bool left = _target->mapCoordsToPixel(
 		_units.at(unitID).sprite->getPixelPosition(), _view).x >
 		_target->getSize().x / 2.0f;
+	const auto res =
+		animateViewScroll(_units.at(unitID).data.getPosition(), 500.f);
 	// TODO-2.
 	_animationQueue.push(std::make_unique<awe::label_unit>(
 		_units.at(unitID).data, _units.at(unitID).sprite, (*_sheets)["icon"],
 		(left ? leftLabel : rightLabel), left, duration));
-	return true;
+	return res;
 }
 
 bool awe::map::animateCapture(const sf::Vector2u& tile, const awe::UnitID unit,
@@ -628,7 +632,7 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 	return true;
 }
 
-bool awe::map::animateViewScrolling(const sf::Vector2u& tile, const float speed,
+bool awe::map::animateViewScroll(const sf::Vector2u& tile, const float speed,
 	const bool drawCursors) {
 	if (!_canAnimationBeQueued()) return false;
 	if (_isOutOfBounds(tile)) {

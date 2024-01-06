@@ -2392,9 +2392,10 @@ namespace awe {
 
 		/**
 		 * Attempts to queue a "tile particle" animation.
+		 * Also automatically queues an \c awe::scroll animation before this one.
 		 * @param  particles The particles to animate.
 		 * @param  sheet     The name of the sheet to use for particle sprites.
-		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 * @return \c TRUE if both animations were queued, \c FALSE otherwise.
 		 */
 		bool animateParticles(const CScriptArray* const particles,
 			const std::string& sheet);
@@ -2408,6 +2409,7 @@ namespace awe {
 
 		/**
 		 * Attempts to queue a "label unit" animation.
+		 * Also automatically queues an \c awe::scroll animation before this one.
 		 * @param  unitID     The ID of the unit that's being replenished.
 		 * @param  leftLabel  ID of the label sprite to use when the label is on
 		 *                    the left side of the unit.
@@ -2415,7 +2417,7 @@ namespace awe {
 		 *                    the right side of the unit.
 		 * @param  duration   The number of seconds the label should be visible
 		 *                    for.
-		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 * @return \c TRUE if both animations were queued, \c FALSE otherwise.
 		 */
 		bool animateLabelUnit(const awe::UnitID unitID,
 			const std::string& leftLabel, const std::string& rightLabel,
@@ -2454,7 +2456,7 @@ namespace awe {
 		 *                     the view is scrolling, \c FALSE if not.
 		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
 		 */
-		bool animateViewScrolling(const sf::Vector2u& tile, const float speed,
+		bool animateViewScroll(const sf::Vector2u& tile, const float speed,
 			const bool drawCursors = false);
 
 		//////////
