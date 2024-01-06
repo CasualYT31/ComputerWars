@@ -47,6 +47,12 @@ namespace awe {
 			const float duration = 0.1f);
 
 		/**
+		 * The cursor graphics are rendered during this animation.
+		 * @return \c TRUE.
+		 */
+		inline bool enableCursorGraphics() const override final { return true; }
+
+		/**
 		 * This drawable's \c animate() method.
 		 * @param  target The target to render the animation to.
 		 * @return \c TRUE if the animation has completed, \c FALSE otherwise.

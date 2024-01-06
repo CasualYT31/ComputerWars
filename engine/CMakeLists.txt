@@ -94,6 +94,7 @@ add_library(${PROJECT_NAME} STATIC
 	"source/language.cpp"
 	"source/script.cpp"
 	"source/binary.cpp"
+	"source/maths.cpp"
 	${angelscript_SOURCE_DIR}/add_on/scriptarray/scriptarray.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring.cpp
 	${angelscript_SOURCE_DIR}/add_on/scriptstdstring/scriptstdstring_utils.cpp

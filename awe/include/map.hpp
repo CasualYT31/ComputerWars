@@ -2446,6 +2446,17 @@ namespace awe {
 		bool animateMoveUnit(const awe::UnitID unit,
 			const CScriptArray* const closedList);
 
+		/**
+		 * Attempts to queue a "scroll view" animation.
+		 * @param  tile        The tile to bring into view.
+		 * @param  speed       The speed of the scroll, in pixels per second.
+		 * @param  drawCursors \c TRUE if the cursors should still be drawn whilst
+		 *                     the view is scrolling, \c FALSE if not.
+		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool animateViewScrolling(const sf::Vector2u& tile, const float speed,
+			const bool drawCursors = false);
+
 		//////////
 		// MISC //
 		//////////

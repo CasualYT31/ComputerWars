@@ -20,13 +20,14 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#pragma once
+#include "maths.hpp"
 
-#include "include/daybegin.hpp"
-#include "include/tagcos.hpp"
-#include "include/tileparticles.hpp"
-#include "include/zoom.hpp"
-#include "include/labelunit.hpp"
-#include "include/capture.hpp"
-#include "include/moveunit.hpp"
-#include "include/scroll.hpp"
+bool engine::closeTo(const float a, const float b, const float epsilon) noexcept {
+	// Equal numbers and infinity will return immediately
+	if (a == b) return true;
+	// When very close to 0, we can use the absolute comparison
+	const float diff = ::fabsf(a - b);
+	if ((a == 0 || b == 0) && (diff < epsilon)) return true;
+	// Otherwise we need to use relative comparison to account for precision
+	return diff / (::fabs(a) + ::fabs(b)) < epsilon;
+}

@@ -20,13 +20,42 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/**@file maths.hpp
+ * Defines maths functions.
+ */
+
 #pragma once
 
-#include "include/daybegin.hpp"
-#include "include/tagcos.hpp"
-#include "include/tileparticles.hpp"
-#include "include/zoom.hpp"
-#include "include/labelunit.hpp"
-#include "include/capture.hpp"
-#include "include/moveunit.hpp"
-#include "include/scroll.hpp"
+#include "SFML/System/Vector2.hpp"
+#include <cmath>
+
+namespace engine {
+	/**
+	 * Normalises the given vector.
+	 * @param  v The vector to normalise.
+	 * @return The normalised vector.
+	 */
+	inline sf::Vector2f normalise(const sf::Vector2f& v) noexcept {
+		return v / ::sqrtf(v.x * v.x + v.y * v.y);
+	}
+
+	/**
+	 * Floating point equality comparison.
+	 * @remark This function is an amended version of the function with the same
+	 *         signature from scriptmath.cpp, making it originally part of
+	 *         AngelScript.
+	 * @param  a       LHS.
+	 * @param  b       RHS.
+	 * @param  epsilon Tolerance.
+	 */
+	bool closeTo(const float a, const float b,
+		const float epsilon = 0.00001f) noexcept;
+
+	/**
+	 * Version of \c closeTo() for use with floating-point vectors.
+	 */
+	inline bool closeTo(const sf::Vector2f& a, const sf::Vector2f& b,
+		const float epsilon = 0.00001f) noexcept {
+		return closeTo(a.x, b.x, epsilon) && closeTo(a.y, b.y, epsilon);
+	}
+}

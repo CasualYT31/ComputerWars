@@ -990,6 +990,10 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map", "bool animateMoveUnit("
 			"const UnitID, const array<ClosedListNode>@ const)",
 			asMETHOD(awe::map, animateMoveUnit), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "bool animateScroll("
+			"const Vector2&in, const float, const bool = false)",
+			asMETHOD(awe::map, animateViewScrolling), asCALL_THISCALL);
 	}
 }
 

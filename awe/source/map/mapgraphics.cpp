@@ -229,7 +229,10 @@ void awe::map::alwaysShowHiddenUnits(const bool alwaysShow) noexcept {
 }
 
 void awe::map::setSelectedTile(const sf::Vector2u& pos) {
-	if (!_isOutOfBounds(pos)) _sel = pos;
+	if (!_isOutOfBounds(pos)) {
+		_sel = pos;
+		animateViewScrolling(_sel, 500.0f, true);
+	}
 }
 
 void awe::map::moveSelectedTileUp() {
@@ -625,6 +628,40 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 	return true;
 }
 
+bool awe::map::animateViewScrolling(const sf::Vector2u& tile, const float speed,
+	const bool drawCursors) {
+	if (!_canAnimationBeQueued()) return false;
+	if (_isOutOfBounds(tile)) {
+		_logger.error("animateViewScrolling operation cancelled: tile {} is "
+			"out-of-bounds.", tile);
+		return false;
+	}
+	if (speed <= 0.0f) {
+		_logger.error("animateViewScrolling operation cancelled: speed {} is "
+			"invalid!", speed);
+		return false;
+	}
+	const auto& tileSprite = _tiles[tile.x][tile.y].sprite;
+	const auto pixel = sf::Vector2f(_target->mapCoordsToPixel(
+		tileSprite->getPixelPosition() + tileSprite->getPixelSize() * 0.5f,
+		_view));
+	const auto mapPixelSize = sf::Vector2f(
+		static_cast<float>(getMapSize().x * awe::animated_tile::MIN_WIDTH),
+		static_cast<float>(getMapSize().y * awe::animated_tile::MIN_HEIGHT)
+	);
+	_animationQueue.push(std::make_unique<awe::scroll>(
+		_viewOffsetX,
+		_viewOffsetY,
+		_target,
+		pixel,
+		speed,
+		mapPixelSize,
+		_scaling,
+		drawCursors
+	));
+	return true;
+}
+
 bool awe::map::_canAnimationBeQueued(
 	const std::vector<awe::animation_preset>& presets) const {
 	if (!_animationsEnabled) return false;
@@ -838,8 +875,7 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	_view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 	static const auto moveOffsetAxis = [](const float viewSize,
 		const float mapPixelSize, std::optional<float>& viewOffset,
-		const float cursorPos, const float cursorSize, const float padding,
-		const float screenSize) -> float {
+		const float cursorPos) -> float {
 		if (viewSize > mapPixelSize) {
 			// Map appears smaller than the screen along this axis, so centre it on
 			// that axis. Also, reset the view offset to ensure that when the map
@@ -849,37 +885,24 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 			return -(viewSize / 2.0f - mapPixelSize / 2.0f);
 		} else {
 			if (viewOffset) {
-				// If the cursor is too close to either edge of the screen, adjust
-				// the offset to bring the cursor a little further into the centre
-				// of the screen.
-				if (cursorPos <= padding * 2.0f) {
-					*viewOffset -= padding;
-				} else if (cursorPos + cursorSize >= screenSize - padding * 2.0f) {
-					*viewOffset += padding;
-				}
+				// Make sure the view offset does not exceed its limits.
+				if (*viewOffset < 0.0f) *viewOffset = 0.0f;
+				else if (*viewOffset > mapPixelSize - viewSize)
+					*viewOffset = mapPixelSize - viewSize;
 			} else {
 				// Map appears larger immediately after appearing smaller. Default
-				// offset to centre on the cursor.
-				viewOffset = (cursorPos + cursorSize / 2.0f) - viewSize / 2.0f;
-			}
-			// Make sure the map fully fills the screen along this axis.
-			if (*viewOffset < 0.0f) {
-				viewOffset = 0.0f;
-			} else if (*viewOffset + viewSize >= mapPixelSize) {
-				viewOffset = mapPixelSize - viewSize;
+				// offset to centre on the cursor. TODO-4: this no longer works,
+				// will have to achieve this in the zoom animation instead.
+				viewOffset = cursorPos - viewSize / 2.0f;
 			}
 			return *viewOffset;
 		}
 	};
 	_view.move(
 		moveOffsetAxis(rect.width, static_cast<float>(mapPixelSize.x),
-			_viewOffsetX, cursorRect.left, cursorRect.width,
-			static_cast<float>(awe::animated_tile::MIN_WIDTH),
-			static_cast<float>(target.getSize().x)),
+			_viewOffsetX, cursorRect.left + cursorRect.width * 0.5f),
 		moveOffsetAxis(rect.height, static_cast<float>(mapPixelSize.y),
-			_viewOffsetY, cursorRect.top, cursorRect.height,
-			static_cast<float>(awe::animated_tile::MIN_HEIGHT),
-			static_cast<float>(target.getSize().y))
+			_viewOffsetY, cursorRect.top + cursorRect.height * 0.5f)
 	);
 
 	// End.
