@@ -541,6 +541,13 @@ void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
 	document->DocumentGlobalFunction(r, "Gets a widget's full size, which "
 		"includes any borders it may have, etc.");
 
+	r = engine->RegisterGlobalFunction("void setWidgetScale(" WIDGET_ID_PARAM ", "
+		"const float, const float)",
+		asMETHOD(sfx::gui, _setWidgetScale), asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets a widget's scale. The ID of the "
+		"widget is given first. Then the new scale is given: along the X axis, "
+		"and then along the Y axis.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetEnabled(" WIDGET_ID_PARAM
 		", const bool)",
 		asMETHOD(sfx::gui, _setWidgetEnabled), asCALL_THISCALL_ASGLOBAL, this);

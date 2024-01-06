@@ -62,12 +62,10 @@ int awe::game_engine::run() {
 			if (acceptInput) _gui->handleInput(_userinput);
 			_userinput->update();
 
-			// Now handle the events.
-			sf::Event event;
-			while (_renderer->pollEvent(event)) {
-				if (event.type == sf::Event::Closed) _renderer->close();
-				if (acceptInput) _gui->handleEvent(event);
-			}
+			_renderer->handleEvents([&](const sf::Event& e) {
+				if (e.type == sf::Event::Closed) _renderer->close();
+				if (acceptInput) _gui->handleEvent(e);
+			});
 
 			_renderer->clear();
 			_sprites->updateGlobalFrameIDs();
@@ -519,9 +517,9 @@ bool awe::game_engine::_load(engine::json& j) {
 	const sf::View old = _renderer->getView();
 	bool failed = false; // Lets us display the logs one last time before breaking.
 	for (const auto& loadOperation : loadOperations) {
-		sf::Event event;
-		while (_renderer->pollEvent(event))
-			if (event.type == sf::Event::Closed) throw load_cancelled();
+		_renderer->handleEvents([&](const sf::Event& e) {
+			if (e.type == sf::Event::Closed) throw load_cancelled();
+		});
 		_renderer->clear();
 		sf::View v(sf::FloatRect(0.0f, 0.0f,
 			static_cast<float>(_renderer->getSize().x),

@@ -132,7 +132,7 @@ class DetailedInfoMenu : Menu, Panel {
             armies[a].setAlignment(ArmyWidgetAlignment::Left);
             armies[a].update(armyIDs[a]);
             armies[a].setPosition("2%", "2% + " +
-                formatUInt(55 + (ArmyWidgetConstants::Height + 10) * a));
+                formatFloat(55 + (ArmyWidgetConstants::Height + 10) * a));
             armyPanel.add(armies[a]);
         }
 

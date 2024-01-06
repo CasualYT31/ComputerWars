@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "renderer.hpp"
+#include "fmtsfx.hpp"
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -120,8 +121,14 @@ bool sfx::isWindowMaximised(const sf::WindowHandle window,
 #endif
 }
 
+const sf::Vector2u sfx::renderer::MIN_SIZE{ 426, 240 };
+
 sfx::renderer::renderer(const engine::logger::data& data) :
 	json_script({ data.sink, "json_script" }), _logger(data) {}
+
+void sfx::renderer::setSize(const sf::Vector2u& size) {
+	sf::RenderWindow::setSize(_updateSize(size));
+}
 
 void sfx::renderer::openWindow() {
 	sf::VideoMode mode(_settings.width, _settings.height);
@@ -173,6 +180,16 @@ void sfx::renderer::setSettings(const sfx::renderer_settings& newSettings) {
 	openWindow();
 }
 
+void sfx::renderer::handleEvents(
+	const std::function<void(const sf::Event&)>& onEvent) {
+	sf::Event event;
+	while (pollEvent(event)) {
+		if (event.type == sf::Event::Resized) sf::RenderWindow::setSize(
+			_updateSize({ event.size.width, event.size.height }, false));
+		onEvent(event);
+	}
+}
+
 bool sfx::renderer::animate(sfx::animated_drawable& drawable) const {
 	return drawable.animate(*this);
 }
@@ -181,6 +198,9 @@ bool sfx::renderer::_load(engine::json& j) {
 	sfx::renderer_settings settings;
 	j.apply(settings.width, { "width" }, true);
 	j.apply(settings.height, { "height" }, true);
+	const auto newSize = _updateSize({ settings.width, settings.height });
+	settings.width = newSize.x;
+	settings.height = newSize.y;
 	j.apply(settings.x, { "x" }, true);
 	j.apply(settings.y, { "y" }, true);
 	j.apply(settings.framerate, { "framerate" }, true);
@@ -231,4 +251,14 @@ bool sfx::renderer::_save(nlohmann::ordered_json& j) {
 	j["grabbedmouse"] = _settings.style.mouseGrabbed;
 	j["maximised"] = _settings.style.maximised;
 	return true;
+}
+
+sf::Vector2u sfx::renderer::_updateSize(const sf::Vector2u& size, const bool log) {
+	sf::Vector2u newSize(size);
+	if (newSize.x < MIN_SIZE.x) newSize.x = MIN_SIZE.x;
+	if (newSize.y < MIN_SIZE.y) newSize.y = MIN_SIZE.y;
+	if (log && size != newSize) _logger.warning("Attempted to set the render "
+		"window's size to {}, which is smaller than the minimum allowed size of "
+		"{}. Setting the window's size to {}.", size, MIN_SIZE, newSize);
+	return newSize;
 }

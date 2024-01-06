@@ -18,22 +18,22 @@ namespace ArmyWidgetConstants {
     /**
      * Stores the width of an ArmyWidget.
      */
-    const uint Width = 250;
+    const float Width = 250.0;
 
     /**
      * Stores the width of an ArmyWidget as a string.
      */
-    const string WidthStr = formatUInt(Width);
+    const string WidthStr = formatFloat(Width);
 
     /**
      * Stores the height of an ArmyWidget.
      */
-    const uint Height = 60;
+    const float Height = 60.0;
 
     /**
      * Stores the height of an ArmyWidget as a string.
      */
-    const string HeightStr = formatUInt(Height);
+    const string HeightStr = formatFloat(Height);
 
     /**
      * Stores the radius of an ArmyWidget's border.
@@ -43,7 +43,7 @@ namespace ArmyWidgetConstants {
     /**
      * Stores the radius of an ArmyWidget's border as a string.
      */
-    const string RadiusStr = formatUInt(Radius);
+    const string RadiusStr = formatFloat(Radius);
 
     /**
      * Stores the size of an ArmyWidget's border.
@@ -77,6 +77,7 @@ namespace ArmyWidgetConstants {
 class ArmyWidget : Panel {
     /**
      * Constructs an army widget.
+     * @param transparency The transparency of the panel's background.
      */
     ArmyWidget(const uint8 transparency = 255) {
         alpha = transparency;

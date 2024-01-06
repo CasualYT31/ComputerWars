@@ -108,7 +108,7 @@ class MapMenu : Menu, Group {
     /**
      * The command menu widget.
      */
-    private CommandWidget mapMenuCommands("MapMenu");
+    private CommandWidget mapMenuCommands("MapMenu", "50%");
 
     /**
      * The index of the Visual command.

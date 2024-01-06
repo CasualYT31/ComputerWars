@@ -15,6 +15,10 @@ shared class Picture : ClickableWidget {
     }
 
     void setSprite(const string&in sheet, const string&in sprite) {
-        setWidgetSprite(this, sheet, sprite);
+        ::setWidgetSprite(this, sheet, sprite);
+    }
+
+    void matchSizeToSprite(const bool f) {
+        ::matchWidgetSizeToSprite(this, f);
     }
 }

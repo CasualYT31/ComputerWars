@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "TGUI/Widgets/Label.hpp"
 #include "TGUI/Widgets/Scrollbar.hpp"
 #include "TGUI/Widgets/Grid.hpp"
+#include "TGUI/Widgets/EditBox.hpp"
 
 /**
  * Fmt formatter for the \c tgui::String type.

@@ -387,11 +387,24 @@ namespace sfx {
 	class renderer : public sf::RenderWindow, public engine::json_script {
 	public:
 		/**
+		 * The minimum size of the render window, which is 426x240.
+		 */
+		static const sf::Vector2u MIN_SIZE;
+
+		/**
 		 * Initialises the internal logger object.
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
 		renderer(const engine::logger::data& data);
+
+		/**
+		 * Override of \c sf::RenderWindow::setSize() that makes sure the window
+		 * never goes below a hard-coded size.
+		 * \c _updateSize() is called with \c log set to \c TRUE.
+		 * @sa \c _updateSize().
+		 */
+		void setSize(const sf::Vector2u& size);
 
 		/**
 		 * Opens the render window using configurations.
@@ -429,6 +442,16 @@ namespace sfx {
 		 * @sa     openWindow()
 		 */
 		void setSettings(const sfx::renderer_settings& newSettings);
+
+		/**
+		 * Handles this renderer's events.
+		 * To be called as part of this renderer's draw loop. It makes sure that
+		 * the renderer does not get smaller than a hard-coded size.
+		 * *remember to create function object before loop begins*
+		 * @param onEvent When an event arrives, this function will be called, and
+		 *                the event will be passed.
+		 */
+		void handleEvents(const std::function<void(const sf::Event&)>& onEvent);
 
 		/**
 		 * Animate an \c sfx::animated_drawable object.
@@ -543,6 +566,16 @@ namespace sfx {
 		 *         suggest they should throw anything extraordinary.
 		 */
 		bool _save(nlohmann::ordered_json& j);
+
+		/**
+		 * Makes sure the given window size never goes below a hard-coded size.
+		 * @param  size The proposed new size of the window.
+		 * @param  log  If \c size does not equal the return value, and this
+		 *              parameter is \c TRUE, a warning log will be written.
+		 * @return \c size adjusted to make sure it does not violate the size
+		 *         constraint.
+		 */
+		sf::Vector2u _updateSize(const sf::Vector2u& size, const bool log = true);
 
 		/**
 		 * The internal logger object.

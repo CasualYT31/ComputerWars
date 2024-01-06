@@ -68,9 +68,10 @@ class GameScreen : Menu, Group {
      * Set up the menu.
      */
     GameScreen() {
-        // Setup the root group.
-        add(armyWidget);
+        armyGroup.setSize("50%", "");
+        armyGroup.add(armyWidget);
         add(tileWidget);
+        add(armyGroup);
         ::add(ROOT_WIDGET, this);
     }
 
@@ -120,27 +121,22 @@ class GameScreen : Menu, Group {
         }
 
         HandleCommonGameInput(ui, mouse, previousMouse, currentMouse);
+        const auto cursorOnLeft = game.map.isCursorOnLeftSide();
         
         // Update army widget.
         armyWidget.update(game.map.getSelectedArmy());
-        if (!game.map.isCursorOnLeftSide()) {
+        if (!cursorOnLeft) {
             armyWidget.setAlignment(ArmyWidgetAlignment::Left);
             armyWidget.setOrigin(0.0, 0.0);
-            armyWidget.setPosition("0%-" + ArmyWidgetConstants::RadiusStr + "-" +
-                ArmyWidgetConstants::BorderSizeStr,
-                "0%-" + ArmyWidgetConstants::BorderSizeStr);
         } else {
             armyWidget.setAlignment(ArmyWidgetAlignment::Right);
             armyWidget.setOrigin(1.0, 0.0);
-            armyWidget.setPosition("100%+" + ArmyWidgetConstants::RadiusStr +
-                "+" + ArmyWidgetConstants::BorderSizeStr,
-                "0%-" + ArmyWidgetConstants::BorderSizeStr);
         }
 
         // Update tile widget.
         const auto selectedTile = game.map.getSelectedTile();
         tileWidget.update(selectedTile);
-        if (!game.map.isCursorOnLeftSide()) {
+        if (!cursorOnLeft) {
             tileWidget.setAlignment(TileWidgetAlignment::Left);
             tileWidget.setOrigin(0.0, 1.0);
             tileWidget.setPosition("0%", "100%");
@@ -148,6 +144,25 @@ class GameScreen : Menu, Group {
             tileWidget.setAlignment(TileWidgetAlignment::Right);
             tileWidget.setOrigin(1.0, 1.0);
             tileWidget.setPosition("100%", "100%");
+        }
+
+        // Update the army and tile widget sizes and positions.
+        auto scale = armyGroup.getFullSize().x / ArmyWidgetConstants::Width;
+        if (scale > 1.0) scale = 1.0;
+        armyWidget.setScale(scale, scale);
+        tileWidget.setScale(scale, scale);
+        if (cursorOnLeft) {
+            armyGroup.setAutoLayout(AutoLayout::Right);
+            armyWidget.setPosition("100%+" +
+                formatFloat(ArmyWidgetConstants::Radius * scale) + "+" +
+                formatFloat(ArmyWidgetConstants::BorderSize * scale),
+                "0%-" + formatFloat(ArmyWidgetConstants::BorderSize * scale));
+        } else {
+            armyGroup.setAutoLayout(AutoLayout::Left);
+            armyWidget.setPosition("0%-" +
+                formatFloat(ArmyWidgetConstants::Radius * scale) + "-" +
+                formatFloat(ArmyWidgetConstants::BorderSize * scale),
+                "0%-" + formatFloat(ArmyWidgetConstants::BorderSize * scale));
         }
 
         // If the user is holding the correct control, calculate the attack range
@@ -219,6 +234,12 @@ class GameScreen : Menu, Group {
         armyWidget.setVisibility(false);
         tileWidget.setVisibility(false);
     }
+
+    /**
+     * Group used to scale down the army and tile widgets if the army widget won't
+     * fit in it.
+     */
+    private Group armyGroup;
 
     /**
      * Displays information on the current army.

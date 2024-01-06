@@ -53,6 +53,10 @@ shared abstract class Widget {
     Vector2f getFullSize() const {
         return getWidgetFullSize(this);
     }
+    
+    void setScale(const float x, const float y) {
+        ::setWidgetScale(this, x, y);
+    }
 
     void setEnabled(const bool e) {
         setWidgetEnabled(this, e);

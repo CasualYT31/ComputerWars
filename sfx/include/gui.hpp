@@ -1094,6 +1094,7 @@ namespace sfx {
 		void _setWidgetSize(const WidgetIDRef, const std::string&,
 			const std::string&);
 		sf::Vector2f _getWidgetFullSize(const WidgetIDRef);
+		void _setWidgetScale(const WidgetIDRef, const float, const float);
 		void _setWidgetEnabled(const WidgetIDRef, const bool);
 		bool _getWidgetEnabled(const WidgetIDRef) const;
 		void _setWidgetVisibility(const WidgetIDRef, const bool);
