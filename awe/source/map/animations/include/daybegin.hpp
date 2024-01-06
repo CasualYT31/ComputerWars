@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "renderer.hpp"
+#include "animation.hpp"
 #include "bank.hpp"
 #include "language.hpp"
 
@@ -34,7 +34,7 @@ namespace awe {
 	/**
 	 * The animation played at the beginning of an army's day.
 	 */
-	class day_begin : public sfx::animated_drawable {
+	class day_begin : public awe::animation {
 	public:
 		/**
 		 * Sets up the day begin animation.

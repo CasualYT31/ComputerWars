@@ -806,9 +806,9 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	// Step 7. animations.
 	if (!_drawCursors) _drawCursors = true;
 	if (_destroyAnimation) {
+		_drawCursors = _currentAnimation->enableCursorGraphics();
 		_currentAnimation = nullptr;
 		_destroyAnimation = false;
-		_drawCursors = false;
 	}
 	while (!_animationQueue.empty() && !animationInProgress()) {
 		auto next = &_animationQueue.front();
@@ -839,7 +839,7 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	static const auto moveOffsetAxis = [](const float viewSize,
 		const float mapPixelSize, std::optional<float>& viewOffset,
 		const float cursorPos, const float cursorSize, const float padding,
-		const float screenSize) {
+		const float screenSize) -> float {
 		if (viewSize > mapPixelSize) {
 			// Map appears smaller than the screen along this axis, so centre it on
 			// that axis. Also, reset the view offset to ensure that when the map
@@ -997,11 +997,14 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	for (const auto& overridden : unitsWithLocationOverrides)
 		target.draw(overridden.first, overridden.second);
 
-	if (animationInProgress()) {
-		// Step 5. the animation.
-		target.draw(*_currentAnimation, states);
-	} else if (_drawCursors) {
-		// Step 5. the additional cursor.
+	// Step 5. the animation.
+	const bool animationInProgress = this->animationInProgress();
+	if (animationInProgress) target.draw(*_currentAnimation, states);
+
+	// Step 6. the cursor graphics.
+	if ((!animationInProgress && _drawCursors) || (animationInProgress &&
+		_currentAnimation->enableCursorGraphics())) {
+		// Step 6a. the additional cursor.
 		if (_additionalSel &&
 			!_additionallySelectedTileCursorUL.getSprite().empty() &&
 			!_additionallySelectedTileCursorUR.getSprite().empty() &&
@@ -1013,14 +1016,14 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 			target.draw(_additionallySelectedTileCursorLR, states);
 		}
 
-		// Step 6. the cursor. Always rendered over the additional cursor.
+		// Step 6b. the cursor. Always rendered over the additional cursor.
 		if (!_cursor.getSprite().empty()) target.draw(_cursor, states);
 
-		// Step 7. the rectangle selection graphic.
+		// Step 6c. the rectangle selection graphic.
 		if (_startOfRectSel && _endOfRectSel) target.draw(_rectangle, states);
 	}
 
-	// Step 8. restore old view.
+	// Step 7. restore old view.
 	target.setView(oldView);
 }
 

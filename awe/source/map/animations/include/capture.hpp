@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "renderer.hpp"
+#include "animation.hpp"
 #include "animated_tile.hpp"
 #include "language.hpp"
 #include "typedef.hpp"
@@ -35,7 +35,7 @@ namespace awe {
 	/**
 	 * The property capture animation.
 	 */
-	class capture : public sfx::animated_drawable {
+	class capture : public awe::animation {
 	public:
 		/**
 		 * Sets up the capture animation.

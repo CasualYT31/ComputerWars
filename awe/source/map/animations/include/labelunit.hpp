@@ -26,14 +26,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "renderer.hpp"
+#include "animation.hpp"
 #include "unit.hpp"
 
 namespace awe {
 	/**
 	 * The animation played when a unit is labelled.
 	 */
-	class label_unit : public sfx::animated_drawable {
+	class label_unit : public awe::animation {
 	public:
 		/**
 		 * Sets up the label unit animation.

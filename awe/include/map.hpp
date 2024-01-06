@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui.hpp"
 #include "binary.hpp"
 #include "mapstrings.hpp"
+#include "animation.hpp"
 #include <cmath>
 #include <stack>
 #include <optional>
@@ -3125,7 +3126,7 @@ namespace awe {
 		/**
 		 * An animated drawable.
 		 */
-		typedef std::unique_ptr<sfx::animated_drawable> animation;
+		typedef std::unique_ptr<awe::animation> animation;
 
 		/**
 		 * A piece of code to execute once it has reached the front of the

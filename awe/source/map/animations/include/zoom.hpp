@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "renderer.hpp"
+#include "animation.hpp"
 
 namespace awe {
 	/**
@@ -34,7 +34,7 @@ namespace awe {
 	 * A simple mechanism via which the map's scaling factor is gradually increased
 	 * or decreased.
 	 */
-	class zoom : public sfx::animated_drawable {
+	class zoom : public awe::animation {
 	public:
 		/**
 		 * Sets up the zoom animation.

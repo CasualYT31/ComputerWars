@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "renderer.hpp"
+#include "animation.hpp"
 #include "animated_tile.hpp"
 #include "script.hpp"
 
@@ -124,7 +124,7 @@ namespace awe {
 	 * or 1.5 seconds will have elapsed, before this drawable marks itself as
 	 * finished.
 	 */
-	class tile_particles : public sfx::animated_drawable {
+	class tile_particles : public awe::animation {
 	public:
 		/**
 		 * Sets up the tile particles animation.

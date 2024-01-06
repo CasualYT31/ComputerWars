@@ -32,7 +32,7 @@ namespace awe {
 	/**
 	 * The animation played when a unit is moving.
 	 */
-	class move_unit : public sfx::animated_drawable {
+	class move_unit : public awe::animation {
 	public:
 		/**
 		 * Represents a single position along a \c move_unit path.
