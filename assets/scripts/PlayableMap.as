@@ -261,7 +261,7 @@ shared class PlayableMap {
     private void destroyStructure(const Vector2&in rootTile) {
         const auto terrainName = map.getTileType(rootTile).type.scriptName;
         map.destroyStructure(rootTile);
-        if (terrainName == "MINICANNON") {
+        if (terrainName == "MINICANNON" || terrainName == "PIPESEAM") {
             map.animateParticles({ TileParticle(
                 rootTile,
                 "minicannondestroy",
