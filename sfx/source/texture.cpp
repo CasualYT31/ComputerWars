@@ -233,18 +233,22 @@ bool sfx::animated_spritesheet::_load(engine::json& j) {
 						_tallestSpriteHeight = rect.height;
 				}
 				// Go through the durations.
-				for (std::size_t f = 0; f < i.value()["durations"].size(); f++) {
-					sf::Time time;
-					time = sf::milliseconds(i.value()["durations"][f]);
-					data.durations.push_back(time);
-				}
-				// Report a warning if the frame count did not match the duration
-				// count.
-				if (data.frames.size() != data.durations.size()) {
-					_logger.warning("The number of frames for sprite \"{}\" was "
-						"{} and the number of durations was {}.", i.key(),
-						data.frames.size(), data.durations.size());
-				}
+				if (i.value()["durations"].is_array()) {
+					for (std::size_t f = 0; f < i.value()["durations"].size();
+						f++) {
+						sf::Time time;
+						time = sf::milliseconds(i.value()["durations"][f]);
+						data.durations.push_back(time);
+					}
+					// Report a warning if the frame count did not match the
+					// duration count.
+					if (data.frames.size() != data.durations.size()) {
+						_logger.warning("The number of frames for sprite \"{}\" "
+							"was {} and the number of durations was {}.", i.key(),
+							data.frames.size(), data.durations.size());
+					}
+				} else data.durations.resize(data.frames.size(),
+					sf::milliseconds(i.value()["durations"]));
 				// Read the sprite's offset, if one was given.
 				if (i.value().contains("offset")) {
 					std::array<float, 2> offset;

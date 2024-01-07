@@ -79,7 +79,8 @@ class PreviewMoveUnitMenu : Menu, Group {
                     unitType.scriptName == "MECH")) {
                     previewCommands.addCommand("launch", "attackicon", function(){
                         cast<ExplodePreviewMenu>(getMenu("ExplodePreviewMenu")).
-                            Initialise(3, Vector2(0, 3), true, function(tile){
+                            Initialise(3, Vector2(0, 3), true,
+                            function(tile, target){
                                 // If the launch is going ahead, then we need to
                                 // make the Missile Silo empty. Since it's a
                                 // structure, we can destroy it to achieve this.
@@ -152,10 +153,21 @@ class PreviewMoveUnitMenu : Menu, Group {
                     previewCommands.addCommand("explode", "attackicon",
                         function(){
                         cast<ExplodePreviewMenu>(getMenu("ExplodePreviewMenu")).
-                            Initialise(5, Vector2(1, 3), false, function(tile){
+                            Initialise(5, Vector2(1, 3), false,
+                            function(tile, target){
                                 // If the explosion is going ahead, then we need
-                                // to delete the Black Bomb unit.
+                                // to delete the Black Bomb unit, but do not
+                                // animate its destruction.
+                                game.map.enableAnimations(false);
                                 game.deleteUnit(game.map.getSelectedUnit());
+                                game.map.enableAnimations(true);
+                            }, function(target) {
+                                // Begin animating the explosion now.
+                                game.map.animateParticles({ TileParticle(
+                                    target,
+                                    "blackbombexplode",
+                                    Vector2f(0.5, 0.5)
+                                ) }, "particle");
                             }
                         );
                         setGUI("ExplodePreviewMenu");

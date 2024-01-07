@@ -10,8 +10,19 @@
  * @param <tt>const Vector2&in</tt> The tile that was selected when the menu was
  *                                  opened, \b not the tile that was selected
  *                                  \em whilst this menu was open!
+ * @param <tt>const Vector2&in</tt> The tile that was selected whilst this menu
+ *                                  was open.
  */
-funcdef void ExplodePreviewMenuExplosionCallback(const Vector2&in);
+funcdef
+    void ExplodePreviewMenuExplosionCallback(const Vector2&in, const Vector2&in);
+
+/**
+ * Defines the signature that the \c ExplodePreviewMenu::postExplosionHandler
+ * anonymous function should take.
+ * @param <tt>const Vector2&in</tt> The tile that was selected whilst this menu
+ *                                  was open.
+ */
+funcdef void ExplodePreviewMenuPostExplosionCallback(const Vector2&in);
 
 /**
  * The preview explosion menu.
@@ -50,6 +61,7 @@ class ExplodePreviewMenu : Menu, Group {
         range.y = 0;
         allowCursorMovement = true;
         @explosionHandler = null;
+        @postExplosionHandler = null;
         setVisibility(false);
     }
 
@@ -85,11 +97,15 @@ class ExplodePreviewMenu : Menu, Group {
             // Clear selected unit render data for this menu so that if the
             // callback needs to move a unit, it's free to do so.
             clearSelectedUnitData();
+            const auto selectedTile = game.map.getSelectedTile();
             // Perform any custom code before exploding.
-            if (explosionHandler !is null) explosionHandler(selectedTileCache);
+            if (explosionHandler !is null)
+                explosionHandler(selectedTileCache, selectedTile);
             // Perform explosion.
-            game.damageUnitsInRange(game.map.getSelectedTile(), range.x, range.y,
+            game.damageUnitsInRange(selectedTile, range.x, range.y,
                 damageToDeal, { "OOZIUM" });
+            // Perform any custom code after exploding.
+            if (postExplosionHandler !is null) postExplosionHandler(selectedTile);
             // Go back to the game screen.
             setGUI("GameScreen");
         }
@@ -106,10 +122,13 @@ class ExplodePreviewMenu : Menu, Group {
      *                                 this menu is open?
      * @param callback                 Carry out custom code before making an
      *                                 explosion.
+     * @param postCallback             Carry out custom code after making an
+     *                                 explosion.
      */
     void Initialise(const HP damage, const Vector2&in newRange,
         const bool allowTileSelectionChange,
-        ExplodePreviewMenuExplosionCallback@ const callback) {
+        ExplodePreviewMenuExplosionCallback@ const callback,
+        ExplodePreviewMenuPostExplosionCallback@ const postCallback = null) {
         damageToDeal = damage;
         range = newRange;
         if (range.x > range.y) {
@@ -119,6 +138,7 @@ class ExplodePreviewMenu : Menu, Group {
         }
         allowCursorMovement = allowTileSelectionChange;
         @explosionHandler = callback;
+        @postExplosionHandler = postCallback;
     }
 
     /**
@@ -171,4 +191,9 @@ class ExplodePreviewMenu : Menu, Group {
      * Callback invoked just before an explosion takes place.
      */
     private ExplodePreviewMenuExplosionCallback@ explosionHandler = null;
+
+    /**
+     * Callback invoked just after an explosion takes place.
+     */
+    private ExplodePreviewMenuPostExplosionCallback@ postExplosionHandler = null;
 }

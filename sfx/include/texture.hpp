@@ -170,7 +170,8 @@ namespace sfx {
 		 *         [X,Y,W,H].</li>
 		 *     <li>\c durations - An array of integers. Each integer represents the
 		 *         duration of time which the corresponding frame should last for
-		 *         on screen, in milliseconds.</li>
+		 *         on screen, in milliseconds. OR: an integer, which stores the
+		 *         duration of time which every frame should last for, in ms.</li>
 		 *     <li>\c offset - An array that must contain two floats, [X, Y]. This
 		 *         will store offsets along the X and Y axes that the sprite will
 		 *         always be drawn with. If this array isn't provided, then an
