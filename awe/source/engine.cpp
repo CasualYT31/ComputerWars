@@ -49,6 +49,9 @@ int awe::game_engine::run() {
 	try {
 		_gui->setScalingFactor(_scaling);
 		while (_renderer->isOpen()) {
+			float rawDelta = 0.0f;
+			const auto delta = accumulatedDelta(rawDelta);
+
 			const bool acceptInput = !_map || !_map->animationInProgress();
 
 			// Handle menu user input first before handling the events.
@@ -75,6 +78,18 @@ int awe::game_engine::run() {
 				_renderer->draw(*_map);
 			}
 			_renderer->draw(*_gui);
+			if (delta < _colourFlashDuration) {
+				auto alphaOffset = 255.0f / _colourFlashDuration * rawDelta;
+				if (delta > _colourFlashDuration * 0.5f)
+					alphaOffset = -alphaOffset;
+				_colourForFlashA += alphaOffset;
+				if (_colourForFlashA < 0.f) _colourForFlashA = 0.f;
+				else if (_colourForFlashA > 255.f) _colourForFlashA = 255.f;
+				_colourForFlash.a = static_cast<sf::Uint8>(_colourForFlashA);
+				_colourFlash.setFillColor(_colourForFlash);
+				_colourFlash.setSize(sf::Vector2f(_renderer->getSize()));
+				_renderer->draw(_colourFlash);
+			}
 			_renderer->display();
 
 			if (_map && _map->periodic()) {
@@ -98,6 +113,7 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	sfx::joystick::Register(engine, document);
 	engine::RegisterVectorTypes(engine, document);
 	engine::RegisterTimeTypes(engine, document);
+	engine::RegisterColourType(engine, document);
 	awe::map::Register(engine, document);
 
 	// Register the global functions.
@@ -350,6 +366,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game_engine, _script_formatBool),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Converts a bool into a string.");
+
+	r = engine->RegisterGlobalFunction(
+		"void flashColour(const Colour&in, const float = 2.0)",
+		asMETHOD(awe::game_engine, _script_flashColour),
+		asCALL_THISCALL_ASGLOBAL, this);
 }
 
 bool awe::game_engine::_load(engine::json& j) {
@@ -752,4 +773,12 @@ std::string awe::game_engine::_script_getLatestLogEntry() const {
 
 std::string awe::game_engine::_script_formatBool(const bool b) const {
 	return b ? "true" : "false";
+}
+
+void awe::game_engine::_script_flashColour(const sf::Color& c, const float d) {
+	if (accumulatedDelta() < _colourFlashDuration) return;
+	_colourForFlash = c;
+	_colourForFlashA = 0.0f;
+	_colourFlashDuration = d;
+	resetDeltaAccumulation();
 }

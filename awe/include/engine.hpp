@@ -45,7 +45,7 @@ namespace awe {
 	 * The game engine class.
 	 */
 	class game_engine : sf::NonCopyable, public engine::script_registrant,
-		public engine::json_script {
+		public engine::json_script, public sfx::delta_timer {
 	public:
 		/**
 		 * Thrown by \c load() when the user closes the window during loading.
@@ -316,6 +316,15 @@ namespace awe {
 		 */
 		std::string _script_formatBool(const bool b) const;
 
+		/**
+		 * Fade the entire screen into a solid colour, and then fade it back to
+		 * normal again.
+		 * Whilst a flash is on-going, a new one will not be made.
+		 * @param c The colour to fade into.
+		 * @param d The duration of the entire flash, in seconds.
+		 */
+		void _script_flashColour(const sf::Color& c, const float d = 2.0f);
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================
@@ -458,6 +467,26 @@ namespace awe {
 		 * The pseudo-random number sequence generator.
 		 */
 		std::unique_ptr<std::mt19937> _prng;
+
+		/**
+		 * The rectangle used to produce the colour flash.
+		 */
+		sf::RectangleShape _colourFlash;
+
+		/**
+		 * The colour last given to \c _script_flashColour().
+		 */
+		sf::Color _colourForFlash;
+
+		/**
+		 * Stores the duration last given to \c _script_flashColour().
+		 */
+		float _colourFlashDuration = 0.0f;
+
+		/**
+		 * Floating point holder for alpha.
+		 */
+		float _colourForFlashA = 0.f;
 	};
 }
 
