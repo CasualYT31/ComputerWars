@@ -941,6 +941,9 @@ void awe::map::Register(asIScriptEngine* engine,
 			"IntRect getMapBoundingBox() const",
 			asMETHOD(awe::map, getMapBoundingBox), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map", "void shake()",
+			asMETHOD(awe::map, shakeMap), asCALL_THISCALL);
+
 		//////////////////////////
 		// ANIMATION OPERATIONS //
 		//////////////////////////

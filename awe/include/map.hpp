@@ -40,6 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stack>
 #include <optional>
 #include <queue>
+#include <random>
 
 namespace awe {
 	/**
@@ -2327,6 +2328,11 @@ namespace awe {
 		 */
 		sf::IntRect getMapBoundingBox() const;
 
+		/**
+		 * Trigger a map shake animation, if one is not already ongoing.
+		 */
+		void shakeMap();
+
 		//////////////////////////
 		// ANIMATION OPERATIONS //
 		//////////////////////////
@@ -3215,6 +3221,58 @@ namespace awe {
 		 * and for an additional frame after the animation is destroyed.
 		 */
 		bool _drawCursors = true;
+
+		// MISC DRAWING //
+
+		/**
+		 * Initialises the map's pseudo-random number generator.
+		 */
+		void _initPRNG();
+
+		/**
+		 * Map shakes always have this duration.
+		 */
+		static const sf::Time MAP_SHAKE_DURATION;
+
+		/**
+		 * A new offset during a map shake is only generated once this time has
+		 * passed.
+		 */
+		static const sf::Time WAIT_DURATION_FOR_NEW_SHAKE;
+
+		/**
+		 * The pseudo-random number sequence generator.
+		 */
+		std::unique_ptr<std::mt19937> _prng;
+
+		/**
+		 * The uniform distribution to use when generating random numbers for map
+		 * shaking along the X axis.
+		 */
+		std::uniform_int_distribution<int> _mapShakeXDistribution =
+			std::uniform_int_distribution<int>(-14, 14);
+
+		/**
+		 * The uniform distribution to use when generating random numbers for map
+		 * shaking along the Y axis.
+		 */
+		std::uniform_int_distribution<int> _mapShakeYDistribution =
+			std::uniform_int_distribution<int>(-6, 6);
+
+		/**
+		 * Shake the map graphic for this length of time.
+		 */
+		sf::Time _mapShakeTimeLeft;
+
+		/**
+		 * Wait for this duration of time before generating a new map shake offset.
+		 */
+		sf::Time _waitBeforeNextShake;
+
+		/**
+		 * The last randomly-generated offset.
+		 */
+		sf::Vector2f _mapShakeOffset;
 
 		///////////////
 		// RESOURCES //

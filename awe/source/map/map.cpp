@@ -73,6 +73,7 @@ awe::map::map(const engine::logger::data& data) : _logger(data),
 		data.name + "_addcursorll_sprite" }),
 	_additionallySelectedTileCursorLR({ data.sink,
 		data.name + "_addcursorlr_sprite" }) {
+	_initPRNG();
 	_initShaders();
 }
 
@@ -98,6 +99,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	_unitTypes = units;
 	_commanders = commanders;
 	_structures = structures;
+	_initPRNG();
 	_initShaders();
 }
 
@@ -493,6 +495,8 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	_mapSizeCache = { 0, 0 };
 	_scriptFiles.clear();
 	removeAllPreviewUnits();
+	_mapShakeTimeLeft = sf::Time::Zero;
+	_waitBeforeNextShake = sf::Time::Zero;
 	if (_scripts->doesModuleExist(_moduleName))
 		_scripts->deleteModule(_moduleName);
 	_moduleName.clear();
@@ -594,4 +598,20 @@ void awe::map::_initShaders() {
 		"pixel.x = 1.0; pixel.yz -= 0.25;"
 		"gl_FragColor = pixel;}", sf::Shader::Fragment);
 	_attackableTileShader.setUniform("texUnit", sf::Shader::CurrentTexture);
+}
+
+void awe::map::_initPRNG() {
+	// Credit: https://stackoverflow.com/a/13446015/6928376.
+	std::random_device randomDevice;
+	std::mt19937::result_type seed = randomDevice() ^ (
+		(std::mt19937::result_type)
+		std::chrono::duration_cast<std::chrono::seconds>(
+			std::chrono::system_clock::now().time_since_epoch()
+		).count() +
+		(std::mt19937::result_type)
+		std::chrono::duration_cast<std::chrono::microseconds>(
+			std::chrono::high_resolution_clock::now().time_since_epoch()
+		).count()
+	);
+	_prng = std::make_unique<std::mt19937>(seed);
 }
