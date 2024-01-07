@@ -38,29 +38,32 @@ namespace awe {
 	public:
 		/**
 		 * Sets up the scroll animation.
-		 * @param viewOffsetX Reference to the offset the view has in the X
-		 *                    direction. If there is no need to scroll in this
-		 *                    direction, the optional must be empty.
-		 * @param viewOffsetY Reference to the offset the view has in the Y
-		 *                    direction. If there is no need to scroll in this
-		 *                    direction, the optional must be empty.
-		 * @param target      Points to the target being used.
-		 * @param end         The global coordinates pointing to the pixel that
-		 *                    needs to be visible by the end of the animation.
-		 * @param speed       The speed the view scrolls at, in pixels per second.
-		 * @param padding     Distances from the edges of the screen. The space
-		 *                    between the edges and this distance is considered
-		 *                    "not within view."
+		 * @param viewOffsetX  Reference to the offset the view has in the X
+		 *                     direction. If there is no need to scroll in this
+		 *                     direction, the optional must be empty.
+		 * @param viewOffsetY  Reference to the offset the view has in the Y
+		 *                     direction. If there is no need to scroll in this
+		 *                     direction, the optional must be empty.
+		 * @param end          The *LOCAL* coordinates pointing to the pixel that
+		 *                     needs to be visible by the end of the animation.
+		 * @param view         Reference to the map's view. Keep the original value
+		 *                     alive!
+		 * @param speed        The speed the view scrolls at, in pixels per second.
+		 * @param mapPixelSize The size of the entire map graphic, in pixels.
+		 * @param scaling      Reference to the map's scaling factor. Keep the
+		 *                     original value alive!
 		 * @param drawCursors \c TRUE if the cursor graphics should still render.
+		 * @param padding      Distances from the edges of the screen. The space
+		 *                     between the edges and this distance is considered
+		 *                     "not within view."
 		 */
 		scroll(std::optional<float>& viewOffsetX,
-			std::optional<float>& viewOffsetY,
-			const std::shared_ptr<const sf::RenderTarget>& target,
-			const sf::Vector2f& end, const float speed,
-			const sf::Vector2f& mapPixelSize, const float scaling,
+			std::optional<float>& viewOffsetY, const sf::Vector2f& end,
+			const sf::View& view, const float speed,
+			const sf::Vector2f& mapPixelSize, const float& scaling,
 			const bool drawCursors = false, sf::Vector2f padding =
-			{ awe::animated_tile::MIN_WIDTH * 2.0f,
-				awe::animated_tile::MIN_HEIGHT * 2.0f });
+				{ awe::animated_tile::MIN_WIDTH * 2.0f,
+					awe::animated_tile::MIN_HEIGHT * 2.0f });
 
 		/**
 		 * Should the cursor graphics remain on the screen whilst this animation is
@@ -84,6 +87,33 @@ namespace awe {
 		 * @param states The render states to apply to the animation.
 		 */
 		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
+
+		/**
+		 * Reference to the scaling factor currently used by the map.
+		 */
+		const float& _scaling;
+
+		/**
+		 * Reference to the view currently used by the map.
+		 */
+		const sf::View& _view;
+
+		/**
+		 * The padding between the edge of the screen and the centre of the screen
+		 * that is treated as invisible to the user.
+		 */
+		sf::Vector2f _padding;
+
+		/**
+		 * The destination given to the constructor is eventually converted into
+		 * global coordinates and stored in here.
+		 */
+		sf::Vector2f _end;
+
+		/**
+		 * The pixel size of the map when this object was constructed.
+		 */
+		const sf::Vector2f _mapPixelSize;
 
 		/**
 		 * Reference to the view X offset to update.

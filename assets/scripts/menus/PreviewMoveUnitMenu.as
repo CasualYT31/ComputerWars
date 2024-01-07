@@ -80,13 +80,51 @@ class PreviewMoveUnitMenu : Menu, Group {
                     previewCommands.addCommand("launch", "attackicon", function(){
                         cast<ExplodePreviewMenu>(getMenu("ExplodePreviewMenu")).
                             Initialise(3, Vector2(0, 3), true,
-                            function(tile, target){
+                            function(tile, target) {
                                 // If the launch is going ahead, then we need to
                                 // make the Missile Silo empty. Since it's a
                                 // structure, we can destroy it to achieve this.
                                 game.map.destroyStructure(tile);
+                                // Now animate missile launch.
+                                game.map.animateLaunchOrStrike(
+                                    true,
+                                    "missilelaunch",
+                                    "particle",
+                                    tile
+                                );
                                 // Move the unit that is launching the silo.
                                 game.moveUnit();
+                                // Now animate missile strike.
+                                game.map.animateLaunchOrStrike(
+                                    false,
+                                    "missilestrike",
+                                    "particle",
+                                    target
+                                );
+                            }, function(target) {
+                                // Animate damage particles.
+                                const Vector2 up(target.x, target.y - 1),
+                                    down(target.x, target.y + 1),
+                                    right(target.x + 1, target.y),
+                                    left(target.x - 1, target.y);
+                                array<TileParticle> particles = { TileParticle(
+                                    up, "minicannondestroy", Vector2f(0.5, 1.0)
+                                ), TileParticle(
+                                    down, "minicannondestroy", Vector2f(0.5, 1.0)
+                                ), TileParticle(
+                                    right, "minicannondestroy", Vector2f(0.5, 1.0)
+                                ), TileParticle(
+                                    left, "minicannondestroy", Vector2f(0.5, 1.0)
+                                ) };
+                                if (game.map.isOutOfBounds(left))
+                                    particles.removeAt(3);
+                                if (game.map.isOutOfBounds(right))
+                                    particles.removeAt(2);
+                                if (game.map.isOutOfBounds(down))
+                                    particles.removeAt(1);
+                                if (game.map.isOutOfBounds(up))
+                                    particles.removeAt(0);
+                                game.map.animateParticles(particles, "particle");
                             }
                         );
                         setGUI("ExplodePreviewMenu");
@@ -154,7 +192,7 @@ class PreviewMoveUnitMenu : Menu, Group {
                         function(){
                         cast<ExplodePreviewMenu>(getMenu("ExplodePreviewMenu")).
                             Initialise(5, Vector2(1, 3), false,
-                            function(tile, target){
+                            function(tile, target) {
                                 // If the explosion is going ahead, then we need
                                 // to delete the Black Bomb unit, but do not
                                 // animate its destruction.

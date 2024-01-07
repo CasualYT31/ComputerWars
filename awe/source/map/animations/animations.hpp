@@ -30,3 +30,4 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "include/capture.hpp"
 #include "include/moveunit.hpp"
 #include "include/scroll.hpp"
+#include "include/launchorstrike.hpp"

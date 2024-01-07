@@ -186,6 +186,20 @@
       ],
       "durations": [ 80, 80, 80, 80, 80, 80 ]
     },
+    "missilelaunch": {
+      "frames": [
+        [ 0, 384, 16, 32 ],
+        [ 16, 384, 16, 32 ]
+      ],
+      "durations": 75
+    },
+    "missilestrike": {
+      "frames": [
+        [ 32, 384, 16, 32 ],
+        [ 48, 384, 16, 32 ]
+      ],
+      "durations": 75
+    },
     "blackbombexplode": {
       "frames": [
         [ 0, 416, 96, 96 ],

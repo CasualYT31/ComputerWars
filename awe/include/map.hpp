@@ -2459,6 +2459,24 @@ namespace awe {
 		bool animateViewScroll(const sf::Vector2u& tile, const float speed,
 			const bool drawCursors = false);
 
+		/**
+		 * Attempts to queue a "launch or strike" animation.
+		 * Also automatically queues an \c awe::scroll animation before this one.
+		 * @param  launch   \c TRUE if the sprite should launch from the given tile
+		 *                  to over the top edge of the screen, \c FALSE if vice
+		 *                  versa.
+		 * @param  sprite   The name of the sprite to animate.
+		 * @param  sheet    The name of the sheet where the sprite comes from.
+		 * @param  tile     The tile to launch the sprite from, or strike with the
+		 *                  sprite.
+		 * @param  duration The number of seconds the sprite should remain in
+		 *                  transit across the screen.
+		 * @return \c TRUE if both animations were queued, \c FALSE otherwise.
+		 */
+		bool animateLaunchOrStrike(const bool launch, const std::string& sprite,
+			const std::string& sheet, const sf::Vector2u& tile,
+			const float duration = 1.0f);
+
 		//////////
 		// MISC //
 		//////////

@@ -29,7 +29,8 @@ add_library(${PROJECT_NAME} STATIC
 	"source/map/animations/source/labelunit.cpp"
 	"source/map/animations/source/capture.cpp"
 	"source/map/animations/source/moveunit.cpp"
-	"source/map/animations/source/scroll.cpp")
+	"source/map/animations/source/scroll.cpp"
+	"source/map/animations/source/launchorstrike.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsAWE_INCLUDE_DIRS})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

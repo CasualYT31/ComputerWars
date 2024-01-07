@@ -639,19 +639,16 @@ bool awe::map::animateViewScroll(const sf::Vector2u& tile, const float speed,
 	const bool drawCursors) {
 	if (!_canAnimationBeQueued()) return false;
 	if (_isOutOfBounds(tile)) {
-		_logger.error("animateViewScrolling operation cancelled: tile {} is "
+		_logger.error("animateViewScroll operation cancelled: tile {} is "
 			"out-of-bounds.", tile);
 		return false;
 	}
 	if (speed <= 0.0f) {
-		_logger.error("animateViewScrolling operation cancelled: speed {} is "
+		_logger.error("animateViewScroll operation cancelled: speed {} is "
 			"invalid!", speed);
 		return false;
 	}
 	const auto& tileSprite = _tiles[tile.x][tile.y].sprite;
-	const auto pixel = sf::Vector2f(_target->mapCoordsToPixel(
-		tileSprite->getPixelPosition() + tileSprite->getPixelSize() * 0.5f,
-		_view));
 	const auto mapPixelSize = sf::Vector2f(
 		static_cast<float>(getMapSize().x * awe::animated_tile::MIN_WIDTH),
 		static_cast<float>(getMapSize().y * awe::animated_tile::MIN_HEIGHT)
@@ -659,14 +656,40 @@ bool awe::map::animateViewScroll(const sf::Vector2u& tile, const float speed,
 	_animationQueue.push(std::make_unique<awe::scroll>(
 		_viewOffsetX,
 		_viewOffsetY,
-		_target,
-		pixel,
+		tileSprite->getPixelPosition() + tileSprite->getPixelSize() * 0.5f,
+		_view,
 		speed,
 		mapPixelSize,
 		_scaling,
 		drawCursors
 	));
 	return true;
+}
+
+bool awe::map::animateLaunchOrStrike(const bool launch, const std::string& sprite,
+	const std::string& sheet, const sf::Vector2u& tile, const float duration) {
+	if (!_canAnimationBeQueued()) return false;
+	if (_isOutOfBounds(tile)) {
+		_logger.error("animateLaunchOrStrike operation cancelled: tile {} is "
+			"out-of-bounds.", tile);
+		return false;
+	}
+	if (!_sheets->exists(sheet)) {
+		_logger.error("animateLaunchOrStrike operation cancelled: the spritesheet "
+			"\"{}\" doesn't exist!", sheet);
+		return false;
+	}
+	const auto res = animateViewScroll(tile, 500.f);
+	_animationQueue.push(std::make_unique<awe::launch_or_strike>(
+		launch,
+		sprite,
+		(*_sheets)[sheet],
+		_scaling,
+		_view,
+		_tiles[tile.x][tile.y].sprite,
+		duration
+	));
+	return res;
 }
 
 bool awe::map::_canAnimationBeQueued(
