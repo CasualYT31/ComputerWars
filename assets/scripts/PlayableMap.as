@@ -276,6 +276,13 @@ shared class PlayableMap {
                 "blackcannondestroy",
                 Vector2f(0.5, 1.0)
             ) }, "particle");
+        } else if (terrainName == "GRANDBOLTROOT") {
+            map.queueCode(AnimationCode(this.largeStructureDestroyEffects));
+            map.animateParticles({ TileParticle(
+                rootTile,
+                "grandboltdestroy",
+                Vector2f(0.5, 1.0)
+            ) }, "particle");
         }
     }
 
