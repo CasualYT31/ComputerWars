@@ -79,7 +79,7 @@ int awe::game_engine::run() {
 			}
 			_renderer->draw(*_gui);
 			if (delta < _colourFlashDuration) {
-				auto alphaOffset = 255.0f / _colourFlashDuration * rawDelta;
+				auto alphaOffset = 255.f / (_colourFlashDuration / 2.f) * rawDelta;
 				if (delta > _colourFlashDuration * 0.5f)
 					alphaOffset = -alphaOffset;
 				_colourForFlashA += alphaOffset;

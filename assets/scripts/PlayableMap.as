@@ -258,7 +258,7 @@ shared class PlayableMap {
      * Destroys a structure, and queues a particle effect afterwards.
      * @param rootTile The root tile of the structure.
      */
-    private void destroyStructure(const Vector2&in rootTile) {
+    private void destroyStructure(Vector2 rootTile) {
         const auto terrainName = map.getTileType(rootTile).type.scriptName;
         map.destroyStructure(rootTile);
         if (terrainName == "MINICANNON" || terrainName == "PIPESEAM") {
@@ -267,7 +267,24 @@ shared class PlayableMap {
                 "minicannondestroy",
                 Vector2f(0.5, 1.0)
             ) }, "particle");
+        } else if (terrainName == "BLACKCANNONROOT") {
+            map.queueCode(AnimationCode(this.largeStructureDestroyEffects));
+            auto centreTile = rootTile;
+            centreTile.y -= 1;
+            map.animateParticles({ TileParticle(
+                centreTile,
+                "blackcannondestroy",
+                Vector2f(0.5, 1.0)
+            ) }, "particle");
         }
+    }
+
+    /**
+     * Shakes the map and flashes white.
+     */
+    private void largeStructureDestroyEffects() {
+        map.shake();
+        flashColour(White);
     }
 
     ///////////////////////////////
@@ -1681,6 +1698,36 @@ shared class PlayableMap {
                 "minicannonshootrightshadow",
                 Vector2f(0.5, 0.5)
             ) }, "particle");
+        } else if (type == "blackcannondown1,2") {
+            auto topTile = rootTile, centreTile = rootTile;
+            topTile.y -= 2; centreTile.y -= 1;
+            map.animateParticles({ TileParticle(
+                topTile,
+                "blackcannonshootdowntop",
+                Vector2f(0.5, 1.0)
+            ), TileParticle(
+                centreTile,
+                "blackcannonshootdowncentre",
+                Vector2f(0.5, 0.5)
+            ), TileParticle(
+                rootTile,
+                "blackcannonshootdownbottom",
+                Vector2f(0.5, 0.0)
+            ) }, "particle");
+        } else if (type == "blackcannonup1,2") {
+            auto topTile = rootTile, centreTile = rootTile;
+            topTile.y -= 3; centreTile.y -= 1;
+            // topTile could be out-of-bounds, but with its current range, it will
+            // never fire if that is the case.
+            map.animateParticles({ TileParticle(
+                centreTile,
+                "blackcannonshootupshadow",
+                Vector2f(0.5, 0.5)
+            ), TileParticle(
+                topTile,
+                "blackcannonshootup",
+                Vector2f(0.5, 1.0)
+            ) }, "particle");
         }
     }
 
@@ -1692,13 +1739,13 @@ shared class PlayableMap {
      */
     private void animateCannonDamage(const Vector2&in targetTile,
         const string&in type) {
-        if (type == "minicannonup") {
+        if (type == "minicannonup" || type == "blackcannonup1,2") {
             map.animateParticles({ TileParticle(
                 targetTile,
                 "damagefrombelow",
                 Vector2f(0.5, 1.0)
             ) }, "particle");
-        } else if (type == "minicannondown") {
+        } else if (type == "minicannondown" || type == "blackcannondown1,2") {
             map.animateParticles({ TileParticle(
                 targetTile,
                 "damagefromabove",
