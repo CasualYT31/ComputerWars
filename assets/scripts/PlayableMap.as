@@ -261,13 +261,15 @@ shared class PlayableMap {
     private void destroyStructure(Vector2 rootTile) {
         const auto terrainName = map.getTileType(rootTile).type.scriptName;
         map.destroyStructure(rootTile);
-        if (terrainName == "MINICANNON" || terrainName == "PIPESEAM") {
+        if (terrainName == "MINICANNON" || terrainName == "PIPESEAM" ||
+            terrainName == "BLACKLASER") {
             map.animateParticles({ TileParticle(
                 rootTile,
                 "minicannondestroy",
                 Vector2f(0.5, 1.0)
             ) }, "particle");
-        } else if (terrainName == "BLACKCANNONROOT") {
+        } else if (terrainName == "BLACKCANNONROOT" ||
+            terrainName == "DEATHRAYROOT") {
             map.queueCode(AnimationCode(this.largeStructureDestroyEffects));
             auto centreTile = rootTile;
             centreTile.y -= 1;
