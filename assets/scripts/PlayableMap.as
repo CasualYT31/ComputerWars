@@ -1895,6 +1895,42 @@ shared class PlayableMap {
         map.animateParticles(particles, "particle");
     }
 
+    /**
+     * Animates the Death Ray firing.
+     * Temporarily uses the Laser Cannon's downwards firing animation as the real
+     * one is complicated and I'd rather focus on other things right now.
+     * @param rootTile The root tile of the Death Ray.
+     */
+    private void animateDeathRayFire(const Vector2&in rootTile) {
+        array<TileParticle> particles;
+        // DOWN //
+        Vector2 tile(rootTile.x, rootTile.y - 1);
+        particles.resize(1);
+        particles[0].tile = tile;
+        particles[0].particle = "blacklaser.down.root";
+        particles[0].origin = Vector2f(0.5, 0.0);
+        // Every tile downwards is to have a loop particle. The root tile covers
+        // two tiles, so start counting from 2 tiles below the root tile. If the
+        // laser is on the bottom row of the map, it will look strange, but I
+        // don't mind right now.
+        tile.y += 2;
+        while (!map.isOutOfBounds(tile)) {
+            const auto i = particles.length();
+            particles.resize(i + 1);
+            particles[i].tile = tile;
+            particles[i].particle = ((tile.y - rootTile.y - 1) % 2) == 0 ?
+                "blacklaser.down.loop.even" : "blacklaser.down.loop.odd";
+            // We have to base these particles on the bottoms of the tiles, as
+            // tall tile sprites will mess up the positioning.
+            particles[i].origin = Vector2f(0.5, 1.0);
+            // Delay to line up with the root tile.
+            particles[i].delay = 1.6f;
+            tile.y += 1;
+        }
+        // END //
+        map.animateParticles(particles, "particle");
+    }
+
     /////////////////////////////
     // END TURN HELPER METHODS //
     /////////////////////////////
@@ -2012,6 +2048,7 @@ shared class PlayableMap {
             // The deathray only attacks every week.
             if (map.getDay() % 7 == 0) {
                 const auto tilesInRange = getStructureAttackRange(tile);
+                animateDeathRayFire(tile);
                 for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
                     // Units on the same team as the owner will not be affected.
                     // Ooziums are also immune to the laser regardless of team.
