@@ -63,6 +63,14 @@ void awe::tile_particle_node::Register(asIScriptEngine* engine,
 
 		r = engine->RegisterObjectProperty("TileParticle", "float delay",
 			asOFFSET(awe::tile_particle_node, delay));
+		
+		r = engine->RegisterObjectMethod("TileParticle",
+			"void set_position(const Vector2f&in) property",
+			asMETHOD(awe::tile_particle_node, setPosition), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("TileParticle",
+			"Vector2f get_position() const property",
+			asMETHOD(awe::tile_particle_node, getPosition), asCALL_THISCALL);
 	}
 }
 
@@ -98,8 +106,8 @@ bool awe::tile_particle_node::animate(const sf::RenderTarget& target) {
 		particleSize.y * origin.y));
 	const auto tileSpriteSize = tileSprite->getPixelSize();
 	auto tileSpritePos = tileSprite->getPixelPosition();
-	tileSpritePos.x += tileSpriteSize.x * origin.x;
-	tileSpritePos.y += tileSpriteSize.y * origin.y;
+	tileSpritePos.x += tileSpriteSize.x * getPosition().x;
+	tileSpritePos.y += tileSpriteSize.y * getPosition().y;
 	particleSprite.setPosition(tileSpritePos);
 	if (ret) tileSprite->clearSpriteOverride();
 	return ret;

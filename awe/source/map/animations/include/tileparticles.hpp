@@ -97,6 +97,27 @@ namespace awe {
 		float delay = 0.f;
 
 		/**
+		 * Mapping for AngelScript as std::optional is not registered.
+		 */
+		inline void setPosition(const sf::Vector2f& p) {
+			position = p;
+		}
+
+		/**
+		 * Use this method when you want to retrieve the position.
+		 */
+		inline sf::Vector2f getPosition() const {
+			return position ? *position : origin;
+		}
+	private:
+		/**
+		 * The position of the particle within the tile as a percentage (0.0-1.0)
+		 * of its X and Y size.
+		 * If this value is empty, then it must be = to \c origin.
+		 */
+		std::optional<sf::Vector2f> position;
+	public:
+		/**
 		 * The particle sprite.
 		 * @warning \c tile_particles will need to assign the spritesheet, as well
 		 *          as the \c particle sprite ID.

@@ -1825,6 +1825,66 @@ shared class PlayableMap {
                 tile.y -= 1;
             }
         }
+        // RIGHT //
+        tile.y = rootTile.y;
+        tile.x += 1;
+        if (!map.isOutOfBounds(tile)) {
+            particles.resize(particles.length() + 1);
+            particles[particles.length() - 1].tile = rootTile;
+            particles[particles.length() - 1].particle = "blacklaser.right.root";
+            particles[particles.length() - 1].origin = Vector2f(0.0, 0.5);
+            particles[particles.length() - 1].position = Vector2f(1.0, 0.5);
+            // Loop.
+            tile.x += 1;
+            while (!map.isOutOfBounds(tile)) {
+                const auto i = particles.length();
+                particles.resize(i + 1);
+                particles[i].tile = rootTile;
+                const auto distance = tile.x - rootTile.x;
+                particles[i].particle = (distance % 2) == 0 ?
+                    "blacklaser.right.loop.even" : "blacklaser.right.loop.odd";
+                particles[i].origin = Vector2f(0.0, 0.5);
+                // We can't add the particle to every tile sideways and expect
+                // them all to line up, as taller tiles will, again, screw it up.
+                // But what we can do is set them all to the root tile, and space
+                // them out using the distance between the root tile and each
+                // looping tile. This won't work if tiles of varying widths exist,
+                // but they never do in the original games, and they shouldn't in
+                // general. I guess you could add extra particles (or remove them)
+                // to accomodate for the extra/missing pixels?
+                particles[i].position = Vector2f(distance, 0.5);
+                // Delay to line up with the root tile.
+                particles[i].delay = 1.6f;
+                tile.x += 1;
+            }
+        }
+        // LEFT //
+        tile.x = rootTile.x;
+        tile.x -= 1;
+        if (!map.isOutOfBounds(tile)) {
+            particles.resize(particles.length() + 1);
+            particles[particles.length() - 1].tile = rootTile;
+            particles[particles.length() - 1].particle = "blacklaser.left.root";
+            particles[particles.length() - 1].origin = Vector2f(1.0, 0.5);
+            particles[particles.length() - 1].position = Vector2f(0.0, 0.5);
+            // Loop.
+            tile.x -= 1;
+            while (!map.isOutOfBounds(tile)) {
+                const auto i = particles.length();
+                particles.resize(i + 1);
+                particles[i].tile = rootTile;
+                const auto distance = rootTile.x - tile.x;
+                particles[i].particle = (distance % 2) == 0 ?
+                    "blacklaser.left.loop.even" : "blacklaser.left.loop.odd";
+                particles[i].origin = Vector2f(1.0, 0.5);
+                // See RIGHT, except this time, we can go backwards by negating
+                // the distance
+                particles[i].position = Vector2f(-(distance - 1), 0.5);
+                // Delay to line up with the root tile.
+                particles[i].delay = 1.6f;
+                tile.x -= 1;
+            }
+        }
         // END //
         map.animateParticles(particles, "particle");
     }
