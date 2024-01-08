@@ -1587,6 +1587,12 @@ shared class PlayableMap {
             // structure, destroy the structure.
             if (newTileHP <= 0 && map.isTileAStructureTile(defender))
                 destroyStructure(defender);
+            // Otherwise, animate a particle over it.
+            else map.animateParticles({ TileParticle(
+                defender,
+                "land",
+                Vector2f(0.5, 1.0)
+            ) }, "particle");
         }
         // If the weapon used has finite ammo, and it is still alive, then remove
         // one from its ammo count.
