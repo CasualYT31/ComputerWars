@@ -24,8 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "fmtawe.hpp"
 #include "animations/animations.hpp"
 
-const sf::Time awe::map::MAP_SHAKE_DURATION = sf::seconds(1.5f);
-
 const sf::Time awe::map::WAIT_DURATION_FOR_NEW_SHAKE = sf::milliseconds(25);
 
 bool awe::map::setSelectedUnit(const awe::UnitID unit) {
@@ -437,9 +435,9 @@ sf::IntRect awe::map::getMapBoundingBox() const {
 	return { ul, _target->mapCoordsToPixel(mapSize, _view) - ul };
 }
 
-void awe::map::shakeMap() {
+void awe::map::shakeMap(const float duration) {
 	if (_mapShakeTimeLeft <= sf::Time::Zero) {
-		_mapShakeTimeLeft = MAP_SHAKE_DURATION;
+		_mapShakeTimeLeft = sf::seconds(duration);
 		_waitBeforeNextShake = sf::Time::Zero;
 	}
 }

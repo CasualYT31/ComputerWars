@@ -2330,8 +2330,9 @@ namespace awe {
 
 		/**
 		 * Trigger a map shake animation, if one is not already ongoing.
+		 * @param duration The duration of the shake animation, in seconds.
 		 */
-		void shakeMap();
+		void shakeMap(const float duration = 1.5f);
 
 		//////////////////////////
 		// ANIMATION OPERATIONS //
@@ -3228,11 +3229,6 @@ namespace awe {
 		 * Initialises the map's pseudo-random number generator.
 		 */
 		void _initPRNG();
-
-		/**
-		 * Map shakes always have this duration.
-		 */
-		static const sf::Time MAP_SHAKE_DURATION;
 
 		/**
 		 * A new offset during a map shake is only generated once this time has

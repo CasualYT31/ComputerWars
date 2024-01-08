@@ -79,12 +79,14 @@ int awe::game_engine::run() {
 			}
 			_renderer->draw(*_gui);
 			if (delta < _colourFlashDuration) {
-				auto alphaOffset = 255.f / (_colourFlashDuration / 2.f) * rawDelta;
+				auto alphaOffset =
+					_colourFlashMaxAlpha / (_colourFlashDuration / 2.f) * rawDelta;
 				if (delta > _colourFlashDuration * 0.5f)
 					alphaOffset = -alphaOffset;
 				_colourForFlashA += alphaOffset;
 				if (_colourForFlashA < 0.f) _colourForFlashA = 0.f;
-				else if (_colourForFlashA > 255.f) _colourForFlashA = 255.f;
+				else if (_colourForFlashA > _colourFlashMaxAlpha)
+					_colourForFlashA = _colourFlashMaxAlpha;
 				_colourForFlash.a = static_cast<sf::Uint8>(_colourForFlashA);
 				_colourFlash.setFillColor(_colourForFlash);
 				_colourFlash.setSize(sf::Vector2f(_renderer->getSize()));
@@ -779,6 +781,7 @@ void awe::game_engine::_script_flashColour(const sf::Color& c, const float d) {
 	if (accumulatedDelta() < _colourFlashDuration) return;
 	_colourForFlash = c;
 	_colourForFlashA = 0.0f;
+	_colourFlashMaxAlpha = c.a;
 	_colourFlashDuration = d;
 	resetDeltaAccumulation();
 }

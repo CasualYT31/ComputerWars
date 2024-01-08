@@ -941,7 +941,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			"IntRect getMapBoundingBox() const",
 			asMETHOD(awe::map, getMapBoundingBox), asCALL_THISCALL);
 
-		r = engine->RegisterObjectMethod("Map", "void shake()",
+		r = engine->RegisterObjectMethod("Map", "void shake(const float = 1.5)",
 			asMETHOD(awe::map, shakeMap), asCALL_THISCALL);
 
 		//////////////////////////

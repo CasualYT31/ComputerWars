@@ -285,6 +285,18 @@ shared class PlayableMap {
                 "grandboltdestroy",
                 Vector2f(0.5, 1.0)
             ) }, "particle");
+        } else if (terrainName == "BLACKCRYSTAL") {
+            map.animateParticles({ TileParticle(
+                rootTile,
+                "blackcrystal.destroy.1",
+                Vector2f(0.5, 0.62)
+            ) }, "particle");
+            map.queueCode(AnimationCode(this.blackCrystalDestroyEffects));
+            map.animateParticles({ TileParticle(
+                rootTile,
+                "blackcrystal.destroy.2",
+                Vector2f(0.5, 0.62)
+            ) }, "particle");
         }
     }
 
@@ -294,6 +306,14 @@ shared class PlayableMap {
     private void largeStructureDestroyEffects() {
         map.shake();
         flashColour(White);
+    }
+
+    /**
+     * Shakes the map and flashes white momentarily.
+     */
+    private void blackCrystalDestroyEffects() {
+        map.shake(0.1f);
+        flashColour(Colour(255, 255, 255, 96), 0.1f);
     }
 
     ///////////////////////////////

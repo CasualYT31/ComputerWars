@@ -484,6 +484,12 @@ namespace awe {
 		float _colourFlashDuration = 0.0f;
 
 		/**
+		 * Stores the alpha that was originally given to \c _script_flashColour()
+		 * and uses it as a maximum alpha.
+		 */
+		float _colourFlashMaxAlpha = 255.f;
+
+		/**
 		 * Floating point holder for alpha.
 		 */
 		float _colourForFlashA = 0.f;
