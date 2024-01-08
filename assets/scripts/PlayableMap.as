@@ -1931,6 +1931,78 @@ shared class PlayableMap {
         map.animateParticles(particles, "particle");
     }
 
+    /**
+     * Queues a Black Crystal's healing animation.
+     * @param rootTile The tile the crystal is on.
+     */
+    private void animateBlackCrystalHeal(const Vector2&in rootTile) {
+        // Animate root.
+        array<TileParticle> particles = { TileParticle(
+            rootTile,
+            "blackcrystal.heal.root",
+            Vector2f(0.5, 0.5)
+        ) };
+        // Then, animate the surrounding tiles. We'll need to order them from back
+        // to front so the correct draw order is carried out.
+        // Backward.
+        if (animateBlackCrystalHeal_Adjacent(particles,
+            Vector2(rootTile.x, rootTile.y - 2), "blackcrystal.heal.outer", 1.1f))
+        {
+            particles[particles.length() - 1].origin.y = 0.5;
+            particles[particles.length() - 1].position = Vector2f(0.5, 1.0);
+        }
+        animateBlackCrystalHeal_Adjacent(particles,
+            Vector2(rootTile.x, rootTile.y - 1), "blackcrystal.heal.inner", 0.7f);
+        // Sides.
+        if (animateBlackCrystalHeal_Adjacent(particles,
+            Vector2(rootTile.x - 2, rootTile.y), "blackcrystal.heal.outer", 0.8f))
+        {
+            particles[particles.length() - 1].position = Vector2f(1.0, 1.0);
+        }
+        if (animateBlackCrystalHeal_Adjacent(particles,
+            Vector2(rootTile.x + 2, rootTile.y), "blackcrystal.heal.outer", 1.0f))
+        {
+            particles[particles.length() - 1].position = Vector2f(0.0, 1.0);
+        }
+        animateBlackCrystalHeal_Adjacent(particles,
+            Vector2(rootTile.x - 1, rootTile.y), "blackcrystal.heal.inner", 0.4f);
+        animateBlackCrystalHeal_Adjacent(particles,
+            Vector2(rootTile.x + 1, rootTile.y), "blackcrystal.heal.inner", 0.6f);
+        // Forward.
+        animateBlackCrystalHeal_Adjacent(particles,
+            Vector2(rootTile.x, rootTile.y + 1), "blackcrystal.heal.inner", 0.5f);
+        if (animateBlackCrystalHeal_Adjacent(particles,
+            Vector2(rootTile.x, rootTile.y + 2), "blackcrystal.heal.outer", 0.9f))
+        {
+            particles[particles.length() - 1].tile.y -= 1;
+            particles[particles.length() - 1].origin.y = 0.5;
+            particles[particles.length() - 1].position = Vector2f(0.5, 1.0);
+        }
+        // Queue particle effect.
+        map.animateParticles(particles, "particle");
+    }
+
+    /**
+     * Adds a Black Crystal particle to a given tile if it's in bounds.
+     * @param  arr   The array of particles to amend.
+     * @param  tile  The tile to apply the particle on.
+     * @param  p     The particle to apply.
+     * @param  delay The delay to apply to the particle.
+     * @return \c TRUE if a particle was added.
+     */
+    private bool animateBlackCrystalHeal_Adjacent(array<TileParticle>& arr,
+        const Vector2&in tile, const string&in p, const float delay) {
+        if (!map.isOutOfBounds(tile)) {
+            const auto i = arr.length();
+            arr.resize(i + 1);
+            arr[i].tile = tile;
+            arr[i].particle = p;
+            arr[i].origin = Vector2f(0.5, 1.0);
+            arr[i].delay = delay;
+            return true;
+        } else return false;
+    }
+
     /////////////////////////////
     // END TURN HELPER METHODS //
     /////////////////////////////
@@ -2063,6 +2135,8 @@ shared class PlayableMap {
         } else if (terrainName == "BLACKCRYSTAL" ||
             terrainName == "BLACKOBELISKROOT") {
             const auto tilesInRange = getStructureAttackRange(tile);
+            // Black crystals animate before the healing.
+            if (terrainName == "BLACKCRYSTAL") animateBlackCrystalHeal(tile);
             for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
                 // All units on the same team as the owner are healed 2HP, and
                 // replenished, for free, including Oozium units.
