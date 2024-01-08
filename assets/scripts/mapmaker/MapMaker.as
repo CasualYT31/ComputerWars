@@ -697,7 +697,7 @@ class MapMaker : Menu, Group {
      * Quits \c edit.
      */
     private void quitEditMapAuthorised() {
-        ::quitMap();
+        ::quitMap("MapMaker");
         mementoWindow.close();
         mapPropertiesWindow.close();
         fillWindow.close();

@@ -22,6 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "transitions.hpp"
 
+using namespace awe;
+
 transition::base::base(const bool isFadingIn, const sf::Time& duration) noexcept :
 	_isFadingIn(isFadingIn), _duration(duration) {}
 
@@ -33,14 +35,10 @@ sf::Time transition::base::duration() const {
 	return _duration;
 }
 
-transition::rectangle::rectangle(const bool isFadingIn, const sf::Color& colour,
-	const sf::Time& duration) : base(isFadingIn, duration) {
+transition::rectangle::rectangle(const bool isFadingIn, const sf::Time& duration,
+	const sf::Color& colour) : base(isFadingIn, duration) {
 	_toprect.setFillColor(colour);
 	_bottomrect.setFillColor(colour);
-	_toprect.setOutlineThickness(2.0f);
-	_toprect.setOutlineColor(sf::Color::Red);
-	_bottomrect.setOutlineThickness(2.0f);
-	_bottomrect.setOutlineColor(sf::Color::Red);
 }
 
 bool transition::rectangle::animate(const sf::RenderTarget& target) {

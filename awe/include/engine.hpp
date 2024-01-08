@@ -37,6 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "bank.hpp"
 #include "map.hpp"
 #include "mapstrings.hpp"
+#include "transitions.hpp"
 #include <filesystem>
 #include <random>
 
@@ -153,6 +154,21 @@ namespace awe {
 		 * @return \c 0 if all tests passed, \c 1 if not.
 		 */
 		int _initCheck() const;
+
+		//===================
+		//======DRAWING======
+		//===================
+		/**
+		 * Draws the colour flash animation, if one is currently in progress.
+		 * @param rawDelta The value of \c calculateDelta().
+		 * @param delta    The value of \c accumulatedDelta().
+		 */
+		void _drawColourFlash(const float rawDelta, const float delta);
+
+		/**
+		 * Animates the GUI transition, if it's currently animating.
+		 */
+		void _animateGUITransition();
 
 		//=============================
 		//======SCRIPT INTERFACE=======
@@ -271,11 +287,11 @@ namespace awe {
 			const std::string& playableMapTypeName);
 
 		/**
-		 * Quits the current map and goes back to the menu that was open when
-		 * \c _script_loadMap() was called.
+		 * Quits the current map and opens a new menu.
 		 * @warning This operation will invalidate the \c map pointer!
+		 * @param menu The menu to open after closing the map.
 		 */
-		void _script_quitMap();
+		void _script_quitMap(const std::string& menu);
 
 		/**
 		 * Translates a string, with or without variables.
@@ -324,6 +340,17 @@ namespace awe {
 		 * @param d The duration of the entire flash, in seconds.
 		 */
 		void _script_flashColour(const sf::Color& c, const float d = 2.0f);
+
+		/**
+		 * Invokes \c setGUI() after performing a fade out transition, and then
+		 * animates a fade in transition.
+		 * If a transition is already in progress, no changes will be made.
+		 * @param menu     The name of the menu to set once the fade out animation
+		 *                 has finished.
+		 * @param duration The duration of the entire transition, in seconds.
+		 */
+		void _script_transitionToGUI(const std::string& menu,
+			const float duration = 1.0f);
 
 		//=============================
 		//==========GAME DATA==========
@@ -454,11 +481,6 @@ namespace awe {
 		//==========ENGINE DATA===========
 		//================================
 		/**
-		 * The name of the menu that was showing before a map was loaded.
-		 */
-		std::string _menuBeforeMapLoad;
-
-		/**
 		 * The scaling applied to all drawing.
 		 */
 		float _scaling = 2.0f;
@@ -493,6 +515,22 @@ namespace awe {
 		 * Floating point holder for alpha.
 		 */
 		float _colourForFlashA = 0.f;
+
+		/**
+		 * The menu last given to \c _script_transitionToGUI().
+		 */
+		std::string _transitionToGUIMenu;
+
+		/**
+		 * The GUI transition animation.
+		 */
+		std::unique_ptr<awe::transition::rectangle> _guiTransition;
+
+		/**
+		 * Half the duration of the GUI transition given by the scripts.
+		 * Half to account for the separate fade out and fade in.
+		 */
+		sf::Time _guiTransitionDuration;
 	};
 }
 

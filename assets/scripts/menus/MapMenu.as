@@ -58,7 +58,7 @@ class MapMenu : Menu, Group {
             setGUI("GameScreen");
         });
         mapMenuCommands.addCommand("quit", "quiticon", function(){
-            quitMap();
+            quitMap("MainMenu");
         });
         setVisibility(true);
     }

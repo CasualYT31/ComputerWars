@@ -73,6 +73,7 @@ class GameScreen : Menu, Group {
         add(tileWidget);
         add(armyGroup);
         ::add(ROOT_WIDGET, this);
+        hideWidgets();
     }
 
     /**
@@ -81,6 +82,12 @@ class GameScreen : Menu, Group {
      * @param oldMenuName Name of the type of the \c Menu object.
      */
     void Open(Menu@ const oldMenu, const string&in oldMenuName) {
+        if (!mapPath.isEmpty()) {
+            @game = PlayableMap(loadMap(mapPath, PLAYABLE_MAP_TYPENAME));
+            if (game.map is null)
+                error("Failed to load map, game will crash soon!");
+            mapPath = "";
+        }
         setVisibility(true);
     }
 
@@ -236,6 +243,14 @@ class GameScreen : Menu, Group {
     }
 
     /**
+     * To be called before opening this menu when you want to opena map and use it
+     * to initialise \c game.
+     */
+    void loadThisMapWhenNextOpened(const string&in path) {
+        mapPath = path;
+    }
+
+    /**
      * Group used to scale down the army and tile widgets if the army widget won't
      * fit in it.
      */
@@ -256,4 +271,9 @@ class GameScreen : Menu, Group {
      * to reappear immediately after sending a command.
      */
     private bool cancelDevInput = false;
+
+    /**
+     * The map to load when this menu is next opened.
+     */
+    private string mapPath;
 }

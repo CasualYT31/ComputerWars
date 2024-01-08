@@ -52,7 +52,8 @@ int awe::game_engine::run() {
 			float rawDelta = 0.0f;
 			const auto delta = accumulatedDelta(rawDelta);
 
-			const bool acceptInput = !_map || !_map->animationInProgress();
+			const bool acceptInput = !_guiTransition && (!_map ||
+				!_map->animationInProgress());
 
 			// Handle menu user input first before handling the events.
 			// Use case: Map menu and MapMenu menu. Selecting a vacant tile in Map
@@ -72,32 +73,21 @@ int awe::game_engine::run() {
 
 			_renderer->clear();
 			_sprites->updateGlobalFrameIDs();
+			_animateGUITransition();
 			_renderer->animate(*_gui);
 			if (_map) {
 				_renderer->animate(*_map);
 				_renderer->draw(*_map);
 			}
 			_renderer->draw(*_gui);
-			if (delta < _colourFlashDuration) {
-				auto alphaOffset =
-					_colourFlashMaxAlpha / (_colourFlashDuration / 2.f) * rawDelta;
-				if (delta > _colourFlashDuration * 0.5f)
-					alphaOffset = -alphaOffset;
-				_colourForFlashA += alphaOffset;
-				if (_colourForFlashA < 0.f) _colourForFlashA = 0.f;
-				else if (_colourForFlashA > _colourFlashMaxAlpha)
-					_colourForFlashA = _colourFlashMaxAlpha;
-				_colourForFlash.a = static_cast<sf::Uint8>(_colourForFlashA);
-				_colourFlash.setFillColor(_colourForFlash);
-				_colourFlash.setSize(sf::Vector2f(_renderer->getSize()));
-				_renderer->draw(_colourFlash);
-			}
+			if (_guiTransition) _renderer->draw(*_guiTransition);
+			_drawColourFlash(rawDelta, delta);
 			_renderer->display();
 
 			if (_map && _map->periodic()) {
 				boxer::show("The game has ended!", "Thanks for Playing!",
 					boxer::Style::Info);
-				_script_quitMap();
+				_script_quitMap("MainMenu");
 			}
 		}
 	} catch (const std::exception& e) {
@@ -106,6 +96,39 @@ int awe::game_engine::run() {
 	}
 
 	return 0;
+}
+
+void awe::game_engine::_drawColourFlash(const float rawDelta, const float delta) {
+	if (delta < _colourFlashDuration) {
+		auto alphaOffset =
+			_colourFlashMaxAlpha / (_colourFlashDuration / 2.f) * rawDelta;
+		if (delta > _colourFlashDuration * 0.5f)
+			alphaOffset = -alphaOffset;
+		_colourForFlashA += alphaOffset;
+		if (_colourForFlashA < 0.f) _colourForFlashA = 0.f;
+		else if (_colourForFlashA > _colourFlashMaxAlpha)
+			_colourForFlashA = _colourFlashMaxAlpha;
+		_colourForFlash.a = static_cast<sf::Uint8>(_colourForFlashA);
+		_colourFlash.setFillColor(_colourForFlash);
+		_colourFlash.setSize(sf::Vector2f(_renderer->getSize()));
+		_renderer->draw(_colourFlash);
+	}
+}
+
+void awe::game_engine::_animateGUITransition() {
+	if (_guiTransition) {
+		const auto finished = _guiTransition->animate(*_renderer);
+		if (finished && !_guiTransition->isFadingIn()) {
+			_gui->setGUI(_transitionToGUIMenu);
+			_guiTransition = std::make_unique<awe::transition::rectangle>(true,
+				_guiTransitionDuration);
+		} else if (finished) {
+			_guiTransition = nullptr;
+			_transitionToGUIMenu.clear();
+		}
+	} else if (!_transitionToGUIMenu.empty()) _guiTransition =
+		std::make_unique<awe::transition::rectangle>(false,
+			_guiTransitionDuration);
 }
 
 // Script interface.
@@ -302,13 +325,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"The second string parameter must be the name of the class defined by the "
 		"scripts that represents a playable map.");
 
-	r = engine->RegisterGlobalFunction("void quitMap()",
+	r = engine->RegisterGlobalFunction("void quitMap(const string&in)",
 		asMETHOD(awe::game_engine, _script_quitMap),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Closes the currently open map and "
-		"switches back to the menu that was being displayed when loadMap() was "
-		"originally called. If there is no open map, then a warning will be "
-		"logged.");
+		"switches to the specified menu.");
 
 	r = engine->RegisterGlobalFunction("MousePosition mousePosition()",
 		asMETHOD(sfx::user_input, mousePosition),
@@ -372,6 +393,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	r = engine->RegisterGlobalFunction(
 		"void flashColour(const Colour&in, const float = 2.0)",
 		asMETHOD(awe::game_engine, _script_flashColour),
+		asCALL_THISCALL_ASGLOBAL, this);
+
+	r = engine->RegisterGlobalFunction(
+		"void transitionToGUI(const string&in, const float = 1.0)",
+		asMETHOD(awe::game_engine, _script_transitionToGUI),
 		asCALL_THISCALL_ASGLOBAL, this);
 }
 
@@ -699,7 +725,6 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 		_map->setGUI(_gui);
 		auto r = _map->load(file);
 		if (r) {
-			_menuBeforeMapLoad = _gui->getGUI();
 			return _map.get();
 		} else {
 			_map = nullptr;
@@ -709,9 +734,9 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 	}
 }
 
-void awe::game_engine::_script_quitMap() {
+void awe::game_engine::_script_quitMap(const std::string& menu) {
 	_map = nullptr;
-	_gui->setGUI(_menuBeforeMapLoad);
+	_gui->setGUI(menu);
 }
 
 std::string awe::game_engine::_script_translate(const std::string& nativeString,
@@ -784,4 +809,13 @@ void awe::game_engine::_script_flashColour(const sf::Color& c, const float d) {
 	_colourFlashMaxAlpha = c.a;
 	_colourFlashDuration = d;
 	resetDeltaAccumulation();
+}
+
+void awe::game_engine::_script_transitionToGUI(const std::string& menu,
+	const float duration) {
+	// Disabled for now to speed up debugging.
+	_gui->setGUI(menu);
+	//if (_guiTransition) return;
+	//_transitionToGUIMenu = menu;
+	//_guiTransitionDuration = sf::seconds(duration * 0.5f);
 }

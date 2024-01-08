@@ -36,7 +36,8 @@ class MainMenu : Menu, Group {
         openMapMaker.setOrigin(1.0, 0.0);
         openMapMaker.setText("~Map Maker");
         openMapMaker.setDirectionalFlow(mapFiles, mapFiles, mapFiles, mapFiles);
-        openMapMaker.connect(MouseReleased, function(){ setGUI("MapMaker"); });
+        openMapMaker.connect(MouseReleased,
+            function(){ transitionToGUI("MapMaker"); });
         add(openMapMaker);
 
         // Setup the root group.
@@ -88,14 +89,13 @@ class MainMenu : Menu, Group {
         const MousePosition&in currentMouse) {}
 
     /**
-     * When the user selects a file, attempt to load it, and if successful, open
-     * the game screen.
+     * When the user selects a file, open the game screen after setting the map
+     * file's path to it.
      */
     private void mapFilesMouseReleased() {
-        @game = PlayableMap(loadMap("map/" + mapFiles.getSelectedItemText(),
-            PLAYABLE_MAP_TYPENAME));
-        if (game.map is null) error("Failed to load map, will not switch menus.");
-        else setGUI("GameScreen");
+        cast<GameScreen>(getMenu("GameScreen")).loadThisMapWhenNextOpened(
+            "map/" + mapFiles.getSelectedItemText());
+        transitionToGUI("GameScreen");
     }
 
     /**

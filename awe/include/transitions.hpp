@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "renderer.hpp"
 
-namespace transition {
+namespace awe { namespace transition {
 	/**
 	 * Defines the blueprint all transitions should conform to.
 	 * All transitions should be single-use animations that do not repeat.
@@ -94,12 +94,12 @@ namespace transition {
 		/**
 		 * Sets the transition up, ready for drawing.
 		 * @param isFadingIn The fade in property of this transition.
-		 * @param colour     The colour of the two rectangles.
 		 * @param duration   The duration of this transition.
+		 * @param colour     The colour of the two rectangles.
 		 * @sa    sfx::base::base()
 		 */
-		rectangle(const bool isFadingIn, const sf::Color& colour = sf::Color(),
-			const sf::Time& duration = sf::seconds(1));
+		rectangle(const bool isFadingIn, const sf::Time& duration = sf::seconds(1),
+			const sf::Color& colour = sf::Color());
 		
 		/**
 		 * This drawable's \c animate() method.
@@ -134,4 +134,4 @@ namespace transition {
 		 */
 		sf::RectangleShape _bottomrect;
 	};
-}
+} }
