@@ -32,7 +32,8 @@ void awe::tile_particle_node::Register(asIScriptEngine* engine,
 				// We have to declare the default factory explicitly.
 				engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
 					std::string(type + "@ f()").c_str(),
-					asFUNCTION(awe::tile_particle_node::Create), asCALL_CDECL);
+					asFUNCTIONPR(awe::tile_particle_node::Create, (),
+						awe::tile_particle_node*), asCALL_CDECL);
 				engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
 					std::string(type + "@ f("
 						"const Vector2&in = Vector2(0, 0),"
@@ -41,7 +42,10 @@ void awe::tile_particle_node::Register(asIScriptEngine* engine,
 						"const string&in = \"\","
 						"const float = 0.0"
 					")").c_str(),
-					asFUNCTION(awe::tile_particle_node::Create), asCALL_CDECL);
+					asFUNCTIONPR(awe::tile_particle_node::Create,
+						(const sf::Vector2u&, const std::string&,
+							const sf::Vector2f&, const std::string&,
+						const float), awe::tile_particle_node*), asCALL_CDECL);
 			});
 		document->DocumentObjectType(r, "Holds information on a tile particle.");
 
@@ -70,6 +74,10 @@ awe::tile_particle_node::tile_particle_node(const sf::Vector2u& t,
 	origin = o;
 	spriteOverride = s;
 	delay = d;
+}
+
+awe::tile_particle_node* awe::tile_particle_node::Create() {
+	return new awe::tile_particle_node();
 }
 
 awe::tile_particle_node* awe::tile_particle_node::Create(const sf::Vector2u& t,

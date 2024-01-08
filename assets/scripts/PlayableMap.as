@@ -1775,6 +1775,37 @@ shared class PlayableMap {
         }
     }
 
+    /**
+     * Animates particles over the tiles in the black laser's range.
+     * @param rootTile The tile the black laser is on.
+     */
+    private void animateBlackLaserFire(const Vector2&in rootTile) {
+        array<TileParticle> particles;
+        particles.resize(1);
+        particles[0].tile = rootTile;
+        particles[0].particle = "blacklaser.down.root";
+        particles[0].origin = Vector2f(0.5, 0.0);
+        // Every tile downwards is to have a loop particle. The root tile covers
+        // two tiles, so start counting from 2 tiles below the root tile. If the
+        // laser is on the bottom row of the map, it will look strange, but I
+        // don't mind right now.
+        Vector2 tile(rootTile.x, rootTile.y + 2);
+        while (!map.isOutOfBounds(tile)) {
+            const auto i = particles.length();
+            particles.resize(i + 1);
+            particles[i].tile = tile;
+            particles[i].particle = ((tile.y - rootTile.y - 1) % 2) == 0 ?
+                "blacklaser.down.loop.even" : "blacklaser.down.loop.odd";
+            // We have to base these particles on the bottoms of the tiles, as
+            // tall tile sprites will mess up the positioning.
+            particles[i].origin = Vector2f(0.5, 1.0);
+            // Delay to line up with the root tile.
+            particles[i].delay = 1.6f;
+            tile.y += 1;
+        }
+        map.animateParticles(particles, "particle");
+    }
+
     /////////////////////////////
     // END TURN HELPER METHODS //
     /////////////////////////////
@@ -1878,6 +1909,7 @@ shared class PlayableMap {
 
         } else if (terrainName == "BLACKLASER") {
             const auto tilesInRange = getStructureAttackRange(tile);
+            animateBlackLaserFire(tile);
             for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
                 // Ooziums are the only units that will be impervious to the
                 // laser.

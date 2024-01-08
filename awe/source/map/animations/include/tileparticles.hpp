@@ -57,6 +57,12 @@ namespace awe {
 		 * Creates the tile particle node.
 		 * @return Pointer to the tile particle node.
 		 */
+		static awe::tile_particle_node* Create();
+
+		/**
+		 * Creates the tile particle node.
+		 * @return Pointer to the tile particle node.
+		 */
 		static awe::tile_particle_node* Create(const sf::Vector2u& t = {},
 			const std::string& p = {}, const sf::Vector2f& o = {},
 			const std::string& s = {}, const float d = 0.f);
