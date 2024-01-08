@@ -123,6 +123,7 @@ class MapMenu : Menu, Group {
         "visualb",
         "visualc",
         "visuald",
-        "novisual"
+        "novisual",
+        "debugvisual"
     };
 }

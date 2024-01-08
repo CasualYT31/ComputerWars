@@ -114,6 +114,7 @@
 	"visualc": "Visual C",
 	"visuald": "Visual D",
 	"novisual": "No Visual",
+	"debugvisual": "Debug Visual",
 
 	"alert": "Alert!",
 	"mapfilealreadyexists": "The map file \"#\" already exists! Do you wish to overwrite it?",

@@ -466,14 +466,16 @@ void awe::map::queueCode(asIScriptFunction* const func) {
 
 bool awe::map::animateDayBegin(const awe::ArmyID armyID, const awe::Day day,
 	const std::string& font) {
-	if (!_canAnimationBeQueued()) return false;
+	if (!_canAnimationBeQueued({ awe::animation_preset::Debug }, true))
+		return false;
 	_animationQueue.push(std::make_unique<awe::day_begin>(getArmyCountry(armyID),
 		day, _dict, (*_fonts)[font]));
 	return true;
 }
 
 bool awe::map::animateTagCO(const awe::ArmyID armyID, const std::string& font) {
-	if (!_canAnimationBeQueued()) return false;
+	if (!_canAnimationBeQueued({ awe::animation_preset::Debug }, true))
+		return false;
 	// TODO-2.
 	_animationQueue.push(std::make_unique<awe::tag_cos>(getArmyCountry(armyID),
 		getArmyCurrentCO(armyID), getArmyTagCO(armyID), (*_sheets)["co"], _dict,
@@ -636,10 +638,19 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 		path.emplace_back(pos, sheet);
 		previousTile = nextTile;
 	}
+	float speed = 375.f;
+	switch (_selectedAnimationPreset) {
+	case awe::animation_preset::VisualA:
+		speed = 125.f;
+		break;
+	case awe::animation_preset::Debug:
+		speed = 1000.f;
+		break;
+	}
 	_animationQueue.push(std::make_unique<awe::move_unit>(
 		_units.at(unit).sprite,
 		path,
-		_selectedAnimationPreset == awe::animation_preset::VisualA ? 125.f : 375.f
+		speed
 	));
 	return true;
 }
@@ -702,12 +713,12 @@ bool awe::map::animateLaunchOrStrike(const bool launch, const std::string& sprit
 }
 
 bool awe::map::_canAnimationBeQueued(
-	const std::vector<awe::animation_preset>& presets) const {
+	const std::vector<awe::animation_preset>& presets, const bool invert) const {
 	if (!_animationsEnabled) return false;
 	if (presets.empty()) return true;
 	for (const auto preset : presets)
-		if (_selectedAnimationPreset == preset) return true;
-	return false;
+		if (_selectedAnimationPreset == preset) return !invert;
+	return !invert;
 }
 
 bool awe::map::animate(const sf::RenderTarget& target) {

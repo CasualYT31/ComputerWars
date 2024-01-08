@@ -205,6 +205,7 @@ namespace awe {
 		VisualC,  //!< Fast unit speed, battle animations only.
 		VisualD,  //!< Fast unit speed, no CPU battle animations. Redundant atm.
 		NoVisual, //!< Only basic animations.
+		Debug,    //!< Used to skip some longer animations such as Day Begin.
 		Count     //!< C++-only, used to know when to wrap when cycling.
 	};
 
@@ -2687,12 +2688,16 @@ namespace awe {
 		/**
 		 * Can an animation be queued?
 		 * @param  presets List of presets that are supported.
+		 * @param  invert  If \c TRUE, \c presets will instead list presets that
+		 *                 are \em not supported, and every other preset is assumed
+		 *                 to be supported.
 		 * @return \c TRUE if animations are enabled, and \c presets is empty or
-		 *         the currently selected preset is within the given list. \c FALSE
-		 *         otherwise.
+		 *         the currently selected preset is within the given list (or not
+		 *         in the list, if \c invert is \c TRUE). \c FALSE otherwise.
 		 */
 		bool _canAnimationBeQueued(
-			const std::vector<awe::animation_preset>& presets = {}) const;
+			const std::vector<awe::animation_preset>& presets = {},
+			const bool invert = false) const;
 
 		/**
 		 * Internal logger object.
@@ -3202,7 +3207,7 @@ namespace awe {
 		 * The currently selected animation preset.
 		 */
 		awe::animation_preset _selectedAnimationPreset =
-			awe::animation_preset::NoVisual;
+			awe::animation_preset::Debug;
 
 		/**
 		 * Are animations enabled?
