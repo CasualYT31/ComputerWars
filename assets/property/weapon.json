@@ -31,7 +31,7 @@
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
       "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 1
+      "GRANDBOLTROOT": 20
     }
   },
   "MECH_PRIMARY": {
@@ -62,7 +62,7 @@
       "DEATHRAYROOT": 15,
       "BLACKCRYSTAL": 15,
       "BLACKOBELISKROOT": 15,
-      "GRANDBOLTROOT": 15
+      "GRANDBOLTROOT": 30
     }
   },
   "MECH_SECONDARY": {
@@ -97,7 +97,7 @@
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
       "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 1
+      "GRANDBOLTROOT": 20
     }
   },
   "RECON_SECONDARY": {
@@ -132,7 +132,7 @@
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
       "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 1
+      "GRANDBOLTROOT": 20
     }
   },
   "TANK_PRIMARY": {
@@ -169,7 +169,7 @@
       "DEATHRAYROOT": 15,
       "BLACKCRYSTAL": 15,
       "BLACKOBELISKROOT": 15,
-      "GRANDBOLTROOT": 15
+      "GRANDBOLTROOT": 20
     }
   },
   "TANK_SECONDARY": {
@@ -204,7 +204,7 @@
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
       "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 1
+      "GRANDBOLTROOT": 20
     }
   },
   "MDTANK_PRIMARY": {
@@ -241,7 +241,7 @@
       "DEATHRAYROOT": 55,
       "BLACKCRYSTAL": 55,
       "BLACKOBELISKROOT": 55,
-      "GRANDBOLTROOT": 55
+      "GRANDBOLTROOT": 30
     }
   },
   "MDTANK_SECONDARY": {
@@ -276,7 +276,7 @@
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
       "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 1
+      "GRANDBOLTROOT": 20
     }
   },
   "NEOTANK_PRIMARY": {
@@ -313,7 +313,7 @@
       "DEATHRAYROOT": 75,
       "BLACKCRYSTAL": 75,
       "BLACKOBELISKROOT": 75,
-      "GRANDBOLTROOT": 75
+      "GRANDBOLTROOT": 35
     }
   },
   "NEOTANK_SECONDARY": {
@@ -348,7 +348,7 @@
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
       "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 1
+      "GRANDBOLTROOT": 20
     }
   },
   "MEGATANK_PRIMARY": {
@@ -385,7 +385,7 @@
       "DEATHRAYROOT": 125,
       "BLACKCRYSTAL": 125,
       "BLACKOBELISKROOT": 125,
-      "GRANDBOLTROOT": 125
+      "GRANDBOLTROOT": 45
     }
   },
   "MEGATANK_SECONDARY": {
@@ -420,7 +420,7 @@
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
       "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 1
+      "GRANDBOLTROOT": 30
     }
   },
   "ANTIAIR_PRIMARY": {
@@ -459,7 +459,7 @@
       "DEATHRAYROOT": 10,
       "BLACKCRYSTAL": 10,
       "BLACKOBELISKROOT": 10,
-      "GRANDBOLTROOT": 10
+      "GRANDBOLTROOT": 30
     }
   },
   "ARTILLERY_PRIMARY": {
@@ -501,7 +501,7 @@
       "DEATHRAYROOT": 45,
       "BLACKCRYSTAL": 45,
       "BLACKOBELISKROOT": 45,
-      "GRANDBOLTROOT": 45
+      "GRANDBOLTROOT": 5
     }
   },
   "ROCKETS_PRIMARY": {
@@ -543,7 +543,7 @@
       "DEATHRAYROOT": 55,
       "BLACKCRYSTAL": 55,
       "BLACKOBELISKROOT": 55,
-      "GRANDBOLTROOT": 55
+      "GRANDBOLTROOT": 15
     },
     "these units override this weapon (just documentation)": [
       "PIPERUNNER",
@@ -625,7 +625,7 @@
       "DEATHRAYROOT": 95,
       "BLACKCRYSTAL": 95,
       "BLACKOBELISKROOT": 95,
-      "GRANDBOLTROOT": 95
+      "GRANDBOLTROOT": 35
     }
   },
   "STEALTH_PRIMARY": {
@@ -670,7 +670,7 @@
       "DEATHRAYROOT": 70,
       "BLACKCRYSTAL": 70,
       "BLACKOBELISKROOT": 70,
-      "GRANDBOLTROOT": 70
+      "GRANDBOLTROOT": 30
     },
     "hiddenunits": {
       "STEALTH": true
@@ -745,7 +745,7 @@
       "DEATHRAYROOT": 1,
       "BLACKCRYSTAL": 1,
       "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 1
+      "GRANDBOLTROOT": 20
     }
   },
   "CRUISER_PRIMARY": {
