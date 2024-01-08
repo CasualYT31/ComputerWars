@@ -1781,6 +1781,7 @@ shared class PlayableMap {
      */
     private void animateBlackLaserFire(const Vector2&in rootTile) {
         array<TileParticle> particles;
+        // DOWN //
         particles.resize(1);
         particles[0].tile = rootTile;
         particles[0].particle = "blacklaser.down.root";
@@ -1803,6 +1804,28 @@ shared class PlayableMap {
             particles[i].delay = 1.6f;
             tile.y += 1;
         }
+        // UP //
+        tile.y = rootTile.y - 1;
+        if (!map.isOutOfBounds(tile)) {
+            particles.resize(particles.length() + 1);
+            particles[particles.length() - 1].tile = tile;
+            particles[particles.length() - 1].particle = "blacklaser.up.root";
+            particles[particles.length() - 1].origin = Vector2f(0.5, 1.0);
+            // Loop.
+            tile.y -= 1;
+            while (!map.isOutOfBounds(tile)) {
+                const auto i = particles.length();
+                particles.resize(i + 1);
+                particles[i].tile = tile;
+                particles[i].particle = ((rootTile.y - tile.y) % 2) == 0 ?
+                    "blacklaser.up.loop.even" : "blacklaser.up.loop.odd";
+                particles[i].origin = Vector2f(0.5, 1.0);
+                // Delay to line up with the root tile.
+                particles[i].delay = 1.6f;
+                tile.y -= 1;
+            }
+        }
+        // END //
         map.animateParticles(particles, "particle");
     }
 
