@@ -327,6 +327,10 @@ float sfx::gui::getScalingFactor() const noexcept {
 	return _scalingFactor;
 }
 
+std::string sfx::gui::getSelectControl() const {
+	return _selectControl;
+}
+
 bool sfx::gui::isWidgetUnderMouse() const {
 	if (!_ui) {
 		_logger.error("Called isWidgetUnderMouse() when no user input object has "

@@ -2374,6 +2374,12 @@ namespace awe {
 		void enableAnimations(const bool enabled);
 
 		/**
+		 * Attempts to skip the currently playing animation, if there is one.
+		 * @return \c TRUE if an animation was skipped via this method.
+		 */
+		bool skipAnimationIfPossible();
+
+		/**
 		 * Pushes code to the animation queue.
 		 * @param func Pointer to the script function to execute.
 		 */

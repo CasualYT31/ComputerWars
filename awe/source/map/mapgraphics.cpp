@@ -458,6 +458,13 @@ void awe::map::enableAnimations(const bool enabled) {
 	_animationsEnabled = enabled;
 }
 
+bool awe::map::skipAnimationIfPossible() {
+	if (animationInProgress() && _currentAnimation->isSkippable()) {
+		_destroyAnimation = true;
+		return true;
+	} else return false;
+}
+
 void awe::map::queueCode(asIScriptFunction* const func) {
 	if (!func) return;
 	_animationQueue.push(engine::CScriptWrapper(func));
@@ -718,7 +725,7 @@ bool awe::map::_canAnimationBeQueued(
 	if (presets.empty()) return true;
 	for (const auto preset : presets)
 		if (_selectedAnimationPreset == preset) return !invert;
-	return !invert;
+	return invert;
 }
 
 bool awe::map::animate(const sf::RenderTarget& target) {

@@ -47,6 +47,15 @@ namespace awe {
 		inline virtual bool enableCursorGraphics() const {
 			return false;
 		}
+
+		/**
+		 * Can this animation be destroyed prematurely?
+		 * @return By default, \c FALSE. However, animations may decide to override
+		 *         this method and return their own value.
+		 */
+		inline virtual bool isSkippable() const {
+			return false;
+		}
 	protected:
 		/**
 		 * You cannot directly instantiate this class.

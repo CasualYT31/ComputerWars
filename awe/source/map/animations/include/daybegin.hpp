@@ -50,6 +50,12 @@ namespace awe {
 			const std::shared_ptr<sf::Font>& font);
 
 		/**
+		 * The Day Begin animation can be skipped.
+		 * @return \c TRUE.
+		 */
+		inline bool isSkippable() const override final { return true; }
+
+		/**
 		 * This drawable's \c animate() method.
 		 * @param  target The target to render the animation to.
 		 * @return \c TRUE if the animation has completed, \c FALSE otherwise.

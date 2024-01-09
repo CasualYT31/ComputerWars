@@ -339,6 +339,12 @@ namespace sfx {
 		float getScalingFactor() const noexcept;
 
 		/**
+		 * Returns the configured select control.
+		 * @return The name of the control that is used to trigger "select."
+		 */
+		std::string getSelectControl() const;
+
+		/**
 		 * Finds out if a widget is under the current mouse position.
 		 * If a user input object hasn't been given, then \c FALSE will be returned
 		 * and an error will be logged.

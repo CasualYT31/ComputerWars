@@ -48,6 +48,9 @@ int awe::game_engine::run() {
 
 	try {
 		_gui->setScalingFactor(_scaling);
+		// Used to prevent _gui->handleInput() from reading a select that was
+		// intended only to skip an animation.
+		bool mapAnimationSkipped = false;
 		while (_renderer->isOpen()) {
 			float rawDelta = 0.0f;
 			const auto delta = accumulatedDelta(rawDelta);
@@ -63,13 +66,18 @@ int awe::game_engine::run() {
 			// after and triggers MapMenu again, ensuring the MapMenu never goes
 			// away. By handling the click in MapMenu last, Map doesn't get to see
 			// the click and so safely ignores it for that iteration.
-			if (acceptInput) _gui->handleInput(_userinput);
+			if (acceptInput && !mapAnimationSkipped) _gui->handleInput(_userinput);
+			mapAnimationSkipped = false;
 			_userinput->update();
 
 			_renderer->handleEvents([&](const sf::Event& e) {
 				if (e.type == sf::Event::Closed) _renderer->close();
 				if (acceptInput) _gui->handleEvent(e);
 			});
+
+			if (_map && _map->animationInProgress() &&
+				(*_userinput)[_gui->getSelectControl()])
+				mapAnimationSkipped = _map->skipAnimationIfPossible();
 
 			_renderer->clear();
 			_sprites->updateGlobalFrameIDs();
