@@ -66,6 +66,9 @@ int awe::game_engine::run() {
 			// after and triggers MapMenu again, ensuring the MapMenu never goes
 			// away. By handling the click in MapMenu last, Map doesn't get to see
 			// the click and so safely ignores it for that iteration.
+			// NB: it's also important to handle GUI input before updating the user
+			// input. If not, then clicks can "leak" through to other menus if a
+			// click were to update the current menu.
 			if (acceptInput && !mapAnimationSkipped) _gui->handleInput(_userinput);
 			mapAnimationSkipped = false;
 			_userinput->update();
