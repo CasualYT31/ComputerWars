@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "safejson.hpp"
+#include "resourcepool.hpp"
 #include "SFML/Audio.hpp"
 
 namespace sfx {
@@ -312,5 +313,41 @@ namespace sfx {
 		 * in letting the client choose the granularity of fadeouts.
 		 */
 		static const float _granularity;
+	};
+
+	/**
+	 * A collection of \c audio objects.
+	 */
+	class audios : public engine::resource_pool<sfx::audio> {
+	public:
+		/**
+		 * Initialises the internal logger object.
+		 * @param data The data to initialise the logger object with.
+		 * @sa    \c engine::logger
+		 */
+		audios(const engine::logger::data& data);
+	private:
+		/**
+		 * The JSON load method for this class.
+		 * Within the root object, there are simply a list of key-string pairs,
+		 * with the keys defining the names of the audio objects, and the string
+		 * values containing the paths to the JSON scripts to pass to the \c load()
+		 * method of each \c audio.
+		 * @param  j The \c engine::json object representing the contents of the
+		 *           loaded script which this method reads.
+		 * @return \c TRUE if every audio file could be loaded successfully,
+		 *         \c FALSE if even one of the \c load() methods returned \c FALSE.
+		 * @safety No guarantee.
+		 */
+		bool _load(engine::json& j);
+
+		/**
+		 * The JSON save method for this class.
+		 * Simply rewrites the audio list.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON
+		 *           script which this method writes to.
+		 * @return Always returns \c TRUE.
+		 */
+		bool _save(nlohmann::ordered_json& j);
 	};
 }

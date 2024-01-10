@@ -236,3 +236,26 @@ float sfx::audio::_volumeAfterOffset(const std::string& name) const {
 	}
 	return 0.0;
 }
+
+sfx::audios::audios(const engine::logger::data& data) :
+	resource_pool<sfx::audio>({ data.sink, "json_script" }, "audio object") {}
+
+bool sfx::audios::_load(engine::json& j) {
+	PoolType pool;
+	bool ret = true;
+	nlohmann::ordered_json jj = j.nlohmannJSON();
+	for (auto& i : jj.items()) {
+		pool.emplace(i.key(), std::make_shared<sfx::audio>(
+			engine::logger::data{ _logger.getData().sink,
+			_logger.getData().name + "_" + i.key() }));
+		pool[i.key()]->load(i.value());
+		if (!pool[i.key()]->inGoodState()) ret = false;
+	}
+	_pool = std::move(pool);
+	return ret;
+}
+
+bool sfx::audios::_save(nlohmann::ordered_json& j) {
+	for (const auto& pair : _pool) j[pair.first] = pair.second->getScriptPath();
+	return true;
+}

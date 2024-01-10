@@ -204,35 +204,6 @@ namespace awe {
 		bool _script_getVSync();
 
 		/**
-		 * Calls \c _music->load().
-		 * I wanted to make the mapping directly, however, I have to define the
-		 * string parameter in the AngelScript declaration explicitly, otherwise
-		 * the engine will crash, and that has the problem of letting scripts load
-		 * and save the JSON script from and to anywhere. So I have to write this
-		 * intermediary method to avoid crashing the engine and avoid giving
-		 * scripts more power than they need.
-		 */
-		void _script_loadMusicConfig();
-
-		/**
-		 * Calls \c _music->save().
-		 * @sa \c _script_loadMusicConfig()
-		 */
-		void _script_saveMusicConfig();
-
-		/**
-		 * Calls \c _sounds->load().
-		 * @sa \c _script_loadMusicConfig()
-		 */
-		void _script_loadSoundConfig();
-
-		/**
-		 * Calls \c _sounds->save().
-		 * @sa \c _script_loadMusicConfig()
-		 */
-		void _script_saveSoundConfig();
-
-		/**
 		 * Calls \c _userinput->load().
 		 * @sa \c _script_loadMusicConfig()
 		 */
@@ -433,16 +404,11 @@ namespace awe {
 		 * Pointer to the fonts of the game.
 		 */
 		std::shared_ptr<sfx::fonts> _fonts;
-		
-		/**
-		 * Pointer to the game's sound objects.
-		 */
-		std::shared_ptr<sfx::audio> _sounds;
 
 		/**
-		 * Pointer to the game's BGM objects.
+		 * Pointer to the game's audio objects.
 		 */
-		std::shared_ptr<sfx::audio> _music;
+		std::shared_ptr<sfx::audios> _audios;
 		
 		/**
 		 * Pointer to the renderer to render to.

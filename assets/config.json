@@ -1,8 +1,7 @@
 {
   "languages": "lang/langs.json",
   "fonts": "fonts/fonts.json",
-  "sounds": "audio/sounds.json",
-  "music": "audio/music.json",
+  "audios": "audio/audios.json",
   "renderer": "renderer/renderer.json",
   "userinput": "userinput/userinput.json",
   "spritesheets": "sprites/spritesheets.json",

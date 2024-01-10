@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "renderer.hpp"
+#include "resourcepool.hpp"
 
 namespace sfx {
 	/**
@@ -260,7 +261,8 @@ namespace sfx {
 	/**
 	 * A collection of \c animated_spritesheet objects.
 	 */
-	class animated_spritesheets : public engine::json_script {
+	class animated_spritesheets :
+		public engine::resource_pool<sfx::animated_spritesheet> {
 	public:
 		/**
 		 * Initialises the internal logger object.
@@ -268,26 +270,6 @@ namespace sfx {
 		 * @sa    \c engine::logger
 		 */
 		animated_spritesheets(const engine::logger::data& data);
-
-		/**
-		 * Accesses a previously loaded \c sfx::animated_spritesheet object.
-		 * If a non-existent spritesheet name is given, an error will be logged.
-		 * @param  key The string name of the spritesheet which was given in the
-		 *             JSON script.
-		 * @return The pointer to the \c sfx::animated_spritesheet object, or
-		 *         \c nullptr if the spritesheet didn't exist.
-		 * @safety Strong guarantee.
-		 */
-		std::shared_ptr<sfx::animated_spritesheet> operator[](
-			const std::string& key) const;
-
-		/**
-		 * Finds out if there is a spritesheet stored under the given key.
-		 * @param  key The key to test.
-		 * @return \c TRUE if there is a spritesheet with the given name, \c FALSE
-		 *         if not.
-		 */
-		bool exists(const std::string& key) const;
 
 		/**
 		 * Goes through every global frame counter in every spritesheet and
@@ -320,17 +302,6 @@ namespace sfx {
 		 * @return Always returns \c TRUE.
 		 */
 		bool _save(nlohmann::ordered_json& j);
-
-		/**
-		 * The internal logger object.
-		 */
-		mutable engine::logger _logger;
-
-		/**
-		 * The spritesheets.
-		 */
-		std::unordered_map<std::string, std::shared_ptr<sfx::animated_spritesheet>>
-			_sheets;
 	};
 
 	/**

@@ -278,65 +278,57 @@ bool sfx::animated_spritesheet::_save(nlohmann::ordered_json& j) noexcept {
 }
 
 sfx::animated_spritesheets::animated_spritesheets(const engine::logger::data& data)
-	: json_script({ data.sink, "json_script" }), _logger(data) {}
-
-std::shared_ptr<sfx::animated_spritesheet> sfx::animated_spritesheets::operator[](
-	const std::string& key) const {
-	if (exists(key)) return _sheets.at(key);
-	_logger.error("Attempting to access spritesheet with key \"{}\" which "
-		"does not exist.", key);
-	return nullptr;
-}
-
-bool sfx::animated_spritesheets::exists(const std::string& key) const {
-	return _sheets.find(key) != _sheets.end();
-}
+	: resource_pool<sfx::animated_spritesheet>({ data.sink, "json_script" },
+		"spritesheet") {}
 
 void sfx::animated_spritesheets::updateGlobalFrameIDs() {
-	for (auto& sheet : _sheets) sheet.second->updateGlobalFrameIDs();
+	for (auto& sheet : _pool) sheet.second->updateGlobalFrameIDs();
 }
 
 bool sfx::animated_spritesheets::_load(engine::json& j) {
+	PoolType sheets;
 	bool ret = true;
 	nlohmann::ordered_json jj = j.nlohmannJSON();
-	_sheets.clear();
 	for (auto& i : jj.items()) {
-		_sheets[i.key()] = std::make_shared<sfx::animated_spritesheet>(
+		sheets[i.key()] = std::make_shared<sfx::animated_spritesheet>(
 			engine::logger::data{ _logger.getData().sink,
 				_logger.getData().name + "_" + i.key() });
 		if (i.value().is_string()) {
-			_sheets[i.key()]->load(i.value());
+			sheets[i.key()]->load(i.value());
 		} else if (i.value().is_object()) {
 			if (i.value().find("json") == i.value().end()) {
-				_logger.error("Could not load spritesheet with name \"{}\" as its "
-					"object value did not contain the \"json\" key.", i.key());
-				_sheets.erase(i.key());
+				_logger.error("Could not load {} with name \"{}\" as its object "
+					"value did not contain the \"json\" key.", _objectType,
+					i.key());
+				sheets.erase(i.key());
 				ret = false;
 				continue;
 			} else if (i.value().find("path") == i.value().end()) {
-				_logger.error("Could not load spritesheet with name \"{}\" as its "
-					"object value did not contain the \"path\" key.", i.key());
-				_sheets.erase(i.key());
+				_logger.error("Could not load {} with name \"{}\" as its object "
+					"value did not contain the \"path\" key.", _objectType,
+					i.key());
+				sheets.erase(i.key());
 				ret = false;
 				continue;
 			}
-			_sheets[i.key()]->setPathOverride(i.value()["path"]);
-			_sheets[i.key()]->load(i.value()["json"]);
+			sheets[i.key()]->setPathOverride(i.value()["path"]);
+			sheets[i.key()]->load(i.value()["json"]);
 		} else {
-			_logger.error("Could not load spritesheet with name \"{}\" as its "
-				"value was of unrecognised type \"{}\".", i.key(),
+			_logger.error("Could not load {} with name \"{}\" as its value was of "
+				"unrecognised type \"{}\".", _objectType, i.key(),
 				i.value().type_name());
-			_sheets.erase(i.key());
+			sheets.erase(i.key());
 			ret = false;
 			continue;
 		}
-		if (!_sheets[i.key()]->inGoodState()) ret = false;
+		if (!sheets[i.key()]->inGoodState()) ret = false;
 	}
+	_pool = std::move(sheets);
 	return ret;
 }
 
 bool sfx::animated_spritesheets::_save(nlohmann::ordered_json& j) {
-	for (const auto& pair : _sheets) j[pair.first] = pair.second->getScriptPath();
+	for (const auto& pair : _pool) j[pair.first] = pair.second->getScriptPath();
 	return true;
 }
 

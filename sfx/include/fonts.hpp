@@ -26,14 +26,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include "safejson.hpp"
+#include "resourcepool.hpp"
 #include "SFML/Graphics/Font.hpp"
 
 namespace sfx {
 	/**
 	 * This class is used as a JSON-configured font collection.
 	 */
-	class fonts : public engine::json_script {
+	class fonts : public engine::resource_pool<sf::Font> {
 	public:
 		/**
 		 * Initialises the internal logger object.
@@ -41,19 +41,6 @@ namespace sfx {
 		 * @sa    \c engine::logger
 		 */
 		fonts(const engine::logger::data& data);
-
-		/**
-		 * Accesses a previously loaded \c sf::Font object.
-		 * If a non-existent font is given, an error will be logged.\n
-		 * The \c font object may technically be amended but no edits will be saved
-		 * in any way via \c save().
-		 * @param  key The string name of the font which was given in the JSON
-		 *             script.
-		 * @return The pointer to the \c sf::Font object, or \c nullptr if the font
-		 *         didn't exist.
-		 * @safety Strong guarantee.
-		 */
-		std::shared_ptr<sf::Font> operator[](const std::string& key) const;
 
 		/**
 		 * Accesses a previously loaded font file path.
@@ -92,18 +79,9 @@ namespace sfx {
 		bool _save(nlohmann::ordered_json& j);
 
 		/**
-		 * The collection of font objects.
-		 */
-		std::unordered_map<std::string, std::shared_ptr<sf::Font>> _font;
-
-		/**
-		 * The collection of font file paths corresponding to each font object.
+		 * The collection of font file paths corresponding to each font object
+		 * that's stored in \c resource_pool::_pool.
 		 */
 		std::unordered_map<std::string, std::string> _fontpath;
-
-		/**
-		 * The internal logger object.
-		 */
-		mutable engine::logger _logger;
 	};
 }

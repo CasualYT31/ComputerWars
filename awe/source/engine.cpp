@@ -181,32 +181,6 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asCALL_THISCALL_ASGLOBAL, _scripts.get());
 	document->DocumentGlobalFunction(r, "Writes the stacktrace to the log.");
 
-	r = engine->RegisterGlobalFunction("float getSoundVolume()",
-		asMETHOD(sfx::audio, getVolume),
-		asCALL_THISCALL_ASGLOBAL, _sounds.get());
-	document->DocumentGlobalFunction(r, "Gets the current sound volume.");
-
-	r = engine->RegisterGlobalFunction("void setSoundVolume(const float)",
-		asMETHOD(sfx::audio, setVolume),
-		asCALL_THISCALL_ASGLOBAL, _sounds.get());
-	document->DocumentGlobalFunction(r, "Sets the current sound volume. The value "
-		"must be between <tt>0.0</tt> and <tt>100.0</tt>. If under or over the "
-		"bounds, it will be adjusted upwards or downwards to the bound "
-		"accordingly, and a warning will be logged.");
-
-	r = engine->RegisterGlobalFunction("float getMusicVolume()",
-		asMETHOD(sfx::audio, getVolume),
-		asCALL_THISCALL_ASGLOBAL, _music.get());
-	document->DocumentGlobalFunction(r, "Gets the current music volume.");
-
-	r = engine->RegisterGlobalFunction("void setMusicVolume(const float)",
-		asMETHOD(sfx::audio, setVolume),
-		asCALL_THISCALL_ASGLOBAL, _music.get());
-	document->DocumentGlobalFunction(r, "Sets the current music volume. The value "
-		"must be between <tt>0.0</tt> and <tt>100.0</tt>. If under or over the "
-		"bounds, it will be adjusted upwards or downwards to the bound "
-		"accordingly, and a warning will be logged.");
-
 	r = engine->RegisterGlobalFunction("void setFullscreen(const bool)",
 		asMETHOD(awe::game_engine, _script_setFullscreen),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -228,32 +202,6 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::game_engine, _script_getVSync),
 		asCALL_THISCALL_ASGLOBAL, this);
 	document->DocumentGlobalFunction(r, "Gets the V-sync setting.");
-
-	r = engine->RegisterGlobalFunction("void loadMusicConfig()",
-		asMETHOD(awe::game_engine, _script_loadMusicConfig),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Loads the music configuration script. "
-		"This will replace all of the configurations that are currently loaded "
-		"(including the music volume).");
-
-	r = engine->RegisterGlobalFunction("void saveMusicConfig()",
-		asMETHOD(awe::game_engine, _script_saveMusicConfig),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Saves the music configuration (i.e. the "
-		"music volume).");
-
-	r = engine->RegisterGlobalFunction("void loadSoundConfig()",
-		asMETHOD(awe::game_engine, _script_loadSoundConfig),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Loads the sound configuration script. "
-		"This will replace all of the configurations that are currently loaded "
-		"(including the sound volume).");
-
-	r = engine->RegisterGlobalFunction("void saveSoundConfig()",
-		asMETHOD(awe::game_engine, _script_saveSoundConfig),
-		asCALL_THISCALL_ASGLOBAL, this);
-	document->DocumentGlobalFunction(r, "Saves the sound configuration (i.e. the "
-		"sound volume).");
 
 	r = engine->RegisterGlobalFunction("void loadRendererConfig()",
 		asMETHOD(awe::game_engine, _script_loadRendererConfig),
@@ -436,12 +384,8 @@ bool awe::game_engine::_load(engine::json& j) {
 					"language_dictionary" });
 		},
 		[&]() {
-			return _loadObject(_sounds, j, { "sounds" },
-				engine::logger::data{ _logger.getData().sink, "sounds" });
-		},
-		[&]() {
-			return _loadObject(_music, j, { "music" },
-				engine::logger::data{ _logger.getData().sink, "music" });
+			return _loadObject(_audios, j, { "audios" },
+				engine::logger::data{ _logger.getData().sink, "audios" });
 		},
 		[&]() {
 			// Allocate GUI and scripts objects, but don't initialise yet.
@@ -616,8 +560,7 @@ int awe::game_engine::_initCheck() const {
 	if (!_mapStrings) errstring += "map strings\n";
 	if (!_dictionary) errstring += "dictionary\n";
 	if (!_fonts) errstring += "fonts\n";
-	if (!_sounds) errstring += "sounds\n";
-	if (!_music) errstring += "music\n";
+	if (!_audios) errstring += "audios\n";
 	if (!_renderer) errstring += "renderer\n";
 	if (!_userinput) errstring += "userinput\n";
 	if (!_sprites) errstring += "spritesheets\n";
@@ -646,22 +589,6 @@ void awe::game_engine::_script_setVSync(const bool in) {
 
 bool awe::game_engine::_script_getVSync() {
 	return _tempRendererSettings.style.vsync;
-}
-
-void awe::game_engine::_script_loadMusicConfig() {
-	_music->load();
-}
-
-void awe::game_engine::_script_saveMusicConfig() {
-	_music->save();
-}
-
-void awe::game_engine::_script_loadSoundConfig() {
-	_sounds->load();
-}
-
-void awe::game_engine::_script_saveSoundConfig() {
-	_sounds->save();
 }
 
 void awe::game_engine::_script_loadRendererConfig() {

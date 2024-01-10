@@ -23,28 +23,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "fonts.hpp"
 
 sfx::fonts::fonts(const engine::logger::data& data) :
-	json_script({data.sink, "json_script"}), _logger(data) {}
-
-std::shared_ptr<sf::Font> sfx::fonts::operator[](const std::string& key) const {
- 	if (_font.find(key) == _font.end()) {
-		_logger.error("Attempting to access font with key \"{}\" which does not "
-			"exist.", key);
-		return nullptr;
-	}
-	return _font.at(key);
-}
+	resource_pool<sf::Font>({data.sink, "json_script"}, "font") {}
 
 std::string sfx::fonts::getFontPath(const std::string& key) const {
 	if (_fontpath.find(key) == _fontpath.end()) {
-		_logger.error("Attempting to access font file path with key \"{}\" which "
-			"does not exist.", key);
+		_logger.error("Attempting to access {} file path with key \"{}\" which "
+			"does not exist.", _objectType, key);
 		return "";
 	}
 	return _fontpath.at(key);
 }
 
 bool sfx::fonts::_load(engine::json& j) {
-	std::unordered_map<std::string, std::shared_ptr<sf::Font>> fonts;
+	PoolType fonts;
 	std::unordered_map<std::string, std::string> fontpaths;
 	bool ret = true;
 	nlohmann::ordered_json jj = j.nlohmannJSON();
@@ -52,13 +43,13 @@ bool sfx::fonts::_load(engine::json& j) {
 		std::string path = i.value();
 		fonts[i.key()] = std::make_shared<sf::Font>();
 		if (!fonts[i.key()]->loadFromFile(path)) {
-			_logger.error("Could not load font file \"{}\".", path);
+			_logger.error("Could not load {} file \"{}\".", _objectType, path);
 			fonts.erase(i.key());
 			ret = false;
 		}
 		fontpaths[i.key()] = path;
 	}
-	_font = std::move(fonts);
+	_pool = std::move(fonts);
 	_fontpath = std::move(fontpaths);
 	return ret;
 }
