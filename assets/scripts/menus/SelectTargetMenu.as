@@ -37,6 +37,7 @@ class SelectTargetMenu : Menu, Group {
         game.map.setAvailableTileShader(AvailableTileShader::Red);
         game.map.disableShaderForAvailableUnits(true);
         game.setAttackCursorSprites();
+        damageWidget.setVisibility(false);
         setVisibility(true);
     }
 
