@@ -1,5 +1,5 @@
 {
-	"volume": 100.0,
+	"volume": 0.0,
 	"mainmenu": {
 		"type": "music",
 		"path": "audio/music/MainMenu.ogg",

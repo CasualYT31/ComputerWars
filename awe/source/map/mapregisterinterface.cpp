@@ -810,6 +810,10 @@ void awe::map::Register(asIScriptEngine* engine,
 		// DRAWING OPERATIONS //
 		////////////////////////
 		r = engine->RegisterObjectMethod("Map",
+			"void setViewport(const float, const float, const float, const float)",
+			asMETHOD(awe::map, setViewport), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void alwaysShowHiddenUnits(const bool)",
 			asMETHOD(awe::map, alwaysShowHiddenUnits), asCALL_THISCALL);
 

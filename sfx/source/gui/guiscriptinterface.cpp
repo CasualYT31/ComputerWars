@@ -277,6 +277,13 @@ sf::Vector2f sfx::gui::_getWidgetFullSize(const sfx::WidgetIDRef id) {
 	return {};
 }
 
+sf::Vector2f sfx::gui::_getWidgetScaledFullSize(const sfx::WidgetIDRef id) {
+	START_WITH_WIDGET(id)
+		return widget->ptr->getFullSize() * _scalingFactor;
+	END("Attempted to get the scaled full size of a widget \"{}\".", id)
+	return {};
+}
+
 void sfx::gui::_setWidgetScale(const sfx::WidgetIDRef id, const float x,
 	const float y) {
 	START_WITH_WIDGET(id)

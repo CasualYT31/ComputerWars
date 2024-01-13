@@ -764,8 +764,6 @@ void awe::game_engine::_script_flashColour(const sf::Color& c, const float d) {
 
 void awe::game_engine::_script_transitionToGUI(const std::string& menu,
 	const float duration) {
-	// Disabled for now to speed up debugging.
-	//_gui->setGUI(menu);
 	if (_guiTransition) return;
 	_transitionToGUIMenu = menu;
 	_guiTransitionDuration = sf::seconds(duration * 0.5f);

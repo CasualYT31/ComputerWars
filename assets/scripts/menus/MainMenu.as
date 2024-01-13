@@ -37,7 +37,8 @@ class MainMenu : Menu, Group {
         openMapMaker.setText("~Map Maker");
         openMapMaker.setDirectionalFlow(mapFiles, mapFiles, mapFiles, mapFiles);
         openMapMaker.connect(MouseReleased,
-            function(){ transitionToGUI("MapMaker"); });
+            // function(){ transitionToGUI("MapMaker"); });
+            function(){ setGUI("MapMaker"); });
         add(openMapMaker);
 
         // Setup the root group.
@@ -97,7 +98,8 @@ class MainMenu : Menu, Group {
     private void mapFilesMouseReleased() {
         cast<GameScreen>(getMenu("GameScreen")).loadThisMapWhenNextOpened(
             "map/" + mapFiles.getSelectedItemText());
-        transitionToGUI("GameScreen");
+        // transitionToGUI("GameScreen");
+        setGUI("GameScreen");
     }
 
     /**

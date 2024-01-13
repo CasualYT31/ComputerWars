@@ -132,11 +132,16 @@ class MapMaker : Menu, Group {
         if (edit is null || edit.map.getMapSize().x == 0 ||
             edit.map.getMapSize().y == 0 || messageBox !is null) return;
 
+        // Update the viewport of the map to make sure no tiles are hiding behind
+        // the menu or status bars.
+        const Vector2 windowSize = getWindowSize();
+        edit.map.setViewport(0.0, menuBar.getScaledFullSize().y / windowSize.y, 0.0,
+            mainStatusBar.getScaledFullSize().y / windowSize.y);
+
         // Handle mouse input. Ignore the mouse if the game doesn't have focus.
         bool mouseInMap = edit.map.getMapBoundingBox().contains(currentMouse);
         if (currentMouse != INVALID_MOUSE) {
             // Ignore the mouse if it's outside of the window.
-            Vector2 windowSize = getWindowSize();
             if (currentMouse.x >= 0 && currentMouse.y >= 0
                 && currentMouse.x <= int(windowSize.x)
                 && currentMouse.y <= int(windowSize.y)) {

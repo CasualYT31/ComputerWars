@@ -2045,6 +2045,21 @@ namespace awe {
 		void setTarget(const std::shared_ptr<sf::RenderTarget>& target) noexcept;
 
 		/**
+		 * Sets the viewport that the map uses.
+		 * Each parameter is a value between \c 0.0 and \c 1.0 that describes how
+		 * far away from each edge of the screen the viewport should start, as a
+		 * fraction of the screen's size. For example, if every value was \c 0.5,
+		 * the map would be invisible.\n
+		 * The default viewport covers the entire screen (so each value is \c 0.0).
+		 * @param left   How far away the viewport should start from the left.
+		 * @param top    How far away the viewport should start from the top.
+		 * @param right  How far away the viewport should start from the right.
+		 * @param bottom How far away the viewport should start from the bottom.
+		 */
+		void setViewport(const float left, const float top, const float right,
+			const float bottom);
+
+		/**
 		 * Used to always draw units that are hidden from the perspective of the
 		 * current army.
 		 * @param alwaysShow \c TRUE if all hidden units should be shown, \c FALSE

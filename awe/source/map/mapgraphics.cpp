@@ -229,6 +229,11 @@ void awe::map::setTarget(
 	_target = target;
 }
 
+void awe::map::setViewport(const float left, const float top, const float right,
+	const float bottom) {
+	_view.setViewport({ left, top, 1.0f - left - right, 1.0f - top - bottom });
+}
+
 void awe::map::alwaysShowHiddenUnits(const bool alwaysShow) noexcept {
 	_alwaysShowHiddenUnits = alwaysShow;
 }
@@ -927,13 +932,14 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	mapPixelSize.x *= awe::animated_tile::MIN_WIDTH;
 	mapPixelSize.y *= awe::animated_tile::MIN_HEIGHT;
 	const auto rect = sf::FloatRect(0.0f, 0.0f,
-		static_cast<float>(target.getSize().x) / _scaling,
-		static_cast<float>(target.getSize().y) / _scaling);
+		static_cast<float>(target.getSize().x) / _scaling *
+			_view.getViewport().width,
+		static_cast<float>(target.getSize().y) / _scaling *
+			_view.getViewport().height);
 	const auto cursorRect = sf::FloatRect(
 		sf::Vector2f(_target->mapCoordsToPixel(_cursor.getPosition(), _view)),
 		_cursor.getSize() * _scaling);
 	_view.reset(rect);
-	_view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 	static const auto moveOffsetAxis = [](const float viewSize,
 		const float mapPixelSize, std::optional<float>& viewOffset,
 		const float cursorPos) -> float {

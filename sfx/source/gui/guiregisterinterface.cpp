@@ -541,6 +541,15 @@ void sfx::gui::_registerWidgetGlobalFunctions(asIScriptEngine* const engine,
 	document->DocumentGlobalFunction(r, "Gets a widget's full size, which "
 		"includes any borders it may have, etc.");
 
+	r = engine->RegisterGlobalFunction(
+		"Vector2f getWidgetScaledFullSize(" WIDGET_ID_PARAM ")",
+		asMETHOD(sfx::gui, _getWidgetScaledFullSize),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Gets a widget's full size, which "
+		"includes any borders it may have, etc. The result also has the GUI's "
+		"scaling factor applied to it, meaning this function returns a widget's "
+		"\"true\" size.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetScale(" WIDGET_ID_PARAM ", "
 		"const float, const float)",
 		asMETHOD(sfx::gui, _setWidgetScale), asCALL_THISCALL_ASGLOBAL, this);
