@@ -49,6 +49,16 @@ namespace engine {
 		typedef std::unordered_map<std::string, ObjectType> PoolType;
 
 		/**
+		 * Iterator typedef.
+		 */
+		typedef typename PoolType::iterator iterator;
+
+		/**
+		 * Const iterator typedef.
+		 */
+		typedef typename PoolType::const_iterator const_iterator;
+
+		/**
 		 * Accesses a previously loaded \c T object.
 		 * If an object with the given does not exist, an error will be logged.
 		 * @param  key The string name of the object which was given in the JSON
@@ -66,6 +76,38 @@ namespace engine {
 		 */
 		inline bool exists(const std::string& key) const {
 			return _pool.find(key) != _pool.end();
+		}
+
+		/**
+		 * Points to the beginning of the pool.
+		 * @return Internal pool \c iterator.
+		 */
+		inline iterator begin() {
+			return _pool.begin();
+		}
+
+		/**
+		 * Points to the end of the pool.
+		 * @return Internal pool \c iterator.
+		 */
+		inline iterator end() {
+			return _pool.end();
+		}
+
+		/**
+		 * Points to the beginning of the pool.
+		 * @return Internal pool \c const_iterator.
+		 */
+		inline const_iterator cbegin() const {
+			return _pool.cbegin();
+		}
+
+		/**
+		 * Points to the end of the pool.
+		 * @return Internal pool \c const_iterator.
+		 */
+		inline const_iterator cend() const {
+			return _pool.cend();
 		}
 	protected:
 		/**

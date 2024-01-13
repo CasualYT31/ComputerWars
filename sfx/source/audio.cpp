@@ -22,10 +22,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "audio.hpp"
 
-const float sfx::audio::_granularity = 100.0f;
-
 sfx::audio::audio(const engine::logger::data& data) :
 	json_script({data.sink, "json_script"}), _logger(data) {}
+
+void sfx::audio::process() {
+	while (!_queue.empty() && _queue.front()()) _queue.pop();
+}
 
 float sfx::audio::getVolume() const noexcept {
 	return _volume;
@@ -42,82 +44,56 @@ void sfx::audio::setVolume(float newvolume) {
 	}
 }
 
-void sfx::audio::play(std::string name) {
-	if (name == "") name = getCurrentMusic();
-	if (name == "") return;
+void sfx::audio::play(const std::string& name, const sf::Time& length) {
 	if (_sound.find(name) != _sound.end()) {
 		// Play the sound /*if not already playing*/.
 		/*if (_sound[name].sound.getStatus() != sf::Sound::Playing)*/
 			_sound[name].sound.play();
 	} else if (_music.find(name) != _music.end()) {
-		// Play the music if not already playing. Also stop the currently playing
-		// music if there is one. If paused, resume.
-		if (_music[name].music.getStatus() == sf::Music::Paused) {
-			_music[name].music.play();
-		} else if (_music[name].music.getStatus() == sf::Music::Stopped) {
-			if (getCurrentMusic() != "") stop();
+		// Queue a stop action, and then queue the play action.
+		stop(length);
+		_queue.push(std::bind([this](const std::string& name) -> bool {
 			_music[name].music.play();
 			_currentMusic = name;
-		}
+			return true;
+		}, name));
 	} else {
 		_logger.error("Audio object \"{}\" could not be found.", name);
 	}
 }
 
-void sfx::audio::stop(const std::string& name) {
-	if (_sound.find(name) != _sound.end()) {
-		_sound[name].sound.stop();
-	} else {
-		if (getCurrentMusic() != "") {
+void sfx::audio::stop(const sf::Time& length) {
+	_queue.push(std::bind([this](const sf::Time& length) -> bool {
+		// If there is no music currently playing, do nothing.
+		if (getCurrentMusic().empty()) return true;
+		// If there is no fade out, or the fade out has ended, stop immediately.
+		if (length.asMilliseconds() < 10 ||
+			_music[getCurrentMusic()].music.getVolume() < 1.0) {
+			_music[getCurrentMusic()].music.setVolume(
+				_volumeAfterOffset(getCurrentMusic()));
 			_music[getCurrentMusic()].music.stop();
 			_currentMusic = "";
+			return true;
 		}
-	}
-}
-
-void sfx::audio::pause(const std::string& name) {
-	if (_sound.find(name) != _sound.end()) {
-		_sound[name].sound.pause();
-	} else {
-		if (getCurrentMusic() != "") _music[getCurrentMusic()].music.pause();
-	}
-}
-
-bool sfx::audio::fadeout(sf::Time length) {
-	if (getCurrentMusic() == "") return true;
-	if (!_fadingOut) {
-		_clock.restart();
-		_fadingOut = true;
-	}
-	if (_clock.getElapsedTime().asSeconds() >= length.asSeconds() / _granularity) {
-		float newVolume = _music[getCurrentMusic()].music.getVolume() -
-			_volumeAfterOffset(getCurrentMusic()) / _granularity;
-		if (newVolume <= 1.0f) newVolume = 0.0f;
-		_music[getCurrentMusic()].music.setVolume(newVolume);
-		_clock.restart();
-	}
-	if (length.asMilliseconds() < 10 ||
-		_music[getCurrentMusic()].music.getVolume() < 1.0) {
-		std::string temp = getCurrentMusic();
-		stop();
-		_music[temp].music.setVolume(_volumeAfterOffset(temp));
-		_fadingOut = false;
-		return true;
-	}
-	return !_fadingOut;
-}
-
-std::string sfx::audio::getCurrentMusic() const {
-	return _currentMusic;
+		// Otherwise, handle the fadeout.
+		if (accumulatedDelta() >= length.asSeconds() / _granularity) {
+			float newVolume = _music[getCurrentMusic()].music.getVolume() -
+				_volumeAfterOffset(getCurrentMusic()) / _granularity;
+			if (newVolume <= 1.0f) newVolume = 0.0f;
+			_music[getCurrentMusic()].music.setVolume(newVolume);
+			resetDeltaAccumulation();
+		}
+		return false;
+	}, length));
 }
 
 bool sfx::audio::_load(engine::json& j) {
 	j.apply(_volume, { "volume" }, true);
 	nlohmann::ordered_json jj = j.nlohmannJSON();
+	while (!_queue.empty()) _queue.pop();
 	_sound.clear();
 	_music.clear();
 	_currentMusic = "";
-	_fadingOut = false;
 
 	for (auto& i : jj.items()) {
 		if (i.key() != "volume") {

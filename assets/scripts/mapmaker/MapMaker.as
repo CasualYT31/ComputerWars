@@ -99,6 +99,7 @@ class MapMaker : Menu, Group {
         toolBar.dock();
         paletteWindow.dock();
         setVisibility(true);
+        play("music", "mapmaker", 0.0);
     }
 
     /**
@@ -108,6 +109,7 @@ class MapMaker : Menu, Group {
      */
     void Close(Menu@ const newMenu, const string&in newMenuName) {
         setVisibility(false);
+        stop("music", 0.0);
     }
 
     /**

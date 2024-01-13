@@ -31,7 +31,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "safejson.hpp"
 #include "resourcepool.hpp"
+#include "renderer.hpp"
 #include "SFML/Audio.hpp"
+#include <queue>
 
 namespace sfx {
 	/**
@@ -109,7 +111,7 @@ namespace sfx {
 	 *         their own volume.
 	 * @sa     _load()
 	 */
-	class audio : public engine::json_script {
+	class audio : public engine::json_script, public sfx::delta_timer {
 	public:
 		/**
 		 * Initialises the internal logger object.
@@ -117,6 +119,11 @@ namespace sfx {
 		 * @sa    \c engine::logger
 		 */
 		audio(const engine::logger::data& data);
+
+		/**
+		 * Processes the music queue.
+		 */
+		void process();
 
 		/**
 		 * Retrieves the base volume of all audio objects.
@@ -135,52 +142,29 @@ namespace sfx {
 
 		/**
 		 * Plays a specified audio object.
-		 * If a sound is played, it will always start from the beginning unless it
-		 * was paused, in which case playback will resume. If music is played, the
-		 * currently playing or paused music (if any) will be stopped, and the new
-		 * one will be played from the beginning or resumed if it was paused. If
-		 * sound is played, it will play in conjunction with any other sound
-		 * playing at the time of calling, as well as with the background music if
-		 * it is being played. If an unregistered name was given, an error will be
-		 * logged.
+		 * If a sound is played, it will be played immediately without being
+		 * queued.\n
+		 * If music is played, a \c stop() action will be queued first, and it will
+		 * be given the \c length parameter. Then, the given music's play action
+		 * will be queued.\n
+		 * If an unregistered name was given, an error will be logged.
 		 * @param  name The name of the audio object to play. If a blank string,
 		 *              the previously accessed \c music object will be
 		 *              substituted.
 		 * @safety No guarantee.
 		 */
-		void play(std::string name = "");
+		void play(const std::string& name,
+			const sf::Time& length = sf::seconds(1.0));
 
 		/**
-		 * Stops a specified audio object.
-		 * If a blank or invalid sound object name is given, the current music will
-		 * stop.
-		 * @param  name The name of the sound object to stop.
-		 * @safety No guarantee.
-		 */
-		void stop(const std::string& name = "");
-
-		/**
-		 * Pauses a specified audio object.
-		 * If a blank or invalid sound object name is given, the current music will
-		 * pause.
-		 * @param  name The name of the sound object to pause.
-		 * @safety No guarantee.
-		 */
-		void pause(const std::string& name = "");
-
-		/**
-		 * Fades out the currently playing music until it is stopped.
-		 * This method is to be called within the game loop continuously until it
-		 * returns \c TRUE. It adjusts the specific music object's volume only and
-		 * not the overall volume.
+		 * Stops the currently playing music at the time the queued stop is
+		 * actioned, either immediately or with a fade out.
 		 * @warning Avoid changing any volume value during the fadeout: undefined
 		 *          behaviour will ensue.
-		 * @param   length The amount of time that passes between music volume to
-		 *                 zero volume.
-		 * @return  \c TRUE if the fadeout is complete, \c FALSE if not.
-		 * @safety  No guarantee.
+		 * @param   length The duration of the fade out. \c sf::Time::Zero should
+		 *                 be given if you wish to stop the music immediately.
 		 */
-		bool fadeout(sf::Time length = sf::seconds(1.0));
+		void stop(const sf::Time& length = sf::seconds(1.0));
 
 		/**
 		 * Gets the name of the current music, whether playing or paused.
@@ -190,7 +174,9 @@ namespace sfx {
 		 * @return The name of the current music.
 		 * @safety Strong guarantee.
 		 */
-		std::string getCurrentMusic() const;
+		inline std::string getCurrentMusic() const {
+			return _currentMusic;
+		}
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -296,23 +282,20 @@ namespace sfx {
 		float _volume = 50.0f;
 
 		/**
-		 * Flag which keeps track of whether or not a piece of music is fading out
-		 * or not.
-		 */
-		bool _fadingOut = false;
-
-		/**
-		 * Clock which is used to time fadeouts.
-		 */
-		sf::Clock _clock;
-
-		/**
 		 * The granularity of fadeouts, which is 100.0.
 		 * Setting this to very small values (< 10.0) doesn't sound very nice, and
 		 * anything higher sounds similar to \c 100.0 anyway, so I saw little point
 		 * in letting the client choose the granularity of fadeouts.
 		 */
-		static const float _granularity;
+		static constexpr float _granularity = 100.0f;
+
+		/**
+		 * The music queue.
+		 * When play and stop requests are made, they are pushed to this queue, and
+		 * carried out in sequence. The only reason why the queue should
+		 * temporarily block is if a fade out is on-going.
+		 */
+		std::queue<std::function<bool(void)>> _queue;
 	};
 
 	/**

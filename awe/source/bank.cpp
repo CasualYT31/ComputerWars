@@ -387,6 +387,11 @@ void awe::unit_type::updateSpriteMaps(
 //***********
 //*COMMANDER*
 //***********
+awe::commander::commander(const std::string& scriptName, engine::json& j) :
+	common_properties(scriptName, j) {
+	j.apply(_portrait, { "portrait" }, true);
+	j.apply(_theme, { "theme" }, true);
+}
 
 //***********
 //*STRUCTURE*

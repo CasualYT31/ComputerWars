@@ -2254,16 +2254,14 @@ namespace awe {
 		 * It also passes on the JSON object to the \c common_properties
 		 * constructor. In addition to the keys defined in the superclass, the
 		 * following keys are required:
-		 * <ul><li>\c "portrait" = \c _portrait, <tt>(string)</tt></li></ul>
+		 * <ul><li>\c "portrait" = \c _portrait, <tt>(string)</tt></li>
+		 *     <li>\c "theme" = \c _theme, <tt>(string)</tt></li></ul>
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
 		 * @param j          The object value containing the commander's
 		 *                   properties.
 		 */
-		inline commander(const std::string& scriptName, engine::json& j) :
-			common_properties(scriptName, j) {
-			j.apply(_portrait, { "portrait" }, true);
-		}
+		commander(const std::string& scriptName, engine::json& j);
 
 		/**
 		 * Registers \c commander with a given type.
@@ -2288,11 +2286,24 @@ namespace awe {
 		inline const std::string& getPortrait() const noexcept {
 			return _portrait;
 		}
+
+		/**
+		 * Retrieves the music name of this commander's theme.
+		 * @return The music name.
+		 */
+		inline const std::string& getTheme() const noexcept {
+			return _theme;
+		}
 	private:
 		/**
 		 * The portrait property.
 		 */
 		std::string _portrait;
+
+		/**
+		 * The name of the commander's theme music.
+		 */
+		std::string _theme;
 	};
 
 	/**

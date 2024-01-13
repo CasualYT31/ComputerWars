@@ -569,6 +569,11 @@ void awe::commander::Register(const std::string& type,
 		asMETHOD(T, getPortrait), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the sprite key of the portrait of "
 		"this CO.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_theme() const property",
+		asMETHOD(T, getTheme), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the music name of the theme of this "
+		"CO.");
 }
 
 template<typename T>

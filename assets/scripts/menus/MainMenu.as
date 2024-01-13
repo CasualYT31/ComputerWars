@@ -62,6 +62,7 @@ class MainMenu : Menu, Group {
                 if (files[f].substr(files[f].findLast(".")) == ".cwm")
                     mapFiles.addItem("~" + files[f]);
         setVisibility(true);
+        play("music", "mainmenu", 0.0);
     }
 
     /**
@@ -71,6 +72,7 @@ class MainMenu : Menu, Group {
      */
     void Close(Menu@ const newMenu, const string&in newMenuName) {
         setVisibility(false);
+        stop("music", 0.0);
     }
 
     /**

@@ -4,13 +4,15 @@
 		"shortname": "NOCO_shortname",
 		"icon": "noco",
 		"description": "NOCO_description",
-		"portrait": "noco"
+		"portrait": "noco",
+		"theme": "noco"
 	},
 	"JAKE": {
 		"longname": "JAKE_longname",
 		"shortname": "JAKE_shortname",
 		"icon": "jakeface",
 		"description": "JAKE_description",
-		"portrait": "jake"
+		"portrait": "jake",
+		"theme": "jake"
 	}
 }

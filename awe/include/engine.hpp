@@ -323,6 +323,29 @@ namespace awe {
 		void _script_transitionToGUI(const std::string& menu,
 			const float duration = 1.0f);
 
+		/**
+		 * Plays a sound or piece of music.
+		 * If a piece of music is given, the currently playing music will be
+		 * stopped first, if there is music currently playing.
+		 * @param audioObject The name of the audio object containing the piece of
+		 *                    audio to play.
+		 * @param audioName   The name of the piece of audio to play.
+		 * @param duration    The duration of the fade out. \c 0.0f if the music
+		 *                    stops immediately without a fade out.
+		 */
+		void _script_play(const std::string& audioObject,
+			const std::string& audioName, const float duration = 1.f);
+
+		/**
+		 * Stops the currently playing music from a given audio object.
+		 * @param audioObject The name of the audio object containing the piece of
+		 *                    music to stop.
+		 * @param duration    The duration of the fade out. \c 0.0f if the music
+		 *                    stops immediately without a fade out.
+		 */
+		void _script_stop(const std::string& audioObject,
+			const float duration = 1.f);
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================

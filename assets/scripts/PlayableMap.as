@@ -65,6 +65,7 @@ shared class PlayableMap {
             map.setMapScalingFactor(_mapScalingFactor);
             map.enableAnimations(true);
             setNormalCursorSprites();
+            _playCurrentArmysTheme();
         }
     }
 
@@ -408,7 +409,9 @@ shared class PlayableMap {
         }
         currentArmy = nextArmy;
 
-        // 4. Queue Day Begin animation.
+        // 4. Queue Day Begin animation, and queue the playing of the next army's
+        //    theme.
+        map.queueCode(AnimationCode(this._playCurrentArmysTheme));
         map.animateDayBegin(currentArmy, map.getDay(), "Monospace");
 
         // 5. Go through each of the current army's units and perform start of
@@ -2453,6 +2456,21 @@ shared class PlayableMap {
         }
         arr[uint(index)].tile = tile;
         arr[uint(index)].g = g;
+    }
+
+    //////////////////////////
+    // AUDIO HELPER METHODS //
+    //////////////////////////
+    /**
+     * Play the current army's current CO's theme, automatically stopping any music
+     * that is currently playing.
+     */
+    private void _playCurrentArmysTheme() {
+        const auto army = map.getSelectedArmy();
+        if (army != NO_ARMY) {
+            const auto currentCO = map.getArmyCurrentCO(army);
+            play("music", commander[currentCO].theme);
+        }
     }
 
     /////////

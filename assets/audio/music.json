@@ -1,5 +1,19 @@
 {
 	"volume": 100.0,
+	"mainmenu": {
+		"type": "music",
+		"path": "audio/music/MainMenu.ogg",
+		"offset": -50.0,
+		"loopto": 1844,
+		"loopwhen": 90489
+	},
+	"mapmaker": {
+		"type": "music",
+		"path": "audio/music/MapMaker.ogg",
+		"offset": 0.0,
+		"loopto": 148,
+		"loopwhen": 70728
+	},
 	"noco": {
 		"type": "music",
 		"path": "audio/music/NoCO.ogg",

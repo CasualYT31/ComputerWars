@@ -55,6 +55,8 @@ int awe::game_engine::run() {
 			float rawDelta = 0.0f;
 			const auto delta = accumulatedDelta(rawDelta);
 
+			for (auto& audio : *_audios) audio.second->process();
+
 			const bool acceptInput = !_guiTransition && (!_map ||
 				!_map->animationInProgress());
 
@@ -357,6 +359,16 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	r = engine->RegisterGlobalFunction(
 		"void transitionToGUI(const string&in, const float = 1.0)",
 		asMETHOD(awe::game_engine, _script_transitionToGUI),
+		asCALL_THISCALL_ASGLOBAL, this);
+
+	r = engine->RegisterGlobalFunction(
+		"void play(const string&in, const string&in, const float = 1.0)",
+		asMETHOD(awe::game_engine, _script_play),
+		asCALL_THISCALL_ASGLOBAL, this);
+
+	r = engine->RegisterGlobalFunction(
+		"void stop(const string&in, const float = 1.0)",
+		asMETHOD(awe::game_engine, _script_stop),
 		asCALL_THISCALL_ASGLOBAL, this);
 }
 
@@ -752,8 +764,28 @@ void awe::game_engine::_script_flashColour(const sf::Color& c, const float d) {
 void awe::game_engine::_script_transitionToGUI(const std::string& menu,
 	const float duration) {
 	// Disabled for now to speed up debugging.
-	_gui->setGUI(menu);
-	//if (_guiTransition) return;
-	//_transitionToGUIMenu = menu;
-	//_guiTransitionDuration = sf::seconds(duration * 0.5f);
+	//_gui->setGUI(menu);
+	if (_guiTransition) return;
+	_transitionToGUIMenu = menu;
+	_guiTransitionDuration = sf::seconds(duration * 0.5f);
+}
+
+void awe::game_engine::_script_play(const std::string& audioObject,
+	const std::string& audioName, const float duration) {
+	if (!_audios->exists(audioObject)) {
+		_logger.error("Attempted to play piece of audio \"{}\" from audio object "
+			"\"{}\", the latter of which does not exist.", audioName, audioObject);
+		return;
+	}
+	(*_audios)[audioObject]->play(audioName, sf::seconds(duration));
+}
+
+void awe::game_engine::_script_stop(const std::string& audioObject,
+	const float duration) {
+	if (!_audios->exists(audioObject)) {
+		_logger.error("Attempted to stop the currently playing music from audio "
+			"object \"{}\", which does not exist.", audioObject);
+		return;
+	}
+	(*_audios)[audioObject]->stop(sf::seconds(duration));
 }
