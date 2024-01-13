@@ -135,6 +135,7 @@ void awe::game_engine::_animateGUITransition() {
 			_gui->setGUI(_transitionToGUIMenu);
 			_guiTransition = std::make_unique<awe::transition::rectangle>(true,
 				_guiTransitionDuration);
+			_guiTransition->animate(*_renderer);
 		} else if (finished) {
 			_guiTransition = nullptr;
 			_transitionToGUIMenu.clear();
