@@ -2199,9 +2199,12 @@ namespace awe {
 		 * Sets the amount by which the map is scaled.
 		 * If it is detected that a value at or below \c 0.0f is given, an error
 		 * will be logged and \c _scaling will not be changed.
-		 * @param factor The factor by which to scale the map.
+		 * @param factor  The factor by which to scale the map.
+		 * @param animate \c TRUE if the "zoom" is to be animated, \c FALSE if not.
+		 *                Note that the value of \c _animationsEnabled is ignored
+		 *                here.
 		 */
-		void setMapScalingFactor(const float factor);
+		void setMapScalingFactor(const float factor, const bool animate = true);
 
 		/**
 		 * Determines if the cursor is on the left or right side of the target.

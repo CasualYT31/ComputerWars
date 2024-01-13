@@ -882,7 +882,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getFirstArmy), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void setMapScalingFactor(const float) const",
+			"void setMapScalingFactor(const float, const bool = true) const",
 			asMETHOD(awe::map, setMapScalingFactor), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",

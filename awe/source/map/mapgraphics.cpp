@@ -343,14 +343,14 @@ awe::ArmyID awe::map::getFirstArmy() const {
 	else return _armies.cbegin()->first;
 }
 
-void awe::map::setMapScalingFactor(const float factor) {
+void awe::map::setMapScalingFactor(const float factor, const bool animate) {
 	if (factor <= 0.0f) {
 		_logger.error("setMapScalingFactor operation failed: attempted to assign "
 			"a map scaling factor {} that was at or below 0.0.", factor);
 	} else {
-		if (_canAnimationBeQueued()) {
+		if (animate)
 			_animationQueue.push(std::make_unique<awe::zoom>(_scaling, factor));
-		} else _scaling = factor;
+		else _scaling = factor;
 	}
 }
 
@@ -664,7 +664,8 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 
 bool awe::map::animateViewScroll(const sf::Vector2u& tile, const float speed,
 	const bool drawCursors) {
-	if (!_canAnimationBeQueued()) return false;
+	// We must always queue the scroll animation, otherwise the view will never
+	// move.
 	if (_isOutOfBounds(tile)) {
 		_logger.error("animateViewScroll operation cancelled: tile {} is "
 			"out-of-bounds.", tile);

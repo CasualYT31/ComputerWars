@@ -61,9 +61,7 @@ shared class PlayableMap {
             @map = mapToPlayOn;
             map.setMapObject(this);
             map.disableMementos();
-            map.enableAnimations(false);
-            map.setMapScalingFactor(_mapScalingFactor);
-            map.enableAnimations(true);
+            map.setMapScalingFactor(_mapScalingFactor, false);
             setNormalCursorSprites();
             _playCurrentArmysTheme();
         }

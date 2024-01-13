@@ -119,7 +119,7 @@ class EditableMap {
             map.enableAnimations(false);
             map.enablePeriodic(false);
             map.alwaysShowHiddenUnits(true);
-            map.setMapScalingFactor(_mapScalingFactor);
+            map.setMapScalingFactor(_mapScalingFactor, false);
             map.setULAdditionalCursorSprite("ulanglebracket");
             map.setURAdditionalCursorSprite("uranglebracket");
             map.setLLAdditionalCursorSprite("llanglebracket");
