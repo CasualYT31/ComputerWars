@@ -455,10 +455,6 @@ awe::animation_preset awe::map::getSelectedAnimationPreset() const {
 	return _selectedAnimationPreset;
 }
 
-awe::animation_preset awe::map::selectNextAnimationPreset() {
-	return ++_selectedAnimationPreset;
-}
-
 void awe::map::enableAnimations(const bool enabled) {
 	_animationsEnabled = enabled;
 }

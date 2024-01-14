@@ -1,1 +1,4 @@
-{"ENG_GB":"./lang/ENG_GB.json","lang":"ENG_GB","GER_DE":"./lang/GER_DE.json"}
+{
+  "ENG_GB": "./lang/ENG_GB.json",
+  "GER_DE": "./lang/GER_DE.json"
+}

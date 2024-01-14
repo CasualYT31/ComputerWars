@@ -40,7 +40,7 @@ class MapMenu : Menu, Group {
         });
         visualIndex = mapMenuCommands.addCommand("", "visualicon",
             SingleSignalHandler(this.selectNextPreset));
-        updateTextOfVisualCommand(game.map.getSelectedAnimationPreset());
+        updateTextOfVisualCommand(getSelectedMapAnimationPreset());
         if (game.map.tagCOIsPresent(game.map.getSelectedArmy())) {
             mapMenuCommands.addCommand("tag", "tagicon", function(){
                 auto gameScreen = cast<GameScreen>(getMenu("GameScreen"));
@@ -94,7 +94,8 @@ class MapMenu : Menu, Group {
      * Selects the next animation preset in the internal list.
      */
     private void selectNextPreset() {
-        updateTextOfVisualCommand(game.map.selectNextAnimationPreset());
+        updateTextOfVisualCommand(selectNextMapAnimationPreset());
+        saveGlobalSettings();
     }
 
     /**

@@ -113,13 +113,13 @@ std::string engine::language_dictionary::getLanguage() const {
 }
 
 bool engine::language_dictionary::_load(engine::json& j) {
-	std::string buffer = "";
+	std::string buffer;
 	// Firstly, load language scripts.
 	_languageFiles.clear();
-	_currentLanguage = "";
+	_currentLanguage.clear();
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	for (auto& i : jj.items()) {
-		if (i.key() != "lang" && i.key() != "") {
+		if (!i.key().empty()) {
 			j.apply(buffer, { i.key() });
 			if (j.inGoodState()) {
 				addLanguage(i.key(), buffer);
@@ -128,19 +128,17 @@ bool engine::language_dictionary::_load(engine::json& j) {
 			}
 		}
 	}
-	// Lastly, load current language.
-	j.apply(buffer, { "lang" }, &_currentLanguage);
-	if (!j.inGoodState()) {
-		return false;
+	// Lastly, set the current language to the first in the list.
+	if (jj.begin() != jj.end()) {
+		return setLanguage(jj.begin().key());
 	} else {
-		return setLanguage(buffer);
+		_logger.error("There were no languages defined in the JSON file!");
+		return false;
 	}
 }
 
 bool engine::language_dictionary::_save(nlohmann::ordered_json& j) {
-	j["lang"] = _currentLanguage;
-	for (auto& itr : _languageFiles) j[itr.first] = itr.second;
-	return true;
+	return false;
 }
 
 engine::language_dictionary::language::language(const engine::logger::data& data) :

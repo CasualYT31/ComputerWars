@@ -235,32 +235,28 @@ namespace engine {
 		 * Before loading, the language map is \b cleared, even if the method
 		 * returns \c FALSE.\n
 		 * The JSON script loaded by this class must have the following format:\n
-		 * <ul><li>There should only be string values, no objects or any other
-		 * types are permitted. If they exist a warning will be reported and the
-		 * value will be ignored.</li>
-		 * <li>There is a special key, "lang", which is paired with the current
-		 * language ID as it was when last saved.</li>
-		 * <li>All other keys are language IDs, and <em>their</em> values should be
-		 * paths to JSON scripts detailing that language's string map.</li>
+		 * <ul><li>All keys are language IDs, and their values should be paths to
+		 * JSON scripts detailing that language's string map.</li>
 		 * <li>A blank key and its value will be completely ignored.</li></ul>\n
+		 * There must be at least one language for this method to return \c TRUE.
+		 * The first language in the list will be considered the default language,
+		 * and it will be set before this method is finished.\n
 		 * Please see \c engine::language_dictionary::language::_load() for more
 		 * details on the format of these string map JSON scripts.
 		 * @param  j The \c engine::json object representing the contents
 		 *           of the loaded script which this method reads.
-		 * @return \c TRUE if the current language as dictated by the
-		 *         \c lang key could be loaded, \c FALSE if not, or
-		 *         if the current language ID could not identify a language.
+		 * @return \c TRUE if the default language could be loaded, \c FALSE if
+		 *         not, or if there were no languages defined.
 		 * @safety Basic guarantee.
 		 */
 		bool _load(engine::json& j);
 
 		/**
 		 * The JSON save method for this class.
-		 * Please see \c _load() for a detailed summary of
-		 * the format of JSON script that this method produces.
+		 * This class cannot be saved.
 		 * @param  j The \c nlohmann::ordered_json object representing
 		 *           the JSON script which this method writes to.
-		 * @return Always returns \c TRUE.
+		 * @return Always returns \c FALSE.
 		 * @safety Strong guarantee.
 		 */
 		bool _save(nlohmann::ordered_json& j);

@@ -135,22 +135,6 @@ void awe::map::Register(asIScriptEngine* engine,
 			static_cast<int>(awe::direction::Right));
 		document->DocumentObjectEnum(r, "Represents an orthogonal direction.");
 
-		///////////////////////////
-		// ANIMATION PRESET ENUM //
-		///////////////////////////
-		r = engine->RegisterEnum("AnimationPreset");
-		engine->RegisterEnumValue("AnimationPreset", "VisualA",
-			static_cast<int>(awe::animation_preset::VisualA));
-		engine->RegisterEnumValue("AnimationPreset", "VisualB",
-			static_cast<int>(awe::animation_preset::VisualB));
-		engine->RegisterEnumValue("AnimationPreset", "VisualC",
-			static_cast<int>(awe::animation_preset::VisualC));
-		engine->RegisterEnumValue("AnimationPreset", "VisualD",
-			static_cast<int>(awe::animation_preset::VisualD));
-		engine->RegisterEnumValue("AnimationPreset", "NoVisual",
-			static_cast<int>(awe::animation_preset::NoVisual));
-		document->DocumentObjectEnum(r, "Represents an animation preset.");
-
 		//////////////////////
 		// GLOBAL FUNCTIONS //
 		//////////////////////
@@ -951,18 +935,6 @@ void awe::map::Register(asIScriptEngine* engine,
 		//////////////////////////
 		// ANIMATION OPERATIONS //
 		//////////////////////////
-		r = engine->RegisterObjectMethod("Map",
-			"void setSelectedAnimationPreset(const AnimationPreset)",
-			asMETHOD(awe::map, setSelectedAnimationPreset), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"AnimationPreset getSelectedAnimationPreset() const",
-			asMETHOD(awe::map, getSelectedAnimationPreset), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"AnimationPreset selectNextAnimationPreset()",
-			asMETHOD(awe::map, selectNextAnimationPreset), asCALL_THISCALL);
-
 		r = engine->RegisterObjectMethod("Map",
 			"void enableAnimations(const bool)",
 			asMETHOD(awe::map, enableAnimations), asCALL_THISCALL);

@@ -180,11 +180,8 @@ namespace sfx {
 	private:
 		/**
 		 * The JSON load method for this class.
-		 * Within the root object, there is one special key, \c "volume", which
-		 * stores the floating point base volume of each audio object.\n
-		 * 
-		 * All other keys are names of audio objects to store. Each of these keys
-		 * must have an object value. Within these object values, there are several
+		 * All keys are names of audio objects to store. Each of these keys must
+		 * have an object value. Within these object values, there are several
 		 * key-value pairs to include:
 		 * 
 		 * <ul><li>\c "path" contains the path of the audio file.</li>

@@ -17,5 +17,6 @@
   "structures": "property/structure.json",
   "mapstrings": "lang/mapstrings.json",
   "gui": "gui/gui.json",
-  "scripts": "scripts"
+  "scripts": "scripts",
+  "settings": "settings.json"
 }

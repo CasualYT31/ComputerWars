@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "map.hpp"
 #include "mapstrings.hpp"
 #include "transitions.hpp"
+#include "settings.hpp"
 #include <filesystem>
 #include <random>
 
@@ -110,7 +111,7 @@ namespace awe {
 		 *          configuration script was in at the time of calling.
 		 * @param   j The \c engine::json object representing the contents of the
 		 *            loaded script which this method reads.
-		 * @return Always returns \c TRUE.
+		 * @return \c TRUE if loading was successful, \c FALSE otherwise.
 		 * @safety No guarantee.
 		 */
 		bool _load(engine::json& j);
@@ -346,6 +347,29 @@ namespace awe {
 		void _script_stop(const std::string& audioObject,
 			const float duration = 1.f);
 
+		/**
+		 * Updates the selected animation preset used with all maps.
+		 * @param p The preset to apply.
+		 */
+		void _script_setSelectedMapAnimationPreset(const awe::animation_preset p);
+
+		/**
+		 * Gets the selected animation preset used with all maps.
+		 * @return The selected animation preset.
+		 */
+		awe::animation_preset _script_getSelectedMapAnimationPreset() const;
+
+		/**
+		 * Selects the next map animation preset in the list.
+		 * @return The newly selected animation preset.
+		 */
+		awe::animation_preset _script_selectNextMapAnimationPreset();
+
+		/**
+		 * Saves the global settings as they currently are.
+		 */
+		void _script_saveGlobalSettings();
+
 		//=============================
 		//==========GAME DATA==========
 		//=============================
@@ -465,6 +489,11 @@ namespace awe {
 		 * Pointer to the GUI object containing all the menus.
 		 */
 		std::shared_ptr<sfx::gui> _gui;
+
+		/**
+		 * The global settings of the game.
+		 */
+		std::shared_ptr<awe::settings> _settings;
 
 		//================================
 		//==========ENGINE DATA===========

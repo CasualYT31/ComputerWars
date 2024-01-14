@@ -88,7 +88,6 @@ void sfx::audio::stop(const sf::Time& length) {
 }
 
 bool sfx::audio::_load(engine::json& j) {
-	j.apply(_volume, { "volume" }, true);
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	while (!_queue.empty()) _queue.pop();
 	_sound.clear();
@@ -96,34 +95,31 @@ bool sfx::audio::_load(engine::json& j) {
 	_currentMusic = "";
 
 	for (auto& i : jj.items()) {
-		if (i.key() != "volume") {
-			std::string path;
-			j.apply(path, { i.key(), "path" });
-			if (!j.inGoodState()) {
-				_logger.error("Audio object \"{}\" was not given a valid \"path\" "
-					"value, in script \"{}\".", i.key(), getScriptPath());
-				j.resetState();
-				continue;
-			}
+		std::string path;
+		j.apply(path, { i.key(), "path" });
+		if (!j.inGoodState()) {
+			_logger.error("Audio object \"{}\" was not given a valid \"path\" "
+				"value, in script \"{}\".", i.key(), getScriptPath());
+			j.resetState();
+			continue;
+		}
 
-			std::string type = "sound";
-			j.apply(type, { i.key(), "type" }, true);
-			if (type != "sound" && type != "music") {
-				_logger.warning("Invalid type \"{}\" provided for audio object "
-					"\"{}\" in script \"{}\", \"sound\" assumed.", type, i.key(),
-					getScriptPath());
-				type = "sound";
-			}
-
-			if (type == "sound") {
-				_sound[i.key()].path = path;
-				j.apply(_sound[i.key()].volumeOffset, { i.key(), "offset" }, true);
-			} else if (type == "music") {
-				_music[i.key()].path = path;
-				j.apply(_music[i.key()].volumeOffset, { i.key(), "offset" }, true);
-				j.apply(_music[i.key()].loopTo, { i.key(), "loopto" }, true);
-				j.apply(_music[i.key()].loopWhen, { i.key(), "loopwhen" }, true);
-			}
+		std::string type = "sound";
+		j.apply(type, { i.key(), "type" }, true);
+		if (type != "sound" && type != "music") {
+			_logger.warning("Invalid type \"{}\" provided for audio object \"{}\" "
+				"in script \"{}\", \"sound\" assumed.", type, i.key(),
+				getScriptPath());
+			type = "sound";
+		}
+		if (type == "sound") {
+			_sound[i.key()].path = path;
+			j.apply(_sound[i.key()].volumeOffset, { i.key(), "offset" }, true);
+		} else if (type == "music") {
+			_music[i.key()].path = path;
+			j.apply(_music[i.key()].volumeOffset, { i.key(), "offset" }, true);
+			j.apply(_music[i.key()].loopTo, { i.key(), "loopto" }, true);
+			j.apply(_music[i.key()].loopWhen, { i.key(), "loopwhen" }, true);
 		}
 	}
 
@@ -131,7 +127,6 @@ bool sfx::audio::_load(engine::json& j) {
 }
 
 bool sfx::audio::_save(nlohmann::ordered_json& j) {
-	j["volume"] = _volume;
 	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; ++itr) {
 		j[itr->first]["type"] = "sound";
 		j[itr->first]["path"] = itr->second.path;

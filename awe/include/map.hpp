@@ -2378,12 +2378,6 @@ namespace awe {
 		awe::animation_preset getSelectedAnimationPreset() const;
 
 		/**
-		 * Selects the next animation preset in the list.
-		 * @return The newly selected animation preset.
-		 */
-		awe::animation_preset selectNextAnimationPreset();
-
-		/**
 		 * Enables or disables animations.
 		 * Disabling animations will not clear the animation queue.
 		 * @param enabled \c TRUE to enable animations (default), \c FALSE to

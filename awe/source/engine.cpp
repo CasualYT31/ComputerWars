@@ -155,6 +155,21 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	engine::RegisterColourType(engine, document);
 	awe::map::Register(engine, document);
 
+	if (!engine->GetTypeInfoByName("AnimationPreset")) {
+		auto r = engine->RegisterEnum("AnimationPreset");
+		engine->RegisterEnumValue("AnimationPreset", "VisualA",
+			static_cast<int>(awe::animation_preset::VisualA));
+		engine->RegisterEnumValue("AnimationPreset", "VisualB",
+			static_cast<int>(awe::animation_preset::VisualB));
+		engine->RegisterEnumValue("AnimationPreset", "VisualC",
+			static_cast<int>(awe::animation_preset::VisualC));
+		engine->RegisterEnumValue("AnimationPreset", "VisualD",
+			static_cast<int>(awe::animation_preset::VisualD));
+		engine->RegisterEnumValue("AnimationPreset", "NoVisual",
+			static_cast<int>(awe::animation_preset::NoVisual));
+		document->DocumentObjectEnum(r, "Represents a map animation preset.");
+	}
+
 	// Register the global functions.
 	auto r = engine->RegisterGlobalFunction("void info(const string&in)",
 		asMETHOD(engine::scripts, writeToLog),
@@ -371,6 +386,26 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 		"void stop(const string&in, const float = 1.0)",
 		asMETHOD(awe::game_engine, _script_stop),
 		asCALL_THISCALL_ASGLOBAL, this);
+
+	r = engine->RegisterGlobalFunction(
+		"void setSelectedMapAnimationPreset(const AnimationPreset)",
+		asMETHOD(awe::game_engine, _script_setSelectedMapAnimationPreset),
+		asCALL_THISCALL_ASGLOBAL, this);
+
+	r = engine->RegisterGlobalFunction(
+		"AnimationPreset getSelectedMapAnimationPreset()",
+		asMETHOD(awe::game_engine, _script_getSelectedMapAnimationPreset),
+		asCALL_THISCALL_ASGLOBAL, this);
+
+	r = engine->RegisterGlobalFunction(
+		"AnimationPreset selectNextMapAnimationPreset()",
+		asMETHOD(awe::game_engine, _script_selectNextMapAnimationPreset),
+		asCALL_THISCALL_ASGLOBAL, this);
+
+	r = engine->RegisterGlobalFunction(
+		"void saveGlobalSettings()",
+		asMETHOD(awe::game_engine, _script_saveGlobalSettings),
+		asCALL_THISCALL_ASGLOBAL, this);
 }
 
 bool awe::game_engine::_load(engine::json& j) {
@@ -407,10 +442,6 @@ bool awe::game_engine::_load(engine::json& j) {
 			_gui = std::make_shared<sfx::gui>(_scripts,
 				engine::logger::data{_logger.getData().sink, "gui"});
 			return _scripts && _gui;
-		},
-		[&]() {
-			return _loadObject(_userinput, j, { "userinput" },
-				engine::logger::data{ _logger.getData().sink, "user_input" });
 		},
 		[&]() {
 			return _loadObject(_userinput, j, { "userinput" },
@@ -525,6 +556,11 @@ bool awe::game_engine::_load(engine::json& j) {
 			_userinput->tieWindow(_renderer);
 			_userinput->setGUI(_gui);
 			return true;
+		},
+		[&]() {
+			return _loadObject(_settings, j, { "settings" },
+				engine::logger::data{ _logger.getData().sink, "settings" },
+				_audios, _dictionary);
 		}
 	};
 	// Render the logs to the screen in between each load operation.
@@ -579,6 +615,7 @@ int awe::game_engine::_initCheck() const {
 	if (!_sprites) errstring += "spritesheets\n";
 	if (!_scripts) errstring += "scripts\n";
 	if (!_gui) errstring += "gui\n";
+	if (!_settings) errstring += "settings\n";
 	if (errstring.length()) {
 		_logger.critical("Fatal error: could not run the game engine due to the "
 			"following objects not being allocated correctly:\n{}Game will now "
@@ -674,6 +711,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 		_map->setMapStrings(_mapStrings);
 		_map->setScripts(_scripts);
 		_map->setGUI(_gui);
+		_map->setSelectedAnimationPreset(_settings->getAnimationPreset());
 		auto r = _map->load(file);
 		if (r) {
 			return _map.get();
@@ -787,4 +825,25 @@ void awe::game_engine::_script_stop(const std::string& audioObject,
 		return;
 	}
 	(*_audios)[audioObject]->stop(sf::seconds(duration));
+}
+
+void awe::game_engine::_script_setSelectedMapAnimationPreset(
+	const awe::animation_preset p) {
+	_settings->setAnimationPreset(p);
+	if (_map) _map->setSelectedAnimationPreset(p);
+}
+
+awe::animation_preset
+	awe::game_engine::_script_getSelectedMapAnimationPreset() const {
+	return _settings->getAnimationPreset();
+}
+
+awe::animation_preset awe::game_engine::_script_selectNextMapAnimationPreset() {
+	auto p = _settings->getAnimationPreset();
+	_script_setSelectedMapAnimationPreset(++p);
+	return p;
+}
+
+void awe::game_engine::_script_saveGlobalSettings() {
+	_settings->save();
 }
