@@ -210,6 +210,7 @@ class GameScreen : Menu, Group {
             } else if (game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy() &&
                 !game.map.isUnitWaiting(unitID)) {
                 game.selectUnit(unitID);
+                game.map.queuePlay("sound", "select.unit");
                 game.enableClosedList(true);
                 game.map.removeAllPreviewUnits();
                 setGUI("MoveUnitMenu");

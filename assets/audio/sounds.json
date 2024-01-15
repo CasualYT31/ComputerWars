@@ -9,6 +9,11 @@
 		"path": "audio/sound/select.wav",
 		"offset": 0.0
 	},
+	"select.unit": {
+		"type": "sound",
+		"path": "audio/sound/selectunit.wav",
+		"offset": -75.0
+	},
 	"back": {
 		"type": "sound",
 		"path": "audio/sound/back.wav",

@@ -49,6 +49,7 @@ class MoveUnitMenu : Menu, Group {
         HandleCommonGameInput(ui, mouse, previousMouse, currentMouse);
         if (bool(ui["back"])) {
             game.selectUnit(NO_UNIT);
+            game.map.queuePlay("sound", "back");
             setGUI("GameScreen");
             return;
         } else if (bool(ui["select"])) {
