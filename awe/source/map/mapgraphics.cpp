@@ -546,7 +546,8 @@ bool awe::map::animateParticles(const CScriptArray* const particles,
 }
 
 bool awe::map::animateParticle(const sf::Vector2u& tile, const std::string& sheet,
-	const std::string& particle, const sf::Vector2f& origin) {
+	const std::string& particle, const sf::Vector2f& origin,
+	const std::string& audio, const std::string& name) {
 	if (!_canAnimationBeQueued()) return false;
 	if (!_sheets->exists(sheet)) {
 		_logger.error("animateParticle operation cancelled: the spritesheet "
@@ -561,6 +562,7 @@ bool awe::map::animateParticle(const sf::Vector2u& tile, const std::string& shee
 	awe::tile_particle_node node(tile, particle, origin);
 	node.tileSprite = _tiles[tile.x][tile.y].sprite;
 	const auto res = animateViewScroll(tile, 500.f);
+	if (!audio.empty() && !name.empty()) queuePlay(audio, name);
 	_animationQueue.push(std::make_unique<awe::tile_particles>(std::vector{ node },
 		(*_sheets)[sheet]));
 	return res;

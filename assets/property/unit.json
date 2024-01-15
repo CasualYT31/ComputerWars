@@ -94,7 +94,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [ "CITY", "BASE", "AIRPORT", "PORT", "COMTOWER", "LAB", "HQ" ],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"MECH": {
 		"longname": "MECH_longname",
@@ -192,7 +195,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [ "CITY", "BASE", "AIRPORT", "PORT", "COMTOWER", "LAB", "HQ" ],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"RECON": {
 		"longname": "RECON_longname",
@@ -275,7 +281,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"TANK": {
 		"longname": "TANK_longname",
@@ -359,7 +368,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"MDTANK": {
 		"longname": "MDTANK_longname",
@@ -443,7 +455,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"NEOTANK": {
 		"longname": "NEOTANK_longname",
@@ -527,7 +542,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"MEGATANK": {
 		"longname": "MEGATANK_longname",
@@ -611,7 +629,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.megatank.piperunner"
+		}
 	},
 	"APC": {
 		"longname": "APC_longname",
@@ -691,7 +712,10 @@
 		"turnstartpriority": 500,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"ANTIAIR": {
 		"longname": "ANTIAIR_longname",
@@ -774,7 +798,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"ARTILLERY": {
 		"longname": "ARTILLERY_longname",
@@ -857,7 +884,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"ROCKETS": {
 		"longname": "ROCKETS_longname",
@@ -940,7 +970,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"MISSILES": {
 		"longname": "MISSILES_longname",
@@ -1023,7 +1056,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	},
 	"PIPERUNNER": {
 		"longname": "PIPERUNNER_longname",
@@ -1120,7 +1156,10 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.megatank.piperunner"
+		}
 	},
 	"TCOPTER": {
 		"longname": "TCOPTER_longname",
@@ -1217,7 +1256,10 @@
 			"LAB",
 			"HQ"
 		],
-		"ignoresdefence": true
+		"ignoresdefence": true,
+		"sounds": {
+			"destroy": "destroy.copter"
+		}
 	},
 	"BCOPTER": {
 		"longname": "BCOPTER_longname",
@@ -1302,7 +1344,10 @@
 		"cancapture": [],
 		"canhide": false,
 		"canunloadfrom": [],
-		"ignoresdefence": true
+		"ignoresdefence": true,
+		"sounds": {
+			"destroy": "destroy.copter"
+		}
 	},
 	"FIGHTER": {
 		"longname": "FIGHTER_longname",
@@ -1386,7 +1431,10 @@
 		"cancapture": [],
 		"canhide": false,
 		"canunloadfrom": [],
-		"ignoresdefence": true
+		"ignoresdefence": true,
+		"sounds": {
+			"destroy": "destroy.plane"
+		}
 	},
 	"BOMBER": {
 		"longname": "BOMBER_longname",
@@ -1470,7 +1518,10 @@
 		"cancapture": [],
 		"canhide": false,
 		"canunloadfrom": [],
-		"ignoresdefence": true
+		"ignoresdefence": true,
+		"sounds": {
+			"destroy": "destroy.plane"
+		}
 	},
 	"STEALTH": {
 		"longname": "STEALTH_longname",
@@ -1556,6 +1607,7 @@
 		"canunloadfrom": [],
 		"ignoresdefence": true,
 		"sounds": {
+			"destroy": "destroy.plane",
 			"hide": "hide",
 			"unhide": "unhide"
 		}
@@ -1639,7 +1691,10 @@
 		"cancapture": [],
 		"canhide": false,
 		"canunloadfrom": [],
-		"ignoresdefence": true
+		"ignoresdefence": true,
+		"sounds": {
+			"destroy": "destroy.plane"
+		}
 	},
 	"BLACKBOAT": {
 		"longname": "BLACKBOAT_longname",
@@ -1719,7 +1774,10 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": [ "SHOAL", "PORT" ]
+		"canunloadfrom": [ "SHOAL", "PORT" ],
+		"sounds": {
+			"destroy": "destroy.ship"
+		}
 	},
 	"LANDER": {
 		"longname": "LANDER_longname",
@@ -1812,7 +1870,10 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": [ "SHOAL", "PORT" ]
+		"canunloadfrom": [ "SHOAL", "PORT" ],
+		"sounds": {
+			"destroy": "destroy.ship"
+		}
 	},
 	"CRUISER": {
 		"longname": "CRUISER_longname",
@@ -1896,7 +1957,10 @@
 		"turnstartpriority": 1500,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.ship"
+		}
 	},
 	"SUB": {
 		"longname": "SUB_longname",
@@ -1981,6 +2045,7 @@
 		"canhide": true,
 		"canunloadfrom": [],
 		"sounds": {
+			"destroy": "destroy.ship",
 			"hide": "hide",
 			"unhide": "unhide"
 		}
@@ -2081,7 +2146,10 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.ship"
+		}
 	},
 	"CARRIER": {
 		"longname": "CARRIER_longname",
@@ -2174,7 +2242,10 @@
 		"turnstartpriority": 1500,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.ship"
+		}
 	},
 	"OOZIUM": {
 		"longname": "OOZIUM_longname",
@@ -2271,6 +2342,9 @@
 		"turnstartpriority": 1000,
 		"cancapture": [],
 		"canhide": false,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"destroy": "destroy.land"
+		}
 	}
 }

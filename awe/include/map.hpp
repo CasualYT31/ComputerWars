@@ -2453,7 +2453,8 @@ namespace awe {
 		 * a single particle.
 		 */
 		bool animateParticle(const sf::Vector2u& tile, const std::string& sheet,
-			const std::string& particle, const sf::Vector2f& origin);
+			const std::string& particle, const sf::Vector2f& origin,
+			const std::string& audio = "", const std::string& name = "");
 
 		/**
 		 * Attempts to queue a "label unit" animation.

@@ -1481,6 +1481,8 @@ namespace awe {
 		 *         <ul><li>\c "hide" = \c _sound_hide, <tt>(string)</tt></li></ul>
 		 *         <ul><li>\c "unhide" = \c _sound_unhide, <tt>(string)</tt></li>
 		 *             </ul>
+		 *         <ul><li>\c "destroy" = \c _sound_destroy, <tt>(string)</tt></li>
+		 *             </ul>
 		 *     </li>
 		 *     <li>\c "sprites" = \c _units, <tt>{COUNTRY_SCRIPT_NAME: string
 		 *         SPRITE_NAME[, etc.]}</tt></li>
@@ -2026,6 +2028,14 @@ namespace awe {
 		inline std::string getUnhideSound() const {
 			return _sound_unhide;
 		}
+
+		/**
+		 * The name of the sound played when this type of unit is destroyed.
+		 * @return The name of the sound, or an empty string if there is no sound.
+		 */
+		inline std::string getDestroySound() const {
+			return _sound_destroy;
+		}
 	private:
 		/**
 		 * Script interface version of \c getMovementType().
@@ -2271,6 +2281,11 @@ namespace awe {
 		 * This unit's unhide sound.
 		 */
 		std::string _sound_unhide;
+
+		/**
+		 * The unit's destroy sound.
+		 */
+		std::string _sound_destroy;
 	};
 
 	/**

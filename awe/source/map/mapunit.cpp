@@ -105,9 +105,10 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 			_unitsBeingDestroyed.erase(deletingID);
 		}, id));
 		// TODO-2.
-		animateParticle(position, "particle",
-			_units.at(id).data.getType()->getDestroyedUnit(
-				_units.at(id).data.getArmy()), { 0.5f, 1.0f });
+		const auto type = _units.at(id).data.getType();
+		animateParticle(position, "particle", type->getDestroyedUnit(
+			_units.at(id).data.getArmy()), { 0.5f, 1.0f }, "sound",
+			type->getDestroySound());
 	} else {
 		if (isPreviewUnit(id)) removePreviewUnit(id);
 	}

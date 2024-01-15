@@ -286,6 +286,8 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) :
 			j.apply(_sound_hide, { "sounds", "hide" }, true);
 		if (j.keysExist({ "sounds", "unhide" }))
 			j.apply(_sound_unhide, { "sounds", "unhide" }, true);
+		if (j.keysExist({ "sounds", "destroy" }))
+			j.apply(_sound_destroy, { "sounds", "destroy" }, true);
 	}
 }
 void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)

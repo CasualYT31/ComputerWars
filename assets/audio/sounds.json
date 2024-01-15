@@ -34,6 +34,31 @@
 		"path": "audio/sound/destroy.wav",
 		"offset": 0.0
 	},
+	"destroy.land": {
+		"type": "sound",
+		"path": "audio/sound/destroycheapland.wav",
+		"offset": 0.0
+	},
+	"destroy.megatank.piperunner": {
+		"type": "sound",
+		"path": "audio/sound/destroyexpensiveland.wav",
+		"offset": 0.0
+	},
+	"destroy.copter": {
+		"type": "sound",
+		"path": "audio/sound/destroycopter.wav",
+		"offset": 0.0
+	},
+	"destroy.plane": {
+		"type": "sound",
+		"path": "audio/sound/destroyplane.wav",
+		"offset": 0.0
+	},
+	"destroy.ship": {
+		"type": "sound",
+		"path": "audio/sound/destroyship.wav",
+		"offset": 0.0
+	},
 	"load": {
 		"type": "sound",
 		"path": "audio/sound/load.wav",

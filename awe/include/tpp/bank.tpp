@@ -565,6 +565,11 @@ void awe::unit_type::Register(const std::string& type,
 		asMETHOD(T, getUnhideSound), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the name of this unit's unhide "
 		"sound, or an empty string if there is none.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"string get_destroySound() const property",
+		asMETHOD(T, getDestroySound), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the name of this unit's destroy "
+		"sound, or an empty string if there is none.");
 }
 
 template<typename T>
