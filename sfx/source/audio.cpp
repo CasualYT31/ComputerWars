@@ -51,6 +51,11 @@ void sfx::audio::play(const std::string& name, const sf::Time& length) {
 		/*if (_sound[name].sound.getStatus() != sf::Sound::Playing)*/
 			_sound[name].sound.play();
 	} else if (_music.find(name) != _music.end()) {
+		// If the music is in sound mode, play immediately like a sound.
+		if (_music[name].soundMode) {
+			_music[name].music.play();
+			return;
+		}
 		// Queue a stop action, and then queue the play action.
 		stop(length);
 		_queue.push(std::bind([this](const std::string& name) -> bool {
@@ -88,6 +93,14 @@ void sfx::audio::stop(const sf::Time& length) {
 	}, length));
 }
 
+void sfx::audio::stop(const std::string& name) {
+	if (_music.find(name) != _music.end() && _music[name].soundMode) {
+		_music[name].music.stop();
+	} else if (_sound.find(name) != _sound.end()) {
+		_sound[name].sound.stop();
+	}
+}
+
 bool sfx::audio::_load(engine::json& j) {
 	nlohmann::ordered_json jj = j.nlohmannJSON();
 	while (!_queue.empty()) _queue.pop();
@@ -113,14 +126,18 @@ bool sfx::audio::_load(engine::json& j) {
 				getScriptPath());
 			type = "sound";
 		}
-		if (type == "sound") {
+		const bool soundMode = type == "sound" &&
+			j.keysExist({ i.key(), "loopto" }) &&
+			j.keysExist({ i.key(), "loopwhen" });
+		if (type == "sound" && !soundMode) {
 			_sound[i.key()].path = path;
 			j.apply(_sound[i.key()].volumeOffset, { i.key(), "offset" }, true);
-		} else if (type == "music") {
+		} else if (type == "music" || soundMode) {
 			_music[i.key()].path = path;
 			j.apply(_music[i.key()].volumeOffset, { i.key(), "offset" }, true);
 			j.apply(_music[i.key()].loopTo, { i.key(), "loopto" }, true);
 			j.apply(_music[i.key()].loopWhen, { i.key(), "loopwhen" }, true);
+			_music[i.key()].soundMode = soundMode;
 		}
 	}
 
@@ -128,19 +145,7 @@ bool sfx::audio::_load(engine::json& j) {
 }
 
 bool sfx::audio::_save(nlohmann::ordered_json& j) {
-	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; ++itr) {
-		j[itr->first]["type"] = "sound";
-		j[itr->first]["path"] = itr->second.path;
-		j[itr->first]["offset"] = itr->second.volumeOffset;
-	}
-	for (auto itr = _music.begin(), enditr = _music.end(); itr != enditr; ++itr) {
-		j[itr->first]["type"] = "music";
-		j[itr->first]["path"] = itr->second.path;
-		j[itr->first]["offset"] = itr->second.volumeOffset;
-		j[itr->first]["loopto"] = itr->second.loopTo;
-		j[itr->first]["loopwhen"] = itr->second.loopWhen;
-	}
-	return true;
+	return false;
 }
 
 bool sfx::audio::_loadAudio() {

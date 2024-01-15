@@ -99,6 +99,17 @@ namespace sfx {
 		 * The offset to apply to this music object's volume.
 		 */
 		float volumeOffset = 0.0;
+
+		/**
+		 * If this flag is \c TRUE, this music will instead be treated like a
+		 * sound.
+		 * This means that they will play and stop immediately, instead of being
+		 * pushed to the queue, and if they need to be stopped, their name needs to
+		 * be explicitly given to the stop method (they cannot fade out).\n
+		 * This flag was added (instead of allowing sounds to be loopable) so that
+		 * sounds can have custom loop points just like music.
+		 */
+		bool soundMode = false;
 	};
 
 	/**
@@ -166,6 +177,14 @@ namespace sfx {
 		void stop(const sf::Time& length = sf::seconds(1.0));
 
 		/**
+		 * Immediately stops a sound, or a piece of music if it is in sound mode.
+		 * @param name The name of the sound or piece of music to stop. Cannot stop
+		 *             music that is not in sound mode, for that use the other
+		 *             \c stop() method.
+		 */
+		void stop(const std::string& name);
+
+		/**
 		 * Gets the name of the current music, whether playing or paused.
 		 * If all music is in the stopped state, a blank string is returned. Note
 		 * that this method does not return names of any sounds that may be
@@ -192,9 +211,13 @@ namespace sfx {
 		 *         invalid type is provided, \c "sound" will be assumed and a
 		 *         warning will be logged.</li>
 		 *     <li>\c "loopto" <em>Music type only</em> Used to apply
-		 *         \c sfx::music::loopTo.</li>
+		 *         \c sfx::music::loopTo. <b>If both loop properties are given to a
+		 *         sound type, \c sfx::music::soundMode will be set to \c TRUE and
+		 *         the sound will become music.</b></li>
 		 *     <li>\c "loopwhen" <em>Music type only</em> Used to apply
-		 *         \c sfx::music::loopWhen.</li></ul>
+		 *         \c sfx::music::loopWhen. <b>If both loop properties are given to
+		 *         a sound type, \c sfx::music::soundMode will be set to \c TRUE
+		 *         and the sound will become music.</b></li></ul>
 		 * 
 		 * All other keys within these object values are ignored.
 		 * @warning All calls to this method will clear the internal collections of
@@ -210,11 +233,10 @@ namespace sfx {
 
 		/**
 		 * The JSON save method for this class.
-		 * Please see \c _load() for a detailed summary of the format of JSON
-		 * script that this method produces.
+		 * This class cannot be saved.
 		 * @param  j The \c nlohmann::ordered_json object representing the JSON
 		 *           script which this method writes to.
-		 * @return Always returns \c TRUE.
+		 * @return Always returns \c FALSE.
 		 * @safety Strong guarantee.
 		 */
 		bool _save(nlohmann::ordered_json& j);
