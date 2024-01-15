@@ -284,32 +284,28 @@ class EditableMap {
      * Moves the cursor up one tile.
      */
     void moveSelectedTileUp() {
-        map.moveSelectedTileUp();
-        _updateStatusBar();
+        _commonTileSelectionCode(map.moveSelectedTileUp());
     }
     
     /**
      * Moves the cursor down one tile.
      */
     void moveSelectedTileDown() {
-        map.moveSelectedTileDown();
-        _updateStatusBar();
+        _commonTileSelectionCode(map.moveSelectedTileDown());
     }
     
     /**
      * Moves the cursor left one tile.
      */
     void moveSelectedTileLeft() {
-        map.moveSelectedTileLeft();
-        _updateStatusBar();
+        _commonTileSelectionCode(map.moveSelectedTileLeft());
     }
     
     /**
      * Moves the cursor right one tile.
      */
     void moveSelectedTileRight() {
-        map.moveSelectedTileRight();
-        _updateStatusBar();
+        _commonTileSelectionCode(map.moveSelectedTileRight());
     }
     
     /**
@@ -317,8 +313,17 @@ class EditableMap {
      * @param pixel The tile underneath this pixel will be selected.
      */
     void setSelectedTileByPixel(const MousePosition&in pixel) {
-        map.setSelectedTileByPixel(pixel);
+        _commonTileSelectionCode(map.setSelectedTileByPixel(pixel));
+    }
+
+    /**
+     * Common code performed after updating the selected tile.
+     * Plays a sound and updates the main status bar.
+     * @param playSound \c TRUE if the sound should be played.
+     */
+    private void _commonTileSelectionCode(const bool playSound) {
         _updateStatusBar();
+        if (playSound) map.queuePlay("sound", "movecursor");
     }
 
     ////////////////////

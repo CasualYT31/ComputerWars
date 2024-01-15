@@ -356,48 +356,48 @@ shared class PlayableMap {
     ///////////////////////////////
     /**
      * Moves the cursor up one tile.
-     * Also updates the selected unit's closed list.
      */
     void moveSelectedTileUp() {
-        map.moveSelectedTileUp();
-        if (_closedListEnabled) _updateMoveModeClosedList();
+        _commonTileSelectionCode(map.moveSelectedTileUp());
     }
     
     /**
      * Moves the cursor down one tile.
-     * Also updates the selected unit's closed list.
      */
     void moveSelectedTileDown() {
-        map.moveSelectedTileDown();
-        if (_closedListEnabled) _updateMoveModeClosedList();
+        _commonTileSelectionCode(map.moveSelectedTileDown());
     }
     
     /**
      * Moves the cursor left one tile.
-     * Also updates the selected unit's closed list.
      */
     void moveSelectedTileLeft() {
-        map.moveSelectedTileLeft();
-        if (_closedListEnabled) _updateMoveModeClosedList();
+        _commonTileSelectionCode(map.moveSelectedTileLeft());
     }
     
     /**
      * Moves the cursor right one tile.
-     * Also updates the selected unit's closed list.
      */
     void moveSelectedTileRight() {
-        map.moveSelectedTileRight();
-        if (_closedListEnabled) _updateMoveModeClosedList();
+        _commonTileSelectionCode(map.moveSelectedTileRight());
     }
     
     /**
      * Selects a tile based on a given pixel.
-     * Also updates the selected unit's closed list.
      * @param pixel The tile underneath this pixel will be selected.
      */
     void setSelectedTileByPixel(const MousePosition&in pixel) {
-        map.setSelectedTileByPixel(pixel);
+        _commonTileSelectionCode(map.setSelectedTileByPixel(pixel));
+    }
+
+    /**
+     * Common code performed after updating the selected tile.
+     * Plays a sound and updates the selected unit's closed list.
+     * @param playSound \c TRUE if the sound should be played.
+     */
+    private void _commonTileSelectionCode(const bool playSound) {
         if (_closedListEnabled) _updateMoveModeClosedList();
+        if (playSound) map.queuePlay("sound", "movecursor");
     }
 
     /**

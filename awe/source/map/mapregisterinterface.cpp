@@ -802,27 +802,27 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, alwaysShowHiddenUnits), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void setSelectedTile(const Vector2&in)",
+			"bool setSelectedTile(const Vector2&in)",
 			asMETHOD(awe::map, setSelectedTile), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void moveSelectedTileUp()",
+			"bool moveSelectedTileUp()",
 			asMETHOD(awe::map, moveSelectedTileUp), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void moveSelectedTileDown()",
+			"bool moveSelectedTileDown()",
 			asMETHOD(awe::map, moveSelectedTileDown), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void moveSelectedTileLeft()",
+			"bool moveSelectedTileLeft()",
 			asMETHOD(awe::map, moveSelectedTileLeft), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void moveSelectedTileRight()",
+			"bool moveSelectedTileRight()",
 			asMETHOD(awe::map, moveSelectedTileRight), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void setSelectedTileByPixel(const MousePosition&in)",
+			"bool setSelectedTileByPixel(const MousePosition&in)",
 			asMETHOD(awe::map, setSelectedTileByPixel), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",

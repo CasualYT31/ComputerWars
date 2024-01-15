@@ -238,31 +238,36 @@ void awe::map::alwaysShowHiddenUnits(const bool alwaysShow) noexcept {
 	_alwaysShowHiddenUnits = alwaysShow;
 }
 
-void awe::map::setSelectedTile(const sf::Vector2u& pos) {
-	if (!_isOutOfBounds(pos)) {
-		_sel = pos;
-		animateViewScroll(_sel, 500.0f, true);
-	}
+bool awe::map::setSelectedTile(const sf::Vector2u& pos) {
+	if (_isOutOfBounds(pos)) return false;
+	const bool changed = _sel != pos;
+	_sel = pos;
+	animateViewScroll(_sel, 500.0f, true);
+	return changed;
 }
 
-void awe::map::moveSelectedTileUp() {
-	setSelectedTile(sf::Vector2u(getSelectedTile().x, getSelectedTile().y - 1));
+bool awe::map::moveSelectedTileUp() {
+	return setSelectedTile(
+		sf::Vector2u(getSelectedTile().x, getSelectedTile().y - 1));
 }
 
-void awe::map::moveSelectedTileDown() {
-	setSelectedTile(sf::Vector2u(getSelectedTile().x, getSelectedTile().y + 1));
+bool awe::map::moveSelectedTileDown() {
+	return setSelectedTile(
+		sf::Vector2u(getSelectedTile().x, getSelectedTile().y + 1));
 }
 
-void awe::map::moveSelectedTileLeft() {
-	setSelectedTile(sf::Vector2u(getSelectedTile().x - 1, getSelectedTile().y));
+bool awe::map::moveSelectedTileLeft() {
+	return setSelectedTile(
+		sf::Vector2u(getSelectedTile().x - 1, getSelectedTile().y));
 }
 
-void awe::map::moveSelectedTileRight() {
-	setSelectedTile(sf::Vector2u(getSelectedTile().x + 1, getSelectedTile().y));
+bool awe::map::moveSelectedTileRight() {
+	return setSelectedTile(
+		sf::Vector2u(getSelectedTile().x + 1, getSelectedTile().y));
 }
 
-void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
-	if (!_target) return;
+bool awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
+	if (!_target) return false;
 	const auto coord = _target->mapPixelToCoords(pixel, _view);
 	auto sel = getSelectedTile(), size = getMapSize();
 
@@ -289,7 +294,7 @@ void awe::map::setSelectedTileByPixel(const sf::Vector2i& pixel) {
 		if (sel.x >= size.x) sel.x = size.x - 1;
 	}
 
-	setSelectedTile(sel);
+	return setSelectedTile(sel);
 }
 
 void awe::map::setAdditionallySelectedTile(const sf::Vector2u& pos) {

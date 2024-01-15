@@ -2073,43 +2073,45 @@ namespace awe {
 		 * Used only to let \c map know what tile to draw information on, as well
 		 * as where to draw the cursor. If the given location is out of bounds, the
 		 * call will be ignored.
-		 * @param pos The X and Y location of the tile which is selected.
+		 * @param  pos The X and Y location of the tile which is selected.
+		 * @return \c TRUE if the selected tile was changed, \c FALSE if not.
 		 */
-		void setSelectedTile(const sf::Vector2u& pos);
+		bool setSelectedTile(const sf::Vector2u& pos);
 
 		/**
 		 * Moves the cursor up one tile, if possible.
-		 * If not possible, the call is ignored.
+		 * @return \c TRUE if the selected tile was changed, \c FALSE if not.
 		 */
-		void moveSelectedTileUp();
+		bool moveSelectedTileUp();
 
 		/**
 		 * Moves the cursor down one tile, if possible.
-		 * If not possible, the call is ignored.
+		 * @return \c TRUE if the selected tile was changed, \c FALSE if not.
 		 */
-		void moveSelectedTileDown();
+		bool moveSelectedTileDown();
 
 		/**
 		 * Moves the cursor left one tile, if possible.
-		 * If not possible, the call is ignored.
+		 * @return \c TRUE if the selected tile was changed, \c FALSE if not.
 		 */
-		void moveSelectedTileLeft();
+		bool moveSelectedTileLeft();
 
 		/**
 		 * Moves the cursor right one tile, if possible.
-		 * If not possible, the call is ignored.
+		 * @return \c TRUE if the selected tile was changed, \c FALSE if not.
 		 */
-		void moveSelectedTileRight();
+		bool moveSelectedTileRight();
 
 		/**
 		 * Selects a tile on the map based on a pixel.
 		 * The tile that is drawn underneath the pixel will be selected, if there
 		 * is one.\n
 		 * Note that if \c _target is \c nullptr this method will have no effect.
-		 * @param pixel The pixel relative to the render target to use to identify
-		 *              a tile to select.
+		 * @param  pixel The pixel relative to the render target to use to identify
+		 *               a tile to select.
+		 * @return \c TRUE if the selected tile was changed, \c FALSE if not.
 		 */
-		void setSelectedTileByPixel(const sf::Vector2i& pixel);
+		bool setSelectedTileByPixel(const sf::Vector2i& pixel);
 
 		/**
 		 * Gets the position of the currently selected tile.
