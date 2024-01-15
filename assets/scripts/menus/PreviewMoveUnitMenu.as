@@ -86,6 +86,7 @@ class PreviewMoveUnitMenu : Menu, Group {
                                 // structure, we can destroy it to achieve this.
                                 game.map.destroyStructure(tile);
                                 // Now animate missile launch.
+                                game.map.queuePlay("sound", "missilesilo.launch");
                                 game.map.animateLaunchOrStrike(
                                     true,
                                     "missilelaunch",
@@ -101,6 +102,7 @@ class PreviewMoveUnitMenu : Menu, Group {
                                     "particle",
                                     target
                                 );
+                                game.map.queuePlay("sound", "missilesilo.strike");
                             }, function(target) {
                                 // Animate damage particles.
                                 const Vector2 up(target.x, target.y - 1),
@@ -205,7 +207,7 @@ class PreviewMoveUnitMenu : Menu, Group {
                                     target,
                                     "blackbombexplode",
                                     Vector2f(0.5, 0.5)
-                                ) }, "particle");
+                                ) }, "particle", "sound", "missilesilo.strike");
                             }
                         );
                         setGUI("ExplodePreviewMenu");

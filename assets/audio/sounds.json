@@ -98,5 +98,15 @@
 		"type": "sound",
 		"path": "audio/sound/unhide.wav",
 		"offset": 0.0
+	},
+	"missilesilo.launch": {
+		"type": "sound",
+		"path": "audio/sound/missilesilolaunch.wav",
+		"offset": 0.0
+	},
+	"missilesilo.strike": {
+		"type": "sound",
+		"path": "audio/sound/missilesilostrike.wav",
+		"offset": 0.0
 	}
 }
