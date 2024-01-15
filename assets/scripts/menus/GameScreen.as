@@ -229,7 +229,7 @@ class GameScreen : Menu, Group {
     /**
      * Shows the army and tile widgets.
      */
-    void showWidgets() {
+    void showWidgets(any@ const _ = null) {
         armyWidget.setVisibility(true);
         tileWidget.setVisibility(true);
     }

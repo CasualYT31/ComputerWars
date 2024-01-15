@@ -19,7 +19,7 @@ namespace awe {
      * @return An array of each split string. The order of the characters will be
      *         retained.
      */
-    array<string>@ split(const string&in str, const string&in delimiter) {
+    shared array<string>@ split(const string&in str, const string&in delimiter) {
         array<string>@ arr = array<string>();
         int lastPos = 0, delimiterPos = str.findFirst(delimiter);
         while (delimiterPos >= 0) {
@@ -42,7 +42,7 @@ namespace awe {
      *                   changed).
      * @return The result. An empty string is \c arr is \c null.
      */
-    string join(const array<string>@ const arr, const string&in delimiter) {
+    shared string join(const array<string>@ const arr, const string&in delimiter) {
         if (arr is null) return "";
         string res;
         for (uint64 i = 0, len = arr.length(); i < len; ++i) {

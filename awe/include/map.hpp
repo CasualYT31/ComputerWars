@@ -36,6 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "binary.hpp"
 #include "mapstrings.hpp"
 #include "animation.hpp"
+#include "audio.hpp"
 #include <cmath>
 #include <stack>
 #include <optional>
@@ -2394,8 +2395,21 @@ namespace awe {
 		/**
 		 * Pushes code to the animation queue.
 		 * @param func Pointer to the script function to execute.
+		 * @param data Optional data to pass to the script function.
 		 */
-		void queueCode(asIScriptFunction* const func);
+		void queueCode(asIScriptFunction* const func,
+			CScriptAny* const data = nullptr);
+
+		/**
+		 * Queues an audio play operation.
+		 * @param audio The name of the audio object containing the audio to play.
+		 * @param name  The name of the audio to play.
+		 * @param dur   If the play operation will cause any currently playing
+		 *              music to stop, this will be the duration of the fade out,
+		 *              in seconds.
+		 */
+		void queuePlay(const std::string& audio, const std::string& name,
+			const float dur = 1.0f);
 
 		/**
 		 * Attempts to queue a "day begin" animation.
@@ -2418,13 +2432,19 @@ namespace awe {
 
 		/**
 		 * Attempts to queue a "tile particle" animation.
-		 * Also automatically queues an \c awe::scroll animation before this one.
+		 * Also automatically queues an \c awe::scroll animation before this one.\n
+		 * If both \c audio and \c name are non-empty, a sound will be played
+		 * between the scroll and the particle effect.
 		 * @param  particles The particles to animate.
 		 * @param  sheet     The name of the sheet to use for particle sprites.
+		 * @param  audio     The name of the audio object containing the sound to
+		 *                   queue.
+		 * @param  name      The name of the audio to queue a play for.
 		 * @return \c TRUE if both animations were queued, \c FALSE otherwise.
 		 */
 		bool animateParticles(const CScriptArray* const particles,
-			const std::string& sheet);
+			const std::string& sheet, const std::string& audio = "",
+			const std::string& name = "");
 
 		/**
 		 * Version of \c animateParticles() that's used by the C++ code to animate
@@ -2519,6 +2539,13 @@ namespace awe {
 		 * @param fonts Pointer to the fonts to use with this map.
 		 */
 		void setFonts(const std::shared_ptr<sfx::fonts>& fonts);
+
+		/**
+		 * Sets the audios used with this map.
+		 * If \c nullptr is given, an error will be logged.
+		 * @param audios Pointer to the audios to use with this map.
+		 */
+		void setAudios(const std::shared_ptr<sfx::audios>& audios);
 
 		/**
 		 * Sets the GUI engine to pull the GUI scaling factor from.
@@ -3209,7 +3236,23 @@ namespace awe {
 		/**
 		 * Allows the scripts to push code to the animation queue.
 		 */
-		typedef engine::CScriptWrapper<asIScriptFunction> script_code;
+		struct script_code {
+			/**
+			 * Stores the script code and its optional data.
+			 */
+			script_code(asIScriptFunction* const c, CScriptAny* const d) :
+				code(c), data(d) {}
+
+			/**
+			 * Points to the script code to execute.
+			 */
+			engine::CScriptWrapper<asIScriptFunction> code;
+
+			/**
+			 * Optional data to pass to the code when executed.
+			 */
+			engine::CScriptWrapper<CScriptAny> data;
+		};
 
 		/**
 		 * The animation queue.
@@ -3310,6 +3353,11 @@ namespace awe {
 		 * The fonts available to the map.
 		 */
 		std::shared_ptr<sfx::fonts> _fonts;
+
+		/**
+		 * The audios available to the map.
+		 */
+		std::shared_ptr<sfx::audios> _audios;
 
 		///////////
 		// BANKS //

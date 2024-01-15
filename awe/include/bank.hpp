@@ -1477,6 +1477,11 @@ namespace awe {
 		 *                 <tt>{COUNTRY_SCRIPT_NAME: string SHEET_NAME[, etc.]}
 		 *                 </tt></li></ul>
 		 *     </li>
+		 *     <li>\c "sounds" is an object with the following keys:
+		 *         <ul><li>\c "hide" = \c _sound_hide, <tt>(string)</tt></li></ul>
+		 *         <ul><li>\c "unhide" = \c _sound_unhide, <tt>(string)</tt></li>
+		 *             </ul>
+		 *     </li>
 		 *     <li>\c "sprites" = \c _units, <tt>{COUNTRY_SCRIPT_NAME: string
 		 *         SPRITE_NAME[, etc.]}</tt></li>
 		 *     <li>\c "destroyedsprites" = \c _destroyedUnits,
@@ -2005,6 +2010,22 @@ namespace awe {
 		inline bool ignoresDefence() const noexcept {
 			return _ignoreDefence;
 		}
+
+		/**
+		 * The name of the sound played when this type of unit hides.
+		 * @return The name of the sound, or an empty string if there is no sound.
+		 */
+		inline std::string getHideSound() const {
+			return _sound_hide;
+		}
+
+		/**
+		 * The name of the sound played when this type of unit unhides.
+		 * @return The name of the sound, or an empty string if there is no sound.
+		 */
+		inline std::string getUnhideSound() const {
+			return _sound_unhide;
+		}
 	private:
 		/**
 		 * Script interface version of \c getMovementType().
@@ -2240,6 +2261,16 @@ namespace awe {
 		 * calculations.
 		 */
 		bool _ignoreDefence = false;
+
+		/**
+		 * This unit's hide sound.
+		 */
+		std::string _sound_hide;
+
+		/**
+		 * This unit's unhide sound.
+		 */
+		std::string _sound_unhide;
 	};
 
 	/**

@@ -426,6 +426,14 @@ void awe::map::setFonts(const std::shared_ptr<sfx::fonts>& fonts) {
 	_fonts = fonts;
 }
 
+void awe::map::setAudios(const std::shared_ptr<sfx::audios>& audios) {
+	if (!audios) {
+		_logger.error("setAudios operation failed: nullptr was given!");
+		return;
+	}
+	_audios = audios;
+}
+
 void awe::map::setGUI(const std::shared_ptr<sfx::gui>& gui) {
 	if (!gui) {
 		_logger.error("setGUI operation failed: nullptr was given!");

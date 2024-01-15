@@ -179,7 +179,7 @@ void awe::map::Register(asIScriptEngine* engine,
 		document->DocumentObjectFuncDef(r, "The signature of the callback that is "
 			"invoked after memento state changes.");
 
-		r = engine->RegisterFuncdef("void AnimationCode()");
+		r = engine->RegisterFuncdef("void AnimationCode(any@ const)");
 		document->DocumentObjectFuncDef(r, "The signature of functions that are "
 			"added to the animation queue.");
 
@@ -940,8 +940,12 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, enableAnimations), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"void queueCode(AnimationCode@ const)",
+			"void queueCode(AnimationCode@ const, any@ const = null)",
 			asMETHOD(awe::map, queueCode), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void queuePlay(const string&in, const string&in, const float = 1.0)",
+			asMETHOD(awe::map, queuePlay), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool animateDayBegin(const ArmyID, const Day, const string&in)",
@@ -953,7 +957,7 @@ void awe::map::Register(asIScriptEngine* engine,
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool animateParticles(const array<TileParticle>@ const, "
-			"const string&in)",
+			"const string&in, const string&in = \"\", const string&in = \"\")",
 			asMETHOD(awe::map, animateParticles), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",

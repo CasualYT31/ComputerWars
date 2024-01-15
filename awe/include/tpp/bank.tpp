@@ -555,6 +555,16 @@ void awe::unit_type::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Returns TRUE if this unit always has 0 "
 		"defence, FALSE if this unit's defence is based on the terrain it is "
 		"positioned on.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"string get_hideSound() const property",
+		asMETHOD(T, getHideSound), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the name of this unit's hide "
+		"sound, or an empty string if there is none.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"string get_unhideSound() const property",
+		asMETHOD(T, getUnhideSound), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the name of this unit's unhide "
+		"sound, or an empty string if there is none.");
 }
 
 template<typename T>

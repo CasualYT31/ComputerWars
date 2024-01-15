@@ -807,6 +807,8 @@ class EditableMap {
      */
     void unitHiding(const UnitID unit, const bool hide) {
         map.unitHiding(unit, hide);
+        const auto type = map.getUnitType(unit);
+        map.queuePlay("sound", hide ? type.hideSound : type.unhideSound);
         refreshTileProps();
     }
 

@@ -466,10 +466,28 @@ bool awe::map::skipAnimationIfPossible() {
 	} else return false;
 }
 
-void awe::map::queueCode(asIScriptFunction* const func) {
+void awe::map::queueCode(asIScriptFunction* const func, CScriptAny* const data) {
 	if (!func) return;
-	_animationQueue.push(engine::CScriptWrapper(func));
+	_animationQueue.push(script_code(func, data));
 	func->Release();
+	if (data) data->Release();
+}
+
+void awe::map::queuePlay(const std::string& audio, const std::string& name,
+	const float dur) {
+	_animationQueue.push(std::bind([&](const std::string& audio,
+		const std::string& name, const float duration) {
+		if (!_audios) {
+			_logger.error("queuePlay operation failed: _audios is nullptr.");
+			return;
+		}
+		if (!_audios->exists(audio)) {
+			_logger.error("queuePlay operation failed: audio object with key "
+				"\"{}\" does not exist.", audio);
+			return;
+		}
+		(*_audios)[audio]->play(name, sf::seconds(duration));
+	}, audio, name, dur));
 }
 
 bool awe::map::animateDayBegin(const awe::ArmyID armyID, const awe::Day day,
@@ -492,7 +510,7 @@ bool awe::map::animateTagCO(const awe::ArmyID armyID, const std::string& font) {
 }
 
 bool awe::map::animateParticles(const CScriptArray* const particles,
-	const std::string& sheet) {
+	const std::string& sheet, const std::string& audio, const std::string& name) {
 	engine::CScriptWrapper particlesRAII(particles);
 	particles->Release();
 	if (!_canAnimationBeQueued()) return false;
@@ -516,6 +534,7 @@ bool awe::map::animateParticles(const CScriptArray* const particles,
 			[particleNodes[i].tile.y].sprite;
 	}
 	const auto res = animateViewScroll(particleNodes[0].tile, 500.f);
+	if (!audio.empty() && !name.empty()) queuePlay(audio, name);
 	_animationQueue.push(std::make_unique<awe::tile_particles>(
 		particleNodes, (*_sheets)[sheet]));
 	return res;
@@ -916,7 +935,8 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 		else if (animation* const pDrawable = std::get_if<animation>(next))
 			_currentAnimation = std::move(*pDrawable);
 		else if (script_code* const pScriptFunc = std::get_if<script_code>(next))
-			_scripts->callFunction(pScriptFunc->operator->());
+			_scripts->callFunction(pScriptFunc->code.operator->(),
+				pScriptFunc->data.operator->());
 		_animationQueue.pop();
 	}
 	if (animationInProgress())

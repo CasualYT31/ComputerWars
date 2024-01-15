@@ -281,6 +281,12 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) :
 	if (j.keysExist({ "ignoresdefence" })) {
 		j.apply(_ignoreDefence, { "ignoresdefence" }, true);
 	}
+	if (j.keysExist({ "sounds" })) {
+		if (j.keysExist({ "sounds", "hide" }))
+			j.apply(_sound_hide, { "sounds", "hide" }, true);
+		if (j.keysExist({ "sounds", "unhide" }))
+			j.apply(_sound_unhide, { "sounds", "unhide" }, true);
+	}
 }
 void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)
 	const {

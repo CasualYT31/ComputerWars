@@ -147,10 +147,9 @@ namespace sfx {
 		 * If music is played, a \c stop() action will be queued first, and it will
 		 * be given the \c length parameter. Then, the given music's play action
 		 * will be queued.\n
-		 * If an unregistered name was given, an error will be logged.
-		 * @param  name The name of the audio object to play. If a blank string,
-		 *              the previously accessed \c music object will be
-		 *              substituted.
+		 * If an unregistered name was given, an error will be logged.\n
+		 * If an empty name is given, this call will have no effect.
+		 * @param  name The name of the audio object to play.
 		 * @safety No guarantee.
 		 */
 		void play(const std::string& name,

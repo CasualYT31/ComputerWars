@@ -1554,7 +1554,11 @@
 		"cancapture": [],
 		"canhide": true,
 		"canunloadfrom": [],
-		"ignoresdefence": true
+		"ignoresdefence": true,
+		"sounds": {
+			"hide": "hide",
+			"unhide": "unhide"
+		}
 	},
 	"BLACKBOMB": {
 		"longname": "BLACKBOMB_longname",
@@ -1975,7 +1979,11 @@
 		"turnstartpriority": 2000,
 		"cancapture": [],
 		"canhide": true,
-		"canunloadfrom": []
+		"canunloadfrom": [],
+		"sounds": {
+			"hide": "hide",
+			"unhide": "unhide"
+		}
 	},
 	"BATTLESHIP": {
 		"longname": "BATTLESHIP_longname",

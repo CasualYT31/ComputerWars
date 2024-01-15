@@ -37,6 +37,41 @@ shared class GameOptions {
     dictionary teams;
 }
 
+/**
+ * Customise extra structure destroy effects.
+ */
+shared class StructureDestroyEffectOptions {
+    /**
+     * The duration of the map shake, in seconds.
+     */
+    float shakeDuration = 1.5;
+
+    /**
+     * The duration of the screen flash, in seconds.
+     */
+    float flashDuration = 2.0;
+
+    /**
+     * The colour of the screen flash.
+     */
+    Colour colour = White;
+}
+
+/**
+ * A Grand Bolt's new Oozium unit ID and destination.
+ */
+shared class OoziumPosition {
+    /**
+     * The ID of the Oozium unit that's been created.
+     */
+    UnitID oozium;
+
+    /**
+     * The eventual destination of the Oozium unit.
+     */
+    Vector2 destination;
+}
+
 /// The name of the \c PlayableMap class.
 const string PLAYABLE_MAP_TYPENAME = "PlayableMap";
 
@@ -63,7 +98,9 @@ shared class PlayableMap {
             map.disableMementos();
             map.setMapScalingFactor(_mapScalingFactor, false);
             setNormalCursorSprites();
-            _playCurrentArmysTheme();
+            const auto currentArmy = map.getSelectedArmy();
+            if (currentArmy != NO_ARMY)
+                play("music", commander[map.getArmyCurrentCO(currentArmy)].theme);
         }
     }
 
@@ -260,6 +297,7 @@ shared class PlayableMap {
     private void destroyStructure(Vector2 rootTile) {
         const auto terrainName = map.getTileType(rootTile).type.scriptName;
         map.destroyStructure(rootTile);
+        StructureDestroyEffectOptions opts;
         if (terrainName == "MINICANNON" || terrainName == "PIPESEAM" ||
             terrainName == "BLACKLASER") {
             map.animateParticles({ TileParticle(
@@ -269,7 +307,7 @@ shared class PlayableMap {
             ) }, "particle");
         } else if (terrainName == "BLACKCANNONROOT" ||
             terrainName == "DEATHRAYROOT") {
-            map.queueCode(AnimationCode(this.largeStructureDestroyEffects));
+            map.queueCode(AnimationCode(this.structureDestroyEffects), any(opts));
             auto centreTile = rootTile;
             centreTile.y -= 1;
             map.animateParticles({ TileParticle(
@@ -278,7 +316,7 @@ shared class PlayableMap {
                 Vector2f(0.5, 1.0)
             ) }, "particle");
         } else if (terrainName == "GRANDBOLTROOT") {
-            map.queueCode(AnimationCode(this.largeStructureDestroyEffects));
+            map.queueCode(AnimationCode(this.structureDestroyEffects), any(opts));
             map.animateParticles({ TileParticle(
                 rootTile,
                 "grandboltdestroy",
@@ -290,7 +328,9 @@ shared class PlayableMap {
                 "blackcrystal.destroy.1",
                 Vector2f(0.5, 0.62)
             ) }, "particle");
-            map.queueCode(AnimationCode(this.blackCrystalDestroyEffects));
+            opts.shakeDuration = opts.flashDuration = 0.1;
+            opts.colour.a = 96;
+            map.queueCode(AnimationCode(this.structureDestroyEffects), any(opts));
             map.animateParticles({ TileParticle(
                 rootTile,
                 "blackcrystal.destroy.2",
@@ -300,19 +340,15 @@ shared class PlayableMap {
     }
 
     /**
-     * Shakes the map and flashes white.
+     * Shakes the map and flash the screen a given colour.
+     * @param options Dictates the colour of the screen flash and the duration of
+     *                both it and the map shake.
      */
-    private void largeStructureDestroyEffects() {
-        map.shake();
-        flashColour(White);
-    }
-
-    /**
-     * Shakes the map and flashes white momentarily.
-     */
-    private void blackCrystalDestroyEffects() {
-        map.shake(0.1f);
-        flashColour(Colour(255, 255, 255, 96), 0.1f);
+    private void structureDestroyEffects(any@ const options) {
+        StructureDestroyEffectOptions opts;
+        if (!options.retrieve(opts)) return;
+        map.shake(opts.shakeDuration);
+        flashColour(opts.colour, opts.flashDuration);
     }
 
     ///////////////////////////////
@@ -409,7 +445,7 @@ shared class PlayableMap {
 
         // 4. Queue Day Begin animation, and queue the playing of the next army's
         //    theme.
-        map.queueCode(AnimationCode(this._playCurrentArmysTheme));
+        map.queuePlay("music", commander[map.getArmyCurrentCO(currentArmy)].theme);
         map.animateDayBegin(currentArmy, map.getDay(), "Monospace");
 
         // 5. Go through each of the current army's units and perform start of
@@ -811,13 +847,14 @@ shared class PlayableMap {
         moveUnit();
         map.unitHiding(id, hide);
         string particle = "stealthhideshow";
-        if (map.getUnitType(id).scriptName == "SUB")
+        const auto type = map.getUnitType(id);
+        if (type.scriptName == "SUB")
             particle = hide ? "subhide" : "subshow";
         map.animateParticles({ TileParticle(
             map.getUnitPosition(id),
             particle,
             Vector2f(0.5, 0.5)
-        ) }, "particle");
+        ) }, "particle", "sound", hide ? type.hideSound : type.unhideSound);
     }
 
     /**
@@ -2186,55 +2223,40 @@ shared class PlayableMap {
                     const auto oozium = createUnit(ooziumType, currentArmy,
                         NO_POSITION);
                     // Queue the Oozium's preview position assignment.
-                    _newOoziums.insertLast(oozium);
-                    _newOoziumPositions.insertLast(tilesInRange[i]);
-                    map.queueCode(AnimationCode(
-                        this._removeFirstOoziumFromNewList));
+                    OoziumPosition newOozium;
+                    newOozium.oozium = oozium;
+                    newOozium.destination = tilesInRange[i];
+                    map.queueCode(AnimationCode(this._previewGrandBoltOozium),
+                        any(newOozium));
                     // If a unit of an opposing team is occupying the tile, delete
                     // the unit before moving the Oozium onto the tile proper.
                     if (unitID != NO_UNIT) deleteUnit(unitID);
                     // Then, queue the Oozium's move.
-                    map.queueCode(AnimationCode(this._setupVisibleOozium));
+                    map.queueCode(AnimationCode(this._moveGrandBoltOozium),
+                        any(newOozium));
                 }
             }
         }
     }
 
     /**
-     * The IDs of Oozium units that have just been created by the Grand Bolt.
+     * Sets the preview location of a new Grand Bolt Oozium.
+     * @param oozium Must point to the Oozium's ID and its eventual destination.
      */
-    private array<UnitID> _newOoziums;
-
-    /**
-     * The positions of Ooziums within \c _newOoziums.
-     */
-    private array<Vector2> _newOoziumPositions;
-
-    /**
-     * Oozium unit that has most recently been popped from \c _newOoziums.
-     */
-    private UnitID _visibleOozium = NO_UNIT;
-
-    /**
-     * Pops the first Oozium in the new list and sets its preview location.
-     */
-    private void _removeFirstOoziumFromNewList() {
-        const auto oozium = _newOoziums[0];
-        const auto destination = _newOoziumPositions[0];
-        map.addPreviewUnit(oozium, destination);
-        _visibleOozium = oozium;
-        _newOoziums.removeAt(0);
-        _newOoziumPositions.removeAt(0);
+    private void _previewGrandBoltOozium(any@ const oozium) {
+        OoziumPosition o;
+        if (oozium.retrieve(o)) map.addPreviewUnit(o.oozium, o.destination);
     }
 
     /**
      * Moves the \c _visibleOozium unit onto its preview tile.
      */
-    private void _setupVisibleOozium() {
-        const auto destination = map.getUnitPreviewPosition(_visibleOozium);
-        map.removePreviewUnit(_visibleOozium);
-        map.setUnitPosition(_visibleOozium, destination);
-        _visibleOozium = NO_UNIT;
+    private void _moveGrandBoltOozium(any@ const oozium) {
+        OoziumPosition o;
+        if (oozium.retrieve(o)) {
+            map.removePreviewUnit(o.oozium);
+            map.setUnitPosition(o.oozium, o.destination);
+        }
     }
 
     /**
@@ -2454,21 +2476,6 @@ shared class PlayableMap {
         }
         arr[uint(index)].tile = tile;
         arr[uint(index)].g = g;
-    }
-
-    //////////////////////////
-    // AUDIO HELPER METHODS //
-    //////////////////////////
-    /**
-     * Play the current army's current CO's theme, automatically stopping any music
-     * that is currently playing.
-     */
-    private void _playCurrentArmysTheme() {
-        const auto army = map.getSelectedArmy();
-        if (army != NO_ARMY) {
-            const auto currentCO = map.getArmyCurrentCO(army);
-            play("music", commander[currentCO].theme);
-        }
     }
 
     /////////

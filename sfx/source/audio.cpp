@@ -45,6 +45,7 @@ void sfx::audio::setVolume(float newvolume) {
 }
 
 void sfx::audio::play(const std::string& name, const sf::Time& length) {
+	if (name.empty()) return;
 	if (_sound.find(name) != _sound.end()) {
 		// Play the sound /*if not already playing*/.
 		/*if (_sound[name].sound.getStatus() != sf::Sound::Playing)*/

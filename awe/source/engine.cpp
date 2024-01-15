@@ -707,6 +707,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 		_map->setTarget(_renderer);
 		_map->setSpritesheets(_sprites);
 		_map->setFonts(_fonts);
+		_map->setAudios(_audios);
 		_map->setLanguageDictionary(_dictionary);
 		_map->setMapStrings(_mapStrings);
 		_map->setScripts(_scripts);
