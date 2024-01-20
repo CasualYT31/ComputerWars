@@ -121,6 +121,7 @@ class DetailedInfoMenu : Menu, Panel {
      * @param oldMenuName Name of the type of the \c Menu object.
      */
     void Open(Menu@ const oldMenu, const string&in oldMenuName) {
+        game.map.queuePlay("sound", "openinfopage");
         setVisibility(true);
 
         // Army panel.
@@ -195,6 +196,7 @@ class DetailedInfoMenu : Menu, Panel {
      * @param newMenuName Name of the type of the \c Menu object.
      */
     void Close(Menu@ const newMenu, const string&in newMenuName) {
+        game.map.queuePlay("sound", "back");
         setVisibility(false);
         armies.resize(0);
         tileMoveCosts.resize(0);

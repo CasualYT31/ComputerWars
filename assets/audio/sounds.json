@@ -9,6 +9,11 @@
 		"path": "audio/sound/submerge.wav",
 		"offset": 0.0
 	},
+	"openinfopage": {
+		"type": "sound",
+		"path": "audio/sound/pageturn.wav",
+		"offset": 0.0
+	},
 	"select": {
 		"type": "sound",
 		"path": "audio/sound/select.wav",
