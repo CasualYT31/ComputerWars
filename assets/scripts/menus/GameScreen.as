@@ -189,6 +189,7 @@ class GameScreen : Menu, Group {
 
             const auto currentArmy = game.map.getSelectedArmy();
             if (unitID == NO_UNIT) {
+                game.map.queuePlay("sound", "select");
                 if (!game.map.isOutOfBounds(selectedTile)) {
                     ArmyID owner = game.map.getTileOwner(selectedTile);
                     string type =
@@ -205,6 +206,7 @@ class GameScreen : Menu, Group {
                 return;
             } else if (game.map.isUnitWaiting(unitID) ||
                 !game.map.isUnitVisible(unitID, currentArmy)) {
+                game.map.queuePlay("sound", "select");
                 setGUI("MapMenu");
                 return;
             } else if (game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy() &&
