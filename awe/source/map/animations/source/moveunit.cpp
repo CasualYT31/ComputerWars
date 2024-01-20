@@ -24,8 +24,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "maths.hpp"
 
 awe::move_unit::move_unit(const std::shared_ptr<awe::animated_unit>& unitSprite,
-	const std::vector<node>& path, const float speed) :
-	_unit(unitSprite), _path(path), _speed(speed) {
+	const std::vector<node>& path, const float speed,
+	const std::shared_ptr<sfx::audio>& sounds) :
+	_unit(unitSprite), _path(path), _speed(speed), _sounds(sounds) {
 	assert(path.size() >= 2);
 	_setupNextDestination();
 }
@@ -41,10 +42,12 @@ bool awe::move_unit::animate(const sf::RenderTarget& target) {
 	const auto slope = _path[_tile].position - _path[_tile - 1].position;
 	auto newPos = _path[_tile - 1].position;
 	const auto normalisedSlope = engine::normalise(slope);
-	if (slope.x != 0.0f) newPos.x += slope.x *
+	sf::Vector2f offset;
+	if (slope.x != 0.0f) offset.x = slope.x *
 		((delta / (::abs(slope.x) / _speed)) * ::abs(normalisedSlope.x));
-	if (slope.y != 0.0f) newPos.y += slope.y *
+	if (slope.y != 0.0f) offset.y = slope.y *
 		((delta / (::abs(slope.y) / _speed)) * ::abs(normalisedSlope.y));
+	newPos += offset;
 	if ((slope.x < 0 && newPos.x < _path[_tile].position.x) ||
 		(slope.x >= 0 && newPos.x > _path[_tile].position.x))
 		newPos.x = _path[_tile].position.x;
@@ -53,13 +56,19 @@ bool awe::move_unit::animate(const sf::RenderTarget& target) {
 		newPos.y = _path[_tile].position.y;
 	_unit->setPixelPosition(newPos.x, newPos.y);
 
-	if (engine::closeTo(newPos.x, _path[_tile].position.x) &&
-		engine::closeTo(newPos.y, _path[_tile].position.y))
+	const auto overallDistance = engine::distance(_path[_tile].position,
+		_path[_tile - 1].position),
+		distanceYetToTravel = engine::distance(newPos, _path[_tile - 1].position);
+	if (distanceYetToTravel / overallDistance <= 0.5f)
+		_playNextSound(_path[_tile].secondSound);
+
+	if (engine::closeTo(newPos, _path[_tile].position))
 		_setupNextDestination();
 
 	if (_tile >= _path.size()) {
 		_unit->clearSpritesheetOverride();
 		_unit->clearIconSpritesheetOverride();
+		if (!_sound.empty()) _sounds->stop(_sound);
 		return true;
 	} else return false;
 }
@@ -73,4 +82,13 @@ void awe::move_unit::_setupNextDestination() {
 	resetDeltaAccumulation();
 	if (++_tile >= _path.size()) return;
 	_unit->setSpritesheetOverride(_path[_tile].sheet);
+	_playNextSound(_path[_tile].firstSound);
+}
+
+void awe::move_unit::_playNextSound(const std::string& sound) {
+	if (!sound.empty() && _sound != sound) {
+		if (!_sound.empty()) _sounds->stop(_sound);
+		_sound = sound;
+		_sounds->play(_sound);
+	}
 }

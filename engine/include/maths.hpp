@@ -58,4 +58,14 @@ namespace engine {
 		const float epsilon = 0.00001f) noexcept {
 		return closeTo(a.x, b.x, epsilon) && closeTo(a.y, b.y, epsilon);
 	}
+
+	/**
+	 * Calculates the euclidean distance between two points.
+	 * @param  a The first point.
+	 * @param  b The second point.
+	 * @return The distance.
+	 */
+	inline float distance(const sf::Vector2f& a, const sf::Vector2f& b) noexcept {
+		return ::sqrtf((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
+	}
 }

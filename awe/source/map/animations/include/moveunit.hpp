@@ -42,8 +42,9 @@ namespace awe {
 			 * Initialises the node.
 			 */
 			node(const sf::Vector2f& p,
-				const std::shared_ptr<sfx::animated_spritesheet>& s) : position(p),
-				sheet(s) {}
+				const std::shared_ptr<sfx::animated_spritesheet>& s,
+				const std::string& f, const std::string& n) :
+				position(p), sheet(s), firstSound(f), secondSound(n) {}
 
 			/**
 			 * The position to move the unit sprite to.
@@ -56,6 +57,24 @@ namespace awe {
 			 * The \c sheet in the first node is ignored.
 			 */
 			const std::shared_ptr<sfx::animated_spritesheet> sheet;
+
+			/**
+			 * The name of the sound to play when the unit is travelling to this
+			 * node during the first half of the journey.
+			 * If there was a move sound playing previously in this animation, then
+			 * that sound will be stopped. All of the animation's sounds will be
+			 * stopped when it finishes.\n
+			 * If this value is empty, or the same as the name of the sound
+			 * currently playing in the animation, then nothing changes.
+			 */
+			const std::string firstSound;
+
+			/**
+			 * The name of the sound to play when the unit is travelling to this
+			 * node during the second half of the journey.
+			 * @sa \c firstSound.
+			 */
+			const std::string secondSound;
 		};
 
 		/**
@@ -71,9 +90,12 @@ namespace awe {
 		 *                   starting position of the unit, and subsequent elements
 		 *                   dictate the destinations, in order.
 		 * @param speed      The speed the unit moves at, in pixels per second.
+		 * @param sounds     The audio object containing the sounds to play when
+		 *                   moving the unit.
 		 */
 		move_unit(const std::shared_ptr<awe::animated_unit>& unitSprite,
-			const std::vector<node>& path, const float speed);
+			const std::vector<node>& path, const float speed,
+			const std::shared_ptr<sfx::audio>& sounds);
 
 		/**
 		 * This drawable's \c animate() method.
@@ -95,6 +117,13 @@ namespace awe {
 		void _setupNextDestination();
 
 		/**
+		 * Play the next sound in the list.
+		 * @param sound The sound to play.
+		 * @sa    \c move_unit::node::firstSound.
+		 */
+		void _playNextSound(const std::string& sound);
+
+		/**
 		 * The unit sprite that will be moved during this animation.
 		 */
 		const std::shared_ptr<awe::animated_unit> _unit;
@@ -110,8 +139,18 @@ namespace awe {
 		const float _speed;
 
 		/**
+		 * Contains the sounds to play.
+		 */
+		const std::shared_ptr<sfx::audio> _sounds;
+
+		/**
 		 * The index of the \c _path location the unit is currently moving to.
 		 */
 		std::size_t _tile = 0;
+
+		/**
+		 * Keeps track of which sound this animation is currently playing.
+		 */
+		std::string _sound;
 	};
 }

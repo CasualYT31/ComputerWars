@@ -273,7 +273,7 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) :
 		j.resetState();
 	}
 	if (j.keysExist({ "weapons" })) {
-		const auto jj = j.nlohmannJSON()["weapons"];
+		const nlohmann::ordered_json jj = j.nlohmannJSON()["weapons"];
 		for (const auto& weapon : jj.items()) {
 			_baseWeapons.push_back({weapon.key(), jj});
 		}
@@ -281,6 +281,11 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) :
 	if (j.keysExist({ "ignoresdefence" })) {
 		j.apply(_ignoreDefence, { "ignoresdefence" }, true);
 	}
+	// We must always default initialise the movement sounds to empty strings, even
+	// if no sounds are provided, since the movement sounds are not stored as
+	// simple string values.
+	_sound_move[false];
+	_sound_move[true];
 	if (j.keysExist({ "sounds" })) {
 		if (j.keysExist({ "sounds", "hide" }))
 			j.apply(_sound_hide, { "sounds", "hide" }, true);
@@ -288,6 +293,40 @@ awe::unit_type::unit_type(const std::string& scriptName, engine::json& j) :
 			j.apply(_sound_unhide, { "sounds", "unhide" }, true);
 		if (j.keysExist({ "sounds", "destroy" }))
 			j.apply(_sound_destroy, { "sounds", "destroy" }, true);
+		const auto initialiseMoveSounds = [&](const std::string& move,
+			const bool hidden) {
+			if (j.keysExist({ "sounds", move })) {
+				const nlohmann::ordered_json jj = j.nlohmannJSON()["sounds"][move];
+				if (jj.is_string()) {
+					j.apply(_sound_move[hidden], { "sounds", move }, true);
+				} else if (jj.is_object() && !jj.empty()) {
+					for (const auto& sound : jj.items()) {
+						if (_sound_move[hidden].empty()) {
+							// The first sound in the terrain list is the default
+							// move sound, so store it there too.
+							_sound_move[hidden] = sound.value();
+						}
+						_sound_move_on_terrain[sound.key()][hidden] =
+							sound.value();
+					}
+				}
+			}
+		};
+		const auto fixMoveSounds = [&](const bool dest) {
+			if (_sound_move[dest].empty()) _sound_move[dest] = _sound_move[!dest];
+			for (auto& t : _sound_move_on_terrain)
+				if (t.second[dest].empty()) t.second[dest] = t.second[!dest];
+		};
+		initialiseMoveSounds("move", false);
+		initialiseMoveSounds("movehidden", true);
+		// If there was a non-hidden sound, but there was no hidden sound, then
+		// store the non-hidden sound in the hidden sound, too.
+		fixMoveSounds(true);
+		// And vice versa.
+		fixMoveSounds(false);
+		// Now both TRUE and FALSE pairs will have different non-empty values, the
+		// same non-empty value, or empty values. No pair will have one empty value
+		// and one non-empty value.
 	}
 }
 void awe::unit_type::updateUnitTypes(const awe::bank<awe::unit_type>& unitBank)

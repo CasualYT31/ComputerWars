@@ -570,6 +570,18 @@ void awe::unit_type::Register(const std::string& type,
 		asMETHOD(T, getDestroySound), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the name of this unit's destroy "
 		"sound, or an empty string if there is none.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"string get_moveSound(const string&in = \"\", const bool = false) const",
+		asMETHOD(T, getMoveSound), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the name of this unit's moving "
+		"sound, or an empty string if there is none. The string parameter is the "
+		"script name of the terrain the unit is moving on, if this sound is "
+		"desired. If one of these is not defined, or the parameter is empty, the "
+		"default move sound will be returned. The bool parameter, if "
+		"<tt>TRUE</tt>, returns the sounds configured to play if the unit is "
+		"hidden, if they are defined. If they are not defined, then the "
+		"non-hidden sounds will be returned. Vice versa is also true, if a hidden "
+		"sound is defined, but not the non-hidden one.");
 }
 
 template<typename T>

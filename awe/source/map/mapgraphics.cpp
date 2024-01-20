@@ -495,6 +495,22 @@ void awe::map::queuePlay(const std::string& audio, const std::string& name,
 	}, audio, name, dur));
 }
 
+void awe::map::queueStop(const std::string& audio, const std::string& name) {
+	_animationQueue.push(std::bind([&](const std::string& audio,
+		const std::string& name) {
+		if (!_audios) {
+			_logger.error("queueStop operation failed: _audios is nullptr.");
+			return;
+		}
+		if (!_audios->exists(audio)) {
+			_logger.error("queueStop operation failed: audio object with key "
+				"\"{}\" does not exist.", audio);
+			return;
+		}
+		(*_audios)[audio]->stop(name);
+	}, audio, name));
+}
+
 bool awe::map::animateDayBegin(const awe::ArmyID armyID, const awe::Day day,
 	const std::string& font) {
 	if (!_canAnimationBeQueued({ awe::animation_preset::Debug }, true))
@@ -650,11 +666,12 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 	}
 	std::vector<awe::move_unit::node> path;
 	const auto unitType = _units.at(unit).data.getType();
+	const auto hidden = _units.at(unit).data.isHiding();
 	std::optional<sf::Vector2u> previousTile;
 	for (asUINT i = 0, len = closedList->GetSize(); i < len; ++i) {
 		const auto nextTile =
 			static_cast<const awe::closed_list_node*>(closedList->At(i))->tile;
-		const auto& nextTileSprite = _tiles[nextTile.x][nextTile.y].sprite;
+		const auto& nextTileObj = _tiles[nextTile.x][nextTile.y];
 		std::shared_ptr<sfx::animated_spritesheet> sheet;
 		if (previousTile) {
 			if (nextTile.x < previousTile->x)
@@ -666,10 +683,14 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 			else
 				sheet = (*_sheets)[unitType->getDownSpritesheet()];
 		}
-		auto pos = nextTileSprite->getPixelPosition();
-		pos.x += nextTileSprite->getPixelSize().x * 0.5f;
-		pos.y += nextTileSprite->getPixelSize().y;
-		path.emplace_back(pos, sheet);
+		auto pos = nextTileObj.sprite->getPixelPosition();
+		pos.x += nextTileObj.sprite->getPixelSize().x * 0.5f;
+		pos.y += nextTileObj.sprite->getPixelSize().y;
+		path.emplace_back(pos, sheet, (previousTile ? unitType->getMoveSound(
+			_tiles[previousTile->x][previousTile->y]
+				.data.getTileType()->getTypeScriptName(), hidden) : ""),
+			unitType->getMoveSound(
+				nextTileObj.data.getTileType()->getTypeScriptName(), hidden));
 		previousTile = nextTile;
 	}
 	float speed = 375.f;
@@ -684,7 +705,8 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 	_animationQueue.push(std::make_unique<awe::move_unit>(
 		_units.at(unit).sprite,
 		path,
-		speed
+		speed,
+		(*_audios)["sound"]
 	));
 	return true;
 }

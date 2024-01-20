@@ -948,6 +948,11 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, queuePlay), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void queueStop(const string&in, const string&in)",
+			asMETHODPR(awe::map, queueStop,
+				(const std::string&, const std::string&), void), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"bool animateDayBegin(const ArmyID, const Day, const string&in)",
 			asMETHOD(awe::map, animateDayBegin), asCALL_THISCALL);
 

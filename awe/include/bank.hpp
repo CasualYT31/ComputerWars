@@ -1478,11 +1478,15 @@ namespace awe {
 		 *                 </tt></li></ul>
 		 *     </li>
 		 *     <li>\c "sounds" is an object with the following keys:
-		 *         <ul><li>\c "hide" = \c _sound_hide, <tt>(string)</tt></li></ul>
-		 *         <ul><li>\c "unhide" = \c _sound_unhide, <tt>(string)</tt></li>
-		 *             </ul>
-		 *         <ul><li>\c "destroy" = \c _sound_destroy, <tt>(string)</tt></li>
-		 *             </ul>
+		 *         <ul><li>\c "hide" = \c _sound_hide, <tt>(string)</tt></li>
+		 *             <li>\c "unhide" = \c _sound_unhide, <tt>(string)</tt></li>
+		 *             <li>\c "destroy" = \c _sound_destroy, <tt>(string)</tt></li>
+		 *             <li>\c "move" = \c _sound_move[false], <tt>(string)</tt>
+		 *                 -OR-
+		 *                 \c _sound_move_on_terrain[TERRAIN_SCRIPT_NAME][false]
+		 *                 <tt>({TERRAIN_SCRIPT_NAME: string[, etc.]})</tt></li>
+		 *             <li>\c "movehidden" = same as \c "move" except \c bool key
+		 *                 is \c TRUE not \c FALSE.</li></ul>
 		 *     </li>
 		 *     <li>\c "sprites" = \c _units, <tt>{COUNTRY_SCRIPT_NAME: string
 		 *         SPRITE_NAME[, etc.]}</tt></li>
@@ -1528,6 +1532,21 @@ namespace awe {
 		 * the unit begins a capture, and the latter is shown when the unit
 		 * completes a capture. They should be given if this unit type can
 		 * capture.\n
+		 *
+		 * Moving sounds can either be a single string, or an object of strings
+		 * keyed on terrain type script name. If a single string is given, that
+		 * will be the sound played when a unit moves across all terrain types. If
+		 * an object is given, then different sounds will play when a unit moves
+		 * across different terrains, whose script names are used as keys. The
+		 * first non-empty value in this object will also be defined as the default
+		 * move sound, so if a terrain does not have a sound, or if the default
+		 * move sound is queried, this sound will be played. Different move sounds
+		 * can also be defined for if the unit is hidden. If a move sound's
+		 * non-hidden version is defined, but not its hidden version, then the
+		 * hidden version will be set to the non-hidden version, and vice versa.
+		 * This means the only way a unit can have no move sound associated with it
+		 * is by giving no values to either \c "move" or \c "movehidden". A unit
+		 * cannot have a sound for moving and no sound for hidden moving.\n
 		 *
 		 * Upon the start of an army's turn, all of their units go through a script
 		 * function which will affect the unit depending on its type.
@@ -2036,6 +2055,26 @@ namespace awe {
 		inline std::string getDestroySound() const {
 			return _sound_destroy;
 		}
+
+		/**
+		 * The name of the sound played when this type of unit is moving.
+		 * @param  terrain The script name of the terrain the unit is moving on. If
+		 *                 this unit has a special sound for this terrain, it will
+		 *                 be returned. If not, or if this parameter is an empty
+		 *                 string, the unit's "default" moving sound will be
+		 *                 returned.
+		 * @param  hidden  If \c TRUE, the returned sound is the unit's moving
+		 *                 sound when it is hidden. If \c FALSE, it will be the
+		 *                 sound when it is not hidden.
+		 * @return The name of the sound, or an empty string if there is no sound.
+		 */
+		inline std::string getMoveSound(const std::string& terrain = "",
+			const bool hidden = false) const {
+			if (!terrain.empty() && _sound_move_on_terrain.find(terrain) !=
+				_sound_move_on_terrain.end())
+				return _sound_move_on_terrain.at(terrain).at(hidden);
+			return _sound_move.at(hidden);
+		}
 	private:
 		/**
 		 * Script interface version of \c getMovementType().
@@ -2261,7 +2300,6 @@ namespace awe {
 
 		/**
 		 * Each of the unit's weapons with overrides applied.
-		 * 
 		 */
 		mutable std::unordered_map<std::string, std::shared_ptr<const awe::weapon>>
 			_weapons;
@@ -2286,6 +2324,25 @@ namespace awe {
 		 * The unit's destroy sound.
 		 */
 		std::string _sound_destroy;
+
+		/**
+		 * The unit's default move sound.
+		 * Key differentiates movement sound whilst hidden (\c TRUE) from not
+		 * hidden (\c FALSE).
+		 * @warning Both \c TRUE and \c FALSE keys need to be stored, even if the
+		 *          stored value is an empty string.
+		 */
+		std::unordered_map<bool, std::string> _sound_move;
+
+		/**
+		 * The unit's move sounds for each terrain type.
+		 * Key differentiates movement sound whilst hidden (\c TRUE) from not
+		 * hidden (\c FALSE).
+		 * @warning Both \c TRUE and \c FALSE keys need to be stored for each
+		 *          terrain given.
+		 */
+		std::unordered_map<std::string, std::unordered_map<bool, std::string>>
+			_sound_move_on_terrain;
 	};
 
 	/**

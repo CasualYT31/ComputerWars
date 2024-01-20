@@ -4,6 +4,11 @@
 		"path": "audio/sound/hide.wav",
 		"offset": 0.0
 	},
+	"submerge": {
+		"type": "sound",
+		"path": "audio/sound/submerge.wav",
+		"offset": 0.0
+	},
 	"select": {
 		"type": "sound",
 		"path": "audio/sound/select.wav",
@@ -104,6 +109,11 @@
 		"path": "audio/sound/unhide.wav",
 		"offset": 0.0
 	},
+	"resurface": {
+		"type": "sound",
+		"path": "audio/sound/resurface.wav",
+		"offset": 0.0
+	},
 	"missilesilo.launch": {
 		"type": "sound",
 		"path": "audio/sound/missilesilolaunch.wav",
@@ -113,5 +123,124 @@
 		"type": "sound",
 		"path": "audio/sound/missilesilostrike.wav",
 		"offset": 0.0
+	},
+	"move.foot.default": {
+		"type": "sound",
+		"path": "audio/sound/movefootdefault.wav",
+		"offset": 0.0,
+		"loopto": 0,
+		"loopwhen": -1
+	},
+	"move.foot.road": {
+		"type": "sound",
+		"path": "audio/sound/movefootroad.wav",
+		"offset": 0.0,
+		"loopto": 0,
+		"loopwhen": -1
+	},
+	"move.foot.mount": {
+		"type": "sound",
+		"path": "audio/sound/movefootmount.wav",
+		"offset": 0.0,
+		"loopto": 0,
+		"loopwhen": -1
+	},
+	"move.foot.woods": {
+		"type": "sound",
+		"path": "audio/sound/movefootwoods.wav",
+		"offset": 0.0,
+		"loopto": 0,
+		"loopwhen": -1
+	},
+	"move.foot.river": {
+		"type": "sound",
+		"path": "audio/sound/movefootriver.wav",
+		"offset": 0.0,
+		"loopto": 0,
+		"loopwhen": -1
+	},
+	"move.foot.shoal": {
+		"type": "sound",
+		"path": "audio/sound/movefootshoal.wav",
+		"offset": 0.0,
+		"loopto": 0,
+		"loopwhen": -1
+	},
+	"move.tire.light": {
+		"type": "sound",
+		"path": "audio/sound/movetirelight.wav",
+		"offset": 0.0,
+		"loopto": 456,
+		"loopwhen": -1
+	},
+	"move.tire.heavy": {
+		"type": "sound",
+		"path": "audio/sound/movetireheavy.wav",
+		"offset": 0.0,
+		"loopto": 456,
+		"loopwhen": -1
+	},
+	"move.tread": {
+		"type": "sound",
+		"path": "audio/sound/movetread.wav",
+		"offset": 0.0,
+		"loopto": 110,
+		"loopwhen": -1
+	},
+	"move.tread.light": {
+		"type": "sound",
+		"path": "audio/sound/movetreadlight.wav",
+		"offset": 0.0,
+		"loopto": 102,
+		"loopwhen": -1
+	},
+	"move.pipe": {
+		"type": "sound",
+		"path": "audio/sound/movepipe.wav",
+		"offset": 0.0,
+		"loopto": 84,
+		"loopwhen": -1
+	},
+	"move.copter.light": {
+		"type": "sound",
+		"path": "audio/sound/movecopterlight.wav",
+		"offset": 0.0,
+		"loopto": 43,
+		"loopwhen": -1
+	},
+	"move.copter.heavy": {
+		"type": "sound",
+		"path": "audio/sound/movecopterheavy.wav",
+		"offset": 0.0,
+		"loopto": 48,
+		"loopwhen": -1
+	},
+	"move.plane": {
+		"type": "sound",
+		"path": "audio/sound/moveplane.wav",
+		"offset": 0.0,
+		"loopto": 286,
+		"loopwhen": -1
+	},
+	"move.ship": {
+		"type": "sound",
+		"path": "audio/sound/moveship.wav",
+		"offset": 0.0,
+		"loopto": 478,
+		"loopwhen": -1
+	},
+	"move.ship.hidden": {
+		"type": "sound",
+		"path": "audio/sound/movehiddensub.wav",
+		"offset": 0.0,
+		"loopto": 478,
+		"loopwhen": -1
+	},
+	"move.oozium": {
+		"type": "sound",
+		"path": "audio/sound/moveoozium.wav",
+		"offset": 0.0,
+		"loopto": 0,
+		"loopwhen": -1
 	}
 }

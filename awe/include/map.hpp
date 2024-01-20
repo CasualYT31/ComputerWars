@@ -2414,6 +2414,13 @@ namespace awe {
 			const float dur = 1.0f);
 
 		/**
+		 * Queues a sound stop operation.
+		 * @param audio The name of the audio object containing the sound to stop.
+		 * @param name  The name of the sound to stop.
+		 */
+		void queueStop(const std::string& audio, const std::string& name);
+
+		/**
 		 * Attempts to queue a "day begin" animation.
 		 * @param  armyID The ID of the army who's having their turn.
 		 * @param  day    The day to display.
