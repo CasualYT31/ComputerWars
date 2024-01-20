@@ -117,6 +117,9 @@ class UnloadUnitsMenu : Menu, Group {
                         return;
                     }
                 }
+
+                if (bool(ui["back"])) game.map.queuePlay("sound", "back");
+
                 game.map.popSelectedUnit();
                 panel.setVisibility(true);
                 return;
@@ -161,6 +164,7 @@ class UnloadUnitsMenu : Menu, Group {
             if (game.map.isPreviewUnit(loadedUnit))
                 game.map.removePreviewUnit(loadedUnit);
         }
+        game.map.queuePlay("sound", "back");
         setGUI("PreviewMoveUnitMenu");
     }
 

@@ -80,7 +80,10 @@ class BaseMenu : Menu, Group {
     void Periodic(const dictionary ui, const dictionary mouse,
         const MousePosition&in previousMouse,
         const MousePosition&in currentMouse) {
-        if (bool(ui["back"])) setGUI("GameScreen");
+        if (bool(ui["back"])) {
+            game.map.queuePlay("sound", "back");
+            setGUI("GameScreen");
+        }
     }
 
     /**

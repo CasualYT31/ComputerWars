@@ -278,6 +278,7 @@ class PreviewMoveUnitMenu : Menu, Group {
         if (bool(ui["back"])) {
             game.map.disableSelectedUnitRenderingEffects(false);
             game.map.removePreviewUnit(game.map.getSelectedUnit());
+            game.map.queuePlay("sound", "back");
             setGUI("MoveUnitMenu");
             return;
         }

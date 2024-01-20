@@ -64,6 +64,7 @@ class RepairMenu : Menu, Group {
         HandleCommonGameInput(ui, mouse, previousMouse, currentMouse);
         if (bool(ui["back"])) {
             game.map.popSelectedUnit();
+            game.map.queuePlay("sound", "back");
             setGUI("PreviewMoveUnitMenu");
         } else if (bool(ui["select"])) {
             // If the select control is being made by the mouse, and it is not

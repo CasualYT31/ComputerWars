@@ -61,6 +61,7 @@ class DeleteUnitMenu : Menu, Group {
                 setGUI("GameScreen");
             }
         } else if (bool(ui["back"])) {
+            game.map.queuePlay("sound", "back");
             setGUI("GameScreen");
         }
     }

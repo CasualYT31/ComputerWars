@@ -120,6 +120,7 @@ class SelectTargetMenu : Menu, Group {
 
         if (bool(ui["back"])) {
             game.map.popSelectedUnit();
+            game.map.queuePlay("sound", "back");
             setGUI("PreviewMoveUnitMenu");
         } else if (bool(ui["select"])) {
             // If the select control is being made by the mouse, and it is not
