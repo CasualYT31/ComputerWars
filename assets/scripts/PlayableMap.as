@@ -1698,7 +1698,8 @@ shared class PlayableMap {
      */
     void animateReplenish(const UnitID unit) {
         if (map.isUnitReplenished(unit, true)) return;
-        map.animateLabelUnit(unit, "supplypointtoright", "supplypointtoleft");
+        map.animateLabelUnit(unit, "supplypointtoright", "supplypointtoleft",
+            "sound", "replenishloop", "sound", "replenish");
     }
     
     /**
@@ -1706,7 +1707,8 @@ shared class PlayableMap {
      * @param unit The ID of the unit to point the label to.
      */
     void animateRepair(const UnitID unit) {
-        map.animateLabelUnit(unit, "repairpointtoright", "repairpointtoleft");
+        map.animateLabelUnit(unit, "repairpointtoright", "repairpointtoleft",
+            "sound", "replenishloop", "sound", "replenish");
     }
     
     /**
@@ -1714,7 +1716,8 @@ shared class PlayableMap {
      * @param unit The ID of the unit to point the label to.
      */
     void animateTrap(const UnitID unit) {
-        map.animateLabelUnit(unit, "trappointtoright", "trappointtoleft", 1.3);
+        map.animateLabelUnit(unit, "trappointtoright", "trappointtoleft", "sound",
+            "trap", "", "", 1.3);
     }
 
     /**

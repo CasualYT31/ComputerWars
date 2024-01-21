@@ -593,6 +593,8 @@ bool awe::map::animateParticle(const sf::Vector2u& tile, const std::string& shee
 
 bool awe::map::animateLabelUnit(const awe::UnitID unitID,
 	const std::string& leftLabel, const std::string& rightLabel,
+	const std::string& loopSoundObject, const std::string& loopSound,
+	const std::string& endSoundObject, const std::string& endSound,
 	const float duration) {
 	if (!_canAnimationBeQueued()) return false;
 	if (!_isUnitPresent(unitID)) {
@@ -607,10 +609,16 @@ bool awe::map::animateLabelUnit(const awe::UnitID unitID,
 		_target->getSize().x / 2.0f;
 	const auto res =
 		animateViewScroll(_units.at(unitID).data.getPosition(), 500.f);
+	if (!loopSoundObject.empty() && !loopSound.empty())
+		queuePlay(loopSoundObject, loopSound);
 	// TODO-2.
 	_animationQueue.push(std::make_unique<awe::label_unit>(
 		_units.at(unitID).data, _units.at(unitID).sprite, (*_sheets)["icon"],
 		(left ? leftLabel : rightLabel), left, duration));
+	if (!loopSoundObject.empty() && !loopSound.empty())
+		queueStop(loopSoundObject, loopSound);
+	if (!endSoundObject.empty() && !endSound.empty())
+		queuePlay(endSoundObject, endSound);
 	return res;
 }
 

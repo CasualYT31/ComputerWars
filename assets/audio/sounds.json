@@ -99,6 +99,13 @@
 		"path": "audio/sound/movesel.wav",
 		"offset": 0.0
 	},
+	"replenishloop": {
+		"type": "sound",
+		"path": "audio/sound/replenishloop.wav",
+		"offset": 0.0,
+		"loopto": 0,
+		"loopwhen": -1
+	},
 	"replenish": {
 		"type": "sound",
 		"path": "audio/sound/replenish.wav",

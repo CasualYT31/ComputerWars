@@ -2475,18 +2475,34 @@ namespace awe {
 		/**
 		 * Attempts to queue a "label unit" animation.
 		 * Also automatically queues an \c awe::scroll animation before this one.
-		 * @param  unitID     The ID of the unit that's being replenished.
-		 * @param  leftLabel  ID of the label sprite to use when the label is on
-		 *                    the left side of the unit.
-		 * @param  rightLabel ID of the label sprite to use when the label is on
-		 *                    the right side of the unit.
-		 * @param  duration   The number of seconds the label should be visible
-		 *                    for.
+		 * @param  unitID          The ID of the unit that's being replenished.
+		 * @param  leftLabel       ID of the label sprite to use when the label is
+		 *                         on the left side of the unit.
+		 * @param  rightLabel      ID of the label sprite to use when the label is
+		 *                         on the right side of the unit.
+		 * @param  loopSoundObject The name of the audio object containing the
+		 *                         loop sound. Leave empty if you do not wish to
+		 *                         play a loop sound.
+		 * @param  loopSound       The name of the sound to play whilst showing
+		 *                         the label unit animation. Leave empty if you do
+		 *                         not wish to play a loop sound.
+		 * @param  endSoundObject  The name of the audio object containing the
+		 *                         sound to play once the animation has finished.
+		 *                         Leave empty if you do not wish to play an end
+		 *                         sound.
+		 * @param  endSound        The name of the sound to play after finishing
+		 *                         the label unit animation. Leave empty if you do
+		 *                         not wish to play an end sound.
+		 * @param  duration        The number of seconds the label should be
+		 *                         visible for.
 		 * @return \c TRUE if both animations were queued, \c FALSE otherwise.
 		 */
 		bool animateLabelUnit(const awe::UnitID unitID,
 			const std::string& leftLabel, const std::string& rightLabel,
-			const float duration = 0.7f);
+			const std::string& loopSoundObject = "",
+			const std::string& loopSound = "",
+			const std::string& endSoundObject = "",
+			const std::string& endSound = "", const float duration = 0.7f);
 
 		/**
 		 * Attempts to queue a "property capture" animation.
