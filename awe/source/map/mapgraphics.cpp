@@ -524,6 +524,7 @@ bool awe::map::animateTagCO(const awe::ArmyID armyID, const std::string& font) {
 	if (!_canAnimationBeQueued({ awe::animation_preset::Debug }, true))
 		return false;
 	// TODO-2.
+	queuePlay("sound", "changeco");
 	_animationQueue.push(std::make_unique<awe::tag_cos>(getArmyCountry(armyID),
 		getArmyCurrentCO(armyID), getArmyTagCO(armyID), (*_sheets)["co"], _dict,
 		(*_fonts)[font]));
