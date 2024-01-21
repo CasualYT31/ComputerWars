@@ -165,6 +165,11 @@ void awe::environment::Register(const std::string& type,
 	asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	awe::common_properties::Register<T>(type, engine, document);
+	auto r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_spritesheet() const property",
+		asMETHOD(T, getSpritesheet), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of the tile spritesheet to "
+		"use with this environment.");
 }
 
 template<typename T>

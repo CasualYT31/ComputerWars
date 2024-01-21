@@ -3,24 +3,28 @@
 		"longname": "Normal",
 		"shortname": "Nrml",
 		"icon": "",
-		"description": "Normal environment."
+		"description": "Normal environment.",
+		"spritesheet": "tile.normal"
 	},
 	"WASTELAND": {
 		"longname": "Wasteland",
 		"shortname": "Wstl",
 		"icon": "",
-		"description": "Wasteland environment."
+		"description": "Wasteland environment.",
+		"spritesheet": "tile.normal"
 	},
 	"SNOWY": {
 		"longname": "Snowy",
 		"shortname": "Snow",
 		"icon": "",
-		"description": "Snowy environment."
+		"description": "Snowy environment.",
+		"spritesheet": "tile.normal"
 	},
 	"SANDY": {
 		"longname": "Sandy",
 		"shortname": "Sand",
 		"icon": "",
-		"description": "Desert environment."
+		"description": "Desert environment.",
+		"spritesheet": "tile.normal"
 	}
 }

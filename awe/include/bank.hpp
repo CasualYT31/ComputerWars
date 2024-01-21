@@ -584,14 +584,18 @@ namespace awe {
 		/**
 		 * Constructor which passes on the JSON object to the \c common_properties
 		 * constructor.
-		 * No additional keys are required.
+		 * There is an additional key-string pair required, \c "spritesheet". This
+		 * key will store the name of the tile spritesheet to use with this
+		 * environment.
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
 		 * @param j          The object value containing the environment's
 		 *                   properties.
 		 */
-		environment(const std::string& scriptName, engine::json& j) :
-			common_properties(scriptName, j) {}
+		inline environment(const std::string& scriptName, engine::json& j) :
+			common_properties(scriptName, j) {
+			j.apply(_spritesheet, { "spritesheet" }, true);
+		}
 
 		/**
 		 * Registers \c environment with a given type.
@@ -608,6 +612,19 @@ namespace awe {
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document);
+
+		/**
+		 * Retrieves the name of this environment's tile spritesheet.
+		 * @return The name of the tile spritesheet.
+		 */
+		inline const std::string& getSpritesheet() const {
+			return _spritesheet;
+		}
+	private:
+		/**
+		 * This environment's tile spritesheet.
+		 */
+		std::string _spritesheet;
 	};
 
 	/**
