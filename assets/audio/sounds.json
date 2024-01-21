@@ -79,6 +79,11 @@
 		"path": "audio/sound/destroyship.wav",
 		"offset": 0.0
 	},
+	"destroy.oozium": {
+		"type": "sound",
+		"path": "audio/sound/destroyoozium.wav",
+		"offset": 0.0
+	},
 	"destroy.minicannon": {
 		"type": "sound",
 		"path": "audio/sound/destroyminicannon.wav",
@@ -243,6 +248,13 @@
 		"loopto": 0,
 		"loopwhen": -1
 	},
+	"move.tire.verylight": {
+		"type": "sound",
+		"path": "audio/sound/movetireverylight.wav",
+		"offset": 0.0,
+		"loopto": 456,
+		"loopwhen": -1
+	},
 	"move.tire.light": {
 		"type": "sound",
 		"path": "audio/sound/movetirelight.wav",
@@ -257,11 +269,39 @@
 		"loopto": 456,
 		"loopwhen": -1
 	},
+	"move.tire.veryheavy": {
+		"type": "sound",
+		"path": "audio/sound/movetireveryheavy.wav",
+		"offset": 0.0,
+		"loopto": 456,
+		"loopwhen": -1
+	},
+	"move.tread.veryheavy": {
+		"type": "sound",
+		"path": "audio/sound/movetreadveryheavy.wav",
+		"offset": 0.0,
+		"loopto": 110,
+		"loopwhen": -1
+	},
+	"move.tread.heavy": {
+		"type": "sound",
+		"path": "audio/sound/movetreadheavy.wav",
+		"offset": 0.0,
+		"loopto": 110,
+		"loopwhen": -1
+	},
 	"move.tread": {
 		"type": "sound",
 		"path": "audio/sound/movetread.wav",
 		"offset": 0.0,
 		"loopto": 110,
+		"loopwhen": -1
+	},
+	"move.tread.verylight": {
+		"type": "sound",
+		"path": "audio/sound/movetreadverylight.wav",
+		"offset": 0.0,
+		"loopto": 102,
 		"loopwhen": -1
 	},
 	"move.tread.light": {
@@ -292,12 +332,43 @@
 		"loopto": 48,
 		"loopwhen": -1
 	},
+	"move.plane.light": {
+		"type": "sound",
+		"path": "audio/sound/moveplanelight.wav",
+		"offset": 0.0,
+		"loopto": 286,
+		"loopwhen": -1
+	},
 	"move.plane": {
 		"type": "sound",
 		"path": "audio/sound/moveplane.wav",
 		"offset": 0.0,
 		"loopto": 286,
 		"loopwhen": -1
+	},
+	"move.plane.heavy": {
+		"type": "sound",
+		"path": "audio/sound/moveplaneheavy.wav",
+		"offset": 0.0,
+		"loopto": 286,
+		"loopwhen": -1
+	},
+	"move.plane.veryheavy": {
+		"type": "sound",
+		"path": "audio/sound/moveplaneveryheavy.wav",
+		"offset": 0.0,
+		"loopto": 286,
+		"loopwhen": -1
+	},
+	"move.ship.verylight": {
+		"type": "sound",
+		"path": "audio/sound/moveshipverylight.wav",
+		"offset": 0.0
+	},
+	"move.ship.light": {
+		"type": "sound",
+		"path": "audio/sound/moveshiplight.wav",
+		"offset": 0.0
 	},
 	"move.ship": {
 		"type": "sound",
@@ -312,6 +383,16 @@
 		"offset": 0.0,
 		"loopto": 478,
 		"loopwhen": -1
+	},
+	"move.ship.heavy": {
+		"type": "sound",
+		"path": "audio/sound/moveshipheavy.wav",
+		"offset": 0.0
+	},
+	"move.ship.veryheavy": {
+		"type": "sound",
+		"path": "audio/sound/moveshipveryheavy.wav",
+		"offset": 0.0
 	},
 	"move.oozium": {
 		"type": "sound",

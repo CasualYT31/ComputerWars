@@ -711,10 +711,11 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 			unitMoveSound);
 		previousTile = nextTile;
 	}
-	float speed = 375.f;
+	float speed = 375.f, delay = 0.05f;
 	switch (_selectedAnimationPreset) {
 	case awe::animation_preset::VisualA:
 		speed = 125.f;
+		delay = 0.025f;
 		break;
 	case awe::animation_preset::Debug:
 		speed = 1000.f;
@@ -728,7 +729,7 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 		(*_audios)["sound"]
 	));
 	if (!finalSound.empty()) {
-		queueDelay(0.1f);
+		queueDelay(delay);
 		queueStop("sound", finalSound);
 	}
 	return true;
