@@ -2195,14 +2195,18 @@ shared class PlayableMap {
             }
             // Deal damage if there was a unit.
             if (targetUnit != NO_UNIT) {
+                map.queuePlay("sound", terrainName == "BLACKCANNONROOT" ?
+                    "fire.blackcannon" : "fire.minicannon");
                 animateCannonFire(tile, tileTypeName);
                 damageUnitsInRange(tilesInRange[unitTile], 0, 0,
                     terrainName == "BLACKCANNONROOT" ? 5 : 3);
+                map.queuePlay("sound", "fire.cannon.hit");
                 animateCannonDamage(tilesInRange[unitTile], tileTypeName);
             }
 
         } else if (terrainName == "BLACKLASER") {
             const auto tilesInRange = getStructureAttackRange(tile);
+            map.queuePlay("sound", "fire.lasercannon");
             animateBlackLaserFire(tile);
             for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
                 // Ooziums are the only units that will be impervious to the
@@ -2217,6 +2221,7 @@ shared class PlayableMap {
             // The deathray only attacks every week.
             if (map.getDay() % 7 == 0) {
                 const auto tilesInRange = getStructureAttackRange(tile);
+                map.queuePlay("sound", "fire.lasercannon");
                 animateDeathRayFire(tile);
                 for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
                     // Units on the same team as the owner will not be affected.
@@ -2233,7 +2238,10 @@ shared class PlayableMap {
             terrainName == "BLACKOBELISKROOT") {
             const auto tilesInRange = getStructureAttackRange(tile);
             // Black crystals animate before the healing.
-            if (terrainName == "BLACKCRYSTAL") animateBlackCrystalHeal(tile);
+            if (terrainName == "BLACKCRYSTAL") {
+                map.queuePlay("sound", "heal.blackcrystal");
+                animateBlackCrystalHeal(tile);
+            }
             for (uint64 i = 0, len = tilesInRange.length(); i < len; ++i) {
                 // All units on the same team as the owner are healed 2HP, and
                 // replenished, for free, including Oozium units.
@@ -2242,6 +2250,10 @@ shared class PlayableMap {
                     map.getTeamOfUnit(unitID) != currentTeam) continue;
                 healUnit(unitID, 2, NO_ARMY);
                 map.replenishUnit(unitID);
+            }
+            // Black obelisks animate after the healing.
+            if (terrainName == "BLACKOBELISKROOT") {
+                map.queuePlay("sound", "heal.blackobelisk");
             }
 
         } else if (terrainName == "GRANDBOLTROOT") {

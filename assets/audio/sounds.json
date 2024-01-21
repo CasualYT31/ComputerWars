@@ -136,6 +136,36 @@
 		"path": "audio/sound/replenish.wav",
 		"offset": 0.0
 	},
+	"fire.minicannon": {
+		"type": "sound",
+		"path": "audio/sound/fireminicannon.wav",
+		"offset": 0.0
+	},
+	"fire.blackcannon": {
+		"type": "sound",
+		"path": "audio/sound/fireblackcannon.wav",
+		"offset": 0.0
+	},
+	"fire.cannon.hit": {
+		"type": "sound",
+		"path": "audio/sound/firecannonhit.wav",
+		"offset": 0.0
+	},
+	"fire.lasercannon": {
+		"type": "sound",
+		"path": "audio/sound/firelasercannon.wav",
+		"offset": 0.0
+	},
+	"heal.blackcrystal": {
+		"type": "sound",
+		"path": "audio/sound/healcrystal.wav",
+		"offset": 0.0
+	},
+	"heal.blackobelisk": {
+		"type": "sound",
+		"path": "audio/sound/healobelisk.wav",
+		"offset": 0.0
+	},
 	"savestart": {
 		"type": "sound",
 		"path": "audio/sound/savestart.wav",
