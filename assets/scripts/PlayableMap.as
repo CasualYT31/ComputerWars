@@ -291,15 +291,32 @@ shared class PlayableMap {
     }
 
     /**
-     * Destroys a structure, and queues a particle effect afterwards.
+     * Destroys a structure, and queues a particle effect and sounds afterwards.
      * @param rootTile The root tile of the structure.
      */
     private void destroyStructure(Vector2 rootTile) {
         const auto terrainName = map.getTileType(rootTile).type.scriptName;
         map.destroyStructure(rootTile);
+        // Play sound (black crystal is handled with its animation).
+        if (terrainName == "PIPESEAM" || terrainName == "BLACKLASER") {
+            map.queuePlay("sound", "destroy");
+        } else if (terrainName == "MINICANNON" || terrainName == "GRANDBOLTROOT") {
+            map.queuePlay("sound", "destroy.minicannon");
+        } else if (terrainName == "DEATHRAYROOT" ||
+            terrainName == "BLACKCANNONROOT") {
+            map.queuePlay("sound", "destroy.blackcannon");
+        } else if (terrainName == "BLACKOBELISKROOT") {
+            map.queuePlay("sound", "destroy.blackobelisk");
+        }
+        // Animate particle.
         StructureDestroyEffectOptions opts;
         if (terrainName == "MINICANNON" || terrainName == "PIPESEAM" ||
             terrainName == "BLACKLASER") {
+            if (terrainName == "MINICANNON") {
+                opts.flashDuration = opts.shakeDuration;
+                map.queueCode(AnimationCode(this.structureDestroyEffects),
+                    any(opts));
+            }
             map.animateParticles({ TileParticle(
                 rootTile,
                 "minicannondestroy",
@@ -316,6 +333,7 @@ shared class PlayableMap {
                 Vector2f(0.5, 1.0)
             ) }, "particle");
         } else if (terrainName == "GRANDBOLTROOT") {
+            opts.flashDuration = opts.shakeDuration;
             map.queueCode(AnimationCode(this.structureDestroyEffects), any(opts));
             map.animateParticles({ TileParticle(
                 rootTile,
@@ -323,6 +341,7 @@ shared class PlayableMap {
                 Vector2f(0.5, 1.0)
             ) }, "particle");
         } else if (terrainName == "BLACKCRYSTAL") {
+            map.queuePlay("sound", "destroy.blackcrystal.1");
             map.animateParticles({ TileParticle(
                 rootTile,
                 "blackcrystal.destroy.1",
@@ -330,6 +349,7 @@ shared class PlayableMap {
             ) }, "particle");
             opts.shakeDuration = opts.flashDuration = 0.1;
             opts.colour.a = 96;
+            map.queuePlay("sound", "destroy.blackcrystal.2");
             map.queueCode(AnimationCode(this.structureDestroyEffects), any(opts));
             map.animateParticles({ TileParticle(
                 rootTile,

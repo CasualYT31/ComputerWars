@@ -79,6 +79,31 @@
 		"path": "audio/sound/destroyship.wav",
 		"offset": 0.0
 	},
+	"destroy.minicannon": {
+		"type": "sound",
+		"path": "audio/sound/destroyminicannon.wav",
+		"offset": 0.0
+	},
+	"destroy.blackcannon": {
+		"type": "sound",
+		"path": "audio/sound/destroyblackcannon.wav",
+		"offset": 0.0
+	},
+	"destroy.blackcrystal.1": {
+		"type": "sound",
+		"path": "audio/sound/destroyblackcrystal1.wav",
+		"offset": 0.0
+	},
+	"destroy.blackcrystal.2": {
+		"type": "sound",
+		"path": "audio/sound/destroyblackcrystal2.wav",
+		"offset": 0.0
+	},
+	"destroy.blackobelisk": {
+		"type": "sound",
+		"path": "audio/sound/destroyobelisk.wav",
+		"offset": 0.0
+	},
 	"load": {
 		"type": "sound",
 		"path": "audio/sound/load.wav",
