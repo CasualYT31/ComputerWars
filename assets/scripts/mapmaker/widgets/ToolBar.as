@@ -99,6 +99,22 @@ class ToolBar : ChildWindow {
     }
 
     /**
+     * Selects a tool from the tool bar.
+     * @param t The tool to select.
+     */
+    void select(const Tool t) {
+        buttonSignalHandler(buttons[uint(t)], Clicked);
+    }
+
+    /**
+     * Selects the main paint tool, if a paint tool isn't currently selected.
+     */
+    void selectPaint() {
+        if (currentTool != Tool::Paint && currentTool != Tool::RectPaint)
+            select(Tool::Paint);
+    }
+
+    /**
      * Checks if a given tool is selected.
      * @param  t The tool to test for.
      * @return \c TRUE if the given tool is currently selected, \c FALSE if not.

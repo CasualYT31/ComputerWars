@@ -814,7 +814,7 @@ class MapMaker : Menu, Group {
     /**
      * The palette window.
      */
-    private PaletteWindow paletteWindow;
+    private PaletteWindow paletteWindow(@toolBar);
 
     /**
      * The army properties window.

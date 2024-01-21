@@ -20,8 +20,12 @@ enum Palette {
 class PaletteWindow : ChildWindow {
     /**
      * Sets up the palette window.
+     * @param toolBar Handle to the tool bar widget to select the paint tool of when
+     *                a change is made to any palette panel by the user.
      */
-    PaletteWindow() {
+    PaletteWindow(ToolBar@ const toolBar) {
+        @this.toolBar = toolBar;
+
         // Setup the child window.
         setText("objectdialog");
         add(tabContainer);
@@ -30,10 +34,10 @@ class PaletteWindow : ChildWindow {
 
         // Setup each palette.
         panels.resize(Palette::Count);
-        @panels[Palette::Terrain] = TerrainPalette(@tabContainer);
-        @panels[Palette::TileType] = TileTypePalette(@tabContainer);
-        @panels[Palette::UnitType] = UnitTypePalette(@tabContainer);
-        @panels[Palette::Structure] = StructurePalette(@tabContainer);
+        @panels[Palette::Terrain] = TerrainPalette(@tabContainer, toolBar);
+        @panels[Palette::TileType] = TileTypePalette(@tabContainer, toolBar);
+        @panels[Palette::UnitType] = UnitTypePalette(@tabContainer, toolBar);
+        @panels[Palette::Structure] = StructurePalette(@tabContainer, toolBar);
         tabContainer.setSelectedTab(0);
     }
 
@@ -71,8 +75,14 @@ class PaletteWindow : ChildWindow {
             connect(Minimized, handler);
             connect(Maximized, handler);
             panels[currentTab].paletteWindowSizeChanged();
+            toolBar.selectPaint();
         }
     }
+
+    /**
+     * Handle to the tool bar widget.
+     */
+    private ToolBar@ toolBar;
 
     /**
      * Cache of the currently selected tab.
@@ -298,8 +308,10 @@ class TerrainPalette : Observer, PalettePanel {
     /**
      * Sets up the terrain palette.
      * @param tabContainer The tab container to create the tab and panel in.
+     * @param toolBar      Handle to a tool bar widget. If an object is selected,
+     *                     the paint tool from this tool bar will also be selected.
      */
-    TerrainPalette(TabContainer@ const tabContainer) {
+    TerrainPalette(TabContainer@ const tabContainer, ToolBar@ const toolBar) {
         super(
             tabContainer,
             "terraindialog",
@@ -310,6 +322,7 @@ class TerrainPalette : Observer, PalettePanel {
             3,
             true
         );
+        @this.toolBar = toolBar;
         // Attach this palette to the selectedTerrain to receive a refresh
         // request when the selected owner changes in any way.
         selectedTerrain.attach(this);
@@ -348,6 +361,7 @@ class TerrainPalette : Observer, PalettePanel {
         const string&in signal) override {
         if (signal != Clicked) return;
         @selectedTerrain.type = terrain[::getWidgetName(button)];
+        toolBar.selectPaint();
     }
 
     /**
@@ -356,6 +370,7 @@ class TerrainPalette : Observer, PalettePanel {
     private void countryComboboxCallback(const ArmyID owner) override {
         if (owner == NO_ARMY) selectedTerrain.owner = "";
         else selectedTerrain.owner = country.scriptNames[owner];
+        toolBar.selectPaint();
     }
 
     /**
@@ -372,6 +387,11 @@ class TerrainPalette : Observer, PalettePanel {
     }
 
     /**
+     * Handle to the tool bar widget.
+     */
+    private ToolBar@ toolBar;
+
+    /**
      * When the owner of the selected terrain changes, it is updated here.
      */
     private string latestOwner;
@@ -384,8 +404,10 @@ class TileTypePalette : Observer, PalettePanel {
     /**
      * Sets up the tile type palette.
      * @param tabContainer The tab container to create the tab and panel in.
+     * @param toolBar      Handle to a tool bar widget. If an object is selected,
+     *                     the paint tool from this tool bar will also be selected.
      */
-    TileTypePalette(TabContainer@ const tabContainer) {
+    TileTypePalette(TabContainer@ const tabContainer, ToolBar@ const toolBar) {
         super(
             tabContainer,
             "tiledialog",
@@ -396,6 +418,7 @@ class TileTypePalette : Observer, PalettePanel {
             6,
             true
         );
+        @this.toolBar = toolBar;
         // Attach this palette to the selectedTileType to receive a refresh
         // request when the selected owner changes in any way.
         selectedTileType.attach(this);
@@ -434,6 +457,7 @@ class TileTypePalette : Observer, PalettePanel {
         const string&in signal) override {
         if (signal != Clicked) return;
         @selectedTileType.type = tiletype[::getWidgetName(button)];
+        toolBar.selectPaint();
     }
 
     /**
@@ -442,6 +466,7 @@ class TileTypePalette : Observer, PalettePanel {
     private void countryComboboxCallback(const ArmyID owner) override {
         if (owner == NO_ARMY) selectedTileType.owner = "";
         else selectedTileType.owner = country.scriptNames[owner];
+        toolBar.selectPaint();
     }
 
     /**
@@ -458,6 +483,11 @@ class TileTypePalette : Observer, PalettePanel {
     }
 
     /**
+     * Handle to the tool bar widget.
+     */
+    private ToolBar@ toolBar;
+
+    /**
      * When the owner of the selected tile type changes, it is updated here.
      */
     private string latestOwner;
@@ -470,8 +500,10 @@ class UnitTypePalette : Observer, PalettePanel {
     /**
      * Sets up the unit type palette.
      * @param tabContainer The tab container to create the tab and panel in.
+     * @param toolBar      Handle to a tool bar widget. If an object is selected,
+     *                     the paint tool from this tool bar will also be selected.
      */
-    UnitTypePalette(TabContainer@ const tabContainer) {
+    UnitTypePalette(TabContainer@ const tabContainer, ToolBar@ const toolBar) {
         super(
             tabContainer,
             "unitdialog",
@@ -483,6 +515,7 @@ class UnitTypePalette : Observer, PalettePanel {
             4,
             false
         );
+        @this.toolBar = toolBar;
         // Attach this palette to the selectedUnitType to receive a refresh
         // request when the selected owner changes in any way.
         selectedUnitType.attach(this);
@@ -519,6 +552,7 @@ class UnitTypePalette : Observer, PalettePanel {
         const string&in signal) override {
         if (signal != Clicked) return;
         @selectedUnitType.type = unittype[::getWidgetName(button)];
+        toolBar.selectPaint();
     }
 
     /**
@@ -526,7 +560,13 @@ class UnitTypePalette : Observer, PalettePanel {
      */
     private void countryComboboxCallback(const ArmyID owner) override {
         selectedUnitType.owner = country.scriptNames[owner];
+        toolBar.selectPaint();
     }
+
+    /**
+     * Handle to the tool bar widget.
+     */
+    private ToolBar@ toolBar;
 
     /**
      * When the owner of the selected unit type changes, it is updated here.
@@ -541,8 +581,10 @@ class StructurePalette : Observer, PalettePanel {
     /**
      * Sets up the structure palette.
      * @param tabContainer The tab container to create the tab and panel in.
+     * @param toolBar      Handle to a tool bar widget. If an object is selected,
+     *                     the paint tool from this tool bar will also be selected.
      */
-    StructurePalette(TabContainer@ const tabContainer) {
+    StructurePalette(TabContainer@ const tabContainer, ToolBar@ const toolBar) {
         super(
             tabContainer,
             "structuredialog",
@@ -553,6 +595,7 @@ class StructurePalette : Observer, PalettePanel {
             4,
             false
         );
+        @this.toolBar = toolBar;
         // Attach this palette to the selectedStructure to receive a refresh
         // request when the selected owner or destroyed flag change in any way.
         selectedStructure.attach(this);
@@ -613,6 +656,7 @@ class StructurePalette : Observer, PalettePanel {
         const string&in signal) override {
         if (signal != Clicked) return;
         @selectedStructure.type = structure[::getWidgetName(button)];
+        toolBar.selectPaint();
     }
 
     /**
@@ -621,6 +665,7 @@ class StructurePalette : Observer, PalettePanel {
     private void countryComboboxCallback(const ArmyID owner) override {
         if (owner == NO_ARMY) selectedStructure.owner = "";
         else selectedStructure.owner = country.scriptNames[owner];
+        toolBar.selectPaint();
     }
 
     /**
@@ -629,6 +674,7 @@ class StructurePalette : Observer, PalettePanel {
      */
     private void destroyedChanged() {
         selectedStructure.destroyed = destroyed.getChecked();
+        toolBar.selectPaint();
     }
 
     /**
@@ -643,6 +689,11 @@ class StructurePalette : Observer, PalettePanel {
         }
         return names;
     }
+
+    /**
+     * Handle to the tool bar widget.
+     */
+    private ToolBar@ toolBar;
 
     /**
      * When the owner of the selected structure changes, it is updated here.

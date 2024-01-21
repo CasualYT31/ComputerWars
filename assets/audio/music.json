@@ -9,7 +9,7 @@
 	"mapmaker": {
 		"type": "music",
 		"path": "audio/music/MapMaker.ogg",
-		"offset": 0.0,
+		"offset": 100.0,
 		"loopto": 148,
 		"loopwhen": 70728
 	},
