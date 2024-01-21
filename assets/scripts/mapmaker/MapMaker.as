@@ -141,6 +141,18 @@ class MapMaker : Menu, Group {
             selectedTerrain.update();
             selectedTileType.update();
         }
+        if (lastKnownEnvironmentPictureSpritesheet !=
+            edit.map.getEnvironmentPictureSpritesheet()) {
+            lastKnownEnvironmentPictureSpritesheet =
+                edit.map.getEnvironmentPictureSpritesheet();
+            edit.refreshTileProps();
+        }
+        if (lastKnownEnvironmentStructureIconSpritesheet !=
+            edit.map.getEnvironmentStructureIconSpritesheet()) {
+            lastKnownEnvironmentStructureIconSpritesheet =
+                edit.map.getEnvironmentStructureIconSpritesheet();
+            selectedStructure.update();
+        }
 
         // Update the viewport of the map to make sure no tiles are hiding behind
         // the menu or status bars.
@@ -764,10 +776,20 @@ class MapMaker : Menu, Group {
     //////////
 
     /**
-     * Stores the current map's latest known environment spritesheet.
+     * Stores the current map's last known environment spritesheet.
      * @remark This is another good reason why awe::map should emit signals.
      */
     private string lastKnownEnvironmentSpritesheet;
+
+    /**
+     * Stores the current map's last known environment tile picture spritesheet.
+     */
+    private string lastKnownEnvironmentPictureSpritesheet;
+
+    /**
+     * Stores the current map's last known environment structure icon spritesheet.
+     */
+    private string lastKnownEnvironmentStructureIconSpritesheet;
 
     /////////////
     // WIDGETS //

@@ -4,27 +4,35 @@
 		"shortname": "Nrml",
 		"icon": "environment.normal",
 		"description": "Normal environment.",
-		"spritesheet": "tile.normal"
+		"spritesheet": "tile.normal",
+		"picturespritesheet": "tilePicture.normal",
+		"structureiconspritesheet": "structure"
 	},
 	"WASTELAND": {
 		"longname": "Wasteland",
 		"shortname": "Wstl",
 		"icon": "environment.wasteland",
 		"description": "Wasteland environment.",
-		"spritesheet": "tile.normal"
+		"spritesheet": "tile.normal",
+		"picturespritesheet": "tilePicture.normal",
+		"structureiconspritesheet": "structure"
 	},
 	"SNOWY": {
 		"longname": "Snowy",
 		"shortname": "Snow",
 		"icon": "environment.snowy",
 		"description": "Snowy environment.",
-		"spritesheet": "tile.normal"
+		"spritesheet": "tile.normal",
+		"picturespritesheet": "tilePicture.normal",
+		"structureiconspritesheet": "structure"
 	},
 	"SANDY": {
 		"longname": "Sandy",
 		"shortname": "Sand",
 		"icon": "environment.sandy",
 		"description": "Desert environment.",
-		"spritesheet": "tile.normal"
+		"spritesheet": "tile.normal",
+		"picturespritesheet": "tilePicture.normal",
+		"structureiconspritesheet": "structure"
 	}
 }

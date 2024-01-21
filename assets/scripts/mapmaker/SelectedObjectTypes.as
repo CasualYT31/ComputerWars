@@ -200,10 +200,11 @@ class SelectedStructure : SelectedObject {
      * Notifies observers when a change is made to the state of this object.
      */
     void update() override {
+        const auto sheet = awe::getEditMapEnvironmentStructureIconSpritesheet();
         if (type is null) update("", "", "");
         else if (destroyed)
-            update(type.destroyedName, "structure", type.destroyedIconName);
-        else if (owner.isEmpty()) update(type.name, "structure", type.iconName);
-        else update(type.name, "structure", type.ownedIconName(owner));
+            update(type.destroyedName, sheet, type.destroyedIconName);
+        else if (owner.isEmpty()) update(type.name, sheet, type.iconName);
+        else update(type.name, sheet, type.ownedIconName(owner));
     }
 }

@@ -481,6 +481,14 @@ std::string awe::map::getEnvironmentSpritesheet() const {
 	return _environment ? _environment->getSpritesheet() : "";
 }
 
+std::string awe::map::getEnvironmentPictureSpritesheet() const {
+	return _environment ? _environment->getPictureSpritesheet() : "";
+}
+
+std::string awe::map::getEnvironmentStructureIconSpritesheet() const {
+	return _environment ? _environment->getStructureIconSpritesheet() : "";
+}
+
 void awe::map::setSelectedAnimationPreset(const awe::animation_preset preset) {
 	_selectedAnimationPreset = preset;
 }

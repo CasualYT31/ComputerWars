@@ -2392,6 +2392,22 @@ namespace awe {
 		 */
 		std::string getEnvironmentSpritesheet() const;
 
+		/**
+		 * Retrieves the tile picture spritesheet of the current environment, if
+		 * there is one.
+		 * @return The current environment's configured tile picture spritesheet,
+		 *         or an empty string if there is no environment currently set.
+		 */
+		std::string getEnvironmentPictureSpritesheet() const;
+
+		/**
+		 * Retrieves the structure icon spritesheet of the current environment, if
+		 * there is one.
+		 * @return The current environment's configured structure icon spritesheet,
+		 *         or an empty string if there is no environment currently set.
+		 */
+		std::string getEnvironmentStructureIconSpritesheet() const;
+
 		//////////////////////////
 		// ANIMATION OPERATIONS //
 		//////////////////////////

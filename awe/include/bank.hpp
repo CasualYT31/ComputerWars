@@ -584,18 +584,21 @@ namespace awe {
 		/**
 		 * Constructor which passes on the JSON object to the \c common_properties
 		 * constructor.
-		 * There is an additional key-string pair required, \c "spritesheet". This
-		 * key will store the name of the tile spritesheet to use with this
-		 * environment.
+		 * It also passes on the JSON object to the \c common_properties
+		 * constructor. In addition to the keys defined in the superclass, the
+		 * following keys are required:
+		 *
+		 * <ul><li>\c "spritesheet" = \c _spritesheet, <tt>(string)</tt></li>
+		 *     <li>\c "picturespritesheet" = \c _pictureSpritesheet, <tt>(string)
+		 *         </tt></li>
+		 *     <li>\c "structureiconspritesheet" = \c _structureIconSpritesheet,
+		 *         <tt>(string)</tt></li></ul>
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
 		 * @param j          The object value containing the environment's
 		 *                   properties.
 		 */
-		inline environment(const std::string& scriptName, engine::json& j) :
-			common_properties(scriptName, j) {
-			j.apply(_spritesheet, { "spritesheet" }, true);
-		}
+		environment(const std::string& scriptName, engine::json& j);
 
 		/**
 		 * Registers \c environment with a given type.
@@ -620,11 +623,37 @@ namespace awe {
 		inline const std::string& getSpritesheet() const {
 			return _spritesheet;
 		}
+
+		/**
+		 * Retrieves the name of this environment's tile picture spritesheet.
+		 * @return The name of the tile picture spritesheet.
+		 */
+		inline const std::string& getPictureSpritesheet() const {
+			return _pictureSpritesheet;
+		}
+
+		/**
+		 * Retrieves the name of this environment's structure icon spritesheet.
+		 * @return The name of the structure icon spritesheet.
+		 */
+		inline const std::string& getStructureIconSpritesheet() const {
+			return _structureIconSpritesheet;
+		}
 	private:
 		/**
 		 * This environment's tile spritesheet.
 		 */
 		std::string _spritesheet;
+
+		/**
+		 * This environment's tile picture spritesheet.
+		 */
+		std::string _pictureSpritesheet;
+
+		/**
+		 * This environment's structure icon spritesheet.
+		 */
+		std::string _structureIconSpritesheet;
 	};
 
 	/**

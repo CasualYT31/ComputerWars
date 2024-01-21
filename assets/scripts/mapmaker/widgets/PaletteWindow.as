@@ -602,18 +602,12 @@ class StructurePalette : Observer, PalettePanel {
     }
 
     /**
-     * When the owner or destroyed flag changes, update the sprites on the
-     * buttons.
+     * Update the sprites on the buttons.
      * Also make sure the destroyed checkbox is up-to-date.
      */
     private void refresh(any&in data = any()) override {
-        const auto ownerChanged = latestOwner != selectedStructure.owner;
-        if (ownerChanged || latestDestroyed != selectedStructure.destroyed) {
-            regenerateButtonSprites();
-        }
-        if (ownerChanged) {
-            refreshCountryCombobox(latestOwner);
-        }
+        regenerateButtonSprites();
+        refreshCountryCombobox(selectedStructure.owner);
         destroyed.setChecked(selectedStructure.destroyed);
     }
 
@@ -622,18 +616,19 @@ class StructurePalette : Observer, PalettePanel {
      * selected structure, as well as its destroyed flag.
      */
     private void regenerateButtonSprites() {
-        latestOwner = selectedStructure.owner;
-        latestDestroyed = selectedStructure.destroyed;
         for (uint64 i = 0, len = buttonCount; i < len; ++i) {
             const auto scriptName = buttons[i].getName();
-            if (latestDestroyed) {
-                buttons[i].setSprite("structure",
+            if (selectedStructure.destroyed) {
+                buttons[i].setSprite(
+                    awe::getEditMapEnvironmentStructureIconSpritesheet(),
                     structure[scriptName].destroyedIconName
                 );
             } else {
-                buttons[i].setSprite("structure", latestOwner.isEmpty() ?
+                buttons[i].setSprite(
+                    awe::getEditMapEnvironmentStructureIconSpritesheet(),
+                    selectedStructure.owner.isEmpty() ?
                     structure[scriptName].iconName :
-                    structure[scriptName].ownedIconName(latestOwner)
+                    structure[scriptName].ownedIconName(selectedStructure.owner)
                 );
             }
         }
@@ -684,17 +679,6 @@ class StructurePalette : Observer, PalettePanel {
      * Handle to the tool bar widget.
      */
     private ToolBar@ toolBar;
-
-    /**
-     * When the owner of the selected structure changes, it is updated here.
-     */
-    private string latestOwner;
-
-    /**
-     * When the destroyed flag of the selected structure changes, it is updated
-     * here.
-     */
-    private bool latestDestroyed;
 
     /**
      * The group containing the destroyed checkbox.

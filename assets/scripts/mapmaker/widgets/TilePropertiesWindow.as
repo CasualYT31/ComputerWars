@@ -211,7 +211,7 @@ class TilePropertiesPanel {
         const auto tileType = edit.map.getTileType(tile);
         const auto tileOwner = edit.map.getTileOwner(tile);
         const auto terrain = tileType.type;
-        picture.setSprite("tilePicture.normal",
+        picture.setSprite(awe::getEditMapEnvironmentPictureSpritesheet(),
             tileOwner == NO_ARMY ? terrain.iconName : terrain.picture(tileOwner));
         tileTypeName.setText("~" + tileType.scriptName);
         terrainName.setText(terrain.name);

@@ -60,4 +60,24 @@ namespace awe {
     string getEditMapEnvironmentSpritesheet() {
         return edit is null ? "tile.normal" : edit.map.getEnvironmentSpritesheet();
     }
+
+    /**
+     * Retrieves the edit map's current environment tile picture spritesheet.
+     * @return The edit map's current environment tile picture spritesheet, or
+     *         \c "tilePicture.normal" if an edit map is not currently open.
+     */
+    string getEditMapEnvironmentPictureSpritesheet() {
+        return edit is null ? "tilePicture.normal" :
+            edit.map.getEnvironmentPictureSpritesheet();
+    }
+
+    /**
+     * Retrieves the edit map's current environment structure icon spritesheet.
+     * @return The edit map's current environment structure icon spritesheet, or
+     *         \c "structure" if an edit map is not currently open.
+     */
+    string getEditMapEnvironmentStructureIconSpritesheet() {
+        return edit is null ? "structure" :
+            edit.map.getEnvironmentStructureIconSpritesheet();
+    }
 }

@@ -84,6 +84,12 @@ awe::country::country(const std::string& scriptName, engine::json& j) :
 //*************
 //*ENVIRONMENT*
 //*************
+awe::environment::environment(const std::string& scriptName, engine::json& j) :
+	common_properties(scriptName, j) {
+	j.apply(_spritesheet, { "spritesheet" }, true);
+	j.apply(_pictureSpritesheet, { "picturespritesheet" }, true);
+	j.apply(_structureIconSpritesheet, { "structureiconspritesheet" }, true);
+}
 
 //***************
 //*MOVEMENT TYPE*

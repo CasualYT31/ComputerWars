@@ -145,7 +145,8 @@ class DetailedInfoMenu : Menu, Panel {
         tileHP.setText("~" + formatHP(game.map.getTileHP(currentTile)) + " / " +
             formatUInt(terrainType.maxHP));
         tileHP.setVisibility(terrainType.maxHP != 0);
-        tilePicture.setSprite("tilePicture.normal", getTilePicture(currentTile));
+        tilePicture.setSprite(game.map.getEnvironmentPictureSpritesheet(),
+            getTilePicture(currentTile));
         tileDescription.setText(terrainType.description);
         const auto movementTypeNames = movement.scriptNames;
         const auto movementTypeCount = movementTypeNames.length();
@@ -222,7 +223,7 @@ class DetailedInfoMenu : Menu, Panel {
     /**
      * Determines which tile picture to present to the user.
      * @param  pos The location of the tile whose picture is to be shown.
-     * @return The \c tilePicture.normal sprite to show.
+     * @return The tile picture sprite to show.
      */
     private string getTilePicture(const Vector2&in pos) {
         const auto t = game.map.getTileType(pos).type;

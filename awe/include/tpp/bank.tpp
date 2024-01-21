@@ -170,6 +170,18 @@ void awe::environment::Register(const std::string& type,
 		asMETHOD(T, getSpritesheet), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the name of the tile spritesheet to "
 		"use with this environment.");
+
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_pictureSpritesheet() const property",
+		asMETHOD(T, getPictureSpritesheet), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of the tile picture "
+		"spritesheet to use with this environment.");
+
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"const string& get_structureIconSpritesheet() const property",
+		asMETHOD(T, getStructureIconSpritesheet), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Gets the name of the structure icon "
+		"spritesheet to use with this environment.");
 }
 
 template<typename T>
