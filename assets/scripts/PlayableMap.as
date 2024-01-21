@@ -291,6 +291,18 @@ shared class PlayableMap {
     }
 
     /**
+     * Plays a structure's hit sound.
+     * @param terrainName The type of terrain that was hit.
+     */
+    private void playStructureHitSound(const string&in terrainName) {
+        if (terrainName == "PIPESEAM") {
+            map.queuePlay("sound", "destroy.megatank.piperunner");
+        } else {
+            map.queuePlay("sound", "destroy");
+        }
+    }
+
+    /**
      * Destroys a structure, and queues a particle effect and sounds afterwards.
      * @param rootTile The root tile of the structure.
      */
@@ -298,9 +310,10 @@ shared class PlayableMap {
         const auto terrainName = map.getTileType(rootTile).type.scriptName;
         map.destroyStructure(rootTile);
         // Play sound (black crystal is handled with its animation).
-        if (terrainName == "PIPESEAM" || terrainName == "BLACKLASER") {
-            map.queuePlay("sound", "destroy");
-        } else if (terrainName == "MINICANNON" || terrainName == "GRANDBOLTROOT") {
+        if (terrainName == "PIPESEAM") {
+            map.queuePlay("sound", "destroy.megatank.piperunner");
+        } else if (terrainName == "MINICANNON" || terrainName == "GRANDBOLTROOT" ||
+            terrainName == "BLACKLASER") {
             map.queuePlay("sound", "destroy.minicannon");
         } else if (terrainName == "DEATHRAYROOT" ||
             terrainName == "BLACKCANNONROOT") {
@@ -1665,12 +1678,15 @@ shared class PlayableMap {
             // structure, destroy the structure.
             if (newTileHP <= 0 && map.isTileAStructureTile(defender))
                 destroyStructure(defender);
-            // Otherwise, animate a particle over it.
-            else map.animateParticles({ TileParticle(
-                defender,
-                "land",
-                Vector2f(0.5, 1.0)
-            ) }, "particle");
+            // Otherwise, animate a particle over it and play a sound.
+            else {
+                playStructureHitSound(defenderTerrainTypeName);
+                map.animateParticles({ TileParticle(
+                    defender,
+                    "land",
+                    Vector2f(0.5, 1.0)
+                ) }, "particle");
+            }
         }
         // If the weapon used has finite ammo, and it is still alive, then remove
         // one from its ammo count.
