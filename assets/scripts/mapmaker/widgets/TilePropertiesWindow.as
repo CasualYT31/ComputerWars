@@ -41,7 +41,9 @@ class TilePropertiesWindow : Observer, ChildWindow {
      */
     void open(const string&in x, const string&in y) override {
         ChildWindow::open(x, y);
+        isOpening = true;
         selectBestTabIfNoTabIsSelected();
+        isOpening = false;
     }
 
     /**
@@ -94,7 +96,11 @@ class TilePropertiesWindow : Observer, ChildWindow {
      * If no tab is selected, this method will select the "best" one available.
      */
     private void selectBestTabIfNoTabIsSelected() {
-        if (tabs.getSelectedTab() >= 0) return;
+        if (tabs.getSelectedTab() >= 0) {
+            // Still play the select sound.
+            if (!isOpening) edit.map.queuePlay("sound", "select");
+            return;
+        }
         if (tabs.getTabEnabled(1)) tabs.setSelectedTab(1);
         else if (tabs.getTabEnabled(0)) tabs.setSelectedTab(0);
     }
@@ -118,6 +124,12 @@ class TilePropertiesWindow : Observer, ChildWindow {
      * Message that's visible when none of the panels are selected.
      */
     private Label noTileSelectMessage;
+
+    /**
+     * Prevents playing the select sound twice when opening this window in certain
+     * cases.
+     */
+    private bool isOpening = false;
 }
 
 /**
@@ -472,7 +484,7 @@ class UnitPropertiesPanel {
         button.setSize("100%", "100%");
         button.setText(text);
         button.setSprite("icon", icon);
-        button.connect(MouseReleased, handler);
+        button.connect(Clicked, handler);
         group.add(button);
         group.setPadding("5");
     }

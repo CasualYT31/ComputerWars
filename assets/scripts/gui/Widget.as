@@ -12,7 +12,7 @@ shared abstract class Widget {
      * @param widgetType The name of the type of widget to create.
      */
     protected Widget(const string&in widgetType) {
-        id = createWidget(widgetType);
+        id = ::createWidget(widgetType);
     }
 
     /**
@@ -39,19 +39,19 @@ shared abstract class Widget {
     }
 
     void setPosition(const string&in x, const string&in y) {
-        setWidgetPosition(this, x, y);
+        ::setWidgetPosition(this, x, y);
     }
 
     void setOrigin(const float x, const float y) {
-        setWidgetOrigin(this, x, y);
+        ::setWidgetOrigin(this, x, y);
     }
 
     void setSize(const string&in w, const string&in h) {
-        setWidgetSize(this, w, h);
+        ::setWidgetSize(this, w, h);
     }
 
     Vector2f getFullSize() const {
-        return getWidgetFullSize(this);
+        return ::getWidgetFullSize(this);
     }
 
     Vector2f getScaledFullSize() const {
@@ -63,27 +63,27 @@ shared abstract class Widget {
     }
 
     void setEnabled(const bool e) {
-        setWidgetEnabled(this, e);
+        ::setWidgetEnabled(this, e);
     }
 
     bool getEnabled() const {
-        return getWidgetEnabled(this);
+        return ::getWidgetEnabled(this);
     }
 
     void setVisibility(const bool visible) {
-        setWidgetVisibility(this, visible);
+        ::setWidgetVisibility(this, visible);
     }
 
     bool getVisibility() const {
-        return getWidgetVisibility(this);
+        return ::getWidgetVisibility(this);
     }
 
     void setFocus() {
-        setWidgetFocus(this);
+        ::setWidgetFocus(this);
     }
 
     void setTextSize(const uint size) {
-        setWidgetTextSize(this, size);
+        ::setWidgetTextSize(this, size);
     }
 
     void setFont(const string&in f) {
@@ -91,34 +91,38 @@ shared abstract class Widget {
     }
 
     void setName(const string&in n) {
-        setWidgetName(this, n);
+        ::setWidgetName(this, n);
     }
 
     string getName() const {
-        return getWidgetName(this);
+        return ::getWidgetName(this);
     }
 
     void setIndex(const uint64 i) {
-        setWidgetIndex(this, i);
+        ::setWidgetIndex(this, i);
     }
 
     void moveToFront() {
-        moveWidgetToFront(this);
+        ::moveWidgetToFront(this);
     }
 
     void moveToBack() {
-        moveWidgetToBack(this);
+        ::moveWidgetToBack(this);
     }
 
     void setAutoLayout(const AutoLayout l) {
-        setWidgetAutoLayout(this, l);
+        ::setWidgetAutoLayout(this, l);
     }
 
     void setDirectionalFlow(const Widget@ const up, const Widget@ const down,
         const Widget@ const left, const Widget@ const right) {
-        setWidgetDirectionalFlow(this, (up is null ? NO_WIDGET : up),
+        ::setWidgetDirectionalFlow(this, (up is null ? NO_WIDGET : up),
             (down is null ? NO_WIDGET : down), (left is null ? NO_WIDGET : left),
             (right is null ? NO_WIDGET : right));
+    }
+
+    void setSelectionSound(const string&in o, const string&in n) {
+        ::setWidgetSelectionSound(this, o, n);
     }
 
     /**

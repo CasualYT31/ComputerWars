@@ -22,6 +22,8 @@ class PreviewMoveUnitMenu : Menu, Group {
      * @param oldMenuName Name of the type of the \c Menu object.
      */
     void Open(Menu@ const oldMenu, const string&in oldMenuName) {
+        game.map.queuePlay("sound", "select");
+
         // Gather data.
         const auto unit = game.map.getSelectedUnit();
         const auto unitType = game.map.getUnitType(unit);

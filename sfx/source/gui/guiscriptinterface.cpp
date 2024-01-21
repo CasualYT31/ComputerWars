@@ -429,7 +429,7 @@ void sfx::gui::_setWidgetDirectionalFlowSelection(const std::string& menu,
 	const WidgetIDRef id) {
 	START_WITH_WIDGET(id)
 		if (!_menuExists(menu)) ERROR("This menu does not exist!");
-		_makeNewDirectionalSelection(id, menu);
+		_makeNewDirectionalSelection(id, menu, _upControl);
 	END("Attempted to manually directionally select the widget \"{}\", in the "
 		"menu \"{}\".", id, menu)
 }
@@ -461,6 +461,15 @@ void sfx::gui::_setDirectionalFlowAngleBracketSprite(const std::string& corner,
 	END("Attempted to set the sprite \"{}\" from spritesheet \"{}\" as the "
 		"directional flow angle bracket for the \"{}\" corner.", key, sheet,
 		corner)
+}
+
+void sfx::gui::_setWidgetSelectionSound(const sfx::WidgetIDRef id,
+	const std::string& object, const std::string& sound) {
+	START_WITH_WIDGET(id)
+		widget->selectionSoundObject = object;
+		widget->selectionSound = sound;
+	END("Attempted to set the widget \"{}\"'s selection sound to \"{}\", with "
+		"audio object \"{}\".", id, sound, object)
 }
 
 // SPRITES //

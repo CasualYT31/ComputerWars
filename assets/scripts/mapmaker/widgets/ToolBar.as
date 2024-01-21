@@ -86,7 +86,7 @@ class ToolBar : ChildWindow {
             add(buttons[i]);
             buttons[i].connect(MultiSignalHandler(this.buttonSignalHandler));
             // Automatically select the first tool.
-            if (i == 0) buttonSignalHandler(buttons[i], MouseReleased);
+            if (i == 0) buttonSignalHandler(buttons[i], Clicked);
         }
     }
 
@@ -112,7 +112,7 @@ class ToolBar : ChildWindow {
      * tool's button.
      */
     private void buttonSignalHandler(const WidgetID id, const string&in signal) {
-        if (signal != MouseReleased) return;
+        if (signal != Clicked) return;
         // Re-enable old tool button.
         if (currentTool < buttons.length())
             buttons[currentTool].setEnabled(true);

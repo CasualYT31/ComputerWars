@@ -36,7 +36,7 @@ class MainMenu : Menu, Group {
         openMapMaker.setOrigin(1.0, 0.0);
         openMapMaker.setText("~Map Maker");
         openMapMaker.setDirectionalFlow(mapFiles, mapFiles, mapFiles, mapFiles);
-        openMapMaker.connect(MouseReleased,
+        openMapMaker.connect(Clicked,
             // function(){ transitionToGUI("MapMaker"); });
             function(){ setGUI("MapMaker"); });
         add(openMapMaker);

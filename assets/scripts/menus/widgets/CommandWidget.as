@@ -27,7 +27,7 @@ class CommandWidget : VerticalLayout {
      * Adds a command button.
      * @param  widgetText The text to assign to the command button.
      * @param  spriteName The key of the sprite to assign to this command button.
-     * @param  handler    The \c MouseReleased signal handler for this button.
+     * @param  handler    The \c Clicked signal handler for this button.
      * @param  sheetName  The name of the sheet which contains the sprite.
      * @return The 0-based index of the newly added command.
      */
@@ -36,7 +36,7 @@ class CommandWidget : VerticalLayout {
         const auto i = bitmapButtons.length();
         bitmapButtons.resize(i + 1);
         add(bitmapButtons[i]);
-        bitmapButtons[i].connect(MouseReleased, handler);
+        bitmapButtons[i].connect(Clicked, handler);
         bitmapButtons[i].setSprite(sheetName, spriteName);
         bitmapButtons[i].setText(widgetText);
         configureDirectionalFlow(bitmapButtons[i]);

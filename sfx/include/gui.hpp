@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "language.hpp"
 #include "userinput.hpp"
 #include "fonts.hpp"
+#include "audio.hpp"
 #include "tgui/tgui.hpp"
 #include "tgui/Backend/SFML-Graphics.hpp"
 #include "tgui/Layout.hpp"
@@ -175,13 +176,15 @@ namespace sfx {
 		 * documentation for the \c Menu interface for more information.\n
 		 * This method also handles directional controls selecting different
 		 * widgets based on the current menu's configuration. If "select" is
-		 * triggered, a \c MouseReleased signal will be issued to the currently
-		 * selected widget in the current menu, if there is any, and if that widget
-		 * is of type \c ButtonBase, \c Button, \c BitmapButton, or \c ListBox.
+		 * triggered, a \c Clicked signal will be issued to the currently selected
+		 * widget in the current menu, if there is any, and if that widget is of
+		 * type \c ButtonBase or any of its derived types. If it is of type
+		 * \c ListBox, the \c MouseReleased signal will be issued instead.
 		 * @param  ui Pointer to the @c user_input instance to send information on.
 		 *            Note that the @c user_input::update() method should already
 		 *            have been called before a call to @c handleInput().
 		 * @safety No guarantee.
+		 * @sa     \c selectedSignalHandler().
 		 */
 		void handleInput(const std::shared_ptr<sfx::user_input>& ui);
 
@@ -200,6 +203,18 @@ namespace sfx {
 		 * @safety  No guarantee.
 		 */
 		bool signalHandler(tgui::Widget::Ptr widget,
+			const tgui::String& signalName);
+
+		/**
+		 * Handles \c Clicked signals for \c ButtonBase widgets, and all derived
+		 * widget types, as well as the \c MouseReleased signal for \c ListBox
+		 * widgets.
+		 * This will play a select sound, if the widget has one configured. Then,
+		 * \c signalHandler() will be invoked.
+		 * @param widget     The widget sending the signal.
+		 * @param signalName The name of the signal being sent.
+		 */
+		void selectedSignalHandler(tgui::Widget::Ptr widget,
 			const tgui::String& signalName);
 
 		/**
@@ -324,6 +339,13 @@ namespace sfx {
 		 *              given is so desired.
 		 */
 		void setFonts(const std::shared_ptr<sfx::fonts>& fonts) noexcept;
+
+		/**
+		 * Sets the audios to use with these menus.
+		 * @param audios Pointer to the \c audios object to use. \c nullptr to
+		 *               disable sounds (the default).
+		 */
+		void setAudios(const std::shared_ptr<sfx::audios>& audios) noexcept;
 
 		/**
 		 * Sets a scaling factor that is applied to all menus when drawn.
@@ -550,6 +572,25 @@ namespace sfx {
 			} directionalFlow;
 
 			/**
+			 * The name of the audio object containing the \c selectionSound.
+			 * If empty, no sound will play.
+			 */
+			std::string selectionSoundObject;
+
+			/**
+			 * When this widget is "selected," this sound will play.
+			 * Currently, this means if certain signals are emitted to certain
+			 * widget types, this sound will play. See the documentation on
+			 * \c handleInput() for the list of signals and widget types.\n
+			 * In addition to these signals and widget types, there is also
+			 * \c TabContainer and \c SelectionChanged, \c Tabs and \c TabSelected,
+			 * and \c MessageBox and \c ButtonPressed.\n
+			 * If empty, no sound will play.
+			 * @sa \c handleInput().
+			 */
+			std::string selectionSound;
+
+			/**
 			 * The name of the spritesheet containing the sprite to display with
 			 * this widget.
 			 */
@@ -681,13 +722,16 @@ namespace sfx {
 		 */
 		WidgetID _moveDirectionalFlow(const std::shared_ptr<sfx::user_input>& ui);
 
+		struct control_settings;
+
 		/**
 		 * Update the current directional flow selection.
 		 * @param newsel The ID of the widget to select.
 		 * @param menu   The name of the menu to update.
+		 * @param sound  The control used to make the new selection.
 		 */
 		void _makeNewDirectionalSelection(const WidgetIDRef newsel,
-			const std::string& menu);
+			const std::string& menu, const control_settings& sound);
 
 		/**
 		 * Reapplies all the translations to a widget recursively.
@@ -713,16 +757,15 @@ namespace sfx {
 		 * For the GUI engine to know which menu to open first, the JSON script
 		 * needs to store the class name of the \c Menu subclass to open as a
 		 * string. The key for this value is "main".\n
-		 * Additionally, five key-string pairs must be included, with the keys
-		 * "up", "down", "left", "right", and "select". The string values should
-		 * store the names of the game controls used to send those signals to the
-		 * GUI engine to move the setfocus around and to select the GUI currently
-		 * in setfocus.
+		 * Additionally, five key-object pairs must be included, with the keys
+		 * "up", "down", "left", "right", and "select". See
+		 * \c control_settings::load() for more information.
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return \c TRUE if all existing menus before the call were deleted, \c
 		 *         FALSE if not.
 		 * @safety No guarantee.
+		 * @sa     \c control_settings::load().
 		 */
 		bool _load(engine::json& j);
 
@@ -730,7 +773,7 @@ namespace sfx {
 		 * The JSON save method for this class.
 		 * The game control signals will be resaved. Additionally, the "reserve"
 		 * value shall be increased if the \c _widgets container has had to be
-		 * reallocated during execution.
+		 * reallocated during execution. \c "main" will also be remembered.
 		 * @param  j The \c nlohmann::ordered_json object representing the JSON
 		 *           script which this method writes to.
 		 * @return Always returns \c TRUE.
@@ -1131,6 +1174,8 @@ namespace sfx {
 			const WidgetIDRef);
 		void _setDirectionalFlowAngleBracketSprite(const std::string&,
 			const std::string&, const std::string&);
+		void _setWidgetSelectionSound(const WidgetIDRef, const std::string&,
+			const std::string&);
 
 		// SPRITES //
 
@@ -1525,6 +1570,11 @@ namespace sfx {
 		std::shared_ptr<sfx::fonts> _fonts;
 
 		/**
+		 * Pointer to the audios object.
+		 */
+		std::shared_ptr<sfx::audios> _audios;
+
+		/**
 		 * Pointer to the animated spritesheets that can be used with the GUI
 		 * menus.
 		 */
@@ -1592,34 +1642,70 @@ namespace sfx {
 			_widgetSprites;
 
 		/**
-		 * The game control name used to instruct the GUI engine to move the set
-		 * focus "up."
+		 * The settings for each UI control in the GUI.
 		 */
-		std::string _upControl;
+		struct control_settings {
+			/**
+			 * Initialises the control setting object's name.
+			 * @param n The name the object will have in the JSON script.
+			 */
+			control_settings(const std::string& n) : name(n) {}
+
+			/**
+			 * Play the default sound.
+			 * @param audios Pointer to the \c audios object.
+			 */
+			void play(const std::shared_ptr<sfx::audios>& audios) const;
+
+			/**
+			 * Loads this control's settings from a JSON object, after clearing
+			 * each field.
+			 * \c name should be a key in the root object, with an object value
+			 * containing the following key-string pairs:
+			 * <ul><li>\c "control", maps to \c control.</li>
+			 *     <li>\c "soundobject", maps to \c defaultSoundObject.</li>
+			 *     <li>\c "soundname", maps to \c defaultSoundName.</li></ul>
+			 * @param j The JSON object.
+			 */
+			void load(engine::json& j);
+
+			/**
+			 * Saves this control's settings to a JSON object.
+			 * @param j The root JSON object to store this object into.
+			 * @sa    \c load().
+			 */
+			void save(nlohmann::ordered_json& j);
+
+			/**
+			 * The name of the control.
+			 */
+			const std::string name;
+
+			/**
+			 * The game control name used to instruct the GUI engine to perform
+			 * this action.
+			 */
+			std::string control;
+
+			/**
+			 * The default sound object for this control.
+			 */
+			std::string defaultSoundObject;
+
+			/**
+			 * The default sound for this control.
+			 */
+			std::string defaultSoundName;
+		} _upControl{ "up" },           ///< Move the setfocus "up."
+			_downControl{ "down" },     ///< Move the setfocus "down."
+			_leftControl{ "left" },     ///< Move the setfocus "left."
+			_rightControl{ "right" },   ///< Move the setfocus "right."
+			_selectControl{ "select" }; ///< "Select" the setfocused UI element.
 
 		/**
-		 * The game control name used to instruct the GUI engine to move the set
-		 * focus "down."
+		 * Cache of the first menu opened since the last call to \c _load().
 		 */
-		std::string _downControl;
-
-		/**
-		 * The game control name used to instruct the GUI engine to move the set
-		 * focus "left."
-		 */
-		std::string _leftControl;
-
-		/**
-		 * The game control name used to instruct the GUI engine to move the set
-		 * focus "right."
-		 */
-		std::string _rightControl;
-
-		/**
-		 * The game control name used to instruct the GUI engine to "select" the UI
-		 * element with the setfocus.
-		 */
-		std::string _selectControl;
+		std::string _firstMenu;
 
 		/**
 		 * The current mouse position.

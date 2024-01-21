@@ -548,6 +548,7 @@ bool awe::game_engine::_load(engine::json& j) {
 			_gui->setSpritesheets(_sprites);
 			_gui->setLanguageDictionary(_dictionary);
 			_gui->setFonts(_fonts);
+			_gui->setAudios(_audios);
 			_gui->setTarget(*_renderer);
 			_gui->load(guiPath);
 			return _gui->inGoodState();

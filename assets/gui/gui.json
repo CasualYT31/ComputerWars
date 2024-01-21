@@ -1,9 +1,29 @@
 {
 	"main": "MainMenu",
 	"reserve": 1200,
-	"up": "up",
-	"down": "down",
-	"left": "left",
-	"right": "right",
-	"select": "select"
+	"up": {
+		"control": "up",
+		"soundobject": "sound",
+		"soundname": "movesel"
+	},
+	"down": {
+		"control": "down",
+		"soundobject": "sound",
+		"soundname": "movesel"
+	},
+	"left": {
+		"control": "left",
+		"soundobject": "sound",
+		"soundname": "movesel"
+	},
+	"right": {
+		"control": "right",
+		"soundobject": "sound",
+		"soundname": "movesel"
+	},
+	"select": {
+		"control": "select",
+		"soundobject": "sound",
+		"soundname": "select"
+	}
 }

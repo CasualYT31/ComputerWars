@@ -58,6 +58,19 @@ bool sfx::gui::signalHandler(tgui::Widget::Ptr widget,
 	return calledAny && allSuccessful;
 }
 
+void sfx::gui::selectedSignalHandler(tgui::Widget::Ptr widget,
+	const tgui::String& signalName) {
+	if (_audios) {
+		const auto data = _findWidget(_getWidgetID(widget));
+		if (data != _widgets.end() && !data->selectionSoundObject.empty() &&
+			!data->selectionSound.empty()) {
+			const auto audio = (*_audios)[data->selectionSoundObject];
+			if (audio) audio->play(data->selectionSound);
+		}
+	}
+	signalHandler(widget, signalName);
+}
+
 void sfx::gui::menuItemClickedSignalHandler(const sfx::WidgetID menuBarID,
 	const sfx::MenuItemID index) {
 	auto& data = *_findWidget(menuBarID);
@@ -73,7 +86,7 @@ void sfx::gui::messageBoxButtonPressedSignalHandler(const sfx::WidgetID id,
 	for (const auto len = btns.size(); data.lastMessageBoxButtonClicked < len;
 		++data.lastMessageBoxButtonClicked)
 		if (btns[data.lastMessageBoxButtonClicked] == caption) break;
-	signalHandler(data.ptr, signal::ButtonPressed);
+	selectedSignalHandler(data.ptr, signal::ButtonPressed);
 }
 
 void sfx::gui::child_window_properties::cache(
@@ -212,7 +225,36 @@ void sfx::gui::_connectSignals(tgui::Widget::Ptr widget) {
 		if (!signal.second.count(type.toStdString()) && !signal.second.empty())
 			continue;
 		// Connect special signal handlers...
-		if (type == type::ChildWindow || type == type::ColorPicker) {
+		if (type == type::ButtonBase || type == type::Button ||
+			type == type::BitmapButton || type == type::ToggleButton) {
+			auto button = std::dynamic_pointer_cast<ButtonBase>(widget);
+			if (signal.first == signal::Clicked) {
+				button->onClick(&sfx::gui::selectedSignalHandler, this, widget,
+					signal.first);
+				continue;
+			}
+		} else if (type == type::ListBox) {
+			auto listbox = std::dynamic_pointer_cast<ListBox>(widget);
+			if (signal.first == signal::MouseReleased) {
+				listbox->onMouseRelease(&sfx::gui::selectedSignalHandler, this,
+					widget, signal.first);
+				continue;
+			}
+		} else if (type == type::TabContainer) {
+			auto tabContainer = std::dynamic_pointer_cast<TabContainer>(widget);
+			if (signal.first == signal::SelectionChanged) {
+				tabContainer->onSelectionChange(&sfx::gui::selectedSignalHandler,
+					this, widget, signal.first);
+				continue;
+			}
+		} else if (type == type::Tabs) {
+			auto tabs = std::dynamic_pointer_cast<Tabs>(widget);
+			if (signal.first == signal::TabSelected) {
+				tabs->onTabSelect(&sfx::gui::selectedSignalHandler, this, widget,
+					signal.first);
+				continue;
+			}
+		} else if (type == type::ChildWindow || type == type::ColorPicker) {
 			auto childWindow = std::dynamic_pointer_cast<ChildWindow>(widget);
 			if (signal.first == signal::Minimized) {
 				childWindow->onMinimize(&sfx::gui::minimizedSignalHandler, this,

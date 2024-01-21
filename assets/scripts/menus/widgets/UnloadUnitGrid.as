@@ -19,9 +19,12 @@ class UnloadUnitGrid : Grid {
         SingleSignalHandler@ const cancelHandler) {
         // Setup the buttons.
         cancel.setText("cancelunload");
-        cancel.connect(MouseReleased, cancelHandler);
+        cancel.connect(Clicked, cancelHandler);
+        // Opening the PreviewMoveUnitMenu will already play the selection sound for
+        // us, so disable this button's selection sound.
+        cancel.setSelectionSound("", "");
         proceed.setText("proceedwithunload");
-        proceed.connect(MouseReleased, proceedHandler);
+        proceed.connect(Clicked, proceedHandler);
 
         // Setup the icons.
         hpIcon.setSprite("icon", "hp");

@@ -164,7 +164,6 @@ class UnloadUnitsMenu : Menu, Group {
             if (game.map.isPreviewUnit(loadedUnit))
                 game.map.removePreviewUnit(loadedUnit);
         }
-        game.map.queuePlay("sound", "back");
         setGUI("PreviewMoveUnitMenu");
     }
 
@@ -174,7 +173,7 @@ class UnloadUnitsMenu : Menu, Group {
      * @param s The signal emitted by the button widget.
      */
     private void unloadButtonSignalHandler(const WidgetID w, const string&in s) {
-        if (s != MouseReleased) return;
+        if (s != Clicked) return;
         currentlyUnloadingUnitsUnloadButton = w;
         currentlyUnloadingUnit = parseUnitID(getWidgetName(w));
         if (game.map.isPreviewUnit(currentlyUnloadingUnit)) {

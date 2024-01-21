@@ -346,7 +346,7 @@ class TerrainPalette : Observer, PalettePanel {
      */
     private void objectButtonSignalHandler(const WidgetID button,
         const string&in signal) override {
-        if (signal != MouseReleased) return;
+        if (signal != Clicked) return;
         @selectedTerrain.type = terrain[::getWidgetName(button)];
     }
 
@@ -432,7 +432,7 @@ class TileTypePalette : Observer, PalettePanel {
      */
     private void objectButtonSignalHandler(const WidgetID button,
         const string&in signal) override {
-        if (signal != MouseReleased) return;
+        if (signal != Clicked) return;
         @selectedTileType.type = tiletype[::getWidgetName(button)];
     }
 
@@ -517,7 +517,7 @@ class UnitTypePalette : Observer, PalettePanel {
      */
     private void objectButtonSignalHandler(const WidgetID button,
         const string&in signal) override {
-        if (signal != MouseReleased) return;
+        if (signal != Clicked) return;
         @selectedUnitType.type = unittype[::getWidgetName(button)];
     }
 
@@ -611,7 +611,7 @@ class StructurePalette : Observer, PalettePanel {
      */
     private void objectButtonSignalHandler(const WidgetID button,
         const string&in signal) override {
-        if (signal != MouseReleased) return;
+        if (signal != Clicked) return;
         @selectedStructure.type = structure[::getWidgetName(button)];
     }
 

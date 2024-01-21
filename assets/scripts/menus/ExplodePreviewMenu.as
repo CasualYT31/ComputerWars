@@ -87,7 +87,6 @@ class ExplodePreviewMenu : Menu, Group {
         // Handle cancellation and acceptance.
         if (bool(ui["back"])) {
             clearSelectedUnitData();
-            game.map.queuePlay("sound", "back");
             setGUI(PREVIOUS_MENU);
         } else if (bool(ui["select"])) {
             // If the cursor can be moved in this menu, the select control is

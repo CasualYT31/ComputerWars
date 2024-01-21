@@ -48,7 +48,7 @@ abstract class ButtonsWindow : ChildWindow {
             buttons[i].setText(props[i].text);
             buttons[i].setSize("100%", "100%");
             buttonGroups[i].add(buttons[i]);
-            buttons[i].connect(MouseReleased, props[i].handler);
+            buttons[i].connect(Clicked, props[i].handler);
         }
 
         // Setup each button group.

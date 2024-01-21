@@ -144,8 +144,7 @@ class ArmyPropertiesPanel : Panel {
             ArmyPropertiesPanelConstants::InputWidgetHeight);
         actionButton.setOrigin(0.5, 0.5);
         actionButton.setPosition("50%", "50%");
-        actionButton.connect(MouseReleased,
-            SingleSignalHandler(this.actionTriggered));
+        actionButton.connect(Clicked, SingleSignalHandler(this.actionTriggered));
         actionButtonGroup.add(actionButton);
 
         // Setup the top, bottom, and base layouts.

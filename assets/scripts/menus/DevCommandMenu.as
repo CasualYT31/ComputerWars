@@ -27,7 +27,7 @@ class DevCommandMenu : Menu, Group {
         back.setOrigin(1.0, 1.0);
         back.setPosition("100%", "DevCommandMenuCode.top");
         back.setTextSize(22);
-        back.connect(MouseReleased, function(){ setGUI("GameScreen"); });
+        back.connect(Clicked, function(){ setGUI("GameScreen"); });
         add(back);
 
         // Setup the error label.

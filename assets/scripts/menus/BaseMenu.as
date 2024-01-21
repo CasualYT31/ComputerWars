@@ -107,7 +107,7 @@ class BaseMenu : Menu, Group {
     private void unitButtonHandler(const WidgetID widget,
         const string&in signal) {
         const auto type = unittype[::getWidgetName(widget)];
-        if (signal == MouseReleased) {
+        if (signal == Clicked) {
             const ArmyID army = game.map.getSelectedArmy();
             if (game.buyUnit(type, army, game.map.getSelectedTile()))
                 setGUI("GameScreen");

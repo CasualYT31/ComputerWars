@@ -674,6 +674,14 @@ void sfx::gui::_registerDirectionalFlowGlobalFunctions(
 		"\"UL\", \"UR\", \"LL\", or \"LR\"), the second string denotes the "
 		"spritesheet to retrieve the sprite from, and the third string stores the "
 		"name of the sprite. The first string is trimmed and case-insensitive.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetSelectionSound("
+		WIDGET_ID_PARAM ", const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setWidgetSelectionSound),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the given widget's selection sound. "
+		"The widget's ID is given first, then the name of the audio object "
+		"containing the sound, then the name of the sound.");
 }
 
 void sfx::gui::_registerSpriteGlobalFunctions(asIScriptEngine* const engine,
