@@ -71,6 +71,9 @@ class MoveUnitMenu : Menu, Group {
                         !game.map.isUnitVisible(otherUnit,
                             game.map.getArmyOfUnit(unitID)) ||
                         game.canOoziumMove(unitID, selectedTile)) {
+                        // Set the moving unit's preview location now. If there is a
+                        // trap, it will be removed using game.moveUnit().
+                        game.map.addPreviewUnit(unitID, selectedTile);
                         const auto obstructionIndex =
                             game.map.scanPath(game.map.closedList, unitID);
                         if (obstructionIndex >= 0) {
@@ -90,7 +93,6 @@ class MoveUnitMenu : Menu, Group {
                             });
                         } else {
                             game.map.disableSelectedUnitRenderingEffects(true);
-                            game.map.addPreviewUnit(unitID, selectedTile);
                             if (game.map.closedList.length() >= 2)
                                 game.map.animateMoveUnit(unitID,
                                     game.map.closedList);
