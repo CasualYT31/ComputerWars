@@ -1,36 +1,36 @@
 {
 	"NORMAL": {
-		"longname": "Normal",
-		"shortname": "Nrml",
+		"longname": "NORMAL_longname",
+		"shortname": "NORMAL_shortname",
 		"icon": "environment.normal",
-		"description": "Normal environment.",
+		"description": "NORMAL_description",
 		"spritesheet": "tile.normal",
 		"picturespritesheet": "tilePicture.normal",
 		"structureiconspritesheet": "structure"
 	},
 	"WASTELAND": {
-		"longname": "Wasteland",
-		"shortname": "Wstl",
+		"longname": "WASTELAND_longname",
+		"shortname": "WASTELAND_shortname",
 		"icon": "environment.wasteland",
-		"description": "Wasteland environment.",
+		"description": "WASTELAND_description",
 		"spritesheet": "tile.normal",
 		"picturespritesheet": "tilePicture.normal",
 		"structureiconspritesheet": "structure"
 	},
 	"SNOWY": {
-		"longname": "Snowy",
-		"shortname": "Snow",
+		"longname": "SNOWY_longname",
+		"shortname": "SNOWY_shortname",
 		"icon": "environment.snowy",
-		"description": "Snowy environment.",
+		"description": "SNOWY_description",
 		"spritesheet": "tile.normal",
 		"picturespritesheet": "tilePicture.normal",
 		"structureiconspritesheet": "structure"
 	},
 	"SANDY": {
-		"longname": "Sandy",
-		"shortname": "Sand",
+		"longname": "SANDY_longname",
+		"shortname": "SANDY_shortname",
 		"icon": "environment.sandy",
-		"description": "Desert environment.",
+		"description": "SANDY_description",
 		"spritesheet": "tile.normal",
 		"picturespritesheet": "tilePicture.normal",
 		"structureiconspritesheet": "structure"

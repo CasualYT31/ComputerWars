@@ -497,7 +497,7 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	_unitsBeingDestroyed.clear();
 	_tiles.clear();
 	_mapName.clear();
-	_day = 0;
+	_day = 1;
 	_viewOffsetX.reset();
 	_viewOffsetY.reset();
 	_mapSizeCache = { 0, 0 };
@@ -505,7 +505,7 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	removeAllPreviewUnits();
 	_mapShakeTimeLeft = sf::Time::Zero;
 	_waitBeforeNextShake = sf::Time::Zero;
-	_environment = nullptr;
+	_environment = _environments->begin()->second;
 	if (_scripts->doesModuleExist(_moduleName))
 		_scripts->deleteModule(_moduleName);
 	_moduleName.clear();

@@ -68,6 +68,7 @@
 	"name": "Name",
 	"size": "Size",
 	"daylabel": "Day",
+	"environment": "Environment",
 	"newmap": "New Map",
 	"openmap": "Open Map",
 	"savemap": "Save Map",
@@ -182,7 +183,7 @@
 	"OPERATION_renamescript": "Rename Script",
 	"OPERATION_environment": "Set Environment",
 
-	"OPERATION_mapprops": "Update Map's Name and/or Day",
+	"OPERATION_mapprops": "Update Map's Name, Day, and/or Environment",
 	"OPERATION_tiletypeandowner": "Set Tile's Type and/or Owner",
 	"OPERATION_createloadunit": "Create and Load Unit",
 	"OPERATION_paintstructure": "Paint Structure",
@@ -260,6 +261,22 @@
 	"WHITE_COUNTRY_longname": "White Nova",
 	"WHITE_COUNTRY_shortname": "WN",
 	"WHITE_COUNTRY_description": "White Nova.",
+
+	"NORMAL_longname": "Normal",
+	"NORMAL_shortname": "Nrml",
+	"NORMAL_description": "Normal environment.",
+
+	"WASTELAND_longname": "Wasteland",
+	"WASTELAND_shortname": "Wstl",
+	"WASTELAND_description": "Wasteland environment.",
+
+	"SNOWY_longname": "Snowy",
+	"SNOWY_shortname": "Snow",
+	"SNOWY_description": "Snowy environment.",
+
+	"SANDY_longname": "Sandy",
+	"SANDY_shortname": "Sand",
+	"SANDY_description": "Sandy environment.",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

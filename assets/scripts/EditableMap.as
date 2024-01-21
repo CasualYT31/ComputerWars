@@ -331,14 +331,18 @@ class EditableMap {
     ////////////////////
     /**
      * Updates a map's properties.
-     * @param mapName The name of the map.
-     * @param day     The current day of the map.
+     * @param mapName        The name of the map.
+     * @param day            The current day of the map.
+     * @param newEnvironment Script name of the environment to set to the map.
      */
-    void setMapProperties(const string&in mapName, const Day day) {
-        if (mapName == map.getMapName() && day == map.getDay()) return;
+    void setMapProperties(const string&in mapName, const Day day,
+        const string&in newEnvironment) {
+        if (mapName == map.getMapName() && day == map.getDay() &&
+            newEnvironment == map.getEnvironment().scriptName) return;
         DisableMementos token(map, OPERATION[Operation::MAP_PROPS]);
         map.setMapName(mapName);
         map.setDay(day);
+        map.setEnvironment(newEnvironment);
     }
 
     /**

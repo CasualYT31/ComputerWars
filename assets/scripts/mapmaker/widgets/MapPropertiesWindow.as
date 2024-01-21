@@ -15,15 +15,16 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         super({ ButtonsWindowButton("cancel", SingleSignalHandler(this.cancel)),
             ButtonsWindowButton("ok", SingleSignalHandler(this.ok)) });
         setText("mapprops");
-        setSize("250", "175");
+        setSize("250", "235");
         setResizable(false);
         setTitleButtons(TitleButton::Close);
         close(false);
 
-        // Setup the edit boxes.
+        // Setup the edit boxes and comboboxes.
         day.setValidator(VALIDATOR_UINT);
         width.setValidator(VALIDATOR_UINT);
         height.setValidator(VALIDATOR_UINT);
+        environmentComboBox.setSize("", "48");
 
         // Setup the size layout.
         width.setSize("100%", "100%");
@@ -40,6 +41,7 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         sizeLayout.setRatioOfWidget(1, 0.3);
 
         // Setup properties layout.
+        propertiesLayout.setRatioOfWidget(3, 1.1);
         clientArea.add(propertiesLayout);
 
         // Setup the confirm resize window.
@@ -83,6 +85,8 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         const auto size = edit.map.getMapSize();
         width.setText(formatUInt(size.x));
         height.setText(formatUInt(size.y));
+        environmentComboBox.select(uint(environment.scriptNames.find(
+            edit.map.getEnvironment().scriptName)));
     }
 
     /**
@@ -123,7 +127,8 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
      * Apply the updated map properties and close the window/s.
      */
     private void applyChangesAndClose() {
-        edit.setMapProperties(name.getText(), parseDay(day.getText()));
+        edit.setMapProperties(name.getText(), parseDay(day.getText()),
+            environment.scriptNames[uint(environmentComboBox.getSelected())]);
         const Vector2 oldSize = edit.map.getMapSize(),
             newSize(parseUInt(width.getText()), parseUInt(height.getText()));
         // Check if we've resized first, because in rare cases there may not be a
@@ -220,12 +225,18 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
     private EditBox height;
 
     /**
+     * The map's environment.
+     */
+    private EnvironmentComboBox environmentComboBox(4, null);
+
+    /**
      * The map properties.
      */
     private array<MapPropertyRow@> rows = {
         MapPropertyRow(propertiesLayout, "name", name),
         MapPropertyRow(propertiesLayout, "daylabel", day),
-        MapPropertyRow(propertiesLayout, "size", sizeLayout)
+        MapPropertyRow(propertiesLayout, "size", sizeLayout),
+        MapPropertyRow(propertiesLayout, "environment", environmentComboBox)
     };
 }
 
