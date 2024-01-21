@@ -2421,6 +2421,15 @@ namespace awe {
 		void queueStop(const std::string& audio, const std::string& name);
 
 		/**
+		 * Attempts to queue a "delay" animation.
+		 * @param  duration  The duration of the delay, in seconds.
+		 * @param  skippable \c TRUE if the user can skip the delay, \c FALSE if
+		 *                   not.
+		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool queueDelay(const float duration, const bool skippable = false);
+
+		/**
 		 * Attempts to queue a "day begin" animation.
 		 * @param  armyID The ID of the army who's having their turn.
 		 * @param  day    The day to display.

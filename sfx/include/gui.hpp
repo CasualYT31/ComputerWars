@@ -572,6 +572,58 @@ namespace sfx {
 			} directionalFlow;
 
 			/**
+			 * The name of the audio object containing the \c moveUpSound.
+			 * If empty, no sound will play.
+			 */
+			std::string moveUpSoundObject;
+
+			/**
+			 * The sound to play when the setfocus is moved away from this widget
+			 * by pressing "up."
+			 * If empty, no sound will play.
+			 */
+			std::string moveUpSound;
+
+			/**
+			 * The name of the audio object containing the \c moveDownSound.
+			 * If empty, no sound will play.
+			 */
+			std::string moveDownSoundObject;
+
+			/**
+			 * The sound to play when the setfocus is moved away from this widget
+			 * by pressing "down."
+			 * If empty, no sound will play.
+			 */
+			std::string moveDownSound;
+
+			/**
+			 * The name of the audio object containing the \c moveLeftSound.
+			 * If empty, no sound will play.
+			 */
+			std::string moveLeftSoundObject;
+
+			/**
+			 * The sound to play when the setfocus is moved away from this widget
+			 * by pressing "left."
+			 * If empty, no sound will play.
+			 */
+			std::string moveLeftSound;
+
+			/**
+			 * The name of the audio object containing the \c moveRightSound.
+			 * If empty, no sound will play.
+			 */
+			std::string moveRightSoundObject;
+
+			/**
+			 * The sound to play when the setfocus is moved away from this widget
+			 * by pressing "right."
+			 * If empty, no sound will play.
+			 */
+			std::string moveRightSound;
+
+			/**
 			 * The name of the audio object containing the \c selectionSound.
 			 * If empty, no sound will play.
 			 */
@@ -1065,6 +1117,16 @@ namespace sfx {
 		void _eraseWidgetState(const tgui::Widget::Ptr& widget,
 			const bool removeIt);
 
+		/**
+		 * Plays a sound.
+		 * @param object The name of the audio object containing the sound.
+		 * @param name   The name of the sound to play.
+		 */
+		inline void _play(const std::string& object, const std::string& name) {
+			if (_audios) if (const auto audio = (*_audios)[object])
+				audio->play(name);
+		}
+
 		//////////////////////
 		// SCRIPT INTERFACE //
 		//////////////////////
@@ -1174,6 +1236,14 @@ namespace sfx {
 			const WidgetIDRef);
 		void _setDirectionalFlowAngleBracketSprite(const std::string&,
 			const std::string&, const std::string&);
+		void _setWidgetMoveUpFromSound(const WidgetIDRef, const std::string&,
+			const std::string&);
+		void _setWidgetMoveDownFromSound(const WidgetIDRef, const std::string&,
+			const std::string&);
+		void _setWidgetMoveLeftFromSound(const WidgetIDRef, const std::string&,
+			const std::string&);
+		void _setWidgetMoveRightFromSound(const WidgetIDRef, const std::string&,
+			const std::string&);
 		void _setWidgetSelectionSound(const WidgetIDRef, const std::string&,
 			const std::string&);
 
@@ -1650,12 +1720,6 @@ namespace sfx {
 			 * @param n The name the object will have in the JSON script.
 			 */
 			control_settings(const std::string& n) : name(n) {}
-
-			/**
-			 * Play the default sound.
-			 * @param audios Pointer to the \c audios object.
-			 */
-			void play(const std::shared_ptr<sfx::audios>& audios) const;
 
 			/**
 			 * Loads this control's settings from a JSON object, after clearing

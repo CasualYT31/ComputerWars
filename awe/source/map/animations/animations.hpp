@@ -31,3 +31,4 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "include/moveunit.hpp"
 #include "include/scroll.hpp"
 #include "include/launchorstrike.hpp"
+#include "include/delay.hpp"

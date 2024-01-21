@@ -62,10 +62,12 @@ namespace awe {
 			 * The name of the sound to play when the unit is travelling to this
 			 * node during the first half of the journey.
 			 * If there was a move sound playing previously in this animation, then
-			 * that sound will be stopped. All of the animation's sounds will be
-			 * stopped when it finishes.\n
+			 * that sound will be stopped.\n
 			 * If this value is empty, or the same as the name of the sound
 			 * currently playing in the animation, then nothing changes.
+			 * @warning The final sound in the animation will \b not be stopped! So
+			 *          make sure this is carried out manually. This was done to
+			 *          prevent move sounds from seemingly ending "abruptly."
 			 */
 			const std::string firstSound;
 

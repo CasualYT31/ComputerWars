@@ -463,6 +463,42 @@ void sfx::gui::_setDirectionalFlowAngleBracketSprite(const std::string& corner,
 		corner)
 }
 
+void sfx::gui::_setWidgetMoveUpFromSound(const sfx::WidgetIDRef id,
+	const std::string& object, const std::string& sound) {
+	START_WITH_WIDGET(id)
+		widget->moveUpSoundObject = object;
+		widget->moveUpSound = sound;
+	END("Attempted to set the widget \"{}\"'s move up sound to \"{}\", with "
+		"audio object \"{}\".", id, sound, object)
+}
+
+void sfx::gui::_setWidgetMoveDownFromSound(const sfx::WidgetIDRef id,
+	const std::string& object, const std::string& sound) {
+	START_WITH_WIDGET(id)
+		widget->moveDownSoundObject = object;
+		widget->moveDownSound = sound;
+	END("Attempted to set the widget \"{}\"'s move down sound to \"{}\", with "
+		"audio object \"{}\".", id, sound, object)
+}
+
+void sfx::gui::_setWidgetMoveLeftFromSound(const sfx::WidgetIDRef id,
+	const std::string& object, const std::string& sound) {
+	START_WITH_WIDGET(id)
+		widget->moveLeftSoundObject = object;
+		widget->moveLeftSound = sound;
+	END("Attempted to set the widget \"{}\"'s move left sound to \"{}\", with "
+		"audio object \"{}\".", id, sound, object)
+}
+
+void sfx::gui::_setWidgetMoveRightFromSound(const sfx::WidgetIDRef id,
+	const std::string& object, const std::string& sound) {
+	START_WITH_WIDGET(id)
+		widget->moveRightSoundObject = object;
+		widget->moveRightSound = sound;
+	END("Attempted to set the widget \"{}\"'s move right sound to \"{}\", with "
+		"audio object \"{}\".", id, sound, object)
+}
+
 void sfx::gui::_setWidgetSelectionSound(const sfx::WidgetIDRef id,
 	const std::string& object, const std::string& sound) {
 	START_WITH_WIDGET(id)

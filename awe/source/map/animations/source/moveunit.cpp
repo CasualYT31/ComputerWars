@@ -68,7 +68,6 @@ bool awe::move_unit::animate(const sf::RenderTarget& target) {
 	if (_tile >= _path.size()) {
 		_unit->clearSpritesheetOverride();
 		_unit->clearIconSpritesheetOverride();
-		if (!_sound.empty()) _sounds->stop(_sound);
 		return true;
 	} else return false;
 }

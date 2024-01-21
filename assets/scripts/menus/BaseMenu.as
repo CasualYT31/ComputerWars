@@ -119,6 +119,7 @@ class BaseMenu : Menu, Group {
             label.setText("~" + translate("price", { any(current) }) + " - " +
                 translate("price", { any(cost) }) + " = " +
                 translate("price", { any(result) }));
+            game.map.queuePlay("sound", "movesel");
         }
     }
 

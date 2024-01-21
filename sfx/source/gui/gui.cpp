@@ -271,13 +271,6 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 			}
 		}
 	} else if (_previousMousePosition == _currentMousePosition) {
-		// If the directional flow cursor is coming back, play a select sound.
-		if (!_enableDirectionalFlow) {
-			if ((*ui)[_upControl.control]) _upControl.play(_audios);
-			if ((*ui)[_downControl.control]) _downControl.play(_audios);
-			if ((*ui)[_leftControl.control]) _leftControl.play(_audios);
-			if ((*ui)[_rightControl.control]) _rightControl.play(_audios);
-		}
 		// Only re-enable directional flow if a directional input is made,
 		// whilst the mouse isn't moving.
 		_enableDirectionalFlow = (*ui)[_upControl.control] ||
@@ -289,8 +282,19 @@ void sfx::gui::handleInput(const std::shared_ptr<sfx::user_input>& ui) {
 		if (cursel.first == sfx::NO_WIDGET)
 			_moveDirectionalFlow(ui);
 		// Otherwise, make sure what was selected is now visible to the user.
-		else if (_enableDirectionalFlow && cursel.second)
+		// Make sure to play a sound, too.
+		else if (_enableDirectionalFlow && cursel.second) {
 			_showWidgetInScrollablePanel(cursel.second);
+			const auto w = _findWidget(cursel.first);
+			if ((*ui)[_upControl.control])
+				_play(w->moveUpSoundObject, w->moveUpSound);
+			if ((*ui)[_downControl.control])
+				_play(w->moveDownSoundObject, w->moveDownSound);
+			if ((*ui)[_leftControl.control])
+				_play(w->moveLeftSoundObject, w->moveLeftSound);
+			if ((*ui)[_rightControl.control])
+				_play(w->moveRightSoundObject, w->moveRightSound);
+		}
 	}
 	// Invoke the current menu's bespoke input handling method.
 	// If the signal handler was invoked, do not invoke any bespoke input
@@ -569,6 +573,7 @@ sfx::WidgetID sfx::gui::_moveDirectionalFlow(
 	const std::shared_ptr<sfx::user_input>& ui) {
 	const auto cursel = _findCurrentlySelectedWidget();
 	const auto& widgetType = !cursel.second ? "" : cursel.second->getWidgetType();
+	const auto widgetData = _findWidget(cursel.first);
 	if ((*ui)[_upControl.control]) {
 		if (cursel.first == sfx::NO_WIDGET) {
 			_makeNewDirectionalSelection(_menus.at(getGUI()).selectThisWidgetFirst,
@@ -577,20 +582,20 @@ sfx::WidgetID sfx::gui::_moveDirectionalFlow(
 			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
 			const auto i = listbox->getSelectedItemIndex();
 			if (i == -1) {
-				if (listbox->setSelectedItemByIndex(0)) _upControl.play(_audios);
+				if (listbox->setSelectedItemByIndex(0))
+					_play(widgetData->moveUpSoundObject, widgetData->moveUpSound);
 			} else if (i > 0) {
 				if (listbox->setSelectedItemByIndex(
-					static_cast<std::size_t>(i) - 1)) _upControl.play(_audios);
-			} else if (_findWidget(cursel.first)->directionalFlow.up ==
-				sfx::NO_WIDGET) {
+					static_cast<std::size_t>(i) - 1))
+					_play(widgetData->moveUpSoundObject, widgetData->moveUpSound);
+			} else if (widgetData->directionalFlow.up == sfx::NO_WIDGET) {
 				// If there is nowhere to go from the top, loop through to the
 				// the bottom of the list.
 				if (listbox->setSelectedItemByIndex(listbox->getItemCount() - 1))
-					_upControl.play(_audios);
+					_play(widgetData->moveUpSoundObject, widgetData->moveUpSound);
 			} else {
-				_makeNewDirectionalSelection(
-					_findWidget(cursel.first)->directionalFlow.up, getGUI(),
-					_upControl);
+				_makeNewDirectionalSelection(widgetData->directionalFlow.up,
+					getGUI(), _upControl);
 			}
 		} else if (widgetType == type::ScrollablePanel) {
 			const auto panel =
@@ -608,13 +613,11 @@ sfx::WidgetID sfx::gui::_moveDirectionalFlow(
 						value - panel->getVerticalScrollAmount());
 				}
 			} else {
-				_makeNewDirectionalSelection(
-					_findWidget(cursel.first)->directionalFlow.up, getGUI(),
-					_upControl);
+				_makeNewDirectionalSelection(widgetData->directionalFlow.up,
+					getGUI(), _upControl);
 			}
 		} else {
-			_makeNewDirectionalSelection(
-				_findWidget(cursel.first)->directionalFlow.up, getGUI(),
+			_makeNewDirectionalSelection(widgetData->directionalFlow.up, getGUI(),
 				_upControl);
 		}
 	}
@@ -626,19 +629,23 @@ sfx::WidgetID sfx::gui::_moveDirectionalFlow(
 			const auto listbox = std::dynamic_pointer_cast<ListBox>(cursel.second);
 			const auto i = listbox->getSelectedItemIndex();
 			if (i == -1) {
-				if (listbox->setSelectedItemByIndex(0)) _downControl.play(_audios);
+				if (listbox->setSelectedItemByIndex(0))
+					_play(widgetData->moveDownSoundObject,
+						widgetData->moveDownSound);
 			} else if (i < listbox->getItemCount() - 1) {
 				if (listbox->setSelectedItemByIndex(
-					static_cast<std::size_t>(i) + 1)) _downControl.play(_audios);
-			} else if (_findWidget(cursel.first)->directionalFlow.down ==
-				sfx::NO_WIDGET) {
+					static_cast<std::size_t>(i) + 1))
+					_play(widgetData->moveDownSoundObject,
+						widgetData->moveDownSound);
+			} else if (widgetData->directionalFlow.down == sfx::NO_WIDGET) {
 				// If there is nowhere to go from the bottom, loop through to the
 				// the top of the list.
-				if (listbox->setSelectedItemByIndex(0)) _downControl.play(_audios);
+				if (listbox->setSelectedItemByIndex(0))
+					_play(widgetData->moveDownSoundObject,
+						widgetData->moveDownSound);
 			} else {
-				_makeNewDirectionalSelection(
-					_findWidget(cursel.first)->directionalFlow.down, getGUI(),
-					_downControl);
+				_makeNewDirectionalSelection(widgetData->directionalFlow.down,
+					getGUI(), _downControl);
 			}
 		} else if (widgetType == type::ScrollablePanel) {
 			const auto panel =
@@ -654,14 +661,12 @@ sfx::WidgetID sfx::gui::_moveDirectionalFlow(
 				panel->setVerticalScrollbarValue(
 					value + panel->getVerticalScrollAmount());
 			} else {
-				_makeNewDirectionalSelection(
-					_findWidget(cursel.first)->directionalFlow.down, getGUI(),
-					_downControl);
+				_makeNewDirectionalSelection(widgetData->directionalFlow.down,
+					getGUI(), _downControl);
 			}
 		} else {
-			_makeNewDirectionalSelection(
-				_findWidget(cursel.first)->directionalFlow.down, getGUI(),
-				_downControl);
+			_makeNewDirectionalSelection(widgetData->directionalFlow.down,
+				getGUI(), _downControl);
 		}
 	}
 	if ((*ui)[_leftControl.control]) {
@@ -684,14 +689,12 @@ sfx::WidgetID sfx::gui::_moveDirectionalFlow(
 						value - panel->getHorizontalScrollAmount());
 				}
 			} else {
-				_makeNewDirectionalSelection(
-					_findWidget(cursel.first)->directionalFlow.left, getGUI(),
-					_leftControl);
+				_makeNewDirectionalSelection(widgetData->directionalFlow.left,
+					getGUI(), _leftControl);
 			}
 		} else {
-			_makeNewDirectionalSelection(
-				_findWidget(cursel.first)->directionalFlow.left, getGUI(),
-				_leftControl);
+			_makeNewDirectionalSelection(widgetData->directionalFlow.left,
+				getGUI(), _leftControl);
 		}
 	}
 	if ((*ui)[_rightControl.control]) {
@@ -712,14 +715,12 @@ sfx::WidgetID sfx::gui::_moveDirectionalFlow(
 				panel->setHorizontalScrollbarValue(
 					value + panel->getHorizontalScrollAmount());
 			} else {
-				_makeNewDirectionalSelection(
-					_findWidget(cursel.first)->directionalFlow.right, getGUI(),
-					_rightControl);
+				_makeNewDirectionalSelection(widgetData->directionalFlow.right,
+					getGUI(), _rightControl);
 			}
 		} else {
-			_makeNewDirectionalSelection(
-				_findWidget(cursel.first)->directionalFlow.right, getGUI(),
-				_rightControl);
+			_makeNewDirectionalSelection(widgetData->directionalFlow.right,
+				getGUI(), _rightControl);
 		}
 	}
 	return _menus.at(getGUI()).currentlySelectedWidget;
@@ -730,6 +731,7 @@ void sfx::gui::_makeNewDirectionalSelection(const sfx::WidgetIDRef newsel,
 	if (newsel == sfx::NO_WIDGET) return;
 	auto& prev = _menus.at(menu).previouslySelectedWidget;
 	auto& current = _menus.at(menu).currentlySelectedWidget;
+	const auto currentSel = _findWidget(current);
 	if (newsel == GOTO_PREVIOUS_WIDGET) {
 		// Do not allow selection to go ahead if the previous widget is now not
 		// visible!
@@ -744,13 +746,28 @@ void sfx::gui::_makeNewDirectionalSelection(const sfx::WidgetIDRef newsel,
 			current = newsel;
 		} else return;
 	}
+	// Selection is moving, so play sound now.
+	if (_audios && currentSel != _widgets.end()) {
+		if (sound.name == "up") {
+			if (const auto audio = (*_audios)[currentSel->moveUpSoundObject])
+				audio->play(currentSel->moveUpSound);
+		} else if (sound.name == "down") {
+			if (const auto audio = (*_audios)[currentSel->moveDownSoundObject])
+				audio->play(currentSel->moveDownSound);
+		} else if (sound.name == "left") {
+			if (const auto audio = (*_audios)[currentSel->moveLeftSoundObject])
+				audio->play(currentSel->moveLeftSound);
+		} else if (sound.name == "right") {
+			if (const auto audio = (*_audios)[currentSel->moveRightSoundObject])
+				audio->play(currentSel->moveRightSound);
+		}
+	}
 	// Make a copy of the pointer instead of holding a reference to the original.
 	// This is because the signal handler may invalidate the iterator returned by
 	// _findWidget(). See the documentation on signalHandler().
 	const Widget::Ptr widget = _findWidget(current)->ptr;
 	signalHandler(widget, "MouseEntered");
 	_showWidgetInScrollablePanel(widget);
-	sound.play(_audios);
 };
 
 void sfx::gui::_translateWidget(tgui::Widget::Ptr widget) {
@@ -1177,7 +1194,15 @@ sfx::WidgetID sfx::gui::_storeWidget(const tgui::Widget::Ptr& w) {
 	w->setUserData(widgetID);
 	const auto widget = _findWidget(widgetID);
 	widget->ptr = w;
-	// If this widget can be "selected," apply the default selection sound.
+	// If this widget can be "selected," apply the default sounds.
+	widget->moveUpSoundObject = _upControl.defaultSoundObject;
+	widget->moveUpSound = _upControl.defaultSoundName;
+	widget->moveDownSoundObject = _downControl.defaultSoundObject;
+	widget->moveDownSound = _downControl.defaultSoundName;
+	widget->moveLeftSoundObject = _leftControl.defaultSoundObject;
+	widget->moveLeftSound = _leftControl.defaultSoundName;
+	widget->moveRightSoundObject = _rightControl.defaultSoundObject;
+	widget->moveRightSound = _rightControl.defaultSoundName;
 	widget->selectionSoundObject = _selectControl.defaultSoundObject;
 	widget->selectionSound = _selectControl.defaultSoundName;
 	if (w->getWidgetType() == type::ChildWindow) {
@@ -1294,12 +1319,6 @@ void sfx::gui::_clearState(const std::size_t widgetCount) {
 
 sfx::gui::menu_data::~menu_data() noexcept {
 	if (object) object->Release();
-}
-
-void sfx::gui::control_settings::play(
-	const std::shared_ptr<sfx::audios>& audios) const {
-	if (audios) if (const auto audio = (*audios)[defaultSoundObject])
-		audio->play(defaultSoundName);
 }
 
 void sfx::gui::control_settings::load(engine::json& j) {

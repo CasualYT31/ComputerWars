@@ -511,6 +511,12 @@ void awe::map::queueStop(const std::string& audio, const std::string& name) {
 	}, audio, name));
 }
 
+bool awe::map::queueDelay(const float duration, const bool skippable) {
+	if (!_canAnimationBeQueued()) return false;
+	_animationQueue.push(std::make_unique<awe::delay>(duration, skippable));
+	return true;
+}
+
 bool awe::map::animateDayBegin(const awe::ArmyID armyID, const awe::Day day,
 	const std::string& font) {
 	if (!_canAnimationBeQueued({ awe::animation_preset::Debug }, true))
@@ -669,6 +675,7 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 	const auto unitType = _units.at(unit).data.getType();
 	const auto hidden = _units.at(unit).data.isHiding();
 	std::optional<sf::Vector2u> previousTile;
+	std::string finalSound;
 	for (asUINT i = 0, len = closedList->GetSize(); i < len; ++i) {
 		const auto nextTile =
 			static_cast<const awe::closed_list_node*>(closedList->At(i))->tile;
@@ -687,11 +694,13 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 		auto pos = nextTileObj.sprite->getPixelPosition();
 		pos.x += nextTileObj.sprite->getPixelSize().x * 0.5f;
 		pos.y += nextTileObj.sprite->getPixelSize().y;
+		const std::string unitMoveSound = unitType->getMoveSound(
+			nextTileObj.data.getTileType()->getTypeScriptName(), hidden);
+		if (!unitMoveSound.empty()) finalSound = unitMoveSound;
 		path.emplace_back(pos, sheet, (previousTile ? unitType->getMoveSound(
 			_tiles[previousTile->x][previousTile->y]
 				.data.getTileType()->getTypeScriptName(), hidden) : ""),
-			unitType->getMoveSound(
-				nextTileObj.data.getTileType()->getTypeScriptName(), hidden));
+			unitMoveSound);
 		previousTile = nextTile;
 	}
 	float speed = 375.f;
@@ -703,12 +712,17 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 		speed = 1000.f;
 		break;
 	}
+	// TODO-2.
 	_animationQueue.push(std::make_unique<awe::move_unit>(
 		_units.at(unit).sprite,
 		path,
 		speed,
 		(*_audios)["sound"]
 	));
+	if (!finalSound.empty()) {
+		queueDelay(0.1f);
+		queueStop("sound", finalSound);
+	}
 	return true;
 }
 

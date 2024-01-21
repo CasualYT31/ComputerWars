@@ -121,6 +121,22 @@ shared abstract class Widget {
             (right is null ? NO_WIDGET : right));
     }
 
+    void setMoveUpFromSound(const string&in o, const string&in n) {
+        ::setWidgetMoveUpFromSound(this, o, n);
+    }
+
+    void setMoveDownFromSound(const string&in o, const string&in n) {
+        ::setWidgetMoveDownFromSound(this, o, n);
+    }
+
+    void setMoveLeftFromSound(const string&in o, const string&in n) {
+        ::setWidgetMoveLeftFromSound(this, o, n);
+    }
+
+    void setMoveRightFromSound(const string&in o, const string&in n) {
+        ::setWidgetMoveRightFromSound(this, o, n);
+    }
+
     void setSelectionSound(const string&in o, const string&in n) {
         ::setWidgetSelectionSound(this, o, n);
     }

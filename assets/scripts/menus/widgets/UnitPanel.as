@@ -72,6 +72,12 @@ class UnitPanel : ScrollablePanel {
             );
             button.setText("~" + translate(type.name) + " (" +
                 translate("price", { any(type.cost) }) + ")");
+            // We will let the user of this object manually handle directional
+            // sounds.
+            button.setMoveUpFromSound("", "");
+            button.setMoveDownFromSound("", "");
+            button.setMoveLeftFromSound("", "");
+            button.setMoveRightFromSound("", "");
             button.connect(handler);
             add(button);
         }

@@ -675,6 +675,38 @@ void sfx::gui::_registerDirectionalFlowGlobalFunctions(
 		"spritesheet to retrieve the sprite from, and the third string stores the "
 		"name of the sprite. The first string is trimmed and case-insensitive.");
 
+	r = engine->RegisterGlobalFunction("void setWidgetMoveUpFromSound("
+		WIDGET_ID_PARAM ", const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setWidgetMoveUpFromSound),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the given widget's move up sound. "
+		"The widget's ID is given first, then the name of the audio object "
+		"containing the sound, then the name of the sound.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetMoveDownFromSound("
+		WIDGET_ID_PARAM ", const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setWidgetMoveDownFromSound),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the given widget's move down sound. "
+		"The widget's ID is given first, then the name of the audio object "
+		"containing the sound, then the name of the sound.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetMoveLeftFromSound("
+		WIDGET_ID_PARAM ", const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setWidgetMoveLeftFromSound),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the given widget's move left sound. "
+		"The widget's ID is given first, then the name of the audio object "
+		"containing the sound, then the name of the sound.");
+
+	r = engine->RegisterGlobalFunction("void setWidgetMoveRightFromSound("
+		WIDGET_ID_PARAM ", const string&in, const string&in)",
+		asMETHOD(sfx::gui, _setWidgetMoveRightFromSound),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Sets the given widget's move right "
+		"sound. The widget's ID is given first, then the name of the audio object "
+		"containing the sound, then the name of the sound.");
+
 	r = engine->RegisterGlobalFunction("void setWidgetSelectionSound("
 		WIDGET_ID_PARAM ", const string&in, const string&in)",
 		asMETHOD(sfx::gui, _setWidgetSelectionSound),
