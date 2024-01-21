@@ -51,4 +51,13 @@ namespace awe {
         }
         return res;
     }
+
+    /**
+     * Retrieves the edit map's current environment spritesheet.
+     * @return The edit map's current environment spritesheet, or \c "tile.normal"
+     *         if an edit map is not currently open.
+     */
+    string getEditMapEnvironmentSpritesheet() {
+        return edit is null ? "tile.normal" : edit.map.getEnvironmentSpritesheet();
+    }
 }

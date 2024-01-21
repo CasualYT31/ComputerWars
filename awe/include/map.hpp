@@ -2385,6 +2385,13 @@ namespace awe {
 		 */
 		const awe::environment* getEnvironmentObject() const;
 
+		/**
+		 * Retrieves the spritesheet of the current environment, if there is one.
+		 * @return The current environment's configured spritesheet, or an empty
+		 *         string if there is no environment currently set.
+		 */
+		std::string getEnvironmentSpritesheet() const;
+
 		//////////////////////////
 		// ANIMATION OPERATIONS //
 		//////////////////////////
@@ -2807,6 +2814,12 @@ namespace awe {
 		bool _canAnimationBeQueued(
 			const std::vector<awe::animation_preset>& presets = {},
 			const bool invert = false) const;
+
+		/**
+		 * Updates every tile's spritesheet based on the current data stored in
+		 * this map.
+		 */
+		void _regenerateTileSprites();
 
 		/**
 		 * Internal logger object.

@@ -51,12 +51,11 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 	for (std::size_t x = 0; x < dim.x; ++x) {
 		_tiles[x].reserve(dim.y);
 		for (std::size_t y = 0; y < dim.y; ++y)
-			// TODO-2.
 			_tiles[x].emplace_back(
 				engine::logger::data{ _logger.getData().sink, "tile" },
 				[&](const std::function<void(void)>& func)
 					{ _animationQueue.push(func); }, tile, owner,
-				(*_sheets)["tile.normal"]);
+				(*_sheets)[getEnvironmentSpritesheet()]);
 	}
 	_mapSizeCache = dim;
 	if (mapHasShrunk) {

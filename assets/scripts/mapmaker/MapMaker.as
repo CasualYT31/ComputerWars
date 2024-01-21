@@ -131,6 +131,16 @@ class MapMaker : Menu, Group {
         // Also, if a MessageBox is open, we must prevent input until it is gone.
         if (edit is null || edit.map.getMapSize().x == 0 ||
             edit.map.getMapSize().y == 0 || messageBox !is null) return;
+        
+        // If the environment spritesheet has changed, force an update to the
+        // currently selected terrain and tile type. This will regenerate sprites
+        // where ever it is necessary.
+        if (lastKnownEnvironmentSpritesheet !=
+            edit.map.getEnvironmentSpritesheet()) {
+            lastKnownEnvironmentSpritesheet = edit.map.getEnvironmentSpritesheet();
+            selectedTerrain.update();
+            selectedTileType.update();
+        }
 
         // Update the viewport of the map to make sure no tiles are hiding behind
         // the menu or status bars.
@@ -748,6 +758,16 @@ class MapMaker : Menu, Group {
     private void fillWindowNo() {
         fillWindow.close();
     }
+
+    //////////
+    // DATA //
+    //////////
+
+    /**
+     * Stores the current map's latest known environment spritesheet.
+     * @remark This is another good reason why awe::map should emit signals.
+     */
+    private string lastKnownEnvironmentSpritesheet;
 
     /////////////
     // WIDGETS //

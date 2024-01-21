@@ -186,10 +186,12 @@ class TileWidget : HorizontalLayout {
             const auto terrainType = tileType.type;
             const ArmyID tileOwner = game.map.getTileOwner(tilePos);
             if (tileOwner == NO_ARMY) {
-                panels[0].setIcon("tile.normal", tileType.neutralTileSprite);
+                panels[0].setIcon(game.map.getEnvironmentSpritesheet(),
+                    tileType.neutralTileSprite);
             } else {
-                panels[0].setIcon("tile.normal", tileType.ownedTileSprite(
-                    game.map.getArmyCountry(tileOwner).turnOrder));
+                panels[0].setIcon(game.map.getEnvironmentSpritesheet(),
+                    tileType.ownedTileSprite(
+                        game.map.getArmyCountry(tileOwner).turnOrder));
             }
             panels[0].setName(terrainType.shortName);
             panels[0].setPropertyText(0,

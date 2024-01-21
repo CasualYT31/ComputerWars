@@ -318,6 +318,9 @@ class TerrainPalette : Observer, PalettePanel {
             // Don't bother detaching, we'll never need to.
             selectedTerrain.widgetFactory(),
             generateScriptNames(),
+            // A more robust implementation would not rely on just one of the tile
+            // spritesheets, but they should all be the same size anyway, so the
+            // effort to make this more robust is not worth it.
             getHeightOfTallestFrame("tile.normal") + 10,
             3,
             true
@@ -330,13 +333,11 @@ class TerrainPalette : Observer, PalettePanel {
     }
 
     /**
-     * When the owner changes, update the sprites on the buttons.
+     * Update the sprites on the buttons.
      */
     private void refresh(any&in data = any()) override {
-        if (latestOwner != selectedTerrain.owner) {
-            regenerateButtonSprites();
-            refreshCountryCombobox(latestOwner);
-        }
+        regenerateButtonSprites();
+        refreshCountryCombobox(selectedTerrain.owner);
     }
 
     /**
@@ -344,12 +345,13 @@ class TerrainPalette : Observer, PalettePanel {
      * selected terrain.
      */
     private void regenerateButtonSprites() {
-        latestOwner = selectedTerrain.owner;
         for (uint64 i = 0, len = buttonCount; i < len; ++i) {
             const auto scriptName = buttons[i].getName();
-            buttons[i].setSprite("tile.normal", latestOwner.isEmpty() ?
+            buttons[i].setSprite(awe::getEditMapEnvironmentSpritesheet(),
+                selectedTerrain.owner.isEmpty() ?
                 terrain[scriptName].primaryTileType.neutralTileSprite :
-                terrain[scriptName].primaryTileType.ownedTileSprite(latestOwner)
+                terrain[scriptName].primaryTileType.ownedTileSprite(
+                    selectedTerrain.owner)
             );
         }
     }
@@ -390,11 +392,6 @@ class TerrainPalette : Observer, PalettePanel {
      * Handle to the tool bar widget.
      */
     private ToolBar@ toolBar;
-
-    /**
-     * When the owner of the selected terrain changes, it is updated here.
-     */
-    private string latestOwner;
 }
 
 /**
@@ -426,13 +423,11 @@ class TileTypePalette : Observer, PalettePanel {
     }
 
     /**
-     * When the owner changes, update the sprites on the buttons.
+     * Update the sprites on the buttons.
      */
     private void refresh(any&in data = any()) override {
-        if (latestOwner != selectedTileType.owner) {
-            regenerateButtonSprites();
-            refreshCountryCombobox(latestOwner);
-        }
+        regenerateButtonSprites();
+        refreshCountryCombobox(selectedTileType.owner);
     }
 
     /**
@@ -440,12 +435,12 @@ class TileTypePalette : Observer, PalettePanel {
      * selected tile type.
      */
     private void regenerateButtonSprites() {
-        latestOwner = selectedTileType.owner;
         for (uint64 i = 0, len = buttonCount; i < len; ++i) {
             const auto scriptName = buttons[i].getName();
-            buttons[i].setSprite("tile.normal", latestOwner.isEmpty() ?
+            buttons[i].setSprite(awe::getEditMapEnvironmentSpritesheet(),
+                selectedTileType.owner.isEmpty() ?
                 tiletype[scriptName].neutralTileSprite :
-                tiletype[scriptName].ownedTileSprite(latestOwner)
+                tiletype[scriptName].ownedTileSprite(selectedTileType.owner)
             );
         }
     }
@@ -486,11 +481,6 @@ class TileTypePalette : Observer, PalettePanel {
      * Handle to the tool bar widget.
      */
     private ToolBar@ toolBar;
-
-    /**
-     * When the owner of the selected tile type changes, it is updated here.
-     */
-    private string latestOwner;
 }
 
 /**

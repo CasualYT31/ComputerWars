@@ -415,9 +415,7 @@ void awe::map::setSpritesheets(
 			unit.second.data.getType()->getIdleSpritesheet()]);
 		unit.second.sprite->setIconSpritesheet((*_sheets)["icon"]);
 	}
-	for (auto& column : _tiles)
-		for (auto& tile : column)
-			tile.sprite->setSpritesheet((*_sheets)["tile.normal"]);
+	_regenerateTileSprites();
 }
 
 void awe::map::setFonts(const std::shared_ptr<sfx::fonts>& fonts) {

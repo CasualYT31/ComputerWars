@@ -941,6 +941,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"const Environment@ getEnvironment() const",
 			asMETHOD(awe::map, getEnvironmentObject), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"string getEnvironmentSpritesheet() const",
+			asMETHOD(awe::map, getEnvironmentSpritesheet), asCALL_THISCALL);
+
 		//////////////////////////
 		// ANIMATION OPERATIONS //
 		//////////////////////////

@@ -46,7 +46,7 @@ abstract class SelectedObject {
      * Method to be overridden by subclasses which invokes the other \c update()
      * method with the necessary values based on its own state.
      */
-    protected void update() {}
+    void update() {}
 
     /**
      * Notifies all observers when a new object has been selected.

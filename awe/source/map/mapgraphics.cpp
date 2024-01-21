@@ -457,6 +457,7 @@ void awe::map::setEnvironment(
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::ENVIRONMENT));
 	_environment = environment;
+	_regenerateTileSprites();
 }
 
 void awe::map::setEnvironment(const std::string& name) {
@@ -474,6 +475,10 @@ const awe::environment* awe::map::getEnvironmentObject() const {
 	} else {
 		throw std::out_of_range("There is currently no environment set!");
 	}
+}
+
+std::string awe::map::getEnvironmentSpritesheet() const {
+	return _environment ? _environment->getSpritesheet() : "";
 }
 
 void awe::map::setSelectedAnimationPreset(const awe::animation_preset preset) {
@@ -824,6 +829,12 @@ bool awe::map::_canAnimationBeQueued(
 	for (const auto preset : presets)
 		if (_selectedAnimationPreset == preset) return !invert;
 	return invert;
+}
+
+void awe::map::_regenerateTileSprites() {
+	for (auto& column : _tiles)
+		for (auto& tile : column)
+			tile.sprite->setSpritesheet((*_sheets)[getEnvironmentSpritesheet()]);
 }
 
 bool awe::map::animate(const sf::RenderTarget& target) {

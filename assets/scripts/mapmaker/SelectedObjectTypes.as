@@ -44,11 +44,12 @@ class SelectedTerrain : SelectedObject {
     /**
      * Notifies observers when a change is made to the state of this object.
      */
-    private void update() override {
+    void update() override {
         if (type is null) update("", "", "");
-        else if (owner.isEmpty()) update(type.name, "tile.normal",
+        else if (owner.isEmpty()) update(type.name,
+            awe::getEditMapEnvironmentSpritesheet(),
             type.primaryTileType.neutralTileSprite);
-        else update(type.name, "tile.normal",
+        else update(type.name, awe::getEditMapEnvironmentSpritesheet(),
             type.primaryTileType.ownedTileSprite(owner));
     }
 }
@@ -91,11 +92,13 @@ class SelectedTileType : SelectedObject {
     /**
      * Notifies observers when a change is made to the state of this object.
      */
-    private void update() override {
+    void update() override {
         if (type is null) update("", "", "");
         else if (owner.isEmpty())
-            update(type.type.name, "tile.normal", type.neutralTileSprite);
-        else update(type.type.name, "tile.normal", type.ownedTileSprite(owner));
+            update(type.type.name, awe::getEditMapEnvironmentSpritesheet(),
+                type.neutralTileSprite);
+        else update(type.type.name, awe::getEditMapEnvironmentSpritesheet(),
+            type.ownedTileSprite(owner));
     }
 }
 
@@ -136,7 +139,7 @@ class SelectedUnitType : SelectedObject {
     /**
      * Notifies observers when a change is made to the state of this object.
      */
-    private void update() override {
+    void update() override {
         if (type is null) update("", "", "");
         else update(type.name, "unit", type.unitSprite(owner));
     }
@@ -196,7 +199,7 @@ class SelectedStructure : SelectedObject {
     /**
      * Notifies observers when a change is made to the state of this object.
      */
-    private void update() override {
+    void update() override {
         if (type is null) update("", "", "");
         else if (destroyed)
             update(type.destroyedName, "structure", type.destroyedIconName);
