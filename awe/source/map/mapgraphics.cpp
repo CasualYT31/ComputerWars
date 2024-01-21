@@ -452,6 +452,30 @@ void awe::map::shakeMap(const float duration) {
 	}
 }
 
+void awe::map::setEnvironment(
+	const std::shared_ptr<const awe::environment>& environment) {
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::ENVIRONMENT));
+	_environment = environment;
+}
+
+void awe::map::setEnvironment(const std::string& name) {
+	setEnvironment((*_environments)[name]);
+}
+
+std::shared_ptr<const awe::environment> awe::map::getEnvironment() const {
+	return _environment;
+}
+
+const awe::environment* awe::map::getEnvironmentObject() const {
+	auto ret = getEnvironment();
+	if (ret) {
+		return ret.get();
+	} else {
+		throw std::out_of_range("There is currently no environment set!");
+	}
+}
+
 void awe::map::setSelectedAnimationPreset(const awe::animation_preset preset) {
 	_selectedAnimationPreset = preset;
 }

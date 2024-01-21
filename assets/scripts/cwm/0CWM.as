@@ -7,6 +7,7 @@
 /* The following is pseudocode describing the structure of the format:
 CWMFileVersion version;
 string mapName;
+string environmentScriptName;
 uint32 mapWidth;
 uint32 mapHeight;
 uint32 selectedTileX;
@@ -159,6 +160,9 @@ namespace cwm {
 		string mapName;
 		stream.read(mapName);
 		map.setMapName(mapName);
+        string environmentScriptName;
+        stream.read(environmentScriptName);
+        map.setEnvironment(environmentScriptName);
 		uint32 width, height, selX, selY, armyCount;
 		stream.read(width);
 		stream.read(height);
@@ -282,6 +286,7 @@ namespace cwm {
 		// For now, save the same file version every time. See LoadMap().
 		stream.write(LATEST_CWM_FILE_VERSION);
 		stream.write(map.getMapName());
+        stream.write(map.getEnvironment().scriptName);
 		const auto mapSize = map.getMapSize();
 		stream.write(mapSize.x);
 		stream.write(mapSize.y);

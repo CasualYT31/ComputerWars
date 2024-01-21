@@ -180,6 +180,7 @@
 	"OPERATION_updatescript": "Update Script",
 	"OPERATION_removescript": "Remove Script",
 	"OPERATION_renamescript": "Rename Script",
+	"OPERATION_environment": "Set Environment",
 
 	"OPERATION_mapprops": "Update Map's Name and/or Day",
 	"OPERATION_tiletypeandowner": "Set Tile's Type and/or Owner",

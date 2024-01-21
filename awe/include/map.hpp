@@ -246,16 +246,19 @@ namespace awe {
 		/**
 		 * Initialises this object with \c bank pointers.
 		 * Also initialises the internal logger object.\n
-		 * @param countries  Information on the countries available to the map.
-		 * @param tiles      Information on the tile types available to the map.
-		 * @param terrains   Information on the terrains available to the map.
-		 * @param units      Information on the unit types available to the map.
-		 * @param commanders Information on the COs available to the map.
-		 * @param structures Information on the structures available to the map.
-		 * @param data       The data to initialise the logger object with.
+		 * @param countries    Information on the countries available to the map.
+		 * @param environments Information on the environments available to the
+		 *                     map.
+		 * @param tiles        Information on the tile types available to the map.
+		 * @param terrains     Information on the terrains available to the map.
+		 * @param units        Information on the unit types available to the map.
+		 * @param commanders   Information on the COs available to the map.
+		 * @param structures   Information on the structures available to the map.
+		 * @param data         The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
 		map(const std::shared_ptr<awe::bank<awe::country>>& countries,
+			const std::shared_ptr<awe::bank<awe::environment>>& environments,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::terrain>>& terrains,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
@@ -2356,6 +2359,32 @@ namespace awe {
 		 */
 		void shakeMap(const float duration = 1.5f);
 
+		/**
+		 * Sets this map's environment.
+		 * @param environment Pointer to the environment to set.
+		 */
+		void setEnvironment(
+			const std::shared_ptr<const awe::environment>& environment);
+
+		/**
+		 * Overload of \c setEnvironment() which accepts a script name.
+		 * @param name Script name of the environment to set.
+		 */
+		void setEnvironment(const std::string& name);
+
+		/**
+		 * Retrieves the currently set environment.
+		 * @return Pointer to the information on the current environment.
+		 */
+		std::shared_ptr<const awe::environment> getEnvironment() const;
+
+		/**
+		 * Retrieves the current environment, for use with the scripts.
+		 * @return Information on the current environment.
+		 * @throws \c std::out_of_range If there is currently no environment set.
+		 */
+		const awe::environment* getEnvironmentObject() const;
+
 		//////////////////////////
 		// ANIMATION OPERATIONS //
 		//////////////////////////
@@ -3233,6 +3262,11 @@ namespace awe {
 		 */
 		sfx::animated_sprite _additionallySelectedTileCursorLR;
 
+		/**
+		 * The currently selected environment.
+		 */
+		std::shared_ptr<const awe::environment> _environment;
+
 		// MOVE MODE DRAWING //
 
 		/**
@@ -3401,6 +3435,11 @@ namespace awe {
 		 * Data pertaining to countries.
 		 */
 		std::shared_ptr<awe::bank<awe::country>> _countries = nullptr;
+
+		/**
+		 * Data pertaining to environments.
+		 */
+		std::shared_ptr<awe::bank<awe::environment>> _environments = nullptr;
 
 		/**
 		 * Data pertaining to tile types.

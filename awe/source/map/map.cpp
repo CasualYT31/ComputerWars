@@ -78,6 +78,7 @@ awe::map::map(const engine::logger::data& data) : _logger(data),
 }
 
 awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
+	const std::shared_ptr<awe::bank<awe::environment>>& environments,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::terrain>>& terrains,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
@@ -94,6 +95,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	_additionallySelectedTileCursorLR({ data.sink,
 		data.name + "_addcursorlr_sprite" }) {
 	_countries = countries;
+	_environments = environments;
 	_tileTypes = tiles;
 	_terrains = terrains;
 	_unitTypes = units;
@@ -505,6 +507,7 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	removeAllPreviewUnits();
 	_mapShakeTimeLeft = sf::Time::Zero;
 	_waitBeforeNextShake = sf::Time::Zero;
+	_environment = nullptr;
 	if (_scripts->doesModuleExist(_moduleName))
 		_scripts->deleteModule(_moduleName);
 	_moduleName.clear();

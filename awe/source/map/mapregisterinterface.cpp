@@ -932,6 +932,15 @@ void awe::map::Register(asIScriptEngine* engine,
 		r = engine->RegisterObjectMethod("Map", "void shake(const float = 1.5)",
 			asMETHOD(awe::map, shakeMap), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"void setEnvironment(const string&in)",
+			asMETHODPR(awe::map, setEnvironment, (const std::string&), void),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"const Environment@ getEnvironment() const",
+			asMETHOD(awe::map, getEnvironmentObject), asCALL_THISCALL);
+
 		//////////////////////////
 		// ANIMATION OPERATIONS //
 		//////////////////////////

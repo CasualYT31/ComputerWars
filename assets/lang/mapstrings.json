@@ -34,5 +34,6 @@
   "addscript": "OPERATION_addscript",
   "updatescript": "OPERATION_updatescript",
   "removescript": "OPERATION_removescript",
-  "renamescript": "OPERATION_renamescript"
+  "renamescript": "OPERATION_renamescript",
+  "environment": "OPERATION_environment"
 }
