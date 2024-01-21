@@ -2,28 +2,28 @@
 	"NORMAL": {
 		"longname": "Normal",
 		"shortname": "Nrml",
-		"icon": "",
+		"icon": "environment.normal",
 		"description": "Normal environment.",
 		"spritesheet": "tile.normal"
 	},
 	"WASTELAND": {
 		"longname": "Wasteland",
 		"shortname": "Wstl",
-		"icon": "",
+		"icon": "environment.wasteland",
 		"description": "Wasteland environment.",
 		"spritesheet": "tile.normal"
 	},
 	"SNOWY": {
 		"longname": "Snowy",
 		"shortname": "Snow",
-		"icon": "",
+		"icon": "environment.snowy",
 		"description": "Snowy environment.",
 		"spritesheet": "tile.normal"
 	},
 	"SANDY": {
 		"longname": "Sandy",
 		"shortname": "Sand",
-		"icon": "",
+		"icon": "environment.sandy",
 		"description": "Desert environment.",
 		"spritesheet": "tile.normal"
 	}

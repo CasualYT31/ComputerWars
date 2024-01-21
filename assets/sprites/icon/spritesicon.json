@@ -574,6 +574,22 @@
 		"trappointtoright": {
 			"frames": [ [ 222, 177, 55, 14 ] ],
 			"durations": [ 0 ]
+		},
+		"environment.normal": {
+			"frames": [ [ 0, 237, 48, 48 ] ],
+			"durations": 0
+		},
+		"environment.snowy": {
+			"frames": [ [ 48, 237, 48, 48 ] ],
+			"durations": 0
+		},
+		"environment.sandy": {
+			"frames": [ [ 96, 237, 48, 48 ] ],
+			"durations": 0
+		},
+		"environment.wasteland": {
+			"frames": [ [ 144, 237, 48, 48 ] ],
+			"durations": 0
 		}
 	}
 }
