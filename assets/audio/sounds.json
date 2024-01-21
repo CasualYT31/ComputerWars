@@ -99,6 +99,11 @@
 		"path": "audio/sound/replenish.wav",
 		"offset": 0.0
 	},
+	"savestart": {
+		"type": "sound",
+		"path": "audio/sound/savestart.wav",
+		"offset": 0.0
+	},
 	"save": {
 		"type": "sound",
 		"path": "audio/sound/save.wav",

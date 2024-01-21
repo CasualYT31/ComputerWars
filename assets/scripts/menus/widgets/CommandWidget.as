@@ -29,16 +29,20 @@ class CommandWidget : VerticalLayout {
      * @param  spriteName The key of the sprite to assign to this command button.
      * @param  handler    The \c Clicked signal handler for this button.
      * @param  sheetName  The name of the sheet which contains the sprite.
+     * @param  sound      The selection sound to apply to this command button. If
+     *                    empty, it will be left to the default.
      * @return The 0-based index of the newly added command.
      */
     uint addCommand(const string&in widgetText, const string&in spriteName,
-        SingleSignalHandler@ const handler, const string&in sheetName = "icon") {
+        SingleSignalHandler@ const handler, const string&in sheetName = "icon",
+        const string&in sound = "") {
         const auto i = bitmapButtons.length();
         bitmapButtons.resize(i + 1);
         add(bitmapButtons[i]);
         bitmapButtons[i].connect(Clicked, handler);
         bitmapButtons[i].setSprite(sheetName, spriteName);
         bitmapButtons[i].setText(widgetText);
+        if (!sound.isEmpty()) bitmapButtons[i].setSelectionSound("sound", sound);
         configureDirectionalFlow(bitmapButtons[i]);
         resizeLayout();
         return i;

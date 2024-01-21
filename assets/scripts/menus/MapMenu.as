@@ -26,8 +26,9 @@ class MapMenu : Menu, Group {
     void Open(Menu@ const oldMenu, const string&in oldMenuName) {
         mapMenuCommands.addCommand("save", "saveicon", function(){
             game.map.save();
+            game.map.queuePlay("sound", "save");
             setGUI("GameScreen");
-        });
+        }, "icon", "savestart");
         mapMenuCommands.addCommand("delete", "deleteicon", function(){
             setGUI("DeleteUnitMenu");
         });
