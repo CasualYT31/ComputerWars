@@ -592,7 +592,12 @@ class UnitPropertiesPanel {
         loadLimit.setText("~" + formatUInt(unitType.loadLimit));
         movementType.setText(unitType.movementType.name);
         movementPoints.setText("~" + formatUInt(unitType.movementPoints));
-        vision.setText("~" + formatUInt(unitType.vision));
+        const auto unitPosition = edit.map.getUnitPosition(unit);
+        if (unitPosition == NO_POSITION)
+            vision.setText(awe::getUnitVisionText(unitType, null));
+        else
+            vision.setText(awe::getUnitVisionText(unitType,
+                edit.map.getTileType(unitPosition).type));
         priceLayout.setText("price", { any(unitType.cost) });
         
         // Finally, adjust the height of the base layout based on the number of

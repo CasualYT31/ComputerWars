@@ -22,23 +22,5 @@
 		"shortname": "Snow",
 		"icon": "",
 		"description": "Units use up more fuel to move."
-	},
-	"FOG": {
-		"longname": "Fog-of-War",
-		"shortname": "Fog",
-		"icon": "",
-		"description": "Not all of the map is visible in FoW."
-	},
-	"FOGRAIN": {
-		"longname": "Fog-and-Rain",
-		"shortname": "F&R",
-		"icon": "",
-		"description": "<-1 Vision?>."
-	},
-	"FOGSNOW": {
-		"longname": "Fog-and-Snow",
-		"shortname": "F&S",
-		"icon": "",
-		"description": "Fog and snow."
 	}
 }

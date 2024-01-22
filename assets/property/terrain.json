@@ -77,7 +77,11 @@
 			"AIR": 1,
 			"SLIME": 1
 		},
-		"primarytiletype": "032mtn"
+		"primarytiletype": "032mtn",
+		"visionoffsets": {
+			"INFANTRY": 3,
+			"MECH": 3
+		}
 	},
 	"WOODS": {
 		"longname": "WOODS_longname",
@@ -94,7 +98,8 @@
 			"AIR": 1,
 			"SLIME": 1
 		},
-		"primarytiletype": "033wood"
+		"primarytiletype": "033wood",
+		"fowvisibility": "hidden"
 	},
 	"RIVER": {
 		"longname": "RIVER_longname",
@@ -123,7 +128,8 @@
 			"SHIPS": 2,
 			"TRANSPORT": 2
 		},
-		"primarytiletype": "03Freef"
+		"primarytiletype": "03Freef",
+		"fowvisibility": "hidden"
 	},
 	"SHOAL": {
 		"longname": "SHOAL_longname",
@@ -153,7 +159,8 @@
 		"movecosts": {
 			"PIPELINE": 1
 		},
-		"primarytiletype": "057pipevert"
+		"primarytiletype": "057pipevert",
+		"fowvisibility": "visible"
 	},
 	"PIPESEAM": {
 		"longname": "PIPESEAM_longname",
@@ -165,7 +172,8 @@
 		"movecosts": {
 			"PIPELINE": 1
 		},
-		"primarytiletype": "05Fpipeseamvert"
+		"primarytiletype": "05Fpipeseamvert",
+		"fowvisibility": "visible"
 	},
 	"MISSILESILO": {
 		"longname": "MISSILESILO_longname",
@@ -313,7 +321,8 @@
 		"icon": "noentry",
 		"description": "VOLCANO_description",
 		"hp": 0,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"BLACKCANNONROOT": {
 		"longname": "BLACKCANNON_longname",
@@ -321,7 +330,8 @@
 		"icon": "noentry",
 		"description": "BLACKCANNON_description",
 		"hp": 99,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"BLACKCANNON": {
 		"longname": "BLACKCANNON_longname",
@@ -329,7 +339,8 @@
 		"icon": "noentry",
 		"description": "BLACKCANNON_description",
 		"hp": 0,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"MINICANNON": {
 		"longname": "MINICANNON_longname",
@@ -337,7 +348,8 @@
 		"icon": "noentry",
 		"description": "MINICANNON_description",
 		"hp": 99,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"BLACKLASER": {
 		"longname": "BLACKLASER_longname",
@@ -345,7 +357,8 @@
 		"icon": "noentry",
 		"description": "BLACKLASER_description",
 		"hp": 99,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"DEATHRAYROOT": {
 		"longname": "DEATHRAY_longname",
@@ -353,7 +366,8 @@
 		"icon": "noentry",
 		"description": "DEATHRAY_description",
 		"hp": 99,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"DEATHRAY": {
 		"longname": "DEATHRAY_longname",
@@ -361,7 +375,8 @@
 		"icon": "noentry",
 		"description": "DEATHRAY_description",
 		"hp": 0,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"BLACKCRYSTAL": {
 		"longname": "BLACKCRYSTAL_longname",
@@ -369,7 +384,8 @@
 		"icon": "noentry",
 		"description": "BLACKCRYSTAL_description",
 		"hp": 99,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"BLACKOBELISKROOT": {
 		"longname": "BLACKOBELISK_longname",
@@ -377,7 +393,8 @@
 		"icon": "noentry",
 		"description": "BLACKOBELISK_description",
 		"hp": 99,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"BLACKOBELISK": {
 		"longname": "BLACKOBELISK_longname",
@@ -385,7 +402,8 @@
 		"icon": "noentry",
 		"description": "BLACKOBELISK_description",
 		"hp": 0,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"GRANDBOLTROOT": {
 		"longname": "GRANDBOLT_longname",
@@ -393,7 +411,8 @@
 		"icon": "noentry",
 		"description": "GRANDBOLT_description",
 		"hp": 99,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"GRANDBOLT": {
 		"longname": "GRANDBOLT_longname",
@@ -401,7 +420,8 @@
 		"icon": "noentry",
 		"description": "GRANDBOLT_description",
 		"hp": 0,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"FACTORYROOT": {
 		"longname": "FACTORY_longname",
@@ -409,7 +429,8 @@
 		"icon": "noentry",
 		"description": "FACTORY_description",
 		"hp": 0,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"FACTORY": {
 		"longname": "FACTORY_longname",
@@ -417,7 +438,8 @@
 		"icon": "noentry",
 		"description": "FACTORY_description",
 		"hp": 0,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"BLACKHOLE_DECORATION": {
 		"longname": "BLACKHOLE_DECORATION_longname",
@@ -425,7 +447,8 @@
 		"icon": "noentry",
 		"description": "BLACKHOLE_DECORATION_description",
 		"hp": 0,
-		"defence": 0
+		"defence": 0,
+		"fowvisibility": "visible"
 	},
 	"HQ": {
 		"longname": "HQ_longname",
@@ -459,6 +482,7 @@
 			"PURPLE": "plhq",
 			"ACID": "arhq",
 			"WHITE": "wnhq"
-		}
+		},
+		"showownerwhenhidden": true
 	}
 }

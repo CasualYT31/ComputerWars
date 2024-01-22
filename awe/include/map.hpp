@@ -990,6 +990,17 @@ namespace awe {
 			const std::string& weapon) const;
 
 		/**
+		 * Gets a unit's vision.
+		 * Retrieves the unit type's base vision, and then applies any offsets to
+		 * it based on the tile the unit is currently on, if any.
+		 * @param  id The ID of the unit to query.
+		 * @return The vision of the unit, with any offsets applied. Will never be
+		 *         lower than \c 1. Will return \c 0, however, if the given unit
+		 *         does not exist.
+		 */
+		unsigned int getUnitVision(const awe::UnitID id) const;
+
+		/**
 		 * Replenishes a unit's fuel and all of its ammo.
 		 * @param id   The ID of the unit to replenish.
 		 * @param heal If \c TRUE, the unit's HP is set to max, too.

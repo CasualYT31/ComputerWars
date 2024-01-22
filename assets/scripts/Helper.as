@@ -80,4 +80,25 @@ namespace awe {
         return edit is null ? "structure" :
             edit.map.getEnvironmentStructureIconSpritesheet();
     }
+
+    /**
+     * Retrieves a unit's base vision, with any offsets reported separately.
+     * @param  unit    Points to the type of unit to report the vision of.
+     * @param  terrain Points to the terrain the unit is on. \c null if the unit is
+     *                 not located on any terrain.
+     * @return The unit's offset vision, as a string that can be directly given set
+     *         to a widget's text.
+     */
+    string getUnitVisionText(const UnitType@ const unit,
+        const Terrain@ const terrain = null) {
+        string visionText = "~" + formatUInt(unit.vision);
+        if (terrain is null) return visionText;
+        const auto visionOffset = terrain.visionOffset(unit.scriptName);
+        if (visionOffset > 0) {
+            visionText += " + " + formatInt(visionOffset);
+        } else if (visionOffset < 0) {
+            visionText += " - " + formatInt(int(abs(visionOffset)));
+        }
+        return visionText;
+    }
 }

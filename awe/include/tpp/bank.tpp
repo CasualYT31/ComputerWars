@@ -198,7 +198,18 @@ void awe::terrain::Register(const std::string& type,
 	awe::common_properties::Register<T>(type, engine, document,
 		"For terrain types, this holds the sprite ID of the picture shown "
 		"for a tile that has no owner.");
-	auto r = engine->RegisterObjectMethod(type.c_str(),
+	// fow_visibility enum.
+	auto r = engine->RegisterEnum("FoWVisibility");
+	engine->RegisterEnumValue("FoWVisibility", "Normal",
+		(int)awe::terrain::fow_visibility::Normal);
+	engine->RegisterEnumValue("FoWVisibility", "Hidden",
+		(int)awe::terrain::fow_visibility::Hidden);
+	engine->RegisterEnumValue("FoWVisibility", "Visible",
+		(int)awe::terrain::fow_visibility::Visible);
+	document->DocumentObjectEnum(r, "Describes the vision properties a terrain "
+		"has during Fog of War.");
+	// Terrain type.
+	r = engine->RegisterObjectMethod(type.c_str(),
 		"uint get_maxHP() const property",
 		asMETHOD(T, getMaxHP), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Gets the maximum HP of this terrain type.");
@@ -244,6 +255,22 @@ void awe::terrain::Register(const std::string& type,
 	document->DocumentObjectMethod(r, "Returns details on this terrain's primary "
 		"tile type. Do not call this method if <tt>isPaintable</tt> returns "
 		"<tt>FALSE</tt>.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"FoWVisibility get_FoWVisibility() const property",
+		asMETHOD(T, getFoWVisibility), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns the Fog of War visibility "
+		"properties of this terrain.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"bool get_showOwnerWhenHidden() const property",
+		asMETHOD(T, showOwnerWhenHidden), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "<tt>TRUE</tt> if tiles of this terrain "
+		"should show as normal if they are hidden, <tt>FALSE</tt> if tiles of "
+		"this terrain should always show as neutral if hidden.");
+	r = engine->RegisterObjectMethod(type.c_str(),
+		"int visionOffset(const string&in) const",
+		asMETHOD(T, getVisionOffsetForUnitType), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "If the given unit type has a vision offset "
+		"for this terrain, it will be returned. If not, 0 is returned.");
 }
 
 template<typename T>

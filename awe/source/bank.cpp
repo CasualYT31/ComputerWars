@@ -112,7 +112,23 @@ awe::terrain::terrain(const std::string& scriptName, engine::json& j) :
 		j.resetState();
 	}
 	if (j.keysExist({ "primarytiletype" }))
-		j.apply(_primaryTileTypeScriptName, { "primarytiletype" });
+		j.apply(_primaryTileTypeScriptName, { "primarytiletype" }, true);
+	if (j.keysExist({ "fowvisibility" })) {
+		std::string v;
+		j.apply(v, { "fowvisibility" }, true);
+		const auto value = tgui::String(v).trim().toLower();
+		if (value == "hidden") {
+			_fowVisibility = fow_visibility::Hidden;
+		} else if (value == "visible") {
+			_fowVisibility = fow_visibility::Visible;
+		}
+	}
+	if (j.keysExist({ "showownerwhenhidden" }))
+		j.apply(_showOwnerWhenHidden, { "showownerwhenhidden" }, true);
+	if (j.keysExist({ "visionoffsets" })) {
+		j.applyMap(_visionOffsets, { "visionoffsets" });
+		j.resetState();
+	}
 }
 void awe::terrain::updatePictureMap(
 	const awe::bank<awe::country>& countries) const {

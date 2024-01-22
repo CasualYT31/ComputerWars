@@ -702,6 +702,31 @@ namespace awe {
 	class terrain : public awe::common_properties {
 	public:
 		/**
+		 * Describes the different types of visibility properties that a terrain
+		 * can have during Fog of War.
+		 */
+		enum class fow_visibility {
+			/**
+			 * Tiles of this terrain will be visible to a team if they occupy them,
+			 * own them, or if it is within at least one of their units' vision
+			 * ranges.
+			 */
+			Normal,
+
+			/**
+			 * Tiles of this terrain will be invisible to a team, unless they
+			 * occupy them, own them, or have at least one of their units directly
+			 * adjacent to it.
+			 */
+			Hidden,
+
+			/**
+			 * Tiles of this terrain will always be visible to every team.
+			 */
+			Visible
+		};
+
+		/**
 		 * Constructor which scans a JSON object for the terrain type's properties.
 		 * It also passes on the JSON object to the \c common_properties
 		 * constructor. In addition to the keys defined in the superclass, the
@@ -716,7 +741,12 @@ namespace awe {
 		 *     <li>\c "pictures" = \c _pictures, <tt>({"COUNTRY_SCRIPT_NAME":
 		 *         string[, etc.]})</tt></li>
 		 *     <li>\c "primarytiletype" = \c _primaryTileTypeScriptName, <tt>
-		 *         (string, TILE_TYPE_SCRIPT_NAME)</tt></li></ul>
+		 *         (string, TILE_TYPE_SCRIPT_NAME)</tt></li>
+		 *     <li>\c "fowvisibility" = \c _fowVisibility, <tt>(string)</tt></li>
+		 *     <li>\c "showownerwhenhidden" = \c _showOwnerWhenHidden, <tt>(bool)
+		 *         </tt></li>
+		 *     <li>\c "visionoffsets" = \c _visionOffsets, <tt>({
+		 *         "UNIT_TYPE_SCRIPT_NAME": int[, etc.]})</tt></li></ul>
 		 * 
 		 * The \c movecosts object stores a list of movement points associated with
 		 * each movement type. A negative value indicates that a unit of the
@@ -738,7 +768,11 @@ namespace awe {
 		 *     <li>Is itself paintable.</li>
 		 *     <li>Exists.<li></ol>
 		 * Then a pointer to the tile type will be stored internally, and the
-		 * terrain is considered \b paintable.
+		 * terrain is considered \b paintable.\n
+		 *
+		 * \c fowvisibility must be either \c "normal", \c "hidden", or
+		 * \c "visible". Unrecognised values will turn into \c "normal". If a value
+		 * if not given, \c "normal" will be assumed.
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
 		 * @param j          The object value containing the terrain type's
@@ -843,6 +877,34 @@ namespace awe {
 		}
 
 		/**
+		 * Retrieves this terrain's Fog of War visibility properties.
+		 * @return The visibility properties of this terrain.
+		 */
+		inline fow_visibility getFoWVisibility() const {
+			return _fowVisibility;
+		}
+
+		/**
+		 * Should owned tiles of this terrain show their owner when hidden?
+		 * @return \c TRUE if so, \c FALSE if a tile should show as neutral if
+		 *         hidden, even if it is owned.
+		 */
+		inline bool showOwnerWhenHidden() const {
+			return _showOwnerWhenHidden;
+		}
+
+		/**
+		 * Finds out if the given unit type has their vision offset if they are
+		 * positioned on a tile of this terrain.
+		 * @param  name The script name of the unit type to test.
+		 * @return \c 0 if this unit type has no configured offset. If it does have
+		 *         an offset, it will be returned.
+		 */
+		inline int getVisionOffsetForUnitType(const std::string& name) const {
+			return _visionOffsets.count(name) == 0 ? 0 : _visionOffsets.at(name);
+		}
+
+		/**
 		 * Updates \c _picturesTurnOrder by copying over the contents of
 		 * \c _pictures and supplying the respective turn order IDs as keys.
 		 * @param  countries Pointer to the country bank to pull the turn order IDs
@@ -906,6 +968,26 @@ namespace awe {
 		 * \c bank constructor, via \c updateTileType().
 		 */
 		mutable std::shared_ptr<const awe::tile_type> _primaryTileType;
+
+		/**
+		 * The visibility properties this terrain has in Fog of War.
+		 */
+		fow_visibility _fowVisibility = fow_visibility::Normal;
+
+		/**
+		 * Usually, if a tile of this terrain is hidden, it will always appear as
+		 * neutral.
+		 * If this is set to \c TRUE, however, a tile will always be shown as
+		 * owned, even if it is hidden.
+		 */
+		bool _showOwnerWhenHidden = false;
+
+		/**
+		 * If this terrain should apply an offset to a unit type's vision, it
+		 * should be stored here.
+		 * Keyed on unit type script name.
+		 */
+		std::unordered_map<std::string, int> _visionOffsets;
 	};
 
 	class structure;

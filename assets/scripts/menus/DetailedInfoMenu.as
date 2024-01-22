@@ -180,7 +180,7 @@ class DetailedInfoMenu : Menu, Panel {
         unitMP.setText("~" + formatUInt(unitType.movementPoints));
         unitMoveTypeIcon.setSprite("icon", movementType.iconName);
         unitMoveType.setText(movementType.shortName);
-        unitVision.setText("~" + formatUInt(unitType.vision));
+        unitVision.setText(awe::getUnitVisionText(unitType, terrainType));
         unitPicture.setSprite("unitPicture", unitType.pictureSprite(
             game.map.getArmyCountry(game.map.getArmyOfUnit(unitID)).turnOrder));
         unitRangeLayout.setVisibility(unitType.weaponCount > 0);

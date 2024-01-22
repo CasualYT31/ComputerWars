@@ -265,6 +265,22 @@ awe::Ammo awe::map::getUnitAmmo(const awe::UnitID id,
 	return 0;
 }
 
+unsigned int awe::map::getUnitVision(const awe::UnitID id) const {
+	if (!_isUnitPresent(id)) {
+		_logger.error("getUnitVision operation failed: unit with ID {} doesn't "
+			"exist!", id);
+		return 0;
+	}
+	const auto& unit = _units.at(id).data;
+	const auto vision = unit.getType()->getVision();
+	const auto position = unit.getPosition();
+	if (position == awe::unit::NO_POSITION) return vision;
+	const auto terrain =
+		_tiles[position.x][position.y].data.getTileType()->getType();
+	return static_cast<unsigned int>(std::max(1, static_cast<int>(vision) +
+		terrain->getVisionOffsetForUnitType(unit.getType()->getScriptName())));
+}
+
 void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
 	if (_isUnitPresent(id)) {
 		if (isUnitReplenished(id, heal)) return;

@@ -412,6 +412,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getUnitAmmo), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"uint getUnitVision(const UnitID) const",
+			asMETHOD(awe::map, getUnitVision), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void replenishUnit(const UnitID, const bool = false)",
 			asMETHOD(awe::map, replenishUnit), asCALL_THISCALL);
 
