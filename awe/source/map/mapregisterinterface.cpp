@@ -252,6 +252,14 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getDay), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void enableFoW(const bool)",
+			asMETHOD(awe::map, enableFoW), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"bool isFowEnabled() const",
+			asMETHOD(awe::map, isFoWEnabled), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"bool defaultWinCondition() const",
 			asMETHOD(awe::map, defaultWinCondition), asCALL_THISCALL);
 

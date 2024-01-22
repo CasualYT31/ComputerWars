@@ -540,6 +540,21 @@ namespace awe {
 		 */
 		awe::Day getDay() const noexcept;
 
+		/**
+		 * Enables Fog of War on this map.
+		 * @param enabled \c TRUE if Fog of War should be enabled, \c FALSE if it
+		 *                should be disabled.
+		 */
+		void enableFoW(const bool enabled);
+
+		/**
+		 * Is Fog of War currently enabled on this map?
+		 * @return \c TRUE if yes, \c FALSE otherwise.
+		 */
+		inline bool isFoWEnabled() const noexcept {
+			return _fow;
+		}
+
 		/////////////////////
 		// ARMY OPERATIONS //
 		/////////////////////
@@ -3052,6 +3067,11 @@ namespace awe {
 		 * Stores which day it currently is.
 		 */
 		awe::Day _day = 1;
+
+		/**
+		 * Is Fog of War enabled on this map?
+		 */
+		bool _fow = false;
 
 		/////////////
 		// SCRIPTS //

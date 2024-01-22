@@ -257,3 +257,10 @@ void awe::map::setDay(const awe::Day day) {
 awe::Day awe::map::getDay() const noexcept {
 	return _day;
 }
+
+void awe::map::enableFoW(const bool enabled) {
+	if (isFoWEnabled() == enabled) return;
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::FOG_OF_WAR));
+	_fow = enabled;
+}

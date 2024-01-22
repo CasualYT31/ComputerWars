@@ -152,6 +152,7 @@
 	"OPERATION_rectfillunits": "Rectangle Fill Units",
 	"OPERATION_rectdelunits": "Rectangle Delete Units",
 	"OPERATION_day": "Set Day",
+	"OPERATION_fow": "Set Fog of War",
 	"OPERATION_createarmy": "Create Army",
 	"OPERATION_deletearmy": "Delete Army",
 	"OPERATION_armyteam": "Set Army's Team",

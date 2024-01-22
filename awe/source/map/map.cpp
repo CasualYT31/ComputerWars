@@ -498,6 +498,7 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 	_tiles.clear();
 	_mapName.clear();
 	_day = 1;
+	_fow = false;
 	_viewOffsetX.reset();
 	_viewOffsetY.reset();
 	_mapSizeCache = { 0, 0 };

@@ -13,6 +13,7 @@ uint32 mapHeight;
 uint32 selectedTileX;
 uint32 selectedTileY;
 Day currentDay;
+bool fowEnabled;
 uint32 scriptCount;
 foreach script {
     string name;
@@ -181,6 +182,9 @@ namespace cwm {
 		Day day;
 		stream.read(day);
 		map.setDay(day);
+        bool fowEnabled;
+        stream.read(fowEnabled);
+        map.enableFoW(fowEnabled);
         uint32 scriptCount;
         stream.read(scriptCount);
         for (uint32 i = 0; i < scriptCount; ++i) {
@@ -294,6 +298,7 @@ namespace cwm {
 		stream.write(cursor.x);
 		stream.write(cursor.y);
 		stream.write(map.getDay());
+        stream.write(map.isFowEnabled());
         const auto scriptFileNames = map.getScriptNames();
         const uint scriptFileCount = scriptFileNames.length();
         stream.write(scriptFileCount);

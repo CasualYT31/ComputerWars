@@ -6,6 +6,7 @@
   "rectfillunits": "OPERATION_rectfillunits",
   "rectdelunits": "OPERATION_rectdelunits",
   "day": "OPERATION_day",
+  "fow": "OPERATION_fow",
   "createarmy": "OPERATION_createarmy",
   "deletearmy": "OPERATION_deletearmy",
   "armyteam": "OPERATION_armyteam",

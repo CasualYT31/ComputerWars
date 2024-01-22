@@ -454,6 +454,7 @@ void awe::map::shakeMap(const float duration) {
 
 void awe::map::setEnvironment(
 	const std::shared_ptr<const awe::environment>& environment) {
+	if (_environment == environment) return;
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::ENVIRONMENT));
 	_environment = environment;
