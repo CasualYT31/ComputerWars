@@ -37,30 +37,9 @@ void awe::army::setCOs(const std::shared_ptr<const awe::commander>& current,
 	}
 }
 
-void awe::army::tagCOs() noexcept {
-	if (_co_2) std::swap(_co_1, _co_2);
-}
-
-void awe::army::addUnit(const awe::UnitID unit) {
-	_units.insert(unit);
-}
-
-void awe::army::removeUnit(const awe::UnitID unit) {
-	_units.erase(unit);
-}
-
-std::unordered_set<awe::UnitID> awe::army::getUnits() const {
-	return _units;
-}
-
-void awe::army::addTile(const sf::Vector2u tile) {
-	_tiles.insert(tile);
-}
-
-void awe::army::removeTile(const sf::Vector2u tile) {
-	_tiles.erase(tile);
-}
-
-std::unordered_set<sf::Vector2u> awe::army::getTiles() const {
-	return _tiles;
+void awe::army::removeVisibleTiles(const std::unordered_set<sf::Vector2u>& tiles) {
+	for (const auto& tile : tiles) {
+		const auto itr = _visibleTiles.find(tile);
+		if (itr != _visibleTiles.end()) _visibleTiles.erase(itr);
+	}
 }

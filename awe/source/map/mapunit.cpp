@@ -64,24 +64,30 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::DELETE_UNIT));
 	_updateCapturingUnit(id);
-	// Firstly, remove the unit from the tile, if it was on a tile.
+	// Firstly, remove this unit's visible tiles from the army's visible tile
+	// cache.
+	const auto position = _units.at(id).data.getPosition();
+	auto& armyData = _armies.at(_units.at(id).data.getArmy());
+	auto visibleTiles = getAvailableTiles(position, 1, getUnitVision(id));
+	visibleTiles.insert(position);
+	armyData.removeVisibleTiles(visibleTiles);
+	// Secondly, remove the unit from the tile, if it was on a tile.
 	// We don't need to check if the unit "is actually on the map or not," since
 	// the tile will always hold the index to the unit in either case: which is why
 	// we need the "actually" check to begin with.
-	const auto position = _units.at(id).data.getPosition();
 	if (!_isOutOfBounds(position))
 		_tiles[position.x][position.y].data.setUnit(awe::NO_UNIT);
-	// Secondly, remove the unit from the army's list.
+	// Thirdly, remove the unit from the army's list.
 	if (_isArmyPresent(_units.at(id).data.getArmy())) {
-		_armies.at(_units.at(id).data.getArmy()).removeUnit(id);
+		armyData.removeUnit(id);
 	} else {
 		_logger.warning("deleteUnit warning: unit with ID {} didn't have a valid "
 			"owning army ID, which was {}.", id, _units.at(id).data.getArmy());
 	}
-	// Thirdly, delete all units that are loaded onto this one.
+	// Fourthly, delete all units that are loaded onto this one.
 	const auto loaded = _units.at(id).data.loadedUnits();
 	for (const auto unit : loaded) deleteUnit(unit);
-	// Fourthly, if this unit was loaded onto another, remove it from that unit's
+	// Fifthly, if this unit was loaded onto another, remove it from that unit's
 	// list.
 	const auto loadedOnto = _units.at(id).data.loadedOnto();
 	if (loadedOnto != awe::NO_UNIT && !_units.at(loadedOnto).data.unloadUnit(id)) {
@@ -89,11 +95,11 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 			"deleted, was loaded onto unit with ID {}, but the former could not "
 			"be unloaded from the latter!", id, loadedOnto);
 	}
-	// Fifthly, if this unit was selected, deselect it if it's on top of the
+	// Sixthly, if this unit was selected, deselect it if it's on top of the
 	// stack. If it is further down the stack, then it will have to be removed
 	// later: see popSelectedUnit().
 	if (getSelectedUnit() == id) setSelectedUnit(awe::NO_UNIT);
-	// Sixthly, animate the destroyed unit now, if it has a position on the map.
+	// Seventhly, animate the destroyed unit now, if it has a position on the map.
 	// Retain the unit's sprite and location override as it may not be destroyed
 	// immediately. However, if there will be no destroy unit animation, remove the
 	// location override immediately.
@@ -162,13 +168,23 @@ void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
 	_updateCapturingUnit(id);
 	// Make new tile occupied.
 	if (pos != awe::unit::NO_POSITION) _tiles[pos.x][pos.y].data.setUnit(id);
-	// Make old tile vacant.
+	// Make old tile vacant, and remove the unit's previously visible tiles from
+	// the army's visible tile cache.
+	auto& armyData = _armies.at(_units.at(id).data.getArmy());
 	if (_units.at(id).data.isOnMap()) {
 		const auto oldLocation = _units.at(id).data.getPosition();
 		_tiles[oldLocation.x][oldLocation.y].data.setUnit(awe::NO_UNIT);
+		auto visibleTiles = getAvailableTiles(oldLocation, 1, getUnitVision(id));
+		visibleTiles.insert(oldLocation);
+		armyData.removeVisibleTiles(visibleTiles);
 	}
 	// Assign new location to unit.
 	_units.at(id).data.setPosition(pos);
+	// Update the visible tile cache in the army.
+	if (pos == awe::unit::NO_POSITION) return;
+	auto visibleTiles = getAvailableTiles(pos, 1, getUnitVision(id));
+	visibleTiles.insert(pos);
+	armyData.addVisibleTiles(visibleTiles);
 }
 
 sf::Vector2u awe::map::getUnitPosition(const awe::UnitID id) const {
@@ -374,17 +390,19 @@ bool awe::map::isUnitVisible(const awe::UnitID unit,
 	// A unit is visible if...
 	// 1. It is on the map.
 	if (!isUnitOnMap(unit)) return false;
-	// 2. It isn't hiding.
+	// 2. The tile the unit is on is visible.
+	const auto unitPos = getUnitPosition(unit);
+	if (!isTileVisible(unitPos, army)) return false;
+	// 3. It isn't hiding.
 	if (!isUnitHiding(unit)) return true;
-	// 3. It is hiding, but it belongs to the same team as the given army.
+	// 4. It is hiding, but it belongs to the same team as the given army.
 	const auto armyTeam = getArmyTeam(army);
 	if (getTeamOfUnit(unit) == armyTeam) return true;
-	// 4. It is hiding, but it is located on a tile that belongs to `army`'s team.
-	const auto unitPos = getUnitPosition(unit);
+	// 5. It is hiding, but it is located on a tile that belongs to `army`'s team.
 	const auto tileOwner = getTileOwner(unitPos);
 	if (tileOwner != awe::NO_ARMY && getArmyTeam(tileOwner) == armyTeam)
 		return true;
-	// 5. It is hiding, but it is adjacent to a unit that belongs to the same team
+	// 6. It is hiding, but it is adjacent to a unit that belongs to the same team
 	//    as `army`.
 	const auto adjacentTiles = getAvailableTiles(unitPos, 1, 1);
 	for (const auto& tile : adjacentTiles) {
@@ -420,15 +438,7 @@ void awe::map::loadUnit(const awe::UnitID load, const awe::UnitID onto) {
 	}
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::UNIT_LOAD));
-	_updateCapturingUnit(load);
-	// Make the tile that `load` was on vacant, and remove the unit ID from the
-	// tile.
-	if (_units.at(load).data.isOnMap()) {
-		const auto location = _units.at(load).data.getPosition();
-		_tiles[location.x][location.y].data.setUnit(awe::NO_UNIT);
-	}
-	_units.at(load).data.setPosition(awe::unit::NO_POSITION);
-	// Perform loads.
+	setUnitPosition(load, awe::unit::NO_POSITION);
 	_units.at(onto).data.loadUnit(load);
 	_units.at(load).data.loadOnto(onto);
 }

@@ -1113,7 +1113,8 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	}
 
 	// Step 2. the tiles.
-	auto mapSize = getMapSize();
+	const auto mapSize = getMapSize();
+	const auto currentArmy = getSelectedArmy();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			if ((_selectedUnitRenderData.top().selectedUnit != awe::NO_UNIT ||
@@ -1126,18 +1127,28 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 					// Apply configured shading.
 					switch (_selectedUnitRenderData.top().availableTileShader) {
 					case awe::available_tile_shader::Yellow:
-						tileStates.shader = &_availableTileShader;
+						tileStates.shader = isTileVisible(currentTile, currentArmy)
+							? &_availableTileShader : &_availableTileShaderFoW;
 						break;
 					case awe::available_tile_shader::Red:
-						tileStates.shader = &_attackableTileShader;
+						tileStates.shader = isTileVisible(currentTile, currentArmy)
+							? &_attackableTileShader : &_attackableTileShaderFoW;
 						break;
 					}
 				} else { // Not an available tile. Grey out.
-					tileStates.shader = &_unavailableTileShader;
+					tileStates.shader = isTileVisible(currentTile, currentArmy) ?
+						&_unavailableTileShader : &_unavailableTileShaderFoW;
 				}
+				// If we already don't have a shader, and the tile is hidden, apply
+				// a FoW shader.
+				if (!tileStates.shader && !isTileVisible(currentTile, currentArmy))
+					tileStates.shader = &_hiddenTileShaderFoW;
 				target.draw(*_tiles[x][y].sprite, tileStates);
 			} else {
-				target.draw(*_tiles[x][y].sprite, states);
+				sf::RenderStates tileStates = states;
+				if (!isTileVisible({ x, y }, currentArmy))
+					tileStates.shader = &_hiddenTileShaderFoW;
+				target.draw(*_tiles[x][y].sprite, tileStates);
 			}
 		}
 	}
@@ -1161,7 +1172,6 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	// other units to ensure they are as visible as possible.
 	std::list<std::pair<const awe::animated_unit&, sf::RenderStates>>
 		unitsWithLocationOverrides;
-	const auto currentArmy = getSelectedArmy();
 	for (const auto& unitsPair : _units) {
 		const awe::UnitID unitID = unitsPair.first;
 		const auto hasLocationOverride =

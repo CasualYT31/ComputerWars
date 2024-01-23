@@ -104,7 +104,9 @@ namespace awe {
 		 * Swaps the two COs of this army.
 		 * This call will be ignored if there is no secondary CO to tag with.
 		 */
-		void tagCOs() noexcept;
+		inline void tagCOs() noexcept {
+			if (_co_2) std::swap(_co_1, _co_2);
+		}
 
 		/**
 		 * Retrieves a pointer to the information on the CO currently in charge of
@@ -129,40 +131,81 @@ namespace awe {
 		 * @param  unit The ID of the unit to add.
 		 * @safety Strong guarantee.
 		 */
-		void addUnit(const awe::UnitID unit);
+		inline void addUnit(const awe::UnitID unit) {
+			_units.insert(unit);
+		}
 
 		/**
 		 * Removes a unit from this army's unit list.
 		 * @param  unit The ID of the unit to remove.
 		 * @safety Strong guarantee.
 		 */
-		void removeUnit(const awe::UnitID unit);
+		inline void removeUnit(const awe::UnitID unit) {
+			_units.erase(unit);
+		}
 
 		/**
 		 * Copies the internal list of all the units that belong to this army.
 		 * @return The IDs of all the units that belong to this army.
 		 */
-		std::unordered_set<awe::UnitID> getUnits() const;
+		inline std::unordered_set<awe::UnitID> getUnits() const {
+			return _units;
+		}
 
 		/**
 		 * Adds a tile to this army's owned tiles list.
 		 * @param  tile The X and Y location of the tile.
 		 * @safety Strong guarantee.
 		 */
-		void addTile(const sf::Vector2u tile);
+		inline void addTile(const sf::Vector2u tile) {
+			_tiles.insert(tile);
+		}
 
 		/**
 		 * Removes a tile from this army's owned tiles list.
 		 * @param  tile The X and Y location of the tile.
 		 * @safety Strong guarantee.
 		 */
-		void removeTile(const sf::Vector2u tile);
+		inline void removeTile(const sf::Vector2u tile) {
+			_tiles.erase(tile);
+		}
 
 		/**
 		 * Retrieves a list of all the tiles this army owns.
 		 * @return The internal list of tile locations, copied.
 		 */
-		std::unordered_set<sf::Vector2u> getTiles() const;
+		inline std::unordered_set<sf::Vector2u> getTiles() const {
+			return _tiles;
+		}
+
+		/**
+		 * Adds tiles to this army's visible tile cache.
+		 * @param tiles The tiles that are now visible to one of this army's units.
+		 */
+		inline void addVisibleTiles(
+			const std::unordered_set<sf::Vector2u>& tiles) {
+			_visibleTiles.insert(tiles.begin(), tiles.end());
+		}
+
+		/**
+		 * Removes tiles from this army's visible tile cache.
+		 * @param tiles The tiles that are now no longer visible to one of this
+		 *              army's units.
+		 */
+		void removeVisibleTiles(const std::unordered_set<sf::Vector2u>& tiles);
+
+		/**
+		 * Is the given tile visible to at least one of this army's units?
+		 * @param  tile The tile to check.
+		 * @return \c TRUE if this tile is visible to this army, considering only
+		 *         each unit's vision range. \c FALSE if it is not.
+		 */
+		inline bool isTileVisible(const sf::Vector2u& tile) const {
+			// count() is linear in complexity, whereas a simple find() is constant
+			// in complexity (in the average case). We only need to know if there
+			// is at least one of `tile` in this unordered multiset.
+			return _visibleTiles.find(tile) != _visibleTiles.end();
+		}
 	private:
 		/**
 		 * The team that this army belongs to.
@@ -198,5 +241,13 @@ namespace awe {
 		 * The tiles that belong to this army.
 		 */
 		std::unordered_set<sf::Vector2u> _tiles;
+
+		/**
+		 * A cache of tiles that are visible to all of the units belonging to this
+		 * army, disregarding terrain visibility properties, tile ownership, etc.
+		 * This is a multiset, as tiles may be visible to more than one unit at any
+		 * given time.
+		 */
+		std::unordered_multiset<sf::Vector2u> _visibleTiles;
 	};
 }

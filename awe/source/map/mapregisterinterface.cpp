@@ -571,6 +571,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"bool isTileDestroyed(const Vector2&in) const",
 			asMETHOD(awe::map, isTileDestroyed), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"bool isTileVisible(const Vector2&in, const ArmyID) const",
+			asMETHOD(awe::map, isTileVisible), asCALL_THISCALL);
+
 		r = engine->RegisterObjectMethod("Map", "array<Vector2>@ "
 			"getAvailableTiles(const Vector2&in, const uint, const uint) const",
 			asMETHOD(awe::map, getAvailableTilesAsArray), asCALL_THISCALL);

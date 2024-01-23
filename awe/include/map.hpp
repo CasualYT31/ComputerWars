@@ -1378,6 +1378,18 @@ namespace awe {
 		bool isTileDestroyed(const sf::Vector2u& pos) const;
 
 		/**
+		 * Figures out if a given tile is visible on the map from the perspective
+		 * of the given army.
+		 * @param  pos  The X and Y coordinate of the tile to check.
+		 * @param  army The ID of the army who is trying to see the tile.
+		 * @return \c TRUE if \c army can see \c tile on the map,
+		 *         \c FALSE otherwise. Will always return \c TRUE if Fog of War is
+		 *         disabled, unless the given tile is out-of-bounds or the given
+		 *         army doesn't exist, which case this will always return \c FALSE.
+		 */
+		bool isTileVisible(const sf::Vector2u& pos, const awe::ArmyID army) const;
+
+		/**
 		 * Calculates the tiles available from a specified tile.
 		 * @param  tile      The tile to calculate from.
 		 * @param  startFrom The number of tiles away from the given tile to start
@@ -3348,6 +3360,28 @@ namespace awe {
 		 * Unavilable tiles shader.
 		 */
 		sf::Shader _unavailableTileShader;
+
+		/**
+		 * Normal tile shader for hidden tiles.
+		 */
+		sf::Shader _hiddenTileShaderFoW;
+
+		/**
+		 * Yellow tiles shader for hidden tiles.
+		 */
+		sf::Shader _availableTileShaderFoW;
+
+		/**
+		 * Red tiles shader for hidden tiles.
+		 * Units should never cause this shader to be applied, but structure attack
+		 * ranges can.
+		 */
+		sf::Shader _attackableTileShaderFoW;
+
+		/**
+		 * Unavilable tiles shader for hidden tiles.
+		 */
+		sf::Shader _unavailableTileShaderFoW;
 
 		// ANIMATIONS //
 

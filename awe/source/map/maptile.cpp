@@ -79,13 +79,28 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 		}
 		// Now, allow the caller to set the originally given tile's type.
 	}
-	_updateCapturingUnit(getUnitOnTile(pos));
+	const auto unitOnTile = getUnitOnTile(pos);
+	// If the tile has a unit on it, update its army's visible tile cache.
+	if (unitOnTile != awe::NO_UNIT) {
+		auto visibleTiles = getAvailableTiles(pos, 1, getUnitVision(unitOnTile));
+		visibleTiles.insert(pos);
+		_armies.at(_units.at(unitOnTile).data.getArmy()).removeVisibleTiles(
+			visibleTiles);
+	}
+	_updateCapturingUnit(unitOnTile);
 	_tiles[pos.x][pos.y].data.setTileType(type);
 	// Set the tile's HP to the max.
 	_tiles[pos.x][pos.y].data.setTileHP(
 		static_cast<awe::HP>(type->getType()->getMaxHP()));
 	// Remove ownership of the tile from the army who owns it, if any army does.
 	setTileOwner(pos, awe::NO_ARMY);
+	// If the tile has a unit on it, update its army's visible tile cache.
+	if (unitOnTile != awe::NO_UNIT) {
+		auto visibleTiles = getAvailableTiles(pos, 1, getUnitVision(unitOnTile));
+		visibleTiles.insert(pos);
+		_armies.at(_units.at(unitOnTile).data.getArmy()).addVisibleTiles(
+			visibleTiles);
+	}
 	return true;
 }
 
@@ -320,6 +335,56 @@ bool awe::map::isTileDestroyed(const sf::Vector2u& pos) const {
 		return false;
 	}
 	return _tiles[pos.x][pos.y].data.getStructureDestroyed();
+}
+
+bool awe::map::isTileVisible(const sf::Vector2u& pos,
+	const awe::ArmyID army) const {
+	if (_isOutOfBounds(pos)) {
+		_logger.error("isTileVisible operation failed: tile at position {} is "
+			"out of bounds with the map's size of {}!", pos, getMapSize());
+		return false;
+	}
+	if (!_isArmyPresent(army)) {
+		_logger.error("isTileVisible operation failed: army with ID {} doesn't "
+			"exist!", army);
+		return false;
+	}
+	// A tile is visible if...
+	// 1. Fog of War is disabled.
+	if (!isFoWEnabled()) return true;
+	// 2. It is of a terrain type that is always visible.
+	const auto terrain = _tiles[pos.x][pos.y].data.getTileType()->getType();
+	if (terrain->getFoWVisibility() == awe::terrain::fow_visibility::Visible)
+		return true;
+	// 3. It is owned by a teammate.
+	const auto team = getArmyTeam(army);
+	const auto tileOwner = getTileOwner(pos);
+	if (tileOwner != awe::NO_ARMY && team == getArmyTeam(tileOwner)) return true;
+	// 4. It is within an army's cache of visible tiles...
+	for (const auto& army : _armies) {
+		if (team != army.second.getTeam()) continue;
+		if (army.second.isTileVisible(pos)) {
+			// ...unless it is of a terrain type that is configured to be hidden,
+			// and none of its adjacent tiles (or the tile itself) is occupied by a
+			// teammate...
+			if (terrain->getFoWVisibility() !=
+				awe::terrain::fow_visibility::Hidden) return true;
+			// (This may be too slow if you want to increase this range at all. In
+			// which case you will have to update the army visible tile cache to
+			// incorporate this logic instead of leaving it here.)
+			auto adjacentTiles = getAvailableTiles(pos, 1, 1);
+			adjacentTiles.insert(pos);
+			for (const auto& tile : adjacentTiles) {
+				const auto unitOnTile = getUnitOnTile(tile);
+				if (unitOnTile == awe::NO_UNIT) continue;
+				if (getTeamOfUnit(unitOnTile) == team) return true;
+			}
+			// ...in which case it is invisible.
+			break;
+		}
+	}
+	// Otherwise, the tile is invisible to the army.
+	return false;
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getAvailableTiles(

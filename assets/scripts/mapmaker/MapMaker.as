@@ -211,9 +211,11 @@ class MapMaker : Menu, Group {
         }
         if (bool(ui["zoomout"])) {
             edit.zoomOut();
+            edit.map.enableFoW(true);
         }
         if (bool(ui["zoomin"])) {
             edit.zoomIn();
+            edit.map.enableFoW(false);
         }
         // Undo and redo.
         if (undoControl) {

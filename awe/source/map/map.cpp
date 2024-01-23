@@ -235,7 +235,7 @@ void awe::map::undo(std::size_t additionalUndos) {
 	}
 	// Pop front memento/s of undo deque and push to the redo deque.
 	for (std::size_t i = 0; i <= additionalUndos; ++i) {
-		auto popped = _undoDeque.front();
+		awe::map::memento popped = _undoDeque.front();
 		_undoDeque.pop_front();
 		_redoDeque.push_front(popped);
 	}
@@ -258,7 +258,7 @@ void awe::map::redo(std::size_t additionalRedos) {
 	}
 	// Pop front memento/s of redo deque and push to the undo deque.
 	for (std::size_t i = 0; i <= additionalRedos; ++i) {
-		auto popped = _redoDeque.front();
+		awe::map::memento popped = _redoDeque.front();
 		_redoDeque.pop_front();
 		_undoDeque.push_front(popped);
 	}
@@ -608,6 +608,40 @@ void awe::map::_initShaders() {
 		"pixel.x = 1.0; pixel.yz -= 0.25;"
 		"gl_FragColor = pixel;}", sf::Shader::Fragment);
 	_attackableTileShader.setUniform("texUnit", sf::Shader::CurrentTexture);
+
+	_hiddenTileShaderFoW.loadFromMemory("uniform sampler2D texUnit;"
+		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
+		// First, apply FoW effect.
+		"pixel.xyz = (pixel.x + pixel.y + pixel.z) / 3.0;" // B&W.
+		"pixel.y *= 0.7;"                                  // Purple tint.
+		// Then, apply our effect.
+		"gl_FragColor = pixel;}", sf::Shader::Fragment);
+	_hiddenTileShaderFoW.setUniform("texUnit", sf::Shader::CurrentTexture);
+	_unavailableTileShaderFoW.loadFromMemory("uniform sampler2D texUnit;"
+		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
+		// First, apply FoW effect.
+		"pixel.xyz = (pixel.x + pixel.y + pixel.z) / 3.0;" // B&W.
+		"pixel.y *= 0.7;"                                  // Purple tint.
+		// Then, apply our effect.
+		"pixel.xyz /= 2.0; gl_FragColor = pixel;}", sf::Shader::Fragment);
+	_unavailableTileShaderFoW.setUniform("texUnit", sf::Shader::CurrentTexture);
+	_availableTileShaderFoW.loadFromMemory("uniform sampler2D texUnit;"
+		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
+		// First, apply FoW effect.
+		"pixel.xyz = (pixel.x + pixel.y + pixel.z) / 3.0;" // B&W.
+		"pixel.y *= 0.7;"                                  // Purple tint.
+		// Then, apply our effect.
+		"pixel.xy *= 1.1; gl_FragColor = pixel;}", sf::Shader::Fragment);
+	_availableTileShaderFoW.setUniform("texUnit", sf::Shader::CurrentTexture);
+	_attackableTileShaderFoW.loadFromMemory("uniform sampler2D texUnit;"
+		"void main() {vec4 pixel = texture2D(texUnit, gl_TexCoord[0].xy);"
+		// First, apply FoW effect.
+		"pixel.xyz = (pixel.x + pixel.y + pixel.z) / 3.0;" // B&W.
+		"pixel.y *= 0.7;"                                  // Purple tint.
+		// Then, apply our effect.
+		"pixel.x = 1.0; pixel.yz -= 0.25;"
+		"gl_FragColor = pixel;}", sf::Shader::Fragment);
+	_attackableTileShaderFoW.setUniform("texUnit", sf::Shader::CurrentTexture);
 }
 
 void awe::map::_initPRNG() {
