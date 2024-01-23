@@ -344,7 +344,7 @@ bool awe::map::isTileVisible(const sf::Vector2u& pos,
 			"out of bounds with the map's size of {}!", pos, getMapSize());
 		return false;
 	}
-	if (army == awe::NO_ARMY) return isFoWEnabled();
+	if (army == awe::NO_ARMY) return !isFoWEnabled();
 	if (!_isArmyPresent(army)) {
 		_logger.error("isTileVisible operation failed: army with ID {} doesn't "
 			"exist!", army);

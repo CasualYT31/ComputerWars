@@ -180,7 +180,11 @@ class ArmyWidget : Panel {
                 tagCO.setVisibility(false);
             }
 
-            funds.setText("price", { any(game.map.getArmyFunds(armyID)) });
+            const auto currentArmy = game.map.getSelectedArmy();
+            if (game.map.isFoWEnabled() && (currentArmy == NO_ARMY ||
+                game.map.getArmyTeam(currentArmy) != teamID))
+                funds.setText("price", { any("?????") });
+            else funds.setText("price", { any(game.map.getArmyFunds(armyID)) });
         } else {
             setBackgroundColour(Colour(255, 255, 255, alpha));
             team.setText("~");
