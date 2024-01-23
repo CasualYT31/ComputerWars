@@ -227,9 +227,11 @@ class DetailedInfoMenu : Menu, Panel {
      */
     private string getTilePicture(const Vector2&in pos) {
         const auto t = game.map.getTileType(pos).type;
-        // If the tile is owned, attempt to retrieve the owned terrain picture.
+        // If the tile is owned, attempt to retrieve the owned terrain picture,
+        // unless it is hidden and it's configured to hide its owner when hidden.
         const auto ownerID = game.map.getTileOwner(pos);
-        if (ownerID != NO_ARMY) {
+        if (ownerID != NO_ARMY && (game.map.isTileVisible(pos,
+            game.map.getSelectedArmy()) || t.showOwnerWhenHidden)) {
             const auto owned =
                 t.picture(game.map.getArmyCountry(ownerID).scriptName);
             if (!owned.isEmpty()) return owned;

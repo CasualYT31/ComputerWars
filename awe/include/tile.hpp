@@ -68,7 +68,9 @@ namespace awe {
 		 * Returns the tile's type.
 		 * @return Information on the tile's type.
 		 */
-		std::shared_ptr<const awe::tile_type> getTileType() const;
+		inline std::shared_ptr<const awe::tile_type> getTileType() const {
+			return _type;
+		}
 
 		/**
 		 * Sets the owner of this tile.
@@ -83,34 +85,44 @@ namespace awe {
 		 * @return The army ID of the owning army. \c awe::army::NO_ARMY if the
 		 *         tile isn't owned.
 		 */
-		awe::ArmyID getTileOwner() const noexcept;
+		inline awe::ArmyID getTileOwner() const noexcept {
+			return _owner;
+		}
 
 		/**
 		 * Sets the tile's HP.
 		 * If a negative number is given, it will be adjusted to \c 0.
 		 * @param hp The HP to set to the tile.
 		 */
-		void setTileHP(const awe::HP hp) noexcept;
+		inline void setTileHP(const awe::HP hp) noexcept {
+			_hp = std::max(0, hp);
+		}
 
 		/**
 		 * Retrieves the tile's HP.
 		 * @return The HP of the tile.
 		 */
-		awe::HP getTileHP() const noexcept;
+		inline awe::HP getTileHP() const noexcept {
+			return _hp;
+		}
 
 		/**
 		 * Sets the unit currently occupying the tile.
 		 * @param id The ID of the unit now occupying the tile. \c NO_UNIT
 		 *           indicates this tile should be vacant.
 		 */
-		void setUnit(const awe::UnitID id) noexcept;
+		inline void setUnit(const awe::UnitID id) noexcept {
+			_unit = id;
+		}
 
 		/**
 		 * Retrieves the ID of the unit currently occupying the tile.
 		 * @return The ID of the unit occupying the tile. \c 0 if the tile is
 		 *         vacant.
 		 */
-		awe::UnitID getUnit() const noexcept;
+		inline awe::UnitID getUnit() const noexcept {
+			return _unit;
+		}
 
 		/**
 		 * Define if this tile forms part of a structure or not.
@@ -118,22 +130,28 @@ namespace awe {
 		 *                  form. If \c nullptr, this tile is not a member of a
 		 *                  structure.
 		 */
-		void setStructureType(
-			const std::shared_ptr<const awe::structure>& structure);
+		inline void setStructureType(
+			const std::shared_ptr<const awe::structure>& structure) {
+			_structure = structure;
+		}
 
 		/**
 		 * Gets the type of structure that this tile helps form, if any.
 		 * @return If this tile forms part of a structure, the type of structure is
 		 *         returned. Otherwise, \c nullptr.
 		 */
-		std::shared_ptr<const awe::structure> getStructureType() const;
+		inline std::shared_ptr<const awe::structure> getStructureType() const {
+			return _structure;
+		}
 
 		/**
 		 * Stores which tile from a structure this tile is.
 		 * @param offset The offset from the root tile of the structure. Can be
 		 *               <tt>(0, 0)</tt> to represent the root tile.
 		 */
-		void setStructureTile(const sf::Vector2i offset);
+		inline void setStructureTile(const sf::Vector2i offset) {
+			_offset = offset;
+		}
 
 		/**
 		 * Gets this tile's offset from the root tile of the structure it's a part
@@ -142,26 +160,48 @@ namespace awe {
 		 * @return If this tile is the root tile, returns <tt>(0, 0)</tt>,
 		 *         otherwise, returns the offset from the root tile, in tiles.
 		 */
-		sf::Vector2i getStructureTile() const;
+		inline sf::Vector2i getStructureTile() const {
+			return _offset;
+		}
 
 		/**
 		 * Updates the destroyed flag on this tile.
 		 * @param isDestroyed Set to \c TRUE if this tile forms part of a structure
 		 *                    that's destroyed. \c FALSE otherwise.
 		 */
-		void setStructureDestroyed(const bool isDestroyed);
+		inline void setStructureDestroyed(const bool isDestroyed) {
+			_destroyed = isDestroyed;
+		}
 
 		/**
 		 * Retrieves the destroyed flag in this tile.
 		 * @return \c TRUE or \c FALSE.
 		 */
-		bool getStructureDestroyed() const;
+		inline bool getStructureDestroyed() const {
+			return _destroyed;
+		}
 
 		/**
-		 * Updates the sprite ID to use with this tile based on its type and owner.
+		 * Updates the visibility status of this tile.
+		 * @param visible \c TRUE if the tile is visible to the current army,
+		 *                \c FALSE if it is hidden.
+		 */
+		void setVisibility(const bool visible);
+
+		/**
+		 * Updates the sprite ID to use with this tile based on its type, owner,
+		 * and visibility.
 		 */
 		void updateSpriteID();
 	private:
+		/**
+		 * Same as \c updateSpriteID() except the sprite changes are not given to
+		 * the callback but are applied immediately.
+		 */
+		void _updateSpriteID(const std::weak_ptr<awe::animated_tile>& _tileSprite,
+			const awe::ArmyID owner,
+			const std::shared_ptr<const awe::tile_type>& type, const bool visible);
+
 		/**
 		 * The type of this tile.
 		 */
@@ -198,6 +238,11 @@ namespace awe {
 		 * Does this tile form part of a destroyed structure?
 		 */
 		bool _destroyed = false;
+
+		/**
+		 * Is this tile visible to the current army?
+		 */
+		bool _visible = true;
 
 		/**
 		 * Weak pointer to this tile's animated sprite.

@@ -185,7 +185,9 @@ class TileWidget : HorizontalLayout {
             const auto tileType = game.map.getTileType(tilePos);
             const auto terrainType = tileType.type;
             const ArmyID tileOwner = game.map.getTileOwner(tilePos);
-            if (tileOwner == NO_ARMY) {
+            if (tileOwner == NO_ARMY || (!game.map.isTileVisible(tilePos,
+                game.map.getSelectedArmy()) &&
+                    !terrainType.showOwnerWhenHidden)) {
                 panels[0].setIcon(game.map.getEnvironmentSpritesheet(),
                     tileType.neutralTileSprite);
             } else {

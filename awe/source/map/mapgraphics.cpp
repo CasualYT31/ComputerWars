@@ -862,9 +862,10 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 		float tilex = 0.0f;
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			auto& tile = _tiles[x][y];
+			const sf::Vector2u tilePos = sf::Vector2u(x, y);
+			tile.data.setVisibility(isTileVisible(tilePos, getSelectedArmy()));
 			tile.sprite->animate(target);
 
-			sf::Vector2u tilePos = sf::Vector2u(x, y);
 			sf::Uint32 tileWidth = 0, tileHeight = 0;
 			auto type = tile.data.getTileType();
 			if (type) {

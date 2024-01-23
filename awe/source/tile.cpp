@@ -38,77 +38,35 @@ void awe::tile::setTileType(const std::shared_ptr<const awe::tile_type>& type) {
 	updateSpriteID();
 }
 
-std::shared_ptr<const awe::tile_type> awe::tile::getTileType() const {
-	return _type;
-}
-
 void awe::tile::setTileOwner(const awe::ArmyID owner) {
 	_owner = owner;
 	updateSpriteID();
 }
 
-awe::ArmyID awe::tile::getTileOwner() const noexcept {
-	return _owner;
-}
-
-void awe::tile::setTileHP(const awe::HP hp) noexcept {
-	if (hp <= 0) {
-		_hp = 0;
-	} else {
-		_hp = hp;
-	}
-}
-
-awe::HP awe::tile::getTileHP() const noexcept {
-	return _hp;
-}
-
-void awe::tile::setUnit(const awe::UnitID id) noexcept {
-	_unit = id;
-}
-
-awe::UnitID awe::tile::getUnit() const noexcept {
-	return _unit;
-}
-
-void awe::tile::setStructureType(
-	const std::shared_ptr<const awe::structure>& structure) {
-	_structure = structure;
-}
-
-std::shared_ptr<const awe::structure> awe::tile::getStructureType() const {
-	return _structure;
-}
-
-void awe::tile::setStructureTile(const sf::Vector2i offset) {
-	_offset = offset;
-}
-
-sf::Vector2i awe::tile::getStructureTile() const {
-	return _offset;
-}
-
-void awe::tile::setStructureDestroyed(const bool isDestroyed) {
-	_destroyed = isDestroyed;
-}
-
-bool awe::tile::getStructureDestroyed() const {
-	return _destroyed;
+void awe::tile::setVisibility(const bool visible) {
+	// If just the visibility changes, update the sprite immediately instead of
+	// queueing the update, as start of day animations may temporarily show the
+	// owner of tiles otherwise.
+	const auto changed = visible != _visible;
+	_visible = visible;
+	if (changed) _updateSpriteID(_tileSprite, _owner, _type, _visible);
 }
 
 void awe::tile::updateSpriteID() {
 	if (!_type) return;
-	_updateSprite(std::bind([](
-		const std::weak_ptr<awe::animated_tile>& _tileSprite,
-		const awe::ArmyID owner,
-		const std::shared_ptr<const awe::tile_type>& type) {
-			if (_tileSprite.expired()) return;
-			const auto tileSprite = _tileSprite.lock();
-			if (owner == awe::NO_ARMY) {
-				tileSprite->setSprite(type->getNeutralTile());
-			} else {
-				tileSprite->setSprite(type->getOwnedTile(owner));
-			}
-		}, _tileSprite, _owner, _type)
-	);
+	_updateSprite(std::bind(&awe::tile::_updateSpriteID, this, _tileSprite, _owner,
+		_type, _visible));
+}
+
+void awe::tile::_updateSpriteID(
+	const std::weak_ptr<awe::animated_tile>& _tileSprite, const awe::ArmyID owner,
+	const std::shared_ptr<const awe::tile_type>& type, const bool visible) {
+	if (!type || _tileSprite.expired()) return;
+	const auto tileSprite = _tileSprite.lock();
+	if (owner == awe::NO_ARMY ||
+		(!visible && !type->getType()->showOwnerWhenHidden())) {
+		tileSprite->setSprite(type->getNeutralTile());
+	} else {
+		tileSprite->setSprite(type->getOwnedTile(owner));
+	}
 }
