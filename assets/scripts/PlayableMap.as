@@ -979,8 +979,11 @@ shared class PlayableMap {
             }
             map.waitUnit(stationary, true);
             // For "efficiency," don't perform extra PlayableMap checking that
-            // comes with deleteUnit() and just delete it directly.
+            // comes with deleteUnit() and just delete it directly. Don't animate
+            // its destruction, though.
+            map.enableAnimations(false);
             map.deleteUnit(moving);
+            map.enableAnimations(true);
         } else {
             error("Attempted to join moving unit " + formatUInt(moving) +
                 " with stationary unit " + formatUInt(stationary) + ". Details:\n"
