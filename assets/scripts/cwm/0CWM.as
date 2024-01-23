@@ -298,7 +298,7 @@ namespace cwm {
 		stream.write(cursor.x);
 		stream.write(cursor.y);
 		stream.write(map.getDay());
-        stream.write(map.isFowEnabled());
+        stream.write(map.isFoWEnabled());
         const auto scriptFileNames = map.getScriptNames();
         const uint scriptFileCount = scriptFileNames.length();
         stream.write(scriptFileCount);

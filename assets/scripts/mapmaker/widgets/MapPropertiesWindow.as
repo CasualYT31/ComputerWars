@@ -15,16 +15,17 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         super({ ButtonsWindowButton("cancel", SingleSignalHandler(this.cancel)),
             ButtonsWindowButton("ok", SingleSignalHandler(this.ok)) });
         setText("mapprops");
-        setSize("250", "235");
+        setSize("250", "275");
         setResizable(false);
         setTitleButtons(TitleButton::Close);
         close(false);
 
-        // Setup the edit boxes and comboboxes.
+        // Setup the edit boxes, comboboxes, and checkboxes.
         day.setValidator(VALIDATOR_UINT);
         width.setValidator(VALIDATOR_UINT);
         height.setValidator(VALIDATOR_UINT);
         environmentComboBox.setSize("", "48");
+        fogOfWar.setSize("20", "");
 
         // Setup the size layout.
         width.setSize("100%", "100%");
@@ -128,7 +129,8 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
      */
     private void applyChangesAndClose() {
         edit.setMapProperties(name.getText(), parseDay(day.getText()),
-            environment.scriptNames[uint(environmentComboBox.getSelected())]);
+            environment.scriptNames[uint(environmentComboBox.getSelected())],
+            fogOfWar.getChecked());
         const Vector2 oldSize = edit.map.getMapSize(),
             newSize(parseUInt(width.getText()), parseUInt(height.getText()));
         // Check if we've resized first, because in rare cases there may not be a
@@ -230,13 +232,19 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
     private EnvironmentComboBox environmentComboBox(4, null);
 
     /**
+     * Allows the user to enable or disable Fog of War.
+     */
+    private CheckBox fogOfWar;
+
+    /**
      * The map properties.
      */
     private array<MapPropertyRow@> rows = {
         MapPropertyRow(propertiesLayout, "name", name),
         MapPropertyRow(propertiesLayout, "daylabel", day),
         MapPropertyRow(propertiesLayout, "size", sizeLayout),
-        MapPropertyRow(propertiesLayout, "environment", environmentComboBox)
+        MapPropertyRow(propertiesLayout, "environment", environmentComboBox),
+        MapPropertyRow(propertiesLayout, "fow", fogOfWar)
     };
 }
 

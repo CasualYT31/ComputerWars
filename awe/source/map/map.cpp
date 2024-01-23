@@ -63,20 +63,6 @@ awe::animation_preset& awe::operator++(animation_preset& p) noexcept {
 	return p;
 }
 
-awe::map::map(const engine::logger::data& data) : _logger(data),
-	_cursor({ data.sink, data.name + "_cursor_sprite" }),
-	_additionallySelectedTileCursorUL({ data.sink,
-		data.name + "_addcursorul_sprite" }),
-	_additionallySelectedTileCursorUR({ data.sink,
-		data.name + "_addcursorur_sprite" }),
-	_additionallySelectedTileCursorLL({ data.sink,
-		data.name + "_addcursorll_sprite" }),
-	_additionallySelectedTileCursorLR({ data.sink,
-		data.name + "_addcursorlr_sprite" }) {
-	_initPRNG();
-	_initShaders();
-}
-
 awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::environment>>& environments,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
@@ -94,6 +80,7 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 		data.name + "_addcursorll_sprite" }),
 	_additionallySelectedTileCursorLR({ data.sink,
 		data.name + "_addcursorlr_sprite" }) {
+	assert(environments);
 	_countries = countries;
 	_environments = environments;
 	_tileTypes = tiles;
@@ -101,6 +88,9 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	_unitTypes = units;
 	_commanders = commanders;
 	_structures = structures;
+	// We need to make sure the map is in a valid state for the case where an empty
+	// map is saved (i.e. where load() is never called to reset the state).
+	_initState();
 	_initPRNG();
 	_initShaders();
 }
@@ -489,27 +479,7 @@ void awe::map::_loadMapFromInputStream(engine::binary_istream& stream,
 			"not found in the scripts!");
 	}
 	// Clear state (excluding mementos).
-	_sel = sf::Vector2u(0, 0);
-	_currentArmy = awe::NO_ARMY;
-	_lastUnitID = awe::ID_OF_FIRST_UNIT;
-	_armies.clear();
-	_units.clear();
-	_unitsBeingDestroyed.clear();
-	_tiles.clear();
-	_mapName.clear();
-	_day = 1;
-	_fow = false;
-	_viewOffsetX.reset();
-	_viewOffsetY.reset();
-	_mapSizeCache = { 0, 0 };
-	_scriptFiles.clear();
-	removeAllPreviewUnits();
-	_mapShakeTimeLeft = sf::Time::Zero;
-	_waitBeforeNextShake = sf::Time::Zero;
-	_environment = _environments->begin()->second;
-	if (_scripts->doesModuleExist(_moduleName))
-		_scripts->deleteModule(_moduleName);
-	_moduleName.clear();
+	_initState();
 	// Load state.
 	_mementoHardDisable = true;
 	_scripts->callFunction(_scripts->MAIN_MODULE, "LoadMap", &stream, this,
@@ -590,6 +560,30 @@ void awe::map::selected_unit_render_data::clearState() {
 	closedList->RemoveRange(0, closedList->GetSize());
 	disableRenderingEffects = false;
 	disableShaderForAvailableUnits = false;
+}
+
+void awe::map::_initState() {
+	_sel = sf::Vector2u(0, 0);
+	_currentArmy = awe::NO_ARMY;
+	_lastUnitID = awe::ID_OF_FIRST_UNIT;
+	_armies.clear();
+	_units.clear();
+	_unitsBeingDestroyed.clear();
+	_tiles.clear();
+	_mapName.clear();
+	_day = 1;
+	_fow = false;
+	_viewOffsetX.reset();
+	_viewOffsetY.reset();
+	_mapSizeCache = { 0, 0 };
+	_scriptFiles.clear();
+	removeAllPreviewUnits();
+	_mapShakeTimeLeft = sf::Time::Zero;
+	_waitBeforeNextShake = sf::Time::Zero;
+	_environment = _environments->begin()->second;
+	if (_scripts && _scripts->doesModuleExist(_moduleName))
+		_scripts->deleteModule(_moduleName);
+	_moduleName.clear();
 }
 
 void awe::map::_initShaders() {

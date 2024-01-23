@@ -69,6 +69,7 @@
 	"size": "Size",
 	"daylabel": "Day",
 	"environment": "Environment",
+	"fow": "Fog of War",
 	"newmap": "New Map",
 	"openmap": "Open Map",
 	"savemap": "Save Map",
@@ -184,7 +185,7 @@
 	"OPERATION_renamescript": "Rename Script",
 	"OPERATION_environment": "Set Environment",
 
-	"OPERATION_mapprops": "Update Map's Name, Day, and/or Environment",
+	"OPERATION_mapprops": "Update Map's Non-Size Properties",
 	"OPERATION_tiletypeandowner": "Set Tile's Type and/or Owner",
 	"OPERATION_createloadunit": "Create and Load Unit",
 	"OPERATION_paintstructure": "Paint Structure",

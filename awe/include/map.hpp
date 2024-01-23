@@ -237,18 +237,11 @@ namespace awe {
 			const std::shared_ptr<DocumentationGenerator>& document);
 
 		/**
-		 * Initialises the internal logger object.
-		 * @param data The data to initialise the logger object with.
-		 * @sa    \c engine::logger
-		 */
-		map(const engine::logger::data& data);
-
-		/**
 		 * Initialises this object with \c bank pointers.
 		 * Also initialises the internal logger object.\n
 		 * @param countries    Information on the countries available to the map.
 		 * @param environments Information on the environments available to the
-		 *                     map.
+		 *                     map. Cannot be \c nullptr.
 		 * @param tiles        Information on the tile types available to the map.
 		 * @param terrains     Information on the terrains available to the map.
 		 * @param units        Information on the unit types available to the map.
@@ -1386,6 +1379,8 @@ namespace awe {
 		 *         \c FALSE otherwise. Will always return \c TRUE if Fog of War is
 		 *         disabled, unless the given tile is out-of-bounds or the given
 		 *         army doesn't exist, which case this will always return \c FALSE.
+		 *         No error will be logged if \c NO_ARMY is given. If \c NO_ARMY is
+		 *         given, the result of \c isFoWEnabled() will be returned.
 		 */
 		bool isTileVisible(const sf::Vector2u& pos, const awe::ArmyID army) const;
 
@@ -2962,6 +2957,11 @@ namespace awe {
 		//////////
 		// DATA //
 		//////////
+		/**
+		 * Clears this map's state to its defaults.
+		 */
+		void _initState();
+
 		/**
 		 * Stores the map's name.
 		 */

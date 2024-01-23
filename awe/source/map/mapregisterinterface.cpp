@@ -256,7 +256,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, enableFoW), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"bool isFowEnabled() const",
+			"bool isFoWEnabled() const",
 			asMETHOD(awe::map, isFoWEnabled), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
