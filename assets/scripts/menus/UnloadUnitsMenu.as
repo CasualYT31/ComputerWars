@@ -111,6 +111,11 @@ class UnloadUnitsMenu : Menu, Group {
                                 selectedTile);
                             setWidgetText(currentlyUnloadingUnitsUnloadButton,
                                 "load");
+                            // In Fog of War, previewing an unload of a unit takes
+                            // one unit of fuel. Unloading is still allowed even
+                            // if the unit has no fuel, however.
+                            if (game.map.isFoWEnabled())
+                                grid.burnUnitFuel(currentlyUnloadingUnit, 1);
                         }
                     } else {
                         // Don't cancel the unload operation if it's unavailable!
@@ -180,6 +185,8 @@ class UnloadUnitsMenu : Menu, Group {
             // Remove the unit from the map.
             game.map.removePreviewUnit(currentlyUnloadingUnit);
             setWidgetText(w, "unload");
+            // Always allow a unit to unload, even if Fog of War is enabled and
+            // the unit has no fuel.
         } else {
             panel.setVisibility(false);
             const auto unitMoveType = game.map.getUnitType(

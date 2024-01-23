@@ -209,8 +209,8 @@ class GameScreen : Menu, Group {
                 game.map.queuePlay("sound", "select");
                 setGUI("MapMenu");
                 return;
-            } else if (game.map.getArmyOfUnit(unitID) == game.map.getSelectedArmy() &&
-                !game.map.isUnitWaiting(unitID)) {
+            } else if (game.map.getArmyOfUnit(unitID) ==
+                game.map.getSelectedArmy() && !game.map.isUnitWaiting(unitID)) {
                 game.selectUnit(unitID);
                 game.map.queuePlay("sound", "select.unit");
                 game.enableClosedList(true);

@@ -852,13 +852,19 @@ shared class PlayableMap {
     /**
      * Moves the currently selected unit along the chosen path and deselects the
      * unit.
+     * @param  alwaysBurnFuel \c TRUE if the move should always burn fuel, even if
+     *                        Fog of War is enabled. Usually, if Fog of War is
+     *                        enabled, a move will not burn fuel, with a view of
+     *                        allowing the caller to manage burning fuel
+     *                        themselves.
      * @throws If a unit hasn't been selected.
      */
-    void moveUnit() {
+    void moveUnit(const bool alwaysBurnFuel = false) {
         const auto id = map.getSelectedUnit();
         if (id != NO_UNIT) {
             const auto node = map.closedList[map.closedList.length() - 1];
-            map.burnUnitFuel(id, node.g);
+            if (alwaysBurnFuel || !map.isFoWEnabled())
+                map.burnUnitFuel(id, node.g);
             map.setUnitPosition(id, node.tile);
             map.waitUnit(id, true);
             selectUnit(NO_UNIT);
@@ -871,13 +877,14 @@ shared class PlayableMap {
     /**
      * Moves the currently selected unit along the chosen path, deselects the
      * unit, and ensures it's either hidden or shown.
-     * @param  hide \c TRUE to hide the unit, \c FALSE to show it.
+     * @param  hide           \c TRUE to hide the unit, \c FALSE to show it.
+     * @param  alwaysBurnFuel See \c moveUnit().
      * @throws If a unit hasn't been selected. Note that no unit will be hidden or
      *         shown if this is the case.
      */
-    void moveUnitHide(const bool hide) {
+    void moveUnitHide(const bool hide, const bool alwaysBurnFuel = false) {
         const auto id = map.getSelectedUnit();
-        moveUnit();
+        moveUnit(alwaysBurnFuel);
         map.unitHiding(id, hide);
         string particle = "stealthhideshow";
         const auto type = map.getUnitType(id);
@@ -1020,14 +1027,15 @@ shared class PlayableMap {
      * Note that the game engine handles all cases where a capture is completely
      * interrupted, and in such cases, the tile's HP will be set back to maximum
      * and the unit will no longer be in capturing mode.
+     * @param  alwaysBurnFuel See \c moveUnit().
      * @throws If a unit hasn't been selected, or if the unit cannot capture the
      *         destination tile.
      */
-    void moveUnitAndCapture() {
+    void moveUnitAndCapture(const bool alwaysBurnFuel = false) {
         const auto unit = map.getSelectedUnit();
         const auto tile = map.closedList[map.closedList.length() - 1].tile;
         if (canCapture(unit, tile)) {
-            moveUnit();
+            moveUnit(alwaysBurnFuel);
             const auto oldHP = map.getTileHP(tile);
             const auto newHP = oldHP - map.getUnitDisplayedHP(unit);
             map.animateCapture(tile, unit, oldHP, newHP);

@@ -68,6 +68,28 @@ bool awe::move_unit::animate(const sf::RenderTarget& target) {
 	if (_tile >= _path.size()) {
 		_unit->clearSpritesheetOverride();
 		_unit->clearIconSpritesheetOverride();
+		// Fail-safe for very fast moving units: stop all sounds except for the
+		// last one. Speedy units can sometimes miss their _playNextSound() calls,
+		// which can result in sounds not being stopped.
+		// I could replicate such a case by running on my beefier PC and moving a
+		// unit with a speed of 1000.f across two tiles with different moving
+		// sounds (optionally having tiles before these two tiles, but none after).
+		// E.g. moving an infantry over a road then a shoal with the debug visual.
+		// We explicitly prevent stopping the final sound, as that is handled
+		// outside of this class.
+		auto revItr = _path.rbegin();
+		std::string finalSound;
+		while (finalSound.empty() && revItr != _path.rend())
+			finalSound = (revItr++)->secondSound;
+		if (finalSound.empty()) return true;
+		for (const auto& node : _path) {
+			if (!node.firstSound.empty() &&
+				node.firstSound != _path.back().secondSound)
+				_sounds->stop(node.firstSound);
+			if (!node.secondSound.empty() &&
+				node.secondSound != _path.back().secondSound)
+				_sounds->stop(node.secondSound);
+		}
 		return true;
 	} else return false;
 }

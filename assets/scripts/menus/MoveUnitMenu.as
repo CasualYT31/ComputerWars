@@ -84,7 +84,7 @@ class MoveUnitMenu : Menu, Group {
                             game.map.closedList.removeRange(obstructionIndex,
                                 game.map.closedList.length() - obstructionIndex);
                             game.map.animateMoveUnit(unitID, game.map.closedList);
-                            game.moveUnit();
+                            game.moveUnit(true);
                             game.map.queueCode(AnimationCode(this.showTrapUnit),
                                 any(trapUnit));
                             game.animateTrap(unitID);
@@ -92,6 +92,13 @@ class MoveUnitMenu : Menu, Group {
                                 setGUI("GameScreen");
                             });
                         } else {
+                            // In Fog of War, units will burn fuel whilst
+                            // previewing moves, and not after confirming a move.
+                            // moveUnit() will know not to burn fuel if FoW is on.
+                            if (game.map.isFoWEnabled()) {
+                                game.map.burnUnitFuel(unitID, game.map.closedList[
+                                    game.map.closedList.length() - 1].g);
+                            }
                             game.map.disableSelectedUnitRenderingEffects(true);
                             if (game.map.closedList.length() >= 2)
                                 game.map.animateMoveUnit(unitID,

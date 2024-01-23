@@ -279,7 +279,28 @@ class PreviewMoveUnitMenu : Menu, Group {
         const MousePosition&in currentMouse) {
         if (bool(ui["back"])) {
             game.map.disableSelectedUnitRenderingEffects(false);
-            game.map.removePreviewUnit(game.map.getSelectedUnit());
+            const auto selectedUnit = game.map.getSelectedUnit();
+            game.map.removePreviewUnit(selectedUnit);
+            // If we are in Fog of War, we need to deselect the unit, then
+            // reselect it. This is to recalculate the available tiles, as fuel
+            // will have been burnt whilst previewing the move.
+            if (game.map.isFoWEnabled()) {
+                array<ClosedListNode> closedListCopy;
+                for (uint i = 0, len = game.map.closedList.length(); i < len; ++i)
+                    game.newClosedListNode(closedListCopy, -1,
+                        game.map.closedList[i].tile, game.map.closedList[i].g);
+                game.selectUnit(NO_UNIT);
+                game.selectUnit(selectedUnit);
+                // If the final tile of the closed list is still available, then
+                // reinstate old closed list.
+                if (game.map.isAvailableTile(
+                    closedListCopy[closedListCopy.length() - 1].tile)) {
+                    for (uint i = 0, len = closedListCopy.length(); i < len; ++i)
+                        game.newClosedListNode(game.map.closedList, -1,
+                            closedListCopy[i].tile, closedListCopy[i].g);
+                    game.map.regenerateClosedListSprites();
+                }
+            }
             game.map.queuePlay("sound", "back");
             setGUI("MoveUnitMenu");
             return;

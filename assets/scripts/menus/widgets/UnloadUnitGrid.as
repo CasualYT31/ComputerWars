@@ -60,6 +60,16 @@ class UnloadUnitGrid : Grid {
     }
 
     /**
+     * If the given unit ID matches one stored, burn that unit's fuel.
+     * @param u The ID to test against.
+     * @param f The fuel to burn from the unit if the given ID matches \c unit.
+     */
+    void burnUnitFuel(const UnitID u, const Fuel f) {
+        for (uint i = 0, len = units.length(); i < len; ++i)
+            if (units[i].burnUnitFuelIfIDMatches(u, f)) return;
+    }
+
+    /**
      * Reinitialises the directional flow within the grid.
      */
     void setupDirectionalFlow() {
@@ -163,6 +173,7 @@ class UnloadUnitRow {
     UnloadUnitRow(UnloadUnitGrid@ const grid, const UnitID unitID,
         MultiSignalHandler@ const unloadHandler) {
         @pGrid = grid;
+        unit = unitID;
         const auto type = game.map.getUnitType(unitID);
 
         // Setup the icon widget.
@@ -211,6 +222,20 @@ class UnloadUnitRow {
     }
 
     /**
+     * If the given unit ID matches the one stored, burn the unit's fuel.
+     * @param  u The ID to test against.
+     * @param  f The fuel to burn from the unit if the given ID matches \c unit.
+     * @return \c TRUE if the given ID matches the unit ID stored.
+     */
+    bool burnUnitFuelIfIDMatches(const UnitID u, const Fuel f) {
+        if (unit == u) {
+            game.map.burnUnitFuel(u, f);
+            fuel.setText("~" + formatInt(game.map.getUnitFuel(u)));
+            return true;
+        } else return false;
+    }
+
+    /**
      * Sets up directional flow for this row.
      * @param up   The row of widgets, starting from the first column, that are
      *             above this row.
@@ -252,6 +277,11 @@ class UnloadUnitRow {
      * Points to the grid this row is within.
      */
     private Grid@ pGrid;
+
+    /**
+     * The ID of the unit that is displayed in this row.
+     */
+    private UnitID unit;
 
     /**
      * The unit icon.
