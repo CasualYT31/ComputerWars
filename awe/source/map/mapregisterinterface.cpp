@@ -1027,7 +1027,8 @@ void awe::map::Register(asIScriptEngine* engine,
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool animateCapture(const Vector2&in, const UnitID, const HP, "
-			"const HP)",
+			"const HP, const string&in, const string&in, const string&in, "
+			"const string&in)",
 			asMETHOD(awe::map, animateCapture), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "bool animateMoveUnit("

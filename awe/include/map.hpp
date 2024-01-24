@@ -2622,15 +2622,27 @@ namespace awe {
 
 		/**
 		 * Attempts to queue a "property capture" animation.
+		 * Empty strings can be given to any of the sound parameters to not play a
+		 * particular sound, or not play any of them.
 		 * @param  tile  The property tile being captured.
 		 * @param  unit  The ID of the unit capturing the property.
 		 * @param  oldHP The old HP of the tile.
 		 * @param  newHP The new HP of the tile. If this is \c <= \c 0, the tile is
 		 *               considered captured.
+		 * @param  audioObject   The name of the audio object containing the sounds
+		 *                       to play.
+		 * @param  introSound    The name of the sound to play when the animation
+		 *                       starts.
+		 * @param  fallingSound  The name of the sound to play when the "falling"
+		 *                       portion of the animation starts.
+		 * @param  capturedSound The name of the sound to play when the "captured"
+		 *                       portion of the animation starts.
 		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
 		 */
 		bool animateCapture(const sf::Vector2u& tile, const awe::UnitID unit,
-			const awe::HP oldHP, const awe::HP newHP);
+			const awe::HP oldHP, const awe::HP newHP,
+			const std::string& audioObject, const std::string& introSound,
+			const std::string& fallingSound, const std::string& capturedSound);
 
 		/**
 		 * Attempts to queue a "unit move" animation.

@@ -30,7 +30,9 @@ awe::capture::capture(const std::shared_ptr<sfx::animated_spritesheet>& sheet,
 	const awe::HP oldHP, const awe::HP newHP, const unsigned int maxHP,
 	const awe::animated_tile& tileSprite,
 	const std::shared_ptr<sf::Font>& hpTextFont,
-	const std::shared_ptr<sf::Font>& capturedTextFont) :
+	const std::shared_ptr<sf::Font>& capturedTextFont,
+	const std::shared_ptr<sfx::audio>& sounds, const std::string& introSound,
+	const std::string& fallingSound, const std::string& capturedSound) :
 	_background(sheet, background),
 	_property(sheet, oldProperty),
 	_unit(sheet, capturing),
@@ -41,7 +43,11 @@ awe::capture::capture(const std::shared_ptr<sfx::animated_spritesheet>& sheet,
 	_hp(static_cast<float>(oldHP)), _oldHP(_hp),
 	_newHP(std::max(0.0f, static_cast<float>(newHP))),
 	_maxHP(static_cast<float>(maxHP)), _capturedProperty(newProperty),
-	_capturedUnit(captured) {
+	_capturedUnit(captured),
+	_sounds(sounds),
+	_introSound(introSound),
+	_fallingSound(fallingSound),
+	_capturedSound(capturedSound) {
 	// Set position of background sprite now.
 	const auto tilePos = tileSprite.getPixelPosition(),
 		tileSize = tileSprite.getPixelSize();
@@ -60,6 +66,8 @@ awe::capture::capture(const std::shared_ptr<sfx::animated_spritesheet>& sheet,
 }
 
 bool awe::capture::animate(const sf::RenderTarget& target) {
+	if (_sounds && !_introSound.empty() && firstTimeAnimated())
+		_sounds->play(_introSound);
 	const auto delta = accumulatedDelta();
 	_background.animate(target);
 	_property.animate(target);
@@ -68,9 +76,7 @@ bool awe::capture::animate(const sf::RenderTarget& target) {
 	} else if (_state == State::Intro && _unit.animate(target)) {
 		setState(State::Wait);
 		_unit.setCurrentFrame(0);
-	}
-
-	if (_state == State::Wait) {
+	} else if (_state == State::Wait) {
 		if (delta >= WAIT_DURATION) setState(State::Falling);
 		return false;
 	}
@@ -145,4 +151,9 @@ void awe::capture::draw(sf::RenderTarget& target, sf::RenderStates states) const
 void awe::capture::setState(const State newState) {
 	_state = newState;
 	resetDeltaAccumulation();
+	if (!_sounds) return;
+	if (newState == State::Falling && !_fallingSound.empty())
+		_sounds->play(_fallingSound);
+	else if (newState == State::Captured && !_capturedSound.empty())
+		_sounds->play(_capturedSound);
 }

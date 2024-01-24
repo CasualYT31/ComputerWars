@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "animated_tile.hpp"
 #include "language.hpp"
 #include "typedef.hpp"
+#include "audio.hpp"
 
 namespace awe {
 	/**
@@ -48,7 +49,10 @@ namespace awe {
 			const awe::HP oldHP, const awe::HP newHP, const unsigned int maxHP,
 			const awe::animated_tile& tileSprite,
 			const std::shared_ptr<sf::Font>& hpTextFont,
-			const std::shared_ptr<sf::Font>& capturedTextFont);
+			const std::shared_ptr<sf::Font>& capturedTextFont,
+			const std::shared_ptr<sfx::audio>& sounds,
+			const std::string& introSound, const std::string& fallingSound,
+			const std::string& capturedSound);
 
 		/**
 		 * This drawable's \c animate() method.
@@ -136,6 +140,26 @@ namespace awe {
 		 * Set this sprite to \c _unit when the property has been captured.
 		 */
 		const std::string _capturedUnit;
+
+		/**
+		 * Sounds to use with this animation.
+		 */
+		const std::shared_ptr<sfx::audio> _sounds;
+
+		/**
+		 * Sound to play when the animation is first animated.
+		 */
+		const std::string _introSound;
+
+		/**
+		 * Sound to play when the \c Falling state begins.
+		 */
+		const std::string _fallingSound;
+
+		/**
+		 * Sound to play when the \c Captured state begins.
+		 */
+		const std::string _capturedSound;
 
 		/**
 		 * Duration of the \c Wait state, in seconds.

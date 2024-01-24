@@ -1047,9 +1047,12 @@ shared class PlayableMap {
             moveUnit(alwaysBurnFuel);
             const auto oldHP = map.getTileHP(tile);
             const auto newHP = oldHP - map.getUnitDisplayedHP(unit);
-            map.animateCapture(tile, unit, oldHP, newHP);
+            const auto isHQ = map.getTileType(tile).type.scriptName == "HQ";
+            map.animateCapture(tile, unit, oldHP, newHP, "sound", "capture.intro",
+                "capture.falling",
+                isHQ ? "capture.captured.hq" : "capture.captured");
             if (newHP <= 0) {
-                if (map.getTileType(tile).type.scriptName == "HQ") {
+                if (isHQ) {
                     deleteArmy(map.getTileOwner(tile), map.getArmyOfUnit(unit));
                 } else {
                     map.setTileOwner(tile, map.getArmyOfUnit(unit));

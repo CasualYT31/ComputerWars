@@ -670,7 +670,9 @@ bool awe::map::animateLabelUnit(const awe::UnitID unitID,
 }
 
 bool awe::map::animateCapture(const sf::Vector2u& tile, const awe::UnitID unit,
-	const awe::HP oldHP, const awe::HP newHP) {
+	const awe::HP oldHP, const awe::HP newHP, const std::string& audioObject,
+	const std::string& introSound, const std::string& fallingSound,
+	const std::string& capturedSound) {
 	if (!_canAnimationBeQueued({ awe::animation_preset::VisualA,
 		awe::animation_preset::VisualB })) return false;
 	if (_isOutOfBounds(tile)) {
@@ -705,7 +707,11 @@ bool awe::map::animateCapture(const sf::Vector2u& tile, const awe::UnitID unit,
 		t.data.getTileType()->getType()->getMaxHP(),
 		*t.sprite,
 		(*_fonts)["Monospace"],
-		(*_fonts)["AW2"]
+		(*_fonts)["AW2"],
+		audioObject.empty() ? nullptr : (*_audios)[audioObject],
+		introSound,
+		fallingSound,
+		capturedSound
 	));
 	return true;
 }
@@ -844,7 +850,8 @@ bool awe::map::animateNextTurn(const awe::ArmyID prevArmy,
 	const awe::ArmyID armyID, const CScriptArray* const controls) {
 	const auto controlsStd = engine::ConvertCScriptArray<
 		std::unordered_set<std::string>, std::string>(controls);
-	if (!_canAnimationBeQueued()) return false;
+	if (!_canAnimationBeQueued({ awe::animation_preset::Debug }, true))
+		return false;
 	if (prevArmy != awe::NO_ARMY && !_isArmyPresent(prevArmy)) {
 		_logger.error("animateNextTurn operation cancelled: previous army with ID "
 			"{} does not exist.", prevArmy);

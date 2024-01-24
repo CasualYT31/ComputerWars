@@ -34,19 +34,9 @@
 		"path": "audio/sound/back.wav",
 		"offset": 0.0
 	},
-	"captured": {
-		"type": "sound",
-		"path": "audio/sound/captured.wav",
-		"offset": 0.0
-	},
 	"unload": {
 		"type": "sound",
 		"path": "audio/sound/unload.wav",
-		"offset": 0.0
-	},
-	"capturing": {
-		"type": "sound",
-		"path": "audio/sound/capturing.wav",
 		"offset": 0.0
 	},
 	"destroy": {
@@ -400,5 +390,25 @@
 		"offset": 0.0,
 		"loopto": 0,
 		"loopwhen": -1
+	},
+	"capture.intro": {
+		"type": "sound",
+		"path": "audio/sound/captureintro.wav",
+		"offset": 0.0
+	},
+	"capture.falling": {
+		"type": "sound",
+		"path": "audio/sound/capturefalling.wav",
+		"offset": 0.0
+	},
+	"capture.captured": {
+		"type": "sound",
+		"path": "audio/sound/capturecaptured.wav",
+		"offset": 0.0
+	},
+	"capture.captured.hq": {
+		"type": "sound",
+		"path": "audio/sound/capturecapturedhq.wav",
+		"offset": 0.0
 	}
 }
