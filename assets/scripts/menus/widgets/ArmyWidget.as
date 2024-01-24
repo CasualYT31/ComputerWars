@@ -180,7 +180,7 @@ class ArmyWidget : Panel {
                 tagCO.setVisibility(false);
             }
 
-            const auto currentArmy = game.map.getSelectedArmy();
+            const auto currentArmy = game.map.getOverriddenSelectedArmy();
             if (game.map.isFoWEnabled() && (currentArmy == NO_ARMY ||
                 game.map.getArmyTeam(currentArmy) != teamID))
                 funds.setText("price", { any("?????") });

@@ -131,7 +131,7 @@ class GameScreen : Menu, Group {
         const auto cursorOnLeft = game.map.isCursorOnLeftSide();
         
         // Update army widget.
-        armyWidget.update(game.map.getSelectedArmy());
+        armyWidget.update(game.map.getOverriddenSelectedArmy());
         if (!cursorOnLeft) {
             armyWidget.setAlignment(ArmyWidgetAlignment::Left);
             armyWidget.setOrigin(0.0, 0.0);

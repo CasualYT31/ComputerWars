@@ -353,6 +353,15 @@ awe::ArmyID awe::map::getFirstArmy() const {
 	else return _armies.cbegin()->first;
 }
 
+void awe::map::setSelectedArmyOverride(const awe::ArmyID army) {
+	if (army != awe::NO_ARMY && !_isArmyPresent(army)) {
+		_logger.error("setSelectedArmyOverride operation failed: army with ID {} "
+			"does not exist.", army);
+		return;
+	}
+	_currentArmyOverride = army;
+}
+
 void awe::map::setMapScalingFactor(const float factor, const bool animate) {
 	if (factor <= 0.0f) {
 		_logger.error("setMapScalingFactor operation failed: attempted to assign "
@@ -831,6 +840,45 @@ bool awe::map::animateLaunchOrStrike(const bool launch, const std::string& sprit
 	return res;
 }
 
+bool awe::map::animateNextTurn(const awe::ArmyID prevArmy,
+	const awe::ArmyID armyID, const CScriptArray* const controls) {
+	const auto controlsStd = engine::ConvertCScriptArray<
+		std::unordered_set<std::string>, std::string>(controls);
+	if (!_canAnimationBeQueued()) return false;
+	if (prevArmy != awe::NO_ARMY && !_isArmyPresent(prevArmy)) {
+		_logger.error("animateNextTurn operation cancelled: previous army with ID "
+			"{} does not exist.", prevArmy);
+		return false;
+	}
+	if (!_isArmyPresent(armyID)) {
+		_logger.error("animateNextTurn operation cancelled: next army with ID {} "
+			"does not exist.", armyID);
+		return false;
+	}
+	const std::unordered_set<std::string> availableControls = _ui->getControls();
+	if (controlsStd.empty() || std::none_of(controlsStd.begin(), controlsStd.end(),
+		[&availableControls](const std::string& control) {
+			return availableControls.count(control);
+		})) {
+		_logger.error("animateNextTurn operation cancelled: no valid controls "
+			"were given.");
+		return false;
+	}
+	setSelectedArmyOverride(prevArmy);
+	// TODO-2.
+	_animationQueue.push(std::make_unique<awe::next_turn>(
+		_armies.at(armyID).getCountry(),
+		"nextturn",
+		controlsStd,
+		_ui,
+		_dict,
+		(*_sheets)["icon"],
+		(*_fonts)["AW2"],
+		std::bind(&awe::map::clearSelectedArmyOverride, this)
+	));
+	return true;
+}
+
 bool awe::map::_canAnimationBeQueued(
 	const std::vector<awe::animation_preset>& presets, const bool invert) const {
 	if (!_animationsEnabled) return false;
@@ -863,7 +911,8 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			auto& tile = _tiles[x][y];
 			const sf::Vector2u tilePos = sf::Vector2u(x, y);
-			tile.data.setVisibility(isTileVisible(tilePos, getSelectedArmy()));
+			tile.data.setVisibility(isTileVisible(tilePos,
+				getOverriddenSelectedArmy()));
 			tile.sprite->animate(target);
 
 			sf::Uint32 tileWidth = 0, tileHeight = 0;
@@ -1115,7 +1164,7 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 
 	// Step 2. the tiles.
 	const auto mapSize = getMapSize();
-	const auto currentArmy = getSelectedArmy();
+	const auto currentArmy = getOverriddenSelectedArmy();
 	for (sf::Uint32 y = 0; y < mapSize.y; ++y) {
 		for (sf::Uint32 x = 0; x < mapSize.x; ++x) {
 			if ((_selectedUnitRenderData.top().selectedUnit != awe::NO_UNIT ||

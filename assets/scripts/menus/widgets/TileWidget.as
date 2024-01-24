@@ -111,8 +111,8 @@ class TileWidget : HorizontalLayout {
         const UnitID unitID = game.map.getUnitOnTile(tilePos);
         array<UnitID> unitIDs;
         array<const UnitType@> unitTypes;
-        if (unitID != NO_UNIT &&
-            game.map.isUnitVisible(unitID, game.map.getSelectedArmy())) {
+        if (unitID != NO_UNIT && game.map.isUnitVisible(unitID,
+            game.map.getOverriddenSelectedArmy())) {
             // Right now, information on a tile's unit/s are not displayed if
             // `unitID` isn't visible. The hiding status of loaded units is
             // ignored. If you wish to change this behaviour (i.e. hide loaded
@@ -186,7 +186,7 @@ class TileWidget : HorizontalLayout {
             const auto terrainType = tileType.type;
             const ArmyID tileOwner = game.map.getTileOwner(tilePos);
             if (tileOwner == NO_ARMY || (!game.map.isTileVisible(tilePos,
-                game.map.getSelectedArmy()) &&
+                game.map.getOverriddenSelectedArmy()) &&
                     !terrainType.showOwnerWhenHidden)) {
                 panels[0].setIcon(game.map.getEnvironmentSpritesheet(),
                     tileType.neutralTileSprite);

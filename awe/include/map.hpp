@@ -1075,7 +1075,8 @@ namespace awe {
 		 * Figures out if a given unit is visible on the map from the perspective
 		 * of the given army.
 		 * @param  unit The ID of the unit to check.
-		 * @param  army The ID of the army who is trying to see the unit.
+		 * @param  army The ID of the army who is trying to see the unit. Can be
+		 *              \n NO_ARMY.
 		 * @return \c TRUE if \c army can see \c unit on the map,
 		 *         \c FALSE otherwise.
 		 */
@@ -1380,7 +1381,7 @@ namespace awe {
 		 *         disabled, unless the given tile is out-of-bounds or the given
 		 *         army doesn't exist, which case this will always return \c FALSE.
 		 *         No error will be logged if \c NO_ARMY is given. If \c NO_ARMY is
-		 *         given, the result of \c isFoWEnabled() will be returned.
+		 *         given, the result of \c !isFoWEnabled() will be returned.
 		 */
 		bool isTileVisible(const sf::Vector2u& pos, const awe::ArmyID army) const;
 
@@ -2250,6 +2251,36 @@ namespace awe {
 		awe::ArmyID getFirstArmy() const;
 
 		/**
+		 * Force the map to render as if the current army was \c army, and not the
+		 * actually selected army.
+		 * If an invalid army is given, an error will be logged and nothing will
+		 * change. You can give \c NO_ARMY.\n
+		 * If the given army is later deleted, the override will be cleared.
+		 * @param army ID of the army to override the selected army with.
+		 */
+		void setSelectedArmyOverride(const awe::ArmyID army);
+
+		/**
+		 * If there is a selected army override, return it.
+		 * Otherwise, return the result of \c getSelectedArmy(). Should be used
+		 * with rendering code, both in \c map and in the scripts.
+		 * @return The current army override, or the current army if there is no
+		 *         override.
+		 */
+		inline awe::ArmyID getOverriddenSelectedArmy() const {
+			return
+				_currentArmyOverride ? *_currentArmyOverride : getSelectedArmy();
+		}
+
+		/**
+		 * Ensure the map is rendered as normal, without any selected army
+		 * override.
+		 */
+		inline void clearSelectedArmyOverride() {
+			_currentArmyOverride = std::nullopt;
+		}
+
+		/**
 		 * Sets the amount by which the map is scaled.
 		 * If it is detected that a value at or below \c 0.0f is given, an error
 		 * will be logged and \c _scaling will not be changed.
@@ -2643,6 +2674,22 @@ namespace awe {
 			const std::string& sheet, const sf::Vector2u& tile,
 			const float duration = 1.0f);
 
+		/**
+		 * Attempts to queue a "next turn" animation.
+		 * @param  prevArmy The ID of the army whose turn is ending. <b>Note that
+		 *                  this will be assigned as the selected army override
+		 *                  <u>immediately</u> if this method returns \c TRUE. Once
+		 *                  the animation enters the \c TransitionOut state, the
+		 *                  selected army override will be cleared.</b> This value
+		 *                  is permitted to be \c NO_ARMY.
+		 * @param  armyID   The ID of the army that is having their turn next.
+		 * @param  controls A list of \c user_input control names that, if input,
+		 *                  will close the next turn "screen."
+		 * @return \c TRUE if the animation was queued, \c FALSE otherwise.
+		 */
+		bool animateNextTurn(const awe::ArmyID prevArmy, const awe::ArmyID armyID,
+			const CScriptArray* const controls);
+
 		//////////
 		// MISC //
 		//////////
@@ -2689,6 +2736,14 @@ namespace awe {
 		 * @param strs Pointer to the strings to use with this map.
 		 */
 		void setMapStrings(const std::shared_ptr<awe::map_strings>& strs);
+
+		/**
+		 * Sets the user input object to use with this map.
+		 * If \c nullptr is given, an error will be logged, and the internal
+		 * pointer won't change.
+		 * @param ui Pointer to the user input objectt to use with this map.
+		 */
+		void setUserInput(const std::shared_ptr<sfx::user_input>& ui);
 
 		/**
 		 * This drawable's \c animate() method.
@@ -3286,6 +3341,12 @@ namespace awe {
 		awe::ArmyID _currentArmy = awe::NO_ARMY;
 
 		/**
+		 * An override used to force the rendering code to display the map as if it
+		 * were being viewed by the stored army.
+		 */
+		std::optional<awe::ArmyID> _currentArmyOverride;
+
+		/**
 		 * The animated sprite representing the cursor.
 		 */
 		sfx::animated_sprite _cursor;
@@ -3521,6 +3582,11 @@ namespace awe {
 		 * The audios available to the map.
 		 */
 		std::shared_ptr<sfx::audios> _audios;
+
+		/**
+		 * The user input object.
+		 */
+		std::shared_ptr<sfx::user_input> _ui;
 
 		///////////
 		// BANKS //

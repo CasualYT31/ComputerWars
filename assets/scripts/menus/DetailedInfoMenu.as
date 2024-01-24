@@ -161,7 +161,7 @@ class DetailedInfoMenu : Menu, Panel {
         // Unit panel.
         const auto unitID = game.map.getUnitOnTile(currentTile);
         const auto visible = unitID != NO_UNIT &&
-            game.map.isUnitVisible(unitID, game.map.getSelectedArmy());
+            game.map.isUnitVisible(unitID, game.map.getOverriddenSelectedArmy());
         unitPanel.setVisibility(visible);
         if (!visible) return;
         const auto unitType = game.map.getUnitType(unitID);
@@ -231,7 +231,7 @@ class DetailedInfoMenu : Menu, Panel {
         // unless it is hidden and it's configured to hide its owner when hidden.
         const auto ownerID = game.map.getTileOwner(pos);
         if (ownerID != NO_ARMY && (game.map.isTileVisible(pos,
-            game.map.getSelectedArmy()) || t.showOwnerWhenHidden)) {
+            game.map.getOverriddenSelectedArmy()) || t.showOwnerWhenHidden)) {
             const auto owned =
                 t.picture(game.map.getArmyCountry(ownerID).scriptName);
             if (!owned.isEmpty()) return owned;

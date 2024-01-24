@@ -474,10 +474,14 @@ shared class PlayableMap {
         if (deleteOldArmy) {
             map.deleteArmy(currentArmy);
         }
+        const auto oldArmy = currentArmy;
         currentArmy = nextArmy;
 
         // 4. Queue Day Begin animation, and queue the playing of the next army's
-        //    theme.
+        //    theme. If Fog of War is enabled, queue the Next Turn screen before
+        //    queueing these.
+        if (map.isFoWEnabled()) map.animateNextTurn(
+            (deleteOldArmy ? NO_ARMY : oldArmy), currentArmy, { "select" });
         map.queuePlay("music", commander[map.getArmyCurrentCO(currentArmy)].theme);
         map.animateDayBegin(currentArmy, map.getDay(), "Monospace");
 

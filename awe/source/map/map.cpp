@@ -443,6 +443,11 @@ void awe::map::setMapStrings(const std::shared_ptr<awe::map_strings>& strs) {
 	else _logger.error("setMapStrings operation failed: nullptr was given!");
 }
 
+void awe::map::setUserInput(const std::shared_ptr<sfx::user_input>& ui) {
+	if (ui) _ui = ui;
+	else _logger.error("setUserInput operation failed: nullptr was given!");
+}
+
 void awe::map::_updateCapturingUnit(const awe::UnitID id) {
 	if (id != awe::NO_UNIT && isUnitCapturing(id)) {
 		const auto t = getUnitPosition(id);

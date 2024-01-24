@@ -48,6 +48,14 @@ int awe::game_engine::run() {
 
 	try {
 		_gui->setScalingFactor(_scaling);
+		// The events that must always be handled by the GUI engine, even if input
+		// is not being accepted.
+		static const std::unordered_set<sf::Event::EventType> REQUIRED_EVENTS{
+			sf::Event::Closed,
+			sf::Event::Resized,
+			sf::Event::LostFocus,
+			sf::Event::GainedFocus
+		};
 		// Used to prevent _gui->handleInput() from reading a select that was
 		// intended only to skip an animation.
 		bool mapAnimationSkipped = false;
@@ -77,7 +85,10 @@ int awe::game_engine::run() {
 
 			_renderer->handleEvents([&](const sf::Event& e) {
 				if (e.type == sf::Event::Closed) _renderer->close();
-				if (acceptInput) _gui->handleEvent(e);
+				// We need to pass in resizing-based events all of the time, or
+				// else the entire GUI screws up if the target is resized.
+				if (acceptInput || REQUIRED_EVENTS.count(e.type))
+					_gui->handleEvent(e);
 			});
 
 			if (_map && _map->animationInProgress() &&
@@ -713,6 +724,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 		_map->setMapStrings(_mapStrings);
 		_map->setScripts(_scripts);
 		_map->setGUI(_gui);
+		_map->setUserInput(_userinput);
 		_map->setSelectedAnimationPreset(_settings->getAnimationPreset());
 		auto r = _map->load(file);
 		if (r) {

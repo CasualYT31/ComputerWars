@@ -78,6 +78,9 @@ void awe::map::deleteArmy(const awe::ArmyID army,
 	// Then, disown all tiles.
 	auto tiles = _armies.at(army).getTiles();
 	for (auto& tile : tiles) setTileOwner(tile, transferOwnership);
+	// If this army was assigned to the selected army override, remove it.
+	if (_currentArmyOverride && *_currentArmyOverride == army)
+		clearSelectedArmyOverride();
 	// Finally, delete the army from the army list.
 	_armies.erase(army);
 }

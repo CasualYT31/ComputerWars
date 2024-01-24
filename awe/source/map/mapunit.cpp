@@ -382,7 +382,7 @@ bool awe::map::isUnitVisible(const awe::UnitID unit,
 			"exist!", unit);
 		return false;
 	}
-	if (!_isArmyPresent(army)) {
+	if (army != awe::NO_ARMY && !_isArmyPresent(army)) {
 		_logger.error("isUnitVisible operation failed: army with ID {} doesn't "
 			"exist!", army);
 		return false;
@@ -395,6 +395,8 @@ bool awe::map::isUnitVisible(const awe::UnitID unit,
 	if (!isTileVisible(unitPos, army)) return false;
 	// 3. It isn't hiding.
 	if (!isUnitHiding(unit)) return true;
+	// 3.b If it is hiding, and army is NO_ARMY, then the unit is hidden.
+	if (army == awe::NO_ARMY) return false;
 	// 4. It is hiding, but it belongs to the same team as the given army.
 	const auto armyTeam = getArmyTeam(army);
 	if (getTeamOfUnit(unit) == armyTeam) return true;

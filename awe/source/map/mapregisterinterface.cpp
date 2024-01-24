@@ -886,6 +886,18 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getFirstArmy), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void setSelectedArmyOverride(const ArmyID)",
+			asMETHOD(awe::map, setSelectedArmyOverride), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"ArmyID getOverriddenSelectedArmy() const",
+			asMETHOD(awe::map, getOverriddenSelectedArmy), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"void clearSelectedArmyOverride()",
+			asMETHOD(awe::map, clearSelectedArmyOverride), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"void setMapScalingFactor(const float, const bool = true) const",
 			asMETHOD(awe::map, setMapScalingFactor), asCALL_THISCALL);
 
@@ -1030,6 +1042,10 @@ void awe::map::Register(asIScriptEngine* engine,
 			"const bool, const string&in, const string&in, const Vector2&in, "
 			"const float = 1.0)",
 			asMETHOD(awe::map, animateLaunchOrStrike), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map", "bool animateNextTurn("
+			"const ArmyID, const ArmyID, const array<string>@ const)",
+			asMETHOD(awe::map, animateNextTurn), asCALL_THISCALL);
 	}
 }
 
