@@ -175,19 +175,25 @@ class GameScreen : Menu, Group {
         // If the user is holding the correct control, calculate the attack range
         // of the unit on the currently selected tile and display it. Otherwise,
         // allow a unit to be selected.
+        const auto currentArmy = game.map.getSelectedArmy();
         const auto unitID = game.map.getUnitOnTile(selectedTile);
         game.showAttackRangeOfUnit(NO_UNIT);
         if (bool(ui["range"])) {
             game.enableClosedList(false);
-            if (unitID != NO_UNIT) game.showAttackRangeOfUnit(unitID);
-            else game.showAttackRangeOfTile(selectedTile);
+            if (unitID != NO_UNIT &&
+                game.map.isUnitVisible(unitID, currentArmy)) {
+                game.showAttackRangeOfUnit(unitID);
+                if (bool(ui["rangesound"]))
+                    game.map.queuePlay("sound", "select.unit");
+            } else if (game.showAttackRangeOfTile(selectedTile) &&
+                bool(ui["rangesound"]))
+                game.map.queuePlay("sound", "select.unit");
         } else if (bool(ui["select"])) {
             // If the select control is being made by the mouse, and it is not
             // inside the map's graphic, then drop it.
             if (bool(mouse["select"]) &&
                 !game.map.getMapBoundingBox().contains(currentMouse)) return;
 
-            const auto currentArmy = game.map.getSelectedArmy();
             if (unitID == NO_UNIT) {
                 game.map.queuePlay("sound", "select");
                 if (!game.map.isOutOfBounds(selectedTile)) {

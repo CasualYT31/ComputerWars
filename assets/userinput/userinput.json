@@ -133,6 +133,15 @@
 		],
 		"type": 0
 	},
+	"rangesound": {
+		"keys": [
+			21
+		],
+		"mouse": [
+			1
+		],
+		"type": 3
+	},
 	"dev": {
 		"keys": [
 			58

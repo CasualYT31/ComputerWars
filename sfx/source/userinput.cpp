@@ -489,6 +489,10 @@ void sfx::user_input::_updateSingle(const sfx::user_configuration& scan,
 		}
 		signal.triggeredByMouse = signal.signal && signal.currentTriggeredByMouse;
 		break;
+	case sfx::control_signal::PressedForm:
+		signal.signal = !signal.previous && signal.current;
+		signal.triggeredByMouse = signal.signal && signal.currentTriggeredByMouse;
+		break;
 	}
 
 	// If the input started when the mouse was over a widget, cancel the signal.

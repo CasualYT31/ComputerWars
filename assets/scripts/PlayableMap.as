@@ -205,20 +205,22 @@ shared class PlayableMap {
      * changes. Otherwise, the structure's attack range will be added to the map's
      * available tiles. If the attack range is not empty, then the available tile
      * shader will be set to \c Red.
-     * @param tile The tile to show the attack range of.
+     * @param  tile The tile to show the attack range of.
+     * @return \c TRUE if the tile has an attack range, \c FALSE if not.
      */
-    void showAttackRangeOfTile(Vector2 tile) {
-        if (!map.isTileAStructureTile(tile)) return;
+    bool showAttackRangeOfTile(Vector2 tile) {
+        if (!map.isTileAStructureTile(tile)) return false;
         const auto offset = map.getTileStructureOffset(tile);
         tile.x -= offset.x;
         tile.y -= offset.y;
         // If the root tile is neutral, assume this structure can't attack.
-        if (map.getTileOwner(tile) == NO_ARMY) return;
+        if (map.getTileOwner(tile) == NO_ARMY) return false;
         const auto tiles = getStructureAttackRange(tile);
         for (uint64 i = 0, len = tiles.length(); i < len; ++i)
             map.addAvailableTile(tiles[i]);
         if (!tiles.isEmpty())
             map.setAvailableTileShader(AvailableTileShader::Red);
+        return true;
     }
 
     /**

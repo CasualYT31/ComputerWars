@@ -57,6 +57,8 @@ namespace sfx {
 	 * key/button is released, and not when held.\n
 	 * \c DelayedForm (\c 2) triggers game controls at configured intervals if a
 	 * configured key/button is being held.\n
+	 * \c PressedForm (\c 3) triggers game controls only when a configured
+	 * key/button is initially pressed, and not when held or released.\n
 	 * \c SignalTypeCount stores the number of control signal types and must
 	 * \b remain as the last member of \c control_signal.
 	 * @sa user_input::operator[]()
@@ -65,6 +67,7 @@ namespace sfx {
 		FreeForm,
 		ButtonForm,
 		DelayedForm,
+		PressedForm,
 		SignalTypeCount
 	};
 
