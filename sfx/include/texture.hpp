@@ -55,10 +55,16 @@ namespace sfx {
 		}
 
 		/**
-		 * Retrieves the entire spritesheet graphic.
-		 * @return A reference to the texture object storing the spritesheet.
+		 * Retrieves the entire spritesheet graphic, or a sprite's separate texture
+		 * graphic if it's repeated.
+		 * @param  sprite The sprite whose texture is to be queried.
+		 * @param  frame  The 0-based ID of the frame to retrieve the texture of.
+		 * @return A reference to the texture object storing the spritesheet, if
+		 *         the given sprite is not repeated. If it is, a reference to the
+		 *         texture with just the specified frame is returned.
 		 */
-		const sf::Texture& getTexture() const noexcept;
+		const sf::Texture& getTexture(const std::string& sprite,
+			const std::size_t frame) const noexcept;
 
 		/**
 		 * Retrieves the frame count of a given sprite.
@@ -78,7 +84,11 @@ namespace sfx {
 		 * @return  The width, height, and upper-left location of the given
 		 *          sprite's frame in the spritesheet texture. A blank rect will be
 		 *          returned if either the sprite or the frame of the sprite did
-		 *          not exist (an error will also be logged in this case).
+		 *          not exist (an error will also be logged in this case). In the
+		 *          case where the given sprite is repeated, <tt>{ 0, 0,
+		 *          frameWidth, frameHeight }</tt> will be returned, since the
+		 *          frame is stored in its own texture and has no need to remember
+		 *          where it was in the original spritesheet texture.
 		 */
 		sf::IntRect getFrameRect(const std::string& sprite,
 			const std::size_t frame) const;
@@ -104,6 +114,14 @@ namespace sfx {
 		 *          there was an error.
 		 */
 		std::vector<sf::Time> getFrameDurations(const std::string& sprite) const;
+
+		/**
+		 * Finds out if the given sprite is configured to repeat.
+		 * @warning Logging has been disabled in this method.
+		 * @param   sprite The sprite whose repeated flag is to be returned.
+		 * @return  \c TRUE if this sprite repeats, \c FALSE if it does not.
+		 */
+		bool isSpriteRepeated(const std::string& sprite) const;
 
 		/**
 		 * Retrieves the offset intended to be applied to a sprite as it is being
@@ -180,7 +198,11 @@ namespace sfx {
 		 *     <li>\c globalframeid - A bool. By default, it is \c false and does
 		 *         not have to be specified. If \c true is given, however, the game
 		 *         engine will make sure all copies of this sprite animate in
-		 *         sync.</li></ul>
+		 *         sync.</li>
+		 *     <li>\c repeated - A bool. By default, it is \c false and does not
+		 *         have to be specified. If \c true is given, however, each frame
+		 *         of the sprite is <a target="_blank" href="https://www.sfml-dev.org/documentation/2.5.1/classsf_1_1Texture.php#aaa87d1eff053b9d4d34a24c784a28658">
+		 *         repeated</a>.</li></ul>
 		 * @param  j The \c engine::json object representing the contents of the
 		 *           loaded script which this method reads.
 		 * @return If the spritesheet graphic could not be loaded, \c FALSE is
@@ -225,6 +247,11 @@ namespace sfx {
 
 			/// The durations of each frame of the sprite.
 			std::vector<sf::Time> durations;
+
+			/// If the sprite is configured to repeat, each frame will need to be
+			/// stored in their own texture. If this sprite doesn't repeat, this
+			/// vector will be empty.
+			std::vector<sf::Texture> textures;
 
 			/// The offset that is applied to this sprite.
 			sf::Vector2f offset;
@@ -432,6 +459,28 @@ namespace sfx {
 		std::size_t operator--(int) noexcept;
 
 		/**
+		 * If this animated sprite is using a sprite that repeats, its size can be
+		 * defined using this method.
+		 * A repeated animated sprite's default size will match the current frame's
+		 * size, meaning no frame will ever seem to repeat by default.\n
+		 * If this animated sprite is not repeated, this texture rect will not be
+		 * used.
+		 * @param size The size, in pixels, of the repeated sprite.
+		 */
+		inline void setRepeatedSize(const sf::Vector2i& size) {
+			_repeatedSize = size;
+		}
+
+		/**
+		 * Will always ensure that, if this animated sprite is rendering a repeated
+		 * sprite, its size matches each frame's size exactly.
+		 * This is the default behaviour of repeated sprites.
+		 */
+		inline void clearRepeatedSize() {
+			_repeatedSize = std::nullopt;
+		}
+
+		/**
 		 * Gets the current size of the sprite with scaling applied.
 		 * @return The size of the internal sprite, specifically, the texture rect
 		 *         width and height, at the time of calling, with scaling applied.
@@ -596,6 +645,12 @@ namespace sfx {
 		 * The current frame.
 		 */
 		std::size_t _currentFrame = 0;
+
+		/**
+		 * If present, will override the sprite's texture rect's width and height,
+		 * only if it is repeating.
+		 */
+		std::optional<sf::Vector2i> _repeatedSize;
 
 		/**
 		 * Flag tracking \c animate() errors so they don't spam the log file.

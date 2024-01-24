@@ -27,8 +27,9 @@ sfx::delta_timer sfx::animated_spritesheet::_globalTimer = {};
 sfx::animated_spritesheet::animated_spritesheet(const engine::logger::data& data) :
 	json_script({ data.sink, "json_script" }), _logger(data) {}
 
-const sf::Texture& sfx::animated_spritesheet::getTexture() const noexcept {
-	return _texture;
+const sf::Texture& sfx::animated_spritesheet::getTexture(const std::string& sprite,
+	const std::size_t frame) const noexcept {
+	return isSpriteRepeated(sprite) ? _data.at(sprite).textures[frame] : _texture;
 }
 
 std::size_t sfx::animated_spritesheet::getFrameCount(
@@ -48,7 +49,9 @@ sf::IntRect sfx::animated_spritesheet::getFrameRect(const std::string& sprite,
 	try {
 		const std::vector<sf::IntRect>& frames = _data.at(sprite).frames;
 		try {
-			return frames.at(frame);
+			sf::IntRect coords = frames.at(frame);
+			if (isSpriteRepeated(sprite)) coords.left = coords.top = 0;
+			return coords;
 		} catch (const std::out_of_range&) {
 			/*
 			_logger.error("Error whilst attempting to retrieve the rect of frame "
@@ -95,6 +98,18 @@ std::vector<sf::Time> sfx::animated_spritesheet::getFrameDurations(
 			*/
 	}
 	return {};
+}
+
+bool sfx::animated_spritesheet::isSpriteRepeated(const std::string& sprite) const {
+	try {
+		return !_data.at(sprite).textures.empty();
+	} catch (const std::out_of_range&) {
+		/*
+		_logger.error("Error whilst attempting to retrieve the repeated flag of "
+			"sprite \"{}\": the sprite does not exist!", sprite);
+			*/
+	}
+	return false;
 }
 
 sf::Vector2f sfx::animated_spritesheet::getSpriteOffset(const std::string& sprite)
@@ -207,7 +222,8 @@ bool sfx::animated_spritesheet::_load(engine::json& j) {
 			return false;
 		}
 	}
-	if (!_texture.loadFromFile(imgpath)) {
+	sf::Image img;
+	if (!img.loadFromFile(imgpath) || !_texture.loadFromImage(img)) {
 		_logger.error("Couldn't load image file \"{}\" - aborting load attempt.",
 			imgpath);
 		return false;
@@ -249,6 +265,19 @@ bool sfx::animated_spritesheet::_load(engine::json& j) {
 					}
 				} else data.durations.resize(data.frames.size(),
 					sf::milliseconds(i.value()["durations"]));
+				// Does this sprite repeat?
+				if (i.value().contains("repeated") &&
+					i.value()["repeated"].is_boolean() && i.value()["repeated"]) {
+					// Copy each frame into its own texture.
+					const auto len = data.frames.size();
+					data.textures.resize(len);
+					for (std::size_t f = 0; f < len; ++f) {
+						if (data.textures[f].loadFromImage(img, data.frames[f]))
+							data.textures[f].setRepeated(true);
+						else _logger.error("Creating texture for frame {} of "
+							"repeated sprite \"{}\" failed", f, i.key());
+					}
+				}
 				// Read the sprite's offset, if one was given.
 				if (i.value().contains("offset")) {
 					std::array<float, 2> offset;
@@ -414,8 +443,13 @@ bool sfx::animated_sprite::animate(const sf::RenderTarget& target) {
 			ret = incrementFrameID(_sheet->getFrameDurations(_spriteID),
 				_sheet->getFrameCount(_spriteID), *this, _currentFrame);
 		}
-		_sprite.setTexture(_sheet->getTexture());
-		_sprite.setTextureRect(_sheet->getFrameRect(_spriteID, _currentFrame));
+		_sprite.setTexture(_sheet->getTexture(_spriteID, _currentFrame));
+		auto textureRect = _sheet->getFrameRect(_spriteID, _currentFrame);
+		if (_sheet->isSpriteRepeated(_spriteID) && _repeatedSize) {
+			textureRect.width = _repeatedSize->x;
+			textureRect.height = _repeatedSize->y;
+		}
+		_sprite.setTextureRect(textureRect);
 		return ret;
 	} catch (const std::out_of_range& e) {
 		if (!_errored) {
