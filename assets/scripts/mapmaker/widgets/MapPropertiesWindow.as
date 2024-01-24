@@ -15,7 +15,7 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         super({ ButtonsWindowButton("cancel", SingleSignalHandler(this.cancel)),
             ButtonsWindowButton("ok", SingleSignalHandler(this.ok)) });
         setText("mapprops");
-        setSize("250", "275");
+        setSize("250", "300");
         setResizable(false);
         setTitleButtons(TitleButton::Close);
         close(false);
@@ -26,6 +26,7 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         height.setValidator(VALIDATOR_UINT);
         environmentComboBox.setSize("", "48");
         fogOfWar.setSize("20", "");
+        weatherComboBox.setSize("", "35");
 
         // Setup the size layout.
         width.setSize("100%", "100%");
@@ -42,7 +43,7 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         sizeLayout.setRatioOfWidget(1, 0.3);
 
         // Setup properties layout.
-        propertiesLayout.setRatioOfWidget(3, 1.1);
+        propertiesLayout.setRatioOfWidget(3, 1.25);
         clientArea.add(propertiesLayout);
 
         // Setup the confirm resize window.
@@ -88,6 +89,9 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         height.setText(formatUInt(size.y));
         environmentComboBox.select(uint(environment.scriptNames.find(
             edit.map.getEnvironment().scriptName)));
+        fogOfWar.setChecked(edit.map.isFoWEnabled());
+        weatherComboBox.select(uint(weather.scriptNames.find(
+            edit.map.getWeather().scriptName)));
     }
 
     /**
@@ -130,7 +134,8 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
     private void applyChangesAndClose() {
         edit.setMapProperties(name.getText(), parseDay(day.getText()),
             environment.scriptNames[uint(environmentComboBox.getSelected())],
-            fogOfWar.getChecked());
+            fogOfWar.getChecked(),
+            weather.scriptNames[uint(weatherComboBox.getSelected())]);
         const Vector2 oldSize = edit.map.getMapSize(),
             newSize(parseUInt(width.getText()), parseUInt(height.getText()));
         // Check if we've resized first, because in rare cases there may not be a
@@ -237,6 +242,11 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
     private CheckBox fogOfWar;
 
     /**
+     * The map's weather.
+     */
+    private WeatherComboBox weatherComboBox(4, null);
+
+    /**
      * The map properties.
      */
     private array<MapPropertyRow@> rows = {
@@ -244,7 +254,8 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         MapPropertyRow(propertiesLayout, "daylabel", day),
         MapPropertyRow(propertiesLayout, "size", sizeLayout),
         MapPropertyRow(propertiesLayout, "environment", environmentComboBox),
-        MapPropertyRow(propertiesLayout, "fow", fogOfWar)
+        MapPropertyRow(propertiesLayout, "fow", fogOfWar),
+        MapPropertyRow(propertiesLayout, "weather", weatherComboBox)
     };
 }
 

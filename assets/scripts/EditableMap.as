@@ -336,17 +336,21 @@ class EditableMap {
      * @param newEnvironment Script name of the environment to set to the map.
      * @param newFoW         \c TRUE if Fog of War is to be enabled, \c FALSE if
      *                       it is to be disabled.
+     * @param newWeather     Script name of the weather to set to the map.
      */
     void setMapProperties(const string&in mapName, const Day day,
-        const string&in newEnvironment, const bool newFoW) {
+        const string&in newEnvironment, const bool newFoW,
+        const string&in newWeather) {
         if (mapName == map.getMapName() && day == map.getDay() &&
             newEnvironment == map.getEnvironment().scriptName &&
-            newFoW == map.isFoWEnabled()) return;
+            newFoW == map.isFoWEnabled() &&
+            newWeather == map.getWeather().scriptName) return;
         DisableMementos token(map, OPERATION[Operation::MAP_PROPS]);
         map.setMapName(mapName);
         map.setDay(day);
         map.setEnvironment(newEnvironment);
         map.enableFoW(newFoW);
+        map.setWeather(newWeather);
     }
 
     /**

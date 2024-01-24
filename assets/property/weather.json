@@ -2,25 +2,25 @@
 	"CLEAR": {
 		"longname": "CLEAR_longname",
 		"shortname": "CLEAR_shortname",
-		"icon": "",
+		"icon": "weather.clear",
 		"description": "CLEAR_description"
 	},
 	"RAIN": {
 		"longname": "RAIN_longname",
 		"shortname": "RAIN_shortname",
-		"icon": "",
+		"icon": "weather.rain",
 		"description": "RAIN_description"
 	},
 	"SANDSTORM": {
 		"longname": "SANDSTORM_longname",
 		"shortname": "SANDSTORM_shortname",
-		"icon": "",
+		"icon": "weather.sandstorm",
 		"description": "SANDSTORM_description"
 	},
 	"SNOW": {
 		"longname": "SNOW_longname",
 		"shortname": "SNOW_shortname",
-		"icon": "",
+		"icon": "weather.snow",
 		"description": "SNOW_description"
 	}
 }

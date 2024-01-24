@@ -70,6 +70,7 @@
 	"size": "Size",
 	"daylabel": "Day",
 	"environment": "Environment",
+	"weather": "Weather",
 	"fow": "Fog of War",
 	"newmap": "New Map",
 	"openmap": "Open Map",

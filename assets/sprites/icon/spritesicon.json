@@ -590,6 +590,26 @@
 		"environment.wasteland": {
 			"frames": [ [ 144, 237, 48, 48 ] ],
 			"durations": 0
+		},
+		"weather.clear": {
+			"frames": [ [ 192, 237, 16, 16 ] ],
+			"durations": 0
+		},
+		"weather.random": {
+			"frames": [ [ 208, 237, 16, 16 ] ],
+			"durations": 0
+		},
+		"weather.sandstorm": {
+			"frames": [ [ 224, 237, 16, 16 ] ],
+			"durations": 0
+		},
+		"weather.snow": {
+			"frames": [ [ 240, 237, 12, 16 ] ],
+			"durations": 0
+		},
+		"weather.rain": {
+			"frames": [ [ 252, 237, 16, 15 ] ],
+			"durations": 0
 		}
 	}
 }
