@@ -8,6 +8,7 @@
 CWMFileVersion version;
 string mapName;
 string environmentScriptName;
+string weatherScriptName;
 uint32 mapWidth;
 uint32 mapHeight;
 uint32 selectedTileX;
@@ -164,6 +165,9 @@ namespace cwm {
         string environmentScriptName;
         stream.read(environmentScriptName);
         map.setEnvironment(environmentScriptName);
+        string weatherScriptName;
+        stream.read(weatherScriptName);
+        map.setWeather(weatherScriptName);
 		uint32 width, height, selX, selY, armyCount;
 		stream.read(width);
 		stream.read(height);
@@ -291,6 +295,7 @@ namespace cwm {
 		stream.write(LATEST_CWM_FILE_VERSION);
 		stream.write(map.getMapName());
         stream.write(map.getEnvironment().scriptName);
+        stream.write(map.getWeather().scriptName);
 		const auto mapSize = map.getMapSize();
 		stream.write(mapSize.x);
 		stream.write(mapSize.y);

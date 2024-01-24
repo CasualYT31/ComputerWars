@@ -110,7 +110,10 @@ namespace awe {
 
 		/**
 		 * Points to the beginning of the bank.
-		 * @return Internal bank \c const_iterator.
+		 * @warning This iterator does not guarantee that the order is the same as
+		 *          that defined by the JSON script. For this, iterator over the
+		 *          \c getScriptNames() container.
+		 * @return  Internal bank \c const_iterator.
 		 */
 		inline const_iterator begin() const {
 			return _bank.cbegin();
@@ -122,6 +125,19 @@ namespace awe {
 		 */
 		inline const_iterator end() const {
 			return _bank.cend();
+		}
+
+		/**
+		 * Fast way to get the first item in the JSON script.
+		 * @warning This iterator does not guarantee that the order is the same as
+		 *          that defined by the JSON script when advancing from this
+		 *          iterator. For this, iterator over the \c getScriptNames()
+		 *          container directly.
+		 * @return  Internal bank \c const_iterator that points to the first item
+		 *          in the bank, following the order stored in \c getScriptNames().
+		 */
+		inline const_iterator first() const {
+			return _bank.empty() ? end() : _bank.find(getScriptNames()[0]);
 		}
 
 		/**

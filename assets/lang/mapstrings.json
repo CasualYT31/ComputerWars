@@ -36,5 +36,6 @@
   "updatescript": "OPERATION_updatescript",
   "removescript": "OPERATION_removescript",
   "renamescript": "OPERATION_renamescript",
-  "environment": "OPERATION_environment"
+  "environment": "OPERATION_environment",
+  "weather": "OPERATION_weather"
 }

@@ -185,6 +185,7 @@
 	"OPERATION_removescript": "Remove Script",
 	"OPERATION_renamescript": "Rename Script",
 	"OPERATION_environment": "Set Environment",
+	"OPERATION_weather": "Set Weather",
 
 	"OPERATION_mapprops": "Update Map's Non-Size Properties",
 	"OPERATION_tiletypeandowner": "Set Tile's Type and/or Owner",
@@ -280,6 +281,22 @@
 	"SANDY_longname": "Sandy",
 	"SANDY_shortname": "Sand",
 	"SANDY_description": "Sandy environment.",
+
+	"CLEAR_longname": "Clear",
+	"CLEAR_shortname": "Clr",
+	"CLEAR_description": "Clear weather.",
+
+	"RAIN_longname": "Rain",
+	"RAIN_shortname": "Rain",
+	"RAIN_description": "<Rain effect?>.",
+
+	"SANDSTORM_longname": "Sandstorm",
+	"SANDSTORM_shortname": "Sand",
+	"SANDSTORM_description": "Indirect units suffer a -1 range penalty.",
+
+	"SNOW_longname": "Snow",
+	"SNOW_shortname": "Snow",
+	"SNOW_description": "Units use up more fuel when moving.",
 
 	"INFANTRY_MOVEMENT_longname": "Infantry",
 	"INFANTRY_MOVEMENT_shortname": "Inftry",

@@ -260,6 +260,15 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, isFoWEnabled), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"void setWeather(const string&in)",
+			asMETHODPR(awe::map, setWeather, (const std::string&), void),
+			asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"const Weather@ getWeather() const",
+			asMETHOD(awe::map, getWeatherObject), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"bool defaultWinCondition() const",
 			asMETHOD(awe::map, defaultWinCondition), asCALL_THISCALL);
 

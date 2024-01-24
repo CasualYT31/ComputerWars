@@ -65,6 +65,7 @@ awe::animation_preset& awe::operator++(animation_preset& p) noexcept {
 
 awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	const std::shared_ptr<awe::bank<awe::environment>>& environments,
+	const std::shared_ptr<awe::bank<awe::weather>>& weathers,
 	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 	const std::shared_ptr<awe::bank<awe::terrain>>& terrains,
 	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
@@ -80,9 +81,10 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 		data.name + "_addcursorll_sprite" }),
 	_additionallySelectedTileCursorLR({ data.sink,
 		data.name + "_addcursorlr_sprite" }) {
-	assert(environments);
+	assert(environments && weathers);
 	_countries = countries;
 	_environments = environments;
+	_weathers = weathers;
 	_tileTypes = tiles;
 	_terrains = terrains;
 	_unitTypes = units;
@@ -585,7 +587,8 @@ void awe::map::_initState() {
 	removeAllPreviewUnits();
 	_mapShakeTimeLeft = sf::Time::Zero;
 	_waitBeforeNextShake = sf::Time::Zero;
-	_environment = _environments->begin()->second;
+	_environment = _environments->first()->second;
+	_weather = _weathers->first()->second;
 	if (_scripts && _scripts->doesModuleExist(_moduleName))
 		_scripts->deleteModule(_moduleName);
 	_moduleName.clear();

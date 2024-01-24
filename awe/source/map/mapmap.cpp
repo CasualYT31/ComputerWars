@@ -264,3 +264,27 @@ void awe::map::enableFoW(const bool enabled) {
 		_getMementoName(awe::map_strings::operation::FOG_OF_WAR));
 	_fow = enabled;
 }
+
+void awe::map::setWeather(const std::shared_ptr<const awe::weather>& weather) {
+	if (_weather == weather) return;
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::WEATHER));
+	_weather = weather;
+}
+
+void awe::map::setWeather(const std::string& name) {
+	setWeather((*_weathers)[name]);
+}
+
+std::shared_ptr<const awe::weather> awe::map::getWeather() const {
+	return _weather;
+}
+
+const awe::weather* awe::map::getWeatherObject() const {
+	auto ret = getWeather();
+	if (ret) {
+		return ret.get();
+	} else {
+		throw std::out_of_range("There is currently no weather set!");
+	}
+}

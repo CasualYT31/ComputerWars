@@ -1,26 +1,26 @@
 {
 	"CLEAR": {
-		"longname": "Clear",
-		"shortname": "Clr",
+		"longname": "CLEAR_longname",
+		"shortname": "CLEAR_shortname",
 		"icon": "",
-		"description": "Clear weather."
+		"description": "CLEAR_description"
 	},
 	"RAIN": {
-		"longname": "Rain",
-		"shortname": "Rain",
+		"longname": "RAIN_longname",
+		"shortname": "RAIN_shortname",
 		"icon": "",
-		"description": "<Rain effect?>."
+		"description": "RAIN_description"
 	},
 	"SANDSTORM": {
-		"longname": "Sandstorm",
-		"shortname": "Sand",
+		"longname": "SANDSTORM_longname",
+		"shortname": "SANDSTORM_shortname",
 		"icon": "",
-		"description": "Indirect units suffer a -1 range penalty."
+		"description": "SANDSTORM_description"
 	},
 	"SNOW": {
-		"longname": "Snow",
-		"shortname": "Snow",
+		"longname": "SNOW_longname",
+		"shortname": "SNOW_shortname",
 		"icon": "",
-		"description": "Units use up more fuel to move."
+		"description": "SNOW_description"
 	}
 }

@@ -242,6 +242,8 @@ namespace awe {
 		 * @param countries    Information on the countries available to the map.
 		 * @param environments Information on the environments available to the
 		 *                     map. Cannot be \c nullptr.
+		 * @param weathers     Information on the weathers available to the map.
+		 *                     Cannot be \c nullptr.
 		 * @param tiles        Information on the tile types available to the map.
 		 * @param terrains     Information on the terrains available to the map.
 		 * @param units        Information on the unit types available to the map.
@@ -252,6 +254,7 @@ namespace awe {
 		 */
 		map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 			const std::shared_ptr<awe::bank<awe::environment>>& environments,
+			const std::shared_ptr<awe::bank<awe::weather>>& weathers,
 			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
 			const std::shared_ptr<awe::bank<awe::terrain>>& terrains,
 			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
@@ -547,6 +550,31 @@ namespace awe {
 		inline bool isFoWEnabled() const noexcept {
 			return _fow;
 		}
+
+		/**
+		 * Sets this map's weather.
+		 * @param weather Pointer to the weather to set.
+		 */
+		void setWeather(const std::shared_ptr<const awe::weather>& weather);
+
+		/**
+		 * Overload of \c setWeather() which accepts a script name.
+		 * @param name Script name of the weather to set.
+		 */
+		void setWeather(const std::string& name);
+
+		/**
+		 * Retrieves the currently set weather.
+		 * @return Pointer to the information on the current weather.
+		 */
+		std::shared_ptr<const awe::weather> getWeather() const;
+
+		/**
+		 * Retrieves the current weather, for use with the scripts.
+		 * @return Information on the current weather.
+		 * @throws \c std::out_of_range If there is currently no weather set.
+		 */
+		const awe::weather* getWeatherObject() const;
 
 		/////////////////////
 		// ARMY OPERATIONS //
@@ -3412,6 +3440,11 @@ namespace awe {
 		 */
 		std::shared_ptr<const awe::environment> _environment;
 
+		/**
+		 * The currently selected weather.
+		 */
+		std::shared_ptr<const awe::weather> _weather;
+
 		// MOVE MODE DRAWING //
 
 		/**
@@ -3612,6 +3645,11 @@ namespace awe {
 		 * Data pertaining to environments.
 		 */
 		std::shared_ptr<awe::bank<awe::environment>> _environments = nullptr;
+
+		/**
+		 * Data pertaining to weathers.
+		 */
+		std::shared_ptr<awe::bank<awe::weather>> _weathers = nullptr;
 
 		/**
 		 * Data pertaining to tile types.
