@@ -563,13 +563,16 @@ namespace awe {
 		/**
 		 * Constructor which passes on the JSON object to the \c common_properties
 		 * constructor.
-		 * No additional keys are required.
+		 * One additional key, \c "sound", is paired with a string value that holds
+		 * the name of the sound to play when that weather is set in-game.
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
 		 * @param j          The object value containing the weather's properties.
 		 */
 		inline weather(const std::string& scriptName, engine::json& j) :
-			common_properties(scriptName, j) {}
+			common_properties(scriptName, j) {
+			j.apply(_sound, { "sound" }, true);
+		}
 
 		/**
 		 * Registers \c weather with a given type.
@@ -586,6 +589,20 @@ namespace awe {
 		static void Register(const std::string& type,
 			asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document);
+
+		/**
+		 * The name of the sound to play when this weather is set in-game.
+		 * @return The name of the sound to play, or an empty string if no sound is
+		 *         to be played.
+		 */
+		inline const std::string& getSound() const {
+			return _sound;
+		}
+	private:
+		/**
+		 * The sound to play when this weather is set in-game.
+		 */
+		std::string _sound;
 	};
 
 	/**

@@ -1748,6 +1748,28 @@ shared class PlayableMap {
     // ANIMATION HELPER METHODS //
     //////////////////////////////
     /**
+     * Updates the weather of the map.
+     * @param newWeather The script name of the weather to set.
+     */
+    void setWeather(const string&in newWeather) {
+        map.queueCode(function(any@ const _) { ::flashColour(White, 2.f); });
+        map.queueDelay(1.f);
+        map.queuePlay("sound", weather[newWeather].sound);
+        map.queueCode(AnimationCode(this._setWeather), any(newWeather));
+        map.queueDelay(1.f);
+    }
+
+    /**
+     * Sets the weather.
+     * @param newWeather Must contain the script name of the weather to set.
+     */
+    private void _setWeather(any@ const newWeather) {
+        string newWeatherScriptName;
+        newWeather.retrieve(newWeatherScriptName);
+        map.setWeather(newWeatherScriptName);
+    }
+    
+    /**
      * Animates the Supply Label on a given unit if it's not already fully
      * replenished and healed.
      * @param unit The ID of the unit to point the label to.

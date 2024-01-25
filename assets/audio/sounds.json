@@ -410,5 +410,25 @@
 		"type": "sound",
 		"path": "audio/sound/capturecapturedhq.wav",
 		"offset": 0.0
+	},
+	"weather.clear": {
+		"type": "sound",
+		"path": "audio/sound/weatherclear.wav",
+		"offset": 0.0
+	},
+	"weather.rain": {
+		"type": "sound",
+		"path": "audio/sound/weatherrain.wav",
+		"offset": 0.0
+	},
+	"weather.sandstorm": {
+		"type": "sound",
+		"path": "audio/sound/weathersandstorm.wav",
+		"offset": 0.0
+	},
+	"weather.snow": {
+		"type": "sound",
+		"path": "audio/sound/weathersnow.wav",
+		"offset": 0.0
 	}
 }
