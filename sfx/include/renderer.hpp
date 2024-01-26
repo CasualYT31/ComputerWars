@@ -234,6 +234,35 @@ namespace sfx {
 	};
 
 	/**
+	 * An animated drawable that temporarily applies a <tt>{ 0, 0,
+	 * target.getSize().x, target.getSize().y }</tt> view to the target whilst
+	 * drawing.
+	 */
+	class animated_drawable_with_independent_view : public animated_drawable {
+	public:
+		/**
+		 * Polymorphic base classes should have virtual destructors.
+		 */
+		virtual ~animated_drawable_with_independent_view() noexcept = default;
+	private:
+		/**
+		 * Applies the view before invoking \c drawWithIndependentView(), and then
+		 * resets the view to what it was just before the \c draw() call, once
+		 * \c drawWithIndependentView() returns.
+		 * @param target The target to render the animation to.
+		 * @param states The render states to apply to the animation.
+		 */
+		void draw(sf::RenderTarget& target, sf::RenderStates states) const final;
+
+		/**
+		 * Subclasses must implement this method instead of the usual \c draw().
+		 * @sa \c draw().
+		 */
+		virtual void drawWithIndependentView(sf::RenderTarget& target,
+			sf::RenderStates states) const = 0;
+	};
+
+	/**
 	 * This structure contains a collection of settings that can be applied to a
 	 * \c renderer object.
 	 */

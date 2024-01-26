@@ -37,11 +37,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "mapstrings.hpp"
 #include "animation.hpp"
 #include "audio.hpp"
-#include <cmath>
+#include "maths.hpp"
 #include <stack>
 #include <optional>
 #include <queue>
-#include <random>
 
 namespace awe {
 	/**
@@ -3561,11 +3560,6 @@ namespace awe {
 		// MISC DRAWING //
 
 		/**
-		 * Initialises the map's pseudo-random number generator.
-		 */
-		void _initPRNG();
-
-		/**
 		 * A new offset during a map shake is only generated once this time has
 		 * passed.
 		 */
@@ -3574,7 +3568,7 @@ namespace awe {
 		/**
 		 * The pseudo-random number sequence generator.
 		 */
-		std::unique_ptr<std::mt19937> _prng;
+		const std::unique_ptr<std::mt19937> _prng = engine::RNGFactory();
 
 		/**
 		 * The uniform distribution to use when generating random numbers for map

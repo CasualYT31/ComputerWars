@@ -70,6 +70,16 @@ void sfx::animated_drawable::resetAnimation() noexcept {
 	_firsttime = true;
 }
 
+void sfx::animated_drawable_with_independent_view::draw(sf::RenderTarget& target,
+	sf::RenderStates states) const {
+	const sf::View oldView = target.getView();
+	target.setView(sf::View(sf::FloatRect(0.0f, 0.0f,
+		static_cast<float>(target.getSize().x),
+		static_cast<float>(target.getSize().y))));
+	drawWithIndependentView(target, states);
+	target.setView(oldView);
+}
+
 bool sfx::maximiseWindow(const sf::WindowHandle window, const bool maximise,
 	engine::logger* const logger) noexcept {
 #ifdef _WIN32

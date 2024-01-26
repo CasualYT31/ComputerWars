@@ -39,8 +39,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "mapstrings.hpp"
 #include "transitions.hpp"
 #include "settings.hpp"
+#include "maths.hpp"
 #include <filesystem>
-#include <random>
 
 namespace awe {
 	/**
@@ -56,7 +56,6 @@ namespace awe {
 
 		/**
 		 * Initialises the internal logger object.
-		 * Also seeds the psuedo random number sequence generator.
 		 * @param data The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
@@ -506,7 +505,7 @@ namespace awe {
 		/**
 		 * The pseudo-random number sequence generator.
 		 */
-		std::unique_ptr<std::mt19937> _prng;
+		const std::unique_ptr<std::mt19937> _prng = engine::RNGFactory();
 
 		/**
 		 * The rectangle used to produce the colour flash.

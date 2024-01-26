@@ -28,15 +28,31 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "SFML/System/Vector2.hpp"
 #include <cmath>
+#include <random>
+#include <memory>
+
+#define PI     3.14159265358979323846f
+#define TO_RAD (PI / 180.0f)
+#define TO_DEG (180.0f / PI)
 
 namespace engine {
+	/**
+	 * Calculates the magnitude of a vector.
+	 * @param  v The vector to measure.
+	 * @return The length of the vector.
+	 */
+	inline float magnitude(const sf::Vector2f& v) noexcept {
+		// Is slightly faster than passing { 0, 0 } to distance() I guess.
+		return ::sqrtf(v.x * v.x + v.y * v.y);
+	}
+
 	/**
 	 * Normalises the given vector.
 	 * @param  v The vector to normalise.
 	 * @return The normalised vector.
 	 */
 	inline sf::Vector2f normalise(const sf::Vector2f& v) noexcept {
-		return v / ::sqrtf(v.x * v.x + v.y * v.y);
+		return v / magnitude(v);
 	}
 
 	/**
@@ -68,4 +84,39 @@ namespace engine {
 	inline float distance(const sf::Vector2f& a, const sf::Vector2f& b) noexcept {
 		return ::sqrtf((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
 	}
+
+	/**
+	 * Calculates the angle of a point, in degrees, relative to the X axis.
+	 * @param  p      The point.
+	 * @param  offset The offset to apply to the angle 
+	 * @return The angle of the given point, in degrees.
+	 */
+	inline float angleOfPoint(const sf::Vector2f& p) noexcept {
+		const auto angle = ::atan2f(p.y, p.x) * TO_DEG;
+		return angle < 0.0f ? angle + 360.0f : angle;
+	}
+
+	/**
+	 * Invokes the sine function with degrees.
+	 * @param  a Angle, in degrees.
+	 * @return Result.
+	 */
+	inline float sin(const float a) noexcept {
+		return ::sinf(a * TO_RAD);
+	}
+
+	/**
+	 * Invokes the cosine function with degrees.
+	 * @param  a Angle, in degrees.
+	 * @return Result.
+	 */
+	inline float cos(const float a) noexcept {
+		return ::cosf(a * TO_RAD);
+	}
+
+	/**
+	 * Creates and seeds a random number generator.
+	 * @return Pointer to the RNG.
+	 */
+	std::unique_ptr<std::mt19937> RNGFactory();
 }

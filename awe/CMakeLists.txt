@@ -23,6 +23,7 @@ add_library(${PROJECT_NAME} STATIC
 	"source/typedef.cpp"
 	"source/mapstrings.cpp"
 	"source/transitions.cpp"
+	"source/random_particles.cpp"
 	
 	"source/map/animations/source/daybegin.cpp"
 	"source/map/animations/source/tagcos.cpp"

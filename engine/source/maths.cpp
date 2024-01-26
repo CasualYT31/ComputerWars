@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "maths.hpp"
+#include <chrono>
 
 bool engine::closeTo(const float a, const float b, const float epsilon) noexcept {
 	// Equal numbers and infinity will return immediately
@@ -30,4 +31,20 @@ bool engine::closeTo(const float a, const float b, const float epsilon) noexcept
 	if ((a == 0 || b == 0) && (diff < epsilon)) return true;
 	// Otherwise we need to use relative comparison to account for precision
 	return diff / (::fabs(a) + ::fabs(b)) < epsilon;
+}
+
+std::unique_ptr<std::mt19937> engine::RNGFactory() {
+	// Credit: https://stackoverflow.com/a/13446015/6928376.
+	std::random_device randomDevice;
+	std::mt19937::result_type seed = randomDevice() ^ (
+		(std::mt19937::result_type)
+		std::chrono::duration_cast<std::chrono::seconds>(
+			std::chrono::system_clock::now().time_since_epoch()
+		).count() +
+		(std::mt19937::result_type)
+		std::chrono::duration_cast<std::chrono::microseconds>(
+			std::chrono::high_resolution_clock::now().time_since_epoch()
+		).count()
+	);
+	return std::make_unique<std::mt19937>(seed);
 }

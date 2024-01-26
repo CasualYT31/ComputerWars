@@ -93,7 +93,6 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 	// We need to make sure the map is in a valid state for the case where an empty
 	// map is saved (i.e. where load() is never called to reset the state).
 	_initState();
-	_initPRNG();
 	_initShaders();
 }
 
@@ -644,20 +643,4 @@ void awe::map::_initShaders() {
 		"pixel.x = 1.0; pixel.yz -= 0.25;"
 		"gl_FragColor = pixel;}", sf::Shader::Fragment);
 	_attackableTileShaderFoW.setUniform("texUnit", sf::Shader::CurrentTexture);
-}
-
-void awe::map::_initPRNG() {
-	// Credit: https://stackoverflow.com/a/13446015/6928376.
-	std::random_device randomDevice;
-	std::mt19937::result_type seed = randomDevice() ^ (
-		(std::mt19937::result_type)
-		std::chrono::duration_cast<std::chrono::seconds>(
-			std::chrono::system_clock::now().time_since_epoch()
-		).count() +
-		(std::mt19937::result_type)
-		std::chrono::duration_cast<std::chrono::microseconds>(
-			std::chrono::high_resolution_clock::now().time_since_epoch()
-		).count()
-	);
-	_prng = std::make_unique<std::mt19937>(seed);
 }

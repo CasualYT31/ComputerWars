@@ -26,24 +26,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "army.hpp"
 
 awe::game_engine::game_engine(const engine::logger::data& data) :
-	engine::json_script({ data.sink, "json_script" }), _logger(data) {
-	// Credit: https://stackoverflow.com/a/13446015/6928376.
-	std::random_device randomDevice;
-	std::mt19937::result_type seed = randomDevice() ^ (
-		(std::mt19937::result_type)
-		std::chrono::duration_cast<std::chrono::seconds>(
-			std::chrono::system_clock::now().time_since_epoch()
-		).count() +
-		(std::mt19937::result_type)
-		std::chrono::duration_cast<std::chrono::microseconds>(
-			std::chrono::high_resolution_clock::now().time_since_epoch()
-		).count()
-	);
-	_prng = std::make_unique<std::mt19937>(seed);
-}
+	engine::json_script({ data.sink, "json_script" }), _logger(data) {}
 
 int awe::game_engine::run() {
-	auto r = _initCheck();
+	const auto r = _initCheck();
 	if (r) return r;
 
 	try {
