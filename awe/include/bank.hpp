@@ -563,16 +563,24 @@ namespace awe {
 		/**
 		 * Constructor which passes on the JSON object to the \c common_properties
 		 * constructor.
-		 * One additional key, \c "sound", is paired with a string value that holds
-		 * the name of the sound to play when that weather is set in-game.
+		 * An additional key, \c "sound", is paired with a string value that holds
+		 * the name of the sound to play when that weather is set in-game.\n
+		 * Another key, \c "particles", is paired with an array of objects that
+		 * hold the following key pairs:
+		 *
+		 * <ul><li>\c "sheet" = \c _particles.sheet, <tt>(string)</tt>.</li>
+		 *     <li>\c "sprite" = \c _particles.spriteID, <tt>(string)</tt>.</li>
+		 *     <li>\c "density" = \c _particles.density, <tt>(float)</tt>.</li>
+		 *     <li>\c "vectorx" = \c _particles.vector.x, <tt>(float)</tt>.</li>
+		 *     <li>\c "vectory" = \c _particles.vector.y, <tt>(float)</tt>.</li>
+		 *     <li>\c "respawndelay" = \c _particles.respawnDelay, <tt>(uint)</tt>.
+		 *         </li></ul>
 		 * @param scriptName The identifier of this bank entry that is to be used
 		 *                   within game scripts.
 		 * @param j          The object value containing the weather's properties.
+		 * @sa    \c awe::random_particles::data.
 		 */
-		inline weather(const std::string& scriptName, engine::json& j) :
-			common_properties(scriptName, j) {
-			j.apply(_sound, { "sound" }, true);
-		}
+		weather(const std::string& scriptName, engine::json& j);
 
 		/**
 		 * Registers \c weather with a given type.
@@ -598,11 +606,36 @@ namespace awe {
 		inline const std::string& getSound() const {
 			return _sound;
 		}
+
+		/**
+		 * Data used to setup \c awe::random_particles::data objects.
+		 * @sa \c awe::random_particles::data.
+		 */
+		struct particle_data {
+			std::string sheet;
+			std::string spriteID;
+			float density;
+			sf::Vector2f vector;
+			sf::Time respawnDelay;
+		};
+
+		/**
+		 * The particles that this weather produces.
+		 * @return Reference to the particle configurations.
+		 */
+		inline const std::vector<particle_data>& getParticles() const {
+			return _particles;
+		}
 	private:
 		/**
 		 * The sound to play when this weather is set in-game.
 		 */
 		std::string _sound;
+
+		/**
+		 * The particles this weather will render.
+		 */
+		std::vector<particle_data> _particles;
 	};
 
 	/**

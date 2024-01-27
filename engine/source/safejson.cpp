@@ -126,8 +126,8 @@ bool engine::json::keysExist(const engine::json::KeySequence& keys,
 	return false;
 }
 
-bool engine::json::equalType(nlohmann::ordered_json& dest,
-	nlohmann::ordered_json& src) noexcept {
+bool engine::json::equalType(const nlohmann::ordered_json& dest,
+	const nlohmann::ordered_json& src) noexcept {
 	if (dest.type() == src.type()) return true;
 	// Special case 1: unsigned onto signed.
 	// When this JSON library parses a positive integer, it interprets that as an

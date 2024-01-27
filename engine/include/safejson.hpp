@@ -337,8 +337,8 @@ namespace engine {
 		 * @return  \c TRUE if the two JSON values are of compatible data types,
 		 *          \c FALSE if not.
 		 */
-		static bool equalType(nlohmann::ordered_json& dest,
-			nlohmann::ordered_json& src) noexcept;
+		static bool equalType(const nlohmann::ordered_json& dest,
+			const nlohmann::ordered_json& src) noexcept;
 
 		/**
 		 * Converts a key sequence into a single string.

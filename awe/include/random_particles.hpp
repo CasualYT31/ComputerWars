@@ -54,11 +54,15 @@ namespace awe {
 			std::string spriteID;
 
 			/**
-			 * The size of this vector defines the maximum number of this type of
-			 * sprite to render at a time.
-			 * The objects themselves are initialised by \c random_particles.
+			 * The number of particles to generate when the target they are being
+			 * rendered on is at or below \c sfx::renderer::MIN_SIZE in size.
+			 * If the target is larger than this size, then the number of particles
+			 * generated will grow in proportion. Therefore, this value describes
+			 * the "density" of the particles.\n
+			 * If the number of particles is less than \c 1, it will be increased
+			 * to \c 1.
 			 */
-			std::vector<sfx::animated_sprite> sprites;
+			float density = 10.0f;
 
 			/**
 			 * If these particles move across the target, this vector will describe
@@ -68,27 +72,45 @@ namespace awe {
 			 * in pixels per second.
 			 */
 			sf::Vector2f vector;
-		};
 
-		/**
-		 * Represents a set of particles to render.
-		 */
-		using particle_set = std::vector<data>;
+			/**
+			 * When a particle despawns, how long should \c random_particles wait
+			 * before respawning it?
+			 */
+			sf::Time respawnDelay = sf::Time::Zero;
+
+			/**
+			 * Data managed by \c random_particles.
+			 */
+			struct internal_data {
+				sfx::animated_sprite sprite;
+				sf::Clock clock;
+				bool despawned = false;
+			};
+
+			/**
+			 * Used by \c random_particles internally, leave empty.
+			 */
+			std::vector<internal_data> sprites;
+		};
 
 		/**
 		 * Initialises the angle distribution.
 		 */
-		random_particles() : _angleDistribution(0.0f, 180.0f)/*,
-			_line(sf::LineStrip, 2), _line2(sf::LineStrip, 2),
-			_line3(sf::LineStrip, 2)*/ {}
+		random_particles() : _angleDistribution(0.0f, 180.0f)
+			//, _line(sf::LineStrip, 2), _line2(sf::LineStrip, 2),
+			//_line3(sf::LineStrip, 2)
+		{}
 
 		/**
 		 * Removes all current particles, and initialises a new set of particles.
-		 * Initially, the maximum amount of each particle will spawn at random
-		 * positions. Then, they will either stay stationary or start moving.\n
+		 * Initially, the appropriate amount of each particle will spawn at random
+		 * positions, given the target's size when it's given to \c animate().
+		 * Then, they will either stay stationary or start moving.\n
 		 * If a particle is not configured to move, then the particle sprites will
 		 * animate, and that's all. They will not be added or removed unless
-		 * \c resetParticles() is called.\n
+		 * \c resetParticles() is called, or the target given to \c animate()
+		 * resizes.\n
 		 * If they move, however, they will all move in the direction defined by
 		 * their vector. The line that is perpendicular to this vector divides the
 		 * target into two halves. The half that the vector points \em away from
@@ -99,12 +121,9 @@ namespace awe {
 		 * method.
 		 * @warning This drawable will not render anything until this method has
 		 *          been invoked.
-		 * @param   particles  The different types of particles to render at once.
-		 * @param   targetSize The size of the target. Used to know where to place
-		 *                     the particles at initialisation.
+		 * @param   particles The different types of particles to render at once.
 		 */
-		void resetParticles(const particle_set& particles,
-			const sf::Vector2u& targetSize);
+		void resetParticles(const std::vector<data>& particles);
 
 		/**
 		 * This drawable's \c animate() method.
@@ -122,10 +141,13 @@ namespace awe {
 			sf::RenderStates states) const final;
 
 		/**
-		 * Generates a random position within 
+		 * Assigns an origin to the sprite that favours the centre of the given
+		 * target, based on the sprite's position.
+		 * @param sprite     The sprite to update.
+		 * @param targetSize The size of the target.
 		 */
-		sf::Vector2f _generatePosition(const sf::Vector2f& min,
-			const sf::Vector2f& max) const;
+		void _calculateOrigin(sfx::animated_sprite& sprite,
+			const sf::Vector2f& targetSize);
 
 		/**
 		 * The pseudo-random number sequence generator.
@@ -140,13 +162,13 @@ namespace awe {
 		/**
 		 * The types of particles to keep track of.
 		 */
-		particle_set _particleSet;
+		std::vector<data> _particleSet;
 
-		// Debug ling showing the line perpendicular to particle.vector.
+		//// Debug ling showing the line perpendicular to particle.vector.
 		//sf::VertexArray _line;
-		// Debug line showing the particle.vector.
+		//// Debug line showing the particle.vector.
 		//sf::VertexArray _line2;
-		// Debug line showing the latest randomly generated trajectory.
+		//// Debug line showing the latest randomly generated trajectory.
 		//sf::VertexArray _line3;
 	};
 }

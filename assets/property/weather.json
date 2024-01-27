@@ -4,27 +4,183 @@
 		"shortname": "CLEAR_shortname",
 		"icon": "weather.clear",
 		"description": "CLEAR_description",
-		"sound": "weather.clear"
+		"sound": "weather.clear",
+		"particles": [
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.1",
+				"density": 3,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.2",
+				"density": 3,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.3",
+				"density": 2,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.bird.1",
+				"density": 0.2,
+				"vectorx": 20.0,
+				"vectory": -25.0,
+				"respawndelay": 5000
+			}
+		]
 	},
 	"RAIN": {
 		"longname": "RAIN_longname",
 		"shortname": "RAIN_shortname",
 		"icon": "weather.rain",
 		"description": "RAIN_description",
-		"sound": "weather.rain"
+		"sound": "weather.rain",
+		"particles": [
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.1",
+				"density": 3,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.2",
+				"density": 3,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.3",
+				"density": 2,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.rain.1",
+				"density": 15,
+				"vectorx": 200.0,
+				"vectory": 750.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.rain.2",
+				"density": 15,
+				"vectorx": 200.0,
+				"vectory": 750.0
+			}
+		]
 	},
 	"SANDSTORM": {
 		"longname": "SANDSTORM_longname",
 		"shortname": "SANDSTORM_shortname",
 		"icon": "weather.sandstorm",
 		"description": "SANDSTORM_description",
-		"sound": "weather.sandstorm"
+		"sound": "weather.sandstorm",
+		"particles": [
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.1",
+				"density": 3,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.2",
+				"density": 3,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.3",
+				"density": 2,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.sand.1",
+				"density": 30,
+				"vectorx": 1000.0,
+				"vectory": 0.0
+			}
+		]
 	},
 	"SNOW": {
 		"longname": "SNOW_longname",
 		"shortname": "SNOW_shortname",
 		"icon": "weather.snow",
 		"description": "SNOW_description",
-		"sound": "weather.snow"
+		"sound": "weather.snow",
+		"particles": [
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.1",
+				"density": 3,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.2",
+				"density": 3,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.cloud.3",
+				"density": 2,
+				"vectorx": -5.0,
+				"vectory": 6.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.snow.1",
+				"density": 6,
+				"vectorx": 125.0,
+				"vectory": 175.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.snow.2",
+				"density": 6,
+				"vectorx": 100.0,
+				"vectory": 190.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.snow.3",
+				"density": 6,
+				"vectorx": 50.0,
+				"vectory": 200.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.snow.4",
+				"density": 6,
+				"vectorx": 75.0,
+				"vectory": 150.0
+			},
+			{
+				"sheet": "particle",
+				"sprite": "weather.snow.5",
+				"density": 6,
+				"vectorx": 150.0,
+				"vectory": 250.0
+			}
+		]
 	}
 }

@@ -269,7 +269,7 @@ void awe::map::setWeather(const std::shared_ptr<const awe::weather>& weather) {
 	if (_weather == weather) return;
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::WEATHER));
-	_weather = weather;
+	_setWeather(weather);
 }
 
 void awe::map::setWeather(const std::string& name) {

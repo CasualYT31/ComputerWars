@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "animation.hpp"
 #include "audio.hpp"
 #include "maths.hpp"
+#include "random_particles.hpp"
 #include <stack>
 #include <optional>
 #include <queue>
@@ -3443,6 +3444,17 @@ namespace awe {
 		 * The currently selected weather.
 		 */
 		std::shared_ptr<const awe::weather> _weather;
+
+		/**
+		 * Weather particles.
+		 */
+		awe::random_particles _weatherParticles;
+
+		/**
+		 * Updates \c _weather, and resets the weather's particles.
+		 * @param weather The new weather to set.
+		 */
+		void _setWeather(const std::shared_ptr<const awe::weather>& weather);
 
 		// MOVE MODE DRAWING //
 

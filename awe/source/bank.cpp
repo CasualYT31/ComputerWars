@@ -80,6 +80,37 @@ awe::country::country(const std::string& scriptName, engine::json& j) :
 //*********
 //*WEATHER*
 //*********
+awe::weather::weather(const std::string& scriptName, engine::json& j) :
+	common_properties(scriptName, j) {
+	j.apply(_sound, { "sound" }, true);
+	nlohmann::ordered_json p;
+	if (j.keysExist({ "particles" }, &p) &&
+		p.is_array() && !p.empty() && p.at(0).is_object()) {
+		_particles.reserve(p.size());
+		for (const auto& particle : p) {
+			_particles.emplace_back();
+			if (particle.contains("sheet") && particle["sheet"].is_string())
+				_particles.back().sheet = particle["sheet"];
+			if (particle.contains("sprite") && particle["sprite"].is_string())
+				_particles.back().spriteID = particle["sprite"];
+			const nlohmann::ordered_json test = static_cast<std::size_t>(0);
+			const nlohmann::ordered_json testFloat = 0.0f;
+			if (particle.contains("density") &&
+				engine::json::equalType(testFloat, particle["density"]))
+				_particles.back().density = particle["density"];
+			if (particle.contains("vectorx") &&
+				engine::json::equalType(testFloat, particle["vectorx"]))
+				_particles.back().vector.x = particle["vectorx"];
+			if (particle.contains("vectory") &&
+				engine::json::equalType(testFloat, particle["vectory"]))
+				_particles.back().vector.y = particle["vectory"];
+			if (particle.contains("respawndelay") &&
+				engine::json::equalType(test, particle["respawndelay"]))
+				_particles.back().respawnDelay =
+					sf::milliseconds(particle["respawndelay"]);
+		}
+	}
+}
 
 //*************
 //*ENVIRONMENT*

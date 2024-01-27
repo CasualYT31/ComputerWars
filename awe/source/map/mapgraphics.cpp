@@ -1096,7 +1096,10 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 	if (animationInProgress())
 		_destroyAnimation = _currentAnimation->animate(target);
 
-	// Step 8. update the view to match the target's size, and apply the scaling.
+	// Step 8. weather particles.
+	_weatherParticles.animate(target);
+
+	// Step 9. update the view to match the target's size, and apply the scaling.
 	// Additionally, update the view offset.
 	auto mapPixelSize = mapSize; // Ignore fancy tile heights and widths.
 	mapPixelSize.x *= awe::animated_tile::MIN_WIDTH;
@@ -1142,7 +1145,8 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 			_viewOffsetY, cursorRect.top + cursorRect.height * 0.5f)
 	);
 
-	// Step 9. if the map shake animation is still on-going, count down the timers.
+	// Step 10. if the map shake animation is still on-going, count down the
+	//          timers.
 	if (_mapShakeTimeLeft > sf::Time::Zero) {
 		const auto seconds = sf::seconds(delta);
 		_mapShakeTimeLeft -= seconds;
@@ -1312,8 +1316,14 @@ void awe::map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		// Step 6c. the rectangle selection graphic.
 		if (_startOfRectSel && _endOfRectSel) target.draw(_rectangle, states);
 	}
+	
+	// Step 7. the weather particles.
+	auto weatherStates = states;
+	weatherStates.transform.scale({ _scaling, _scaling },
+		sf::Vector2f(target.getSize()) * 0.5f);
+	target.draw(_weatherParticles, weatherStates);
 
-	// Step 7. restore old view.
+	// Step 8. restore old view.
 	target.setView(oldView);
 }
 
@@ -1324,3 +1334,18 @@ void awe::map::drawUnit(sf::RenderTarget& target, const sf::RenderStates& states
 		_unitLocationOverrideHasNotYetBeenApplied.count(unitID) > 0)) return;
 	target.draw(sprite, states);
 };
+
+void awe::map::_setWeather(const std::shared_ptr<const awe::weather>& weather) {
+	_weather = weather;
+	std::vector<awe::random_particles::data> particles;
+	particles.reserve(_weather->getParticles().size());
+	for (const auto& particle : _weather->getParticles()) {
+		particles.emplace_back();
+		particles.back().sheet = _sheets ? (*_sheets)[particle.sheet] : nullptr;
+		particles.back().spriteID = particle.spriteID;
+		particles.back().density = particle.density;
+		particles.back().vector = particle.vector;
+		particles.back().respawnDelay = particle.respawnDelay;
+	}
+	_weatherParticles.resetParticles(particles);
+}

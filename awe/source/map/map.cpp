@@ -587,7 +587,7 @@ void awe::map::_initState() {
 	_mapShakeTimeLeft = sf::Time::Zero;
 	_waitBeforeNextShake = sf::Time::Zero;
 	_environment = _environments->first()->second;
-	_weather = _weathers->first()->second;
+	_setWeather(_weathers->first()->second);
 	if (_scripts && _scripts->doesModuleExist(_moduleName))
 		_scripts->deleteModule(_moduleName);
 	_moduleName.clear();

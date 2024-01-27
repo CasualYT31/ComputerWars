@@ -186,6 +186,59 @@
       ],
       "durations": [ 80, 80, 80, 80, 80, 80 ]
     },
+    "weather.cloud.1": {
+      "frames": [ [ 1104, 124, 17, 24 ] ],
+      "durations": 0
+    },
+    "weather.cloud.2": {
+      "frames": [ [ 1121, 124, 20, 16 ] ],
+      "durations": 0
+    },
+    "weather.cloud.3": {
+      "frames": [ [ 1141, 124, 43, 60 ] ],
+      "durations": 0
+    },
+    "weather.bird.1": {
+      "frames": [
+        [ 1088, 156, 8, 16 ],
+        [ 1096, 156, 8, 16 ],
+        [ 1072, 156, 8, 16 ],
+        [ 1080, 156, 8, 16 ]
+      ],
+      "durations": [ 1000, 150, 150, 150 ]
+    },
+    "weather.rain.1": {
+      "frames": [ [ 1064, 124, 5, 15 ] ],
+      "durations": 0
+    },
+    "weather.rain.2": {
+      "frames": [ [ 1069, 124, 3, 8 ] ],
+      "durations": 0
+    },
+    "weather.sand.1": {
+      "frames": [ [ 1072, 124, 32, 32 ] ],
+      "durations": 0
+    },
+    "weather.snow.1": {
+      "frames": [ [ 1064, 139, 8, 8 ] ],
+      "durations": 0
+    },
+    "weather.snow.2": {
+      "frames": [ [ 1064, 147, 8, 8 ] ],
+      "durations": 0
+    },
+    "weather.snow.3": {
+      "frames": [ [ 1064, 155, 8, 8 ] ],
+      "durations": 0
+    },
+    "weather.snow.4": {
+      "frames": [ [ 1064, 163, 8, 8 ] ],
+      "durations": 0
+    },
+    "weather.snow.5": {
+      "frames": [ [ 1064, 171, 8, 8 ] ],
+      "durations": 0
+    },
     "missilelaunch": {
       "frames": [
         [ 0, 384, 16, 32 ],
