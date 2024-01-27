@@ -22,6 +22,8 @@ shared abstract class ScriptsMap {
             return;
         }
         @map = mapToAdd;
+        map.addMementoStateChangedCallback(
+            MementoStateChangedCallback(this.loadAdditionalData));
         loadAdditionalData();
         map.setMapScalingFactor(_mapScalingFactor, false);
         setNormalCursorSprites();
@@ -101,6 +103,18 @@ shared abstract class ScriptsMap {
      */
     Day getArmyDifferentWeatherStartedOn() const {
         return armyDifferentWeatherStartedOn;
+    }
+
+    /**
+     * Update all of the additional weather properties at once.
+     */
+    void updateAdditionalWeatherProperties(const bool enabled,
+        const Weather@ const defWeather, const Day d, const ArmyID a) {
+        randomWeather = enabled;
+        @defaultWeather = defWeather;
+        dayDifferentWeatherStartedOn = d;
+        armyDifferentWeatherStartedOn = a;
+        saveAdditionalData();
     }
 
     /**

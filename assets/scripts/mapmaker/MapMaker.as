@@ -530,7 +530,7 @@ class MapMaker : Menu, Group {
      */
     private void initEditMap(Map@ const mapToHandle) {
         @edit = EditableMap(mapToHandle);
-        edit.map.setMementoStateChangedCallback(
+        edit.map.addMementoStateChangedCallback(
             MementoStateChangedCallback(this.mementosHaveChanged));
         edit.setObserver(Subject::Properties, @mapPropertiesWindow);
         edit.setObserver(Subject::Scripts, @scriptsWindow);

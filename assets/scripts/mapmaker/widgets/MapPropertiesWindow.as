@@ -15,7 +15,7 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         super({ ButtonsWindowButton("cancel", SingleSignalHandler(this.cancel)),
             ButtonsWindowButton("ok", SingleSignalHandler(this.ok)) });
         setText("mapprops");
-        setSize("250", "300");
+        setSize("565", "275");
         setResizable(false);
         setTitleButtons(TitleButton::Close);
         close(false);
@@ -24,9 +24,13 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         day.setValidator(VALIDATOR_UINT);
         width.setValidator(VALIDATOR_UINT);
         height.setValidator(VALIDATOR_UINT);
+        differentWeatherDay.setValidator(VALIDATOR_UINT);
         environmentComboBox.setSize("", "48");
         fogOfWar.setSize("20", "");
+        randomWeather.setSize("20", "");
         weatherComboBox.setSize("", "35");
+        defaultWeatherComboBox.setSize("", "35");
+        differentWeatherArmyComboBox.setSize("", "35");
 
         // Setup the size layout.
         width.setSize("100%", "100%");
@@ -42,9 +46,18 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         sizeLayout.add(heightGroup);
         sizeLayout.setRatioOfWidget(1, 0.3);
 
-        // Setup properties layout.
+        // Setup property layouts.
+        propertiesLayout.setSize("50%", "");
+        propertiesLayout.setOrigin(0.0, 0.5);
+        propertiesLayout.setPosition("0%", "50%");
         propertiesLayout.setRatioOfWidget(3, 1.25);
         clientArea.add(propertiesLayout);
+        weatherPropertiesLayout.setSize("50%", "");
+        weatherPropertiesLayout.setOrigin(1.0, 0.5);
+        weatherPropertiesLayout.setPosition("100%", "50%");
+        weatherPropertiesLayout.setRatioOfWidget(3, 1.25);
+        weatherPropertiesLayout.setRatioOfWidget(4, 1.25);
+        clientArea.add(weatherPropertiesLayout);
 
         // Setup the confirm resize window.
         selectedTileType.attach(confirmResize);
@@ -92,6 +105,13 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
         fogOfWar.setChecked(edit.map.isFoWEnabled());
         weatherComboBox.select(uint(weather.scriptNames.find(
             edit.map.getWeather().scriptName)));
+        defaultWeatherComboBox.select(uint(weather.scriptNames.find(
+            edit.getDefaultWeather().scriptName)));
+        randomWeather.setChecked(edit.isRandomWeatherEnabled());
+        differentWeatherDay.setText(formatDay(
+            edit.getDayDifferentWeatherStartedOn()));
+        differentWeatherArmyComboBox.select(
+            edit.getArmyDifferentWeatherStartedOn());
     }
 
     /**
@@ -132,10 +152,19 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
      * Apply the updated map properties and close the window/s.
      */
     private void applyChangesAndClose() {
-        edit.setMapProperties(name.getText(), parseDay(day.getText()),
+        edit.setMapProperties(
+            name.getText(),
+            parseDay(day.getText()),
             environment.scriptNames[uint(environmentComboBox.getSelected())],
-            fogOfWar.getChecked(),
-            weather.scriptNames[uint(weatherComboBox.getSelected())]);
+            fogOfWar.getChecked()
+        );
+        edit.setWeatherProperties(
+            weather.scriptNames[uint(weatherComboBox.getSelected())],
+            weather.scriptNames[uint(defaultWeatherComboBox.getSelected())],
+            randomWeather.getChecked(),
+            parseDay(differentWeatherDay.getText()),
+            ArmyID(differentWeatherArmyComboBox.getSelected())
+        );
         const Vector2 oldSize = edit.map.getMapSize(),
             newSize(parseUInt(width.getText()), parseUInt(height.getText()));
         // Check if we've resized first, because in rare cases there may not be a
@@ -182,7 +211,7 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
     );
 
     /**
-     * The layout in which each of the map's properties is shown.
+     * The layout in which each of the map's properties are shown.
      */
     private VerticalLayout propertiesLayout;
 
@@ -242,20 +271,63 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
     private CheckBox fogOfWar;
 
     /**
+     * The map properties.
+     */
+    private array<MapPropertyRow@> rows = {
+        MapPropertyRow(propertiesLayout, "name", name, 0.3, 0.7),
+        MapPropertyRow(propertiesLayout, "daylabel", day, 0.3, 0.7),
+        MapPropertyRow(propertiesLayout, "size", sizeLayout, 0.3, 0.7),
+        MapPropertyRow(propertiesLayout, "environment", environmentComboBox, 0.3,
+            0.7),
+        MapPropertyRow(propertiesLayout, "fow", fogOfWar, 0.3, 0.7)
+    };
+
+    /**
+     * The layout in which each of the map's weather properties are shown.
+     */
+    private VerticalLayout weatherPropertiesLayout;
+
+    /**
      * The map's weather.
      */
     private WeatherComboBox weatherComboBox(4, null);
 
     /**
-     * The map properties.
+     * The map's default weather.
      */
-    private array<MapPropertyRow@> rows = {
-        MapPropertyRow(propertiesLayout, "name", name),
-        MapPropertyRow(propertiesLayout, "daylabel", day),
-        MapPropertyRow(propertiesLayout, "size", sizeLayout),
-        MapPropertyRow(propertiesLayout, "environment", environmentComboBox),
-        MapPropertyRow(propertiesLayout, "fow", fogOfWar),
-        MapPropertyRow(propertiesLayout, "weather", weatherComboBox)
+    private WeatherComboBox defaultWeatherComboBox(4, null);
+
+    /**
+     * Allows the user to enable or disable random weather.
+     */
+    private CheckBox randomWeather;
+
+    /**
+     * The day when the current weather started (if it's different from the
+     * default).
+     */
+    private EditBox differentWeatherDay;
+
+    /**
+     * The army whose turn the current weather started on (if it's different from
+     * the default).
+     */
+    private CountryComboBox differentWeatherArmyComboBox(false, 5, null);
+    
+    /**
+     * The map's weather properties.
+     */
+    private array<MapPropertyRow@> weatherRows = {
+        MapPropertyRow(weatherPropertiesLayout, "currentweather",
+            weatherComboBox, 0.4, 0.6),
+        MapPropertyRow(weatherPropertiesLayout, "defaultweather",
+            defaultWeatherComboBox, 0.4, 0.6),
+        MapPropertyRow(weatherPropertiesLayout, "randomweather",
+            randomWeather, 0.4, 0.6),
+        MapPropertyRow(weatherPropertiesLayout, "dayweather",
+            differentWeatherDay, 0.4, 0.6),
+        MapPropertyRow(weatherPropertiesLayout, "armyweather",
+            differentWeatherArmyComboBox, 0.4, 0.6)
     };
 }
 
@@ -265,14 +337,19 @@ class MapPropertiesWindow : Observer, ButtonsWindow {
 class MapPropertyRow : HorizontalLayout {
     /**
      * Sets up a map property row and adds it to a vertical layout.
-     * @param parent The layout to add this new row to.
-     * @param text   The caption of the map property.
-     * @param editor The widget owned by the client that's responsible for
-     *               allowing the user to change the property. It will be sized
-     *               and positioned automatically by this class.
+     * @param parent       The layout to add this new row to.
+     * @param text         The caption of the map property.
+     * @param editor       The widget owned by the client that's responsible for
+     *                     allowing the user to change the property. It will be
+     *                     sized and positioned automatically by this class, but
+     *                     you can override these values if you wish.
+     * @param captionRatio The ratio the caption group will have in the horizontal
+     *                     layout.
+     * @param editorRatio  The ratio the editor group will have in the horizontal
+     *                     layout.
      */
     MapPropertyRow(VerticalLayout@ const parent, const string&in text,
-        Widget@ const editor) {
+        Widget@ const editor, const float captionRatio, const float editorRatio) {
         caption.setText(text);
         caption.setPosition("100%", "50%");
         caption.setOrigin(1.0, 0.5);
@@ -285,8 +362,8 @@ class MapPropertyRow : HorizontalLayout {
         editorGroup.setPadding("2.5", "5", "5", "5");
         add(captionGroup);
         add(editorGroup);
-        setRatioOfWidget(0, 0.3);
-        setRatioOfWidget(1, 0.7);
+        setRatioOfWidget(0, captionRatio);
+        setRatioOfWidget(1, editorRatio);
         parent.add(this);
     }
 

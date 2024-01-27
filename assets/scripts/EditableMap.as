@@ -45,6 +45,7 @@ enum Subject {
 enum Operation {
     // Internal.
     MAP_PROPS,
+    WEATHER_PROPS,
     CREATE_ARMY_SCRIPT,
     DELETE_ARMY_SCRIPT,
     TILE_TYPE_AND_OWNER,
@@ -74,6 +75,7 @@ enum Operation {
 const array<string> OPERATION = {
     // Internal.
     "OPERATION_mapprops",
+    "OPERATION_weatherprops",
     "OPERATION_createarmy",
     "OPERATION_deletearmy",
     "OPERATION_tiletypeandowner",
@@ -279,21 +281,47 @@ class EditableMap : ScriptsMap {
      * @param newEnvironment Script name of the environment to set to the map.
      * @param newFoW         \c TRUE if Fog of War is to be enabled, \c FALSE if
      *                       it is to be disabled.
-     * @param newWeather     Script name of the weather to set to the map.
      */
     void setMapProperties(const string&in mapName, const Day day,
-        const string&in newEnvironment, const bool newFoW,
-        const string&in newWeather) {
+        const string&in newEnvironment, const bool newFoW) {
         if (mapName == map.getMapName() && day == map.getDay() &&
             newEnvironment == map.getEnvironment().scriptName &&
-            newFoW == map.isFoWEnabled() &&
-            newWeather == map.getWeather().scriptName) return;
+            newFoW == map.isFoWEnabled()) return;
         DisableMementos token(map, OPERATION[Operation::MAP_PROPS]);
         map.setMapName(mapName);
         map.setDay(day);
         map.setEnvironment(newEnvironment);
         map.enableFoW(newFoW);
+    }
+    
+    /**
+     * Updates a map's weather properties.
+     * @param newWeather        Script name of the weather to set to the map.
+     * @param newDefaultWeather Script name of the weather to set as the default.
+     * @param newRandom         \c TRUE if random weather is to be enabled,
+     *                          \c FALSE if it is to be disabled.
+     * @param dayStartedOn      If <tt>newWeather != newDefaultWeather</tt>, then
+     *                          this stores the day \c newWeather began on.
+     * @param armyStartedOn     If <tt>newWeather != newDefaultWeather</tt>, then
+     *                          this stores the army who was having their turn
+     *                          when \c newWeather began.
+     */
+    void setWeatherProperties(const string&in newWeather,
+        const string&in newDefaultWeather, const bool newRandom,
+        const Day dayStartedOn, const ArmyID armyStartedOn) {
+        if (newWeather == map.getWeather().scriptName &&
+            newDefaultWeather == getDefaultWeather().scriptName &&
+            newRandom == isRandomWeatherEnabled() &&
+            dayStartedOn == getDayDifferentWeatherStartedOn() &&
+            armyStartedOn == getArmyDifferentWeatherStartedOn()) return;
+        DisableMementos token(map, OPERATION[Operation::WEATHER_PROPS]);
         map.setWeather(newWeather);
+        updateAdditionalWeatherProperties(
+            newRandom,
+            weather[newDefaultWeather],
+            dayStartedOn,
+            armyStartedOn
+        );
     }
 
     /**

@@ -97,7 +97,6 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 }
 
 awe::map::~map() noexcept {
-	if (_mementosChangedCallback) _mementosChangedCallback->Release();
 	if (_scripts && !_moduleName.empty()) _scripts->deleteModule(_moduleName);
 }
 
@@ -305,9 +304,14 @@ std::string awe::map::getNextRedoMementoName() const {
 	else return _redoDeque.front().name;
 }
 
-void awe::map::setMementoStateChangedCallback(asIScriptFunction* const callback) {
-	if (_mementosChangedCallback) _mementosChangedCallback->Release();
-	_mementosChangedCallback = callback;
+void awe::map::addMementoStateChangedCallback(asIScriptFunction* const callback) {
+	if (callback) {
+		_mementosChangedCallbacks.emplace_back(callback);
+		callback->Release();
+	} else {
+		_logger.error("addMementoStateChangedCallback operation failed: cannot "
+			"add NULL callback pointer!");
+	}
 }
 
 void awe::map::addScriptFile(const std::string& name, const std::string& code) {

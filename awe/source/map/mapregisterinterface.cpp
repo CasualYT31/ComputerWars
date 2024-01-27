@@ -776,8 +776,8 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getNextRedoMementoName), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "void "
-			"setMementoStateChangedCallback(MementoStateChangedCallback@ const)",
-			asMETHOD(awe::map, setMementoStateChangedCallback), asCALL_THISCALL);
+			"addMementoStateChangedCallback(MementoStateChangedCallback@ const)",
+			asMETHOD(awe::map, addMementoStateChangedCallback), asCALL_THISCALL);
 
 		////////////////////////
 		// SCRIPTS OPERATIONS //

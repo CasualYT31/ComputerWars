@@ -2029,12 +2029,18 @@ namespace awe {
 		std::string getNextRedoMementoName() const;
 
 		/**
-		 * Sets the script callback that is invoked when a memento is added or
+		 * Adds a script callback that is invoked when a memento is added or
 		 * removed, or undone or redone.
-		 * @param callback Pointer to the callback, or \c nullptr to not execute
-		 *                 any code when memento state is changed.
+		 * This callback is particularly useful when the scripts need to refresh
+		 * data that depends on the additional data stored in the map. Mementos
+		 * allow one to undo and redo the additional data itself, but since this
+		 * data is stored separately by the scripts, they need to be notified when
+		 * it changes, and reload their data accordingly.\n
+		 * Invokes callbacks in the order they were given in.
+		 * @param callback Pointer to the callback. Logs an error when \c nullptr
+		 *                 is given, and does not add the \c nullptr.
 		 */
-		void setMementoStateChangedCallback(asIScriptFunction* const callback);
+		void addMementoStateChangedCallback(asIScriptFunction* const callback);
 
 		///////////////////////
 		// SCRIPT OPERATIONS //
@@ -2954,8 +2960,9 @@ namespace awe {
 		 * The state of the mementos has changes, so invoke callback if possible.
 		 */
 		inline void _mementosHaveChanged() {
-			if (_scripts && _mementosChangedCallback)
-				_scripts->callFunction(_mementosChangedCallback);
+			if (!_scripts) return;
+			for (const auto& callback : _mementosChangedCallbacks)
+				_scripts->callFunction(callback.operator->());
 		}
 
 		/**
@@ -3057,10 +3064,11 @@ namespace awe {
 		std::shared_ptr<awe::map_strings> _mapStrings;
 
 		/**
-		 * Pointer to a script function that is invoked when the state of the undo
-		 * and/or redo deques has changed.
+		 * Pointers to script functions that are invoked when the state of the undo
+		 * and/or redo deques have changed.
 		 */
-		asIScriptFunction* _mementosChangedCallback = nullptr;
+		std::list<engine::CScriptWrapper<asIScriptFunction>>
+			_mementosChangedCallbacks;
 
 		//////////
 		// DATA //

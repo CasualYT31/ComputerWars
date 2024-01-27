@@ -80,6 +80,15 @@ class CountryComboBox : Group {
     }
 
     /**
+     * Returns the index of the country selected.
+     * @return The 0-based index of the country selected, or < 0 if no country is
+     *         selected (nor is neutral selected, if present).
+     */
+    int getSelected() const {
+        return list.getSelectedItem();
+    }
+
+    /**
      * When the user selects a country, update the icon, then invoke the callback,
      * if one was given.
      * Clears the icon, and emits \c NO_ARMY, when there is no item selected.
