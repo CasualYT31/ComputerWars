@@ -31,6 +31,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace awe {
 	/**
 	 * Abstract base class for all animations.
+	 * @remark Unfortunately, I can't use \c animation_with_independent_view here
+	 *         as if I try to template the base class it will complicate the
+	 *         \c awe::map animation management code.
 	 */
 	class animation : public sfx::animated_drawable {
 	public:
