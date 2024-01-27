@@ -46,7 +46,10 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 	T::Register<T>(_propertyName, engine, document);
 	// 3. Register a single reference type, called _propertyName + "Bank".
 	const std::string bankTypeName(_propertyName + "Bank"),
-		indexOpStrDecl("const " + _propertyName + "@ opIndex(const string&in)"),
+		indexOpStrDecl(
+			"const " + _propertyName + "@ opIndex(const string&in) const"),
+		getFirstItemDecl(
+			"const " + _propertyName + "@ get_first() const property"),
 		globalPropDecl(bankTypeName + " " +
 			tgui::String(_propertyName).toLower().toStdString());
 	r = engine->RegisterObjectType(bankTypeName.c_str(), 0,
@@ -71,6 +74,11 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 		asMETHOD(awe::bank<T>, _getScriptNamesArray), asCALL_THISCALL);
 	document->DocumentObjectMethod(r, "Returns the script name of each game "
 		"property stored in this bank, in the order they were given to the bank.");
+	r = engine->RegisterObjectMethod(bankTypeName.c_str(),
+		getFirstItemDecl.c_str(),
+		asMETHOD(awe::bank<T>, _getFirstItem), asCALL_THISCALL);
+	document->DocumentObjectMethod(r, "Returns a handle to the first property in "
+		"the bank, as defined by the order specified in the JSON script.");
 	// 4. Register the global point of access to the _propertyName + "Bank" object.
 	engine->RegisterGlobalProperty(globalPropDecl.c_str(), this);
 	document->DocumentExpectedFunction(globalPropDecl, "The single point of "

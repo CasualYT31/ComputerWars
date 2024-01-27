@@ -97,36 +97,32 @@ const array<string> OPERATION = {
 };
 
 /**
- * Represents a map with game logic attached.
+ * Represents a map with map maker logic attached.
  * <b>Note that all the HP values that are <em>given</em> to and <em>received</em>
  * from this class are internal.</b>
+ * @remark I'm assuming that if you were to try to access an \c EditableMap in a
+ *         separate module as if it were a \c ScriptsMap, it would crash the game.
  */
-class EditableMap {
+class EditableMap : ScriptsMap {
     //////////////////
     // CONSTRUCTION //
     //////////////////
     /**
      * Constructs an editable map from a previously loaded map.
-     * @param mapToEdit    The map to edit.
+     * @param mapToEdit The map to edit.
      */
-    EditableMap(Map@ mapToEdit) {
+    EditableMap(Map@ const mapToEdit) {
+        super(mapToEdit);
         observers.resize(Subject::Count);
-        if (mapToEdit is null) {
-            error("An invalid Map handle was given to the constructor of "
-                "EditableMap; the game will crash soon!");
-        } else {
-            @map = mapToEdit;
-            map.enableAnimations(false);
-            map.enablePeriodic(false);
-            map.alwaysShowHiddenUnits(true);
-            map.setMapScalingFactor(_mapScalingFactor, false);
-            map.setULAdditionalCursorSprite("ulanglebracket");
-            map.setURAdditionalCursorSprite("uranglebracket");
-            map.setLLAdditionalCursorSprite("llanglebracket");
-            map.setLRAdditionalCursorSprite("lranglebracket");
-            setNormalCursorSprites();
-            _updateStatusBar();
-        }
+        if (mapToEdit is null) return;
+        map.enableAnimations(false);
+        map.enablePeriodic(false);
+        map.alwaysShowHiddenUnits(true);
+        map.setULAdditionalCursorSprite("ulanglebracket");
+        map.setURAdditionalCursorSprite("uranglebracket");
+        map.setLLAdditionalCursorSprite("llanglebracket");
+        map.setLRAdditionalCursorSprite("lranglebracket");
+        _updateStatusBar();
     }
 
     /**
@@ -246,84 +242,31 @@ class EditableMap {
     // DRAWING OPERATIONS //
     ////////////////////////
     /**
-     * Increases the map scaling factor by \c 1.0.
-     * The map scaling factor does not go above \c 5.0.
+     * @sa \c ScriptsMap::zoomIn().
      */
-    void zoomIn() {
-        _mapScalingFactor += 1.0;
-        if (_mapScalingFactor > 5.0) _mapScalingFactor = 5.0;
-        map.setMapScalingFactor(_mapScalingFactor);
+    void zoomIn() override final {
+        ScriptsMap::zoomIn();
         _updateStatusBar();
     }
     
     /**
-     * Decreases the map scaling factor by \c 1.0.
-     * The map scaling factor does not go below \c 1.0.
+     * @sa \c ScriptsMap::zoomOut().
      */
-    void zoomOut() {
-        _mapScalingFactor -= 1.0;
-        if (_mapScalingFactor < 1.0) _mapScalingFactor = 1.0;
-        map.setMapScalingFactor(_mapScalingFactor);
+    void zoomOut() override final {
+        ScriptsMap::zoomOut();
         _updateStatusBar();
-    }
-
-    /**
-     * Reverts the cursor back to the normal sprites.
-     */
-    void setNormalCursorSprites() {
-        map.setULCursorSprite("ulcursor");
-        map.setURCursorSprite("urcursor");
-        map.setLLCursorSprite("llcursor");
-        map.setLRCursorSprite("lrcursor");
     }
 
     ///////////////////////////////
     // TILE SELECTION OPERATIONS //
     ///////////////////////////////
     /**
-     * Moves the cursor up one tile.
+     * Also updates the main status bar.
+     * @sa \c ScriptsMap::commonTileSelectionCode().
      */
-    void moveSelectedTileUp() {
-        _commonTileSelectionCode(map.moveSelectedTileUp());
-    }
-    
-    /**
-     * Moves the cursor down one tile.
-     */
-    void moveSelectedTileDown() {
-        _commonTileSelectionCode(map.moveSelectedTileDown());
-    }
-    
-    /**
-     * Moves the cursor left one tile.
-     */
-    void moveSelectedTileLeft() {
-        _commonTileSelectionCode(map.moveSelectedTileLeft());
-    }
-    
-    /**
-     * Moves the cursor right one tile.
-     */
-    void moveSelectedTileRight() {
-        _commonTileSelectionCode(map.moveSelectedTileRight());
-    }
-    
-    /**
-     * Selects a tile based on a given pixel.
-     * @param pixel The tile underneath this pixel will be selected.
-     */
-    void setSelectedTileByPixel(const MousePosition&in pixel) {
-        _commonTileSelectionCode(map.setSelectedTileByPixel(pixel));
-    }
-
-    /**
-     * Common code performed after updating the selected tile.
-     * Plays a sound and updates the main status bar.
-     * @param playSound \c TRUE if the sound should be played.
-     */
-    private void _commonTileSelectionCode(const bool playSound) {
+    protected void commonTileSelectionCode(const bool playSound) override final {
+        ScriptsMap::commonTileSelectionCode(playSound);
         _updateStatusBar();
-        if (playSound) map.queuePlay("sound", "movecursor");
     }
 
     ////////////////////
@@ -986,7 +929,7 @@ class EditableMap {
      * Notifies the status observer of a change.
      */
     private void _updateStatusBar() {
-        _refresh(Subject::Status, any(_mapScalingFactor));
+        _refresh(Subject::Status, any(this.getMapScalingFactor()));
     }
 
     /**
@@ -1014,18 +957,6 @@ class EditableMap {
         if (army != NO_ARMY && !map.isArmyPresent(army)) createArmy(army);
     }
 
-    /////////
-    // MAP //
-    /////////
-    /**
-     * The map.
-     * @warning Although read-write access to the map is given here, it is assumed
-     *          that the state of the map will be changed via \c EditableMap's
-     *          operations wherever possible. Also, do not update the handle
-     *          itself. I would have made it constant if I could.
-     */
-    Map@ map;
-
     //////////
     // DATA //
     //////////
@@ -1043,9 +974,4 @@ class EditableMap {
      * Does \c tilePropsTile contains a valid value?
      */
     private bool tilePropsTileSet = false;
-
-    /**
-     * The map scaling factor.
-     */
-    private float _mapScalingFactor = 2.0f;
 }

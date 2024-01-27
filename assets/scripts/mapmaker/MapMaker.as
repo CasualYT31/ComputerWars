@@ -670,7 +670,7 @@ class MapMaker : Menu, Group {
     }
 
     /**
-     * We can now try to open the new map.
+     * We can now save the map.
      */
     private void saveEditMapAsAuthorised() {
         edit.map.save(fileDialogFile);

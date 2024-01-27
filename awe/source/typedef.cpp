@@ -185,6 +185,19 @@ awe::Day parseDay(const std::string& str, const unsigned int base = 10,
 	return std::stoul(str, byteCount, base);
 }
 
+/**
+ * Parses an \c ArmyID from a string.
+ * @param  str       The string to parse.
+ * @param  base      The expected base of the number.
+ * @param  byteCount Stores the number of bytes processed.
+ * @return The \c ArmyID value.
+ */
+awe::ArmyID parseArmyID(const std::string& str, const unsigned int base = 10,
+	std::size_t* byteCount = nullptr) {
+	if (str.empty()) return 0;
+	return static_cast<awe::ArmyID>(std::stoul(str, byteCount, base));
+}
+
 void awe::RegisterGameTypedefs(asIScriptEngine* engine,
 	const std::shared_ptr<DocumentationGenerator>& document) {
 	if (!engine->GetTypeInfoByName("TeamID")) {
@@ -280,6 +293,11 @@ void awe::RegisterGameTypedefs(asIScriptEngine* engine,
 			"string formatArmyID(const ArmyID)",
 			asFUNCTION(formatArmyID), asCALL_CDECL);
 		document->DocumentGlobalFunction(r, "Formats an <tt>ArmyID</tt> as a "
+			"string.");
+		r = engine->RegisterGlobalFunction("ArmyID parseArmyID(const string&in, "
+			"const uint = 10, uint64&out = 0)",
+			asFUNCTION(parseArmyID), asCALL_CDECL);
+		document->DocumentGlobalFunction(r, "Parses an <tt>ArmyID</tt> from a "
 			"string.");
 	}
 	if (!engine->GetTypeInfoByName("Day")) {

@@ -240,6 +240,15 @@ namespace awe {
 		}
 
 		/**
+		 * Retrieves the direct pointer to the first item in the bank.
+		 * @return Pointer to the first item in the bank, \c nullptr if it is
+		 *         empty.
+		 */
+		inline const T* _getFirstItem() const {
+			return _bank.empty() ? nullptr : first()->second.get();
+		}
+
+		/**
 		 * Internal logger object.
 		 */
 		mutable engine::logger _logger;

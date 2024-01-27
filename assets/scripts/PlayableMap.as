@@ -80,7 +80,7 @@ const string PLAYABLE_MAP_TYPENAME = "PlayableMap";
  * <b>Note that all the HP values that are <em>given</em> to and <em>received</em>
  * from this class are user-friendly.</b>
  */
-shared class PlayableMap {
+shared class PlayableMap : ScriptsMap {
     //////////////////
     // CONSTRUCTION //
     //////////////////
@@ -88,20 +88,14 @@ shared class PlayableMap {
      * Constructs a playable map from a previously loaded map.
      * @param mapToPlayOn The map to play on.
      */
-    PlayableMap(Map@ mapToPlayOn) {
-        if (mapToPlayOn is null) {
-            error("An invalid Map handle was given to the constructor of "
-                "PlayableMap; the game will crash soon!");
-        } else {
-            @map = mapToPlayOn;
-            map.setMapObject(this);
-            map.disableMementos();
-            map.setMapScalingFactor(_mapScalingFactor, false);
-            setNormalCursorSprites();
-            const auto currentArmy = map.getSelectedArmy();
-            if (currentArmy != NO_ARMY)
-                play("music", commander[map.getArmyCurrentCO(currentArmy)].theme);
-        }
+    PlayableMap(Map@ const mapToPlayOn) {
+        super(mapToPlayOn);
+        if (map is null) return;
+        map.setMapObject(this);
+        map.disableMementos();
+        const auto currentArmy = map.getSelectedArmy();
+        if (currentArmy != NO_ARMY)
+            play("music", commander[map.getArmyCurrentCO(currentArmy)].theme);
     }
 
     /**
@@ -141,59 +135,6 @@ shared class PlayableMap {
             map.setArmyTeam(parseUInt(teamKeys[i]), team);
         }
 
-    }
-
-    ////////////////////////
-    // DRAWING OPERATIONS //
-    ////////////////////////
-    /**
-     * Increases the map scaling factor by \c 1.0.
-     * The map scaling factor does not go above \c 5.0.
-     */
-    void zoomIn() {
-        _mapScalingFactor += 1.0;
-        if (_mapScalingFactor > 5.0) _mapScalingFactor = 5.0;
-        map.setMapScalingFactor(_mapScalingFactor);
-    }
-    
-    /**
-     * Decreases the map scaling factor by \c 1.0.
-     * The map scaling factor does not go below \c 1.0.
-     */
-    void zoomOut() {
-        _mapScalingFactor -= 1.0;
-        if (_mapScalingFactor < 1.0) _mapScalingFactor = 1.0;
-        map.setMapScalingFactor(_mapScalingFactor);
-    }
-
-    /**
-     * Reverts the cursor back to the normal sprites.
-     */
-    void setNormalCursorSprites() {
-        map.setULCursorSprite("ulcursor");
-        map.setURCursorSprite("urcursor");
-        map.setLLCursorSprite("llcursor");
-        map.setLRCursorSprite("lrcursor");
-    }
-
-    /**
-     * Sets the cursor to have the attack cursor sprites.
-     */
-    void setAttackCursorSprites() {
-        map.setULCursorSprite("ulattackcursor");
-        map.setURCursorSprite("urattackcursor");
-        map.setLLCursorSprite("llattackcursor");
-        map.setLRCursorSprite("lrattackcursor");
-    }
-
-    /**
-     * Sets the cursor to have the delete cursor sprites.
-     */
-    void setDeleteCursorSprites() {
-        map.setULCursorSprite("deletecursor");
-        map.setURCursorSprite("deletecursor");
-        map.setLLCursorSprite("deletecursor");
-        map.setLRCursorSprite("deletecursor");
     }
 
     //////////////////////////
@@ -390,49 +331,12 @@ shared class PlayableMap {
     // TILE SELECTION OPERATIONS //
     ///////////////////////////////
     /**
-     * Moves the cursor up one tile.
+     * Also updates the selected unit's closed list.
+     * @sa \c ScriptsMap::commonTileSelectionCode().
      */
-    void moveSelectedTileUp() {
-        _commonTileSelectionCode(map.moveSelectedTileUp());
-    }
-    
-    /**
-     * Moves the cursor down one tile.
-     */
-    void moveSelectedTileDown() {
-        _commonTileSelectionCode(map.moveSelectedTileDown());
-    }
-    
-    /**
-     * Moves the cursor left one tile.
-     */
-    void moveSelectedTileLeft() {
-        _commonTileSelectionCode(map.moveSelectedTileLeft());
-    }
-    
-    /**
-     * Moves the cursor right one tile.
-     */
-    void moveSelectedTileRight() {
-        _commonTileSelectionCode(map.moveSelectedTileRight());
-    }
-    
-    /**
-     * Selects a tile based on a given pixel.
-     * @param pixel The tile underneath this pixel will be selected.
-     */
-    void setSelectedTileByPixel(const MousePosition&in pixel) {
-        _commonTileSelectionCode(map.setSelectedTileByPixel(pixel));
-    }
-
-    /**
-     * Common code performed after updating the selected tile.
-     * Plays a sound and updates the selected unit's closed list.
-     * @param playSound \c TRUE if the sound should be played.
-     */
-    private void _commonTileSelectionCode(const bool playSound) {
+    protected void commonTileSelectionCode(const bool playSound) override final {
+        ScriptsMap::commonTileSelectionCode(playSound);
         if (_closedListEnabled) _updateMoveModeClosedList();
-        if (playSound) map.queuePlay("sound", "movecursor");
     }
 
     /**
@@ -2571,26 +2475,9 @@ shared class PlayableMap {
         arr[uint(index)].g = g;
     }
 
-    /////////
-    // MAP //
-    /////////
-    /**
-     * The map.
-     * @warning Although read-write access to the map is given here, it is assumed
-     *          that the state of the map will be changed via \c PlayableMap's
-     *          operations wherever possible. Also, do not update the handle
-     *          itself. I would have made it constant if I could.
-     */
-    Map@ map;
-
     //////////
     // DATA //
     //////////
-    /**
-     * The map scaling factor.
-     */
-    private float _mapScalingFactor = 2.0f;
-
     /**
      * Flag which determines if the \c _updateMoveModeClosedList() method should
      * be called.
