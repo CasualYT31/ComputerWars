@@ -160,6 +160,10 @@
     "bhdmissile": {
       "frames": [ [ 46, 92, 46, 46 ] ],
       "durations": [ 0 ]
+    },
+    "bhdskyfortress": {
+      "frames": [ [ 92, 92, 46, 46 ] ],
+      "durations": [ 0 ]
     }
   }
 }

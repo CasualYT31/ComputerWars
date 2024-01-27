@@ -1645,5 +1645,92 @@
         "deleted": "000plain"
       }
     ]
+  },
+  "BHDSKYFORTRESS": {
+    "longname": "BLACKHOLE_DECORATION_longname",
+    "shortname": "BLACKHOLE_DECORATION_shortname",
+    "icon": "bhdskyfortress",
+    "description": "BLACKHOLE_DECORATION_description",
+    "root": {
+      "tile": "bhdskyfortress0,0",
+      "deleted": "000plain"
+    },
+    "dependent": [
+      {
+        "offset": [ 1, 0 ],
+        "tile": "bhdskyfortress1,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, 0 ],
+        "tile": "bhdskyfortress2,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, 0 ],
+        "tile": "bhdskyfortress3,0",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, 1 ],
+        "tile": "bhdskyfortress0,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 1 ],
+        "tile": "bhdskyfortress1,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, 1 ],
+        "tile": "bhdskyfortress2,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, 1 ],
+        "tile": "bhdskyfortress3,1",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, 2 ],
+        "tile": "bhdskyfortress0,2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 2 ],
+        "tile": "bhdskyfortress1,2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, 2 ],
+        "tile": "bhdskyfortress2,2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, 2 ],
+        "tile": "bhdskyfortress3,2",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 0, 3 ],
+        "tile": "bhdskyfortress0,3",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 1, 3 ],
+        "tile": "bhdskyfortress1,3",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 2, 3 ],
+        "tile": "bhdskyfortress2,3",
+        "deleted": "000plain"
+      },
+      {
+        "offset": [ 3, 3 ],
+        "tile": "bhdskyfortress3,3",
+        "deleted": "000plain"
+      }
+    ]
   }
 }

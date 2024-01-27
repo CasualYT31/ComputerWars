@@ -680,5 +680,22 @@
 	"bhdmissile0,3": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdmissile0,3"},
 	"bhdmissile1,3": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdmissile1,3"},
 	"bhdmissile2,3": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdmissile2,3"},
-	"bhdmissile3,3": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdmissile3,3"}
+	"bhdmissile3,3": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdmissile3,3"},
+
+	"bhdskyfortress0,0": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress0,0"},
+	"bhdskyfortress1,0": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress1,0"},
+	"bhdskyfortress2,0": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress2,0"},
+	"bhdskyfortress3,0": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress3,0"},
+	"bhdskyfortress0,1": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress0,1"},
+	"bhdskyfortress1,1": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress1,1"},
+	"bhdskyfortress2,1": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress2,1"},
+	"bhdskyfortress3,1": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress3,1"},
+	"bhdskyfortress0,2": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress0,2"},
+	"bhdskyfortress1,2": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress1,2"},
+	"bhdskyfortress2,2": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress2,2"},
+	"bhdskyfortress3,2": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress3,2"},
+	"bhdskyfortress0,3": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress0,3"},
+	"bhdskyfortress1,3": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress1,3"},
+	"bhdskyfortress2,3": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress2,3"},
+	"bhdskyfortress3,3": {"type": "BLACKHOLE_DECORATION", "neutral": "bhdskyfortress3,3"}
 }
