@@ -308,6 +308,19 @@ namespace awe {
 		bool save(const std::string& file = "");
 
 		/**
+		 * Stores additional data into the map.
+		 * @param data The data to store. Can take any format the scripts desire.
+		 *             It can also store NULL bytes.
+		 */
+		void setAdditionalData(const std::string& data);
+
+		/**
+		 * Copies the additional data stored in the map, and returns it.
+		 * @return A copy of the additional data that's currently stored.
+		 */
+		std::string getAdditionalData() const;
+
+		/**
 		 * The \c scripts object which will allow this \c map object to create
 		 * arrays for the scripts.
 		 * If the given pointer was not \c nullptr, then the closed list will be
@@ -3179,6 +3192,11 @@ namespace awe {
 		 * Is Fog of War enabled on this map?
 		 */
 		bool _fow = false;
+
+		/**
+		 * The additional data stored inside the map.
+		 */
+		std::string _additionalData;
 
 		/////////////
 		// SCRIPTS //

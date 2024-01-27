@@ -187,6 +187,7 @@
 	"OPERATION_renamescript": "Rename Script",
 	"OPERATION_environment": "Set Environment",
 	"OPERATION_weather": "Set Weather",
+	"OPERATION_additionaldata": "Set Additional Map Data",
 
 	"OPERATION_mapprops": "Update Map's Non-Size Properties",
 	"OPERATION_tiletypeandowner": "Set Tile's Type and/or Owner",

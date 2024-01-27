@@ -81,6 +81,7 @@ namespace awe {
 			RENAME_SCRIPT,
 			ENVIRONMENT,
 			WEATHER,
+			ADDITIONAL_DATA,
 			count
 		};
 
@@ -126,7 +127,8 @@ namespace awe {
 			"removescript",
 			"renamescript",
 			"environment",
-			"weather"
+			"weather",
+			"additionaldata"
 		};
 
 		/**

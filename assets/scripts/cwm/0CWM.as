@@ -60,6 +60,7 @@ foreach tile {
 		}
 	}
 }
+string optionalAdditionalData;
 */
 
 /**
@@ -251,6 +252,9 @@ namespace cwm {
 				}
 			}
 		}
+        string additionalData;
+        stream.read(additionalData);
+        map.setAdditionalData(additionalData);
 	}
 
 	/**
@@ -351,5 +355,6 @@ namespace cwm {
 				}
 			}
 		}
+        stream.write(map.getAdditionalData());
 	}
 }

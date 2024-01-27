@@ -153,6 +153,17 @@ bool awe::map::save(const std::string& file) {
 	return save(file, 0);
 }
 
+void awe::map::setAdditionalData(const std::string& data) {
+	if (data == _additionalData) return;
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::ADDITIONAL_DATA));
+	_additionalData = data;
+}
+
+std::string awe::map::getAdditionalData() const {
+	return _additionalData;
+}
+
 void awe::map::setScripts(const std::shared_ptr<engine::scripts>& scripts) {
 	if (scripts) {
 		if (_selectedUnitRenderData.empty()) {
@@ -588,6 +599,7 @@ void awe::map::_initState() {
 	_waitBeforeNextShake = sf::Time::Zero;
 	_environment = _environments->first()->second;
 	_setWeather(_weathers->first()->second);
+	_additionalData.clear();
 	if (_scripts && _scripts->doesModuleExist(_moduleName))
 		_scripts->deleteModule(_moduleName);
 	_moduleName.clear();

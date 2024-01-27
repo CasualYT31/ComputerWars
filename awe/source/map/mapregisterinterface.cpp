@@ -272,6 +272,14 @@ void awe::map::Register(asIScriptEngine* engine,
 			"bool defaultWinCondition() const",
 			asMETHOD(awe::map, defaultWinCondition), asCALL_THISCALL);
 
+		r = engine->RegisterObjectMethod("Map",
+			"void setAdditionalData(const string&in)",
+			asMETHOD(awe::map, setAdditionalData), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"string getAdditionalData() const",
+			asMETHOD(awe::map, getAdditionalData), asCALL_THISCALL);
+
 		/////////////////////
 		// ARMY OPERATIONS //
 		/////////////////////
