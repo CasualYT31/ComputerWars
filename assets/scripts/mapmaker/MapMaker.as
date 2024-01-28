@@ -98,6 +98,7 @@ class MapMaker : Menu, Group {
         @mapMaker = this;
         toolBar.dock();
         paletteWindow.dock();
+        mainStatusBar.clear();
         setVisibility(true);
         play("music", "mapmaker", 0.0);
     }

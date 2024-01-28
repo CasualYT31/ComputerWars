@@ -283,6 +283,13 @@ namespace awe {
 		unsigned int _script_rand(const unsigned int max);
 
 		/**
+		 * Returns a randomly generated number between \c 0.0 and \c max.
+		 * @param  max The maximum value the result can be.
+		 * @return The random number.
+		 */
+		float _script_frand(const float max);
+
+		/**
 		 * Finds out if the given path exists as either a file or directory.
 		 * @param  path The path to test.
 		 * @return \c TRUE if \c path is either an existing path or file, \c FALSE

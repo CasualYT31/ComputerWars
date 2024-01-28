@@ -348,9 +348,21 @@ awe::ArmyID awe::map::getNextArmy() const {
 	return itr->first;
 }
 
+awe::ArmyID awe::map::findNextArmy(const awe::ArmyID from) const {
+	if (_armies.empty()) return awe::NO_ARMY;
+	const auto next = _armies.upper_bound(from);
+	if (next == _armies.end()) return getFirstArmy();
+	return next->first;
+}
+
 awe::ArmyID awe::map::getFirstArmy() const {
 	if (_armies.size() == 0) return awe::NO_ARMY;
 	else return _armies.cbegin()->first;
+}
+
+awe::ArmyID awe::map::getLastArmy() const {
+	if (_armies.size() == 0) return awe::NO_ARMY;
+	else return _armies.crbegin()->first;
 }
 
 void awe::map::setSelectedArmyOverride(const awe::ArmyID army) {

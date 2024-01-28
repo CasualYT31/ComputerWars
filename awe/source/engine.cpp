@@ -348,6 +348,12 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Generates a random number between 0 and "
 		"the given value (inclusive).");
 
+	r = engine->RegisterGlobalFunction("float frand(const float)",
+		asMETHOD(awe::game_engine, _script_frand),
+		asCALL_THISCALL_ASGLOBAL, this);
+	document->DocumentGlobalFunction(r, "Generates a random number between 0.0 "
+		"and the given value (inclusive).");
+
 	r = engine->RegisterGlobalFunction("bool doesPathExist(const string&in)",
 		asMETHOD(awe::game_engine, _script_doesPathExist),
 		asCALL_THISCALL_ASGLOBAL, this);
@@ -775,6 +781,11 @@ sf::Vector2i awe::game_engine::_script_scaledMousePosition() const {
 unsigned int awe::game_engine::_script_rand(const unsigned int max) {
 	// Credit: https://stackoverflow.com/a/13446015/6928376.
 	std::uniform_int_distribution<unsigned> distribution(0, max);
+	return distribution(*_prng);
+}
+
+float awe::game_engine::_script_frand(const float max) {
+	std::uniform_real_distribution<float> distribution(0.0f, max);
 	return distribution(*_prng);
 }
 

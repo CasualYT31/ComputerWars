@@ -103,7 +103,8 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	// Retain the unit's sprite and location override as it may not be destroyed
 	// immediately. However, if there will be no destroy unit animation, remove the
 	// location override immediately.
-	if (loadedOnto == awe::NO_UNIT) {
+	if (loadedOnto == awe::NO_UNIT &&
+		_canAnimationBeQueued({ awe::animation_preset::Debug }, true)) {
 		_unitsBeingDestroyed.insert({ id, _units.at(id).sprite });
 		_animationQueue.push(std::bind([&](const awe::UnitID deletingID) {
 			// Remove the sprite now.

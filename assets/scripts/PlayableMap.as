@@ -384,10 +384,11 @@ shared class PlayableMap : ScriptsMap {
         currentArmy = nextArmy;
 
         // 4. Queue Day Begin animation, and queue the playing of the next army's
-        //    theme. If Fog of War is enabled, queue the Next Turn screen before
-        //    queueing these.
+        //    theme. We also manage weather beforehand, and if Fog of War is
+        //    enabled, queue the Next Turn screen before queueing all of these.
         if (map.isFoWEnabled()) map.animateNextTurn(
             (deleteOldArmy ? NO_ARMY : oldArmy), currentArmy, { "select" });
+        _manageWeather(map.getDay(), currentArmy);
         map.queuePlay("music", commander[map.getArmyCurrentCO(currentArmy)].theme);
         map.animateDayBegin(currentArmy, map.getDay(), "Monospace");
 
@@ -2049,6 +2050,61 @@ shared class PlayableMap : ScriptsMap {
     /////////////////////////////
     // END TURN HELPER METHODS //
     /////////////////////////////
+    /**
+     * When a turn ends, the weather will change if certain conditions pass.
+     * @param currentArmy The ID of the army who is now having their turn.
+     */
+    private void _manageWeather(const Day currentDay, const ArmyID currentArmy) {
+        const auto currentWeather = map.getWeather().scriptName,
+            defaultWeather = getDefaultWeather().scriptName;
+        if (currentWeather == defaultWeather) {
+            // TODO-3: will need to explicitly prevent rolling for random weather
+            // in the case (e.g.) Olaf triggers snow with his SCOP on a map where
+            // snow is the default.
+            // Roll for random weather if it's enabled.
+            if (isRandomWeatherEnabled()) {
+                // For now, each weather has a 4%, 3%, or 2% chance of appearing.
+                // It is not scalable, though...
+                const uint chance = (
+                    map.getArmyCount() <= 2 ? 4 :
+                    (
+                        map.getArmyCount() == 3 ? 3 : 2
+                    )
+                );
+                const uint threshold = chance * weather.length();
+                const uint roll = ::rand(100);
+                if (roll < threshold) {
+                    uint newWeather = roll % weather.length();
+                    if (weather.scriptNames[newWeather] != defaultWeather) {
+                        setDayDifferentWeatherStartedOn(currentDay);
+                        setArmyDifferentWeatherStartedOn(currentArmy);
+                        setWeather(weather.scriptNames[newWeather]);
+                    }
+                }
+            }
+        } else {
+            // If the current weather isn't the default, see if it's been a whole
+            // day since the current weather started. If it has, reset the weather
+            // to the default now.
+            auto dayStartedOn = getDayDifferentWeatherStartedOn();
+            auto armyStartedOn = getArmyDifferentWeatherStartedOn();
+            // If the army the weather started on doesn't exist anymore, try to
+            // get the next army and assign that to be the new army started on.
+            if (!map.isArmyPresent(armyStartedOn)) {
+                const auto old = armyStartedOn;
+                armyStartedOn = map.findNextArmy(armyStartedOn);
+                // If the next army is earlier in the list, then we need to
+                // increment the day, too.
+                if (old > armyStartedOn)
+                    setDayDifferentWeatherStartedOn(++dayStartedOn);
+                setArmyDifferentWeatherStartedOn(armyStartedOn);
+            }
+            if (currentDay > dayStartedOn + 1 ||
+                (currentDay > dayStartedOn && currentArmy >= armyStartedOn))
+                setWeather(defaultWeather);
+        }
+    }
+
     /**
      * When a turn ends, the next army's units will be given to this method.
      * They are given in order of their turn start priority. The order of units

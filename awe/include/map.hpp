@@ -2292,10 +2292,24 @@ namespace awe {
 		awe::ArmyID getNextArmy() const;
 
 		/**
+		 * Find the ID of an existing army that immediately proceeds the one given.
+		 * @param  from The ID of the army to search from. May or may not exist.
+		 * @return The ID of the army that follows the one given in the turn order.
+		 *         \c NO_ARMY if there are no armies.
+		 */
+		awe::ArmyID findNextArmy(const awe::ArmyID from) const;
+
+		/**
 		 * Returns the ID of the army that should have their turn first.
 		 * @return The ID of the first army, or \c NO_ARMY if there are no armies.
 		 */
 		awe::ArmyID getFirstArmy() const;
+
+		/**
+		 * Returns the ID of the army that should have their turn last.
+		 * @return The ID of the last army, or \c NO_ARMY if there are no armies.
+		 */
+		awe::ArmyID getLastArmy() const;
 
 		/**
 		 * Force the map to render as if the current army was \c army, and not the

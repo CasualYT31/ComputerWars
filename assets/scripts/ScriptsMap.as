@@ -142,13 +142,21 @@ shared abstract class ScriptsMap {
     private void loadAdditionalData() {
         resetAdditionalData();
         const auto data = map.getAdditionalData();
+        // If there is no data, assume we're loading a new map, and just set the
+        // defaults silently.
+        if (data.isEmpty()) {
+            saveAdditionalData();
+            return;
+        }
+
         const auto firstComma = data.findFirst(',');
         const auto secondComma = data.findFirst(',', firstComma + 1);
         // If either of these are < 0, the format of the additional data is not
         // valid, leave to the defaults.
         if (firstComma < 0 || secondComma < 0) {
-            error("Unrecognised additional data format, leaving additional data "
-                "to default values.");
+            error("Unrecognised additional data format, resetting additional "
+                "data to default values.");
+            saveAdditionalData();
             return;
         }
 
@@ -164,7 +172,8 @@ shared abstract class ScriptsMap {
         pos += defaultWeatherScriptNameSize;
         if (!weather.contains(defaultWeatherScriptName)) {
             error("Invalid default weather \"" + defaultWeatherScriptName + "\", "
-                "leaving additional data to default values.");
+                "resetting additional data to default values.");
+            saveAdditionalData();
             return;
         }
         const auto dayStartedOnStr = data.substr(pos, secondComma - pos);
@@ -172,6 +181,13 @@ shared abstract class ScriptsMap {
         const auto dayStartedOn = parseDay(dayStartedOnStr);
         const auto armyStartedOnStr = data.substr(pos);
         const auto armyStartedOn = parseArmyID(armyStartedOnStr);
+        if (armyStartedOn >= country.length()) {
+            error("Invalid army ID \"" + formatArmyID(armyStartedOn) + "\" for "
+                "additional weather data, resetting additional data to default "
+                "values.");
+            saveAdditionalData();
+            return;
+        }
 
         // Data may still be invalid at this point, but it should not cause
         // crashes at least.

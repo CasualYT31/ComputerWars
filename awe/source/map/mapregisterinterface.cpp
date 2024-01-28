@@ -899,8 +899,16 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getNextArmy), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
+			"ArmyID findNextArmy(const ArmyID) const",
+			asMETHOD(awe::map, findNextArmy), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
 			"ArmyID getFirstArmy() const",
 			asMETHOD(awe::map, getFirstArmy), asCALL_THISCALL);
+
+		r = engine->RegisterObjectMethod("Map",
+			"ArmyID getLastArmy() const",
+			asMETHOD(awe::map, getLastArmy), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"void setSelectedArmyOverride(const ArmyID)",
