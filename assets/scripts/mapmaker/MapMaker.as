@@ -531,6 +531,10 @@ class MapMaker : Menu, Group {
      */
     private void initEditMap(Map@ const mapToHandle) {
         @edit = EditableMap(mapToHandle);
+        // The normal cursor will be set right now, so only check for the deletion
+        // tools here.
+        if (toolBar.selected(Tool::Delete) || toolBar.selected(Tool::RectDelete))
+            edit.setDeleteCursorSprites();
         edit.map.addMementoStateChangedCallback(
             MementoStateChangedCallback(this.mementosHaveChanged));
         edit.setObserver(Subject::Properties, @mapPropertiesWindow);

@@ -135,6 +135,12 @@ class ToolBar : ChildWindow {
         // Disable selected tool button.
         currentTool = parseUInt(::getWidgetName(id));
         buttons[currentTool].setEnabled(false);
+        // If the tool is a paint tool, set the normal cursor sprites, but if it's
+        // a delete tool, set the delete cursor sprites.
+        if (edit is null) return;
+        if (selected(Tool::Delete) || selected(Tool::RectDelete))
+            edit.setDeleteCursorSprites();
+        else edit.setNormalCursorSprites();
     }
 
     /**
