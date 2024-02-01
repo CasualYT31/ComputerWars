@@ -665,15 +665,6 @@ namespace engine {
 		bool _load(engine::json& j);
 
 		/**
-		 * The JSON save method for this class.
-		 * This class cannot be saved.
-		 * @param  j The \c nlohmann::ordered_json object representing the JSON
-		 *           script which this method writes to.
-		 * @return Always returns \c FALSE.
-		 */
-		bool _save(nlohmann::ordered_json& j);
-
-		/**
 		 * Loads a folder of scripts recursively into a given module.
 		 * Note that this function expects every file within the folder
 		 * (recursively) to be a valid AngelScript file. If one file couldn't be

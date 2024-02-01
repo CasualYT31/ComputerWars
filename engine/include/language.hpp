@@ -252,16 +252,6 @@ namespace engine {
 		bool _load(engine::json& j);
 
 		/**
-		 * The JSON save method for this class.
-		 * This class cannot be saved.
-		 * @param  j The \c nlohmann::ordered_json object representing
-		 *           the JSON script which this method writes to.
-		 * @return Always returns \c FALSE.
-		 * @safety Strong guarantee.
-		 */
-		bool _save(nlohmann::ordered_json& j);
-
-		/**
 		 * This class represents the string map of a single language.
 		 * This is a private, nested class, meaning that only the
 		 * \c language_dictionary class can access it.

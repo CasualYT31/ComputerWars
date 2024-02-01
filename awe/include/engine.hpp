@@ -148,15 +148,6 @@ namespace awe {
 			Ts... constructorParams);
 
 		/**
-		 * The JSON save method for this class.
-		 * This class does not have the ability to be saved.
-		 * @param  j The \c nlohmann::ordered_json object representing the JSON
-		 *           script which this method writes to.
-		 * @return Always returns \c FALSE.
-		 */
-		bool _save(nlohmann::ordered_json& j) noexcept;
-
-		/**
 		 * Method called at the start of \c run() to make preliminary checks on
 		 * internal data.
 		 * All shared pointers are tested here: if at least one of them is

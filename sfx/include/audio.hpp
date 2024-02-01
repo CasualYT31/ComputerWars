@@ -232,16 +232,6 @@ namespace sfx {
 		bool _load(engine::json& j);
 
 		/**
-		 * The JSON save method for this class.
-		 * This class cannot be saved.
-		 * @param  j The \c nlohmann::ordered_json object representing the JSON
-		 *           script which this method writes to.
-		 * @return Always returns \c FALSE.
-		 * @safety Strong guarantee.
-		 */
-		bool _save(nlohmann::ordered_json& j);
-
-		/**
 		 * Helper method called in \c _load() which reads all paths for each audio
 		 * object and loads the files.
 		 * This method also applies all the initial configurations, such as base

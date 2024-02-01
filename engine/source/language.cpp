@@ -137,10 +137,6 @@ bool engine::language_dictionary::_load(engine::json& j) {
 	}
 }
 
-bool engine::language_dictionary::_save(nlohmann::ordered_json& j) {
-	return false;
-}
-
 engine::language_dictionary::language::language(const engine::logger::data& data) :
 	engine::json_script({ data.sink, "json_script" }), _logger(data) {}
 

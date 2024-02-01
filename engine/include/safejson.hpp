@@ -693,20 +693,23 @@ namespace engine {
 		
 		/**
 		 * The method which derived classes use to store their configurations.
-		 * This method must be implemented by derived classes. It accepts a
-		 * \c nlohmann::ordered_json object, which can be populated with the
-		 * derived class' data fields as necessary. The structure of the resulting
-		 * JSON object (besides the requirement for a root object) is entirely up
-		 * to the derived class. It should, however, be consistent with the one
-		 * implmented in the corresponding \c _load() method. The return value
-		 * should usually be \c TRUE: only under very rare circumstances should
-		 * \c FALSE ever be returned.
+		 * This method must be implemented by derived classes if they want to be
+		 * saveable. It accepts a \c nlohmann::ordered_json object, which can be
+		 * populated with the derived class' data fields as necessary. The
+		 * structure of the resulting JSON object (besides the requirement for a
+		 * root object) is entirely up to the derived class. It should, however, be
+		 * consistent with the one implmented in the corresponding \c _load()
+		 * method. The return value should usually be \c TRUE: only under very rare
+		 * circumstances should \c FALSE ever be returned. \c FALSE is returned by
+		 * default, if \c save() is not supported for a class.
 		 * @return \c TRUE if the method succeeded, or \c FALSE if a
 		 *         serious/unrecoverable error occurred.
 		 * @safety Derived classes must at least provide the basic guarantee for
 		 *         their implementation of this method.
 		 */
-		virtual bool _save(nlohmann::ordered_json&) = 0;
+		inline virtual bool _save(nlohmann::ordered_json&) {
+			return false;
+		}
 
 		/**
 		 * This method loads a JSON script file and stores it in the given JSON

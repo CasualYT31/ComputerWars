@@ -207,17 +207,6 @@ namespace awe {
 		bool _load(engine::json& j);
 
 		/**
-		 * The JSON save method for this class.
-		 * This class does not have the ability to be saved.
-		 * @param  j The \c nlohmann::ordered_json object representing the JSON
-		 *           script which this method writes to.
-		 * @return Always returns \c FALSE.
-		 */
-		inline bool _save(nlohmann::ordered_json& j) noexcept {
-			return false;
-		}
-
-		/**
 		 * Script's string index operator.
 		 * @throws std::runtime_error if no game property with the given name
 		 *                            exists.

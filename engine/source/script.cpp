@@ -988,10 +988,6 @@ bool engine::scripts::_load(engine::json& j) {
     return true;
 }
 
-bool engine::scripts::_save(nlohmann::ordered_json& j) {
-    return false;
-}
-
 bool engine::scripts::_loadScripts(const char* const moduleName,
     const std::string& folder) {
     // Now load the scripts.

@@ -144,10 +144,6 @@ bool sfx::audio::_load(engine::json& j) {
 	return _loadAudio();
 }
 
-bool sfx::audio::_save(nlohmann::ordered_json& j) {
-	return false;
-}
-
 bool sfx::audio::_loadAudio() {
 	bool ret = true;
 	for (auto itr = _sound.begin(), enditr = _sound.end(); itr != enditr; ++itr) {

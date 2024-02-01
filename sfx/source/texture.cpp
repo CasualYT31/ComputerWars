@@ -302,10 +302,6 @@ bool sfx::animated_spritesheet::_load(engine::json& j) {
 	return true;
 }
 
-bool sfx::animated_spritesheet::_save(nlohmann::ordered_json& j) noexcept {
-	return false;
-}
-
 sfx::animated_spritesheets::animated_spritesheets(const engine::logger::data& data)
 	: resource_pool<sfx::animated_spritesheet>({ data.sink, "json_script" },
 		"spritesheet") {}

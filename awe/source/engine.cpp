@@ -598,10 +598,6 @@ bool awe::game_engine::_load(engine::json& j) {
 	return !failed;
 }
 
-bool awe::game_engine::_save(nlohmann::ordered_json& j) noexcept {
-	return false;
-}
-
 int awe::game_engine::_initCheck() const {
 	std::string errstring = "";
 	if (!_countries) errstring += "countries\n";
