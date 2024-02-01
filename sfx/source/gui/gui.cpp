@@ -925,7 +925,8 @@ bool sfx::gui::_load(engine::json& j) {
 		_rightControl.load(j);
 		_selectControl.load(j);
 		// Now, load the menus.
-		const auto menuTypes = _scripts->getConcreteClassNames("Menu");
+		const auto menuTypes = _scripts->getConcreteClassNames(
+			engine::scripts::modules[engine::scripts::MAIN], "Menu");
 		_menus.reserve(menuTypes.size());
 		for (const auto& menuType : menuTypes) _menus.insert({ menuType, {} });
 		for (const auto& menuType : menuTypes) {

@@ -24,10 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T, typename... Ts>
 bool awe::game_engine::_loadObject(std::shared_ptr<T>& ptr, engine::json& j,
-	const engine::json::KeySequence& keys, Ts... constructorParams) {
+	const engine::json::KeySequence& keys, const bool construct,
+	Ts... constructorParams) {
 	std::string path;
 	j.apply(path, keys);
-	ptr = std::make_shared<T>(constructorParams...);
+	if (construct) ptr = std::make_shared<T>(constructorParams...);
 	ptr->load(path);
 	return j.inGoodState() && ptr->inGoodState();
 }

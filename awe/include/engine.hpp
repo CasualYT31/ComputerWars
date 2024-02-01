@@ -126,6 +126,15 @@ namespace awe {
 		 *                           JSON script.
 		 * @param  keys              Key sequence leading to the path of the JSON
 		 *                           script to load with.
+		 * @param  construct         If \c TRUE, the object will be constructed and
+		 *                           store the pointer to \c ptr. If \c FALSE, this
+		 *                           method will not replace the pointer stored at
+		 *                           \c ptr. Note that since this is a template
+		 *                           method, if type \c T does not have a default
+		 *                           constructor, you will still need to provide
+		 *                           dummy \c constructorParams, even though the
+		 *                           constructor is not called when \c FALSE is
+		 *                           given.
 		 * @param  constructorParams Additional objects that can be passed to the
 		 *                           constructor of the object that @c ptr will
 		 *                           point to.
@@ -135,7 +144,8 @@ namespace awe {
 		 */
 		template<typename T, typename... Ts>
 		bool _loadObject(std::shared_ptr<T>& ptr, engine::json& j,
-			const engine::json::KeySequence& keys, Ts... constructorParams);
+			const engine::json::KeySequence& keys, const bool construct,
+			Ts... constructorParams);
 
 		/**
 		 * The JSON save method for this class.

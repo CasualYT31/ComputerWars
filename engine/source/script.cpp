@@ -427,7 +427,13 @@ void engine::RegisterStreamTypes(asIScriptEngine* engine,
     }
 }
 
-engine::scripts::scripts(const engine::logger::data& data) : _logger(data) {
+const std::array<const std::string, 2> engine::scripts::modules = {
+    "ComputerWars",
+    "BankOverrides"
+};
+
+engine::scripts::scripts(const engine::logger::data& data) :
+    json_script({ data.sink, "json_script" }), _logger(data) {
     _engine = asCreateScriptEngine();
     if (_engine) {
         // Allocate the documentation generator.
@@ -518,59 +524,6 @@ void engine::scripts::translateExceptionCallback(asIScriptContext* context, void
     } catch (...) {}
 }
 
-bool engine::scripts::loadScripts(std::string folder) {
-    // First check if the interface has been registered, and if not, register it.
-    if (_registrants.size() > 0) {
-        _logger.write("Registering the script interface...");
-        for (auto& reg : _registrants) reg->registerInterface(_engine, _document);
-        _logger.write("Finished registering the script interface.");
-        _registrants.clear();
-    }
-    // Now load the scripts.
-    if (folder == "") folder = getScriptsFolder();
-    _logger.write("Loading scripts from \"{}\"...", folder);
-    if (folder == "" || !_engine) return false;
-    // Before starting a new module, if it already exists, the MAIN_MODULE should
-    // be discarded before being replaced. If it doesn't yet exist, then the
-    // negative value returned is ignored.
-    _engine->DiscardModule(MAIN_MODULE);
-    int r = _builder.StartNewModule(_engine, MAIN_MODULE);
-    if (r < 0) {
-        _logger.error("Failed to start the main module while loading scripts: "
-            "code {}.", r);
-        return false;
-    }
-    try {
-        std::function<bool(const std::string&)> directoryIterator =
-            [&](const std::string& dir) -> bool {
-            for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-                if (entry.is_regular_file()) {
-                    if ((r =
-                        _builder.AddSectionFromFile(entry.path().string().c_str()))
-                        < 0) {
-                        _logger.error("Failed to add script \"{}\" to the main "
-                            "module: code {}.", entry.path().string().c_str(), r);
-                        return false;
-                    }
-                } else if (entry.is_directory()) {
-                    if (!directoryIterator(entry.path().string())) return false;
-                }
-            }
-            return true;
-        };
-        if (!directoryIterator(folder)) return false;
-    } catch (const std::exception& e) {
-        _logger.error("Failed to interact with directory entry: {}.", e);
-    }
-    if ((r = _builder.BuildModule()) < 0) {
-        _logger.error("Failed to build the main module: code {}.", r);
-        return false;
-    }
-    _scriptsFolder = folder;
-    _logger.write("Finished loading scripts.");
-    return true;
-}
-
 int engine::scripts::generateDocumentation() {
 #if AS_GENERATE_DOCUMENTATION == 1
     if (_document) {
@@ -584,10 +537,6 @@ int engine::scripts::generateDocumentation() {
     }
 #endif
     return INT_MIN + 1;
-}
-
-const std::string& engine::scripts::getScriptsFolder() const noexcept {
-    return _scriptsFolder;
 }
 
 bool engine::scripts::functionExists(const std::string& module,
@@ -731,7 +680,7 @@ std::string engine::scripts::executeCode(std::string code) {
     static const auto Log = [&](const std::string& m) -> std::string {
         _logger.error(m); return m;
     };
-    auto m = _engine->GetModule(MAIN_MODULE);
+    auto m = _engine->GetModule(modules[MAIN].c_str());
     if (m) {
         static std::size_t counter = 0;
         asIScriptFunction* func = nullptr;
@@ -801,10 +750,10 @@ CScriptAny* engine::scripts::createAny() const {
 }
 
 asIScriptObject* engine::scripts::createObject(const std::string& type) {
-    auto m = _engine->GetModule(MAIN_MODULE);
+    auto m = _engine->GetModule(modules[MAIN].c_str());
     if (!m) {
         _logger.error("Could not create object of type \"{}\" as the module "
-            "\"{}\" does not exist.", type, MAIN_MODULE);
+            "\"{}\" does not exist.", type, modules[MAIN]);
         return nullptr;
     }
     const auto typeInfo = m->GetTypeInfoByDecl(type.c_str());
@@ -925,12 +874,12 @@ std::string engine::scripts::getTypeName(const int id) const {
 }
 
 std::vector<std::string> engine::scripts::getConcreteClassNames(
-    const std::string& interfaceName) const {
-    auto m = _engine->GetModule(MAIN_MODULE);
+    const std::string& moduleName, const std::string& interfaceName) const {
+    auto m = _engine->GetModule(moduleName.c_str());
     if (!m) {
         _logger.error("Cannot get concrete classes that implement interface "
             "\"{}\" as the \"{}\" module does not exist.", interfaceName,
-            MAIN_MODULE);
+            moduleName);
         return {};
     }
     const auto interfaceTypeInfo = m->GetTypeInfoByDecl(interfaceName.c_str());
@@ -950,7 +899,7 @@ std::vector<std::string> engine::scripts::getConcreteClassNames(
 
 bool engine::scripts::createModule(const std::string& name,
     const engine::scripts::files& code, std::string& errorString) {
-    if (name == MAIN_MODULE) {
+    if (IsCoreModule(name)) {
         _logger.error("Attempted to create new module called \"{}\", which is not "
             "allowed!", name);
         return false;
@@ -1000,7 +949,7 @@ bool engine::scripts::createModule(const std::string& name,
 }
 
 bool engine::scripts::deleteModule(const std::string& name) {
-    if (name == MAIN_MODULE) {
+    if (IsCoreModule(name)) {
         _logger.error("Cannot discard module \"{}\"!", name);
         return false;
     }
@@ -1012,6 +961,87 @@ bool engine::scripts::deleteModule(const std::string& name) {
 
 bool engine::scripts::doesModuleExist(const std::string& name) const {
     return _engine->GetModule(name.c_str());
+}
+
+bool engine::scripts::_load(engine::json& j) {
+    // First check if the interface has been registered, and if not, register it.
+    if (!_registrants.empty()) {
+        _logger.write("Registering the script interface...");
+        for (auto& reg : _registrants) reg->registerInterface(_engine, _document);
+        _logger.write("Finished registering the script interface.");
+        _registrants.clear();
+    }
+    // Next, load the path of the folder containing all of the scripts to load for
+    // each module.
+    std::array<std::string, modules.size()> paths;
+    for (std::size_t i = 0; i < paths.size(); ++i) {
+        j.apply(paths[i], { modules[i] });
+        if (!j.inGoodState()) {
+            _logger.error("Will not discard old script modules; no folder was "
+                "given for module \"{}\".", modules[i]);
+            return false;
+        }
+    }
+    // Now load each module, automatically discarding the previous version of each.
+    for (std::size_t i = 0; i < paths.size(); ++i)
+        if (!_loadScripts(modules[i].c_str(), paths[i])) return false;
+    return true;
+}
+
+bool engine::scripts::_save(nlohmann::ordered_json& j) {
+    return false;
+}
+
+bool engine::scripts::_loadScripts(const char* const moduleName,
+    const std::string& folder) {
+    // Now load the scripts.
+    _logger.write("Loading scripts from \"{}\" for module \"{}\"...", folder,
+        moduleName);
+    if (folder == "" || !_engine) {
+        _logger.error("Will not build module \"{}\" as given folder was empty or "
+            "the script engine was not initialised.", moduleName);
+        return false;
+    }
+    // Before starting a new module, if it already exists, the old module should be
+    // discarded before being replaced. If it doesn't yet exist, then the negative
+    // value returned is ignored.
+    _engine->DiscardModule(moduleName);
+    int r = _builder.StartNewModule(_engine, moduleName);
+    if (r < 0) {
+        _logger.error("Failed to start the \"{}\" module while loading scripts: "
+            "code {}.", moduleName, r);
+        return false;
+    }
+    try {
+        std::function<bool(const std::string&)> directoryIterator =
+            [&](const std::string& dir) -> bool {
+            for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+                if (entry.is_regular_file()) {
+                    if ((r =
+                        _builder.AddSectionFromFile(entry.path().string().c_str()))
+                        < 0) {
+                        _logger.error("Failed to add script \"{}\" to the \"{}\" "
+                            "module: code {}.", entry.path().string().c_str(),
+                            moduleName, r);
+                        return false;
+                    }
+                } else if (entry.is_directory()) {
+                    if (!directoryIterator(entry.path().string())) return false;
+                }
+            }
+            return true;
+        };
+        if (!directoryIterator(folder)) return false;
+    } catch (const std::exception& e) {
+        _logger.error("Failed to interact with directory entry: {}.", e);
+    }
+    if ((r = _builder.BuildModule()) < 0) {
+        _logger.error("Failed to build the \"{}\" module: code {}.", moduleName,
+            r);
+        return false;
+    }
+    _logger.write("Finished loading scripts for module \"{}\".", moduleName);
+    return true;
 }
 
 int engine::scripts::_allocateContext() {

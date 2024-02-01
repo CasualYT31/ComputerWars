@@ -420,22 +420,22 @@ bool awe::game_engine::_load(engine::json& j) {
 	// Additionally, opening the renderer now will prevent glFlush() SFML errors
 	// from plaguing standard output when we load images in the
 	// animated_spritesheet objects.
-	if (!_loadObject(_renderer, j, { "renderer" },
+	if (!_loadObject(_renderer, j, { "renderer" }, true,
 		engine::logger::data{ _logger.getData().sink, "renderer" })) return false;
 	_renderer->openWindow();
 	// Load the fonts now so that we can use them when printing the logs.
-	if (!_loadObject(_fonts, j, { "fonts" },
+	if (!_loadObject(_fonts, j, { "fonts" }, true,
 		engine::logger::data{ _logger.getData().sink, "fonts" })) return false;
 	// Create a list of load operations to carry out. Functions must return FALSE
 	// when the load operation failed, TRUE if it succeeded.
 	std::forward_list<std::function<bool(void)>> loadOperations = {
 		[&]() {
-			return _loadObject(_dictionary, j, { "languages" },
+			return _loadObject(_dictionary, j, { "languages" }, true,
 				engine::logger::data{ _logger.getData().sink,
 					"language_dictionary" });
 		},
 		[&]() {
-			return _loadObject(_audios, j, { "audios" },
+			return _loadObject(_audios, j, { "audios" }, true,
 				engine::logger::data{ _logger.getData().sink, "audios" });
 		},
 		[&]() {
@@ -447,59 +447,64 @@ bool awe::game_engine::_load(engine::json& j) {
 			return _scripts && _gui;
 		},
 		[&]() {
-			return _loadObject(_userinput, j, { "userinput" },
+			return _loadObject(_userinput, j, { "userinput" }, true,
 				engine::logger::data{ _logger.getData().sink, "user_input" });
 		},
 		[&]() {
-			return _loadObject(_sprites, j, { "spritesheets" },
+			return _loadObject(_sprites, j, { "spritesheets" }, true,
 				engine::logger::data{ _logger.getData().sink, "spritesheet" });
 		},
 		[&]() {
-			return _loadObject(_countries, j, { "countries" }, _scripts, "Country",
+			return _loadObject(_countries, j, { "countries" }, true, _scripts,
+				"Country",
 				engine::logger::data{ _logger.getData().sink, "country_bank" });
 		},
 		[&]() {
-			return _loadObject(_weathers, j, { "weathers" }, _scripts, "Weather",
+			return _loadObject(_weathers, j, { "weathers" }, true, _scripts,
+				"Weather",
 				engine::logger::data{ _logger.getData().sink, "weather_bank" });
 		},
 		[&]() {
-			return _loadObject(_environments, j, { "environments" }, _scripts,
-				"Environment", engine::logger::data{ _logger.getData().sink,
+			return _loadObject(_environments, j, { "environments" }, true,
+				_scripts, "Environment",
+				engine::logger::data{ _logger.getData().sink,
 				"environment_bank" });
 		},
 		[&]() {
-			return _loadObject(_movements, j, { "movements" }, _scripts,
+			return _loadObject(_movements, j, { "movements" }, true, _scripts,
 				"Movement", engine::logger::data{ _logger.getData().sink,
 				"movement_bank" });
 		},
 		[&]() {
-			return _loadObject(_terrains, j, { "terrains" }, _scripts, "Terrain",
+			return _loadObject(_terrains, j, { "terrains" }, true, _scripts,
+				"Terrain",
 				engine::logger::data{ _logger.getData().sink, "terrain_bank" });
 		},
 		[&]() {
-			return _loadObject(_tiles, j, { "tiles" }, _scripts, "TileType",
+			return _loadObject(_tiles, j, { "tiles" }, true, _scripts, "TileType",
 				engine::logger::data{ _logger.getData().sink, "tile_bank" });
 		},
 		[&]() {
-			return _loadObject(_weapons, j, { "weapons" }, _scripts, "Weapon",
+			return _loadObject(_weapons, j, { "weapons" }, true, _scripts,
+				"Weapon",
 				engine::logger::data{ _logger.getData().sink, "weapon_bank" });
 		},
 		[&]() {
-			return _loadObject(_units, j, { "units" }, _scripts, "UnitType",
+			return _loadObject(_units, j, { "units" }, true, _scripts, "UnitType",
 				engine::logger::data{ _logger.getData().sink, "unit_bank" });
 		},
 		[&]() {
-			return _loadObject(_commanders, j, { "commanders" }, _scripts,
+			return _loadObject(_commanders, j, { "commanders" }, true, _scripts,
 				"Commander", engine::logger::data{ _logger.getData().sink,
 				"commander_bank" });
 		},
 		[&]() {
-			return _loadObject(_structures, j, { "structures" }, _scripts,
+			return _loadObject(_structures, j, { "structures" }, true, _scripts,
 				"Structure", engine::logger::data{ _logger.getData().sink,
 				"structure_bank" });
 		},
 		[&]() {
-			return _loadObject(_mapStrings, j, { "mapstrings" },
+			return _loadObject(_mapStrings, j, { "mapstrings" }, true,
 				engine::logger::data{ _logger.getData().sink, "map_strings" });
 		},
 		[&]() {
@@ -534,11 +539,9 @@ bool awe::game_engine::_load(engine::json& j) {
 			return true;
 		},
 		[&]() {
-			std::string scriptsPath;
-			j.apply(scriptsPath, { "scripts" });
-			if (!j.inGoodState()) return false;
 			_scripts->addRegistrant(this);
-			return _scripts->loadScripts(scriptsPath);
+			return _loadObject(_scripts, j, { "scripts" }, false,
+				engine::logger::data{ _logger.getData().sink, "scripts" });
 		},
 		[&]() {
 			_scripts->generateDocumentation();
@@ -562,7 +565,7 @@ bool awe::game_engine::_load(engine::json& j) {
 			return true;
 		},
 		[&]() {
-			return _loadObject(_settings, j, { "settings" },
+			return _loadObject(_settings, j, { "settings" }, true,
 				engine::logger::data{ _logger.getData().sink, "settings" },
 				_audios, _dictionary);
 		}

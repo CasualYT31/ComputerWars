@@ -39,6 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "scripthandle.h"
 #include "weakref.h"
 #include "logger.hpp"
+#include "safejson.hpp"
 #include <type_traits>
 #include "docgen.h"
 
@@ -262,7 +263,7 @@ namespace engine {
 	 * functions from these scripts, given the name of the function and a variety
 	 * of parameters.
 	 */
-	class scripts {
+	class scripts : public engine::json_script {
 	public:
 		/**
 		 * Represents a collection of script files.
@@ -272,9 +273,32 @@ namespace engine {
 		typedef std::unordered_map<std::string, std::string> files;
 
 		/**
-		 * The name of the main module in which all script files are built.
+		 * The core modules that the scripts engine expects.
 		 */
-		static constexpr const char* const MAIN_MODULE = "ComputerWars";
+		static const std::array<const std::string, 2> modules;
+
+		/**
+		 * The index pointing to the \c modules entry that stores the name of the
+		 * main module.
+		 */
+		static constexpr std::size_t MAIN = 0;
+
+		/**
+		 * The index pointing to the \c modules entry that stores the name of the
+		 * module containing all of the bank override code.
+		 */
+		static constexpr std::size_t BANK_OVERRIDE = 1;
+
+		/**
+		 * Is the given string the name of a core module?
+		 * @param  name The string to test.
+		 * @return \c TRUE if the given string identifies a core module, \c FALSE
+		 *         otherwise.
+		 */
+		inline static constexpr bool IsCoreModule(const std::string& name) {
+			return
+				std::find(modules.begin(), modules.end(), name) != modules.end();
+		}
 
 		/**
 		 * Sets up the script engine and initialises the internal logger object.
@@ -356,31 +380,6 @@ namespace engine {
 		void translateExceptionCallback(asIScriptContext* context, void*) noexcept;
 
 		/**
-		 * Loads a folder of scripts recursively.
-		 * Note that this function expects every file within the folder
-		 * (recursively) to be a valid AngelScript file. If one file couldn't be
-		 * loaded, this function will return @c FALSE.\n
-		 * A new module is built, and each file is attached to it. This means all
-		 * scripts aren't separate, so all functions across all scripts should have
-		 * a unique name.\n
-		 * Every time this method is called, the previous module is discarded. This
-		 * means any functions registered in the old module can no longer be
-		 * called. Note that the previous module is discarded regardless of the
-		 * outcome of this method.
-		 * @warning It is imperative that the interface is registered \em before
-		 *          loading scripts by adding registrants!
-		 * @param   folder The path containing all the script files to load. If
-		 *                 blank, the last folder used with this method will be
-		 *                 substituted.
-		 * @return  \c TRUE if successful, \c FALSE if not. Note that this method
-		 *          returns \c TRUE even if the given folder did not exist or could
-		 *          not be read.
-		 * @safety  No guarantee.
-		 * @sa      engine::scripts::addRegistrant()
-		 */
-		bool loadScripts(std::string folder = "");
-
-		/**
 		 * Generate the documentation for this @c scripts instance.
 		 * Can only be called after at least one call to @c loadScripts(), since
 		 * the script interface is only registered in that method.
@@ -390,13 +389,6 @@ namespace engine {
 		 * @safety No guarantee.
 		 */
 		int generateDocumentation();
-
-		/**
-		 * Retrieves the last path used with \c loadScripts().
-		 * Even if the path did not exist, it will be internally assigned.
-		 * @return The path containing all the loaded scripts.
-		 */
-		const std::string& getScriptsFolder() const noexcept;
 
 		/**
 		 * Tests to see if a function with the given name exists in the specified
@@ -530,11 +522,11 @@ namespace engine {
 
 		/**
 		 * Compiles and executes the given code, which can call any code that is in
-		 * the \c MAIN_MODULE.
+		 * the main module.
 		 * @param  code The code to execute. It is automatically put into a
 		 *              function so you don't have to do this maually in the code.
 		 * @return If execution was successful, an empty string is returned. If
-		 *         not, an error string will be returned. The error string will
+		 *         not, an error strng will be returned. The error string will
 		 *         also be logged. These include build errors and exception errors.
 		 * @safety No guarantee.
 		 */
@@ -609,8 +601,9 @@ namespace engine {
 		std::string getTypeName(const int id) const;
 
 		/**
-		 * Returns a list of names of types in the main module that implement a
+		 * Returns a list of names of types in the given module that implement a
 		 * given interface.
+		 * @param  moduleName    The name of the module to search in.
 		 * @param  interfaceName The name of the interface that is used when
 		 *                       searching through all of the registered and
 		 *                       declared types.
@@ -619,12 +612,12 @@ namespace engine {
 		 *         returned list will be empty.
 		 */
 		std::vector<std::string> getConcreteClassNames(
-			const std::string& interfaceName) const;
+			const std::string& moduleName, const std::string& interfaceName) const;
 
 		/**
 		 * Creates a new module, or replaces an existing one.
 		 * This method will fail in the following circumstances:
-		 * <ol><li>If \c name == \c MAIN_MODULE. The main module is managed
+		 * <ol><li>If \c name is within \c modules. The core modules are managed
 		 *     separately and so cannot be amended using this method.</li>
 		 *     <li>If the code given couldn't be built or added.</li>
 		 *     <li>If the given module name contains \c ~.</li></ol>
@@ -640,7 +633,7 @@ namespace engine {
 			std::string& errorString);
 
 		/**
-		 * Deletes a non-main module.
+		 * Deletes a non-core module.
 		 * @param  name The name of the module to discard.
 		 * @return \c TRUE if the module could be discarded, \c FALSE if not (the
 		 *         reason why will be logged).
@@ -654,6 +647,54 @@ namespace engine {
 		 */
 		bool doesModuleExist(const std::string& name) const;
 	private:
+		/**
+		 * The JSON load method for this class.
+		 * Within the root object, there are simply a list of key-string pairs,
+		 * with the keys defining the names of the modules the engine creates, and
+		 * the string values containing the paths to the folders to pass to the
+		 * \c _loadScripts() method.
+		 * @warning It is imperative that the interface is registered \em before
+		 *          loading scripts by adding registrants!
+		 * @param   j The \c engine::json object representing the contents of the
+		 *            loaded script which this method reads.
+		 * @return  \c TRUE if every module could be loaded successfully, \c FALSE
+		 *          if even one of the \c _loadScripts() calls returned \c FALSE.
+		 * @safety  No guarantee.
+		 * @sa      \c engine::scripts::modules
+		 */
+		bool _load(engine::json& j);
+
+		/**
+		 * The JSON save method for this class.
+		 * This class cannot be saved.
+		 * @param  j The \c nlohmann::ordered_json object representing the JSON
+		 *           script which this method writes to.
+		 * @return Always returns \c FALSE.
+		 */
+		bool _save(nlohmann::ordered_json& j);
+
+		/**
+		 * Loads a folder of scripts recursively into a given module.
+		 * Note that this function expects every file within the folder
+		 * (recursively) to be a valid AngelScript file. If one file couldn't be
+		 * loaded, this function will return @c FALSE.\n
+		 * A new module with the given name is built, and each file is attached to
+		 * it. This means all scripts within a module aren't separate, so all
+		 * functions across all scripts within the folder should have a unique
+		 * name.\n
+		 * Every time this method is called, the previous module with the given
+		 * name is discarded. This means any functions registered in the old module
+		 * can no longer be called. Note that the previous module is discarded
+		 * regardless of the outcome of this method.
+		 * @param   folder The path containing all the script files to load.
+		 * @return  \c TRUE if successful, \c FALSE if not. Note that this method
+		 *          returns \c TRUE even if the given folder did not exist or could
+		 *          not be read.
+		 * @safety  No guarantee.
+		 * @sa      engine::scripts::addRegistrant()
+		 */
+		bool _loadScripts(const char* const moduleName, const std::string& folder);
+
 		/**
 		 * Allocates a new function context.
 		 * @return The error code.
@@ -694,11 +735,6 @@ namespace engine {
 		 * The internal logger object.
 		 */
 		mutable engine::logger _logger;
-
-		/**
-		 * The folder containing all the scripts loaded.
-		 */
-		std::string _scriptsFolder;
 
 		/**
 		 * Pointer to the script engine.
