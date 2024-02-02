@@ -646,6 +646,37 @@ namespace engine {
 		 * @return \c TRUE if a module exists with the given name, \c FALSE if not.
 		 */
 		bool doesModuleExist(const std::string& name) const;
+
+		/**
+		 * Stores a global function's declaration and metadata.
+		 */
+		struct global_function {
+			/**
+			 * Declaration of the function.
+			 */
+			std::string declaration;
+
+			/**
+			 * The metadata.
+			 */
+			std::vector<std::string> metadata;
+		};
+
+		/**
+		 * A collection of functions that have metadata
+		 */
+		using global_function_metadata =
+			std::unordered_map<asIScriptFunction*, global_function>;
+
+		/**
+		 * Retrieves a copy of each global function's metadata within a given
+		 * module.
+		 * @param  moduleName The name of the module to search in.
+		 * @return A container of global functions within the given module that
+		 *         have metadata. Empty if the given module does not exist.
+		 */
+		global_function_metadata getGlobalFunctionMetadata(
+			const std::string& moduleName) const;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -789,6 +820,11 @@ namespace engine {
 		 * The module builder.
 		 */
 		CScriptBuilder _builder;
+
+		/**
+		 * Stores the metadata associated with each global function in each module.
+		 */
+		std::unordered_map<std::string, global_function_metadata> _metadata;
 	};
 }
 

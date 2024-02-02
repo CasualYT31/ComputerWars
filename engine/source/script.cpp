@@ -963,6 +963,17 @@ bool engine::scripts::doesModuleExist(const std::string& name) const {
     return _engine->GetModule(name.c_str());
 }
 
+engine::scripts::global_function_metadata
+    engine::scripts::getGlobalFunctionMetadata(
+        const std::string& moduleName) const {
+    if (!_engine->GetModule(moduleName.c_str())) {
+        _logger.error("Could not return function metadata of non-existent module "
+            "\"{}\".", moduleName);
+        return {};
+    }
+    return _metadata.at(moduleName);
+}
+
 bool engine::scripts::_load(engine::json& j) {
     // First check if the interface has been registered, and if not, register it.
     if (!_registrants.empty()) {
@@ -982,6 +993,9 @@ bool engine::scripts::_load(engine::json& j) {
             return false;
         }
     }
+    // Clear the metadata container, as we are now going to discard the old
+    // modules.
+    _metadata.clear();
     // Now load each module, automatically discarding the previous version of each.
     for (std::size_t i = 0; i < paths.size(); ++i)
         if (!_loadScripts(modules[i].c_str(), paths[i])) return false;
@@ -1035,6 +1049,17 @@ bool engine::scripts::_loadScripts(const char* const moduleName,
         _logger.error("Failed to build the \"{}\" module: code {}.", moduleName,
             r);
         return false;
+    }
+    _logger.write("Loading global function metadata for module \"{}\"...",
+        moduleName);
+    const auto m = _builder.GetModule();
+    for (asUINT i = 0, len = m->GetFunctionCount(); i < len; ++i) {
+        const auto func = m->GetFunctionByIndex(i);
+        const auto data = _builder.GetMetadataForFunc(func);
+        if (!data.empty()) {
+            _metadata[moduleName][func].declaration = func->GetDeclaration();
+            _metadata[moduleName][func].metadata = data;
+        }
     }
     _logger.write("Finished loading scripts for module \"{}\".", moduleName);
     return true;
