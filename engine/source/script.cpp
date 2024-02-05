@@ -971,7 +971,18 @@ engine::scripts::global_function_metadata
             "\"{}\".", moduleName);
         return {};
     }
-    return _metadata.at(moduleName);
+    return _functionMetadata.at(moduleName);
+}
+
+engine::scripts::global_variable_metadata
+engine::scripts::getGlobalVariableMetadata(
+    const std::string& moduleName) const {
+    if (!_engine->GetModule(moduleName.c_str())) {
+        _logger.error("Could not return variable metadata of non-existent module "
+            "\"{}\".", moduleName);
+        return {};
+    }
+    return _variableMetadata.at(moduleName);
 }
 
 bool engine::scripts::_load(engine::json& j) {
@@ -993,9 +1004,10 @@ bool engine::scripts::_load(engine::json& j) {
             return false;
         }
     }
-    // Clear the metadata container, as we are now going to discard the old
+    // Clear the metadata containers, as we are now going to discard the old
     // modules.
-    _metadata.clear();
+    _functionMetadata.clear();
+    _variableMetadata.clear();
     // Now load each module, automatically discarding the previous version of each.
     for (std::size_t i = 0; i < paths.size(); ++i)
         if (!_loadScripts(modules[i].c_str(), paths[i])) return false;
@@ -1050,15 +1062,24 @@ bool engine::scripts::_loadScripts(const char* const moduleName,
             r);
         return false;
     }
-    _logger.write("Loading global function metadata for module \"{}\"...",
+    _logger.write("Loading metadata for module \"{}\"...",
         moduleName);
     const auto m = _builder.GetModule();
     for (asUINT i = 0, len = m->GetFunctionCount(); i < len; ++i) {
         const auto func = m->GetFunctionByIndex(i);
         const auto data = _builder.GetMetadataForFunc(func);
         if (!data.empty()) {
-            _metadata[moduleName][func].declaration = func->GetDeclaration();
-            _metadata[moduleName][func].metadata = data;
+            _functionMetadata[moduleName][func].declaration =
+                func->GetDeclaration();
+            _functionMetadata[moduleName][func].metadata = data;
+        }
+    }
+    for (asUINT i = 0, len = m->GetGlobalVarCount(); i < len; ++i) {
+        const auto data = _builder.GetMetadataForVar(i);
+        if (!data.empty()) {
+            _variableMetadata[moduleName][i].declaration =
+                m->GetGlobalVarDeclaration(i);
+            _variableMetadata[moduleName][i].metadata = data;
         }
     }
     _logger.write("Finished loading scripts for module \"{}\".", moduleName);

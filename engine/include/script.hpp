@@ -648,11 +648,11 @@ namespace engine {
 		bool doesModuleExist(const std::string& name) const;
 
 		/**
-		 * Stores a global function's declaration and metadata.
+		 * Stores a global function or variable's declaration and metadata.
 		 */
-		struct global_function {
+		struct global_object {
 			/**
-			 * Declaration of the function.
+			 * Declaration of the function or variable.
 			 */
 			std::string declaration;
 
@@ -663,10 +663,15 @@ namespace engine {
 		};
 
 		/**
-		 * A collection of functions that have metadata
+		 * A collection of global functions that have metadata.
 		 */
 		using global_function_metadata =
-			std::unordered_map<asIScriptFunction*, global_function>;
+			std::unordered_map<asIScriptFunction*, global_object>;
+
+		/**
+		 * A collection of global variables that have metadata.
+		 */
+		using global_variable_metadata = std::unordered_map<asUINT, global_object>;
 
 		/**
 		 * Retrieves a copy of each global function's metadata within a given
@@ -676,6 +681,16 @@ namespace engine {
 		 *         have metadata. Empty if the given module does not exist.
 		 */
 		global_function_metadata getGlobalFunctionMetadata(
+			const std::string& moduleName) const;
+
+		/**
+		 * Retrieves a copy of each global variable's metadata within a given
+		 * module.
+		 * @param  moduleName The name of the module to search in.
+		 * @return A container of global variables within the given module that
+		 *         have metadata. Empty if the given module does not exist.
+		 */
+		global_variable_metadata getGlobalVariableMetadata(
 			const std::string& moduleName) const;
 	private:
 		/**
@@ -824,7 +839,14 @@ namespace engine {
 		/**
 		 * Stores the metadata associated with each global function in each module.
 		 */
-		std::unordered_map<std::string, global_function_metadata> _metadata;
+		std::unordered_map<std::string, global_function_metadata>
+			_functionMetadata;
+
+		/**
+		 * Stores the metadata associated with each global variable in each module.
+		 */
+		std::unordered_map<std::string, global_variable_metadata>
+			_variableMetadata;
 	};
 }
 
