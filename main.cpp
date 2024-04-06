@@ -46,8 +46,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @brief     The \c transition namespace contains all the transition drawables.
  */
 
-#include <filesystem>
-#include "engine.hpp"
+//#include <filesystem>
+//#include "engine.hpp"
+
+#include "bank-v2.hpp"
 
 /**
  * Loads the game engine, then runs it.
@@ -78,40 +80,62 @@ int main(int argc, char* argv[]) {
             std::make_shared<System::Properties>());
 #endif
         engine::logger rootLogger({ sink, "main" });
-        awe::game_engine engine({ sink, "engine" });
-        {
-            // Find assets folder path from command-line arguments.
-            std::string assetsFolder = "./assets";
-            if (argc >= 2) {
-                assetsFolder = std::string(argv[1]);
-                rootLogger.write("Assets folder provided: \"{}\".", assetsFolder);
-            } else {
-                rootLogger.write("Assets folder not provided in command-line "
-                    "arguments, assuming \"{}\".", assetsFolder);
-            }
-            // Find config.json within the assets folder, then load the game engine
-            // with it.
-            std::string configPath = assetsFolder + "/config.json";
-            if (!std::filesystem::exists(configPath)) {
-                rootLogger.critical("config.json script not found in assets "
-                    "folder \"{}\", aborting.", assetsFolder);
-                return 2;
-            } else {
-                try {
-                    engine.load(configPath);
-                } catch (const awe::game_engine::load_cancelled&) {
-                    return 5;
-                }
-            }
-        }
-        if (engine.inGoodState()) {
-            const auto r = engine.run();
-            return r;
-        } else {
-            rootLogger.critical("Game engine in bad state after loading, "
-                "aborting...");
-            return 3;
-        }
+
+        nlohmann::ordered_json object = {
+            { "longName", "Orange Star" }
+        };
+        awe::country orangeStar("ORANGE",
+            engine::json(object, rootLogger.getData()), rootLogger);
+
+        rootLogger.write("{}", orangeStar.longName());
+
+        awe::field_overrides jake; jake.commander("JAKE");
+        awe::field_overrides noco; noco.commander("NOCO");
+
+        orangeStar.longName(jake) = "JAKE'S OVERRIDE";
+
+        const auto& accessFromAngelScripts = orangeStar;
+
+        rootLogger.write("{}, {}, {}",
+            accessFromAngelScripts.longName(),
+            accessFromAngelScripts.longName(jake),
+            accessFromAngelScripts.longName(noco)
+        );
+
+        //awe::game_engine engine({ sink, "engine" });
+        //{
+        //    // Find assets folder path from command-line arguments.
+        //    std::string assetsFolder = "./assets";
+        //    if (argc >= 2) {
+        //        assetsFolder = std::string(argv[1]);
+        //        rootLogger.write("Assets folder provided: \"{}\".", assetsFolder);
+        //    } else {
+        //        rootLogger.write("Assets folder not provided in command-line "
+        //            "arguments, assuming \"{}\".", assetsFolder);
+        //    }
+        //    // Find config.json within the assets folder, then load the game engine
+        //    // with it.
+        //    std::string configPath = assetsFolder + "/config.json";
+        //    if (!std::filesystem::exists(configPath)) {
+        //        rootLogger.critical("config.json script not found in assets "
+        //            "folder \"{}\", aborting.", assetsFolder);
+        //        return 2;
+        //    } else {
+        //        try {
+        //            engine.load(configPath);
+        //        } catch (const awe::game_engine::load_cancelled&) {
+        //            return 5;
+        //        }
+        //    }
+        //}
+        //if (engine.inGoodState()) {
+        //    const auto r = engine.run();
+        //    return r;
+        //} else {
+        //    rootLogger.critical("Game engine in bad state after loading, "
+        //        "aborting...");
+        //    return 3;
+        //}
     } catch (const std::exception& e) {
         boxer::show(e.what(), "Critical Error!", boxer::Style::Error);
         return 4;

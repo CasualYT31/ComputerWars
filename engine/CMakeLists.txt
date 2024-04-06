@@ -8,7 +8,7 @@ include(FetchContent)
 # Builder must specify location of their Boost 1.65.0 or later.
 # https://stackoverflow.com/questions/54581717/adding-boost-to-cmake-project for
 # help with Boost.
-set(BOOST_ROOT "C:/Boost/boost-1.81.0" CACHE STRING "The folder which contains Boost. You must install at least version 1.65.0 for stacktrace support.")
+set(BOOST_ROOT "C:/Boost/boost-1.81.0" CACHE STRING "The folder which contains Boost. You must install at least version 1.65.0 for stacktrace support (1.14.1 for call traits support).")
 
 # SystemProperties.
 FetchContent_Declare(systemproperties
