@@ -46,6 +46,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define GAME_PROPERTY_COUNT 10
 
+#define REGISTER_BANK_OVERRIDE_FIELD(n) \
+	r = engine->RegisterObjectMethod("Overrides", \
+		"Overrides& " #n "(const string&in)", \
+		asMETHODPR(awe::overrides, n, (const std::string&), \
+			awe::overrides&), asCALL_THISCALL); \
+	r = engine->RegisterObjectMethod("Overrides", "string& " #n "()", \
+		asMETHODPR(awe::overrides, n, (), std::string&), asCALL_THISCALL); \
+	r = engine->RegisterObjectMethod("Overrides", "string& " #n "() const", \
+		asMETHODPR(awe::overrides, n, () const, const std::string&), \
+		asCALL_THISCALL);
+
 #define BANK_OVERRIDE_FIELD(n, i) \
 	static_assert(i >= 0 && i < GAME_PROPERTY_COUNT, \
 		"i must be within the game property count!"); \
@@ -55,12 +66,37 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	} \
 	inline std::string& n() { \
 		return _overrides[i]; \
+	} \
+	inline const std::string& n() const { \
+		return _overrides.at(i); \
 	}
 
 namespace awe {
-	class overrides {
+	class overrides : engine::script_reference_type<awe::overrides> {
 		std::array<std::string, GAME_PROPERTY_COUNT> _overrides;
+		// By default, an empty overrides object is constructed.
+		// However, the engine can register its own factory function for overrides
+		// that's implicitly invoked when a new overrides object is constructed.
+		// This is useful for awe::map, which can use this to automatically
+		// provide override fields based on context (e.g. uses the current army and
+		// their COs by default, etc.), without the engine or scripts having to
+		// manually set them each time.
+		static std::function<void(awe::overrides&)> _factory;
 	public:
+		static void setFactoryFunction(
+			const std::function<void(awe::overrides&)>& func) { _factory = func; }
+		overrides() { if (_factory) _factory(*this); }
+		/**
+		 * Creates the overrides.
+		 * @return Pointer to the overrides.
+		 */
+		static awe::overrides* Create() {
+			return new awe::overrides();
+		}
+		overrides& operator=(const awe::overrides& o) {
+			_overrides = o._overrides;
+			return *this;
+		}
 		inline std::string& operator[](const std::size_t i) {
 			return _overrides[i];
 		}
@@ -68,6 +104,26 @@ namespace awe {
 			return _overrides.at(i);
 		}
 		friend bool operator==(const awe::overrides& lhs, const awe::overrides& rhs);
+		static void Register(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) {
+			if (engine->GetTypeInfoByName("Overrides")) return;
+			auto r = RegisterType(engine, "Overrides",
+				[](asIScriptEngine* engine, const std::string& type) {
+					engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
+						std::string(type + "@ f()").c_str(),
+						asFUNCTION(awe::overrides::Create), asCALL_CDECL);
+				});
+			REGISTER_BANK_OVERRIDE_FIELD(weapon)
+			REGISTER_BANK_OVERRIDE_FIELD(unitType)
+			REGISTER_BANK_OVERRIDE_FIELD(terrain)
+			REGISTER_BANK_OVERRIDE_FIELD(tileType)
+			REGISTER_BANK_OVERRIDE_FIELD(structure)
+			REGISTER_BANK_OVERRIDE_FIELD(movementType)
+			REGISTER_BANK_OVERRIDE_FIELD(country)
+			REGISTER_BANK_OVERRIDE_FIELD(environment)
+			REGISTER_BANK_OVERRIDE_FIELD(weather)
+			REGISTER_BANK_OVERRIDE_FIELD(commander)
+		}
 		BANK_OVERRIDE_FIELD(weapon, 9)
 		BANK_OVERRIDE_FIELD(unitType, 8)
 		BANK_OVERRIDE_FIELD(terrain, 7)
@@ -79,6 +135,7 @@ namespace awe {
 		BANK_OVERRIDE_FIELD(weather, 1)
 		BANK_OVERRIDE_FIELD(commander, 0)
 	};
+	std::function<void(awe::overrides&)> awe::overrides::_factory = {};
 
 	inline bool operator==(const awe::overrides& lhs, const awe::overrides& rhs) {
 		return lhs._overrides == rhs._overrides;
@@ -112,23 +169,22 @@ namespace awe {
 }
 
 namespace awe {
-	template<typename T> struct Serialisable {};
-	template<> struct Serialisable<std::string> {
+	template<typename T> struct Serialisable {
 		static void fromJSON(std::string& value, engine::json& j,
-			const engine::json::KeySequence& keys) {
+			const engine::json::KeySequence& keys, engine::logger&) {
 			j.apply(value, keys, true);
 		}
 	};
 	template<> struct Serialisable<sf::Color> {
 		static void fromJSON(sf::Color& value, engine::json& j,
-			const engine::json::KeySequence& keys) {
+			const engine::json::KeySequence& keys, engine::logger&) {
 			j.applyColour(value, keys, true);
 		}
 	};
-	// TODO: This will need access to logging.
 	template<> struct Serialisable<std::vector<particle_data>> {
 		static void fromJSON(std::vector<particle_data>& value, engine::json& j,
-			const engine::json::KeySequence& keys) {
+			const engine::json::KeySequence& keys, engine::logger&) {
+			// TODO: Write logs.
 			nlohmann::ordered_json p;
 			if (j.keysExist({ "particles" }, &p) &&
 				p.is_array() && !p.empty() && p.at(0).is_object()) {
@@ -170,11 +226,11 @@ namespace awe {
 			"N must be within the game property count!");
 	public:
 		inline property_field(engine::json& j,
-			const engine::json::KeySequence& keys) {
+			const engine::json::KeySequence& keys, engine::logger& logger) {
 			for (auto& i : _scriptNamesWithOverrides) i.insert("");
 			// We can always rely on the default value existing in a blank state so
 			// long as T is default constructible.
-			awe::Serialisable<T>::fromJSON(_values[{}], j, keys);
+			awe::Serialisable<T>::fromJSON(_values[{}], j, keys, logger);
 		}
 		inline typename boost::call_traits<T>::reference operator[](
 			const overrides& overrides) {
@@ -233,7 +289,7 @@ namespace awe {
 #define PROPERTY(cc, ac, n, ct, i, e) class n##_ { \
 	awe::property_field<ct, i> _##n; \
 public: \
-	n##_(engine::json& j, engine::logger& logger) : _##n(j, { #n }) { e } \
+	n##_(engine::json& j, engine::logger& logger) : _##n(j, { #n }, logger) { e } \
 	static void Register(asIScriptEngine* engine) { \
 		if constexpr (awe::AngelScriptType<ct>::value[0] == '\0') return; \
 		std::stringstream builder; \

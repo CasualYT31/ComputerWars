@@ -109,6 +109,19 @@ int main(int argc, char* argv[]) {
                 itr->icon(o), itr->description(o), itr->colour(o));
         }
 
+        awe::overrides::setFactoryFunction([](awe::overrides& overrides) {
+            return overrides.commander("NOCO");
+        });
+
+        const auto o2 = awe::overrides();
+        rootLogger.write("{}", o2.commander());
+
+        // Reset the function.
+        awe::overrides::setFactoryFunction({});
+
+        const auto o3 = awe::overrides();
+        rootLogger.write("{}", o3.commander());
+
         //awe::game_engine engine({ sink, "engine" });
         //{
         //    // Find assets folder path from command-line arguments.
