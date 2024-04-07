@@ -780,7 +780,7 @@ namespace awe {
 			/**
 			 * Tiles of this terrain will be invisible to a team, unless they
 			 * occupy them, own them, or have at least one of their units directly
-			 * adjacent to it.
+			 * adjacent to them.
 			 */
 			Hidden,
 
