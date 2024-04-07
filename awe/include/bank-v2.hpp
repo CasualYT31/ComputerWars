@@ -499,6 +499,7 @@ namespace awe {
 		colour, sf::Color,,
 		_turnOrder = _turnOrderCounter++;,
 		private: awe::ArmyID _turnOrder; static awe::ArmyID _turnOrderCounter;
+		public: awe::ArmyID	turnOrder() { return _turnOrder; }
 	)
 	awe::ArmyID country::_turnOrderCounter = 0;
 

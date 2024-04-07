@@ -116,6 +116,8 @@ int main(int argc, char* argv[]) {
         const auto o2 = awe::overrides();
         rootLogger.write("{}", o2.commander());
 
+        rootLogger.write("TEST={}", (bank.end() - 1)->turnOrder() == bank.size() - 1);
+
         // Reset the function.
         awe::overrides::setFactoryFunction({});
 
