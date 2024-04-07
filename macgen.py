@@ -28,12 +28,11 @@ for p in argv[1:]:
     FC = int(p)
     MACROS += f"""
 
-#define GAME_PROPERTY_{FC}(cc, ac, i, {gen('p~, t~, e~, ', FC)}e, a) \\
+#define GAME_PROPERTY_{FC}(cc, ac, gp, i, {gen('p~, t~, e~, ', FC)}e, a) \\
     GAME_PROPERTY_DECLARE(cc) \\
     {gen('    p~(j, logger), \\\n    ', FC)}GAME_PROPERTY_REGISTER(cc, ac, e) \\
     {gen('    p~##_::Register(engine); \\\n    ', FC)}GAME_PROPERTY_SCRIPTNAME() \\
-{gen('    PROPERTY(cc, ac, p~, t~, i, e~) \\\n', FC)}    a \\
-}};"""
+{gen('    PROPERTY(cc, ac, p~, t~, i, e~) \\\n', FC)}    GAME_PROPERTY_END(cc, ac, gp, a)"""
 
 copy(MACROS)
 

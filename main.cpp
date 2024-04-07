@@ -50,6 +50,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //#include "engine.hpp"
 
 #include "bank-v2.hpp"
+#include "fmtsfx.hpp"
 
 /**
  * Loads the game engine, then runs it.
@@ -81,28 +82,32 @@ int main(int argc, char* argv[]) {
 #endif
         engine::logger rootLogger({ sink, "main" });
 
-        nlohmann::ordered_json object = {
-            { "longName", "Orange Star" }
-        };
-        awe::country orangeStar("ORANGE",
-            engine::json(object, rootLogger.getData()), rootLogger);
+        awe::bank<awe::country> bank(nullptr, rootLogger.getData());
+        bank.load("assets/property/country.json");
 
-        rootLogger.write("{}", orangeStar.longName());
+        for (auto itr = bank.cbegin(), end = bank.cend(); itr != end; ++itr) {
+            // Won't compile, which is good.
+            //itr->longName() = "Test!";
+            // But we can read:
+            rootLogger.write("{}: {}, {}, {}, {}, {}",
+                itr->scriptName(), itr->longName(), itr->shortName(),
+                itr->icon(), itr->description(), itr->colour());
+        }
 
-        awe::overrides jake; jake.commander("JAKE");
-        awe::overrides noco; noco.commander("NOCO");
+        const auto o = awe::overrides().commander("JAKE").weather("CLEAR");
 
-        orangeStar.longName(jake) = "JAKE'S OVERRIDE";
+        (bank.begin() + 2)->longName(o) = "JAKE ON GREEN DURING A CLEAR DAY";
 
-        const auto& accessFromAngelScripts = orangeStar;
-
-        rootLogger.write("{}, {}, {}",
-            accessFromAngelScripts.longName(),
-            accessFromAngelScripts.longName(jake),
-            accessFromAngelScripts.longName(noco)
-        );
-
-        rootLogger.write(orangeStar.scriptName());
+        for (auto itr = bank.begin(), end = bank.end(); itr != end; ++itr) {
+            // Not sure this is the behaviour I want, pretty sure if there isn't an
+            // override for the given value/s, it should default to the ELSE branch
+            // like I have in my notes. But in fairness I think that's because those
+            // branches need to be set manually. At least the overrides work.
+            itr->shortName(o) = "Test!";
+            rootLogger.write("{}: {}, {}, {}, {}, {}",
+                itr->scriptName(), itr->longName(o), itr->shortName(o),
+                itr->icon(o), itr->description(o), itr->colour(o));
+        }
 
         //awe::game_engine engine({ sink, "engine" });
         //{

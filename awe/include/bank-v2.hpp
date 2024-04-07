@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <new>
 #include <sstream>
 #include <unordered_set>
 #include "boost/call_traits.hpp"
@@ -104,7 +105,7 @@ namespace awe {
 	struct particle_data {
 		std::string sheet;
 		std::string spriteID;
-		float density;
+		float density = 0.f;
 		sf::Vector2f vector;
 		sf::Time respawnDelay;
 	};
@@ -124,6 +125,7 @@ namespace awe {
 			j.applyColour(value, keys, true);
 		}
 	};
+	// TODO: This will need access to logging.
 	template<> struct Serialisable<std::vector<particle_data>> {
 		static void fromJSON(std::vector<particle_data>& value, engine::json& j,
 			const engine::json::KeySequence& keys) {
@@ -267,12 +269,20 @@ public: \
 #define GAME_PROPERTY_SCRIPTNAME() } \
 	inline const std::string& scriptName() const { return _scriptName; }
 
+#define GAME_PROPERTY_END(cc, ac, gp, a) a \
+public: \
+	static constexpr char* const type = ac; \
+	static constexpr char* const global_property = gp; \
+};
+
 /* Generates a game property class with 1 field.
 	Unfortunately, I can't come up with a cleaner solution to support variable
 	numbers of fields in macros beyond manually defining each N-field macro. To
 	simplify the process, I've written a Python script that can generate them.
 	cc: C++ name of the game property type.
 	ac: String literal containing the typename to give this game property in AS.
+	gp: String literal containing the name of the global property of the bank type
+	    that stores this game property type.
 	 i: Depth of the hierarchy desired for every field (see awe::property_field).
 	p1: The name of the first field.
 	t1: The C++ type of the first field, without qualifiers.
@@ -282,17 +292,16 @@ public: \
 	 a: Append extra code to the end of the class.
 */
 
-#define GAME_PROPERTY_1(cc, ac, i, p1, t1, e1, e, a) \
+#define GAME_PROPERTY_1(cc, ac, gp, i, p1, t1, e1, e, a) \
     GAME_PROPERTY_DECLARE(cc) \
         p1(j, logger), \
     GAME_PROPERTY_REGISTER(cc, ac, e) \
         p1##_::Register(engine); \
     GAME_PROPERTY_SCRIPTNAME() \
     PROPERTY(cc, ac, p1, t1, i, e1) \
-    a \
-};
+    GAME_PROPERTY_END(cc, ac, gp, a)
 
-#define GAME_PROPERTY_4(cc, ac, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, e, a) \
+#define GAME_PROPERTY_4(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, e, a) \
     GAME_PROPERTY_DECLARE(cc) \
         p1(j, logger), \
         p2(j, logger), \
@@ -308,10 +317,9 @@ public: \
     PROPERTY(cc, ac, p2, t2, i, e2) \
     PROPERTY(cc, ac, p3, t3, i, e3) \
     PROPERTY(cc, ac, p4, t4, i, e4) \
-    a \
-};
+    GAME_PROPERTY_END(cc, ac, gp, a)
 
-#define GAME_PROPERTY_5(cc, ac, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, e, a) \
+#define GAME_PROPERTY_5(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, e, a) \
     GAME_PROPERTY_DECLARE(cc) \
         p1(j, logger), \
         p2(j, logger), \
@@ -330,10 +338,9 @@ public: \
     PROPERTY(cc, ac, p3, t3, i, e3) \
     PROPERTY(cc, ac, p4, t4, i, e4) \
     PROPERTY(cc, ac, p5, t5, i, e5) \
-    a \
-};
+    GAME_PROPERTY_END(cc, ac, gp, a)
 
-#define GAME_PROPERTY_6(cc, ac, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, e, a) \
+#define GAME_PROPERTY_6(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, e, a) \
     GAME_PROPERTY_DECLARE(cc) \
         p1(j, logger), \
         p2(j, logger), \
@@ -355,10 +362,9 @@ public: \
     PROPERTY(cc, ac, p4, t4, i, e4) \
     PROPERTY(cc, ac, p5, t5, i, e5) \
     PROPERTY(cc, ac, p6, t6, i, e6) \
-    a \
-};
+    GAME_PROPERTY_END(cc, ac, gp, a)
 
-#define GAME_PROPERTY_7(cc, ac, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, e, a) \
+#define GAME_PROPERTY_7(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, e, a) \
     GAME_PROPERTY_DECLARE(cc) \
         p1(j, logger), \
         p2(j, logger), \
@@ -383,10 +389,9 @@ public: \
     PROPERTY(cc, ac, p5, t5, i, e5) \
     PROPERTY(cc, ac, p6, t6, i, e6) \
     PROPERTY(cc, ac, p7, t7, i, e7) \
-    a \
-};
+    GAME_PROPERTY_END(cc, ac, gp, a)
 
-#define GAME_PROPERTY_10(cc, ac, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, p9, t9, e9, p10, t10, e10, e, a) \
+#define GAME_PROPERTY_10(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, p9, t9, e9, p10, t10, e10, e, a) \
     GAME_PROPERTY_DECLARE(cc) \
         p1(j, logger), \
         p2(j, logger), \
@@ -420,18 +425,17 @@ public: \
     PROPERTY(cc, ac, p8, t8, i, e8) \
     PROPERTY(cc, ac, p9, t9, i, e9) \
     PROPERTY(cc, ac, p10, t10, i, e10) \
-    a \
-};
+    GAME_PROPERTY_END(cc, ac, gp, a)
 
 namespace awe {
-	GAME_PROPERTY_4(movement_type, "MovementType", 4,
+	GAME_PROPERTY_4(movement_type, "MovementType", "movementtype", 4,
 		longName, std::string,,
 		shortName, std::string,,
 		icon, std::string,,
 		description, std::string,,
 	, )
 
-	GAME_PROPERTY_5(country, "Country", 3,
+	GAME_PROPERTY_5(country, "Country", "country", 3,
 		longName, std::string,,
 		shortName, std::string,,
 		icon, std::string,,
@@ -442,16 +446,7 @@ namespace awe {
 	)
 	awe::ArmyID country::_turnOrderCounter = 0;
 
-	GAME_PROPERTY_6(weather, "Weather", 1,
-		longName, std::string,,
-		shortName, std::string,,
-		icon, std::string,,
-		description, std::string,,
-		sound, std::string,,
-		particles, std::vector<awe::particle_data>,,
-	, )
-
-	GAME_PROPERTY_7(environment, "Environment", 2,
+	GAME_PROPERTY_7(environment, "Environment", "environment", 2,
 		longName, std::string,,
 		shortName, std::string,,
 		icon, std::string,,
@@ -460,16 +455,282 @@ namespace awe {
 		pictureSpritesheet, std::string,,
 		structureIconSpritesheet, std::string,,
 	, )
+
+	GAME_PROPERTY_6(weather, "Weather", "weather", 1,
+		longName, std::string,,
+		shortName, std::string,,
+		icon, std::string,,
+		description, std::string,,
+		sound, std::string,,
+		particles, std::vector<awe::particle_data>,,
+	, )
 }
+
+#define COMMA ,
 
 namespace awe {
 	template<typename T>
 	class bank : public engine::script_registrant, public engine::json_script {
 	public:
+		/**
+		 * The type of the container used to store game property values.
+		 */
+		using type = nlohmann::ordered_map<std::string, std::shared_ptr<T>>;
+
+		/**
+		 * Provides script interface details to this @c bank instance.
+		 * @param scripts Pointer to the @c scripts object to register this bank
+		 *                with. If @c nullptr, the bank won't be registered with
+		 *                any script interface.
+		 * @param data    The data to initialise the logger object with.
+		 */
+		bank(const std::shared_ptr<engine::scripts>& scripts,
+			const engine::logger::data& data) :
+			engine::json_script({ data.sink, "json_script" }), _logger(data) {
+			if (scripts) scripts->addRegistrant(this);
+		}
+
+		std::shared_ptr<T> operator[](const std::string& sn) {
+			if (_bank.find(sn) == _bank.end()) {
+				_logger.error("Game property \"{}\" does not exist in this bank!",
+					sn);
+			}
+			return _bank[sn];
+		}
+
+		std::shared_ptr<const T> operator[](const std::string& sn) const {
+			if (_bank.find(sn) == _bank.end()) {
+				_logger.error("Game property \"{}\" does not exist in this bank!",
+					sn);
+			}
+			return _bank.at(sn);
+		}
+
+		/**
+		 * Calculates the size of the bank.
+		 * @return The number of members or elements of the internal map \c _bank.
+		 */
+		inline std::size_t size() const noexcept {
+			return _bank.size();
+		}
+
+		/**
+		 * Finds out if an entry exists in this bank with the given script name.
+		 * @param  scriptName The script name to search for.
+		 * @return \c TRUE if there is an entry with the given name, \c FALSE
+		 *         otherwise.
+		 */
+		inline bool contains(const std::string& scriptName) const {
+			return _bank.find(scriptName) != _bank.end();
+		}
+
+		// I = type::iterator or type::const_iterator.
+		// J = T or const T.
+		template<typename itr_type, typename J>
+		class base_iterator {
+			itr_type _itr;
+			void copyConstructor(void* memory,
+				const base_iterator<itr_type, J>& o) {
+				new(memory) base_iterator<itr_type, J>(o);
+			}
+			void destructor(void* memory) {
+				static_cast<base_iterator<itr_type, J>*>(memory)
+					->~base_iterator<itr_type, J>();
+			}
+		public:
+			base_iterator(const itr_type& itr) : _itr(itr) {}
+			base_iterator(const base_iterator<itr_type, J>& origin) :
+				_itr(origin._itr) {}
+			~base_iterator() noexcept = default;
+			inline base_iterator<itr_type, J>& operator=(const base_iterator<itr_type, J>& origin) { _itr = origin._itr; return *this; }
+			inline bool operator==(const base_iterator<itr_type, J>& r) const { return _itr == r._itr; }
+			inline bool operator!=(const base_iterator<itr_type, J>& r) const { return _itr != r._itr; }
+			inline base_iterator<itr_type, J>& operator++() { ++_itr; return *this; }
+			inline base_iterator<itr_type, J> operator++(int) { const base_iterator<itr_type, J> copy(*this); ++_itr; return copy; }
+			inline base_iterator<itr_type, J>& operator--() { --_itr; return *this; }
+			inline base_iterator<itr_type, J> operator--(int) { const base_iterator<itr_type, J> copy(*this); --_itr; return copy; }
+			inline base_iterator<itr_type, J> operator+(const sf::Int64 ad) const { base_iterator<itr_type, J> copy(*this); std::advance(copy._itr, ad); return copy; }
+			inline base_iterator<itr_type, J> operator-(const sf::Int64 rm) const { base_iterator<itr_type, J> copy(*this); std::advance(copy._itr, -rm); return copy; }
+			inline J& operator*() { return *(_itr->second); }
+			inline J* operator->() { return _itr->second.get(); }
+			static std::string Register(asIScriptEngine* engine, std::string t) {
+				const char* const itrPostfix = ((constexpr
+					(std::is_const<J>::value)) ? ("ConstItr") : ("Itr"));
+				const char* const tc = t.append(itrPostfix).c_str();
+				auto r = engine->RegisterObjectType(tc,
+					sizeof(base_iterator<itr_type, J>),
+					asOBJ_VALUE | asGetTypeTraits<base_iterator<itr_type, J>>());
+				std::string copyConstructorSignature("void f(const ");
+				copyConstructorSignature.append(tc).append("&in)");
+				r = engine->RegisterObjectBehaviour(tc, asBEHAVE_CONSTRUCT,
+					copyConstructorSignature.c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, copyConstructor),
+					asCALL_THISCALL_OBJFIRST);
+				r = engine->RegisterObjectBehaviour(tc, asBEHAVE_DESTRUCT,
+					"void f()", asMETHOD(base_iterator<itr_type COMMA J>, destructor),
+					asCALL_THISCALL_OBJFIRST);
+				r = engine->RegisterObjectMethod(tc, std::string(tc)
+					.append("& opAssign(const ").append(tc).append("&in)").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, operator=),
+					asCALL_THISCALL);
+				r = engine->RegisterObjectMethod(tc, std::string(tc)
+					.append("& opEquals(const ").append(tc)
+					.append("&in) const").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, operator==),
+					asCALL_THISCALL);
+				r = engine->RegisterObjectMethod(tc, std::string(tc)
+					.append("& opPreInc()").c_str(),
+					asMETHODPR(base_iterator<itr_type COMMA J>, operator++, (),
+						base_iterator<itr_type COMMA J>&),
+					asCALL_THISCALL);
+				r = engine->RegisterObjectMethod(tc, std::string(tc)
+					.append(" opPostInc()").c_str(),
+					asMETHODPR(base_iterator<itr_type COMMA J>, operator++, (int),
+						base_iterator<itr_type COMMA J>),
+					asCALL_THISCALL);
+				r = engine->RegisterObjectMethod(tc, std::string(tc)
+					.append("& opPreDec()").c_str(),
+					asMETHODPR(base_iterator<itr_type COMMA J>, operator--, (),
+						base_iterator<itr_type COMMA J>&),
+					asCALL_THISCALL);
+				r = engine->RegisterObjectMethod(tc, std::string(tc)
+					.append(" opPostDec()").c_str(),
+					asMETHODPR(base_iterator<itr_type COMMA J>, operator--, (int),
+						base_iterator<itr_type COMMA J>),
+					asCALL_THISCALL);
+				r = engine->RegisterObjectMethod(tc, std::string(tc)
+					.append(" opAdd(const int64) const").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, operator+),
+					asCALL_THISCALL);
+				r = engine->RegisterObjectMethod(tc, std::string(tc)
+					.append(" opSub(const int64) const").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, operator-),
+					asCALL_THISCALL);
+				if constexpr (std::is_const<J>::value) {
+					r = engine->RegisterObjectMethod(tc, std::string("const ")
+						.append(t).append("@ opCall()").c_str(),
+						asMETHOD(base_iterator<itr_type COMMA J>, operator->),
+						asCALL_THISCALL);
+				} else {
+					r = engine->RegisterObjectMethod(tc, std::string(t)
+						.append("@ opCall()").c_str(),
+						asMETHOD(base_iterator<itr_type COMMA J>, operator->),
+						asCALL_THISCALL);
+				}
+				return tc;
+			}
+		};
+		using iterator = base_iterator<typename type::iterator, T>;
+		using const_iterator = base_iterator<typename type::const_iterator, const T>;
+
+		inline bank<T>::iterator begin() {
+			return bank<T>::iterator(_bank.begin());
+		}
+
+		inline bank<T>::iterator end() {
+			return bank<T>::iterator(_bank.end());
+		}
+
+		inline bank<T>::const_iterator cbegin() const {
+			return bank<T>::const_iterator(_bank.cbegin());
+		}
+
+		inline bank<T>::const_iterator cend() const {
+			return bank<T>::const_iterator(_bank.cend());
+		}
+
+		/**
+		 * Callback given to \c engine::scripts::registerInterface() to register
+		 * the bank type, as well as the type the bank stores, with a \c scripts
+		 * object.
+		 * @sa \c engine::scripts::registerInterface().
+		 */
+		void registerInterface(asIScriptEngine* engine,
+			const std::shared_ptr<DocumentationGenerator>& document) {
+			// 1. Register dependencies shared between all bank types, as well as
+			//    all the types stored within all bank types.
+			awe::RegisterGameTypedefs(engine, document);
+
+			// 2. Register the game property type that this bank stores (i.e. T).
+			auto r = engine->RegisterObjectType(T::type, 0,
+				asOBJ_REF | asOBJ_NOCOUNT);
+			T::Register(engine);
+
+			// 3. Register the const iterator type for this bank object.
+			const auto itrType = const_iterator::Register(engine, T::type);
+
+			// 4. Register the bank type, called T::type + "Bank".
+			const auto bankTypeName = std::string(T::type).append("Bank");
+			const auto bankType = bankTypeName.c_str();
+			r = engine->RegisterObjectType(bankType, 0,
+				asOBJ_REF | asOBJ_NOHANDLE);
+			// Scripts cannot amend game properties, only read them.
+			r = engine->RegisterObjectMethod(bankType, std::string("const ")
+				.append(T::type).append("@ opIndex(const string&in) const").c_str(),
+				asMETHOD(awe::bank<T>, _opIndexStr), asCALL_THISCALL);
+			r = engine->RegisterObjectMethod(bankType, "uint64 length() const",
+				asMETHOD(awe::bank<T>, size), asCALL_THISCALL);
+			r = engine->RegisterObjectMethod(bankType,
+				"bool contains(const string&in) const",
+				asMETHOD(awe::bank<T>, contains), asCALL_THISCALL);
+			r = engine->RegisterObjectMethod(bankType, std::string(itrType)
+				.append(" begin() const").c_str(),
+				asMETHOD(awe::bank<T>, cbegin), asCALL_THISCALL);
+			r = engine->RegisterObjectMethod(bankType, std::string(itrType)
+				.append(" end() const").c_str(),
+				asMETHOD(awe::bank<T>, cend), asCALL_THISCALL);
+
+			// 5. Register the global point of access to the bank object.
+			const auto globalProperty = std::string(bankTypeName).append(" ")
+				.append(T::global_property);
+			engine->RegisterGlobalProperty(globalProperty.c_str(), this);
+		}
 	private:
+		/**
+		 * The JSON load method for this class.
+		 * All classes substituted for \c T should have a common JSON script
+		 * format. In the root object, key-value pairs list each member/entry of
+		 * the bank and their properties.\n
+		 * The keys will store the script names of each bank entry. It is then up
+		 * to the classes used with this template class to parse the object values
+		 * of these keys in its constructor.
+		 * @param  j The \c engine::json object representing the contents of the
+		 *           loaded script which this method reads.
+		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee.
+		 * @sa     @c awe::bank<T>
+		 */
+		bool _load(engine::json& j) {
+			type bank;
+			nlohmann::ordered_json jj = j.nlohmannJSON();
+			for (auto& i : jj.items()) {
+				engine::json input(i.value(), { _logger.getData().sink, "json" });
+				bank[i.key()] = std::make_shared<T>(i.key(), input, _logger);
+			}
+			_bank = std::move(bank);
+			return true;
+		}
+
+		/**
+		 * Script's string index operator.
+		 * @throws std::runtime_error if no game property with the given name
+		 *                            exists.
+		 * @sa     @c awe::bank<T>::operator[](const std::string&) const
+		 */
+		const T* _opIndexStr(const std::string& name) const {
+			auto ret = operator[](name);
+			if (ret) return ret.get();
+			throw std::runtime_error("Could not access game property");
+		}
+
+		/**
+		 * Internal logger object.
+		 */
+		mutable engine::logger _logger;
+
 		/**
 		 * Each game property is stored in here, accessible via their script names.
 		 */
-		nlohmann::ordered_map<std::string, std::shared_ptr<T>> _bank;
+		type _bank;
 	};
 }
