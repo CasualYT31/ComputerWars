@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <sstream>
 #include <unordered_set>
 #include "boost/call_traits.hpp"
 #include "script.hpp"
@@ -44,7 +45,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define BANK_OVERRIDE_FIELD(n, i) \
 	static_assert(i >= 0 && i < GAME_PROPERTY_COUNT, \
 		"i must be within the game property count!"); \
-	inline field_overrides& n(const std::string& newValue) { \
+	inline overrides& n(const std::string& newValue) { \
 		_overrides[i] = newValue; \
 		return *this; \
 	} \
@@ -53,7 +54,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	}
 
 namespace awe {
-	class field_overrides {
+	class overrides {
 		std::array<std::string, GAME_PROPERTY_COUNT> _overrides;
 	public:
 		inline std::string& operator[](const std::size_t i) {
@@ -62,7 +63,7 @@ namespace awe {
 		inline const std::string& operator[](const std::size_t i) const {
 			return _overrides.at(i);
 		}
-		friend bool operator==(const awe::field_overrides& lhs, const awe::field_overrides& rhs);
+		friend bool operator==(const awe::overrides& lhs, const awe::overrides& rhs);
 		BANK_OVERRIDE_FIELD(weapon, 9)
 		BANK_OVERRIDE_FIELD(unitType, 8)
 		BANK_OVERRIDE_FIELD(terrain, 7)
@@ -75,14 +76,14 @@ namespace awe {
 		BANK_OVERRIDE_FIELD(commander, 0)
 	};
 
-	inline bool operator==(const awe::field_overrides& lhs, const awe::field_overrides& rhs) {
+	inline bool operator==(const awe::overrides& lhs, const awe::overrides& rhs) {
 		return lhs._overrides == rhs._overrides;
 	}
 }
 
 namespace std {
-	template<> struct hash<awe::field_overrides> {
-		std::size_t operator()(awe::field_overrides const& f) const noexcept {
+	template<> struct hash<awe::overrides> {
+		std::size_t operator()(awe::overrides const& f) const noexcept {
 			std::hash<std::string> hasher;
 			std::size_t seed = 0;
 			for (std::size_t i = 0; i < GAME_PROPERTY_COUNT; ++i)
@@ -93,7 +94,6 @@ namespace std {
 }
 
 namespace awe {
-
 	// T = type of field.
 	// N = depth of the hierarchy desired. 1 = just CO, 2 = CO, then weather, etc.
 	//                                     0 = no overrides.
@@ -109,11 +109,12 @@ namespace awe {
 			// we can always rely on the default value existing.
 			j.apply(_values[{}], keys, true);
 		}
-		inline T& operator[](const field_overrides& overrides) {
+		inline typename boost::call_traits<T>::reference operator[](
+			const overrides& overrides) {
 			return _values[overrides];
 		}
 		inline typename boost::call_traits<T>::const_reference operator[](
-			const field_overrides& overrides) const {
+			const overrides& overrides) const {
 			try {
 				return _values.at(overrides);
 			} catch (const std::out_of_range&) {
@@ -125,73 +126,97 @@ namespace awe {
 			}
 		}
 	private:
-		field_overrides _sanitiseFieldOverrides(
-			const field_overrides& overrides) const {
-			field_overrides result;
+		overrides _sanitiseFieldOverrides(const overrides& o) const {
+			overrides result;
 			for (std::size_t i = 0; i < N; ++i)
-				if (_scriptNamesWithOverrides[i].count(overrides[i]) > 0)
-					result[i] = overrides[i];
+				if (_scriptNamesWithOverrides[i].count(o[i]) > 0)
+					result[i] = o[i];
 			return result;
 		}
 		std::array<std::unordered_set<std::string>, N> _scriptNamesWithOverrides;
-		std::unordered_map<field_overrides, T> _values;
+		std::unordered_map<overrides, T> _values;
 	};
 
-	//class script_name_field {
-	//public:
-	//	script_name_field(const std::string& scriptName);
-	//	static void Register(const std::string& type, asIScriptEngine* engine) {
-	//		engine->RegisterObjectMethod(type.c_str(), // < may not need this if we will use macros.
-	//			"const string& longName(const Overrides&in) const",
-	//			asMETHODPR(country_long_name, operator(), (const field_overrides&) const, const std::string&),
-	//			asCALL_THISCALL, nullptr, asOFFSET(country, longName), false);
-	//	}
-
-	//private:
-	//	std::string _scriptName;
-	//};
-
-	class country {
-	public:
-		country(const std::string& scriptName, engine::json& j, engine::logger& logger)
-			: longName(j, logger)
-		{
-			// Extra processing of all fields will go here.
-		}
-		static void Register(const std::string& type, asIScriptEngine* engine) {
-			country_long_name::Register(type, engine);
-		}
-		class country_long_name {
-		public:
-			// Initialises the default value (i.e. no overrides, from JSON).
-			country_long_name(engine::json& j, engine::logger& logger) :
-				_longName(j, { "longName" })
-			{
-				// Extra processing of the long name field will go here.
-			}
-			// Register const access for the scripts.
-			static void Register(const std::string& type, asIScriptEngine* engine) {
-				engine->RegisterObjectMethod(type.c_str(), // < may not need this if we will use macros (think I meant the c_str() call).
-					"const string& longName(const Overrides&in) const",
-					asMETHODPR(country_long_name, operator(), (const field_overrides&) const, const std::string&),
-					asCALL_THISCALL, nullptr, asOFFSET(country, longName), false);
-			}
-			// Used to add overrides: available only to the game_engine.
-			std::string& operator()(const field_overrides& overrides = {}) {
-				return _longName[overrides];
-			}
-			// Retrieve the default, or overridden value.
-			const std::string& operator()(const field_overrides& overrides = {}) const {
-				return _longName[overrides];
-			}
-		private:
-			property_field<std::string, 2> _longName;
-		} longName;
-		// Usage example:
-		// Add or replace override for JAKE:
-		// longName[country_override().commander("JAKE")] = "JAKE'S override"
-		// Retrieve override for JAKE [non-const and const]:
-		// longName[country_override().commander("JAKE")]
-	private:
+	// Used to map C++ types to the AS types that are returned from game property
+	// field accessors. "const" is applied automatically by the PROPERTY() macro,
+	// but any references must be added to the AS type if applicable. If a mapping
+	// hasn't been defined here for a given C++ type, and you try to create a field
+	// of that type, the code will fail to compile with an error:
+	//     'value': is not a member of 'awe::AngelScriptType<T>'
+	// where T will be the type you gave.
+	template<typename T> struct AngelScriptType {};
+	template<> struct AngelScriptType<std::string> {
+		static constexpr char* const value = "string&";
 	};
+}
+
+/* Generates code necessary to define a field in a game property class.
+	cc: C++ game property class the field belongs to.
+	ac: String literal containing the game property class's AngelScript typename.
+	 n: The name of the property in C++ and AngelScript.
+	ct: The C++ type of the property, without qualifiers.
+	 i: Depth of the hierarchy desired (see awe::property_field).
+	 e: Extra processing that's applied to the property. Can be nothing.
+*/
+#define PROPERTY(cc, ac, n, ct, i, e) class n##_ { \
+	awe::property_field<ct, i> _##n; \
+public: \
+	n##_(engine::json& j, engine::logger& logger) : _##n(j, { #n }) { e } \
+	static void Register(asIScriptEngine* engine) { \
+		std::stringstream builder; \
+		builder << "const "; \
+		builder << awe::AngelScriptType<ct>::value; \
+		builder << " " #n "(const Overrides&in) const"; \
+		engine->RegisterObjectMethod(ac, builder.str().c_str(), \
+			asMETHODPR(n##_, operator(), (const awe::overrides&) const, \
+				typename boost::call_traits<ct>::const_reference), \
+			asCALL_THISCALL, nullptr, asOFFSET(cc, n), false); \
+	} \
+	typename boost::call_traits<ct>::reference operator()( \
+		const awe::overrides& overrides = {}) { \
+		return _##n[overrides]; \
+	} \
+	typename boost::call_traits<ct>::const_reference operator()( \
+		const awe::overrides& overrides = {}) const { \
+		return _##n[overrides]; \
+	} \
+} n;
+
+// Building blocks of a game property class.
+#define GAME_PROPERTY_DECLARE(cc) class cc { \
+	std::string _scriptName; \
+public: \
+	cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
+		_scriptName(scriptName),
+
+#define GAME_PROPERTY_REGISTER(cc, ac, e) { e } \
+	static void Register(asIScriptEngine* engine) { \
+		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
+			asMETHOD(cc, scriptName), asCALL_THISCALL);
+
+#define GAME_PROPERTY_SCRIPTNAME() } \
+	inline const std::string& scriptName() const { return _scriptName; }
+
+/* Generates a game property class with 1 field.
+	Unfortunately, I can't come up with a cleaner solution to support variable
+	numbers of fields in macros beyond manually defining each N-field macro. To
+	simplify the process, I've written a Python script that can generate them.
+	cc: C++ name of the game property type.
+	ac: String literal containing the typename to give this game property in AS.
+	 i: Depth of the hierarchy desired for every field (see awe::property_field).
+	p1: The name of the first field.
+	t1: The C++ type of the first field, without qualifiers.
+	 e: Extra processing that's applied to every field. Can be nothing.
+*/
+#define GAME_PROPERTY_1(cc, ac, i, p1, t1, e) \
+	GAME_PROPERTY_DECLARE(cc) \
+        p1(j, logger) \
+    GAME_PROPERTY_REGISTER(cc, ac, e) \
+        p1##_::Register(engine); \
+    GAME_PROPERTY_SCRIPTNAME() \
+    PROPERTY(cc, ac, p1, t1, i) \
+};
+
+namespace awe {
+	GAME_PROPERTY_1(country, "Country", 2, longName, std::string, )
 }

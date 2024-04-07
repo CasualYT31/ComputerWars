@@ -89,8 +89,8 @@ int main(int argc, char* argv[]) {
 
         rootLogger.write("{}", orangeStar.longName());
 
-        awe::field_overrides jake; jake.commander("JAKE");
-        awe::field_overrides noco; noco.commander("NOCO");
+        awe::overrides jake; jake.commander("JAKE");
+        awe::overrides noco; noco.commander("NOCO");
 
         orangeStar.longName(jake) = "JAKE'S OVERRIDE";
 
@@ -101,6 +101,8 @@ int main(int argc, char* argv[]) {
             accessFromAngelScripts.longName(jake),
             accessFromAngelScripts.longName(noco)
         );
+
+        rootLogger.write(orangeStar.scriptName());
 
         //awe::game_engine engine({ sink, "engine" });
         //{
