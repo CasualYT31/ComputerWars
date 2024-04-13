@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <any>
 #include <new>
 #include <sstream>
 #include <unordered_set>
@@ -276,212 +277,54 @@ namespace awe {
 	template<> struct AngelScriptType<sf::Color> {
 		static constexpr char* const value = "Colour&";
 	};
+
+	// Used to map C++ types to the AS types used for a game property field's
+	// overrides. TODO: blank string represents inability to override?
+	template<typename T> struct AngelScriptOverrideType {
+		static constexpr char* const value = "";
+	};
+	template<> struct AngelScriptOverrideType<std::string> {
+		static constexpr char* const value = "string";
+	};
+	template<> struct AngelScriptOverrideType<sf::Color> {
+		static constexpr char* const value = "Colour";
+	};
+
+	template<typename T> struct OverrideVariable {
+		static std::any read(const std::shared_ptr<engine::scripts>& scripts,
+			const asUINT variable) {
+			void* var = scripts->getGlobalVariableAddress(
+				engine::scripts::modules[engine::scripts::BANK_OVERRIDE], variable);
+			if (!var) return {};
+			return *static_cast<T*>(var);
+		}
+	};
+	template<> struct OverrideVariable<std::vector<particle_data>> {
+		static std::any read(const std::shared_ptr<engine::scripts>& scripts,
+			const asUINT variable) {
+			return {};
+		}
+	};
+	// If a type needs a special read method for variables, specialise here.
+
+	template<typename T> struct OverrideFunction {
+		static std::any read(const std::shared_ptr<engine::scripts>& scripts,
+			asIScriptFunction* const function, const std::any& parent) {
+			T* p = std::any_cast<T*>(parent);
+			scripts->callFunction(function, p);
+			return *p;
+		}
+	};
+	template<> struct OverrideFunction<std::vector<particle_data>> {
+		static std::any read(const std::shared_ptr<engine::scripts>& scripts,
+			asIScriptFunction* const function, const std::any& parent) {
+			return {};
+		}
+	};
+	// If a type needs a special read method for functions, specialise here.
 }
 
-/* Generates code necessary to define a field in a game property class.
-	cc: C++ game property class the field belongs to.
-	ac: String literal containing the game property class's AngelScript typename.
-	 n: The name of the property in C++ and AngelScript.
-	ct: The C++ type of the property, without qualifiers.
-	 i: Depth of the hierarchy desired (see awe::property_field).
-	 e: Extra processing that's applied to the property. Can be nothing.
-*/
-#define PROPERTY(cc, ac, n, ct, i, e) class n##_ { \
-	awe::property_field<ct, i> _##n; \
-public: \
-	n##_(engine::json& j, engine::logger& logger) : _##n(j, { #n }, logger) { e } \
-	static void Register(asIScriptEngine* engine) { \
-		if constexpr (awe::AngelScriptType<ct>::value[0] == '\0') return; \
-		std::stringstream builder; \
-		builder << "const "; \
-		builder << awe::AngelScriptType<ct>::value; \
-		builder << " " #n "(const Overrides&in) const"; \
-		engine->RegisterObjectMethod(ac, builder.str().c_str(), \
-			asMETHODPR(n##_, operator(), (const awe::overrides&) const, \
-				typename boost::call_traits<ct>::const_reference), \
-			asCALL_THISCALL, nullptr, asOFFSET(cc, n), false); \
-	} \
-	typename boost::call_traits<ct>::reference operator()( \
-		const awe::overrides& overrides = {}) { \
-		return _##n[overrides]; \
-	} \
-	typename boost::call_traits<ct>::const_reference operator()( \
-		const awe::overrides& overrides = {}) const { \
-		return _##n[overrides]; \
-	} \
-} n;
-
-// Building blocks of a game property class.
-#define GAME_PROPERTY_DECLARE(cc) class cc { \
-	std::string _scriptName; \
-public: \
-	cc(const std::string& scriptName, engine::json& j, engine::logger& logger) :
-
-#define GAME_PROPERTY_REGISTER(cc, ac, e) _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
-		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
-			asMETHOD(cc, scriptName), asCALL_THISCALL);
-
-#define GAME_PROPERTY_SCRIPTNAME() } \
-	inline const std::string& scriptName() const { return _scriptName; }
-
-#define GAME_PROPERTY_END(cc, ac, gp, a) a \
-public: \
-	static constexpr char* const type = ac; \
-	static constexpr char* const global_property = gp; \
-};
-
-/* Generates a game property class with 1 field.
-	Unfortunately, I can't come up with a cleaner solution to support variable
-	numbers of fields in macros beyond manually defining each N-field macro. To
-	simplify the process, I've written a Python script that can generate them.
-	cc: C++ name of the game property type.
-	ac: String literal containing the typename to give this game property in AS.
-	gp: String literal containing the name of the global property of the bank type
-	    that stores this game property type.
-	 i: Depth of the hierarchy desired for every field (see awe::property_field).
-	p1: The name of the first field.
-	t1: The C++ type of the first field, without qualifiers.
-	e1: Extra processing that's applied to the first field.
-	 e: Extra processing that's applied to every field after every field has been
-	    processed. Can be nothing.
-	 a: Append extra code to the end of the class.
-*/
-
-#define GAME_PROPERTY_1(cc, ac, gp, i, p1, t1, e1, e, a) \
-    GAME_PROPERTY_DECLARE(cc) \
-        p1(j, logger), \
-    GAME_PROPERTY_REGISTER(cc, ac, e) \
-        p1##_::Register(engine); \
-    GAME_PROPERTY_SCRIPTNAME() \
-    PROPERTY(cc, ac, p1, t1, i, e1) \
-    GAME_PROPERTY_END(cc, ac, gp, a)
-
-#define GAME_PROPERTY_4(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, e, a) \
-    GAME_PROPERTY_DECLARE(cc) \
-        p1(j, logger), \
-        p2(j, logger), \
-        p3(j, logger), \
-        p4(j, logger), \
-    GAME_PROPERTY_REGISTER(cc, ac, e) \
-        p1##_::Register(engine); \
-        p2##_::Register(engine); \
-        p3##_::Register(engine); \
-        p4##_::Register(engine); \
-    GAME_PROPERTY_SCRIPTNAME() \
-    PROPERTY(cc, ac, p1, t1, i, e1) \
-    PROPERTY(cc, ac, p2, t2, i, e2) \
-    PROPERTY(cc, ac, p3, t3, i, e3) \
-    PROPERTY(cc, ac, p4, t4, i, e4) \
-    GAME_PROPERTY_END(cc, ac, gp, a)
-
-#define GAME_PROPERTY_5(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, e, a) \
-    GAME_PROPERTY_DECLARE(cc) \
-        p1(j, logger), \
-        p2(j, logger), \
-        p3(j, logger), \
-        p4(j, logger), \
-        p5(j, logger), \
-    GAME_PROPERTY_REGISTER(cc, ac, e) \
-        p1##_::Register(engine); \
-        p2##_::Register(engine); \
-        p3##_::Register(engine); \
-        p4##_::Register(engine); \
-        p5##_::Register(engine); \
-    GAME_PROPERTY_SCRIPTNAME() \
-    PROPERTY(cc, ac, p1, t1, i, e1) \
-    PROPERTY(cc, ac, p2, t2, i, e2) \
-    PROPERTY(cc, ac, p3, t3, i, e3) \
-    PROPERTY(cc, ac, p4, t4, i, e4) \
-    PROPERTY(cc, ac, p5, t5, i, e5) \
-    GAME_PROPERTY_END(cc, ac, gp, a)
-
-#define GAME_PROPERTY_6(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, e, a) \
-    GAME_PROPERTY_DECLARE(cc) \
-        p1(j, logger), \
-        p2(j, logger), \
-        p3(j, logger), \
-        p4(j, logger), \
-        p5(j, logger), \
-        p6(j, logger), \
-    GAME_PROPERTY_REGISTER(cc, ac, e) \
-        p1##_::Register(engine); \
-        p2##_::Register(engine); \
-        p3##_::Register(engine); \
-        p4##_::Register(engine); \
-        p5##_::Register(engine); \
-        p6##_::Register(engine); \
-    GAME_PROPERTY_SCRIPTNAME() \
-    PROPERTY(cc, ac, p1, t1, i, e1) \
-    PROPERTY(cc, ac, p2, t2, i, e2) \
-    PROPERTY(cc, ac, p3, t3, i, e3) \
-    PROPERTY(cc, ac, p4, t4, i, e4) \
-    PROPERTY(cc, ac, p5, t5, i, e5) \
-    PROPERTY(cc, ac, p6, t6, i, e6) \
-    GAME_PROPERTY_END(cc, ac, gp, a)
-
-#define GAME_PROPERTY_7(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, e, a) \
-    GAME_PROPERTY_DECLARE(cc) \
-        p1(j, logger), \
-        p2(j, logger), \
-        p3(j, logger), \
-        p4(j, logger), \
-        p5(j, logger), \
-        p6(j, logger), \
-        p7(j, logger), \
-    GAME_PROPERTY_REGISTER(cc, ac, e) \
-        p1##_::Register(engine); \
-        p2##_::Register(engine); \
-        p3##_::Register(engine); \
-        p4##_::Register(engine); \
-        p5##_::Register(engine); \
-        p6##_::Register(engine); \
-        p7##_::Register(engine); \
-    GAME_PROPERTY_SCRIPTNAME() \
-    PROPERTY(cc, ac, p1, t1, i, e1) \
-    PROPERTY(cc, ac, p2, t2, i, e2) \
-    PROPERTY(cc, ac, p3, t3, i, e3) \
-    PROPERTY(cc, ac, p4, t4, i, e4) \
-    PROPERTY(cc, ac, p5, t5, i, e5) \
-    PROPERTY(cc, ac, p6, t6, i, e6) \
-    PROPERTY(cc, ac, p7, t7, i, e7) \
-    GAME_PROPERTY_END(cc, ac, gp, a)
-
-#define GAME_PROPERTY_10(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, p9, t9, e9, p10, t10, e10, e, a) \
-    GAME_PROPERTY_DECLARE(cc) \
-        p1(j, logger), \
-        p2(j, logger), \
-        p3(j, logger), \
-        p4(j, logger), \
-        p5(j, logger), \
-        p6(j, logger), \
-        p7(j, logger), \
-        p8(j, logger), \
-        p9(j, logger), \
-        p10(j, logger), \
-    GAME_PROPERTY_REGISTER(cc, ac, e) \
-        p1##_::Register(engine); \
-        p2##_::Register(engine); \
-        p3##_::Register(engine); \
-        p4##_::Register(engine); \
-        p5##_::Register(engine); \
-        p6##_::Register(engine); \
-        p7##_::Register(engine); \
-        p8##_::Register(engine); \
-        p9##_::Register(engine); \
-        p10##_::Register(engine); \
-    GAME_PROPERTY_SCRIPTNAME() \
-    PROPERTY(cc, ac, p1, t1, i, e1) \
-    PROPERTY(cc, ac, p2, t2, i, e2) \
-    PROPERTY(cc, ac, p3, t3, i, e3) \
-    PROPERTY(cc, ac, p4, t4, i, e4) \
-    PROPERTY(cc, ac, p5, t5, i, e5) \
-    PROPERTY(cc, ac, p6, t6, i, e6) \
-    PROPERTY(cc, ac, p7, t7, i, e7) \
-    PROPERTY(cc, ac, p8, t8, i, e8) \
-    PROPERTY(cc, ac, p9, t9, i, e9) \
-    PROPERTY(cc, ac, p10, t10, i, e10) \
-    GAME_PROPERTY_END(cc, ac, gp, a)
+#include "tpp/bank-v2-macros.tpp"
 
 namespace awe {
 	GAME_PROPERTY_4(movement_type, "MovementType", "movementtype", 4,
@@ -532,7 +375,12 @@ namespace awe {
 		/**
 		 * The type of the container used to store game property values.
 		 */
-		using type = nlohmann::ordered_map<std::string, std::shared_ptr<T>>;
+		using container = nlohmann::ordered_map<std::string, std::shared_ptr<T>>;
+
+		/**
+		 * The type of game property stored in this bank.
+		 */
+		using type = T;
 
 		/**
 		 * Provides script interface details to this @c bank instance.
@@ -677,8 +525,8 @@ namespace awe {
 				return tc;
 			}
 		};
-		using iterator = base_iterator<typename type::iterator, T>;
-		using const_iterator = base_iterator<typename type::const_iterator, const T>;
+		using iterator = base_iterator<typename container::iterator, T>;
+		using const_iterator = base_iterator<typename container::const_iterator, const T>;
 
 		inline bank<T>::iterator begin() {
 			return bank<T>::iterator(_bank.begin());
@@ -742,6 +590,240 @@ namespace awe {
 				.append(T::global_property);
 			engine->RegisterGlobalProperty(globalProperty.c_str(), this);
 		}
+
+		// We should cache scripts.
+		template<typename... Os>
+		void processOverrides(const std::shared_ptr<engine::scripts>& scripts,
+			const std::unordered_map<std::string,
+			std::vector<engine::scripts::global_variables_and_their_namespaces::value_type>>&vars,
+			const std::unordered_map<std::string,
+			std::vector<engine::scripts::global_functions_and_their_namespaces::value_type>>&funcs,
+			Os... banks) {
+			std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
+				std::variant<asUINT, asIScriptFunction*>>>> overrideValues;
+			// 1. Go through each override bank and extract valid override vars and funcs.
+			processOverridesForBank(overrideValues, scripts, vars, funcs, banks...);
+			// 2. Calculate overrides, storing into std::any objects.
+			std::unordered_map<awe::overrides, std::any> calculatedValues;
+			for (const auto& baseTypeScriptName : overrideValues) {
+				for (const auto field : T::fields) {
+					// Begin the override value calculation for each field in T with its default value.
+					awe::overrides overrides;
+					calculateOverrideForField(
+						calculatedValues,
+						scripts,
+						field,
+						overrides,
+						overrideValues,
+						_bank.at(baseTypeScriptName)->getFieldDefaultValue(field),
+						banks...
+					) // This isn't right...
+				}
+			}
+			// 3. Populate field overrides with std::any objects.
+		}
+
+		// Terminate as no more banks left.
+		void calculateOverrideForField(std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
+			std::any>>>& calculatedValues,
+			const std::shared_ptr<engine::scripts>& scripts,
+			const std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
+			std::variant<asUINT, asIScriptFunction*>>>>& overrideValues) {}
+
+		template<typename O, typename... Os>
+		void calculateOverrideForField(std::unordered_map<awe::overrides, std::any>& calculatedValues,
+			const std::shared_ptr<engine::scripts>& scripts,
+			const char* const field,
+			awe::overrides& overrides,
+			const std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
+			std::variant<asUINT, asIScriptFunction*>>>>& overrideValues,
+			const std::any& parent,
+			const O& bank,
+			Os... banks) {
+			for (const auto& baseTypeScriptName : overrideValues) {
+				// baseTypeScriptName now holds the name of the field we are overriding (.first),
+				// and the override types we are overriding with (.second).
+				// We use O::type::type to access the override type we care about in this call.
+				for (const auto& overrideTypeScriptName : overrideValues[O::type::type]) {
+					// .first = the script name of the game property that is overriding.
+					// .second = function or variable.
+					if ()
+				}
+			}
+			overrideValues[O::type::type]
+		}
+
+		// Terminate as no more banks left.
+		void processOverridesForBanks(std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
+			std::variant<asUINT, asIScriptFunction*>>>>&overrideValues,
+			const std::shared_ptr<engine::scripts>& scripts,
+			const std::unordered_map<std::string,
+			std::vector<engine::scripts::global_variables_and_their_namespaces::value_type>>&vars,
+			const std::unordered_map<std::string,
+			std::vector<engine::scripts::global_functions_and_their_namespaces::value_type>>&funcs) {}
+
+		/**
+		 * Goes through all of the overrides configured for this bank and stores
+		 * them.
+		 * @param scripts The scripts engine containing the overrides.
+		 */
+		template<typename O, typename... Os>
+		void processOverridesForBanks(std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
+				std::variant<asUINT, asIScriptFunction*>>>>& overrideValues,
+			const std::shared_ptr<engine::scripts>& scripts,
+			const std::unordered_map<std::string,
+			std::vector<engine::scripts::global_variables_and_their_namespaces::value_type>>& vars,
+			const std::unordered_map<std::string,
+			std::vector<engine::scripts::global_functions_and_their_namespaces::value_type>>& funcs,
+			const O& bank,
+			Os... banks) {
+			// vars and funcs will be within four namespaces.
+			if (vars.count(T::type)) {
+				for (const auto& var : vars[T::type]) {
+					// 1. Is the base type script name valid?
+					const auto& baseTypeScriptName = var.second[1];
+					if (!contains(baseTypeScriptName)) {
+						_logger.error("Attempting to override fields within game "
+							"property \"{}\" of type \"{}\", the former of which "
+							"does not exist.", baseTypeScriptName, T::type);
+						continue;
+					}
+
+					// 2. Is the overrider type valid? Does it exist and is it
+					//    within the acceptable range of the hierarchy?
+					const auto& overriderType = var.second[2];
+					if (overriderType != O::type::type) {
+						// Tiny UX problem: we can't tell here if it's actually an
+						// invalid overrider type, or if it's just a type we haven't
+						// visited yet (i.e. it's within banks). To warn of these,
+						// we'll have to maintain a separate list of unused entries
+						// and report them all later.
+						continue;
+					}
+
+					// 3. Is the overrider type script name valid?
+					const auto& overriderTypeScriptName = var.second[3];
+					if (!bank.contains(overriderTypeScriptName)) {
+						_logger.error("Attempting to override fields within game "
+							"property \"{}\" of type \"{}\", with game property "
+							"\"{}\" of overrider type \"{}\". The overrider game "
+							"property \"{}\" does not exist.", baseTypeScriptName,
+							T::type, overriderTypeScriptName, O::type::type,
+							overriderTypeScriptName);
+						continue;
+					}
+
+					// 4. Does the variable name match a field name?
+					std::string varName; int varTypeID = 0;
+					if (!_scripts->getGlobalVariable(
+						engine::scripts::modules[engine::scripts::BANK_OVERRIDE],
+						var.first, varName, varTypeID)) {
+						_logger.error("Will not apply override from "
+							"{}::{}::{}::{}.", T::type, baseTypeScriptName,
+							overriderType, overriderTypeScriptName);
+						continue;
+					}
+					if (!T::hasField(varName)) {
+						_logger.error("Attempting to override non-existent field "
+							"\"{}\" within game property \"{}\" of type \"{}\", "
+							"with game property \"{}\" of overrider type \"{}\".",
+							varName, baseTypeScriptName, T::type,
+							overriderTypeScriptName, O::type::type);
+						continue;
+					}
+
+					// For each game property type, we could define a map, e.g.:
+					// weather["longName"] = <references> weather.longName
+					// Then for type...
+					// weather["longName"].ANGEL_SCRIPT_TYPE = "string"
+					// To assign "string" within the macro, let's use a new set of
+					// template specialisations.
+
+					// Actually, because they're all different types, we can't
+					// easily map each field like that (actually we could use
+					// inheritance if we really wanted to).
+					// constexpr weather.getFieldAngelScriptType() == "string"
+					// weather.readFieldOverrideVariable()
+					// weather.readFieldOverrideFunction()
+
+					// Next big problem though is how we're going to convert the
+					// AS object values into C++ values to assign to the overrides.
+					// Could make use of std::any?
+					// Vars:: module->GetAddressOfGlobalVar(asUINT).
+					//        Cast pointer, dereference.
+					// Funcs: _scripts->callFunction(inter.Var).
+					//        intermediate variable is of the correct type.
+					// Could do template specialisations again for each, it's not
+					// a lot of lines.
+					// To support that though, we're going to have to assign the
+					// functions to the property_field in the same way as ANGEL_SCRIPT_TYPE.
+					// We have to do it this way because I don't think it's possible
+					// to access the actual typename from the field, you can only do
+					// so from the field type itself. E.g. you can't do this:
+					// weather.longName::type
+					// Or
+					// weather["longName"]::type
+					// It might be possible to compile each property_field subtype
+					// in a type list somehow, and then use a parameter pack to go
+					// through each property and access the actual C++ types that
+					// way, but I'm not clever enough to figure it out, and this
+					// approach should work anyway.
+
+					// 5. Does the variable type match the field's type?
+					const auto actualType = T::getFieldAngelScriptType(varName);
+					const auto varType = _scripts->getTypeName(varTypeID);
+					if (varType != actualType) {
+						_logger.error("Attempting to override field \"{}\" of "
+							"type \"{}\" within game property \"{}\" of type "
+							"\"{}\", with game property \"{}\" of overrider type "
+							"\"{}\". The type you gave was \"{}\".",
+							varName, actualType, baseTypeScriptName, T::type,
+							overriderTypeScriptName, O::type::type, varType);
+						continue;
+					}
+
+					// 6. All checks pass, store the override.
+					overrideValues[baseTypeScriptName][overriderType][overriderTypeScriptName] =
+						var.first
+				}
+			}
+
+			processOverridesForBanks(overrideValues, scripts, vars, funcs, banks...);
+
+
+
+
+			//// Function overrides will always replace any variable overrides, if
+			//// they're for the same game property.
+			//const auto varMetadata =
+			//	scripts->getGlobalVariableMetadata(
+			//		engine::scripts::modules[engine::scripts::BANK_OVERRIDE]);
+			//for (const auto& var : varMetadata) {
+			//	// Find out if the base metadata exists, and matches this game
+			//	// property type. If not, skip this entry.
+			//	// Let's use T::type instead of T::global_property (implied in my
+			//	// notes), but make it case insensitive. Make use of
+			//	// tgui::String::equalIgnoreCase().
+			//
+			//	// To map overrider type to awe::overrides index, let's add
+			//	// T::override_index.
+			//
+			//	// May need to rethink how I'm storing overrides. I'll need to do
+			//	// them in order of hierarchy, and this will be especially
+			//	// important for functions, which will accept the value that
+			//	// immediately precedes the level of the hierarchy given in the
+			//	// metadata.
+			//
+			//	// Just realised this is super inefficient. We'd only want to go
+			//	// through these lists once. We we'll need to take this method out
+			//	// and instead write a class method that processes just one
+			//	// override, that this method will invoke.
+			//}
+			//
+			//const auto funcMetadata =
+			//	scripts->getGlobalFunctionMetadata(
+			//		engine::scripts::modules[engine::scripts::BANK_OVERRIDE]);
+		}
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -758,7 +840,7 @@ namespace awe {
 		 * @sa     @c awe::bank<T>
 		 */
 		bool _load(engine::json& j) {
-			type bank;
+			container bank;
 			nlohmann::ordered_json jj = j.nlohmannJSON();
 			for (auto& i : jj.items()) {
 				engine::json input(i.value(), { _logger.getData().sink, "json" });
@@ -788,6 +870,61 @@ namespace awe {
 		/**
 		 * Each game property is stored in here, accessible via their script names.
 		 */
-		type _bank;
+		container _bank;
 	};
+}
+
+/* Overrides are applied in scripts like so:
+namespace BaseType {
+	namespace BaseScriptName {
+		namespace OverriderType {
+			namespace OverriderScriptName {
+				const string tile = "oscity"; // Prefer const...
+				string tile = "oscity";       // ...but technically it doesn't matter.
+				uint vision(uint parent) {
+					return parent + 2;
+				}
+			}
+		}
+	}
+}
+*/
+
+template<typename T>
+void filterOnBaseType(const std::unordered_map<T, std::vector<std::string>>& in,
+	std::unordered_map<std::string, std::vector<std::pair<T, std::vector<std::string>>>>& out) {
+	for (const auto& i : in) {
+		if (i.second.size() == 4) {
+			out[i.second[0]].push_back(i);
+			// Idea: could find a way to warn user if func or var within four namespaces
+			//       isn't used.
+		} else {
+			// Log warning.
+			// TODO: could use metadata here, [helper], to tell the engine that
+			// it's intended to be excluded from the override calculations (at least directly).
+		}
+	}
+}
+
+// Each game property bank will have to be stored in its own object.
+// To access them via their hierarchy index, it becomes necessary to define a function:
+// ???
+// Make i param of GAME_PROPERTY_N() a static field of the class,
+// e.g. awe::weapon::index.
+
+/**
+ * Scans the \c BANK_OVERRIDE script module and applies overrides accordingly.
+ */
+void processOverrides(const std::shared_ptr<engine::scripts>& scripts) {
+	// 1. Filter each global variable and global function on base type.
+	auto vars = scripts->getGlobalVariablesAndTheirNamespaces(
+		engine::scripts::modules[engine::scripts::BANK_OVERRIDE]);
+	std::unordered_map<std::string, std::vector<std::pair<asUINT, std::vector<std::string>>>> filteredVars;
+	filterOnBaseType(vars, filteredVars);
+	auto funcs = scripts->getGlobalFunctionsAndTheirNamespaces(
+		engine::scripts::modules[engine::scripts::BANK_OVERRIDE]);
+	std::unordered_map<std::string, std::vector<std::pair<asIScriptFunction*, std::vector<std::string>>>> filteredFuncs;
+	filterOnBaseType(funcs, filteredFuncs);
+
+	// 2. Go through each bank, 
 }

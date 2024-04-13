@@ -1007,6 +1007,48 @@ engine::scripts::global_variables_and_their_namespaces
     return _variableNamespaces.at(moduleName);
 }
 
+bool engine::scripts::getGlobalVariable(const std::string& moduleName,
+    const asUINT variable, std::string& name, int& typeID) const {
+    const auto m = _engine->GetModule(moduleName.c_str());
+    if (!m) {
+        _logger.error("Could not return the properties of global variable {} "
+            "within non-existent module \"{}\".", variable, moduleName);
+        return false;
+    }
+    const char* tempName = nullptr;
+    int tempTypeID = 0;
+    if (auto r = m->GetGlobalVar(variable, &tempName, nullptr, &tempTypeID)) {
+        _logger.error("Could not return the properties of global variable {} "
+            "within module \"{}\", error code: {}.", variable, moduleName, r);
+        return false;
+    }
+    if (!tempName) {
+        _logger.error("Could not return the name of global variable {} within "
+            "module \"{}\", that has type ID {}.", variable, moduleName,
+            tempTypeID);
+        return false;
+    }
+    name = tempName;
+    typeID = tempTypeID;
+    return true;
+}
+
+void* engine::scripts::getGlobalVariableAddress(const std::string& moduleName,
+    const asUINT variable) const {
+    const auto m = _engine->GetModule(moduleName.c_str());
+    if (!m) {
+        _logger.error("Could not return the address of global variable {} within "
+            "non-existent module \"{}\".", variable, moduleName);
+        return nullptr;
+    }
+    void* const v = m->GetAddressOfGlobalVar(variable);
+    if (!v) {
+        _logger.error("Could not return the address of non-existent global "
+            "variable {} within module \"{}\".", variable, moduleName);
+    }
+    return v;
+}
+
 bool engine::scripts::_load(engine::json& j) {
     // First check if the interface has been registered, and if not, register it.
     if (!_registrants.empty()) {

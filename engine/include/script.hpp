@@ -730,6 +730,29 @@ namespace engine {
 		 */
 		global_variables_and_their_namespaces getGlobalVariablesAndTheirNamespaces(
 			const std::string& moduleName) const;
+
+		/**
+		 * Retrieves a module's global variable's name and type ID.
+		 * @param  moduleName The name of the module containing the variable.
+		 * @param  variable   The ID of the global variable to query.
+		 * @param  name       If the variable's name could be retrieved, it will be
+		 *                    assigned to this parameter.
+		 * @param  typeID     If the variable's type ID could be retrieved, it will
+		 *                    be assigned to this parameter.
+		 * @return \c TRUE if the call succeeded, \c FALSE otherwise.
+		 */
+		bool getGlobalVariable(const std::string& moduleName,
+			const asUINT variable, std::string& name, int& typeID) const;
+
+		/**
+		 * Retrieves the address to a module's global variable.
+		 * @param  moduleName The name of the module containing the variable.
+		 * @param  variable   The ID of the global variable to query.
+		 * @return Address to the variable, or \c nullptr if it couldn't be
+		 *         accessed.
+		 */
+		void* getGlobalVariableAddress(const std::string& moduleName,
+			const asUINT variable) const;
 	private:
 		/**
 		 * The JSON load method for this class.
