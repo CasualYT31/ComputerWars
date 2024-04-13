@@ -692,6 +692,44 @@ namespace engine {
 		 */
 		global_variable_metadata getGlobalVariableMetadata(
 			const std::string& moduleName) const;
+
+		/**
+		 * A collection of global functions that key to a list of namespaces.
+		 */
+		using global_functions_and_their_namespaces =
+			std::unordered_map<asIScriptFunction*, std::vector<std::string>>;
+
+		/**
+		 * A collection of global variables that key to a list of namespaces.
+		 */
+		using global_variables_and_their_namespaces =
+			std::unordered_map<asUINT, std::vector<std::string>>;
+
+		/**
+		 * Retrieves a map of global functions that key to a list of strings, each
+		 * string containing the name of a namespace that the function is within.
+		 * The list begins with the outermost namespace and finishes with the
+		 * innermost namespace. If a function is not within a namespace, the list
+		 * will be empty but the function will still be included in the map.
+		 * @param  moduleName The name of the module to search in.
+		 * @return A list of global functions and their namespaces. Empty if the
+		 *         given module doesn't exist.
+		 */
+		global_functions_and_their_namespaces getGlobalFunctionsAndTheirNamespaces(
+			const std::string& moduleName) const;
+
+		/**
+		 * Retrieves a map of global variables that key to a list of strings, each
+		 * string containing the name of a namespace that the function is within.
+		 * The list begins with the outermost namespace and finishes with the
+		 * innermost namespace. If a variable is not within a namespace, the list
+		 * will be empty but the variable will still be included in the map.
+		 * @param  moduleName The name of the module to search in.
+		 * @return A list of global variables and their namespaces. Empty if the
+		 *         given module doesn't exist.
+		 */
+		global_variables_and_their_namespaces getGlobalVariablesAndTheirNamespaces(
+			const std::string& moduleName) const;
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -847,6 +885,18 @@ namespace engine {
 		 */
 		std::unordered_map<std::string, global_variable_metadata>
 			_variableMetadata;
+
+		/**
+		 * Stores the namespace/s of each global function in each module.
+		 */
+		std::unordered_map<std::string, global_functions_and_their_namespaces>
+			_functionNamespaces;
+
+		/**
+		 * Stores the namespace/s of each global variable in each module.
+		 */
+		std::unordered_map<std::string, global_variables_and_their_namespaces>
+			_variableNamespaces;
 	};
 }
 

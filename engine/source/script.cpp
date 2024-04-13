@@ -975,7 +975,7 @@ engine::scripts::global_function_metadata
 }
 
 engine::scripts::global_variable_metadata
-engine::scripts::getGlobalVariableMetadata(
+    engine::scripts::getGlobalVariableMetadata(
     const std::string& moduleName) const {
     if (!_engine->GetModule(moduleName.c_str())) {
         _logger.error("Could not return variable metadata of non-existent module "
@@ -983,6 +983,28 @@ engine::scripts::getGlobalVariableMetadata(
         return {};
     }
     return _variableMetadata.at(moduleName);
+}
+
+engine::scripts::global_functions_and_their_namespaces
+    engine::scripts::getGlobalFunctionsAndTheirNamespaces(
+    const std::string& moduleName) const {
+    if (!_engine->GetModule(moduleName.c_str())) {
+        _logger.error("Could not return the namespaces of functions within "
+            "non-existent module \"{}\".", moduleName);
+        return {};
+    }
+    return _functionNamespaces.at(moduleName);
+}
+
+engine::scripts::global_variables_and_their_namespaces
+    engine::scripts::getGlobalVariablesAndTheirNamespaces(
+    const std::string& moduleName) const {
+    if (!_engine->GetModule(moduleName.c_str())) {
+        _logger.error("Could not return the namespaces of variables within "
+            "non-existent module \"{}\".", moduleName);
+        return {};
+    }
+    return _variableNamespaces.at(moduleName);
 }
 
 bool engine::scripts::_load(engine::json& j) {
@@ -1004,14 +1026,41 @@ bool engine::scripts::_load(engine::json& j) {
             return false;
         }
     }
-    // Clear the metadata containers, as we are now going to discard the old
-    // modules.
+    // Clear the metadata and namespace containers, as we are now going to discard
+    // the old modules.
     _functionMetadata.clear();
     _variableMetadata.clear();
+    _functionNamespaces.clear();
+    _variableNamespaces.clear();
     // Now load each module, automatically discarding the previous version of each.
     for (std::size_t i = 0; i < paths.size(); ++i)
         if (!_loadScripts(modules[i].c_str(), paths[i])) return false;
     return true;
+}
+
+// ADAPTATION OF ANGELSCRIPT CODE TAKEN FROM scriptstdstring_utils.cpp
+// This function takes an input string and splits it into parts by looking
+// for a specified delimiter. Example:
+//
+// string str = "A|B||D";
+// array<string>@ array = str.split("|");
+//
+// The resulting array has the following elements:
+//
+// {"A", "B", "", "D"}
+//
+// If str is empty, a vector with a single empty string should be returned.
+// If delim is empty, the string should be split up character by character.
+static std::vector<std::string> stringSplit(const std::string& str,
+    const std::string& delim) {
+    std::vector<std::string> vec;
+    std::size_t pos = 0, prev = 0;
+    while ((pos = str.find(delim, prev)) != std::string::npos) {
+        vec.emplace_back(str.substr(prev, pos - prev));
+        prev = pos + delim.length();
+    }
+    vec.emplace_back(str.substr(prev));
+    return vec;
 }
 
 bool engine::scripts::_loadScripts(const char* const moduleName,
@@ -1067,6 +1116,16 @@ bool engine::scripts::_loadScripts(const char* const moduleName,
     const auto m = _builder.GetModule();
     for (asUINT i = 0, len = m->GetFunctionCount(); i < len; ++i) {
         const auto func = m->GetFunctionByIndex(i);
+        _functionNamespaces[moduleName][func] = {};
+        const auto namespaces = func->GetNamespace();
+        if (namespaces) {
+            _functionNamespaces[moduleName][func] = stringSplit(namespaces, "::");
+            // If there's one empty string element in the vector, delete it, as
+            // this indicates it's within the global namespace.
+            if (_functionNamespaces[moduleName][func].size() == 1 &&
+                _functionNamespaces[moduleName][func][0].empty())
+                _functionNamespaces[moduleName][func].clear();
+        }
         const auto data = _builder.GetMetadataForFunc(func);
         if (!data.empty()) {
             _functionMetadata[moduleName][func].declaration =
@@ -1074,7 +1133,18 @@ bool engine::scripts::_loadScripts(const char* const moduleName,
             _functionMetadata[moduleName][func].metadata = data;
         }
     }
+    const char* namespaces = nullptr;
     for (asUINT i = 0, len = m->GetGlobalVarCount(); i < len; ++i) {
+        _variableNamespaces[moduleName][i] = {};
+        m->GetGlobalVar(i, nullptr, &namespaces);
+        if (namespaces) {
+            _variableNamespaces[moduleName][i] = stringSplit(namespaces, "::");
+            // If there's one empty string element in the vector, delete it, as
+            // this indicates it's within the global namespace.
+            if (_variableNamespaces[moduleName][i].size() == 1 &&
+                _variableNamespaces[moduleName][i][0].empty())
+                _variableNamespaces[moduleName][i].clear();
+        }
         const auto data = _builder.GetMetadataForVar(i);
         if (!data.empty()) {
             _variableMetadata[moduleName][i].declaration =
