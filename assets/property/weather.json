@@ -1,7 +1,7 @@
 {
 	"CLEAR": {
-		"longname": "CLEAR_longname",
-		"shortname": "CLEAR_shortname",
+		"longName": "CLEAR_longname",
+		"shortName": "CLEAR_shortname",
 		"icon": "weather.clear",
 		"description": "CLEAR_description",
 		"sound": "weather.clear",
@@ -38,8 +38,8 @@
 		]
 	},
 	"RAIN": {
-		"longname": "RAIN_longname",
-		"shortname": "RAIN_shortname",
+		"longName": "RAIN_longname",
+		"shortName": "RAIN_shortname",
 		"icon": "weather.rain",
 		"description": "RAIN_description",
 		"sound": "weather.rain",
@@ -82,8 +82,8 @@
 		]
 	},
 	"SANDSTORM": {
-		"longname": "SANDSTORM_longname",
-		"shortname": "SANDSTORM_shortname",
+		"longName": "SANDSTORM_longname",
+		"shortName": "SANDSTORM_shortname",
 		"icon": "weather.sandstorm",
 		"description": "SANDSTORM_description",
 		"sound": "weather.sandstorm",
@@ -119,8 +119,8 @@
 		]
 	},
 	"SNOW": {
-		"longname": "SNOW_longname",
-		"shortname": "SNOW_shortname",
+		"longName": "SNOW_longname",
+		"shortName": "SNOW_shortname",
 		"icon": "weather.snow",
 		"description": "SNOW_description",
 		"sound": "weather.snow",

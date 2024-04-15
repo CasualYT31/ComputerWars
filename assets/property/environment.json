@@ -1,38 +1,38 @@
 {
 	"NORMAL": {
-		"longname": "NORMAL_longname",
-		"shortname": "NORMAL_shortname",
+		"longName": "NORMAL_longname",
+		"shortName": "NORMAL_shortname",
 		"icon": "environment.normal",
 		"description": "NORMAL_description",
 		"spritesheet": "tile.normal",
-		"picturespritesheet": "tilePicture.normal",
-		"structureiconspritesheet": "structure"
+		"pictureSpritesheet": "tilePicture.normal",
+		"structureIconSpritesheet": "structure"
 	},
 	"WASTELAND": {
-		"longname": "WASTELAND_longname",
-		"shortname": "WASTELAND_shortname",
+		"longName": "WASTELAND_longname",
+		"shortName": "WASTELAND_shortname",
 		"icon": "environment.wasteland",
 		"description": "WASTELAND_description",
 		"spritesheet": "tile.normal",
-		"picturespritesheet": "tilePicture.normal",
-		"structureiconspritesheet": "structure"
+		"pictureSpritesheet": "tilePicture.normal",
+		"structureIconSpritesheet": "structure"
 	},
 	"SNOWY": {
-		"longname": "SNOWY_longname",
-		"shortname": "SNOWY_shortname",
+		"longName": "SNOWY_longname",
+		"shortName": "SNOWY_shortname",
 		"icon": "environment.snowy",
 		"description": "SNOWY_description",
 		"spritesheet": "tile.normal",
-		"picturespritesheet": "tilePicture.normal",
-		"structureiconspritesheet": "structure"
+		"pictureSpritesheet": "tilePicture.normal",
+		"structureIconSpritesheet": "structure"
 	},
 	"SANDY": {
-		"longname": "SANDY_longname",
-		"shortname": "SANDY_shortname",
+		"longName": "SANDY_longname",
+		"shortName": "SANDY_shortname",
 		"icon": "environment.sandy",
 		"description": "SANDY_description",
 		"spritesheet": "tile.normal",
-		"picturespritesheet": "tilePicture.normal",
-		"structureiconspritesheet": "structure"
+		"pictureSpritesheet": "tilePicture.normal",
+		"structureIconSpritesheet": "structure"
 	}
 }

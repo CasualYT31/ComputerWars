@@ -82,47 +82,26 @@ int main(int argc, char* argv[]) {
 #endif
         engine::logger rootLogger({ sink, "main" });
 
-        awe::bank<awe::country> bank(nullptr, rootLogger.getData());
-        bank.load("assets/property/country.json");
+        std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>(rootLogger.getData());
+        scripts->load("assets/test-scripts.json");
 
-        for (auto itr = bank.cbegin(), end = bank.cend(); itr != end; ++itr) {
-            // Won't compile, which is good.
-            //itr->longName() = "Test!";
-            // But we can read:
-            rootLogger.write("{}: {}, {}, {}, {}, {}",
-                itr->scriptName(), itr->longName(), itr->shortName(),
-                itr->icon(), itr->description(), itr->colour());
-        }
+        awe::bank<awe::commander> commanders(nullptr, rootLogger.getData());
+        commanders.load("assets/property/co.json");
 
-        const auto o = awe::overrides().commander("JAKE").weather("CLEAR");
+        awe::bank<awe::weather> weathers(nullptr, rootLogger.getData());
+        weathers.load("assets/property/weather.json");
 
-        (bank.begin() + 2)->longName(o) = "JAKE ON GREEN DURING A CLEAR DAY";
+        awe::bank<awe::environment> environments(nullptr, rootLogger.getData());
+        environments.load("assets/property/environment.json");
 
-        for (auto itr = bank.begin(), end = bank.end(); itr != end; ++itr) {
-            // Not sure this is the behaviour I want, pretty sure if there isn't an
-            // override for the given value/s, it should default to the ELSE branch
-            // like I have in my notes. But in fairness I think that's because those
-            // branches need to be set manually. At least the overrides work.
-            itr->shortName(o) = "Test!";
-            rootLogger.write("{}: {}, {}, {}, {}, {}",
-                itr->scriptName(), itr->longName(o), itr->shortName(o),
-                itr->icon(o), itr->description(o), itr->colour(o));
-        }
+        awe::bank<awe::country> countries(nullptr, rootLogger.getData());
+        countries.load("assets/property/country.json");
 
-        awe::overrides::setFactoryFunction([](awe::overrides& overrides) {
-            return overrides.commander("NOCO");
-        });
+        awe::bank<awe::movement_type> movementTypes(nullptr, rootLogger.getData());
+        movementTypes.load("assets/property/movement.json");
 
-        const auto o2 = awe::overrides();
-        rootLogger.write("{}", o2.commander());
-
-        rootLogger.write("TEST={}", (bank.end() - 1)->turnOrder() == bank.size() - 1);
-
-        // Reset the function.
-        awe::overrides::setFactoryFunction({});
-
-        const auto o3 = awe::overrides();
-        rootLogger.write("{}", o3.commander());
+        awe::processOverrides(scripts, commanders);
+        awe::processOverrides(scripts, weathers, commanders);
 
         //awe::game_engine engine({ sink, "engine" });
         //{

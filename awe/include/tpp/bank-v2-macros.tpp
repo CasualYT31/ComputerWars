@@ -78,10 +78,10 @@ public: \
 #define GAME_PROPERTY_4(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, e, a) class cc { \
     std::string _scriptName; \
 public: \
-	static constexpr char* const type = ac; \
-	static constexpr char* const global_property = gp; \
-    static constexpr std::array<const char* const, 4> fields = { #p1, #p2, #p3, #p4, }; \
-    static constexpr std::size_t overrideID = i; \
+	inline static const std::string type = ac; \
+	inline static const std::string global_property = gp; \
+    inline static const std::array<std::string, 4> fields = { #p1, #p2, #p3, #p4, }; \
+    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), \
         _scriptName(scriptName) { e } \
@@ -92,10 +92,10 @@ public: \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) \
-    static constexpr bool hasField(const std::string_view field) { \
+    inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || false; \
     } \
-	static constexpr const char* const getFieldAngelScriptType(const std::string_view field) { \
+	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
 		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; \
 		return ""; \
 	} \
@@ -124,10 +124,10 @@ public: \
 #define GAME_PROPERTY_5(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, e, a) class cc { \
     std::string _scriptName; \
 public: \
-	static constexpr char* const type = ac; \
-	static constexpr char* const global_property = gp; \
-    static constexpr std::array<const char* const, 5> fields = { #p1, #p2, #p3, #p4, #p5, }; \
-    static constexpr std::size_t overrideID = i; \
+	inline static const std::string type = ac; \
+	inline static const std::string global_property = gp; \
+    inline static const std::array<std::string, 5> fields = { #p1, #p2, #p3, #p4, #p5, }; \
+    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), \
         _scriptName(scriptName) { e } \
@@ -138,10 +138,10 @@ public: \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) \
-    static constexpr bool hasField(const std::string_view field) { \
+    inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || false; \
     } \
-	static constexpr const char* const getFieldAngelScriptType(const std::string_view field) { \
+	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
 		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; \
 		return ""; \
 	} \
@@ -170,10 +170,10 @@ public: \
 #define GAME_PROPERTY_6(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, e, a) class cc { \
     std::string _scriptName; \
 public: \
-	static constexpr char* const type = ac; \
-	static constexpr char* const global_property = gp; \
-    static constexpr std::array<const char* const, 6> fields = { #p1, #p2, #p3, #p4, #p5, #p6, }; \
-    static constexpr std::size_t overrideID = i; \
+	inline static const std::string type = ac; \
+	inline static const std::string global_property = gp; \
+    inline static const std::array<std::string, 6> fields = { #p1, #p2, #p3, #p4, #p5, #p6, }; \
+    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), \
         _scriptName(scriptName) { e } \
@@ -184,10 +184,10 @@ public: \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) PROPERTY(cc, ac, p6, t6, i, e6) \
-    static constexpr bool hasField(const std::string_view field) { \
+    inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || false; \
     } \
-	static constexpr const char* const getFieldAngelScriptType(const std::string_view field) { \
+	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
 		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; if (field == #p6) return awe::AngelScriptOverrideType<t6>::value; \
 		return ""; \
 	} \
@@ -216,10 +216,10 @@ public: \
 #define GAME_PROPERTY_7(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, e, a) class cc { \
     std::string _scriptName; \
 public: \
-	static constexpr char* const type = ac; \
-	static constexpr char* const global_property = gp; \
-    static constexpr std::array<const char* const, 7> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, }; \
-    static constexpr std::size_t overrideID = i; \
+	inline static const std::string type = ac; \
+	inline static const std::string global_property = gp; \
+    inline static const std::array<std::string, 7> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, }; \
+    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), p7(j, logger), \
         _scriptName(scriptName) { e } \
@@ -230,10 +230,10 @@ public: \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) PROPERTY(cc, ac, p6, t6, i, e6) PROPERTY(cc, ac, p7, t7, i, e7) \
-    static constexpr bool hasField(const std::string_view field) { \
+    inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || false; \
     } \
-	static constexpr const char* const getFieldAngelScriptType(const std::string_view field) { \
+	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
 		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; if (field == #p6) return awe::AngelScriptOverrideType<t6>::value; if (field == #p7) return awe::AngelScriptOverrideType<t7>::value; \
 		return ""; \
 	} \
@@ -262,10 +262,10 @@ public: \
 #define GAME_PROPERTY_10(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, p9, t9, e9, p10, t10, e10, e, a) class cc { \
     std::string _scriptName; \
 public: \
-	static constexpr char* const type = ac; \
-	static constexpr char* const global_property = gp; \
-    static constexpr std::array<const char* const, 10> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, }; \
-    static constexpr std::size_t overrideID = i; \
+	inline static const std::string type = ac; \
+	inline static const std::string global_property = gp; \
+    inline static const std::array<std::string, 10> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, }; \
+    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), p7(j, logger), p8(j, logger), p9(j, logger), p10(j, logger), \
         _scriptName(scriptName) { e } \
@@ -276,10 +276,10 @@ public: \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) PROPERTY(cc, ac, p6, t6, i, e6) PROPERTY(cc, ac, p7, t7, i, e7) PROPERTY(cc, ac, p8, t8, i, e8) PROPERTY(cc, ac, p9, t9, i, e9) PROPERTY(cc, ac, p10, t10, i, e10) \
-    static constexpr bool hasField(const std::string_view field) { \
+    inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || false; \
     } \
-	static constexpr const char* const getFieldAngelScriptType(const std::string_view field) { \
+	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
 		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; if (field == #p6) return awe::AngelScriptOverrideType<t6>::value; if (field == #p7) return awe::AngelScriptOverrideType<t7>::value; if (field == #p8) return awe::AngelScriptOverrideType<t8>::value; if (field == #p9) return awe::AngelScriptOverrideType<t9>::value; if (field == #p10) return awe::AngelScriptOverrideType<t10>::value; \
 		return ""; \
 	} \
