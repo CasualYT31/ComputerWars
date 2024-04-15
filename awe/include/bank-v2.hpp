@@ -87,6 +87,7 @@ namespace awe {
 		static void setFactoryFunction(
 			const std::function<void(awe::overrides&)>& func) { _factory = func; }
 		overrides() { if (_factory) _factory(*this); }
+		overrides(const awe::overrides& cpy) : _overrides(cpy._overrides) {}
 		/**
 		 * Creates the overrides.
 		 * @return Pointer to the overrides.
@@ -603,54 +604,91 @@ namespace awe {
 				std::variant<asUINT, asIScriptFunction*>>>> overrideValues;
 			// 1. Go through each override bank and extract valid override vars and funcs.
 			processOverridesForBank(overrideValues, scripts, vars, funcs, banks...);
-			// 2. Calculate overrides, storing into std::any objects.
-			std::unordered_map<awe::overrides, std::any> calculatedValues;
-			for (const auto& baseTypeScriptName : overrideValues) {
-				for (const auto field : T::fields) {
-					// Begin the override value calculation for each field in T with its default value.
+			// 2. Calculate overrides and store them in each field.
+			for (auto& gameProperty : *this) {
+				for (const auto& field : T::fields) {
+					std::any defaultValue = gameProperty.second->getFieldDefaultValue(field);
 					awe::overrides overrides;
-					calculateOverrideForField(
-						calculatedValues,
+					calculateOverride(
 						scripts,
+						gameProperty,
 						field,
 						overrides,
+						defaultValue,
 						overrideValues,
-						_bank.at(baseTypeScriptName)->getFieldDefaultValue(field),
 						banks...
-					) // This isn't right...
+					);
 				}
 			}
-			// 3. Populate field overrides with std::any objects.
 		}
 
 		// Terminate as no more banks left.
-		void calculateOverrideForField(std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
-			std::any>>>& calculatedValues,
+		void calculateOverride(
 			const std::shared_ptr<engine::scripts>& scripts,
-			const std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
-			std::variant<asUINT, asIScriptFunction*>>>>& overrideValues) {}
-
-		template<typename O, typename... Os>
-		void calculateOverrideForField(std::unordered_map<awe::overrides, std::any>& calculatedValues,
-			const std::shared_ptr<engine::scripts>& scripts,
+			const bank<T>::iterator& gameProperty,
 			const char* const field,
 			awe::overrides& overrides,
+			std::any& parent,
 			const std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
-			std::variant<asUINT, asIScriptFunction*>>>>& overrideValues,
-			const std::any& parent,
+				std::variant<asUINT, asIScriptFunction*>>>>& overrideValues
+		) {
+			// 4. Store the override.
+			gameProperty.second->setFieldValue(field, parent, overrides);
+		}
+
+		template<typename O, typename... Os>
+		void calculateOverride(
+			const std::shared_ptr<engine::scripts>& scripts,
+			const bank<T>::iterator& gameProperty,
+			const char* const field,
+			awe::overrides& overrides,
+			std::any& parent,
+			const std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string,
+				std::variant<asUINT, asIScriptFunction*>>>>& overrideValues,
 			const O& bank,
-			Os... banks) {
-			for (const auto& baseTypeScriptName : overrideValues) {
-				// baseTypeScriptName now holds the name of the field we are overriding (.first),
-				// and the override types we are overriding with (.second).
-				// We use O::type::type to access the override type we care about in this call.
-				for (const auto& overrideTypeScriptName : overrideValues[O::type::type]) {
-					// .first = the script name of the game property that is overriding.
-					// .second = function or variable.
-					if ()
-				}
+			Os... banks
+		) {
+			// If there's no overrides for this layer in the hierarchy, traverse to the next one.
+			if (overrideValues[gameProperty.first][O::type::type].empty()) {
+				calculateOverride(
+					scripts,
+					gameProperty,
+					field,
+					overrides,
+					parent,
+					overrideValues,
+					banks...
+				);
+				return;
 			}
-			overrideValues[O::type::type]
+			for (const auto& overrider : overrideValues[gameProperty.first][O::type::type]) {
+				// 1. If this isn't the else branch, apply the override.
+				std::any depthCopy(parent);
+				if (!overrider.first.empty()) {
+					if (const asUINT* const var = std::get_if<asUINT>(overrider.second)) {
+						// Global variable, replace value.
+						depthCopy = awe::OverrideVariable::read(scripts, *var);
+					} else if (asIScriptFunction** const func = std::get_if<asIScriptFunction*>(overrider.second)) {
+						// Global function, perform code on value.
+						depthCopy = awe::OverrideFunction::read(scripts, *func, depthCopy);
+					} else {
+						assert(false);
+					}
+				}
+				// 2. Create copy of overrides, and apply this overrider's script name.
+				awe::overrides depthCopyOverrides(overrides);
+				depthCopyOverrides[O::type::overrideID] = overrider.first;
+				// 3. Make recursive call.
+				calculateOverride(
+					scripts,
+					gameProperty,
+					field,
+					depthCopyOverrides,
+					depthCopy,
+					overrideValues,
+					banks...
+				);
+			}
 		}
 
 		// Terminate as no more banks left.
@@ -677,6 +715,11 @@ namespace awe {
 			std::vector<engine::scripts::global_functions_and_their_namespaces::value_type>>& funcs,
 			const O& bank,
 			Os... banks) {
+			// Each bank given will need an empty scriptName representing the "else" branch.
+			// I.e. "no overrides" for that level in the hierarchy.
+			overrideValues[baseTypeScriptName][overriderType][overriderTypeScriptName] =
+				var.first
+
 			// vars and funcs will be within four namespaces.
 			if (vars.count(T::type)) {
 				for (const auto& var : vars[T::type]) {
@@ -695,9 +738,9 @@ namespace awe {
 					if (overriderType != O::type::type) {
 						// Tiny UX problem: we can't tell here if it's actually an
 						// invalid overrider type, or if it's just a type we haven't
-						// visited yet (i.e. it's within banks). To warn of these,
-						// we'll have to maintain a separate list of unused entries
-						// and report them all later.
+						// visited yet (i.e. it's within Os... banks). To warn of
+						// these, we'll have to maintain a separate list of unused
+						// entries and report them all later.
 						continue;
 					}
 
@@ -784,14 +827,95 @@ namespace awe {
 
 					// 6. All checks pass, store the override.
 					overrideValues[baseTypeScriptName][overriderType][overriderTypeScriptName] =
-						var.first
+						var.first;
+					// And make sure the else branch is stored.
+					overrideValues[baseTypeScriptName][overriderType][""] = {};
+				}
+			}
+			if (funcs.count(T::type)) {
+				for (const auto& func : funcs[T::type]) {
+					// 1. Is the base type script name valid?
+					const auto& baseTypeScriptName = func.second[1];
+					if (!contains(baseTypeScriptName)) {
+						_logger.error("Attempting to override fields within game "
+							"property \"{}\" of type \"{}\", the former of which "
+							"does not exist.", baseTypeScriptName, T::type);
+						continue;
+					}
+
+					// 2. Is the overrider type valid? Does it exist and is it
+					//    within the acceptable range of the hierarchy?
+					const auto& overriderType = func.second[2];
+					if (overriderType != O::type::type) {
+						// Tiny UX problem: we can't tell here if it's actually an
+						// invalid overrider type, or if it's just a type we haven't
+						// visited yet (i.e. it's within Os... banks). To warn of
+						// these, we'll have to maintain a separate list of unused
+						// entries and report them all later.
+						continue;
+					}
+
+					// 3. Is the overrider type script name valid?
+					const auto& overriderTypeScriptName = func.second[3];
+					if (!bank.contains(overriderTypeScriptName)) {
+						_logger.error("Attempting to override fields within game "
+							"property \"{}\" of type \"{}\", with game property "
+							"\"{}\" of overrider type \"{}\". The overrider game "
+							"property \"{}\" does not exist.", baseTypeScriptName,
+							T::type, overriderTypeScriptName, O::type::type,
+							overriderTypeScriptName);
+						continue;
+					}
+
+					// 4. Does the function name match a field name?
+					std::string funcName(func->GetName());
+					if (!T::hasField(funcName)) {
+						_logger.error("Attempting to override non-existent field "
+							"\"{}\" within game property \"{}\" of type \"{}\", "
+							"with game property \"{}\" of overrider type \"{}\".",
+							funcName, baseTypeScriptName, T::type,
+							overriderTypeScriptName, O::type::type);
+						continue;
+					}
+					
+					// 5. Does the function signature match the field's type?
+					const auto actualType = T::getFieldAngelScriptType(varName);
+					std::string funcSignature(func->GetDeclaration(true, true, true));
+					if (func->GetParamCount() != 1) {
+						_logger.error("Attempting to override field \"{}\" of "
+							"type \"{}\" within game property \"{}\" of type "
+							"\"{}\", with game property \"{}\" of overrider type "
+							"\"{}\", with function \"{}\". The function must have "
+							"only one parameter of type \"{}&\".",
+							funcName, actualType, baseTypeScriptName, T::type,
+							overriderTypeScriptName, O::type::type, varType,
+							funcSignature, actualType);
+						continue;
+					}
+					int typeID = 0; asETypeModifiers mods;
+					func->GetParam(0, &typeID, &mods);
+					const auto funcType = _scripts->getTypeName(typeID);
+					if (funcType != actualType || !(mods & asETypeModifiers::asTM_INOUTREF)) {
+						_logger.error("Attempting to override field \"{}\" of "
+							"type \"{}\" within game property \"{}\" of type "
+							"\"{}\", with game property \"{}\" of overrider type "
+							"\"{}\", with function \"{}\". The function must have "
+							"only one parameter of type \"{}&\".",
+							funcName, actualType, baseTypeScriptName, T::type,
+							overriderTypeScriptName, O::type::type, varType,
+							funcSignature, actualType);
+						continue;
+					}
+
+					// 6. All checks pass, store the override.
+					overrideValues[baseTypeScriptName][overriderType][overriderTypeScriptName] =
+						func.first;
+					// And make sure the else branch is stored.
+					overrideValues[baseTypeScriptName][overriderType][""] = {};
 				}
 			}
 
 			processOverridesForBanks(overrideValues, scripts, vars, funcs, banks...);
-
-
-
 
 			//// Function overrides will always replace any variable overrides, if
 			//// they're for the same game property.
@@ -881,8 +1005,8 @@ namespace BaseType {
 			namespace OverriderScriptName {
 				const string tile = "oscity"; // Prefer const...
 				string tile = "oscity";       // ...but technically it doesn't matter.
-				uint vision(uint parent) {
-					return parent + 2;
+				void vision(uint& parent) {
+					parent + 2;
 				}
 			}
 		}
@@ -925,6 +1049,9 @@ void processOverrides(const std::shared_ptr<engine::scripts>& scripts) {
 		engine::scripts::modules[engine::scripts::BANK_OVERRIDE]);
 	std::unordered_map<std::string, std::vector<std::pair<asIScriptFunction*, std::vector<std::string>>>> filteredFuncs;
 	filterOnBaseType(funcs, filteredFuncs);
-
-	// 2. Go through each bank, 
+	// 2. Go through each bank, and process every valid override.
+	//commanders->processOverrides(scripts, filteredVars, filteredFuncs);
+	//weathers->processOverrides(scripts, filteredVars, filteredFuncs, commanders);
+	//environments->processOverrides(scripts, filteredVars, filteredFuncs, weathers, commanders);
+	// Etc.
 }

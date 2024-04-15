@@ -81,6 +81,7 @@ public: \
 	static constexpr char* const type = ac; \
 	static constexpr char* const global_property = gp; \
     static constexpr std::array<const char* const, 4> fields = { #p1, #p2, #p3, #p4, }; \
+    static constexpr std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), \
         _scriptName(scriptName) { e } \
@@ -114,6 +115,9 @@ public: \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); \
         return {}; \
     } \
+    void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value);  \
+    } \
     a \
 };
 
@@ -123,6 +127,7 @@ public: \
 	static constexpr char* const type = ac; \
 	static constexpr char* const global_property = gp; \
     static constexpr std::array<const char* const, 5> fields = { #p1, #p2, #p3, #p4, #p5, }; \
+    static constexpr std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), \
         _scriptName(scriptName) { e } \
@@ -156,6 +161,9 @@ public: \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); if (field == #p5) return p5(); \
         return {}; \
     } \
+    void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value);  \
+    } \
     a \
 };
 
@@ -165,6 +173,7 @@ public: \
 	static constexpr char* const type = ac; \
 	static constexpr char* const global_property = gp; \
     static constexpr std::array<const char* const, 6> fields = { #p1, #p2, #p3, #p4, #p5, #p6, }; \
+    static constexpr std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), \
         _scriptName(scriptName) { e } \
@@ -198,6 +207,9 @@ public: \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); if (field == #p5) return p5(); if (field == #p6) return p6(); \
         return {}; \
     } \
+    void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value);  \
+    } \
     a \
 };
 
@@ -207,6 +219,7 @@ public: \
 	static constexpr char* const type = ac; \
 	static constexpr char* const global_property = gp; \
     static constexpr std::array<const char* const, 7> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, }; \
+    static constexpr std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), p7(j, logger), \
         _scriptName(scriptName) { e } \
@@ -240,6 +253,9 @@ public: \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); if (field == #p5) return p5(); if (field == #p6) return p6(); if (field == #p7) return p7(); \
         return {}; \
     } \
+    void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value);  \
+    } \
     a \
 };
 
@@ -249,6 +265,7 @@ public: \
 	static constexpr char* const type = ac; \
 	static constexpr char* const global_property = gp; \
     static constexpr std::array<const char* const, 10> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, }; \
+    static constexpr std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), p7(j, logger), p8(j, logger), p9(j, logger), p10(j, logger), \
         _scriptName(scriptName) { e } \
@@ -281,6 +298,9 @@ public: \
     std::any getFieldDefaultValue(const std::string& field) { \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); if (field == #p5) return p5(); if (field == #p6) return p6(); if (field == #p7) return p7(); if (field == #p8) return p8(); if (field == #p9) return p9(); if (field == #p10) return p10(); \
         return {}; \
+    } \
+    void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value); if (field == #p8) p8(overrides) = std::any_cast<t8>(value); if (field == #p9) p9(overrides) = std::any_cast<t9>(value); if (field == #p10) p10(overrides) = std::any_cast<t10>(value);  \
     } \
     a \
 };

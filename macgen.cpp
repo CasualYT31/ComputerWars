@@ -4,6 +4,7 @@ public: \
 	static constexpr char* const type = ac; \
 	static constexpr char* const global_property = gp; \
     static constexpr std::array<const char* const, $> fields = { `#p$, `}; \
+    static constexpr std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
         `p$(j, logger), `\
         _scriptName(scriptName) { e } \
@@ -36,6 +37,9 @@ public: \
     std::any getFieldDefaultValue(const std::string& field) { \
         `if (field == #p$) return p$(); `\
         return {}; \
+    } \
+    void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
+        `if (field == #p$) p$(overrides) = std::any_cast<t$>(value); ` \
     } \
     a \
 };
