@@ -1153,8 +1153,9 @@ bool engine::scripts::_loadScripts(const char* const moduleName,
             r);
         return false;
     }
-    _logger.write("Loading metadata for module \"{}\"...",
+    _logger.write("Loading metadata and namespaces for module \"{}\"...",
         moduleName);
+    _functionNamespaces[moduleName] = {};
     const auto m = _builder.GetModule();
     for (asUINT i = 0, len = m->GetFunctionCount(); i < len; ++i) {
         const auto func = m->GetFunctionByIndex(i);
@@ -1175,6 +1176,7 @@ bool engine::scripts::_loadScripts(const char* const moduleName,
             _functionMetadata[moduleName][func].metadata = data;
         }
     }
+    _variableNamespaces[moduleName] = {};
     const char* namespaces = nullptr;
     for (asUINT i = 0, len = m->GetGlobalVarCount(); i < len; ++i) {
         _variableNamespaces[moduleName][i] = {};

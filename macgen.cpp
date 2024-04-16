@@ -34,6 +34,10 @@ public: \
 		`if (field == #p$) return awe::OverrideFunction<t$>::read(scripts, function, parent); `\
 		return {}; \
 	} \
+    static bool isFieldOverrideable(const std::string& field) { \
+        `if (field == #p$) return !awe::AngelScriptOverrideType<t$>::value.empty(); `\
+        return false; \
+    } \
     std::any getFieldDefaultValue(const std::string& field) { \
         `if (field == #p$) return p$(); `\
         return {}; \

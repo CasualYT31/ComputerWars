@@ -46,7 +46,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public: \\
 	n##_(engine::json& j, engine::logger& logger) : _##n(j, { #n }, logger) { e } \\
 	static void Register(asIScriptEngine* engine) { \\
-		if constexpr (awe::AngelScriptType<ct>::value[0] == '\\0') return; \\
+		if (awe::AngelScriptType<ct>::value.empty()) return; \\
 		std::stringstream builder; \\
 		builder << "const "; \\
 		builder << awe::AngelScriptType<ct>::value; \\

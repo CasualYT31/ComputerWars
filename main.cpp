@@ -103,6 +103,13 @@ int main(int argc, char* argv[]) {
         awe::processOverrides(scripts, commanders);
         awe::processOverrides(scripts, weathers, commanders);
 
+        rootLogger.write("{} --- {}", weathers["CLEAR"]->longName(), weathers["CLEAR"]->longName(awe::overrides().commander("JAKE")));
+        rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), weathers["CLEAR"]->shortName(awe::overrides().commander("JAKE")));
+
+        // TODO:
+        //      Keep testing.
+        //      
+
         //awe::game_engine engine({ sink, "engine" });
         //{
         //    // Find assets folder path from command-line arguments.

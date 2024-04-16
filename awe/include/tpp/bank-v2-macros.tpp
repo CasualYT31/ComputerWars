@@ -38,7 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 public: \
 	n##_(engine::json& j, engine::logger& logger) : _##n(j, { #n }, logger) { e } \
 	static void Register(asIScriptEngine* engine) { \
-		if constexpr (awe::AngelScriptType<ct>::value[0] == '\0') return; \
+		if (awe::AngelScriptType<ct>::value.empty()) return; \
 		std::stringstream builder; \
 		builder << "const "; \
 		builder << awe::AngelScriptType<ct>::value; \
@@ -111,6 +111,10 @@ public: \
 		if (field == #p1) return awe::OverrideFunction<t1>::read(scripts, function, parent); if (field == #p2) return awe::OverrideFunction<t2>::read(scripts, function, parent); if (field == #p3) return awe::OverrideFunction<t3>::read(scripts, function, parent); if (field == #p4) return awe::OverrideFunction<t4>::read(scripts, function, parent); \
 		return {}; \
 	} \
+    static bool isFieldOverrideable(const std::string& field) { \
+        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); \
+        return false; \
+    } \
     std::any getFieldDefaultValue(const std::string& field) { \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); \
         return {}; \
@@ -157,6 +161,10 @@ public: \
 		if (field == #p1) return awe::OverrideFunction<t1>::read(scripts, function, parent); if (field == #p2) return awe::OverrideFunction<t2>::read(scripts, function, parent); if (field == #p3) return awe::OverrideFunction<t3>::read(scripts, function, parent); if (field == #p4) return awe::OverrideFunction<t4>::read(scripts, function, parent); if (field == #p5) return awe::OverrideFunction<t5>::read(scripts, function, parent); \
 		return {}; \
 	} \
+    static bool isFieldOverrideable(const std::string& field) { \
+        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); \
+        return false; \
+    } \
     std::any getFieldDefaultValue(const std::string& field) { \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); if (field == #p5) return p5(); \
         return {}; \
@@ -203,6 +211,10 @@ public: \
 		if (field == #p1) return awe::OverrideFunction<t1>::read(scripts, function, parent); if (field == #p2) return awe::OverrideFunction<t2>::read(scripts, function, parent); if (field == #p3) return awe::OverrideFunction<t3>::read(scripts, function, parent); if (field == #p4) return awe::OverrideFunction<t4>::read(scripts, function, parent); if (field == #p5) return awe::OverrideFunction<t5>::read(scripts, function, parent); if (field == #p6) return awe::OverrideFunction<t6>::read(scripts, function, parent); \
 		return {}; \
 	} \
+    static bool isFieldOverrideable(const std::string& field) { \
+        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); if (field == #p6) return !awe::AngelScriptOverrideType<t6>::value.empty(); \
+        return false; \
+    } \
     std::any getFieldDefaultValue(const std::string& field) { \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); if (field == #p5) return p5(); if (field == #p6) return p6(); \
         return {}; \
@@ -249,6 +261,10 @@ public: \
 		if (field == #p1) return awe::OverrideFunction<t1>::read(scripts, function, parent); if (field == #p2) return awe::OverrideFunction<t2>::read(scripts, function, parent); if (field == #p3) return awe::OverrideFunction<t3>::read(scripts, function, parent); if (field == #p4) return awe::OverrideFunction<t4>::read(scripts, function, parent); if (field == #p5) return awe::OverrideFunction<t5>::read(scripts, function, parent); if (field == #p6) return awe::OverrideFunction<t6>::read(scripts, function, parent); if (field == #p7) return awe::OverrideFunction<t7>::read(scripts, function, parent); \
 		return {}; \
 	} \
+    static bool isFieldOverrideable(const std::string& field) { \
+        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); if (field == #p6) return !awe::AngelScriptOverrideType<t6>::value.empty(); if (field == #p7) return !awe::AngelScriptOverrideType<t7>::value.empty(); \
+        return false; \
+    } \
     std::any getFieldDefaultValue(const std::string& field) { \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); if (field == #p5) return p5(); if (field == #p6) return p6(); if (field == #p7) return p7(); \
         return {}; \
@@ -295,6 +311,10 @@ public: \
 		if (field == #p1) return awe::OverrideFunction<t1>::read(scripts, function, parent); if (field == #p2) return awe::OverrideFunction<t2>::read(scripts, function, parent); if (field == #p3) return awe::OverrideFunction<t3>::read(scripts, function, parent); if (field == #p4) return awe::OverrideFunction<t4>::read(scripts, function, parent); if (field == #p5) return awe::OverrideFunction<t5>::read(scripts, function, parent); if (field == #p6) return awe::OverrideFunction<t6>::read(scripts, function, parent); if (field == #p7) return awe::OverrideFunction<t7>::read(scripts, function, parent); if (field == #p8) return awe::OverrideFunction<t8>::read(scripts, function, parent); if (field == #p9) return awe::OverrideFunction<t9>::read(scripts, function, parent); if (field == #p10) return awe::OverrideFunction<t10>::read(scripts, function, parent); \
 		return {}; \
 	} \
+    static bool isFieldOverrideable(const std::string& field) { \
+        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); if (field == #p6) return !awe::AngelScriptOverrideType<t6>::value.empty(); if (field == #p7) return !awe::AngelScriptOverrideType<t7>::value.empty(); if (field == #p8) return !awe::AngelScriptOverrideType<t8>::value.empty(); if (field == #p9) return !awe::AngelScriptOverrideType<t9>::value.empty(); if (field == #p10) return !awe::AngelScriptOverrideType<t10>::value.empty(); \
+        return false; \
+    } \
     std::any getFieldDefaultValue(const std::string& field) { \
         if (field == #p1) return p1(); if (field == #p2) return p2(); if (field == #p3) return p3(); if (field == #p4) return p4(); if (field == #p5) return p5(); if (field == #p6) return p6(); if (field == #p7) return p7(); if (field == #p8) return p8(); if (field == #p9) return p9(); if (field == #p10) return p10(); \
         return {}; \
