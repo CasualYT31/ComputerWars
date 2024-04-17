@@ -3,7 +3,6 @@ namespace Weather {
         namespace Commander {
             namespace JAKE {
                 const string longName("Jake's Clear Weather");
-                // Short is overriding long somehow.
                 string shortName("shortie");
 
                 // void longName(string&out name) {
@@ -18,12 +17,42 @@ namespace Environment {
     namespace NORMAL {
         namespace Weather {
             namespace CLEAR {
-                const string icon("clear");
+                void icon(string&out icon) {
+                    icon += "-clear";
+                }
             }
         }
         namespace Commander {
             namespace JAKE {
-                const string icon("jake");
+                void icon(string&out icon) {
+                    icon += "-jake";
+                }
+            }
+        }
+    }
+}
+
+namespace Country {
+    namespace ORANGE {
+        namespace Environment {
+            namespace NORMAL {
+                void longName(string&out name) {
+                    name += "-normal";
+                }
+            }
+        }
+        namespace Weather {
+            namespace CLEAR {
+                void longName(string&out name) {
+                    name += "-clear";
+                }
+            }
+        }
+        namespace Commander {
+            namespace JAKE {
+                void longName(string&out name) {
+                    name += "-jake";
+                }
             }
         }
     }
