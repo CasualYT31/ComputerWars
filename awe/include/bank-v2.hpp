@@ -739,7 +739,14 @@ namespace awe {
 			if (vars.count(T::type)) {
 				for (const auto& var : vars.at(T::type)) {
 					// 1. Is the base type script name valid?
-					const auto& baseTypeScriptName = var.second[1];
+					std::string baseTypeScriptName = var.second[1];
+					// Ideally, I would never have had script names that begin with
+					// digits. But with so many of my original tile type script names
+					// starting with hex digits, the easiest way to support them is
+					// to prepend them with an underscore that's then removed, as
+					// opposed to fixing them everywhere (scripts, JSON, map files...).
+					if (baseTypeScriptName[0] == '_')
+						baseTypeScriptName = baseTypeScriptName.substr(1);
 					if (!contains(baseTypeScriptName)) {
 						_logger.error("Attempting to override fields within game "
 							"property \"{}\" of type \"{}\", the former of which "
@@ -760,7 +767,9 @@ namespace awe {
 					}
 
 					// 3. Is the overrider type script name valid?
-					const auto& overriderTypeScriptName = var.second[3];
+					std::string overriderTypeScriptName = var.second[3];
+					if (overriderTypeScriptName[0] == '_')
+						overriderTypeScriptName = overriderTypeScriptName.substr(1);
 					if (!bank.contains(overriderTypeScriptName)) {
 						_logger.error("Attempting to override fields within game "
 							"property \"{}\" of type \"{}\", with game property "
@@ -858,7 +867,9 @@ namespace awe {
 			if (funcs.count(T::type)) {
 				for (const auto& func : funcs.at(T::type)) {
 					// 1. Is the base type script name valid?
-					const auto& baseTypeScriptName = func.second[1];
+					std::string baseTypeScriptName = func.second[1];
+					if (baseTypeScriptName[0] == '_')
+						baseTypeScriptName = baseTypeScriptName.substr(1);
 					if (!contains(baseTypeScriptName)) {
 						_logger.error("Attempting to override fields within game "
 							"property \"{}\" of type \"{}\", the former of which "
@@ -879,7 +890,9 @@ namespace awe {
 					}
 
 					// 3. Is the overrider type script name valid?
-					const auto& overriderTypeScriptName = func.second[3];
+					std::string overriderTypeScriptName = func.second[3];
+					if (overriderTypeScriptName[0] == '_')
+						overriderTypeScriptName = overriderTypeScriptName.substr(1);
 					if (!bank.contains(overriderTypeScriptName)) {
 						_logger.error("Attempting to override fields within game "
 							"property \"{}\" of type \"{}\", with game property "

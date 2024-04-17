@@ -35,7 +35,7 @@ namespace Environment {
 namespace Country {
     namespace ORANGE {
         namespace Environment {
-            namespace NORMAL {
+            namespace _NORMAL {
                 void longName(string&out name) {
                     name += "-normal";
                 }
