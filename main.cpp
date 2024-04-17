@@ -102,9 +102,17 @@ int main(int argc, char* argv[]) {
 
         awe::processOverrides(scripts, commanders);
         awe::processOverrides(scripts, weathers, commanders);
+        awe::processOverrides(scripts, environments, weathers, commanders);
 
         rootLogger.write("{} --- {}", weathers["CLEAR"]->longName(), weathers["CLEAR"]->longName(awe::overrides().commander("JAKE")));
-        rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), weathers["CLEAR"]->shortName(awe::overrides().commander("JAKE")));
+        rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), static_cast<const awe::bank<awe::weather>>(weathers)["CLEAR"]->shortName(awe::overrides().commander("JAKER")));
+
+        const auto& e = environments;
+        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKE")));
+        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEARR").commander("JAKE")));
+        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKER")));
+        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("").commander("")));
+        rootLogger.write("Counter");
 
         // TODO:
         //      Keep testing.

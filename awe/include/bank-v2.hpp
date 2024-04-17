@@ -220,7 +220,7 @@ namespace awe {
 	};
 
 	// T = type of field.
-	// N = depth of the hierarchy desired. 1 = just CO, 2 = CO, then weather, etc.
+	// N = depth of the hierarchy desired. 1 = just CO, 2 = weather, then CO, etc.
 	//                                     0 = no overrides.
 	template<typename T, std::size_t N>
 	class property_field {
@@ -236,6 +236,8 @@ namespace awe {
 		}
 		inline typename boost::call_traits<T>::reference operator[](
 			const overrides& overrides) {
+			for (std::size_t i = 0; i < N; ++i)
+				_scriptNamesWithOverrides[i].insert(overrides[i]);
 			return _values[overrides];
 		}
 		inline typename boost::call_traits<T>::const_reference operator[](

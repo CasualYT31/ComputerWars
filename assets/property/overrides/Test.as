@@ -13,3 +13,18 @@ namespace Weather {
         }
     }
 }
+
+namespace Environment {
+    namespace NORMAL {
+        namespace Weather {
+            namespace CLEAR {
+                const string icon("clear");
+            }
+        }
+        namespace Commander {
+            namespace JAKE {
+                const string icon("jake");
+            }
+        }
+    }
+}
