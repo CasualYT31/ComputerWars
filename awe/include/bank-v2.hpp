@@ -73,7 +73,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	}
 
 namespace awe {
-	class overrides : engine::script_reference_type<awe::overrides> {
+	class overrides : public engine::script_reference_type<awe::overrides> {
 		std::array<std::string, GAME_PROPERTY_COUNT> _overrides;
 		// By default, an empty overrides object is constructed.
 		// However, the engine can register its own factory function for overrides
@@ -471,8 +471,12 @@ namespace awe {
 			inline J& operator*() { return *(_itr->second); }
 			inline J* operator->() { return _itr->second.get(); }
 			static std::string Register(asIScriptEngine* engine, std::string t) {
-				const char* const itrPostfix = ((constexpr
-					(std::is_const<J>::value)) ? ("ConstItr") : ("Itr"));
+				const char* itrPostfix = nullptr;
+				if constexpr (std::is_const<J>::value) {
+					itrPostfix = "ConstItr";
+				} else {
+					itrPostfix = "Itr";
+				}
 				const char* const tc = t.append(itrPostfix).c_str();
 				auto r = engine->RegisterObjectType(tc,
 					sizeof(base_iterator<itr_type, J>),
