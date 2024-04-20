@@ -28,6 +28,9 @@ The project has now entered the alpha stage :smile:! [Here's a small demo](https
 ### Build Issue With My Fork of TGUI At Version 0.9
 When I upgraded my fork to the latest 1.x version, I also accidentally synchronised my 0.9 branch, which introduced a CMake configuration error to versions of this codebase that relied on 0.9 of my fork. I cba to fix it properly, so if you want to build old versions of this codebase that use that branch of my fork, you will have to apply the `fix-0.9.patch` to the root of the repository.
 
+### Build Dependencies
+Besides a C++17 compiler and CMake >= 3.14, you'll also require Python >= 3.2 (for `argparse` support). I use Python to generate some macros during CMake configuration. `python/requirements.txt` mentions `pyperclip`, but you won't need this module to get a build up and running.
+
 ### Dependencies
 For information on the versions of libraries I have used for this project, please check the `FetchContent_Declare` statements in the referenced `CMakeLists.txt` files.
 - [SFML](https://github.com/SFML/SFML) (check `engine/CMakeLists.txt`)

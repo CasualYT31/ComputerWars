@@ -57,3 +57,26 @@ namespace Country {
         }
     }
 }
+
+// Don't use pod&out here, I think it frees it early after the function ends?
+void func(pod& passing, const pod&in around) {
+    passing.message = around.message;
+}
+
+void main() {
+    pod test();
+    pod another("another");
+    pod j(another);
+    info(test.message);
+    info(another.message);
+    info(j.message += "2");
+    if (another == j) {
+        info("Yes!");
+    }
+    info((test = another).message);
+    func(another, j);
+    info(another.message);
+    pod finalTest = another;
+    info("?" + finalTest.message);
+    info(j.message);
+}

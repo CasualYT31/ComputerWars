@@ -9,3 +9,5 @@ build/
 *.log
 *.html
 *.htm
+__pycache__
+*.pyc
