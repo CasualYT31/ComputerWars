@@ -86,7 +86,7 @@ add_executable(${PROJECT_NAME}
 	"unittest.cpp"
 	"armytest.cpp"
 	"maptest.cpp")
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD ${CW_CXX_STANDARD})
 target_include_directories(${PROJECT_NAME} PRIVATE ${ComputerWarsAWE_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} gtest gtest_main ComputerWarsAWE)
 # https://cmake.org/cmake/help/latest/module/GoogleTest.html

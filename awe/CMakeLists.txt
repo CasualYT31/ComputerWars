@@ -37,5 +37,5 @@ add_library(${PROJECT_NAME} STATIC
 	"source/map/animations/source/nextturn.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsAWE_INCLUDE_DIRS})
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD ${CW_CXX_STANDARD})
 target_link_libraries(${PROJECT_NAME} ComputerWarsSFX)

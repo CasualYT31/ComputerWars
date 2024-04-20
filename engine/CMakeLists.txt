@@ -122,7 +122,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	${angelscript_SOURCE_DIR}/add_on/scripthandle/
 	${angelscript_SOURCE_DIR}/add_on/weakref/
 	${docgen_SOURCE_DIR}/source/)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD ${CW_CXX_STANDARD})
 target_link_libraries(${PROJECT_NAME}
 	SystemProperties
 	Boxer

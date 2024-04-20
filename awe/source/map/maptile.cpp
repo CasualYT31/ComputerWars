@@ -130,8 +130,8 @@ std::unordered_set<sf::Vector2u> awe::map::querySetTileTypeChangedTiles(
 CScriptArray* awe::map::querySetTileTypeChangedTilesAsArray(
 	const sf::Vector2u& pos) const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("Vector2",
-		querySetTileTypeChangedTiles(pos));
+	const auto changedTiles = querySetTileTypeChangedTiles(pos);
+	return _scripts->createArrayFromContainer("Vector2", changedTiles);
 }
 
 std::shared_ptr<const awe::tile_type> awe::map::getTileType(
@@ -434,8 +434,8 @@ CScriptArray* awe::map::getAvailableTilesAsArray(
 	const sf::Vector2u& tile, const unsigned int startFrom,
 	const unsigned int endAt) const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("Vector2",
-		getAvailableTiles(tile, startFrom, endAt));
+	const auto availableTiles = getAvailableTiles(tile, startFrom, endAt);
+	return _scripts->createArrayFromContainer("Vector2", availableTiles);
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getTilesInCone(sf::Vector2u tile,
@@ -481,8 +481,8 @@ CScriptArray* awe::map::getTilesInConeAsArray(const sf::Vector2u& tile,
 	const direction dir, const unsigned int startFrom,
 	const unsigned int endAt) const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("Vector2",
-		getTilesInCone(tile, dir, startFrom, endAt));
+	const auto tiles = getTilesInCone(tile, dir, startFrom, endAt);
+	return _scripts->createArrayFromContainer("Vector2", tiles);
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getTilesInCrosshair(
@@ -502,8 +502,8 @@ std::unordered_set<sf::Vector2u> awe::map::getTilesInCrosshair(
 CScriptArray* awe::map::getTilesInCrosshairAsArray(
 	const sf::Vector2u& tile) const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("Vector2",
-		getTilesInCrosshair(tile));
+	const auto tiles = getTilesInCrosshair(tile);
+	return _scripts->createArrayFromContainer("Vector2", tiles);
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getTilesInLine(sf::Vector2u tile,
@@ -561,8 +561,8 @@ std::unordered_set<sf::Vector2u> awe::map::getTilesInLine(sf::Vector2u tile,
 CScriptArray* awe::map::getTilesInLineAsArray(const sf::Vector2u& tile,
 	const direction dir, const unsigned int distance) const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("Vector2",
-		getTilesInLine(tile, dir, distance));
+	const auto tiles = getTilesInLine(tile, dir, distance);
+	return _scripts->createArrayFromContainer("Vector2", tiles);
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getTilesInArea(sf::Vector2u tile1,
@@ -586,8 +586,8 @@ std::unordered_set<sf::Vector2u> awe::map::getTilesInArea(sf::Vector2u tile1,
 CScriptArray* awe::map::getTilesInAreaAsArray(const sf::Vector2u& tile1,
 	const sf::Vector2u& tile2) const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("Vector2",
-		getTilesInArea(tile1, tile2));
+	const auto tiles = getTilesInArea(tile1, tile2);
+	return _scripts->createArrayFromContainer("Vector2", tiles);
 }
 
 std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin,
@@ -683,7 +683,8 @@ CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 			ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
 	for (auto& node : vec) {
-		ret->InsertLast(&awe::closed_list_node());
+		awe::closed_list_node element;
+		ret->InsertLast(&element);
 		((awe::closed_list_node*)ret->At(ret->GetSize() - 1))->tile = node.tile;
 		((awe::closed_list_node*)ret->At(ret->GetSize() - 1))->g = node.g;
 	}
@@ -700,7 +701,8 @@ CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
 			ignoredUnits));
 	CScriptArray* ret = _scripts->createArray("ClosedListNode");
 	for (auto& node : vec) {
-		ret->InsertLast(&awe::closed_list_node());
+		awe::closed_list_node element;
+		ret->InsertLast(&element);
 		((awe::closed_list_node*)ret->At(ret->GetSize() - 1))->tile = node.tile;
 		((awe::closed_list_node*)ret->At(ret->GetSize() - 1))->g = node.g;
 	}

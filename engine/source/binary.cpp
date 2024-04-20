@@ -87,28 +87,30 @@ void engine::binary_istream::readString(std::string& str) {
 	}
 }
 
-std::istream& engine::operator>>(std::istream& is, engine::binary_istream& data) {
-	const auto oldpos = is.tellg();
-	is.seekg(0, std::ios::end);
-	const auto size = is.tellg();
-	is.seekg(oldpos);
-	char* const block = reinterpret_cast<char* const>(::malloc(size));
-	if (block) {
-		try {
-			is.seekg(std::ios::beg);
-			is.read(block, size);
-			is.seekg(oldpos);
-			data._stream.clear();
-			data._stream.write(block, size);
-			data._bytes = 0;
-			data._totalBytes = size;
-			::free(block);
-		} catch (...) {
-			::free(block);
-			throw;
+namespace engine {
+	std::istream& operator>>(std::istream& is, binary_istream& data) {
+		const auto oldpos = is.tellg();
+		is.seekg(0, std::ios::end);
+		const auto size = is.tellg();
+		is.seekg(oldpos);
+		char* const block = reinterpret_cast<char* const>(::malloc(size));
+		if (block) {
+			try {
+				is.seekg(std::ios::beg);
+				is.read(block, size);
+				is.seekg(oldpos);
+				data._stream.clear();
+				data._stream.write(block, size);
+				data._bytes = 0;
+				data._totalBytes = size;
+				::free(block);
+			} catch (...) {
+				::free(block);
+				throw;
+			}
 		}
+		return is;
 	}
-	return is;
 }
 
 engine::binary_ostream::binary_ostream(const engine::logger::data& data) :
@@ -154,20 +156,22 @@ void engine::binary_ostream::writeString(const std::string& str) {
 	}
 }
 
-std::ostream& engine::operator<<(std::ostream& os, engine::binary_ostream& data) {
-	char* const block = reinterpret_cast<char* const>(::malloc(data._bytes));
-	if (block) {
-		try {
-			data._stream.read(block, data._bytes);
-			data._stream.seekg(0);
-			os.write(block, data._bytes);
-			::free(block);
-		} catch (...) {
-			::free(block);
-			throw;
+namespace engine {
+	std::ostream& operator<<(std::ostream& os, binary_ostream& data) {
+		char* const block = reinterpret_cast<char* const>(::malloc(data._bytes));
+		if (block) {
+			try {
+				data._stream.read(block, data._bytes);
+				data._stream.seekg(0);
+				os.write(block, data._bytes);
+				::free(block);
+			} catch (...) {
+				::free(block);
+				throw;
+			}
 		}
+		return os;
 	}
-	return os;
 }
 
 void engine::operator>>(engine::binary_ostream& from, engine::binary_istream& to) {

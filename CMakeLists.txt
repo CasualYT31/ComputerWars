@@ -23,6 +23,8 @@ else()
 	add_compile_definitions(AS_GENERATE_DOCUMENTATION=0)
 endif()
 
+set(CW_CXX_STANDARD "20" CACHE STRING "The C++ standard to compile Computer Wars (and the TGUI dependency) in")
+
 # engine namespace/library.
 add_subdirectory("engine")
 
@@ -37,7 +39,7 @@ add_subdirectory("test")
 
 # Application.
 add_executable(${PROJECT_NAME} "main.cpp")
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD ${CW_CXX_STANDARD})
 target_include_directories(${PROJECT_NAME} PRIVATE
 	${ComputerWarsAWE_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ComputerWarsAWE)

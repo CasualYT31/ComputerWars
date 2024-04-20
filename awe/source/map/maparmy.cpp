@@ -97,7 +97,8 @@ std::set<awe::ArmyID> awe::map::getArmyIDs() const {
 
 CScriptArray* awe::map::getArmyIDsAsArray() const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("ArmyID", getArmyIDs());
+	const auto armyIDs = getArmyIDs();
+	return _scripts->createArrayFromContainer("ArmyID", armyIDs);
 }
 
 void awe::map::setArmyTeam(const awe::ArmyID army, const awe::TeamID team) {
@@ -321,8 +322,8 @@ CScriptArray* awe::map::getTilesOfArmyAsArray(const awe::ArmyID army,
 	std::unordered_set<std::shared_ptr<const awe::terrain>> terrainFilter;
 	for (const auto& name : scriptNames)
 		terrainFilter.insert((*_terrains)[name]);
-	return _scripts->createArrayFromContainer("Vector2", getTilesOfArmy(army,
-		terrainFilter));
+	const auto tilesOfArmy = getTilesOfArmy(army, terrainFilter);
+	return _scripts->createArrayFromContainer("Vector2", tilesOfArmy);
 }
 
 std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(
@@ -335,7 +336,8 @@ std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(
 
 CScriptArray* awe::map::getUnitsOfArmyAsArray(const awe::ArmyID army) const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("UnitID", getUnitsOfArmy(army));
+	const auto unitsOfArmy = getUnitsOfArmy(army);
+	return _scripts->createArrayFromContainer("UnitID", unitsOfArmy);
 }
 
 std::map<unsigned int, std::unordered_set<awe::UnitID>>

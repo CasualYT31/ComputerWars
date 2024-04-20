@@ -1192,7 +1192,7 @@ namespace sfx {
 		void _connectSignal(const WidgetIDRef, asIScriptFunction* const);
 		void _disconnectSignals(const CScriptArray* const);
 		WidgetID _getParent(const WidgetIDRef);
-		void sfx::gui::_deleteWidgetScriptInterface(const sfx::WidgetIDRef id);
+		void _deleteWidgetScriptInterface(const sfx::WidgetIDRef id);
 		void _setWidgetName(const WidgetIDRef, const std::string&);
 		std::string _getWidgetName(const WidgetIDRef) const;
 		void _setWidgetFocus(const WidgetIDRef);

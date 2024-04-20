@@ -2,6 +2,7 @@ project("ComputerWarsSFX")
 
 # TGUI
 set(TGUI_BACKEND "SFML_GRAPHICS")
+set(TGUI_CXX_STANDARD ${CW_CXX_STANDARD})
 FetchContent_Declare(tgui
 	# Don't forget to update documentation links in guiregisterinterface.cpp
 	# when updating the version of TGUI.
@@ -27,5 +28,5 @@ add_library(${PROJECT_NAME} STATIC
 	"source/gui/guisignalhandlers.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${ComputerWarsSFX_INCLUDE_DIRS})
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD ${CW_CXX_STANDARD})
 target_link_libraries(${PROJECT_NAME} ComputerWarsEngine tgui)

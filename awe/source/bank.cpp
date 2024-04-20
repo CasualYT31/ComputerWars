@@ -467,8 +467,9 @@ void awe::unit_type::updateWeapons(const awe::bank<awe::weapon>& weaponBank,
 			updateJJNew(jjNew, jjBase, jjOver, "terrains");
 			// For hiddenunits, the override will completely replace the base
 			// object, if an override is given. update() does this for us.
+			engine::json passIn(jjNew, { sink, "json" });
 			const auto newWeapon = std::make_shared<const awe::weapon>(
-				weapon.first, engine::json(jjNew, {sink, "json"}));
+				weapon.first, passIn);
 			_weapons.emplace(weapon.first, newWeapon);
 		}
 	}

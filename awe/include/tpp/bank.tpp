@@ -43,7 +43,7 @@ void awe::bank<T>::registerInterface(asIScriptEngine* engine,
 	// 2. Register the value type that this bank stores (i.e. T).
 	auto r = engine->RegisterObjectType(_propertyName.c_str(), 0,
 		asOBJ_REF | asOBJ_NOCOUNT);
-	T::Register<T>(_propertyName, engine, document);
+	T::template Register<T>(_propertyName, engine, document);
 	// 3. Register a single reference type, called _propertyName + "Bank".
 	const std::string bankTypeName(_propertyName + "Bank"),
 		indexOpStrDecl(

@@ -291,8 +291,8 @@ std::vector<std::string> awe::map::getMementos(
 
 CScriptArray* awe::map::getMementosAsArray(std::size_t& lastKnownMemento) const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("string",
-		getMementos(lastKnownMemento));
+	const auto mementos = getMementos(lastKnownMemento);
+	return _scripts->createArrayFromContainer("string", mementos);
 }
 
 std::string awe::map::getNextUndoMementoName() const {
@@ -403,7 +403,8 @@ std::vector<std::string> awe::map::getScriptNames() const {
 
 CScriptArray* awe::map::getScriptNamesAsArray() const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("string", getScriptNames());
+	const auto scriptNames = getScriptNames();
+	return _scripts->createArrayFromContainer("string", scriptNames);
 }
 
 void awe::map::setSpritesheets(

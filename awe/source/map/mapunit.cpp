@@ -548,7 +548,8 @@ std::unordered_set<awe::UnitID> awe::map::getLoadedUnits(
 
 CScriptArray* awe::map::getLoadedUnitsAsArray(const awe::UnitID id) const {
 	if (!_scripts) throw NO_SCRIPTS;
-	return _scripts->createArrayFromContainer("UnitID", getLoadedUnits(id));
+	const auto loadedUnits = getLoadedUnits(id);
+	return _scripts->createArrayFromContainer("UnitID", loadedUnits);
 }
 
 unsigned int awe::map::getUnitDefence(const awe::UnitID id) const {

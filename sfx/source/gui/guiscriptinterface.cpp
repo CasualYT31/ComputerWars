@@ -845,8 +845,10 @@ CScriptArray* sfx::gui::_getSelectedItemTextHierarchy(
 			const auto item = castWidget->getSelectedItem();
 			arr->Resize(static_cast<asUINT>(item.size()));
 			asUINT i = 0;
-			for (const auto& parent : item)
-				arr->SetValue(i++, &parent.toStdString());
+			for (const auto& parent : item) {
+				auto stdParent = parent.toStdString();
+				arr->SetValue(i++, &stdParent);
+			}
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the hierarchy of the selected item of a widget \"{}\", "
@@ -1764,8 +1766,10 @@ CScriptArray* sfx::gui::_getFileDialogSelectedPaths(
 	START_WITH_WIDGET(id)
 		IF_WIDGET_IS(FileDialog,
 			const auto& paths = castWidget->getSelectedPaths();
-			for (const auto& path : paths)
-				ret->InsertLast(&path.asString().toStdString());
+			for (const auto& path : paths) {
+				auto stdPath = path.asString().toStdString();
+				ret->InsertLast(&stdPath);
+			}
 		)
 		ELSE_UNSUPPORTED()
 	END("Attempted to get the selected paths from widget \"{}\", which is of type "
