@@ -62,6 +62,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // This will be most useful for banks, but I think this will be useful for
 // awe::map-based types, too.
 
+// Small correction: they aren't *technically* POD types in the C++ sense, but they
+// are just fields in a struct pretty much.
+
+// The ultimate aim of this work is to make it super super easy to let objects be
+// overrideable via bank-v2. Both read<>() methods can be supported for POD types
+// out-of-the-box with no need for specialisation. At least, in theory...
+
 DECLARE_POD_1(pod, "pod", std::string, message);
 
 DEFINE_POD_1(pod, "pod", std::string, message);
