@@ -63,7 +63,7 @@ void func(pod& passing, const pod&in around) {
     passing.message = around.message;
 }
 
-void main() {
+void main(Coords simCoords) {
     pod test();
     pod another("another");
     pod j(another);
@@ -77,6 +77,17 @@ void main() {
     func(another, j);
     info(another.message);
     pod finalTest = another;
+    if (finalTest == another) info("EQUAL!");
     info("?" + finalTest.message);
     info(j.message);
+    simCoords.x += -0.5;
+    info(formatFloat(simCoords.x, "", 0, 4));
+    Coords copy = simCoords;
+    copy.x += 0.00001;
+    copy.y -= 0.000001;
+    if (copy == simCoords) info("YES!");
+    copy.z = 10000.78;
+    if (copy != simCoords) info("NO!");
+    CoordPair pair1(simCoords, copy);
+    info(formatFloat(pair1.b.z, "", 0, 4));
 }

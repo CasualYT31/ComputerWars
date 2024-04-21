@@ -21,12 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "script.hpp"
-#include "binary.hpp"
 #include <filesystem>
-#include "SFML/Graphics/Color.hpp"
-#include "SFML/System/Vector2.hpp"
-#include "SFML/System/Clock.hpp"
-#include "SFML/Graphics/Rect.hpp"
 #include "boost/stacktrace.hpp"
 #include "fmtengine.hpp"
 
@@ -67,26 +62,28 @@ static sf::Color White = sf::Color::White;
 
 void engine::RegisterColourType(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) {
-    if (!engine->GetTypeInfoByName("Colour")) {
-        auto r = engine->RegisterObjectType("Colour", sizeof(sf::Color),
+    if (!engine->GetTypeInfoByName(engine::script_type<sf::Color>())) {
+        auto r = engine->RegisterObjectType(engine::script_type<sf::Color>(),
+            sizeof(sf::Color),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Color>());
-        engine->RegisterObjectProperty("Colour", "uint8 r",
+        engine->RegisterObjectProperty(engine::script_type<sf::Color>(), "uint8 r",
             asOFFSET(sf::Color, r));
-        engine->RegisterObjectProperty("Colour", "uint8 g",
+        engine->RegisterObjectProperty(engine::script_type<sf::Color>(), "uint8 g",
             asOFFSET(sf::Color, g));
-        engine->RegisterObjectProperty("Colour", "uint8 b",
+        engine->RegisterObjectProperty(engine::script_type<sf::Color>(), "uint8 b",
             asOFFSET(sf::Color, b));
-        engine->RegisterObjectProperty("Colour", "uint8 a",
+        engine->RegisterObjectProperty(engine::script_type<sf::Color>(), "uint8 a",
             asOFFSET(sf::Color, a));
-        engine->RegisterObjectBehaviour("Colour", asBEHAVE_CONSTRUCT,
-            "void Colour(const Colour&in)",
+        engine->RegisterObjectBehaviour(engine::script_type<sf::Color>(),
+            asBEHAVE_CONSTRUCT, "void Colour(const Colour&in)",
             asFUNCTION(AWEColourTypeCopyConstructor), asCALL_CDECL_OBJLAST);
-        engine->RegisterObjectBehaviour("Colour", asBEHAVE_CONSTRUCT,
+        engine->RegisterObjectBehaviour(engine::script_type<sf::Color>(),
+            asBEHAVE_CONSTRUCT,
             "void Colour(const int, const int, const int, const int)",
             asFUNCTION(AWEColourTypeConstructor), asCALL_CDECL_OBJLAST);
         document->DocumentObjectType(r, "Represents a colour value.");
-        r = engine->RegisterObjectMethod("Colour", "Colour gradientTo("
-            "const Colour&in, double, const bool = false) const",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Color>(),
+            "Colour gradientTo(const Colour&in, double, const bool = false) const",
             asFUNCTION(AWEColourGradientTo), asCALL_CDECL_OBJFIRST);
         document->DocumentObjectMethod(r, "Calculates the colour that is "
             "<tt>double</tt>% from the current colour, to the given colour. If "
@@ -184,71 +181,77 @@ sf::Vector2i INVALID_MOUSE_SCRIPT = sf::Vector2i(INT_MIN, INT_MIN);
 
 void engine::RegisterVectorTypes(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) {
-    if (!engine->GetTypeInfoByName("Vector2")) {
-        auto r = engine->RegisterObjectType("Vector2", sizeof(sf::Vector2u),
+    if (!engine->GetTypeInfoByName(engine::script_type<sf::Vector2u>())) {
+        auto r = engine->RegisterObjectType(engine::script_type<sf::Vector2u>(),
+            sizeof(sf::Vector2u),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2u>());
-        engine->RegisterObjectProperty("Vector2", "uint x",
-            asOFFSET(sf::Vector2u, x));
-        engine->RegisterObjectProperty("Vector2", "uint y",
-            asOFFSET(sf::Vector2u, y));
-        engine->RegisterObjectBehaviour("Vector2", asBEHAVE_CONSTRUCT,
-            "void Vector2(const uint, const uint)",
+        engine->RegisterObjectProperty(engine::script_type<sf::Vector2u>(),
+            "uint x", asOFFSET(sf::Vector2u, x));
+        engine->RegisterObjectProperty(engine::script_type<sf::Vector2u>(),
+            "uint y", asOFFSET(sf::Vector2u, y));
+        engine->RegisterObjectBehaviour(engine::script_type<sf::Vector2u>(),
+            asBEHAVE_CONSTRUCT, "void Vector2(const uint, const uint)",
             asFUNCTION(AWEVector2TypeConstructor), asCALL_CDECL_OBJLAST);
-        engine->RegisterObjectBehaviour("Vector2", asBEHAVE_CONSTRUCT,
-            "void Vector2(const string&in)",
+        engine->RegisterObjectBehaviour(engine::script_type<sf::Vector2u>(),
+            asBEHAVE_CONSTRUCT, "void Vector2(const string&in)",
             asFUNCTION(AWEVector2TypeConstructFromString), asCALL_CDECL_OBJLAST);
-        engine->RegisterObjectMethod("Vector2", "string toString() const",
+        engine->RegisterObjectMethod(engine::script_type<sf::Vector2u>(),
+            "string toString() const",
             asFUNCTION(AWEVector2TypeToString), asCALL_CDECL_OBJLAST);
         document->DocumentObjectType(r, "Represents a 2D vector.");
 
-        r = engine->RegisterObjectType("MousePosition", sizeof(sf::Vector2i),
+        r = engine->RegisterObjectType(engine::script_type<sf::Vector2i>(),
+            sizeof(sf::Vector2i),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2i>());
         document->DocumentObjectType(r, "Represents a mouse position.");
         r = engine->RegisterGlobalProperty("const MousePosition INVALID_MOUSE",
             &INVALID_MOUSE_SCRIPT);
-        engine->RegisterObjectProperty("MousePosition", "int x",
-            asOFFSET(sf::Vector2i, x));
-        engine->RegisterObjectProperty("MousePosition", "int y",
-            asOFFSET(sf::Vector2i, y));
-        engine->RegisterObjectBehaviour("MousePosition", asBEHAVE_CONSTRUCT,
-            "void MousePosition(const int, const int)",
+        engine->RegisterObjectProperty(engine::script_type<sf::Vector2i>(),
+            "int x", asOFFSET(sf::Vector2i, x));
+        engine->RegisterObjectProperty(engine::script_type<sf::Vector2i>(),
+            "int y", asOFFSET(sf::Vector2i, y));
+        engine->RegisterObjectBehaviour(engine::script_type<sf::Vector2i>(),
+            asBEHAVE_CONSTRUCT, "void MousePosition(const int, const int)",
             asFUNCTION(AWEVector2iTypeConstructor), asCALL_CDECL_OBJLAST);
-        r = engine->RegisterObjectMethod("MousePosition",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Vector2i>(),
             "bool opEquals(const MousePosition&in) const",
             asFUNCTION(iEqI), asCALL_CDECL_OBJFIRST);
-        r = engine->RegisterObjectMethod("MousePosition",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Vector2i>(),
             "bool opEquals(const Vector2&in) const",
             asFUNCTION(iEqU), asCALL_CDECL_OBJFIRST);
-        engine->RegisterObjectMethod("MousePosition", "string toString() const",
+        engine->RegisterObjectMethod(engine::script_type<sf::Vector2i>(),
+            "string toString() const",
             asFUNCTION(AWEVector2iTypeToString), asCALL_CDECL_OBJLAST);
 
         // Vector2 opEquals
-        r = engine->RegisterObjectMethod("Vector2",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Vector2u>(),
             "bool opEquals(const Vector2&in) const",
             asFUNCTION(uEqU), asCALL_CDECL_OBJFIRST);
-        r = engine->RegisterObjectMethod("Vector2",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Vector2u>(),
             "bool opEquals(const MousePosition&in) const",
             asFUNCTION(uEqI), asCALL_CDECL_OBJFIRST);
 
         // Vector2 opAdd
-        r = engine->RegisterObjectMethod("Vector2",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Vector2u>(),
             "Vector2 opAdd(const MousePosition&in) const",
             asFUNCTION(uAddI), asCALL_CDECL_OBJFIRST);
 
-        r = engine->RegisterObjectType("Vector2f", sizeof(sf::Vector2f),
+        r = engine->RegisterObjectType(engine::script_type<sf::Vector2f>(),
+            sizeof(sf::Vector2f),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Vector2f>());
-        engine->RegisterObjectProperty("Vector2f", "float x",
-            asOFFSET(sf::Vector2f, x));
-        engine->RegisterObjectProperty("Vector2f", "float y",
-            asOFFSET(sf::Vector2f, y));
-        engine->RegisterObjectBehaviour("Vector2f", asBEHAVE_CONSTRUCT,
-            "void Vector2f(const float, const float)",
+        engine->RegisterObjectProperty(engine::script_type<sf::Vector2f>(),
+            "float x", asOFFSET(sf::Vector2f, x));
+        engine->RegisterObjectProperty(engine::script_type<sf::Vector2f>(),
+            "float y", asOFFSET(sf::Vector2f, y));
+        engine->RegisterObjectBehaviour(engine::script_type<sf::Vector2f>(),
+            asBEHAVE_CONSTRUCT, "void Vector2f(const float, const float)",
             asFUNCTION(AWEVector2fTypeConstructor), asCALL_CDECL_OBJLAST);
-        engine->RegisterObjectBehaviour("Vector2f", asBEHAVE_CONSTRUCT,
-            "void Vector2f(const MousePosition&in)",
+        engine->RegisterObjectBehaviour(engine::script_type<sf::Vector2f>(),
+            asBEHAVE_CONSTRUCT, "void Vector2f(const MousePosition&in)",
             asFUNCTION(AWEVector2fTypeConstructorFromVector2i),
             asCALL_CDECL_OBJLAST);
-        engine->RegisterObjectMethod("Vector2f", "string toString() const",
+        engine->RegisterObjectMethod(engine::script_type<sf::Vector2f>(),
+            "string toString() const",
             asFUNCTION(AWEVector2fTypeToString), asCALL_CDECL_OBJLAST);
     }
 }
@@ -271,23 +274,26 @@ std::string AWEIntRectTypeToString(void* memory) {
 void engine::RegisterRectTypes(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) {
     engine::RegisterVectorTypes(engine, document);
-    if (!engine->GetTypeInfoByName("IntRect")) {
-        auto r = engine->RegisterObjectType("IntRect", sizeof(sf::IntRect),
+    if (!engine->GetTypeInfoByName(engine::script_type<sf::IntRect>())) {
+        auto r = engine->RegisterObjectType(engine::script_type<sf::IntRect>(),
+            sizeof(sf::IntRect),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::IntRect>());
-        engine->RegisterObjectProperty("IntRect", "int left",
-            asOFFSET(sf::IntRect, left));
-        engine->RegisterObjectProperty("IntRect", "int top",
-            asOFFSET(sf::IntRect, top));
-        engine->RegisterObjectProperty("IntRect", "int width",
-            asOFFSET(sf::IntRect, width));
-        engine->RegisterObjectProperty("IntRect", "int height",
-            asOFFSET(sf::IntRect, height));
-        engine->RegisterObjectBehaviour("IntRect", asBEHAVE_CONSTRUCT,
+        engine->RegisterObjectProperty(engine::script_type<sf::IntRect>(),
+            "int left", asOFFSET(sf::IntRect, left));
+        engine->RegisterObjectProperty(engine::script_type<sf::IntRect>(),
+            "int top", asOFFSET(sf::IntRect, top));
+        engine->RegisterObjectProperty(engine::script_type<sf::IntRect>(),
+            "int width", asOFFSET(sf::IntRect, width));
+        engine->RegisterObjectProperty(engine::script_type<sf::IntRect>(),
+            "int height", asOFFSET(sf::IntRect, height));
+        engine->RegisterObjectBehaviour(engine::script_type<sf::IntRect>(),
+            asBEHAVE_CONSTRUCT,
             "void IntRect(const int, const int, const int, const int)",
             asFUNCTION(AWEIntRectTypeConstructor), asCALL_CDECL_OBJLAST);
-        engine->RegisterObjectMethod("IntRect", "string toString() const",
+        engine->RegisterObjectMethod(engine::script_type<sf::IntRect>(),
+            "string toString() const",
             asFUNCTION(AWEIntRectTypeToString), asCALL_CDECL_OBJLAST);
-        engine->RegisterObjectMethod("IntRect",
+        engine->RegisterObjectMethod(engine::script_type<sf::IntRect>(),
             "bool contains(const MousePosition&in) const",
             asMETHODPR(sf::IntRect, contains, (const sf::Vector2i&) const, bool),
             asCALL_THISCALL);
@@ -297,20 +303,24 @@ void engine::RegisterRectTypes(asIScriptEngine* engine,
 
 void engine::RegisterTimeTypes(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) {
-    if (!engine->GetTypeInfoByName("Time")) {
+    if (!engine->GetTypeInfoByName(engine::script_type<sf::Time>())) {
         // Time class.
-        auto r = engine->RegisterObjectType("Time", sizeof(sf::Time),
+        auto r = engine->RegisterObjectType(engine::script_type<sf::Time>(),
+            sizeof(sf::Time),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Time>());
         document->DocumentObjectType(r, "Represents a time value.");
-        r = engine->RegisterObjectMethod("Time", "float asSeconds()",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Time>(),
+            "float asSeconds()",
             asMETHOD(sf::Time, asSeconds), asCALL_THISCALL);
         document->DocumentObjectMethod(r, "Return the time value as a number of "
             "seconds.");
-        r = engine->RegisterObjectMethod("Time", "int32 asMilliseconds()",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Time>(),
+            "int32 asMilliseconds()",
             asMETHOD(sf::Time, asMilliseconds), asCALL_THISCALL);
         document->DocumentObjectMethod(r, "Return the time value as a number of "
             "milliseconds.");
-        r = engine->RegisterObjectMethod("Time", "int64 asMicroseconds()",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Time>(),
+            "int64 asMicroseconds()",
             asMETHOD(sf::Time, asMicroseconds), asCALL_THISCALL);
         document->DocumentObjectMethod(r, "Return the time value as a number of "
             "microseconds.");
@@ -329,14 +339,17 @@ void engine::RegisterTimeTypes(asIScriptEngine* engine,
             "microseconds.");
 
         // Clock class.
-        r = engine->RegisterObjectType("Clock", sizeof(sf::Clock),
+        r = engine->RegisterObjectType(engine::script_type<sf::Clock>(),
+            sizeof(sf::Clock),
             asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<sf::Clock>());
         document->DocumentObjectType(r, "Used to calculate elapsed time.");
-        r = engine->RegisterObjectMethod("Clock", "Time getElapsedTime()",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Clock>(),
+            "Time getElapsedTime()",
             asMETHOD(sf::Clock, getElapsedTime), asCALL_THISCALL);
         document->DocumentObjectMethod(r, "Calculates the elapsed time since the "
             "clock was constructed or since <tt>restart()</tt> was called.");
-        r = engine->RegisterObjectMethod("Clock", "Time restart()",
+        r = engine->RegisterObjectMethod(engine::script_type<sf::Clock>(),
+            "Time restart()",
             asMETHOD(sf::Clock, restart), asCALL_THISCALL);
         document->DocumentObjectMethod(r, "Restarts the clock. Returns the time "
             "elapsed.");
@@ -345,83 +358,106 @@ void engine::RegisterTimeTypes(asIScriptEngine* engine,
 
 void engine::RegisterStreamTypes(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) {
-    if (!engine->GetTypeInfoByName("BinaryIStream")) {
-        auto r = engine->RegisterObjectType("BinaryIStream", 0,
+    if (!engine->GetTypeInfoByName(
+        engine::script_type<engine::binary_istream>())) {
+        auto r = engine->RegisterObjectType(
+            engine::script_type<engine::binary_istream>(), 0,
             asOBJ_REF | asOBJ_NOCOUNT);
         document->DocumentObjectType(r, "Represents an input stream of binary "
             "data.");
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(int8&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(int8&out)",
             asMETHODPR(engine::binary_istream, readNumber, (sf::Int8&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(int16&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(int16&out)",
             asMETHODPR(engine::binary_istream, readNumber, (sf::Int16&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(int32&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(int32&out)",
             asMETHODPR(engine::binary_istream, readNumber, (sf::Int32&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(int64&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(int64&out)",
             asMETHODPR(engine::binary_istream, readNumber, (sf::Int64&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(uint8&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(uint8&out)",
             asMETHODPR(engine::binary_istream, readNumber, (sf::Uint8&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(uint16&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(uint16&out)",
             asMETHODPR(engine::binary_istream, readNumber, (sf::Uint16&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(uint32&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(uint32&out)",
             asMETHODPR(engine::binary_istream, readNumber, (sf::Uint32&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(uint64&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(uint64&out)",
             asMETHODPR(engine::binary_istream, readNumber, (sf::Uint64&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(bool&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(bool&out)",
             asMETHODPR(engine::binary_istream, readBool, (bool&), void),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryIStream", "void read(string&out)",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_istream>(), "void read(string&out)",
             asMETHODPR(engine::binary_istream, readString, (std::string&), void),
             asCALL_THISCALL);
 
-        r = engine->RegisterObjectType("BinaryOStream", 0,
+        r = engine->RegisterObjectType(
+            engine::script_type<engine::binary_ostream>(), 0,
             asOBJ_REF | asOBJ_NOCOUNT);
         document->DocumentObjectType(r, "Represents an output stream of binary "
             "data.");
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const int8)",
             asMETHOD(engine::binary_ostream, writeNumber<sf::Int8>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const int16)",
             asMETHOD(engine::binary_ostream, writeNumber<sf::Int16>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const int32)",
             asMETHOD(engine::binary_ostream, writeNumber<sf::Int32>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const int64)",
             asMETHOD(engine::binary_ostream, writeNumber<sf::Int64>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const uint8)",
             asMETHOD(engine::binary_ostream, writeNumber<sf::Uint8>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const uint16)",
             asMETHOD(engine::binary_ostream, writeNumber<sf::Uint16>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const uint32)",
             asMETHOD(engine::binary_ostream, writeNumber<sf::Uint32>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const uint64)",
             asMETHOD(engine::binary_ostream, writeNumber<sf::Uint64>),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const bool)",
             asMETHOD(engine::binary_ostream, writeBool),
             asCALL_THISCALL);
-        r = engine->RegisterObjectMethod("BinaryOStream",
+        r = engine->RegisterObjectMethod(
+            engine::script_type<engine::binary_ostream>(),
             "void write(const string&in)",
             asMETHOD(engine::binary_ostream, writeString), asCALL_THISCALL);
     }

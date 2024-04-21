@@ -51,6 +51,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "bank-v2.hpp"
 #include "fmtsfx.hpp"
+#include "tpp/pod.tpp"
 
 // An example of a POD type in AngelScript.
 // Let's make the declaration and definition of these, macros.
@@ -61,89 +62,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // This will be most useful for banks, but I think this will be useful for
 // awe::map-based types, too.
 
-// To make this as seamless as possible, I should provide a standard method via which
-// a programmer can define the core AngelScript datatype (without qualifiers) for each
-// C++ type. I should use the template<> approach I've come up with in bank-v2.hpp,
-// but the code for that should be in fmtXYZ.hpp-like headers (you may need to forward
-// declare your custom types in those headers).
+DECLARE_POD_1(pod, "pod", std::string, message);
 
-template<typename T>
-constexpr const char* angel_script() {
-    static_assert(false, "You must specialise engine::script_type<T>()");
-}
+DEFINE_POD_1(pod, "pod", std::string, message);
 
-template<>
-constexpr const char* angel_script<std::string>() {
-    return "string";
-}
+DECLARE_POD_3(coords, "Coords", double, x, double, y, double, z);
 
-// And then with that approach, have an angel_script_param_type template function that
-// either returns "const TYPE" for primitive types or "const TYPE&in" for other types.
+DEFINE_POD_3(coords, "Coords", double, x, double, y, double, z);
 
-struct pod : public engine::script_reference_type<pod> {
-    static void Register(asIScriptEngine* engine,
-        const std::shared_ptr<DocumentationGenerator>& document);
-    inline static pod* Create() { return new pod(); }
-    inline static pod* Create(const std::string& m) { return new pod(m); };
-    inline static pod* Create(const pod* const o) { return new pod(*o); };
-    pod() = default;
-    pod(const std::string& i);
-    pod(const pod& o);
-    pod(pod&& o) noexcept;
-    bool operator==(const pod& o);
-    inline bool operator!=(const pod& o) { return !(*this == o); }
-    pod& operator=(const pod& o);
-    pod& operator=(pod&& o) noexcept;
-    std::string message;
-private:
-    inline pod* opAssign(const pod* const o) { return &(*this = *o); }
-    inline bool opEquals(const pod* const o) { return *this == *o; }
-};
+DECLARE_POD_2(coord_pair, "CoordPair", coords, a, coords, b);
 
-void pod::Register(asIScriptEngine* engine,
-    const std::shared_ptr<DocumentationGenerator>& document) {
-    if (engine->GetTypeInfoByName("pod")) return;
-    auto r = RegisterType(engine, "pod",
-        [](asIScriptEngine* engine, const std::string& type) {
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
-                std::string(type + "@ f()").c_str(),
-                asFUNCTIONPR(pod::Create, (), pod*), asCALL_CDECL);
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
-                std::string(type + "@ f(const string&in)").c_str(),
-                asFUNCTIONPR(pod::Create, (const std::string&), pod*), asCALL_CDECL);
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY,
-                std::string(type + "@ f(const pod&in)").c_str(),
-                asFUNCTIONPR(pod::Create, (const pod* const), pod*), asCALL_CDECL);
-        });
-    document->DocumentObjectType(r, "POD data type.");
-    r = engine->RegisterObjectProperty("pod", "string message",
-        asOFFSET(pod, message));
-
-    r = engine->RegisterObjectMethod("pod", "pod@ opAssign(const pod&in)",
-        asMETHOD(pod, opAssign), asCALL_THISCALL);
-    r = engine->RegisterObjectMethod("pod", "bool opEquals(const pod&in)",
-        asMETHOD(pod, opEquals), asCALL_THISCALL);
-}
-
-pod::pod(const std::string& i) : message(i) {}
-
-pod::pod(const pod& o) : message(o.message) {}
-
-pod::pod(pod&& o) noexcept : message(std::move(o.message)) {}
-
-bool pod::operator==(const pod& o) {
-    return message == o.message;
-}
-
-pod& pod::operator=(const pod& o) {
-    message = o.message;
-    return *this;
-}
-
-pod& pod::operator=(pod&& o) noexcept {
-    message = std::move(o.message);
-    return *this;
-}
+DEFINE_POD_2(coord_pair, "CoordPair", coords, a, coords, b);
 
 class reg : public engine::script_registrant {
 public:
@@ -155,6 +84,8 @@ public:
 void reg::registerInterface(asIScriptEngine* engine,
     const std::shared_ptr<DocumentationGenerator>& document) {
     pod::Register(engine, document);
+    coords::Register(engine, document);
+    coord_pair::Register(engine, document);
     engine->RegisterGlobalFunction("void info(const string&in)", asMETHODPR(engine::logger, write, (const std::string&), void), asCALL_THISCALL_ASGLOBAL, &this->logger);
 }
 
@@ -167,9 +98,6 @@ void reg::registerInterface(asIScriptEngine* engine,
  * @param argv The command-line arguments.
  */
 int main(int argc, char* argv[]) {
-    angel_script<std::string>();
-    // Fails with static_assert:
-    //angel_script<int>();
     try {
         // Debugging measure. Since the application runs from within "out", I have
         // to make the current directory match with where "main.cpp" is so that my
@@ -197,7 +125,13 @@ int main(int argc, char* argv[]) {
         scripts->addRegistrant(&regInterface);
         scripts->load("assets/test-scripts.json");
 
-        scripts->callFunction(engine::scripts::modules[engine::scripts::BANK_OVERRIDE], "main");
+        coords simCoords(-0.4789, 51.6704, 0);
+
+        scripts->callFunction(engine::scripts::modules[engine::scripts::BANK_OVERRIDE], "main", &simCoords);
+
+        //constexpr std::string test = engine::sig_builder<2, void, std::string*, void>("main", { "Menu@ const", "dictionary" });
+
+        //rootLogger.write("{}", test);
 
         //awe::bank<awe::commander> commanders(nullptr, rootLogger.getData());
         //commanders.load("assets/property/co.json");

@@ -31,10 +31,12 @@ def main(args=None):
 
     Each template is divided up into sections delimited by a ` character. In
     odd sections (i.e. the first section, the third section, etc.), all
-    occurrences of the $ character will be replaced with N. In even sections
-    (i.e. the second section, the fourth section, etc.), these sections will
-    be repeated N times, and all occurrences of $ characters will be
-    replaced by the one-based iteration index.
+    occurrences of the $ character will be replaced with N. Even sections (i.e.
+    (the second section, the fourth section, etc.), will be repeated N times, and
+    all occurrences of $ characters will be replaced by the one-based iteration
+    index. Even sections can also optionally be split up using £ characters, and
+    if there's at least two subsections, the right-most subsection will NOT be
+    included in the final code file, if $ is at the final index.
 
     For example, the following template:
 
@@ -42,7 +44,7 @@ def main(args=None):
     `$$`
     This is the third section.`
     Repeat sections can also contain newlines.`
-    `if (i == $) return $;`
+    `if (i == $) return $£;`
     else return 0;
 
     Will produce the following final code, if N == 3:
@@ -51,14 +53,14 @@ def main(args=None):
     11
     This is the third section.
     Repeat sections can also contain newlines.
-    if (i == 1) return 1;
+    if (i == 1) return 1
     else return 0;
     This template has been insert 2 times so far.
     1122
     This is the third section.
     Repeat sections can also contain newlines.
     Repeat sections can also contain newlines.
-    if (i == 1) return 1;if (i == 2) return 2;
+    if (i == 1) return 1;if (i == 2) return 2
     else return 0;
     This template has been insert 3 times so far.
     112233
@@ -66,7 +68,7 @@ def main(args=None):
     Repeat sections can also contain newlines.
     Repeat sections can also contain newlines.
     Repeat sections can also contain newlines.
-    if (i == 1) return 1;if (i == 2) return 2;if (i == 3) return 3;
+    if (i == 1) return 1;if (i == 2) return 2;if (i == 3) return 3
     else return 0;
     """,
         formatter_class=RawTextHelpFormatter
@@ -133,7 +135,15 @@ def main(args=None):
                 # different $ substitution, starting with 1 and ending with FC.
                 # E.g. first iteration replaces $ with 1, second with 2, etc.
                 # `p$, t$` with FC of 3 becomes: p1, t1p2, t2p3, t3
-                for x in range(1, FC + 1): macro += t.replace('$', f'{x}')
+                # Before this step, the string is split using £. The entire string
+                # will undergo the above $ substitution, but the right-most £
+                # section will NOT be included if x == the last in the FC range.
+                sections = t.split('£')
+                for x in range(1, FC + 1):
+                    for j, section in enumerate(sections):
+                        if len(sections) > 1 and j == len(sections) - 1 and \
+                            x == FC: break
+                        macro += section.replace('$', f'{x}')
         return macro
 
     GENERATED_FILE: str = "" if args.header is None else load_file(args.header)

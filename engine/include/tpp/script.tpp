@@ -22,6 +22,142 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+/////////////////////////////////
+// SCRIPT_TYPE SPECIALISATIONS //
+/////////////////////////////////
+
+template<>
+inline constexpr const char* engine::script_type<bool>() { return "bool"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Int8>() { return "int8"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Uint8>() { return "uint8"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Int16>() { return "int16"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Uint16>() { return "uint16"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Int32>() { return "int"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Uint32>() { return "uint"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Int64>() { return "int64"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Uint64>() { return "uint64"; }
+template<>
+inline constexpr const char* engine::script_type<float>() { return "float"; }
+template<>
+inline constexpr const char* engine::script_type<double>() { return "double"; }
+template<>
+inline constexpr const char* engine::script_type<std::string>() {
+	return "string";
+}
+
+template<>
+inline constexpr const char* engine::script_type<sf::Color>() { return "Colour"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Vector2u>() {
+	return "Vector2";
+}
+template<>
+inline constexpr const char* engine::script_type<sf::Vector2i>() {
+	return "MousePosition";
+}
+template<>
+inline constexpr const char* engine::script_type<sf::Vector2f>() {
+	return "Vector2f";
+}
+template<>
+inline constexpr const char* engine::script_type<sf::IntRect>() {
+	return "IntRect";
+}
+template<>
+inline constexpr const char* engine::script_type<sf::Time>() { return "Time"; }
+template<>
+inline constexpr const char* engine::script_type<sf::Clock>() { return "Clock"; }
+
+template<>
+inline constexpr const char* engine::script_type<engine::binary_istream>() {
+	return "BinaryIStream";
+}
+template<>
+inline constexpr const char* engine::script_type<engine::binary_ostream>() {
+	return "BinaryOStream";
+}
+
+template<typename T>
+constexpr std::string engine::script_param_type() {
+	constexpr const bool NUMBER =
+		std::is_integral<T>::value || std::is_floating_point<T>::value;
+	constexpr const bool PTR = std::is_pointer<T>::value &&
+		!std::is_integral<std::remove_pointer<T>::type>::value &&
+		!std::is_floating_point<std::remove_pointer<T>::type>::value;
+	constexpr const bool OBJ = std::is_object<T>::value;
+	static_assert(NUMBER || PTR || OBJ, "engine::script_param_type<T>(): type T "
+		"isn't supported as a constant input parameter, you will have to write "
+		"out your intended qualifier/s manually");
+	if constexpr (NUMBER) {
+		return std::string("const ").append(engine::script_type<T>());
+	} else if constexpr (PTR) {
+		return std::string("const ").append(
+			engine::script_type<std::remove_pointer<T>::type>()).append("&in");
+	} else if constexpr (OBJ) {
+		return std::string("const ").append(engine::script_type<T>())
+			.append("&in");
+	}
+	return "";
+}
+
+template<std::size_t N, std::size_t C, bool COMMA>
+constexpr std::string engine::params_builder(
+	const std::array<const char*, N>& customParams) {
+	static_assert(C == N, "Extra custom parameters were given to the "
+		"sig_builder() call, please remove these if they are not needed");
+	return "";
+}
+
+template<std::size_t N, std::size_t C, bool COMMA, typename T, typename... Ts>
+constexpr std::string engine::params_builder(
+	const std::array<const char*, N>& customParams) {
+	if constexpr (COMMA) {
+		if constexpr (std::is_void<T>::value) {
+			static_assert(C < N, "Not enough custom parameters were given to "
+				"the sig_builder() call");
+			return std::string(", ").append(customParams[C])
+				.append(engine::params_builder<N, C + 1, true, Ts...>(
+					customParams));
+		} else {
+			return std::string(", ").append(engine::script_param_type<T>())
+				.append(engine::params_builder<N, C, true, Ts...>(customParams));
+		}
+	} else {
+		if constexpr (std::is_void<T>::value) {
+			static_assert(C < N, "Not enough custom parameters were given to "
+				"the sig_builder() call");
+			return std::string(customParams[C])
+				.append(engine::params_builder<N, C + 1, true, Ts...>(
+					customParams));
+		} else {
+			return std::string(engine::script_param_type<T>())
+				.append(engine::params_builder<N, C, true, Ts...>(customParams));
+		}
+	}
+}
+
+template<std::size_t N, typename... Ts>
+constexpr std::string engine::sig_builder(const std::string& funcName,
+	const std::array<const char*, N>& customParams, const std::string& retType) {
+	return std::string(retType).append(" ").append(funcName).append("(")
+		.append(engine::params_builder<N, 0, false, Ts...>(customParams))
+		.append(")");
+}
+
+template<typename... Ts>
+constexpr std::string sig_builder(const std::string& funcName,
+	const std::string& retType) {
+	return engine::sig_builder<0, Ts...>(funcName, {}, retType);
+}
+
 ///////////////////////////
 // SCRIPT_REFERENCE_TYPE //
 ///////////////////////////

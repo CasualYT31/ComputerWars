@@ -40,7 +40,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "weakref.h"
 #include "logger.hpp"
 #include "safejson.hpp"
+#include "binary.hpp"
 #include <type_traits>
+#include "SFML/Graphics/Color.hpp"
+#include "SFML/System/Vector2.hpp"
+#include "SFML/System/Clock.hpp"
+#include "SFML/Graphics/Rect.hpp"
 #include "docgen.h"
 
 namespace engine {
@@ -83,6 +88,99 @@ namespace engine {
 	 */
 	void RegisterStreamTypes(asIScriptEngine* engine,
 		const std::shared_ptr<DocumentationGenerator>& document);
+
+	/**
+	 * This constant expression is used to alert the programmer that the type's
+	 * corresponding AngelScript type hasn't been configured.
+	 * All types that are registered with the script interface should ideally have
+	 * their corresponding AngelScript typename configured for use throughout the
+	 * engine. This involves specialising this function, within the \c engine
+	 * namespace, to return the name of the C++ type in AngelScript, without
+	 * qualifiers. If the engine code compilation results in this error, you'll
+	 * need to specialise for the type you're trying to work with.\n
+	 * If you wish to specialise an STL type, or a type otherwise outside of the
+	 * Computer Wars codebase (e.g. in a dependency), please do so within
+	 * \c script.tpp. If a non-engine level dependency needs to define their AS
+	 * type, introduce a new *.tpp file and include that in the header that makes
+	 * the most sense.
+	 * @tparam T The type to retrieve the AngelScript type of.
+	 * @return The AngelScript type of the C++ type \c T, as a character array.
+	 */
+	template<typename T>
+	inline constexpr const char* script_type() {
+		static_assert(false, "You must specialise engine::script_type<T>()");
+	}
+
+	/**
+	 * Automatically determines the best AngelScript type qualifiers for the given
+	 * type if used as a constant input parameter.
+	 * @tparam T The type of the parameter.
+	 * @return The full AngelScript type for the parameter.
+	 */
+	template<typename T>
+	constexpr std::string script_param_type();
+
+	/**
+	 * No more parameters to generate.
+	 * @tparam N     The number of custom AngelScript types to insert.
+	 * @tparam C     Which custom AngelScript type to insert next.
+	 * @tparam COMMA Should a comma prepend the string generated in this call?
+	 * @param  customParams The custom AngelScript types to insert into the
+	 *                      generated string.
+	 * @return An empty string.
+	 * @sa     \c params_builder().
+	 */
+	template<std::size_t N, std::size_t C, bool COMMA>
+	constexpr std::string params_builder(
+		const std::array<const char*, N>& customParams);
+
+	/**
+	 * Generate the next AngelScript parameter in a parameter list for a function
+	 * signature.
+	 * @tparam N     The number of custom AngelScript types to insert.
+	 * @tparam C     Which custom AngelScript type to insert next.
+	 * @tparam COMMA Should a comma prepend the string generated in this call?
+	 * @tparam T     The next C++ type to be converted into an AngelScript constant
+	 *               input parameter type. If \c void, the next custom type will be
+	 *               inserted instead.
+	 * @tparam Ts    The next C++ types in the list, if any.
+	 * @param  customParams The custom AngelScript types to insert into the
+	 *                      generated string.
+	 * @return \c T as an AngelScript type, with the rest of the parameters
+	 *         appended.
+	 */
+	template<std::size_t N, std::size_t C, bool COMMA, typename T, typename... Ts>
+	constexpr std::string params_builder(
+		const std::array<const char*, N>& customParams);
+
+	/**
+	 * Build a signature for an AngelScript function that includes custom types
+	 * without \c script_param_type specialisations.
+	 * @tparam N  The number of custom AngelScript types to insert.
+	 * @tparam Ts The C++ types to insert into the signature, in order. Use \c void
+	 *            to represent each custom type.
+	 * @param  funcName     The name of the function.
+	 * @param  customParams The custom AngelScript types to insert into the
+	 *                      generated string.
+	 * @return The function's full AngelScript signature.
+	 */
+	template<std::size_t N, typename... Ts>
+	constexpr std::string sig_builder(const std::string& funcName,
+		const std::array<const char*, N>& customParams,
+		const std::string& retType = "void");
+
+	/**
+	 * Build a signature for an AngelScript function that accepts C++ types.
+	 * Each C++ type given must have \c script_param_type specialisation. Do not
+	 * provide const qualifiers, as these will be automatically included in the
+	 * AngelScript signature.
+	 * @tparam Ts The C++ types to insert into the signature, in order.
+	 * @param  funcName The name of the function.
+	 * @return The function's full AngelScript signature.
+	 */
+	template<typename... Ts>
+	constexpr std::string sig_builder(const std::string& funcName,
+		const std::string& retType = "void");
 
 	/**
 	 * Base class for AngelScript reference types.
