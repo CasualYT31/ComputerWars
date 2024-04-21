@@ -126,6 +126,10 @@ int main(int argc, char* argv[]) {
 #endif
         engine::logger rootLogger({ sink, "main" });
 
+        int jdd{};
+
+        rootLogger.warning("{}", jdd);
+
         std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>(rootLogger.getData());
         reg regInterface;
         regInterface.logger.setData(rootLogger);

@@ -56,7 +56,7 @@ namespace engine {
     inline bool operator!=(const cc& o) const { return !(*this == o); } \
     cc& operator=(const cc& o); \
     cc& operator=(cc&& o) noexcept; \
-    t1 p1; \
+    t1 p1{}; \
 private: \
     inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
     inline bool opEquals(const cc* const o) const { return *this == *o; } \
@@ -120,7 +120,7 @@ cc& cc::operator=(cc&& o) noexcept { \
     inline bool operator!=(const cc& o) const { return !(*this == o); } \
     cc& operator=(const cc& o); \
     cc& operator=(cc&& o) noexcept; \
-    t1 p1; t2 p2; \
+    t1 p1{}; t2 p2{}; \
 private: \
     inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
     inline bool opEquals(const cc* const o) const { return *this == *o; } \
@@ -185,7 +185,7 @@ cc& cc::operator=(cc&& o) noexcept { \
     inline bool operator!=(const cc& o) const { return !(*this == o); } \
     cc& operator=(const cc& o); \
     cc& operator=(cc&& o) noexcept; \
-    t1 p1; t2 p2; t3 p3; \
+    t1 p1{}; t2 p2{}; t3 p3{}; \
 private: \
     inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
     inline bool opEquals(const cc* const o) const { return *this == *o; } \

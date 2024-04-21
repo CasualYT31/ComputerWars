@@ -13,7 +13,7 @@
     inline bool operator!=(const cc& o) const { return !(*this == o); } \
     cc& operator=(const cc& o); \
     cc& operator=(cc&& o) noexcept; \
-    `t$ p$; `\
+    `t$ p${}; `\
 private: \
     inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
     inline bool opEquals(const cc* const o) const { return *this == *o; } \

@@ -90,4 +90,7 @@ void main(Coords simCoords) {
     if (copy != simCoords) info("NO!");
     CoordPair pair1(simCoords, copy);
     info(formatFloat(pair1.b.z, "", 0, 4));
+    info("Zeroed");
+    Coords zeroTest;
+    info(formatFloat(zeroTest.x, "", 0, 4));
 }
