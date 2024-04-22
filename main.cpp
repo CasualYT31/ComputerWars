@@ -51,7 +51,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "bank-v2.hpp"
 #include "fmtsfx.hpp"
-#include "tpp/pod.tpp"
 
 // An example of a POD type in AngelScript.
 // Let's make the declaration and definition of these, macros.
@@ -69,17 +68,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // overrideable via bank-v2. Both read<>() methods can be supported for POD types
 // out-of-the-box with no need for specialisation. At least, in theory...
 
-DECLARE_POD_1(pod, "pod", std::string, message);
+DECLARE_POD_1(, pod, "pod", std::string, message);
 
-DEFINE_POD_1(pod, "pod", std::string, message);
+DEFINE_POD_1(, pod, "pod", std::string, message);
 
-DECLARE_POD_3(coords, "Coords", double, x, double, y, double, z);
+DECLARE_POD_3(, coords, "Coords", double, x, double, y, double, z);
 
-DEFINE_POD_3(coords, "Coords", double, x, double, y, double, z);
+DEFINE_POD_3(, coords, "Coords", double, x, double, y, double, z);
 
-DECLARE_POD_2(coord_pair, "CoordPair", coords, a, coords, b);
+DECLARE_POD_2(, coord_pair, "CoordPair", coords, a, coords, b);
 
-DEFINE_POD_2(coord_pair, "CoordPair", coords, a, coords, b);
+DEFINE_POD_2(, coord_pair, "CoordPair", coords, a, coords, b);
 
 class reg : public engine::script_registrant {
 public:
@@ -126,65 +125,68 @@ int main(int argc, char* argv[]) {
 #endif
         engine::logger rootLogger({ sink, "main" });
 
-        int jdd{};
-
-        rootLogger.warning("{}", jdd);
-
         std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>(rootLogger.getData());
-        reg regInterface;
-        regInterface.logger.setData(rootLogger);
-        scripts->addRegistrant(&regInterface);
+
+        // TODO: how tf do we provide the scripts pointer to each bank_array specialisation?
+        awe::bank_array<awe::particle_data>::scripts = scripts;
+
+        //reg regInterface;
+        //regInterface.logger.setData(rootLogger);
+        //scripts->addRegistrant(&regInterface);
+
+        //coords simCoords(-0.4789, 51.6704, 0);
+
+        //scripts->callFunction(engine::scripts::modules[engine::scripts::BANK_OVERRIDE], "main", &simCoords);
+
+        awe::bank<awe::commander> commanders(scripts, rootLogger.getData());
+
+        awe::bank<awe::weather> weathers(scripts, rootLogger.getData());
+
+        awe::bank<awe::environment> environments(scripts, rootLogger.getData());
+
+        awe::bank<awe::country> countries(scripts, rootLogger.getData());
+
+        awe::bank<awe::movement_type> movementTypes(scripts, rootLogger.getData());
+
         scripts->load("assets/test-scripts.json");
 
-        coords simCoords(-0.4789, 51.6704, 0);
+        commanders.load("assets/property/co.json");
+        weathers.load("assets/property/weather.json");
+        environments.load("assets/property/environment.json");
+        countries.load("assets/property/country.json");
+        movementTypes.load("assets/property/movement.json");
 
-        scripts->callFunction(engine::scripts::modules[engine::scripts::BANK_OVERRIDE], "main", &simCoords);
+        awe::processOverrides(scripts, commanders);
+        awe::processOverrides(scripts, weathers, commanders);
+        awe::processOverrides(scripts, environments, weathers, commanders);
+        awe::processOverrides(scripts, countries, environments, weathers, commanders);
+        awe::processOverrides(scripts, movementTypes, countries, environments, weathers, commanders);
 
-        //constexpr std::string test = engine::sig_builder<2, void, std::string*, void>("main", { "Menu@ const", "dictionary" });
+        rootLogger.write("{} --- {}", weathers["CLEAR"]->longName(), weathers["CLEAR"]->longName(awe::overrides().commander("JAKE")));
+        rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), static_cast<const awe::bank<awe::weather>>(weathers)["CLEAR"]->shortName(awe::overrides().commander("JAKER")));
 
-        //rootLogger.write("{}", test);
+        rootLogger.write("{} --- {}",
+            weathers["CLEAR"]->particles().vector[3].respawnDelay.asSeconds(),
+            weathers["CLEAR"]->particles(awe::overrides().commander("JAKE")).vector[4].vector.x
+        );
 
-        //awe::bank<awe::commander> commanders(nullptr, rootLogger.getData());
-        //commanders.load("assets/property/co.json");
+        const auto& e = environments;
+        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKE")));
+        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEARR").commander("JAKE")));
+        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKER")));
+        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("").commander("")));
+        rootLogger.write("Counter");
 
-        //awe::bank<awe::weather> weathers(nullptr, rootLogger.getData());
-        //weathers.load("assets/property/weather.json");
-
-        //awe::bank<awe::environment> environments(nullptr, rootLogger.getData());
-        //environments.load("assets/property/environment.json");
-
-        //awe::bank<awe::country> countries(nullptr, rootLogger.getData());
-        //countries.load("assets/property/country.json");
-
-        //awe::bank<awe::movement_type> movementTypes(nullptr, rootLogger.getData());
-        //movementTypes.load("assets/property/movement.json");
-
-        //awe::processOverrides(scripts, commanders);
-        //awe::processOverrides(scripts, weathers, commanders);
-        //awe::processOverrides(scripts, environments, weathers, commanders);
-        //awe::processOverrides(scripts, countries, environments, weathers, commanders);
-        //awe::processOverrides(scripts, movementTypes, countries, environments, weathers, commanders);
-
-        //rootLogger.write("{} --- {}", weathers["CLEAR"]->longName(), weathers["CLEAR"]->longName(awe::overrides().commander("JAKE")));
-        //rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), static_cast<const awe::bank<awe::weather>>(weathers)["CLEAR"]->shortName(awe::overrides().commander("JAKER")));
-
-        //const auto& e = environments;
-        //rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKE")));
-        //rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEARR").commander("JAKE")));
-        //rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKER")));
-        //rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("").commander("")));
-        //rootLogger.write("Counter");
-
-        //const auto& c = countries;
-        //rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKE")));
-        //rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEARR").commander("JAKE")));
-        //rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKER")));
-        //rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEARR").commander("JAKER")));
-        //rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMALL").weather("CLEARR").commander("JAKE")));
-        //rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMALL").weather("CLEAR").commander("JAKER")));
-        //rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMALL").weather("CLEAR").commander("JAKE")));
-        //rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("").weather("").commander("")));
-        //rootLogger.write("Counter");
+        const auto& c = countries;
+        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKE")));
+        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEARR").commander("JAKE")));
+        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKER")));
+        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEARR").commander("JAKER")));
+        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMALL").weather("CLEARR").commander("JAKE")));
+        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMALL").weather("CLEAR").commander("JAKER")));
+        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMALL").weather("CLEAR").commander("JAKE")));
+        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("").weather("").commander("")));
+        rootLogger.write("Counter");
 
         // TODO:
         //      Keep testing.

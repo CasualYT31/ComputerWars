@@ -5,9 +5,14 @@ namespace Weather {
                 const string longName("Jake's Clear Weather");
                 string shortName("shortie");
 
-                // void longName(string&out name) {
+                // void longName(string& name) {
                 //     name += "APPEND";
                 // }
+
+                void particles(ParticleDataArray& particles) {
+                    particles.array.resize(5);
+                    particles.array[4].vector.x = -1000.5;
+                }
             }
         }
     }
@@ -58,39 +63,39 @@ namespace Country {
     }
 }
 
-// Don't use pod&out here, I think it frees it early after the function ends?
-void func(pod& passing, const pod&in around) {
-    passing.message = around.message;
-}
+// // Don't use pod&out here, I think it frees it early after the function ends?
+// void func(pod& passing, const pod&in around) {
+//     passing.message = around.message;
+// }
 
-void main(Coords simCoords) {
-    pod test();
-    pod another("another");
-    pod j(another);
-    info(test.message);
-    info(another.message);
-    info(j.message += "2");
-    if (another == j) {
-        info("Yes!");
-    }
-    info((test = another).message);
-    func(another, j);
-    info(another.message);
-    pod finalTest = another;
-    if (finalTest == another) info("EQUAL!");
-    info("?" + finalTest.message);
-    info(j.message);
-    simCoords.x += -0.5;
-    info(formatFloat(simCoords.x, "", 0, 4));
-    Coords copy = simCoords;
-    copy.x += 0.00001;
-    copy.y -= 0.000001;
-    if (copy == simCoords) info("YES!");
-    copy.z = 10000.78;
-    if (copy != simCoords) info("NO!");
-    CoordPair pair1(simCoords, copy);
-    info(formatFloat(pair1.b.z, "", 0, 4));
-    info("Zeroed");
-    Coords zeroTest;
-    info(formatFloat(zeroTest.x, "", 0, 4));
-}
+// void main(Coords simCoords) {
+//     pod test();
+//     pod another("another");
+//     pod j(another);
+//     info(test.message);
+//     info(another.message);
+//     info(j.message += "2");
+//     if (another == j) {
+//         info("Yes!");
+//     }
+//     info((test = another).message);
+//     func(another, j);
+//     info(another.message);
+//     pod finalTest = another;
+//     if (finalTest == another) info("EQUAL!");
+//     info("?" + finalTest.message);
+//     info(j.message);
+//     simCoords.x += -0.5;
+//     info(formatFloat(simCoords.x, "", 0, 4));
+//     Coords copy = simCoords;
+//     copy.x += 0.00001;
+//     copy.y -= 0.000001;
+//     if (copy == simCoords) info("YES!");
+//     copy.z = 10000.78;
+//     if (copy != simCoords) info("NO!");
+//     CoordPair pair1(simCoords, copy);
+//     info(formatFloat(pair1.b.z, "", 0, 4));
+//     info("Zeroed");
+//     Coords zeroTest;
+//     info(formatFloat(zeroTest.x, "", 0, 4));
+// }

@@ -8,32 +8,28 @@
 		"particles": [
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.1",
+				"spriteID": "weather.cloud.1",
 				"density": 3,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.2",
+				"spriteID": "weather.cloud.2",
 				"density": 3,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.3",
+				"spriteID": "weather.cloud.3",
 				"density": 2,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.bird.1",
+				"spriteID": "weather.bird.1",
 				"density": 0.2,
-				"vectorx": 20.0,
-				"vectory": -25.0,
-				"respawndelay": 5000
+				"vector": [ 20.0, -25.0 ],
+				"respawnDelay": 5000
 			}
 		]
 	},
@@ -46,38 +42,33 @@
 		"particles": [
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.1",
+				"spriteID": "weather.cloud.1",
 				"density": 3,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.2",
+				"spriteID": "weather.cloud.2",
 				"density": 3,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.3",
+				"spriteID": "weather.cloud.3",
 				"density": 2,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.rain.1",
+				"spriteID": "weather.rain.1",
 				"density": 15,
-				"vectorx": 200.0,
-				"vectory": 750.0
+				"vector": [ 200.0, 750.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.rain.2",
+				"spriteID": "weather.rain.2",
 				"density": 15,
-				"vectorx": 200.0,
-				"vectory": 750.0
+				"vector": [ 200.0, 750.0 ]
 			}
 		]
 	},
@@ -90,31 +81,27 @@
 		"particles": [
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.1",
+				"spriteID": "weather.cloud.1",
 				"density": 3,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.2",
+				"spriteID": "weather.cloud.2",
 				"density": 3,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.3",
+				"spriteID": "weather.cloud.3",
 				"density": 2,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.sand.1",
+				"spriteID": "weather.sand.1",
 				"density": 30,
-				"vectorx": 1000.0,
-				"vectory": 0.0
+				"vector": [ 1000.0, 0.0 ]
 			}
 		]
 	},
@@ -127,59 +114,51 @@
 		"particles": [
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.1",
+				"spriteID": "weather.cloud.1",
 				"density": 3,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.2",
+				"spriteID": "weather.cloud.2",
 				"density": 3,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.cloud.3",
+				"spriteID": "weather.cloud.3",
 				"density": 2,
-				"vectorx": -5.0,
-				"vectory": 6.0
+				"vector": [ -5.0, 6.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.snow.1",
+				"spriteID": "weather.snow.1",
 				"density": 6,
-				"vectorx": 125.0,
-				"vectory": 175.0
+				"vector": [ 125.0, 175.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.snow.2",
+				"spriteID": "weather.snow.2",
 				"density": 6,
-				"vectorx": 100.0,
-				"vectory": 190.0
+				"vector": [ 100.0, 190.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.snow.3",
+				"spriteID": "weather.snow.3",
 				"density": 6,
-				"vectorx": 50.0,
-				"vectory": 200.0
+				"vector": [ 50.0, 200.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.snow.4",
+				"spriteID": "weather.snow.4",
 				"density": 6,
-				"vectorx": 75.0,
-				"vectory": 150.0
+				"vector": [ 75.0, 150.0 ]
 			},
 			{
 				"sheet": "particle",
-				"sprite": "weather.snow.5",
+				"spriteID": "weather.snow.5",
 				"density": 6,
-				"vectorx": 150.0,
-				"vectory": 250.0
+				"vector": [ 150.0, 250.0 ]
 			}
 		]
 	}

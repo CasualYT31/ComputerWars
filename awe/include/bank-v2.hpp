@@ -44,6 +44,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "SFML/System/Time.hpp"
 #include "script.hpp"
 #include "typedef.hpp"
+#include "tpp/pod.tpp"
 
 #define GAME_PROPERTY_COUNT 10
 
@@ -152,72 +153,239 @@ namespace std {
 			for (std::size_t i = 0; i < GAME_PROPERTY_COUNT; ++i)
 				seed ^= hasher(f[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 			return seed;
-		}
+			}
 	};
 }
 
 namespace awe {
-	/**
-	 * Data used to setup \c awe::random_particles::data objects.
-	 * @sa \c awe::random_particles::data.
-	 */
-	struct particle_data {
-		std::string sheet;
-		std::string spriteID;
-		float density = 0.f;
-		sf::Vector2f vector;
-		sf::Time respawnDelay;
+	//struct particle_data {
+	//	std::string sheet;
+	//	std::string spriteID;
+	//	float density = 0.f;
+	//	sf::Vector2f vector;
+	//	sf::Time respawnDelay;
+	//};
+}
+
+namespace awe {
+	// To easily support arrays in bank-v2:
+	// 1. Have them be stored as CScriptArrays initially.
+	// 2. Overrides will then work with those arrays directly.
+	// 3. Then, after all overrides have been calculated, create an std::vector for
+	//    every override (and the default) that is then accessed by the engine by
+	//    ref. This keeps both C++ and AngelScript speedy during gameplay without
+	//    compromising on ease of use.
+	// Only compromise is that any code *during* and *before* the override code
+	// must *only* work with the CScriptArray. This includes fromJSON
+	// specialisations.
+	// DO NOT USE THIS TYPE OUTSIDE OF BANKS, due to bank code limitations,
+	// the resource management of this class is partially manual.
+	template<typename T>
+	struct bank_array {
+		/// @warning THIS MUST BE SET ASAP, BEFORE ANY ARRAYS ARE CREATED BY JSON LOADING CODE.
+		static std::shared_ptr<engine::scripts> scripts;
+		bank_array() {
+			array = std::make_unique<engine::CScriptWrapper<CScriptArray>>(scripts->createArray(engine::script_type<T>()));
+		};
+		bank_array(const bank_array<T>& o) { *this = o; }
+		static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) {
+			if (engine->GetTypeInfoByName(engine::script_type<bank_array<T>>().c_str())) return;
+			// Could register a template type but I don't see the benefit for our use case.
+			auto r = engine->RegisterObjectType(engine::script_type<bank_array<T>>().c_str(), 0,
+				asOBJ_REF | asOBJ_NOCOUNT);
+			// No factory functions, no ref counting: banks will manage the lifetime of these objects.
+			// Just provide const access to the underlying array (and non-const for override code).
+			// TODO: somehow find nicer way to achieve this, guess we could implement the entire
+			// array interface directly into this type, but I want to avoid that if possible.
+			r = engine->RegisterObjectMethod(
+				engine::script_type<bank_array<T>>().c_str(),
+				std::string("array<").append(engine::script_type<T>().c_str()).append(">@ get_array() property").c_str(),
+				asMETHOD(bank_array<T>, _getArray), asCALL_THISCALL
+			);
+			r = engine->RegisterObjectMethod(
+				engine::script_type<bank_array<T>>().c_str(),
+				std::string("const array<").append(engine::script_type<T>().c_str()).append(">@ get_array() const property").c_str(),
+				asMETHOD(bank_array<T>, _getArray), asCALL_THISCALL
+			);
+		}
+		bank_array<T>& operator=(const bank_array<T>& o) {
+			CScriptArray* newArray = scripts->createArray(engine::script_type<T>());
+			*newArray = *o.array->operator->();
+			array = std::make_unique<engine::CScriptWrapper<CScriptArray>>(newArray);
+			// The = operator is used on a bank_array when applying overrides.
+			// Calling initVector() will ensure that the vector is a copy of the
+			// script array as and when overrides are applied.
+			initVector();
+			return *this;
+		}
+		std::unique_ptr<engine::CScriptWrapper<CScriptArray>> array;
+		std::vector<T> vector;
+		inline void initVector() {
+			// Increase the ref counter of our array so we don't lose it after
+			// conversion.
+			array->operator->()->AddRef();
+			vector = engine::ConvertCScriptArray<std::vector<T>, T>(array->operator->());
+		}
+	private:
+		inline CScriptArray* _getArray() {
+			return array->operator->();
+		}
 	};
+	template<typename T>
+	std::shared_ptr<engine::scripts> bank_array<T>::scripts = nullptr;
 }
 
 namespace awe {
 	template<typename T> struct Serialisable {
-		static void fromJSON(std::string& value, engine::json& j,
-			const engine::json::KeySequence& keys, engine::logger&) {
+		static void fromJSON(T& value, engine::json& j,
+			const engine::json::KeySequence& keys, engine::logger&,
+			const std::shared_ptr<engine::scripts>&) {
 			j.apply(value, keys, true);
 		}
 	};
 	template<> struct Serialisable<sf::Color> {
 		static void fromJSON(sf::Color& value, engine::json& j,
-			const engine::json::KeySequence& keys, engine::logger&) {
+			const engine::json::KeySequence& keys, engine::logger&,
+			const std::shared_ptr<engine::scripts>&) {
 			j.applyColour(value, keys, true);
 		}
 	};
-	template<> struct Serialisable<std::vector<particle_data>> {
-		static void fromJSON(std::vector<particle_data>& value, engine::json& j,
-			const engine::json::KeySequence& keys, engine::logger&) {
-			// TODO: Write logs.
-			nlohmann::ordered_json p;
-			if (j.keysExist({ "particles" }, &p) &&
-				p.is_array() && !p.empty() && p.at(0).is_object()) {
-				value.reserve(p.size());
-				for (const auto& particle : p) {
-					value.emplace_back();
-					if (particle.contains("sheet") &&
-						particle["sheet"].is_string())
-						value.back().sheet = particle["sheet"];
-					if (particle.contains("sprite") &&
-						particle["sprite"].is_string())
-						value.back().spriteID = particle["sprite"];
-					const nlohmann::ordered_json t = static_cast<std::size_t>(0);
-					const nlohmann::ordered_json testFloat = 0.0f;
-					if (particle.contains("density") &&
-						engine::json::equalType(testFloat, particle["density"]))
-						value.back().density = particle["density"];
-					if (particle.contains("vectorx") &&
-						engine::json::equalType(testFloat, particle["vectorx"]))
-						value.back().vector.x = particle["vectorx"];
-					if (particle.contains("vectory") &&
-						engine::json::equalType(testFloat, particle["vectory"]))
-						value.back().vector.y = particle["vectory"];
-					if (particle.contains("respawndelay") &&
-						engine::json::equalType(t, particle["respawndelay"]))
-						value.back().respawnDelay =
-							sf::milliseconds(particle["respawndelay"]);
-				}
+	template<typename T> struct Serialisable<sf::Vector2<T>> {
+		static void fromJSON(sf::Vector2<T>& value, engine::json& j,
+			const engine::json::KeySequence& keys, engine::logger&,
+			const std::shared_ptr<engine::scripts>&) {
+			std::array<T, 2> vec;
+			j.applyArray(vec, keys);
+			if (!j.inGoodState()) {
+				j.resetState();
+				return;
 			}
+			value.x = vec[0];
+			value.y = vec[1];
 		}
 	};
+	template<> struct Serialisable<sf::Time> {
+		static void fromJSON(sf::Time& value, engine::json& j,
+			const engine::json::KeySequence& keys, engine::logger& logger,
+			const std::shared_ptr<engine::scripts>&) {
+			sf::Uint32 ms = 0;
+			j.apply(ms, keys);
+			if (!j.inGoodState()) {
+				j.resetState();
+				return;
+			}
+			if (ms > static_cast<sf::Uint32>(std::numeric_limits<sf::Int32>::max())) {
+				logger.error("Cannot store a millisecond value {} at {} that is "
+					"greater than {}.", ms, j.synthesiseKeySequence(keys),
+					std::numeric_limits<sf::Int32>::max());
+				return;
+			}
+			value = sf::milliseconds(static_cast<sf::Int32>(ms));
+		}
+	};
+	// Replace direct calls to j with calls to awe::Serialisable,
+	// and I think we can include this in the pod macro.
+	//template<> struct Serialisable<particle_data> {
+	//	static void fromJSON(particle_data& value, engine::json& j,
+	//		const engine::json::KeySequence& keys, engine::logger& logger) {
+	//		nlohmann::ordered_json p;
+	//		if (!j.keysExist(keys, &p)) {
+	//			logger.error("Attempting to read {}: these keys do not exist.",
+	//				j.synthesiseKeySequence(keys));
+	//			return;
+	//		}
+	//		if (!p.is_object()) {
+	//			logger.error("Attempting to read {} as an object, but the value "
+	//				"at these keys is of type \"{}\".",
+	//				j.synthesiseKeySequence(keys), j.getTypeName(p));
+	//			return;
+	//		}
+	//		j.apply(value.sheet, j.concatKeys(keys, { "sheet" }), true, true);
+	//		j.apply(value.spriteID, j.concatKeys(keys, { "spriteID" }), true,
+	//			true);
+	//		j.apply(value.density, j.concatKeys(keys, { "density" }), true, true);
+	//		if (p.contains("vector")) {
+	//			awe::Serialisable<decltype(value.vector)>::fromJSON(
+	//				value.vector, j, j.concatKeys(keys, { "vector" }), logger);
+	//		}
+	//		if (p.contains("respawnDelay")) {
+	//			awe::Serialisable<decltype(value.respawnDelay)>::fromJSON(
+	//				value.respawnDelay, j, j.concatKeys(keys, { "respawnDelay" }),
+	//				logger);
+	//		}
+	//	}
+	//};
+	template<typename E> struct Serialisable<awe::bank_array<E>> {
+		static void fromJSON(awe::bank_array<E>& value, engine::json& j,
+			const engine::json::KeySequence& keys, engine::logger& logger,
+			const std::shared_ptr<engine::scripts>& scripts) {
+			nlohmann::ordered_json p;
+			if (!j.keysExist(keys, &p)) {
+				logger.error("Attempting to read {}: these keys do not exist.",
+					j.synthesiseKeySequence(keys));
+				return;
+			}
+			if (!p.is_array()) {
+				logger.error("Attempting to read {} as an array, but the value at "
+					"these keys is of type \"{}\".", j.synthesiseKeySequence(keys),
+					j.getTypeName(p));
+				return;
+			}
+			if (p.empty()) return;
+			value.array->operator->()->Resize(static_cast<asUINT>(p.size()));
+			for (asUINT i = 0, end = value.array->operator->()->GetSize(); i < end; ++i) {
+				// Create an engine::json object for the array value so a fromJSON
+				// implementation can get at the value.
+				const auto valueKey = "arrayValue" + std::to_string(i);
+				nlohmann::json valueObject;
+				valueObject[valueKey] = p[i];
+				engine::json valueObjectEngine(valueObject, logger.getData());
+				E* element = static_cast<E*>(value.array->operator->()->At(i));
+				// TODO: error logs produced by this call will be close to
+				// meaningless to the user without the full key sequence. This
+				// method should return FALSE so that callers know something went
+				// wrong and can report more details.
+				awe::Serialisable<E>::fromJSON(*element, valueObjectEngine,
+					engine::json::KeySequence{ valueKey }, logger, scripts);
+			}
+			value.initVector();
+		}
+	};
+	//template<> struct Serialisable<std::vector<particle_data>> {
+	//	static void fromJSON(std::vector<particle_data>& value, engine::json& j,
+	//		const engine::json::KeySequence& keys, engine::logger&) {
+	//		// TODO: Write logs.
+	//		nlohmann::ordered_json p;
+	//		if (j.keysExist({ "particles" }, &p) &&
+	//			p.is_array() && !p.empty() && p.at(0).is_object()) {
+	//			value.reserve(p.size());
+	//			for (const auto& particle : p) {
+	//				value.emplace_back();
+	//				if (particle.contains("sheet") &&
+	//					particle["sheet"].is_string())
+	//					value.back().sheet = particle["sheet"];
+	//				if (particle.contains("sprite") &&
+	//					particle["sprite"].is_string())
+	//					value.back().spriteID = particle["sprite"];
+	//				const nlohmann::ordered_json t = static_cast<std::size_t>(0);
+	//				const nlohmann::ordered_json testFloat = 0.0f;
+	//				if (particle.contains("density") &&
+	//					engine::json::equalType(testFloat, particle["density"]))
+	//					value.back().density = particle["density"];
+	//				if (particle.contains("vectorx") &&
+	//					engine::json::equalType(testFloat, particle["vectorx"]))
+	//					value.back().vector.x = particle["vectorx"];
+	//				if (particle.contains("vectory") &&
+	//					engine::json::equalType(testFloat, particle["vectory"]))
+	//					value.back().vector.y = particle["vectory"];
+	//				if (particle.contains("respawndelay") &&
+	//					engine::json::equalType(t, particle["respawndelay"]))
+	//					value.back().respawnDelay =
+	//						sf::milliseconds(particle["respawndelay"]);
+	//			}
+	//		}
+	//	}
+	//};
 
 	// T = type of field.
 	// N = depth of the hierarchy desired. 1 = just CO, 2 = weather, then CO, etc.
@@ -228,11 +396,12 @@ namespace awe {
 			"N must be within the game property count!");
 	public:
 		inline property_field(engine::json& j,
-			const engine::json::KeySequence& keys, engine::logger& logger) {
+			const engine::json::KeySequence& keys, engine::logger& logger,
+			const std::shared_ptr<engine::scripts>& scripts) {
 			for (auto& i : _scriptNamesWithOverrides) i.insert("");
 			// We can always rely on the default value existing in a blank state so
 			// long as T is default constructible.
-			awe::Serialisable<T>::fromJSON(_values[{}], j, keys, logger);
+			awe::Serialisable<T>::fromJSON(_values[{}], j, keys, logger, scripts);
 		}
 		inline typename boost::call_traits<T>::reference operator[](
 			const overrides& overrides) {
@@ -264,34 +433,27 @@ namespace awe {
 		std::unordered_map<overrides, T> _values;
 	};
 
-	// Used to map C++ types to the AS types that are returned from game property
-	// field accessors. "const" is applied automatically by the PROPERTY() macro,
-	// but any references must be added to the AS type if applicable. If a mapping
-	// hasn't been defined here for a given C++ type, fields of that type won't be
-	// registered with the script interface. This may be handy in cases where the
-	// data is in a complex format that's not worth adding to the interface
-	// (especially if the scripts won't need that data).
-	template<typename T> struct AngelScriptType {
-		inline static const std::string value = "";
-	};
-	template<> struct AngelScriptType<std::string> {
-		inline static const std::string value = "string&";
-	};
-	template<> struct AngelScriptType<sf::Color> {
-		inline static const std::string value = "Colour&";
-	};
-
-	// Used to map C++ types to the AS types used for a game property field's
-	// overrides. TODO: blank string represents inability to override?
-	template<typename T> struct AngelScriptOverrideType {
-		inline static const std::string value = "";
-	};
-	template<> struct AngelScriptOverrideType<std::string> {
-		inline static const std::string value = "string";
-	};
-	template<> struct AngelScriptOverrideType<sf::Color> {
-		inline static const std::string value = "Colour";
-	};
+	/**
+	 * When a field in a game property is accessed, the engine should always return const refs.
+	 * @tparam T The type of the parameter.
+	 * @return The full AngelScript type for the return value of a game property field.
+	 */
+	template<typename T>
+	constexpr std::string bank_return_type() {
+		return std::string("const ").append(engine::script_type<T>()).append("&");
+		// TODO: In the future, it would be nice to be able to differentiate between
+		// primitive types and all others.
+		// It makes little sense to return "const int&" when a copy ("int") would suffice.
+		// To achieve this, we can wrap the call_traits<T>::const_reference instantiation
+		// in the macros, in some template function that returns different values between
+		// primitive values (T) and others (call_traits<T>::const_reference).
+		// Let's just get something working for now.
+		//if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value) {
+		//	return engine::script_type<T>();
+		//} else {
+		//	return std::string("const ").append(engine::script_type<T>()).append("&");
+		//}
+	}
 
 	template<typename T> struct OverrideVariable {
 		static std::any read(const std::shared_ptr<engine::scripts>& scripts,
@@ -300,12 +462,6 @@ namespace awe {
 				engine::scripts::modules[engine::scripts::BANK_OVERRIDE], variable);
 			if (!var) return {};
 			return *static_cast<T*>(var);
-		}
-	};
-	template<> struct OverrideVariable<std::vector<particle_data>> {
-		static std::any read(const std::shared_ptr<engine::scripts>& scripts,
-			const asUINT variable) {
-			return {};
 		}
 	};
 	// If a type needs a special read method for variables, specialise here.
@@ -318,13 +474,45 @@ namespace awe {
 			return p;
 		}
 	};
-	template<> struct OverrideFunction<std::vector<particle_data>> {
+	class particle_data;
+	template<> struct OverrideFunction<awe::bank_array<awe::particle_data>> {
 		static std::any read(const std::shared_ptr<engine::scripts>& scripts,
 			asIScriptFunction* const function, const std::any& parent) {
-			return parent;
+			awe::bank_array<awe::particle_data> p = std::any_cast<awe::bank_array<awe::particle_data>>(parent);
+			// TODO: Find a different way to address this refcount issue...
+			// I don't want to have to specialise for every bank_array type,
+			// I already have to do something similar with bank_array::scripts...
+			p.array->operator->()->AddRef();
+			scripts->callFunction(function, &p);
+			return p;
 		}
 	};
 	// If a type needs a special read method for functions, specialise here.
+}
+
+/**
+ * Data used to setup \c awe::random_particles::data objects.
+ * @sa \c awe::random_particles::data.
+ */
+DECLARE_POD_5(awe, particle_data, "ParticleData",
+	std::string, sheet,
+	std::string, spriteID,
+	float, density,
+	sf::Vector2f, vector,
+	sf::Time, respawnDelay
+);
+	
+DEFINE_POD_5(awe, particle_data, "ParticleData",
+	std::string, sheet,
+	std::string, spriteID,
+	float, density,
+	sf::Vector2f, vector,
+	sf::Time, respawnDelay
+);
+
+template<>
+inline constexpr std::string engine::script_type<awe::bank_array<awe::particle_data>>() {
+	return std::string(engine::script_type<awe::particle_data>()).append("Array");
 }
 
 #include "tpp/bank-v2-macros.tpp"
@@ -335,7 +523,7 @@ namespace awe {
 		shortName, std::string,,
 		icon, std::string,,
 		description, std::string,,
-	, )
+	,, )
 
 	GAME_PROPERTY_5(country, "Country", "country", 3,
 		longName, std::string,,
@@ -343,6 +531,7 @@ namespace awe {
 		icon, std::string,,
 		description, std::string,,
 		colour, sf::Color,,
+		,
 		_turnOrder = _turnOrderCounter++;,
 		private: awe::ArmyID _turnOrder; static awe::ArmyID _turnOrderCounter;
 		public: awe::ArmyID	turnOrder() { return _turnOrder; }
@@ -357,7 +546,7 @@ namespace awe {
 		spritesheet, std::string,,
 		pictureSpritesheet, std::string,,
 		structureIconSpritesheet, std::string,,
-	, )
+	,, )
 
 	GAME_PROPERTY_6(weather, "Weather", "weather", 1,
 		longName, std::string,,
@@ -365,8 +554,10 @@ namespace awe {
 		icon, std::string,,
 		description, std::string,,
 		sound, std::string,,
-		particles, std::vector<awe::particle_data>,,
-	, )
+		particles, awe::bank_array<awe::particle_data>,,
+		awe::particle_data::Register(engine, document);
+		awe::bank_array<awe::particle_data>::Register(engine, document);
+	,, )
 	
 	GAME_PROPERTY_6(commander, "Commander", "commander", 0,
 		longName, std::string,,
@@ -375,7 +566,7 @@ namespace awe {
 		description, std::string,,
 		portrait, std::string,,
 		theme, std::string,,
-	, )
+	,, )
 }
 
 #define COMMA ,
@@ -383,6 +574,7 @@ namespace awe {
 namespace awe {
 	template<typename T>
 	class bank : public engine::script_registrant, public engine::json_script {
+		std::shared_ptr<engine::scripts> _scripts;
 	public:
 		/**
 		 * The type of the container used to store game property values.
@@ -403,7 +595,7 @@ namespace awe {
 		 */
 		bank(const std::shared_ptr<engine::scripts>& scripts,
 			const engine::logger::data& data) :
-			engine::json_script({ data.sink, "json_script" }), _logger(data) {
+			engine::json_script({ data.sink, "json_script" }), _scripts(scripts), _logger(data) {
 			if (scripts) scripts->addRegistrant(this);
 		}
 
@@ -444,15 +636,41 @@ namespace awe {
 		// I = type::iterator or type::const_iterator.
 		// J = T or const T.
 		template<typename itr_type, typename J>
-		class base_iterator {
+		class base_iterator : public engine::script_reference_type<awe::bank<T>::base_iterator<itr_type, J>> {
 			itr_type _itr;
-			void copyConstructor(void* memory,
-				const base_iterator<itr_type, J>& o) {
-				new(memory) base_iterator<itr_type, J>(o);
+			inline base_iterator<itr_type, J>* opAssign(const base_iterator<itr_type, J>* const o) {
+				return &(*this = *o);
 			}
-			void destructor(void* memory) {
-				static_cast<base_iterator<itr_type, J>*>(memory)
-					->~base_iterator<itr_type, J>();
+			inline bool opEquals(const base_iterator<itr_type, J>* const o) const {
+				return *this == *o;
+			}
+			inline base_iterator<itr_type, J>* opPreInc() {
+				return &(++*this);
+			}
+			inline base_iterator<itr_type, J>* opPostInc() {
+				base_iterator<itr_type, J> copyItr(*this);
+				++*this;
+				copyItr.AddRef();
+				return &copyItr;
+			}
+			inline base_iterator<itr_type, J>* opPreDec() {
+				return &(--*this);
+			}
+			inline base_iterator<itr_type, J>* opPostDec() {
+				base_iterator<itr_type, J> copyItr(*this);
+				--*this;
+				copyItr.AddRef();
+				return &copyItr;
+			}
+			inline base_iterator<itr_type, J>* opAdd(const sf::Int64 ad) const {
+				base_iterator<itr_type, J> res(*this + ad);
+				res.AddRef();
+				return &res;
+			}
+			inline base_iterator<itr_type, J>* opSub(const sf::Int64 rm) const {
+				base_iterator<itr_type, J> res(*this - rm);
+				res.AddRef();
+				return &res;
 			}
 		public:
 			base_iterator(const itr_type& itr) : _itr(itr) {}
@@ -478,54 +696,39 @@ namespace awe {
 					itrPostfix = "Itr";
 				}
 				const char* const tc = t.append(itrPostfix).c_str();
-				auto r = engine->RegisterObjectType(tc,
-					sizeof(base_iterator<itr_type, J>),
-					asOBJ_VALUE | asGetTypeTraits<base_iterator<itr_type, J>>());
-				std::string copyConstructorSignature("void f(const ");
-				copyConstructorSignature.append(tc).append("&in)");
-				r = engine->RegisterObjectBehaviour(tc, asBEHAVE_CONSTRUCT,
-					copyConstructorSignature.c_str(),
-					asMETHOD(base_iterator<itr_type COMMA J>, copyConstructor),
-					asCALL_THISCALL_OBJFIRST);
-				r = engine->RegisterObjectBehaviour(tc, asBEHAVE_DESTRUCT,
-					"void f()", asMETHOD(base_iterator<itr_type COMMA J>, destructor),
-					asCALL_THISCALL_OBJFIRST);
+				auto r = engine::script_reference_type<awe::bank<T>::base_iterator<itr_type, J>>::RegisterType(engine, tc,
+					[](asIScriptEngine* engine, const std::string& type) {});
 				r = engine->RegisterObjectMethod(tc, std::string(tc)
-					.append("& opAssign(const ").append(tc).append("&in)").c_str(),
-					asMETHOD(base_iterator<itr_type COMMA J>, operator=),
+					.append("@ opAssign(const ").append(tc).append("@ const)").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, opAssign),
+					asCALL_THISCALL);
+				r = engine->RegisterObjectMethod(tc, std::string("bool opEquals(const ").append(tc)
+					.append("@ const) const").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, opEquals),
 					asCALL_THISCALL);
 				r = engine->RegisterObjectMethod(tc, std::string(tc)
-					.append("& opEquals(const ").append(tc)
-					.append("&in) const").c_str(),
-					asMETHOD(base_iterator<itr_type COMMA J>, operator==),
+					.append("@ opPreInc()").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, opPreInc),
 					asCALL_THISCALL);
 				r = engine->RegisterObjectMethod(tc, std::string(tc)
-					.append("& opPreInc()").c_str(),
-					asMETHODPR(base_iterator<itr_type COMMA J>, operator++, (),
-						base_iterator<itr_type COMMA J>&),
+					.append("@ opPostInc()").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, opPostInc),
 					asCALL_THISCALL);
 				r = engine->RegisterObjectMethod(tc, std::string(tc)
-					.append(" opPostInc()").c_str(),
-					asMETHODPR(base_iterator<itr_type COMMA J>, operator++, (int),
-						base_iterator<itr_type COMMA J>),
+					.append("@ opPreDec()").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, opPreDec),
 					asCALL_THISCALL);
 				r = engine->RegisterObjectMethod(tc, std::string(tc)
-					.append("& opPreDec()").c_str(),
-					asMETHODPR(base_iterator<itr_type COMMA J>, operator--, (),
-						base_iterator<itr_type COMMA J>&),
+					.append("@ opPostDec()").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, opPostDec),
 					asCALL_THISCALL);
 				r = engine->RegisterObjectMethod(tc, std::string(tc)
-					.append(" opPostDec()").c_str(),
-					asMETHODPR(base_iterator<itr_type COMMA J>, operator--, (int),
-						base_iterator<itr_type COMMA J>),
+					.append("@ opAdd(const int64) const").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, opAdd),
 					asCALL_THISCALL);
 				r = engine->RegisterObjectMethod(tc, std::string(tc)
-					.append(" opAdd(const int64) const").c_str(),
-					asMETHOD(base_iterator<itr_type COMMA J>, operator+),
-					asCALL_THISCALL);
-				r = engine->RegisterObjectMethod(tc, std::string(tc)
-					.append(" opSub(const int64) const").c_str(),
-					asMETHOD(base_iterator<itr_type COMMA J>, operator-),
+					.append("@ opSub(const int64) const").c_str(),
+					asMETHOD(base_iterator<itr_type COMMA J>, opSub),
 					asCALL_THISCALL);
 				if constexpr (std::is_const<J>::value) {
 					r = engine->RegisterObjectMethod(tc, std::string("const ")
@@ -559,7 +762,18 @@ namespace awe {
 		inline bank<T>::const_iterator cend() const {
 			return bank<T>::const_iterator(_bank.cend());
 		}
-
+	private:
+		inline bank<T>::const_iterator* cbeginScript() const {
+			bank<T>::const_iterator b(cbegin());
+			b.AddRef();
+			return &b;
+		}
+		inline bank<T>::const_iterator* cendScript() const {
+			bank<T>::const_iterator b(cend());
+			b.AddRef();
+			return &b;
+		}
+	public:
 		/**
 		 * Callback given to \c engine::scripts::registerInterface() to register
 		 * the bank type, as well as the type the bank stores, with a \c scripts
@@ -571,11 +785,16 @@ namespace awe {
 			// 1. Register dependencies shared between all bank types, as well as
 			//    all the types stored within all bank types.
 			awe::RegisterGameTypedefs(engine, document);
+			engine::RegisterColourType(engine, document);
+			engine::RegisterVectorTypes(engine, document);
+			engine::RegisterTimeTypes(engine, document);
+			engine::RegisterRectTypes(engine, document);
+			awe::overrides::Register(engine, document);
 
 			// 2. Register the game property type that this bank stores (i.e. T).
 			auto r = engine->RegisterObjectType(T::type.c_str(), 0,
 				asOBJ_REF | asOBJ_NOCOUNT);
-			T::Register(engine);
+			T::Register(engine, document);
 
 			// 3. Register the const iterator type for this bank object.
 			const auto itrType = const_iterator::Register(engine, T::type);
@@ -595,11 +814,11 @@ namespace awe {
 				"bool contains(const string&in) const",
 				asMETHOD(awe::bank<T>, contains), asCALL_THISCALL);
 			r = engine->RegisterObjectMethod(bankType, std::string(itrType)
-				.append(" begin() const").c_str(),
-				asMETHOD(awe::bank<T>, cbegin), asCALL_THISCALL);
+				.append("@ begin() const").c_str(),
+				asMETHOD(awe::bank<T>, cbeginScript), asCALL_THISCALL);
 			r = engine->RegisterObjectMethod(bankType, std::string(itrType)
-				.append(" end() const").c_str(),
-				asMETHOD(awe::bank<T>, cend), asCALL_THISCALL);
+				.append("@ end() const").c_str(),
+				asMETHOD(awe::bank<T>, cendScript), asCALL_THISCALL);
 
 			// 5. Register the global point of access to the bank object.
 			const auto globalProperty = std::string(bankTypeName).append(" ")
@@ -934,7 +1153,7 @@ namespace awe {
 							"type \"{}\" within game property \"{}\" of type "
 							"\"{}\", with game property \"{}\" of overrider type "
 							"\"{}\", with function \"{}\". The function must have "
-							"only one parameter of type \"{}&\".",
+							"only one parameter of type \"{}&[out]\".",
 							funcName, actualType, baseTypeScriptName, T::type,
 							overriderTypeScriptName, O::type::type,
 							funcSignature, actualType);
@@ -943,12 +1162,12 @@ namespace awe {
 					int typeID = 0; asDWORD mods = 0;
 					func.first->GetParam(0, &typeID, &mods);
 					const auto funcType = scripts->getTypeName(typeID);
-					if (funcType != actualType || !(mods & asETypeModifiers::asTM_OUTREF)) {
+					if (funcType != actualType || !(mods & asETypeModifiers::asTM_OUTREF) || !(mods & asETypeModifiers::asTM_INOUTREF)) {
 						_logger.error("Attempting to override field \"{}\" of "
 							"type \"{}\" within game property \"{}\" of type "
 							"\"{}\", with game property \"{}\" of overrider type "
 							"\"{}\", with function \"{}\". The function must have "
-							"only one parameter of type \"{}&\".",
+							"only one parameter of type \"{}&[out]\".",
 							funcName, actualType, baseTypeScriptName, T::type,
 							overriderTypeScriptName, O::type::type,
 							funcSignature, actualType);
@@ -1016,7 +1235,7 @@ namespace awe {
 			nlohmann::ordered_json jj = j.nlohmannJSON();
 			for (auto& i : jj.items()) {
 				engine::json input(i.value(), { _logger.getData().sink, "json" });
-				bank[i.key()] = std::make_shared<T>(i.key(), input, _logger);
+				bank[i.key()] = std::make_shared<T>(i.key(), input, _logger, _scripts);
 			}
 			_bank = std::move(bank);
 			return true;

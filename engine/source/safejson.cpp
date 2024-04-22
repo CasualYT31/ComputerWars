@@ -164,6 +164,12 @@ std::string engine::json::synthesiseKeySequence(
 	}
 }
 
+engine::json::KeySequence engine::json::concatKeys(KeySequence parentKeys,
+	const KeySequence& childKeys) {
+	std::copy(childKeys.begin(), childKeys.end(), std::back_inserter(parentKeys));
+	return parentKeys;
+}
+
 void engine::json::applyColour(sf::Color& dest,
 	const engine::json::KeySequence& keys, const bool suppressErrors) {
 	std::array<unsigned int, 4> colour = { 0, 0, 0, 255 };
@@ -178,8 +184,9 @@ void engine::json::applyColour(sf::Color& dest,
 }
 
 bool engine::json::_performInitialChecks(const engine::json::KeySequence& keys,
-	nlohmann::ordered_json& test, nlohmann::ordered_json dest, std::string type) {
-	if (type == "") type = _getTypeName(dest);
+	nlohmann::ordered_json& test, nlohmann::ordered_json dest, std::string type,
+	const bool optional) {
+	if (type == "") type = getTypeName(dest);
 	if (keys.empty()) {
 		_logger.error("Attempted to assign a value to a destination of type "
 			"\"{}\" without specifying a key sequence.", type);
@@ -191,10 +198,10 @@ bool engine::json::_performInitialChecks(const engine::json::KeySequence& keys,
 			} else {
 				_logger.error("Attempted to assign a value of data type \"{}\" to "
 					"a destination of type \"{}\", in the key sequence {}.",
-					_getTypeName(test), type, synthesiseKeySequence(keys));
+					getTypeName(test), type, synthesiseKeySequence(keys));
 				_toggleState(MISMATCHING_TYPE);
 			}
-		} else {
+		} else if (!optional) {
 			_logger.error("The key sequence {} does not exist in the JSON object.",
 				synthesiseKeySequence(keys));
 			_toggleState(KEYS_DID_NOT_EXIST);

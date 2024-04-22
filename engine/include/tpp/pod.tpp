@@ -41,197 +41,432 @@ namespace engine {
     }
 }
 
-#define DECLARE_POD_1(cc, ac, t1, p1) struct cc : public engine::script_reference_type<cc> { \
-    static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
-    inline static cc* Create() { return new cc(); }; \
-    inline static cc* Create(boost::call_traits<t1>::param_type param1) { \
-        return new cc(param1); \
-    } \
-    inline static cc* Create(const cc* const o) { return new cc(*o); } \
-    cc() = default; \
-    cc(boost::call_traits<t1>::param_type); \
-    cc(const cc& o); \
-    cc(cc&& o) noexcept; \
-    bool operator==(const cc& o) const; \
-    inline bool operator!=(const cc& o) const { return !(*this == o); } \
-    cc& operator=(const cc& o); \
-    cc& operator=(cc&& o) noexcept; \
-    t1 p1{}; \
-private: \
-    inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
-    inline bool opEquals(const cc* const o) const { return *this == *o; } \
-}; \
+#define DECLARE_POD_1(ns, cc, ac, t1, p1) namespace ns { \
+    struct cc : public engine::script_reference_type<ns::cc> { \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
+        inline static cc* Create() { return new cc(); }; \
+        inline static cc* Create(boost::call_traits<t1>::param_type param1) { \
+            return new cc(param1); \
+        } \
+        inline static cc* Create(const cc* const o) { return new cc(*o); } \
+        cc() = default; \
+        cc(boost::call_traits<t1>::param_type); \
+        cc(const cc& o); \
+        cc(cc&& o) noexcept; \
+        bool operator==(const cc& o) const; \
+        inline bool operator!=(const cc& o) const { return !(*this == o); } \
+        cc& operator=(const cc& o); \
+        cc& operator=(cc&& o) noexcept; \
+        t1 p1{}; \
+    private: \
+        inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
+        inline bool opEquals(const cc* const o) const { return *this == *o; } \
+    }; \
+} \
 template <> \
-inline constexpr const char* engine::script_type<cc>() { return ac; }
-
-#define DEFINE_POD_1(cc, ac, t1, p1) void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
-    if (engine->GetTypeInfoByName(ac)) return; \
-    auto r = RegisterType(engine, ac, \
-        [](asIScriptEngine* engine, const std::string& type) { \
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
-                ac "@ f()", \
-                asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
-                std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(")").c_str(), \
-                asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type), cc*), asCALL_CDECL); \
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
-                ac "@ f(const " ac "&in)", \
-                asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
-        }); \
-    r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
-    r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
-        asMETHOD(cc, opAssign), asCALL_THISCALL); \
-    r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
-        asMETHOD(cc, opEquals), asCALL_THISCALL); \
-} \
-\
-cc::cc(boost::call_traits<t1>::param_type param1) : p1(param1) {} \
-\
-cc::cc(const cc& o) : p1(o.p1) {} \
-\
-cc::cc(cc&& o) noexcept : p1(std::move(o.p1)) {} \
-\
-bool cc::operator==(const cc& o) const { \
-    return engine::isEqual<t1, t1>(p1, o.p1); \
-} \
-\
-cc& cc::operator=(const cc& o) { \
-    p1 = o.p1; \
-    return *this; \
-} \
-\
-cc& cc::operator=(cc&& o) noexcept { \
-    p1 = std::move(o.p1); \
-    return *this; \
+inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
+namespace awe { \
+    template<> struct Serialisable<ns::cc> { \
+        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+            nlohmann::ordered_json p; \
+			if (!j.keysExist(keys, &p)) { \
+				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+				return; \
+			} \
+			if (!p.is_object()) { \
+				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
+				return; \
+			} \
+            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); \
+        } \
+    }; \
 }
 
-#define DECLARE_POD_2(cc, ac, t1, p1, t2, p2) struct cc : public engine::script_reference_type<cc> { \
-    static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
-    inline static cc* Create() { return new cc(); }; \
-    inline static cc* Create(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2) { \
-        return new cc(param1, param2); \
+#define DEFINE_POD_1(ns, cc, ac, t1, p1) namespace ns { \
+    void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        if (engine->GetTypeInfoByName(ac)) return; \
+        auto r = RegisterType(engine, ac, \
+            [](asIScriptEngine* engine, const std::string& type) { \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f()", \
+                    asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(")").c_str(), \
+                    asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f(const " ac "&in)", \
+                    asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
+            }); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
+        r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
+            asMETHOD(cc, opAssign), asCALL_THISCALL); \
+        r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
+            asMETHOD(cc, opEquals), asCALL_THISCALL); \
     } \
-    inline static cc* Create(const cc* const o) { return new cc(*o); } \
-    cc() = default; \
-    cc(boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type); \
-    cc(const cc& o); \
-    cc(cc&& o) noexcept; \
-    bool operator==(const cc& o) const; \
-    inline bool operator!=(const cc& o) const { return !(*this == o); } \
-    cc& operator=(const cc& o); \
-    cc& operator=(cc&& o) noexcept; \
-    t1 p1{}; t2 p2{}; \
-private: \
-    inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
-    inline bool opEquals(const cc* const o) const { return *this == *o; } \
-}; \
-template <> \
-inline constexpr const char* engine::script_type<cc>() { return ac; }
-
-#define DEFINE_POD_2(cc, ac, t1, p1, t2, p2) void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
-    if (engine->GetTypeInfoByName(ac)) return; \
-    auto r = RegisterType(engine, ac, \
-        [](asIScriptEngine* engine, const std::string& type) { \
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
-                ac "@ f()", \
-                asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
-                std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(", ").append(engine::script_param_type<t2>()).append(")").c_str(), \
-                asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type), cc*), asCALL_CDECL); \
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
-                ac "@ f(const " ac "&in)", \
-                asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
-        }); \
-    r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
-    r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t2>()).append(" ").append(#p2).c_str(), asOFFSET(cc, p2)); \
-    r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
-        asMETHOD(cc, opAssign), asCALL_THISCALL); \
-    r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
-        asMETHOD(cc, opEquals), asCALL_THISCALL); \
-} \
-\
-cc::cc(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2) : p1(param1), p2(param2) {} \
-\
-cc::cc(const cc& o) : p1(o.p1), p2(o.p2) {} \
-\
-cc::cc(cc&& o) noexcept : p1(std::move(o.p1)), p2(std::move(o.p2)) {} \
-\
-bool cc::operator==(const cc& o) const { \
-    return engine::isEqual<t1, t1>(p1, o.p1) && engine::isEqual<t2, t2>(p2, o.p2); \
-} \
-\
-cc& cc::operator=(const cc& o) { \
-    p1 = o.p1; p2 = o.p2; \
-    return *this; \
-} \
-\
-cc& cc::operator=(cc&& o) noexcept { \
-    p1 = std::move(o.p1); p2 = std::move(o.p2); \
-    return *this; \
+    \
+    cc::cc(boost::call_traits<t1>::param_type param1) : p1(param1) {} \
+    \
+    cc::cc(const cc& o) : p1(o.p1) {} \
+    \
+    cc::cc(cc&& o) noexcept : p1(std::move(o.p1)) {} \
+    \
+    bool cc::operator==(const cc& o) const { \
+        return engine::isEqual<t1, t1>(p1, o.p1); \
+    } \
+    \
+    cc& cc::operator=(const cc& o) { \
+        p1 = o.p1; \
+        return *this; \
+    } \
+    \
+    cc& cc::operator=(cc&& o) noexcept { \
+        p1 = std::move(o.p1); \
+        return *this; \
+    } \
 }
 
-#define DECLARE_POD_3(cc, ac, t1, p1, t2, p2, t3, p3) struct cc : public engine::script_reference_type<cc> { \
-    static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
-    inline static cc* Create() { return new cc(); }; \
-    inline static cc* Create(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3) { \
-        return new cc(param1, param2, param3); \
-    } \
-    inline static cc* Create(const cc* const o) { return new cc(*o); } \
-    cc() = default; \
-    cc(boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type); \
-    cc(const cc& o); \
-    cc(cc&& o) noexcept; \
-    bool operator==(const cc& o) const; \
-    inline bool operator!=(const cc& o) const { return !(*this == o); } \
-    cc& operator=(const cc& o); \
-    cc& operator=(cc&& o) noexcept; \
-    t1 p1{}; t2 p2{}; t3 p3{}; \
-private: \
-    inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
-    inline bool opEquals(const cc* const o) const { return *this == *o; } \
-}; \
+#define DECLARE_POD_2(ns, cc, ac, t1, p1, t2, p2) namespace ns { \
+    struct cc : public engine::script_reference_type<ns::cc> { \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
+        inline static cc* Create() { return new cc(); }; \
+        inline static cc* Create(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2) { \
+            return new cc(param1, param2); \
+        } \
+        inline static cc* Create(const cc* const o) { return new cc(*o); } \
+        cc() = default; \
+        cc(boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type); \
+        cc(const cc& o); \
+        cc(cc&& o) noexcept; \
+        bool operator==(const cc& o) const; \
+        inline bool operator!=(const cc& o) const { return !(*this == o); } \
+        cc& operator=(const cc& o); \
+        cc& operator=(cc&& o) noexcept; \
+        t1 p1{}; t2 p2{}; \
+    private: \
+        inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
+        inline bool opEquals(const cc* const o) const { return *this == *o; } \
+    }; \
+} \
 template <> \
-inline constexpr const char* engine::script_type<cc>() { return ac; }
+inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
+namespace awe { \
+    template<> struct Serialisable<ns::cc> { \
+        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+            nlohmann::ordered_json p; \
+			if (!j.keysExist(keys, &p)) { \
+				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+				return; \
+			} \
+			if (!p.is_object()) { \
+				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
+				return; \
+			} \
+            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); if (p.contains(#p2)) awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, scripts); \
+        } \
+    }; \
+}
 
-#define DEFINE_POD_3(cc, ac, t1, p1, t2, p2, t3, p3) void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
-    if (engine->GetTypeInfoByName(ac)) return; \
-    auto r = RegisterType(engine, ac, \
-        [](asIScriptEngine* engine, const std::string& type) { \
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
-                ac "@ f()", \
-                asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
-                std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(", ").append(engine::script_param_type<t2>()).append(", ").append(engine::script_param_type<t3>()).append(")").c_str(), \
-                asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type), cc*), asCALL_CDECL); \
-            engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
-                ac "@ f(const " ac "&in)", \
-                asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
-        }); \
-    r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
-    r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t2>()).append(" ").append(#p2).c_str(), asOFFSET(cc, p2)); \
-    r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t3>()).append(" ").append(#p3).c_str(), asOFFSET(cc, p3)); \
-    r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
-        asMETHOD(cc, opAssign), asCALL_THISCALL); \
-    r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
-        asMETHOD(cc, opEquals), asCALL_THISCALL); \
+#define DEFINE_POD_2(ns, cc, ac, t1, p1, t2, p2) namespace ns { \
+    void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        if (engine->GetTypeInfoByName(ac)) return; \
+        auto r = RegisterType(engine, ac, \
+            [](asIScriptEngine* engine, const std::string& type) { \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f()", \
+                    asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(", ").append(engine::script_param_type<t2>()).append(")").c_str(), \
+                    asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f(const " ac "&in)", \
+                    asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
+            }); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t2>()).append(" ").append(#p2).c_str(), asOFFSET(cc, p2)); \
+        r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
+            asMETHOD(cc, opAssign), asCALL_THISCALL); \
+        r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
+            asMETHOD(cc, opEquals), asCALL_THISCALL); \
+    } \
+    \
+    cc::cc(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2) : p1(param1), p2(param2) {} \
+    \
+    cc::cc(const cc& o) : p1(o.p1), p2(o.p2) {} \
+    \
+    cc::cc(cc&& o) noexcept : p1(std::move(o.p1)), p2(std::move(o.p2)) {} \
+    \
+    bool cc::operator==(const cc& o) const { \
+        return engine::isEqual<t1, t1>(p1, o.p1) && engine::isEqual<t2, t2>(p2, o.p2); \
+    } \
+    \
+    cc& cc::operator=(const cc& o) { \
+        p1 = o.p1; p2 = o.p2; \
+        return *this; \
+    } \
+    \
+    cc& cc::operator=(cc&& o) noexcept { \
+        p1 = std::move(o.p1); p2 = std::move(o.p2); \
+        return *this; \
+    } \
+}
+
+#define DECLARE_POD_3(ns, cc, ac, t1, p1, t2, p2, t3, p3) namespace ns { \
+    struct cc : public engine::script_reference_type<ns::cc> { \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
+        inline static cc* Create() { return new cc(); }; \
+        inline static cc* Create(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3) { \
+            return new cc(param1, param2, param3); \
+        } \
+        inline static cc* Create(const cc* const o) { return new cc(*o); } \
+        cc() = default; \
+        cc(boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type); \
+        cc(const cc& o); \
+        cc(cc&& o) noexcept; \
+        bool operator==(const cc& o) const; \
+        inline bool operator!=(const cc& o) const { return !(*this == o); } \
+        cc& operator=(const cc& o); \
+        cc& operator=(cc&& o) noexcept; \
+        t1 p1{}; t2 p2{}; t3 p3{}; \
+    private: \
+        inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
+        inline bool opEquals(const cc* const o) const { return *this == *o; } \
+    }; \
 } \
-\
-cc::cc(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3) : p1(param1), p2(param2), p3(param3) {} \
-\
-cc::cc(const cc& o) : p1(o.p1), p2(o.p2), p3(o.p3) {} \
-\
-cc::cc(cc&& o) noexcept : p1(std::move(o.p1)), p2(std::move(o.p2)), p3(std::move(o.p3)) {} \
-\
-bool cc::operator==(const cc& o) const { \
-    return engine::isEqual<t1, t1>(p1, o.p1) && engine::isEqual<t2, t2>(p2, o.p2) && engine::isEqual<t3, t3>(p3, o.p3); \
+template <> \
+inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
+namespace awe { \
+    template<> struct Serialisable<ns::cc> { \
+        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+            nlohmann::ordered_json p; \
+			if (!j.keysExist(keys, &p)) { \
+				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+				return; \
+			} \
+			if (!p.is_object()) { \
+				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
+				return; \
+			} \
+            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); if (p.contains(#p2)) awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, scripts); if (p.contains(#p3)) awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, scripts); \
+        } \
+    }; \
+}
+
+#define DEFINE_POD_3(ns, cc, ac, t1, p1, t2, p2, t3, p3) namespace ns { \
+    void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        if (engine->GetTypeInfoByName(ac)) return; \
+        auto r = RegisterType(engine, ac, \
+            [](asIScriptEngine* engine, const std::string& type) { \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f()", \
+                    asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(", ").append(engine::script_param_type<t2>()).append(", ").append(engine::script_param_type<t3>()).append(")").c_str(), \
+                    asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f(const " ac "&in)", \
+                    asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
+            }); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t2>()).append(" ").append(#p2).c_str(), asOFFSET(cc, p2)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t3>()).append(" ").append(#p3).c_str(), asOFFSET(cc, p3)); \
+        r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
+            asMETHOD(cc, opAssign), asCALL_THISCALL); \
+        r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
+            asMETHOD(cc, opEquals), asCALL_THISCALL); \
+    } \
+    \
+    cc::cc(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3) : p1(param1), p2(param2), p3(param3) {} \
+    \
+    cc::cc(const cc& o) : p1(o.p1), p2(o.p2), p3(o.p3) {} \
+    \
+    cc::cc(cc&& o) noexcept : p1(std::move(o.p1)), p2(std::move(o.p2)), p3(std::move(o.p3)) {} \
+    \
+    bool cc::operator==(const cc& o) const { \
+        return engine::isEqual<t1, t1>(p1, o.p1) && engine::isEqual<t2, t2>(p2, o.p2) && engine::isEqual<t3, t3>(p3, o.p3); \
+    } \
+    \
+    cc& cc::operator=(const cc& o) { \
+        p1 = o.p1; p2 = o.p2; p3 = o.p3; \
+        return *this; \
+    } \
+    \
+    cc& cc::operator=(cc&& o) noexcept { \
+        p1 = std::move(o.p1); p2 = std::move(o.p2); p3 = std::move(o.p3); \
+        return *this; \
+    } \
+}
+
+#define DECLARE_POD_4(ns, cc, ac, t1, p1, t2, p2, t3, p3, t4, p4) namespace ns { \
+    struct cc : public engine::script_reference_type<ns::cc> { \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
+        inline static cc* Create() { return new cc(); }; \
+        inline static cc* Create(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3, boost::call_traits<t4>::param_type param4) { \
+            return new cc(param1, param2, param3, param4); \
+        } \
+        inline static cc* Create(const cc* const o) { return new cc(*o); } \
+        cc() = default; \
+        cc(boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type, boost::call_traits<t4>::param_type); \
+        cc(const cc& o); \
+        cc(cc&& o) noexcept; \
+        bool operator==(const cc& o) const; \
+        inline bool operator!=(const cc& o) const { return !(*this == o); } \
+        cc& operator=(const cc& o); \
+        cc& operator=(cc&& o) noexcept; \
+        t1 p1{}; t2 p2{}; t3 p3{}; t4 p4{}; \
+    private: \
+        inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
+        inline bool opEquals(const cc* const o) const { return *this == *o; } \
+    }; \
 } \
-\
-cc& cc::operator=(const cc& o) { \
-    p1 = o.p1; p2 = o.p2; p3 = o.p3; \
-    return *this; \
+template <> \
+inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
+namespace awe { \
+    template<> struct Serialisable<ns::cc> { \
+        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+            nlohmann::ordered_json p; \
+			if (!j.keysExist(keys, &p)) { \
+				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+				return; \
+			} \
+			if (!p.is_object()) { \
+				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
+				return; \
+			} \
+            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); if (p.contains(#p2)) awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, scripts); if (p.contains(#p3)) awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, scripts); if (p.contains(#p4)) awe::Serialisable<t4>::fromJSON(value.p4, j, j.concatKeys(keys, { #p4 }), logger, scripts); \
+        } \
+    }; \
+}
+
+#define DEFINE_POD_4(ns, cc, ac, t1, p1, t2, p2, t3, p3, t4, p4) namespace ns { \
+    void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        if (engine->GetTypeInfoByName(ac)) return; \
+        auto r = RegisterType(engine, ac, \
+            [](asIScriptEngine* engine, const std::string& type) { \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f()", \
+                    asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(", ").append(engine::script_param_type<t2>()).append(", ").append(engine::script_param_type<t3>()).append(", ").append(engine::script_param_type<t4>()).append(")").c_str(), \
+                    asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type, boost::call_traits<t4>::param_type), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f(const " ac "&in)", \
+                    asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
+            }); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t2>()).append(" ").append(#p2).c_str(), asOFFSET(cc, p2)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t3>()).append(" ").append(#p3).c_str(), asOFFSET(cc, p3)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t4>()).append(" ").append(#p4).c_str(), asOFFSET(cc, p4)); \
+        r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
+            asMETHOD(cc, opAssign), asCALL_THISCALL); \
+        r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
+            asMETHOD(cc, opEquals), asCALL_THISCALL); \
+    } \
+    \
+    cc::cc(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3, boost::call_traits<t4>::param_type param4) : p1(param1), p2(param2), p3(param3), p4(param4) {} \
+    \
+    cc::cc(const cc& o) : p1(o.p1), p2(o.p2), p3(o.p3), p4(o.p4) {} \
+    \
+    cc::cc(cc&& o) noexcept : p1(std::move(o.p1)), p2(std::move(o.p2)), p3(std::move(o.p3)), p4(std::move(o.p4)) {} \
+    \
+    bool cc::operator==(const cc& o) const { \
+        return engine::isEqual<t1, t1>(p1, o.p1) && engine::isEqual<t2, t2>(p2, o.p2) && engine::isEqual<t3, t3>(p3, o.p3) && engine::isEqual<t4, t4>(p4, o.p4); \
+    } \
+    \
+    cc& cc::operator=(const cc& o) { \
+        p1 = o.p1; p2 = o.p2; p3 = o.p3; p4 = o.p4; \
+        return *this; \
+    } \
+    \
+    cc& cc::operator=(cc&& o) noexcept { \
+        p1 = std::move(o.p1); p2 = std::move(o.p2); p3 = std::move(o.p3); p4 = std::move(o.p4); \
+        return *this; \
+    } \
+}
+
+#define DECLARE_POD_5(ns, cc, ac, t1, p1, t2, p2, t3, p3, t4, p4, t5, p5) namespace ns { \
+    struct cc : public engine::script_reference_type<ns::cc> { \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
+        inline static cc* Create() { return new cc(); }; \
+        inline static cc* Create(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3, boost::call_traits<t4>::param_type param4, boost::call_traits<t5>::param_type param5) { \
+            return new cc(param1, param2, param3, param4, param5); \
+        } \
+        inline static cc* Create(const cc* const o) { return new cc(*o); } \
+        cc() = default; \
+        cc(boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type, boost::call_traits<t4>::param_type, boost::call_traits<t5>::param_type); \
+        cc(const cc& o); \
+        cc(cc&& o) noexcept; \
+        bool operator==(const cc& o) const; \
+        inline bool operator!=(const cc& o) const { return !(*this == o); } \
+        cc& operator=(const cc& o); \
+        cc& operator=(cc&& o) noexcept; \
+        t1 p1{}; t2 p2{}; t3 p3{}; t4 p4{}; t5 p5{}; \
+    private: \
+        inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
+        inline bool opEquals(const cc* const o) const { return *this == *o; } \
+    }; \
 } \
-\
-cc& cc::operator=(cc&& o) noexcept { \
-    p1 = std::move(o.p1); p2 = std::move(o.p2); p3 = std::move(o.p3); \
-    return *this; \
+template <> \
+inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
+namespace awe { \
+    template<> struct Serialisable<ns::cc> { \
+        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+            nlohmann::ordered_json p; \
+			if (!j.keysExist(keys, &p)) { \
+				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+				return; \
+			} \
+			if (!p.is_object()) { \
+				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
+				return; \
+			} \
+            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); if (p.contains(#p2)) awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, scripts); if (p.contains(#p3)) awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, scripts); if (p.contains(#p4)) awe::Serialisable<t4>::fromJSON(value.p4, j, j.concatKeys(keys, { #p4 }), logger, scripts); if (p.contains(#p5)) awe::Serialisable<t5>::fromJSON(value.p5, j, j.concatKeys(keys, { #p5 }), logger, scripts); \
+        } \
+    }; \
+}
+
+#define DEFINE_POD_5(ns, cc, ac, t1, p1, t2, p2, t3, p3, t4, p4, t5, p5) namespace ns { \
+    void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        if (engine->GetTypeInfoByName(ac)) return; \
+        auto r = RegisterType(engine, ac, \
+            [](asIScriptEngine* engine, const std::string& type) { \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f()", \
+                    asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(", ").append(engine::script_param_type<t2>()).append(", ").append(engine::script_param_type<t3>()).append(", ").append(engine::script_param_type<t4>()).append(", ").append(engine::script_param_type<t5>()).append(")").c_str(), \
+                    asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type, boost::call_traits<t4>::param_type, boost::call_traits<t5>::param_type), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f(const " ac "&in)", \
+                    asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
+            }); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t2>()).append(" ").append(#p2).c_str(), asOFFSET(cc, p2)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t3>()).append(" ").append(#p3).c_str(), asOFFSET(cc, p3)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t4>()).append(" ").append(#p4).c_str(), asOFFSET(cc, p4)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t5>()).append(" ").append(#p5).c_str(), asOFFSET(cc, p5)); \
+        r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
+            asMETHOD(cc, opAssign), asCALL_THISCALL); \
+        r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
+            asMETHOD(cc, opEquals), asCALL_THISCALL); \
+    } \
+    \
+    cc::cc(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3, boost::call_traits<t4>::param_type param4, boost::call_traits<t5>::param_type param5) : p1(param1), p2(param2), p3(param3), p4(param4), p5(param5) {} \
+    \
+    cc::cc(const cc& o) : p1(o.p1), p2(o.p2), p3(o.p3), p4(o.p4), p5(o.p5) {} \
+    \
+    cc::cc(cc&& o) noexcept : p1(std::move(o.p1)), p2(std::move(o.p2)), p3(std::move(o.p3)), p4(std::move(o.p4)), p5(std::move(o.p5)) {} \
+    \
+    bool cc::operator==(const cc& o) const { \
+        return engine::isEqual<t1, t1>(p1, o.p1) && engine::isEqual<t2, t2>(p2, o.p2) && engine::isEqual<t3, t3>(p3, o.p3) && engine::isEqual<t4, t4>(p4, o.p4) && engine::isEqual<t5, t5>(p5, o.p5); \
+    } \
+    \
+    cc& cc::operator=(const cc& o) { \
+        p1 = o.p1; p2 = o.p2; p3 = o.p3; p4 = o.p4; p5 = o.p5; \
+        return *this; \
+    } \
+    \
+    cc& cc::operator=(cc&& o) noexcept { \
+        p1 = std::move(o.p1); p2 = std::move(o.p2); p3 = std::move(o.p3); p4 = std::move(o.p4); p5 = std::move(o.p5); \
+        return *this; \
+    } \
 }

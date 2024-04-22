@@ -1,17 +1,18 @@
-#define GAME_PROPERTY_$(cc, ac, gp, i`, p$, t$, e$`, e, a) class cc { \
+#define GAME_PROPERTY_$(cc, ac, gp, i`, p$, t$, e$`, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, $> fields = { `#p$, `}; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        `p$(j, logger), `\
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        `p$(j, logger, scripts), `\
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        `p$##_::Register(engine); `\
+        `p$##_::Register(engine, document); `\
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     `PROPERTY(cc, ac, p$, t$, i, e$) `\
@@ -19,7 +20,7 @@ public: \
         return `field == #p$ || `false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		`if (field == #p$) return awe::AngelScriptOverrideType<t$>::value; `\
+		`if (field == #p$) return engine::script_type<t$>(); `\
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -35,7 +36,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        `if (field == #p$) return !awe::AngelScriptOverrideType<t$>::value.empty(); `\
+        `if (field == #p$) return !engine::script_type<t$>().empty(); `\
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -43,7 +44,7 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        `if (field == #p$) p$(overrides) = std::any_cast<t$>(value); ` \
+        `if (field == #p$) p$(overrides) = std::any_cast<t$>(value); `\
     } \
     a \
 };

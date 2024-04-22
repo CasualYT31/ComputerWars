@@ -36,14 +36,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define PROPERTY(cc, ac, n, ct, i, e) class n##_ { \
 	awe::property_field<ct, i> _##n; \
 public: \
-	n##_(engine::json& j, engine::logger& logger) : _##n(j, { #n }, logger) { e } \
-	static void Register(asIScriptEngine* engine) { \
-		if (awe::AngelScriptType<ct>::value.empty()) return; \
-		std::stringstream builder; \
-		builder << "const "; \
-		builder << awe::AngelScriptType<ct>::value; \
-		builder << " " #n "(const Overrides&in) const"; \
-		engine->RegisterObjectMethod(ac, builder.str().c_str(), \
+	n##_(engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : _##n(j, { #n }, logger, scripts) { e } \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+		engine->RegisterObjectMethod(ac, std::string(awe::bank_return_type<ct>()).append(" " #n "(const Overrides&in) const").c_str(), \
 			asMETHODPR(n##_, operator(), (const awe::overrides&) const, \
 				typename boost::call_traits<ct>::const_reference), \
 			asCALL_THISCALL, nullptr, asOFFSET(cc, n), false); \
@@ -70,25 +65,28 @@ public: \
 	p1: The name of the first field.
 	t1: The C++ type of the first field, without qualifiers.
 	e1: Extra processing that's applied to the first field.
+     d: Allows you to register any script interface dependencies (you have access
+        to the engine pointer). This is mandatory for all bank_array fields.
 	 e: Extra processing that's applied to every field after every field has been
 	    processed. Can be nothing.
 	 a: Append extra code to the end of the class.
 */
 
-#define GAME_PROPERTY_1(cc, ac, gp, i, p1, t1, e1, e, a) class cc { \
+#define GAME_PROPERTY_1(cc, ac, gp, i, p1, t1, e1, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 1> fields = { #p1, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); \
+        p1##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) \
@@ -96,7 +94,7 @@ public: \
         return field == #p1 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; \
+		if (field == #p1) return engine::script_type<t1>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -112,7 +110,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -120,25 +118,26 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); \
     } \
     a \
 };
 
-#define GAME_PROPERTY_2(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, e, a) class cc { \
+#define GAME_PROPERTY_2(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 2> fields = { #p1, #p2, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), p2(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), p2(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); p2##_::Register(engine); \
+        p1##_::Register(engine, document); p2##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) \
@@ -146,7 +145,7 @@ public: \
         return field == #p1 || field == #p2 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; \
+		if (field == #p1) return engine::script_type<t1>(); if (field == #p2) return engine::script_type<t2>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -162,7 +161,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); if (field == #p2) return !engine::script_type<t2>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -170,25 +169,26 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); \
     } \
     a \
 };
 
-#define GAME_PROPERTY_3(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, e, a) class cc { \
+#define GAME_PROPERTY_3(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 3> fields = { #p1, #p2, #p3, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), p2(j, logger), p3(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), p2(j, logger, scripts), p3(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); p2##_::Register(engine); p3##_::Register(engine); \
+        p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) \
@@ -196,7 +196,7 @@ public: \
         return field == #p1 || field == #p2 || field == #p3 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; \
+		if (field == #p1) return engine::script_type<t1>(); if (field == #p2) return engine::script_type<t2>(); if (field == #p3) return engine::script_type<t3>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -212,7 +212,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); if (field == #p2) return !engine::script_type<t2>().empty(); if (field == #p3) return !engine::script_type<t3>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -220,25 +220,26 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); \
     } \
     a \
 };
 
-#define GAME_PROPERTY_4(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, e, a) class cc { \
+#define GAME_PROPERTY_4(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 4> fields = { #p1, #p2, #p3, #p4, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), p2(j, logger, scripts), p3(j, logger, scripts), p4(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); p2##_::Register(engine); p3##_::Register(engine); p4##_::Register(engine); \
+        p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) \
@@ -246,7 +247,7 @@ public: \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; \
+		if (field == #p1) return engine::script_type<t1>(); if (field == #p2) return engine::script_type<t2>(); if (field == #p3) return engine::script_type<t3>(); if (field == #p4) return engine::script_type<t4>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -262,7 +263,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); if (field == #p2) return !engine::script_type<t2>().empty(); if (field == #p3) return !engine::script_type<t3>().empty(); if (field == #p4) return !engine::script_type<t4>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -270,25 +271,26 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); \
     } \
     a \
 };
 
-#define GAME_PROPERTY_5(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, e, a) class cc { \
+#define GAME_PROPERTY_5(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 5> fields = { #p1, #p2, #p3, #p4, #p5, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), p2(j, logger, scripts), p3(j, logger, scripts), p4(j, logger, scripts), p5(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); p2##_::Register(engine); p3##_::Register(engine); p4##_::Register(engine); p5##_::Register(engine); \
+        p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) \
@@ -296,7 +298,7 @@ public: \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; \
+		if (field == #p1) return engine::script_type<t1>(); if (field == #p2) return engine::script_type<t2>(); if (field == #p3) return engine::script_type<t3>(); if (field == #p4) return engine::script_type<t4>(); if (field == #p5) return engine::script_type<t5>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -312,7 +314,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); if (field == #p2) return !engine::script_type<t2>().empty(); if (field == #p3) return !engine::script_type<t3>().empty(); if (field == #p4) return !engine::script_type<t4>().empty(); if (field == #p5) return !engine::script_type<t5>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -320,25 +322,26 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); \
     } \
     a \
 };
 
-#define GAME_PROPERTY_6(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, e, a) class cc { \
+#define GAME_PROPERTY_6(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 6> fields = { #p1, #p2, #p3, #p4, #p5, #p6, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), p2(j, logger, scripts), p3(j, logger, scripts), p4(j, logger, scripts), p5(j, logger, scripts), p6(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); p2##_::Register(engine); p3##_::Register(engine); p4##_::Register(engine); p5##_::Register(engine); p6##_::Register(engine); \
+        p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) PROPERTY(cc, ac, p6, t6, i, e6) \
@@ -346,7 +349,7 @@ public: \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; if (field == #p6) return awe::AngelScriptOverrideType<t6>::value; \
+		if (field == #p1) return engine::script_type<t1>(); if (field == #p2) return engine::script_type<t2>(); if (field == #p3) return engine::script_type<t3>(); if (field == #p4) return engine::script_type<t4>(); if (field == #p5) return engine::script_type<t5>(); if (field == #p6) return engine::script_type<t6>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -362,7 +365,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); if (field == #p6) return !awe::AngelScriptOverrideType<t6>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); if (field == #p2) return !engine::script_type<t2>().empty(); if (field == #p3) return !engine::script_type<t3>().empty(); if (field == #p4) return !engine::script_type<t4>().empty(); if (field == #p5) return !engine::script_type<t5>().empty(); if (field == #p6) return !engine::script_type<t6>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -370,25 +373,26 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); \
     } \
     a \
 };
 
-#define GAME_PROPERTY_7(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, e, a) class cc { \
+#define GAME_PROPERTY_7(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 7> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), p7(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), p2(j, logger, scripts), p3(j, logger, scripts), p4(j, logger, scripts), p5(j, logger, scripts), p6(j, logger, scripts), p7(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); p2##_::Register(engine); p3##_::Register(engine); p4##_::Register(engine); p5##_::Register(engine); p6##_::Register(engine); p7##_::Register(engine); \
+        p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) PROPERTY(cc, ac, p6, t6, i, e6) PROPERTY(cc, ac, p7, t7, i, e7) \
@@ -396,7 +400,7 @@ public: \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; if (field == #p6) return awe::AngelScriptOverrideType<t6>::value; if (field == #p7) return awe::AngelScriptOverrideType<t7>::value; \
+		if (field == #p1) return engine::script_type<t1>(); if (field == #p2) return engine::script_type<t2>(); if (field == #p3) return engine::script_type<t3>(); if (field == #p4) return engine::script_type<t4>(); if (field == #p5) return engine::script_type<t5>(); if (field == #p6) return engine::script_type<t6>(); if (field == #p7) return engine::script_type<t7>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -412,7 +416,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); if (field == #p6) return !awe::AngelScriptOverrideType<t6>::value.empty(); if (field == #p7) return !awe::AngelScriptOverrideType<t7>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); if (field == #p2) return !engine::script_type<t2>().empty(); if (field == #p3) return !engine::script_type<t3>().empty(); if (field == #p4) return !engine::script_type<t4>().empty(); if (field == #p5) return !engine::script_type<t5>().empty(); if (field == #p6) return !engine::script_type<t6>().empty(); if (field == #p7) return !engine::script_type<t7>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -420,25 +424,26 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value); \
     } \
     a \
 };
 
-#define GAME_PROPERTY_8(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, e, a) class cc { \
+#define GAME_PROPERTY_8(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 8> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), p7(j, logger), p8(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), p2(j, logger, scripts), p3(j, logger, scripts), p4(j, logger, scripts), p5(j, logger, scripts), p6(j, logger, scripts), p7(j, logger, scripts), p8(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); p2##_::Register(engine); p3##_::Register(engine); p4##_::Register(engine); p5##_::Register(engine); p6##_::Register(engine); p7##_::Register(engine); p8##_::Register(engine); \
+        p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) PROPERTY(cc, ac, p6, t6, i, e6) PROPERTY(cc, ac, p7, t7, i, e7) PROPERTY(cc, ac, p8, t8, i, e8) \
@@ -446,7 +451,7 @@ public: \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; if (field == #p6) return awe::AngelScriptOverrideType<t6>::value; if (field == #p7) return awe::AngelScriptOverrideType<t7>::value; if (field == #p8) return awe::AngelScriptOverrideType<t8>::value; \
+		if (field == #p1) return engine::script_type<t1>(); if (field == #p2) return engine::script_type<t2>(); if (field == #p3) return engine::script_type<t3>(); if (field == #p4) return engine::script_type<t4>(); if (field == #p5) return engine::script_type<t5>(); if (field == #p6) return engine::script_type<t6>(); if (field == #p7) return engine::script_type<t7>(); if (field == #p8) return engine::script_type<t8>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -462,7 +467,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); if (field == #p6) return !awe::AngelScriptOverrideType<t6>::value.empty(); if (field == #p7) return !awe::AngelScriptOverrideType<t7>::value.empty(); if (field == #p8) return !awe::AngelScriptOverrideType<t8>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); if (field == #p2) return !engine::script_type<t2>().empty(); if (field == #p3) return !engine::script_type<t3>().empty(); if (field == #p4) return !engine::script_type<t4>().empty(); if (field == #p5) return !engine::script_type<t5>().empty(); if (field == #p6) return !engine::script_type<t6>().empty(); if (field == #p7) return !engine::script_type<t7>().empty(); if (field == #p8) return !engine::script_type<t8>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -470,25 +475,26 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value); if (field == #p8) p8(overrides) = std::any_cast<t8>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value); if (field == #p8) p8(overrides) = std::any_cast<t8>(value); \
     } \
     a \
 };
 
-#define GAME_PROPERTY_9(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, p9, t9, e9, e, a) class cc { \
+#define GAME_PROPERTY_9(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, p9, t9, e9, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 9> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), p7(j, logger), p8(j, logger), p9(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), p2(j, logger, scripts), p3(j, logger, scripts), p4(j, logger, scripts), p5(j, logger, scripts), p6(j, logger, scripts), p7(j, logger, scripts), p8(j, logger, scripts), p9(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); p2##_::Register(engine); p3##_::Register(engine); p4##_::Register(engine); p5##_::Register(engine); p6##_::Register(engine); p7##_::Register(engine); p8##_::Register(engine); p9##_::Register(engine); \
+        p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) PROPERTY(cc, ac, p6, t6, i, e6) PROPERTY(cc, ac, p7, t7, i, e7) PROPERTY(cc, ac, p8, t8, i, e8) PROPERTY(cc, ac, p9, t9, i, e9) \
@@ -496,7 +502,7 @@ public: \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; if (field == #p6) return awe::AngelScriptOverrideType<t6>::value; if (field == #p7) return awe::AngelScriptOverrideType<t7>::value; if (field == #p8) return awe::AngelScriptOverrideType<t8>::value; if (field == #p9) return awe::AngelScriptOverrideType<t9>::value; \
+		if (field == #p1) return engine::script_type<t1>(); if (field == #p2) return engine::script_type<t2>(); if (field == #p3) return engine::script_type<t3>(); if (field == #p4) return engine::script_type<t4>(); if (field == #p5) return engine::script_type<t5>(); if (field == #p6) return engine::script_type<t6>(); if (field == #p7) return engine::script_type<t7>(); if (field == #p8) return engine::script_type<t8>(); if (field == #p9) return engine::script_type<t9>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -512,7 +518,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); if (field == #p6) return !awe::AngelScriptOverrideType<t6>::value.empty(); if (field == #p7) return !awe::AngelScriptOverrideType<t7>::value.empty(); if (field == #p8) return !awe::AngelScriptOverrideType<t8>::value.empty(); if (field == #p9) return !awe::AngelScriptOverrideType<t9>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); if (field == #p2) return !engine::script_type<t2>().empty(); if (field == #p3) return !engine::script_type<t3>().empty(); if (field == #p4) return !engine::script_type<t4>().empty(); if (field == #p5) return !engine::script_type<t5>().empty(); if (field == #p6) return !engine::script_type<t6>().empty(); if (field == #p7) return !engine::script_type<t7>().empty(); if (field == #p8) return !engine::script_type<t8>().empty(); if (field == #p9) return !engine::script_type<t9>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -520,25 +526,26 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value); if (field == #p8) p8(overrides) = std::any_cast<t8>(value); if (field == #p9) p9(overrides) = std::any_cast<t9>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value); if (field == #p8) p8(overrides) = std::any_cast<t8>(value); if (field == #p9) p9(overrides) = std::any_cast<t9>(value); \
     } \
     a \
 };
 
-#define GAME_PROPERTY_10(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, p9, t9, e9, p10, t10, e10, e, a) class cc { \
+#define GAME_PROPERTY_10(cc, ac, gp, i, p1, t1, e1, p2, t2, e2, p3, t3, e3, p4, t4, e4, p5, t5, e5, p6, t6, e6, p7, t7, e7, p8, t8, e8, p9, t9, e9, p10, t10, e10, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 10> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, }; \
     inline static const std::size_t overrideID = i; \
-    cc(const std::string& scriptName, engine::json& j, engine::logger& logger) : \
-        p1(j, logger), p2(j, logger), p3(j, logger), p4(j, logger), p5(j, logger), p6(j, logger), p7(j, logger), p8(j, logger), p9(j, logger), p10(j, logger), \
+    cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
+        p1(j, logger, scripts), p2(j, logger, scripts), p3(j, logger, scripts), p4(j, logger, scripts), p5(j, logger, scripts), p6(j, logger, scripts), p7(j, logger, scripts), p8(j, logger, scripts), p9(j, logger, scripts), p10(j, logger, scripts), \
         _scriptName(scriptName) { e } \
-	static void Register(asIScriptEngine* engine) { \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        d \
 		engine->RegisterObjectMethod(ac, "const string& scriptName() const", \
 			asMETHOD(cc, scriptName), asCALL_THISCALL); \
-        p1##_::Register(engine); p2##_::Register(engine); p3##_::Register(engine); p4##_::Register(engine); p5##_::Register(engine); p6##_::Register(engine); p7##_::Register(engine); p8##_::Register(engine); p9##_::Register(engine); p10##_::Register(engine); \
+        p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
     PROPERTY(cc, ac, p1, t1, i, e1) PROPERTY(cc, ac, p2, t2, i, e2) PROPERTY(cc, ac, p3, t3, i, e3) PROPERTY(cc, ac, p4, t4, i, e4) PROPERTY(cc, ac, p5, t5, i, e5) PROPERTY(cc, ac, p6, t6, i, e6) PROPERTY(cc, ac, p7, t7, i, e7) PROPERTY(cc, ac, p8, t8, i, e8) PROPERTY(cc, ac, p9, t9, i, e9) PROPERTY(cc, ac, p10, t10, i, e10) \
@@ -546,7 +553,7 @@ public: \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || false; \
     } \
 	inline static std::string getFieldAngelScriptType(const std::string_view field) { \
-		if (field == #p1) return awe::AngelScriptOverrideType<t1>::value; if (field == #p2) return awe::AngelScriptOverrideType<t2>::value; if (field == #p3) return awe::AngelScriptOverrideType<t3>::value; if (field == #p4) return awe::AngelScriptOverrideType<t4>::value; if (field == #p5) return awe::AngelScriptOverrideType<t5>::value; if (field == #p6) return awe::AngelScriptOverrideType<t6>::value; if (field == #p7) return awe::AngelScriptOverrideType<t7>::value; if (field == #p8) return awe::AngelScriptOverrideType<t8>::value; if (field == #p9) return awe::AngelScriptOverrideType<t9>::value; if (field == #p10) return awe::AngelScriptOverrideType<t10>::value; \
+		if (field == #p1) return engine::script_type<t1>(); if (field == #p2) return engine::script_type<t2>(); if (field == #p3) return engine::script_type<t3>(); if (field == #p4) return engine::script_type<t4>(); if (field == #p5) return engine::script_type<t5>(); if (field == #p6) return engine::script_type<t6>(); if (field == #p7) return engine::script_type<t7>(); if (field == #p8) return engine::script_type<t8>(); if (field == #p9) return engine::script_type<t9>(); if (field == #p10) return engine::script_type<t10>(); \
 		return ""; \
 	} \
 	static std::any readFieldOverrideVariable(const std::string& field, \
@@ -562,7 +569,7 @@ public: \
 		return {}; \
 	} \
     static bool isFieldOverrideable(const std::string& field) { \
-        if (field == #p1) return !awe::AngelScriptOverrideType<t1>::value.empty(); if (field == #p2) return !awe::AngelScriptOverrideType<t2>::value.empty(); if (field == #p3) return !awe::AngelScriptOverrideType<t3>::value.empty(); if (field == #p4) return !awe::AngelScriptOverrideType<t4>::value.empty(); if (field == #p5) return !awe::AngelScriptOverrideType<t5>::value.empty(); if (field == #p6) return !awe::AngelScriptOverrideType<t6>::value.empty(); if (field == #p7) return !awe::AngelScriptOverrideType<t7>::value.empty(); if (field == #p8) return !awe::AngelScriptOverrideType<t8>::value.empty(); if (field == #p9) return !awe::AngelScriptOverrideType<t9>::value.empty(); if (field == #p10) return !awe::AngelScriptOverrideType<t10>::value.empty(); \
+        if (field == #p1) return !engine::script_type<t1>().empty(); if (field == #p2) return !engine::script_type<t2>().empty(); if (field == #p3) return !engine::script_type<t3>().empty(); if (field == #p4) return !engine::script_type<t4>().empty(); if (field == #p5) return !engine::script_type<t5>().empty(); if (field == #p6) return !engine::script_type<t6>().empty(); if (field == #p7) return !engine::script_type<t7>().empty(); if (field == #p8) return !engine::script_type<t8>().empty(); if (field == #p9) return !engine::script_type<t9>().empty(); if (field == #p10) return !engine::script_type<t10>().empty(); \
         return false; \
     } \
     std::any getFieldDefaultValue(const std::string& field) { \
@@ -570,7 +577,7 @@ public: \
         return {}; \
     } \
     void setFieldValue(const std::string& field, const std::any& value, const awe::overrides& overrides) { \
-        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value); if (field == #p8) p8(overrides) = std::any_cast<t8>(value); if (field == #p9) p9(overrides) = std::any_cast<t9>(value); if (field == #p10) p10(overrides) = std::any_cast<t10>(value);  \
+        if (field == #p1) p1(overrides) = std::any_cast<t1>(value); if (field == #p2) p2(overrides) = std::any_cast<t2>(value); if (field == #p3) p3(overrides) = std::any_cast<t3>(value); if (field == #p4) p4(overrides) = std::any_cast<t4>(value); if (field == #p5) p5(overrides) = std::any_cast<t5>(value); if (field == #p6) p6(overrides) = std::any_cast<t6>(value); if (field == #p7) p7(overrides) = std::any_cast<t7>(value); if (field == #p8) p8(overrides) = std::any_cast<t8>(value); if (field == #p9) p9(overrides) = std::any_cast<t9>(value); if (field == #p10) p10(overrides) = std::any_cast<t10>(value); \
     } \
     a \
 };

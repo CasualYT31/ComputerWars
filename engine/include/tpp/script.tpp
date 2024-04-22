@@ -27,61 +27,61 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////
 
 template<>
-inline constexpr const char* engine::script_type<bool>() { return "bool"; }
+inline constexpr std::string engine::script_type<bool>() { return "bool"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Int8>() { return "int8"; }
+inline constexpr std::string engine::script_type<sf::Int8>() { return "int8"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Uint8>() { return "uint8"; }
+inline constexpr std::string engine::script_type<sf::Uint8>() { return "uint8"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Int16>() { return "int16"; }
+inline constexpr std::string engine::script_type<sf::Int16>() { return "int16"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Uint16>() { return "uint16"; }
+inline constexpr std::string engine::script_type<sf::Uint16>() { return "uint16"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Int32>() { return "int"; }
+inline constexpr std::string engine::script_type<sf::Int32>() { return "int"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Uint32>() { return "uint"; }
+inline constexpr std::string engine::script_type<sf::Uint32>() { return "uint"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Int64>() { return "int64"; }
+inline constexpr std::string engine::script_type<sf::Int64>() { return "int64"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Uint64>() { return "uint64"; }
+inline constexpr std::string engine::script_type<sf::Uint64>() { return "uint64"; }
 template<>
-inline constexpr const char* engine::script_type<float>() { return "float"; }
+inline constexpr std::string engine::script_type<float>() { return "float"; }
 template<>
-inline constexpr const char* engine::script_type<double>() { return "double"; }
+inline constexpr std::string engine::script_type<double>() { return "double"; }
 template<>
-inline constexpr const char* engine::script_type<std::string>() {
+inline constexpr std::string engine::script_type<std::string>() {
 	return "string";
 }
 
 template<>
-inline constexpr const char* engine::script_type<sf::Color>() { return "Colour"; }
+inline constexpr std::string engine::script_type<sf::Color>() { return "Colour"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Vector2u>() {
+inline constexpr std::string engine::script_type<sf::Vector2u>() {
 	return "Vector2";
 }
 template<>
-inline constexpr const char* engine::script_type<sf::Vector2i>() {
+inline constexpr std::string engine::script_type<sf::Vector2i>() {
 	return "MousePosition";
 }
 template<>
-inline constexpr const char* engine::script_type<sf::Vector2f>() {
+inline constexpr std::string engine::script_type<sf::Vector2f>() {
 	return "Vector2f";
 }
 template<>
-inline constexpr const char* engine::script_type<sf::IntRect>() {
+inline constexpr std::string engine::script_type<sf::IntRect>() {
 	return "IntRect";
 }
 template<>
-inline constexpr const char* engine::script_type<sf::Time>() { return "Time"; }
+inline constexpr std::string engine::script_type<sf::Time>() { return "Time"; }
 template<>
-inline constexpr const char* engine::script_type<sf::Clock>() { return "Clock"; }
+inline constexpr std::string engine::script_type<sf::Clock>() { return "Clock"; }
 
 template<>
-inline constexpr const char* engine::script_type<engine::binary_istream>() {
+inline constexpr std::string engine::script_type<engine::binary_istream>() {
 	return "BinaryIStream";
 }
 template<>
-inline constexpr const char* engine::script_type<engine::binary_ostream>() {
+inline constexpr std::string engine::script_type<engine::binary_ostream>() {
 	return "BinaryOStream";
 }
 

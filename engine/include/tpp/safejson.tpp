@@ -24,14 +24,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 template<typename T>
 void engine::json::apply(T& dest, const engine::json::KeySequence& keys,
-	const bool suppressErrors) {
+	const bool suppressErrors, const bool optional) {
 	nlohmann::ordered_json test;
-	if (_performInitialChecks(keys, test, dest)) {
+	if (_performInitialChecks(keys, test, dest, "", optional)) {
 		dest = test.get<T>();
 	} else {
 		if (suppressErrors) resetState();
-		_logger.write("{} property faulty: left to the default of {}.",
-			synthesiseKeySequence(keys), dest);
+		_logger.write("{} property faulty or not given: left to the default of "
+			"{}.", synthesiseKeySequence(keys), dest);
 	}
 }
 
@@ -54,8 +54,8 @@ void engine::json::applyArray(std::array<T, N>& dest,
 					_logger.error("The specified JSON array was not homogeneous, "
 						"found an element of data type \"{}\" when attempting to "
 						"assign to an array of data type \"{}\", in the key "
-						"sequence {}.", _getTypeName(test[i]),
-						_getTypeName(testDataType), synthesiseKeySequence(keys));
+						"sequence {}.", getTypeName(test[i]),
+						getTypeName(testDataType), synthesiseKeySequence(keys));
 					_toggleState(MISMATCHING_ELEMENT_TYPE);
 					break;
 				}
@@ -85,7 +85,7 @@ void engine::json::applyVector(std::vector<T>& dest,
 				_logger.error("The specified JSON array was not homogeneous, "
 					"found an element of data type \"{}\" when attempting to "
 					"assign to a vector of data type \"{}\", in the key sequence "
-					"{}.", _getTypeName(test[i]), _getTypeName(testDataType),
+					"{}.", getTypeName(test[i]), getTypeName(testDataType),
 					synthesiseKeySequence(keys));
 				_toggleState(MISMATCHING_ELEMENT_TYPE);
 				break;
@@ -107,8 +107,8 @@ void engine::json::applyMap(std::unordered_map<std::string, T>& dest,
 				_logger.error("The specified JSON object was not homogeneous, "
 					"found a value of data type \"{}\" with key \"{}\" when "
 					"attempting to assign to a map with values of data type "
-					"\"{}\", in the key sequence {}.{}", _getTypeName(
-					item.value()), item.key(), _getTypeName(testDataType),
+					"\"{}\", in the key sequence {}.{}", getTypeName(
+					item.value()), item.key(), getTypeName(testDataType),
 					synthesiseKeySequence(keys), ((continueReadingOnTypeError) ?
 						("") : (" Will now stop reading key-value pairs from this "
 							"object.")));

@@ -312,6 +312,23 @@ namespace engine {
 			nlohmann::ordered_json* const ret = nullptr) const noexcept;
 
 		/**
+		 * Returns the data type of the value stored in a given
+		 * \c nlohmann::ordered_json object as a string.
+		 * Internally, \c nlohmann::ordered_json's \c type_name() method is used.
+		 * This private method only exists to return <tt>"float"</tt> in case the
+		 * JSON number is indeed a \c float: this method does not distinguish
+		 * between different types of numbers.
+		 * @param  j The \c nlohmann::ordered_json object containing the JSON value
+		 *           to evaluate.
+		 * @return The string name of the JSON data type as defined by the
+		 *         \c nlohmann::ordered_json class (unless where specified in the
+		 *         detailed section).
+		 */
+		static inline std::string getTypeName(const nlohmann::ordered_json& j) {
+			return (j.is_number_float()) ? ("float") : (j.type_name());
+		}
+
+		/**
 		 * Determines if two \c nlohmann::ordered_json objects contain a value with
 		 * the same or compatible data types.
 		 * The test is performed on a source-destination basis: if the source could
@@ -350,6 +367,15 @@ namespace engine {
 		 * @throws If building the string failed in some way.
 		 */
 		static std::string synthesiseKeySequence(const KeySequence& keys);
+
+		/**
+		 * Concatenates two key sequences together.
+		 * @param  parentKeys The keys that will be to the left of the sequence.
+		 * @param  childKeys  The keys that will be to the right of the sequence.
+		 * @return The new key sequence.
+		 */
+		static KeySequence concatKeys(KeySequence parentKeys,
+			const KeySequence& childKeys);
 
 		/**
 		 * Returns the \c nlohmann::ordered_json object stored in this object.
@@ -400,6 +426,9 @@ namespace engine {
 		 *                         value to apply to the C++ object.
 		 * @param   suppressErrors If \c TRUE, the error state of this object will
 		 *                         be reset at the end of the call.
+		 * @param   optional       If \c TRUE, and the \c KEYS_DID_NOT_EXIST bit is
+		 *                         going to be set, the bit won't be set, and the
+		 *                         call will instead return silently.
 		 * @safety  If an exception is thrown, \c dest is guaranteed not to be
 		 *          amended. Additionally, if \c suppressErrors is \c TRUE, the
 		 *          error state will always be reset even if an exception is
@@ -411,7 +440,7 @@ namespace engine {
 		 */
 		template<typename T>
 		void apply(T& dest, const KeySequence& keys,
-			const bool suppressErrors = false);
+			const bool suppressErrors = false, const bool optional = false);
 
 		/**
 		 * Applies a JSON array of homogenous values to a given
@@ -544,23 +573,6 @@ namespace engine {
 			const KeySequence& keys, const bool continueReadingOnTypeError = true);
 	private:
 		/**
-		 * Returns the data type of the value stored in a given
-		 * \c nlohmann::ordered_json object as a string.
-		 * Internally, \c nlohmann::ordered_json's \c type_name() method is used.
-		 * This private method only exists to return <tt>"float"</tt> in case the
-		 * JSON number is indeed a \c float: this method does not distinguish
-		 * between different types of numbers.
-		 * @param  j The \c nlohmann::ordered_json object containing the JSON value
-		 *           to evaluate.
-		 * @return The string name of the JSON data type as defined by the
-		 *         \c nlohmann::ordered_json class (unless where specified in the
-		 *         detailed section).
-		 */
-		static inline std::string _getTypeName(const nlohmann::ordered_json& j) {
-			return (j.is_number_float()) ? ("float") : (j.type_name());
-		}
-
-		/**
 		 * Performs preliminary checks before continuing with the \c apply() call.
 		 * Checks for the \c NO_KEYS_GIVEN, \c KEYS_DID_NOT_EXIST, and
 		 * \c MISMATCHING_TYPE conditions for all \c apply() methods.
@@ -571,14 +583,17 @@ namespace engine {
 		 *              this allows the method to compare the data type of the
 		 *              destination object with the data type of the value found.
 		 * @param  type The name of the data type of the destination object. If
-		 *              blank, \c _getTypeName(dest) will be called.
+		 *              blank, \c getTypeName(dest) will be called.
+		 * @param  optional If \c TRUE, and the \c KEYS_DID_NOT_EXIST bit is going
+		 *                  to be set, the bit won't be set, nor will an error be
+		 *                  logged, but the call will still return \c FALSE.
 		 * @return \c TRUE if all checks passed, \c FALSE if at least one failed.
 		 * @safety Strong guarantee: if an exception is thrown, no error bit will
 		 *         be set, even if an error condition was detected.
 		 */
 		bool _performInitialChecks(const engine::json::KeySequence& keys,
 			nlohmann::ordered_json& test, nlohmann::ordered_json dest,
-			std::string type = "");
+			std::string type = "", const bool optional = false);
 
 		/**
 		 * The \c nlohmann::ordered_json object stored internally.

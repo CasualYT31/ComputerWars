@@ -104,10 +104,10 @@ namespace engine {
 	 * type, introduce a new *.tpp file and include that in the header that makes
 	 * the most sense.
 	 * @tparam T The type to retrieve the AngelScript type of.
-	 * @return The AngelScript type of the C++ type \c T, as a character array.
+	 * @return The AngelScript type of the C++ type \c T.
 	 */
 	template<typename T>
-	inline constexpr const char* script_type() {
+	inline constexpr std::string script_type() {
 		static_assert(false, "You must specialise engine::script_type<T>()");
 	}
 

@@ -36,14 +36,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define PROPERTY(cc, ac, n, ct, i, e) class n##_ { \
 	awe::property_field<ct, i> _##n; \
 public: \
-	n##_(engine::json& j, engine::logger& logger) : _##n(j, { #n }, logger) { e } \
-	static void Register(asIScriptEngine* engine) { \
-		if (awe::AngelScriptType<ct>::value.empty()) return; \
-		std::stringstream builder; \
-		builder << "const "; \
-		builder << awe::AngelScriptType<ct>::value; \
-		builder << " " #n "(const Overrides&in) const"; \
-		engine->RegisterObjectMethod(ac, builder.str().c_str(), \
+	n##_(engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : _##n(j, { #n }, logger, scripts) { e } \
+	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+		engine->RegisterObjectMethod(ac, std::string(awe::bank_return_type<ct>()).append(" " #n "(const Overrides&in) const").c_str(), \
 			asMETHODPR(n##_, operator(), (const awe::overrides&) const, \
 				typename boost::call_traits<ct>::const_reference), \
 			asCALL_THISCALL, nullptr, asOFFSET(cc, n), false); \
@@ -70,6 +65,8 @@ public: \
 	p1: The name of the first field.
 	t1: The C++ type of the first field, without qualifiers.
 	e1: Extra processing that's applied to the first field.
+     d: Allows you to register any script interface dependencies (you have access
+        to the engine pointer). This is mandatory for all bank_array fields.
 	 e: Extra processing that's applied to every field after every field has been
 	    processed. Can be nothing.
 	 a: Append extra code to the end of the class.
