@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
         std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>(rootLogger.getData());
 
         // TODO: how tf do we provide the scripts pointer to each bank_array specialisation?
-        awe::bank_array<awe::particle_data>::scripts = scripts;
+        awe::bank_array<awe::particle_data>::scripts = scripts.get();
 
         //reg regInterface;
         //regInterface.logger.setData(rootLogger);
@@ -148,13 +148,23 @@ int main(int argc, char* argv[]) {
 
         awe::bank<awe::movement_type> movementTypes(scripts, rootLogger.getData());
 
+        // We need to load the scripts before loading the bank JSON data because
+        // the latter relies on the script interface to be able to allocate
+        // CScriptArrays.
         scripts->load("assets/test-scripts.json");
+        if (!scripts->inGoodState()) {
+            throw std::exception("Failed to load scripts!");
+        }
 
         commanders.load("assets/property/co.json");
         weathers.load("assets/property/weather.json");
         environments.load("assets/property/environment.json");
         countries.load("assets/property/country.json");
         movementTypes.load("assets/property/movement.json");
+
+        if (!scripts->evaluateAssertions()) {
+            throw std::exception("Script assertions failed!");
+        }
 
         awe::processOverrides(scripts, commanders);
         awe::processOverrides(scripts, weathers, commanders);

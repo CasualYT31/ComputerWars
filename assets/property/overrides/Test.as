@@ -99,3 +99,18 @@ namespace Country {
 //     Coords zeroTest;
 //     info(formatFloat(zeroTest.x, "", 0, 4));
 // }
+
+// #expand Test a b c d e f g h i j k l m n o p q r s t u v w x y z
+#expand Test 1  3 4 5 6 7 8 9 0 1 2 3 4 5 6
+
+// #expand ThisIsATest
+
+// #assert true;
+// #assert true; "Proper"
+// #assert true; "Proper
+// #assert true; Proper"
+// #assert true; "Pro""er"
+// #assert true; Pro""er
+// #assert true; None!
+// #assert true; """
+// #assert true; "

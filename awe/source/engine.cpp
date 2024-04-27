@@ -336,11 +336,11 @@ void awe::game_engine::registerInterface(asIScriptEngine* engine,
 	document->DocumentGlobalFunction(r, "Translates a string with or without "
 		"variables.");
 
-	r = engine->RegisterGlobalFunction("string execute(string)",
+	r = engine->RegisterGlobalFunction("string execute(string, string=\"\")",
 		asMETHOD(engine::scripts, executeCode),
 		asCALL_THISCALL_ASGLOBAL, _scripts.get());
-	document->DocumentGlobalFunction(r, "Executes code within the ComputerWars "
-		"module.");
+	document->DocumentGlobalFunction(r, "Executes code within the given module. "
+		"Defaults to the main module.");
 
 	r = engine->RegisterGlobalFunction("uint rand(const uint)",
 		asMETHOD(awe::game_engine, _script_rand),

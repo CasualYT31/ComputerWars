@@ -40,12 +40,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "weakref.h"
 #include "logger.hpp"
 #include "safejson.hpp"
+#include "maths.hpp"
 #include "binary.hpp"
 #include <type_traits>
 #include "SFML/Graphics/Color.hpp"
 #include "SFML/System/Vector2.hpp"
 #include "SFML/System/Clock.hpp"
 #include "SFML/Graphics/Rect.hpp"
+#include <unordered_set>
 #include "docgen.h"
 
 namespace engine {
@@ -620,15 +622,19 @@ namespace engine {
 
 		/**
 		 * Compiles and executes the given code, which can call any code that is in
-		 * the main module.
-		 * @param  code The code to execute. It is automatically put into a
-		 *              function so you don't have to do this maually in the code.
+		 * the given module.
+		 * Wish I had known about \c ExecuteString() before I wrote this function.
+		 * @param  code       The code to execute. It is automatically put into a
+		 *                    function so you don't have to do this maually in the
+		 *                    code.
+		 * @param  moduleName The module to execute the code within. Defaults to
+		 *                    \c MAIN.
 		 * @return If execution was successful, an empty string is returned. If
 		 *         not, an error strng will be returned. The error string will
 		 *         also be logged. These include build errors and exception errors.
 		 * @safety No guarantee.
 		 */
-		std::string executeCode(std::string code);
+		std::string executeCode(std::string code, std::string moduleName = "");
 
 		/**
 		 * Creates a @c CScriptDictionary object.
@@ -851,6 +857,17 @@ namespace engine {
 		 */
 		void* getGlobalVariableAddress(const std::string& moduleName,
 			const asUINT variable) const;
+
+		/**
+		 * Evaluates each module's registered assertions.
+		 * The evaluation of assertions was separated from \c load() because some
+		 * assertions may rely on a script interface that may not be fully
+		 * initialised at the time \c load() is called.
+		 * @return \c TRUE if every assertion in every module passed, \c FALSE if
+		 *         at least one failed (no further assertions will be evaluated in
+		 *         this case).
+		 */
+		bool evaluateAssertions();
 	private:
 		/**
 		 * The JSON load method for this class.
@@ -890,6 +907,165 @@ namespace engine {
 		 * @sa      engine::scripts::addRegistrant()
 		 */
 		bool _loadScripts(const char* const moduleName, const std::string& folder);
+
+		/**
+		 * Iterates through the templates queue, instantiates each of them, then
+		 * attempts to add each instantiated template to the builder.
+		 * It will empty the queue as it processes each request.
+		 * @return \c FALSE if an instantiated template couldn't be added to the
+		 *         module. \c TRUE if all of the instantiated templates were
+		 *         well-formed.
+		 */
+		bool _instantiateTemplatesInQueue();
+
+		/**
+		 * Performs basic string substitution and generation on a given script
+		 * template based on a list of parameters, and attempts to add the
+		 * resulting script to the builder after performing preprocessing.
+		 * @param  templateName   The name of the template.
+		 * @param  templateScript The template script to expand/instantiate.
+		 * @param  parameters     The parameters to instantiate with.
+		 * @return \c FALSE if the instantiated template couldn't be added to the
+		 *         module, \c TRUE if it could.
+		 */
+		bool _instantiateTemplate(const std::string& templateName,
+			const std::string& templateScript,
+			const std::vector<std::string>& parameters);
+
+		/**
+		 * Performs normal substitution on the given section.
+		 * Every occurrence of \c $ will be replaced with a value from
+		 * \c parameters, based on the number that immediately follows the
+		 * symbol.\n
+		 * If it is \c 0, the number of parameters will be substituted. If it's
+		 * \c > 0, the value of the corresonding parameter will be substituted. If
+		 * no number was given, or the number was invalid, a warn or error will be
+		 * logged, and the $ with its number will be inserted into the final
+		 * result.
+		 * @param  section    The code to perform substitution on.
+		 * @param  parameters The parameters to subtitute into the section.
+		 * @return The result of inserting \c parameters into \c section.
+		 */
+		std::string _normalSubstitution(const std::string& section,
+			const std::vector<std::string>& parameters);
+
+		/**
+		 * 
+		 */
+		void _normalSubstitution_parseNormalChar(const char chr,
+			bool& readingParam, std::string& number, std::string& result);
+
+		/**
+		 * 
+		 */
+		void _normalSubstitution_substituteParameter(const char* chr,
+			bool& readingParam, std::string& number, std::string& result,
+			const std::vector<std::string>& parameters);
+
+		/**
+		 * Reads an integer from a given string.
+		 * All whitespace will be removed from \c from before conversion.\n
+		 * If the string is equal to '$', then <tt>parameters.size() + 1</tt> will
+		 * be returned.\n
+		 * If an integer couldn't be extracted, then an error is logged and \c 0 is
+		 * returned.
+		 * @param  from       Extract an integer from this string.
+		 * @param  parameters Used to retrieve the number of parameters.
+		 * @param  which      Used for logging: describes how the integer will be
+		 *                    used.
+		 * @return The extracted integer.
+		 */
+		sf::Int64 _readInt(std::string from,
+			const std::vector<std::string>& parameters, const char* const which);
+
+		/**
+		 * Performs normal substitution on \c section as many times as \c start,
+		 * \c stop, and \c step allow, with the results of each concatenated
+		 * together.
+		 * On each iteration, instances of '$i' or '$I' are replaced with whatever
+		 * the loop index is. Then, normal substituion occurs.
+		 * @param  section    The section of code to continuously insert.
+		 * @param  endSection The second part of the code to continuously insert
+		 *                    after the main \c section. Except on the last
+		 *                    iteration, \c endSection will not be inserted.
+		 * @param  parameters The parameters to subtitute with.
+		 * @param  start      The loop index starts here.
+		 * @param  stop       Looping will stop when \c start is <tt>&gt;=
+		 *                    stop</tt> if \c step is <tt>&gt; 0</tt>, or <tt>&lt;=
+		 &                    stop</tt> if \c step is <tt>&lt; 0</tt>.
+		 * @param  step       The amount to increment \c start by on each loop.
+		 * @return The result of the substitution.
+		 */
+		std::string _loopSubtitution(const std::string& section,
+			const std::string& endSection,
+			const std::vector<std::string>& parameters, sf::Int64 start,
+			sf::Int64 stop, sf::Int64 step);
+
+		/**
+		 * Before adding a file to the builder, it must be scanned for custom
+		 * directives.
+		 * @param  filePath The path to the script file.
+		 * @param  file     An already opened input stream to read from. The read
+		 *                  pointer must be at the beginning of the stream! The
+		 *                  stream will be configured to throw exceptions on the
+		 *                  bad and fail bits being set.
+		 * @return If the file is to be added to the builder as a section, it will
+		 *         be returned with custom directives removed. If the file is a
+		 *         template, an empty string will be returned.
+		 */
+		std::string _parseDirectives(const std::string& filePath,
+			std::istream& file);
+
+		/**
+		 * Parses a #template directive.
+		 * @param  directiveText The text that follows the #template directive.
+		 * @param  lineNumber    The line number the directive was found on.
+		 *                       Template directives only take effect on line 1.
+		 * @return The name of the template, if one was given. An empty string
+		 *         indicates an invalid #template directive.
+		 */
+		std::string _parseTemplateDirective(const std::string& directiveText,
+			const std::size_t lineNumber);
+
+		/**
+		 * Parses an #expand directive.
+		 * @param  directiveText The text that follows the #expand directive.
+		 * @param  lineNumber    The line number the directive was found on.
+		 * @return The name of the template to instantiate, along with a list of
+		 *         parameters to instantiate it with. If \c first is empty, the
+		 *         directive given was invalid.
+		 */
+		std::pair<std::string, std::vector<std::string>>
+			_parseInstantiateDirective(const std::string& directiveText,
+				const std::size_t lineNumber);
+
+		/**
+		 * Represents an assertion.
+		 */
+		struct assertion {
+			/**
+			 * The code to evaluate after a successful build.
+			 * If this code evaluates to \c FALSE, the build will "fail."\n
+			 * No terminating <tt>;</tt> will be stored.
+			 */
+			std::string code;
+
+			/**
+			 * If the code evaluates to \c FALSE, this help text will be logged.
+			 */
+			std::string helpText = "\"\"";
+		};
+
+		/**
+		 * Parses an #assert directive.
+		 * @param  directiveText The text that follows the #assert directive.
+		 * @param  lineNumber    The line number the directive was found on.
+		 * @return The code to evaluate after a successful build, and the error
+		 *         text to log when that code evaluates to \c FALSE. If \c code is
+		 *         empty, the directive given was invalid.
+		 */
+		assertion _parseAssertDirective(const std::string& directiveText,
+			const std::size_t lineNumber);
 
 		/**
 		 * Allocates a new function context.
@@ -995,6 +1171,21 @@ namespace engine {
 		 */
 		CScriptBuilder _builder;
 
+		//////////////////////
+		// ADDITIONAL STATE //
+		//////////////////////
+
+		/**
+		 * Clears additional state used for building and metadata etc. storage.
+		 * Additionally clears templates and assertions.
+		 */
+		void _clearState() noexcept;
+
+		/**
+		 * Clears template and assertion data after building.
+		 */
+		void _clearTemplatesAndAssertions() noexcept;
+
 		/**
 		 * Stores the metadata associated with each global function in each module.
 		 */
@@ -1018,6 +1209,31 @@ namespace engine {
 		 */
 		std::unordered_map<std::string, global_variables_and_their_namespaces>
 			_variableNamespaces;
+
+		/**
+		 * Stores the templates available to the scripts.
+		 */
+		std::unordered_map<std::string, std::string> _templates;
+
+		/**
+		 * When a script attempts to instantiate a template, its request will be
+		 * added here.
+		 * The map is keyed on template name (which may or may not end up being
+		 * valid). Each parameter of the instantiation is then stored within a
+		 * vector, and since a template may be instantiated multiple times, a set
+		 * of vectors is stored.\n
+		 * We only attempt to service the request once all script files have been
+		 * loaded.
+		 */
+		std::unordered_map<std::string,
+			std::unordered_set<std::vector<std::string>>>
+			_templateInstantiationQueue;
+
+		/**
+		 * Assertions read from scripts will be stored in this queue, then
+		 * processed once the build has succeeded.
+		 */
+		std::vector<assertion> _assertionQueue;
 	};
 }
 

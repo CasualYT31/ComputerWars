@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "bank.hpp"
-#include "hash.hpp"
+#include "maths.hpp"
 #include "SFML/System/Vector2.hpp"
 #include <unordered_set>
 

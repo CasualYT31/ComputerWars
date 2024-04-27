@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cmath>
 #include <random>
 #include <memory>
+//#include "boost/call_traits.hpp"
 
 #define PI     3.14159265358979323846f
 #define TO_RAD (PI / 180.0f)
@@ -119,4 +120,75 @@ namespace engine {
 	 * @return Pointer to the RNG.
 	 */
 	std::unique_ptr<std::mt19937> RNGFactory();
+
+	// Can't get this to work right now.
+	///**
+	// * Hashes a collection of hashable, heterogeneous values.
+	// * @tparam T    The type of value to hash.
+	// * @tparam Ts   The types of values to hash after \c val, if any.
+	// * @param  seed The seed so far.
+	// * @param  val  The value to hash and apply to the seed.
+	// * @param  vals The rest of the values to hash, if any.
+	// * @return The final seed.
+	// */
+	//template<typename T, typename... Ts>
+	//std::size_t combinationHasher(std::size_t seed,
+	//	typename boost::call_traits<T>::param_type val, Ts... vals) {
+	//	std::hash<T> hasher;
+	//	return combinationHasher(
+	//		seed ^= hasher(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2),
+	//		vals...
+	//	);
+	//}
+
+	///**
+	// * Termination condition for the heterogeneous values hasher.
+	// * @param  seed The final seed.
+	// * @return \c seed.
+	// */
+	//inline std::size_t combinationHasher(std::size_t seed) noexcept {
+	//	return seed;
+	//}
+
+	/**
+	 * Hashes a container of hashable, homogeneous values.
+	 * @tparam T    The type of values stored within the container.
+	 * @tparam C    The type of container to iterate through.
+	 * @param  vals A container with \c begin() and \c end() implementations that
+	 *              let you iterate through a collection of values of type \c T.
+	 * @return The final seed.
+	 */
+	template<typename T, typename C>
+	std::size_t combinationHasher(const C& vals) {
+		std::hash<T> hasher;
+		std::size_t seed = 0;
+		for (auto itr = vals.begin(), end = vals.end(); itr != end; ++itr)
+			seed ^= hasher(*itr) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		return seed;
+	}
+}
+
+namespace std {
+	/**
+	 * Lets you hash \c std::vector objects.
+	 * @tparam T The type of values stored in the \c vector.
+	 */
+	template<typename T> struct hash<std::vector<T>> {
+		std::size_t operator()(const std::vector<T>& v) const {
+			return engine::combinationHasher<T>(v);
+		}
+	};
+
+	/**
+	 * Custom specialisation of \c std::hash for \c sf::Vector2.
+	 * Much thanks to https://en.cppreference.com/w/cpp/utility/hash and
+	 * https://stackoverflow.com/questions/9927208/requirements-for-elements-in-stdunordered-set.
+	 * Also thanks to Elias Daler and Laurent
+	 * (https://en.sfml-dev.org/forums/index.php?topic=24275.0).
+	 */
+	template<typename T> struct hash<sf::Vector2<T>> {
+		std::size_t operator()(const sf::Vector2<T>& v) const {
+			return engine::combinationHasher<T>(std::vector<T>{ v.x, v.y });
+		}
+	};
 }

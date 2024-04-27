@@ -43,6 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "SFML/System/Vector2.hpp"
 #include "SFML/System/Time.hpp"
 #include "script.hpp"
+#include "maths.hpp"
 #include "typedef.hpp"
 #include "tpp/pod.tpp"
 
@@ -106,6 +107,18 @@ namespace awe {
 		inline const std::string& operator[](const std::size_t i) const {
 			return _overrides.at(i);
 		}
+		inline decltype(_overrides)::iterator begin() noexcept {
+			return _overrides.begin();
+		}
+		inline decltype(_overrides)::iterator end() noexcept {
+			return _overrides.end();
+		}
+		inline decltype(_overrides)::const_iterator begin() const noexcept {
+			return _overrides.begin();
+		}
+		inline decltype(_overrides)::const_iterator end() const noexcept {
+			return _overrides.end();
+		}
 		friend bool operator==(const awe::overrides& lhs, const awe::overrides& rhs);
 		static void Register(asIScriptEngine* engine,
 			const std::shared_ptr<DocumentationGenerator>& document) {
@@ -148,12 +161,8 @@ namespace awe {
 namespace std {
 	template<> struct hash<awe::overrides> {
 		std::size_t operator()(awe::overrides const& f) const noexcept {
-			std::hash<std::string> hasher;
-			std::size_t seed = 0;
-			for (std::size_t i = 0; i < GAME_PROPERTY_COUNT; ++i)
-				seed ^= hasher(f[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-			return seed;
-			}
+			return engine::combinationHasher<std::string>(f);
+		}
 	};
 }
 
@@ -183,7 +192,10 @@ namespace awe {
 	template<typename T>
 	struct bank_array {
 		/// @warning THIS MUST BE SET ASAP, BEFORE ANY ARRAYS ARE CREATED BY JSON LOADING CODE.
-		static std::shared_ptr<engine::scripts> scripts;
+		// I was getting crashes at shutdown when using shared_ptr.
+		// This indicates that this is a horrible way of doing it.
+		// But I can't think of any better way right now.
+		static engine::scripts* scripts;
 		bank_array() {
 			array = std::make_unique<engine::CScriptWrapper<CScriptArray>>(scripts->createArray(engine::script_type<T>()));
 		};
@@ -232,7 +244,7 @@ namespace awe {
 		}
 	};
 	template<typename T>
-	std::shared_ptr<engine::scripts> bank_array<T>::scripts = nullptr;
+	engine::scripts* bank_array<T>::scripts = nullptr;
 }
 
 namespace awe {

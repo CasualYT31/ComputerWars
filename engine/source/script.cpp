@@ -22,6 +22,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "script.hpp"
 #include <filesystem>
+#include <regex>
+#include "SFML/Graphics/Color.hpp"
+#include "SFML/System/Vector2.hpp"
+#include "SFML/System/Clock.hpp"
+#include "SFML/Graphics/Rect.hpp"
 #include "boost/stacktrace.hpp"
 #include "fmtengine.hpp"
 
@@ -710,13 +715,16 @@ bool engine::scripts::callFunction(asIScriptFunction* const func) {
     return true;
 }
 
-std::string engine::scripts::executeCode(std::string code) {
-    // If only I had known about ExecuteString() before writing all of this...
-    // Bruh...
+std::string engine::scripts::executeCode(std::string code,
+    std::string moduleName) {
     static const auto Log = [&](const std::string& m) -> std::string {
         _logger.error(m); return m;
     };
-    auto m = _engine->GetModule(modules[MAIN].c_str());
+    if (moduleName.empty()) moduleName = modules[MAIN];
+    if (!doesModuleExist(moduleName))
+        return Log(fmt::format("Cannot executeCode() in non-existent module "
+            "\"{}\"!", moduleName));
+    auto m = _engine->GetModule(moduleName.c_str());
     if (m) {
         static std::size_t counter = 0;
         asIScriptFunction* func = nullptr;
@@ -766,7 +774,7 @@ std::string engine::scripts::executeCode(std::string code) {
             return Log(_constructBuildErrorMessage(r));
         }
     } else {
-        return Log("The main module does not exist!");
+        return Log(fmt::format("The module \"{}\" does not exist!", moduleName));
     }
 }
 
@@ -955,7 +963,7 @@ bool engine::scripts::createModule(const std::string& name,
     }
     for (const auto& file : code) {
         r = _builder.AddSectionFromMemory(file.first.c_str(), file.second.c_str(),
-            static_cast<int>(file.second.size()));
+            static_cast<unsigned int>(file.second.size()));
         if (r < 0) {
             _logger.error("Failed to add code file \"{}\" to new module \"{}\": "
                 "code {}.", file.first, tempName, r);
@@ -1085,6 +1093,28 @@ void* engine::scripts::getGlobalVariableAddress(const std::string& moduleName,
     return v;
 }
 
+static const auto EVAL_ASSERTS = "__evaluate_assertions__";
+
+bool engine::scripts::evaluateAssertions() {
+    for (const auto& mName : engine::scripts::modules) {
+        if (!doesModuleExist(mName)) {
+            _logger.error("Couldn't evaluate module \"{}\"'s assertions because "
+                "the module does not exist.", mName);
+            continue;
+        }
+        _logger.write("Evaluating module \"{}\"'s assertions...", mName);
+        bool res = false;
+        std::string code, helpText;
+        callFunction(mName, EVAL_ASSERTS, &res, &code, &helpText);
+        if (!res) {
+            _logger.error("Assertion {} failed! {}", code, helpText);
+            return false;
+        }
+    }
+    _logger.write("All assertions passed!");
+    return true;
+}
+
 bool engine::scripts::_load(engine::json& j) {
     // First check if the interface has been registered, and if not, register it.
     if (!_registrants.empty()) {
@@ -1106,13 +1136,16 @@ bool engine::scripts::_load(engine::json& j) {
     }
     // Clear the metadata and namespace containers, as we are now going to discard
     // the old modules.
-    _functionMetadata.clear();
-    _variableMetadata.clear();
-    _functionNamespaces.clear();
-    _variableNamespaces.clear();
+    _clearState();
     // Now load each module, automatically discarding the previous version of each.
-    for (std::size_t i = 0; i < paths.size(); ++i)
-        if (!_loadScripts(modules[i].c_str(), paths[i])) return false;
+    for (std::size_t i = 0; i < paths.size(); ++i) {
+        if (!_loadScripts(modules[i].c_str(), paths[i])) {
+            _clearTemplatesAndAssertions();
+            return false;
+        }
+        // Templates and assertions are not shared between modules.
+        _clearTemplatesAndAssertions();
+    }
     return true;
 }
 
@@ -1165,17 +1198,23 @@ bool engine::scripts::_loadScripts(const char* const moduleName,
         std::function<bool(const std::string&)> directoryIterator =
             [&](const std::string& dir) -> bool {
             for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+                const auto path = entry.path().string();
                 if (entry.is_regular_file()) {
-                    if ((r =
-                        _builder.AddSectionFromFile(entry.path().string().c_str()))
-                        < 0) {
+                    std::string scriptFile;
+                    {
+                        std::ifstream file(path);
+                        scriptFile = _parseDirectives(path, file);
+                    }
+                    if (scriptFile.empty()) continue;
+                    if ((r = _builder.AddSectionFromMemory(path.c_str(),
+                        scriptFile.c_str(),
+                        static_cast<unsigned int>(scriptFile.size())) < 0)) {
                         _logger.error("Failed to add script \"{}\" to the \"{}\" "
-                            "module: code {}.", entry.path().string().c_str(),
-                            moduleName, r);
+                            "module: code {}.", path, moduleName, r);
                         return false;
                     }
                 } else if (entry.is_directory()) {
-                    if (!directoryIterator(entry.path().string())) return false;
+                    if (!directoryIterator(path)) return false;
                 }
             }
             return true;
@@ -1184,15 +1223,38 @@ bool engine::scripts::_loadScripts(const char* const moduleName,
     } catch (const std::exception& e) {
         _logger.error("Failed to interact with directory entry: {}.", e);
     }
-    if ((r = _builder.BuildModule()) < 0) {
-        _logger.error("Failed to build the \"{}\" module: code {}.", moduleName,
-            r);
+    if (!_instantiateTemplatesInQueue()) return false;
+    assert(_templateInstantiationQueue.empty());
+    // ...Don't ask why I did assertions like this and not using ExecuteString or
+    // executeCode()... I didn't just spend the past however many minutes trying to
+    // check countries.length() instead of country.length() in an assertion and
+    // then scratching my head, wondering why ExecuteString couldn't access the
+    // engine's interface... Nope, I didn't just do that.
+    _logger.write("Compiling {} assertion{}...", _assertionQueue.size(),
+        (_assertionQueue.size() == 1 ? "" : "s"));
+    std::string asserts = fmt::format("void {}(bool&out res, "
+        "string&out code, string&out helpText) {{", EVAL_ASSERTS);
+    for (const auto& assertion : _assertionQueue) {
+        asserts += fmt::format("if (!({})) {{ code = \"{}\"; helpText = {}; "
+            "return; }}", assertion.code, assertion.code, assertion.helpText);
+    }
+    asserts += "res = true;}";
+    if ((r = _builder.AddSectionFromMemory(EVAL_ASSERTS, asserts.c_str(),
+        static_cast<unsigned int>(asserts.size())) < 0)) {
+        _logger.error("Failed to add assertion evaluation code to the \"{}\" "
+            "module: code {}. The code follows:\n{}", moduleName, r, asserts);
         return false;
     }
+    if ((r = _builder.BuildModule()) < 0) {
+        _logger.error("Failed to build the \"{}\" module: code {}. Here is the "
+            "assertion code:\n{}", moduleName, r, asserts);
+        _engine->DiscardModule(moduleName);
+        return false;
+    }
+    const auto m = _builder.GetModule();
     _logger.write("Loading metadata and namespaces for module \"{}\"...",
         moduleName);
     _functionNamespaces[moduleName] = {};
-    const auto m = _builder.GetModule();
     for (asUINT i = 0, len = m->GetFunctionCount(); i < len; ++i) {
         const auto func = m->GetFunctionByIndex(i);
         _functionNamespaces[moduleName][func] = {};
@@ -1234,6 +1296,525 @@ bool engine::scripts::_loadScripts(const char* const moduleName,
     }
     _logger.write("Finished loading scripts for module \"{}\".", moduleName);
     return true;
+}
+
+static constexpr std::size_t SUBSECTIONS = 6;
+
+static const auto PARAMETER = '$';
+
+static const auto COALESCE = '\\';
+
+static const auto LOOP = '`';
+
+static const std::string NUMBERS = "0123456789";
+
+static const std::regex LOOP_INDEX("\\$i|\\$I");
+
+bool engine::scripts::_instantiateTemplatesInQueue() {
+    // More requests may be added to the queue during the handling of previous
+    // requests, so don't use a for loop.
+    while (!_templateInstantiationQueue.empty()) {
+        const std::string templateName =
+            _templateInstantiationQueue.begin()->first;
+        if (_templates.count(templateName) == 0) {
+            _logger.error("Could not find template with the name \"{}\".",
+                templateName);
+            _templateInstantiationQueue.erase(templateName);
+            continue;
+        }
+        const std::string templateScript = _templates[templateName];
+        if (std::ranges::count(templateScript, LOOP) % SUBSECTIONS) {
+            _logger.error("BUILD FAILED. There are an incorrect number of loop "
+                "control characters (\"{}\") in the \"{}\" template, which means "
+                "a loop construct within the template is incomplete.", LOOP,
+                templateName);
+            return false;
+        }
+        while (!_templateInstantiationQueue.begin()->second.empty()) {
+            // Let's be safe and copy even the parameters, as well as the name and
+            // template itself. There is a chance that adding elements to
+            // _templateInstantiationQueue whilst working with it could invalidate
+            // references [if it reallocates]? Not sure I want to take that chance.
+            const auto params(
+                *_templateInstantiationQueue.begin()->second.begin());
+            if (!_instantiateTemplate(templateName, templateScript, params))
+                return false;
+            // We're finished with this particular instantiation now, so erase it.
+            _templateInstantiationQueue.begin()->second.erase(params);
+        }
+        // We're now finished with this template. Both it and its previous
+        // instantiations could come back, but I'm pretty sure they can never come
+        // back recursively...
+        _templateInstantiationQueue.erase(templateName);
+    }
+    return true;
+}
+
+bool engine::scripts::_instantiateTemplate(const std::string& templateName,
+    const std::string& templateScript,
+    const std::vector<std::string>& parameters) {
+    const auto fullName = fmt::format("{} {}", templateName,
+        engine::json::synthesiseKeySequence(parameters));
+    _logger.write("Instantiating template: {}", fullName);
+    std::string script, repeatedSection;
+    sf::Int64 start = 0, stop = 0, step = 0;
+    const auto sections = stringSplit(templateScript, std::string(1, LOOP));
+    for (std::size_t i = 0, end = sections.size(); i < end; ++i) {
+        const auto sectionType = i % SUBSECTIONS;
+        switch (sectionType) {
+        case 0:
+            // [0], [6], [12], ... = Normal substitution.
+            script += _normalSubstitution(sections[i], parameters);
+            break;
+        case 1:
+            // [1], [7], [13], ... = Set the start index of the next loop.
+            start = _readInt(sections[i], parameters, "start index");
+            break;
+        case 2:
+            // [2], [8], [14], ... = Set the stop index of the next loop.
+            stop = _readInt(sections[i], parameters, "stop index");
+            break;
+        case 3:
+            // [3], [9], [15], ... = Set the step of the next loop.
+            step = _readInt(sections[i], parameters, "step value");
+            if (step == 0) {
+                _logger.warning("A step value of 0 is invalid! Using 1...");
+                step = 1;
+            }
+            if ((step > 0 && start > stop) ||
+                (step < 0 && start < stop) ||
+                (start == stop)) {
+                _logger.warning("A start index of {}, a stop index of {}, and a "
+                    "step value of {} will result in a loop that is not expanded.",
+                    start, stop, step);
+            }
+            break;
+        case 4:
+            // [4], [10], [16], ... = Main body of the loop substitution.
+            repeatedSection = sections[i];
+            break;
+        case 5:
+            // [5], [11], [17], ... = End body of the loop substitution.
+            script += _loopSubtitution(repeatedSection, sections[i], parameters,
+                start, stop, step);
+            break;
+        }
+    }
+    // Add the final script to the builder.
+    std::stringstream emulateFile;
+    emulateFile << script;
+    script = _parseDirectives(fullName, emulateFile);
+    if (script.empty()) {
+        // It's possible to create more templates using a template, but there's no
+        // way for #expand to instantiate them, so it will just store it, or
+        // replace itself, but that won't have any effect because the template is
+        // copied when it's extracted from the _templates map.
+        return true;
+    }
+    // Always dump templates to help the user debug any issues, even if the build
+    // succeeds.
+    _logger.write("Adding the template \"{}\" to the builder for this "
+        "module...\n{}", fullName, script);
+    const auto r = _builder.AddSectionFromMemory(fullName.c_str(),
+        script.c_str(), static_cast<unsigned int>(script.size()));
+    if (r == 0) {
+        _logger.error("When instantiating template: section \"{}\" already "
+            "existed!", fullName);
+    } else if (r < 0) {
+        _logger.error("Failed to add instantiated template \"{}\" to engine: code "
+            "{}.", fullName, r);
+        return false;
+    }
+    return true;
+}
+
+std::string engine::scripts::_normalSubstitution(const std::string& section,
+    const std::vector<std::string>& parameters) {
+    std::string result, number;
+    bool readingParam = false;
+    static const auto substituteParameter = [](const char* chr,
+        bool& readingParam, std::string& number, std::string& result,
+        const std::vector<std::string>& parameters,
+        const engine::scripts* const scripts) -> void {
+    };
+    for (const auto chr : section) {
+        if (!readingParam) {
+            _normalSubstitution_parseNormalChar(chr, readingParam, number, result);
+        } else {
+            if (NUMBERS.find(chr) != std::string::npos) {
+                // We're reading a parameter, and a digit has been given.
+                // Append it to our running list of digits.
+                number += chr;
+            } else {
+                _normalSubstitution_substituteParameter(&chr, readingParam, number,
+                    result, parameters);
+            }
+        }
+    }
+    // If we were still reading a number once we reached the end of the string,
+    // don't neglect to substitute a variable if possible.
+    if (readingParam) _normalSubstitution_substituteParameter(nullptr,
+        readingParam, number, result, parameters);
+    return result;
+}
+
+void engine::scripts::_normalSubstitution_parseNormalChar(const char chr,
+    bool& readingParam, std::string& number, std::string& result) {
+    if (chr == PARAMETER) {
+        // If we're not already reading a parameter, and we come across $,
+        // start reading a parameter.
+        readingParam = true;
+        number.clear();
+    } else {
+        // Add the character as normal.
+        result += chr;
+    }
+}
+
+void engine::scripts::_normalSubstitution_substituteParameter(const char* chr,
+    bool& readingParam, std::string& number, std::string& result,
+    const std::vector<std::string>& parameters) {
+    // We've come across a non-positive digit
+    // (or the end of the string if chr == nullptr),
+    // so stop reading our number now.
+    // Attempt to subtitute a parameter in its place.
+    readingParam = false;
+    if (number.empty()) {
+        // If there was just a $ on its own, warn the user, but leave it in.
+        result += PARAMETER;
+        // Don't forget to write the non-digit!
+        if (chr) _normalSubstitution_parseNormalChar(*chr, readingParam,
+            number, result);
+        _logger.warning("Stray {} was found, inserting it into the final "
+            "instantiation...", PARAMETER);
+        return;
+    }
+    const std::size_t paramIndex = std::stoull(number);
+    if (paramIndex == 0) {
+        // $0 == the number of parameters.
+        result += std::to_string(parameters.size());
+    } else if (paramIndex <= parameters.size()) {
+        // $n == nth parameter.
+        result += parameters[paramIndex - 1];
+    } else {
+        // Substitution didn't work. Leave $n as is and log an error.
+        result += PARAMETER;
+        result += number;
+        _logger.error("Attempted to substitute \"{}{}\", but the number of "
+            "parameters given was {}.", PARAMETER, number, parameters.size());
+    }
+    // Don't forget to write the non-digit!
+    if (chr) _normalSubstitution_parseNormalChar(*chr, readingParam,
+        number, result);
+}
+
+sf::Int64 engine::scripts::_readInt(std::string from,
+    const std::vector<std::string>& parameters, const char* const which) {
+    from.erase(std::remove_if(from.begin(), from.end(), ::isspace), from.end());
+    // First, see if '$' on its own was given.
+    // If it was, return the number of parameters.
+    if (from == std::string(1, PARAMETER)) {
+        return static_cast<sf::Int64>(parameters.size() + 1);
+    }
+    // Assume it's an ordinary integer.
+    try {
+        return std::stoll(from);
+    } catch (const std::invalid_argument&) {
+        _logger.error("\"{}\" is an invalid {} for a loop construct! Using 0...",
+            from, which);
+    } catch (const std::out_of_range&) {
+        _logger.error("\"{}\" is out-of-range as a {} for a loop construct! Using "
+            "0...", from, which);
+    }
+    return 0;
+}
+
+std::string engine::scripts::_loopSubtitution(const std::string& section,
+    const std::string& endSection, const std::vector<std::string>& parameters,
+    sf::Int64 start, sf::Int64 stop, sf::Int64 step) {
+    if (start == stop) return "";
+    std::string result;
+    for (sf::Int64 i = start;
+        (step > 0 && i < stop) || (step < 0 && i > stop);
+        i += step) {
+        std::string sectionToEvaluate = section;
+        // If this isn't the last iteration, include the endSection, as well.
+        if ((step > 0 && (i + step) < stop) || (step < 0 && (i + step) > stop)) {
+            sectionToEvaluate += endSection;
+        }
+        // First pass through: replace all instances of $i with i.
+        const auto newSection = std::regex_replace(sectionToEvaluate, LOOP_INDEX,
+            std::to_string(i), std::regex_constants::match_flag_type::match_any);
+        // Second pass through: normal substitution.
+        result += _normalSubstitution(newSection, parameters);
+    }
+    return result;
+}
+
+static const std::string WHITESPACE = " \t\n\r\f\v";
+
+static const std::string TEMPLATE_DIRECTIVE = "#template";
+
+static const std::string INSTANTIATE_DIRECTIVE = "#expand";
+
+static const std::string ASSERT_DIRECTIVE = "#assert";
+
+std::string engine::scripts::_parseDirectives(const std::string& filePath,
+    std::istream& file) {
+    _logger.write("Reading script file \"{}\" for directives...", filePath);
+    if (!file) {
+        _logger.error("The input stream for this file could not be opened!");
+        return {};
+    }
+    std::string scriptFile;
+    // If an exception occurs, don't add to the actual queues.
+    // (A template will only ever be recorded if it could be read successfully,
+    // so no need to store it in a temporary variable).
+    auto templateInstantiationQueueCopy = _templateInstantiationQueue;
+    auto assertionQueueCopy = _assertionQueue;
+    file.exceptions(std::ios::failbit | std::ios::badbit);
+    try {
+        std::string templateName;
+        std::size_t lineNumber = 0;
+        // If std::getline() can't extract any characters for any reason, it will
+        // set the fail bit. This is problematic because it will set the bit even
+        // if it's reached the end of the file, and there's a blank line at the
+        // very end. There are no characters after the final newline, so it will
+        // panic. Luckily we can just peek the next character, and if it's EOF, we
+        // can prevent getline from throwing in this circumstance.
+        while (file.good() && file.peek() != EOF) {
+            std::string line, directive, directiveText;
+            std::getline(file, line);
+
+            ++lineNumber;
+
+            // If we're reading a template, just read each line straight into
+            // scriptFile. We must preserve newline characters in case there are
+            // single line comments.
+            if (!templateName.empty()) {
+                scriptFile += line + "\n";
+                continue;
+            }
+            
+            // Otherwise, look for directives. If the first non-whitespace
+            // character is a #, it's a directive.
+            const auto firstNonWhitespace = line.find_first_not_of(WHITESPACE);
+            const auto isDirective = firstNonWhitespace != std::string::npos &&
+                line[firstNonWhitespace] == '#';
+            
+            if (isDirective) {
+                const auto endOfDirective = line.find_first_of(WHITESPACE,
+                    firstNonWhitespace);
+                if (endOfDirective == std::string::npos) {
+                    directive = "#";
+                } else {
+                    directive = line.substr(firstNonWhitespace,
+                        endOfDirective - firstNonWhitespace);
+                    directiveText = line.substr(line.find_first_not_of(WHITESPACE,
+                        endOfDirective));
+                }
+
+                if (directive == TEMPLATE_DIRECTIVE) {
+                    _logger.write("Line {}: found {} directive.", lineNumber,
+                        TEMPLATE_DIRECTIVE);
+                    templateName = _parseTemplateDirective(directiveText,
+                        lineNumber);
+                    if (!templateName.empty()) continue;
+                } else if (directive == INSTANTIATE_DIRECTIVE) {
+                    _logger.write("Line {}: found {} directive.", lineNumber,
+                        INSTANTIATE_DIRECTIVE);
+                    const auto templateNameAndParameters =
+                        _parseInstantiateDirective(directiveText, lineNumber);
+                    if (!templateNameAndParameters.first.empty()) {
+                        if (templateInstantiationQueueCopy[
+                            templateNameAndParameters.first].count(
+                                templateNameAndParameters.second)) {
+                            _logger.warning("Line {}: this template instantiation "
+                                "has already been queued!", lineNumber);
+                        }
+                        templateInstantiationQueueCopy[
+                            templateNameAndParameters.first].insert(
+                                templateNameAndParameters.second);
+                        continue;
+                    }
+                } else if (directive == ASSERT_DIRECTIVE) {
+                    _logger.write("Line {}: found {} directive.", lineNumber,
+                        ASSERT_DIRECTIVE);
+                    const auto assertion = _parseAssertDirective(directiveText,
+                        lineNumber);
+                    if (!assertion.code.empty()) {
+                        assertionQueueCopy.push_back(assertion);
+                        continue;
+                    }
+                }
+
+                // If we've reached this point, the directive was invalid. Don't
+                // add it to the final script file (we never add them anyway).
+                _logger.warning("Invalid directive line {} is being excluded from "
+                    "the build: {}", lineNumber, line);
+            } else {
+                // If there's no directive, it's a normal script line, add it.
+                // We must preserve newline characters in case there are single
+                // line comments.
+                scriptFile += line + "\n";
+            }
+        }
+
+        // If we just read a template, store it separately and do not add it to the
+        // build.
+        if (!templateName.empty()) {
+            _templates[templateName] = scriptFile;
+            scriptFile.clear();
+        }
+    } catch (const std::exception& e) {
+        _logger.error("Couldn't read script file \"{}\", will not be adding it to "
+            "the builder: {}. Any queued assertions and template instantiations "
+            "from this script will not be evaluated.", filePath, e.what());
+        return {};
+    }
+    _templateInstantiationQueue = std::move(templateInstantiationQueueCopy);
+    _assertionQueue = std::move(assertionQueueCopy);
+    return scriptFile;
+}
+
+std::string engine::scripts::_parseTemplateDirective(
+    const std::string& directiveText, const std::size_t lineNumber) {
+    if (lineNumber != 1) {
+        _logger.warning("Line {}: {} directives after the first line have no "
+            "effect.", lineNumber, TEMPLATE_DIRECTIVE);
+        return {};
+    }
+    const auto endOfTemplateName = directiveText.find_first_of(WHITESPACE);
+    const auto templateName = directiveText.substr(0, endOfTemplateName);
+    if (templateName.empty()) {
+        _logger.error("Line {}: no name given to template, this script will be "
+            "treated like a normal script.", lineNumber);
+        return {};
+    }
+    if (endOfTemplateName != std::string::npos &&
+        directiveText.find_first_not_of(WHITESPACE, endOfTemplateName)
+        != std::string::npos) {
+        _logger.warning("Line {}: extra characters given to {} directive, these "
+            "will be ignored: {}", lineNumber, TEMPLATE_DIRECTIVE,
+            directiveText.substr(endOfTemplateName));
+    }
+    _logger.write("Line {}: this script is a template with the name {}.",
+        lineNumber, templateName);
+    if (_templates.count(templateName)) {
+        _logger.warning("This will replace an existing template with the same "
+            "name if it's loaded successfully!");
+    }
+    return templateName;
+}
+
+std::pair<std::string, std::vector<std::string>>
+    engine::scripts::_parseInstantiateDirective(const std::string& directiveText,
+        const std::size_t lineNumber) {
+    const auto endOfTemplateName = directiveText.find_first_of(WHITESPACE);
+    const auto templateName = directiveText.substr(0, endOfTemplateName);
+    if (templateName.empty()) {
+        _logger.error("Line {}: no template name given to {} directive.",
+            lineNumber, INSTANTIATE_DIRECTIVE);
+        return {};
+    }
+    // Now parse parameters. To keep this simple, let's assume parameters are only
+    // separated by spaces, starting with the second character after the end of the
+    // template name.
+    // To include spaces within a parameter, simply prefix the space with a \.
+    if (endOfTemplateName == std::string::npos ||
+        directiveText.size() - endOfTemplateName < 1) {
+        _logger.write("Line {}: this script will attempt to instantiate template "
+            "{} with no parameters. To add parameters, insert a space after the "
+            "template name, then write them out, each separated by a single "
+            "space. Blank parameters are permitted.", lineNumber, templateName);
+        return std::make_pair(templateName, std::vector<std::string>{});
+    }
+    // Now split the rest of the directive text into words delimited by spaces.
+    auto words = stringSplit(directiveText.substr(endOfTemplateName + 1), " ");
+    // Coalesce elements together if the element on the left ends with a \.
+    for (std::size_t i = 0; i < words.size() - 1; ++i) {
+        if (words[i].empty()) continue;
+        if (*words[i].rbegin() == COALESCE) {
+            words[i].erase(words[i].size() - 1);
+            words[i] += words[i + 1];
+            auto itr = words.begin();
+            std::advance(itr, i + 1);
+            words.erase(itr);
+            // We'll need to reevaluate the current element in case it coalesced
+            // with an element that had a \ at the end.
+            --i;
+        }
+    }
+    _logger.write("Line {}: this script will attempt to instantiate template {} "
+        "with these parameters: {}.", lineNumber, templateName,
+        engine::json::synthesiseKeySequence(words));
+    return std::make_pair(templateName, words);
+}
+
+engine::scripts::assertion engine::scripts::_parseAssertDirective(
+    const std::string& directiveText, const std::size_t lineNumber) {
+    const auto startOfCode = directiveText.find_first_not_of(WHITESPACE);
+    if (startOfCode == std::string::npos) {
+        _logger.error("Line {}: {} directive was given no code to evaluate.",
+            lineNumber, ASSERT_DIRECTIVE);
+        return {};
+    }
+    const auto endOfCode = directiveText.find(';');
+    if (endOfCode == std::string::npos) {
+        _logger.warning("Line {}: {} directive's code is not terminated with a "
+            "';'. No help text will be displayed if the assertion fails.",
+            lineNumber, ASSERT_DIRECTIVE);
+    }
+    assertion ret;
+    // Excludes the terminating ';'.
+    ret.code = directiveText.substr(startOfCode, endOfCode);
+    if (endOfCode != std::string::npos) {
+        auto startOfHelpText = directiveText.find_first_not_of(WHITESPACE,
+            endOfCode + 1);
+        if (startOfHelpText != std::string::npos) {
+            ret.helpText = directiveText.substr(startOfHelpText);
+            const auto endOfHelpText = ret.helpText.find_last_not_of(WHITESPACE);
+            if (endOfHelpText != std::string::npos) {
+                ret.helpText = ret.helpText.substr(0, endOfHelpText + 1);
+            }
+            // Now check for quotes '"'. If the help text isn't surrounded by them,
+            // insert them. If there are any other quotes within the string, escape
+            // them.
+            if (*ret.helpText.begin() != '"') {
+                _logger.warning("Line {}: {} directive's help text didn't start "
+                    "with a quote (\")! Adding one...", lineNumber,
+                    ASSERT_DIRECTIVE);
+                ret.helpText = "\"" + ret.helpText;
+            }
+            if (*ret.helpText.rbegin() != '"' || (ret.helpText.size() == 1 &&
+                *ret.helpText.rbegin() == '"')) {
+                _logger.warning("Line {}: {} directive's help text didn't end "
+                    "with a quote (\")! Adding one...", lineNumber,
+                    ASSERT_DIRECTIVE);
+                ret.helpText += "\"";
+            }
+            std::size_t escapedQuotes = 0;
+            assert(ret.helpText.size() >= 2);
+            for (std::size_t i = ret.helpText.size() - 2; i > 0; --i) {
+                if (ret.helpText[i] == '"') {
+                    ++escapedQuotes;
+                    ret.helpText.insert(i, 1, '\\');
+                }
+            }
+            if (escapedQuotes) {
+                _logger.warning("Line {}: found quote{} (\") within help text of "
+                    "{} directive! Escaping them...", lineNumber,
+                    (escapedQuotes == 1 ? "" : "s"), ASSERT_DIRECTIVE);
+            }
+        } else {
+            _logger.warning("Line {}: {} directive was given no help text after "
+                "the terminating ';'.", lineNumber, ASSERT_DIRECTIVE);
+        }
+    }
+    _logger.write("Line {}: this script asserts that ({}) is TRUE. It has {}",
+        lineNumber, ret.code, (ret.helpText.empty() ? "no help text." :
+            std::string("the following help text: ").append(ret.helpText)));
+    return ret;
 }
 
 int engine::scripts::_allocateContext() {
@@ -1319,4 +1900,18 @@ std::string engine::scripts::_constructBuildErrorMessage(const int code) const {
         return "An unknown error occurred during compilation: code " +
             std::to_string(code) + ".";
     }
+}
+
+void engine::scripts::_clearState() noexcept {
+    _functionMetadata.clear();
+    _variableMetadata.clear();
+    _functionNamespaces.clear();
+    _variableNamespaces.clear();
+    _clearTemplatesAndAssertions();
+}
+
+void engine::scripts::_clearTemplatesAndAssertions() noexcept {
+    _templates.clear();
+    _templateInstantiationQueue.clear();
+    _assertionQueue.clear();
 }
