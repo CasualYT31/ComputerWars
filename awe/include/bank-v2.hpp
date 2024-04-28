@@ -167,16 +167,6 @@ namespace std {
 }
 
 namespace awe {
-	//struct particle_data {
-	//	std::string sheet;
-	//	std::string spriteID;
-	//	float density = 0.f;
-	//	sf::Vector2f vector;
-	//	sf::Time respawnDelay;
-	//};
-}
-
-namespace awe {
 	// To easily support arrays in bank-v2:
 	// 1. Have them be stored as CScriptArrays initially.
 	// 2. Overrides will then work with those arrays directly.
@@ -191,14 +181,10 @@ namespace awe {
 	// the resource management of this class is partially manual.
 	template<typename T>
 	struct bank_array {
-		/// @warning THIS MUST BE SET ASAP, BEFORE ANY ARRAYS ARE CREATED BY JSON LOADING CODE.
-		// I was getting crashes at shutdown when using shared_ptr.
-		// This indicates that this is a horrible way of doing it.
-		// But I can't think of any better way right now.
-		static engine::scripts* scripts;
-		bank_array() {
-			array = std::make_unique<engine::CScriptWrapper<CScriptArray>>(scripts->createArray(engine::script_type<T>()));
-		};
+		using type = T;
+		// WARNING: to initialise a property field of type bank_array correctly,
+		//          you must use the INIT_BANK_ARRAY() macro!
+		bank_array() = default;
 		bank_array(const bank_array<T>& o) { *this = o; }
 		static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) {
 			if (engine->GetTypeInfoByName(engine::script_type<bank_array<T>>().c_str())) return;
@@ -221,6 +207,7 @@ namespace awe {
 			);
 		}
 		bank_array<T>& operator=(const bank_array<T>& o) {
+			scripts = o.scripts;
 			CScriptArray* newArray = scripts->createArray(engine::script_type<T>());
 			*newArray = *o.array->operator->();
 			array = std::make_unique<engine::CScriptWrapper<CScriptArray>>(newArray);
@@ -230,6 +217,7 @@ namespace awe {
 			initVector();
 			return *this;
 		}
+		std::shared_ptr<engine::scripts> scripts;
 		std::unique_ptr<engine::CScriptWrapper<CScriptArray>> array;
 		std::vector<T> vector;
 		inline void initVector() {
@@ -243,107 +231,102 @@ namespace awe {
 			return array->operator->();
 		}
 	};
-	template<typename T>
-	engine::scripts* bank_array<T>::scripts = nullptr;
 }
 
 namespace awe {
 	template<typename T> struct Serialisable {
-		static void fromJSON(T& value, engine::json& j,
+		static bool fromJSON(T& value, engine::json& j,
 			const engine::json::KeySequence& keys, engine::logger&,
-			const std::shared_ptr<engine::scripts>&) {
-			j.apply(value, keys, true);
+			const bool optional) {
+			j.apply(value, keys, false, optional);
+			if (j.inGoodState()) return true;
+			const bool doesntExist = j.whatFailed() &
+				engine::json_state::KEYS_DID_NOT_EXIST;
+			j.resetState();
+			// If the keys didn't exist, but this is an optional field, do not
+			// propagate any indication of an error (i.e. return true).
+			return doesntExist && optional;
 		}
 	};
 	template<> struct Serialisable<sf::Color> {
-		static void fromJSON(sf::Color& value, engine::json& j,
+		static bool fromJSON(sf::Color& value, engine::json& j,
 			const engine::json::KeySequence& keys, engine::logger&,
-			const std::shared_ptr<engine::scripts>&) {
-			j.applyColour(value, keys, true);
+			const bool optional) {
+			j.applyColour(value, keys, false, optional);
+			if (j.inGoodState()) return true;
+			const bool doesntExist = j.whatFailed() &
+				engine::json_state::KEYS_DID_NOT_EXIST;
+			j.resetState();
+			// If the keys didn't exist, but this is an optional field, do not
+			// propagate any indication of an error (i.e. return true).
+			return doesntExist && optional;
 		}
 	};
 	template<typename T> struct Serialisable<sf::Vector2<T>> {
-		static void fromJSON(sf::Vector2<T>& value, engine::json& j,
+		static bool fromJSON(sf::Vector2<T>& value, engine::json& j,
 			const engine::json::KeySequence& keys, engine::logger&,
-			const std::shared_ptr<engine::scripts>&) {
+			const bool optional) {
 			std::array<T, 2> vec;
-			j.applyArray(vec, keys);
+			j.applyArray(vec, keys, optional);
 			if (!j.inGoodState()) {
+				const bool doesntExist = j.whatFailed() &
+					engine::json_state::KEYS_DID_NOT_EXIST;
 				j.resetState();
-				return;
+				// If the keys didn't exist, but this is an optional field, do not
+				// propagate any indication of an error (i.e. return true).
+				return doesntExist && optional;
 			}
 			value.x = vec[0];
 			value.y = vec[1];
+			return true;
 		}
 	};
 	template<> struct Serialisable<sf::Time> {
-		static void fromJSON(sf::Time& value, engine::json& j,
+		static bool fromJSON(sf::Time& value, engine::json& j,
 			const engine::json::KeySequence& keys, engine::logger& logger,
-			const std::shared_ptr<engine::scripts>&) {
+			const bool optional) {
 			sf::Uint32 ms = 0;
-			j.apply(ms, keys);
+			j.apply(ms, keys, false, optional);
 			if (!j.inGoodState()) {
+				const bool doesntExist = j.whatFailed() &
+					engine::json_state::KEYS_DID_NOT_EXIST;
 				j.resetState();
-				return;
+				// If the keys didn't exist, but this is an optional field, do not
+				// propagate any indication of an error (i.e. return true).
+				return doesntExist && optional;
 			}
 			if (ms > static_cast<sf::Uint32>(std::numeric_limits<sf::Int32>::max())) {
 				logger.error("Cannot store a millisecond value {} at {} that is "
 					"greater than {}.", ms, j.synthesiseKeySequence(keys),
 					std::numeric_limits<sf::Int32>::max());
-				return;
+				return false;
 			}
 			value = sf::milliseconds(static_cast<sf::Int32>(ms));
+			return true;
 		}
 	};
-	// Replace direct calls to j with calls to awe::Serialisable,
-	// and I think we can include this in the pod macro.
-	//template<> struct Serialisable<particle_data> {
-	//	static void fromJSON(particle_data& value, engine::json& j,
-	//		const engine::json::KeySequence& keys, engine::logger& logger) {
-	//		nlohmann::ordered_json p;
-	//		if (!j.keysExist(keys, &p)) {
-	//			logger.error("Attempting to read {}: these keys do not exist.",
-	//				j.synthesiseKeySequence(keys));
-	//			return;
-	//		}
-	//		if (!p.is_object()) {
-	//			logger.error("Attempting to read {} as an object, but the value "
-	//				"at these keys is of type \"{}\".",
-	//				j.synthesiseKeySequence(keys), j.getTypeName(p));
-	//			return;
-	//		}
-	//		j.apply(value.sheet, j.concatKeys(keys, { "sheet" }), true, true);
-	//		j.apply(value.spriteID, j.concatKeys(keys, { "spriteID" }), true,
-	//			true);
-	//		j.apply(value.density, j.concatKeys(keys, { "density" }), true, true);
-	//		if (p.contains("vector")) {
-	//			awe::Serialisable<decltype(value.vector)>::fromJSON(
-	//				value.vector, j, j.concatKeys(keys, { "vector" }), logger);
-	//		}
-	//		if (p.contains("respawnDelay")) {
-	//			awe::Serialisable<decltype(value.respawnDelay)>::fromJSON(
-	//				value.respawnDelay, j, j.concatKeys(keys, { "respawnDelay" }),
-	//				logger);
-	//		}
-	//	}
-	//};
 	template<typename E> struct Serialisable<awe::bank_array<E>> {
-		static void fromJSON(awe::bank_array<E>& value, engine::json& j,
+		static bool fromJSON(awe::bank_array<E>& value, engine::json& j,
 			const engine::json::KeySequence& keys, engine::logger& logger,
-			const std::shared_ptr<engine::scripts>& scripts) {
+			const bool optional) {
 			nlohmann::ordered_json p;
 			if (!j.keysExist(keys, &p)) {
-				logger.error("Attempting to read {}: these keys do not exist.",
-					j.synthesiseKeySequence(keys));
-				return;
+				if (!optional) {
+					logger.error("Attempting to read {}: these keys do not exist.",
+						j.synthesiseKeySequence(keys));
+					return false;
+				} else {
+					return true;
+				}
 			}
 			if (!p.is_array()) {
 				logger.error("Attempting to read {} as an array, but the value at "
 					"these keys is of type \"{}\".", j.synthesiseKeySequence(keys),
 					j.getTypeName(p));
-				return;
+				return false;
 			}
-			if (p.empty()) return;
+			if (p.empty()) return true;
+			bool thereWasAnError = false;
 			value.array->operator->()->Resize(static_cast<asUINT>(p.size()));
 			for (asUINT i = 0, end = value.array->operator->()->GetSize(); i < end; ++i) {
 				// Create an engine::json object for the array value so a fromJSON
@@ -353,51 +336,18 @@ namespace awe {
 				valueObject[valueKey] = p[i];
 				engine::json valueObjectEngine(valueObject, logger.getData());
 				E* element = static_cast<E*>(value.array->operator->()->At(i));
-				// TODO: error logs produced by this call will be close to
-				// meaningless to the user without the full key sequence. This
-				// method should return FALSE so that callers know something went
-				// wrong and can report more details.
-				awe::Serialisable<E>::fromJSON(*element, valueObjectEngine,
-					engine::json::KeySequence{ valueKey }, logger, scripts);
+				if (!awe::Serialisable<E>::fromJSON(*element,
+					valueObjectEngine, engine::json::KeySequence{ valueKey },
+					logger, false)) {
+					thereWasAnError = true;
+					logger.error("The above error refers to object {}.",
+						j.synthesiseKeySequence(keys));
+				}
 			}
 			value.initVector();
+			return !thereWasAnError;
 		}
 	};
-	//template<> struct Serialisable<std::vector<particle_data>> {
-	//	static void fromJSON(std::vector<particle_data>& value, engine::json& j,
-	//		const engine::json::KeySequence& keys, engine::logger&) {
-	//		// TODO: Write logs.
-	//		nlohmann::ordered_json p;
-	//		if (j.keysExist({ "particles" }, &p) &&
-	//			p.is_array() && !p.empty() && p.at(0).is_object()) {
-	//			value.reserve(p.size());
-	//			for (const auto& particle : p) {
-	//				value.emplace_back();
-	//				if (particle.contains("sheet") &&
-	//					particle["sheet"].is_string())
-	//					value.back().sheet = particle["sheet"];
-	//				if (particle.contains("sprite") &&
-	//					particle["sprite"].is_string())
-	//					value.back().spriteID = particle["sprite"];
-	//				const nlohmann::ordered_json t = static_cast<std::size_t>(0);
-	//				const nlohmann::ordered_json testFloat = 0.0f;
-	//				if (particle.contains("density") &&
-	//					engine::json::equalType(testFloat, particle["density"]))
-	//					value.back().density = particle["density"];
-	//				if (particle.contains("vectorx") &&
-	//					engine::json::equalType(testFloat, particle["vectorx"]))
-	//					value.back().vector.x = particle["vectorx"];
-	//				if (particle.contains("vectory") &&
-	//					engine::json::equalType(testFloat, particle["vectory"]))
-	//					value.back().vector.y = particle["vectory"];
-	//				if (particle.contains("respawndelay") &&
-	//					engine::json::equalType(t, particle["respawndelay"]))
-	//					value.back().respawnDelay =
-	//						sf::milliseconds(particle["respawndelay"]);
-	//			}
-	//		}
-	//	}
-	//};
 
 	// T = type of field.
 	// N = depth of the hierarchy desired. 1 = just CO, 2 = weather, then CO, etc.
@@ -407,13 +357,20 @@ namespace awe {
 		static_assert(N < GAME_PROPERTY_COUNT,
 			"N must be within the game property count!");
 	public:
-		inline property_field(engine::json& j,
+		inline property_field(engine::json& j, const std::string& scriptName,
 			const engine::json::KeySequence& keys, engine::logger& logger,
-			const std::shared_ptr<engine::scripts>& scripts) {
+			const std::shared_ptr<engine::scripts>& scripts, const bool optional,
+			const std::function<void(T&, const std::shared_ptr<engine::scripts>&)>&
+				defaultValue) {
 			for (auto& i : _scriptNamesWithOverrides) i.insert("");
-			// We can always rely on the default value existing in a blank state so
-			// long as T is default constructible.
-			awe::Serialisable<T>::fromJSON(_values[{}], j, keys, logger, scripts);
+			// Allow the caller to initialise the field with a default value in
+			// case the value couldn't be serialised from the JSON.
+			defaultValue(_values[{}], scripts);
+			if (!awe::Serialisable<T>::fromJSON(_values[{}], j, keys, logger,
+				optional)) {
+				logger.error("The above error refers to object \"{}\".",
+					scriptName);
+			}
 		}
 		inline typename boost::call_traits<T>::reference operator[](
 			const overrides& overrides) {
@@ -478,40 +435,46 @@ namespace awe {
 	};
 	// If a type needs a special read method for variables, specialise here.
 
+	template<typename T> struct is_bank_array : std::false_type {};
+	template<typename T> struct is_bank_array<bank_array<T>> : std::true_type {};
 	template<typename T> struct OverrideFunction {
 		static std::any read(const std::shared_ptr<engine::scripts>& scripts,
 			asIScriptFunction* const function, const std::any& parent) {
-			T p = std::any_cast<T>(parent);
-			scripts->callFunction(function, &p);
-			return p;
-		}
-	};
-	class particle_data;
-	template<> struct OverrideFunction<awe::bank_array<awe::particle_data>> {
-		static std::any read(const std::shared_ptr<engine::scripts>& scripts,
-			asIScriptFunction* const function, const std::any& parent) {
-			awe::bank_array<awe::particle_data> p = std::any_cast<awe::bank_array<awe::particle_data>>(parent);
-			// TODO: Find a different way to address this refcount issue...
-			// I don't want to have to specialise for every bank_array type,
-			// I already have to do something similar with bank_array::scripts...
-			p.array->operator->()->AddRef();
-			scripts->callFunction(function, &p);
-			return p;
+			if constexpr (is_bank_array<T>::value) {
+				// Would've preferred to use a template specialisation here,
+				// but I can't find a way to specialise a template struct with one
+				// template parameter with another template struct that has one
+				// template parameter (i.e. the T given to bank_array). There's
+				// probably a way but I can't Google well enough.
+				T p = std::any_cast<T>(parent);
+				p.array->operator->()->AddRef();
+				scripts->callFunction(function, &p);
+				return p;
+			} else {
+				T p = std::any_cast<T>(parent);
+				scripts->callFunction(function, &p);
+				return p;
+			}
 		}
 	};
 	// If a type needs a special read method for functions, specialise here.
 }
+
+// TODO: AngelScript and C++ member-wise constructors need to have default values
+// for optional parameters.
+// this will mean optional members must come after all mandatory members.
+// This is not straight-forward for non-basic types.
 
 /**
  * Data used to setup \c awe::random_particles::data objects.
  * @sa \c awe::random_particles::data.
  */
 DECLARE_POD_5(awe, particle_data, "ParticleData",
-	std::string, sheet,
-	std::string, spriteID,
-	float, density,
-	sf::Vector2f, vector,
-	sf::Time, respawnDelay
+	std::string, sheet, true, {},
+	std::string, spriteID, true, {},
+	float, density, true, 0.0f,
+	sf::Vector2f, vector, true, {},
+	sf::Time, respawnDelay, true, {}
 );
 	
 DEFINE_POD_5(awe, particle_data, "ParticleData",
@@ -522,27 +485,141 @@ DEFINE_POD_5(awe, particle_data, "ParticleData",
 	sf::Time, respawnDelay
 );
 
+/**
+ * Configuration of a structure's root tile.
+ */
+DECLARE_POD_3(awe, root_structure_tile, "RootStructureTile",
+	std::string, tile, false, {},
+	std::string, destroyed, true, {},
+	std::string, deleted, true, {}
+);
+
+DEFINE_POD_3(awe, root_structure_tile, "RootStructureTile",
+	std::string, tile,
+	std::string, destroyed,
+	std::string, deleted
+);
+
+/**
+ * Configuration of a structure's dependent tile.
+ */
+DECLARE_POD_4(awe, dependent_structure_tile, "DependentStructureTile",
+	std::string, tile, false, {},
+	sf::Vector2i, offset, false, {},
+	std::string, destroyed, true, {},
+	std::string, deleted, true, {}
+);
+
+DEFINE_POD_4(awe, dependent_structure_tile, "DependentStructureTile",
+	std::string, tile,
+	sf::Vector2i, offset,
+	std::string, destroyed,
+	std::string, deleted
+);
+
+// SPECIALISE BANK_ARRAY SCRIPT TYPENAMES HERE!
+// Hopefully we can find a way round this, suffers from the same problem as:
+// OverrideFunction::read()
+
 template<>
 inline constexpr std::string engine::script_type<awe::bank_array<awe::particle_data>>() {
 	return std::string(engine::script_type<awe::particle_data>()).append("Array");
 }
 
+template<>
+inline constexpr std::string engine::script_type<awe::bank_array<awe::dependent_structure_tile>>() {
+	return std::string(engine::script_type<awe::dependent_structure_tile>()).append("Array");
+}
+
 #include "tpp/bank-v2-macros.tpp"
 
+#define COMMA ,
+
 namespace awe {
+	GAME_PROPERTY_4(tile_type, "TileType", "tiletype", 6,
+		terrain, std::string, false, DEFAULT_VALUE(""), ,
+		tile, std::string, false, DEFAULT_VALUE(""), ,
+		capturingProperty, std::string, true, DEFAULT_VALUE(""), ,
+		alwaysPaintable, bool, true, DEFAULT_VALUE(false), ,
+	, , )
+
+	/**
+	 * @warning If a structure is not paintable, all of its dependent tiles
+	 *          will be removed, and its root tile type \b must be unique
+	 *          across non-paintable structures! Code that searches through
+	 *          structures to find a non-paintable structure that has a given
+	 *          root tile type should always select the structure found first
+	 *          to at least try and maintain consistency if this constraint is
+	 *          not followed.
+	 */
+	GAME_PROPERTY_11(structure, "Structure", "structure", 5,
+		longName, std::string, false, DEFAULT_VALUE(""), ,
+		shortName, std::string, false, DEFAULT_VALUE(""), ,
+		icon, std::string, false, DEFAULT_VALUE(""), ,
+		description, std::string, false, DEFAULT_VALUE(""), ,
+		ownedIcon, std::string, true, DEFAULT_VALUE(""), ,
+		root, awe::root_structure_tile, false, DEFAULT_VALUE({}), ,
+		paintable, bool, true, DEFAULT_VALUE(true), ,
+		keepUnits, bool, true, DEFAULT_VALUE(false), ,
+		destroyedLongName, std::string, true, DEFAULT_VALUE(""), ,
+		destroyedIcon, std::string, true, DEFAULT_VALUE(""), ,
+		dependent, awe::bank_array<awe::dependent_structure_tile>, true, INIT_BANK_ARRAY(), ,
+		awe::root_structure_tile::Register(engine, document);
+		awe::dependent_structure_tile::Register(engine, document);
+		awe::bank_array<awe::dependent_structure_tile>::Register(engine, document);,
+			// This checking works great for the dependent tiles without overrides,
+			// but what if an override is applied that is invalid? Because of this,
+			// it might be more beneficial to move this checking out of here and
+			// into the code responsible for managing all the banks.
+			const auto depArr = dependent({}).array->operator->();
+			if (depArr->GetSize() == 0) return;
+			if (!paintable({})) {
+				logger.warning("Structure \"{}\" was configured to be non-paintable. "
+					"Removing {} dependent tile{}..." COMMA scriptName COMMA depArr->GetSize() COMMA
+					(depArr->GetSize() == 1 ? "" : "s"));
+				depArr->Resize(0);
+			} else {
+				// The root tile { 0, 0 } cannot be a dependent tile, since 0, 0
+				// describes an offset in relation to the root tile.
+				std::unordered_set<decltype(awe::dependent_structure_tile::offset)> roots = { { 0 COMMA 0 } };
+				std::set<asUINT> elemsToDelete;
+				for (asUINT i = 0 COMMA end = depArr->GetSize(); i < end; ++i) {
+					const auto tile = static_cast<awe::dependent_structure_tile*>(depArr->At(i));
+					if (roots.count(tile->offset)) {
+						if (tile->offset.x == 0 && tile->offset.y == 0) {
+							logger.warning("Structure \"{}\": dependent tile with "
+								"offset {} is not allowed! Removing this tile..." COMMA
+								scriptName COMMA tile->offset);
+						} else {
+							logger.warning("Structure \"{}\": dependent tile with "
+								"offset {} already exists! Removing duplicate tile..." COMMA
+								scriptName COMMA tile->offset);
+						}
+						elemsToDelete.insert(i);
+					} else {
+						roots.insert(tile->offset);
+					}
+				}
+				for (auto itr = elemsToDelete.rbegin() COMMA end = elemsToDelete.rend(); itr != end; ++itr) {
+					depArr->RemoveAt(*itr);
+				}
+			}
+			dependent({}).initVector();
+	, )
+
 	GAME_PROPERTY_4(movement_type, "MovementType", "movementtype", 4,
-		longName, std::string,,
-		shortName, std::string,,
-		icon, std::string,,
-		description, std::string,,
+		longName, std::string, false, DEFAULT_VALUE(""), ,
+		shortName, std::string, false, DEFAULT_VALUE(""), ,
+		icon, std::string, false, DEFAULT_VALUE(""), ,
+		description, std::string, false, DEFAULT_VALUE(""), ,
 	,, )
 
 	GAME_PROPERTY_5(country, "Country", "country", 3,
-		longName, std::string,,
-		shortName, std::string,,
-		icon, std::string,,
-		description, std::string,,
-		colour, sf::Color,,
+		longName, std::string, false, DEFAULT_VALUE(""), ,
+		shortName, std::string, false, DEFAULT_VALUE(""), ,
+		icon, std::string, false, DEFAULT_VALUE(""), ,
+		description, std::string, false, DEFAULT_VALUE(""), ,
+		colour, sf::Color, false, DEFAULT_VALUE({}), ,
 		,
 		_turnOrder = _turnOrderCounter++;,
 		private: awe::ArmyID _turnOrder; static awe::ArmyID _turnOrderCounter;
@@ -551,37 +628,35 @@ namespace awe {
 	awe::ArmyID country::_turnOrderCounter = 0;
 
 	GAME_PROPERTY_7(environment, "Environment", "environment", 2,
-		longName, std::string,,
-		shortName, std::string,,
-		icon, std::string,,
-		description, std::string,,
-		spritesheet, std::string,,
-		pictureSpritesheet, std::string,,
-		structureIconSpritesheet, std::string,,
+		longName, std::string, false, DEFAULT_VALUE(""), ,
+		shortName, std::string, false, DEFAULT_VALUE(""), ,
+		icon, std::string, false, DEFAULT_VALUE(""), ,
+		description, std::string, false, DEFAULT_VALUE(""), ,
+		spritesheet, std::string, false, DEFAULT_VALUE(""), ,
+		pictureSpritesheet, std::string, false, DEFAULT_VALUE(""), ,
+		structureIconSpritesheet, std::string, false, DEFAULT_VALUE(""), ,
 	,, )
 
 	GAME_PROPERTY_6(weather, "Weather", "weather", 1,
-		longName, std::string,,
-		shortName, std::string,,
-		icon, std::string,,
-		description, std::string,,
-		sound, std::string,,
-		particles, awe::bank_array<awe::particle_data>,,
+		longName, std::string, false, DEFAULT_VALUE(""), ,
+		shortName, std::string, false, DEFAULT_VALUE(""), ,
+		icon, std::string, false, DEFAULT_VALUE(""), ,
+		description, std::string, false, DEFAULT_VALUE(""), ,
+		sound, std::string, false, DEFAULT_VALUE(""), ,
+		particles, awe::bank_array<awe::particle_data>, false, INIT_BANK_ARRAY(), ,
 		awe::particle_data::Register(engine, document);
 		awe::bank_array<awe::particle_data>::Register(engine, document);
 	,, )
 	
 	GAME_PROPERTY_6(commander, "Commander", "commander", 0,
-		longName, std::string,,
-		shortName, std::string,,
-		icon, std::string,,
-		description, std::string,,
-		portrait, std::string,,
-		theme, std::string,,
+		longName, std::string, false, DEFAULT_VALUE(""), ,
+		shortName, std::string, false, DEFAULT_VALUE(""), ,
+		icon, std::string, false, DEFAULT_VALUE(""), ,
+		description, std::string, false, DEFAULT_VALUE(""), ,
+		portrait, std::string, false, DEFAULT_VALUE(""), ,
+		theme, std::string, false, DEFAULT_VALUE(""), ,
 	,, )
 }
-
-#define COMMA ,
 
 namespace awe {
 	template<typename T>

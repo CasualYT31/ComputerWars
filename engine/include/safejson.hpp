@@ -472,6 +472,9 @@ namespace engine {
 		 * @param   dest The destination array object.
 		 * @param   keys The key sequence uniquely identifying the JSON array value
 		 *               to apply to the C++ array object.
+		 * @param   optional       If \c TRUE, and the \c KEYS_DID_NOT_EXIST bit is
+		 *                         going to be set, the bit won't be set, and the
+		 *                         call will instead return silently.
 		 * @safety  If an exception is thrown, this method will not set any error
 		 *          bit. If an exception is thrown whilst updating \c dest, then it
 		 *          will be left in a valid state but not necessarily in its
@@ -482,7 +485,8 @@ namespace engine {
 		 * @sa      \c applyMap()
 		 */
 		template<typename T, std::size_t N>
-		void applyArray(std::array<T, N>& dest, const KeySequence& keys);
+		void applyArray(std::array<T, N>& dest, const KeySequence& keys,
+			const bool optional = false);
 		
 		/**
 		 * Applies a JSON array of a specific format to an \c sf::Color object.
@@ -500,6 +504,9 @@ namespace engine {
 		 *                         array to apply to the \c Color object.
 		 * @param   suppressErrors Resets the error state of this object when the
 		 *                         call is finished.
+		 * @param   optional       If \c TRUE, and the \c KEYS_DID_NOT_EXIST bit is
+		 *                         going to be set, the bit won't be set, and the
+		 *                         call will instead return silently.
 		 * @safety  If an exception is thrown, \c dest is guaranteed not to be
 		 *          amended. Additionally, if \c suppressErrors is \c TRUE, the
 		 *          error state will always be reset even if an exception is
@@ -510,7 +517,7 @@ namespace engine {
 		 * @sa      \c applyMap()
 		 */
 		void applyColour(sf::Color& dest, const KeySequence& keys,
-			const bool suppressErrors = false);
+			const bool suppressErrors = false, const bool optional = false);
 		
 		/**
 		 * Applies a JSON array of a variable size to a given \c std::vector
@@ -528,6 +535,9 @@ namespace engine {
 		 * @param   dest The destination vector object.
 		 * @param   keys The key sequence uniquely identifying the JSON array to
 		 *               apply.
+		 * @param   optional       If \c TRUE, and the \c KEYS_DID_NOT_EXIST bit is
+		 *                         going to be set, the bit won't be set, and the
+		 *                         call will instead return silently.
 		 * @safety  If an exception is thrown, this method will not set any error
 		 *          bit. If an exception is thrown whilst updating \c dest, then it
 		 *          will be left in a valid state but not in its original state.
@@ -537,7 +547,8 @@ namespace engine {
 		 * @sa      \c applyMap()
 		 */
 		template<typename T>
-		void applyVector(std::vector<T>& dest, const KeySequence& keys);
+		void applyVector(std::vector<T>& dest, const KeySequence& keys,
+			const bool optional = false);
 
 		/**
 		 * Applies a JSON object to a given \c std::unordered_map object.
@@ -561,6 +572,9 @@ namespace engine {
 		 *                                     \c FALSE, no further key-value pairs
 		 *                                     will be read in this case. \c TRUE
 		 *                                     is the default.
+		 * @param   optional       If \c TRUE, and the \c KEYS_DID_NOT_EXIST bit is
+		 *                         going to be set, the bit won't be set, and the
+		 *                         call will instead return silently.
 		 * @safety  Basic guarantee: this object and \c dest will be left in a
 		 *          valid state, but \c dest is not guaranteed to keep its original
 		 *          state.
@@ -570,7 +584,8 @@ namespace engine {
 		 */
 		template<typename T>
 		void applyMap(std::unordered_map<std::string, T>& dest,
-			const KeySequence& keys, const bool continueReadingOnTypeError = true);
+			const KeySequence& keys, const bool continueReadingOnTypeError = true,
+			const bool optional = false);
 	private:
 		/**
 		 * Performs preliminary checks before continuing with the \c apply() call.
@@ -593,7 +608,7 @@ namespace engine {
 		 */
 		bool _performInitialChecks(const engine::json::KeySequence& keys,
 			nlohmann::ordered_json& test, nlohmann::ordered_json dest,
-			std::string type = "", const bool optional = false);
+			bool& exists, std::string type = "", const bool optional = false);
 
 		/**
 		 * The \c nlohmann::ordered_json object stored internally.

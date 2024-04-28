@@ -52,49 +52,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "bank-v2.hpp"
 #include "fmtsfx.hpp"
 
-// An example of a POD type in AngelScript.
-// Let's make the declaration and definition of these, macros.
-// Use param_type from call_traits for the constructors.
-    // For AS, primitive types will be pass by value: bools, all ints, all floats.
-    // Everything else should be const&in.
-// Macros should let you define the public fields.
-// This will be most useful for banks, but I think this will be useful for
-// awe::map-based types, too.
-
-// Small correction: they aren't *technically* POD types in the C++ sense, but they
-// are just fields in a struct pretty much.
-
-// The ultimate aim of this work is to make it super super easy to let objects be
-// overrideable via bank-v2. Both read<>() methods can be supported for POD types
-// out-of-the-box with no need for specialisation. At least, in theory...
-
-DECLARE_POD_1(, pod, "pod", std::string, message);
-
-DEFINE_POD_1(, pod, "pod", std::string, message);
-
-DECLARE_POD_3(, coords, "Coords", double, x, double, y, double, z);
-
-DEFINE_POD_3(, coords, "Coords", double, x, double, y, double, z);
-
-DECLARE_POD_2(, coord_pair, "CoordPair", coords, a, coords, b);
-
-DEFINE_POD_2(, coord_pair, "CoordPair", coords, a, coords, b);
-
-class reg : public engine::script_registrant {
-public:
-    void registerInterface(asIScriptEngine* engine,
-        const std::shared_ptr<DocumentationGenerator>& document) final;
-    engine::logger logger;
-};
-
-void reg::registerInterface(asIScriptEngine* engine,
-    const std::shared_ptr<DocumentationGenerator>& document) {
-    pod::Register(engine, document);
-    coords::Register(engine, document);
-    coord_pair::Register(engine, document);
-    engine->RegisterGlobalFunction("void info(const string&in)", asMETHODPR(engine::logger, write, (const std::string&), void), asCALL_THISCALL_ASGLOBAL, &this->logger);
-}
-
 /**
  * Loads the game engine, then runs it.
  * The first command-line argument should be a path to an assets folder with which
@@ -127,17 +84,6 @@ int main(int argc, char* argv[]) {
 
         std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>(rootLogger.getData());
 
-        // TODO: how tf do we provide the scripts pointer to each bank_array specialisation?
-        awe::bank_array<awe::particle_data>::scripts = scripts.get();
-
-        //reg regInterface;
-        //regInterface.logger.setData(rootLogger);
-        //scripts->addRegistrant(&regInterface);
-
-        //coords simCoords(-0.4789, 51.6704, 0);
-
-        //scripts->callFunction(engine::scripts::modules[engine::scripts::BANK_OVERRIDE], "main", &simCoords);
-
         awe::bank<awe::commander> commanders(scripts, rootLogger.getData());
 
         awe::bank<awe::weather> weathers(scripts, rootLogger.getData());
@@ -147,6 +93,10 @@ int main(int argc, char* argv[]) {
         awe::bank<awe::country> countries(scripts, rootLogger.getData());
 
         awe::bank<awe::movement_type> movementTypes(scripts, rootLogger.getData());
+
+        awe::bank<awe::structure> structures(scripts, rootLogger.getData());
+
+        awe::bank<awe::tile_type> tileTypes(scripts, rootLogger.getData());
 
         // We need to load the scripts before loading the bank JSON data because
         // the latter relies on the script interface to be able to allocate
@@ -161,6 +111,8 @@ int main(int argc, char* argv[]) {
         environments.load("assets/property/environment.json");
         countries.load("assets/property/country.json");
         movementTypes.load("assets/property/movement.json");
+        structures.load("assets/property/structure.json");
+        tileTypes.load("assets/property/tile.json");
 
         if (!scripts->evaluateAssertions()) {
             throw std::exception("Script assertions failed!");
@@ -171,6 +123,8 @@ int main(int argc, char* argv[]) {
         awe::processOverrides(scripts, environments, weathers, commanders);
         awe::processOverrides(scripts, countries, environments, weathers, commanders);
         awe::processOverrides(scripts, movementTypes, countries, environments, weathers, commanders);
+        awe::processOverrides(scripts, structures, movementTypes, countries, environments, weathers, commanders);
+        awe::processOverrides(scripts, tileTypes, structures, movementTypes, countries, environments, weathers, commanders);
 
         rootLogger.write("{} --- {}", weathers["CLEAR"]->longName(), weathers["CLEAR"]->longName(awe::overrides().commander("JAKE")));
         rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), static_cast<const awe::bank<awe::weather>>(weathers)["CLEAR"]->shortName(awe::overrides().commander("JAKER")));
@@ -198,6 +152,12 @@ int main(int argc, char* argv[]) {
         rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("").weather("").commander("")));
         rootLogger.write("Counter");
 
+        const auto& s = structures;
+        rootLogger.write("Default={}", s["HQ"]->ownedIcon());
+        for (const auto& country : countries) {
+            rootLogger.write("{}={}", country.scriptName(), s["HQ"]->ownedIcon(awe::overrides().country(country.scriptName())));
+        }
+        return 0;
         // TODO:
         //      Keep testing.
         //      

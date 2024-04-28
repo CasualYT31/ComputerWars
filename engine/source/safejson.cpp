@@ -171,21 +171,25 @@ engine::json::KeySequence engine::json::concatKeys(KeySequence parentKeys,
 }
 
 void engine::json::applyColour(sf::Color& dest,
-	const engine::json::KeySequence& keys, const bool suppressErrors) {
+	const engine::json::KeySequence& keys, const bool suppressErrors,
+	const bool optional) {
 	std::array<unsigned int, 4> colour = { 0, 0, 0, 255 };
-	applyArray(colour, keys);
+	applyArray(colour, keys, optional);
 	if (!inGoodState()) {
 		if (suppressErrors) resetState();
-		_logger.write("{} colour property faulty: left to the default of {}.",
-			synthesiseKeySequence(keys), dest);
+		if (!optional && !keysExist(keys)) {
+			_logger.write("{} colour property faulty: left to the default of {}.",
+				synthesiseKeySequence(keys), dest);
+		}
 	} else {
 		dest = sf::Color(colour[0], colour[1], colour[2], colour[3]);
 	}
 }
 
 bool engine::json::_performInitialChecks(const engine::json::KeySequence& keys,
-	nlohmann::ordered_json& test, nlohmann::ordered_json dest, std::string type,
-	const bool optional) {
+	nlohmann::ordered_json& test, nlohmann::ordered_json dest, bool& exists,
+	std::string type, const bool optional) {
+	exists = true;
 	if (type == "") type = getTypeName(dest);
 	if (keys.empty()) {
 		_logger.error("Attempted to assign a value to a destination of type "
@@ -201,10 +205,13 @@ bool engine::json::_performInitialChecks(const engine::json::KeySequence& keys,
 					getTypeName(test), type, synthesiseKeySequence(keys));
 				_toggleState(MISMATCHING_TYPE);
 			}
-		} else if (!optional) {
-			_logger.error("The key sequence {} does not exist in the JSON object.",
-				synthesiseKeySequence(keys));
-			_toggleState(KEYS_DID_NOT_EXIST);
+		} else {
+			exists = false;
+			if (!optional) {
+				_logger.error("The key sequence {} does not exist in the JSON object.",
+					synthesiseKeySequence(keys));
+				_toggleState(KEYS_DID_NOT_EXIST);
+			}
 		}
 	}
 	return false;

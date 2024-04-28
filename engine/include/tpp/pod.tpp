@@ -41,7 +41,7 @@ namespace engine {
     }
 }
 
-#define DECLARE_POD_1(ns, cc, ac, t1, p1) namespace ns { \
+#define DECLARE_POD_1(ns, cc, ac, t1, p1, o1, c1) namespace ns { \
     struct cc : public engine::script_reference_type<ns::cc> { \
         static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
         inline static cc* Create() { return new cc(); }; \
@@ -57,7 +57,7 @@ namespace engine {
         inline bool operator!=(const cc& o) const { return !(*this == o); } \
         cc& operator=(const cc& o); \
         cc& operator=(cc&& o) noexcept; \
-        t1 p1{}; \
+        t1 p1 = c1; \
     private: \
         inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
         inline bool opEquals(const cc* const o) const { return *this == *o; } \
@@ -67,17 +67,24 @@ template <> \
 inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
 namespace awe { \
     template<> struct Serialisable<ns::cc> { \
-        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+        static bool fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const bool optional) { \
             nlohmann::ordered_json p; \
 			if (!j.keysExist(keys, &p)) { \
-				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
-				return; \
+                if (!optional) { \
+				    logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+                    return false; \
+                } \
+				return true; \
 			} \
 			if (!p.is_object()) { \
 				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
-				return; \
+				return false; \
 			} \
-            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); \
+            if (!awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, o1)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            return true; \
         } \
     }; \
 }
@@ -125,7 +132,7 @@ namespace awe { \
     } \
 }
 
-#define DECLARE_POD_2(ns, cc, ac, t1, p1, t2, p2) namespace ns { \
+#define DECLARE_POD_2(ns, cc, ac, t1, p1, o1, c1, t2, p2, o2, c2) namespace ns { \
     struct cc : public engine::script_reference_type<ns::cc> { \
         static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
         inline static cc* Create() { return new cc(); }; \
@@ -141,7 +148,7 @@ namespace awe { \
         inline bool operator!=(const cc& o) const { return !(*this == o); } \
         cc& operator=(const cc& o); \
         cc& operator=(cc&& o) noexcept; \
-        t1 p1{}; t2 p2{}; \
+        t1 p1 = c1; t2 p2 = c2; \
     private: \
         inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
         inline bool opEquals(const cc* const o) const { return *this == *o; } \
@@ -151,17 +158,28 @@ template <> \
 inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
 namespace awe { \
     template<> struct Serialisable<ns::cc> { \
-        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+        static bool fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const bool optional) { \
             nlohmann::ordered_json p; \
 			if (!j.keysExist(keys, &p)) { \
-				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
-				return; \
+                if (!optional) { \
+				    logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+                    return false; \
+                } \
+				return true; \
 			} \
 			if (!p.is_object()) { \
 				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
-				return; \
+				return false; \
 			} \
-            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); if (p.contains(#p2)) awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, scripts); \
+            if (!awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, o1)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, o2)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            return true; \
         } \
     }; \
 }
@@ -210,7 +228,7 @@ namespace awe { \
     } \
 }
 
-#define DECLARE_POD_3(ns, cc, ac, t1, p1, t2, p2, t3, p3) namespace ns { \
+#define DECLARE_POD_3(ns, cc, ac, t1, p1, o1, c1, t2, p2, o2, c2, t3, p3, o3, c3) namespace ns { \
     struct cc : public engine::script_reference_type<ns::cc> { \
         static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
         inline static cc* Create() { return new cc(); }; \
@@ -226,7 +244,7 @@ namespace awe { \
         inline bool operator!=(const cc& o) const { return !(*this == o); } \
         cc& operator=(const cc& o); \
         cc& operator=(cc&& o) noexcept; \
-        t1 p1{}; t2 p2{}; t3 p3{}; \
+        t1 p1 = c1; t2 p2 = c2; t3 p3 = c3; \
     private: \
         inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
         inline bool opEquals(const cc* const o) const { return *this == *o; } \
@@ -236,17 +254,32 @@ template <> \
 inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
 namespace awe { \
     template<> struct Serialisable<ns::cc> { \
-        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+        static bool fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const bool optional) { \
             nlohmann::ordered_json p; \
 			if (!j.keysExist(keys, &p)) { \
-				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
-				return; \
+                if (!optional) { \
+				    logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+                    return false; \
+                } \
+				return true; \
 			} \
 			if (!p.is_object()) { \
 				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
-				return; \
+				return false; \
 			} \
-            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); if (p.contains(#p2)) awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, scripts); if (p.contains(#p3)) awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, scripts); \
+            if (!awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, o1)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, o2)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, o3)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            return true; \
         } \
     }; \
 }
@@ -296,7 +329,7 @@ namespace awe { \
     } \
 }
 
-#define DECLARE_POD_4(ns, cc, ac, t1, p1, t2, p2, t3, p3, t4, p4) namespace ns { \
+#define DECLARE_POD_4(ns, cc, ac, t1, p1, o1, c1, t2, p2, o2, c2, t3, p3, o3, c3, t4, p4, o4, c4) namespace ns { \
     struct cc : public engine::script_reference_type<ns::cc> { \
         static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
         inline static cc* Create() { return new cc(); }; \
@@ -312,7 +345,7 @@ namespace awe { \
         inline bool operator!=(const cc& o) const { return !(*this == o); } \
         cc& operator=(const cc& o); \
         cc& operator=(cc&& o) noexcept; \
-        t1 p1{}; t2 p2{}; t3 p3{}; t4 p4{}; \
+        t1 p1 = c1; t2 p2 = c2; t3 p3 = c3; t4 p4 = c4; \
     private: \
         inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
         inline bool opEquals(const cc* const o) const { return *this == *o; } \
@@ -322,17 +355,36 @@ template <> \
 inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
 namespace awe { \
     template<> struct Serialisable<ns::cc> { \
-        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+        static bool fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const bool optional) { \
             nlohmann::ordered_json p; \
 			if (!j.keysExist(keys, &p)) { \
-				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
-				return; \
+                if (!optional) { \
+				    logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+                    return false; \
+                } \
+				return true; \
 			} \
 			if (!p.is_object()) { \
 				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
-				return; \
+				return false; \
 			} \
-            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); if (p.contains(#p2)) awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, scripts); if (p.contains(#p3)) awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, scripts); if (p.contains(#p4)) awe::Serialisable<t4>::fromJSON(value.p4, j, j.concatKeys(keys, { #p4 }), logger, scripts); \
+            if (!awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, o1)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, o2)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, o3)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t4>::fromJSON(value.p4, j, j.concatKeys(keys, { #p4 }), logger, o4)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            return true; \
         } \
     }; \
 }
@@ -383,7 +435,7 @@ namespace awe { \
     } \
 }
 
-#define DECLARE_POD_5(ns, cc, ac, t1, p1, t2, p2, t3, p3, t4, p4, t5, p5) namespace ns { \
+#define DECLARE_POD_5(ns, cc, ac, t1, p1, o1, c1, t2, p2, o2, c2, t3, p3, o3, c3, t4, p4, o4, c4, t5, p5, o5, c5) namespace ns { \
     struct cc : public engine::script_reference_type<ns::cc> { \
         static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
         inline static cc* Create() { return new cc(); }; \
@@ -399,7 +451,7 @@ namespace awe { \
         inline bool operator!=(const cc& o) const { return !(*this == o); } \
         cc& operator=(const cc& o); \
         cc& operator=(cc&& o) noexcept; \
-        t1 p1{}; t2 p2{}; t3 p3{}; t4 p4{}; t5 p5{}; \
+        t1 p1 = c1; t2 p2 = c2; t3 p3 = c3; t4 p4 = c4; t5 p5 = c5; \
     private: \
         inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
         inline bool opEquals(const cc* const o) const { return *this == *o; } \
@@ -409,17 +461,40 @@ template <> \
 inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
 namespace awe { \
     template<> struct Serialisable<ns::cc> { \
-        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+        static bool fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const bool optional) { \
             nlohmann::ordered_json p; \
 			if (!j.keysExist(keys, &p)) { \
-				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
-				return; \
+                if (!optional) { \
+				    logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+                    return false; \
+                } \
+				return true; \
 			} \
 			if (!p.is_object()) { \
 				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
-				return; \
+				return false; \
 			} \
-            if (p.contains(#p1)) awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, scripts); if (p.contains(#p2)) awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, scripts); if (p.contains(#p3)) awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, scripts); if (p.contains(#p4)) awe::Serialisable<t4>::fromJSON(value.p4, j, j.concatKeys(keys, { #p4 }), logger, scripts); if (p.contains(#p5)) awe::Serialisable<t5>::fromJSON(value.p5, j, j.concatKeys(keys, { #p5 }), logger, scripts); \
+            if (!awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, o1)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, o2)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, o3)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t4>::fromJSON(value.p4, j, j.concatKeys(keys, { #p4 }), logger, o4)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t5>::fromJSON(value.p5, j, j.concatKeys(keys, { #p5 }), logger, o5)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            return true; \
         } \
     }; \
 }

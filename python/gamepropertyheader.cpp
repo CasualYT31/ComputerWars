@@ -31,12 +31,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	 n: The name of the property in C++ and AngelScript.
 	ct: The C++ type of the property, without qualifiers.
 	 i: Depth of the hierarchy desired (see awe::property_field).
+     o: true if this field is optional, false if not.
+     d: The default value of the field. Has access to `scripts`.
 	 e: Extra processing that's applied to the property. Can be nothing.
 */
-#define PROPERTY(cc, ac, n, ct, i, e) class n##_ { \
+#define PROPERTY(cc, ac, n, ct, i, o, d, e) class n##_ { \
 	awe::property_field<ct, i> _##n; \
 public: \
-	n##_(engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : _##n(j, { #n }, logger, scripts) { e } \
+	n##_(engine::json& j, const std::string& scriptName, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : _##n(j, scriptName, { #n }, logger, scripts, o, [](ct& defVal, const std::shared_ptr<engine::scripts>& scripts) { d; }) { e } \
 	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
 		engine->RegisterObjectMethod(ac, std::string(awe::bank_return_type<ct>()).append(" " #n "(const Overrides&in) const").c_str(), \
 			asMETHODPR(n##_, operator(), (const awe::overrides&) const, \
@@ -53,6 +55,16 @@ public: \
 	} \
 } n;
 
+/**
+ * Used to initialise the default value of a field.
+ */
+#define DEFAULT_VALUE(v) defVal = v;
+
+/**
+ * Must be given as the default value of bank_array property fields.
+ */
+#define INIT_BANK_ARRAY() defVal.scripts = scripts; defVal.array = std::make_unique<engine::CScriptWrapper<CScriptArray>>(scripts->createArray(engine::script_type<std::remove_reference<decltype(defVal)>::type::type>()));
+
 /* These macros generate a game property class with N fields.
 	Unfortunately, I can't come up with a cleaner solution to support variable
 	numbers of fields in macros beyond manually defining each N-field macro. To
@@ -64,6 +76,8 @@ public: \
 	 i: Depth of the hierarchy desired for every field (see awe::property_field).
 	p1: The name of the first field.
 	t1: The C++ type of the first field, without qualifiers.
+    o1: true if this field is optional, false if not.
+    d1: The field's default value. Has access to `scripts`.
 	e1: Extra processing that's applied to the first field.
      d: Allows you to register any script interface dependencies (you have access
         to the engine pointer). This is mandatory for all bank_array fields.

@@ -26,21 +26,25 @@ template<typename T>
 void engine::json::apply(T& dest, const engine::json::KeySequence& keys,
 	const bool suppressErrors, const bool optional) {
 	nlohmann::ordered_json test;
-	if (_performInitialChecks(keys, test, dest, "", optional)) {
+	bool exists = true;
+	if (_performInitialChecks(keys, test, dest, exists, "", optional)) {
 		dest = test.get<T>();
 	} else {
 		if (suppressErrors) resetState();
-		_logger.write("{} property faulty or not given: left to the default of "
-			"{}.", synthesiseKeySequence(keys), dest);
+		if (!optional && !exists) {
+			_logger.write("{} property faulty or not given: left to the default "
+				"of {}.", synthesiseKeySequence(keys), dest);
+		}
 	}
 }
 
 template<typename T, std::size_t N>
 void engine::json::applyArray(std::array<T, N>& dest,
-	const engine::json::KeySequence& keys) {
+	const engine::json::KeySequence& keys, const bool optional) {
 	if (!N) return;
 	nlohmann::ordered_json test;
-	if (_performInitialChecks(keys, test, dest, "array")) {
+	bool exists = true;
+	if (_performInitialChecks(keys, test, dest, exists, "array", optional)) {
 		if (test.size() == N) {
 			nlohmann::ordered_json testDataType = dest[0];
 			// Loop through each element in the JSON array to see if it matches
@@ -71,9 +75,10 @@ void engine::json::applyArray(std::array<T, N>& dest,
 
 template<typename T>
 void engine::json::applyVector(std::vector<T>& dest,
-	const engine::json::KeySequence& keys) {
+	const engine::json::KeySequence& keys, const bool optional) {
 	nlohmann::ordered_json test;
-	if (_performInitialChecks(keys, test, dest, "vector")) {
+	bool exists = true;
+	if (_performInitialChecks(keys, test, dest, exists, "vector", optional)) {
 		nlohmann::ordered_json testDataType = T();
 		for (std::size_t i = 0; i < test.size(); ++i) {
 			if (i == test.size() - 1 && equalType(testDataType, test[i])) {
@@ -96,9 +101,11 @@ void engine::json::applyVector(std::vector<T>& dest,
 
 template<typename T>
 void engine::json::applyMap(std::unordered_map<std::string, T>& dest,
-	const KeySequence& keys, const bool continueReadingOnTypeError) {
+	const KeySequence& keys, const bool continueReadingOnTypeError,
+	const bool optional) {
 	nlohmann::ordered_json test;
-	if (_performInitialChecks(keys, test, dest, "map")) {
+	bool exists = true;
+	if (_performInitialChecks(keys, test, dest, exists, "map", optional)) {
 		nlohmann::ordered_json testDataType = T();
 		for (const auto& item : test.items()) {
 			if (equalType(testDataType, item.value())) {

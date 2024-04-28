@@ -1,39 +1,21 @@
 {
   "HQ": {
-    "longname": "HQ_longname",
-    "shortname": "HQ_shortname",
+    "longName": "HQ_longname",
+    "shortName": "HQ_shortname",
     "icon": "",
     "description": "HQ_description",
-    "ownedicons": {
-      "ORANGE": "hqos",
-      "BLUE": "hqbm",
-      "GREEN": "hqge",
-      "YELLOW": "hqyc",
-      "BLACK": "hqbh",
-      "RED": "hqrf",
-      "GREY": "hqgs",
-      "BROWN": "hqbd",
-      "AMBER": "hqab",
-      "JADE": "hqjs",
-      "COBALT": "hqci",
-      "PINK": "hqpc",
-      "TEAL": "hqtg",
-      "PURPLE": "hqpl",
-      "ACID": "hqar",
-      "WHITE": "hqwn"
-    },
     "root": {
       "tile": "06Ahq",
       "destroyed": "064city",
       "deleted": "064city"
     },
-    "keepunits": true,
-    "destroyedlongname": "CITY_longname",
-    "destroyediconname": "city"
+    "keepUnits": true,
+    "destroyedLongName": "CITY_longname",
+    "destroyedIcon": "city"
   },
   "MISSILESILO": {
-    "longname": "MISSILESILO_longname",
-    "shortname": "MISSILESILO_shortname",
+    "longName": "MISSILESILO_longname",
+    "shortName": "MISSILESILO_shortname",
     "icon": "",
     "description": "MISSILESILO_description",
     "root": {
@@ -43,8 +25,8 @@
     "paintable": false
   },
   "HORIPIPESEAM": {
-    "longname": "PIPESEAM_longname",
-    "shortname": "PIPESEAM_shortname",
+    "longName": "PIPESEAM_longname",
+    "shortName": "PIPESEAM_shortname",
     "icon": "",
     "description": "PIPESEAM_description",
     "root": {
@@ -54,8 +36,8 @@
     "paintable": false
   },
   "VERTPIPESEAM": {
-    "longname": "PIPESEAM_longname",
-    "shortname": "PIPESEAM_shortname",
+    "longName": "PIPESEAM_longname",
+    "shortName": "PIPESEAM_shortname",
     "icon": "",
     "description": "PIPESEAM_description",
     "root": {
@@ -65,8 +47,8 @@
     "paintable": false
   },
   "BLACKCANNONDOWN": {
-    "longname": "BLACKCANNON_longname",
-    "shortname": "BLACKCANNON_shortname",
+    "longName": "BLACKCANNON_longname",
+    "shortName": "BLACKCANNON_shortname",
     "icon": "blackcannondown",
     "description": "BLACKCANNON_description",
     "root": {
@@ -124,12 +106,12 @@
         "deleted": "000plain"
       }
     ],
-    "destroyedlongname": "BLACKCANNON_longname",
-    "destroyediconname": "dblackcannondown"
+    "destroyedLongName": "BLACKCANNON_longname",
+    "destroyedIcon": "dblackcannondown"
   },
   "BLACKCANNONUP": {
-    "longname": "BLACKCANNON_longname",
-    "shortname": "BLACKCANNON_shortname",
+    "longName": "BLACKCANNON_longname",
+    "shortName": "BLACKCANNON_shortname",
     "icon": "blackcannonup",
     "description": "BLACKCANNON_description",
     "root": {
@@ -187,72 +169,72 @@
         "deleted": "000plain"
       }
     ],
-    "destroyedlongname": "BLACKCANNON_longname",
-    "destroyediconname": "dblackcannondown"
+    "destroyedLongName": "BLACKCANNON_longname",
+    "destroyedIcon": "dblackcannondown"
   },
   "MINICANNONUP": {
-    "longname": "MINICANNON_longname",
-    "shortname": "MINICANNON_shortname",
+    "longName": "MINICANNON_longname",
+    "shortName": "MINICANNON_shortname",
     "icon": "minicannonup",
     "description": "MINICANNON_description",
     "root": {
       "tile": "minicannonup",
       "destroyed": "001plainruin"
     },
-    "destroyedlongname": "PLAINS_longname",
-    "destroyediconname": "dminicannon"
+    "destroyedLongName": "PLAINS_longname",
+    "destroyedIcon": "dminicannon"
   },
   "MINICANNONRIGHT": {
-    "longname": "MINICANNON_longname",
-    "shortname": "MINICANNON_shortname",
+    "longName": "MINICANNON_longname",
+    "shortName": "MINICANNON_shortname",
     "icon": "minicannonright",
     "description": "MINICANNON_description",
     "root": {
       "tile": "minicannonright",
       "destroyed": "001plainruin"
     },
-    "destroyedlongname": "PLAINS_longname",
-    "destroyediconname": "dminicannon"
+    "destroyedLongName": "PLAINS_longname",
+    "destroyedIcon": "dminicannon"
   },
   "MINICANNONLEFT": {
-    "longname": "MINICANNON_longname",
-    "shortname": "MINICANNON_shortname",
+    "longName": "MINICANNON_longname",
+    "shortName": "MINICANNON_shortname",
     "icon": "minicannonleft",
     "description": "MINICANNON_description",
     "root": {
       "tile": "minicannonleft",
       "destroyed": "001plainruin"
     },
-    "destroyedlongname": "PLAINS_longname",
-    "destroyediconname": "dminicannon"
+    "destroyedLongName": "PLAINS_longname",
+    "destroyedIcon": "dminicannon"
   },
   "MINICANNONDOWN": {
-    "longname": "MINICANNON_longname",
-    "shortname": "MINICANNON_shortname",
+    "longName": "MINICANNON_longname",
+    "shortName": "MINICANNON_shortname",
     "icon": "minicannondown",
     "description": "MINICANNON_description",
     "root": {
       "tile": "minicannondown",
       "destroyed": "001plainruin"
     },
-    "destroyedlongname": "PLAINS_longname",
-    "destroyediconname": "dminicannon"
+    "destroyedLongName": "PLAINS_longname",
+    "destroyedIcon": "dminicannon"
   },
   "BLACKLASER": {
-    "longname": "BLACKLASER_longname",
-    "shortname": "BLACKLASER_shortname",
+    "longName": "BLACKLASER_longname",
+    "shortName": "BLACKLASER_shortname",
     "icon": "blacklaser",
     "description": "BLACKLASER_description",
     "root": {
       "tile": "blacklaser",
       "destroyed": "001plainruin"
     },
-    "destroyedlongname": "PLAINS_longname",
-    "destroyediconname": "dminicannon"
+    "destroyedLongName": "PLAINS_longname",
+    "destroyedIcon": "dminicannon"
   },
   "DEATHRAY": {
-    "longname": "DEATHRAY_longname",
-    "shortname": "DEATHRAY_shortname",
+    "longName": "DEATHRAY_longname",
+    "shortName": "DEATHRAY_shortname",
     "icon": "deathray",
     "description": "DEATHRAY_description",
     "root": {
@@ -310,24 +292,24 @@
         "deleted": "000plain"
       }
     ],
-    "destroyedlongname": "DEATHRAY_longname",
-    "destroyediconname": "dblackcannondown"
+    "destroyedLongName": "DEATHRAY_longname",
+    "destroyedIcon": "dblackcannondown"
   },
   "BLACKCRYSTAL": {
-    "longname": "BLACKCRYSTAL_longname",
-    "shortname": "BLACKCRYSTAL_shortname",
+    "longName": "BLACKCRYSTAL_longname",
+    "shortName": "BLACKCRYSTAL_shortname",
     "icon": "blackcrystal",
     "description": "BLACKCRYSTAL_description",
     "root": {
       "tile": "blackcrystal",
       "destroyed": "001plainruin"
     },
-    "destroyedlongname": "PLAINS_longname",
-    "destroyediconname": "dblackcrystal"
+    "destroyedLongName": "PLAINS_longname",
+    "destroyedIcon": "dblackcrystal"
   },
   "BLACKOBELISK": {
-    "longname": "BLACKOBELISK_longname",
-    "shortname": "BLACKOBELISK_shortname",
+    "longName": "BLACKOBELISK_longname",
+    "shortName": "BLACKOBELISK_shortname",
     "icon": "blackobelisk",
     "description": "BLACKOBELISK_description",
     "root": {
@@ -385,12 +367,12 @@
         "deleted": "000plain"
       }
     ],
-    "destroyedlongname": "BLACKOBELISK_longname",
-    "destroyediconname": "dblackcannondown"
+    "destroyedLongName": "BLACKOBELISK_longname",
+    "destroyedIcon": "dblackcannondown"
   },
   "GRANDBOLTLEFT": {
-    "longname": "GRANDBOLT_longname",
-    "shortname": "GRANDBOLT_shortname",
+    "longName": "GRANDBOLT_longname",
+    "shortName": "GRANDBOLT_shortname",
     "icon": "grandboltleft",
     "description": "GRANDBOLT_description",
     "root": {
@@ -635,12 +617,12 @@
         "deleted": "000plain"
       }
     ],
-    "destroyedlongname": "GRANDBOLT_longname",
-    "destroyediconname": "dgrandboltleft"
+    "destroyedLongName": "GRANDBOLT_longname",
+    "destroyedIcon": "dgrandboltleft"
   },
   "GRANDBOLTCENTRE": {
-    "longname": "GRANDBOLT_longname",
-    "shortname": "GRANDBOLT_shortname",
+    "longName": "GRANDBOLT_longname",
+    "shortName": "GRANDBOLT_shortname",
     "icon": "grandboltcentre",
     "description": "GRANDBOLT_description",
     "root": {
@@ -1065,12 +1047,12 @@
         "deleted": "000plain"
       }
     ],
-    "destroyedlongname": "GRANDBOLT_longname",
-    "destroyediconname": "dgrandboltcentre"
+    "destroyedLongName": "GRANDBOLT_longname",
+    "destroyedIcon": "dgrandboltcentre"
   },
   "GRANDBOLTRIGHT": {
-    "longname": "GRANDBOLT_longname",
-    "shortname": "GRANDBOLT_shortname",
+    "longName": "GRANDBOLT_longname",
+    "shortName": "GRANDBOLT_shortname",
     "icon": "grandboltright",
     "description": "GRANDBOLT_description",
     "root": {
@@ -1315,12 +1297,12 @@
         "deleted": "000plain"
       }
     ],
-    "destroyedlongname": "GRANDBOLT_longname",
-    "destroyediconname": "dgrandboltright"
+    "destroyedLongName": "GRANDBOLT_longname",
+    "destroyedIcon": "dgrandboltright"
   },
   "VOLCANO": {
-    "longname": "VOLCANO_longname",
-    "shortname": "VOLCANO_shortname",
+    "longName": "VOLCANO_longname",
+    "shortName": "VOLCANO_shortname",
     "icon": "volcano",
     "description": "VOLCANO_description",
     "root": {
@@ -1406,8 +1388,8 @@
     ]
   },
   "FACTORY": {
-    "longname": "FACTORY_longname",
-    "shortname": "FACTORY_shortname",
+    "longName": "FACTORY_longname",
+    "shortName": "FACTORY_shortname",
     "icon": "factory",
     "description": "FACTORY_description",
     "root": {
@@ -1473,8 +1455,8 @@
     ]
   },
   "BHDBUILDING": {
-    "longname": "BLACKHOLE_DECORATION_longname",
-    "shortname": "BLACKHOLE_DECORATION_shortname",
+    "longName": "BLACKHOLE_DECORATION_longname",
+    "shortName": "BLACKHOLE_DECORATION_shortname",
     "icon": "bhdbuilding",
     "description": "BLACKHOLE_DECORATION_description",
     "root": {
@@ -1560,8 +1542,8 @@
     ]
   },
   "BHDMISSILE": {
-    "longname": "BLACKHOLE_DECORATION_longname",
-    "shortname": "BLACKHOLE_DECORATION_shortname",
+    "longName": "BLACKHOLE_DECORATION_longname",
+    "shortName": "BLACKHOLE_DECORATION_shortname",
     "icon": "bhdmissile",
     "description": "BLACKHOLE_DECORATION_description",
     "root": {
@@ -1647,8 +1629,8 @@
     ]
   },
   "BHDSKYFORTRESS": {
-    "longname": "BLACKHOLE_DECORATION_longname",
-    "shortname": "BLACKHOLE_DECORATION_shortname",
+    "longName": "BLACKHOLE_DECORATION_longname",
+    "shortName": "BLACKHOLE_DECORATION_shortname",
     "icon": "bhdskyfortress",
     "description": "BLACKHOLE_DECORATION_description",
     "root": {

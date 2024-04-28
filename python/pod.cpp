@@ -1,4 +1,4 @@
-#define DECLARE_POD_$(ns, cc, ac`, t$, p$`) namespace ns { \
+#define DECLARE_POD_$(ns, cc, ac`, t$, p$, o$, c$`) namespace ns { \
     struct cc : public engine::script_reference_type<ns::cc> { \
         static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
         inline static cc* Create() { return new cc(); }; \
@@ -14,7 +14,7 @@
         inline bool operator!=(const cc& o) const { return !(*this == o); } \
         cc& operator=(const cc& o); \
         cc& operator=(cc&& o) noexcept; \
-        `t$ p${}; `\
+        `t$ p$ = c$; `\
     private: \
         inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
         inline bool opEquals(const cc* const o) const { return *this == *o; } \
@@ -24,17 +24,24 @@ template <> \
 inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
 namespace awe { \
     template<> struct Serialisable<ns::cc> { \
-        static void fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) { \
+        static bool fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const bool optional) { \
             nlohmann::ordered_json p; \
 			if (!j.keysExist(keys, &p)) { \
-				logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
-				return; \
+                if (!optional) { \
+				    logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+                    return false; \
+                } \
+				return true; \
 			} \
 			if (!p.is_object()) { \
 				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
-				return; \
+				return false; \
 			} \
-            `if (p.contains(#p$)) awe::Serialisable<t$>::fromJSON(value.p$, j, j.concatKeys(keys, { #p$ }), logger, scripts); `\
+            `if (!awe::Serialisable<t$>::fromJSON(value.p$, j, j.concatKeys(keys, { #p$ }), logger, o$)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            `return true; \
         } \
     }; \
 }

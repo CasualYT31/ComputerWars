@@ -1308,8 +1308,6 @@ static const auto LOOP = '`';
 
 static const std::string NUMBERS = "0123456789";
 
-static const std::regex LOOP_INDEX("\\$i|\\$I");
-
 bool engine::scripts::_instantiateTemplatesInQueue() {
     // More requests may be added to the queue during the handling of previous
     // requests, so don't use a for loop.
@@ -1542,9 +1540,19 @@ std::string engine::scripts::_loopSubtitution(const std::string& section,
         if ((step > 0 && (i + step) < stop) || (step < 0 && (i + step) > stop)) {
             sectionToEvaluate += endSection;
         }
-        // First pass through: replace all instances of $i with i.
-        const auto newSection = std::regex_replace(sectionToEvaluate, LOOP_INDEX,
-            std::to_string(i), std::regex_constants::match_flag_type::match_any);
+        // First pass through: replace all instances of $a-$z with i, i ± 1, etc.,
+        // depending on the value of step. E.g. if step == 1, only $a (i) will be
+        // available, but if step == 2, $a (i) and $b (i + 1) will be available,
+        // and if step == -2, $a (i) and $b (i - 1) will be available. Not robust
+        // at all but it satisfies my requirements for now.
+        auto newSection(sectionToEvaluate);
+        for (sf::Int64 s = 0; s < std::min(step, sf::Int64(26)); ++s) {
+            const std::regex LOOP_INDEX(fmt::format("\\${}|\\${}",
+                static_cast<char>('A' + s), static_cast<char>('a' + s)));
+            newSection = std::regex_replace(newSection, LOOP_INDEX,
+                std::to_string(i + (step < 0 ? -s : s)),
+                std::regex_constants::match_flag_type::match_any);
+        }
         // Second pass through: normal substitution.
         result += _normalSubstitution(newSection, parameters);
     }
