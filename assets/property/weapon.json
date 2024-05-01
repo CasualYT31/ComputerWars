@@ -1,802 +1,2338 @@
 {
   "INFANTRY_SECONDARY": {
-    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
-    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "longName": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortName": "INFANTRY_SECONDARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "INFANTRY_SECONDARY_WEAPON_description",
     "ammo": -1,
-    "units": {
-      "INFANTRY": 55,
-      "MECH": 45,
-      "RECON": 12,
-      "TANK": 5,
-      "MDTANK": 1,
-      "NEOTANK": 1,
-      "MEGATANK": 1,
-      "APC": 14,
-      "ANTIAIR": 5,
-      "ARTILLERY": 15,
-      "ROCKETS": 25,
-      "MISSILES": 25,
-      "PIPERUNNER": 5,
-      "TCOPTER": 30,
-      "BCOPTER": 7,
-      "OOZIUM": 20
-    },
-    "terrains": {
-      "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1,
-      "MINICANNON": 1,
-      "BLACKLASER": 1,
-      "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 20
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 55
+      },
+      {
+        "target": "MECH",
+        "damage": 45
+      },
+      {
+        "target": "RECON",
+        "damage": 12
+      },
+      {
+        "target": "TANK",
+        "damage": 5
+      },
+      {
+        "target": "MDTANK",
+        "damage": 1
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 1
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 1
+      },
+      {
+        "target": "APC",
+        "damage": 14
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 5
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 15
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 25
+      },
+      {
+        "target": "MISSILES",
+        "damage": 25
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 5
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 30
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 7
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 20
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 1
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 1
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 1
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 1
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 1
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 20
+      }
+    ]
   },
   "MECH_PRIMARY": {
-    "longname": "MECH_PRIMARY_WEAPON_longname",
-    "shortname": "MECH_PRIMARY_WEAPON_shortname",
+    "longName": "MECH_PRIMARY_WEAPON_longname",
+    "shortName": "MECH_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MECH_PRIMARY_WEAPON_description",
     "ammo": 3,
-    "units": {
-      "RECON": 85,
-      "TANK": 55,
-      "MDTANK": 15,
-      "NEOTANK": 15,
-      "MEGATANK": 5,
-      "APC": 75,
-      "ANTIAIR": 65,
-      "ARTILLERY": 70,
-      "ROCKETS": 85,
-      "MISSILES": 85,
-      "PIPERUNNER": 55,
-      "OOZIUM": 30
-    },
-    "terrains": {
-      "PIPESEAM": 15,
-      "BLACKCANNONROOT": 15,
-      "MINICANNON": 15,
-      "BLACKLASER": 15,
-      "DEATHRAYROOT": 15,
-      "BLACKCRYSTAL": 15,
-      "BLACKOBELISKROOT": 15,
-      "GRANDBOLTROOT": 30
-    }
+    "unitTable": [
+      {
+        "target": "RECON",
+        "damage": 85
+      },
+      {
+        "target": "TANK",
+        "damage": 55
+      },
+      {
+        "target": "MDTANK",
+        "damage": 15
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 15
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 5
+      },
+      {
+        "target": "APC",
+        "damage": 75
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 65
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 70
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 85
+      },
+      {
+        "target": "MISSILES",
+        "damage": 85
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 55
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 30
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 15
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 15
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 15
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 15
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 15
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 15
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 15
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 30
+      }
+    ]
   },
   "MECH_SECONDARY": {
-    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
-    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "longName": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortName": "INFANTRY_SECONDARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MECH_SECONDARY_WEAPON_description",
     "ammo": -1,
-    "units": {
-      "INFANTRY": 65,
-      "MECH": 55,
-      "RECON": 18,
-      "TANK": 6,
-      "MDTANK": 1,
-      "NEOTANK": 1,
-      "MEGATANK": 1,
-      "APC": 20,
-      "ANTIAIR": 6,
-      "ARTILLERY": 32,
-      "ROCKETS": 35,
-      "MISSILES": 35,
-      "PIPERUNNER": 6,
-      "TCOPTER": 35,
-      "BCOPTER": 9,
-      "OOZIUM": 20
-    },
-    "terrains": {
-      "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1,
-      "MINICANNON": 1,
-      "BLACKLASER": 1,
-      "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 20
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 65
+      },
+      {
+        "target": "MECH",
+        "damage": 55
+      },
+      {
+        "target": "RECON",
+        "damage": 18
+      },
+      {
+        "target": "TANK",
+        "damage": 6
+      },
+      {
+        "target": "MDTANK",
+        "damage": 1
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 1
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 1
+      },
+      {
+        "target": "APC",
+        "damage": 20
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 6
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 32
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 35
+      },
+      {
+        "target": "MISSILES",
+        "damage": 35
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 6
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 55
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 8
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 22
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 1
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 1
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 1
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 1
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 1
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 20
+      }
+    ]
   },
   "RECON_SECONDARY": {
-    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
-    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "longName": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortName": "INFANTRY_SECONDARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "RECON_SECONDARY_WEAPON_description",
     "ammo": -1,
-    "units": {
-      "INFANTRY": 70,
-      "MECH": 65,
-      "RECON": 35,
-      "TANK": 6,
-      "MDTANK": 1,
-      "NEOTANK": 1,
-      "MEGATANK": 1,
-      "APC": 45,
-      "ANTIAIR": 4,
-      "ARTILLERY": 45,
-      "ROCKETS": 55,
-      "MISSILES": 28,
-      "PIPERUNNER": 6,
-      "TCOPTER": 35,
-      "BCOPTER": 10,
-      "OOZIUM": 20
-    },
-    "terrains": {
-      "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1,
-      "MINICANNON": 1,
-      "BLACKLASER": 1,
-      "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 20
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 70
+      },
+      {
+        "target": "MECH",
+        "damage": 65
+      },
+      {
+        "target": "RECON",
+        "damage": 35
+      },
+      {
+        "target": "TANK",
+        "damage": 6
+      },
+      {
+        "target": "MDTANK",
+        "damage": 1
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 1
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 1
+      },
+      {
+        "target": "APC",
+        "damage": 45
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 4
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 45
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 55
+      },
+      {
+        "target": "MISSILES",
+        "damage": 28
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 6
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 35
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 10
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 20
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 1
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 1
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 1
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 1
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 1
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 20
+      }
+    ]
   },
   "TANK_PRIMARY": {
-    "longname": "TANK_PRIMARY_WEAPON_longname",
-    "shortname": "TANK_PRIMARY_WEAPON_shortname",
+    "longName": "TANK_PRIMARY_WEAPON_longname",
+    "shortName": "TANK_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "TANK_PRIMARY_WEAPON_description",
     "ammo": 9,
-    "units": {
-      "RECON": 85,
-      "TANK": 55,
-      "MDTANK": 15,
-      "NEOTANK": 15,
-      "MEGATANK": 10,
-      "ANTIAIR": 65,
-      "ARTILLERY": 70,
-      "ROCKETS": 85,
-      "PIPERUNNER": 55,
-      "MISSILES": 85,
-      "APC": 75,
-      "OOZIUM": 20,
-      "CRUISER": 5,
-      "SUB": 1,
-      "BATTLESHIP": 1,
-      "CARRIER": 1,
-      "LANDER": 10,
-      "BLACKBOAT": 10
-    },
-    "terrains": {
-      "PIPESEAM": 15,
-      "BLACKCANNONROOT": 15,
-      "MINICANNON": 15,
-      "BLACKLASER": 15,
-      "DEATHRAYROOT": 15,
-      "BLACKCRYSTAL": 15,
-      "BLACKOBELISKROOT": 15,
-      "GRANDBOLTROOT": 20
-    }
+    "unitTable": [
+      {
+        "target": "RECON",
+        "damage": 85
+      },
+      {
+        "target": "TANK",
+        "damage": 55
+      },
+      {
+        "target": "MDTANK",
+        "damage": 15
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 15
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 10
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 65
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 70
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 85
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 55
+      },
+      {
+        "target": "MISSILES",
+        "damage": 85
+      },
+      {
+        "target": "APC",
+        "damage": 75
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 20
+      },
+      {
+        "target": "CRUISER",
+        "damage": 5
+      },
+      {
+        "target": "SUB",
+        "damage": 1
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 1
+      },
+      {
+        "target": "CARRIER",
+        "damage": 1
+      },
+      {
+        "target": "LANDER",
+        "damage": 10
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 10
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 15
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 15
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 15
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 15
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 15
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 15
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 15
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 20
+      }
+    ]
   },
   "TANK_SECONDARY": {
-    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
-    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "longName": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortName": "INFANTRY_SECONDARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MECH_SECONDARY_WEAPON_description",
     "ammo": -1,
-    "units": {
-      "INFANTRY": 75,
-      "MECH": 70,
-      "RECON": 40,
-      "TANK": 6,
-      "MDTANK": 1,
-      "NEOTANK": 1,
-      "MEGATANK": 1,
-      "ANTIAIR": 6,
-      "ARTILLERY": 45,
-      "ROCKETS": 55,
-      "PIPERUNNER": 6,
-      "MISSILES": 30,
-      "APC": 45,
-      "OOZIUM": 20,
-      "TCOPTER": 40,
-      "BCOPTER": 10
-    },
-    "terrains": {
-      "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1,
-      "MINICANNON": 1,
-      "BLACKLASER": 1,
-      "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 20
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 75
+      },
+      {
+        "target": "MECH",
+        "damage": 70
+      },
+      {
+        "target": "RECON",
+        "damage": 40
+      },
+      {
+        "target": "TANK",
+        "damage": 6
+      },
+      {
+        "target": "MDTANK",
+        "damage": 1
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 1
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 1
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 6
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 45
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 55
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 6
+      },
+      {
+        "target": "MISSILES",
+        "damage": 30
+      },
+      {
+        "target": "APC",
+        "damage": 45
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 20
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 40
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 10
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 1
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 1
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 1
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 1
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 1
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 20
+      }
+    ]
   },
   "MDTANK_PRIMARY": {
-    "longname": "TANK_PRIMARY_WEAPON_longname",
-    "shortname": "TANK_PRIMARY_WEAPON_shortname",
+    "longName": "TANK_PRIMARY_WEAPON_longname",
+    "shortName": "TANK_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MDTANK_PRIMARY_WEAPON_description",
     "ammo": 8,
-    "units": {
-      "RECON": 105,
-      "TANK": 85,
-      "MDTANK": 55,
-      "NEOTANK": 45,
-      "MEGATANK": 25,
-      "ANTIAIR": 105,
-      "ARTILLERY": 105,
-      "ROCKETS": 105,
-      "PIPERUNNER": 85,
-      "MISSILES": 105,
-      "APC": 105,
-      "OOZIUM": 30,
-      "CRUISER": 30,
-      "SUB": 10,
-      "BATTLESHIP": 10,
-      "CARRIER": 10,
-      "LANDER": 35,
-      "BLACKBOAT": 35
-    },
-    "terrains": {
-      "PIPESEAM": 55,
-      "BLACKCANNONROOT": 55,
-      "MINICANNON": 55,
-      "BLACKLASER": 55,
-      "DEATHRAYROOT": 55,
-      "BLACKCRYSTAL": 55,
-      "BLACKOBELISKROOT": 55,
-      "GRANDBOLTROOT": 30
-    }
+    "unitTable": [
+      {
+        "target": "RECON",
+        "damage": 105
+      },
+      {
+        "target": "TANK",
+        "damage": 85
+      },
+      {
+        "target": "MDTANK",
+        "damage": 55
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 45
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 25
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 105
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 105
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 105
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 85
+      },
+      {
+        "target": "MISSILES",
+        "damage": 105
+      },
+      {
+        "target": "APC",
+        "damage": 105
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 30
+      },
+      {
+        "target": "CRUISER",
+        "damage": 30
+      },
+      {
+        "target": "SUB",
+        "damage": 10
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 10
+      },
+      {
+        "target": "CARRIER",
+        "damage": 10
+      },
+      {
+        "target": "LANDER",
+        "damage": 35
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 35
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 55
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 55
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 55
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 55
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 55
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 55
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 55
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 30
+      }
+    ]
   },
   "MDTANK_SECONDARY": {
-    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
-    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "longName": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortName": "INFANTRY_SECONDARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MECH_SECONDARY_WEAPON_description",
     "ammo": -1,
-    "units": {
-      "INFANTRY": 105,
-      "MECH": 95,
-      "RECON": 45,
-      "TANK": 8,
-      "MDTANK": 1,
-      "NEOTANK": 1,
-      "MEGATANK": 1,
-      "ANTIAIR": 7,
-      "ARTILLERY": 45,
-      "ROCKETS": 55,
-      "PIPERUNNER": 8,
-      "MISSILES": 35,
-      "APC": 45,
-      "OOZIUM": 20,
-      "BCOPTER": 12,
-      "TCOPTER": 45
-    },
-    "terrains": {
-      "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1,
-      "MINICANNON": 1,
-      "BLACKLASER": 1,
-      "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 20
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 105
+      },
+      {
+        "target": "MECH",
+        "damage": 95
+      },
+      {
+        "target": "RECON",
+        "damage": 45
+      },
+      {
+        "target": "TANK",
+        "damage": 8
+      },
+      {
+        "target": "MDTANK",
+        "damage": 1
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 1
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 1
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 7
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 45
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 55
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 8
+      },
+      {
+        "target": "MISSILES",
+        "damage": 35
+      },
+      {
+        "target": "APC",
+        "damage": 45
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 20
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 12
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 45
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 1
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 1
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 1
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 1
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 1
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 20
+      }
+    ]
   },
   "NEOTANK_PRIMARY": {
-    "longname": "NEOTANK_PRIMARY_WEAPON_longname",
-    "shortname": "NEOTANK_PRIMARY_WEAPON_shortname",
+    "longName": "NEOTANK_PRIMARY_WEAPON_longname",
+    "shortName": "NEOTANK_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "NEOTANK_PRIMARY_WEAPON_description",
     "ammo": 9,
-    "units": {
-      "RECON": 125,
-      "TANK": 105,
-      "MDTANK": 75,
-      "NEOTANK": 55,
-      "MEGATANK": 35,
-      "ANTIAIR": 115,
-      "ARTILLERY": 115,
-      "ROCKETS": 125,
-      "PIPERUNNER": 105,
-      "MISSILES": 125,
-      "APC": 125,
-      "OOZIUM": 35,
-      "CRUISER": 30,
-      "SUB": 15,
-      "BATTLESHIP": 15,
-      "CARRIER": 15,
-      "LANDER": 40,
-      "BLACKBOAT": 40
-    },
-    "terrains": {
-      "PIPESEAM": 75,
-      "BLACKCANNONROOT": 75,
-      "MINICANNON": 75,
-      "BLACKLASER": 75,
-      "DEATHRAYROOT": 75,
-      "BLACKCRYSTAL": 75,
-      "BLACKOBELISKROOT": 75,
-      "GRANDBOLTROOT": 35
-    }
+    "unitTable": [
+      {
+        "target": "RECON",
+        "damage": 125
+      },
+      {
+        "target": "TANK",
+        "damage": 105
+      },
+      {
+        "target": "MDTANK",
+        "damage": 75
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 55
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 35
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 115
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 115
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 125
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 105
+      },
+      {
+        "target": "MISSILES",
+        "damage": 125
+      },
+      {
+        "target": "APC",
+        "damage": 125
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 35
+      },
+      {
+        "target": "CRUISER",
+        "damage": 30
+      },
+      {
+        "target": "SUB",
+        "damage": 15
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 15
+      },
+      {
+        "target": "CARRIER",
+        "damage": 15
+      },
+      {
+        "target": "LANDER",
+        "damage": 40
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 40
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 75
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 75
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 75
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 75
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 75
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 75
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 75
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 35
+      }
+    ]
   },
   "NEOTANK_SECONDARY": {
-    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
-    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "longName": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortName": "INFANTRY_SECONDARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MECH_SECONDARY_WEAPON_description",
     "ammo": -1,
-    "units": {
-      "INFANTRY": 125,
-      "MECH": 115,
-      "RECON": 65,
-      "TANK": 10,
-      "MDTANK": 1,
-      "NEOTANK": 1,
-      "MEGATANK": 1,
-      "ANTIAIR": 17,
-      "ARTILLERY": 65,
-      "ROCKETS": 75,
-      "PIPERUNNER": 10,
-      "MISSILES": 55,
-      "APC": 65,
-      "OOZIUM": 20,
-      "BCOPTER": 22,
-      "TCOPTER": 55
-    },
-    "terrains": {
-      "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1,
-      "MINICANNON": 1,
-      "BLACKLASER": 1,
-      "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 20
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 125
+      },
+      {
+        "target": "MECH",
+        "damage": 115
+      },
+      {
+        "target": "RECON",
+        "damage": 65
+      },
+      {
+        "target": "TANK",
+        "damage": 10
+      },
+      {
+        "target": "MDTANK",
+        "damage": 1
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 1
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 1
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 17
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 65
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 75
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 10
+      },
+      {
+        "target": "MISSILES",
+        "damage": 55
+      },
+      {
+        "target": "APC",
+        "damage": 65
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 20
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 22
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 55
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 1
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 1
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 1
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 1
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 1
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 20
+      }
+    ]
   },
   "MEGATANK_PRIMARY": {
-    "longname": "MEGATANK_PRIMARY_WEAPON_longname",
-    "shortname": "MEGATANK_PRIMARY_WEAPON_shortname",
+    "longName": "MEGATANK_PRIMARY_WEAPON_longname",
+    "shortName": "MEGATANK_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MEGATANK_PRIMARY_WEAPON_description",
     "ammo": 3,
-    "units": {
-      "RECON": 195,
-      "TANK": 180,
-      "MDTANK": 125,
-      "NEOTANK": 115,
-      "MEGATANK": 65,
-      "ANTIAIR": 195,
-      "ARTILLERY": 195,
-      "ROCKETS": 195,
-      "PIPERUNNER": 180,
-      "MISSILES": 195,
-      "APC": 195,
-      "OOZIUM": 45,
-      "CRUISER": 65,
-      "SUB": 45,
-      "BATTLESHIP": 45,
-      "CARRIER": 45,
-      "LANDER": 75,
-      "BLACKBOAT": 105
-    },
-    "terrains": {
-      "PIPESEAM": 125,
-      "BLACKCANNONROOT": 125,
-      "MINICANNON": 125,
-      "BLACKLASER": 125,
-      "DEATHRAYROOT": 125,
-      "BLACKCRYSTAL": 125,
-      "BLACKOBELISKROOT": 125,
-      "GRANDBOLTROOT": 45
-    }
+    "unitTable": [
+      {
+        "target": "RECON",
+        "damage": 195
+      },
+      {
+        "target": "TANK",
+        "damage": 180
+      },
+      {
+        "target": "MDTANK",
+        "damage": 125
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 115
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 65
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 195
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 195
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 195
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 180
+      },
+      {
+        "target": "MISSILES",
+        "damage": 195
+      },
+      {
+        "target": "APC",
+        "damage": 195
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 45
+      },
+      {
+        "target": "CRUISER",
+        "damage": 65
+      },
+      {
+        "target": "SUB",
+        "damage": 45
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 45
+      },
+      {
+        "target": "CARRIER",
+        "damage": 45
+      },
+      {
+        "target": "LANDER",
+        "damage": 75
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 105
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 125
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 125
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 125
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 125
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 125
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 125
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 125
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 45
+      }
+    ]
   },
   "MEGATANK_SECONDARY": {
-    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
-    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "longName": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortName": "INFANTRY_SECONDARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MECH_SECONDARY_WEAPON_description",
     "ammo": -1,
-    "units": {
-      "INFANTRY": 135,
-      "MECH": 125,
-      "RECON": 65,
-      "TANK": 10,
-      "MDTANK": 1,
-      "NEOTANK": 1,
-      "MEGATANK": 1,
-      "ANTIAIR": 17,
-      "ARTILLERY": 65,
-      "ROCKETS": 75,
-      "PIPERUNNER": 10,
-      "MISSILES": 55,
-      "APC": 65,
-      "OOZIUM": 30,
-      "BCOPTER": 22,
-      "TCOPTER": 55
-    },
-    "terrains": {
-      "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1,
-      "MINICANNON": 1,
-      "BLACKLASER": 1,
-      "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 30
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 135
+      },
+      {
+        "target": "MECH",
+        "damage": 125
+      },
+      {
+        "target": "RECON",
+        "damage": 65
+      },
+      {
+        "target": "TANK",
+        "damage": 10
+      },
+      {
+        "target": "MDTANK",
+        "damage": 1
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 1
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 1
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 17
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 65
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 75
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 10
+      },
+      {
+        "target": "MISSILES",
+        "damage": 55
+      },
+      {
+        "target": "APC",
+        "damage": 65
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 30
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 22
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 55
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 1
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 1
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 1
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 1
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 1
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 30
+      }
+    ]
   },
   "ANTIAIR_PRIMARY": {
-    "longname": "ANTIAIR_PRIMARY_WEAPON_longname",
-    "shortname": "ANTIAIR_PRIMARY_WEAPON_shortname",
+    "longName": "ANTIAIR_PRIMARY_WEAPON_longname",
+    "shortName": "ANTIAIR_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "ANTIAIR_PRIMARY_WEAPON_description",
     "ammo": 9,
-    "units": {
-      "INFANTRY": 105,
-      "MECH": 105,
-      "RECON": 60,
-      "TANK": 25,
-      "MDTANK": 10,
-      "NEOTANK": 5,
-      "MEGATANK": 1,
-      "ANTIAIR": 45,
-      "ARTILLERY": 50,
-      "ROCKETS": 55,
-      "PIPERUNNER": 25,
-      "MISSILES": 55,
-      "APC": 50,
-      "OOZIUM": 30,
-      "FIGHTER": 65,
-      "BOMBER": 75,
-      "STEALTH": 75,
-      "BCOPTER": 105,
-      "TCOPTER": 105,
-      "BLACKBOMB": 120
-    },
-    "terrains": {
-      "PIPESEAM": 10,
-      "BLACKCANNONROOT": 10,
-      "MINICANNON": 10,
-      "BLACKLASER": 10,
-      "DEATHRAYROOT": 10,
-      "BLACKCRYSTAL": 10,
-      "BLACKOBELISKROOT": 10,
-      "GRANDBOLTROOT": 30
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 105
+      },
+      {
+        "target": "MECH",
+        "damage": 105
+      },
+      {
+        "target": "RECON",
+        "damage": 60
+      },
+      {
+        "target": "TANK",
+        "damage": 25
+      },
+      {
+        "target": "MDTANK",
+        "damage": 10
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 5
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 1
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 45
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 50
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 55
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 25
+      },
+      {
+        "target": "MISSILES",
+        "damage": 55
+      },
+      {
+        "target": "APC",
+        "damage": 50
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 30
+      },
+      {
+        "target": "FIGHTER",
+        "damage": 65
+      },
+      {
+        "target": "BOMBER",
+        "damage": 75
+      },
+      {
+        "target": "STEALTH",
+        "damage": 75
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 105
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 105
+      },
+      {
+        "target": "BLACKBOMB",
+        "damage": 120
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 10
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 10
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 10
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 10
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 10
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 10
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 10
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 30
+      }
+    ]
   },
   "ARTILLERY_PRIMARY": {
-    "longname": "TANK_PRIMARY_WEAPON_longname",
-    "shortname": "TANK_PRIMARY_WEAPON_shortname",
+    "longName": "TANK_PRIMARY_WEAPON_longname",
+    "shortName": "TANK_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "ARTILLERY_PRIMARY_WEAPON_description",
     "ammo": 9,
-    "lowrange": 2,
-    "highrange": 3,
-    "canattackaftermoving": false,
-    "units": {
-      "INFANTRY": 90,
-      "MECH": 85,
-      "RECON": 80,
-      "TANK": 70,
-      "MDTANK": 45,
-      "NEOTANK": 40,
-      "MEGATANK": 15,
-      "ANTIAIR": 75,
-      "ARTILLERY": 75,
-      "ROCKETS": 80,
-      "PIPERUNNER": 70,
-      "MISSILES": 80,
-      "APC": 70,
-      "OOZIUM": 5,
-      "CRUISER": 50,
-      "SUB": 60,
-      "BATTLESHIP": 40,
-      "CARRIER": 45,
-      "LANDER": 55,
-      "BLACKBOAT": 55
-    },
-    "terrains": {
-      "PIPESEAM": 45,
-      "BLACKCANNONROOT": 45,
-      "MINICANNON": 45,
-      "BLACKLASER": 45,
-      "DEATHRAYROOT": 45,
-      "BLACKCRYSTAL": 45,
-      "BLACKOBELISKROOT": 45,
-      "GRANDBOLTROOT": 5
-    }
+    "range": [ 2, 3 ],
+    "canAttackAfterMoving": false,
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 90
+      },
+      {
+        "target": "MECH",
+        "damage": 85
+      },
+      {
+        "target": "RECON",
+        "damage": 80
+      },
+      {
+        "target": "TANK",
+        "damage": 70
+      },
+      {
+        "target": "MDTANK",
+        "damage": 45
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 40
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 15
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 75
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 75
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 80
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 70
+      },
+      {
+        "target": "MISSILES",
+        "damage": 80
+      },
+      {
+        "target": "APC",
+        "damage": 70
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 5
+      },
+      {
+        "target": "CRUISER",
+        "damage": 50
+      },
+      {
+        "target": "SUB",
+        "damage": 60
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 40
+      },
+      {
+        "target": "CARRIER",
+        "damage": 45
+      },
+      {
+        "target": "LANDER",
+        "damage": 55
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 55
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 45
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 45
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 45
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 45
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 45
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 45
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 45
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 5
+      }
+    ]
   },
   "ROCKETS_PRIMARY": {
-    "longname": "ROCKETS_PRIMARY_WEAPON_longname",
-    "shortname": "ROCKETS_PRIMARY_WEAPON_shortname",
+    "longName": "ROCKETS_PRIMARY_WEAPON_longname",
+    "shortName": "ROCKETS_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "ROCKETS_PRIMARY_WEAPON_description",
     "ammo": 6,
-    "lowrange": 3,
-    "highrange": 5,
-    "canattackaftermoving": false,
-    "units": {
-      "INFANTRY": 95,
-      "MECH": 90,
-      "RECON": 90,
-      "TANK": 80,
-      "MDTANK": 55,
-      "NEOTANK": 50,
-      "MEGATANK": 25,
-      "ANTIAIR": 85,
-      "ARTILLERY": 80,
-      "ROCKETS": 85,
-      "PIPERUNNER": 80,
-      "MISSILES": 90,
-      "APC": 80,
-      "OOZIUM": 15,
-      "CRUISER": 60,
-      "SUB": 85,
-      "BATTLESHIP": 55,
-      "CARRIER": 60,
-      "LANDER": 60,
-      "BLACKBOAT": 60
-    },
-    "terrains": {
-      "PIPESEAM": 55,
-      "BLACKCANNONROOT": 55,
-      "MINICANNON": 55,
-      "BLACKLASER": 55,
-      "DEATHRAYROOT": 55,
-      "BLACKCRYSTAL": 55,
-      "BLACKOBELISKROOT": 55,
-      "GRANDBOLTROOT": 15
-    },
-    "these units override this weapon (just documentation)": [
-      "PIPERUNNER",
-      "BATTLESHIP"
+    "range": [ 3, 5 ],
+    "canAttackAfterMoving": false,
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 95
+      },
+      {
+        "target": "MECH",
+        "damage": 90
+      },
+      {
+        "target": "RECON",
+        "damage": 90
+      },
+      {
+        "target": "TANK",
+        "damage": 80
+      },
+      {
+        "target": "MDTANK",
+        "damage": 55
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 50
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 25
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 85
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 80
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 85
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 80
+      },
+      {
+        "target": "MISSILES",
+        "damage": 90
+      },
+      {
+        "target": "APC",
+        "damage": 80
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 15
+      },
+      {
+        "target": "CRUISER",
+        "damage": 60
+      },
+      {
+        "target": "SUB",
+        "damage": 85
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 55
+      },
+      {
+        "target": "CARRIER",
+        "damage": 60
+      },
+      {
+        "target": "LANDER",
+        "damage": 60
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 60
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 55
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 55
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 55
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 55
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 55
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 55
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 55
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 15
+      }
     ]
   },
   "MISSILES_PRIMARY": {
-    "longname": "MISSILES_PRIMARY_WEAPON_longname",
-    "shortname": "MISSILES_PRIMARY_WEAPON_shortname",
+    "longName": "MISSILES_PRIMARY_WEAPON_longname",
+    "shortName": "MISSILES_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MISSILES_PRIMARY_WEAPON_description",
     "ammo": 6,
-    "lowrange": 3,
-    "highrange": 5,
-    "canattackaftermoving": false,
-    "units": {
-      "FIGHTER": 100,
-      "BOMBER": 100,
-      "STEALTH": 100,
-      "BCOPTER": 115,
-      "TCOPTER": 115,
-      "BLACKBOMB": 120
-    },
-    "these units override this weapon (just documentation)": [
-      "CARRIER"
+    "range": [ 3, 5 ],
+    "canAttackAfterMoving": false,
+    "unitTable": [
+      {
+        "target": "FIGHTER",
+        "damage": 100
+      },
+      {
+        "target": "BOMBER",
+        "damage": 100
+      },
+      {
+        "target": "STEALTH",
+        "damage": 100
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 115
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 115
+      },
+      {
+        "target": "BLACKBOMB",
+        "damage": 120
+      }
     ]
   },
   "FIGHTER_PRIMARY": {
-    "longname": "MISSILES_PRIMARY_WEAPON_longname",
-    "shortname": "MISSILES_PRIMARY_WEAPON_shortname",
+    "longName": "MISSILES_PRIMARY_WEAPON_longname",
+    "shortName": "MISSILES_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MISSILES_PRIMARY_WEAPON_description",
     "ammo": 9,
-    "units": {
-      "FIGHTER": 55,
-      "BOMBER": 100,
-      "STEALTH": 85,
-      "BCOPTER": 120,
-      "TCOPTER": 120,
-      "BLACKBOMB": 120
-    },
-    "hiddenunits": {
-      "STEALTH": true
-    }
+    "unitTable": [
+      {
+        "target": "FIGHTER",
+        "damage": 55
+      },
+      {
+        "target": "BOMBER",
+        "damage": 100
+      },
+      {
+        "target": "STEALTH",
+        "damage": 85,
+        "damageWhenHidden": 85
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 120
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 120
+      },
+      {
+        "target": "BLACKBOMB",
+        "damage": 120
+      }
+    ]
   },
   "BOMBER_PRIMARY": {
-    "longname": "BOMBER_PRIMARY_WEAPON_longname",
-    "shortname": "BOMBER_PRIMARY_WEAPON_shortname",
+    "longName": "BOMBER_PRIMARY_WEAPON_longname",
+    "shortName": "BOMBER_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "BOMBER_PRIMARY_WEAPON_description",
     "ammo": 9,
-    "units": {
-      "INFANTRY": 110,
-      "MECH": 110,
-      "RECON": 105,
-      "TANK": 105,
-      "MDTANK": 95,
-      "NEOTANK": 90,
-      "MEGATANK": 35,
-      "ANTIAIR": 95,
-      "ARTILLERY": 105,
-      "ROCKETS": 105,
-      "PIPERUNNER": 105,
-      "MISSILES": 105,
-      "APC": 105,
-      "OOZIUM": 35,
-      "CRUISER": 50,
-      "SUB": 95,
-      "BATTLESHIP": 75,
-      "CARRIER": 105,
-      "LANDER": 95,
-      "BLACKBOAT": 75
-    },
-    "terrains": {
-      "PIPESEAM": 95,
-      "BLACKCANNONROOT": 95,
-      "MINICANNON": 95,
-      "BLACKLASER": 95,
-      "DEATHRAYROOT": 95,
-      "BLACKCRYSTAL": 95,
-      "BLACKOBELISKROOT": 95,
-      "GRANDBOLTROOT": 35
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 110
+      },
+      {
+        "target": "MECH",
+        "damage": 110
+      },
+      {
+        "target": "RECON",
+        "damage": 105
+      },
+      {
+        "target": "TANK",
+        "damage": 105
+      },
+      {
+        "target": "MDTANK",
+        "damage": 95
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 90
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 35
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 95
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 105
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 105
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 105
+      },
+      {
+        "target": "MISSILES",
+        "damage": 105
+      },
+      {
+        "target": "APC",
+        "damage": 105
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 35
+      },
+      {
+        "target": "CRUISER",
+        "damage": 50
+      },
+      {
+        "target": "SUB",
+        "damage": 95
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 75
+      },
+      {
+        "target": "CARRIER",
+        "damage": 105
+      },
+      {
+        "target": "LANDER",
+        "damage": 95
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 75
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 95
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 95
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 95
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 95
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 95
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 95
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 95
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 35
+      }
+    ]
   },
   "STEALTH_PRIMARY": {
-    "longname": "STEALTH_PRIMARY_WEAPON_longname",
-    "shortname": "STEALTH_PRIMARY_WEAPON_shortname",
+    "longName": "STEALTH_PRIMARY_WEAPON_longname",
+    "shortName": "STEALTH_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "STEALTH_PRIMARY_WEAPON_description",
     "ammo": 6,
-    "units": {
-      "INFANTRY": 90,
-      "MECH": 90,
-      "RECON": 85,
-      "TANK": 75,
-      "MDTANK": 70,
-      "NEOTANK": 60,
-      "MEGATANK": 15,
-      "ANTIAIR": 50,
-      "ARTILLERY": 75,
-      "ROCKETS": 85,
-      "PIPERUNNER": 80,
-      "MISSILES": 85,
-      "APC": 85,
-      "OOZIUM": 30,
-      "FIGHTER": 45,
-      "BOMBER": 70,
-      "STEALTH": 55,
-      "BCOPTER": 85,
-      "TCOPTER": 95,
-      "BLACKBOMB": 120,
-      "CRUISER": 35,
-      "SUB": 55,
-      "BATTLESHIP": 45,
-      "CARRIER": 45,
-      "LANDER": 65,
-      "BLACKBOAT": 65
-    },
-    "terrains": {
-      "PIPESEAM": 70,
-      "BLACKCANNONROOT": 70,
-      "MINICANNON": 70,
-      "BLACKLASER": 70,
-      "DEATHRAYROOT": 70,
-      "BLACKCRYSTAL": 70,
-      "BLACKOBELISKROOT": 70,
-      "GRANDBOLTROOT": 30
-    },
-    "hiddenunits": {
-      "STEALTH": true
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 90
+      },
+      {
+        "target": "MECH",
+        "damage": 90
+      },
+      {
+        "target": "RECON",
+        "damage": 85
+      },
+      {
+        "target": "TANK",
+        "damage": 75
+      },
+      {
+        "target": "MDTANK",
+        "damage": 70
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 60
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 15
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 50
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 75
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 85
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 80
+      },
+      {
+        "target": "MISSILES",
+        "damage": 85
+      },
+      {
+        "target": "APC",
+        "damage": 85
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 30
+      },
+      {
+        "target": "FIGHTER",
+        "damage": 45
+      },
+      {
+        "target": "BOMBER",
+        "damage": 70
+      },
+      {
+        "target": "STEALTH",
+        "damage": 55,
+        "damageWhenHidden": 55
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 85
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 95
+      },
+      {
+        "target": "BLACKBOMB",
+        "damage": 120
+      },
+      {
+        "target": "CRUISER",
+        "damage": 35
+      },
+      {
+        "target": "SUB",
+        "damage": 55
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 45
+      },
+      {
+        "target": "CARRIER",
+        "damage": 45
+      },
+      {
+        "target": "LANDER",
+        "damage": 65
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 65
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 70
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 70
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 70
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 70
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 70
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 70
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 70
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 30
+      }
+    ]
   },
   "BCOPTER_PRIMARY": {
-    "longname": "MISSILES_PRIMARY_WEAPON_longname",
-    "shortname": "MISSILES_PRIMARY_WEAPON_shortname",
+    "longName": "MISSILES_PRIMARY_WEAPON_longname",
+    "shortName": "MISSILES_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MISSILES_PRIMARY_WEAPON_description",
     "ammo": 6,
-    "units": {
-      "RECON": 55,
-      "TANK": 55,
-      "MDTANK": 25,
-      "NEOTANK": 20,
-      "MEGATANK": 10,
-      "ANTIAIR": 25,
-      "ARTILLERY": 65,
-      "ROCKETS": 65,
-      "PIPERUNNER": 55,
-      "MISSILES": 65,
-      "APC": 60,
-      "OOZIUM": 25,
-      "CRUISER": 25,
-      "SUB": 25,
-      "BATTLESHIP": 25,
-      "CARRIER": 25,
-      "LANDER": 25,
-      "BLACKBOAT": 25
-    },
-    "terrains": {
-      "PIPESEAM": 25,
-      "BLACKCANNONROOT": 25,
-      "MINICANNON": 25,
-      "BLACKLASER": 25,
-      "DEATHRAYROOT": 25,
-      "BLACKCRYSTAL": 25,
-      "BLACKOBELISKROOT": 25,
-      "GRANDBOLTROOT": 25
-    }
+    "unitTable": [
+      {
+        "target": "RECON",
+        "damage": 55
+      },
+      {
+        "target": "TANK",
+        "damage": 55
+      },
+      {
+        "target": "MDTANK",
+        "damage": 25
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 20
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 10
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 25
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 65
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 65
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 55
+      },
+      {
+        "target": "MISSILES",
+        "damage": 65
+      },
+      {
+        "target": "APC",
+        "damage": 60
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 25
+      },
+      {
+        "target": "CRUISER",
+        "damage": 25
+      },
+      {
+        "target": "SUB",
+        "damage": 25
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 25
+      },
+      {
+        "target": "CARRIER",
+        "damage": 25
+      },
+      {
+        "target": "LANDER",
+        "damage": 25
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 25
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 25
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 25
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 25
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 25
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 25
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 25
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 25
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 25
+      }
+    ]
   },
   "BCOPTER_SECONDARY": {
-    "longname": "INFANTRY_SECONDARY_WEAPON_longname",
-    "shortname": "INFANTRY_SECONDARY_WEAPON_shortname",
+    "longName": "INFANTRY_SECONDARY_WEAPON_longname",
+    "shortName": "INFANTRY_SECONDARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "BCOPTER_SECONDARY_WEAPON_description",
     "ammo": -1,
-    "units": {
-      "INFANTRY": 75,
-      "MECH": 75,
-      "RECON": 30,
-      "TANK": 6,
-      "MDTANK": 1,
-      "NEOTANK": 1,
-      "MEGATANK": 1,
-      "APC": 20,
-      "ANTIAIR": 6,
-      "ARTILLERY": 25,
-      "ROCKETS": 35,
-      "MISSILES": 35,
-      "PIPERUNNER": 6,
-      "TCOPTER": 95,
-      "BCOPTER": 65,
-      "OOZIUM": 20
-    },
-    "terrains": {
-      "PIPESEAM": 1,
-      "BLACKCANNONROOT": 1,
-      "MINICANNON": 1,
-      "BLACKLASER": 1,
-      "DEATHRAYROOT": 1,
-      "BLACKCRYSTAL": 1,
-      "BLACKOBELISKROOT": 1,
-      "GRANDBOLTROOT": 20
-    }
+    "unitTable": [
+      {
+        "target": "INFANTRY",
+        "damage": 75
+      },
+      {
+        "target": "MECH",
+        "damage": 75
+      },
+      {
+        "target": "RECON",
+        "damage": 30
+      },
+      {
+        "target": "TANK",
+        "damage": 6
+      },
+      {
+        "target": "MDTANK",
+        "damage": 1
+      },
+      {
+        "target": "NEOTANK",
+        "damage": 1
+      },
+      {
+        "target": "MEGATANK",
+        "damage": 1
+      },
+      {
+        "target": "APC",
+        "damage": 20
+      },
+      {
+        "target": "ANTIAIR",
+        "damage": 6
+      },
+      {
+        "target": "ARTILLERY",
+        "damage": 25
+      },
+      {
+        "target": "ROCKETS",
+        "damage": 35
+      },
+      {
+        "target": "MISSILES",
+        "damage": 35
+      },
+      {
+        "target": "PIPERUNNER",
+        "damage": 6
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 95
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 65
+      },
+      {
+        "target": "OOZIUM",
+        "damage": 20
+      }
+    ],
+    "terrainTable": [
+      {
+        "target": "PIPESEAM",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCANNONROOT",
+        "damage": 1
+      },
+      {
+        "target": "MINICANNON",
+        "damage": 1
+      },
+      {
+        "target": "BLACKLASER",
+        "damage": 1
+      },
+      {
+        "target": "DEATHRAYROOT",
+        "damage": 1
+      },
+      {
+        "target": "BLACKCRYSTAL",
+        "damage": 1
+      },
+      {
+        "target": "BLACKOBELISKROOT",
+        "damage": 1
+      },
+      {
+        "target": "GRANDBOLTROOT",
+        "damage": 20
+      }
+    ]
   },
   "CRUISER_PRIMARY": {
-    "longname": "MISSILES_PRIMARY_WEAPON_longname",
-    "shortname": "MISSILES_PRIMARY_WEAPON_shortname",
+    "longName": "MISSILES_PRIMARY_WEAPON_longname",
+    "shortName": "MISSILES_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "MISSILES_PRIMARY_WEAPON_description",
     "ammo": 9,
-    "units": {
-      "CRUISER": 25,
-      "SUB": 90,
-      "BATTLESHIP": 5,
-      "CARRIER": 5,
-      "LANDER": 25,
-      "BLACKBOAT": 25
-    },
-    "hiddenunits": {
-      "SUB": true
-    }
+    "unitTable": [
+      {
+        "target": "CRUISER",
+        "damage": 25
+      },
+      {
+        "target": "SUB",
+        "damage": 90,
+        "damageWhenHidden": 90
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 5
+      },
+      {
+        "target": "CARRIER",
+        "damage": 5
+      },
+      {
+        "target": "LANDER",
+        "damage": 25
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 25
+      }
+    ]
   },
   "CRUISER_SECONDARY": {
-    "longname": "CRUISER_SECONDARY_WEAPON_longname",
-    "shortname": "CRUISER_SECONDARY_WEAPON_shortname",
+    "longName": "CRUISER_SECONDARY_WEAPON_longname",
+    "shortName": "CRUISER_SECONDARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "CRUISER_SECONDARY_WEAPON_description",
     "ammo": -1,
-    "units": {
-      "FIGHTER": 85,
-      "BOMBER": 100,
-      "STEALTH": 100,
-      "BCOPTER": 105,
-      "TCOPTER": 105,
-      "BLACKBOMB": 120
-    }
+    "unitTable": [
+      {
+        "target": "FIGHTER",
+        "damage": 85
+      },
+      {
+        "target": "BOMBER",
+        "damage": 100
+      },
+      {
+        "target": "STEALTH",
+        "damage": 100
+      },
+      {
+        "target": "BCOPTER",
+        "damage": 105
+      },
+      {
+        "target": "TCOPTER",
+        "damage": 105
+      },
+      {
+        "target": "BLACKBOMB",
+        "damage": 120
+      }
+    ]
   },
   "SUB_PRIMARY": {
-    "longname": "SUB_PRIMARY_WEAPON_longname",
-    "shortname": "SUB_PRIMARY_WEAPON_shortname",
+    "longName": "SUB_PRIMARY_WEAPON_longname",
+    "shortName": "SUB_PRIMARY_WEAPON_shortname",
     "icon": "ammo",
     "description": "SUB_PRIMARY_WEAPON_description",
     "ammo": 6,
-    "units": {
-      "CRUISER": 25,
-      "SUB": 55,
-      "BATTLESHIP": 65,
-      "CARRIER": 75,
-      "LANDER": 95,
-      "BLACKBOAT": 95
-    },
-    "hiddenunits": {
-      "SUB": true
-    }
+    "unitTable": [
+      {
+        "target": "CRUISER",
+        "damage": 25
+      },
+      {
+        "target": "SUB",
+        "damage": 55,
+        "damageWhenHidden": 55
+      },
+      {
+        "target": "BATTLESHIP",
+        "damage": 65
+      },
+      {
+        "target": "CARRIER",
+        "damage": 75
+      },
+      {
+        "target": "LANDER",
+        "damage": 95
+      },
+      {
+        "target": "BLACKBOAT",
+        "damage": 95
+      }
+    ]
   }
 }

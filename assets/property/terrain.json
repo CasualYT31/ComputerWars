@@ -1,488 +1,271 @@
 {
 	"PLAINS": {
-		"longname": "PLAINS_longname",
-		"shortname": "PLAINS_shortname",
+		"longName": "PLAINS_longname",
+		"shortName": "PLAINS_shortname",
 		"icon": "plains",
 		"description": "PLAINS_description",
-		"hp": 0,
 		"defence": 1,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 2,
-			"TREAD": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "000plain"
+		"primaryTileType": "000plain"
 	},
 	"SEA": {
-		"longname": "SEA_longname",
-		"shortname": "SEA_shortname",
+		"longName": "SEA_longname",
+		"shortName": "SEA_shortname",
 		"icon": "sea",
 		"description": "SEA_description",
-		"hp": 0,
-		"defence": 0,
-		"movecosts": {
-			"AIR": 1,
-			"SHIPS": 1,
-			"TRANSPORT": 1
-		},
-		"primarytiletype": "003sea"
+		"primaryTileType": "003sea"
 	},
 	"ROAD": {
-		"longname": "ROAD_longname",
-		"shortname": "ROAD_shortname",
+		"longName": "ROAD_longname",
+		"shortName": "ROAD_shortname",
 		"icon": "road",
 		"description": "ROAD_description",
-		"hp": 0,
-		"defence": 0,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "022roadvert"
+		"primaryTileType": "022roadvert"
 	},
 	"BRIDGE": {
-		"longname": "BRIDGE_longname",
-		"shortname": "BRIDGE_shortname",
+		"longName": "BRIDGE_longname",
+		"shortName": "BRIDGE_shortname",
 		"icon": "bridge",
 		"description": "BRIDGE_description",
-		"hp": 0,
-		"defence": 0,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "030bridgevert"
+		"primaryTileType": "030bridgevert"
 	},
 	"MOUNTAIN": {
-		"longname": "MOUNTAIN_longname",
-		"shortname": "MOUNTAIN_shortname",
+		"longName": "MOUNTAIN_longname",
+		"shortName": "MOUNTAIN_shortname",
 		"icon": "mountain",
 		"description": "MOUNTAIN_description",
-		"hp": 0,
 		"defence": 4,
-		"movecosts": {
-			"INFANTRY": 2,
-			"MECH": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "032mtn",
-		"visionoffsets": {
-			"INFANTRY": 3,
-			"MECH": 3
-		}
+		"primaryTileType": "032mtn"
 	},
 	"WOODS": {
-		"longname": "WOODS_longname",
-		"shortname": "WOODS_shortname",
+		"longName": "WOODS_longname",
+		"shortName": "WOODS_shortname",
 		"icon": "woods",
 		"description": "WOODS_description",
-		"hp": 0,
 		"defence": 2,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 3,
-			"TREAD": 2,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "033wood",
-		"fowvisibility": "hidden"
+		"primaryTileType": "033wood",
+		"FOWVisibility": "hidden"
 	},
 	"RIVER": {
-		"longname": "RIVER_longname",
-		"shortname": "RIVER_shortname",
+		"longName": "RIVER_longname",
+		"shortName": "RIVER_shortname",
 		"icon": "river",
 		"description": "RIVER_description",
-		"hp": 0,
-		"defence": 0,
-		"movecosts": {
-			"INFANTRY": 2,
-			"MECH": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "035riververt"
+		"primaryTileType": "035riververt"
 	},
 	"REEF": {
-		"longname": "REEF_longname",
-		"shortname": "REEF_shortname",
+		"longName": "REEF_longname",
+		"shortName": "REEF_shortname",
 		"icon": "sea",
 		"description": "REEF_description",
-		"hp": 0,
 		"defence": 1,
-		"movecosts": {
-			"AIR": 1,
-			"SHIPS": 2,
-			"TRANSPORT": 2
-		},
-		"primarytiletype": "03Freef",
-		"fowvisibility": "hidden"
+		"primaryTileType": "03Freef",
+		"FOWVisibility": "hidden"
 	},
 	"SHOAL": {
-		"longname": "SHOAL_longname",
-		"shortname": "SHOAL_shortname",
+		"longName": "SHOAL_longname",
+		"shortName": "SHOAL_shortname",
 		"icon": "shoal",
 		"description": "SHOAL_description",
-		"hp": 0,
-		"defence": 0,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"TRANSPORT": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "042shoaldown"
+		"primaryTileType": "042shoaldown"
 	},
 	"PIPE": {
-		"longname": "PIPE_longname",
-		"shortname": "PIPE_shortname",
+		"longName": "PIPE_longname",
+		"shortName": "PIPE_shortname",
 		"icon": "noentry",
 		"description": "PIPE_description",
-		"hp": 0,
-		"defence": 0,
-		"movecosts": {
-			"PIPELINE": 1
-		},
-		"primarytiletype": "057pipevert",
-		"fowvisibility": "visible"
+		"primaryTileType": "057pipevert",
+		"FOWVisibility": "visible"
 	},
 	"PIPESEAM": {
-		"longname": "PIPESEAM_longname",
-		"shortname": "PIPESEAM_shortname",
+		"longName": "PIPESEAM_longname",
+		"shortName": "PIPESEAM_shortname",
 		"icon": "noentry",
 		"description": "PIPESEAM_description",
-		"hp": 99,
-		"defence": 0,
-		"movecosts": {
-			"PIPELINE": 1
-		},
-		"primarytiletype": "05Fpipeseamvert",
-		"fowvisibility": "visible"
+		"maxHP": 99,
+		"primaryTileType": "05Fpipeseamvert",
+		"FOWVisibility": "visible"
 	},
 	"MISSILESILO": {
-		"longname": "MISSILESILO_longname",
-		"shortname": "MISSILESILO_shortname",
+		"longName": "MISSILESILO_longname",
+		"shortName": "MISSILESILO_shortname",
 		"icon": "silo",
 		"description": "MISSILESILO_description",
-		"hp": 0,
 		"defence": 3,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "062missilesilo"
+		"primaryTileType": "062missilesilo"
 	},
 	"CITY": {
-		"longname": "CITY_longname",
-		"shortname": "CITY_shortname",
+		"longName": "CITY_longname",
+		"shortName": "CITY_shortname",
 		"icon": "city",
 		"description": "CITY_description",
-		"hp": 20,
+		"maxHP": 20,
 		"defence": 3,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "064city"
+		"primaryTileType": "064city"
 	},
 	"BASE": {
-		"longname": "BASE_longname",
-		"shortname": "BASE_shortname",
+		"longName": "BASE_longname",
+		"shortName": "BASE_shortname",
 		"icon": "base",
 		"description": "BASE_description",
-		"hp": 20,
+		"maxHP": 20,
 		"defence": 3,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"PIPELINE": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "065base"
+		"primaryTileType": "065base"
 	},
 	"AIRPORT": {
-		"longname": "AIRPORT_longname",
-		"shortname": "AIRPORT_shortname",
+		"longName": "AIRPORT_longname",
+		"shortName": "AIRPORT_shortname",
 		"icon": "airport",
 		"description": "AIRPORT_description",
-		"hp": 20,
+		"maxHP": 20,
 		"defence": 3,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "066airport"
+		"primaryTileType": "066airport"
 	},
 	"PORT": {
-		"longname": "PORT_longname",
-		"shortname": "PORT_shortname",
+		"longName": "PORT_longname",
+		"shortName": "PORT_shortname",
 		"icon": "port",
 		"description": "PORT_description",
-		"hp": 20,
+		"maxHP": 20,
 		"defence": 3,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"SHIPS": 1,
-			"TRANSPORT": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "067port"
+		"primaryTileType": "067port"
 	},
 	"COMTOWER": {
-		"longname": "COMTOWER_longname",
-		"shortname": "COMTOWER_shortname",
+		"longName": "COMTOWER_longname",
+		"shortName": "COMTOWER_shortname",
 		"icon": "silo",
 		"description": "COMTOWER_description",
-		"hp": 20,
+		"maxHP": 20,
 		"defence": 3,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"primarytiletype": "068comtower"
+		"primaryTileType": "068comtower"
 	},
 	"LAB": {
-		"longname": "LAB_longname",
-		"shortname": "LAB_shortname",
-		"icon": "",
+		"longName": "LAB_longname",
+		"shortName": "LAB_shortname",
+		"icon": "city",
 		"description": "LAB_description",
-		"hp": 20,
+		"maxHP": 20,
 		"defence": 3,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"pictures": {
-			"ORANGE": "oshq",
-			"BLUE": "bmhq",
-			"GREEN": "gehq",
-			"YELLOW": "ychq",
-			"BLACK": "bhhq",
-			"RED": "rfhq",
-			"GREY": "gshq",
-			"BROWN": "bdhq",
-			"AMBER": "abhq",
-			"JADE": "jshq",
-			"COBALT": "cihq",
-			"PINK": "pchq",
-			"TEAL": "tghq",
-			"PURPLE": "plhq",
-			"ACID": "arhq",
-			"WHITE": "wnhq"
-		},
-		"primarytiletype": "069lab"
+		"primaryTileType": "069lab"
 	},
 	"VOLCANO": {
-		"longname": "VOLCANO_longname",
-		"shortname": "VOLCANO_shortname",
+		"longName": "VOLCANO_longname",
+		"shortName": "VOLCANO_shortname",
 		"icon": "noentry",
 		"description": "VOLCANO_description",
-		"hp": 0,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"FOWVisibility": "visible"
 	},
 	"BLACKCANNONROOT": {
-		"longname": "BLACKCANNON_longname",
-		"shortname": "BLACKCANNON_shortname",
+		"longName": "BLACKCANNON_longname",
+		"shortName": "BLACKCANNON_shortname",
 		"icon": "noentry",
 		"description": "BLACKCANNON_description",
-		"hp": 99,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"maxHP": 99,
+		"FOWVisibility": "visible"
 	},
 	"BLACKCANNON": {
-		"longname": "BLACKCANNON_longname",
-		"shortname": "BLACKCANNON_shortname",
+		"longName": "BLACKCANNON_longname",
+		"shortName": "BLACKCANNON_shortname",
 		"icon": "noentry",
 		"description": "BLACKCANNON_description",
-		"hp": 0,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"FOWVisibility": "visible"
 	},
 	"MINICANNON": {
-		"longname": "MINICANNON_longname",
-		"shortname": "MINICANNON_shortname",
+		"longName": "MINICANNON_longname",
+		"shortName": "MINICANNON_shortname",
 		"icon": "noentry",
 		"description": "MINICANNON_description",
-		"hp": 99,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"maxHP": 99,
+		"FOWVisibility": "visible"
 	},
 	"BLACKLASER": {
-		"longname": "BLACKLASER_longname",
-		"shortname": "BLACKLASER_shortname",
+		"longName": "BLACKLASER_longname",
+		"shortName": "BLACKLASER_shortname",
 		"icon": "noentry",
 		"description": "BLACKLASER_description",
-		"hp": 99,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"maxHP": 99,
+		"FOWVisibility": "visible"
 	},
 	"DEATHRAYROOT": {
-		"longname": "DEATHRAY_longname",
-		"shortname": "DEATHRAY_shortname",
+		"longName": "DEATHRAY_longname",
+		"shortName": "DEATHRAY_shortname",
 		"icon": "noentry",
 		"description": "DEATHRAY_description",
-		"hp": 99,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"maxHP": 99,
+		"FOWVisibility": "visible"
 	},
 	"DEATHRAY": {
-		"longname": "DEATHRAY_longname",
-		"shortname": "DEATHRAY_shortname",
+		"longName": "DEATHRAY_longname",
+		"shortName": "DEATHRAY_shortname",
 		"icon": "noentry",
 		"description": "DEATHRAY_description",
-		"hp": 0,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"FOWVisibility": "visible"
 	},
 	"BLACKCRYSTAL": {
-		"longname": "BLACKCRYSTAL_longname",
-		"shortname": "BLACKCRYSTAL_shortname",
+		"longName": "BLACKCRYSTAL_longname",
+		"shortName": "BLACKCRYSTAL_shortname",
 		"icon": "noentry",
 		"description": "BLACKCRYSTAL_description",
-		"hp": 99,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"maxHP": 99,
+		"FOWVisibility": "visible"
 	},
 	"BLACKOBELISKROOT": {
-		"longname": "BLACKOBELISK_longname",
-		"shortname": "BLACKOBELISK_shortname",
+		"longName": "BLACKOBELISK_longname",
+		"shortName": "BLACKOBELISK_shortname",
 		"icon": "noentry",
 		"description": "BLACKOBELISK_description",
-		"hp": 99,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"maxHP": 99,
+		"FOWVisibility": "visible"
 	},
 	"BLACKOBELISK": {
-		"longname": "BLACKOBELISK_longname",
-		"shortname": "BLACKOBELISK_shortname",
+		"longName": "BLACKOBELISK_longname",
+		"shortName": "BLACKOBELISK_shortname",
 		"icon": "noentry",
 		"description": "BLACKOBELISK_description",
-		"hp": 0,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"FOWVisibility": "visible"
 	},
 	"GRANDBOLTROOT": {
-		"longname": "GRANDBOLT_longname",
-		"shortname": "GRANDBOLT_shortname",
+		"longName": "GRANDBOLT_longname",
+		"shortName": "GRANDBOLT_shortname",
 		"icon": "noentry",
 		"description": "GRANDBOLT_description",
-		"hp": 99,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"maxHP": 99,
+		"FOWVisibility": "visible"
 	},
 	"GRANDBOLT": {
-		"longname": "GRANDBOLT_longname",
-		"shortname": "GRANDBOLT_shortname",
+		"longName": "GRANDBOLT_longname",
+		"shortName": "GRANDBOLT_shortname",
 		"icon": "noentry",
 		"description": "GRANDBOLT_description",
-		"hp": 0,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"FOWVisibility": "visible"
 	},
 	"FACTORYROOT": {
-		"longname": "FACTORY_longname",
-		"shortname": "FACTORY_shortname",
+		"longName": "FACTORY_longname",
+		"shortName": "FACTORY_shortname",
 		"icon": "noentry",
 		"description": "FACTORY_description",
-		"hp": 0,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"FOWVisibility": "visible"
 	},
 	"FACTORY": {
-		"longname": "FACTORY_longname",
-		"shortname": "FACTORY_shortname",
+		"longName": "FACTORY_longname",
+		"shortName": "FACTORY_shortname",
 		"icon": "noentry",
 		"description": "FACTORY_description",
-		"hp": 0,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"FOWVisibility": "visible"
 	},
 	"BLACKHOLE_DECORATION": {
-		"longname": "BLACKHOLE_DECORATION_longname",
-		"shortname": "BLACKHOLE_DECORATION_shortname",
+		"longName": "BLACKHOLE_DECORATION_longname",
+		"shortName": "BLACKHOLE_DECORATION_shortname",
 		"icon": "noentry",
 		"description": "BLACKHOLE_DECORATION_description",
-		"hp": 0,
-		"defence": 0,
-		"fowvisibility": "visible"
+		"FOWVisibility": "visible"
 	},
 	"HQ": {
-		"longname": "HQ_longname",
-		"shortname": "HQ_shortname",
-		"icon": "",
+		"longName": "HQ_longname",
+		"shortName": "HQ_shortname",
+		"icon": "city",
 		"description": "HQ_description",
-		"hp": 20,
+		"maxHP": 20,
 		"defence": 4,
-		"movecosts": {
-			"INFANTRY": 1,
-			"MECH": 1,
-			"TIRES": 1,
-			"TREAD": 1,
-			"AIR": 1,
-			"SLIME": 1
-		},
-		"pictures": {
-			"ORANGE": "oshq",
-			"BLUE": "bmhq",
-			"GREEN": "gehq",
-			"YELLOW": "ychq",
-			"BLACK": "bhhq",
-			"RED": "rfhq",
-			"GREY": "gshq",
-			"BROWN": "bdhq",
-			"AMBER": "abhq",
-			"JADE": "jshq",
-			"COBALT": "cihq",
-			"PINK": "pchq",
-			"TEAL": "tghq",
-			"PURPLE": "plhq",
-			"ACID": "arhq",
-			"WHITE": "wnhq"
-		},
-		"showownerwhenhidden": true
+		"showOwnerWhenHidden": true
 	}
 }

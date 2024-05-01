@@ -1308,6 +1308,14 @@ static const auto LOOP = '`';
 
 static const std::string NUMBERS = "0123456789";
 
+static const std::string WHITESPACE = " \t\n\r\f\v";
+
+static const std::string TEMPLATE_DIRECTIVE = "#template";
+
+static const std::string INSTANTIATE_DIRECTIVE = "#expand";
+
+static const std::string ASSERT_DIRECTIVE = "#assert";
+
 bool engine::scripts::_instantiateTemplatesInQueue() {
     // More requests may be added to the queue during the handling of previous
     // requests, so don't use a for loop.
@@ -1328,21 +1336,38 @@ bool engine::scripts::_instantiateTemplatesInQueue() {
                 templateName);
             return false;
         }
-        while (!_templateInstantiationQueue.begin()->second.empty()) {
+        // We copy the parameter set here, as using .begin() to access the set
+        // won't work if a new template is added to the queue and it happens to
+        // become the first template in the queue. This can cause infinite loops.
+        // Additionally, if a template instantiates itself, an infinite loop will
+        // occur. Copying protects against this as the copied set won't be updated
+        // after this point.
+        auto parameterSet = _templateInstantiationQueue.begin()->second;
+        const auto numberOfSets = parameterSet.size();
+        while (!parameterSet.empty()) {
             // Let's be safe and copy even the parameters, as well as the name and
             // template itself. There is a chance that adding elements to
             // _templateInstantiationQueue whilst working with it could invalidate
             // references [if it reallocates]? Not sure I want to take that chance.
-            const auto params(
-                *_templateInstantiationQueue.begin()->second.begin());
+            const auto params(*parameterSet.begin());
             if (!_instantiateTemplate(templateName, templateScript, params))
                 return false;
             // We're finished with this particular instantiation now, so erase it.
-            _templateInstantiationQueue.begin()->second.erase(params);
+            parameterSet.erase(params);
+        }
+        // If more instantiations of this template were added whilst instantiating
+        // existing parameter sets, this template is trying to expand itself
+        // recursively! Drop those recursive instantiations, but warn the user.
+        auto recursiveInstantiations =
+            _templateInstantiationQueue[templateName].size() - numberOfSets;
+        if (recursiveInstantiations) {
+            _logger.warning("The template \"{}\" is trying to {} itself! "
+                "{} recursive instantiation{} will be dropped...", templateName,
+                INSTANTIATE_DIRECTIVE, recursiveInstantiations,
+                (recursiveInstantiations == 1 ? "" : "s"));
         }
         // We're now finished with this template. Both it and its previous
-        // instantiations could come back, but I'm pretty sure they can never come
-        // back recursively...
+        // instantiations could come back, though.
         _templateInstantiationQueue.erase(templateName);
     }
     return true;
@@ -1558,14 +1583,6 @@ std::string engine::scripts::_loopSubtitution(const std::string& section,
     }
     return result;
 }
-
-static const std::string WHITESPACE = " \t\n\r\f\v";
-
-static const std::string TEMPLATE_DIRECTIVE = "#template";
-
-static const std::string INSTANTIATE_DIRECTIVE = "#expand";
-
-static const std::string ASSERT_DIRECTIVE = "#assert";
 
 std::string engine::scripts::_parseDirectives(const std::string& filePath,
     std::istream& file) {

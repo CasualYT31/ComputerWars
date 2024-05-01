@@ -57,7 +57,7 @@ FetchContent_MakeAvailable(sfml)
 
 # AngelScript
 FetchContent_Declare(angelscript
-	URL https://www.angelcode.com/angelscript/sdk/files/angelscript_2.35.0.zip
+	URL https://www.angelcode.com/angelscript/sdk/files/angelscript_2.36.1.zip
 	SOURCE_SUBDIR angelscript/projects/cmake
 )
 FetchContent_MakeAvailable(angelscript)

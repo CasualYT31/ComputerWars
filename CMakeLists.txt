@@ -8,6 +8,20 @@ include(GoogleTest)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# bank-v2 Work: ran into C1128 after adding unit_type...
+# There doesn't seem to be any huge drawback to turning this on, so I'll go ahead.
+# https://stackoverflow.com/a/69904326
+# May need to improve this to support more compilers.
+# Still feel like the best way to solve this problem is to find a way to reduce
+# the number of sections I use.
+# I also noticed during out of a clean reconfiguration+rebuild that /bigobj was an
+# "invalid compiler flag" for one of the dependencies (AngelScript?).
+if (MSVC)
+	add_compile_options(/bigobj)
+else ()
+	add_compile_options(-Wa, -mbig-obj)
+endif ()
+
 # Determine if this is a debug or release build.
 if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
 	add_compile_definitions(COMPUTER_WARS_DEBUG)

@@ -545,3 +545,240 @@ namespace awe { \
         return *this; \
     } \
 }
+
+#define DECLARE_POD_6(ns, cc, ac, t1, p1, o1, c1, t2, p2, o2, c2, t3, p3, o3, c3, t4, p4, o4, c4, t5, p5, o5, c5, t6, p6, o6, c6) namespace ns { \
+    struct cc : public engine::script_reference_type<ns::cc> { \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
+        inline static cc* Create() { return new cc(); }; \
+        inline static cc* Create(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3, boost::call_traits<t4>::param_type param4, boost::call_traits<t5>::param_type param5, boost::call_traits<t6>::param_type param6) { \
+            return new cc(param1, param2, param3, param4, param5, param6); \
+        } \
+        inline static cc* Create(const cc* const o) { return new cc(*o); } \
+        cc() = default; \
+        cc(boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type, boost::call_traits<t4>::param_type, boost::call_traits<t5>::param_type, boost::call_traits<t6>::param_type); \
+        cc(const cc& o); \
+        cc(cc&& o) noexcept; \
+        bool operator==(const cc& o) const; \
+        inline bool operator!=(const cc& o) const { return !(*this == o); } \
+        cc& operator=(const cc& o); \
+        cc& operator=(cc&& o) noexcept; \
+        t1 p1 = c1; t2 p2 = c2; t3 p3 = c3; t4 p4 = c4; t5 p5 = c5; t6 p6 = c6; \
+    private: \
+        inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
+        inline bool opEquals(const cc* const o) const { return *this == *o; } \
+    }; \
+} \
+template <> \
+inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
+namespace awe { \
+    template<> struct Serialisable<ns::cc> { \
+        static bool fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const bool optional) { \
+            nlohmann::ordered_json p; \
+			if (!j.keysExist(keys, &p)) { \
+                if (!optional) { \
+				    logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+                    return false; \
+                } \
+				return true; \
+			} \
+			if (!p.is_object()) { \
+				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
+				return false; \
+			} \
+            if (!awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, o1)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, o2)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, o3)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t4>::fromJSON(value.p4, j, j.concatKeys(keys, { #p4 }), logger, o4)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t5>::fromJSON(value.p5, j, j.concatKeys(keys, { #p5 }), logger, o5)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t6>::fromJSON(value.p6, j, j.concatKeys(keys, { #p6 }), logger, o6)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            return true; \
+        } \
+    }; \
+}
+
+#define DEFINE_POD_6(ns, cc, ac, t1, p1, t2, p2, t3, p3, t4, p4, t5, p5, t6, p6) namespace ns { \
+    void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        if (engine->GetTypeInfoByName(ac)) return; \
+        auto r = RegisterType(engine, ac, \
+            [](asIScriptEngine* engine, const std::string& type) { \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f()", \
+                    asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(", ").append(engine::script_param_type<t2>()).append(", ").append(engine::script_param_type<t3>()).append(", ").append(engine::script_param_type<t4>()).append(", ").append(engine::script_param_type<t5>()).append(", ").append(engine::script_param_type<t6>()).append(")").c_str(), \
+                    asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type, boost::call_traits<t4>::param_type, boost::call_traits<t5>::param_type, boost::call_traits<t6>::param_type), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f(const " ac "&in)", \
+                    asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
+            }); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t2>()).append(" ").append(#p2).c_str(), asOFFSET(cc, p2)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t3>()).append(" ").append(#p3).c_str(), asOFFSET(cc, p3)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t4>()).append(" ").append(#p4).c_str(), asOFFSET(cc, p4)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t5>()).append(" ").append(#p5).c_str(), asOFFSET(cc, p5)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t6>()).append(" ").append(#p6).c_str(), asOFFSET(cc, p6)); \
+        r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
+            asMETHOD(cc, opAssign), asCALL_THISCALL); \
+        r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
+            asMETHOD(cc, opEquals), asCALL_THISCALL); \
+    } \
+    \
+    cc::cc(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3, boost::call_traits<t4>::param_type param4, boost::call_traits<t5>::param_type param5, boost::call_traits<t6>::param_type param6) : p1(param1), p2(param2), p3(param3), p4(param4), p5(param5), p6(param6) {} \
+    \
+    cc::cc(const cc& o) : p1(o.p1), p2(o.p2), p3(o.p3), p4(o.p4), p5(o.p5), p6(o.p6) {} \
+    \
+    cc::cc(cc&& o) noexcept : p1(std::move(o.p1)), p2(std::move(o.p2)), p3(std::move(o.p3)), p4(std::move(o.p4)), p5(std::move(o.p5)), p6(std::move(o.p6)) {} \
+    \
+    bool cc::operator==(const cc& o) const { \
+        return engine::isEqual<t1, t1>(p1, o.p1) && engine::isEqual<t2, t2>(p2, o.p2) && engine::isEqual<t3, t3>(p3, o.p3) && engine::isEqual<t4, t4>(p4, o.p4) && engine::isEqual<t5, t5>(p5, o.p5) && engine::isEqual<t6, t6>(p6, o.p6); \
+    } \
+    \
+    cc& cc::operator=(const cc& o) { \
+        p1 = o.p1; p2 = o.p2; p3 = o.p3; p4 = o.p4; p5 = o.p5; p6 = o.p6; \
+        return *this; \
+    } \
+    \
+    cc& cc::operator=(cc&& o) noexcept { \
+        p1 = std::move(o.p1); p2 = std::move(o.p2); p3 = std::move(o.p3); p4 = std::move(o.p4); p5 = std::move(o.p5); p6 = std::move(o.p6); \
+        return *this; \
+    } \
+}
+
+#define DECLARE_POD_7(ns, cc, ac, t1, p1, o1, c1, t2, p2, o2, c2, t3, p3, o3, c3, t4, p4, o4, c4, t5, p5, o5, c5, t6, p6, o6, c6, t7, p7, o7, c7) namespace ns { \
+    struct cc : public engine::script_reference_type<ns::cc> { \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document); \
+        inline static cc* Create() { return new cc(); }; \
+        inline static cc* Create(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3, boost::call_traits<t4>::param_type param4, boost::call_traits<t5>::param_type param5, boost::call_traits<t6>::param_type param6, boost::call_traits<t7>::param_type param7) { \
+            return new cc(param1, param2, param3, param4, param5, param6, param7); \
+        } \
+        inline static cc* Create(const cc* const o) { return new cc(*o); } \
+        cc() = default; \
+        cc(boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type, boost::call_traits<t4>::param_type, boost::call_traits<t5>::param_type, boost::call_traits<t6>::param_type, boost::call_traits<t7>::param_type); \
+        cc(const cc& o); \
+        cc(cc&& o) noexcept; \
+        bool operator==(const cc& o) const; \
+        inline bool operator!=(const cc& o) const { return !(*this == o); } \
+        cc& operator=(const cc& o); \
+        cc& operator=(cc&& o) noexcept; \
+        t1 p1 = c1; t2 p2 = c2; t3 p3 = c3; t4 p4 = c4; t5 p5 = c5; t6 p6 = c6; t7 p7 = c7; \
+    private: \
+        inline cc* opAssign(const cc* const o) { return &(*this = *o); } \
+        inline bool opEquals(const cc* const o) const { return *this == *o; } \
+    }; \
+} \
+template <> \
+inline constexpr std::string engine::script_type<ns::cc>() { return ac; } \
+namespace awe { \
+    template<> struct Serialisable<ns::cc> { \
+        static bool fromJSON(ns::cc& value, engine::json& j, const engine::json::KeySequence& keys, engine::logger& logger, const bool optional) { \
+            nlohmann::ordered_json p; \
+			if (!j.keysExist(keys, &p)) { \
+                if (!optional) { \
+				    logger.error("Attempting to read {}: these keys do not exist.", j.synthesiseKeySequence(keys)); \
+                    return false; \
+                } \
+				return true; \
+			} \
+			if (!p.is_object()) { \
+				logger.error("Attempting to read {} as an object, but the value at these keys is of type \"{}\".", j.synthesiseKeySequence(keys), j.getTypeName(p)); \
+				return false; \
+			} \
+            if (!awe::Serialisable<t1>::fromJSON(value.p1, j, j.concatKeys(keys, { #p1 }), logger, o1)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t2>::fromJSON(value.p2, j, j.concatKeys(keys, { #p2 }), logger, o2)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t3>::fromJSON(value.p3, j, j.concatKeys(keys, { #p3 }), logger, o3)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t4>::fromJSON(value.p4, j, j.concatKeys(keys, { #p4 }), logger, o4)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t5>::fromJSON(value.p5, j, j.concatKeys(keys, { #p5 }), logger, o5)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t6>::fromJSON(value.p6, j, j.concatKeys(keys, { #p6 }), logger, o6)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            if (!awe::Serialisable<t7>::fromJSON(value.p7, j, j.concatKeys(keys, { #p7 }), logger, o7)) { \
+                logger.error("The above error refers to object {}.", j.synthesiseKeySequence(keys)); \
+                return false; \
+            } \
+            return true; \
+        } \
+    }; \
+}
+
+#define DEFINE_POD_7(ns, cc, ac, t1, p1, t2, p2, t3, p3, t4, p4, t5, p5, t6, p6, t7, p7) namespace ns { \
+    void cc::Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+        if (engine->GetTypeInfoByName(ac)) return; \
+        auto r = RegisterType(engine, ac, \
+            [](asIScriptEngine* engine, const std::string& type) { \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f()", \
+                    asFUNCTIONPR(cc::Create, (), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    std::string(ac "@ f(").append(engine::script_param_type<t1>()).append(", ").append(engine::script_param_type<t2>()).append(", ").append(engine::script_param_type<t3>()).append(", ").append(engine::script_param_type<t4>()).append(", ").append(engine::script_param_type<t5>()).append(", ").append(engine::script_param_type<t6>()).append(", ").append(engine::script_param_type<t7>()).append(")").c_str(), \
+                    asFUNCTIONPR(cc::Create, (boost::call_traits<t1>::param_type, boost::call_traits<t2>::param_type, boost::call_traits<t3>::param_type, boost::call_traits<t4>::param_type, boost::call_traits<t5>::param_type, boost::call_traits<t6>::param_type, boost::call_traits<t7>::param_type), cc*), asCALL_CDECL); \
+                engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_FACTORY, \
+                    ac "@ f(const " ac "&in)", \
+                    asFUNCTIONPR(cc::Create, (const cc* const), cc*), asCALL_CDECL); \
+            }); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t1>()).append(" ").append(#p1).c_str(), asOFFSET(cc, p1)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t2>()).append(" ").append(#p2).c_str(), asOFFSET(cc, p2)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t3>()).append(" ").append(#p3).c_str(), asOFFSET(cc, p3)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t4>()).append(" ").append(#p4).c_str(), asOFFSET(cc, p4)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t5>()).append(" ").append(#p5).c_str(), asOFFSET(cc, p5)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t6>()).append(" ").append(#p6).c_str(), asOFFSET(cc, p6)); \
+        r = engine->RegisterObjectProperty(ac, std::string(engine::script_type<t7>()).append(" ").append(#p7).c_str(), asOFFSET(cc, p7)); \
+        r = engine->RegisterObjectMethod(ac, ac "@ opAssign(const " ac "&in)", \
+            asMETHOD(cc, opAssign), asCALL_THISCALL); \
+        r = engine->RegisterObjectMethod(ac, "bool opEquals(const " ac "&in) const", \
+            asMETHOD(cc, opEquals), asCALL_THISCALL); \
+    } \
+    \
+    cc::cc(boost::call_traits<t1>::param_type param1, boost::call_traits<t2>::param_type param2, boost::call_traits<t3>::param_type param3, boost::call_traits<t4>::param_type param4, boost::call_traits<t5>::param_type param5, boost::call_traits<t6>::param_type param6, boost::call_traits<t7>::param_type param7) : p1(param1), p2(param2), p3(param3), p4(param4), p5(param5), p6(param6), p7(param7) {} \
+    \
+    cc::cc(const cc& o) : p1(o.p1), p2(o.p2), p3(o.p3), p4(o.p4), p5(o.p5), p6(o.p6), p7(o.p7) {} \
+    \
+    cc::cc(cc&& o) noexcept : p1(std::move(o.p1)), p2(std::move(o.p2)), p3(std::move(o.p3)), p4(std::move(o.p4)), p5(std::move(o.p5)), p6(std::move(o.p6)), p7(std::move(o.p7)) {} \
+    \
+    bool cc::operator==(const cc& o) const { \
+        return engine::isEqual<t1, t1>(p1, o.p1) && engine::isEqual<t2, t2>(p2, o.p2) && engine::isEqual<t3, t3>(p3, o.p3) && engine::isEqual<t4, t4>(p4, o.p4) && engine::isEqual<t5, t5>(p5, o.p5) && engine::isEqual<t6, t6>(p6, o.p6) && engine::isEqual<t7, t7>(p7, o.p7); \
+    } \
+    \
+    cc& cc::operator=(const cc& o) { \
+        p1 = o.p1; p2 = o.p2; p3 = o.p3; p4 = o.p4; p5 = o.p5; p6 = o.p6; p7 = o.p7; \
+        return *this; \
+    } \
+    \
+    cc& cc::operator=(cc&& o) noexcept { \
+        p1 = std::move(o.p1); p2 = std::move(o.p2); p3 = std::move(o.p3); p4 = std::move(o.p4); p5 = std::move(o.p5); p6 = std::move(o.p6); p7 = std::move(o.p7); \
+        return *this; \
+    } \
+}

@@ -98,6 +98,12 @@ int main(int argc, char* argv[]) {
 
         awe::bank<awe::tile_type> tileTypes(scripts, rootLogger.getData());
 
+        awe::bank<awe::terrain> terrains(scripts, rootLogger.getData());
+
+        awe::bank<awe::unit_type> unitTypes(scripts, rootLogger.getData());
+
+        awe::bank<awe::weapon> weapons(scripts, rootLogger.getData());
+
         // We need to load the scripts before loading the bank JSON data because
         // the latter relies on the script interface to be able to allocate
         // CScriptArrays.
@@ -113,6 +119,9 @@ int main(int argc, char* argv[]) {
         movementTypes.load("assets/property/movement.json");
         structures.load("assets/property/structure.json");
         tileTypes.load("assets/property/tile.json");
+        terrains.load("assets/property/terrain.json");
+        unitTypes.load("assets/property/unit.json");
+        weapons.load("assets/property/weapon.json");
 
         if (!scripts->evaluateAssertions()) {
             throw std::exception("Script assertions failed!");
@@ -125,6 +134,9 @@ int main(int argc, char* argv[]) {
         awe::processOverrides(scripts, movementTypes, countries, environments, weathers, commanders);
         awe::processOverrides(scripts, structures, movementTypes, countries, environments, weathers, commanders);
         awe::processOverrides(scripts, tileTypes, structures, movementTypes, countries, environments, weathers, commanders);
+        awe::processOverrides(scripts, terrains, tileTypes, structures, movementTypes, countries, environments, weathers, commanders);
+        awe::processOverrides(scripts, unitTypes, terrains, tileTypes, structures, movementTypes, countries, environments, weathers, commanders);
+        awe::processOverrides(scripts, weapons, unitTypes, terrains, tileTypes, structures, movementTypes, countries, environments, weathers, commanders);
 
         rootLogger.write("{} --- {}", weathers["CLEAR"]->longName(), weathers["CLEAR"]->longName(awe::overrides().commander("JAKE")));
         rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), static_cast<const awe::bank<awe::weather>>(weathers)["CLEAR"]->shortName(awe::overrides().commander("JAKER")));

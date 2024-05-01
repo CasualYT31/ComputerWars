@@ -42,6 +42,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "boost/call_traits.hpp"
 #include "SFML/System/Vector2.hpp"
 #include "SFML/System/Time.hpp"
+#include "TGUI/String.hpp"
 #include "script.hpp"
 #include "maths.hpp"
 #include "typedef.hpp"
@@ -228,6 +229,7 @@ namespace awe {
 		}
 	private:
 		inline CScriptArray* _getArray() {
+			array->operator->()->AddRef();
 			return array->operator->();
 		}
 	};
@@ -517,8 +519,67 @@ DEFINE_POD_4(awe, dependent_structure_tile, "DependentStructureTile",
 	std::string, deleted
 );
 
+/**
+ * Configures a unit's map sprite.
+ */
+DECLARE_POD_7(awe, unit_sprite_info, "UnitSpriteInfo",
+	std::string, idleSheet, false, {},
+	std::string, upSheet, false, {},
+	std::string, downSheet, false, {},
+	std::string, leftSheet, false, {},
+	std::string, rightSheet, false, {},
+	std::string, selectedSheet, true, {},
+	std::string, sprite, true, {}
+);
+
+DEFINE_POD_7(awe, unit_sprite_info, "UnitSpriteInfo",
+	std::string, idleSheet,
+	std::string, upSheet,
+	std::string, downSheet,
+	std::string, leftSheet,
+	std::string, rightSheet,
+	std::string, selectedSheet,
+	std::string, sprite
+);
+
+/**
+ * Configures a unit's sounds.
+ */
+DECLARE_POD_5(awe, unit_sound_info, "UnitSoundInfo",
+	std::string, move, false, {},
+	std::string, destroy, false, {},
+	std::string, moveHidden, true, {},
+	std::string, hide, true, {},
+	std::string, unhide, true, {}
+);
+
+DEFINE_POD_5(awe, unit_sound_info, "UnitSoundInfo",
+	std::string, move,
+	std::string, destroy,
+	std::string, moveHidden,
+	std::string, hide,
+	std::string, unhide
+);
+
+/**
+ * Describes the base damage a weapon deals against a single type of unit or terrain.
+ * A negative integer means the weapon can't attack the target if it's visible or
+ * hidden, depending on the field.
+ */
+DECLARE_POD_3(awe, weapon_damage, "WeaponDamage",
+	std::string, target, false, {},
+	sf::Int32, damage, false, 0,
+	sf::Int32, damageWhenHidden, true, -1
+)
+
+DEFINE_POD_3(awe, weapon_damage, "WeaponDamage",
+	std::string, target,
+	sf::Int32, damage,
+	sf::Int32, damageWhenHidden
+)
+
 // SPECIALISE BANK_ARRAY SCRIPT TYPENAMES HERE!
-// Hopefully we can find a way round this, suffers from the same problem as:
+// TODO: Hopefully we can find a way round this, suffers from the same problem as:
 // OverrideFunction::read()
 
 template<>
@@ -531,11 +592,201 @@ inline constexpr std::string engine::script_type<awe::bank_array<awe::dependent_
 	return std::string(engine::script_type<awe::dependent_structure_tile>()).append("Array");
 }
 
+template<>
+inline constexpr std::string engine::script_type<awe::bank_array<std::string>>() {
+	return std::string(engine::script_type<std::string>()).append("Array");
+}
+
+template<>
+inline constexpr std::string engine::script_type<awe::bank_array<awe::weapon_damage>>() {
+	return std::string(engine::script_type<awe::weapon_damage>()).append("Array");
+}
+
 #include "tpp/bank-v2-macros.tpp"
 
 #define COMMA ,
 
 namespace awe {
+	/**
+	 * Describes the different types of visibility properties that a terrain
+	 * can have during Fog of War.
+	 */
+	enum class fow_visibility {
+		/**
+		 * Tiles of this terrain will be visible to a team if they occupy them,
+		 * own them, or if it is within at least one of their units' vision
+		 * ranges.
+		 */
+		Normal,
+
+		/**
+		 * Tiles of this terrain will be invisible to a team, unless they
+		 * occupy them, own them, or have at least one of their units directly
+		 * adjacent to them.
+		 */
+		Hidden,
+
+		/**
+		 * Tiles of this terrain will always be visible to every team.
+		 */
+		Visible
+	};
+}
+
+template<>
+inline constexpr std::string engine::script_type<awe::fow_visibility>() {
+	return "FOWVisibility";
+}
+
+namespace awe {
+	// We can't use overrides to query what a weapon's damage to a target is,
+	// unit_type overrides are ATTACKERS not TARGETS. Will need to bring back
+	// unit_type and terrain maps. This time combine "units" and "unitshidden",
+	// so that each unit in the table has two fields, "damage" and "damageWhenHidden".
+	GAME_PROPERTY_11(weapon, "Weapon", "weapon", 9,
+		longName, std::string, false, DEFAULT_VALUE(""), ,
+		shortName, std::string, false, DEFAULT_VALUE(""), ,
+		icon, std::string, false, DEFAULT_VALUE(""), ,
+		description, std::string, false, DEFAULT_VALUE(""), ,
+		ammo, sf::Int32, false, DEFAULT_VALUE(9), ,
+		unitTable, awe::bank_array<awe::weapon_damage>, false, INIT_BANK_ARRAY(), ,
+		terrainTable, awe::bank_array<awe::weapon_damage>, true, INIT_BANK_ARRAY(), ,
+		range, sf::Vector2u, true, DEFAULT_VALUE(sf::Vector2u(1, 1)), ,
+		canAttackAfterMoving, bool, true, DEFAULT_VALUE(true), ,
+		canCounterattackDirectly, bool, true, DEFAULT_VALUE(true), ,
+		canCounterattackIndirectly, bool, true, DEFAULT_VALUE(false), ,
+		awe::weapon_damage::Register(engine, document);
+		awe::bank_array<awe::weapon_damage>::Register(engine, document);
+	, ,)
+
+	GAME_PROPERTY_23(unit_type, "UnitType", "unittype", 8,
+		longName, std::string, false, DEFAULT_VALUE(""), ,
+		shortName, std::string, false, DEFAULT_VALUE(""), ,
+		description, std::string, false, DEFAULT_VALUE(""), ,
+		movementType, std::string, false, DEFAULT_VALUE(""), ,
+		movementPoints, sf::Uint32, false, DEFAULT_VALUE(0), ,
+		price, sf::Uint32, false, DEFAULT_VALUE(0), ,
+		spriteInfo, awe::unit_sprite_info, false, DEFAULT_VALUE({}), ,
+		destroyEffectSprite, std::string, false, DEFAULT_VALUE(""), ,
+		soundInfo, awe::unit_sound_info, false, DEFAULT_VALUE({}), ,
+		picture, std::string, true, DEFAULT_VALUE(""), ,
+		capturingSprite, std::string, true, DEFAULT_VALUE(""), ,
+		finishedCapturingSprite, std::string, true, DEFAULT_VALUE(""), ,
+		maxFuel, sf::Int32, true, DEFAULT_VALUE(99), ,
+		maxHP, sf::Uint32, true, DEFAULT_VALUE(10),
+		if (operator()() > INT_MAX / HP_GRANULARITY) {
+			logger.warning("Max HP of unit type \"{}\" overflowed ({}). "
+				"Setting to {}...", scriptName, operator()(),
+				static_cast<sf::Uint32>(INT_MAX / HP_GRANULARITY));
+			operator()() = static_cast<sf::Uint32>(INT_MAX / HP_GRANULARITY);
+		},
+			vision, sf::Uint32, true, DEFAULT_VALUE(1), ,
+			canLoad, awe::bank_array<std::string>, true, INIT_BANK_ARRAY(), ,
+			loadLimit, sf::Uint32, true, DEFAULT_VALUE(0), ,
+			canUnloadFrom, awe::bank_array<std::string>, true, INIT_BANK_ARRAY(), ,
+			turnStartPriority, sf::Int32, true, DEFAULT_VALUE(1000), ,
+			canCapture, awe::bank_array<std::string>, true, INIT_BANK_ARRAY(), ,
+			canHide, bool, true, DEFAULT_VALUE(false), ,
+			weapons, awe::bank_array<std::string>, true, INIT_BANK_ARRAY(), ,
+			ignoresDefence, bool, true, DEFAULT_VALUE(false), ,
+			awe::unit_sprite_info::Register(engine, document);
+			awe::unit_sound_info::Register(engine, document);
+		awe::bank_array<std::string>::Register(engine, document);
+		, ,
+public:
+	/**
+	 * The granularity of HP values that this engine works with internally.
+	 * This engine calculates health to a finer granularity than 0-10 for units
+	 * (I would be surprised if the original games did not do this). Instead,
+	 * in the original version of this game, HP is calculated from 0-100, or 0
+	 * to whatever the max HP of a unit type is multiplied by this granularity
+	 * value. The higher the granularity, the higher the precision of HP
+	 * calculations.\n
+	 * I chose against using floating point values for HP values to remain as
+	 * precise as possible.
+	 * @sa awe::unit::getDisplayedHP()
+	 */
+	static const unsigned int HP_GRANULARITY;
+
+	/**
+	 * Converts an internal HP value into a user-friendly one.
+	 * @param  hp The internal HP.
+	 * @return The user-friendly HP.
+	 */
+	static inline awe::HP getDisplayedHP(const awe::HP hp) noexcept {
+		return (awe::HP)ceil((double)hp /
+			(double)awe::unit_type::HP_GRANULARITY);
+	}
+
+	/**
+	 * Converts a user-friendly HP value into an internal one.
+	 * @param  hp The user-friendly HP.
+	 * @return The internal HP.
+	 */
+	static inline awe::HP getInternalHP(const awe::HP hp) noexcept {
+		return hp * awe::unit_type::HP_GRANULARITY;
+	}
+	)
+	const unsigned int awe::unit_type::HP_GRANULARITY = 10;
+
+	static void RegisterFOWVisibility(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) {
+		const auto type = engine::script_type<awe::fow_visibility>();
+		if (engine->GetTypeInfoByName(type.c_str())) return;
+		auto r = engine->RegisterEnum(type.c_str());
+		r = engine->RegisterEnumValue(type.c_str(), "Normal",
+			static_cast<int>(fow_visibility::Normal));
+		r = engine->RegisterEnumValue(type.c_str(), "Hidden",
+			static_cast<int>(fow_visibility::Hidden));
+		r = engine->RegisterEnumValue(type.c_str(), "Visible",
+			static_cast<int>(fow_visibility::Visible));
+	}
+
+	template<> struct Serialisable<awe::fow_visibility> {
+		static bool fromJSON(awe::fow_visibility& value, engine::json& j,
+			const engine::json::KeySequence& keys, engine::logger& logger,
+			const bool optional) {
+			std::string name = "Normal";
+			if (awe::Serialisable<std::string>::fromJSON(name, j, keys, logger,
+				optional)) {
+				const auto lowerCase = tgui::String(name).trim().toLower();
+				if (lowerCase == "normal") {
+					value = awe::fow_visibility::Normal;
+				} else if (lowerCase == "hidden") {
+					value = awe::fow_visibility::Hidden;
+				} else if (lowerCase == "visible") {
+					value = awe::fow_visibility::Visible;
+				} else {
+					logger.error("Unrecognised {} value \"{}\" at {}, defaulting "
+						"to Normal...", engine::script_type<awe::fow_visibility>(),
+						name, j.synthesiseKeySequence(keys));
+					return false;
+				}
+				return true;
+			}
+			return false;
+		}
+	};
+
+	GAME_PROPERTY_10(terrain, "Terrain", "terrain", 7,
+		longName, std::string, false, DEFAULT_VALUE(""), ,
+		shortName, std::string, false, DEFAULT_VALUE(""), ,
+		icon, std::string, false, DEFAULT_VALUE(""), ,
+		description, std::string, false, DEFAULT_VALUE(""), ,
+		defence, sf::Uint32, true, DEFAULT_VALUE(0), ,
+		movementCost, sf::Int32, true, DEFAULT_VALUE(-1), ,
+		maxHP, sf::Uint32, true, DEFAULT_VALUE(0),
+		if (operator()() > INT_MAX) {
+			logger.warning("Max HP of terrain \"{}\" overflowed ({}). "
+				"Setting to {}...", scriptName, operator()(),
+				static_cast<sf::Uint32>(INT_MAX));
+			operator()() = static_cast<sf::Uint32>(INT_MAX);
+		},
+		primaryTileType, std::string, true, DEFAULT_VALUE(""), ,
+		FOWVisibility, fow_visibility, true, DEFAULT_VALUE(awe::fow_visibility::Normal), ,
+		showOwnerWhenHidden, bool, true, DEFAULT_VALUE(false), ,
+		awe::RegisterFOWVisibility(engine, document);
+	, , )
+
 	GAME_PROPERTY_4(tile_type, "TileType", "tiletype", 6,
 		terrain, std::string, false, DEFAULT_VALUE(""), ,
 		tile, std::string, false, DEFAULT_VALUE(""), ,
@@ -571,6 +822,8 @@ namespace awe {
 			// but what if an override is applied that is invalid? Because of this,
 			// it might be more beneficial to move this checking out of here and
 			// into the code responsible for managing all the banks.
+			// TODO: above, and unit_type sounds also have additional post-processing
+			// that's applied after all overrides.
 			const auto depArr = dependent({}).array->operator->();
 			if (depArr->GetSize() == 0) return;
 			if (!paintable({})) {
