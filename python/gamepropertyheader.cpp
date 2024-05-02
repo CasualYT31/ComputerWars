@@ -30,13 +30,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	ac: String literal containing the game property class's AngelScript typename.
 	 n: The name of the property in C++ and AngelScript.
 	ct: The C++ type of the property, without qualifiers.
-	 i: Depth of the hierarchy desired (see awe::property_field).
      o: true if this field is optional, false if not.
      d: The default value of the field. Has access to `scripts`.
 	 e: Extra processing that's applied to the property. Can be nothing.
 */
-#define PROPERTY(cc, ac, n, ct, i, o, d, e) class n##_ { \
-	awe::property_field<ct, i> _##n; \
+#define PROPERTY(cc, ac, n, ct, o, d, e) class n##_ { \
+	awe::property_field<ct, cc> _##n; \
 public: \
 	n##_(engine::json& j, const std::string& scriptName, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : _##n(j, scriptName, { #n }, logger, scripts, o, [](ct& defVal, const std::shared_ptr<engine::scripts>& scripts) { d; }) { e } \
 	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
@@ -73,7 +72,6 @@ public: \
 	ac: String literal containing the typename to give this game property in AS.
 	gp: String literal containing the name of the global property of the bank type
 	    that stores this game property type.
-	 i: Depth of the hierarchy desired for every field (see awe::property_field).
 	p1: The name of the first field.
 	t1: The C++ type of the first field, without qualifiers.
     o1: true if this field is optional, false if not.

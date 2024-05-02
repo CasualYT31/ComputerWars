@@ -30,13 +30,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	ac: String literal containing the game property class's AngelScript typename.
 	 n: The name of the property in C++ and AngelScript.
 	ct: The C++ type of the property, without qualifiers.
-	 i: Depth of the hierarchy desired (see awe::property_field).
      o: true if this field is optional, false if not.
      d: The default value of the field. Has access to `scripts`.
 	 e: Extra processing that's applied to the property. Can be nothing.
 */
-#define PROPERTY(cc, ac, n, ct, i, o, d, e) class n##_ { \
-	awe::property_field<ct, i> _##n; \
+#define PROPERTY(cc, ac, n, ct, o, d, e) class n##_ { \
+	awe::property_field<ct, cc> _##n; \
 public: \
 	n##_(engine::json& j, const std::string& scriptName, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : _##n(j, scriptName, { #n }, logger, scripts, o, [](ct& defVal, const std::shared_ptr<engine::scripts>& scripts) { d; }) { e } \
 	static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
@@ -73,7 +72,6 @@ public: \
 	ac: String literal containing the typename to give this game property in AS.
 	gp: String literal containing the name of the global property of the bank type
 	    that stores this game property type.
-	 i: Depth of the hierarchy desired for every field (see awe::property_field).
 	p1: The name of the first field.
 	t1: The C++ type of the first field, without qualifiers.
     o1: true if this field is optional, false if not.
@@ -86,13 +84,12 @@ public: \
 	 a: Append extra code to the end of the class.
 */
 
-#define GAME_PROPERTY_1(cc, ac, gp, i, p1, t1, o1, d1, e1, d, e, a) class cc { \
+#define GAME_PROPERTY_1(cc, ac, gp, p1, t1, o1, d1, e1, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 1> fields = { #p1, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -103,7 +100,7 @@ public: \
         p1##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || false; \
     } \
@@ -137,13 +134,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_2(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, d, e, a) class cc { \
+#define GAME_PROPERTY_2(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 2> fields = { #p1, #p2, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -154,7 +150,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || false; \
     } \
@@ -188,13 +184,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_3(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, d, e, a) class cc { \
+#define GAME_PROPERTY_3(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 3> fields = { #p1, #p2, #p3, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -205,7 +200,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || false; \
     } \
@@ -239,13 +234,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_4(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, d, e, a) class cc { \
+#define GAME_PROPERTY_4(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 4> fields = { #p1, #p2, #p3, #p4, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -256,7 +250,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || false; \
     } \
@@ -290,13 +284,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_5(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, d, e, a) class cc { \
+#define GAME_PROPERTY_5(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 5> fields = { #p1, #p2, #p3, #p4, #p5, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -307,7 +300,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || false; \
     } \
@@ -341,13 +334,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_6(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, d, e, a) class cc { \
+#define GAME_PROPERTY_6(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 6> fields = { #p1, #p2, #p3, #p4, #p5, #p6, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -358,7 +350,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || false; \
     } \
@@ -392,13 +384,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_7(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, d, e, a) class cc { \
+#define GAME_PROPERTY_7(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 7> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -409,7 +400,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || false; \
     } \
@@ -443,13 +434,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_8(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, d, e, a) class cc { \
+#define GAME_PROPERTY_8(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 8> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -460,7 +450,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || false; \
     } \
@@ -494,13 +484,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_9(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, d, e, a) class cc { \
+#define GAME_PROPERTY_9(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 9> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -511,7 +500,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || false; \
     } \
@@ -545,13 +534,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_10(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, d, e, a) class cc { \
+#define GAME_PROPERTY_10(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 10> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -562,7 +550,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || false; \
     } \
@@ -596,13 +584,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_11(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, d, e, a) class cc { \
+#define GAME_PROPERTY_11(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 11> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -613,7 +600,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || false; \
     } \
@@ -647,13 +634,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_12(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, d, e, a) class cc { \
+#define GAME_PROPERTY_12(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 12> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -664,7 +650,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || false; \
     } \
@@ -698,13 +684,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_13(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, d, e, a) class cc { \
+#define GAME_PROPERTY_13(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 13> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -715,7 +700,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || false; \
     } \
@@ -749,13 +734,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_14(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, d, e, a) class cc { \
+#define GAME_PROPERTY_14(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 14> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -766,7 +750,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || false; \
     } \
@@ -800,13 +784,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_15(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, d, e, a) class cc { \
+#define GAME_PROPERTY_15(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 15> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -817,7 +800,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || false; \
     } \
@@ -851,13 +834,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_16(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, d, e, a) class cc { \
+#define GAME_PROPERTY_16(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 16> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, #p16, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), p16(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -868,7 +850,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); p16##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) PROPERTY(cc, ac, p16, t16, i, o16, d16, e16) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) PROPERTY(cc, ac, p16, t16, o16, d16, e16) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || field == #p16 || false; \
     } \
@@ -902,13 +884,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_17(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, d, e, a) class cc { \
+#define GAME_PROPERTY_17(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 17> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, #p16, #p17, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), p16(j, scriptName, logger, scripts), p17(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -919,7 +900,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); p16##_::Register(engine, document); p17##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) PROPERTY(cc, ac, p16, t16, i, o16, d16, e16) PROPERTY(cc, ac, p17, t17, i, o17, d17, e17) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) PROPERTY(cc, ac, p16, t16, o16, d16, e16) PROPERTY(cc, ac, p17, t17, o17, d17, e17) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || field == #p16 || field == #p17 || false; \
     } \
@@ -953,13 +934,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_18(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, d, e, a) class cc { \
+#define GAME_PROPERTY_18(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 18> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, #p16, #p17, #p18, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), p16(j, scriptName, logger, scripts), p17(j, scriptName, logger, scripts), p18(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -970,7 +950,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); p16##_::Register(engine, document); p17##_::Register(engine, document); p18##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) PROPERTY(cc, ac, p16, t16, i, o16, d16, e16) PROPERTY(cc, ac, p17, t17, i, o17, d17, e17) PROPERTY(cc, ac, p18, t18, i, o18, d18, e18) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) PROPERTY(cc, ac, p16, t16, o16, d16, e16) PROPERTY(cc, ac, p17, t17, o17, d17, e17) PROPERTY(cc, ac, p18, t18, o18, d18, e18) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || field == #p16 || field == #p17 || field == #p18 || false; \
     } \
@@ -1004,13 +984,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_19(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, d, e, a) class cc { \
+#define GAME_PROPERTY_19(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 19> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, #p16, #p17, #p18, #p19, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), p16(j, scriptName, logger, scripts), p17(j, scriptName, logger, scripts), p18(j, scriptName, logger, scripts), p19(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -1021,7 +1000,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); p16##_::Register(engine, document); p17##_::Register(engine, document); p18##_::Register(engine, document); p19##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) PROPERTY(cc, ac, p16, t16, i, o16, d16, e16) PROPERTY(cc, ac, p17, t17, i, o17, d17, e17) PROPERTY(cc, ac, p18, t18, i, o18, d18, e18) PROPERTY(cc, ac, p19, t19, i, o19, d19, e19) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) PROPERTY(cc, ac, p16, t16, o16, d16, e16) PROPERTY(cc, ac, p17, t17, o17, d17, e17) PROPERTY(cc, ac, p18, t18, o18, d18, e18) PROPERTY(cc, ac, p19, t19, o19, d19, e19) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || field == #p16 || field == #p17 || field == #p18 || field == #p19 || false; \
     } \
@@ -1055,13 +1034,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_20(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, d, e, a) class cc { \
+#define GAME_PROPERTY_20(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 20> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, #p16, #p17, #p18, #p19, #p20, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), p16(j, scriptName, logger, scripts), p17(j, scriptName, logger, scripts), p18(j, scriptName, logger, scripts), p19(j, scriptName, logger, scripts), p20(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -1072,7 +1050,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); p16##_::Register(engine, document); p17##_::Register(engine, document); p18##_::Register(engine, document); p19##_::Register(engine, document); p20##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) PROPERTY(cc, ac, p16, t16, i, o16, d16, e16) PROPERTY(cc, ac, p17, t17, i, o17, d17, e17) PROPERTY(cc, ac, p18, t18, i, o18, d18, e18) PROPERTY(cc, ac, p19, t19, i, o19, d19, e19) PROPERTY(cc, ac, p20, t20, i, o20, d20, e20) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) PROPERTY(cc, ac, p16, t16, o16, d16, e16) PROPERTY(cc, ac, p17, t17, o17, d17, e17) PROPERTY(cc, ac, p18, t18, o18, d18, e18) PROPERTY(cc, ac, p19, t19, o19, d19, e19) PROPERTY(cc, ac, p20, t20, o20, d20, e20) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || field == #p16 || field == #p17 || field == #p18 || field == #p19 || field == #p20 || false; \
     } \
@@ -1106,13 +1084,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_21(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, d, e, a) class cc { \
+#define GAME_PROPERTY_21(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 21> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, #p16, #p17, #p18, #p19, #p20, #p21, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), p16(j, scriptName, logger, scripts), p17(j, scriptName, logger, scripts), p18(j, scriptName, logger, scripts), p19(j, scriptName, logger, scripts), p20(j, scriptName, logger, scripts), p21(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -1123,7 +1100,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); p16##_::Register(engine, document); p17##_::Register(engine, document); p18##_::Register(engine, document); p19##_::Register(engine, document); p20##_::Register(engine, document); p21##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) PROPERTY(cc, ac, p16, t16, i, o16, d16, e16) PROPERTY(cc, ac, p17, t17, i, o17, d17, e17) PROPERTY(cc, ac, p18, t18, i, o18, d18, e18) PROPERTY(cc, ac, p19, t19, i, o19, d19, e19) PROPERTY(cc, ac, p20, t20, i, o20, d20, e20) PROPERTY(cc, ac, p21, t21, i, o21, d21, e21) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) PROPERTY(cc, ac, p16, t16, o16, d16, e16) PROPERTY(cc, ac, p17, t17, o17, d17, e17) PROPERTY(cc, ac, p18, t18, o18, d18, e18) PROPERTY(cc, ac, p19, t19, o19, d19, e19) PROPERTY(cc, ac, p20, t20, o20, d20, e20) PROPERTY(cc, ac, p21, t21, o21, d21, e21) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || field == #p16 || field == #p17 || field == #p18 || field == #p19 || field == #p20 || field == #p21 || false; \
     } \
@@ -1157,13 +1134,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_22(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, p22, t22, o22, d22, e22, d, e, a) class cc { \
+#define GAME_PROPERTY_22(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, p22, t22, o22, d22, e22, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 22> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, #p16, #p17, #p18, #p19, #p20, #p21, #p22, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), p16(j, scriptName, logger, scripts), p17(j, scriptName, logger, scripts), p18(j, scriptName, logger, scripts), p19(j, scriptName, logger, scripts), p20(j, scriptName, logger, scripts), p21(j, scriptName, logger, scripts), p22(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -1174,7 +1150,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); p16##_::Register(engine, document); p17##_::Register(engine, document); p18##_::Register(engine, document); p19##_::Register(engine, document); p20##_::Register(engine, document); p21##_::Register(engine, document); p22##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) PROPERTY(cc, ac, p16, t16, i, o16, d16, e16) PROPERTY(cc, ac, p17, t17, i, o17, d17, e17) PROPERTY(cc, ac, p18, t18, i, o18, d18, e18) PROPERTY(cc, ac, p19, t19, i, o19, d19, e19) PROPERTY(cc, ac, p20, t20, i, o20, d20, e20) PROPERTY(cc, ac, p21, t21, i, o21, d21, e21) PROPERTY(cc, ac, p22, t22, i, o22, d22, e22) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) PROPERTY(cc, ac, p16, t16, o16, d16, e16) PROPERTY(cc, ac, p17, t17, o17, d17, e17) PROPERTY(cc, ac, p18, t18, o18, d18, e18) PROPERTY(cc, ac, p19, t19, o19, d19, e19) PROPERTY(cc, ac, p20, t20, o20, d20, e20) PROPERTY(cc, ac, p21, t21, o21, d21, e21) PROPERTY(cc, ac, p22, t22, o22, d22, e22) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || field == #p16 || field == #p17 || field == #p18 || field == #p19 || field == #p20 || field == #p21 || field == #p22 || false; \
     } \
@@ -1208,13 +1184,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_23(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, p22, t22, o22, d22, e22, p23, t23, o23, d23, e23, d, e, a) class cc { \
+#define GAME_PROPERTY_23(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, p22, t22, o22, d22, e22, p23, t23, o23, d23, e23, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 23> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, #p16, #p17, #p18, #p19, #p20, #p21, #p22, #p23, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), p16(j, scriptName, logger, scripts), p17(j, scriptName, logger, scripts), p18(j, scriptName, logger, scripts), p19(j, scriptName, logger, scripts), p20(j, scriptName, logger, scripts), p21(j, scriptName, logger, scripts), p22(j, scriptName, logger, scripts), p23(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -1225,7 +1200,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); p16##_::Register(engine, document); p17##_::Register(engine, document); p18##_::Register(engine, document); p19##_::Register(engine, document); p20##_::Register(engine, document); p21##_::Register(engine, document); p22##_::Register(engine, document); p23##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) PROPERTY(cc, ac, p16, t16, i, o16, d16, e16) PROPERTY(cc, ac, p17, t17, i, o17, d17, e17) PROPERTY(cc, ac, p18, t18, i, o18, d18, e18) PROPERTY(cc, ac, p19, t19, i, o19, d19, e19) PROPERTY(cc, ac, p20, t20, i, o20, d20, e20) PROPERTY(cc, ac, p21, t21, i, o21, d21, e21) PROPERTY(cc, ac, p22, t22, i, o22, d22, e22) PROPERTY(cc, ac, p23, t23, i, o23, d23, e23) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) PROPERTY(cc, ac, p16, t16, o16, d16, e16) PROPERTY(cc, ac, p17, t17, o17, d17, e17) PROPERTY(cc, ac, p18, t18, o18, d18, e18) PROPERTY(cc, ac, p19, t19, o19, d19, e19) PROPERTY(cc, ac, p20, t20, o20, d20, e20) PROPERTY(cc, ac, p21, t21, o21, d21, e21) PROPERTY(cc, ac, p22, t22, o22, d22, e22) PROPERTY(cc, ac, p23, t23, o23, d23, e23) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || field == #p16 || field == #p17 || field == #p18 || field == #p19 || field == #p20 || field == #p21 || field == #p22 || field == #p23 || false; \
     } \
@@ -1259,13 +1234,12 @@ public: \
     a \
 };
 
-#define GAME_PROPERTY_24(cc, ac, gp, i, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, p22, t22, o22, d22, e22, p23, t23, o23, d23, e23, p24, t24, o24, d24, e24, d, e, a) class cc { \
+#define GAME_PROPERTY_24(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, p22, t22, o22, d22, e22, p23, t23, o23, d23, e23, p24, t24, o24, d24, e24, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, 24> fields = { #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9, #p10, #p11, #p12, #p13, #p14, #p15, #p16, #p17, #p18, #p19, #p20, #p21, #p22, #p23, #p24, }; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         p1(j, scriptName, logger, scripts), p2(j, scriptName, logger, scripts), p3(j, scriptName, logger, scripts), p4(j, scriptName, logger, scripts), p5(j, scriptName, logger, scripts), p6(j, scriptName, logger, scripts), p7(j, scriptName, logger, scripts), p8(j, scriptName, logger, scripts), p9(j, scriptName, logger, scripts), p10(j, scriptName, logger, scripts), p11(j, scriptName, logger, scripts), p12(j, scriptName, logger, scripts), p13(j, scriptName, logger, scripts), p14(j, scriptName, logger, scripts), p15(j, scriptName, logger, scripts), p16(j, scriptName, logger, scripts), p17(j, scriptName, logger, scripts), p18(j, scriptName, logger, scripts), p19(j, scriptName, logger, scripts), p20(j, scriptName, logger, scripts), p21(j, scriptName, logger, scripts), p22(j, scriptName, logger, scripts), p23(j, scriptName, logger, scripts), p24(j, scriptName, logger, scripts), \
         _scriptName(scriptName) { e } \
@@ -1276,7 +1250,7 @@ public: \
         p1##_::Register(engine, document); p2##_::Register(engine, document); p3##_::Register(engine, document); p4##_::Register(engine, document); p5##_::Register(engine, document); p6##_::Register(engine, document); p7##_::Register(engine, document); p8##_::Register(engine, document); p9##_::Register(engine, document); p10##_::Register(engine, document); p11##_::Register(engine, document); p12##_::Register(engine, document); p13##_::Register(engine, document); p14##_::Register(engine, document); p15##_::Register(engine, document); p16##_::Register(engine, document); p17##_::Register(engine, document); p18##_::Register(engine, document); p19##_::Register(engine, document); p20##_::Register(engine, document); p21##_::Register(engine, document); p22##_::Register(engine, document); p23##_::Register(engine, document); p24##_::Register(engine, document); \
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    PROPERTY(cc, ac, p1, t1, i, o1, d1, e1) PROPERTY(cc, ac, p2, t2, i, o2, d2, e2) PROPERTY(cc, ac, p3, t3, i, o3, d3, e3) PROPERTY(cc, ac, p4, t4, i, o4, d4, e4) PROPERTY(cc, ac, p5, t5, i, o5, d5, e5) PROPERTY(cc, ac, p6, t6, i, o6, d6, e6) PROPERTY(cc, ac, p7, t7, i, o7, d7, e7) PROPERTY(cc, ac, p8, t8, i, o8, d8, e8) PROPERTY(cc, ac, p9, t9, i, o9, d9, e9) PROPERTY(cc, ac, p10, t10, i, o10, d10, e10) PROPERTY(cc, ac, p11, t11, i, o11, d11, e11) PROPERTY(cc, ac, p12, t12, i, o12, d12, e12) PROPERTY(cc, ac, p13, t13, i, o13, d13, e13) PROPERTY(cc, ac, p14, t14, i, o14, d14, e14) PROPERTY(cc, ac, p15, t15, i, o15, d15, e15) PROPERTY(cc, ac, p16, t16, i, o16, d16, e16) PROPERTY(cc, ac, p17, t17, i, o17, d17, e17) PROPERTY(cc, ac, p18, t18, i, o18, d18, e18) PROPERTY(cc, ac, p19, t19, i, o19, d19, e19) PROPERTY(cc, ac, p20, t20, i, o20, d20, e20) PROPERTY(cc, ac, p21, t21, i, o21, d21, e21) PROPERTY(cc, ac, p22, t22, i, o22, d22, e22) PROPERTY(cc, ac, p23, t23, i, o23, d23, e23) PROPERTY(cc, ac, p24, t24, i, o24, d24, e24) \
+    PROPERTY(cc, ac, p1, t1, o1, d1, e1) PROPERTY(cc, ac, p2, t2, o2, d2, e2) PROPERTY(cc, ac, p3, t3, o3, d3, e3) PROPERTY(cc, ac, p4, t4, o4, d4, e4) PROPERTY(cc, ac, p5, t5, o5, d5, e5) PROPERTY(cc, ac, p6, t6, o6, d6, e6) PROPERTY(cc, ac, p7, t7, o7, d7, e7) PROPERTY(cc, ac, p8, t8, o8, d8, e8) PROPERTY(cc, ac, p9, t9, o9, d9, e9) PROPERTY(cc, ac, p10, t10, o10, d10, e10) PROPERTY(cc, ac, p11, t11, o11, d11, e11) PROPERTY(cc, ac, p12, t12, o12, d12, e12) PROPERTY(cc, ac, p13, t13, o13, d13, e13) PROPERTY(cc, ac, p14, t14, o14, d14, e14) PROPERTY(cc, ac, p15, t15, o15, d15, e15) PROPERTY(cc, ac, p16, t16, o16, d16, e16) PROPERTY(cc, ac, p17, t17, o17, d17, e17) PROPERTY(cc, ac, p18, t18, o18, d18, e18) PROPERTY(cc, ac, p19, t19, o19, d19, e19) PROPERTY(cc, ac, p20, t20, o20, d20, e20) PROPERTY(cc, ac, p21, t21, o21, d21, e21) PROPERTY(cc, ac, p22, t22, o22, d22, e22) PROPERTY(cc, ac, p23, t23, o23, d23, e23) PROPERTY(cc, ac, p24, t24, o24, d24, e24) \
     inline static bool hasField(const std::string_view field) { \
         return field == #p1 || field == #p2 || field == #p3 || field == #p4 || field == #p5 || field == #p6 || field == #p7 || field == #p8 || field == #p9 || field == #p10 || field == #p11 || field == #p12 || field == #p13 || field == #p14 || field == #p15 || field == #p16 || field == #p17 || field == #p18 || field == #p19 || field == #p20 || field == #p21 || field == #p22 || field == #p23 || field == #p24 || false; \
     } \

@@ -50,6 +50,44 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define GAME_PROPERTY_COUNT 10
 
+namespace awe {
+	class weapon;
+	class unit_type;
+	class terrain;
+	class tile_type;
+	class structure;
+	class movement_type;
+	class country;
+	class environment;
+	class weather;
+	class commander;
+	template<typename T>
+	inline constexpr std::size_t hierarchy_index() {
+		static_assert(false,
+			"Game property class must be given a hierarchy index");
+	}
+	template<>
+	inline constexpr std::size_t hierarchy_index<weapon>() { return 9; }
+	template<>
+	inline constexpr std::size_t hierarchy_index<unit_type>() { return 8; }
+	template<>
+	inline constexpr std::size_t hierarchy_index<terrain>() { return 7; }
+	template<>
+	inline constexpr std::size_t hierarchy_index<tile_type>() { return 6; }
+	template<>
+	inline constexpr std::size_t hierarchy_index<structure>() { return 5; }
+	template<>
+	inline constexpr std::size_t hierarchy_index<movement_type>() { return 4; }
+	template<>
+	inline constexpr std::size_t hierarchy_index<country>() { return 3; }
+	template<>
+	inline constexpr std::size_t hierarchy_index<environment>() { return 2; }
+	template<>
+	inline constexpr std::size_t hierarchy_index<weather>() { return 1; }
+	template<>
+	inline constexpr std::size_t hierarchy_index<commander>() { return 0; }
+}
+
 #define REGISTER_BANK_OVERRIDE_FIELD(n) \
 	r = engine->RegisterObjectMethod("Overrides", \
 		"Overrides& " #n "(const string&in)", \
@@ -62,17 +100,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		asCALL_THISCALL);
 
 #define BANK_OVERRIDE_FIELD(n, i) \
-	static_assert(i >= 0 && i < GAME_PROPERTY_COUNT, \
-		"i must be within the game property count!"); \
+	static_assert(awe::hierarchy_index<i>() >= 0 && \
+		awe::hierarchy_index<i>() < GAME_PROPERTY_COUNT, \
+		"awe::hierarchy_index<i>() must be within the game property count!"); \
 	inline overrides& n(const std::string& newValue) { \
-		_overrides[i] = newValue; \
+		_overrides[awe::hierarchy_index<i>()] = newValue; \
 		return *this; \
 	} \
 	inline std::string& n() { \
-		return _overrides[i]; \
+		return _overrides[awe::hierarchy_index<i>()]; \
 	} \
 	inline const std::string& n() const { \
-		return _overrides.at(i); \
+		return _overrides.at(awe::hierarchy_index<i>()); \
 	}
 
 namespace awe {
@@ -141,16 +180,16 @@ namespace awe {
 			REGISTER_BANK_OVERRIDE_FIELD(weather)
 			REGISTER_BANK_OVERRIDE_FIELD(commander)
 		}
-		BANK_OVERRIDE_FIELD(weapon, 9)
-		BANK_OVERRIDE_FIELD(unitType, 8)
-		BANK_OVERRIDE_FIELD(terrain, 7)
-		BANK_OVERRIDE_FIELD(tileType, 6)
-		BANK_OVERRIDE_FIELD(structure, 5)
-		BANK_OVERRIDE_FIELD(movementType, 4)
-		BANK_OVERRIDE_FIELD(country, 3)
-		BANK_OVERRIDE_FIELD(environment, 2)
-		BANK_OVERRIDE_FIELD(weather, 1)
-		BANK_OVERRIDE_FIELD(commander, 0)
+		BANK_OVERRIDE_FIELD(weapon, awe::weapon)
+		BANK_OVERRIDE_FIELD(unitType, awe::unit_type)
+		BANK_OVERRIDE_FIELD(terrain, awe::terrain)
+		BANK_OVERRIDE_FIELD(tileType, awe::tile_type)
+		BANK_OVERRIDE_FIELD(structure, awe::structure)
+		BANK_OVERRIDE_FIELD(movementType, awe::movement_type)
+		BANK_OVERRIDE_FIELD(country, awe::country)
+		BANK_OVERRIDE_FIELD(environment, awe::environment)
+		BANK_OVERRIDE_FIELD(weather, awe::weather)
+		BANK_OVERRIDE_FIELD(commander, awe::commander)
 	};
 	std::function<void(awe::overrides&)> awe::overrides::_factory = {};
 
@@ -351,13 +390,12 @@ namespace awe {
 		}
 	};
 
-	// T = type of field.
-	// N = depth of the hierarchy desired. 1 = just CO, 2 = weather, then CO, etc.
-	//                                     0 = no overrides.
-	template<typename T, std::size_t N>
+	//  T = type of field.
+	// GP = game property this field is a member of.
+	template<typename T, typename GP>
 	class property_field {
-		static_assert(N < GAME_PROPERTY_COUNT,
-			"N must be within the game property count!");
+		static_assert(awe::hierarchy_index<GP>() < GAME_PROPERTY_COUNT,
+			"awe::hierarchy_index<GP>() must be within the game property count!");
 	public:
 		inline property_field(engine::json& j, const std::string& scriptName,
 			const engine::json::KeySequence& keys, engine::logger& logger,
@@ -376,7 +414,7 @@ namespace awe {
 		}
 		inline typename boost::call_traits<T>::reference operator[](
 			const overrides& overrides) {
-			for (std::size_t i = 0; i < N; ++i)
+			for (std::size_t i = 0; i < awe::hierarchy_index<GP>(); ++i)
 				_scriptNamesWithOverrides[i].insert(overrides[i]);
 			return _values[overrides];
 		}
@@ -395,12 +433,13 @@ namespace awe {
 	private:
 		overrides _sanitiseFieldOverrides(const overrides& o) const {
 			overrides result;
-			for (std::size_t i = 0; i < N; ++i)
+			for (std::size_t i = 0; i < awe::hierarchy_index<GP>(); ++i)
 				if (_scriptNamesWithOverrides[i].count(o[i]) > 0)
 					result[i] = o[i];
 			return result;
 		}
-		std::array<std::unordered_set<std::string>, N> _scriptNamesWithOverrides;
+		std::array<std::unordered_set<std::string>, awe::hierarchy_index<GP>()>
+			_scriptNamesWithOverrides;
 		std::unordered_map<overrides, T> _values;
 	};
 
@@ -639,11 +678,7 @@ inline constexpr std::string engine::script_type<awe::fow_visibility>() {
 }
 
 namespace awe {
-	// We can't use overrides to query what a weapon's damage to a target is,
-	// unit_type overrides are ATTACKERS not TARGETS. Will need to bring back
-	// unit_type and terrain maps. This time combine "units" and "unitshidden",
-	// so that each unit in the table has two fields, "damage" and "damageWhenHidden".
-	GAME_PROPERTY_11(weapon, "Weapon", "weapon", 9,
+	GAME_PROPERTY_11(weapon, "Weapon", "weapon",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
 		icon, std::string, false, DEFAULT_VALUE(""), ,
@@ -659,7 +694,7 @@ namespace awe {
 		awe::bank_array<awe::weapon_damage>::Register(engine, document);
 	, ,)
 
-	GAME_PROPERTY_23(unit_type, "UnitType", "unittype", 8,
+	GAME_PROPERTY_23(unit_type, "UnitType", "unittype",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
 		description, std::string, false, DEFAULT_VALUE(""), ,
@@ -767,7 +802,7 @@ public:
 		}
 	};
 
-	GAME_PROPERTY_10(terrain, "Terrain", "terrain", 7,
+	GAME_PROPERTY_10(terrain, "Terrain", "terrain",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
 		icon, std::string, false, DEFAULT_VALUE(""), ,
@@ -787,7 +822,7 @@ public:
 		awe::RegisterFOWVisibility(engine, document);
 	, , )
 
-	GAME_PROPERTY_4(tile_type, "TileType", "tiletype", 6,
+	GAME_PROPERTY_4(tile_type, "TileType", "tiletype",
 		terrain, std::string, false, DEFAULT_VALUE(""), ,
 		tile, std::string, false, DEFAULT_VALUE(""), ,
 		capturingProperty, std::string, true, DEFAULT_VALUE(""), ,
@@ -803,7 +838,7 @@ public:
 	 *          to at least try and maintain consistency if this constraint is
 	 *          not followed.
 	 */
-	GAME_PROPERTY_11(structure, "Structure", "structure", 5,
+	GAME_PROPERTY_11(structure, "Structure", "structure",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
 		icon, std::string, false, DEFAULT_VALUE(""), ,
@@ -860,14 +895,14 @@ public:
 			dependent({}).initVector();
 	, )
 
-	GAME_PROPERTY_4(movement_type, "MovementType", "movementtype", 4,
+	GAME_PROPERTY_4(movement_type, "MovementType", "movementtype",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
 		icon, std::string, false, DEFAULT_VALUE(""), ,
 		description, std::string, false, DEFAULT_VALUE(""), ,
 	,, )
 
-	GAME_PROPERTY_5(country, "Country", "country", 3,
+	GAME_PROPERTY_5(country, "Country", "country",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
 		icon, std::string, false, DEFAULT_VALUE(""), ,
@@ -880,7 +915,7 @@ public:
 	)
 	awe::ArmyID country::_turnOrderCounter = 0;
 
-	GAME_PROPERTY_7(environment, "Environment", "environment", 2,
+	GAME_PROPERTY_7(environment, "Environment", "environment",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
 		icon, std::string, false, DEFAULT_VALUE(""), ,
@@ -890,7 +925,7 @@ public:
 		structureIconSpritesheet, std::string, false, DEFAULT_VALUE(""), ,
 	,, )
 
-	GAME_PROPERTY_6(weather, "Weather", "weather", 1,
+	GAME_PROPERTY_6(weather, "Weather", "weather",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
 		icon, std::string, false, DEFAULT_VALUE(""), ,
@@ -901,7 +936,7 @@ public:
 		awe::bank_array<awe::particle_data>::Register(engine, document);
 	,, )
 	
-	GAME_PROPERTY_6(commander, "Commander", "commander", 0,
+	GAME_PROPERTY_6(commander, "Commander", "commander",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
 		icon, std::string, false, DEFAULT_VALUE(""), ,
@@ -1260,7 +1295,7 @@ namespace awe {
 				}
 				// 2. Create copy of overrides, and apply this overrider's script name.
 				awe::overrides depthCopyOverrides(overrides);
-				depthCopyOverrides[O::type::overrideID] = overrider.first;
+				depthCopyOverrides[awe::hierarchy_index<O::type>()] = overrider.first;
 				// 3. Make recursive call.
 				calculateOverride(
 					scripts,

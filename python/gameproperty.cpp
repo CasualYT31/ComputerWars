@@ -1,10 +1,9 @@
-#define GAME_PROPERTY_$(cc, ac, gp, i`, p$, t$, o$, d$, e$`, d, e, a) class cc { \
+#define GAME_PROPERTY_$(cc, ac, gp`, p$, t$, o$, d$, e$`, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
 	inline static const std::string type = ac; \
 	inline static const std::string global_property = gp; \
     inline static const std::array<std::string, $> fields = { `#p$, `}; \
-    inline static const std::size_t overrideID = i; \
     cc(const std::string& scriptName, engine::json& j, engine::logger& logger, const std::shared_ptr<engine::scripts>& scripts) : \
         `p$(j, scriptName, logger, scripts), `\
         _scriptName(scriptName) { e } \
@@ -15,7 +14,7 @@ public: \
         `p$##_::Register(engine, document); `\
     } \
 	inline const std::string& scriptName() const { return _scriptName; } \
-    `PROPERTY(cc, ac, p$, t$, i, o$, d$, e$) `\
+    `PROPERTY(cc, ac, p$, t$, o$, d$, e$) `\
     inline static bool hasField(const std::string_view field) { \
         return `field == #p$ || `false; \
     } \
