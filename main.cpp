@@ -82,61 +82,30 @@ int main(int argc, char* argv[]) {
 #endif
         engine::logger rootLogger({ sink, "main" });
 
+        // DEBUG START.
+        std::filesystem::current_path("assets");
+
         std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>(rootLogger.getData());
 
-        awe::bank<awe::commander> commanders(scripts, rootLogger.getData());
-
-        awe::bank<awe::weather> weathers(scripts, rootLogger.getData());
-
-        awe::bank<awe::environment> environments(scripts, rootLogger.getData());
-
-        awe::bank<awe::country> countries(scripts, rootLogger.getData());
-
-        awe::bank<awe::movement_type> movementTypes(scripts, rootLogger.getData());
-
-        awe::bank<awe::structure> structures(scripts, rootLogger.getData());
-
-        awe::bank<awe::tile_type> tileTypes(scripts, rootLogger.getData());
-
-        awe::bank<awe::terrain> terrains(scripts, rootLogger.getData());
-
-        awe::bank<awe::unit_type> unitTypes(scripts, rootLogger.getData());
-
-        awe::bank<awe::weapon> weapons(scripts, rootLogger.getData());
+        awe::banks banks(scripts, rootLogger.getData());
 
         // We need to load the scripts before loading the bank JSON data because
         // the latter relies on the script interface to be able to allocate
         // CScriptArrays.
-        scripts->load("assets/test-scripts.json");
+        scripts->load("test-scripts.json");
         if (!scripts->inGoodState()) {
             throw std::exception("Failed to load scripts!");
         }
 
-        commanders.load("assets/property/co.json");
-        weathers.load("assets/property/weather.json");
-        environments.load("assets/property/environment.json");
-        countries.load("assets/property/country.json");
-        movementTypes.load("assets/property/movement.json");
-        structures.load("assets/property/structure.json");
-        tileTypes.load("assets/property/tile.json");
-        terrains.load("assets/property/terrain.json");
-        unitTypes.load("assets/property/unit.json");
-        weapons.load("assets/property/weapon.json");
+        banks.load("properties.json");
 
         if (!scripts->evaluateAssertions()) {
             throw std::exception("Script assertions failed!");
         }
 
-        awe::processOverrides(scripts, commanders);
-        awe::processOverrides(scripts, weathers, commanders);
-        awe::processOverrides(scripts, environments, weathers, commanders);
-        awe::processOverrides(scripts, countries, environments, weathers, commanders);
-        awe::processOverrides(scripts, movementTypes, countries, environments, weathers, commanders);
-        awe::processOverrides(scripts, structures, movementTypes, countries, environments, weathers, commanders);
-        awe::processOverrides(scripts, tileTypes, structures, movementTypes, countries, environments, weathers, commanders);
-        awe::processOverrides(scripts, terrains, tileTypes, structures, movementTypes, countries, environments, weathers, commanders);
-        awe::processOverrides(scripts, unitTypes, terrains, tileTypes, structures, movementTypes, countries, environments, weathers, commanders);
-        awe::processOverrides(scripts, weapons, unitTypes, terrains, tileTypes, structures, movementTypes, countries, environments, weathers, commanders);
+        banks.processOverrides();
+
+        const auto& weathers = banks.get<awe::weather>();
 
         rootLogger.write("{} --- {}", weathers["CLEAR"]->longName(), weathers["CLEAR"]->longName(awe::overrides().commander("JAKE")));
         rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), static_cast<const awe::bank<awe::weather>>(weathers)["CLEAR"]->shortName(awe::overrides().commander("JAKER")));
@@ -146,14 +115,14 @@ int main(int argc, char* argv[]) {
             weathers["CLEAR"]->particles(awe::overrides().commander("JAKE")).vector[4].vector.x
         );
 
-        const auto& e = environments;
+        const auto& e = banks.get<awe::environment>();
         rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKE")));
         rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEARR").commander("JAKE")));
         rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKER")));
         rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("").commander("")));
         rootLogger.write("Counter");
 
-        const auto& c = countries;
+        const auto& c = banks.get<awe::country>();
         rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKE")));
         rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEARR").commander("JAKE")));
         rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKER")));
@@ -164,15 +133,12 @@ int main(int argc, char* argv[]) {
         rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("").weather("").commander("")));
         rootLogger.write("Counter");
 
-        const auto& s = structures;
+        const auto& s = banks.get<awe::structure>();
         rootLogger.write("Default={}", s["HQ"]->ownedIcon());
-        for (const auto& country : countries) {
+        for (const auto& country : c) {
             rootLogger.write("{}={}", country.scriptName(), s["HQ"]->ownedIcon(awe::overrides().country(country.scriptName())));
         }
         return 0;
-        // TODO:
-        //      Keep testing.
-        //      
 
         //awe::game_engine engine({ sink, "engine" });
         //{

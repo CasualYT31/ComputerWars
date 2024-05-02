@@ -1,0 +1,12 @@
+{
+  "commanders": "property/co.json",
+  "weathers": "property/weather.json",
+  "environments": "property/environment.json",
+  "countries": "property/country.json",
+  "movementTypes": "property/movement.json",
+  "structures": "property/structure.json",
+  "tileTypes": "property/tile.json",
+  "terrains": "property/terrain.json",
+  "unitTypes": "property/unit.json",
+  "weapons": "property/weapon.json"
+}

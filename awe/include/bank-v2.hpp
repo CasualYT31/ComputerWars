@@ -858,7 +858,7 @@ public:
 			// it might be more beneficial to move this checking out of here and
 			// into the code responsible for managing all the banks.
 			// TODO: above, and unit_type sounds also have additional post-processing
-			// that's applied after all overrides.
+			// that's applied after all overrides. awe::banks::_postOverrideProcessing().
 			const auto depArr = dependent({}).array->operator->();
 			if (depArr->GetSize() == 0) return;
 			if (!paintable({})) {
@@ -1128,6 +1128,14 @@ namespace awe {
 
 		inline bank<T>::iterator end() {
 			return bank<T>::iterator(_bank.end());
+		}
+
+		inline bank<T>::const_iterator begin() const {
+			return cbegin();
+		}
+
+		inline bank<T>::const_iterator end() const {
+			return cend();
 		}
 
 		inline bank<T>::const_iterator cbegin() const {
@@ -1640,6 +1648,165 @@ namespace awe {
 	};
 }
 
+namespace awe {
+	class banks : public engine::json_script {
+	public:
+		banks(const std::shared_ptr<engine::scripts>& scripts,
+			const engine::logger::data& data) :
+			engine::json_script({ data.sink, "json_script" }),
+			_logger(data), _scripts(scripts),
+			_weapons(scripts, engine::logger::data{ data.sink, "weapons" }),
+			_unitTypes(scripts, engine::logger::data{ data.sink, "unit_types" }),
+			_terrains(scripts, engine::logger::data{ data.sink, "terrains" }),
+			_tileTypes(scripts, engine::logger::data{ data.sink, "tile_types" }),
+			_structures(scripts, engine::logger::data{ data.sink, "structures" }),
+			_movementTypes(scripts, engine::logger::data{ data.sink, "movement_types" }),
+			_countries(scripts, engine::logger::data{ data.sink, "countries" }),
+			_environments(scripts, engine::logger::data{ data.sink, "environments" }),
+			_weathers(scripts, engine::logger::data{ data.sink, "weathers" }),
+			_commanders(scripts, engine::logger::data{ data.sink, "commanders" })
+		{}
+
+		template<typename T>
+		const bank<T>& get() const {
+			if constexpr (std::is_same<T, commander>::value) {
+				return _commanders;
+			} else if constexpr (std::is_same<T, weather>::value) {
+				return _weathers;
+			} else if constexpr (std::is_same<T, environment>::value) {
+				return _environments;
+			} else if constexpr (std::is_same<T, country>::value) {
+				return _countries;
+			} else if constexpr (std::is_same<T, movement_type>::value) {
+				return _movementTypes;
+			} else if constexpr (std::is_same<T, structure>::value) {
+				return _structures;
+			} else if constexpr (std::is_same<T, tile_type>::value) {
+				return _tileTypes;
+			} else if constexpr (std::is_same<T, terrain>::value) {
+				return _terrains;
+			} else if constexpr (std::is_same<T, unit_type>::value) {
+				return _unitTypes;
+			} else if constexpr (std::is_same<T, weapon>::value) {
+				return _weapons;
+			} else {
+				static_assert(false, "There is no bank of type T, please "
+					"implement support for it.");
+			}
+		}
+
+		void processOverrides() {
+			_processOverrides(_commanders);
+			_processOverrides(_weathers, _commanders);
+			_processOverrides(_environments, _weathers, _commanders);
+			_processOverrides(_countries, _environments, _weathers, _commanders);
+			_processOverrides(_movementTypes, _countries, _environments, _weathers, _commanders);
+			_processOverrides(_structures, _movementTypes, _countries, _environments, _weathers, _commanders);
+			_processOverrides(_tileTypes, _structures, _movementTypes, _countries, _environments, _weathers, _commanders);
+			_processOverrides(_terrains, _tileTypes, _structures, _movementTypes, _countries, _environments, _weathers, _commanders);
+			_processOverrides(_unitTypes, _terrains, _tileTypes, _structures, _movementTypes, _countries, _environments, _weathers, _commanders);
+			_processOverrides(_weapons, _unitTypes, _terrains, _tileTypes, _structures, _movementTypes, _countries, _environments, _weathers, _commanders);
+			_postOverrideProcessing();
+		}
+	private:
+		/**
+		 * The JSON load method for this class.
+		 * All classes substituted for \c T should have a common JSON script
+		 * format. In the root object, key-value pairs list each member/entry of
+		 * the bank and their properties.\n
+		 * The keys will store the script names of each bank entry. It is then up
+		 * to the classes used with this template class to parse the object values
+		 * of these keys in its constructor.
+		 * @param  j The \c engine::json object representing the contents of the
+		 *           loaded script which this method reads.
+		 * @return Always returns \c TRUE.
+		 * @safety Strong guarantee.
+		 * @sa     @c awe::bank<T>
+		 */
+		bool _load(engine::json& j) {
+			std::string path;
+			j.apply(path, { "commanders" }, true); _commanders.load(path); path.clear();
+			j.apply(path, { "weathers" }, true); _weathers.load(path); path.clear();
+			j.apply(path, { "environments" }, true); _environments.load(path); path.clear();
+			j.apply(path, { "countries" }, true); _countries.load(path); path.clear();
+			j.apply(path, { "movementTypes" }, true); _movementTypes.load(path); path.clear();
+			j.apply(path, { "structures" }, true); _structures.load(path); path.clear();
+			j.apply(path, { "tileTypes" }, true); _tileTypes.load(path); path.clear();
+			j.apply(path, { "terrains" }, true); _terrains.load(path); path.clear();
+			j.apply(path, { "unitTypes" }, true); _unitTypes.load(path); path.clear();
+			j.apply(path, { "weapons" }, true); _weapons.load(path); path.clear();
+			return _commanders.inGoodState() &&
+				_weathers.inGoodState() &&
+				_environments.inGoodState() &&
+				_countries.inGoodState() &&
+				_movementTypes.inGoodState() &&
+				_structures.inGoodState() &&
+				_tileTypes.inGoodState() &&
+				_terrains.inGoodState() &&
+				_unitTypes.inGoodState() &&
+				_weapons.inGoodState();
+		}
+
+		void _postOverrideProcessing() {
+			// TODO: Move post-override processing into here.
+			// The GAME_PROPERTY_N macro might define the post-processing method,
+			// that banks invokes via each bank.
+		}
+
+		template<typename T>
+		void _filterOnBaseType(const std::unordered_map<T, std::vector<std::string>>& in,
+			std::unordered_map<std::string, std::vector<std::pair<T, std::vector<std::string>>>>& out) {
+			for (const auto& i : in) {
+				if (i.second.size() == 4) {
+					out[i.second[0]].push_back(i);
+					// Idea: could find a way to warn user if func or var within four namespaces
+					//       isn't used.
+				} else {
+					// Log warning.
+					// TODO: could use metadata here, [helper], to tell the engine that
+					// it's intended to be excluded from the override calculations (at least directly).
+				}
+			}
+		}
+
+		/**
+		 * Scans the \c BANK_OVERRIDE script module and applies overrides accordingly.
+		 */
+		template<typename O, typename... Os>
+		void _processOverrides(O& bank, Os... banks) {
+			// 1. Filter each global variable and global function on base type.
+			auto vars = _scripts->getGlobalVariablesAndTheirNamespaces(
+				engine::scripts::modules[engine::scripts::BANK_OVERRIDE]);
+			std::unordered_map<std::string, std::vector<std::pair<asUINT, std::vector<std::string>>>> filteredVars;
+			_filterOnBaseType(vars, filteredVars);
+			auto funcs = _scripts->getGlobalFunctionsAndTheirNamespaces(
+				engine::scripts::modules[engine::scripts::BANK_OVERRIDE]);
+			std::unordered_map<std::string, std::vector<std::pair<asIScriptFunction*, std::vector<std::string>>>> filteredFuncs;
+			_filterOnBaseType(funcs, filteredFuncs);
+			// 2. Go through each bank, and process every valid override.
+			bank.processOverrides(_scripts, filteredVars, filteredFuncs, banks...);
+			//commanders->processOverrides(scripts, filteredVars, filteredFuncs);
+			//weathers->processOverrides(scripts, filteredVars, filteredFuncs, commanders);
+			//environments->processOverrides(scripts, filteredVars, filteredFuncs, weathers, commanders);
+			// Etc.
+		}
+
+		mutable engine::logger _logger;
+		std::shared_ptr<engine::scripts> _scripts;
+		// All the banks.
+		bank<weapon> _weapons;
+		bank<unit_type> _unitTypes;
+		bank<terrain> _terrains;
+		bank<tile_type> _tileTypes;
+		bank<structure> _structures;
+		bank<movement_type> _movementTypes;
+		bank<country> _countries;
+		bank<environment> _environments;
+		bank<weather> _weathers;
+		bank<commander> _commanders;
+	};
+}
+
 /* Overrides are applied in scripts like so:
 namespace BaseType {
 	namespace BaseScriptName {
@@ -1655,44 +1822,3 @@ namespace BaseType {
 	}
 }
 */
-
-namespace awe {
-	template<typename T>
-	void filterOnBaseType(const std::unordered_map<T, std::vector<std::string>>& in,
-		std::unordered_map<std::string, std::vector<std::pair<T, std::vector<std::string>>>>& out) {
-		for (const auto& i : in) {
-			if (i.second.size() == 4) {
-				out[i.second[0]].push_back(i);
-				// Idea: could find a way to warn user if func or var within four namespaces
-				//       isn't used.
-			} else {
-				// Log warning.
-				// TODO: could use metadata here, [helper], to tell the engine that
-				// it's intended to be excluded from the override calculations (at least directly).
-			}
-		}
-	}
-
-	/**
-	 * Scans the \c BANK_OVERRIDE script module and applies overrides accordingly.
-	 */
-	template<typename O, typename... Os>
-	void processOverrides(const std::shared_ptr<engine::scripts>& scripts,
-		O& bank, Os... banks) {
-		// 1. Filter each global variable and global function on base type.
-		auto vars = scripts->getGlobalVariablesAndTheirNamespaces(
-			engine::scripts::modules[engine::scripts::BANK_OVERRIDE]);
-		std::unordered_map<std::string, std::vector<std::pair<asUINT, std::vector<std::string>>>> filteredVars;
-		filterOnBaseType(vars, filteredVars);
-		auto funcs = scripts->getGlobalFunctionsAndTheirNamespaces(
-			engine::scripts::modules[engine::scripts::BANK_OVERRIDE]);
-		std::unordered_map<std::string, std::vector<std::pair<asIScriptFunction*, std::vector<std::string>>>> filteredFuncs;
-		filterOnBaseType(funcs, filteredFuncs);
-		// 2. Go through each bank, and process every valid override.
-		bank.processOverrides(scripts, filteredVars, filteredFuncs, banks...);
-		//commanders->processOverrides(scripts, filteredVars, filteredFuncs);
-		//weathers->processOverrides(scripts, filteredVars, filteredFuncs, commanders);
-		//environments->processOverrides(scripts, filteredVars, filteredFuncs, weathers, commanders);
-		// Etc.
-	}
-}
