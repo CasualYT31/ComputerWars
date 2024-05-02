@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
 
         banks.processOverrides();
 
-        const auto& weathers = banks.get<awe::weather>();
+        const auto& weathers = *banks.get<awe::weather>();
 
         rootLogger.write("{} --- {}", weathers["CLEAR"]->longName(), weathers["CLEAR"]->longName(awe::overrides().commander("JAKE")));
         rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), static_cast<const awe::bank<awe::weather>>(weathers)["CLEAR"]->shortName(awe::overrides().commander("JAKER")));
@@ -115,14 +115,14 @@ int main(int argc, char* argv[]) {
             weathers["CLEAR"]->particles(awe::overrides().commander("JAKE")).vector[4].vector.x
         );
 
-        const auto& e = banks.get<awe::environment>();
+        const auto& e = *banks.get<awe::environment>();
         rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKE")));
         rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEARR").commander("JAKE")));
         rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKER")));
         rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("").commander("")));
         rootLogger.write("Counter");
 
-        const auto& c = banks.get<awe::country>();
+        const auto& c = *banks.get<awe::country>();
         rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKE")));
         rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEARR").commander("JAKE")));
         rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKER")));
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
         rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("").weather("").commander("")));
         rootLogger.write("Counter");
 
-        const auto& s = banks.get<awe::structure>();
+        const auto& s = *banks.get<awe::structure>();
         rootLogger.write("Default={}", s["HQ"]->ownedIcon());
         for (const auto& country : c) {
             rootLogger.write("{}={}", country.scriptName(), s["HQ"]->ownedIcon(awe::overrides().country(country.scriptName())));

@@ -1655,20 +1655,20 @@ namespace awe {
 			const engine::logger::data& data) :
 			engine::json_script({ data.sink, "json_script" }),
 			_logger(data), _scripts(scripts),
-			_weapons(scripts, engine::logger::data{ data.sink, "weapons" }),
-			_unitTypes(scripts, engine::logger::data{ data.sink, "unit_types" }),
-			_terrains(scripts, engine::logger::data{ data.sink, "terrains" }),
-			_tileTypes(scripts, engine::logger::data{ data.sink, "tile_types" }),
-			_structures(scripts, engine::logger::data{ data.sink, "structures" }),
-			_movementTypes(scripts, engine::logger::data{ data.sink, "movement_types" }),
-			_countries(scripts, engine::logger::data{ data.sink, "countries" }),
-			_environments(scripts, engine::logger::data{ data.sink, "environments" }),
-			_weathers(scripts, engine::logger::data{ data.sink, "weathers" }),
-			_commanders(scripts, engine::logger::data{ data.sink, "commanders" })
+			_weapons(std::make_shared<bank<weapon>>(scripts, engine::logger::data{ data.sink, "weapons" })),
+			_unitTypes(std::make_shared<bank<unit_type>>(scripts, engine::logger::data{ data.sink, "unit_types" })),
+			_terrains(std::make_shared<bank<terrain>>(scripts, engine::logger::data{ data.sink, "terrains" })),
+			_tileTypes(std::make_shared<bank<tile_type>>(scripts, engine::logger::data{ data.sink, "tile_types" })),
+			_structures(std::make_shared<bank<structure>>(scripts, engine::logger::data{ data.sink, "structures" })),
+			_movementTypes(std::make_shared<bank<movement_type>>(scripts, engine::logger::data{ data.sink, "movement_types" })),
+			_countries(std::make_shared<bank<country>>(scripts, engine::logger::data{ data.sink, "countries" })),
+			_environments(std::make_shared<bank<environment>>(scripts, engine::logger::data{ data.sink, "environments" })),
+			_weathers(std::make_shared<bank<weather>>(scripts, engine::logger::data{ data.sink, "weathers" })),
+			_commanders(std::make_shared<bank<commander>>(scripts, engine::logger::data{ data.sink, "commanders" }))
 		{}
 
 		template<typename T>
-		const bank<T>& get() const {
+		std::shared_ptr<const bank<T>> get() const {
 			if constexpr (std::is_same<T, commander>::value) {
 				return _commanders;
 			} else if constexpr (std::is_same<T, weather>::value) {
@@ -1696,16 +1696,16 @@ namespace awe {
 		}
 
 		void processOverrides() {
-			_processOverrides(_commanders);
-			_processOverrides(_weathers, _commanders);
-			_processOverrides(_environments, _weathers, _commanders);
-			_processOverrides(_countries, _environments, _weathers, _commanders);
-			_processOverrides(_movementTypes, _countries, _environments, _weathers, _commanders);
-			_processOverrides(_structures, _movementTypes, _countries, _environments, _weathers, _commanders);
-			_processOverrides(_tileTypes, _structures, _movementTypes, _countries, _environments, _weathers, _commanders);
-			_processOverrides(_terrains, _tileTypes, _structures, _movementTypes, _countries, _environments, _weathers, _commanders);
-			_processOverrides(_unitTypes, _terrains, _tileTypes, _structures, _movementTypes, _countries, _environments, _weathers, _commanders);
-			_processOverrides(_weapons, _unitTypes, _terrains, _tileTypes, _structures, _movementTypes, _countries, _environments, _weathers, _commanders);
+			_processOverrides(*_commanders);
+			_processOverrides(*_weathers, *_commanders);
+			_processOverrides(*_environments, *_weathers, *_commanders);
+			_processOverrides(*_countries, *_environments, *_weathers, *_commanders);
+			_processOverrides(*_movementTypes, *_countries, *_environments, *_weathers, *_commanders);
+			_processOverrides(*_structures, *_movementTypes, *_countries, *_environments, *_weathers, *_commanders);
+			_processOverrides(*_tileTypes, *_structures, *_movementTypes, *_countries, *_environments, *_weathers, *_commanders);
+			_processOverrides(*_terrains, *_tileTypes, *_structures, *_movementTypes, *_countries, *_environments, *_weathers, *_commanders);
+			_processOverrides(*_unitTypes, *_terrains, *_tileTypes, *_structures, *_movementTypes, *_countries, *_environments, *_weathers, *_commanders);
+			_processOverrides(*_weapons, *_unitTypes, *_terrains, *_tileTypes, *_structures, *_movementTypes, *_countries, *_environments, *_weathers, *_commanders);
 			_postOverrideProcessing();
 		}
 	private:
@@ -1725,26 +1725,26 @@ namespace awe {
 		 */
 		bool _load(engine::json& j) {
 			std::string path;
-			j.apply(path, { "commanders" }, true); _commanders.load(path); path.clear();
-			j.apply(path, { "weathers" }, true); _weathers.load(path); path.clear();
-			j.apply(path, { "environments" }, true); _environments.load(path); path.clear();
-			j.apply(path, { "countries" }, true); _countries.load(path); path.clear();
-			j.apply(path, { "movementTypes" }, true); _movementTypes.load(path); path.clear();
-			j.apply(path, { "structures" }, true); _structures.load(path); path.clear();
-			j.apply(path, { "tileTypes" }, true); _tileTypes.load(path); path.clear();
-			j.apply(path, { "terrains" }, true); _terrains.load(path); path.clear();
-			j.apply(path, { "unitTypes" }, true); _unitTypes.load(path); path.clear();
-			j.apply(path, { "weapons" }, true); _weapons.load(path); path.clear();
-			return _commanders.inGoodState() &&
-				_weathers.inGoodState() &&
-				_environments.inGoodState() &&
-				_countries.inGoodState() &&
-				_movementTypes.inGoodState() &&
-				_structures.inGoodState() &&
-				_tileTypes.inGoodState() &&
-				_terrains.inGoodState() &&
-				_unitTypes.inGoodState() &&
-				_weapons.inGoodState();
+			j.apply(path, { "commanders" }, true); _commanders->load(path); path.clear();
+			j.apply(path, { "weathers" }, true); _weathers->load(path); path.clear();
+			j.apply(path, { "environments" }, true); _environments->load(path); path.clear();
+			j.apply(path, { "countries" }, true); _countries->load(path); path.clear();
+			j.apply(path, { "movementTypes" }, true); _movementTypes->load(path); path.clear();
+			j.apply(path, { "structures" }, true); _structures->load(path); path.clear();
+			j.apply(path, { "tileTypes" }, true); _tileTypes->load(path); path.clear();
+			j.apply(path, { "terrains" }, true); _terrains->load(path); path.clear();
+			j.apply(path, { "unitTypes" }, true); _unitTypes->load(path); path.clear();
+			j.apply(path, { "weapons" }, true); _weapons->load(path); path.clear();
+			return _commanders->inGoodState() &&
+				_weathers->inGoodState() &&
+				_environments->inGoodState() &&
+				_countries->inGoodState() &&
+				_movementTypes->inGoodState() &&
+				_structures->inGoodState() &&
+				_tileTypes->inGoodState() &&
+				_terrains->inGoodState() &&
+				_unitTypes->inGoodState() &&
+				_weapons->inGoodState();
 		}
 
 		void _postOverrideProcessing() {
@@ -1794,16 +1794,16 @@ namespace awe {
 		mutable engine::logger _logger;
 		std::shared_ptr<engine::scripts> _scripts;
 		// All the banks.
-		bank<weapon> _weapons;
-		bank<unit_type> _unitTypes;
-		bank<terrain> _terrains;
-		bank<tile_type> _tileTypes;
-		bank<structure> _structures;
-		bank<movement_type> _movementTypes;
-		bank<country> _countries;
-		bank<environment> _environments;
-		bank<weather> _weathers;
-		bank<commander> _commanders;
+		std::shared_ptr<bank<weapon>> _weapons;
+		std::shared_ptr<bank<unit_type>> _unitTypes;
+		std::shared_ptr<bank<terrain>> _terrains;
+		std::shared_ptr<bank<tile_type>> _tileTypes;
+		std::shared_ptr<bank<structure>> _structures;
+		std::shared_ptr<bank<movement_type>> _movementTypes;
+		std::shared_ptr<bank<country>> _countries;
+		std::shared_ptr<bank<environment>> _environments;
+		std::shared_ptr<bank<weather>> _weathers;
+		std::shared_ptr<bank<commander>> _commanders;
 	};
 }
 
