@@ -134,6 +134,36 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_1(ns, cc, ac, p1, t1) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_2(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -183,6 +213,45 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_2(ns, cc, ac, p1, t1, p2, t2) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_3(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, d, e, a) class cc { \
     std::string _scriptName; \
@@ -234,6 +303,54 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_3(ns, cc, ac, p1, t1, p2, t2, p3, t3) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_4(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -283,6 +400,63 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_4(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_5(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, d, e, a) class cc { \
     std::string _scriptName; \
@@ -334,6 +508,72 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_5(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_6(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -383,6 +623,81 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_6(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_7(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, d, e, a) class cc { \
     std::string _scriptName; \
@@ -434,6 +749,90 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_7(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_8(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -483,6 +882,99 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_8(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_9(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, d, e, a) class cc { \
     std::string _scriptName; \
@@ -534,6 +1026,108 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_9(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_10(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -583,6 +1177,117 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_10(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_11(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, d, e, a) class cc { \
     std::string _scriptName; \
@@ -634,6 +1339,126 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_11(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_12(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -683,6 +1508,135 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_12(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_13(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, d, e, a) class cc { \
     std::string _scriptName; \
@@ -734,6 +1688,144 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_13(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_14(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -783,6 +1875,153 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_14(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_15(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, d, e, a) class cc { \
     std::string _scriptName; \
@@ -834,6 +2073,162 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_15(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_16(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -883,6 +2278,171 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_16(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15, p16, t16) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t16>()).append(" " #p16 "() const").c_str(), asMETHOD(ns::cc##_view, p16), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t16>::const_reference p16() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p16(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_17(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, d, e, a) class cc { \
     std::string _scriptName; \
@@ -934,6 +2494,180 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_17(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15, p16, t16, p17, t17) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t16>()).append(" " #p16 "() const").c_str(), asMETHOD(ns::cc##_view, p16), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t17>()).append(" " #p17 "() const").c_str(), asMETHOD(ns::cc##_view, p17), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t16>::const_reference p16() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p16(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t17>::const_reference p17() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p17(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_18(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -983,6 +2717,189 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_18(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15, p16, t16, p17, t17, p18, t18) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t16>()).append(" " #p16 "() const").c_str(), asMETHOD(ns::cc##_view, p16), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t17>()).append(" " #p17 "() const").c_str(), asMETHOD(ns::cc##_view, p17), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t18>()).append(" " #p18 "() const").c_str(), asMETHOD(ns::cc##_view, p18), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t16>::const_reference p16() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p16(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t17>::const_reference p17() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p17(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t18>::const_reference p18() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p18(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_19(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, d, e, a) class cc { \
     std::string _scriptName; \
@@ -1034,6 +2951,198 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_19(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15, p16, t16, p17, t17, p18, t18, p19, t19) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t16>()).append(" " #p16 "() const").c_str(), asMETHOD(ns::cc##_view, p16), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t17>()).append(" " #p17 "() const").c_str(), asMETHOD(ns::cc##_view, p17), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t18>()).append(" " #p18 "() const").c_str(), asMETHOD(ns::cc##_view, p18), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t19>()).append(" " #p19 "() const").c_str(), asMETHOD(ns::cc##_view, p19), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t16>::const_reference p16() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p16(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t17>::const_reference p17() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p17(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t18>::const_reference p18() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p18(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t19>::const_reference p19() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p19(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_20(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -1083,6 +3192,207 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_20(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15, p16, t16, p17, t17, p18, t18, p19, t19, p20, t20) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t16>()).append(" " #p16 "() const").c_str(), asMETHOD(ns::cc##_view, p16), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t17>()).append(" " #p17 "() const").c_str(), asMETHOD(ns::cc##_view, p17), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t18>()).append(" " #p18 "() const").c_str(), asMETHOD(ns::cc##_view, p18), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t19>()).append(" " #p19 "() const").c_str(), asMETHOD(ns::cc##_view, p19), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t20>()).append(" " #p20 "() const").c_str(), asMETHOD(ns::cc##_view, p20), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t16>::const_reference p16() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p16(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t17>::const_reference p17() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p17(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t18>::const_reference p18() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p18(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t19>::const_reference p19() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p19(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t20>::const_reference p20() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p20(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_21(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, d, e, a) class cc { \
     std::string _scriptName; \
@@ -1134,6 +3444,216 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_21(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15, p16, t16, p17, t17, p18, t18, p19, t19, p20, t20, p21, t21) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t16>()).append(" " #p16 "() const").c_str(), asMETHOD(ns::cc##_view, p16), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t17>()).append(" " #p17 "() const").c_str(), asMETHOD(ns::cc##_view, p17), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t18>()).append(" " #p18 "() const").c_str(), asMETHOD(ns::cc##_view, p18), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t19>()).append(" " #p19 "() const").c_str(), asMETHOD(ns::cc##_view, p19), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t20>()).append(" " #p20 "() const").c_str(), asMETHOD(ns::cc##_view, p20), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t21>()).append(" " #p21 "() const").c_str(), asMETHOD(ns::cc##_view, p21), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t16>::const_reference p16() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p16(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t17>::const_reference p17() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p17(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t18>::const_reference p18() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p18(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t19>::const_reference p19() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p19(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t20>::const_reference p20() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p20(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t21>::const_reference p21() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p21(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_22(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, p22, t22, o22, d22, e22, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -1183,6 +3703,225 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_22(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15, p16, t16, p17, t17, p18, t18, p19, t19, p20, t20, p21, t21, p22, t22) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t16>()).append(" " #p16 "() const").c_str(), asMETHOD(ns::cc##_view, p16), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t17>()).append(" " #p17 "() const").c_str(), asMETHOD(ns::cc##_view, p17), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t18>()).append(" " #p18 "() const").c_str(), asMETHOD(ns::cc##_view, p18), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t19>()).append(" " #p19 "() const").c_str(), asMETHOD(ns::cc##_view, p19), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t20>()).append(" " #p20 "() const").c_str(), asMETHOD(ns::cc##_view, p20), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t21>()).append(" " #p21 "() const").c_str(), asMETHOD(ns::cc##_view, p21), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t22>()).append(" " #p22 "() const").c_str(), asMETHOD(ns::cc##_view, p22), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t16>::const_reference p16() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p16(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t17>::const_reference p17() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p17(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t18>::const_reference p18() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p18(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t19>::const_reference p19() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p19(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t20>::const_reference p20() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p20(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t21>::const_reference p21() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p21(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t22>::const_reference p22() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p22(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
 
 #define GAME_PROPERTY_23(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, p22, t22, o22, d22, e22, p23, t23, o23, d23, e23, d, e, a) class cc { \
     std::string _scriptName; \
@@ -1234,6 +3973,234 @@ public: \
     a \
 };
 
+#define GAME_PROPERTY_VIEW_23(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15, p16, t16, p17, t17, p18, t18, p19, t19, p20, t20, p21, t21, p22, t22, p23, t23) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t16>()).append(" " #p16 "() const").c_str(), asMETHOD(ns::cc##_view, p16), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t17>()).append(" " #p17 "() const").c_str(), asMETHOD(ns::cc##_view, p17), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t18>()).append(" " #p18 "() const").c_str(), asMETHOD(ns::cc##_view, p18), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t19>()).append(" " #p19 "() const").c_str(), asMETHOD(ns::cc##_view, p19), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t20>()).append(" " #p20 "() const").c_str(), asMETHOD(ns::cc##_view, p20), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t21>()).append(" " #p21 "() const").c_str(), asMETHOD(ns::cc##_view, p21), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t22>()).append(" " #p22 "() const").c_str(), asMETHOD(ns::cc##_view, p22), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t23>()).append(" " #p23 "() const").c_str(), asMETHOD(ns::cc##_view, p23), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t16>::const_reference p16() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p16(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t17>::const_reference p17() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p17(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t18>::const_reference p18() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p18(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t19>::const_reference p19() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p19(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t20>::const_reference p20() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p20(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t21>::const_reference p21() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p21(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t22>::const_reference p22() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p22(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t23>::const_reference p23() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p23(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}
+
 #define GAME_PROPERTY_24(cc, ac, gp, p1, t1, o1, d1, e1, p2, t2, o2, d2, e2, p3, t3, o3, d3, e3, p4, t4, o4, d4, e4, p5, t5, o5, d5, e5, p6, t6, o6, d6, e6, p7, t7, o7, d7, e7, p8, t8, o8, d8, e8, p9, t9, o9, d9, e9, p10, t10, o10, d10, e10, p11, t11, o11, d11, e11, p12, t12, o12, d12, e12, p13, t13, o13, d13, e13, p14, t14, o14, d14, e14, p15, t15, o15, d15, e15, p16, t16, o16, d16, e16, p17, t17, o17, d17, e17, p18, t18, o18, d18, e18, p19, t19, o19, d19, e19, p20, t20, o20, d20, e20, p21, t21, o21, d21, e21, p22, t22, o22, d22, e22, p23, t23, o23, d23, e23, p24, t24, o24, d24, e24, d, e, a) class cc { \
     std::string _scriptName; \
 public: \
@@ -1283,3 +4250,240 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_24(ns, cc, ac, p1, t1, p2, t2, p3, t3, p4, t4, p5, t5, p6, t6, p7, t7, p8, t8, p9, t9, p10, t10, p11, t11, p12, t12, p13, t13, p14, t14, p15, t15, p16, t16, p17, t17, p18, t18, p19, t19, p20, t20, p21, t21, p22, t22, p23, t23, p24, t24) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t1>()).append(" " #p1 "() const").c_str(), asMETHOD(ns::cc##_view, p1), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t2>()).append(" " #p2 "() const").c_str(), asMETHOD(ns::cc##_view, p2), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t3>()).append(" " #p3 "() const").c_str(), asMETHOD(ns::cc##_view, p3), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t4>()).append(" " #p4 "() const").c_str(), asMETHOD(ns::cc##_view, p4), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t5>()).append(" " #p5 "() const").c_str(), asMETHOD(ns::cc##_view, p5), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t6>()).append(" " #p6 "() const").c_str(), asMETHOD(ns::cc##_view, p6), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t7>()).append(" " #p7 "() const").c_str(), asMETHOD(ns::cc##_view, p7), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t8>()).append(" " #p8 "() const").c_str(), asMETHOD(ns::cc##_view, p8), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t9>()).append(" " #p9 "() const").c_str(), asMETHOD(ns::cc##_view, p9), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t10>()).append(" " #p10 "() const").c_str(), asMETHOD(ns::cc##_view, p10), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t11>()).append(" " #p11 "() const").c_str(), asMETHOD(ns::cc##_view, p11), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t12>()).append(" " #p12 "() const").c_str(), asMETHOD(ns::cc##_view, p12), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t13>()).append(" " #p13 "() const").c_str(), asMETHOD(ns::cc##_view, p13), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t14>()).append(" " #p14 "() const").c_str(), asMETHOD(ns::cc##_view, p14), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t15>()).append(" " #p15 "() const").c_str(), asMETHOD(ns::cc##_view, p15), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t16>()).append(" " #p16 "() const").c_str(), asMETHOD(ns::cc##_view, p16), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t17>()).append(" " #p17 "() const").c_str(), asMETHOD(ns::cc##_view, p17), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t18>()).append(" " #p18 "() const").c_str(), asMETHOD(ns::cc##_view, p18), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t19>()).append(" " #p19 "() const").c_str(), asMETHOD(ns::cc##_view, p19), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t20>()).append(" " #p20 "() const").c_str(), asMETHOD(ns::cc##_view, p20), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t21>()).append(" " #p21 "() const").c_str(), asMETHOD(ns::cc##_view, p21), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t22>()).append(" " #p22 "() const").c_str(), asMETHOD(ns::cc##_view, p22), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t23>()).append(" " #p23 "() const").c_str(), asMETHOD(ns::cc##_view, p23), asCALL_THISCALL); \
+            engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t24>()).append(" " #p24 "() const").c_str(), asMETHOD(ns::cc##_view, p24), asCALL_THISCALL); \
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        inline typename boost::call_traits<t1>::const_reference p1() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p1(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t2>::const_reference p2() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p2(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t3>::const_reference p3() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p3(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t4>::const_reference p4() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p4(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t5>::const_reference p5() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p5(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t6>::const_reference p6() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p6(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t7>::const_reference p7() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p7(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t8>::const_reference p8() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p8(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t9>::const_reference p9() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p9(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t10>::const_reference p10() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p10(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t11>::const_reference p11() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p11(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t12>::const_reference p12() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p12(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t13>::const_reference p13() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p13(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t14>::const_reference p14() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p14(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t15>::const_reference p15() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p15(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t16>::const_reference p16() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p16(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t17>::const_reference p17() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p17(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t18>::const_reference p18() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p18(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t19>::const_reference p19() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p19(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t20>::const_reference p20() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p20(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t21>::const_reference p21() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p21(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t22>::const_reference p22() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p22(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t23>::const_reference p23() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p23(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+        inline typename boost::call_traits<t24>::const_reference p24() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p24(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } \
+    }; \
+}

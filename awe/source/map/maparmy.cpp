@@ -22,33 +22,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "map.hpp"
 
-bool awe::map::createArmy(const std::shared_ptr<const awe::country>& country) {
-	if (!country) {
+bool awe::map::createArmy(const std::string& country) {
+	const auto& countries = *_banks->get<awe::country>();
+	if (!countries.contains(country)) {
 		_logger.error("createArmy operation cancelled: attempted to create an "
-			"army with no country!");
+			"army with a country, \"{}\", that doesn't exist!", country);
 		return false;
 	}
-	if (_isArmyPresent(country->getTurnOrder())) {
+	const auto turnOrder = countries[country]->turnOrder();
+	if (_isArmyPresent(turnOrder)) {
 		_logger.error("createArmy operation cancelled: attempted to create an "
 			"army with a country, \"{}\", that already existed on the map!",
-			country->getScriptName());
+			country);
 		return false;
 	}
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::CREATE_ARMY));
 	// Create the army.
 	_armies.insert(
-		std::pair<awe::ArmyID, awe::army>(country->getTurnOrder(), country)
+		std::pair<awe::ArmyID, awe::army>(turnOrder, awe::army(_banks, country,
+			engine::logger::data{ _logger.getData().sink, "army_view" }))
 	);
 	// This will miss out the maximum value for a team ID, but I don't care.
 	if (_teamIDCounter == std::numeric_limits<awe::TeamID>::max())
 		_teamIDCounter = std::numeric_limits<awe::TeamID>::min();
-	_armies.at(country->getTurnOrder()).setTeam(_teamIDCounter++);
+	_armies.at(turnOrder).setTeam(_teamIDCounter++);
 	return true;
-}
-
-bool awe::map::createArmy(const std::string& country) {
-	return createArmy(_countries->operator[](country));
 }
 
 void awe::map::deleteArmy(const awe::ArmyID army,
@@ -154,84 +153,62 @@ awe::Funds awe::map::getArmyFunds(const awe::ArmyID army) const {
 	return -1;
 }
 
-std::shared_ptr<const awe::country>
-awe::map::getArmyCountry(const awe::ArmyID army) const {
-	if (_isArmyPresent(army)) return _armies.at(army).getCountry();
-	_logger.error("getArmyCountry operation failed: army with ID {} didn't exist "
-		"at the time of calling!", army);
-	return nullptr;
+const engine::CScriptWrapper<awe::country_view> awe::map::getArmyCountry(const awe::ArmyID army) const {
+	if (!_isArmyPresent(army)) {
+		_logger.error("getArmyCountry operation failed: army with ID {} didn't "
+			"exist at the time of calling!", army);
+		return nullptr;
+	}
+	return _armies.at(army).getCountry();
 }
 
-const awe::country* awe::map::getArmyCountryObject(const awe::ArmyID army) const {
-	auto ret = getArmyCountry(army);
-	if (ret) {
-		return ret.get();
-	} else {
-		throw std::out_of_range("This army does not exist!");
-	}
+const awe::country_view* awe::map::getRawArmyCountry(const awe::ArmyID army) const {
+	const auto country = getArmyCountry(army);
+	if (!country.operator->()) return nullptr;
+	country->AddRef();
+	return country.operator->();
 }
 
-void awe::map::setArmyCOs(const awe::ArmyID army,
-	const std::shared_ptr<const awe::commander>& current,
-	const std::shared_ptr<const awe::commander>& tag) {
-	if (_isArmyPresent(army)) {
-		if (!current && !tag) {
-			_logger.error("setCOs operation failed: army with ID {} was given no "
-				"COs!", army);
-		} else {
-			if (current == getArmyCurrentCO(army) && tag == getArmyTagCO(army))
-				return;
-			awe::disable_mementos token(this,
-				_getMementoName(awe::map_strings::operation::ARMY_COS));
-			if (!current && tag) {
-				_logger.warning("setCOs operation: army with ID {} was given a "
-					"tag CO but not current CO! The army will instead be assigned "
-					"a current CO and it will not be assigned a tag CO.", army);
-			}
-			_armies.at(army).setCOs(current, tag);
-		}
-	} else {
-		_logger.error("setCOs operation failed: army with ID {} didn't exist at "
-			"the time of calling!", army);
+std::string awe::map::getArmyCountryScriptName(const awe::ArmyID army) const {
+	if (!_isArmyPresent(army)) {
+		_logger.error("getArmyCountryScriptName operation failed: army with ID {} "
+			"didn't exist at the time of calling!", army);
+		return "";
 	}
+	return _armies.at(army).getCountryScriptName();
 }
 
 void awe::map::setArmyCOs(const awe::ArmyID army, const std::string& current,
 	const std::string& tag) {
-	if (current.empty() && tag.empty()) {
-		_logger.error("setArmyCOs operation cancelled: both the current and tag "
-			"CO script names given were blank!");
+	if (!_isArmyPresent(army)) {
+		_logger.error("setCOs operation failed: army with ID {} didn't exist at "
+			"the time of calling!", army);
 		return;
 	}
-	if (tag.empty()) {
-		setArmyCOs(army, _commanders->operator[](current), nullptr);
-	} else {
-		setArmyCOs(army, _commanders->operator[](current),
-			_commanders->operator[](tag));
+	if (current.empty() && tag.empty()) {
+		_logger.error("setCOs operation failed: army with ID {} was given no "
+			"COs!", army);
+		return;
 	}
-}
-
-void awe::map::setArmyCurrentCO(const awe::ArmyID army,
-	const std::shared_ptr<const awe::commander>& current) {
-	setArmyCOs(army, current, getArmyTagCO(army));
+	if (current == getArmyCurrentCOScriptName(army) &&
+		tag == getArmyTagCOScriptName(army)) return;
+	awe::disable_mementos token(this,
+		_getMementoName(awe::map_strings::operation::ARMY_COS));
+	if (current.empty() && !tag.empty()) {
+		_logger.warning("setCOs operation: army with ID {} was given a "
+			"tag CO but not current CO! The army will instead be assigned "
+			"a current CO and it will not be assigned a tag CO.", army);
+	}
+	_armies.at(army).setCOs(current, tag);
 }
 
 void awe::map::setArmyCurrentCO(const awe::ArmyID army,
 	const std::string& current) {
-	setArmyCOs(army, _commanders->operator[](current), getArmyTagCO(army));
-}
-
-void awe::map::setArmyTagCO(const awe::ArmyID army,
-	const std::shared_ptr<const awe::commander>& tag) {
-	setArmyCOs(army, getArmyCurrentCO(army), tag);
+	setArmyCOs(army, current, getArmyTagCOScriptName(army));
 }
 
 void awe::map::setArmyTagCO(const awe::ArmyID army, const std::string& tag) {
-	if (tag.empty()) {
-		setArmyCOs(army, getArmyCurrentCO(army), nullptr);
-	} else {
-		setArmyCOs(army, getArmyCurrentCO(army), _commanders->operator[](tag));
-	}
+	setArmyCOs(army, getArmyCurrentCOScriptName(army), tag);
 }
 
 void awe::map::tagArmyCOs(const awe::ArmyID army) {
@@ -239,7 +216,7 @@ void awe::map::tagArmyCOs(const awe::ArmyID army) {
 		_logger.error("tagCOs operation failed: army with ID {} didn't exist at "
 			"the time of calling!", army);
 	} else {
-		if (_armies.at(army).getTagCO()) {
+		if (tagCOIsPresent(army)) {
 			awe::disable_mementos token(this,
 				_getMementoName(awe::map_strings::operation::TAG_COS));
 			_armies.at(army).tagCOs();
@@ -250,49 +227,57 @@ void awe::map::tagArmyCOs(const awe::ArmyID army) {
 	}
 }
 
-std::shared_ptr<const awe::commander> awe::map::getArmyCurrentCO(
-	const awe::ArmyID army) const {
+const engine::CScriptWrapper<awe::commander_view> awe::map::getArmyCurrentCO(const awe::ArmyID army) {
 	if (_isArmyPresent(army)) return _armies.at(army).getCurrentCO();
 	_logger.error("getCurrentCO operation failed: army with ID {} didn't exist at "
 		"the time of calling!", army);
 	return nullptr;
 }
 
-std::string awe::map::getArmyCurrentCOScriptName(const awe::ArmyID army) const {
-	auto co = getArmyCurrentCO(army);
-	if (co) {
-		return co->getScriptName();
-	} else {
-		return "";
-	}
+const awe::commander_view* awe::map::getRawArmyCurrentCO(const awe::ArmyID army) {
+	const auto co = getArmyCurrentCO(army);
+	if (!co.operator->()) return nullptr;
+	co->AddRef();
+	return co.operator->();
 }
 
-std::shared_ptr<const awe::commander> awe::map::getArmyTagCO(
-	const awe::ArmyID army) const {
+std::string awe::map::getArmyCurrentCOScriptName(const awe::ArmyID army) const {
+	if (_isArmyPresent(army)) return _armies.at(army).getCurrentCOScriptName();
+	_logger.error("getCurrentCOScriptName operation failed: army with ID {} "
+		"didn't exist at the time of calling!", army);
+	return "";
+}
+
+const engine::CScriptWrapper<awe::commander_view> awe::map::getArmyTagCO(const awe::ArmyID army) {
 	if (_isArmyPresent(army)) return _armies.at(army).getTagCO();
 	_logger.error("getTagCO operation failed: army with ID {} didn't exist at the "
 		"time of calling!", army);
 	return nullptr;
 }
 
-std::string awe::map::getArmyTagCOScriptName(const awe::ArmyID army) const {
-	auto co = getArmyTagCO(army);
-	if (co) {
-		return co->getScriptName();
-	} else {
-		return "";
-	}
+const awe::commander_view* awe::map::getRawArmyTagCO(const awe::ArmyID army) {
+	const auto co = getArmyTagCO(army);
+	if (!co.operator->()) return nullptr;
+	co->AddRef();
+	return co.operator->();
 }
 
-bool awe::map::tagCOIsPresent(const awe::ArmyID army) const {
-	if (_isArmyPresent(army)) return _armies.at(army).getTagCO().operator bool();
+std::string awe::map::getArmyTagCOScriptName(const awe::ArmyID army) const {
+	if (_isArmyPresent(army)) return _armies.at(army).getTagCOScriptName();
+	_logger.error("getTagCOScriptName operation failed: army with ID {} didn't "
+		"exist at the time of calling!", army);
+	return "";
+}
+
+bool awe::map::tagCOIsPresent(const awe::ArmyID army) {
+	if (_isArmyPresent(army)) return _armies.at(army).hasTagCO();
 	_logger.error("tagCOIsPresent operation failed: army with ID {} didn't exist "
 		"at the time of calling!", army);
 	return false;
 }
 
 std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army,
-	const std::unordered_set<std::shared_ptr<const awe::terrain>>& filter) const {
+	const std::unordered_set<std::string>& filter) const {
 	if (_isArmyPresent(army)) {
 		auto result = _armies.at(army).getTiles();
 		if (!filter.empty()) {
@@ -300,8 +285,7 @@ std::unordered_set<sf::Vector2u> awe::map::getTilesOfArmy(const awe::ArmyID army
 			std::vector<sf::Vector2u> converted(result.begin(), result.end());
 			auto begin = converted.begin(), end = converted.end();
 			end = std::remove_if(begin, end, [&](const sf::Vector2u& tile) {
-				return filter.find(
-					_tiles[tile.x][tile.y].data.getTileType()->getType())
+				return filter.find(getTerrainOfTileScriptName(tile))
 					== filter.end();
 				});
 			return std::unordered_set<sf::Vector2u>(begin, end);
@@ -319,11 +303,7 @@ CScriptArray* awe::map::getTilesOfArmyAsArray(const awe::ArmyID army,
 	const auto scriptNames =
 		engine::ConvertCScriptArray<std::unordered_set<std::string>, std::string>(
 			filter);
-	std::unordered_set<std::shared_ptr<const awe::terrain>> terrainFilter;
-	for (const auto& name : scriptNames)
-		terrainFilter.insert((*_terrains)[name]);
-	const auto tilesOfArmy = getTilesOfArmy(army, terrainFilter);
-	return _scripts->createArrayFromContainer("Vector2", tilesOfArmy);
+	return _scripts->createArrayFromContainer("Vector2", scriptNames);
 }
 
 std::unordered_set<awe::UnitID> awe::map::getUnitsOfArmy(
@@ -350,7 +330,7 @@ awe::map::getUnitsOfArmyByPriority(const awe::ArmyID army) const {
 	std::map<unsigned int, std::unordered_set<awe::UnitID>> ret;
 	auto units = getUnitsOfArmy(army);
 	for (auto& unit : units)
-		ret[_units.at(unit).data.getType()->getTurnStartPriority()].insert(unit);
+		ret[getUnitType(unit)->turnStartPriority()].insert(unit);
 	return ret;
 }
 
@@ -379,11 +359,8 @@ std::size_t awe::map::countTilesBelongingToArmy(const awe::ArmyID army,
 	std::size_t counter = 0;
 	const auto tiles = getTilesOfArmy(army);
 	for (const auto& tile : tiles) {
-		const auto type = getTileType(tile);
-		if (type) {
-			const auto terrain = type->getType();
-			if (terrain && terrain->getScriptName() == terrainType) ++counter;
-		}
+		const auto terrain = getTerrainOfTileScriptName(tile);
+		if (terrain == terrainType) ++counter;
 	}
 	return counter;
 }

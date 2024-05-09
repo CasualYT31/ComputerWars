@@ -46,11 +46,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @brief     The \c transition namespace contains all the transition drawables.
  */
 
-//#include <filesystem>
-//#include "engine.hpp"
-
-#include "bank-v2.hpp"
-#include "fmtsfx.hpp"
+#include <filesystem>
+#include "engine.hpp"
 
 /**
  * Loads the game engine, then runs it.
@@ -82,98 +79,40 @@ int main(int argc, char* argv[]) {
 #endif
         engine::logger rootLogger({ sink, "main" });
 
-        // DEBUG START.
-        std::filesystem::current_path("assets");
-
-        std::shared_ptr<engine::scripts> scripts = std::make_shared<engine::scripts>(rootLogger.getData());
-
-        awe::banks banks(scripts, rootLogger.getData());
-
-        // We need to load the scripts before loading the bank JSON data because
-        // the latter relies on the script interface to be able to allocate
-        // CScriptArrays.
-        scripts->load("test-scripts.json");
-        if (!scripts->inGoodState()) {
-            throw std::exception("Failed to load scripts!");
+        awe::game_engine engine({ sink, "engine" });
+        {
+            // Find assets folder path from command-line arguments.
+            std::string assetsFolder = "./assets";
+            if (argc >= 2) {
+                assetsFolder = std::string(argv[1]);
+                rootLogger.write("Assets folder provided: \"{}\".", assetsFolder);
+            } else {
+                rootLogger.write("Assets folder not provided in command-line "
+                    "arguments, assuming \"{}\".", assetsFolder);
+            }
+            // Find config.json within the assets folder, then load the game engine
+            // with it.
+            std::string configPath = assetsFolder + "/config.json";
+            if (!std::filesystem::exists(configPath)) {
+                rootLogger.critical("config.json script not found in assets "
+                    "folder \"{}\", aborting.", assetsFolder);
+                return 2;
+            } else {
+                try {
+                    engine.load(configPath);
+                } catch (const awe::game_engine::load_cancelled&) {
+                    return 5;
+                }
+            }
         }
-
-        banks.load("properties.json");
-
-        if (!scripts->evaluateAssertions()) {
-            throw std::exception("Script assertions failed!");
+        if (engine.inGoodState()) {
+            const auto r = engine.run();
+            return r;
+        } else {
+            rootLogger.critical("Game engine in bad state after loading, "
+                "aborting...");
+            return 3;
         }
-
-        banks.processOverrides();
-
-        const auto& weathers = *banks.get<awe::weather>();
-
-        rootLogger.write("{} --- {}", weathers["CLEAR"]->longName(), weathers["CLEAR"]->longName(awe::overrides().commander("JAKE")));
-        rootLogger.write("{} --- {}", weathers["CLEAR"]->shortName(), static_cast<const awe::bank<awe::weather>>(weathers)["CLEAR"]->shortName(awe::overrides().commander("JAKER")));
-
-        rootLogger.write("{} --- {}",
-            weathers["CLEAR"]->particles().vector[3].respawnDelay.asSeconds(),
-            weathers["CLEAR"]->particles(awe::overrides().commander("JAKE")).vector[4].vector.x
-        );
-
-        const auto& e = *banks.get<awe::environment>();
-        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKE")));
-        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEARR").commander("JAKE")));
-        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("CLEAR").commander("JAKER")));
-        rootLogger.write("{}", e["NORMAL"]->icon(awe::overrides().weather("").commander("")));
-        rootLogger.write("Counter");
-
-        const auto& c = *banks.get<awe::country>();
-        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKE")));
-        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEARR").commander("JAKE")));
-        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEAR").commander("JAKER")));
-        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMAL").weather("CLEARR").commander("JAKER")));
-        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMALL").weather("CLEARR").commander("JAKE")));
-        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMALL").weather("CLEAR").commander("JAKER")));
-        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("NORMALL").weather("CLEAR").commander("JAKE")));
-        rootLogger.write("{}", c["ORANGE"]->longName(awe::overrides().environment("").weather("").commander("")));
-        rootLogger.write("Counter");
-
-        const auto& s = *banks.get<awe::structure>();
-        rootLogger.write("Default={}", s["HQ"]->ownedIcon());
-        for (const auto& country : c) {
-            rootLogger.write("{}={}", country.scriptName(), s["HQ"]->ownedIcon(awe::overrides().country(country.scriptName())));
-        }
-        return 0;
-
-        //awe::game_engine engine({ sink, "engine" });
-        //{
-        //    // Find assets folder path from command-line arguments.
-        //    std::string assetsFolder = "./assets";
-        //    if (argc >= 2) {
-        //        assetsFolder = std::string(argv[1]);
-        //        rootLogger.write("Assets folder provided: \"{}\".", assetsFolder);
-        //    } else {
-        //        rootLogger.write("Assets folder not provided in command-line "
-        //            "arguments, assuming \"{}\".", assetsFolder);
-        //    }
-        //    // Find config.json within the assets folder, then load the game engine
-        //    // with it.
-        //    std::string configPath = assetsFolder + "/config.json";
-        //    if (!std::filesystem::exists(configPath)) {
-        //        rootLogger.critical("config.json script not found in assets "
-        //            "folder \"{}\", aborting.", assetsFolder);
-        //        return 2;
-        //    } else {
-        //        try {
-        //            engine.load(configPath);
-        //        } catch (const awe::game_engine::load_cancelled&) {
-        //            return 5;
-        //        }
-        //    }
-        //}
-        //if (engine.inGoodState()) {
-        //    const auto r = engine.run();
-        //    return r;
-        //} else {
-        //    rootLogger.critical("Game engine in bad state after loading, "
-        //        "aborting...");
-        //    return 3;
-        //}
     } catch (const std::exception& e) {
         boxer::show(e.what(), "Critical Error!", boxer::Style::Error);
         return 4;

@@ -22,25 +22,56 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tile.hpp"
 
-awe::tile::tile(const std::shared_ptr<awe::animated_tile>& animatedTile,
+awe::tile::tile(const view_callbacks& callbacks,
+	const std::shared_ptr<const awe::banks>& banks,
+	const std::shared_ptr<awe::animated_tile>& animatedTile,
 	const std::function<void(const std::function<void(void)>&)>& spriteCallback,
-	const std::shared_ptr<const awe::tile_type>& type,
+	const engine::logger::data& data,
+	const std::string& type,
 	const awe::ArmyID owner,
 	const std::shared_ptr<sfx::animated_spritesheet>& sheet) :
-	_type(type), _owner(owner), _tileSprite(animatedTile),
-	_updateSprite(spriteCallback) {
+	_viewCallbacks(callbacks), _type(type), _owner(owner), _tileSprite(animatedTile),
+	_updateSprite(spriteCallback), _loggerData(data), _banks(banks) {
 	animatedTile->setSpritesheet(sheet);
 	updateSpriteID();
 }
 
-void awe::tile::setTileType(const std::shared_ptr<const awe::tile_type>& type) {
+void awe::tile::setTileType(const std::string& type) {
 	_type = type;
 	updateSpriteID();
+}
+
+engine::CScriptWrapper<awe::tile_type_view> awe::tile::getTileType() const {
+	const auto tileType = awe::tile_type_view::Create(_loggerData, _banks, _type);
+	tileType->overrides
+		.commander(_owner == awe::NO_ARMY ? "" : _viewCallbacks.commander(_owner))
+		.country(_owner == awe::NO_ARMY ? "" : _viewCallbacks.country(_owner))
+		.structure(_structure);
+	return tileType;
+}
+
+engine::CScriptWrapper<awe::terrain_view> awe::tile::getTerrain() const {
+	const auto terrain = awe::terrain_view::Create(_loggerData, _banks, getTerrainScriptName());
+	terrain->overrides
+		.commander(_owner == awe::NO_ARMY ? "" : _viewCallbacks.commander(_owner))
+		.country(_owner == awe::NO_ARMY ? "" : _viewCallbacks.country(_owner))
+		.structure(_structure)
+		.tileType(_type);
+	return terrain;
 }
 
 void awe::tile::setTileOwner(const awe::ArmyID owner) {
 	_owner = owner;
 	updateSpriteID();
+}
+
+engine::CScriptWrapper<awe::structure_view> awe::tile::getStructureType() const {
+	if (!isPartOfStructure()) return nullptr;
+	const auto structure = awe::structure_view::Create(_loggerData, _banks, _structure);
+	structure->overrides
+		.commander(_owner == awe::NO_ARMY ? "" : _viewCallbacks.commander(_owner))
+		.country(_owner == awe::NO_ARMY ? "" : _viewCallbacks.country(_owner));
+	return structure;
 }
 
 void awe::tile::setVisibility(const bool visible) {
@@ -49,24 +80,27 @@ void awe::tile::setVisibility(const bool visible) {
 	// owner of tiles otherwise.
 	const auto changed = visible != _visible;
 	_visible = visible;
-	if (changed) _updateSpriteID(_tileSprite, _owner, _type, _visible);
+	if (changed) _updateSpriteID(_tileSprite, getTileType(), getTerrain(), _visible);
 }
 
 void awe::tile::updateSpriteID() {
-	if (!_type) return;
-	_updateSprite(std::bind(&awe::tile::_updateSpriteID, this, _tileSprite, _owner,
-		_type, _visible));
+	const auto tileType = getTileType();
+	if (!tileType->isScriptNameValid()) return;
+	const auto terrain = getTerrain();
+	_updateSprite(std::bind(&awe::tile::_updateSpriteID, this, _tileSprite,
+		tileType, terrain, _visible));
 }
 
 void awe::tile::_updateSpriteID(
-	const std::weak_ptr<awe::animated_tile>& _tileSprite, const awe::ArmyID owner,
-	const std::shared_ptr<const awe::tile_type>& type, const bool visible) {
-	if (!type || _tileSprite.expired()) return;
-	const auto tileSprite = _tileSprite.lock();
-	if (owner == awe::NO_ARMY ||
-		(!visible && !type->getType()->showOwnerWhenHidden())) {
-		tileSprite->setSprite(type->getNeutralTile());
-	} else {
-		tileSprite->setSprite(type->getOwnedTile(owner));
+	const std::weak_ptr<awe::animated_tile>& _tileSprite,
+	engine::CScriptWrapper<awe::tile_type_view> type,
+	engine::CScriptWrapper<awe::terrain_view> terrain, const bool visible) {
+	if (!type->isScriptNameValid() || _tileSprite.expired()) return;
+	// Explicitly clear owner country override if the tile is hidden, and it
+	// shouldn't show its owner when hidden.
+	if (!visible && !terrain->showOwnerWhenHidden()) {
+		type->overrides.country("");
 	}
+	const auto tileSprite = _tileSprite.lock();
+	tileSprite->setSprite(type->tile());
 }

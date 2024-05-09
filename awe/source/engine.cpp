@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 #include "engine.hpp"
 #include "army.hpp"
+#include "fmtsfx.hpp"
 
 awe::game_engine::game_engine(const engine::logger::data& data) :
 	engine::json_script({ data.sink, "json_script" }), _logger(data) {}
@@ -455,96 +456,47 @@ bool awe::game_engine::_load(engine::json& j) {
 				engine::logger::data{ _logger.getData().sink, "spritesheet" });
 		},
 		[&]() {
-			return _loadObject(_countries, j, { "countries" }, true, _scripts,
-				"Country",
-				engine::logger::data{ _logger.getData().sink, "country_bank" });
-		},
-		[&]() {
-			return _loadObject(_weathers, j, { "weathers" }, true, _scripts,
-				"Weather",
-				engine::logger::data{ _logger.getData().sink, "weather_bank" });
-		},
-		[&]() {
-			return _loadObject(_environments, j, { "environments" }, true,
-				_scripts, "Environment",
-				engine::logger::data{ _logger.getData().sink,
-				"environment_bank" });
-		},
-		[&]() {
-			return _loadObject(_movements, j, { "movements" }, true, _scripts,
-				"Movement", engine::logger::data{ _logger.getData().sink,
-				"movement_bank" });
-		},
-		[&]() {
-			return _loadObject(_terrains, j, { "terrains" }, true, _scripts,
-				"Terrain",
-				engine::logger::data{ _logger.getData().sink, "terrain_bank" });
-		},
-		[&]() {
-			return _loadObject(_tiles, j, { "tiles" }, true, _scripts, "TileType",
-				engine::logger::data{ _logger.getData().sink, "tile_bank" });
-		},
-		[&]() {
-			return _loadObject(_weapons, j, { "weapons" }, true, _scripts,
-				"Weapon",
-				engine::logger::data{ _logger.getData().sink, "weapon_bank" });
-		},
-		[&]() {
-			return _loadObject(_units, j, { "units" }, true, _scripts, "UnitType",
-				engine::logger::data{ _logger.getData().sink, "unit_bank" });
-		},
-		[&]() {
-			return _loadObject(_commanders, j, { "commanders" }, true, _scripts,
-				"Commander", engine::logger::data{ _logger.getData().sink,
-				"commander_bank" });
-		},
-		[&]() {
-			return _loadObject(_structures, j, { "structures" }, true, _scripts,
-				"Structure", engine::logger::data{ _logger.getData().sink,
-				"structure_bank" });
+			_banks = std::make_shared<awe::banks>(_scripts,
+				engine::logger::data{ _logger.getData().sink, "game_properties" });
+			return _banks.operator bool();
 		},
 		[&]() {
 			return _loadObject(_mapStrings, j, { "mapstrings" }, true,
 				engine::logger::data{ _logger.getData().sink, "map_strings" });
 		},
-		[&]() {
-			// Finish initialisation of banks.
-			if (!awe::checkCountryTurnOrderIDs(*_countries)) {
-				_logger.critical("The turn order IDs assigned to each configured "
-					"country are not valid. See the log for more information.");
-				for (const auto& pCountry : *_countries) {
-					_logger.error("Turn order ID for country {} = {}",
-						pCountry.first, pCountry.second->getTurnOrder());
-				}
-				return false;
-			}
-			return true;
-		},
-		[&]() {
-			awe::updateTileTypeBank(*_tiles, *_terrains, *_countries, *_structures,
-					_scripts);
-			return true;
-		},
-		[&]() {
-			awe::updateTerrainBank(*_terrains, *_countries, *_tiles);
-			return true;
-		},
-		[&]() {
-			awe::updateUnitTypeBank(*_units, *_movements, *_terrains, *_weapons,
-				*_countries, _logger.getData().sink);
-			return true;
-		},
-		[&]() {
-			awe::updateStructureBank(*_structures, *_tiles, *_countries);
-			return true;
-		},
+		// TODO: BANK-V2: Review this, but I'm pretty sure we've not needed this
+		// ever since I introduced ordered_map into bank-v1.
+		//[&]() {
+		//	// Finish initialisation of banks.
+		//	if (!awe::checkCountryTurnOrderIDs(*_countries)) {
+		//		_logger.critical("The turn order IDs assigned to each configured "
+		//			"country are not valid. See the log for more information.");
+		//		for (const auto& pCountry : *_countries) {
+		//			_logger.error("Turn order ID for country {} = {}",
+		//				pCountry.first, pCountry.second->getTurnOrder());
+		//		}
+		//		return false;
+		//	}
+		//	return true;
+		//},
 		[&]() {
 			_scripts->addRegistrant(this);
 			return _loadObject(_scripts, j, { "scripts" }, false,
 				engine::logger::data{ _logger.getData().sink, "scripts" });
 		},
 		[&]() {
+			return _loadObject(_banks, j, { "properties" }, false, _scripts,
+				engine::logger::data{ _logger.getData().sink, "game_properties" });
+		},
+		[&]() {
+			return _scripts->evaluateAssertions();
+		},
+		[&]() {
 			_scripts->generateDocumentation();
+			return true;
+		},
+		[&]() {
+			_banks->processOverrides();
 			return true;
 		},
 		[&]() {
@@ -600,15 +552,7 @@ bool awe::game_engine::_load(engine::json& j) {
 
 int awe::game_engine::_initCheck() const {
 	std::string errstring = "";
-	if (!_countries) errstring += "countries\n";
-	if (!_weathers) errstring += "weathers\n";
-	if (!_environments) errstring += "environments\n";
-	if (!_movements) errstring += "movements\n";
-	if (!_terrains) errstring += "terrains\n";
-	if (!_tiles) errstring += "tiles\n";
-	if (!_units) errstring += "units\n";
-	if (!_commanders) errstring += "commanders\n";
-	if (!_structures) errstring += "structures\n";
+	if (!_banks) errstring += "game properties\n";
 	if (!_mapStrings) errstring += "map strings\n";
 	if (!_dictionary) errstring += "dictionary\n";
 	if (!_fonts) errstring += "fonts\n";
@@ -672,8 +616,7 @@ awe::map* awe::game_engine::_script_createMap(const std::string& file,
 	}
 	// Create a blank map, save it, then load it using _script_loadMap().
 	try {
-		_map = std::make_unique<awe::map>(_countries, _environments, _weathers,
-			_tiles, _terrains, _units, _commanders, _structures,
+		_map = std::make_unique<awe::map>(_banks,
 			engine::logger::data{ _logger.getData().sink, "map" });
 	} catch (const std::bad_alloc& e) {
 		_logger.error("Couldn't allocate the map object for creation: {}", e);
@@ -699,8 +642,7 @@ awe::map* awe::game_engine::_script_loadMap(const std::string& file,
 		return nullptr;
 	} else {
 		try {
-			_map = std::make_unique<awe::map>( _countries, _environments,
-				_weathers, _tiles, _terrains, _units, _commanders, _structures,
+			_map = std::make_unique<awe::map>(_banks,
 				engine::logger::data{_logger.getData().sink, "map"});
 		} catch (const std::bad_alloc& e) {
 			_logger.error("Couldn't allocate the map object for loading: {}", e);

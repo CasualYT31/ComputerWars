@@ -29,59 +29,114 @@ const sf::Vector2u awe::unit::NO_POSITION(std::numeric_limits<unsigned int>::max
 
 sf::Vector2u awe::unit::NO_POSITION_SCRIPT = awe::unit::NO_POSITION;
 
-awe::unit::unit(const std::shared_ptr<awe::animated_unit>& animatedUnit,
+awe::unit::unit(const view_callbacks& callbacks,
+	const std::shared_ptr<const awe::banks>& banks,
+	const std::shared_ptr<awe::animated_unit>& animatedUnit,
 	const std::function<void(const std::function<void(void)>&)>& spriteCallback,
-	const std::shared_ptr<const awe::unit_type>& type, const awe::ArmyID army,
+	const std::string& type, const engine::logger::data& data,
+	const awe::ArmyID army,
 	const std::shared_ptr<sfx::animated_spritesheet>& icons) :
-	_type(type), _army(army), _unitSprite(animatedUnit),
-	_updateSprite(spriteCallback) {
+	_viewCallbacks(callbacks), _type(type), _army(army),
+	_unitSprite(animatedUnit), _updateSprite(spriteCallback),
+	_loggerData(data), _banks(banks) {
 	// Initialise all ammos.
-	for (std::size_t i = 0, weaponCount = type->getWeaponCount();
-		i < weaponCount; ++i) {
-		const auto weapon = type->getWeaponByIndex(i);
-		_ammos[weapon->getScriptName()] = 0;
+	const auto unitType = getType();
+	for (std::size_t i = 0, end = unitType->weapons().vector.size(); i < end; ++i) {
+		const auto weapon = getWeapon(i);
+		_ammos[weapon->scriptName] = 0;
 	}
 	// Initialise the sprite.
 	animatedUnit->setIconSpritesheet(icons);
-	animatedUnit->setSprite((type) ? (type->getUnit(army)) : (""));
+	animatedUnit->setSprite(unitType->spriteInfo().sprite);
 	animatedUnit->setHPIconSprite("nohpicon");
 	animatedUnit->setFuelAmmoIconSprite("nostatusicon");
 	animatedUnit->setLoadedIconSprite("nostatusicon");
 	animatedUnit->setCapturingHidingIconSprite("nostatusicon");
 }
 
+engine::CScriptWrapper<awe::unit_type_view> awe::unit::getType() const {
+	const auto unitType = awe::unit_type_view::Create(_loggerData, _banks, _type);
+	unitType->overrides
+		.commander(_viewCallbacks.commander(_army))
+		.country(_viewCallbacks.country(_army));
+	if (_location != NO_POSITION) {
+		unitType->overrides
+			.structure(_viewCallbacks.structure(_location))
+			.tileType(_viewCallbacks.tileType(_location))
+			.terrain(_viewCallbacks.terrain(_location));
+	}
+	return unitType;
+}
+
+engine::CScriptWrapper<awe::movement_type_view> awe::unit::getMovementType() const {
+	const auto unitType = getType();
+	const auto movementType = awe::movement_type_view::Create(_loggerData, _banks,
+		unitType->movementType());
+	movementType->overrides
+		.commander(unitType->overrides.commander())
+		.country(unitType->overrides.country());
+	return movementType;
+}
+
+engine::CScriptWrapper<awe::weapon_view> awe::unit::getWeapon(const std::size_t i) const {
+	const auto unitType = getType();
+	const auto& weapons = unitType->weapons().vector;
+	const auto weaponName = i >= weapons.size() ? "" : weapons[i];
+	const auto weapon = awe::weapon_view::Create(_loggerData, _banks, weaponName);
+	weapon->overrides
+		.commander(_viewCallbacks.commander(_army))
+		.country(_viewCallbacks.country(_army))
+		.unitType(_type);
+	if (_location != NO_POSITION) {
+		weapon->overrides
+			.structure(_viewCallbacks.structure(_location))
+			.tileType(_viewCallbacks.tileType(_location))
+			.terrain(_viewCallbacks.terrain(_location));
+	}
+	return weapon;
+}
+
 bool awe::unit::isReplenished(const bool heal) const {
+	const auto unitType = getType();
 	// First check fuel.
-	if (!_type->hasInfiniteFuel() && getFuel() != _type->getMaxFuel())
+	if (!unitType->hasInfiniteFuel() && getFuel() != unitType->maxFuel())
 		return false;
 	// Then check ammos.
-	for (std::size_t i = 0, len = _type->getWeaponCount(); i < len; ++i) {
-		const auto weaponType = _type->getWeaponByIndex(i);
-		if (!weaponType->hasInfiniteAmmo() &&
-			getAmmo(weaponType->getScriptName()) != weaponType->getMaxAmmo())
+	for (std::size_t i = 0, end = unitType->weapons().vector.size(); i < end; ++i) {
+		const auto weapon = getWeapon(i);
+		if (!weapon->hasInfiniteAmmo() && getAmmo(weapon->scriptName) != weapon->ammo())
 			return false;
 	}
 	// Finally, check HP, if configured to do so.
 	if (!heal) return true;
-	return static_cast<unsigned int>(getHP()) == _type->getMaxHP();
+	return static_cast<sf::Uint32>(getHP()) == unitType->maxHP();
 }
 
+// TODO: If an override introduces a new weapon, or gets rid of a weapon, how are
+// we going to track that? Either we forbid overridding the weapons a unit possesses (likely option),
+// or we continuously keep track of it somehow.
+
 void awe::unit::replenish(const bool heal) {
-	if (heal) setHP(_type->getMaxHP());
-	if (!_type->hasInfiniteFuel()) setFuel(_type->getMaxFuel());
-	for (std::size_t i = 0, len = _type->getWeaponCount(); i < len; ++i) {
-		const auto weaponType = _type->getWeaponByIndex(i);
-		if (!weaponType->hasInfiniteAmmo())
-			setAmmo(weaponType->getScriptName(), weaponType->getMaxAmmo());
+	const auto unitType = getType();
+	if (heal) setHP(unitType->maxHP());
+	if (!unitType->hasInfiniteFuel()) setFuel(unitType->maxFuel());
+	for (std::size_t i = 0, end = unitType->weapons().vector.size(); i < end; ++i) {
+		const auto weapon = getWeapon(i);
+		if (!weapon->hasInfiniteAmmo()) setAmmo(weapon->scriptName, weapon->ammo());
 	}
 }
 
 bool awe::unit::_isLowOnAmmo() const {
 	// TODO-1: determine when we should show the low ammo icon. What we have now
 	// might be fine.
-	const auto weapon = _type->getFirstWeaponWithFiniteAmmo();
-	if (!weapon) return false;
-	return getAmmo(weapon->getScriptName()) <= weapon->getMaxAmmo() / 2;
+	const auto unitType = getType();
+	for (std::size_t i = 0, end = unitType->weapons().vector.size(); i < end; ++i) {
+		const auto weapon = getWeapon(i);
+		if (weapon->hasInfiniteAmmo()) continue;
+		return getAmmo(weapon->scriptName) <= weapon->ammo() / 2;
+	}
+	// All weapons have infinite ammo.
+	return false;
 }
 
 void awe::unit::_updateHPIcon() {
@@ -102,12 +157,12 @@ void awe::unit::_updateHPIcon() {
 void awe::unit::_updateFuelAmmoIcon() {
 	_updateSprite(std::bind([](
 		const std::weak_ptr<awe::animated_unit>& _unitSprite,
-		const std::shared_ptr<const awe::unit_type>& _type,
+		engine::CScriptWrapper<awe::unit_type_view> unitType,
 		const awe::Fuel fuel, const bool lowAmmo) {
 			if (_unitSprite.expired()) return;
 			const auto unitSprite = _unitSprite.lock();
 			const bool lowFuel =
-				(!_type->hasInfiniteFuel() && fuel <= _type->getMaxFuel() / 2);
+				(!unitType->hasInfiniteFuel() && fuel <= unitType->maxFuel() / 2);
 			if (lowFuel && lowAmmo) {
 				unitSprite->setFuelAmmoIconSprite("fuelammolow");
 			} else if (lowFuel) {
@@ -117,7 +172,7 @@ void awe::unit::_updateFuelAmmoIcon() {
 			} else {
 				unitSprite->setFuelAmmoIconSprite("nostatusicon");
 			}
-		}, _unitSprite, _type, getFuel(), _isLowOnAmmo())
+		}, _unitSprite, getType(), getFuel(), _isLowOnAmmo())
 	);
 }
 

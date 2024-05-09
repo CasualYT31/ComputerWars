@@ -28,7 +28,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "animation.hpp"
 #include "userinput.hpp"
-#include "bank.hpp"
+#include "texture.hpp"
+#include "bank-v2.hpp"
 #include "language.hpp"
 
 namespace awe {
@@ -54,7 +55,7 @@ namespace awe {
 		 * @param code          Code invoked once this animation enters the
 		 *                      \c TransitionOut state.
 		 */
-		next_turn(const std::shared_ptr<const awe::country>& country,
+		next_turn(const engine::CScriptWrapper<awe::country_view>& country,
 			const std::string& nextTurnLabel,
 			const std::unordered_set<std::string>& controls,
 			const std::shared_ptr<sfx::user_input>& ui,

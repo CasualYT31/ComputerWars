@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../include/nextturn.hpp"
 
-awe::next_turn::next_turn(const std::shared_ptr<const awe::country>& country,
+awe::next_turn::next_turn(const engine::CScriptWrapper<awe::country_view>& country,
 	const std::string& nextTurnLabel,
 	const std::unordered_set<std::string>& controls,
 	const std::shared_ptr<sfx::user_input>& ui,
@@ -31,8 +31,8 @@ awe::next_turn::next_turn(const std::shared_ptr<const awe::country>& country,
 	const std::shared_ptr<sf::Font>& font,
 	const std::function<void(void)>& code) :
 	_controls(controls), _ui(ui), _code(code),
-	_countryIcon(sheet, country->getIconName()),
-	_countryName((*dict)(country->getName()), *font),
+	_countryIcon(sheet, country->icon()),
+	_countryName((*dict)(country->longName()), *font),
 	_nextTurnLabel((*dict)(nextTurnLabel), *font) {
 	_circle.setFillColor(sf::Color::Black);
 	_countryName.setFillColor(sf::Color::White);

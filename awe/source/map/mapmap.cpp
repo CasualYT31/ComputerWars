@@ -39,8 +39,13 @@ std::string awe::map::getMapName() const {
 	return _mapName;
 }
 
-void awe::map::setMapSize(const sf::Vector2u& dim,
-	const std::shared_ptr<const awe::tile_type>& tile, const awe::ArmyID owner) {
+void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile,
+	const awe::ArmyID owner) {
+	if (!_banks->get<tile_type>()->contains(tile)) {
+		_logger.error("setMapSize operation failed: an invalid tile type \"{}\" "
+			"was given!", tile);
+		return;
+	}
 	if (dim == getMapSize()) return;
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::MAP_SIZE));
@@ -51,11 +56,14 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 	for (std::size_t x = 0; x < dim.x; ++x) {
 		_tiles[x].reserve(dim.y);
 		for (std::size_t y = 0; y < dim.y; ++y)
-			_tiles[x].emplace_back(
+			_tiles[x].emplace_back(awe::tile::view_callbacks{
+					std::bind(&awe::map::getArmyCurrentCOScriptName, this, std::placeholders::_1),
+					std::bind(&awe::map::getArmyCountryScriptName, this, std::placeholders::_1)
+				}, _banks,
 				engine::logger::data{ _logger.getData().sink, "tile" },
 				[&](const std::function<void(void)>& func)
 					{ _animationQueue.push(func); }, tile, owner,
-				(*_sheets)[getEnvironmentSpritesheet()]);
+				(*_sheets)[getEnvironment(false)->spritesheet()]);
 	}
 	_mapSizeCache = dim;
 	if (mapHasShrunk) {
@@ -94,31 +102,21 @@ void awe::map::setMapSize(const sf::Vector2u& dim,
 	}
 }
 
-void awe::map::setMapSize(const sf::Vector2u& dim, const std::string& tile,
-	const awe::ArmyID owner) {
-	setMapSize(dim, _tileTypes->operator[](tile), owner);
-}
-
-bool awe::map::fillMap(const std::shared_ptr<const awe::tile_type>& type,
-	const awe::ArmyID owner) {
-	if (!type) {
-		_logger.error("fillMap operation failed: an empty tile type was given!");
+bool awe::map::fillMap(const std::string& type, const awe::ArmyID owner) {
+	if (!_banks->get<tile_type>()->contains(type)) {
+		_logger.error("fillMap operation failed: an invalid tile type \"{}\" was "
+			"given!", type);
 		return false;
 	}
 	return rectangleFillTiles(sf::Vector2u(0, 0),
 		getMapSize() - sf::Vector2u(1, 1), type, owner);
 }
 
-bool awe::map::fillMap(const std::string& type, const awe::ArmyID owner) {
-	return fillMap(_tileTypes->operator[](type), owner);
-}
-
 bool awe::map::rectangleFillTiles(const sf::Vector2u& start,
-	const sf::Vector2u& end, const std::shared_ptr<const awe::tile_type>& type,
-	const awe::ArmyID owner) {
-	if (!type) {
-		_logger.error("rectangleFillTiles operation failed: an empty tile type "
-			"was given!");
+	const sf::Vector2u& end, const std::string& type, const awe::ArmyID owner) {
+	if (!_banks->get<tile_type>()->contains(type)) {
+		_logger.error("rectangleFillTiles operation failed: an invalid tile type "
+			"\"{}\" was given!", type);
 		return false;
 	}
 	if (_isOutOfBounds(start)) {
@@ -149,16 +147,10 @@ bool awe::map::rectangleFillTiles(const sf::Vector2u& start,
 	return ret;
 }
 
-bool awe::map::rectangleFillTiles(const sf::Vector2u& start,
-	const sf::Vector2u& end, const std::string& type, const awe::ArmyID owner) {
-	return rectangleFillTiles(start, end, _tileTypes->operator[](type), owner);
-}
-
 bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
-	const sf::Vector2u& end, const std::shared_ptr<const awe::unit_type>& type,
-	const awe::ArmyID army) {
-	if (!type) {
-		_logger.error("rectangleFillUnits operation failed: an empty tile type "
+	const sf::Vector2u& end, const std::string& type, const awe::ArmyID army) {
+	if (!_banks->get<unit_type>()->contains(type)) {
+		_logger.error("rectangleFillUnits operation failed: an invalid unit type "
 			"was given!");
 		return false;
 	}
@@ -177,14 +169,17 @@ bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 			"out of bounds.", end);
 		return false;
 	}
-	if (_countries->getScriptNames().size() <= static_cast<std::size_t>(army)) {
+	const auto countries = _banks->get<country>();
+	if (countries->size() <= static_cast<std::size_t>(army)) {
 		_logger.error("rectangleFillUnits operation failed: the army ID {} is "
 			"invalid.", army);
 		return false;
 	}
+	auto country = countries->begin();
+	std::advance(country, army);
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::RECT_FILL_UNITS));
-	if (!_isArmyPresent(army)) createArmy(_countries->getScriptNames()[army]);
+	if (!_isArmyPresent(army)) createArmy(country->scriptName());
 	bool ret = true;
 	const unsigned int startX = std::min(start.x, end.x),
 		startY = std::min(start.y, end.y);
@@ -207,11 +202,6 @@ bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
 		}
 	}
 	return ret;
-}
-
-bool awe::map::rectangleFillUnits(const sf::Vector2u& start,
-	const sf::Vector2u& end, const std::string& type, const awe::ArmyID army) {
-	return rectangleFillUnits(start, end, _unitTypes->operator[](type), army);
 }
 
 std::size_t awe::map::rectangleDeleteUnits(const sf::Vector2u& start,
@@ -265,26 +255,22 @@ void awe::map::enableFoW(const bool enabled) {
 	_fow = enabled;
 }
 
-void awe::map::setWeather(const std::shared_ptr<const awe::weather>& weather) {
-	if (_weather == weather) return;
+void awe::map::setWeather(const std::string& name) {
+	if (_weather == name) return;
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::WEATHER));
-	_setWeather(weather);
+	_setWeather(name);
 }
 
-void awe::map::setWeather(const std::string& name) {
-	setWeather((*_weathers)[name]);
+const engine::CScriptWrapper<awe::weather_view> awe::map::getWeather() const {
+	const auto weather = awe::weather_view::Create(
+		engine::logger::data{ _logger.getData().sink, "weather_view" }, _banks, _weather);
+	_overrideWithSelectedArmysCurrentCO(weather->overrides);
+	return weather;
 }
 
-std::shared_ptr<const awe::weather> awe::map::getWeather() const {
-	return _weather;
-}
-
-const awe::weather* awe::map::getWeatherObject() const {
-	auto ret = getWeather();
-	if (ret) {
-		return ret.get();
-	} else {
-		throw std::out_of_range("There is currently no weather set!");
-	}
+const awe::weather_view* awe::map::getRawWeather() const {
+	const auto weather = getWeather();
+	weather->AddRef();
+	return weather.operator->();
 }

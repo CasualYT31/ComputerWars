@@ -22,14 +22,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../include/daybegin.hpp"
 
-awe::day_begin::day_begin(const std::shared_ptr<const awe::country>& country,
+awe::day_begin::day_begin(const engine::CScriptWrapper<awe::country_view>& country,
 	const awe::Day day,
 	const std::shared_ptr<engine::language_dictionary>& translate,
 	const std::shared_ptr<sf::Font>& font) :
 	// There isn't a need to re-translate the text mid-animation but it would
 	// be super simple to do in animate().
 	_text((*translate)("day", day), *font, 128),
-	_colour(country->getColour()) {
+	_colour(country->colour()) {
 	_text.setOutlineColor(sf::Color::Black);
 	_text.setOutlineThickness(5.0f);
 	_text.setStyle(sf::Text::Bold);

@@ -23,15 +23,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "map.hpp"
 #include "fmtawe.hpp"
 
-bool awe::map::setTileType(const sf::Vector2u& pos,
-	const std::shared_ptr<const awe::tile_type>& type) {
-	if (!type) _logger.warning("setTileType warning: assigning the tile at "
+bool awe::map::setTileType(const sf::Vector2u& pos, const std::string& type) {
+	if (type.empty()) _logger.warning("setTileType warning: assigning the tile at "
 		"position {} an empty type!", pos);
 	if (_isOutOfBounds(pos)) {
 		_logger.error("setTileType operation cancelled: attempted to assign type "
 			"\"{}\" to tile at position {}, which is out of bounds with the map's "
-			"size of {}!", ((type) ? (type->getType()->getName()) : ("[NULL]")),
-			pos, getMapSize());
+			"size of {}!", type, pos, getMapSize());
 		return false;
 	}
 	// Carry on with operation, even if the type given matches with the type the
@@ -49,12 +47,12 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 		const auto offset = getTileStructureOffset(pos);
 		// Create list of tiles to update.
 		std::vector<std::pair<sf::Vector2u, std::size_t>> tiles;
-		tiles.resize(structure->getDependentTileCount() + 1);
+		tiles.resize(structure->dependent().vector.size() + 1);
 		const auto rootTile = sf::Vector2u(pos.x - offset.x, pos.y - offset.y);
 		tiles[0] = { rootTile, 0 };
-		for (std::size_t i = 0, e = structure->getDependentTileCount(); i < e;
+		for (std::size_t i = 0, e = structure->dependent().vector.size(); i < e;
 			++i) {
-			const sf::Vector2i depOffset = structure->getDependentTileOffset(i);
+			const sf::Vector2i depOffset = structure->dependent().vector[i].offset;
 			tiles[i + 1] = {
 				{ rootTile.x + depOffset.x, rootTile.y + depOffset.y }, i
 			};
@@ -64,11 +62,11 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 			// setTileType() infinitely.
 			setTileStructureData(tile.first, "", { 0, 0 }, false);
 			const auto tileType = tile.first == rootTile ?
-				structure->getRootDeletedTileType() :
-				structure->getDependentDeletedTileType(tile.second);
+				structure->root().deleted :
+				structure->dependent().vector[tile.second].deleted;
 			const auto hasTileType = tile.first == rootTile ?
-				structure->hasRootDeletedTileType() :
-				structure->hasDependentDeletedTileType(tile.second);
+				!structure->root().deleted.empty() :
+				!structure->dependent().vector[tile.second].deleted.empty();
 			if (hasTileType) {
 				// Setting the tile's type will also disown it.
 				setTileType(tile.first, tileType);
@@ -88,12 +86,14 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 			visibleTiles);
 	}
 	_updateCapturingUnit(unitOnTile);
+	// Remove ownership of the tile from the army who owns it, if any army does.
+	// Do this now, because retrieving the terrain's full HP later should not use
+	// the old owner for overrides.
+	setTileOwner(pos, awe::NO_ARMY);
 	_tiles[pos.x][pos.y].data.setTileType(type);
 	// Set the tile's HP to the max.
 	_tiles[pos.x][pos.y].data.setTileHP(
-		static_cast<awe::HP>(type->getType()->getMaxHP()));
-	// Remove ownership of the tile from the army who owns it, if any army does.
-	setTileOwner(pos, awe::NO_ARMY);
+		static_cast<awe::HP>(getTerrainOfTile(pos)->maxHP()));
 	// If the tile has a unit on it, update its army's visible tile cache.
 	if (unitOnTile != awe::NO_UNIT) {
 		auto visibleTiles = getAvailableTiles(pos, 1, getUnitVision(unitOnTile));
@@ -102,10 +102,6 @@ bool awe::map::setTileType(const sf::Vector2u& pos,
 			visibleTiles);
 	}
 	return true;
-}
-
-bool awe::map::setTileType(const sf::Vector2u& pos, const std::string& type) {
-	return setTileType(pos, _tileTypes->operator[](type));
 }
 
 std::unordered_set<sf::Vector2u> awe::map::querySetTileTypeChangedTiles(
@@ -117,9 +113,9 @@ std::unordered_set<sf::Vector2u> awe::map::querySetTileTypeChangedTiles(
 		// Should really get rid of the duplicate code in setTileType().
 		const auto rootTile = sf::Vector2u(pos.x - offset.x, pos.y - offset.y);
 		changing.insert(rootTile);
-		for (std::size_t i = 0, e = structure->getDependentTileCount(); i < e;
+		for (std::size_t i = 0, e = structure->dependent().vector.size(); i < e;
 			++i) {
-			const sf::Vector2i depOffset = structure->getDependentTileOffset(i);
+			const sf::Vector2i depOffset = structure->dependent().vector[i].offset;
 			changing.insert(
 				{ rootTile.x + depOffset.x, rootTile.y + depOffset.y });
 		}
@@ -134,7 +130,7 @@ CScriptArray* awe::map::querySetTileTypeChangedTilesAsArray(
 	return _scripts->createArrayFromContainer("Vector2", changedTiles);
 }
 
-std::shared_ptr<const awe::tile_type> awe::map::getTileType(
+engine::CScriptWrapper<awe::tile_type_view> awe::map::getTileType(
 	const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("getTileType operation failed: tile at position {} is out "
@@ -144,13 +140,46 @@ std::shared_ptr<const awe::tile_type> awe::map::getTileType(
 	return _tiles[pos.x][pos.y].data.getTileType();
 }
 
-const awe::tile_type* awe::map::getTileTypeObject(const sf::Vector2u& pos) const {
-	auto ret = getTileType(pos);
-	if (ret) {
-		return ret.get();
-	} else {
-		throw std::out_of_range("This tile does not exist!");
+awe::tile_type_view* awe::map::getRawTileType(const sf::Vector2u& pos) const {
+	const auto tileType = getTileType(pos);
+	if (!tileType.operator->()) return nullptr;
+	tileType->AddRef();
+	return tileType.operator->();
+}
+
+std::string awe::map::getTileTypeScriptName(const sf::Vector2u& pos) const {
+	if (_isOutOfBounds(pos)) {
+		_logger.error("getTileTypeScriptName operation failed: tile at position "
+			"{} is out of bounds with the map's size of {}!", pos, getMapSize());
+		return "";
 	}
+	return _tiles[pos.x][pos.y].data.getTileTypeScriptName();
+}
+
+engine::CScriptWrapper<awe::terrain_view> awe::map::getTerrainOfTile(
+	const sf::Vector2u& pos) const {
+	if (_isOutOfBounds(pos)) {
+		_logger.error("getTerrainOfTile operation failed: tile at position {} is "
+			"out of bounds with the map's size of {}!", pos, getMapSize());
+		return nullptr;
+	}
+	return _tiles[pos.x][pos.y].data.getTerrain();
+}
+
+awe::terrain_view* awe::map::getRawTerrainOfTile(const sf::Vector2u& pos) const {
+	const auto terrain = getTerrainOfTile(pos);
+	if (!terrain.operator->()) return nullptr;
+	terrain->AddRef();
+	return terrain.operator->();
+}
+
+std::string awe::map::getTerrainOfTileScriptName(const sf::Vector2u& pos) const {
+	if (_isOutOfBounds(pos)) {
+		_logger.error("getTerrainOfTileScriptName operation failed: tile at position "
+			"{} is out of bounds with the map's size of {}!", pos, getMapSize());
+		return "";
+	}
+	return _tiles[pos.x][pos.y].data.getTerrainScriptName();
 }
 
 void awe::map::setTileHP(const sf::Vector2u& pos, const awe::HP hp) {
@@ -216,7 +245,7 @@ awe::UnitID awe::map::getUnitOnTile(const sf::Vector2u& pos) const {
 }
 
 void awe::map::setTileStructureData(const sf::Vector2u& pos,
-	const std::shared_ptr<const awe::structure>& structure,
+	const std::string& structure,
 	const sf::Vector2i& offset, const bool destroyed) {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("setTileStructureData operation failed: tile at position {} "
@@ -229,37 +258,43 @@ void awe::map::setTileStructureData(const sf::Vector2u& pos,
 			"root tile, with the map's size at {}!", pos, offset, getMapSize());
 		return;
 	}
+	if (!_banks->get<awe::structure>()->contains(structure)) {
+		_logger.error("setTileStructureData operation failed: tile at position {} "
+			"was given an offset of {}, and a structure type of \"{}\" that "
+			"doesn't exist!", pos, offset, structure);
+		return;
+	}
 
 	// Log warnings if the input data is not expected.
-	if (structure) {
-		const std::string tileType = getTileType(pos)->getScriptName();
+	if (!structure.empty()) {
+		engine::CScriptWrapper<awe::structure_view> structureView =
+			_createStructureView(structure, pos);
+		const auto tileType = getTileTypeScriptName(pos);
 		if (offset.x == 0 && offset.y == 0) {
-			if (tileType != structure->getRootTileTypeScriptName() &&
-				tileType != structure->getRootDestroyedTileTypeScriptName()) {
+			if (tileType != structureView->root().tile &&
+				tileType != structureView->root().destroyed) {
 				_logger.warning("setTileStructureData: tile at position {} is "
 					"being configured as the root of structure \"{}\", but its "
 					"type, \"{}\", is not either of the structure's configured "
 					"normal (\"{}\") or destroyed (\"{}\") types.", pos,
-					structure->getScriptName(), tileType,
-					structure->getRootTileTypeScriptName(),
-					structure->getRootDestroyedTileTypeScriptName());
+					structure, tileType, structureView->root().tile,
+					structureView->root().destroyed);
 			}
 		} else {
-			const auto count = structure->getDependentTileCount();
+			const auto& dependentTiles = structureView->dependent().vector;
+			const auto count = dependentTiles.size();
 			std::size_t i = 0;
 			for (; i < count; ++i) {
-				if (structure->getDependentTileOffset(i) == offset) {
-					if (tileType != structure->getDependentTileTypeScriptName(i) &&
-						tileType !=
-						structure->getDependentDestroyedTileTypeScriptName(i)) {
+				if (dependentTiles[i].offset == offset) {
+					if (tileType != dependentTiles[i].tile &&
+						tileType != dependentTiles[i].destroyed) {
 						_logger.warning("setTileStructureData: tile at position "
 							"{} is being configured as the dependent of structure "
 							"\"{}\" with offset {}, but its type, \"{}\", is not "
 							"either of the structure's configured normal (\"{}\") "
 							"or destroyed (\"{}\") types for this offset.", pos,
-							structure->getScriptName(), offset, tileType,
-							structure->getDependentTileTypeScriptName(i),
-							structure->getDependentDestroyedTileTypeScriptName(i));
+							structure, offset, tileType,
+							dependentTiles[i].tile, dependentTiles[i].destroyed);
 					}
 					break;
 				}
@@ -268,12 +303,12 @@ void awe::map::setTileStructureData(const sf::Vector2u& pos,
 				_logger.warning("setTileStructureData: tile at position {} is "
 					"being configured as the dependent of structure \"{}\" with "
 					"offset {}, but this structure does not have this configured "
-					"offset!", pos, structure->getScriptName(), offset);
+					"offset!", pos, structure, offset);
 			}
 		}
 	}
 
-	if (structure == getTileStructure(pos) &&
+	if (structure == getTileStructureScriptName(pos) &&
 		offset == getTileStructureOffset(pos) &&
 		destroyed == isTileDestroyed(pos)) return;
 	awe::disable_mementos token(this,
@@ -284,16 +319,7 @@ void awe::map::setTileStructureData(const sf::Vector2u& pos,
 	tile.data.setStructureDestroyed(destroyed);
 }
 
-void awe::map::setTileStructureData(const sf::Vector2u& pos,
-	const std::string& structure, const sf::Vector2i& offset,
-	const bool destroyed) {
-	if (structure.empty()) setTileStructureData(pos,
-		static_cast<std::shared_ptr<const awe::structure>>(nullptr), offset,
-		destroyed);
-	else setTileStructureData(pos, (*_structures)[structure], offset, destroyed);
-}
-
-std::shared_ptr<const awe::structure> awe::map::getTileStructure(
+engine::CScriptWrapper<awe::structure_view> awe::map::getTileStructure(
 	const sf::Vector2u& pos) const {
 	if (_isOutOfBounds(pos)) {
 		_logger.error("getTileStructure operation failed: tile at position {} is "
@@ -303,11 +329,20 @@ std::shared_ptr<const awe::structure> awe::map::getTileStructure(
 	return _tiles[pos.x][pos.y].data.getStructureType();
 }
 
-const awe::structure* awe::map::getTileStructureObject(
-	const sf::Vector2u& pos) const {
-	auto ret = getTileStructure(pos);
-	if (ret) return ret.get();
-	else throw std::out_of_range("This tile does not exist!");
+awe::structure_view* awe::map::getRawTileStructure(const sf::Vector2u& pos) const {
+	const auto structure = getTileStructure(pos);
+	if (!structure.operator->()) return nullptr;
+	structure->AddRef();
+	return structure.operator->();
+}
+
+std::string awe::map::getTileStructureScriptName(const sf::Vector2u& pos) const {
+	if (_isOutOfBounds(pos)) {
+		_logger.error("getTileStructureScriptName operation failed: tile at position {} is "
+			"out of bounds with the map's size of {}!", pos, getMapSize());
+		return nullptr;
+	}
+	return _tiles[pos.x][pos.y].data.getStructureTypeScriptName();
 }
 
 bool awe::map::isTileAStructureTile(const sf::Vector2u& pos) const {
@@ -316,7 +351,7 @@ bool awe::map::isTileAStructureTile(const sf::Vector2u& pos) const {
 			"is out of bounds with the map's size of {}!", pos, getMapSize());
 		return false;
 	}
-	return _tiles[pos.x][pos.y].data.getStructureType().operator bool();
+	return _tiles[pos.x][pos.y].data.isPartOfStructure();
 }
 
 sf::Vector2i awe::map::getTileStructureOffset(const sf::Vector2u& pos) const {
@@ -354,9 +389,8 @@ bool awe::map::isTileVisible(const sf::Vector2u& pos,
 	// 1. Fog of War is disabled.
 	if (!isFoWEnabled()) return true;
 	// 2. It is of a terrain type that is always visible.
-	const auto terrain = _tiles[pos.x][pos.y].data.getTileType()->getType();
-	if (terrain->getFoWVisibility() == awe::terrain::fow_visibility::Visible)
-		return true;
+	const auto terrain = getTerrainOfTile(pos);
+	if (terrain->FoWVisibility() == awe::fow_visibility::Visible) return true;
 	// 3. It is owned by a teammate.
 	const auto team = getArmyTeam(army);
 	const auto tileOwner = getTileOwner(pos);
@@ -368,8 +402,7 @@ bool awe::map::isTileVisible(const sf::Vector2u& pos,
 			// ...unless it is of a terrain type that is configured to be hidden,
 			// and none of its adjacent tiles (or the tile itself) is occupied by a
 			// teammate...
-			if (terrain->getFoWVisibility() !=
-				awe::terrain::fow_visibility::Hidden) return true;
+			if (terrain->FoWVisibility() != awe::fow_visibility::Hidden) return true;
 			// (This may be too slow if you want to increase this range at all. In
 			// which case you will have to update the army visible tile cache to
 			// incorporate this logic instead of leaving it here.)
@@ -591,7 +624,7 @@ CScriptArray* awe::map::getTilesInAreaAsArray(const sf::Vector2u& tile1,
 }
 
 std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin,
-	const sf::Vector2u& dest, const awe::movement_type& moveType,
+	const sf::Vector2u& dest, const std::string& moveType,
 	const unsigned int* const movePoints, const awe::Fuel* const fuel,
 	const awe::TeamID* const team, const awe::ArmyID* const army,
 	const bool hasInfiniteFuel, const bool ignoreUnitChecks,
@@ -629,8 +662,10 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 		auto adjacentTiles = getAvailableTiles(currentTile, 1, 1);
 		for (auto& adjacentTile : adjacentTiles) {
 			// Get the movement cost for this terrain.
-			const auto moveCost = getTileType(adjacentTile)->getType()->
-				getMoveCost(moveType.getScriptName());
+			const auto terrain = getTerrainOfTile(adjacentTile);
+			// Apply the movement type as an override.
+			terrain->overrides.movementType(moveType);
+			const auto moveCost = terrain->movementCost();
 
 			// If this unit cannot traverse the terrain, do not add it to any set.
 			if (moveCost < 0) continue;
@@ -672,7 +707,7 @@ std::vector<awe::closed_list_node> awe::map::findPath(const sf::Vector2u& origin
 }
 
 CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
-	const sf::Vector2u& dest, const awe::movement_type& moveType,
+	const sf::Vector2u& dest, const std::string& moveType,
 	const unsigned int movePoints, const awe::Fuel fuel,
 	const awe::TeamID team, const awe::ArmyID army, const bool hasInfiniteFuel,
 	const bool ignoreUnitChecks, const CScriptArray* const ignoredUnits) const {
@@ -692,7 +727,7 @@ CScriptArray* awe::map::findPathAsArray(const sf::Vector2u& origin,
 }
 
 CScriptArray* awe::map::findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
-	const sf::Vector2u& dest, const awe::movement_type& moveType,
+	const sf::Vector2u& dest, const std::string& moveType,
 	const awe::ArmyID army, const CScriptArray* const ignoredUnits) const {
 	if (!_scripts) throw NO_SCRIPTS;
 	const auto vec = findPath(origin, dest, moveType, nullptr, nullptr, nullptr,
@@ -738,15 +773,14 @@ int awe::map::scanPath(CScriptArray* path, const awe::UnitID unit,
 }
 
 void awe::map::convertTiles(const std::vector<sf::Vector2u>& tiles,
-	const std::shared_ptr<const awe::tile_type>& fromTileType,
-	const std::shared_ptr<const awe::tile_type>& toTileType,
+	const std::string& fromTileType, const std::string& toTileType,
 	const awe::ArmyID transferOwnership) {
-	if (!fromTileType) {
+	if (fromTileType.empty()) {
 		_logger.error("convertTiles operation failed: a tile type filter was not "
 			"given!");
 		return;
 	}
-	if (!toTileType) {
+	if (toTileType.empty()) {
 		_logger.error("convertTiles operation failed: the tile type to convert to "
 			"was not given!");
 		return;
@@ -760,10 +794,10 @@ void awe::map::convertTiles(const std::vector<sf::Vector2u>& tiles,
 		if (_isOutOfBounds(tile)) {
 			_logger.error("convertTiles operation: cannot convert tile {} to the "
 				"tile type \"{}\", with new owner {}: tile is out-of-bounds!",
-				tile, toTileType->getScriptName(), transferOwnership);
+				tile, toTileType, transferOwnership);
 			continue;
 		}
-		if (getTileType(tile)->getScriptName() == fromTileType->getScriptName()) {
+		if (getTileTypeScriptName(tile) == fromTileType) {
 			setTileType(tile, toTileType);
 			setTileOwner(tile, transferOwnership);
 		}
@@ -774,25 +808,23 @@ void awe::map::convertTiles(const CScriptArray* const tiles,
 	const std::string& fromTileType, const std::string& toTileType,
 	const awe::ArmyID transferOwnership) {
 	convertTiles(engine::ConvertCScriptArray<std::vector<sf::Vector2u>,
-		sf::Vector2u>(tiles), (*_tileTypes)[fromTileType],
-		(*_tileTypes)[toTileType], transferOwnership);
-}
-
-bool awe::map::canStructureFit(const sf::Vector2u& fromTile,
-	const std::shared_ptr<const awe::structure>& structure) const {
-	if (_isOutOfBounds(fromTile)) return false;
-	for (std::size_t i = 0, e = structure->getDependentTileCount(); i < e; ++i) {
-		// Cba dealing with integer overflow.
-		const auto& offset = structure->getDependentTileOffset(i);
-		if (_isOutOfBounds({ fromTile.x + offset.x, fromTile.y + offset.y }))
-			return false;
-	}
-	return true;
+		sf::Vector2u>(tiles), fromTileType, toTileType, transferOwnership);
 }
 
 bool awe::map::canStructureFit(const sf::Vector2u& fromTile,
 	const std::string& structure) const {
-	return canStructureFit(fromTile, (*_structures)[structure]);
+	if (_isOutOfBounds(fromTile)) return false;
+	if (!_banks->get<awe::structure>()->contains(structure)) return false;
+	engine::CScriptWrapper<awe::structure_view> structureView =
+		_createStructureView(structure, fromTile);
+	const auto& dependentTiles = structureView->dependent().vector;
+	for (std::size_t i = 0, e = dependentTiles.size(); i < e; ++i) {
+		// Cba dealing with integer overflow.
+		const auto& offset = dependentTiles[i].offset;
+		if (_isOutOfBounds({ fromTile.x + offset.x, fromTile.y + offset.y }))
+			return false;
+	}
+	return true;
 }
 
 void awe::map::destroyStructure(sf::Vector2u tile) {
@@ -801,12 +833,12 @@ void awe::map::destroyStructure(sf::Vector2u tile) {
 			"out-of-bounds with the map's size of {}!", tile, getMapSize());
 		return;
 	}
-	const auto& structure = _tiles[tile.x][tile.y].data.getStructureType();
-	if (!structure) {
+	if (!isTileAStructureTile(tile)) {
 		_logger.error("destroyStructure operation failed: tile at position {} is "
 			"not attached to any structure!", tile);
 		return;
 	}
+	const auto structure = getTileStructure(tile);
 	// If the given tile was a dependent tile, find the root tile first.
 	auto offset = _tiles[tile.x][tile.y].data.getStructureTile();
 	if (offset != sf::Vector2i{ 0, 0 }) {
@@ -819,13 +851,14 @@ void awe::map::destroyStructure(sf::Vector2u tile) {
 	// Carry on with operation even if the structure is already destroyed.
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::DESTROY_STRUCTURE));
-	setTileType(tile, structure->getRootDestroyedTileType());
-	setTileStructureData(tile, structure, { 0, 0 }, true);
-	for (std::size_t i = 0, c = structure->getDependentTileCount(); i < c; ++i) {
-		offset = structure->getDependentTileOffset(i);
+	setTileType(tile, structure->root().destroyed);
+	setTileStructureData(tile, structure->scriptName, { 0, 0 }, true);
+	const auto& dependentTiles = structure->dependent().vector;
+	for (std::size_t i = 0, c = dependentTiles.size(); i < c; ++i) {
+		offset = dependentTiles[i].offset;
 		const auto depTile = sf::Vector2u{ tile.x + offset.x, tile.y + offset.y };
-		setTileType(depTile, structure->getDependentDestroyedTileType(i));
-		setTileStructureData(depTile, structure, offset, true);
+		setTileType(depTile, dependentTiles[i].destroyed);
+		setTileStructureData(depTile, structure->scriptName, offset, true);
 	}
 }
 
@@ -835,12 +868,12 @@ void awe::map::deleteStructure(sf::Vector2u tile) {
 			"out-of-bounds with the map's size of {}!", tile, getMapSize());
 		return;
 	}
-	const auto& structure = _tiles[tile.x][tile.y].data.getStructureType();
-	if (!structure) {
+	if (!isTileAStructureTile(tile)) {
 		_logger.error("deleteStructure operation failed: tile at position {} is "
 			"not attached to any structure!", tile);
 		return;
 	}
+	const auto structure = getTileStructure(tile);
 	// If the given tile was a dependent tile, find the root tile first.
 	auto offset = _tiles[tile.x][tile.y].data.getStructureTile();
 	if (offset != sf::Vector2i{ 0, 0 }) {
@@ -851,25 +884,21 @@ void awe::map::deleteStructure(sf::Vector2u tile) {
 	// deleting the structure data for us.
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::DELETE_STRUCTURE));
-	setTileType(tile, structure->getRootDeletedTileType());
-	for (std::size_t i = 0, c = structure->getDependentTileCount(); i < c; ++i) {
-		offset = structure->getDependentTileOffset(i);
+	setTileType(tile, structure->root().deleted);
+	const auto& dependentTiles = structure->dependent().vector;
+	for (std::size_t i = 0, c = dependentTiles.size(); i < c; ++i) {
+		offset = dependentTiles[i].offset;
 		const auto depTile = sf::Vector2u{ tile.x + offset.x, tile.y + offset.y };
-		setTileType(depTile, structure->getDependentDeletedTileType(i));
+		setTileType(depTile, dependentTiles[i].deleted);
 	}
 }
 
-std::shared_ptr<const awe::structure> awe::map::getTileTypeStructure(
-	const std::shared_ptr<const awe::tile_type>& type) const {
-	for (const auto& structure : *_structures) {
-		if (!structure.second->isPaintable() &&
-			structure.second->getRootTileType() == type) return structure.second;
+// TODO: will this need overrides?
+std::string awe::map::getTileTypeStructureScriptName(const std::string& type) const {
+	const auto structures = _banks->get<awe::structure>();
+	for (const auto structure : *structures) {
+		if (!structure.paintable() && structure.root().tile == type)
+			return structure.scriptName();
 	}
-	return nullptr;
-}
-
-std::string awe::map::getTileTypeStructure(const std::string& type) const {
-	const auto structure = getTileTypeStructure((*_tileTypes)[type]);
-	if (structure) return structure->getScriptName();
-	else return "";
+	return "";
 }

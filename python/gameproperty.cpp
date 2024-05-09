@@ -47,3 +47,35 @@ public: \
     } \
     a \
 };
+
+#define GAME_PROPERTY_VIEW_$(ns, cc, ac`, p$, t$`) namespace ns { \
+    class cc##_view : public engine::script_reference_type<ns::cc##_view> { \
+        mutable engine::logger _logger; \
+        std::shared_ptr<const awe::bank<cc>> _bank; \
+    public: \
+        std::string scriptName; \
+        awe::overrides overrides; \
+        inline cc##_view(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") : _logger(data), _bank(banks->get<cc>()), scriptName(name) {} \
+        inline cc##_view(const cc##_view& c) : _logger(c._logger.getData()), _bank(c._bank), scriptName(c.scriptName), overrides(c.overrides) {} \
+        static inline cc##_view* Create(const engine::logger::data& data, const std::shared_ptr<const awe::banks>& banks, const std::string& name = "") { return new cc##_view(data, banks, name); } \
+        static void Register(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) { \
+            if (engine->GetTypeInfoByName(ac "View")) return; \
+            RegisterType(engine, ac "View", [](asIScriptEngine* engine, const std::string& type) { /* No factory function. */ }); \
+            engine->RegisterObjectProperty(ac "View", "string scriptName", asOFFSET(ns::cc##_view, scriptName)); \
+            engine->RegisterObjectProperty(ac "View", "Overrides overrides", asOFFSET(ns::cc##_view, overrides)); \
+            engine->RegisterObjectMethod(ac "View", "bool isScriptNameValid() const", asMETHOD(ns::cc##_view, isScriptNameValid), asCALL_THISCALL); \
+            `engine->RegisterObjectMethod(ac "View", std::string(awe::bank_return_type<t$>()).append(" " #p$ "() const").c_str(), asMETHOD(ns::cc##_view, p$), asCALL_THISCALL); £\
+            `\
+        } \
+        inline bool isScriptNameValid() const { return _bank->contains(scriptName); } \
+        `inline typename boost::call_traits<t$>::const_reference p$() const { \
+            if (isScriptNameValid()) { \
+                return (*_bank)[scriptName]->p$(overrides); \
+            } else { \
+                _logger.error("\"{}\" view has incorrect script name \"{}\": returning default constructed value.", ac, scriptName); \
+                return {}; \
+            } \
+        } £\
+        `\
+    }; \
+}

@@ -23,14 +23,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "map.hpp"
 #include "fmtawe.hpp"
 
-awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& type,
-	const awe::ArmyID army) {
-	if (!type) _logger.warning("createUnit warning: creating a unit for army {} "
-		"without a type!", army);
+awe::UnitID awe::map::createUnit(const std::string& type, const awe::ArmyID army) {
+	if (!_banks->get<unit_type>()->contains(type)) {
+		_logger.error("createUnit operation failed: attempted to create \"{}\" "
+			"for army with ID {}. That type doesn't exist!", type, army);
+		return awe::NO_UNIT;
+	}
 	if (!_isArmyPresent(army)) {
 		_logger.error("createUnit operation failed: attempted to create \"{}\" "
-			"for army with ID {} that didn't exist!",
-			((type) ? (type->getName()) : ("[NULL]")), army);
+			"for army with ID {} that didn't exist!", type, army);
 		return awe::NO_UNIT;
 	}
 	awe::UnitID id;
@@ -44,15 +45,47 @@ awe::UnitID awe::map::createUnit(const std::shared_ptr<const awe::unit_type>& ty
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::CREATE_UNIT));
 	// TODO-2.
-	_units.insert({ id, unit_data({ _logger.getData().sink, "unit" },
+	// TODO: Also, there is no easy way to get the overridden spritesheets here...
+	// For my purposes now, this is fine, but from an architectural standpoint this
+	// is a really big sign that I need to rethink how I structure the entirety of
+	// this awe::map code. Overrides are pretty clunky right now, and I'm fearing
+	// that they'll be slow during execution, too. Maybe I need to increase the
+	// priority of the "Implement observer pattern" ticket... Having gained some
+	// professional experience with the MVC pattern, I think it would work wonders
+	// here. I've already separated unit and tile models from their "views"
+	// (animated_unit and animated_tile), but that ticket would then involve making
+	// this separation a lot cleaner, and applying it to the entirety of the map's
+	// graphics code. We could potentially apply the MVC pattern all the way to the
+	// game_engine level. Most impotantly, the MVC pattern should allow me to
+	// update overrides for each unit, tile, etc. as and when, instead of constantly
+	// generating them on-the-fly, which should significantly improve performance.
+	// I think it would also simplify the management of the interaction between
+	// armies, tiles, and units. I'm amazed the logic works as it does currently...
+	// It's not the easiest to reason with or debug.
+	// But right now? No man, I've already speant so much time rewriting the
+	// entirety of the bank code, just to get over the final hurdle (tiny bits of
+	// weather logic and the basics of COs). I want to concentrate on completing
+	// the 0.0.5 release for now. But looks like I'll need to address this first
+	// thing after that release has been made.
+	const auto& unitType = (*_banks->get<unit_type>())[type];
+	_units.insert({ id, unit_data(
+		awe::unit::view_callbacks{
+			std::bind(&awe::map::getArmyCurrentCOScriptName, this, std::placeholders::_1),
+			std::bind(&awe::map::getArmyCountryScriptName, this, std::placeholders::_1),
+			std::bind(&awe::map::getTileStructureScriptName, this, std::placeholders::_1),
+			std::bind(&awe::map::getTileTypeScriptName, this, std::placeholders::_1),
+			std::bind(&awe::map::getTerrainOfTileScriptName, this, std::placeholders::_1),
+		},
+		_banks,
+		engine::logger::data{ _logger.getData().sink, "unit" },
 		[&](const std::function<void(void)>& func) { _animationQueue.push(func); },
-		type, army, (*_sheets)[type->getIdleSpritesheet()], (*_sheets)["icon"])});
+		type,
+		army,
+		(*_sheets)[unitType->spriteInfo().idleSheet],
+		(*_sheets)["icon"]
+	)});
 	_armies.at(army).addUnit(id);
 	return id;
-}
-
-awe::UnitID awe::map::createUnit(const std::string& type, const awe::ArmyID army) {
-	return createUnit(_unitTypes->operator[](type), army);
 }
 
 void awe::map::deleteUnit(const awe::UnitID id) {
@@ -112,10 +145,9 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 			_unitsBeingDestroyed.erase(deletingID);
 		}, id));
 		// TODO-2.
-		const auto type = _units.at(id).data.getType();
-		animateParticle(position, "particle", type->getDestroyedUnit(
-			_units.at(id).data.getArmy()), { 0.5f, 1.0f }, "sound",
-			type->getDestroySound());
+		const auto type = getUnitType(id);
+		animateParticle(position, "particle", type->destroyEffectSprite(),
+			{ 0.5f, 1.0f }, "sound", type->soundInfo().destroy);
 	} else {
 		if (isPreviewUnit(id)) removePreviewUnit(id);
 	}
@@ -123,7 +155,7 @@ void awe::map::deleteUnit(const awe::UnitID id) {
 	_units.erase(id);
 }
 
-std::shared_ptr<const awe::unit_type> awe::map::getUnitType(
+engine::CScriptWrapper<awe::unit_type_view> awe::map::getUnitType(
 	const awe::UnitID id) const {
 	if (_isUnitPresent(id)) return _units.at(id).data.getType();
 	_logger.error("getUnitType operation failed: unit with ID {} doesn't exist!",
@@ -131,13 +163,11 @@ std::shared_ptr<const awe::unit_type> awe::map::getUnitType(
 	return nullptr;
 }
 
-const awe::unit_type* awe::map::getUnitTypeObject(const awe::UnitID id) const {
-	auto ret = getUnitType(id);
-	if (ret) {
-		return ret.get();
-	} else {
-		throw std::out_of_range("This unit does not exist!");
-	}
+awe::unit_type_view* awe::map::getRawUnitType(const awe::UnitID id) const {
+	const auto unitType = getUnitType(id);
+	if (!unitType.operator->()) return nullptr;
+	unitType->AddRef();
+	return unitType.operator->();
 }
 
 void awe::map::setUnitPosition(const awe::UnitID id, const sf::Vector2u& pos) {
@@ -288,14 +318,16 @@ unsigned int awe::map::getUnitVision(const awe::UnitID id) const {
 			"exist!", id);
 		return 0;
 	}
-	const auto& unit = _units.at(id).data;
-	const auto vision = unit.getType()->getVision();
-	const auto position = unit.getPosition();
-	if (position == awe::unit::NO_POSITION) return vision;
-	const auto terrain =
-		_tiles[position.x][position.y].data.getTileType()->getType();
-	return static_cast<unsigned int>(std::max(1, static_cast<int>(vision) +
-		terrain->getVisionOffsetForUnitType(unit.getType()->getScriptName())));
+	// Overrides and views handle this for us now!
+	// Could get rid of this method in the future.
+	return _units.at(id).data.getType()->vision();
+	//const auto vision = unit.getType()->getVision();
+	//const auto position = unit.getPosition();
+	//if (position == awe::unit::NO_POSITION) return vision;
+	//const auto terrain =
+	//	_tiles[position.x][position.y].data.getTileType()->getType();
+	//return static_cast<unsigned int>(std::max(1, static_cast<int>(vision) +
+	//	terrain->getVisionOffsetForUnitType(unit.getType()->getScriptName())));
 }
 
 void awe::map::replenishUnit(const awe::UnitID id, const bool heal) {
@@ -559,15 +591,10 @@ unsigned int awe::map::getUnitDefence(const awe::UnitID id) const {
 		return 0;
 	}
 	const auto type = getUnitType(id);
-	if (!type) {
-		_logger.error("getUnitDefence operation failed: couldn't deduce unit {}'s "
-			"type.", id);
-		return 0;
-	}
 	if (type->ignoresDefence() || !isUnitOnMap(id)) {
 		return 0;
 	} else {
-		return getTileType(getUnitPosition(id))->getType()->getDefence();
+		return getTerrainOfTile(getUnitPosition(id))->defence();
 	}
 }
 

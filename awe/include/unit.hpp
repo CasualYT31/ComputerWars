@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Declares the class which represents an in-game unit.
  */
 
-#include "bank.hpp"
+#include "bank-v2.hpp"
 #include "army.hpp"
 #include "animated_unit.hpp"
 
@@ -38,6 +38,20 @@ namespace awe {
 	 *          cannot be used with that map. Use \c at() instead.
 	 */
 	class unit {
+	public:
+		/**
+		 * Used to retrieve overrides that are based on a unit's owner and location.
+		 * @sa @c awe::tile::view_callbacks.
+		 */
+		struct view_callbacks {
+			std::function<std::string(const awe::ArmyID)> commander;
+			std::function<std::string(const awe::ArmyID)> country;
+			std::function<std::string(const sf::Vector2u&)> structure;
+			std::function<std::string(const sf::Vector2u&)> tileType;
+			std::function<std::string(const sf::Vector2u&)> terrain;
+		};
+	private:
+		view_callbacks _viewCallbacks;
 	public:
 		/**
 		 * Reserved value representing no position on the map.
@@ -54,6 +68,9 @@ namespace awe {
 		 * Creates a new unit.
 		 * @warning \c army \b must hold a valid turn order ID: checks must be
 		 *          carried out outside of this class!
+		 * @param   callbacks      Lets this object deduce its owner's current CO and
+		 *                         country, as well as info on its current location,
+		 *                         for override purposes.
 		 * @param   animatedUnit   Pointer to this unit's animated sprite.
 		 * @param   spriteCallback When an update to the unit's sprite is required,
 		 *                         this callback is to be invoked. The function
@@ -65,10 +82,13 @@ namespace awe {
 		 * @param   icons          Pointer to the icon spritesheet to use with this
 		 *                         unit's sprite.
 		 */
-		unit(const std::shared_ptr<awe::animated_unit>& animatedUnit,
+		unit(const view_callbacks& callbacks,
+			const std::shared_ptr<const awe::banks>& banks,
+			const std::shared_ptr<awe::animated_unit>& animatedUnit,
 			const std::function<void(const std::function<void(void)>&)>&
 				spriteCallback,
-			const std::shared_ptr<const awe::unit_type>& type,
+			const std::string& type,
+			const engine::logger::data& data,
 			const awe::ArmyID army = 0,
 			const std::shared_ptr<sfx::animated_spritesheet>& icons = nullptr);
 
@@ -76,9 +96,19 @@ namespace awe {
 		 * Gets the unit's type.
 		 * @return The information on the unit's type.
 		 */
-		inline std::shared_ptr<const awe::unit_type> getType() const {
+		engine::CScriptWrapper<awe::unit_type_view> getType() const;
+
+		inline std::string getTypeScriptName() const {
 			return _type;
 		}
+
+		engine::CScriptWrapper<awe::movement_type_view> getMovementType() const;
+
+		inline std::string getMovementTypeScriptName() const {
+			return getType()->movementType();
+		}
+
+		engine::CScriptWrapper<awe::weapon_view> getWeapon(const std::size_t i) const;
 
 		/**
 		 * Gets the unit's army affiliation.
@@ -336,7 +366,7 @@ namespace awe {
 		/**
 		 * The type of the unit.
 		 */
-		std::shared_ptr<const awe::unit_type> _type;
+		std::string _type;
 
 		/**
 		 * The ID of the army the unit belongs to.
@@ -397,5 +427,16 @@ namespace awe {
 		 * Callback to be invoked when a change is to be made to \c _unitSprite.
 		 */
 		std::function<void(std::function<void(void)>)> _updateSprite;
+
+		/**
+		 * Data used when initialising view objects.
+		 */
+		engine::logger::data _loggerData;
+
+		/**
+		 * Pointer to static game properties.
+		 * Used to create view objects.
+		 */
+		std::shared_ptr<const awe::banks> _banks;
 	};
 }

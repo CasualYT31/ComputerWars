@@ -473,42 +473,25 @@ void awe::map::shakeMap(const float duration) {
 	}
 }
 
-void awe::map::setEnvironment(
-	const std::shared_ptr<const awe::environment>& environment) {
-	if (_environment == environment) return;
+void awe::map::setEnvironment(const std::string& name) {
+	if (_environment == name) return;
 	awe::disable_mementos token(this,
 		_getMementoName(awe::map_strings::operation::ENVIRONMENT));
-	_environment = environment;
+	_environment = name;
 	_regenerateTileSprites();
 }
 
-void awe::map::setEnvironment(const std::string& name) {
-	setEnvironment((*_environments)[name]);
+const engine::CScriptWrapper<awe::environment_view> awe::map::getEnvironment(const bool initLogger) const {
+	const auto environment = awe::environment_view::Create((!initLogger ? engine::logger::data{} :
+		engine::logger::data{ _logger.getData().sink, "environment_view" }), _banks, _environment);
+	_overrideWithSelectedArmysCurrentCO(environment->overrides);
+	return environment;
 }
 
-std::shared_ptr<const awe::environment> awe::map::getEnvironment() const {
-	return _environment;
-}
-
-const awe::environment* awe::map::getEnvironmentObject() const {
-	auto ret = getEnvironment();
-	if (ret) {
-		return ret.get();
-	} else {
-		throw std::out_of_range("There is currently no environment set!");
-	}
-}
-
-std::string awe::map::getEnvironmentSpritesheet() const {
-	return _environment ? _environment->getSpritesheet() : "";
-}
-
-std::string awe::map::getEnvironmentPictureSpritesheet() const {
-	return _environment ? _environment->getPictureSpritesheet() : "";
-}
-
-std::string awe::map::getEnvironmentStructureIconSpritesheet() const {
-	return _environment ? _environment->getStructureIconSpritesheet() : "";
+const awe::environment_view* awe::map::getRawEnvironment() const {
+	const auto environment = getEnvironment();
+	environment->AddRef();
+	return environment.operator->();
 }
 
 void awe::map::setSelectedAnimationPreset(const awe::animation_preset preset) {
@@ -700,23 +683,27 @@ bool awe::map::animateCapture(const sf::Vector2u& tile, const awe::UnitID unit,
 		return false;
 	}
 	const auto& t = _tiles[tile.x][tile.y];
-	const auto tOwner = t.data.getTileOwner();
 	const auto& u = _units.at(unit);
 	const auto uArmy = u.data.getArmy();
 	// TODO-2.
+	auto tileType = getTileType(tile);
+	const auto oldCapturingProperty = tileType->capturingProperty();
+	tileType->overrides.country(getArmyCountryScriptName(uArmy));
+	const auto newCapturingProperty = tileType->capturingProperty();
+	const auto unitType = getUnitType(unit);
+	const auto terrain = getTerrainOfTile(tile);
 	_animationQueue.push(std::make_unique<awe::capture>(
 		(*_sheets)["capturing"],
 		"bg",
-		(tOwner == awe::NO_ARMY ? t.data.getTileType()->getNeutralProperty() :
-			t.data.getTileType()->getOwnedProperty(tOwner)),
-		t.data.getTileType()->getOwnedProperty(uArmy),
-		u.data.getType()->getCapturingUnit(uArmy),
-		u.data.getType()->getCapturedUnit(uArmy),
+		oldCapturingProperty,
+		newCapturingProperty,
+		unitType->capturingSprite(),
+		unitType->finishedCapturingSprite(),
 		"captured",
 		_dict,
 		oldHP,
 		newHP,
-		t.data.getTileType()->getType()->getMaxHP(),
+		terrain->maxHP(),
 		*t.sprite,
 		(*_fonts)["Monospace"],
 		(*_fonts)["AW2"],
@@ -745,7 +732,7 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 		return false;
 	}
 	std::vector<awe::move_unit::node> path;
-	const auto unitType = _units.at(unit).data.getType();
+	const auto unitType = getUnitType(unit);
 	const auto hidden = _units.at(unit).data.isHiding();
 	std::optional<sf::Vector2u> previousTile;
 	std::string finalSound;
@@ -754,25 +741,34 @@ bool awe::map::animateMoveUnit(const awe::UnitID unit,
 			static_cast<const awe::closed_list_node*>(closedList->At(i))->tile;
 		const auto& nextTileObj = _tiles[nextTile.x][nextTile.y];
 		std::shared_ptr<sfx::animated_spritesheet> sheet;
+		// TODO: This definitely isn't right, I think it should be applying
+		// structure, tileType, and terrain overrides for each tile as it moves
+		// across them.
 		if (previousTile) {
 			if (nextTile.x < previousTile->x)
-				sheet = (*_sheets)[unitType->getLeftSpritesheet()];
+				sheet = (*_sheets)[unitType->spriteInfo().leftSheet];
 			else if (nextTile.x > previousTile->x)
-				sheet = (*_sheets)[unitType->getRightSpritesheet()];
+				sheet = (*_sheets)[unitType->spriteInfo().rightSheet];
 			else if (nextTile.y < previousTile->y)
-				sheet = (*_sheets)[unitType->getUpSpritesheet()];
+				sheet = (*_sheets)[unitType->spriteInfo().upSheet];
 			else
-				sheet = (*_sheets)[unitType->getDownSpritesheet()];
+				sheet = (*_sheets)[unitType->spriteInfo().downSheet];
 		}
 		auto pos = nextTileObj.sprite->getPixelPosition();
 		pos.x += nextTileObj.sprite->getPixelSize().x * 0.5f;
 		pos.y += nextTileObj.sprite->getPixelSize().y;
-		const std::string unitMoveSound = unitType->getMoveSound(
-			nextTileObj.data.getTileType()->getTypeScriptName(), hidden);
+		auto newUnitTypeView(unitType);
+		newUnitTypeView->overrides.terrain(nextTileObj.data.getTerrainScriptName());
+		const std::string unitMoveSound = (hidden
+			? newUnitTypeView->soundInfo().moveHidden
+			: newUnitTypeView->soundInfo().move);
 		if (!unitMoveSound.empty()) finalSound = unitMoveSound;
-		path.emplace_back(pos, sheet, (previousTile ? unitType->getMoveSound(
-			_tiles[previousTile->x][previousTile->y]
-				.data.getTileType()->getTypeScriptName(), hidden) : ""),
+		if (previousTile) {
+			newUnitTypeView->overrides.terrain(getTerrainOfTileScriptName(*previousTile));
+		}
+		path.emplace_back(pos, sheet, (previousTile ? (hidden
+			? newUnitTypeView->soundInfo().moveHidden
+			: newUnitTypeView->soundInfo().move) : ""),
 			unitMoveSound);
 		previousTile = nextTile;
 	}
@@ -908,9 +904,10 @@ bool awe::map::_canAnimationBeQueued(
 }
 
 void awe::map::_regenerateTileSprites() {
+	const auto envSpritesheet = getEnvironment()->spritesheet();
 	for (auto& column : _tiles)
 		for (auto& tile : column)
-			tile.sprite->setSpritesheet((*_sheets)[getEnvironmentSpritesheet()]);
+			tile.sprite->setSpritesheet((*_sheets)[envSpritesheet]);
 }
 
 bool awe::map::animate(const sf::RenderTarget& target) {
@@ -935,10 +932,10 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 			tile.sprite->animate(target);
 
 			sf::Uint32 tileWidth = 0, tileHeight = 0;
-			auto type = tile.data.getTileType();
-			if (type) {
-				tileWidth = (sf::Uint32)tile.sprite->getPixelSize().x;
-				tileHeight = (sf::Uint32)tile.sprite->getPixelSize().y;
+			//auto type = tile.data.getTileType();
+			//if (type) {
+			tileWidth = (sf::Uint32)tile.sprite->getPixelSize().x;
+			tileHeight = (sf::Uint32)tile.sprite->getPixelSize().y;
 				/*if (tile.getTileOwner() == awe::NO_ARMY) {
 					tileWidth = (sf::Uint32)_sheet_tile->getFrameRect(
 						type->getNeutralTile()
@@ -954,7 +951,7 @@ bool awe::map::animate(const sf::RenderTarget& target) {
 						type->getOwnedTile(tile.getTileOwner())
 					).height;
 				}*/
-			}
+			//}
 			if (tileWidth < tile.sprite->MIN_WIDTH)
 				tileWidth = tile.sprite->MIN_WIDTH;
 			if (tileHeight < tile.sprite->MIN_HEIGHT)
@@ -1347,11 +1344,12 @@ void awe::map::drawUnit(sf::RenderTarget& target, const sf::RenderStates& states
 	target.draw(sprite, states);
 };
 
-void awe::map::_setWeather(const std::shared_ptr<const awe::weather>& weather) {
+void awe::map::_setWeather(const std::string& weather) {
 	_weather = weather;
 	std::vector<awe::random_particles::data> particles;
-	particles.reserve(_weather->getParticles().size());
-	for (const auto& particle : _weather->getParticles()) {
+	const auto& particleSettings = getWeather()->particles().vector;
+	particles.reserve(particleSettings.size());
+	for (const auto& particle : particleSettings) {
 		particles.emplace_back();
 		particles.back().sheet = _sheets ? (*_sheets)[particle.sheet] : nullptr;
 		particles.back().spriteID = particle.spriteID;

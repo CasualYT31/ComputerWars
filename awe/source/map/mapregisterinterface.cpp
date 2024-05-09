@@ -92,6 +92,17 @@ void awe::map::Register(asIScriptEngine* engine,
 		awe::closed_list_node::Register(engine, document);
 		awe::disable_mementos::Register(engine, document);
 		awe::tile_particle_node::Register(engine, document);
+		// TODO: This is gross.
+		awe::commander_view::Register(engine, document);
+		awe::weather_view::Register(engine, document);
+		awe::environment_view::Register(engine, document);
+		awe::country_view::Register(engine, document);
+		awe::movement_type_view::Register(engine, document);
+		awe::structure_view::Register(engine, document);
+		awe::tile_type_view::Register(engine, document);
+		awe::terrain_view::Register(engine, document);
+		awe::unit_type_view::Register(engine, document);
+		awe::weapon_view::Register(engine, document);
 
 		/////////////////
 		// SHADER ENUM //
@@ -265,8 +276,8 @@ void awe::map::Register(asIScriptEngine* engine,
 			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"const Weather@ getWeather() const",
-			asMETHOD(awe::map, getWeatherObject), asCALL_THISCALL);
+			"WeatherView@ getWeather() const",
+			asMETHOD(awe::map, getRawWeather), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool defaultWinCondition() const",
@@ -325,8 +336,8 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, getArmyFunds), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"const Country@ getArmyCountry(const ArmyID) const",
-			asMETHOD(awe::map, getArmyCountryObject), asCALL_THISCALL);
+			"CountryView@ getArmyCountry(const ArmyID) const",
+			asMETHOD(awe::map, getRawArmyCountry), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "void setArmyCOs(const ArmyID, "
 			"const string&in, const string&in = \"\")",
@@ -389,8 +400,8 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, deleteUnit), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"const UnitType@ getUnitType(const UnitID) const",
-			asMETHOD(awe::map, getUnitTypeObject), asCALL_THISCALL);
+			"UnitTypeView@ getUnitType(const UnitID) const",
+			asMETHOD(awe::map, getRawUnitType), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"void setUnitPosition(const UnitID, const Vector2&in)",
@@ -542,8 +553,8 @@ void awe::map::Register(asIScriptEngine* engine,
 			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"const TileType@ getTileType(const Vector2&in) const",
-			asMETHOD(awe::map, getTileTypeObject), asCALL_THISCALL);
+			"TileTypeView@ getTileType(const Vector2&in) const",
+			asMETHOD(awe::map, getRawTileType), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"void setTileHP(const Vector2&in, const HP)",
@@ -573,8 +584,8 @@ void awe::map::Register(asIScriptEngine* engine,
 				const bool destroyed), void), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"const Structure@ getTileStructure(const Vector2&in) const",
-			asMETHOD(awe::map, getTileStructureObject), asCALL_THISCALL);
+			"StructureView@ getTileStructure(const Vector2&in) const",
+			asMETHOD(awe::map, getRawTileStructure), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool isTileAStructureTile(const Vector2&in) const",
@@ -652,8 +663,7 @@ void awe::map::Register(asIScriptEngine* engine,
 
 		r = engine->RegisterObjectMethod("Map",
 			"string getTileTypeStructure(const string&in) const",
-			asMETHODPR(awe::map, getTileTypeStructure, (const std::string&) const,
-				std::string), asCALL_THISCALL);
+			asMETHOD(awe::map, getTileTypeStructureScriptName), asCALL_THISCALL);
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
@@ -991,21 +1001,8 @@ void awe::map::Register(asIScriptEngine* engine,
 			asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"const Environment@ getEnvironment() const",
-			asMETHOD(awe::map, getEnvironmentObject), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"string getEnvironmentSpritesheet() const",
-			asMETHOD(awe::map, getEnvironmentSpritesheet), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"string getEnvironmentPictureSpritesheet() const",
-			asMETHOD(awe::map, getEnvironmentPictureSpritesheet), asCALL_THISCALL);
-
-		r = engine->RegisterObjectMethod("Map",
-			"string getEnvironmentStructureIconSpritesheet() const",
-			asMETHOD(awe::map, getEnvironmentStructureIconSpritesheet),
-			asCALL_THISCALL);
+			"EnvironmentView@ getEnvironment() const",
+			asMETHOD(awe::map, getRawEnvironment), asCALL_THISCALL);
 
 		//////////////////////////
 		// ANIMATION OPERATIONS //

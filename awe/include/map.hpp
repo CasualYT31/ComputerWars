@@ -239,27 +239,12 @@ namespace awe {
 		/**
 		 * Initialises this object with \c bank pointers.
 		 * Also initialises the internal logger object.\n
-		 * @param countries    Information on the countries available to the map.
-		 * @param environments Information on the environments available to the
-		 *                     map. Cannot be \c nullptr.
-		 * @param weathers     Information on the weathers available to the map.
-		 *                     Cannot be \c nullptr.
-		 * @param tiles        Information on the tile types available to the map.
-		 * @param terrains     Information on the terrains available to the map.
-		 * @param units        Information on the unit types available to the map.
-		 * @param commanders   Information on the COs available to the map.
-		 * @param structures   Information on the structures available to the map.
-		 * @param data         The data to initialise the logger object with.
+		 * @param banks Information on the static game properties available to the
+		 *              map.
+		 * @param data  The data to initialise the logger object with.
 		 * @sa    \c engine::logger
 		 */
-		map(const std::shared_ptr<awe::bank<awe::country>>& countries,
-			const std::shared_ptr<awe::bank<awe::environment>>& environments,
-			const std::shared_ptr<awe::bank<awe::weather>>& weathers,
-			const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-			const std::shared_ptr<awe::bank<awe::terrain>>& terrains,
-			const std::shared_ptr<awe::bank<awe::unit_type>>& units,
-			const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-			const std::shared_ptr<awe::bank<awe::structure>>& structures,
+		map(const std::shared_ptr<const awe::banks>& banks,
 			const engine::logger::data& data);
 
 		/**
@@ -441,16 +426,6 @@ namespace awe {
 		 * @param   tile  The type of tile to assign to new tiles.
 		 * @param   owner The owner to assign to new tiles.
 		 */
-		void setMapSize(const sf::Vector2u& dim,
-			const std::shared_ptr<const awe::tile_type>& tile = nullptr,
-			const awe::ArmyID owner = awe::NO_ARMY);
-
-		/**
-		 * Overload of \c setMapSize() which accepts a tile type script name.
-		 * @param dim   The new size of the map.
-		 * @param tile  The script name of the tile type to assign to new tiles.
-		 * @param owner The owner to assign to new tiles.
-		 */
 		void setMapSize(const sf::Vector2u& dim, const std::string& tile,
 			const awe::ArmyID owner = awe::NO_ARMY);
 
@@ -470,12 +445,6 @@ namespace awe {
 		 * @param  owner The owner to assign to each tile. Can be \c NO_ARMY.
 		 * @return \c TRUE if filling the map was successful, \c FALSE otherwise.
 		 */
-		bool fillMap(const std::shared_ptr<const awe::tile_type>& type,
-			const awe::ArmyID owner);
-
-		/**
-		 * Version of \c fillMap() which accepts a tile type script name.
-		 */
 		bool fillMap(const std::string& type, const awe::ArmyID owner);
 
 		/**
@@ -488,14 +457,6 @@ namespace awe {
 		 * @param  type  The type of tile to change each tile in the rectangle to.
 		 * @param  owner The owner to assign to each tile. Can be \c NO_ARMY.
 		 * @return \c TRUE if filling the tiles was successful, \c FALSE otherwise.
-		 */
-		bool rectangleFillTiles(const sf::Vector2u& start, const sf::Vector2u& end,
-			const std::shared_ptr<const awe::tile_type>& type,
-			const awe::ArmyID owner);
-
-		/**
-		 * Version of \c rectangleFillTiles() which accepts a tile type script
-		 * name.
 		 */
 		bool rectangleFillTiles(const sf::Vector2u& start, const sf::Vector2u& end,
 			const std::string& type, const awe::ArmyID owner);
@@ -514,14 +475,6 @@ namespace awe {
 		 * @param  army  The army to assign to each unit.
 		 * @return \c TRUE if creating the units was successful, \c FALSE
 		 *         otherwise.
-		 */
-		bool rectangleFillUnits(const sf::Vector2u& start, const sf::Vector2u& end,
-			const std::shared_ptr<const awe::unit_type>& type,
-			const awe::ArmyID army);
-
-		/**
-		 * Version of \c rectangleFillUnits() which accepts a unit type script
-		 * name.
 		 */
 		bool rectangleFillUnits(const sf::Vector2u& start, const sf::Vector2u& end,
 			const std::string& type, const awe::ArmyID army);
@@ -566,12 +519,6 @@ namespace awe {
 
 		/**
 		 * Sets this map's weather.
-		 * @param weather Pointer to the weather to set.
-		 */
-		void setWeather(const std::shared_ptr<const awe::weather>& weather);
-
-		/**
-		 * Overload of \c setWeather() which accepts a script name.
 		 * @param name Script name of the weather to set.
 		 */
 		void setWeather(const std::string& name);
@@ -580,33 +527,26 @@ namespace awe {
 		 * Retrieves the currently set weather.
 		 * @return Pointer to the information on the current weather.
 		 */
-		std::shared_ptr<const awe::weather> getWeather() const;
+		const engine::CScriptWrapper<awe::weather_view> getWeather() const;
 
 		/**
-		 * Retrieves the current weather, for use with the scripts.
-		 * @return Information on the current weather.
-		 * @throws \c std::out_of_range If there is currently no weather set.
+		 * Retrieves the currently set weather.
+		 * @return Raw pointer to the information on the current weather.
 		 */
-		const awe::weather* getWeatherObject() const;
+		const awe::weather_view* getRawWeather() const;
 
 		/////////////////////
 		// ARMY OPERATIONS //
 		/////////////////////
 		/**
 		 * Allocates a new army.
-		 * If the army with the given country already exists, or \c nullptr is
-		 * given, the call will be logged.
+		 * If the army with the given country already exists, the call will be
+		 * logged.
 		 * @warning By default, a newly created army will be on its own team.
 		 *          However, a simple counter is used to achieve this, so if the
 		 *          client reassigns team IDs, this behaviour can't be guaranteed.
-		 * @param  country The country of the army.
+		 * @param  country The script name of the country of the army.
 		 * @return \c TRUE if the army was created, \c FALSE otherwise.
-		 */
-		bool createArmy(const std::shared_ptr<const awe::country>& country);
-
-		/**
-		 * Overload of \c createArmy() which accepts a country script name.
-		 * @param country The script name of the country of the army.
 		 */
 		bool createArmy(const std::string& country);
 
@@ -699,34 +639,17 @@ namespace awe {
 		 *         \c nullptr is returned if the given army did not exist at the
 		 *         time of calling.
 		 */
-		std::shared_ptr<const awe::country> getArmyCountry(
-			const awe::ArmyID army) const;
+		const engine::CScriptWrapper<awe::country_view> getArmyCountry(const awe::ArmyID army) const;
+		const awe::country_view* getRawArmyCountry(const awe::ArmyID army) const;
 
-		/**
-		 * Retrieves an army's country, for use with the scripts.
-		 * @param  army The ID of the army whose country is to be reteieved.
-		 * @return Information on the given army's country.
-		 * @throws std::out_of_range if an army with the given ID didn't exist.
-		 */
-		const awe::country* getArmyCountryObject(const awe::ArmyID army) const;
+		std::string getArmyCountryScriptName(const awe::ArmyID army) const;
 
 		/**
 		 * Sets the COs that are in charge of a specified army.
-		 * If \c current was \c nullptr, but \c tag was not, the current CO will be
-		 * assigned \c tag and a warning will be logged. If both pointer parameters
-		 * are \c nullptr, an error will be logged. If the specified army did not
-		 * exist at the time of calling, an error will be logged.
-		 * @param army    The ID of the army to set the COs of.
-		 * @param current The primary CO of the specified army.
-		 * @param tag     The tag CO of the specified army. Should be \c nullptr if
-		 *                there will not be one.
-		 */
-		void setArmyCOs(const awe::ArmyID army,
-			const std::shared_ptr<const awe::commander>& current,
-			const std::shared_ptr<const awe::commander>& tag = nullptr);
-
-		/**
-		 * Overload of \c setArmyCOs() which accepts script names.
+		 * If \c current was empty, but \c tag was not, the current CO will be
+		 * assigned \c tag and a warning will be logged. If both string parameters
+		 * are empty, an error will be logged. If the specified army did not exist
+		 * at the time of calling, an error will be logged.
 		 * @param army    The ID of the army to set the COs of.
 		 * @param current The primary CO of the specified army.
 		 * @param tag     The tag CO of the specified army. Should be an empty
@@ -741,30 +664,14 @@ namespace awe {
 		 * @param current The primary CO of the specified army.
 		 * @sa    @c setArmyCOs()
 		 */
-		void setArmyCurrentCO(const awe::ArmyID army,
-			const std::shared_ptr<const awe::commander>& current);
-
-		/**
-		 * Overload of \c setArmyCurrentCO() which accepts a script name.
-		 * @param army    The ID of the army to set the CO of.
-		 * @param current The primary CO of the specified army.
-		 */
 		void setArmyCurrentCO(const awe::ArmyID army, const std::string& current);
 
 		/**
 		 * Sets the tag CO of a specified army.
 		 * @param army The ID of the army to set the CO of.
-		 * @param tag  The tag CO of the specified army.
-		 * @sa    @c setArmyCOs()
-		 */
-		void setArmyTagCO(const awe::ArmyID army,
-			const std::shared_ptr<const awe::commander>& tag);
-
-		/**
-		 * Overload of \c setArmyTagCO() which accepts a script name.
-		 * @param army The ID of the army to set the CO of.
 		 * @param tag  The tag CO of the specified army. Can be an empty string to
 		 *             mean a lack of a tag CO.
+		 * @sa    @c setArmyCOs()
 		 */
 		void setArmyTagCO(const awe::ArmyID army, const std::string& tag);
 
@@ -779,18 +686,15 @@ namespace awe {
 		/**
 		 * Retrieves an army's primary/current CO.
 		 * @param  army The ID of the army to retrieve the current CO of.
-		 * @return Pointer to the information on the given army's current CO.
-		 *         \c nullptr is returned if the given army did not exist at the
-		 *         time of calling, or if there was no current CO.
+		 * @return The information on the given army's current CO. \c nullptr if
+		 *         the given army did not exist at the time of calling, or if there
+		 *         was no current CO.
 		 */
-		std::shared_ptr<const awe::commander> getArmyCurrentCO(
-			const awe::ArmyID army) const;
+		const engine::CScriptWrapper<awe::commander_view> getArmyCurrentCO(const awe::ArmyID army);
+		const awe::commander_view* getRawArmyCurrentCO(const awe::ArmyID army);
 
 		/**
-		 * Gets the army's primary CO's script name.
-		 * @param  army The ID of the army to retrieve the current CO of.
-		 * @return The script name of the primary CO assigned to this army, or an
-		 *         empty string if one is not assigned.
+		 * 
 		 */
 		std::string getArmyCurrentCOScriptName(const awe::ArmyID army) const;
 
@@ -801,14 +705,11 @@ namespace awe {
 		 *         \c nullptr is returned if the given army did not exist at the
 		 *         time of calling, or if there was no tag CO.
 		 */
-		std::shared_ptr<const awe::commander> getArmyTagCO(
-			const awe::ArmyID army) const;
+		const engine::CScriptWrapper<awe::commander_view> getArmyTagCO(const awe::ArmyID army);
+		const awe::commander_view* getRawArmyTagCO(const awe::ArmyID army);
 
 		/**
-		 * Gets the army's secondary CO's script name.
-		 * @param  army The ID of the army to retrieve the current CO of.
-		 * @return The script name of the secondary CO assigned to this army, or an
-		 *         empty string if one is not assigned.
+		 *
 		 */
 		std::string getArmyTagCOScriptName(const awe::ArmyID army) const;
 
@@ -819,7 +720,7 @@ namespace awe {
 		 *         has one (or if the specified army didn't exist at the time of
 		 *         calling).
 		 */
-		bool tagCOIsPresent(const awe::ArmyID army) const;
+		bool tagCOIsPresent(const awe::ArmyID army);
 
 		/**
 		 * Retrieves a list of tiles that belong to a specified army.
@@ -832,8 +733,7 @@ namespace awe {
 		 * @return A list of locations of tiles that belong to the given army.
 		 */
 		std::unordered_set<sf::Vector2u> getTilesOfArmy(const awe::ArmyID army,
-			const std::unordered_set<std::shared_ptr<const awe::terrain>>&
-			filter = {}) const;
+			const std::unordered_set<std::string>& filter = {}) const;
 
 		/**
 		 * Converts the result of a \c getTilesOfArmy() call into a
@@ -905,16 +805,6 @@ namespace awe {
 		 * @return The ID of the unit created. Will be \c NO_UNIT if the unit
 		 *         couldn't be created.
 		 */
-		awe::UnitID createUnit(const std::shared_ptr<const awe::unit_type>& type,
-			const awe::ArmyID army);
-
-		/**
-		 * Overload of \c createUnit() which accepts a unit type script name.
-		 * @param  type The script name of the type of unit to create.
-		 * @param  army The ID of the army who will own this unit.
-		 * @return The ID of the unit created. Will be \c NO_UNIT if the unit
-		 *         couldn't be created.
-		 */
 		awe::UnitID createUnit(const std::string& type, const awe::ArmyID army);
 
 		/**
@@ -935,15 +825,10 @@ namespace awe {
 		 * @return Pointer to the unit's type properties. \c nullptr if the unit ID
 		 *         was invalid.
 		 */
-		std::shared_ptr<const awe::unit_type> getUnitType(
+		engine::CScriptWrapper<awe::unit_type_view> getUnitType(
 			const awe::UnitID id) const;
 
-		/**
-		 * Script version of \c getUnitType().
-		 * @throws std::out_of_range when the given ID did not identify a unit.
-		 * @sa     @c getUnitType().
-		 */
-		const awe::unit_type* getUnitTypeObject(const awe::UnitID id) const;
+		awe::unit_type_view* getRawUnitType(const awe::UnitID id) const;
 
 		/**
 		 * Sets a unit's position on the map.
@@ -1243,15 +1128,9 @@ namespace awe {
 		 * Changing a tile's type will automatically remove any ownership of the
 		 * tile, and will reset its HP to the maximum allowed by the given type.
 		 * @param  pos  The X and Y coordinate of the tile to change.
-		 * @param  type The type to assign to the tile.
+		 * @param  type The script name of the tile type to assign to the tile.
 		 * @return \c TRUE if setting the tile's type was successful, \c FALSE
 		 *         otherwise.
-		 */
-		bool setTileType(const sf::Vector2u& pos,
-			const std::shared_ptr<const awe::tile_type>& type);
-
-		/**
-		 * Version of \c setTileType() which accepts a tile type script name.
 		 */
 		bool setTileType(const sf::Vector2u& pos, const std::string& type);
 
@@ -1281,15 +1160,23 @@ namespace awe {
 		 * @param  pos The X and Y coordinate of the tile to query.
 		 * @return The type of the tile and its information.
 		 */
-		std::shared_ptr<const awe::tile_type> getTileType(
+		engine::CScriptWrapper<awe::tile_type_view> getTileType(
 			const sf::Vector2u& pos) const;
 
 		/**
 		 * Script version of \c getTileType().
-		 * @throws std::out_of_range if the given tile was out of bounds.
-		 * @sa     @c getTileType().
+		 * @sa @c getTileType().
 		 */
-		const awe::tile_type* getTileTypeObject(const sf::Vector2u& pos) const;
+		awe::tile_type_view* getRawTileType(const sf::Vector2u& pos) const;
+
+		std::string getTileTypeScriptName(const sf::Vector2u& pos) const;
+
+		engine::CScriptWrapper<awe::terrain_view> getTerrainOfTile(
+			const sf::Vector2u& pos) const;
+
+		awe::terrain_view* getRawTerrainOfTile(const sf::Vector2u& pos) const;
+
+		std::string getTerrainOfTileScriptName(const sf::Vector2u& pos) const;
 
 		/**
 		 * Sets a tile's HP.
@@ -1348,22 +1235,16 @@ namespace awe {
 		 * did not describe a tile in the structure.
 		 * @param pos       The X and Y coordinate of the tile that's part of a
 		 *                  structure.
-		 * @param structure The type of structure this tile's a part of. \c nullptr
-		 *                  to set no structure.
+		 * @param structure The script name of the type of structure this tile's a
+		 *                  part of. Empty string to set no structure.
 		 * @param offset    Which tile from the structure this tile's a part of,
 		 *                  defined as the offset from the root tile.
 		 * @param destroyed \c TRUE if this structure is destroyed, \c FALSE if
 		 *                  not.
 		 */
 		void setTileStructureData(const sf::Vector2u& pos,
-			const std::shared_ptr<const awe::structure>& structure,
+			const std::string& structure,
 			const sf::Vector2i& offset, const bool destroyed);
-
-		/// Script interface version of \c setTileStructureData().
-		/// Provide an empty string to set no structure.
-		void setTileStructureData(const sf::Vector2u& pos,
-			const std::string& structure, const sf::Vector2i& offset,
-			const bool destroyed);
 
 		/**
 		 * Retrieves the specified tile's registered structure type.
@@ -1372,7 +1253,7 @@ namespace awe {
 		 * @return The type of structure this tile is a part of. If this tile is
 		 *         not part of a structure, will return \c nullptr.
 		 */
-		std::shared_ptr<const awe::structure> getTileStructure(
+		engine::CScriptWrapper<awe::structure_view> getTileStructure(
 			const sf::Vector2u& pos) const;
 
 		/**
@@ -1381,8 +1262,10 @@ namespace awe {
 		 *                           tile wasn't part of a structure.
 		 * @sa     @c getTileStructure().
 		 */
-		const awe::structure* getTileStructureObject(
+		awe::structure_view* getRawTileStructure(
 			const sf::Vector2u& pos) const;
+
+		std::string getTileStructureScriptName(const sf::Vector2u& pos) const;
 		
 		/**
 		 * Does the given tile form part of a structure?
@@ -1589,7 +1472,7 @@ namespace awe {
 		 *         no path could be found.
 		 */
 		std::vector<awe::closed_list_node> findPath(const sf::Vector2u& origin,
-			const sf::Vector2u& dest, const awe::movement_type& moveType,
+			const sf::Vector2u& dest, const std::string& moveType,
 			const unsigned int* const movePoints, const awe::Fuel* const fuel,
 			const awe::TeamID* const team, const awe::ArmyID* const army,
 			const bool hasInfiniteFuel, const bool ignoreUnitChecks,
@@ -1602,7 +1485,7 @@ namespace awe {
 		 * @sa     @c findPath().
 		 */
 		CScriptArray* findPathAsArray(const sf::Vector2u& origin,
-			const sf::Vector2u& dest, const awe::movement_type& moveType,
+			const sf::Vector2u& dest, const std::string& moveType,
 			const unsigned int movePoints, const awe::Fuel fuel,
 			const awe::TeamID team, const awe::ArmyID army,
 			const bool hasInfiniteFuel, const bool ignoreUnitChecks,
@@ -1615,7 +1498,7 @@ namespace awe {
 		 * @sa     @c findPath().
 		 */
 		CScriptArray* findPathAsArrayUnloadUnit(const sf::Vector2u& origin,
-			const sf::Vector2u& dest, const awe::movement_type& moveType,
+			const sf::Vector2u& dest, const std::string& moveType,
 			const awe::ArmyID army, const CScriptArray* const ignoredUnits) const;
 
 		/**
@@ -1650,8 +1533,7 @@ namespace awe {
 		 *                          be set to the given army.
 		 */
 		void convertTiles(const std::vector<sf::Vector2u>& tiles,
-			const std::shared_ptr<const awe::tile_type>& fromTileType,
-			const std::shared_ptr<const awe::tile_type>& toTileType,
+			const std::string& fromTileType, const std::string& toTileType,
 			const awe::ArmyID transferOwnership);
 
 		/// Script interface version of \c convertTiles().
@@ -1666,10 +1548,6 @@ namespace awe {
 		 * @return \c TRUE if the root and dependent tiles can all fit within the
 		 *         map, \c FALSE if not.
 		 */
-		bool canStructureFit(const sf::Vector2u& fromTile,
-			const std::shared_ptr<const awe::structure>& structure) const;
-
-		/// Script interface version of \c canStructureFit().
 		bool canStructureFit(const sf::Vector2u& fromTile,
 			const std::string& structure) const;
 
@@ -1702,17 +1580,11 @@ namespace awe {
 		 * Is the given tile type the root tile of a non-paintable structure?
 		 * @param  type The type of tile to test.
 		 * @return If there is a structure that is not paintable, and whose root
-		 *         tile is the given tile type, return a pointer to its properties.
-		 *         \c nullptr is returned if no structure could be found that
+		 *         tile is the given tile type, return its script name.
+		 *         An empty string is returned if no structure could be found that
 		 *         matches the criteria.
 		 */
-		std::shared_ptr<const awe::structure> getTileTypeStructure(
-			const std::shared_ptr<const awe::tile_type>& type) const;
-
-		/// Version of \c getTileTypeStructure() that accepts a script name to a
-		/// tile type, and returns either the script name of the found structure,
-		/// or an empty string if no structure was found.
-		std::string getTileTypeStructure(const std::string& type) const;
+		std::string getTileTypeStructureScriptName(const std::string& type) const;
 
 		//////////////////////////////////////
 		// SELECTED UNIT DRAWING OPERATIONS //
@@ -2486,52 +2358,25 @@ namespace awe {
 
 		/**
 		 * Sets this map's environment.
-		 * @param environment Pointer to the environment to set.
-		 */
-		void setEnvironment(
-			const std::shared_ptr<const awe::environment>& environment);
-
-		/**
-		 * Overload of \c setEnvironment() which accepts a script name.
-		 * @param name Script name of the environment to set.
+		 * @param environment Script name of the environment to set.
 		 */
 		void setEnvironment(const std::string& name);
 
 		/**
 		 * Retrieves the currently set environment.
+		 * @param  initLogger Initialise the view's logger. If \c FALSE, no error
+		 *                    logs will be written if the script name set in the
+		 *                    view is invalid.
 		 * @return Pointer to the information on the current environment.
 		 */
-		std::shared_ptr<const awe::environment> getEnvironment() const;
+		const engine::CScriptWrapper<awe::environment_view> getEnvironment(
+			const bool initLogger = true) const;
 
 		/**
-		 * Retrieves the current environment, for use with the scripts.
-		 * @return Information on the current environment.
-		 * @throws \c std::out_of_range If there is currently no environment set.
+		 * Retrieves the currently set environment.
+		 * @return Raw pointer to the information on the current environment.
 		 */
-		const awe::environment* getEnvironmentObject() const;
-
-		/**
-		 * Retrieves the spritesheet of the current environment, if there is one.
-		 * @return The current environment's configured spritesheet, or an empty
-		 *         string if there is no environment currently set.
-		 */
-		std::string getEnvironmentSpritesheet() const;
-
-		/**
-		 * Retrieves the tile picture spritesheet of the current environment, if
-		 * there is one.
-		 * @return The current environment's configured tile picture spritesheet,
-		 *         or an empty string if there is no environment currently set.
-		 */
-		std::string getEnvironmentPictureSpritesheet() const;
-
-		/**
-		 * Retrieves the structure icon spritesheet of the current environment, if
-		 * there is one.
-		 * @return The current environment's configured structure icon spritesheet,
-		 *         or an empty string if there is no environment currently set.
-		 */
-		std::string getEnvironmentStructureIconSpritesheet() const;
+		const awe::environment_view* getRawEnvironment() const;
 
 		//////////////////////////
 		// ANIMATION OPERATIONS //
@@ -3105,16 +2950,19 @@ namespace awe {
 			 * Constructs a tile.
 			 * @sa \c awe::tile::tile().
 			 */
-			tile_data(const engine::logger::data& logger_data,
+			tile_data(const awe::tile::view_callbacks& viewCallbacks,
+				const std::shared_ptr<const awe::banks>& banks,
+				const engine::logger::data& logger_data,
 				const std::function<void(const std::function<void(void)>&)>&
 					spriteCallback,
-				const std::shared_ptr<const awe::tile_type>& type = nullptr,
+				const std::string& type = "",
 				const awe::ArmyID owner = awe::NO_ARMY,
 				const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr)
 				: sprite(std::make_shared<awe::animated_tile>(
 					engine::logger::data{ logger_data.sink,
 						logger_data.name + "_sprite" })),
-				data(sprite, spriteCallback, type, owner, sheet) {}
+				data(viewCallbacks, banks, sprite, spriteCallback, logger_data,
+					type, owner, sheet) {}
 
 			/**
 			 * The tile's animated sprite.
@@ -3150,17 +2998,20 @@ namespace awe {
 			 * Constructs a unit.
 			 * @sa \c awe::unit::unit().
 			 */
-			unit_data(const engine::logger::data& logger_data,
+			unit_data(const awe::unit::view_callbacks& viewCallbacks,
+				const std::shared_ptr<const awe::banks>& banks,
+				const engine::logger::data& logger_data,
 				const std::function<void(const std::function<void(void)>&)>&
 					spriteCallback,
-				const std::shared_ptr<const awe::unit_type>& type,
+				const std::string& type,
 				const awe::ArmyID army = 0,
 				const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr,
 				const std::shared_ptr<sfx::animated_spritesheet>& icons = nullptr)
 				: sprite(std::make_shared<awe::animated_unit>(sheet,
 					engine::logger::data{ logger_data.sink,
 						logger_data.name + "_sprite" })),
-				data(sprite, spriteCallback, type, army, icons) {}
+				data(viewCallbacks, banks, sprite, spriteCallback, type,
+					logger_data, army, icons) {}
 
 			/**
 			 * The unit's animated sprite.
@@ -3217,6 +3068,7 @@ namespace awe {
 
 		/**
 		 * The additional data stored inside the map.
+		 * Used to store map data that the scripts deal with.
 		 */
 		std::string _additionalData;
 
@@ -3476,14 +3328,14 @@ namespace awe {
 		sfx::animated_sprite _additionallySelectedTileCursorLR;
 
 		/**
-		 * The currently selected environment.
+		 * The script name of the currently selected environment.
 		 */
-		std::shared_ptr<const awe::environment> _environment;
+		std::string _environment;
 
 		/**
-		 * The currently selected weather.
+		 * The script name of the currently selected weather.
 		 */
-		std::shared_ptr<const awe::weather> _weather;
+		std::string _weather;
 
 		/**
 		 * Weather particles.
@@ -3492,9 +3344,9 @@ namespace awe {
 
 		/**
 		 * Updates \c _weather, and resets the weather's particles.
-		 * @param weather The new weather to set.
+		 * @param weather The script name of the new weather to set.
 		 */
-		void _setWeather(const std::shared_ptr<const awe::weather>& weather);
+		void _setWeather(const std::string& weather);
 
 		// MOVE MODE DRAWING //
 
@@ -3679,47 +3531,30 @@ namespace awe {
 		 */
 		std::shared_ptr<sfx::user_input> _ui;
 
-		///////////
-		// BANKS //
-		///////////
+		///////////////////////
+		// BANKS & OVERRIDES //
+		///////////////////////
 		/**
-		 * Data pertaining to countries.
+		 * Whenever an \c awe::overrides object is constructed whilst a map is open,
+		 * this function will be called to initialise it.
 		 */
-		std::shared_ptr<awe::bank<awe::country>> _countries = nullptr;
+		void _overridesFactoryFunction(awe::overrides& o) const;
 
 		/**
-		 * Data pertaining to environments.
+		 * Sets the given <tt>overrides</tt>'s \c commander override to be the
+		 * currently selected army's current CO.
+		 * If neither are defined, then the override is set to an empty string.
+		 * @param o The overrides object to update.
 		 */
-		std::shared_ptr<awe::bank<awe::environment>> _environments = nullptr;
+		void _overrideWithSelectedArmysCurrentCO(awe::overrides& o) const;
+
+		/// @warning Assumes scriptName exists!
+		engine::CScriptWrapper<awe::structure_view> _createStructureView(
+			const std::string& scriptName, const sf::Vector2u& pos) const;
 
 		/**
-		 * Data pertaining to weathers.
+		 * Data pertaining to all of the static game properties.
 		 */
-		std::shared_ptr<awe::bank<awe::weather>> _weathers = nullptr;
-
-		/**
-		 * Data pertaining to tile types.
-		 */
-		std::shared_ptr<awe::bank<awe::tile_type>> _tileTypes = nullptr;
-
-		/**
-		 * Data pertaining to terrains.
-		 */
-		std::shared_ptr<awe::bank<awe::terrain>> _terrains = nullptr;
-
-		/**
-		 * Data pertaining to unit types.
-		 */
-		std::shared_ptr<awe::bank<awe::unit_type>> _unitTypes = nullptr;
-
-		/**
-		 * Data pertaining to COs.
-		 */
-		std::shared_ptr<awe::bank<awe::commander>> _commanders = nullptr;
-
-		/**
-		 * Data pertaining to structures.
-		 */
-		std::shared_ptr<awe::bank<awe::structure>> _structures = nullptr;
+		std::shared_ptr<const awe::banks> _banks = nullptr;
 	};
 }

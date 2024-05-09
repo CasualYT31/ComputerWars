@@ -43,7 +43,7 @@
 		"description": "WOODS_description",
 		"defence": 2,
 		"primaryTileType": "033wood",
-		"FOWVisibility": "hidden"
+		"FoWVisibility": "hidden"
 	},
 	"RIVER": {
 		"longName": "RIVER_longname",
@@ -59,7 +59,7 @@
 		"description": "REEF_description",
 		"defence": 1,
 		"primaryTileType": "03Freef",
-		"FOWVisibility": "hidden"
+		"FoWVisibility": "hidden"
 	},
 	"SHOAL": {
 		"longName": "SHOAL_longname",
@@ -74,7 +74,7 @@
 		"icon": "noentry",
 		"description": "PIPE_description",
 		"primaryTileType": "057pipevert",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"PIPESEAM": {
 		"longName": "PIPESEAM_longname",
@@ -83,7 +83,7 @@
 		"description": "PIPESEAM_description",
 		"maxHP": 99,
 		"primaryTileType": "05Fpipeseamvert",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"MISSILESILO": {
 		"longName": "MISSILESILO_longname",
@@ -152,7 +152,7 @@
 		"shortName": "VOLCANO_shortname",
 		"icon": "noentry",
 		"description": "VOLCANO_description",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"BLACKCANNONROOT": {
 		"longName": "BLACKCANNON_longname",
@@ -160,14 +160,14 @@
 		"icon": "noentry",
 		"description": "BLACKCANNON_description",
 		"maxHP": 99,
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"BLACKCANNON": {
 		"longName": "BLACKCANNON_longname",
 		"shortName": "BLACKCANNON_shortname",
 		"icon": "noentry",
 		"description": "BLACKCANNON_description",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"MINICANNON": {
 		"longName": "MINICANNON_longname",
@@ -175,7 +175,7 @@
 		"icon": "noentry",
 		"description": "MINICANNON_description",
 		"maxHP": 99,
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"BLACKLASER": {
 		"longName": "BLACKLASER_longname",
@@ -183,7 +183,7 @@
 		"icon": "noentry",
 		"description": "BLACKLASER_description",
 		"maxHP": 99,
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"DEATHRAYROOT": {
 		"longName": "DEATHRAY_longname",
@@ -191,14 +191,14 @@
 		"icon": "noentry",
 		"description": "DEATHRAY_description",
 		"maxHP": 99,
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"DEATHRAY": {
 		"longName": "DEATHRAY_longname",
 		"shortName": "DEATHRAY_shortname",
 		"icon": "noentry",
 		"description": "DEATHRAY_description",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"BLACKCRYSTAL": {
 		"longName": "BLACKCRYSTAL_longname",
@@ -206,7 +206,7 @@
 		"icon": "noentry",
 		"description": "BLACKCRYSTAL_description",
 		"maxHP": 99,
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"BLACKOBELISKROOT": {
 		"longName": "BLACKOBELISK_longname",
@@ -214,14 +214,14 @@
 		"icon": "noentry",
 		"description": "BLACKOBELISK_description",
 		"maxHP": 99,
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"BLACKOBELISK": {
 		"longName": "BLACKOBELISK_longname",
 		"shortName": "BLACKOBELISK_shortname",
 		"icon": "noentry",
 		"description": "BLACKOBELISK_description",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"GRANDBOLTROOT": {
 		"longName": "GRANDBOLT_longname",
@@ -229,35 +229,35 @@
 		"icon": "noentry",
 		"description": "GRANDBOLT_description",
 		"maxHP": 99,
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"GRANDBOLT": {
 		"longName": "GRANDBOLT_longname",
 		"shortName": "GRANDBOLT_shortname",
 		"icon": "noentry",
 		"description": "GRANDBOLT_description",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"FACTORYROOT": {
 		"longName": "FACTORY_longname",
 		"shortName": "FACTORY_shortname",
 		"icon": "noentry",
 		"description": "FACTORY_description",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"FACTORY": {
 		"longName": "FACTORY_longname",
 		"shortName": "FACTORY_shortname",
 		"icon": "noentry",
 		"description": "FACTORY_description",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"BLACKHOLE_DECORATION": {
 		"longName": "BLACKHOLE_DECORATION_longname",
 		"shortName": "BLACKHOLE_DECORATION_shortname",
 		"icon": "noentry",
 		"description": "BLACKHOLE_DECORATION_description",
-		"FOWVisibility": "visible"
+		"FoWVisibility": "visible"
 	},
 	"HQ": {
 		"longName": "HQ_longname",

@@ -36,22 +36,44 @@ namespace awe {
 	class tile {
 	public:
 		/**
+		 * Used to retrieve overrides that are based on a tile's owner.
+		 * The tile object in isolation cannot know an army's current CO. It could
+		 * deduce the owner's country script name with \c _banks, but it's better
+		 * to retrieve this indirectly to reduce reliance on a direct mapping
+		 * between ArmyID and country, especially as we already have to achieve
+		 * something similar for the commander override.\n
+		 * These callbacks assume the given army ID is valid and not \c NO_ARMY.
+		 */
+		struct view_callbacks {
+			std::function<std::string(const awe::ArmyID)> commander;
+			std::function<std::string(const awe::ArmyID)> country;
+		};
+	private:
+		view_callbacks _viewCallbacks;
+	public:
+		/**
 		 * Construct a new tile with a given type.
+		 * @param callbacks      Lets this object deduce its owner's current CO and
+		 *                       country for override purposes.
+		 * @param banks          Banks pointer.
 		 * @param animatedUnit   Pointer to this tile's animated sprite.
 		 * @param spriteCallback When an update to the tile's sprite is required,
 		 *                       this callback is to be invoked. The function that
 		 *                       will perform operations on the animated tile must
 		 *                       be given.
+		 * @param data           Logger data to pass onto \c _view objects.
 		 * @param type           The type of tile to create. \c nullptr if you
 		 *                       don't wish to provide a type at this time.
 		 * @param owner          The owner of the tile. \c NO_ARMY represents no
 		 *                       owner.
 		 * @param sheet          Pointer to the spritesheet to use with this tile.
 		 */
-		tile(const std::shared_ptr<awe::animated_tile>& animatedTile,
-			const std::function<void(const std::function<void(void)>&)>&
-				spriteCallback,
-			const std::shared_ptr<const awe::tile_type>& type = nullptr,
+		tile(const view_callbacks& callbacks,
+			const std::shared_ptr<const awe::banks>& banks,
+			const std::shared_ptr<awe::animated_tile>& animatedTile,
+			const std::function<void(const std::function<void(void)>&)>& spriteCallback,
+			const engine::logger::data& data,
+			const std::string& type = "",
 			const awe::ArmyID owner = awe::NO_ARMY,
 			const std::shared_ptr<sfx::animated_spritesheet>& sheet = nullptr);
 
@@ -62,14 +84,28 @@ namespace awe {
 		 * @param  type The type to give to the tile.
 		 * @safety No guarantee.
 		 */
-		void setTileType(const std::shared_ptr<const awe::tile_type>& type);
+		void setTileType(const std::string& type);
 
 		/**
 		 * Returns the tile's type.
 		 * @return Information on the tile's type.
 		 */
-		inline std::shared_ptr<const awe::tile_type> getTileType() const {
+		engine::CScriptWrapper<awe::tile_type_view> getTileType() const;
+
+		/**
+		 * 
+		 */
+		inline std::string getTileTypeScriptName() const {
 			return _type;
+		}
+
+		/**
+		 * 
+		 */
+		engine::CScriptWrapper<awe::terrain_view> getTerrain() const;
+
+		inline std::string getTerrainScriptName() const {
+			return getTileType()->terrain();
 		}
 
 		/**
@@ -130,8 +166,7 @@ namespace awe {
 		 *                  form. If \c nullptr, this tile is not a member of a
 		 *                  structure.
 		 */
-		inline void setStructureType(
-			const std::shared_ptr<const awe::structure>& structure) {
+		inline void setStructureType(const std::string& structure) {
 			_structure = structure;
 		}
 
@@ -140,8 +175,14 @@ namespace awe {
 		 * @return If this tile forms part of a structure, the type of structure is
 		 *         returned. Otherwise, \c nullptr.
 		 */
-		inline std::shared_ptr<const awe::structure> getStructureType() const {
+		engine::CScriptWrapper<awe::structure_view> getStructureType() const;
+
+		inline std::string getStructureTypeScriptName() const {
 			return _structure;
+		}
+
+		inline bool isPartOfStructure() const {
+			return !_structure.empty();
 		}
 
 		/**
@@ -199,13 +240,14 @@ namespace awe {
 		 * the callback but are applied immediately.
 		 */
 		void _updateSpriteID(const std::weak_ptr<awe::animated_tile>& _tileSprite,
-			const awe::ArmyID owner,
-			const std::shared_ptr<const awe::tile_type>& type, const bool visible);
+			engine::CScriptWrapper<awe::tile_type_view> type,
+			engine::CScriptWrapper<awe::terrain_view> terrain,
+			const bool visible);
 
 		/**
-		 * The type of this tile.
+		 * The script name of the type of this tile.
 		 */
-		std::shared_ptr<const awe::tile_type> _type;
+		std::string _type;
 
 		/**
 		 * The army ID of the owner of the tile.
@@ -224,10 +266,10 @@ namespace awe {
 		awe::UnitID _unit = awe::NO_UNIT;
 
 		/**
-		 * If this tile forms part of a structure, this points to the type of
-		 * structure.
+		 * If this tile forms part of a structure, this stores the script name of
+		 * the type of structure.
 		 */
-		std::shared_ptr<const awe::structure> _structure;
+		std::string _structure;
 
 		/**
 		 * This tile's offset from the root tile of the structure, in tiles.
@@ -253,5 +295,16 @@ namespace awe {
 		 * Callback to be invoked when a change is to be made to \c _tileSprite.
 		 */
 		std::function<void(std::function<void(void)>)> _updateSprite;
+
+		/**
+		 * Data used when initialising view objects.
+		 */
+		engine::logger::data _loggerData;
+
+		/**
+		 * Pointer to static game properties.
+		 * Used to create view objects.
+		 */
+		std::shared_ptr<const awe::banks> _banks;
 	};
 }

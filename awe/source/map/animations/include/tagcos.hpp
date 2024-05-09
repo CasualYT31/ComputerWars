@@ -27,8 +27,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "animation.hpp"
-#include "bank.hpp"
+#include "bank-v2.hpp"
 #include "language.hpp"
+#include "texture.hpp"
 
 namespace awe {
 	/**
@@ -48,9 +49,9 @@ namespace awe {
 		 * @param translate    Lets the animation translate its tag string.
 		 * @param font         The font to apply to the tag text.
 		 */
-		tag_cos(const std::shared_ptr<const awe::country>& country,
-			const std::shared_ptr<const awe::commander>& oldCurrentCO,
-			const std::shared_ptr<const awe::commander>& newCurrentCO,
+		tag_cos(const engine::CScriptWrapper<awe::country_view>& country,
+			const engine::CScriptWrapper<awe::commander_view>& oldCurrentCO,
+			const engine::CScriptWrapper<awe::commander_view>& newCurrentCO,
 			const std::shared_ptr<sfx::animated_spritesheet>& coSheet,
 			const std::shared_ptr<engine::language_dictionary>& translate,
 			const std::shared_ptr<sf::Font>& font);

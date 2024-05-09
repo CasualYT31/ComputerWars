@@ -34,12 +34,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "renderer.hpp"
 #include "userinput.hpp"
 #include "gui.hpp"
-#include "bank.hpp"
 #include "map.hpp"
 #include "mapstrings.hpp"
 #include "transitions.hpp"
 #include "settings.hpp"
 #include "maths.hpp"
+#include "bank-v2.hpp"
 #include <filesystem>
 
 namespace awe {
@@ -381,55 +381,9 @@ namespace awe {
 		//==========GAME DATA==========
 		//=============================
 		/**
-		 * Pointer to the static information on all the countries available.
+		 * Pointer to the static information on all the game properties available.
 		 */
-		std::shared_ptr<awe::bank<awe::country>> _countries;
-
-		/**
-		 * Pointer to the static information on all the types of weather available.
-		 */
-		std::shared_ptr<awe::bank<awe::weather>> _weathers;
-
-		/**
-		 * Pointer to the static information on all the environments available.
-		 */
-		std::shared_ptr<awe::bank<awe::environment>> _environments;
-
-		/**
-		 * Pointer to the static information on all the types of movement
-		 * available.
-		 */
-		std::shared_ptr<awe::bank<awe::movement_type>> _movements;
-
-		/**
-		 * Pointer to the static information on all the types of terrain available.
-		 */
-		std::shared_ptr<awe::bank<awe::terrain>> _terrains;
-
-		/**
-		 * Pointer to the static information on all the tiles available.
-		 */
-		std::shared_ptr<awe::bank<awe::tile_type>> _tiles;
-
-		/**
-		 * Pointer to the static information on all the weapons available.
-		 */
-		std::shared_ptr<awe::bank<awe::weapon>> _weapons;
-
-		/**
-		 * Pointer to the static information on all the types of units available.
-		 */
-		std::shared_ptr<awe::bank<awe::unit_type>> _units;
-
-		/**
-		 * Pointer to the static information on all the commanders available.
-		 */
-		std::shared_ptr<awe::bank<awe::commander>> _commanders;
-
-		/**
-		 * Pointer to the static information on all the structures available.
-		 */
-		std::shared_ptr<awe::bank<awe::structure>> _structures;
+		std::shared_ptr<awe::banks> _banks;
 
 		/**
 		 * Pointer to the map strings to use with all \c map objects.

@@ -47,6 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "maths.hpp"
 #include "typedef.hpp"
 #include "tpp/pod.tpp"
+#include "fmtsfx.hpp"
 
 #define GAME_PROPERTY_COUNT 10
 
@@ -126,8 +127,9 @@ namespace awe {
 		// manually set them each time.
 		static std::function<void(awe::overrides&)> _factory;
 	public:
-		static void setFactoryFunction(
+		static inline void setFactoryFunction(
 			const std::function<void(awe::overrides&)>& func) { _factory = func; }
+		static inline void clearFactoryFunction() noexcept { _factory = nullptr; }
 		overrides() { if (_factory) _factory(*this); }
 		overrides(const awe::overrides& cpy) : _overrides(cpy._overrides) {}
 		/**
@@ -191,7 +193,6 @@ namespace awe {
 		BANK_OVERRIDE_FIELD(weather, awe::weather)
 		BANK_OVERRIDE_FIELD(commander, awe::commander)
 	};
-	std::function<void(awe::overrides&)> awe::overrides::_factory = {};
 
 	inline bool operator==(const awe::overrides& lhs, const awe::overrides& rhs) {
 		return lhs._overrides == rhs._overrides;
@@ -517,14 +518,6 @@ DECLARE_POD_5(awe, particle_data, "ParticleData",
 	sf::Vector2f, vector, true, {},
 	sf::Time, respawnDelay, true, {}
 );
-	
-DEFINE_POD_5(awe, particle_data, "ParticleData",
-	std::string, sheet,
-	std::string, spriteID,
-	float, density,
-	sf::Vector2f, vector,
-	sf::Time, respawnDelay
-);
 
 /**
  * Configuration of a structure's root tile.
@@ -535,12 +528,6 @@ DECLARE_POD_3(awe, root_structure_tile, "RootStructureTile",
 	std::string, deleted, true, {}
 );
 
-DEFINE_POD_3(awe, root_structure_tile, "RootStructureTile",
-	std::string, tile,
-	std::string, destroyed,
-	std::string, deleted
-);
-
 /**
  * Configuration of a structure's dependent tile.
  */
@@ -549,13 +536,6 @@ DECLARE_POD_4(awe, dependent_structure_tile, "DependentStructureTile",
 	sf::Vector2i, offset, false, {},
 	std::string, destroyed, true, {},
 	std::string, deleted, true, {}
-);
-
-DEFINE_POD_4(awe, dependent_structure_tile, "DependentStructureTile",
-	std::string, tile,
-	sf::Vector2i, offset,
-	std::string, destroyed,
-	std::string, deleted
 );
 
 /**
@@ -571,16 +551,6 @@ DECLARE_POD_7(awe, unit_sprite_info, "UnitSpriteInfo",
 	std::string, sprite, true, {}
 );
 
-DEFINE_POD_7(awe, unit_sprite_info, "UnitSpriteInfo",
-	std::string, idleSheet,
-	std::string, upSheet,
-	std::string, downSheet,
-	std::string, leftSheet,
-	std::string, rightSheet,
-	std::string, selectedSheet,
-	std::string, sprite
-);
-
 /**
  * Configures a unit's sounds.
  */
@@ -592,14 +562,6 @@ DECLARE_POD_5(awe, unit_sound_info, "UnitSoundInfo",
 	std::string, unhide, true, {}
 );
 
-DEFINE_POD_5(awe, unit_sound_info, "UnitSoundInfo",
-	std::string, move,
-	std::string, destroy,
-	std::string, moveHidden,
-	std::string, hide,
-	std::string, unhide
-);
-
 /**
  * Describes the base damage a weapon deals against a single type of unit or terrain.
  * A negative integer means the weapon can't attack the target if it's visible or
@@ -609,13 +571,7 @@ DECLARE_POD_3(awe, weapon_damage, "WeaponDamage",
 	std::string, target, false, {},
 	sf::Int32, damage, false, 0,
 	sf::Int32, damageWhenHidden, true, -1
-)
-
-DEFINE_POD_3(awe, weapon_damage, "WeaponDamage",
-	std::string, target,
-	sf::Int32, damage,
-	sf::Int32, damageWhenHidden
-)
+);
 
 // SPECIALISE BANK_ARRAY SCRIPT TYPENAMES HERE!
 // TODO: Hopefully we can find a way round this, suffers from the same problem as:
@@ -674,7 +630,7 @@ namespace awe {
 
 template<>
 inline constexpr std::string engine::script_type<awe::fow_visibility>() {
-	return "FOWVisibility";
+	return "FoWVisibility";
 }
 
 namespace awe {
@@ -690,9 +646,18 @@ namespace awe {
 		canAttackAfterMoving, bool, true, DEFAULT_VALUE(true), ,
 		canCounterattackDirectly, bool, true, DEFAULT_VALUE(true), ,
 		canCounterattackIndirectly, bool, true, DEFAULT_VALUE(false), ,
-		awe::weapon_damage::Register(engine, document);
-		awe::bank_array<awe::weapon_damage>::Register(engine, document);
-	, ,)
+		awe::weapon_damage::Register(engine COMMA document);
+		awe::bank_array<awe::weapon_damage>::Register(engine COMMA document);
+	, ,
+	public:
+		/**
+		 * Determines if this weapon has infinite ammo.
+		 * @return \c TRUE if the max ammo is below 0, \c FALSE otherwise.
+		 */
+		inline bool hasInfiniteAmmo(const awe::overrides& o = {}) const noexcept {
+			return ammo(o) < 0;
+		}
+	)
 
 	GAME_PROPERTY_23(unit_type, "UnitType", "unittype",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
@@ -711,7 +676,7 @@ namespace awe {
 		maxHP, sf::Uint32, true, DEFAULT_VALUE(10),
 		if (operator()() > INT_MAX / HP_GRANULARITY) {
 			logger.warning("Max HP of unit type \"{}\" overflowed ({}). "
-				"Setting to {}...", scriptName, operator()(),
+				"Setting to {}..." COMMA scriptName COMMA operator()() COMMA
 				static_cast<sf::Uint32>(INT_MAX / HP_GRANULARITY));
 			operator()() = static_cast<sf::Uint32>(INT_MAX / HP_GRANULARITY);
 		},
@@ -724,9 +689,9 @@ namespace awe {
 			canHide, bool, true, DEFAULT_VALUE(false), ,
 			weapons, awe::bank_array<std::string>, true, INIT_BANK_ARRAY(), ,
 			ignoresDefence, bool, true, DEFAULT_VALUE(false), ,
-			awe::unit_sprite_info::Register(engine, document);
-			awe::unit_sound_info::Register(engine, document);
-		awe::bank_array<std::string>::Register(engine, document);
+			awe::unit_sprite_info::Register(engine COMMA document);
+			awe::unit_sound_info::Register(engine COMMA document);
+		awe::bank_array<std::string>::Register(engine COMMA document);
 		, ,
 public:
 	/**
@@ -741,7 +706,7 @@ public:
 	 * precise as possible.
 	 * @sa awe::unit::getDisplayedHP()
 	 */
-	static const unsigned int HP_GRANULARITY;
+	static constexpr unsigned int HP_GRANULARITY = 10;
 
 	/**
 	 * Converts an internal HP value into a user-friendly one.
@@ -749,8 +714,8 @@ public:
 	 * @return The user-friendly HP.
 	 */
 	static inline awe::HP getDisplayedHP(const awe::HP hp) noexcept {
-		return (awe::HP)ceil((double)hp /
-			(double)awe::unit_type::HP_GRANULARITY);
+		return static_cast<awe::HP>(::ceil(static_cast<double>(hp) /
+			static_cast<double>(awe::unit_type::HP_GRANULARITY)));
 	}
 
 	/**
@@ -761,10 +726,18 @@ public:
 	static inline awe::HP getInternalHP(const awe::HP hp) noexcept {
 		return hp * awe::unit_type::HP_GRANULARITY;
 	}
-	)
-	const unsigned int awe::unit_type::HP_GRANULARITY = 10;
 
-	static void RegisterFOWVisibility(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) {
+	/**
+	 * Finds out if this type of unit has infinite fuel.
+	 * @param  o The overrides to give to the \c maxFuel() method.
+	 * @return \c TRUE if \c maxFuel(o) is less than \c 0, \c FALSE otherwise.
+	 */
+	inline bool hasInfiniteFuel(const awe::overrides& o = {}) const noexcept {
+		return maxFuel(o) < 0;
+	}
+	)
+
+	static void RegisterFoWVisibility(asIScriptEngine* engine, const std::shared_ptr<DocumentationGenerator>& document) {
 		const auto type = engine::script_type<awe::fow_visibility>();
 		if (engine->GetTypeInfoByName(type.c_str())) return;
 		auto r = engine->RegisterEnum(type.c_str());
@@ -812,14 +785,14 @@ public:
 		maxHP, sf::Uint32, true, DEFAULT_VALUE(0),
 		if (operator()() > INT_MAX) {
 			logger.warning("Max HP of terrain \"{}\" overflowed ({}). "
-				"Setting to {}...", scriptName, operator()(),
+				"Setting to {}..." COMMA scriptName COMMA operator()() COMMA
 				static_cast<sf::Uint32>(INT_MAX));
 			operator()() = static_cast<sf::Uint32>(INT_MAX);
 		},
 		primaryTileType, std::string, true, DEFAULT_VALUE(""), ,
-		FOWVisibility, fow_visibility, true, DEFAULT_VALUE(awe::fow_visibility::Normal), ,
+		FoWVisibility, fow_visibility, true, DEFAULT_VALUE(awe::fow_visibility::Normal), ,
 		showOwnerWhenHidden, bool, true, DEFAULT_VALUE(false), ,
-		awe::RegisterFOWVisibility(engine, document);
+		awe::RegisterFoWVisibility(engine COMMA document);
 	, , )
 
 	GAME_PROPERTY_4(tile_type, "TileType", "tiletype",
@@ -838,6 +811,8 @@ public:
 	 *          to at least try and maintain consistency if this constraint is
 	 *          not followed.
 	 */
+		// TODO: There is post-processing required for root and dependent.
+		//       It must be applied to all overrides, too.
 	GAME_PROPERTY_11(structure, "Structure", "structure",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
 		shortName, std::string, false, DEFAULT_VALUE(""), ,
@@ -850,9 +825,9 @@ public:
 		destroyedLongName, std::string, true, DEFAULT_VALUE(""), ,
 		destroyedIcon, std::string, true, DEFAULT_VALUE(""), ,
 		dependent, awe::bank_array<awe::dependent_structure_tile>, true, INIT_BANK_ARRAY(), ,
-		awe::root_structure_tile::Register(engine, document);
-		awe::dependent_structure_tile::Register(engine, document);
-		awe::bank_array<awe::dependent_structure_tile>::Register(engine, document);,
+		awe::root_structure_tile::Register(engine COMMA document);
+		awe::dependent_structure_tile::Register(engine COMMA document);
+		awe::bank_array<awe::dependent_structure_tile>::Register(engine COMMA document);,
 			// This checking works great for the dependent tiles without overrides,
 			// but what if an override is applied that is invalid? Because of this,
 			// it might be more beneficial to move this checking out of here and
@@ -911,9 +886,8 @@ public:
 		,
 		_turnOrder = _turnOrderCounter++;,
 		private: awe::ArmyID _turnOrder; static awe::ArmyID _turnOrderCounter;
-		public: awe::ArmyID	turnOrder() { return _turnOrder; }
+		public: inline awe::ArmyID turnOrder() const { return _turnOrder; }
 	)
-	awe::ArmyID country::_turnOrderCounter = 0;
 
 	GAME_PROPERTY_7(environment, "Environment", "environment",
 		longName, std::string, false, DEFAULT_VALUE(""), ,
@@ -932,8 +906,8 @@ public:
 		description, std::string, false, DEFAULT_VALUE(""), ,
 		sound, std::string, false, DEFAULT_VALUE(""), ,
 		particles, awe::bank_array<awe::particle_data>, false, INIT_BANK_ARRAY(), ,
-		awe::particle_data::Register(engine, document);
-		awe::bank_array<awe::particle_data>::Register(engine, document);
+		awe::particle_data::Register(engine COMMA document);
+		awe::bank_array<awe::particle_data>::Register(engine COMMA document);
 	,, )
 	
 	GAME_PROPERTY_6(commander, "Commander", "commander",
@@ -1695,6 +1669,7 @@ namespace awe {
 			}
 		}
 
+		// TODO: We need to return some indication (false) if overrides "fail."
 		void processOverrides() {
 			_processOverrides(*_commanders);
 			_processOverrides(*_weathers, *_commanders);
@@ -1807,18 +1782,121 @@ namespace awe {
 	};
 }
 
-/* Overrides are applied in scripts like so:
-namespace BaseType {
-	namespace BaseScriptName {
-		namespace OverriderType {
-			namespace OverriderScriptName {
-				const string tile = "oscity"; // Prefer const...
-				string tile = "oscity";       // ...but technically it doesn't matter.
-				void vision(uint& parent) {
-					parent + 2;
-				}
-			}
-		}
-	}
-}
-*/
+GAME_PROPERTY_VIEW_12(awe, weapon, "Weapon",
+	longName, std::string,
+	shortName, std::string,
+	icon, std::string,
+	description, std::string,
+	ammo, sf::Int32,
+	unitTable, awe::bank_array<awe::weapon_damage>,
+	terrainTable, awe::bank_array<awe::weapon_damage>,
+	range, sf::Vector2u,
+	canAttackAfterMoving, bool,
+	canCounterattackDirectly, bool,
+	canCounterattackIndirectly, bool,
+	hasInfiniteAmmo, bool
+)
+
+GAME_PROPERTY_VIEW_24(awe, unit_type, "UnitType",
+	longName, std::string,
+	shortName, std::string,
+	description, std::string,
+	movementType, std::string,
+	movementPoints, sf::Uint32,
+	price, sf::Uint32,
+	spriteInfo, awe::unit_sprite_info,
+	destroyEffectSprite, std::string,
+	soundInfo, awe::unit_sound_info,
+	picture, std::string,
+	capturingSprite, std::string,
+	finishedCapturingSprite, std::string,
+	maxFuel, sf::Int32,
+	maxHP, sf::Uint32,
+	vision, sf::Uint32,
+	canLoad, awe::bank_array<std::string>,
+	loadLimit, sf::Uint32,
+	canUnloadFrom, awe::bank_array<std::string>,
+	turnStartPriority, sf::Int32,
+	canCapture, awe::bank_array<std::string>,
+	canHide, bool,
+	weapons, awe::bank_array<std::string>,
+	ignoresDefence, bool,
+	hasInfiniteFuel, bool
+)
+
+GAME_PROPERTY_VIEW_10(awe, terrain, "Terrain",
+	longName, std::string,
+	shortName, std::string,
+	icon, std::string,
+	description, std::string,
+	defence, sf::Uint32,
+	movementCost, sf::Int32,
+	maxHP, sf::Uint32,
+	primaryTileType, std::string,
+	FoWVisibility, fow_visibility,
+	showOwnerWhenHidden, bool
+)
+
+GAME_PROPERTY_VIEW_4(awe, tile_type, "TileType",
+	terrain, std::string,
+	tile, std::string,
+	capturingProperty, std::string,
+	alwaysPaintable, bool
+)
+
+GAME_PROPERTY_VIEW_11(awe, structure, "Structure",
+	longName, std::string,
+	shortName, std::string,
+	icon, std::string,
+	description, std::string,
+	ownedIcon, std::string,
+	root, awe::root_structure_tile,
+	paintable, bool,
+	keepUnits, bool,
+	destroyedLongName, std::string,
+	destroyedIcon, std::string,
+	dependent, awe::bank_array<awe::dependent_structure_tile>
+)
+
+GAME_PROPERTY_VIEW_4(awe, movement_type, "MovementType",
+	longName, std::string,
+	shortName, std::string,
+	icon, std::string,
+	description, std::string
+)
+
+GAME_PROPERTY_VIEW_5(awe, country, "Country",
+	longName, std::string,
+	shortName, std::string,
+	icon, std::string,
+	description, std::string,
+	colour, sf::Color
+)
+
+GAME_PROPERTY_VIEW_7(awe, environment, "Environment",
+	longName, std::string,
+	shortName, std::string,
+	icon, std::string,
+	description, std::string,
+	spritesheet, std::string,
+	pictureSpritesheet, std::string,
+	structureIconSpritesheet, std::string
+)
+
+GAME_PROPERTY_VIEW_6(awe, weather, "Weather",
+	longName, std::string,
+	shortName, std::string,
+	icon, std::string,
+	description, std::string,
+	sound, std::string,
+	particles, awe::bank_array<awe::particle_data>
+)
+	
+GAME_PROPERTY_VIEW_6(awe, commander, "Commander",
+	longName, std::string,
+	shortName, std::string,
+	icon, std::string,
+	description, std::string,
+	portrait, std::string,
+	theme, std::string
+)

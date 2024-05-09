@@ -22,18 +22,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../include/tagcos.hpp"
 
-awe::tag_cos::tag_cos(const std::shared_ptr<const awe::country>& country,
-	const std::shared_ptr<const awe::commander>& oldCurrentCO,
-	const std::shared_ptr<const awe::commander>& newCurrentCO,
+awe::tag_cos::tag_cos(const engine::CScriptWrapper<awe::country_view>& country,
+	const engine::CScriptWrapper<awe::commander_view>& oldCurrentCO,
+	const engine::CScriptWrapper<awe::commander_view>& newCurrentCO,
 	const std::shared_ptr<sfx::animated_spritesheet>& coSheet,
 	const std::shared_ptr<engine::language_dictionary>& translate,
 	const std::shared_ptr<sf::Font>& font) :
 	// There isn't a need to re-translate the text mid-animation but it would
 	// be super simple to do in animate().
 	_text((*translate)("tagco"), *font, 114),
-	_oldCurrentCO(coSheet, oldCurrentCO->getPortrait()),
-	_newCurrentCO(coSheet, newCurrentCO->getPortrait()),
-	_colour(country->getColour()) {
+	_oldCurrentCO(coSheet, oldCurrentCO->portrait()),
+	_newCurrentCO(coSheet, newCurrentCO->portrait()),
+	_colour(country->colour()) {
 	// Setup text.
 	_text.setOutlineColor(sf::Color::White);
 	_text.setOutlineThickness(5.0f);

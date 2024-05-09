@@ -23,14 +23,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "army.hpp"
 #include <algorithm>
 
-awe::army::army(const std::shared_ptr<const awe::country>& country) :
-	_country(country) {}
+awe::army::army(const std::shared_ptr<const awe::banks>& banks,
+	const std::string& country, const engine::logger::data& data) :
+	_country(country), _loggerData(data), _banks(banks) {}
 
-void awe::army::setCOs(const std::shared_ptr<const awe::commander>& current,
-	const std::shared_ptr<const awe::commander>& tag) noexcept {
-	if (!current && tag) {
+void awe::army::setCOs(const std::string& current,
+	const std::string& tag) noexcept {
+	if (current.empty() && !tag.empty()) {
 		_co_1 = tag;
-		_co_2 = nullptr;
+		_co_2.clear();
 	} else {
 		_co_1 = current;
 		_co_2 = tag;

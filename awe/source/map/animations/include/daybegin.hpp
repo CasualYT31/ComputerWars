@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "animation.hpp"
-#include "bank.hpp"
+#include "bank-v2.hpp"
 #include "language.hpp"
 
 namespace awe {
@@ -44,7 +44,7 @@ namespace awe {
 		 * @param translate Lets the animation translate its day string.
 		 * @param font      The font to apply to the day text.
 		 */
-		day_begin(const std::shared_ptr<const awe::country>& country,
+		day_begin(const engine::CScriptWrapper<awe::country_view>& country,
 			const awe::Day day,
 			const std::shared_ptr<engine::language_dictionary>& translate,
 			const std::shared_ptr<sf::Font>& font);

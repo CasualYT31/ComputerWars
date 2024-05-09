@@ -63,14 +63,7 @@ awe::animation_preset& awe::operator++(animation_preset& p) noexcept {
 	return p;
 }
 
-awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
-	const std::shared_ptr<awe::bank<awe::environment>>& environments,
-	const std::shared_ptr<awe::bank<awe::weather>>& weathers,
-	const std::shared_ptr<awe::bank<awe::tile_type>>& tiles,
-	const std::shared_ptr<awe::bank<awe::terrain>>& terrains,
-	const std::shared_ptr<awe::bank<awe::unit_type>>& units,
-	const std::shared_ptr<awe::bank<awe::commander>>& commanders,
-	const std::shared_ptr<awe::bank<awe::structure>>& structures,
+awe::map::map(const std::shared_ptr<const awe::banks>& banks,
 	const engine::logger::data& data) : _logger(data),
 	_cursor({data.sink, data.name + "_cursor_sprite"}),
 	_additionallySelectedTileCursorUL({ data.sink,
@@ -81,15 +74,12 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 		data.name + "_addcursorll_sprite" }),
 	_additionallySelectedTileCursorLR({ data.sink,
 		data.name + "_addcursorlr_sprite" }) {
-	assert(environments && weathers);
-	_countries = countries;
-	_environments = environments;
-	_weathers = weathers;
-	_tileTypes = tiles;
-	_terrains = terrains;
-	_unitTypes = units;
-	_commanders = commanders;
-	_structures = structures;
+	assert(banks);
+	_banks = banks;
+	// Set the overrides factory function now: every awe::overrides object created
+	// from this point on will always have the current weather and environment
+	// provided as overrides.
+	awe::overrides::setFactoryFunction(std::bind(&awe::map::_overridesFactoryFunction, this, std::placeholders::_1));
 	// We need to make sure the map is in a valid state for the case where an empty
 	// map is saved (i.e. where load() is never called to reset the state).
 	_initState();
@@ -97,6 +87,8 @@ awe::map::map(const std::shared_ptr<awe::bank<awe::country>>& countries,
 }
 
 awe::map::~map() noexcept {
+	// Do not allow default overrides for awe::overrides objects now.
+	awe::overrides::clearFactoryFunction();
 	if (_scripts && !_moduleName.empty()) _scripts->deleteModule(_moduleName);
 }
 
@@ -419,7 +411,7 @@ void awe::map::setSpritesheets(
 	_additionallySelectedTileCursorLR.setSpritesheet((*_sheets)["icon"]);
 	for (auto& unit : _units) {
 		unit.second.sprite->setSpritesheet((*_sheets)[
-			unit.second.data.getType()->getIdleSpritesheet()]);
+			unit.second.data.getType()->spriteInfo().idleSheet]);
 		unit.second.sprite->setIconSpritesheet((*_sheets)["icon"]);
 	}
 	_regenerateTileSprites();
@@ -470,8 +462,10 @@ void awe::map::_updateCapturingUnit(const awe::UnitID id) {
 		const auto t = getUnitPosition(id);
 		// If unit is out-of-bounds, don't do anything. This case can come about
 		// when a capturing unit is deleted as a map is shrinking.
-		if (!_isOutOfBounds(t)) setTileHP(t, static_cast<awe::HP>(
-			getTileType(t)->getType()->getMaxHP()));
+		if (!_isOutOfBounds(t)) {
+			const auto terrain = getTerrainOfTile(t);
+			setTileHP(t, static_cast<awe::HP>(terrain->maxHP()));
+		}
 		unitCapturing(id, false);
 	}
 }
@@ -602,8 +596,8 @@ void awe::map::_initState() {
 	removeAllPreviewUnits();
 	_mapShakeTimeLeft = sf::Time::Zero;
 	_waitBeforeNextShake = sf::Time::Zero;
-	_environment = _environments->first()->second;
-	_setWeather(_weathers->first()->second);
+	_environment = _banks->get<environment>()->begin()->scriptName();
+	_setWeather(_banks->get<weather>()->begin()->scriptName());
 	_additionalData.clear();
 	if (_scripts && _scripts->doesModuleExist(_moduleName))
 		_scripts->deleteModule(_moduleName);
@@ -660,4 +654,29 @@ void awe::map::_initShaders() {
 		"pixel.x = 1.0; pixel.yz -= 0.25;"
 		"gl_FragColor = pixel;}", sf::Shader::Fragment);
 	_attackableTileShaderFoW.setUniform("texUnit", sf::Shader::CurrentTexture);
+}
+
+void awe::map::_overridesFactoryFunction(awe::overrides& o) const {
+	o.weather(_weather);
+	o.environment(_environment);
+}
+
+void awe::map::_overrideWithSelectedArmysCurrentCO(awe::overrides& o) const {
+	const auto selectedArmy = getSelectedArmy();
+	if (_isArmyPresent(selectedArmy)) {
+		o.commander(getArmyCurrentCOScriptName(selectedArmy));
+	} else {
+		o.commander("");
+	}
+}
+
+engine::CScriptWrapper<awe::structure_view> awe::map::_createStructureView(
+	const std::string& scriptName, const sf::Vector2u& pos) const {
+	engine::CScriptWrapper<awe::structure_view> structureView =
+		awe::structure_view::Create(engine::logger::data{}, _banks, scriptName);
+	const auto tileOwner = getTileOwner(pos);
+	structureView->overrides
+		.commander(tileOwner == awe::NO_ARMY ? "" : getArmyCurrentCOScriptName(tileOwner))
+		.country(tileOwner == awe::NO_ARMY ? "" : getArmyCountryScriptName(tileOwner));
+	return structureView;
 }
