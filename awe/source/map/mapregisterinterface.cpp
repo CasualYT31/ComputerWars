@@ -241,7 +241,7 @@ void awe::map::Register(asIScriptEngine* engine,
 
 		r = engine->RegisterObjectMethod("Map",
 			"bool rectangleFillUnits(const Vector2&in, const Vector2&in,"
-			"const string& in, const ArmyID)",
+			"const string&in, const ArmyID)",
 			asMETHODPR(awe::map, rectangleFillUnits, (const sf::Vector2u&,
 				const sf::Vector2u&, const std::string&, const awe::ArmyID), bool),
 			asCALL_THISCALL);
@@ -627,14 +627,14 @@ void awe::map::Register(asIScriptEngine* engine,
 
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPath(const Vector2&in origin, const Vector2&in dest, "
-			"const Movement&in moveType, const uint movePoints, const Fuel fuel, "
+			"const string&in moveType, const uint movePoints, const Fuel fuel, "
 			"const TeamID team, const ArmyID army, const bool, const bool, "
 			"const array<UnitID>@ const = null) const",
 			asMETHOD(awe::map, findPathAsArray), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map", "array<ClosedListNode>@ "
 			"findPathForUnloadUnit(const Vector2&in origin, "
-			"const Vector2&in dest, const Movement&in moveType, const ArmyID, "
+			"const Vector2&in dest, const string&in moveType, const ArmyID, "
 			"const array<UnitID>@ const = null) const",
 			asMETHOD(awe::map, findPathAsArrayUnloadUnit), asCALL_THISCALL);
 
@@ -829,7 +829,7 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, enablePeriodic), asCALL_THISCALL);
 
 		r = engine->RegisterObjectMethod("Map",
-			"bool beginTurnForOwnedTile(Vector2, const Terrain@ const, "
+			"bool beginTurnForOwnedTile(Vector2, const TerrainView@ const, "
 			"const ArmyID)",
 			asMETHOD(awe::map, beginTurnForOwnedTile), asCALL_THISCALL);
 
@@ -1071,4 +1071,3 @@ void awe::map::Register(asIScriptEngine* engine,
 			asMETHOD(awe::map, animateNextTurn), asCALL_THISCALL);
 	}
 }
-

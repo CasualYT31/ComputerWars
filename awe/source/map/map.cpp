@@ -203,13 +203,14 @@ bool awe::map::defaultWinCondition() const {
 }
 
 bool awe::map::beginTurnForOwnedTile(sf::Vector2u tile,
-	awe::terrain* const terrain, const awe::ArmyID currentArmy) {
+	awe::terrain_view* const terrain, const awe::ArmyID currentArmy) {
 	if (!_mapObject.GetRef() || _mapObjectTypeName.empty() || !_scripts ||
 		!_scripts->functionDeclExists(_moduleName,
 			"void beginTurnForOwnedTile(" + _mapObjectTypeName + "@ const, "
 			"Vector2, const Terrain@ const, ArmyID, bool&out)"))
 		return false;
 	bool overrideDefaultBehaviour = false;
+	//terrain->AddRef();
 	_scripts->callFunction(_moduleName, "beginTurnForOwnedTile",
 		_mapObject.GetRef(), &tile, terrain, currentArmy,
 		&overrideDefaultBehaviour);

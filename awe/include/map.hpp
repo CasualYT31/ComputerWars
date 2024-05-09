@@ -378,7 +378,8 @@ namespace awe {
 		 *         prevent/override the default behaviour of that tile. \c FALSE
 		 *         otherwise.
 		 */
-		bool beginTurnForOwnedTile(sf::Vector2u tile, awe::terrain* const terrain,
+		bool beginTurnForOwnedTile(sf::Vector2u tile,
+			awe::terrain_view* const terrain,
 			const awe::ArmyID currentArmy);
 
 		////////////////////
