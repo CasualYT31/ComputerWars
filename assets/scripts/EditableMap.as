@@ -310,7 +310,7 @@ class EditableMap : ScriptsMap {
         const string&in newDefaultWeather, const bool newRandom,
         const Day dayStartedOn, const ArmyID armyStartedOn) {
         if (newWeather == map.getWeather().scriptName &&
-            newDefaultWeather == getDefaultWeather().scriptName &&
+            newDefaultWeather == getDefaultWeather() &&
             newRandom == isRandomWeatherEnabled() &&
             dayStartedOn == getDayDifferentWeatherStartedOn() &&
             armyStartedOn == getArmyDifferentWeatherStartedOn()) return;
@@ -318,7 +318,7 @@ class EditableMap : ScriptsMap {
         map.setWeather(newWeather);
         updateAdditionalWeatherProperties(
             newRandom,
-            weather[newDefaultWeather],
+            newDefaultWeather,
             dayStartedOn,
             armyStartedOn
         );
@@ -345,9 +345,8 @@ class EditableMap : ScriptsMap {
      * @param type  The type of tile to fill with.
      * @param owner The owner to assign to each of the tiles.
      */
-    void fillMap(const TileType@ const type, const string&in owner) {
-        map.fillMap(type.scriptName,
-            owner.isEmpty() ? NO_ARMY : country[owner].turnOrder);
+    void fillMap(const string&in type, const string&in owner) {
+        map.fillMap(type, owner.isEmpty() ? NO_ARMY : country[owner].turnOrder());
         refreshTileProps();
     }
 
@@ -369,7 +368,7 @@ class EditableMap : ScriptsMap {
      * gives them to the specified army.
      */
     void rectangleFillTiles(const Vector2&in start, const Vector2&in end,
-        const Terrain@ const type, const string&in owner) {
+        const string&in type, const string&in owner) {
         const auto tiles = map.getTilesInArea(start, end);
         for (uint i = 0, len = tiles.length(); i < len; ++i)
             setTerrain(tiles[i], type, owner);
@@ -421,10 +420,11 @@ class EditableMap : ScriptsMap {
      */
     void createArmy(const ArmyID country) {
         DisableMementos token(map, OPERATION[Operation::CREATE_ARMY_SCRIPT]);
+        const auto temp = (::country.begin() + country).opCall();
         const auto successful =
-            map.createArmy(::country.scriptNames[uint64(country)]);
+            map.createArmy(temp.scriptName());
         // Assign the first CO in the commander bank as this army's current CO.
-        if (successful) map.setArmyCurrentCO(country, commander.scriptNames[0]);
+        if (successful) map.setArmyCurrentCO(country, commander.begin()().scriptName());
         if (successful && map.getArmyCount() == 1) {
             // If the first army has been created, automatically select them.
             map.setSelectedArmy(map.getArmyIDs()[0]);
@@ -513,26 +513,26 @@ class EditableMap : ScriptsMap {
     /**
      * Updates a given tile to a given type and assigns a new owner to it.
      * @param tileToChange The position of the tile to update.
-     * @param toType       Handle to the tile type to assign to the tile.
+     * @param toType       Script name of the tile type to assign to the tile.
      * @param newOwner     Script name of the new owner. Empty if neutral.
      */
-    void setTile(const Vector2&in tileToChange, const TileType@ const toType,
+    void setTile(const Vector2&in tileToChange, const string&in toType,
         const string&in newOwner) {
         const auto fromType = map.getTileType(tileToChange);
         const auto oldOwnerID = map.getTileOwner(tileToChange);
         const auto newOwnerID =
-            newOwner.isEmpty() ? NO_ARMY : country[newOwner].turnOrder;
+            newOwner.isEmpty() ? NO_ARMY : country[newOwner].turnOrder();
 
         array<Vector2>@ changingTiles;
-        if (fromType.scriptName != toType.scriptName) {
+        if (fromType.scriptName != toType) {
             DisableMementos token(map, OPERATION[Operation::TILE_TYPE_AND_OWNER]);
             @changingTiles = map.querySetTileTypeChangedTiles(tileToChange);
-            map.setTileType(tileToChange, toType.scriptName);
+            map.setTileType(tileToChange, toType);
             _createArmyIfNonExistent(newOwnerID);
             map.setTileOwner(tileToChange, newOwnerID);
             // If this tile is a non-paintable structure, setup its data now.
             const auto structureName =
-                map.getTileTypeStructure(toType.scriptName);
+                map.getTileTypeStructure(toType);
             if (!structureName.isEmpty()) {
                 map.setTileStructureData(tileToChange, structureName,
                     MousePosition(0, 0), false);
@@ -552,14 +552,14 @@ class EditableMap : ScriptsMap {
      * tiles.
      * Does nothing if the given tile already is the terrain given.
      * @param tileToChange           The position of the tile to update.
-     * @param toType                 Handle to the terrain that the tile will
+     * @param toType                 Script name of the terrain that the tile will
      *                               have.
      * @param newOwner               Script name of the new owner. Empty if
      *                               neutral.
      * @param updateSurroundingTiles If \c TRUE, the surrounding tiles may also
      *                               be changed.
      */
-    void setTerrain(Vector2 tileToChange, const Terrain@ const toType,
+    void setTerrain(Vector2 tileToChange, const string&in toType,
         const string&in newOwner, const bool updateSurroundingTiles = true) {
         const auto newTileType = awe::DetermineTileType(
             _getTileTypeOfTile(tileToChange.x - 1, tileToChange.y - 1),
@@ -614,7 +614,7 @@ class EditableMap : ScriptsMap {
      * @return If the tile is in bounds, a handle to its tile type. \c null if the
      *         tile is out-of-bounds.
      */
-    private const TileType@ const _getTileTypeOfTile(const uint x,
+    private const TileTypeView@ const _getTileTypeOfTile(const uint x,
         const uint y) const {
         const auto tile = Vector2(x, y);
         if (map.isOutOfBounds(tile)) return null;

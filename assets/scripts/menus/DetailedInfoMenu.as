@@ -540,9 +540,9 @@ class MoveCostRow : HorizontalLayout {
      *                     from.
      * @param cost         The cost to put in this row.
      */
-    MoveCostRow(const Movement@ const movementType, const int cost) {
-        movementTypeIcon.setSprite("icon", movementType.iconName);
-        movementTypeShortName.setText(movementType.shortName);
+    MoveCostRow(const MovementTypeView@ const movementType, const int cost) {
+        movementTypeIcon.setSprite("icon", movementType.icon());
+        movementTypeShortName.setText(movementType.shortName());
         movementTypeCost.setText("~" + formatInt(cost));
         movementTypeIconGroup.add(movementTypeIcon);
         movementTypeShortNameGroup.add(movementTypeShortName);

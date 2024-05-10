@@ -51,18 +51,18 @@ shared abstract class ScriptsMap {
 
     /**
      * Sets the default weather of this map.
-     * @param defWeather Handle to the properties of the default weather.
+     * @param defWeather Script name of the default weather.
      */
-    void setDefaultWeather(const Weather@ const defWeather) {
-        @defaultWeather = defWeather;
+    void setDefaultWeather(const string&in defWeather) {
+        defaultWeather = defWeather;
         saveAdditionalData();
     }
 
     /**
-     * Retrieves the properties of this map's default weather.
-     * @return Handle to the properties of the default weather.
+     * Retrieves this map's default weather.
+     * @return Script name of the default weather.
      */
-    const Weather@ getDefaultWeather() const {
+    string getDefaultWeather() const {
         return defaultWeather;
     }
 
@@ -109,9 +109,9 @@ shared abstract class ScriptsMap {
      * Update all of the additional weather properties at once.
      */
     void updateAdditionalWeatherProperties(const bool enabled,
-        const Weather@ const defWeather, const Day d, const ArmyID a) {
+        const string&in defWeather, const Day d, const ArmyID a) {
         randomWeather = enabled;
-        @defaultWeather = defWeather;
+        defaultWeather = defWeather;
         dayDifferentWeatherStartedOn = d;
         armyDifferentWeatherStartedOn = a;
         saveAdditionalData();
@@ -122,7 +122,7 @@ shared abstract class ScriptsMap {
      */
     private void resetAdditionalData() {
         randomWeather = false;
-        @defaultWeather = weather.first;
+        defaultWeather = weather.being()().scriptName();
         dayDifferentWeatherStartedOn = 1;
         armyDifferentWeatherStartedOn = 0;
     }
@@ -192,7 +192,7 @@ shared abstract class ScriptsMap {
         // Data may still be invalid at this point, but it should not cause
         // crashes at least.
         randomWeather = randomWeatherWillBeEnabled;
-        @defaultWeather = weather[defaultWeatherScriptName];
+        defaultWeather = defaultWeatherScriptName;
         dayDifferentWeatherStartedOn = dayStartedOn;
         armyDifferentWeatherStartedOn = armyStartedOn;
     }
@@ -203,8 +203,7 @@ shared abstract class ScriptsMap {
      */
     private void saveAdditionalData() {
         string data = randomWeather ? "1" : "0";
-        data += defaultWeather.scriptName.length() + "," +
-            defaultWeather.scriptName;
+        data += defaultWeather.length() + "," + defaultWeather;
         data += formatDay(dayDifferentWeatherStartedOn) + ",";
         data += formatArmyID(armyDifferentWeatherStartedOn);
         map.setAdditionalData(data);
@@ -218,7 +217,7 @@ shared abstract class ScriptsMap {
     /**
      * The default weather of this map, if random weather is enabled.
      */
-    private const Weather@ defaultWeather = weather.first;
+    private string defaultWeather = weather.begin()().scriptName();
 
     /**
      * If a weather different to the default has been set, this will store the day

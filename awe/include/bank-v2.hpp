@@ -883,10 +883,12 @@ public:
 		icon, std::string, false, DEFAULT_VALUE(""), ,
 		description, std::string, false, DEFAULT_VALUE(""), ,
 		colour, sf::Color, false, DEFAULT_VALUE({}), ,
-		,
+		engine->RegisterObjectMethod("Country",
+			"ArmyID turnOrder(const Overrides&in = Overrides()) const",
+			asMETHOD(country, turnOrder), asCALL_THISCALL);,
 		_turnOrder = _turnOrderCounter++;,
 		private: awe::ArmyID _turnOrder; static awe::ArmyID _turnOrderCounter;
-		public: inline awe::ArmyID turnOrder() const { return _turnOrder; }
+public: inline awe::ArmyID turnOrder(const awe::overrides& ignored = {}) const { return _turnOrder; }
 	)
 
 	GAME_PROPERTY_7(environment, "Environment", "environment",
@@ -1081,7 +1083,7 @@ namespace awe {
 					asCALL_THISCALL);
 				if constexpr (std::is_const<J>::value) {
 					r = engine->RegisterObjectMethod(tc, std::string("const ")
-						.append(t).append("@ opCall()").c_str(),
+						.append(t).append("@ opCall() const").c_str(),
 						asMETHOD(base_iterator<itr_type COMMA J>, operator->),
 						asCALL_THISCALL);
 				} else {
@@ -1865,12 +1867,13 @@ GAME_PROPERTY_VIEW_4(awe, movement_type, "MovementType",
 	description, std::string
 )
 
-GAME_PROPERTY_VIEW_5(awe, country, "Country",
+GAME_PROPERTY_VIEW_6(awe, country, "Country",
 	longName, std::string,
 	shortName, std::string,
 	icon, std::string,
 	description, std::string,
-	colour, sf::Color
+	colour, sf::Color,
+	turnOrder, awe::ArmyID
 )
 
 GAME_PROPERTY_VIEW_7(awe, environment, "Environment",

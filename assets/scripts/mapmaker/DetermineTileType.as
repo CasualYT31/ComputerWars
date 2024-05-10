@@ -7,19 +7,20 @@
 namespace awe {
     /// The signature for each function responsible for determining the correct
     /// tile type to use.
-    funcdef string DetermineTileTypeFunc(const TileType@ const,
-        const TileType@ const, const TileType@ const, const TileType@ const,
-        const TileType@ const, const TileType@ const, const TileType@ const,
-        const TileType@ const);
+    funcdef string DetermineTileTypeFunc(const TileTypeView@ const,
+        const TileTypeView@ const, const TileTypeView@ const,
+        const TileTypeView@ const, const TileTypeView@ const,
+        const TileTypeView@ const, const TileTypeView@ const,
+        const TileTypeView@ const);
     
     ////////////
     // HELPER //
     ////////////
 
     /// Returns \c TRUE if the given tile type is a building.
-    bool isBuilding(const TileType@ const t) {
+    bool isBuilding(const TileTypeView@ const t) {
         if (t is null) return false;
-        const auto terrainType = t.type.scriptName;
+        const auto terrainType = t.terrain();
         return terrainType == "MISSILESILO" || terrainType == "CITY" ||
             terrainType == "BASE" || terrainType == "AIRPORT" ||
             terrainType == "PORT" || terrainType == "COMTOWER" ||
@@ -27,46 +28,46 @@ namespace awe {
     }
 
     /// Returns \c TRUE if the given tile type will cause a shadow to be cast.
-    bool castsShadow(const TileType@ const t) {
+    bool castsShadow(const TileTypeView@ const t) {
         if (t is null) return false;
-        const auto terrainType = t.type.scriptName;
+        const auto terrainType = t.terrain();
         return isBuilding(t) || terrainType == "BLACKCRYSTAL" ||
             terrainType == "MOUNTAIN" || terrainType == "MINICANNON" ||
             terrainType == "BLACKLASER";
     }
 
     /// Returns \c TRUE if the given tile is land.
-    bool isLand(const TileType@ const t) {
+    bool isLand(const TileTypeView@ const t) {
         if (t is null) return false;
-        const auto terrainType = t.type.scriptName;
+        const auto terrainType = t.terrain();
         return !(terrainType == "SEA" || terrainType == "BRIDGE" ||
             terrainType == "RIVER" || terrainType == "REEF" ||
             terrainType == "SHOAL");
     }
 
     /// Returns \c TRUE if the given tile type is a shoal.
-    bool isShoal(const TileType@ const t) {
+    bool isShoal(const TileTypeView@ const t) {
         if (t is null) return true;
-        return t.type.scriptName == "SHOAL";
+        return t.terrain() == "SHOAL";
     }
 
     /// Returns \c TRUE if the given tile type is a destination for a road tile.
-    bool roadDestination(const TileType@ const t) {
+    bool roadDestination(const TileTypeView@ const t) {
         if (t is null) return true;
-        const auto terrainType = t.type.scriptName;
+        const auto terrainType = t.terrain();
         return terrainType == "ROAD" || terrainType == "BRIDGE" || isBuilding(t);
     }
 
     /// Returns \c TRUE if the given tile type is a destination for a river tile.
-    bool riverDestination(const TileType@ const t) {
+    bool riverDestination(const TileTypeView@ const t) {
         // We want null to be true.
         return !isLand(t);
     }
 
     /// Returns \c TRUE if the given tile type is a destination for a pipe tile.
-    bool pipeDestination(const TileType@ const t) {
+    bool pipeDestination(const TileTypeView@ const t) {
         if (t is null) return true;
-        const auto terrainType = t.type.scriptName;
+        const auto terrainType = t.terrain();
         return terrainType == "PIPE" || terrainType == "PIPESEAM" ||
             terrainType == "BASE";
     }
@@ -168,16 +169,16 @@ namespace awe {
         // Then, determine if a waterfall should be present due to a river. For
         // now, we'll only support what the original games supported: four
         // waterfall tiles.
-        if (U !is null && U.type.scriptName == "RIVER" && !isLand(LE) &&
+        if (U !is null && U.terrain() == "RIVER" && !isLand(LE) &&
             !isLand(R) && !isLand(LL) && !isLand(L) && !isLand(LR))
             sea = "007seariverexitup";
-        else if (LE !is null && LE.type.scriptName == "RIVER" && !isLand(U) &&
+        else if (LE !is null && LE.terrain() == "RIVER" && !isLand(U) &&
             !isLand(UR) && !isLand(R) && !isLand(LR) && !isLand(L))
             sea = "004seariverexitleft";
-        else if (L !is null && L.type.scriptName == "RIVER" && !isLand(UL) &&
+        else if (L !is null && L.terrain() == "RIVER" && !isLand(UL) &&
             !isLand(U) && !isLand(UR) && !isLand(LE) && !isLand(R))
             sea = "005seariverexitdown";
-        else if (R !is null && R.type.scriptName == "RIVER" && !isLand(UL) &&
+        else if (R !is null && R.terrain() == "RIVER" && !isLand(UL) &&
             !isLand(U) && !isLand(LE) && !isLand(LL) && !isLand(L))
             sea = "006seariverexitright";
         return sea;
@@ -222,11 +223,11 @@ namespace awe {
         if (isLand(U) || isLand(L)) bridge = "030bridgevert";
         if (isLand(LE) || isLand(R)) bridge = "031bridgehori";
         // Bridges should always flow when possible.
-        if ((U !is null && U.type.scriptName == "BRIDGE") ||
-            (L !is null && L.type.scriptName == "BRIDGE"))
+        if ((U !is null && U.terrain() == "BRIDGE") ||
+            (L !is null && L.terrain() == "BRIDGE"))
             bridge = "030bridgevert";
-        if ((R !is null && R.type.scriptName == "BRIDGE") ||
-            (LE !is null && LE.type.scriptName == "BRIDGE"))
+        if ((R !is null && R.terrain() == "BRIDGE") ||
+            (LE !is null && LE.terrain() == "BRIDGE"))
             bridge = "031bridgehori";
         return bridge;
     };
@@ -411,7 +412,7 @@ namespace awe {
     /**
      * Determine what a tile's type should be, given its desired terrain, and the
      * types of the tiles that surround it.
-     * If a tile is out-of-bounds, its relevant \c TileType@ parameter must be
+     * If a tile is out-of-bounds, its relevant \c TileTypeView@ parameter must be
      * \c null. \c C must never be \c null.
      * @param  UL The type of the tile that is one tile up and one tile to the
      *            left of the changing tile.
@@ -434,15 +435,15 @@ namespace awe {
      *         the given terrain is to be used.
      */
     string DetermineTileType(
-        const TileType@ const UL,
-        const TileType@ const U,
-        const TileType@ const UR,
-        const TileType@ const LE,
-        const Terrain@ const C,
-        const TileType@ const R,
-        const TileType@ const LL,
-        const TileType@ const L,
-        const TileType@ const LR) {
+        const TileTypeView@ const UL,
+        const TileTypeView@ const U,
+        const TileTypeView@ const UR,
+        const TileTypeView@ const LE,
+        const TerrainView@ const C,
+        const TileTypeView@ const R,
+        const TileTypeView@ const LL,
+        const TileTypeView@ const L,
+        const TileTypeView@ const LR) {
         if (C.scriptName == "PLAINS")
             return awe::determineForPlain(UL, U, UR, LE, R, LL, L, LR);
         else if (C.scriptName == "SEA")

@@ -119,11 +119,11 @@ namespace cwm {
 				stream.read(fuel);
 				map.setUnitFuel(unitID, fuel);
 				const auto type = unittype[unitTypeScriptName];
-				for (uint64 i = 0, weaponCount = type.weaponCount;
+				for (uint64 i = 0, weaponCount = type.weapons().array.length();
 					i < weaponCount; ++i) {
 					Ammo ammo;
 					stream.read(ammo);
-					map.setUnitAmmo(unitID, type.weapon(i).scriptName, ammo);
+					map.setUnitAmmo(unitID, type.weapons().array[i], ammo);
 				}
 				bool isWaiting;
 				stream.read(isWaiting);
@@ -174,8 +174,7 @@ namespace cwm {
 		stream.read(height);
 		// Find the first tile type and use that. They will get replaced with
 		// setTileType() later.
-		string firstTileType =
-			((tiletype.length() > 0) ? (tiletype.scriptNames[0]) : (""));
+		string firstTileType = tiletype.begin()().scriptName();
 		// If we couldn't find one, then setMapSize() will cause a crash, so we
 		// need to throw now.
 		if (firstTileType == "")
@@ -204,7 +203,7 @@ namespace cwm {
 			string countryScriptName;
 			stream.read(countryScriptName);
 			if (map.createArmy(countryScriptName)) {
-				const auto armyID = country[countryScriptName].turnOrder;
+				const auto armyID = country[countryScriptName].turnOrder();
 				TeamID team;
 				stream.read(team);
 				map.setArmyTeam(armyID, team);
@@ -271,8 +270,9 @@ namespace cwm {
 		stream.write(type.scriptName);
 		stream.write(map.getUnitHP(unit));
 		stream.write(map.getUnitFuel(unit));
-		for (uint64 i = 0, weaponCount = type.weaponCount; i < weaponCount; ++i) {
-			stream.write(map.getUnitAmmo(unit, type.weapon(i).scriptName));
+		for (uint64 i = 0, weaponCount = type.weapons().array.length();
+            i < weaponCount; ++i) {
+			stream.write(map.getUnitAmmo(unit, type.weapons().array[i]));
 		}
 		stream.write(map.isUnitWaiting(unit));
 		stream.write(map.isUnitCapturing(unit));

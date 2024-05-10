@@ -58,7 +58,8 @@ namespace awe {
      *         if an edit map is not currently open.
      */
     string getEditMapEnvironmentSpritesheet() {
-        return edit is null ? "tile.normal" : edit.map.getEnvironmentSpritesheet();
+        return edit is null ? "tile.normal" :
+            edit.map.getEnvironment().spritesheet();
     }
 
     /**
@@ -68,7 +69,7 @@ namespace awe {
      */
     string getEditMapEnvironmentPictureSpritesheet() {
         return edit is null ? "tilePicture.normal" :
-            edit.map.getEnvironmentPictureSpritesheet();
+            edit.map.getEnvironment().pictureSpritesheet();
     }
 
     /**
@@ -78,22 +79,24 @@ namespace awe {
      */
     string getEditMapEnvironmentStructureIconSpritesheet() {
         return edit is null ? "structure" :
-            edit.map.getEnvironmentStructureIconSpritesheet();
+            edit.map.getEnvironment().structureIconSpritesheet();
     }
 
     /**
      * Retrieves a unit's base vision, with any offsets reported separately.
-     * @param  unit    Points to the type of unit to report the vision of.
-     * @param  terrain Points to the terrain the unit is on. \c null if the unit is
-     *                 not located on any terrain.
+     * @param  unit    The script name of the type of unit to report the vision of.
+     * @param  terrain The script name of the terrain the unit is on. An empty
+     *                 string if the unit is not located on any terrain.
      * @return The unit's offset vision, as a string that can be directly given set
      *         to a widget's text.
      */
-    string getUnitVisionText(const UnitType@ const unit,
-        const Terrain@ const terrain = null) {
-        string visionText = "~" + formatUInt(unit.vision);
-        if (terrain is null) return visionText;
-        const auto visionOffset = terrain.visionOffset(unit.scriptName);
+    string getUnitVisionText(const string&in unit, const string&in terrain = "") {
+        const UnitType@ const unitType = unittype[unit];
+        const auto oldVision = unitType.vision();
+        string visionText = "~" + formatUInt(oldVision);
+        if (terrain.length() == 0) return visionText;
+        const auto newVision = unitType.vision(Overrides().terrain(terrain));
+        const auto visionOffset = newVision - oldVision;
         if (visionOffset > 0) {
             visionText += " + " + formatInt(visionOffset);
         } else if (visionOffset < 0) {
