@@ -13,6 +13,22 @@ If you've somehow stumbled across this project, then please stick around. This i
 - Ability to easily add in Artificial Intelligence after-the-fact (actually implementing the AI is not a main goal, but it will be invaluable for the campaign side of the engine).
 - In-depth documentation, along with tutorials and examples once the project is ready for release.
 
+### May 10th 2024 ~ Update on Version 0.0.5 and Development Moving Forward
+[Here's the progress I've made on the features I intend to add to Version 0.0.5](https://trello.com/c/QX9kYO6U/269-version-005):
+- I've completely reworked the GUI code, it's a lot more object-oriented friendly now :+1:
+- I've figured out how to get animations to work cleanly in the game engine and maps. The only reason I haven't ticked off that item is due to [this ticket](https://trello.com/c/wQPg0omq/446-complete-black-obelisk-animations), but once I complete Black Obelisk animations, there'd only be the Volcano and the Death Ray animations to complete, and I'm postponing those to a later version.
+- I've added sounds and music to the game.
+- I've added support for weathers, Fog-of-War, and environments (though not the graphics for environments).
+- Only one task left: begin to implement CO logic...
+
+But the final piece of the puzzle for weather support (logic) is where I ran into issues...
+
+It's come to my attention that the way I've written the game engine does not lend itself at all to custom effects that come about with, e.g. certain weathers being active. Things like reducing the attack range of units in sandstorms, changing the way movement works in snow, etc. This becomes an even bigger problem for COs. I had come up with a decent approach in the `bank-rework` branch that would resolve this big limitation. It took quite a while to implement, and after implementing it and trying to integrate it with the rest of the codebase, it gradually became obvious that the entire architecture of the game didn't accommodate it well at all. At some point within the past day or so, I finally acknowledged that I'd need to rework the entire architecture of the game very soon... I already need to carry out so many changes just to get the new `banks` implementation running, and it will inevitably crash/not work once I get it to that stage. I'm not looking forward to debugging that mess. And after all that, I'd need to rewrite a lot of the code anyway. All to jump over one hurdle at the very end of the 0.0.5 iteration.
+
+Needless to say, I'm seriously considering starting from "scratch," _again_... This project was already a fresh start after my first attempt at writing an Advance Wars game failed (the code for that was truly horrid, though, at least this project is somewhat passable). It's taken five years to get to this point, and in the end, it falls short. I don't think it would take as long to get back up and running, thankfully, but it's still a massive blow to the project. I'm not quite at the stage where I want to give up, but I came pretty close today. I may end up officially throwing in the towel within the next year anyway to pursue other endeavours, but for now, I'll keep working on this side project. I'm going to create a whole new repository for it, and I'm already in the process of switching to Jira + Confluence from Trello.
+
+Unsure if I'll create a 0.0.5 tag: it will just point to the current commit of `master` anyway. Feel free to clone it and give it a go though, it pretty much is 0.0.5, just without weather logic and without proper CO support.
+
 ### September 14th 2023 ~ Version 0.0.4
 The map maker has now been added! For a full rundown of the features that have been added, please see the 0.0.4 release tag.
 
