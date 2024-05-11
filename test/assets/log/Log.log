@@ -1,9 +1,0 @@
-Tests © 2022 Dev
----------------
-Event Log:
-[2022-12-28 10:41:08.228] [logger_test_0] [info] Hello World!
-[2022-12-28 10:41:08.229] [logger_test_1] [warning] We are currently testing!
-[2022-12-28 10:41:08.230] [logger_test_2] [error] Oh no!
-[2022-12-28 10:41:08.231] [logger_test_3] [info] Number = 8
-[2022-12-28 10:41:08.233] [logger_test_4] [warning] Inserted text, -79.5 = number
-[2022-12-28 10:41:08.234] [logger_test_5] [error] Error is true!
