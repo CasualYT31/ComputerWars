@@ -1,0 +1,54 @@
+# Clang-Format version required >= 18.
+
+AccessModifierOffset: -4
+AlignAfterOpenBracket: BlockIndent
+AlignOperands: Align
+AllowBreakBeforeNoexceptSpecifier: Never
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortCompoundRequirementOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: true
+BasedOnStyle: LLVM
+BinPackArguments: false
+BinPackParameters: false
+BreakAdjacentStringLiterals: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Attach
+AlwaysBreakTemplateDeclarations: MultiLine
+ColumnLimit: 125
+CompactNamespaces: true
+Cpp11BracedListStyle: false
+EmptyLineBeforeAccessModifier: Always
+FixNamespaceComments: true
+IncludeBlocks: Regroup
+IndentCaseLabels: false
+IndentPPDirectives: BeforeHash
+IndentWidth: 4
+InsertNewlineAtEOF: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+PackConstructorInitializers: CurrentLine
+PenaltyReturnTypeOnItsOwnLine: 1000
+PointerAlignment: Left
+ReflowComments: true
+SeparateDefinitionBlocks: Always
+# May be a good idea.
+# SkipMacroDefinitionBody: true
+SortIncludes: CaseInsensitive
+SortUsingDeclarations: Lexicographic
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpacesInAngles: Never
+SpacesInLineCommentPrefix:
+    Minimum: 1
+    Maximum: 1
+SpacesInParens: Never
+SpacesInSquareBrackets: false
+TabWidth: 4
+UseTab: false
