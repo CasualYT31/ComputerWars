@@ -28,6 +28,12 @@ You can check the `Fetch dependencies` section of `CMakeLists.txt` to know which
 
 - GoogleTest.
 
+## Tools
+
+This is a C++20, CMake project. I use Doxygen to generation documentation and clang-format to format all of the code. Check the `CMakeLists.txt`, `Doxyfile.ini` and `.clang-format` scripts for the versions of these tools I use (or the minimum version supported).
+
+For Windows, I use Visual Studio 2022 + MSVC. For Linux, I use WSL2 + Visual Studio Code + GCC. I develop on Ubuntu 22.04, but hopefully other flavours of Linux can run this game, too.
+
 ## Links
 
 - [GitHub Project](https://github.com/users/CasualYT31/projects/1)
