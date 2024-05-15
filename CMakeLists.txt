@@ -11,9 +11,9 @@ endif ()
 
 # Determine if this is a debug or release build.
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
-	add_compile_definitions(COMPUTER_WARS_DEBUG)
+    add_compile_definitions(COMPUTER_WARS_DEBUG)
 else ()
-	add_compile_definitions(COMPUTER_WARS_RELEASE)
+    add_compile_definitions(COMPUTER_WARS_RELEASE)
 endif ()
 
 # Fetch dependencies.
