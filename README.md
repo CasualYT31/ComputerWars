@@ -24,7 +24,9 @@ I've moved over to Jira and Confluence from Trello. Unfortunately, Jira is not p
 
 ## Dependencies
 
-Todo (I likely won't be changing these much, if at all, so check [0.0.5](https://github.com/CasualYT31/ComputerWars/tree/0.0.5)).
+You can check the `Fetch dependencies` section of `CMakeLists.txt` to know which version of each dependency is used.
+
+- GoogleTest.
 
 ## Links
 
