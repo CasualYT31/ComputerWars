@@ -173,7 +173,7 @@ public:
  * \param type Command, Query, or EventListener.
  * \param obj The concrete Command, Query, or Event typename.
  * \param method A method name in the format Class::method.
- * \param ptr The pointer to specific instance of the method to invoke. Usually \c this.
+ * \param ptr A pointer to the instance of the method's class to invoke the method of. Usually \c this.
  */
 #define REGISTER(controller, type, obj, method, ptr)                                                                        \
     controller->register##type(obj{}, std::bind(&method, ptr, std::placeholders::_1))
