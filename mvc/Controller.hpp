@@ -185,7 +185,7 @@ public:
  * \param params Parentheses-surrounded list of parameters to give to the command's constructor. Provide an empty pair of
  * parentheses if there are no parameters required.
  */
-#define COMMAND(controller, obj, params) controller->command(obj##params);
+#define COMMAND(controller, obj, params) controller->command(obj params);
 
 /**
  * \brief Used to perform queries.
@@ -194,7 +194,7 @@ public:
  * \param params Parentheses-surrounded list of parameters to give to the query's constructor. Provide an empty pair of
  * parentheses if there are no parameters required.
  */
-#define QUERY(controller, obj, params) std::any_cast<obj## ::ReturnType>(controller->query(obj##params))
+#define QUERY(controller, obj, params) std::any_cast<obj::ReturnType>(controller->query(obj params))
 
 /**
  * \brief Used to emit events.
