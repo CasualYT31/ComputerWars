@@ -35,7 +35,7 @@ project ("ComputerWars")
 set (ComputerWarsLibrary_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}
     # Add dependency include dirs here.
     CACHE INTERNAL "ComputerWarsLibrary: Include Directories" FORCE)
-add_library (ComputerWarsLibrary "component/Printing.cpp")
+add_library (ComputerWarsLibrary "mvc/RootController.cpp" "mvc/ChildController.cpp")
 set_property (TARGET ComputerWarsLibrary PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsLibrary PUBLIC ${ComputerWarsLibrary_INCLUDE_DIRS})
 # Dependencies go here:
@@ -56,7 +56,7 @@ else () # WINDOWS.
 endif ()
 
 # The tests.
-add_executable (ComputerWarsTests "component/PrintingTests.cpp")
+add_executable (ComputerWarsTests "mvc/MVCTests.cpp")
 set_property (TARGET ComputerWarsTests PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsTests PRIVATE ${ComputerWarsLibrary_INCLUDE_DIRS})
 target_link_libraries (ComputerWarsTests gtest gtest_main ComputerWarsLibrary)
