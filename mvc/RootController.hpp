@@ -66,7 +66,7 @@ public:
         // If this assertion fails, a nullptr event was emitted.
         assert(e);
         _incomingEvents.push(e);
-        return EventResponse{};
+        return EventResponse();
     }
 
     inline void attachChildController(const std::shared_ptr<ControllerNode>& cc) final {
