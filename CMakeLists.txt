@@ -9,6 +9,11 @@ if (POLICY CMP0141)
     set (CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif ()
 
+# Always update dependency timestamps when fetching content via the URL method.
+if (POLICY CMP0135)
+    cmake_policy (SET CMP0135 NEW)
+endif ()
+
 # Determine if this is a debug or release build.
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     add_compile_definitions(COMPUTER_WARS_DEBUG)
@@ -17,6 +22,10 @@ else ()
 endif ()
 
 # Fetch dependencies.
+
+## nlohmann::json
+FetchContent_Declare (json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable (json)
 
 ## GoogleTest
 FetchContent_Declare (googletest
@@ -33,13 +42,13 @@ project ("ComputerWars")
 
 # All of the game's code.
 set (ComputerWarsLibrary_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}
-    # Add dependency include dirs here.
+    ${nlohmann_json_INCLUDE_DIRS}
     CACHE INTERNAL "ComputerWarsLibrary: Include Directories" FORCE)
-add_library (ComputerWarsLibrary "mvc/RootController.cpp" "mvc/ChildController.cpp")
+add_library (ComputerWarsLibrary "mvc/Controller.cpp" )
 set_property (TARGET ComputerWarsLibrary PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsLibrary PUBLIC ${ComputerWarsLibrary_INCLUDE_DIRS})
 # Dependencies go here:
-# target_link_libraries (ComputerWarsLibrary )
+target_link_libraries (ComputerWarsLibrary PUBLIC nlohmann_json::nlohmann_json)
 
 # The game itself.
 add_executable (ComputerWars "main.cpp")

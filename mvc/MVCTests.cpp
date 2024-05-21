@@ -1,5 +1,4 @@
-#include "ChildController.hpp"
-#include "RootController.hpp"
+#include "Controller.hpp"
 
 #include "gtest/gtest.h"
 #include <iostream>
@@ -82,7 +81,7 @@ public:
 
 protected:
     MVCTests() {
-        root = std::make_shared<cw::RootController>();
+        root = std::make_shared<cw::Controller>();
     }
 
     std::string getCapturedOutput() {
@@ -91,7 +90,7 @@ protected:
         return cpy;
     }
 
-    std::shared_ptr<cw::RootControllerNode> root;
+    std::shared_ptr<cw::ControllerNode> root;
 
 private:
     std::string _output;
@@ -109,7 +108,7 @@ std::any testQuery2(const cw::Query& q) {
 
 class TestModel : public cw::Model {
 public:
-    void registerModel(const std::shared_ptr<cw::Controller>& controller) final {
+    void registerModel(const std::shared_ptr<cw::ReadWriteController>& controller) final {
         _controller = controller;
         controller->registerCommand(TestCommand{}, [controller = this->_controller](const cw::Command& c) {
             const auto& command = dynamic_cast<const TestCommand&>(c);
@@ -125,18 +124,26 @@ public:
         });
     }
 
+    void fromJSON(const cw::json& j) final {}
+
+    void toJSON(cw::json& j) const final {}
+
 private:
-    std::shared_ptr<cw::Controller> _controller;
+    std::shared_ptr<cw::ReadWriteController> _controller;
 };
 
 class TestModel2 : public cw::Model {
 public:
-    void registerModel(const std::shared_ptr<cw::Controller>& controller) final {
+    void registerModel(const std::shared_ptr<cw::ReadWriteController>& controller) final {
         controller->registerEventHandler(TestEvent{}, [](const cw::Event& e) {
             const auto& event = dynamic_cast<const TestEvent&>(e);
             std::cout << event.data;
         });
     }
+
+    void fromJSON(const cw::json& j) final {}
+
+    void toJSON(cw::json& j) const final {}
 };
 
 class TestView : public cw::View {
@@ -286,17 +293,31 @@ TEST_F(MVCTests, MultipleEventsSingleHandlers) {
 }
 
 TEST_F(MVCTests, AttachChildControllerDeathTest) {
-    EXPECT_DEATH(root->attachChildController(nullptr), "");
-    const std::shared_ptr<cw::ControllerNode> child = std::make_shared<cw::ChildController>();
-    root->attachChildController(child);
-    EXPECT_DEATH(root->attachChildController(child), "");
+    EXPECT_DEATH(root->attachChildController("child", nullptr), "");
+    const std::shared_ptr<cw::ControllerNode> child = std::make_shared<cw::Controller>();
+    root->attachChildController("child", child);
+    EXPECT_DEATH(root->attachChildController("child", child), "");
 }
 
 TEST_F(MVCTests, AttachModelDeathTest) {
-    EXPECT_DEATH(root->attachModel(nullptr), "");
+    EXPECT_DEATH(root->attachModel("model", nullptr), "");
     const std::shared_ptr<cw::Model> model = std::make_shared<TestModel>();
-    root->attachModel(model);
-    EXPECT_DEATH(root->attachModel(model), "");
+    root->attachModel("model", model);
+    EXPECT_DEATH(root->attachModel("model", model), "");
+}
+
+TEST_F(MVCTests, AttachChildControllerThenModelDeathTest) {
+    const std::shared_ptr<cw::ControllerNode> child = std::make_shared<cw::Controller>();
+    const std::shared_ptr<cw::Model> model = std::make_shared<TestModel>();
+    root->attachChildController("name", child);
+    EXPECT_DEATH(root->attachModel("name", model), "");
+}
+
+TEST_F(MVCTests, AttachModelThenChildControllerDeathTest) {
+    const std::shared_ptr<cw::ControllerNode> child = std::make_shared<cw::Controller>();
+    const std::shared_ptr<cw::Model> model = std::make_shared<TestModel>();
+    root->attachModel("name", model);
+    EXPECT_DEATH(root->attachChildController("name", child), "");
 }
 
 TEST_F(MVCTests, AttachViewDeathTest) {
@@ -308,7 +329,7 @@ TEST_F(MVCTests, AttachViewDeathTest) {
 
 TEST_F(MVCTests, ModelControllerIntegration) {
     const std::shared_ptr<cw::Model> model = std::make_shared<TestModel>();
-    root->attachModel(model);
+    root->attachModel("model", model);
 
     COMMAND(root, TestCommand, ("Message"));
     testing::internal::CaptureStdout();
@@ -317,7 +338,7 @@ TEST_F(MVCTests, ModelControllerIntegration) {
     EXPECT_EQ(QUERY(root, TestQuery, (1, 2)), 3);
 
     const std::shared_ptr<cw::Model> model2 = std::make_shared<TestModel2>();
-    root->attachModel(model2);
+    root->attachModel("model2", model2);
     COMMAND(root, TestCommand, ("Message"));
     testing::internal::CaptureStdout();
     root->tick();
@@ -327,7 +348,7 @@ TEST_F(MVCTests, ModelControllerIntegration) {
 TEST_F(MVCTests, ModelViewControllerIntegration) {
     const std::shared_ptr<cw::Model> model = std::make_shared<TestModel>();
     const std::shared_ptr<cw::View> view = std::make_shared<TestView>();
-    root->attachModel(model);
+    root->attachModel("model", model);
     root->attachView(view);
 
     testing::internal::CaptureStdout();
@@ -347,12 +368,10 @@ TEST_F(MVCTests, ModelViewControllerIntegration) {
 TEST_F(MVCTests, ChildControllerTestsAndDeathTests) {
     const std::shared_ptr<cw::Model> model = std::make_shared<TestModel>();
     const std::shared_ptr<cw::View> view = std::make_shared<TestView>();
-    const std::shared_ptr<cw::ControllerNode> child = std::make_shared<cw::ChildController>();
-    EXPECT_DEATH(child->attachView(view), "");
-    EXPECT_DEATH(child->attachModel(model), "");
-    root->attachChildController(child);
+    const std::shared_ptr<cw::ControllerNode> child = std::make_shared<cw::Controller>();
+    root->attachChildController("child", child);
     child->attachView(view);
-    child->attachModel(model);
+    child->attachModel("model", model);
 
     testing::internal::CaptureStdout();
     root->tick();
@@ -371,14 +390,12 @@ TEST_F(MVCTests, ChildControllerTestsAndDeathTests) {
 TEST_F(MVCTests, GrandchildControllerTests) {
     const std::shared_ptr<cw::Model> model = std::make_shared<TestModel>();
     const std::shared_ptr<cw::View> view = std::make_shared<TestView>(), view2 = std::make_shared<TestView2>();
-    const std::shared_ptr<cw::ControllerNode> child = std::make_shared<cw::ChildController>(),
-                                              grandchild = std::make_shared<cw::ChildController>();
-    child->attachChildController(grandchild);
-    EXPECT_DEATH(grandchild->attachView(view), "");
-    EXPECT_DEATH(grandchild->attachModel(model), "");
-    root->attachChildController(child);
+    const std::shared_ptr<cw::ControllerNode> child = std::make_shared<cw::Controller>(),
+                                              grandchild = std::make_shared<cw::Controller>();
+    child->attachChildController("grandchild", grandchild);
+    root->attachChildController("child", child);
     grandchild->attachView(view);
-    grandchild->attachModel(model);
+    grandchild->attachModel("model", model);
     child->attachView(view2);
 
     testing::internal::CaptureStdout();

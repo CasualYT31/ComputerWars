@@ -26,7 +26,8 @@ I've moved over to Jira and Confluence from Trello. Unfortunately, Jira is not p
 
 You can check the `Fetch dependencies` section of `CMakeLists.txt` to know which version of each dependency is used.
 
-- GoogleTest.
+- [GoogleTest](https://github.com/google/googletest).
+- [Nlohmann::Json](https://github.com/nlohmann/json).
 
 ## Tools
 
