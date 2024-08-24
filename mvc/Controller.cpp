@@ -79,8 +79,8 @@ void Controller::attachChildController(const std::string& name, const std::share
     assert(cc);
     // If this assertion fails, the given name was not unique.
     assert(!_childControllers.contains(name) && !_models.contains(name));
-    _childControllers[name] = cc;
     cc->setParentController(shared_from_this());
+    _childControllers[name] = cc;
 }
 
 void Controller::attachModel(const std::string& name, const std::shared_ptr<Model>& m) {
