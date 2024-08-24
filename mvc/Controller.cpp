@@ -203,7 +203,7 @@ void Controller::_toInlineOrScript(json& j, const std::string& key, const JSONSe
             j[key] = filepath;
             return;
         } catch (const std::exception& e) {
-            // LOG: Can't write to script file, save inline instead.
+            // LOG: Can't write to script file, saving inline instead.
         }
     }
     // JSON is saved inline.

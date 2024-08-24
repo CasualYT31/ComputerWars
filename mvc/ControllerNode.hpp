@@ -193,3 +193,39 @@ public:
  * parentheses if there are no parameters required.
  */
 #define EVENT(controller, obj, params) controller->event(std::make_shared<obj> params)
+
+/**
+ * \brief Declares a command handler.
+ * \param name The name of the command handler.
+ */
+#define DECLARE_COMMAND(name) void name(const cw::Command& c)
+
+/**
+ * \brief Declares a query handler.
+ * \param name The name of the query handler.
+ */
+#define DECLARE_QUERY(name) std::any name(const cw::Query& q)
+
+/**
+ * \brief Declares an event handler.
+ * \param name The name of the event handler.
+ */
+#define DECLARE_EVENT(name) void name(const cw::Event& e)
+
+/**
+ * \brief Used to define a reference called command that points to the given concrete command object.
+ * \param obj The concrete Command typename.
+ */
+#define RECEIVE_COMMAND(obj) const auto& command = dynamic_cast<const obj&>(c)
+
+/**
+ * \brief Used to define a reference called query that points to the given concrete query object.
+ * \param obj The concrete Query typename.
+ */
+#define RECEIVE_QUERY(obj) const auto& query = dynamic_cast<const obj&>(q)
+
+/**
+ * \brief Used to define a reference called event that points to the given concrete event object.
+ * \param obj The concrete Event typename.
+ */
+#define RECEIVE_EVENT(obj) const auto& event = dynamic_cast<const obj&>(e)

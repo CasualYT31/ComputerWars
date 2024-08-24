@@ -51,30 +51,30 @@ struct TestEvent2 : public cw::Event {
 
 class MVCTests : public testing::Test {
 public:
-    void testCommand(const cw::Command& c) {
-        const auto& command = dynamic_cast<const TestCommand&>(c);
+    DECLARE_COMMAND(testCommand) {
+        RECEIVE_COMMAND(TestCommand);
         _output += command.statement;
     }
 
-    void testCommand2(const cw::Command& c) {
-        const auto& command = dynamic_cast<const TestCommand2&>(c);
+    DECLARE_COMMAND(testCommand2) {
+        RECEIVE_COMMAND(TestCommand2);
         _output += command.statement;
         _output += '2';
     }
 
-    void testEventHandler(const cw::Event& e) {
-        const auto& event = dynamic_cast<const TestEvent&>(e);
+    DECLARE_EVENT(testEventHandler) {
+        RECEIVE_EVENT(TestEvent);
         _output += event.data;
     }
 
-    void testEventHandler1(const cw::Event& e) {
-        const auto& event = dynamic_cast<const TestEvent&>(e);
+    DECLARE_EVENT(testEventHandler1) {
+        RECEIVE_EVENT(TestEvent);
         _output += event.data;
         _output += '1';
     }
 
-    void testEventHandler2(const cw::Event& e) {
-        const auto& event = dynamic_cast<const TestEvent2&>(e);
+    DECLARE_EVENT(testEventHandler2) {
+        RECEIVE_EVENT(TestEvent2);
         _output += event.data;
         _output += '2';
     }
@@ -96,13 +96,13 @@ private:
     std::string _output;
 };
 
-std::any testQuery(const cw::Query& q) {
-    const auto& query = dynamic_cast<const TestQuery&>(q);
+DECLARE_QUERY(testQuery) {
+    RECEIVE_QUERY(TestQuery);
     return query.x + query.y;
 }
 
-std::any testQuery2(const cw::Query& q) {
-    const auto& query = dynamic_cast<const TestQuery2&>(q);
+DECLARE_QUERY(testQuery2) {
+    RECEIVE_QUERY(TestQuery2);
     return query.x - query.y;
 }
 
