@@ -25,6 +25,7 @@ namespace cw {
  * children.
  *
  * Child controllers redirect all of their commands, queries, and events up to the root controller.
+ * \warning The controller hierarchy must be fully setup before any commands, queries, or event handlers are registered!
  */
 class Controller : public ControllerNode {
 public:
@@ -35,24 +36,24 @@ public:
     QueryResponse query(const Query&) const final;
     EventResponse event(const std::shared_ptr<Event>&) final;
     void attachChildController(const std::string&, const std::shared_ptr<ControllerNode>&) final;
-
-    inline void setParentController(const std::shared_ptr<ControllerNode>& pc) final {
-        _parentController = pc;
-    }
-
     void attachModel(const std::string&, const std::shared_ptr<Model>&) final;
-    void attachView(const std::shared_ptr<View>& v) final;
+    void attachView(const std::shared_ptr<View>&) final;
     TickResponse tick() final;
-    void shutdown(const TickResponse exitCode) final;
+    void shutdown(const TickResponse) final;
     /**
      * \brief Loads every attached model (including child models) by deserialising them all from JSON scripts.
      * \details Models are loaded in the order they were attached in.
+     * \copydetails JSONSerialised::fromJSON
      */
     void fromJSON(const cw::json& j) final;
     /**
      * \brief Serialises every attached model (including child models) into JSON scripts.
+     * \copydetails JSONSerialised::toJSON
      */
     void toJSON(json& j) const final;
+
+protected:
+    void setParentController(const std::shared_ptr<ControllerNode>&) final;
 
 private:
     /**

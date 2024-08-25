@@ -1,42 +1,45 @@
 #include "Controller.hpp"
 
-#include "file/file.hpp"
-
-#include <cassert>
+#include "file/File.hpp"
+#include "log/Log.hpp"
 
 namespace cw {
 void Controller::registerCommand(const Command& c, const CommandCallback& cb) {
-    // If this assertion fails, an empty callback was given.
-    assert(cb);
+    ASSERT(cb, "An empty command callback was given!");
     // If this is a child controller, redirect request up the hierarchy.
     const auto parent = _parentController.lock();
-    if (parent) { return parent->registerCommand(c, cb); }
+    if (parent) {
+        LOG(debug, "Registering command in parent controller");
+        return parent->registerCommand(c, cb);
+    }
     // If this is the root controller, respond to request.
     std::type_index cIndex(typeid(c));
-    // If this assertion fails, a command was registered twice, which is not allowed.
-    assert(!_commands.contains(cIndex));
+    ASSERT(!_commands.contains(cIndex), "This command was already registered!");
     _commands.emplace(cIndex, cb);
 }
 
 void Controller::registerQuery(const Query& q, const QueryCallback& cb) {
-    // If this assertion fails, an empty callback was given.
-    assert(cb);
+    ASSERT(cb, "An empty query callback was given!");
     // If this is a child controller, redirect request up the hierarchy.
     const auto parent = _parentController.lock();
-    if (parent) { return parent->registerQuery(q, cb); }
+    if (parent) {
+        LOG(debug, "Registering query in parent controller");
+        return parent->registerQuery(q, cb);
+    }
     // If this is the root controller, respond to request.
     std::type_index qIndex(typeid(q));
-    // If this assertion fails, a query was registered twice, which is not allowed.
-    assert(!_queries.contains(qIndex));
+    ASSERT(!_queries.contains(qIndex), "This query was already registered!");
     _queries.emplace(qIndex, cb);
 }
 
 void Controller::registerEventHandler(const Event& e, const EventCallback& cb) {
-    // If this assertion fails, an empty callback was given.
-    assert(cb);
+    ASSERT(cb, "An empty event callback was given!");
     // If this is a child controller, redirect request up the hierarchy.
     const auto parent = _parentController.lock();
-    if (parent) { return parent->registerEventHandler(e, cb); }
+    if (parent) {
+        LOG(debug, "Registering event handler in parent controller");
+        return parent->registerEventHandler(e, cb);
+    }
     // If this is the root controller, respond to request.
     _events[typeid(e)].push_back(cb);
 }
@@ -47,8 +50,7 @@ CommandResponse Controller::command(const Command& c) {
     if (parent) { return parent->command(c); }
     // If this is the root controller, respond to request.
     std::type_index cIndex(typeid(c));
-    // If this assertion fails, this command wasn't registered.
-    assert(_commands.contains(cIndex));
+    ASSERT(_commands.contains(cIndex), "This command was not registered!");
     return _commands.at(cIndex)(c);
 }
 
@@ -58,14 +60,12 @@ QueryResponse Controller::query(const Query& q) const {
     if (parent) { return parent->query(q); }
     // If this is the root controller, respond to request.
     std::type_index qIndex(typeid(q));
-    // If this assertion fails, this query wasn't registered.
-    assert(_queries.contains(qIndex));
+    ASSERT(_queries.contains(qIndex), "This query was not registered!");
     return _queries.at(qIndex)(q);
 }
 
 EventResponse Controller::event(const std::shared_ptr<Event>& e) {
-    // If this assertion fails, a nullptr event was emitted.
-    assert(e);
+    ASSERT(e, "You cannot emit nullptr!");
     // If this is a child controller, redirect request up the hierarchy.
     const auto parent = _parentController.lock();
     if (parent) { return parent->event(e); }
@@ -75,29 +75,30 @@ EventResponse Controller::event(const std::shared_ptr<Event>& e) {
 }
 
 void Controller::attachChildController(const std::string& name, const std::shared_ptr<ControllerNode>& cc) {
-    // If this assertion fails, a nullptr was attached.
-    assert(cc);
-    // If this assertion fails, the given name was not unique.
-    assert(!_childControllers.contains(name) && !_models.contains(name));
-    cc->setParentController(shared_from_this());
+    LOG(debug, "Attaching child controller \"{}\"", name);
+    ASSERT(cc, "Tried to attach a nullptr controller!");
+    ASSERT(
+        !_childControllers.contains(name) && !_models.contains(name), "A child controller or model already has that name!"
+    );
+    ControllerNode::setParentController(cc, shared_from_this());
     _childControllers[name] = cc;
 }
 
 void Controller::attachModel(const std::string& name, const std::shared_ptr<Model>& m) {
-    // If this assertion fails, a nullptr was attached.
-    assert(m);
-    // If this assertion fails, the given name was not unique.
-    assert(!_childControllers.contains(name) && !_models.contains(name));
+    LOG(debug, "Attaching model \"{}\"", name);
+    ASSERT(m, "Tried to attach a nullptr model!");
+    ASSERT(
+        !_childControllers.contains(name) && !_models.contains(name), "A child controller or model already has that name!"
+    );
     m->registerModel(shared_from_this());
     _models[name] = m;
 }
 
 void Controller::attachView(const std::shared_ptr<View>& v) {
-    // If this assertion fails, a nullptr was attached.
-    assert(v);
-    // If this assertion fails, the view has already been added to the controller.
-    assert(std::find(_views.begin(), _views.end(), v) == _views.end());
+    ASSERT(v, "Tried to attach a nullptr view!");
+    ASSERT(std::find(_views.begin(), _views.end(), v) == _views.end(), "This view's already been attached!");
     v->registerView(shared_from_this());
+    LOG(debug, "Attaching view with ID {}", _views.size());
     _views.push_back(v);
 }
 
@@ -132,59 +133,82 @@ TickResponse Controller::tick() {
 void Controller::shutdown(const TickResponse exitCode) {
     // If this is a child controller, redirect request up the hierarchy.
     const auto parent = _parentController.lock();
-    if (parent) { return parent->shutdown(exitCode); }
+    if (parent) {
+        LOG(debug, "Redirecting shutdown request with code {} to parent controller", exitCode);
+        return parent->shutdown(exitCode);
+    }
     // If this is the root controller, respond to request.
+    LOG(info, "Requesting shutdown with code {}", exitCode);
     _tickCode = exitCode;
 }
 
 void Controller::fromJSON(const cw::json& j) {
+    LOG(debug, "Deserialising JSON into {} controller", (_parentController.expired() ? "root" : "child"));
     _scriptFiles.clear();
     for (const auto& keyValues : j.items()) {
+        const std::string key = keyValues.key();
+        const auto& value = keyValues.value();
         cw::json obj;
-        if (keyValues.value().is_object()) {
-            obj = keyValues.value();
-        } else if (keyValues.value().is_string()) {
+        if (value.is_object()) {
+            LOG(debug, "Key \"{}\" contains an object", key);
+            obj = value;
+        } else if (value.is_string()) {
+            LOG(debug, "Key \"{}\" contains a script filepath", key);
             // Attempt to load the script whose path is stored in the string.
+            const auto path = value.get<std::string>();
             try {
-                const auto script = makeExceptionFStream<std::ifstream>(keyValues.value().get<std::string>());
+                const auto script = makeExceptionFStream<std::ifstream>(path);
                 obj = json::parse(*script);
             } catch (const std::exception& e) {
-                // LOG: Couldn't load script.
+                LOG(err,
+                    "Couldn't load the configuration script \"{}\", the path of which was stored in the \"{}\" key: {}",
+                    path,
+                    key,
+                    e);
                 continue;
             }
-            // LOG: Loaded script successfully.
-            _scriptFiles[keyValues.key()] = keyValues.value();
+            LOG(info, "Loaded configuration script \"{}\" for key \"{}\" successfully", path, key);
+            _scriptFiles[key] = path;
         } else {
-            // LOG: Invalid value type.
+            LOG(warn, "Key \"{}\" pointed to a value of invalid type, \"{}\"", key, value.type_name());
             continue;
         }
-        const auto model = _models.find(keyValues.key());
+        const auto model = _models.find(key);
         if (model != _models.end()) {
             try {
+                LOG(info, "Loading model \"{}\"", key);
                 model->second->fromJSON(obj);
-                // LOG: Loaded model.
-            } catch (const std::exception& e) {
-                // LOG: Couldn't load model.
-            }
+                LOG(info, "Loaded model \"{}\" successfully", key);
+            } catch (const std::exception& e) { LOG(err, "Could not load model \"{}\": {}", key, e); }
             continue;
         }
-        const auto controller = _childControllers.find(keyValues.key());
+        const auto controller = _childControllers.find(key);
         if (controller != _childControllers.end()) {
             try {
+                LOG(info, "Loading controller \"{}\"", key);
                 controller->second->fromJSON(obj);
-                // LOG: Loaded controller.
-            } catch (const std::exception& e) {
-                // LOG: Couldn't load controller.
-            }
+                LOG(info, "Loaded controller \"{}\" successfully", key);
+            } catch (const std::exception& e) { LOG(err, "Could not load controller \"{}\": {}", key, e); }
             continue;
         }
-        // LOG: No controller or model with that name.
+        LOG(warn, "No controller or model has the name \"{}\"", key);
     }
 }
 
 void Controller::toJSON(json& j) const {
+    LOG(debug, "Serialising {} controller into JSON", (_parentController.expired() ? "root" : "child"));
     for (const auto& child : _childControllers) { _toInlineOrScript(j, child.first, *child.second); }
     for (const auto& model : _models) { _toInlineOrScript(j, model.first, *model.second); }
+}
+
+void Controller::setParentController(const std::shared_ptr<ControllerNode>& pc) {
+    // This assertion makes sure that a root controller isn't made a child.
+    ASSERT(
+        _commands.empty() && _queries.empty() && _events.empty() && _incomingEvents.empty() && _models.empty()
+            && _views.empty(),
+        "You must register the entire controller hierarchy before registering any models or views!"
+    );
+    _parentController = pc;
 }
 
 void Controller::_toInlineOrScript(json& j, const std::string& key, const JSONSerialised& f) const {
@@ -195,16 +219,25 @@ void Controller::_toInlineOrScript(json& j, const std::string& key, const JSONSe
         // It will try to write to the stored file path again next time, unless the state is updated via fromJSON()
         // and it's stored inline in the given JSON.
         const auto& filepath = _scriptFiles.at(key);
+        LOG(info, "Attempting to write component \"{}\"'s state to \"{}\"", key, filepath);
         try {
             {
                 const auto script = makeExceptionFStream<std::ofstream>(filepath);
                 *script << object;
             }
             j[key] = filepath;
+            LOG(info, "Successfully wrote component \"{}\"'s state to \"{}\"", key, filepath);
             return;
         } catch (const std::exception& e) {
-            // LOG: Can't write to script file, saving inline instead.
+            LOG(warn,
+                "Could not write component \"{}\" to script file \"{}\": {}. Writing inline instead. Will attempt to write "
+                "to the script file next time",
+                key,
+                filepath,
+                e);
         }
+    } else {
+        LOG(debug, "Writing component \"{}\"'s state inline", key);
     }
     // JSON is saved inline.
     j[key] = object;

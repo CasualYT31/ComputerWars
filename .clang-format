@@ -15,7 +15,7 @@ AllowShortLoopsOnASingleLine: true
 BasedOnStyle: LLVM
 BinPackArguments: false
 BinPackParameters: false
-BreakAdjacentStringLiterals: false
+BreakAdjacentStringLiterals: true
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Attach
 AlwaysBreakTemplateDeclarations: MultiLine

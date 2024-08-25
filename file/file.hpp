@@ -1,5 +1,5 @@
 /**
- * \file file.hpp
+ * \file File.hpp
  * \brief Contains file stream helper functions.
  */
 

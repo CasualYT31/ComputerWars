@@ -26,8 +26,28 @@ I've moved over to Jira and Confluence from Trello. Unfortunately, Jira is not p
 
 You can check the `Fetch dependencies` section of `CMakeLists.txt` to know which version of each dependency is used.
 
+- [Boxer](https://github.com/aaronmjacobs/Boxer).
+- [FMT](https://github.com/fmtlib/fmt).
 - [GoogleTest](https://github.com/google/googletest).
 - [Nlohmann::Json](https://github.com/nlohmann/json).
+- [spdlog](https://github.com/gabime/spdlog).
+- [SystemProperties](https://github.com/CasualYT31/SystemProperties).
+
+### Boost
+
+This project also makes use of Boost (in particular, `program_options` and `stacktrace`). Unfortunately, it doesn't necessarily have the best CMake support currently, so you'll need to build it separately.
+
+#### Windows
+
+Here are the steps I took to get Boost working on Windows. It doesn't use the most optimal settings (e.g. I built the `debug` variant because I couldn't get the `release` variant to play nice), so if you know what you're doing, feel free to make changes to CMakeLists.txt to accomodate your approach:
+
+1. Download the latest Windows release and extract it. At the time of writing, it can be found here: https://www.boost.org/users/history/version_1_86_0.html.
+2. Open an admin command prompt and navigate to the extracted folder.
+3. Run: `call bootstrap.bat`.
+4. Run: `b2 install --prefix=C:\Boost\boost_1_86_0 address-model=64 toolset=msvc variant=debug threading=multi link=static runtime-link=shared architecture=x86`
+5. Note the installation prefix; feel free to set it to whatever you want, but you'll need to apply it to the BOOST_ROOT CMake variable.
+
+**Something to note is that I had to make CMakeLists.txt manually copy over the static library files from the installed location into `${CMAKE_BINARY_DIR}` for my compiler to find them. If I had more patience I would've figured out why it wasn't working, but as it stands, this is what CMakeLists.txt will do in its current form.**
 
 ## Tools
 
@@ -41,6 +61,7 @@ For Windows, I use Visual Studio 2022 + MSVC. For Linux, I use WSL2 + Visual Stu
 - [Discord Server](https://discord.gg/SxaMn2n)
 
 ## Gitmoji
+
 I like the idea of Gitmoji, but I find that there are a lot of emoji for the same thing, and some that are missing. So I decided to use my own emoji:
 
 ### Coding

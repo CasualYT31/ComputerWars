@@ -9,3 +9,4 @@ build/
 *.log
 *.html
 *.htm
+test-files/tmp/

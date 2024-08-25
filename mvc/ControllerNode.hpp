@@ -124,11 +124,6 @@ public:
      */
     virtual void attachChildController(const std::string& name, const std::shared_ptr<ControllerNode>& cc) = 0;
     /**
-     * \brief Creates a link between a parent controller and this child controller.
-     * \param pc The controller who's the parent of this controller.
-     */
-    virtual void setParentController(const std::shared_ptr<ControllerNode>& pc) = 0;
-    /**
      * \brief Adds a model to this controller node.
      * \param name The unique name of the model. The name must be unique across all other child controllers in this
      * controller, as well as models.
@@ -153,6 +148,24 @@ public:
      * \param exitCode Must be >= 0 to cause the game to shutdown.
      */
     virtual void shutdown(const TickResponse exitCode) = 0;
+
+protected:
+    /**
+     * \brief Creates a link between a parent controller and this child controller.
+     * \param pc The controller who's the parent of this controller.
+     */
+    virtual void setParentController(const std::shared_ptr<ControllerNode>& pc) = 0;
+
+    /**
+     * \brief Makes setParentController() invokable from derived classes.
+     * \param cc Pointer to the child controller whose parent pointer is being updated.
+     * \param pc Pointer to the controller who is the parent of self.
+     */
+    inline static void setParentController(
+        const std::shared_ptr<ControllerNode>& cc, const std::shared_ptr<ControllerNode>& pc
+    ) {
+        cc->setParentController(pc);
+    }
 };
 } // namespace cw
 
@@ -165,6 +178,7 @@ public:
  * \param ptr A pointer to the instance of the method's class to invoke the method of. Usually \c this.
  */
 #define REGISTER(controller, type, obj, method, ptr)                                                                        \
+    LOG(debug, #type " " #obj " is being registered to invoke " #ptr "->" #method);                                         \
     controller->register##type(obj{}, std::bind(&method, ptr, std::placeholders::_1))
 
 /**
@@ -174,7 +188,9 @@ public:
  * \param params Parentheses-surrounded list of parameters to give to the command's constructor. Provide an empty pair of
  * parentheses if there are no parameters required.
  */
-#define COMMAND(controller, obj, params) controller->command(obj params);
+#define COMMAND(controller, obj, params)                                                                                    \
+    LOG(trace, "Invoking command " #obj #params);                                                                           \
+    controller->command(obj params);
 
 /**
  * \brief Used to perform queries.
@@ -183,7 +199,11 @@ public:
  * \param params Parentheses-surrounded list of parameters to give to the query's constructor. Provide an empty pair of
  * parentheses if there are no parameters required.
  */
-#define QUERY(controller, obj, params) std::any_cast<obj::ReturnType>(controller->query(obj params))
+#define QUERY(controller, obj, params)                                                                                      \
+    [&controller = controller]() {                                                                                          \
+        LOG(trace, "Invoking query " #obj #params);                                                                         \
+        return std::any_cast<obj::ReturnType>(controller->query(obj params));                                               \
+    }()
 
 /**
  * \brief Used to emit events.
@@ -192,7 +212,9 @@ public:
  * \param params Parentheses-surrounded list of parameters to give to the event's constructor. Provide an empty pair of
  * parentheses if there are no parameters required.
  */
-#define EVENT(controller, obj, params) controller->event(std::make_shared<obj> params)
+#define EVENT(controller, obj, params)                                                                                      \
+    LOG(trace, "Emitting event " #obj #params);                                                                             \
+    controller->event(std::make_shared<obj> params)
 
 /**
  * \brief Declares a command handler.
@@ -216,16 +238,22 @@ public:
  * \brief Used to define a reference called command that points to the given concrete command object.
  * \param obj The concrete Command typename.
  */
-#define RECEIVE_COMMAND(obj) const auto& command = dynamic_cast<const obj&>(c)
+#define RECEIVE_COMMAND(obj)                                                                                                \
+    LOG(trace, "Received command " #obj);                                                                                   \
+    const auto& command = dynamic_cast<const obj&>(c)
 
 /**
  * \brief Used to define a reference called query that points to the given concrete query object.
  * \param obj The concrete Query typename.
  */
-#define RECEIVE_QUERY(obj) const auto& query = dynamic_cast<const obj&>(q)
+#define RECEIVE_QUERY(obj)                                                                                                  \
+    LOG(trace, "Received query " #obj);                                                                                     \
+    const auto& query = dynamic_cast<const obj&>(q)
 
 /**
  * \brief Used to define a reference called event that points to the given concrete event object.
  * \param obj The concrete Event typename.
  */
-#define RECEIVE_EVENT(obj) const auto& event = dynamic_cast<const obj&>(e)
+#define RECEIVE_EVENT(obj)                                                                                                  \
+    LOG(trace, "Received event " #obj);                                                                                     \
+    const auto& event = dynamic_cast<const obj&>(e)
