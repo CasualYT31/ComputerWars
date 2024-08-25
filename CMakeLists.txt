@@ -39,18 +39,28 @@ add_compile_definitions (GIT_BRANCH="${GIT_BRANCH}" GIT_COMMIT="${GIT_COMMIT_HAS
 # Find dependencies.
 
 ## Boost
-## Builder must specify location of their Boost 1.65.0 or later.
 ## https://stackoverflow.com/questions/54581717/adding-boost-to-cmake-project for help with Boost.
-set(BOOST_ROOT "" CACHE STRING "The folder which contains Boost. You must install at least version 1.65.0 for stacktrace support.")
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
+set (BOOST_ROOT "" CACHE STRING "The folder which contains Boost. You must install at least version 1.65.0 for stacktrace support.")
+set (Boost_USE_STATIC_LIBS ON)
+set (Boost_USE_MULTITHREADED ON)
+set (Boost_USE_STATIC_RUNTIME OFF)
+## Builder must specify location of their Boost 1.65.0 or later.
 string (COMPARE EQUAL "${BOOST_ROOT}" "" result)
 if (result)
     message (FATAL_ERROR "You must set BOOST_ROOT to the folder where you installed Boost, please check README.md")
 endif ()
-find_package(Boost 1.65.0 REQUIRED) # boost_stacktrace_windbg, program_options
-if (NOT UNIX)
+if (UNIX)
+    ## Unfortunately, getting Boost to work on Linux wasn't not that much easier...
+    ## 1. Run: sudo apt-get update
+    ## 2. Run: sudo apt-get install libboost-all-dev gtk+-3.0
+    ##    (gtk+-3.0 is required by Boxer).
+    ## 3. Set BOOST_ROOT to /usr (why the fuck should I have to do this?).
+    ## For some fucking reason it will refuse to look into the folder where the libraries are actually installed,
+    ## so I need to spell it out...
+    set (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu")
+    find_package (Boost 1.65.0 COMPONENTS program_options stacktrace_backtrace REQUIRED)
+else () # Windows.
+    find_package (Boost 1.65.0 REQUIRED) # boost_stacktrace_windbg, program_options
     ## Just manually install them man, I can't be bothered with this shit anymore.
     ## Here's what I did to get Boost to work on Windows:
     ## 1. Downloaded latest Windows 7zip archive, which was 1.86.0 at the time:

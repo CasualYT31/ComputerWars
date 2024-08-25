@@ -30,7 +30,11 @@ namespace {
 const std::unordered_map<std::string, std::function<std::string()>> variableMap = { { "%DATE%", []() -> std::string {
                                                                                          time_t curtime = time(nullptr);
                                                                                          tm ltime;
-                                                                                         localtime_s(&ltime, &curtime);
+#ifdef _WIN32
+                                                                                         ::localtime_s(&ltime, &curtime);
+#else
+                                                                                         ::localtime_r(&curtime, &ltime);
+#endif
                                                                                          return fmt::format(
                                                                                              "{}-{}-{} {}-{}-{}",
                                                                                              ltime.tm_mday,
@@ -115,7 +119,7 @@ void Log::Setup(
     _sink->add_sink(std::make_shared<spdlog::sinks::ostream_sink_st>(_logCopy));
     _sink->set_pattern("[%Y-%m-%d %T.%e] %v");
     _logger = std::make_unique<spdlog::logger>("logger", _sink);
-    _logger->log(spdlog::level::off, "Computer Wars © CasualYouTuber31");
+    _logger->log(spdlog::level::off, "Computer Wars ï¿½ CasualYouTuber31");
     _logger->log(spdlog::level::off, "Branch: {}", GIT_BRANCH);
     _logger->log(spdlog::level::off, "Commit: {}", GIT_COMMIT);
     if (logHardwareDetails) {
@@ -170,6 +174,7 @@ void Log::WriteTrace(const Log::Level lvl) {
         traceOutput << "\n";
     }
     _logger->log(lvl, "Stacktrace:\n{}", traceOutput.str());
+    _logger->flush();
 }
 
 std::string Log::Get() {

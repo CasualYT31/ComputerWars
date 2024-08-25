@@ -134,6 +134,8 @@ public:
                 } catch (const std::exception& e) { _logger->log(lvl, "Could not produce dialog box for above log: {}", e); }
             }
         } catch (const std::exception& e) { _logger->log(lvl, "Could not format log \"{}\" due to {}", message, e); }
+        // Logs don't seem to write in Ubuntu unless I flush every time...
+        _logger->flush();
     }
 
     /**
@@ -181,13 +183,20 @@ private:
 #define __RELATIVE_FILENAME__ (__FILE__ + ROOT_SOURCE_PATH_SIZE)
 
 /**
+ * \brief Will only add a preceding comma to __VA_ARGS__ if at least one argument was given.
+ * \details Thanks go to: https://stackoverflow.com/a/5897216.
+ * \param ... Parameters to expand out.
+ */
+#define VA_ARGS(...) , ##__VA_ARGS__
+
+/**
  * \brief Write a line to the log.
  * \param lvl The level to write the log at. Should not be a fully qualified name (i.e. it should be e.g. info or error).
  * \param message The message to write.
- * \param ... The objects to insert into the message using fmt.
+ * \param ... The objects to insert into the message using fmt, if any.
  */
 #define LOG(lvl, message, ...)                                                                                              \
-    cw::Log::Write(__RELATIVE_FILENAME__, __LINE__, cw::Log::Level::lvl, message, true, true, __VA_ARGS__)
+    cw::Log::Write(__RELATIVE_FILENAME__, __LINE__, cw::Log::Level::lvl, message, true, true VA_ARGS(__VA_ARGS__))
 
 /**
  * \brief Make an assertion.
