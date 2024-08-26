@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include "Controller.hpp"
+#include "ControllerNode.hpp"
 
 namespace cw {
 /**
  * \brief A model contains data and logic, and emits events, notifying interested parties of changes to its state.
  */
-class Model {
+class Model : public JSONSerialised {
 public:
     virtual ~Model() = default;
     /**
@@ -22,6 +22,6 @@ public:
      * perform commands and queries later.
      * \param controller The controller that this model is being added to.
      */
-    virtual void registerModel(const std::shared_ptr<Controller>& controller) = 0;
+    virtual void registerModel(const std::shared_ptr<ReadWriteController>& controller) = 0;
 };
 } // namespace cw

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Controller.hpp"
+#include "ControllerNode.hpp"
 
 namespace cw {
 /**

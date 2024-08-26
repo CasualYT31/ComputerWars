@@ -26,11 +26,18 @@ I've moved over to Jira and Confluence from Trello. Unfortunately, Jira is not p
 
 You can check the `Fetch dependencies` section of `CMakeLists.txt` to know which version of each dependency is used.
 
-- GoogleTest.
+- [Boxer](https://github.com/aaronmjacobs/Boxer) (requires `gtk+-3.0` on Linux, run `sudo apt-get update && sudo apt-get install gtk+-3.0` before configuring this project using CMake).
+- [Cpptrace](https://github.com/jeremy-rifkin/cpptrace.git).
+- [Cxxopts](https://github.com/jarro2783/cxxopts.git).
+- [FMT](https://github.com/fmtlib/fmt).
+- [GoogleTest](https://github.com/google/googletest).
+- [Nlohmann::Json](https://github.com/nlohmann/json).
+- [spdlog](https://github.com/gabime/spdlog).
+- [SystemProperties](https://github.com/CasualYT31/SystemProperties).
 
 ## Tools
 
-This is a C++20, CMake project. I use Doxygen to generation documentation and clang-format to format all of the code. Check the `CMakeLists.txt`, `Doxyfile.ini` and `.clang-format` scripts for the versions of these tools I use (or the minimum version supported).
+This is a C++20, CMake project. I use Doxygen to generate documentation and clang-format to format all of the code. Check the `CMakeLists.txt`, `Doxyfile.ini` and `.clang-format` scripts for the versions of these tools I use (or the minimum version supported).
 
 For Windows, I use Visual Studio 2022 + MSVC. For Linux, I use WSL2 + Visual Studio Code + GCC. I develop on Ubuntu 22.04, but hopefully other flavours of Linux can run this game, too.
 
@@ -40,6 +47,7 @@ For Windows, I use Visual Studio 2022 + MSVC. For Linux, I use WSL2 + Visual Stu
 - [Discord Server](https://discord.gg/SxaMn2n)
 
 ## Gitmoji
+
 I like the idea of Gitmoji, but I find that there are a lot of emoji for the same thing, and some that are missing. So I decided to use my own emoji:
 
 ### Coding
