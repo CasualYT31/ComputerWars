@@ -2,7 +2,6 @@
 
 #include "maths/Maths.hpp"
 
-#include <boost/program_options.hpp>
 #include <cpptrace/cpptrace.hpp>
 #include <ctime>
 #include <fmt/format.h>

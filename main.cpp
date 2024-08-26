@@ -2,9 +2,9 @@
 #include "log/Log.hpp"
 #include "mvc/Controller.hpp"
 
-#include <boost/program_options.hpp>
 #include <boxer/boxer.h>
 #include <chrono>
+#include <cxxopts.hpp>
 #include <iostream>
 #include <thread>
 
@@ -18,6 +18,19 @@
  */
 struct LogLevelOption {
     /**
+     * \brief Default initialise the level field.
+     */
+    LogLevelOption()
+        :
+#ifdef COMPUTER_WARS_DEBUG
+          level(cw::Log::Level::trace)
+#else
+          level(cw::Log::Level::info)
+#endif
+    {
+    }
+
+    /**
      * \brief Initialise the level field.
      * \param l The log level to initialise it with.
      */
@@ -30,23 +43,20 @@ struct LogLevelOption {
 };
 
 /**
+ * \brief Streams a log level string from a given input stream.
+ */
+static std::istream& operator>>(std::istream& is, LogLevelOption& v) {
+    std::string str;
+    std::getline(is, str);
+    v.level = cw::Log::LevelFromString(str);
+    return is;
+}
+
+/**
  * \brief Streams a log level option to a given output stream.
  */
 static inline std::ostream& operator<<(std::ostream& os, const LogLevelOption& v) {
     return os << cw::Log::LevelToString(v.level);
-}
-
-/**
- * \brief Validates a log level option.
- */
-void validate(boost::any& v, const std::vector<std::string>& values, LogLevelOption*, int) {
-    std::string l = boost::program_options::validators::get_single_string(values);
-    try {
-        v = boost::any(LogLevelOption(cw::Log::LevelFromString(l)));
-    } catch (const std::exception& e) {
-        std::cout << e.what() << "\n";
-        throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
-    }
 }
 
 /**
@@ -57,27 +67,31 @@ void validate(boost::any& v, const std::vector<std::string>& values, LogLevelOpt
  * \returns cw::ShutdownCode::Success if the program should continue, another value if it should shutdown.
  * \throws std::exception if the command-line arguments could not be parsed.
  */
-int parseCommandLine(const int argc, char* const argv[], boost::program_options::variables_map& vm) {
-    boost::program_options::options_description opts("Available options");
+int parseCommandLine(const int argc, char* const argv[], cxxopts::ParseResult& vm) {
+#ifdef _WIN32
+    const auto applicationName = "ComputerWars.exe";
+#else
+    const auto applicationName = "ComputerWars";
+#endif
 #ifdef COMPUTER_WARS_DEBUG
     const auto defaultLog = "assets/log/Log.log";
-    const auto defaultLogLevel = cw::Log::Level::trace;
+    const auto defaultLogLevel = cw::Log::LevelToString(cw::Log::Level::trace);
 #else
     const auto defaultLog = "assets/log/Log %DATE%.log";
-    const auto defaultLogLevel = cw::Log::Level::info;
+    const auto defaultLogLevel = cw::Log::LevelToString(cw::Log::Level::info);
 #endif
+    cxxopts::Options opts(applicationName, "Logging and core configuration options");
     // clang-format off
     opts.add_options()
-        ("help", "produce help message")
-        ("log", boost::program_options::value<std::string>()->default_value(defaultLog), "tell the game where to write the log file")
-        ("log-level", boost::program_options::value<::LogLevelOption>()->default_value(LogLevelOption(defaultLogLevel)), "set the log level")
+        ("h,help", "produce help message")
+        ("f,log", "tell the game where to write the log file", cxxopts::value<std::string>()->default_value(defaultLog))
+        ("l,log-level", "set the log level", cxxopts::value<::LogLevelOption>()->default_value(defaultLogLevel))
         ("log-no-hardware-details", "prevents the game from logging hardware details")
-        ("core-config", boost::program_options::value<std::string>()->default_value("assets/core.json"), "specify the location of the core configuration file");
+        ("c,core-config", "specify the location of the core configuration file", cxxopts::value<std::string>()->default_value("assets/core.json"));
     // clang-format on
-    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, opts), vm);
-    boost::program_options::notify(vm);
+    vm = opts.parse(argc, argv);
     if (vm.count("help")) {
-        std::cout << opts << "\n";
+        std::cout << opts.help() << "\n";
         return cw::ShutdownCode::DisplayedHelp;
     }
     return cw::ShutdownCode::Success;
@@ -85,7 +99,7 @@ int parseCommandLine(const int argc, char* const argv[], boost::program_options:
 
 int main(int argc, char* argv[]) {
     // Parse the command-line.
-    boost::program_options::variables_map vm;
+    cxxopts::ParseResult vm;
     try {
         const auto code = parseCommandLine(argc, argv, vm);
         if (code != cw::ShutdownCode::Success) { return code; }
@@ -98,7 +112,7 @@ int main(int argc, char* argv[]) {
     {
         const auto logFilePattern = vm["log"].as<std::string>();
         try {
-            cw::Log::Setup(logFilePattern, !vm.contains("log-no-hardware-details"));
+            cw::Log::Setup(logFilePattern, !vm.count("log-no-hardware-details"));
             cw::Log::SetLevel(vm["log-level"].as<LogLevelOption>().level);
         } catch (const std::exception& e) {
             try {
