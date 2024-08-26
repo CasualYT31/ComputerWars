@@ -3,7 +3,7 @@
 #include "maths/Maths.hpp"
 
 #include <boost/program_options.hpp>
-#include <boost/stacktrace.hpp>
+#include <cpptrace/cpptrace.hpp>
 #include <ctime>
 #include <fmt/format.h>
 #include <functional>
@@ -153,27 +153,28 @@ void Log::SetLevel(const Log::Level level) {
 void Log::WriteTrace(const Log::Level lvl) {
     assert(_logger);
     if (_neverWriteTraces) { return; }
-    auto trace = boost::stacktrace::stacktrace();
+    auto trace = cpptrace::generate_trace();
     std::stringstream traceOutput;
     bool foundAWriteTraceEntry = false;
     bool checkedForWriteFrame = false;
     for (const auto& entry : trace) {
         // Do not include anything up to and including the first WriteTrace frame.
         if (!foundAWriteTraceEntry) {
-            foundAWriteTraceEntry = entry.name().find("Log::WriteTrace") != std::string::npos;
+            foundAWriteTraceEntry = entry.symbol.find("Log::WriteTrace") != std::string::npos;
             continue;
         }
         // If a Write frame immediately follows from a WriteTrace frame, drop that, too.
         if (!checkedForWriteFrame) {
             checkedForWriteFrame = true;
-            if (entry.name().find("Log::Write") != std::string::npos) { continue; }
+            if (entry.symbol.find("Log::Write") != std::string::npos) { continue; }
         }
-        traceOutput << entry;
+        traceOutput << entry << "\n";
+        if (entry.line.has_value()) { traceOutput << cpptrace::get_snippet(entry.filename, entry.line.value(), 3, false); }
         // Once we hit main, leave. No point including low-level platform-dependent entries.
-        if (entry.name() == "main") { break; }
+        if (entry.symbol == "main(int, char**)" || entry.symbol == "main") { break; }
         traceOutput << "\n";
     }
-    _logger->log(lvl, "Stacktrace:\n{}", traceOutput.str());
+    _logger->log(lvl, "Stacktrace:\n\n{}", traceOutput.str());
     _logger->flush();
 }
 

@@ -101,6 +101,11 @@ FetchContent_MakeAvailable (boxer)
 FetchContent_Declare (systemproperties GIT_REPOSITORY https://github.com/CasualYT31/SystemProperties.git GIT_TAG 0.6)
 FetchContent_MakeAvailable (systemproperties)
 
+## Cpptrace
+## Don't forget to build with Debug or RelWithDebInfo for symbols and line information.
+FetchContent_Declare (cpptrace GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git GIT_TAG v0.7.0)
+FetchContent_MakeAvailable (cpptrace)
+
 ## GoogleTest
 FetchContent_Declare (googletest
     GIT_REPOSITORY https://github.com/google/googletest
@@ -127,7 +132,7 @@ add_library (ComputerWarsLibrary "mvc/Controller.cpp" "log/Log.cpp")
 set_property (TARGET ComputerWarsLibrary PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsLibrary PUBLIC ${ComputerWarsLibrary_INCLUDE_DIRS})
 # Dependencies go here:
-target_link_libraries (ComputerWarsLibrary PUBLIC nlohmann_json::nlohmann_json fmt spdlog Boxer SystemProperties ${Boost_LIBRARIES})
+target_link_libraries (ComputerWarsLibrary PUBLIC nlohmann_json::nlohmann_json fmt spdlog Boxer SystemProperties cpptrace::cpptrace ${Boost_LIBRARIES})
 
 # The game itself.
 add_executable (ComputerWars "main.cpp")
