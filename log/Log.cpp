@@ -6,7 +6,6 @@
 #include <ctime>
 #include <fmt/format.h>
 #include <functional>
-#include <iostream>
 #include <regex>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/ostream_sink.h>
