@@ -118,7 +118,7 @@ void Log::Setup(
     _sink->add_sink(std::make_shared<spdlog::sinks::ostream_sink_st>(_logCopy));
     _sink->set_pattern("[%Y-%m-%d %T.%e] %v");
     _logger = std::make_unique<spdlog::logger>("logger", _sink);
-    _logger->log(spdlog::level::off, "Computer Wars � CasualYouTuber31");
+    _logger->log(spdlog::level::off, "Computer Wars (c) CasualYouTuber31");
     _logger->log(spdlog::level::off, "Branch: {}", GIT_BRANCH);
     _logger->log(spdlog::level::off, "Commit: {}", GIT_COMMIT);
     if (logHardwareDetails) {

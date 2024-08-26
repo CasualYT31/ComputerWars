@@ -27,35 +27,13 @@ I've moved over to Jira and Confluence from Trello. Unfortunately, Jira is not p
 You can check the `Fetch dependencies` section of `CMakeLists.txt` to know which version of each dependency is used.
 
 - [Boxer](https://github.com/aaronmjacobs/Boxer) (requires `gtk+-3.0` on Linux, run `sudo apt-get update && sudo apt-get install gtk+-3.0` before configuring this project using CMake).
+- [Cpptrace](https://github.com/jeremy-rifkin/cpptrace.git).
+- [Cxxopts](https://github.com/jarro2783/cxxopts.git).
 - [FMT](https://github.com/fmtlib/fmt).
 - [GoogleTest](https://github.com/google/googletest).
 - [Nlohmann::Json](https://github.com/nlohmann/json).
 - [spdlog](https://github.com/gabime/spdlog).
 - [SystemProperties](https://github.com/CasualYT31/SystemProperties).
-
-### Boost
-
-This project also makes use of Boost (in particular, `program_options` and `stacktrace`). Unfortunately, it doesn't necessarily have the best CMake support currently, so you'll need to build it separately.
-
-#### Windows
-
-Here are the steps I took to get Boost working on Windows. It doesn't use the most optimal settings (e.g. I built the `debug` variant because I couldn't get the `release` variant to play nice), so if you know what you're doing, feel free to make changes to CMakeLists.txt to accomodate your approach:
-
-1. Download the latest Windows release and extract it. At the time of writing, it can be found here: https://www.boost.org/users/history/version_1_86_0.html.
-2. Open an admin command prompt and navigate to the extracted folder.
-3. Run: `call bootstrap.bat`.
-4. Run: `b2 install --prefix=C:\Boost\boost_1_86_0 address-model=64 toolset=msvc variant=debug threading=multi link=static runtime-link=shared architecture=x86`
-5. Note the installation prefix; feel free to set it to whatever you want, but you'll need to apply it to the `BOOST_ROOT` CMake variable.
-
-**Something to note is that I had to make CMakeLists.txt manually copy over the static library files from the installed location into `${CMAKE_BINARY_DIR}` for my compiler to find them. If I had more patience I would've figured out why it wasn't working, but as it stands, this is what CMakeLists.txt will do in its current form.**
-
-#### Linux
-
-1. Run: `sudo apt-get update`.
-2. Run: `sudo apt-get install libboost-all-dev gtk+-3.0` (GTK is required by Boxer, might as well install it at the same time). Note: if you're using an old distribution of Ubuntu (or whatever else), this might install too old of a version of Boost (it must be at least 1.65.0). If this is the case, you'll need to build from source like on Windows. Use the steps above as a rough guide.
-3. Set `BOOST_ROOT` to `/usr`.
-
-**Again, I ran into issues with getting CMake (and, by extension, GCC) to find the library files. I had to explicitly include `"/usr/lib/x86_64-linux-gnu"` in `CMAKE_LIBRARY_PATH` within CMakeLists.txt to get it working on my WSL instance. You'll likely need to fiddle around with CMakeLists.txt.**
 
 ## Tools
 

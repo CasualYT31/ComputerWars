@@ -140,7 +140,7 @@ public:
 
     /**
      * \brief Writes the current stacktrace to the log.
-     * \details Any stacktrace frames that pertain to boost::stacktrace, the first Write and/or WriteTrace frames, and any
+     * \details Any stacktrace frames that pertain to cpptrace::stacktrace, the first Write and/or WriteTrace frames, and any
      * frames beyond main, will not be included.
      * \param lvl The level to write the stacktrace at.
      */
