@@ -63,6 +63,13 @@ FetchContent_MakeAvailable (cpptrace)
 FetchContent_Declare (cxxopts GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git GIT_TAG v3.2.0)
 FetchContent_MakeAvailable (cxxopts)
 
+## AngelScript
+FetchContent_Declare (angelscript URL https://www.angelcode.com/angelscript/sdk/files/angelscript_2.37.0.zip SOURCE_SUBDIR angelscript/projects/cmake)
+FetchContent_MakeAvailable (angelscript)
+# Each add-on should be added to this space-separated list.
+# The add-on's folder will be included as an include directory, and the source files contained within the folder will be added to the build.
+set (ANGELSCRIPT_ADD_ONS scriptbuilder)
+
 ## GoogleTest
 FetchContent_Declare (googletest
     GIT_REPOSITORY https://github.com/google/googletest
@@ -76,6 +83,30 @@ enable_testing ()
 # Define targets.
 project ("ComputerWars")
 
+# Find each AngelScript add-on's include directory and source file.
+if (ANGELSCRIPT_ADD_ONS)
+    ## Include directories.
+    list (TRANSFORM ANGELSCRIPT_ADD_ONS PREPEND "${angelscript_SOURCE_DIR}/add_on/")
+    set (ANGELSCRIPT_ADD_ON_INCLUDE_DIRS ${ANGELSCRIPT_ADD_ON_INCLUDE_DIRS} ${ANGELSCRIPT_ADD_ONS})
+    ## Sources.
+    list (TRANSFORM ANGELSCRIPT_ADD_ONS APPEND "/*.cpp")
+    file (GLOB ADD_ON_FILES ${ANGELSCRIPT_ADD_ONS})
+    set (ANGELSCRIPT_ADD_ON_SOURCES ${ANGELSCRIPT_ADD_ON_SOURCES} ${ADD_ON_FILES})
+    ## Debugging.
+    message ("AngelScript add-on include directories:")
+    foreach (X ${ANGELSCRIPT_ADD_ON_INCLUDE_DIRS})
+        message ("\t${X}")
+    endforeach ()
+    message ("AngelScript add-on sources:")
+    foreach (X ${ANGELSCRIPT_ADD_ON_SOURCES})
+        message ("\t${X}")
+    endforeach ()
+else ()
+    set (ANGELSCRIPT_ADD_ON_INCLUDE_DIRS "")
+    set (ANGELSCRIPT_ADD_ON_SOURCES "")
+    message ("No AngelScript add-ons are being included")
+endif ()
+
 # All of the game's code.
 set (ComputerWarsLibrary_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}
     ${nlohmann_json_INCLUDE_DIRS}
@@ -83,12 +114,13 @@ set (ComputerWarsLibrary_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}
     ${spdlog_INCLUDE_DIRS}
     ${boxer_INCLUDE_DIRS}
     ${SystemProperties_INCLUDE_DIRS}
+    ${ANGELSCRIPT_ADD_ON_INCLUDE_DIRS}
     CACHE INTERNAL "ComputerWarsLibrary: Include Directories" FORCE)
-add_library (ComputerWarsLibrary "mvc/Controller.cpp" "log/Log.cpp")
+add_library (ComputerWarsLibrary "mvc/Controller.cpp" "log/Log.cpp" ${ANGELSCRIPT_ADD_ON_SOURCES})
 set_property (TARGET ComputerWarsLibrary PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsLibrary PUBLIC ${ComputerWarsLibrary_INCLUDE_DIRS})
 # Dependencies go here:
-target_link_libraries (ComputerWarsLibrary PUBLIC nlohmann_json::nlohmann_json fmt spdlog Boxer SystemProperties cpptrace::cpptrace cxxopts::cxxopts)
+target_link_libraries (ComputerWarsLibrary PUBLIC nlohmann_json::nlohmann_json fmt spdlog Boxer SystemProperties cpptrace::cpptrace cxxopts::cxxopts angelscript)
 
 # The game itself.
 add_executable (ComputerWars "main.cpp")
