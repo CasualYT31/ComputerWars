@@ -83,7 +83,7 @@ enable_testing ()
 # Define targets.
 project ("ComputerWars")
 
-# Find each AngelScript add-on's include directory and source file.
+# Find each AngelScript add-on's include directory and source files.
 if (ANGELSCRIPT_ADD_ONS)
     ## Include directories.
     list (TRANSFORM ANGELSCRIPT_ADD_ONS PREPEND "${angelscript_SOURCE_DIR}/add_on/")
@@ -116,7 +116,7 @@ set (ComputerWarsLibrary_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}
     ${SystemProperties_INCLUDE_DIRS}
     ${ANGELSCRIPT_ADD_ON_INCLUDE_DIRS}
     CACHE INTERNAL "ComputerWarsLibrary: Include Directories" FORCE)
-add_library (ComputerWarsLibrary "mvc/Controller.cpp" "log/Log.cpp" ${ANGELSCRIPT_ADD_ON_SOURCES})
+add_library (ComputerWarsLibrary ${ANGELSCRIPT_ADD_ON_SOURCES} "mvc/Controller.cpp" "log/Log.cpp" "script/ScriptEngine.cpp")
 set_property (TARGET ComputerWarsLibrary PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsLibrary PUBLIC ${ComputerWarsLibrary_INCLUDE_DIRS})
 # Dependencies go here:

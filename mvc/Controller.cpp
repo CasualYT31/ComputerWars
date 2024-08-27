@@ -3,6 +3,8 @@
 #include "file/File.hpp"
 #include "log/Log.hpp"
 
+#include <set>
+
 namespace cw {
 void Controller::registerCommand(const Command& c, const CommandCallback& cb) {
     ASSERT(cb, "An empty command callback was given!");
@@ -145,6 +147,7 @@ void Controller::shutdown(const TickResponse exitCode) {
 void Controller::fromJSON(const cw::json& j) {
     LOG(debug, "Deserialising JSON into {} controller", (_parentController.expired() ? "root" : "child"));
     _scriptFiles.clear();
+    std::set<std::string> successfullyLoadedModels, successfullyLoadedControllers;
     for (const auto& keyValues : j.items()) {
         const std::string key = keyValues.key();
         const auto& value = keyValues.value();
@@ -179,6 +182,7 @@ void Controller::fromJSON(const cw::json& j) {
                 LOG(info, "Loading model \"{}\"", key);
                 model->second->fromJSON(obj);
                 LOG(info, "Loaded model \"{}\" successfully", key);
+                successfullyLoadedModels.insert(key);
             } catch (const std::exception& e) { LOG(err, "Could not load model \"{}\": {}", key, e); }
             continue;
         }
@@ -188,10 +192,39 @@ void Controller::fromJSON(const cw::json& j) {
                 LOG(info, "Loading controller \"{}\"", key);
                 controller->second->fromJSON(obj);
                 LOG(info, "Loaded controller \"{}\" successfully", key);
+                successfullyLoadedControllers.insert(key);
             } catch (const std::exception& e) { LOG(err, "Could not load controller \"{}\": {}", key, e); }
             continue;
         }
         LOG(warn, "No controller or model has the name \"{}\"", key);
+    }
+    std::set<std::string> allModels, allControllers, unloadedModels, unloadedControllers;
+    std::transform(_models.begin(), _models.end(), std::inserter(allModels, allModels.end()), [](const auto& pair) {
+        return pair.first;
+    });
+    std::transform(
+        _childControllers.begin(),
+        _childControllers.end(),
+        std::inserter(allControllers, allControllers.end()),
+        [](const auto& pair) { return pair.first; }
+    );
+    std::set_difference(
+        allModels.begin(),
+        allModels.end(),
+        successfullyLoadedModels.begin(),
+        successfullyLoadedModels.end(),
+        std::inserter(unloadedModels, unloadedModels.end())
+    );
+    std::set_difference(
+        allControllers.begin(),
+        allControllers.end(),
+        successfullyLoadedControllers.begin(),
+        successfullyLoadedControllers.end(),
+        std::inserter(unloadedControllers, unloadedControllers.end())
+    );
+    if (!unloadedModels.empty()) { LOG(err, "Some models from this controller were not loaded: {}", unloadedModels); }
+    if (!unloadedControllers.empty()) {
+        LOG(err, "Some child controllers from this controller were not loaded: {}", unloadedControllers);
     }
 }
 

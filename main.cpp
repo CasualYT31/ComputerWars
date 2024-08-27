@@ -1,6 +1,7 @@
 #include "file/File.hpp"
 #include "log/Log.hpp"
 #include "mvc/Controller.hpp"
+#include "script/ScriptEngine.hpp"
 
 #include <boxer/boxer.h>
 #include <chrono>
@@ -123,6 +124,10 @@ int main(int argc, char* argv[]) {
     }
 
     try {
+        LOG(debug, "Constructing controller hierarchy");
+        std::shared_ptr<cw::ControllerNode> root = std::make_shared<cw::Controller>();
+        root->attachModel("scriptEngine", std::make_shared<cw::ScriptEngine>());
+
         const auto corePath = vm["core-config"].as<std::string>();
         LOG(info, "Parsing core configuration file {}", corePath);
         cw::json config;
@@ -133,9 +138,6 @@ int main(int argc, char* argv[]) {
             LOG(critical, "Could not parse core configuration file: {}", e);
             return cw::ShutdownCode::InvalidCoreConfigurationFile;
         }
-
-        LOG(debug, "Constructing controller hierarchy");
-        std::shared_ptr<cw::ControllerNode> root = std::make_shared<cw::Controller>();
 
         LOG(debug, "Configuring controller hierarchy");
         root->fromJSON(config);
