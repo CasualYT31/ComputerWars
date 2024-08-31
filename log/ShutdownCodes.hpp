@@ -35,5 +35,13 @@ static constexpr int CriticalLoggingError = 4;
  * \brief An assertion made within the game failed.
  */
 static constexpr int AssertionFailed = 5;
+/**
+ * \brief The user generated the script interface documentation.
+ */
+static constexpr int GeneratedScriptInterfaceDocumentation = 6;
+/**
+ * \brief The user tried to generate the script interface documentation, but was unsuccessful in doing so.
+ */
+static constexpr int FailedToGenerateScriptInterfaceDocumentation = 7;
 }; // namespace ShutdownCode
 } // namespace cw

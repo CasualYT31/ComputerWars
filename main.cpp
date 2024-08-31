@@ -1,11 +1,13 @@
 #include "file/File.hpp"
 #include "log/Log.hpp"
 #include "mvc/Controller.hpp"
-#include "script/ScriptEngine.hpp"
+#include "script/angelscript/AngelScriptEngine.hpp"
+#include "script/ScriptModel.hpp"
 
 #include <boxer/boxer.h>
 #include <chrono>
 #include <cxxopts.hpp>
+#include <filesystem>
 #include <iostream>
 #include <thread>
 
@@ -88,7 +90,9 @@ int parseCommandLine(const int argc, char* const argv[], cxxopts::ParseResult& v
         ("f,log", "tell the game where to write the log file", cxxopts::value<std::string>()->default_value(defaultLog))
         ("l,log-level", "set the log level", cxxopts::value<::LogLevelOption>()->default_value(defaultLogLevel))
         ("log-no-hardware-details", "prevents the game from logging hardware details")
-        ("c,core-config", "specify the location of the core configuration file", cxxopts::value<std::string>()->default_value("assets/core.json"));
+        ("c,core-config", "specify the location of the core configuration file", cxxopts::value<std::string>()->default_value("assets/core.json"))
+        ("d,write-documentation-to", "if this parameter is given, the engine's script interface documentation will be written to the given file, then the game will close. "
+                                     "The generated file will be in the HTML format", cxxopts::value<std::string>());
     // clang-format on
     vm = opts.parse(argc, argv);
     if (vm.count("help")) {
@@ -123,10 +127,36 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    std::string scriptInterfaceDocumentationOutputFile;
+    if (vm.count("write-documentation-to")) {
+        scriptInterfaceDocumentationOutputFile = vm["write-documentation-to"].as<std::string>();
+        LOG(info, "Will write script interface documentation to \"{}\"", scriptInterfaceDocumentationOutputFile);
+    } else {
+        LOG(debug, "Script interface documentation will not be written");
+    }
+
     try {
         LOG(debug, "Constructing controller hierarchy");
         std::shared_ptr<cw::ControllerNode> root = std::make_shared<cw::Controller>();
-        root->attachModel("scriptEngine", std::make_shared<cw::ScriptEngine>());
+        root->attachModel(
+            "scripts", std::make_shared<cw::ScriptModel<cw::AngelScriptEngine>>(scriptInterfaceDocumentationOutputFile)
+        );
+
+        // If the user wants the script interface documentation, generate it, then exit early.
+        if (!scriptInterfaceDocumentationOutputFile.empty()) {
+            const bool success = REQUEST(root, cw::GenerateDocumentationRequest, ());
+            const std::string fmtString = success ? "Script interface documentation has been written to \"{}\", exiting..."
+                                                  : "Failed to write script interface documentation to \"{}\", exiting...";
+            const auto message = fmt::format(fmt::runtime(fmtString), scriptInterfaceDocumentationOutputFile);
+            if (success) {
+                LOG(info, message);
+            } else {
+                LOG(err, message);
+            }
+            std::cout << message << "\n";
+            return success ? cw::ShutdownCode::GeneratedScriptInterfaceDocumentation
+                           : cw::ShutdownCode::FailedToGenerateScriptInterfaceDocumentation;
+        }
 
         const auto corePath = vm["core-config"].as<std::string>();
         LOG(info, "Parsing core configuration file {}", corePath);
@@ -138,6 +168,10 @@ int main(int argc, char* argv[]) {
             LOG(critical, "Could not parse core configuration file: {}", e);
             return cw::ShutdownCode::InvalidCoreConfigurationFile;
         }
+
+        const auto newCWD = std::filesystem::path(corePath).parent_path();
+        LOG(debug, "Setting the current working directory to {}", newCWD);
+        std::filesystem::current_path(newCWD);
 
         LOG(debug, "Configuring controller hierarchy");
         root->fromJSON(config);

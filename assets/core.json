@@ -1,3 +1,9 @@
 {
-    "scriptEngine": {}
+    "scripts": {
+        "modules": {
+            "main": {
+                "folder": "scripts"
+            }
+        }
+    }
 }

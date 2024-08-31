@@ -4,10 +4,13 @@ include (FetchContent)
 include (GoogleTest)
 
 # Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-    cmake_policy (SET CMP0141 NEW)
-    set (CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif ()
+# Currently disabled as EditAndContinue (/ZI) was causing conflicts with the PDB settings of dependencies (/Zi).
+# I'd prefer not to risk leaving this setting on if it could mean that dependencies are negatively affected.
+# EditAndContinue is not something I use anyway.
+# if (POLICY CMP0141)
+#     cmake_policy (SET CMP0141 NEW)
+#     set (CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+# endif ()
 
 # Always update dependency timestamps when fetching content via the URL method.
 if (POLICY CMP0135)
@@ -68,12 +71,16 @@ FetchContent_Declare (angelscript URL https://www.angelcode.com/angelscript/sdk/
 FetchContent_MakeAvailable (angelscript)
 # Each add-on should be added to this space-separated list.
 # The add-on's folder will be included as an include directory, and the source files contained within the folder will be added to the build.
-set (ANGELSCRIPT_ADD_ONS scriptbuilder)
+set (ANGELSCRIPT_ADD_ONS scriptstdstring scriptarray scriptbuilder scripthelper)
+
+## AngelScript Docgen.
+FetchContent_Declare (docgen GIT_REPOSITORY https://github.com/CasualYT31/angelscript-docgen.git GIT_TAG master)
+FetchContent_MakeAvailable (docgen)
 
 ## GoogleTest
 FetchContent_Declare (googletest
     GIT_REPOSITORY https://github.com/google/googletest
-    GIT_TAG v1.14.0
+    GIT_TAG v1.15.2
 )
 ### For Windows: Prevent overriding the parent project's compiler/linker settings.
 set (gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -114,9 +121,16 @@ set (ComputerWarsLibrary_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}
     ${spdlog_INCLUDE_DIRS}
     ${boxer_INCLUDE_DIRS}
     ${SystemProperties_INCLUDE_DIRS}
+    ${angelscript_SOURCE_DIR}/angelscript/include
     ${ANGELSCRIPT_ADD_ON_INCLUDE_DIRS}
+    ${docgen_SOURCE_DIR}/source/
     CACHE INTERNAL "ComputerWarsLibrary: Include Directories" FORCE)
-add_library (ComputerWarsLibrary ${ANGELSCRIPT_ADD_ON_SOURCES} "mvc/Controller.cpp" "log/Log.cpp" "script/ScriptEngine.cpp")
+add_library (ComputerWarsLibrary
+    "mvc/Controller.cpp"
+    "log/Log.cpp"
+    "script/angelscript/AngelScriptEngine.cpp"
+    "file/File.cpp"
+    ${ANGELSCRIPT_ADD_ON_SOURCES} ${docgen_SOURCE_DIR}/source/docgen.cpp)
 set_property (TARGET ComputerWarsLibrary PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsLibrary PUBLIC ${ComputerWarsLibrary_INCLUDE_DIRS})
 # Dependencies go here:
@@ -142,8 +156,8 @@ else () # WINDOWS.
 endif ()
 
 # The tests.
-add_executable (ComputerWarsTests "main_test.cpp" "mvc/MVCTests.cpp")
+add_executable (ComputerWarsTests "main_test.cpp" "mvc/MVCTests.cpp" "file/FileTests.cpp" "script/ScriptEngineTests.cpp" "script/ScriptModelTests.cpp")
 set_property (TARGET ComputerWarsTests PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsTests PRIVATE ${ComputerWarsLibrary_INCLUDE_DIRS})
-target_link_libraries (ComputerWarsTests gtest ComputerWarsLibrary)
+target_link_libraries (ComputerWarsTests GTest::gmock ComputerWarsLibrary)
 gtest_discover_tests (ComputerWarsTests) # https://cmake.org/cmake/help/latest/module/GoogleTest.html

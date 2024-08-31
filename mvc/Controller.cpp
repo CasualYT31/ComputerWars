@@ -34,6 +34,20 @@ void Controller::registerQuery(const Query& q, const QueryCallback& cb) {
     _queries.emplace(qIndex, cb);
 }
 
+void Controller::registerRequest(const Request& r, const RequestCallback& cb) {
+    ASSERT(cb, "An empty request callback was given!");
+    // If this is a child controller, redirect request up the hierarchy.
+    const auto parent = _parentController.lock();
+    if (parent) {
+        LOG(debug, "Registering request in parent controller");
+        return parent->registerRequest(r, cb);
+    }
+    // If this is the root controller, respond to request.
+    std::type_index rIndex(typeid(r));
+    ASSERT(!_requests.contains(rIndex), "This request was already registered!");
+    _requests.emplace(rIndex, cb);
+}
+
 void Controller::registerEventHandler(const Event& e, const EventCallback& cb) {
     ASSERT(cb, "An empty event callback was given!");
     // If this is a child controller, redirect request up the hierarchy.
@@ -64,6 +78,16 @@ QueryResponse Controller::query(const Query& q) const {
     std::type_index qIndex(typeid(q));
     ASSERT(_queries.contains(qIndex), "This query was not registered!");
     return _queries.at(qIndex)(q);
+}
+
+RequestResponse Controller::request(const Request& r) {
+    // If this is a child controller, redirect request up the hierarchy.
+    const auto parent = _parentController.lock();
+    if (parent) { return parent->request(r); }
+    // If this is the root controller, respond to request.
+    std::type_index rIndex(typeid(r));
+    ASSERT(_requests.contains(rIndex), "This request was not registered!");
+    return _requests.at(rIndex)(r);
 }
 
 EventResponse Controller::event(const std::shared_ptr<Event>& e) {

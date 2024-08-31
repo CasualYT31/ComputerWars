@@ -9,6 +9,7 @@
 #include "Event.hpp"
 #include "JSONSerialised.hpp"
 #include "Query.hpp"
+#include "Request.hpp"
 
 #include <any>
 #include <functional>
@@ -39,6 +40,14 @@ using QueryResponse = std::any;
  * \brief The signature of code that's invoked when a query is made.
  */
 using QueryCallback = std::function<QueryResponse(const Query&)>;
+/**
+ * \brief The type of response that every request sends out.
+ */
+using RequestResponse = std::any;
+/**
+ * \brief The signature of code that's invoked when a request is made.
+ */
+using RequestCallback = std::function<RequestResponse(const Request&)>;
 /**
  * \brief Once a tick has completed, this will be the response sent back to the caller.
  */
@@ -71,7 +80,8 @@ public:
 };
 
 /**
- * \brief Interface that allows components to perform commands and queries, as well as dispatch and respond to events.
+ * \brief Interface that allows components to perform commands, requests, and queries, as well as dispatch and respond to
+ * events.
  */
 class ReadWriteController : public ReadOnlyController {
 public:
@@ -89,6 +99,12 @@ public:
      */
     virtual void registerQuery(const Query& q, const QueryCallback& cb) = 0;
     /**
+     * \brief Tells the controller what code to invoke when a given request is sent to the controller.
+     * \param r The type of request to register code for.
+     * \param cb The code to invoke when a request is received.
+     */
+    virtual void registerRequest(const Request& r, const RequestCallback& cb) = 0;
+    /**
      * \brief Dispatches an event.
      * \details Note that the implementation need not immediately respond to the event; it may queue the event for
      * processing later.
@@ -103,6 +119,13 @@ public:
      * \returns The response of the command.
      */
     virtual CommandResponse command(const Command& c) = 0;
+    /**
+     * \brief Performs a request.
+     * \details Note that requests need to be performed immediately. They cannot be queued.
+     * \param c The request to send.
+     * \returns The response of the request.
+     */
+    virtual RequestResponse request(const Request& c) = 0;
 };
 
 class Model;
@@ -170,10 +193,10 @@ protected:
 } // namespace cw
 
 /**
- * \brief Used to register a class method as a command, query, or event handler callback.
+ * \brief Used to register a class method as a command, request, query, or event handler callback.
  * \param controller The pointer to the controller to register with.
- * \param type Command, Query, or EventListener.
- * \param obj The concrete Command, Query, or Event typename.
+ * \param type Command, Query, Request, or EventListener.
+ * \param obj The concrete Command, Query, Request, or Event typename.
  * \param method A method name in the format Class::method.
  * \param ptr A pointer to the instance of the method's class to invoke the method of. Usually \c this.
  */
@@ -206,6 +229,19 @@ protected:
     }()
 
 /**
+ * \brief Used to perform requests.
+ * \param controller The pointer to the controller that has access to the request.
+ * \param obj The concrete Request typename.
+ * \param params Parentheses-surrounded list of parameters to give to the request's constructor. Provide an empty pair of
+ * parentheses if there are no parameters required.
+ */
+#define REQUEST(controller, obj, params)                                                                                    \
+    [&controller = controller]() {                                                                                          \
+        LOG(trace, "Invoking request " #obj #params);                                                                       \
+        return std::any_cast<obj::ReturnType>(controller->request(obj params));                                             \
+    }()
+
+/**
  * \brief Used to emit events.
  * \param controller The pointer to the controller to emit events to.
  * \param obj The concrete Event typename.
@@ -220,19 +256,25 @@ protected:
  * \brief Declares a command handler.
  * \param name The name of the command handler.
  */
-#define DECLARE_COMMAND(name) void name(const cw::Command& c)
+#define DECLARE_COMMAND(name) cw::CommandResponse name(const cw::Command& c)
 
 /**
  * \brief Declares a query handler.
  * \param name The name of the query handler.
  */
-#define DECLARE_QUERY(name) std::any name(const cw::Query& q)
+#define DECLARE_QUERY(name) cw::QueryResponse name(const cw::Query& q)
+
+/**
+ * \brief Declares a request handler.
+ * \param name The name of the request handler.
+ */
+#define DECLARE_REQUEST(name) cw::RequestResponse name(const cw::Request& r)
 
 /**
  * \brief Declares an event handler.
  * \param name The name of the event handler.
  */
-#define DECLARE_EVENT(name) void name(const cw::Event& e)
+#define DECLARE_EVENT(name) cw::EventResponse name(const cw::Event& e)
 
 /**
  * \brief Used to define a reference called command that points to the given concrete command object.
@@ -249,6 +291,14 @@ protected:
 #define RECEIVE_QUERY(obj)                                                                                                  \
     LOG(trace, "Received query " #obj);                                                                                     \
     const auto& query = dynamic_cast<const obj&>(q)
+
+/**
+ * \brief Used to define a reference called request that points to the given concrete request object.
+ * \param obj The concrete Request typename.
+ */
+#define RECEIVE_REQUEST(obj)                                                                                                \
+    LOG(trace, "Received request " #obj);                                                                                   \
+    const auto& request = dynamic_cast<const obj&>(r)
 
 /**
  * \brief Used to define a reference called event that points to the given concrete event object.

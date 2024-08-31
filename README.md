@@ -27,6 +27,7 @@ I've moved over to Jira and Confluence from Trello. Unfortunately, Jira is not p
 You can check the `Fetch dependencies` section of `CMakeLists.txt` to know which version of each dependency is used.
 
 - [AngelScript](https://www.angelcode.com/angelscript/).
+- [AngelScript Docgen](https://github.com/CasualYT31/angelscript-docgen.git).
 - [Boxer](https://github.com/aaronmjacobs/Boxer) (requires `gtk+-3.0` on Linux, run `sudo apt-get update && sudo apt-get install gtk+-3.0` before configuring this project using CMake).
 - [Cpptrace](https://github.com/jeremy-rifkin/cpptrace.git).
 - [Cxxopts](https://github.com/jarro2783/cxxopts.git).
