@@ -6,7 +6,7 @@
 
 template <typename Engine> class ScriptModelTests : public testing::Test {
 protected:
-    cw::ScriptModel<Engine> model;
+    cw::model::Script<Engine> model;
 };
 
 TYPED_TEST_SUITE(ScriptModelTests, cw::ScriptEngineTypesToTest);

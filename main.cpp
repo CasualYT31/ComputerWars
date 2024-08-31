@@ -17,11 +17,22 @@
  */
 
 /**
+ * \namespace cw::model
+ * \brief Defines all of the "components" of the game engine.
+ */
+
+/**
+ * \namespace cw::request
+ * \brief Defines all of the requests that can be made to the game engine.
+ */
+
+/**
  * \brief Used to parse a log level option.
  */
 struct LogLevelOption {
     /**
      * \brief Default initialise the level field.
+     * \details Debug builds default this to trace, whilst release builds default this to info.
      */
     LogLevelOption()
         :
@@ -64,6 +75,8 @@ static inline std::ostream& operator<<(std::ostream& os, const LogLevelOption& v
 
 /**
  * \brief Extract options from the command line.
+ * \details If the log and log level arguments are not give by the user, they'll be set to assets/log/Log.log and trace in
+ * debug builds, and assets/log/Log %DATE%.log and info in release builds.
  * \param argc The number of command-line arguments to parse.
  * \param argv The command-line arguments to parse.
  * \param vm The variables map to fill in with the options provided by the user.
@@ -139,12 +152,12 @@ int main(int argc, char* argv[]) {
         LOG(debug, "Constructing controller hierarchy");
         std::shared_ptr<cw::ControllerNode> root = std::make_shared<cw::Controller>();
         root->attachModel(
-            "scripts", std::make_shared<cw::ScriptModel<cw::AngelScriptEngine>>(scriptInterfaceDocumentationOutputFile)
+            "scripts", std::make_shared<cw::model::Script<cw::AngelScriptEngine>>(scriptInterfaceDocumentationOutputFile)
         );
 
         // If the user wants the script interface documentation, generate it, then exit early.
         if (!scriptInterfaceDocumentationOutputFile.empty()) {
-            const bool success = REQUEST(root, cw::GenerateDocumentationRequest, ());
+            const bool success = REQUEST(root, cw::request::GenerateDocumentation, ());
             const std::string fmtString = success ? "Script interface documentation has been written to \"{}\", exiting..."
                                                   : "Failed to write script interface documentation to \"{}\", exiting...";
             const auto message = fmt::format(fmt::runtime(fmtString), scriptInterfaceDocumentationOutputFile);

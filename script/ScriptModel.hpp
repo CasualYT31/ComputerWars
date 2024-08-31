@@ -12,29 +12,32 @@
 #include <regex>
 
 namespace cw {
+namespace request {
 /**
  * \brief Instruct the script model to generate script interface documentation.
  */
-class GenerateDocumentationRequest : public Request {
+class GenerateDocumentation : public Request {
 public:
     /**
      * \brief True will be returned from the request if generation was successful, false otherwise.
      */
     using ReturnType = bool;
 };
+} // namespace request
 
+namespace model {
 /**
  * \brief Manages external scripts.
  * \tparam Engine The type of script engine to construct within this model.
  */
-template <IsScriptEngine Engine> class ScriptModel : public Model {
+template <IsScriptEngine Engine> class Script : public Model {
 public:
     /**
      * \brief Sets up the script engine that drives the script model.
      * \param documentationOutputFile If the documentation of the script interface should be generated, this should be the
      * name of the HTML file outputted. No documentation will be generated if this parameter is empty.
      */
-    ScriptModel(const std::string& documentationOutputFile = "") : _engine(std::make_unique<Engine>()) {
+    Script(const std::string& documentationOutputFile = "") : _engine(std::make_unique<Engine>()) {
         ASSERT(_engine, "Script engine failed to load.");
         if (!documentationOutputFile.empty()) { _engine->setUpDocumentationGenerator(documentationOutputFile); }
     }
@@ -44,7 +47,7 @@ public:
      * \warning This model must be registered before any model that adds to the script interface.
      */
     void registerModel(const std::shared_ptr<ReadWriteController>& controller) final {
-        REGISTER(controller, Request, GenerateDocumentationRequest, ScriptModel::_generateDocumentation, this);
+        REGISTER(controller, Request, request::GenerateDocumentation, Script::_generateDocumentation, this);
     }
 
     /**
@@ -108,7 +111,7 @@ private:
     /// \cond
 
     DECLARE_REQUEST(_generateDocumentation) {
-        RECEIVE_REQUEST(GenerateDocumentationRequest);
+        RECEIVE_REQUEST(request::GenerateDocumentation);
         return _engine->documentationGeneratorIsSetUp() && _engine->generateDocumentation();
     }
 
@@ -124,4 +127,5 @@ private:
      */
     const std::unique_ptr<Engine> _engine;
 };
+} // namespace model
 } // namespace cw
