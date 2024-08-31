@@ -352,6 +352,7 @@ TEST_F(IterateDirectoryTests, DirectoryRecursiveIncludingFoldersCatchExceptions)
 TEST_F(IterateDirectoryTests, EmptyDirectoryRecursiveIncludingFolders) {
     std::unordered_set<std::filesystem::path> expectedFiles = {};
     const auto expectedCount = expectedFiles.size();
+    std::filesystem::create_directory("EmptyFolder");
     EXPECT_TRUE(iterateDirectory("EmptyFolder", true, true, defaultCallback, defaultExceptionCallback));
     EXPECT_TRUE(expectedFiles.empty());
     EXPECT_EQ(callbackCount(), expectedCount);
