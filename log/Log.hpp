@@ -6,10 +6,13 @@
 #pragma once
 
 #include "Formatters.hpp"
+#include "helper/Types.hpp"
 #include "ShutdownCodes.hpp"
 
 #include <boxer/boxer.h>
 #include <cassert>
+#include <cpptrace/cpptrace.hpp>
+#include <deque>
 #include <memory>
 #include <optional>
 #include <spdlog/sinks/dup_filter_sink.h>
@@ -29,6 +32,96 @@ public:
      */
     AssertionError(const std::string& msg) : std::logic_error(msg) {}
 };
+
+/**
+ * \brief Used to insert "artificial" frames into a stacktrace.
+ * \details Particularly useful if you want to record external stacktraces within the root C++ stacktrace.
+ */
+struct ArtificialStackFrame {
+    /**
+     * \brief The stack frame pointer.
+     */
+    void* pointer = nullptr;
+
+    /**
+     * \brief The full declaration of the current function.
+     */
+    std::string symbol;
+
+    /**
+     * \brief The path to the source file containing the function's source code, if known.
+     */
+    std::optional<std::string> source;
+
+    /**
+     * \brief The line number of the current statement, if known.
+     */
+    std::optional<std::size_t> lineNumber;
+
+    /**
+     * \brief A code snippet including the current statement, if known.
+     */
+    std::optional<std::string> snippet;
+};
+
+/**
+ * \brief Stores a list of artificial stack frames, ordered from higher up the stack to lower.
+ * \todo CW-22: This should be a stack, not a vector.
+ */
+using ArtificialStackFrames = std::vector<ArtificialStackFrame>;
+
+/**
+ * \brief An ordered list of artificial stack frames, coupled with a set of conditions in which they will be inserted.
+ * \details Once a list of artificial stack frames are inserted into a stacktrace, they will not be inserted again in that
+ * stacktrace.
+ */
+struct ArtificialStackFramesWithConditions {
+    /**
+     * \brief The artificial stack frames to insert if the conditions pass.
+     */
+    ArtificialStackFrames frames;
+
+    /**
+     * \brief If this field stores a string, the frames will be inserted before the first frame whose symbol includes this
+     * string.
+     */
+    std::optional<std::string> symbolIncludes;
+
+    /**
+     * \brief Determines if the given real frame matches with the conditions stored in this object.
+     * \param frame The frame to test.
+     * \returns True if so, false otherwise (or if no conditions are defined).
+     */
+    bool isMatchingFrame(const cpptrace::stacktrace_frame& frame) const {
+        if (symbolIncludes) {
+            if (frame.symbol.find(*symbolIncludes) != std::string::npos) { return true; }
+        }
+        return false;
+    }
+
+    /**
+     * \brief If true, the artificial frames will be inserted after the matching frame instead of before (which is the
+     * default).
+     */
+    bool insertAfterMatchingFrame = false;
+
+    /**
+     * \brief If true, the matching frame will be removed from the resulting stacktrace, meaning the artificial frames will
+     * replace the matching real one.
+     */
+    bool deleteMatchingFrame = false;
+};
+
+/**
+ * \brief The signature of the callback function that returns a collection of artificial stack frames with their conditions.
+ */
+using ArtificialStackFramesGenerator = std::function<ArtificialStackFramesWithConditions(void)>;
+
+/**
+ * \brief An ordered list of artificial stack frame groups, each with their own separate conditions.
+ * \todo CW-22: This should be a stack, not a vector.
+ */
+using ListOfArtificialStackFramesWithConditions = std::vector<ArtificialStackFramesWithConditions>;
 
 /**
  * \brief Global point of access to the log.
@@ -147,12 +240,29 @@ public:
     static void WriteTrace(const Log::Level lvl = Log::Level::trace);
 
     /**
+     * \brief Adds an artificial stack frame generator to the top of the generator stack.
+     * \param generator The generator to add.
+     */
+    static void PushArtificialStackFrameGenerator(const ArtificialStackFramesGenerator& generator);
+
+    /**
+     * \brief Removes an artificial stack frame generator from the generator stack.
+     */
+    static void PopArtificialStackFrameGenerator();
+
+    /**
      * \brief Retrieves a copy of the log written so far.
      * \returns The copy of the log.
      */
     static std::string Get();
 
 private:
+    /**
+     * \brief Invokes the stored artificial stack frame generators.
+     * \returns The result of each
+     */
+    static ListOfArtificialStackFramesWithConditions _GetArtificialStackFrames();
+
     /**
      * \brief Non-thread safe distribution sink that outputs to a file and to a string stream.
      */
@@ -173,6 +283,11 @@ private:
      * \brief If true, Log will never write stacktraces.
      */
     static bool _neverWriteTraces;
+    /**
+     * \brief Stores the artificial stack frames to insert into stacktraces.
+     * \details Needs to be a deque, as we want to iterate over it without removing any elements.
+     */
+    static std::deque<ArtificialStackFramesGenerator> _stackFrameGenerators;
 };
 } // namespace cw
 
@@ -201,12 +316,25 @@ private:
 /**
  * \brief Make an assertion.
  * \details If an assertion fails, it will be logged at critical level.
+ * \warning Care should be taken not to perform any important logic within the expression! Doing this will make it a lot
+ * easier to exclude assertions from the build if we want to.
  * \param expression Must be true, or else an exception will be raised.
  * \param message Additional message to log if expression is false.
+ * \param ... The objects to insert into the message using fmt, if any.
  * \throws cw::AssertionError if the given expression evaluated to false.
  */
-#define ASSERT(expression, message)                                                                                         \
+#define ASSERT(expression, message, ...)                                                                                    \
     if (!(expression)) {                                                                                                    \
-        LOG(critical, "Assertion failed: " #expression ". " message);                                                       \
+        const auto additionalInfo = fmt::format(message VA_ARGS(__VA_ARGS__));                                              \
+        LOG(critical, "Assertion failed: {}. {}", #expression, additionalInfo);                                             \
         throw cw::AssertionError(#expression);                                                                              \
     }
+
+/**
+ * \brief Writes an artificial stack frame to an output stream.
+ * \details The line number will not be printed if the source field is not set.
+ * \param os The output stream to write to.
+ * \param frame The artificial frame to write.
+ * \returns os.
+ */
+std::ostream& operator<<(std::ostream& os, const cw::ArtificialStackFrame& frame);

@@ -4,10 +4,13 @@ include (FetchContent)
 include (GoogleTest)
 
 # Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-    cmake_policy (SET CMP0141 NEW)
-    set (CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif ()
+# Currently disabled as EditAndContinue (/ZI) was causing conflicts with the PDB settings of dependencies (/Zi).
+# I'd prefer not to risk leaving this setting on if it could mean that dependencies are negatively affected.
+# EditAndContinue is not something I use anyway.
+# if (POLICY CMP0141)
+#     cmake_policy (SET CMP0141 NEW)
+#     set (CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+# endif ()
 
 # Always update dependency timestamps when fetching content via the URL method.
 if (POLICY CMP0135)
@@ -47,7 +50,7 @@ FetchContent_Declare (spdlog GIT_REPOSITORY https://github.com/gabime/spdlog.git
 FetchContent_MakeAvailable (spdlog)
 
 ## Boxer
-FetchContent_Declare (boxer GIT_REPOSITORY https://github.com/aaronmjacobs/Boxer.git GIT_TAG master)
+FetchContent_Declare (boxer GIT_REPOSITORY https://github.com/aaronmjacobs/Boxer.git GIT_TAG 65e79c3)
 FetchContent_MakeAvailable (boxer)
 
 ## SystemProperties
@@ -63,11 +66,19 @@ FetchContent_MakeAvailable (cpptrace)
 FetchContent_Declare (cxxopts GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git GIT_TAG v3.2.0)
 FetchContent_MakeAvailable (cxxopts)
 
+## AngelScript
+FetchContent_Declare (angelscript URL https://www.angelcode.com/angelscript/sdk/files/angelscript_2.37.0.zip SOURCE_SUBDIR angelscript/projects/cmake)
+FetchContent_MakeAvailable (angelscript)
+# Each add-on should be added to this space-separated list.
+# The add-on's folder will be included as an include directory, and the source files contained within the folder will be added to the build.
+set (ANGELSCRIPT_ADD_ONS scriptstdstring scriptarray scriptbuilder scripthelper)
+
+## AngelScript Docgen.
+FetchContent_Declare (docgen GIT_REPOSITORY https://github.com/CasualYT31/angelscript-docgen.git GIT_TAG 049e5af)
+FetchContent_MakeAvailable (docgen)
+
 ## GoogleTest
-FetchContent_Declare (googletest
-    GIT_REPOSITORY https://github.com/google/googletest
-    GIT_TAG v1.14.0
-)
+FetchContent_Declare (googletest GIT_REPOSITORY https://github.com/google/googletest GIT_TAG v1.15.2)
 ### For Windows: Prevent overriding the parent project's compiler/linker settings.
 set (gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable (googletest)
@@ -76,6 +87,30 @@ enable_testing ()
 # Define targets.
 project ("ComputerWars")
 
+# Find each AngelScript add-on's include directory and source files.
+if (ANGELSCRIPT_ADD_ONS)
+    ## Include directories.
+    list (TRANSFORM ANGELSCRIPT_ADD_ONS PREPEND "${angelscript_SOURCE_DIR}/add_on/")
+    set (ANGELSCRIPT_ADD_ON_INCLUDE_DIRS ${ANGELSCRIPT_ADD_ON_INCLUDE_DIRS} ${ANGELSCRIPT_ADD_ONS})
+    ## Sources.
+    list (TRANSFORM ANGELSCRIPT_ADD_ONS APPEND "/*.cpp")
+    file (GLOB ADD_ON_FILES ${ANGELSCRIPT_ADD_ONS})
+    set (ANGELSCRIPT_ADD_ON_SOURCES ${ANGELSCRIPT_ADD_ON_SOURCES} ${ADD_ON_FILES})
+    ## Debugging.
+    message ("AngelScript add-on include directories:")
+    foreach (X ${ANGELSCRIPT_ADD_ON_INCLUDE_DIRS})
+        message ("\t${X}")
+    endforeach ()
+    message ("AngelScript add-on sources:")
+    foreach (X ${ANGELSCRIPT_ADD_ON_SOURCES})
+        message ("\t${X}")
+    endforeach ()
+else ()
+    set (ANGELSCRIPT_ADD_ON_INCLUDE_DIRS "")
+    set (ANGELSCRIPT_ADD_ON_SOURCES "")
+    message ("No AngelScript add-ons are being included")
+endif ()
+
 # All of the game's code.
 set (ComputerWarsLibrary_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}
     ${nlohmann_json_INCLUDE_DIRS}
@@ -83,18 +118,34 @@ set (ComputerWarsLibrary_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}
     ${spdlog_INCLUDE_DIRS}
     ${boxer_INCLUDE_DIRS}
     ${SystemProperties_INCLUDE_DIRS}
+    ${angelscript_SOURCE_DIR}/angelscript/include
+    ${ANGELSCRIPT_ADD_ON_INCLUDE_DIRS}
+    ${docgen_SOURCE_DIR}/source/
     CACHE INTERNAL "ComputerWarsLibrary: Include Directories" FORCE)
-add_library (ComputerWarsLibrary "mvc/Controller.cpp" "log/Log.cpp")
+add_library (ComputerWarsLibrary
+    "mvc/Controller.cpp"
+    "log/Log.cpp"
+    "script/angelscript/AngelScriptEngine.cpp"
+    "file/File.cpp"
+    ${ANGELSCRIPT_ADD_ON_SOURCES}
+    ${docgen_SOURCE_DIR}/source/docgen.cpp)
 set_property (TARGET ComputerWarsLibrary PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsLibrary PUBLIC ${ComputerWarsLibrary_INCLUDE_DIRS})
 # Dependencies go here:
-target_link_libraries (ComputerWarsLibrary PUBLIC nlohmann_json::nlohmann_json fmt spdlog Boxer SystemProperties cpptrace::cpptrace cxxopts::cxxopts)
+target_link_libraries (ComputerWarsLibrary PUBLIC
+    nlohmann_json::nlohmann_json
+    fmt
+    spdlog
+    Boxer
+    SystemProperties
+    cpptrace::cpptrace
+    angelscript)
 
 # The game itself.
 add_executable (ComputerWars "main.cpp")
 set_property (TARGET ComputerWars PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWars PRIVATE ${ComputerWarsLibrary_INCLUDE_DIRS})
-target_link_libraries (ComputerWars ComputerWarsLibrary)
+target_link_libraries (ComputerWars ComputerWarsLibrary cxxopts::cxxopts)
 # Provide access to the assets folder for development purposes. https://stackoverflow.com/a/61244115.
 # And do the same for test files.
 if (UNIX)
@@ -110,8 +161,12 @@ else () # WINDOWS.
 endif ()
 
 # The tests.
-add_executable (ComputerWarsTests "main_test.cpp" "mvc/MVCTests.cpp")
+add_executable (ComputerWarsTests "main_test.cpp"
+    "mvc/MVCTests.cpp"
+    "file/FileTests.cpp"
+    "script/ScriptEngineTests.cpp"
+    "script/ScriptModelTests.cpp")
 set_property (TARGET ComputerWarsTests PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsTests PRIVATE ${ComputerWarsLibrary_INCLUDE_DIRS})
-target_link_libraries (ComputerWarsTests gtest ComputerWarsLibrary)
+target_link_libraries (ComputerWarsTests GTest::gmock ComputerWarsLibrary)
 gtest_discover_tests (ComputerWarsTests) # https://cmake.org/cmake/help/latest/module/GoogleTest.html

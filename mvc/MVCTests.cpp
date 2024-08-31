@@ -1,7 +1,8 @@
 #include "Controller.hpp"
 #include "log/Log.hpp"
+#include "log/TestHelpers.hpp"
 
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
 #include <iostream>
 
 struct TestCommand : public cw::Command {
@@ -36,6 +37,28 @@ struct TestQuery2 : public cw::Query {
 
     int x = 0;
     int y = 0;
+};
+
+struct TestRequest : public cw::Request {
+    using ReturnType = double;
+
+    TestRequest() = default;
+
+    TestRequest(const double _x, const double _y) : x(_x), y(_y) {}
+
+    double x = 0;
+    double y = 0;
+};
+
+struct TestRequest2 : public cw::Request {
+    using ReturnType = double;
+
+    TestRequest2() = default;
+
+    TestRequest2(const double _x, const double _y) : x(_x), y(_y) {}
+
+    double x = 0;
+    double y = 0;
 };
 
 struct TestEvent : public cw::Event {
@@ -107,6 +130,16 @@ DECLARE_QUERY(testQuery2) {
     return query.x - query.y;
 }
 
+DECLARE_REQUEST(testRequest) {
+    RECEIVE_REQUEST(TestRequest);
+    return request.x * request.y;
+}
+
+DECLARE_REQUEST(testRequest2) {
+    RECEIVE_REQUEST(TestRequest2);
+    return request.x / request.y;
+}
+
 class TestModel : public cw::Model {
 public:
     void registerModel(const std::shared_ptr<cw::ReadWriteController>& controller) final {
@@ -159,6 +192,8 @@ struct TestModel2QueryMessage : public cw::Query {
 
 class TestModel2 : public cw::Model {
 public:
+    TestModel2(const bool throwOnLoad = false) : _throwOnLoad(throwOnLoad) {}
+
     void registerModel(const std::shared_ptr<cw::ReadWriteController>& controller) final {
         REGISTER(controller, Command, TestModel2SetX, TestModel2::SetX, this);
         REGISTER(controller, Command, TestModel2SetMessage, TestModel2::SetMessage, this);
@@ -171,6 +206,7 @@ public:
     }
 
     void fromJSON(const cw::json& j) final {
+        if (_throwOnLoad) { throw std::runtime_error("ERROR"); }
         _x = j["x"];
         _message = j["message"];
     }
@@ -201,6 +237,7 @@ public:
 private:
     int _x = 0;
     std::string _message;
+    const bool _throwOnLoad = false;
 };
 
 struct TestModel3SetX : public cw::Command {
@@ -313,6 +350,13 @@ TEST_F(MVCTests, RegisterQueryDeathTest) {
     root->registerQuery(TestQuery2{}, testQuery2);
 }
 
+TEST_F(MVCTests, RegisterRequestDeathTest) {
+    EXPECT_THROW(root->registerRequest(TestRequest{}, {}), cw::AssertionError);
+    root->registerRequest(TestRequest{}, testRequest);
+    EXPECT_THROW(root->registerRequest(TestRequest{}, testRequest), cw::AssertionError);
+    root->registerRequest(TestRequest2{}, testRequest2);
+}
+
 TEST_F(MVCTests, RegisterEventHandlerDeathTest) {
     EXPECT_THROW(root->registerEventHandler(TestEvent{}, {}), cw::AssertionError);
     REGISTER(root, EventHandler, TestEvent, MVCTests::testEventHandler, this);
@@ -356,6 +400,25 @@ TEST_F(MVCTests, MultipleSuccessfulQueries) {
     EXPECT_EQ(res, 9);
     const auto res2 = QUERY(root, TestQuery2, (4, 5));
     EXPECT_EQ(res2, -1);
+}
+
+TEST_F(MVCTests, SuccessfulRequest) {
+    root->registerRequest(TestRequest{}, testRequest);
+    const auto res = REQUEST(root, TestRequest, (4.0, 5.0));
+    EXPECT_DOUBLE_EQ(res, 20.0);
+}
+
+TEST_F(MVCTests, RequestDeathTest) {
+    EXPECT_THROW(root->request(TestRequest{ 4.0, 5.0 }), cw::AssertionError);
+}
+
+TEST_F(MVCTests, MultipleSuccessfulRequests) {
+    root->registerRequest(TestRequest{}, testRequest);
+    root->registerRequest(TestRequest2{}, testRequest2);
+    const auto res = REQUEST(root, TestRequest, (4.0, 5.0));
+    EXPECT_DOUBLE_EQ(res, 20.0);
+    const auto res2 = REQUEST(root, TestRequest2, (4.0, 5.0));
+    EXPECT_DOUBLE_EQ(res2, 0.8);
 }
 
 TEST_F(MVCTests, NoEventHandlers) {
@@ -563,10 +626,43 @@ TEST_F(MVCTests, DeserialiseDirectTest) {
     EXPECT_EQ(message, "Hello, World!");
 }
 
+TEST_F(MVCTests, DeserialiseDirectTestFailure) {
+    const std::shared_ptr<cw::Model> model = std::make_shared<TestModel2>(true), otherModel = std::make_shared<TestModel>();
+    root->attachModel("model", model);
+    root->attachModel("otherModel", otherModel);
+    EXPECT_LOG(
+        root->fromJSON(R"({ "model": { "x": 5, "message": "Hello, World!" }, "otherModel": {} })"_json),
+        testing::AllOf(
+            testing::HasSubstr("Some models from this controller were not loaded:"), testing::HasSubstr("{ model }")
+        )
+    );
+    const auto x = QUERY(root, TestModel2QueryX, ());
+    EXPECT_EQ(x, 0);
+    const auto message = QUERY(root, TestModel2QueryMessage, ());
+    EXPECT_EQ(message, "");
+}
+
+TEST_F(MVCTests, DeserialiseDirectTestMissing) {
+    const std::shared_ptr<cw::Model> model = std::make_shared<TestModel2>(), otherModel = std::make_shared<TestModel>();
+    root->attachModel("model", model);
+    root->attachModel("otherModel", otherModel);
+    EXPECT_LOG(
+        root->fromJSON(R"({})"_json),
+        testing::AllOf(
+            testing::HasSubstr("Some models from this controller were not loaded:"),
+            testing::AnyOf(testing::HasSubstr("{ model, otherModel }"), testing::HasSubstr("{ otherModel, model }"))
+        )
+    );
+    const auto x = QUERY(root, TestModel2QueryX, ());
+    EXPECT_EQ(x, 0);
+    const auto message = QUERY(root, TestModel2QueryMessage, ());
+    EXPECT_EQ(message, "");
+}
+
 TEST_F(MVCTests, DeserialiseIndirectTest) {
     const std::shared_ptr<cw::Model> model = std::make_shared<TestModel2>();
     root->attachModel("model", model);
-    root->fromJSON(R"({ "model": "test-files/MVCTests_DeserialiseIndirectTest.json"})"_json);
+    root->fromJSON(R"({ "model": "MVCTests_DeserialiseIndirectTest.json"})"_json);
     const auto x = QUERY(root, TestModel2QueryX, ());
     EXPECT_EQ(x, -10);
     const auto message = QUERY(root, TestModel2QueryMessage, ());
@@ -590,7 +686,7 @@ TEST_F(MVCTests, DeserialiseIndirectHierarchyTest) {
     const std::shared_ptr<cw::Model> model = std::make_shared<TestModel2>();
     root->attachChildController("child", child);
     child->attachModel("model", model);
-    root->fromJSON(R"({ "child": "test-files/MVCTests_DeserialiseIndirectHierarchyTest.json" })"_json);
+    root->fromJSON(R"({ "child": "MVCTests_DeserialiseIndirectHierarchyTest.json" })"_json);
     const auto x = QUERY(root, TestModel2QueryX, ());
     EXPECT_EQ(x, -10);
     const auto message = QUERY(root, TestModel2QueryMessage, ());
@@ -610,12 +706,12 @@ TEST_F(MVCTests, SerialiseDirectTest) {
 
 TEST_F(MVCTests, SerialiseIndirectTest) {
     {
-        std::ofstream json("test-files/tmp/MVCTests_SerialiseIndirectTest.json");
+        std::ofstream json("tmp/MVCTests_SerialiseIndirectTest.json");
         json << R"({ "x": 50, "message": "msg" })";
     }
     const std::shared_ptr<cw::Model> model = std::make_shared<TestModel2>();
     root->attachModel("model", model);
-    const auto originalJSON = R"({ "model": "test-files/tmp/MVCTests_SerialiseIndirectTest.json" })"_json;
+    const auto originalJSON = R"({ "model": "tmp/MVCTests_SerialiseIndirectTest.json" })"_json;
     root->fromJSON(originalJSON);
     COMMAND(root, TestModel2SetX, (90));
     COMMAND(root, TestModel2SetMessage, ("Red"));
@@ -624,7 +720,7 @@ TEST_F(MVCTests, SerialiseIndirectTest) {
     EXPECT_EQ(originalJSON, newJSON);
     cw::json storedJSON;
     {
-        std::ifstream json("test-files/tmp/MVCTests_SerialiseIndirectTest.json");
+        std::ifstream json("tmp/MVCTests_SerialiseIndirectTest.json");
         storedJSON = cw::json::parse(json);
     }
     EXPECT_EQ(storedJSON["x"], 90);
@@ -633,14 +729,14 @@ TEST_F(MVCTests, SerialiseIndirectTest) {
 
 TEST_F(MVCTests, SerialiseIndirectTwoModelTest) {
     {
-        std::ofstream json("test-files/tmp/MVCTests_SerialiseIndirectTwoModelTest.json");
+        std::ofstream json("tmp/MVCTests_SerialiseIndirectTwoModelTest.json");
         json << R"({ "x": 500, "message": "msg2" })";
     }
     const std::shared_ptr<cw::Model> model1 = std::make_shared<TestModel2>(), model2 = std::make_shared<TestModel3>();
     root->attachModel("model1", model1);
     root->attachModel("model2", model2);
     const auto originalJSON =
-        R"({ "model1": "test-files/tmp/MVCTests_SerialiseIndirectTwoModelTest.json", "model2": { "x": 300, "message": "Second" } })"_json;
+        R"({ "model1": "tmp/MVCTests_SerialiseIndirectTwoModelTest.json", "model2": { "x": 300, "message": "Second" } })"_json;
     root->fromJSON(originalJSON);
     COMMAND(root, TestModel2SetX, (900));
     COMMAND(root, TestModel2SetMessage, ("Red0"));
@@ -653,7 +749,7 @@ TEST_F(MVCTests, SerialiseIndirectTwoModelTest) {
     EXPECT_EQ(newJSON["model2"]["message"], "Red00");
     cw::json storedJSON;
     {
-        std::ifstream json("test-files/tmp/MVCTests_SerialiseIndirectTwoModelTest.json");
+        std::ifstream json("tmp/MVCTests_SerialiseIndirectTwoModelTest.json");
         storedJSON = cw::json::parse(json);
     }
     EXPECT_EQ(storedJSON["x"], 900);
@@ -662,18 +758,18 @@ TEST_F(MVCTests, SerialiseIndirectTwoModelTest) {
 
 TEST_F(MVCTests, SerialiseIndirectHierarchyTest) {
     {
-        std::ofstream json("test-files/tmp/MVCTests_SerialiseIndirectHierarchyTest_Values.json");
+        std::ofstream json("tmp/MVCTests_SerialiseIndirectHierarchyTest_Values.json");
         json << R"({ "x": 1234, "message": "5678" })";
     }
     {
-        std::ofstream json("test-files/tmp/MVCTests_SerialiseIndirectHierarchyTest.json");
-        json << R"({ "model1": "test-files/tmp/MVCTests_SerialiseIndirectHierarchyTest_Values.json" })";
+        std::ofstream json("tmp/MVCTests_SerialiseIndirectHierarchyTest.json");
+        json << R"({ "model1": "tmp/MVCTests_SerialiseIndirectHierarchyTest_Values.json" })";
     }
     const std::shared_ptr<cw::ControllerNode> child = std::make_shared<cw::Controller>();
     const std::shared_ptr<cw::Model> model1 = std::make_shared<TestModel2>();
     root->attachChildController("child", child);
     child->attachModel("model1", model1);
-    const auto originalJSON = R"({ "child": "test-files/tmp/MVCTests_SerialiseIndirectHierarchyTest.json" })"_json;
+    const auto originalJSON = R"({ "child": "tmp/MVCTests_SerialiseIndirectHierarchyTest.json" })"_json;
     root->fromJSON(originalJSON);
     COMMAND(root, TestModel2SetX, (5678));
     COMMAND(root, TestModel2SetMessage, ("1234"));
@@ -683,15 +779,15 @@ TEST_F(MVCTests, SerialiseIndirectHierarchyTest) {
     {
         cw::json storedJSON;
         {
-            std::ifstream json("test-files/tmp/MVCTests_SerialiseIndirectHierarchyTest.json");
+            std::ifstream json("tmp/MVCTests_SerialiseIndirectHierarchyTest.json");
             storedJSON = cw::json::parse(json);
         }
-        EXPECT_EQ(storedJSON["model1"], "test-files/tmp/MVCTests_SerialiseIndirectHierarchyTest_Values.json");
+        EXPECT_EQ(storedJSON["model1"], "tmp/MVCTests_SerialiseIndirectHierarchyTest_Values.json");
     }
     {
         cw::json storedJSON;
         {
-            std::ifstream json("test-files/tmp/MVCTests_SerialiseIndirectHierarchyTest_Values.json");
+            std::ifstream json("tmp/MVCTests_SerialiseIndirectHierarchyTest_Values.json");
             storedJSON = cw::json::parse(json);
         }
         EXPECT_EQ(storedJSON["x"], 5678);

@@ -31,9 +31,11 @@ class Controller : public ControllerNode {
 public:
     void registerCommand(const Command&, const CommandCallback&) final;
     void registerQuery(const Query&, const QueryCallback&) final;
+    void registerRequest(const Request&, const RequestCallback&) final;
     void registerEventHandler(const Event&, const EventCallback&) final;
     CommandResponse command(const Command&) final;
     QueryResponse query(const Query&) const final;
+    RequestResponse request(const Request&) final;
     EventResponse event(const std::shared_ptr<Event>&) final;
     void attachChildController(const std::string&, const std::shared_ptr<ControllerNode>&) final;
     void attachModel(const std::string&, const std::shared_ptr<Model>&) final;
@@ -72,6 +74,10 @@ private:
      * \brief The queries supported by the controller.
      */
     std::unordered_map<std::type_index, QueryCallback> _queries;
+    /**
+     * \brief The requests supported by the controller.
+     */
+    std::unordered_map<std::type_index, RequestCallback> _requests;
     /**
      * \brief The events that have handlers in this controller.
      */

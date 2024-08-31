@@ -2,7 +2,6 @@
 
 #include "maths/Maths.hpp"
 
-#include <cpptrace/cpptrace.hpp>
 #include <ctime>
 #include <fmt/format.h>
 #include <functional>
@@ -60,6 +59,16 @@ const std::unordered_map<cw::Log::Level, std::string> stringLogLevelMap = {
     { cw::Log::Level::trace, "trace" }, { cw::Log::Level::debug, "debug" }, { cw::Log::Level::info, "info" },
     { cw::Log::Level::warn, "warn" },   { cw::Log::Level::err, "error" },   { cw::Log::Level::critical, "critical" }
 };
+
+/**
+ * \brief Writes the given stack frame to the given output stream.
+ * \param traceOutput The output stream to write the stack frame to.
+ * \param frame The stack frame to write.
+ */
+void outputStackFrame(std::ostream& traceOutput, const cpptrace::stacktrace_frame& frame) {
+    traceOutput << frame << "\n";
+    if (frame.line.has_value()) { traceOutput << cpptrace::get_snippet(frame.filename, frame.line.value(), 3, false); }
+}
 } // namespace
 
 namespace cw {
@@ -147,11 +156,11 @@ void Log::SetLevel(const Log::Level level) {
     Write(__RELATIVE_FILENAME__, __LINE__, level, "Log level has been set to {}", false, false, LevelToString(level));
 }
 
-// TODO: CW-5: we will need a way to interweave the AngelScript stacktrace with this one.
 void Log::WriteTrace(const Log::Level lvl) {
     assert(_logger);
     if (_neverWriteTraces) { return; }
     auto trace = cpptrace::generate_trace();
+    auto artificialFrames = _GetArtificialStackFrames();
     std::stringstream traceOutput;
     bool foundAWriteTraceEntry = false;
     bool checkedForWriteFrame = false;
@@ -166,8 +175,19 @@ void Log::WriteTrace(const Log::Level lvl) {
             checkedForWriteFrame = true;
             if (entry.symbol.find("Log::Write") != std::string::npos) { continue; }
         }
-        traceOutput << entry << "\n";
-        if (entry.line.has_value()) { traceOutput << cpptrace::get_snippet(entry.filename, entry.line.value(), 3, false); }
+        // Check if we have any artificial frames to insert.
+        if (!artificialFrames.empty() && artificialFrames.front().isMatchingFrame(entry)) {
+            if (!artificialFrames.front().deleteMatchingFrame && artificialFrames.front().insertAfterMatchingFrame) {
+                ::outputStackFrame(traceOutput, entry);
+            }
+            for (const auto& artificialFrame : artificialFrames.front().frames) { traceOutput << artificialFrame << "\n"; }
+            if (!artificialFrames.front().deleteMatchingFrame && !artificialFrames.front().insertAfterMatchingFrame) {
+                ::outputStackFrame(traceOutput, entry);
+            }
+            artificialFrames.erase(artificialFrames.begin());
+        } else {
+            ::outputStackFrame(traceOutput, entry);
+        }
         // Once we hit main, leave. No point including low-level platform-dependent entries.
         if (entry.symbol == "main(int, char**)" || entry.symbol == "main") { break; }
         traceOutput << "\n";
@@ -176,10 +196,24 @@ void Log::WriteTrace(const Log::Level lvl) {
     _logger->flush();
 }
 
+void Log::PushArtificialStackFrameGenerator(const ArtificialStackFramesGenerator& generator) {
+    _stackFrameGenerators.push_front(generator);
+}
+
+void Log::PopArtificialStackFrameGenerator() {
+    _stackFrameGenerators.pop_front();
+}
+
 std::string Log::Get() {
     assert(_logger);
     _logger->flush();
     return _logCopy.str();
+}
+
+ListOfArtificialStackFramesWithConditions Log::_GetArtificialStackFrames() {
+    ListOfArtificialStackFramesWithConditions frames;
+    for (const auto& generator : _stackFrameGenerators) { frames.push_back(generator()); }
+    return frames;
 }
 
 std::shared_ptr<spdlog::sinks::dup_filter_sink_st> Log::_sink =
@@ -192,4 +226,13 @@ std::unique_ptr<spdlog::logger> Log::_logger = nullptr;
 bool Log::_neverProduceDialogBoxes = false;
 
 bool Log::_neverWriteTraces = false;
+
+std::deque<ArtificialStackFramesGenerator> Log::_stackFrameGenerators = {};
 } // namespace cw
+
+std::ostream& operator<<(std::ostream& os, const cw::ArtificialStackFrame& frame) {
+    const auto source = frame.source ? fmt::format(" at {}", *frame.source) : "";
+    const auto line = frame.source && frame.lineNumber ? fmt::format(":{}", *frame.lineNumber) : "";
+    const auto snippet = frame.snippet ? fmt::format("\n{}", *frame.snippet) : "";
+    return os << fmt::format("{} in {}{}{}{}\n", frame.pointer, frame.symbol, source, line, snippet);
+}

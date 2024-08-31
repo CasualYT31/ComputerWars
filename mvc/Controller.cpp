@@ -3,6 +3,8 @@
 #include "file/File.hpp"
 #include "log/Log.hpp"
 
+#include <set>
+
 namespace cw {
 void Controller::registerCommand(const Command& c, const CommandCallback& cb) {
     ASSERT(cb, "An empty command callback was given!");
@@ -30,6 +32,20 @@ void Controller::registerQuery(const Query& q, const QueryCallback& cb) {
     std::type_index qIndex(typeid(q));
     ASSERT(!_queries.contains(qIndex), "This query was already registered!");
     _queries.emplace(qIndex, cb);
+}
+
+void Controller::registerRequest(const Request& r, const RequestCallback& cb) {
+    ASSERT(cb, "An empty request callback was given!");
+    // If this is a child controller, redirect request up the hierarchy.
+    const auto parent = _parentController.lock();
+    if (parent) {
+        LOG(debug, "Registering request in parent controller");
+        return parent->registerRequest(r, cb);
+    }
+    // If this is the root controller, respond to request.
+    std::type_index rIndex(typeid(r));
+    ASSERT(!_requests.contains(rIndex), "This request was already registered!");
+    _requests.emplace(rIndex, cb);
 }
 
 void Controller::registerEventHandler(const Event& e, const EventCallback& cb) {
@@ -62,6 +78,16 @@ QueryResponse Controller::query(const Query& q) const {
     std::type_index qIndex(typeid(q));
     ASSERT(_queries.contains(qIndex), "This query was not registered!");
     return _queries.at(qIndex)(q);
+}
+
+RequestResponse Controller::request(const Request& r) {
+    // If this is a child controller, redirect request up the hierarchy.
+    const auto parent = _parentController.lock();
+    if (parent) { return parent->request(r); }
+    // If this is the root controller, respond to request.
+    std::type_index rIndex(typeid(r));
+    ASSERT(_requests.contains(rIndex), "This request was not registered!");
+    return _requests.at(rIndex)(r);
 }
 
 EventResponse Controller::event(const std::shared_ptr<Event>& e) {
@@ -145,6 +171,7 @@ void Controller::shutdown(const TickResponse exitCode) {
 void Controller::fromJSON(const cw::json& j) {
     LOG(debug, "Deserialising JSON into {} controller", (_parentController.expired() ? "root" : "child"));
     _scriptFiles.clear();
+    std::set<std::string> successfullyLoadedModels, successfullyLoadedControllers;
     for (const auto& keyValues : j.items()) {
         const std::string key = keyValues.key();
         const auto& value = keyValues.value();
@@ -179,6 +206,7 @@ void Controller::fromJSON(const cw::json& j) {
                 LOG(info, "Loading model \"{}\"", key);
                 model->second->fromJSON(obj);
                 LOG(info, "Loaded model \"{}\" successfully", key);
+                successfullyLoadedModels.insert(key);
             } catch (const std::exception& e) { LOG(err, "Could not load model \"{}\": {}", key, e); }
             continue;
         }
@@ -188,10 +216,39 @@ void Controller::fromJSON(const cw::json& j) {
                 LOG(info, "Loading controller \"{}\"", key);
                 controller->second->fromJSON(obj);
                 LOG(info, "Loaded controller \"{}\" successfully", key);
+                successfullyLoadedControllers.insert(key);
             } catch (const std::exception& e) { LOG(err, "Could not load controller \"{}\": {}", key, e); }
             continue;
         }
         LOG(warn, "No controller or model has the name \"{}\"", key);
+    }
+    std::set<std::string> allModels, allControllers, unloadedModels, unloadedControllers;
+    std::transform(_models.begin(), _models.end(), std::inserter(allModels, allModels.end()), [](const auto& pair) {
+        return pair.first;
+    });
+    std::transform(
+        _childControllers.begin(),
+        _childControllers.end(),
+        std::inserter(allControllers, allControllers.end()),
+        [](const auto& pair) { return pair.first; }
+    );
+    std::set_difference(
+        allModels.begin(),
+        allModels.end(),
+        successfullyLoadedModels.begin(),
+        successfullyLoadedModels.end(),
+        std::inserter(unloadedModels, unloadedModels.end())
+    );
+    std::set_difference(
+        allControllers.begin(),
+        allControllers.end(),
+        successfullyLoadedControllers.begin(),
+        successfullyLoadedControllers.end(),
+        std::inserter(unloadedControllers, unloadedControllers.end())
+    );
+    if (!unloadedModels.empty()) { LOG(err, "Some models from this controller were not loaded: {}", unloadedModels); }
+    if (!unloadedControllers.empty()) {
+        LOG(err, "Some child controllers from this controller were not loaded: {}", unloadedControllers);
     }
 }
 
