@@ -19,7 +19,7 @@ namespace cw {
  */
 template <typename M> class ScriptEngine {
 public:
-    virtual ~ScriptEngine() = default;
+    virtual ~ScriptEngine() noexcept = default;
 
     /**
      * \brief Module identifiers will be of the type given by the subclass.
@@ -86,8 +86,10 @@ public:
 
     /**
      * \brief Sets up the documentation generator.
+     * \details If the documentation generator was already set up when this method was called, the old generator will be
+     * discarded if creating the new one succeeded.
      * \param documentationOutputFile The name of the HTML file outputted.
-     * \returns True if set up was successful, false otherwise (or if the generator has already been set up).
+     * \returns True if set up was successful, false otherwise.
      */
     virtual bool setUpDocumentationGenerator(const std::string& documentationOutputFile) = 0;
 

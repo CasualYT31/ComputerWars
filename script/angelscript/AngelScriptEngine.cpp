@@ -232,7 +232,7 @@ bool AngelScriptEngine::loadModule(
             r);
         return false;
     }
-    LOG(info, "Finished loading module \"{}\"", moduleName);
+    LOG(debug, "Finished loading module \"{}\"", moduleName);
     return true;
 }
 
@@ -287,23 +287,31 @@ bool AngelScriptEngine::moduleExists(Param<ModuleName>::In moduleName) const {
 bool AngelScriptEngine::setUpDocumentationGenerator(const std::string& documentationOutputFile) {
     if (documentationGeneratorIsSetUp()) {
         LOG(warn,
-            "Ignoring call to set up the documentation generator after it was already set up, this time with output file {}",
+            "Setting up new documentation generator with output file {} - will only discard old one if it can be set up "
+            "successfully",
             documentationOutputFile);
-        return false;
     }
-    ::ScriptDocumentationOptions options;
-    options.projectName = "Computer Wars";
-    options.outputFile = documentationOutputFile;
-    _documentationGenerator = std::make_unique<::DocumentationGenerator>(_engine, options);
-    if (documentationGeneratorIsSetUp()) {
-        LOG(debug, "Allocated AngelScript interface documentation generator with output file {}", documentationOutputFile);
-        return true;
-    } else {
+    try {
+        ::ScriptDocumentationOptions options;
+        options.projectName = "Computer Wars";
+        options.outputFile = documentationOutputFile;
+        auto newGenerator = std::make_unique<::DocumentationGenerator>(_engine, options);
+        if (newGenerator) {
+            LOG(debug, "Allocated AngelScript interface documentation generator with output file {}", documentationOutputFile
+            );
+            _documentationGenerator = std::move(newGenerator);
+            return true;
+        }
         LOG(err,
             "Could not allocate AngelScript interface documentation generator with output file {}",
             documentationOutputFile);
-        return false;
+    } catch (const std::exception& e) {
+        LOG(err,
+            "Could not allocate AngelScript interface documentation generator with output file {}: {}",
+            documentationOutputFile,
+            e);
     }
+    return false;
 }
 
 bool AngelScriptEngine::documentationGeneratorIsSetUp() const {
@@ -317,10 +325,10 @@ bool AngelScriptEngine::generateDocumentation() {
             "first!");
         return false;
     }
-    LOG(info, "Generating script interface documentation");
+    LOG(debug, "Generating script interface documentation");
     const auto result = _documentationGenerator->Generate();
     if (result == ::asDOCGEN_Success) {
-        LOG(info, "Finished generating script interface documentation");
+        LOG(debug, "Finished generating script interface documentation");
         return true;
     }
     LOG(err, "Could not generate script interface documentation, result code is {}", result);

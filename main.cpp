@@ -157,6 +157,7 @@ int main(int argc, char* argv[]) {
 
         // If the user wants the script interface documentation, generate it, then exit early.
         if (!scriptInterfaceDocumentationOutputFile.empty()) {
+            LOG(info, "Requesting the generation of the script interface documentation");
             const bool success = REQUEST(root, cw::request::GenerateDocumentation, ());
             const std::string fmtString = success ? "Script interface documentation has been written to \"{}\", exiting..."
                                                   : "Failed to write script interface documentation to \"{}\", exiting...";

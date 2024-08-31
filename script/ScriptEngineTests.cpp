@@ -66,7 +66,8 @@ TYPED_TEST(ScriptEngineTests, SetUpDocumentationGeneratorSuccess) {
     EXPECT_FALSE(this->engine.documentationGeneratorIsSetUp());
     EXPECT_FALSE(this->engine.generateDocumentation());
     EXPECT_TRUE(this->engine.setUpDocumentationGenerator("tmp/ScriptInterface.html"));
-    EXPECT_FALSE(this->engine.setUpDocumentationGenerator("tmp/ScriptInterface.html"));
+    EXPECT_TRUE(this->engine.documentationGeneratorIsSetUp());
+    EXPECT_TRUE(this->engine.setUpDocumentationGenerator("tmp/ScriptInterface2.html"));
     EXPECT_TRUE(this->engine.documentationGeneratorIsSetUp());
 }
 
@@ -80,6 +81,7 @@ TEST(AngelScriptSpecificTests, LoadModuleSuccess) {
 
 TEST(AngelScriptSpecificTests, GenerateDocumentationSuccess) {
     cw::AngelScriptEngine engine;
+    EXPECT_TRUE(engine.setUpDocumentationGenerator("tmp/ScriptInterface-ToBeReplaced.html"));
     EXPECT_TRUE(engine.setUpDocumentationGenerator("tmp/ScriptInterface.html"));
     EXPECT_TRUE(engine.generateDocumentation());
     const auto output = cw::readEntireTextFile("tmp/ScriptInterface.html");
