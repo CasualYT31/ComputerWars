@@ -120,6 +120,110 @@ TEST_F(IterateDirectoryTests, SingleFile) {
     EXPECT_EQ(exceptionCount(), 0);
 }
 
+TEST_F(IterateDirectoryTests, DirectoryNonRecursiveException) {
+    std::unordered_set<std::filesystem::path> expectedFiles = { "IterateDirectoryTests_File.txt",
+                                                                "IterateDirectoryTests_File2.json" };
+    const auto expectedCount = expectedFiles.size();
+    EXPECT_FALSE(iterateDirectory(
+        "IterateDirectoryTests",
+        false,
+        false,
+        [&expectedFiles](const std::filesystem::directory_entry& entry) {
+            EXPECT_EQ(expectedFiles.erase(entry.path().filename()), 1);
+            if (expectedFiles.empty()) { throw std::runtime_error("Error in last entry"); }
+            return true;
+        },
+        defaultExceptionCallback
+    ));
+    EXPECT_TRUE(expectedFiles.empty());
+    EXPECT_EQ(callbackCount(), expectedCount);
+    EXPECT_EQ(exceptionCount(), 1);
+}
+
+TEST_F(IterateDirectoryTests, DirectoryNonRecursiveStartFailure) {
+    std::unordered_set<std::filesystem::path> expectedFiles = { "IterateDirectoryTests_File.txt",
+                                                                "IterateDirectoryTests_File2.json" };
+    const auto expectedCount = expectedFiles.size();
+    EXPECT_FALSE(iterateDirectory(
+        "IterateDirectoryTests",
+        false,
+        false,
+        [&expectedFiles, expectedCount](const std::filesystem::directory_entry& entry) {
+            EXPECT_EQ(expectedFiles.erase(entry.path().filename()), 1);
+            if (expectedFiles.size() == expectedCount - 1) { return false; }
+            return true;
+        },
+        defaultExceptionCallback
+    ));
+    EXPECT_TRUE(expectedFiles.empty());
+    EXPECT_EQ(callbackCount(), expectedCount);
+    EXPECT_EQ(exceptionCount(), 0);
+}
+
+TEST_F(IterateDirectoryTests, DirectoryRecursiveInnerFailure) {
+    std::unordered_set<std::filesystem::path> expectedFiles = { "IterateDirectoryTests_File.txt",
+                                                                "IterateDirectoryTests_File2.json",
+                                                                "IterateDirectoryTests_File3.txt",
+                                                                "IterateDirectoryTests_File4.txt" };
+    const auto expectedCount = expectedFiles.size();
+    EXPECT_FALSE(iterateDirectory(
+        "IterateDirectoryTests",
+        true,
+        false,
+        [&expectedFiles, expectedCount](const std::filesystem::directory_entry& entry) {
+            EXPECT_EQ(expectedFiles.erase(entry.path().filename()), 1);
+            if (entry.path().filename() == "IterateDirectoryTests_File3.txt") { return false; }
+            return true;
+        },
+        defaultExceptionCallback
+    ));
+    EXPECT_TRUE(expectedFiles.empty());
+    EXPECT_EQ(callbackCount(), expectedCount);
+    EXPECT_EQ(exceptionCount(), 0);
+}
+
+TEST_F(IterateDirectoryTests, DirectoryRecursiveFurtherInnerFailure) {
+    std::unordered_set<std::filesystem::path> expectedFiles = { "IterateDirectoryTests_File.txt",
+                                                                "IterateDirectoryTests_File2.json",
+                                                                "IterateDirectoryTests_File3.txt",
+                                                                "IterateDirectoryTests_File4.txt" };
+    const auto expectedCount = expectedFiles.size();
+    EXPECT_FALSE(iterateDirectory(
+        "IterateDirectoryTests",
+        true,
+        false,
+        [&expectedFiles, expectedCount](const std::filesystem::directory_entry& entry) {
+            EXPECT_EQ(expectedFiles.erase(entry.path().filename()), 1);
+            if (entry.path().filename() == "IterateDirectoryTests_File4.txt") { return false; }
+            return true;
+        },
+        defaultExceptionCallback
+    ));
+    EXPECT_TRUE(expectedFiles.empty());
+    EXPECT_EQ(callbackCount(), expectedCount);
+    EXPECT_EQ(exceptionCount(), 0);
+}
+
+TEST_F(IterateDirectoryTests, DirectoryNonRecursiveEndFailure) {
+    std::unordered_set<std::filesystem::path> expectedFiles = { "IterateDirectoryTests_File.txt",
+                                                                "IterateDirectoryTests_File2.json" };
+    const auto expectedCount = expectedFiles.size();
+    EXPECT_FALSE(iterateDirectory(
+        "IterateDirectoryTests",
+        false,
+        false,
+        [&expectedFiles](const std::filesystem::directory_entry& entry) {
+            EXPECT_EQ(expectedFiles.erase(entry.path().filename()), 1);
+            if (expectedFiles.empty()) { return false; }
+            return true;
+        },
+        defaultExceptionCallback
+    ));
+    EXPECT_TRUE(expectedFiles.empty());
+    EXPECT_EQ(callbackCount(), expectedCount);
+    EXPECT_EQ(exceptionCount(), 0);
+}
+
 TEST_F(IterateDirectoryTests, DirectoryNonRecursive) {
     std::unordered_set<std::filesystem::path> expectedFiles = { "IterateDirectoryTests_File.txt",
                                                                 "IterateDirectoryTests_File2.json" };
@@ -243,4 +347,13 @@ TEST_F(IterateDirectoryTests, DirectoryRecursiveIncludingFoldersCatchExceptions)
     EXPECT_TRUE(expectedFiles.empty());
     EXPECT_EQ(callbackCount(), expectedCount);
     EXPECT_EQ(exceptionCount(), expectedCount);
+}
+
+TEST_F(IterateDirectoryTests, EmptyDirectoryRecursiveIncludingFolders) {
+    std::unordered_set<std::filesystem::path> expectedFiles = {};
+    const auto expectedCount = expectedFiles.size();
+    EXPECT_TRUE(iterateDirectory("EmptyFolder", true, true, defaultCallback, defaultExceptionCallback));
+    EXPECT_TRUE(expectedFiles.empty());
+    EXPECT_EQ(callbackCount(), expectedCount);
+    EXPECT_EQ(exceptionCount(), 0);
 }

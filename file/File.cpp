@@ -26,18 +26,18 @@ bool iterateDirectory(
                 if (entry.is_directory()) {
                     if (invokeOnDirectories) {
                         try {
-                            result |= callback(entry);
+                            result &= callback(entry);
                         } catch (const std::exception& e) {
                             exceptionCallback(entry, e);
                             result = false;
                         }
                     }
                     if (recursive) {
-                        result |=
+                        result &=
                             iterateDirectory(entry.path(), callback, recursive, invokeOnDirectories, exceptionCallback);
                     }
                 } else {
-                    result |= callback(entry);
+                    result &= callback(entry);
                 }
             } catch (const std::exception& e) {
                 exceptionCallback(entry, e);

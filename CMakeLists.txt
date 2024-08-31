@@ -127,17 +127,25 @@ add_library (ComputerWarsLibrary
     "log/Log.cpp"
     "script/angelscript/AngelScriptEngine.cpp"
     "file/File.cpp"
-    ${ANGELSCRIPT_ADD_ON_SOURCES} ${docgen_SOURCE_DIR}/source/docgen.cpp)
+    ${ANGELSCRIPT_ADD_ON_SOURCES}
+    ${docgen_SOURCE_DIR}/source/docgen.cpp)
 set_property (TARGET ComputerWarsLibrary PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsLibrary PUBLIC ${ComputerWarsLibrary_INCLUDE_DIRS})
 # Dependencies go here:
-target_link_libraries (ComputerWarsLibrary PUBLIC nlohmann_json::nlohmann_json fmt spdlog Boxer SystemProperties cpptrace::cpptrace cxxopts::cxxopts angelscript)
+target_link_libraries (ComputerWarsLibrary PUBLIC
+    nlohmann_json::nlohmann_json
+    fmt
+    spdlog
+    Boxer
+    SystemProperties
+    cpptrace::cpptrace
+    angelscript)
 
 # The game itself.
 add_executable (ComputerWars "main.cpp")
 set_property (TARGET ComputerWars PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWars PRIVATE ${ComputerWarsLibrary_INCLUDE_DIRS})
-target_link_libraries (ComputerWars ComputerWarsLibrary)
+target_link_libraries (ComputerWars ComputerWarsLibrary cxxopts::cxxopts)
 # Provide access to the assets folder for development purposes. https://stackoverflow.com/a/61244115.
 # And do the same for test files.
 if (UNIX)
@@ -153,7 +161,11 @@ else () # WINDOWS.
 endif ()
 
 # The tests.
-add_executable (ComputerWarsTests "main_test.cpp" "mvc/MVCTests.cpp" "file/FileTests.cpp" "script/ScriptEngineTests.cpp" "script/ScriptModelTests.cpp")
+add_executable (ComputerWarsTests "main_test.cpp"
+    "mvc/MVCTests.cpp"
+    "file/FileTests.cpp"
+    "script/ScriptEngineTests.cpp"
+    "script/ScriptModelTests.cpp")
 set_property (TARGET ComputerWarsTests PROPERTY CXX_STANDARD 20)
 target_include_directories (ComputerWarsTests PRIVATE ${ComputerWarsLibrary_INCLUDE_DIRS})
 target_link_libraries (ComputerWarsTests GTest::gmock ComputerWarsLibrary)
