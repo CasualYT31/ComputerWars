@@ -50,7 +50,7 @@ FetchContent_Declare (spdlog GIT_REPOSITORY https://github.com/gabime/spdlog.git
 FetchContent_MakeAvailable (spdlog)
 
 ## Boxer
-FetchContent_Declare (boxer GIT_REPOSITORY https://github.com/aaronmjacobs/Boxer.git GIT_TAG master)
+FetchContent_Declare (boxer GIT_REPOSITORY https://github.com/aaronmjacobs/Boxer.git GIT_TAG 65e79c3)
 FetchContent_MakeAvailable (boxer)
 
 ## SystemProperties
@@ -74,14 +74,11 @@ FetchContent_MakeAvailable (angelscript)
 set (ANGELSCRIPT_ADD_ONS scriptstdstring scriptarray scriptbuilder scripthelper)
 
 ## AngelScript Docgen.
-FetchContent_Declare (docgen GIT_REPOSITORY https://github.com/CasualYT31/angelscript-docgen.git GIT_TAG master)
+FetchContent_Declare (docgen GIT_REPOSITORY https://github.com/CasualYT31/angelscript-docgen.git GIT_TAG 049e5af)
 FetchContent_MakeAvailable (docgen)
 
 ## GoogleTest
-FetchContent_Declare (googletest
-    GIT_REPOSITORY https://github.com/google/googletest
-    GIT_TAG v1.15.2
-)
+FetchContent_Declare (googletest GIT_REPOSITORY https://github.com/google/googletest GIT_TAG v1.15.2)
 ### For Windows: Prevent overriding the parent project's compiler/linker settings.
 set (gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable (googletest)
