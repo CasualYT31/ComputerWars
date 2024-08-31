@@ -1,5 +1,5 @@
 /**
- * \file ScriptEngineTypes.hpp
+ * \file script/TestHelpers.hpp
  * \brief Lists the subclasses of ScriptEngine that are included within the tests.
  */
 

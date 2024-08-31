@@ -1,6 +1,6 @@
 #include "angelscript/AngelScriptEngine.hpp"
-#include "ScriptEngineTypes.hpp"
 #include "ScriptModel.hpp"
+#include "TestHelpers.hpp"
 
 #include <gmock/gmock.h>
 

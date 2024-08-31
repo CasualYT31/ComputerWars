@@ -1,5 +1,6 @@
 #include "Controller.hpp"
 #include "log/Log.hpp"
+#include "log/TestHelpers.hpp"
 
 #include <gmock/gmock.h>
 #include <iostream>
@@ -191,6 +192,8 @@ struct TestModel2QueryMessage : public cw::Query {
 
 class TestModel2 : public cw::Model {
 public:
+    TestModel2(const bool throwOnLoad = false) : _throwOnLoad(throwOnLoad) {}
+
     void registerModel(const std::shared_ptr<cw::ReadWriteController>& controller) final {
         REGISTER(controller, Command, TestModel2SetX, TestModel2::SetX, this);
         REGISTER(controller, Command, TestModel2SetMessage, TestModel2::SetMessage, this);
@@ -203,6 +206,7 @@ public:
     }
 
     void fromJSON(const cw::json& j) final {
+        if (_throwOnLoad) { throw std::runtime_error("ERROR"); }
         _x = j["x"];
         _message = j["message"];
     }
@@ -233,6 +237,7 @@ public:
 private:
     int _x = 0;
     std::string _message;
+    const bool _throwOnLoad = false;
 };
 
 struct TestModel3SetX : public cw::Command {
@@ -619,6 +624,39 @@ TEST_F(MVCTests, DeserialiseDirectTest) {
     EXPECT_EQ(x, 5);
     const auto message = QUERY(root, TestModel2QueryMessage, ());
     EXPECT_EQ(message, "Hello, World!");
+}
+
+TEST_F(MVCTests, DeserialiseDirectTestFailure) {
+    const std::shared_ptr<cw::Model> model = std::make_shared<TestModel2>(true), otherModel = std::make_shared<TestModel>();
+    root->attachModel("model", model);
+    root->attachModel("otherModel", otherModel);
+    EXPECT_LOG(
+        root->fromJSON(R"({ "model": { "x": 5, "message": "Hello, World!" }, "otherModel": {} })"_json),
+        testing::AllOf(
+            testing::HasSubstr("Some models from this controller were not loaded:"), testing::HasSubstr("{ model }")
+        )
+    );
+    const auto x = QUERY(root, TestModel2QueryX, ());
+    EXPECT_EQ(x, 0);
+    const auto message = QUERY(root, TestModel2QueryMessage, ());
+    EXPECT_EQ(message, "");
+}
+
+TEST_F(MVCTests, DeserialiseDirectTestMissing) {
+    const std::shared_ptr<cw::Model> model = std::make_shared<TestModel2>(), otherModel = std::make_shared<TestModel>();
+    root->attachModel("model", model);
+    root->attachModel("otherModel", otherModel);
+    EXPECT_LOG(
+        root->fromJSON(R"({})"_json),
+        testing::AllOf(
+            testing::HasSubstr("Some models from this controller were not loaded:"),
+            testing::AnyOf(testing::HasSubstr("{ model, otherModel }"), testing::HasSubstr("{ otherModel, model }"))
+        )
+    );
+    const auto x = QUERY(root, TestModel2QueryX, ());
+    EXPECT_EQ(x, 0);
+    const auto message = QUERY(root, TestModel2QueryMessage, ());
+    EXPECT_EQ(message, "");
 }
 
 TEST_F(MVCTests, DeserialiseIndirectTest) {

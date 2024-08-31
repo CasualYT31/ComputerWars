@@ -66,6 +66,7 @@ struct ArtificialStackFrame {
 
 /**
  * \brief Stores a list of artificial stack frames, ordered from higher up the stack to lower.
+ * \todo CW-22: This should be a stack, not a vector.
  */
 using ArtificialStackFrames = std::vector<ArtificialStackFrame>;
 
@@ -118,6 +119,7 @@ using ArtificialStackFramesGenerator = std::function<ArtificialStackFramesWithCo
 
 /**
  * \brief An ordered list of artificial stack frame groups, each with their own separate conditions.
+ * \todo CW-22: This should be a stack, not a vector.
  */
 using ListOfArtificialStackFramesWithConditions = std::vector<ArtificialStackFramesWithConditions>;
 
@@ -283,6 +285,7 @@ private:
     static bool _neverWriteTraces;
     /**
      * \brief Stores the artificial stack frames to insert into stacktraces.
+     * \details Needs to be a deque, as we want to iterate over it without removing any elements.
      */
     static std::deque<ArtificialStackFramesGenerator> _stackFrameGenerators;
 };

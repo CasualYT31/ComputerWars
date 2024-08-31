@@ -1,7 +1,7 @@
 #include "angelscript/AngelScriptEngine.hpp"
 #include "file/File.hpp"
 #include "ScriptEngine.hpp"
-#include "ScriptEngineTypes.hpp"
+#include "TestHelpers.hpp"
 
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock.h>

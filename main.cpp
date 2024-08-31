@@ -169,7 +169,7 @@ int main(int argc, char* argv[]) {
             return cw::ShutdownCode::InvalidCoreConfigurationFile;
         }
 
-        const auto newCWD = std::filesystem::path(corePath).parent_path();
+        const auto newCWD = std::filesystem::absolute(corePath).parent_path();
         LOG(debug, "Setting the current working directory to {}", newCWD);
         std::filesystem::current_path(newCWD);
 
