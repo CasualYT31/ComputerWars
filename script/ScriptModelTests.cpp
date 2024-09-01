@@ -355,13 +355,25 @@ TEST_F(ScriptModelTests, RegisterInterfaceEmptyDeathTest) {
 
 TEST_F(ScriptModelTests, RegisterInterfaceIAmDeathTest) {
     cw::command::RegisterInterface cmd;
+#ifdef __GNUC__
+    #pragma GCC diagnostic ignored "-Wunused-result"
+#endif
     cmd.IAm<Test>();
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
     EXPECT_THROW(SEND_COMMAND(controller, cmd), cw::AssertionError);
 }
 
 TEST_F(ScriptModelTests, RegisterInterfaceIAmIDependOnDeathTest) {
     cw::command::RegisterInterface cmd;
+#ifdef __GNUC__
+    #pragma GCC diagnostic ignored "-Wunused-result"
+#endif
     cmd.IAm<Test>().IDependOn<Parent>();
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
     EXPECT_THROW(SEND_COMMAND(controller, cmd), cw::AssertionError);
 }
 
