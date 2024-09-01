@@ -1,7 +1,6 @@
 #include "file/File.hpp"
 #include "log/Log.hpp"
 #include "mvc/Controller.hpp"
-#include "script/angelscript/AngelScriptEngine.hpp"
 #include "script/ScriptModel.hpp"
 
 #include <boxer/boxer.h>
@@ -19,6 +18,11 @@
 /**
  * \namespace cw::model
  * \brief Defines all of the "components" of the game engine.
+ */
+
+/**
+ * \namespace cw::command
+ * \brief Defines all of the commands that can be made to the game engine.
  */
 
 /**
@@ -151,9 +155,7 @@ int main(int argc, char* argv[]) {
     try {
         LOG(debug, "Constructing controller hierarchy");
         std::shared_ptr<cw::ControllerNode> root = std::make_shared<cw::Controller>();
-        root->attachModel(
-            "scripts", std::make_shared<cw::model::Script<cw::AngelScriptEngine>>(scriptInterfaceDocumentationOutputFile)
-        );
+        root->attachModel("scripts", std::make_shared<cw::model::Script>(scriptInterfaceDocumentationOutputFile));
 
         // If the user wants the script interface documentation, generate it, then exit early.
         if (!scriptInterfaceDocumentationOutputFile.empty()) {

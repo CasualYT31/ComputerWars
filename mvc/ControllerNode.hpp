@@ -212,8 +212,17 @@ protected:
  * parentheses if there are no parameters required.
  */
 #define COMMAND(controller, obj, params)                                                                                    \
-    LOG(trace, "Invoking command " #obj #params);                                                                           \
+    LOG(trace, "Invoking command {}{}", #obj, #params);                                                                     \
     controller->command(obj params);
+
+/**
+ * \brief Send a premade command object.
+ * \param controller The pointer to the controller that has access to the command.
+ * \param obj The concrete Command object to send.
+ */
+#define SEND_COMMAND(controller, obj)                                                                                       \
+    LOG(trace, "Invoking command {}", std::type_index(typeid(obj)));                                                        \
+    controller->command(obj);
 
 /**
  * \brief Used to perform queries.
@@ -224,7 +233,7 @@ protected:
  */
 #define QUERY(controller, obj, params)                                                                                      \
     [&controller = controller]() {                                                                                          \
-        LOG(trace, "Invoking query " #obj #params);                                                                         \
+        LOG(trace, "Invoking query {}{}", #obj, #params);                                                                   \
         return std::any_cast<obj::ReturnType>(controller->query(obj params));                                               \
     }()
 
@@ -237,7 +246,7 @@ protected:
  */
 #define REQUEST(controller, obj, params)                                                                                    \
     [&controller = controller]() {                                                                                          \
-        LOG(trace, "Invoking request " #obj #params);                                                                       \
+        LOG(trace, "Invoking request {}{}", #obj, #params);                                                                 \
         return std::any_cast<obj::ReturnType>(controller->request(obj params));                                             \
     }()
 
@@ -249,7 +258,7 @@ protected:
  * parentheses if there are no parameters required.
  */
 #define EVENT(controller, obj, params)                                                                                      \
-    LOG(trace, "Emitting event " #obj #params);                                                                             \
+    LOG(trace, "Emitting event {}{}", #obj, #params);                                                                       \
     controller->event(std::make_shared<obj> params)
 
 /**
